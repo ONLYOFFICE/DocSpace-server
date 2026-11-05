@@ -25812,7 +25812,7 @@
           "Files / Sharing"
         ],
         "summary": "Remove sharing rights in batch",
-        "description": "Revokes the access of every account and group on the files and folders listed in the request, and clears the\r\nentries from the caller's own favorites, recent and unread marks. The owner's own record is kept, since\r\nremoving it would take the entry away from the account that owns it, and external links survive untouched -\r\nremove those through the link operations of the entry. The caller must be allowed to change the access of each\r\nentry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;\r\na caller whose only access came through an external link may use this call to drop the entry from its own\r\nlist, while a directly invited member or an unrelated account is refused. The answer is always `true` and\r\nidentifiers that match nothing are skipped silently, so a successful answer is not proof that anything was\r\nrevoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To\r\ntake the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's\r\naccess set to `None`.",
+        "description": "Revokes the access of every account and group on the files and folders listed in the request, and clears the\r\nentries from the caller's own favorites, recent and unread marks. The owner's own record is kept, since\r\nremoving it would take the entry away from the account that owns it, and external links survive untouched -\r\nremove those through the link operations of the entry. The caller must be allowed to change the access of each\r\nentry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;\r\nany other caller who can read the entry may use this call to drop it from their own list, which takes a room\r\nmember out of the room, while an unrelated account is refused. A private room answers to its members alone: a\r\nportal administrator outside it is refused, and whoever loses access to it loses the wrapped file keys\r\n(`PUT api/2.0/files/file/{fileId}/access`) along with it, except its creator. The answer is always `true` and\r\nidentifiers that match nothing are skipped silently, so a successful answer is not proof that anything was\r\nrevoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To\r\ntake the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's\r\naccess set to `None`.",
         "operationId": "removeSecurityInfo",
         "requestBody": {
           "content": {
@@ -25847,7 +25847,7 @@
             }
           },
           "403": {
-            "description": "The caller may not change the access of a listed entry and may not drop it from their own list either, because it was shared with them directly or they cannot read it"
+            "description": "The caller may not change the access of a listed entry and cannot read it either, so it cannot be dropped from their own list. A portal administrator outside a private room gets this as well"
           },
           "500": {
             "description": "An id is a number that is not a 32-bit integer"

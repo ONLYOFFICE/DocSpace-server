@@ -42,15 +42,6 @@ namespace ASC.Files.Tests.Tests._08_Privacy;
 [Trait("Feature", "PrivacyRoom")]
 public class PrivateRoomFileKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixture)
 {
-    private async Task<User> InviteWithKeys(EmployeeType type)
-    {
-        var user = await InviteContact(type);
-        await _filesClient.Authenticate(user);
-        await SetFakeKeys(publicKeyPrefix: "user");
-
-        return user;
-    }
-
     private async Task<(FolderDto Room, int FileId)> CreateRoomWithEncryptedFile()
     {
         await _filesClient.Authenticate(Owner);
@@ -58,18 +49,6 @@ public class PrivateRoomFileKeysTests(AspireAppFixture fixture) : PrivacyRoomTes
         var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
 
         return (room, await UploadEncryptedFile(room.Id, "Encrypted.docx"));
-    }
-
-    private async Task<List<Guid>> WriteKeys(int fileId, params Guid[] userIds)
-    {
-        List<AccessRequestKeyDto> keys = [.. userIds.Select(id => new AccessRequestKeyDto(id, Guid.Empty, "wrapped"))];
-
-        return (await _filesApi.SetEncryptionInfoAsync(fileId, keys, TestContext.Current.CancellationToken)).Response.SkippedUserIds;
-    }
-
-    private async Task<List<RoomMissingFileKeysDto>> GetMissing(int roomId, params Guid[] userIds)
-    {
-        return (await _privacyRoomApi.GetRoomMissingFileKeysAsync(roomId, [.. userIds], TestContext.Current.CancellationToken)).Response;
     }
 
     private async Task AssertMissingRefused(int roomId, int status)

@@ -4685,8 +4685,10 @@ public class FileStorageService //: IFileStorageService
         async Task RemoveSharesAsync(FileEntry<T> entry)
         {
             // Revoking someone else's rights requires the same permission as granting them;
-            // a portal admin may always clean up.
-            if (await fileSharingHelper.CanSetAccessAsync(entry) || await global.IsDocSpaceAdministratorAsync)
+            // a portal admin may always clean up, except in a private room, which answers to its members alone.
+            var inPrivateRoom = entry is Folder<T> { IsRoom: true, SettingsPrivate: true } || await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, daoFactory.GetCacheFolderDao<T>());
+
+            if (await fileSharingHelper.CanSetAccessAsync(entry) || (!inPrivateRoom && await global.IsDocSpaceAdministratorAsync))
             {
                 // The entry owner's record stays: revoking it would delete the entry from its owner's list.
                 var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
@@ -4700,6 +4702,12 @@ public class FileStorageService //: IFileStorageService
                 foreach (var subject in subjects)
                 {
                     await fileSecurity.ShareAsync(entry.Id, entry.FileEntryType, subject, FileShare.None);
+                }
+
+                if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+                {
+                    // the caller's own keys go with the call below
+                    await fileSharingAceHelper.RevokeFileKeysAsync(privateRoom, subjects.Where(s => s != authContext.CurrentAccount.ID).ToList());
                 }
 
                 // keep the caller's own list-cleanup semantics (favorites / recent / new-marks)

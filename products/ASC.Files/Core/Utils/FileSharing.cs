@@ -440,7 +440,8 @@ public class FileSharingAceHelper(
             handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w, file != null ? file : folder));
 
             // Before a change of owner the new owner's own share is what gets removed here: they are not leaving.
-            if (room is { SettingsPrivate: true } && eventType == EventType.Remove && !w.IsLink && !w.SubjectGroup && !beforeOwnerChange)
+            // Neither is the owner, who may hold a share of their own: the room stays theirs without it.
+            if (room is { SettingsPrivate: true } && eventType == EventType.Remove && !w.IsLink && !w.SubjectGroup && !beforeOwnerChange && w.Id != room.CreateBy)
             {
                 usersLeavingPrivateRoom.Add(w.Id);
             }
@@ -631,7 +632,12 @@ public class FileSharingAceHelper(
         }
         else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
         {
-            await RevokeFileKeysAsync(privateRoom, [currentId]);
+            // The owner stays the owner whatever their own list says, and still has to open the files.
+            if (privateRoom.CreateBy != currentId)
+            {
+                await RevokeFileKeysAsync(privateRoom, [currentId]);
+            }
+
             await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
         }
 
@@ -650,7 +656,7 @@ public class FileSharingAceHelper(
     /// Somebody who leaves a private room has no business keeping the wrapped keys of its files. Done by the server, so it
     /// does not depend on a client being online. Coming back means having the keys issued again.
     /// </summary>
-    private async Task RevokeFileKeysAsync<T>(Folder<T> room, List<Guid> userIds)
+    public async Task RevokeFileKeysAsync<T>(Folder<T> room, List<Guid> userIds)
     {
         if (userIds.Count == 0)
         {

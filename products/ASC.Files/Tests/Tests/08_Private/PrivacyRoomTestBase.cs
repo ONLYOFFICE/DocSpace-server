@@ -86,6 +86,27 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
         return last;
     }
 
+    protected async Task<User> InviteWithKeys(EmployeeType type)
+    {
+        var user = await InviteContact(type);
+        await _filesClient.Authenticate(user);
+        await SetFakeKeys(publicKeyPrefix: "user");
+
+        return user;
+    }
+
+    protected async Task<List<Guid>> WriteKeys(int fileId, params Guid[] userIds)
+    {
+        List<AccessRequestKeyDto> keys = [.. userIds.Select(id => new AccessRequestKeyDto(id, Guid.Empty, "wrapped"))];
+
+        return (await _filesApi.SetEncryptionInfoAsync(fileId, keys, TestContext.Current.CancellationToken)).Response.SkippedUserIds;
+    }
+
+    protected async Task<List<RoomMissingFileKeysDto>> GetMissing(int roomId, params Guid[] userIds)
+    {
+        return (await _privacyRoomApi.GetRoomMissingFileKeysAsync(roomId, [.. userIds], TestContext.Current.CancellationToken)).Response;
+    }
+
     /// <summary>Uploads a file the way a private-room client does: chunked, with the encrypted flag. The bytes do not matter here.</summary>
     protected async Task<int> UploadEncryptedFile(int folderId, string title)
     {
