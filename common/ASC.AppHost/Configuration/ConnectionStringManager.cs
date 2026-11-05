@@ -61,6 +61,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
     private bool WebhookTestSettings { get; set; }
 
+    // Set by UsePaymentServices: the stub the billing, accounting and docscloud services are pointed at, "" for none;
+    // null leaves the services with whatever buildtools/config says.
+    private string? PaymentServicesUrl { get; set; }
+
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
     private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
     private IResourceBuilder<JavaScriptAppResource>? ApiTestResource { get; set; }
@@ -422,6 +426,19 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    /// <summary>
+    /// Gives every service the billing, accounting and docscloud addresses in <see cref="AddBaseConfig{T}"/>, in place
+    /// of the ones in <c>buildtools/config/appsettings.json</c>, so a test run never depends on that file - a
+    /// developer's copy may point at a real payment service. Without <paramref name="stubUrl"/> the services get no
+    /// address and report the tariff service as not configured.
+    /// </summary>
+    public ConnectionStringManager UsePaymentServices(string? stubUrl = null)
+    {
+        PaymentServicesUrl = stubUrl ?? string.Empty;
+
+        return this;
+    }
+
     public ConnectionStringManager AddApiTest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
@@ -694,6 +711,32 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             // receiver gives (WebhookDeliveryStateTests), which has to arrive within the limit
             resourceBuilder.WithEnvironment(
                 "webhooks:requestTimeout", Constants.WebhookTestRequestTimeout.ToString());
+        }
+
+        if (PaymentServicesUrl == string.Empty)
+        {
+            resourceBuilder
+                .WithEnvironment("core:payment:url", string.Empty)
+                .WithEnvironment("core:accounting:url", string.Empty)
+                .WithEnvironment("core:docscloud:url", string.Empty);
+        }
+        else if (PaymentServicesUrl != null)
+        {
+            var key = Constants.PaymentStubKey;
+            var secret = Constants.PaymentStubSecret;
+
+            resourceBuilder
+                .WithEnvironment("core:payment:url", PaymentServicesUrl + Constants.PaymentStubBillingPath)
+                .WithEnvironment("core:payment:key", key)
+                .WithEnvironment("core:payment:secret", secret)
+                .WithEnvironment("core:payment:region", Constants.PaymentStubRegion)
+                .WithEnvironment("core:payment:defaultquota", Constants.PaymentStubDefaultQuota.ToString(CultureInfo.InvariantCulture))
+                .WithEnvironment("core:accounting:url", PaymentServicesUrl + Constants.PaymentStubAccountingPath)
+                .WithEnvironment("core:accounting:key", key)
+                .WithEnvironment("core:accounting:secret", secret)
+                .WithEnvironment("core:docscloud:url", PaymentServicesUrl + Constants.PaymentStubDocsCloudPath)
+                .WithEnvironment("core:docscloud:key", key)
+                .WithEnvironment("core:docscloud:secret", secret);
         }
 
         if (isDocker)

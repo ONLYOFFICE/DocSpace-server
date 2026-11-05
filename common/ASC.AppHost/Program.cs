@@ -70,6 +70,9 @@ switch (launchProfile)
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
             .AddNextcloud()
             .UseWebhookTestSettings()
+            // No payment services, whatever buildtools/config says: the payment tests of this profile expect the
+            // tariff service to be reported as not configured. integration-test-billing gives them a stub.
+            .UsePaymentServices()
             .AllowPortalRegistration();
 
         configurator
@@ -110,6 +113,7 @@ switch (launchProfile)
             // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
             .AddMailPit()
+            .UsePaymentServices()
             .AllowPortalRegistration();
 
         configurator
