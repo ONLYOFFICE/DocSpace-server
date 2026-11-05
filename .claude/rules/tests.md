@@ -291,3 +291,29 @@ value on the wire. Use it for those only.
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both
 belongs in code (e.g. `[assembly: CollectionBehavior(...)]`), not on the command line.
+
+## Payment services: two stacks
+
+The `integration-test` stack runs **no** billing, accounting or docscloud service: the AppHost gives every
+service empty addresses for them (`ConnectionStringManager.UsePaymentServices()`), whatever the developer's own
+`buildtools/config/appsettings.json` says. A payment test there can only see "Tariff service is not configured"
+(403) or the checks that come before it.
+
+Everything past that check lives in `web/ASC.Web.Api.Billing.Tests`, on the `integration-test-billing` stack:
+
+- **SaaS, not standalone** (`AspireHostFixture.Standalone => false`). A standalone installation gives every
+  portal the same payment key, so the answers of parallel tests could not be told apart; in SaaS a portal's key
+  is `Constants.PaymentStubRegion` + its tenant id. SaaS also resolves the tenant from the request host, so the
+  harness sends the portal as `Host` as well as `Origin`, takes the alias ApiSystem picks (it ignores the
+  requested one), and sets no base domain.
+- **The three services are one WireMock in the test process**, `PaymentServiceStub`, on
+  `Constants.PaymentStubHost:PaymentStubPort`, started in `OnStartingAsync` - before the stack, because the
+  services ask billing about a portal as soon as it is registered.
+- A test scripts **its own portal** through `BaseTest.Payments` (`Paid`, `Customer`, `Balance`, or `On` for any
+  route) and reads what was asked about it from `PaymentCalls`. Anything not scripted gets the answer of a portal
+  billing does not know: no payments, so the free startup quota (`Constants.PaymentStubDefaultQuota`), no customer.
+- Some requests name **no portal** and their answers are cached for every portal - the checkout template
+  (`PortalId` is `__Tenant__`), the accounting price catalogue. The stub answers those the same way for every
+  test; never script them per test.
+- Cached reads (tariff, customer, balance) are re-read with `refresh=true`, as the TypeScript suite's
+  `setupPayment()` does after a payment.

@@ -55,7 +55,7 @@ if (otelFileLogging)
     connectionManager.AddOpenTelemetryCollector();
 }
 
-var isIntegrationTest = launchProfile is "integration-test" or "notify-test";
+var isIntegrationTest = launchProfile is "integration-test" or "notify-test" or "integration-test-billing";
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker, isIntegrationTest);
 
 switch (launchProfile)
@@ -98,6 +98,27 @@ switch (launchProfile)
             .AddIdentity()
             // The chat surface (/api/2.0/ai) for the AI chat tests, which stand in for the model with a WireMock.
             .AddAiChat();
+
+        break;
+    case "integration-test-billing":
+        // The payment suite's graph (ASC.Web.Api.Billing.Tests): a SaaS stack, where every portal has a payment key
+        // of its own - the standalone stack gives all of them the installation's one, so the billing answers of
+        // parallel tests could not be told apart. Billing, accounting and docscloud are a WireMock the suite runs in
+        // the test process (Constants.PaymentStubPort), started before the stack.
+        connectionManager
+            .AddMySql(withDataVolume: false, withTmpfs: true)
+            .AddRabbitMq(withManagementPlugin: false)
+            .AddRedis()
+            .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
+            .UsePaymentServices($"http://{Constants.PaymentStubHost}:{Constants.PaymentStubPort}")
+            .AllowPortalRegistration();
+
+        configurator
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            // The wallet top-up and low-balance services run in Web.Studio.
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort);
 
         break;
     case "notify-test":
