@@ -143,6 +143,8 @@ public static class IdentityExtension
 
                 entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_authorizations_owner");
 
+                entity.HasIndex(e => e.ModifiedAt, "idx_identity_authorizations_modified_at");
+
                 entity.Property(e => e.PrincipalId).HasColumnName("principal_id");
                 entity.Property(e => e.RegisteredClientId)
                     .HasColumnName("registered_client_id");
@@ -282,6 +284,8 @@ public static class IdentityExtension
                     .HasMaxLength(255);
 
                 entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_authorizations_owner");
+
+                entity.HasIndex(e => e.ModifiedAt, "idx_identity_authorizations_modified_at");
 
                 entity.Property(e => e.State)
                     .HasColumnType("text");

@@ -6152,6 +6152,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex(new[] { "Id" }, "idx_identity_authorizations_id");
 
+                    b.HasIndex(new[] { "ModifiedAt" }, "idx_identity_authorizations_modified_at");
+
                     b.HasIndex(new[] { "OwnerTenantId", "OwnerUserId" }, "idx_identity_authorizations_owner");
 
                     b.HasIndex(new[] { "RefreshTokenHash" }, "idx_identity_authorizations_refresh_token_hash")
@@ -6407,9 +6409,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId")
                         .HasName("PRIMARY");
 
+                    b.HasIndex(new[] { "ModifiedAt" }, "idx_identity_consents_modified_at");
+
                     b.HasIndex(new[] { "OwnerTenantId", "OwnerUserId" }, "idx_identity_consents_owner");
 
                     b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consents_principal_id");
+
+                    b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_consents_registered_client_id");
 
                     b.ToTable("identity_consents", (string)null);
                 });
@@ -6436,6 +6442,60 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "Scopes" }, "idx_identity_consent_scopes_scopes");
 
                     b.ToTable("identity_consent_scopes", (string)null);
+                });
+
+            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityPendingMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Attempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("attempts");
+
+                    b.Property<byte[]>("Body")
+                        .IsRequired()
+                        .HasColumnType("mediumblob")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("DeliverAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deliver_at");
+
+                    b.Property<string>("ExchangeName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("exchange_name");
+
+                    b.Property<string>("Headers")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("headers");
+
+                    b.Property<string>("RoutingKey")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("routing_key");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "DeliverAt" }, "idx_identity_pending_messages_deliver_at");
+
+                    b.ToTable("identity_pending_messages", (string)null);
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityScope", b =>
