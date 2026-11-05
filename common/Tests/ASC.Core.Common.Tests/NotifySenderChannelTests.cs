@@ -34,12 +34,14 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// What a channel reports back after handing a message to its sender. The repeat check takes back its mark when a
-/// letter was not delivered, and it can tell only from this answer.
+/// What a channel reports back after handing a message to its sender, and what the engine does with that answer: when
+/// the letter was not delivered, the repeat check takes back its mark, so the next request is not held back for a
+/// letter nobody got.
 /// </summary>
 public class NotifySenderChannelTests
 {
     private const string SenderName = "email.sender";
+    private const string RecipientId = "3f2504e0-4f89-11d3-9a0c-0305e82c3301";
 
     [Theory]
     [InlineData(SendResult.OK)]
@@ -49,11 +51,85 @@ public class NotifySenderChannelTests
     {
         var context = new Context();
         context.RegisterSender(new DispatchEngine(context, new ConfigurationBuilder().Build(), NullLoggerFactory.Instance), SenderName, new AnsweringSink(result));
-        var message = new NoticeMessage(new DirectRecipient("3f2504e0-4f89-11d3-9a0c-0305e82c3301", null, ["user@example.com"]), new TestAction(), null);
+        var message = Message();
 
         var response = await context.GetSender(SenderName).SendAsync(message, null!);
 
         response.Result.Should().Be(result);
+    }
+
+    [Theory]
+    [InlineData(SendResult.Impossible, false)]
+    [InlineData(SendResult.Inprogress, false)]
+    [InlineData(SendResult.OK, true)]
+    public async Task Engine_TakesBackTheMarkOfALetterNotDelivered(SendResult result, bool repeatHeldBack)
+    {
+        var interceptor = new DuplicateMessageInterceptor(CreateDeduplicationService());
+
+        var first = Request(interceptor);
+        await interceptor.PreventSend(first, InterceptorPlace.MessageSend, null!);
+        await NotifyEngine.SendThroughChannelAsync(first, new AnsweringChannel(result), Message(), null!);
+        var repeat = await interceptor.PreventSend(Request(interceptor), InterceptorPlace.MessageSend, null!);
+
+        repeat.Should().Be(repeatHeldBack);
+    }
+
+    [Fact]
+    public async Task Engine_TakesBackTheMarkWhenTheChannelThrows()
+    {
+        var interceptor = new DuplicateMessageInterceptor(CreateDeduplicationService());
+
+        var first = Request(interceptor);
+        await interceptor.PreventSend(first, InterceptorPlace.MessageSend, null!);
+        var send = async () => await NotifyEngine.SendThroughChannelAsync(first, new AnsweringChannel(null), Message(), null!);
+        await send.Should().ThrowAsync<InvalidOperationException>();
+        var repeat = await interceptor.PreventSend(Request(interceptor), InterceptorPlace.MessageSend, null!);
+
+        repeat.Should().BeFalse();
+    }
+
+    private static NotifyDeduplicationService CreateDeduplicationService()
+    {
+        return new NotifyDeduplicationService(
+            new ConfigurationBuilder().Build(),
+            new FusionCache(new FusionCacheOptions()),
+            new InMemoryLockProvider(),
+            NullLogger<NotifyDeduplicationService>.Instance);
+    }
+
+    private static NotifyRequest Request(ISendInterceptor interceptor)
+    {
+        var request = new NotifyRequest(NullLoggerFactory.Instance, new TestNotifySource(), new TestAction(), "", new DirectRecipient(RecipientId, null))
+        {
+            _tenantId = 1,
+            CurrentSender = SenderName
+        };
+        request._interceptors.Add(interceptor);
+
+        return request;
+    }
+
+    private static NoticeMessage Message()
+    {
+        return new NoticeMessage(new DirectRecipient(RecipientId, null, ["user@example.com"]), new TestAction(), null);
+    }
+
+    // answers with the given result, or throws when there is none
+    private sealed class AnsweringChannel(SendResult? result) : ISenderChannel
+    {
+        public string SenderName => NotifySenderChannelTests.SenderName;
+
+        public Task<SendResponse> DirectSend(INoticeMessage message, IServiceScope serviceScope)
+        {
+            throw new NotSupportedException();
+        }
+
+        public Task<SendResponse> SendAsync(INoticeMessage message, IServiceScope serviceScope)
+        {
+            return result is { } value
+                ? Task.FromResult(new SendResponse(message, SenderName, value))
+                : throw new InvalidOperationException("the channel failed");
+        }
     }
 
     private sealed class AnsweringSink(SendResult result) : Sink
@@ -69,5 +145,21 @@ public class NotifySenderChannelTests
         public string ID => "portal_deactivate";
         public List<Pattern> Patterns => [];
         public List<ITagValue> Tags { get; set; } = [];
+        public bool SuppressRepeats => true;
+    }
+
+    private sealed class TestNotifySource : INotifySource
+    {
+        public string Id => "test";
+
+        public IRecipientProvider GetRecipientsProvider()
+        {
+            throw new NotSupportedException();
+        }
+
+        public ISubscriptionProvider GetSubscriptionProvider()
+        {
+            throw new NotSupportedException();
+        }
     }
 }

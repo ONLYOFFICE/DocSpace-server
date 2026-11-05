@@ -48,12 +48,13 @@ public class NotifyRepeatOptInTests
 {
     private static readonly string[] _optedIn =
     [
-        // POST portal/suspend, POST portal/delete
+        // POST portal/suspend; POST portal/delete and the anonymous POST portal/sendremoveinstructions
         "portal_deactivate",
         "portal_delete",
         // PUT people/self/delete
         "profile_delete",
-        // PUT people/invite
+        // PUT people/invite; activate_email also goes out when an admin changes an address with POST people/email
+        // and when someone joins by an invitation link
         "activate_email",
         "saas_docspace_invite",
         // PUT people/type/{type}
@@ -130,6 +131,45 @@ public class NotifyRepeatOptInTests
         action.DeduplicationTags.Should().Contain("LinkAddress");
     }
 
+    [Fact]
+    public void EveryLetterKeyedOnTags_HasItsTagsCheckedAgainstInit()
+    {
+        // A tag the key reads but Init leaves empty makes the letter go out every time, so a letter that keys on tags
+        // needs a test that its Init fills them. Where that test is:
+        string[] covered =
+        [
+            // LetterTestBase, through each letter's own test in ASC.Notify.Tests
+            "portal_deactivate", "portal_delete", "profile_delete", "saas_docspace_invite", "saas_room_invite",
+            "saas_agent_invite", "user_type_changed", "user_role_changed", "user_agent_role_changed",
+            // RoomRoleLetter_FillsTheAccessLevelItKeysOn below
+            "RoomUpdateAccessForUser", "AgentUpdateAccessForUser",
+            // not checked: Init needs the link utilities from the container, and a tag it left empty would only make
+            // the letter go out every time
+            "ShareDocument", "ShareFolder", "ShareEncryptedDocument"
+        ];
+
+        var keyedOnTags = Actions().Where(a => a.DeduplicationTags.Length > 0).Select(a => a.ID);
+
+        keyedOnTags.Should().BeEquivalentTo(covered);
+    }
+
+    [Theory]
+    [InlineData(typeof(ASC.Files.Core.Services.NotifyService.RoomUpdateAccessForUserNotifyAction))]
+    [InlineData(typeof(ASC.Files.Core.Services.NotifyService.AgentUpdateAccessForUserNotifyAction))]
+    public void RoomRoleLetter_FillsTheAccessLevelItKeysOn(Type actionType)
+    {
+        var action = (ASC.Files.Core.Services.NotifyService.RoomUpdateAccessForUserNotifyAction)RuntimeHelpers.GetUninitializedObject(actionType);
+        var room = (ASC.Files.Core.Folder<int>)RuntimeHelpers.GetUninitializedObject(typeof(ASC.Files.Core.Folder<int>));
+        room.Id = 10;
+        room.ParentId = 1;
+        room.Title = "Room";
+        room.RootFolderType = ASC.Files.Core.FolderType.VirtualRooms;
+
+        action.Init(room, ASC.Files.Core.Security.FileShare.Editing, "Editor");
+
+        action.Tags.Should().Contain(t => t.Tag == "AccessLevel" && "Editing".Equals(t.Value));
+    }
+
     private static IEnumerable<INotifyAction> Actions()
     {
         Assembly[] assemblies =
@@ -141,6 +181,6 @@ public class NotifyRepeatOptInTests
         return assemblies
             .SelectMany(a => a.GetTypes())
             .Where(t => t is { IsClass: true, IsAbstract: false, IsGenericTypeDefinition: false } && typeof(INotifyAction).IsAssignableFrom(t))
-            .Select(t => (INotifyAction)System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(t));
+            .Select(t => (INotifyAction)RuntimeHelpers.GetUninitializedObject(t));
     }
 }
