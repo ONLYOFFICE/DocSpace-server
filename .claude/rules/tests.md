@@ -295,42 +295,15 @@ belongs in code (e.g. `[assembly: CollectionBehavior(...)]`), not on the command
 
 ## Payment services: two stacks
 
-The `integration-test` stack runs **no** billing, accounting or docscloud service: the AppHost gives every
-service empty addresses for them (`ConnectionStringManager.UsePaymentServices()`), whatever the developer's own
-`buildtools/config/appsettings.json` says. A payment test there can only see "Tariff service is not configured"
-(403) or the checks that come before it.
+The `integration-test` stack runs **no** billing, accounting or docscloud service, so a payment test there only
+sees 403 "Tariff service is not configured" or a check before it. Everything past that check goes to
+`web/ASC.Web.Api.Billing.Tests` (SaaS stack, the three services stubbed by `PaymentServiceStub`):
 
-Everything past that check lives in `web/ASC.Web.Api.Billing.Tests`, on the `integration-test-billing` stack:
-
-- **Only the connection is the stub's.** `UsePaymentServices(url)` overrides the addresses, key, secret, region,
-  default quota and the first accounting currency. Everything else under `core:payment` and `core:accounting`
-  (test mode, delays, the top-up period, the limits, further currencies - an array is overridden index by index)
-  still comes from the developer's `buildtools/config`, so a test must not depend on it: an unsupported currency is
-  `XXX`, never a real code some config may list.
-- **SaaS, not standalone** (`AspireHostFixture.Standalone => false`). A standalone installation gives every
-  portal the same payment key, so the answers of parallel tests could not be told apart; in SaaS a portal's key
-  is `Constants.PaymentStubRegion` + its tenant id. SaaS also resolves the tenant from the request host, so the
-  harness sends the portal as `Host` as well as `Origin`, takes the alias ApiSystem picks (it ignores the
-  requested one), and sets no base domain.
-- **The three services are one WireMock in the test process**, `PaymentServiceStub`, on
-  `Constants.PaymentStubHost:PaymentStubPort`, started in `OnStartingAsync` - before the stack, because the
-  services ask billing about a portal as soon as it is registered.
-- A test scripts **its own portal** through `BaseTest.Payments` (`Paid`, `Customer`, `Balance`, or `On` for any
-  route) and reads what was asked about it from `PaymentCalls`. Anything not scripted gets the answer of a portal
-  billing does not know: no payments, so the free startup quota (`Constants.PaymentStubDefaultQuota`), no customer.
-- Some requests name **no portal** and their answers are cached for every portal - the checkout template
-  (`PortalId` is `__Tenant__`), the accounting price catalogue. The stub answers those the same way for every
-  test; never script them per test.
-- Some state is kept the way the real services keep it, because the stack checks it: `Balance` is a wallet a
-  billing deposit credits (the stack polls the balance until it moves), every portal has an account number of its
-  own (`PortalPayments.AccountNumber`), payments are numbered across the run (the stack stores a paid tariff under
-  that number), and spending limits live in one store with ids across the run (`ServiceLimitStore`) - a limit on
-  another account (`PaymentServiceStub.AddServiceLimit`) is answered as missing, as in production.
-- **Assert on what the stack did, not on the stub.** `PaymentCalls` holds only the requests that name the portal:
-  a route by id (`DELETE /serviceLimit/{id}`) names none, so a `NotContain` over it can never fail - check the
-  store instead (`PaymentServiceStub.HasServiceLimit`). A value the test scripted proves nothing once read back
-  from the stub; read it through the API. A billing request body is a multimap of string lists: compare its
-  fields (`BaseTest.BillingValue`), never search it for substrings. A refusal with a status the action returns on
-  more than one path also checks `ErrorContent`.
-- Cached reads (tariff, customer, balance) are re-read with `refresh=true`, as the TypeScript suite's
-  `setupPayment()` does after a payment.
+- Script **only the test's own portal** through `Payments` (`Paid`, `Customer`, `Balance`, `On`). Requests that
+  name no portal (the checkout template, the price catalogue) are answered once for the whole run - never script them.
+- **Assert on what the stack did, not on the stub**: `PaymentCalls` lists only requests that name the portal (a
+  route by id is checked in the store, `HasServiceLimit`); a billing body is compared by field (`BillingValue`),
+  not by substring; a status reachable on several paths also checks `ErrorContent`.
+- Re-read cached data (tariff, customer, balance) with `refresh=true` after scripting a payment.
+- The stub overrides only the connection settings; never depend on the rest of `buildtools/config` (an
+  unsupported currency is `XXX`).
