@@ -71,7 +71,7 @@ public class TopUpSettingsTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(404);
-        exception.ErrorContent?.ToString().Should().Contain("Balance could not be found");
+        exception.ErrorContent!.ToString().Should().Contain("Balance could not be found");
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class TopUpSettingsTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(404);
-        exception.ErrorContent?.ToString().Should().Contain("Customer could not be found");
+        exception.ErrorContent!.ToString().Should().Contain("Customer could not be found");
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class TopUpSettingsTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(403);
-        exception.ErrorContent?.ToString().Should().Contain("Access denied");
+        exception.ErrorContent!.ToString().Should().Contain("Access denied");
     }
 
     private static TenantWalletSettingsRequestDto Settings()

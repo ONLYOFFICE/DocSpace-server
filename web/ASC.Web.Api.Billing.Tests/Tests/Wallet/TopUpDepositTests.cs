@@ -41,14 +41,10 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Wallet;
 public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
     [Fact]
-    public async Task TopUpDeposit_Payer_CreditsTheWallet()
+    public async Task TopUpDeposit_Payer_ChargesThenWaitsForTheWallet()
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m);
-
-        // The balance before the top-up, read without refresh, so it is what the stack has cached.
-        var before = (await _paymentApi.GetCustomerBalanceAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        before.SubAccounts.Should().ContainSingle().Which.Amount.Should().Be(10);
 
         // Act
         var result = await _paymentApi.TopUpDepositAsync(new TopUpDepositRequestDto(100, "USD"), TestContext.Current.CancellationToken);
@@ -56,18 +52,23 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Assert
         result.Response.Should().BeTrue();
 
-        var deposit = PaymentCalls.Should().ContainSingle(call => call.Route == "/billing/Deposit").Subject;
+        var calls = PaymentCalls.ToList();
+        var depositAt = calls.FindIndex(call => call.Route == "/billing/Deposit");
+        depositAt.Should().BeGreaterThanOrEqualTo(0, "the payer's payment method is charged through billing");
+        calls.Count(call => call.Route == "/billing/Deposit").Should().Be(1);
+
+        var deposit = calls[depositAt];
         BillingValue(deposit, "Amount").Should().Be("100");
         BillingValue(deposit, "Currency").Should().Be("USD");
         BillingValue(deposit, "CustomerParticipantName").Should().Be(Owner.Id.ToString());
 
-        // Read without refresh again: the top-up does not leave the balance cached before it in place.
-        var after = (await _paymentApi.GetCustomerBalanceAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
-        after.SubAccounts.Should().ContainSingle().Which.Amount.Should().Be(110);
+        // The stack answers only once accounting shows the money: it reads the balance again after the charge.
+        calls.Skip(depositAt + 1).Should().Contain(call => call.Route == "/customer/{portalId}/balance",
+            "a confirmed charge is waited for until the wallet moves");
     }
 
     [Fact]
-    public async Task TopUpDeposit_BillingDeclinesTheCharge_ReturnsFalseAndLeavesTheWallet()
+    public async Task TopUpDeposit_BillingDeclinesTheCharge_ReturnsFalseWithoutWaitingForTheWallet()
     {
         // Arrange
         Payments.Customer(Owner.Email).Balance(10m)
@@ -78,7 +79,13 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         result.Response.Should().BeFalse();
-        PaymentCalls.Should().ContainSingle(call => call.Route == "/billing/Deposit", "a declined charge is reported, not tried again");
+
+        var calls = PaymentCalls.ToList();
+        var depositAt = calls.FindIndex(call => call.Route == "/billing/Deposit");
+        depositAt.Should().BeGreaterThanOrEqualTo(0);
+        calls.Count(call => call.Route == "/billing/Deposit").Should().Be(1, "a declined charge is reported, not tried again");
+        calls.Skip(depositAt + 1).Should().NotContain(call => call.Route == "/customer/{portalId}/balance",
+            "nothing is waited for once billing declines the charge");
     }
 
     [Fact]
@@ -93,7 +100,7 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(403);
-        exception.ErrorContent?.ToString().Should().Contain("payment method is not set");
+        exception.ErrorContent!.ToString().Should().Contain("payment method is not set");
         PaymentCalls.Should().NotContain(call => call.Route == "/billing/Deposit");
     }
 
@@ -109,7 +116,7 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(403);
-        exception.ErrorContent?.ToString().Should().Contain("Access denied");
+        exception.ErrorContent!.ToString().Should().Contain("Access denied");
         PaymentCalls.Should().NotContain(call => call.Route == "/billing/Deposit");
     }
 
@@ -125,7 +132,7 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(400);
-        exception.ErrorContent?.ToString().Should().Contain("Unsupported currency");
+        exception.ErrorContent!.ToString().Should().Contain("Unsupported currency");
     }
 
     [Fact]
@@ -137,6 +144,6 @@ public class TopUpDepositTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(404);
-        exception.ErrorContent?.ToString().Should().Contain("Customer could not be found");
+        exception.ErrorContent!.ToString().Should().Contain("Customer could not be found");
     }
 }

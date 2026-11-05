@@ -59,7 +59,6 @@ global using ASC.Notify.Messages;
 global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
 global using ASC.Notify.Textile;
-global using ASC.Tests.Http;
 global using ASC.Webhooks.Contract;
 global using ASC.Webhooks.Core;
 

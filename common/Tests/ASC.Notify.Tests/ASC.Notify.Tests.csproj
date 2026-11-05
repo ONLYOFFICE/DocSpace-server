@@ -32,7 +32,7 @@
   <ItemGroup>
     <!-- The stub of an external HTTP service the payment client tests use, compiled in from its one source rather
          than copied, and not taken from ASC.Core.Common.Tests by reference: a test project is no library. -->
-    <Compile Include="..\ASC.Core.Common.Tests\HttpStub.cs" Link="Infrastructure\HttpStub.cs" />
+    <Compile Include="..\ASC.Core.Common.Tests\HttpStub.cs" Link="Linked\ASC.Core.Common.Tests\HttpStub.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -32,21 +32,20 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 
-namespace ASC.Web.Api.Billing.Tests.Tests;
+namespace ASC.Web.Api.Billing.Tests.Tests.Checkout;
 
 /// <summary>
-/// The other side of the administrator guards of the payment operations: a DocSpace administrator who is not the owner
-/// is let through every one of them, so the guard sits at the administrator and not at the owner. The refusals of the
-/// roles below are in the permission classes of each feature folder.
+/// The other side of <see cref="SubscriptionPayerPermissionsTests"/>: the owner, who pays for the portal, is let through
+/// every subscription operation, so the refusals there come from the role and not from a refusal of everybody.
 /// </summary>
-public class PaymentAdministratorControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
+public class SubscriptionPermissionsControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
-    public static TheoryData<string> Operations => [.. AdministratorOperations];
+    public static TheoryData<string> PayerOperations => [.. SubscriptionPayerOperations];
 
     [Theory]
-    [MemberData(nameof(Operations))]
-    public async Task AdministratorOperation_DocSpaceAdministratorWhoIsNotTheOwner_IsNotRefused(string operation)
+    [MemberData(nameof(PayerOperations))]
+    public async Task SubscriptionOperation_OwnerWhoIsThePayer_IsNotRefused(string operation)
     {
-        await AssertAdministratorNotRefusedAsync(operation);
+        await AssertOwnerNotRefusedAsync(operation);
     }
 }

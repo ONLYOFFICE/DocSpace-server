@@ -92,7 +92,7 @@ public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(400);
-        exception.ErrorContent?.ToString().Should().Contain("Only monthly product");
+        exception.ErrorContent!.ToString().Should().Contain("Only monthly product");
     }
 
     [Theory]

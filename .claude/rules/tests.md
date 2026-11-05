@@ -113,10 +113,11 @@ var exception = await Assert.ThrowsAsync<ApiException>(
     async () => await _roomsApi.DeleteRoomAsync(room.Id, new DeleteRoomRequest(false), TestContext.Current.CancellationToken));
 
 exception.ErrorCode.Should().Be(403);
-exception.ErrorContent?.ToString().Should().Contain("Access denied");
+exception.ErrorContent!.ToString().Should().Contain("Access denied");
 ```
 
-`ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`.
+`ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`. Read `ErrorContent` with
+`!`, never `?.`: with `?.` an empty body skips the whole assertion, and a check of the message can never fail.
 
 ## Endpoints the SDK does not expose
 
@@ -305,5 +306,5 @@ sees 403 "Tariff service is not configured" or a check before it. Everything pas
   route by id is checked in the store, `HasServiceLimit`); a billing body is compared by field (`BillingValue`),
   not by substring; a status reachable on several paths also checks `ErrorContent`.
 - Re-read cached data (tariff, customer, balance) with `refresh=true` after scripting a payment.
-- The stub overrides only the connection settings; never depend on the rest of `buildtools/config` (an
-  unsupported currency is `XXX`).
+- The stub profile overrides the payment addresses, key, secret, region, default quota and the first accounting
+  currency; never depend on the rest of `buildtools/config` (an unsupported currency is `XXX`).

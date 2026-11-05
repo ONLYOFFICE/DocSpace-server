@@ -32,20 +32,31 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 
-namespace ASC.Web.Api.Billing.Tests.Tests;
+namespace ASC.Web.Api.Billing.Tests.Tests.Wallet;
 
 /// <summary>
-/// The control of the role checks of the payment operations: the owner, who pays for the portal, is let through every
-/// one of them, so the refusals the other classes see come from the role and not from a refusal of everybody.
+/// The other side of <see cref="WalletPayerPermissionsTests"/> and <see cref="WalletAdminPermissionsTests"/>: the owner,
+/// who pays for the portal, is let through every wallet operation, and a DocSpace administrator who is not the owner
+/// through the ones for administrators - so the refusals come from the role, and the administrator guard sits at the
+/// administrator, not at the owner.
 /// </summary>
-public class PaymentPermissionsControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
+public class WalletPermissionsControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
-    public static TheoryData<string> Operations => AllOperations();
+    public static TheoryData<string> AllWalletOperations => [.. WalletPayerOperations, .. WalletAdministratorOperations];
+
+    public static TheoryData<string> AdministratorOperations => [.. WalletAdministratorOperations];
 
     [Theory]
-    [MemberData(nameof(Operations))]
-    public async Task PaymentOperation_OwnerWhoIsThePayer_IsNotRefused(string operation)
+    [MemberData(nameof(AllWalletOperations))]
+    public async Task WalletOperation_OwnerWhoIsThePayer_IsNotRefused(string operation)
     {
         await AssertOwnerNotRefusedAsync(operation);
+    }
+
+    [Theory]
+    [MemberData(nameof(AdministratorOperations))]
+    public async Task AdministratorOperation_DocSpaceAdministratorWhoIsNotTheOwner_IsNotRefused(string operation)
+    {
+        await AssertAdministratorNotRefusedAsync(operation);
     }
 }

@@ -127,7 +127,7 @@ public class PortalRetentionJobTests
 
         public int Asked => _stub.CallCount;
 
-    /// <summary>The n-th request gets an empty balance when <paramref name="answers"/>[n] is true, a dropped connection otherwise.</summary>
+        /// <summary>The n-th request gets an empty balance when <paramref name="answers"/>[n] is true, a dropped connection otherwise.</summary>
         public static AccountingStub Answering(params bool[] answers)
         {
             return new AccountingStub((n, _) => Task.FromResult(n < answers.Length && answers[n]));

@@ -39,14 +39,7 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Checkout;
 /// </summary>
 public class SubscriptionPayerPermissionsTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
-    public static TheoryData<string, EmployeeType> Cases => Matrix(
-        [
-            "PUT payment/update",
-            "GET payment/subscription/balance",
-            "POST payment/subscription/movetowallet",
-            "GET payment/account"
-        ],
-        NotThePayer);
+    public static TheoryData<string, EmployeeType> Cases => Matrix(SubscriptionPayerOperations, NotThePayer);
 
     [Theory]
     [MemberData(nameof(Cases))]

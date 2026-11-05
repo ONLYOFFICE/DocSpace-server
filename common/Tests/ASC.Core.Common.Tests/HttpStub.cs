@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Tests.Http;
+namespace ASC.Core.Common.Tests;
 
 /// <summary>
 /// One external HTTP service (billing, accounting, docscloud) as a test scripts it: a path of its own on a WireMock
@@ -39,8 +39,9 @@ namespace ASC.Tests.Http;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The source lives in ASC.Core.Common.Tests and is compiled into ASC.Notify.Tests as a linked file, so both suites
-/// fake a service the same way without the unit tests taking on the Aspire harness of ASC.Tests.Common.
+/// The source lives in ASC.Core.Common.Tests, whose folder its namespace follows, and is compiled into ASC.Notify.Tests
+/// as a linked file, so both suites fake a service the same way without the unit tests taking on the Aspire harness
+/// of ASC.Tests.Common.
 /// </para>
 /// <para>
 /// The client under test is pointed at <see cref="Url"/> and talks to it over a real socket, so the request crosses
@@ -57,7 +58,9 @@ namespace ASC.Tests.Http;
 /// sends the request once more, which a test counting requests would see as a retry the code never made.
 /// </para>
 /// <para>
-/// Only a stub made by <see cref="AtRoot"/> owns a server and has to be disposed; disposing any other does nothing.
+/// Disposing a stub takes its mapping off the shared server, so a request that arrives after the test gets
+/// WireMock's 404 instead of a callback into a test that is over; a stub made by <see cref="AtRoot"/> stops its own
+/// server instead. A stub that is never disposed stays mapped until the run ends, which costs nothing else.
 /// </para>
 /// </remarks>
 public sealed class HttpStub : IDisposable
@@ -70,6 +73,7 @@ public sealed class HttpStub : IDisposable
     private static readonly Lazy<string> _dropping = new(StartDroppingListener);
 
     private readonly string _prefix;
+    private readonly Guid _mapping = Guid.NewGuid();
     private readonly WireMockServer? _ownServer;
     private readonly ConcurrentQueue<StubRequest> _requests = new();
     private readonly Func<StubRequest, Task<StubResponse>> _respond = _ => throw new InvalidOperationException("An unreachable service never answers");
@@ -93,6 +97,7 @@ public sealed class HttpStub : IDisposable
 
         Server
             .Given(Request.Create().WithPath(new WildcardMatcher($"{_prefix}/*")).UsingAnyMethod())
+            .WithGuid(_mapping)
             .RespondWith(Response.Create().WithCallback(HandleAsync));
     }
 
@@ -148,8 +153,15 @@ public sealed class HttpStub : IDisposable
 
     public void Dispose()
     {
-        _ownServer?.Stop();
-        _ownServer?.Dispose();
+        if (_ownServer is not null)
+        {
+            _ownServer.Stop();
+            _ownServer.Dispose();
+        }
+        else if (_closedUrl is null)
+        {
+            _server.Value.DeleteMapping(_mapping);
+        }
     }
 
     private static string StartDroppingListener()
@@ -158,16 +170,39 @@ public sealed class HttpStub : IDisposable
         listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
         listener.Listen();
 
-        // Accepts for the life of the test process, like the shared server; the listener is never closed.
+        // Accepts for the life of the test process, like the shared server; the listener is never closed. One failed
+        // connection must not end the loop: the kernel would go on accepting into the backlog, and every later fault
+        // would hang until the client's timeout instead of failing at once.
         _ = Task.Run(async () =>
         {
             while (true)
             {
-                using var connection = await listener.AcceptAsync();
+                Socket connection;
 
-                // A zero linger timeout turns the close into a reset, so the client fails at once instead of waiting
-                // for an answer that never comes.
-                connection.LingerState = new LingerOption(true, 0);
+                try
+                {
+                    connection = await listener.AcceptAsync();
+                }
+                catch (SocketException)
+                {
+                    // A client that gave up before its connection was accepted; there is nothing to reset.
+                    continue;
+                }
+
+                try
+                {
+                    // A zero linger timeout turns the close into a reset, so the client fails at once instead of
+                    // waiting for an answer that never comes.
+                    connection.LingerState = new LingerOption(true, 0);
+                }
+                catch (SocketException)
+                {
+                    // The client closed first, by its own cancellation; the connection is gone either way.
+                }
+                finally
+                {
+                    connection.Dispose();
+                }
             }
         });
 

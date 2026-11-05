@@ -79,7 +79,7 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(400);
-        exception.ErrorContent?.ToString().Should().Contain("DocsCloud subscription is not active");
+        exception.ErrorContent!.ToString().Should().Contain("DocsCloud subscription is not active");
     }
 
     [Fact]
@@ -95,7 +95,7 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(400);
-        exception.ErrorContent?.ToString().Should().Contain("Invalid quantity");
+        exception.ErrorContent!.ToString().Should().Contain("Invalid quantity");
         PaymentCalls.Should().NotContain(call => call.Route == "/billing/CalculateSwitchSubscription");
     }
 

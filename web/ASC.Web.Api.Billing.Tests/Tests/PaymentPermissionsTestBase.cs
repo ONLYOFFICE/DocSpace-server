@@ -44,6 +44,23 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
     /// <summary>Every role but the owner, who is the payer: refused by the operations for the payer.</summary>
     protected static EmployeeType[] NotThePayer => [EmployeeType.DocSpaceAdmin, .. NonAdministrators];
 
+    /// <summary>The subscription: changing the plan, its balance, moving it to the wallet, the billing account page.</summary>
+    protected static string[] SubscriptionPayerOperations =>
+    [
+        "PUT payment/update",
+        "GET payment/subscription/balance",
+        "POST payment/subscription/movetowallet",
+        "GET payment/account"
+    ];
+
+    /// <summary>The wallet as the payer keeps it: topping it up, its automatic top-up, attaching a payment method.</summary>
+    protected static string[] WalletPayerOperations =>
+    [
+        "POST payment/deposit",
+        "POST payment/topupsettings",
+        "GET payment/checkoutsetupurl"
+    ];
+
     /// <summary>The spending of the wallet: the usage by service and by month, and the operations report.</summary>
     protected static string[] UsageOperations =>
     [
@@ -73,9 +90,6 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         "POST payment/servicestate",
         "GET payment/servicessettings"
     ];
-
-    /// <summary>Every operation for administrators - any DocSpace administrator, not only the owner.</summary>
-    protected static string[] AdministratorOperations => [.. UsageOperations, .. UsageReportOperations, .. WalletAdministratorOperations];
 
     // One valid request per operation, as the owner would send it; the TypeScript suite's requests where it has them.
     private static readonly Dictionary<string, Func<PaymentApi, CancellationToken, Task>> _requests = new()
@@ -113,12 +127,6 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         ["GET payment/customer/usage/monthly/report"] = (api, ct) => api.GetCustomerMonthlyUsageReportAsync(ct),
         ["DELETE payment/customer/usage/monthly/report"] = (api, ct) => api.TerminateCustomerMonthlyUsageReportAsync(ct)
     };
-
-    /// <summary>Every operation of the catalogue.</summary>
-    protected static TheoryData<string> AllOperations()
-    {
-        return [.. _requests.Keys];
-    }
 
     /// <summary>Every pairing of <paramref name="operations"/> with <paramref name="roles"/>.</summary>
     protected static TheoryData<string, EmployeeType> Matrix(string[] operations, EmployeeType[] roles)
