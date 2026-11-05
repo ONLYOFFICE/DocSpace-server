@@ -40,20 +40,27 @@ public class PortalModelsService(AiGateway gateway, ByokKeyStorage byokKeyStorag
     {
         List<Model> models = [.. (await gateway.GetModelsAsync()).Data];
 
-        var overridden = (await byokKeyStorage.ReadAllAsync(tenantId))
-            .Select(k => k.Id)
-            .Except(models.Select(m => m.RevisionId))
-            .ToHashSet();
+        var byokOnly = (await byokKeyStorage.ReadAllAsync(tenantId))
+            .Where(k => models.All(m => m.RevisionId != k.Id))
+            .ToDictionary(k => k.Id, k => k.Provider);
 
-        if (overridden.Count == 0)
+        if (byokOnly.Count == 0)
         {
             return models;
         }
 
         var catalogue = (await gateway.GetAllModelsAsync()).Data;
 
-        models.AddRange(catalogue.Where(m => overridden.Contains(m.RevisionId)));
+        models.AddRange(catalogue.Where(m => byokOnly.TryGetValue(m.RevisionId, out var provider) && m.AcceptsByokProvider(provider)));
 
         return models;
+    }
+}
+
+public static class ModelByokExtensions
+{
+    public static bool AcceptsByokProvider(this Model model, string provider)
+    {
+        return model.ByokProviders?.Any(p => p.Id == provider) == true;
     }
 }

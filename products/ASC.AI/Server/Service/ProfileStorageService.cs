@@ -87,7 +87,7 @@ public class ProfileStorageService(
         var model = await FindByokModelAsync(id) ?? throw new ItemNotFoundException();
         var type = GetByokType(model) ?? throw new ItemNotFoundException();
 
-        if (model.ByokProviders?.Any(p => p.Id == provider) != true)
+        if (!model.AcceptsByokProvider(provider))
         {
             throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
         }

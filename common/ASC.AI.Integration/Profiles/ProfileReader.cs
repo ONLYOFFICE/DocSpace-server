@@ -80,8 +80,15 @@ public class ProfileReader(
         [
             .. models
                 .Where(IsNotEmbedding)
-                .Select(m => MapGatewayProfile(m, byokProviders.GetValueOrDefault(m.RevisionId)))
+                .Select(m => MapGatewayProfile(m, ActiveByokProvider(m, byokProviders)))
         ];
+    }
+
+    private static string? ActiveByokProvider(Model model, Dictionary<Guid, string> byokProviders)
+    {
+        return byokProviders.TryGetValue(model.RevisionId, out var provider) && model.AcceptsByokProvider(provider)
+            ? provider
+            : null;
     }
 
     private Profile MapGatewayProfile(Model model, string? byokProvider)
