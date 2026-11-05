@@ -42,7 +42,8 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
     public override bool SuppressRepeats => true;
 
     // the links are valid only while the owner still has the address they were made for, so a request after an
-    // email change is a new letter
+    // email change is a new letter; the address goes in as stored, since the check compares it the way the database
+    // does, which tells case apart on PostgreSQL
     public override string[] DeduplicationTags => [CommonTags.LinkAddress];
 
     public override List<Pattern> Patterns
@@ -62,7 +63,7 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 
         Tags =
         [
-            new TagValue(CommonTags.LinkAddress, RepeatKeyTags.LinkAddress(user)),
+            new TagValue(CommonTags.LinkAddress, user.Email),
             new TagValue(CommonTags.ActivateUrl, activateUrl),
             TagValues.OrangeButton(orangeButtonText, deactivateUrl),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
@@ -79,8 +80,9 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
     // a caller can repeat POST portal/delete at will
     public override bool SuppressRepeats => true;
 
-    // the link is valid only while the owner still has the address they were made for, so a request after an
-    // email change is a new letter
+    // the link is valid only while the owner still has the address it was made for, so a request after an email
+    // change is a new letter; the address goes in as stored, since the check compares it the way the database does,
+    // which tells case apart on PostgreSQL
     public override string[] DeduplicationTags => [CommonTags.LinkAddress];
 
     public override List<Pattern> Patterns
@@ -100,7 +102,7 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
 
         Tags =
         [
-            new TagValue(CommonTags.LinkAddress, RepeatKeyTags.LinkAddress(user)),
+            new TagValue(CommonTags.LinkAddress, user.Email),
             TagValues.OrangeButton(orangeButtonText, url),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
             new TagValue(CommonTags.AutoRenew, showAutoRenewText.ToString()),
@@ -174,6 +176,10 @@ public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtilit
     // a caller can repeat PUT people/self/delete at will
     public override bool SuppressRepeats => true;
 
+    // the link is valid only while the account still has the address it was made for, so a request after an email
+    // change is a new letter; the address goes in as stored, since the check compares it exactly
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -191,6 +197,7 @@ public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtilit
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email),
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, user.GetCulture().Name)
@@ -1341,7 +1348,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         Tags = [
             new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
-            new TagValue(CommonTags.InviteType, RepeatKeyTags.InviteType(inviteType)),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1378,7 +1385,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         Tags = [
             new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
-            new TagValue(CommonTags.InviteType, RepeatKeyTags.InviteType(inviteType)),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1479,7 +1486,7 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
         Tags = [
 
             new TagValue(CommonTags.InviteLink, confirmationUrl),
-            new TagValue(CommonTags.InviteType, RepeatKeyTags.InviteType(inviteType)),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),

@@ -174,7 +174,7 @@ public class StudioNotifyService(
     {
         INotifyAction action = isAgent ? serviceProvider.GetService<SaasAgentInviteNotifyAction>() : serviceProvider.GetService<SaasRoomInviteNotifyAction>();
 
-        return await studioNotifyServiceHelper.IsRepeatAsync(action, roomUniqId, AddressRecipient(email), EMailSenderName, RepeatKeyTags.InviteType(inviteType));
+        return await studioNotifyServiceHelper.IsRepeatAsync(action, roomUniqId, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast());
     }
 
     public async Task SendEmailRoomInviteAsync(
@@ -217,7 +217,7 @@ public class StudioNotifyService(
     {
         var action = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
 
-        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, AddressRecipient(email), EMailSenderName, RepeatKeyTags.InviteType(inviteType));
+        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast());
     }
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, EmployeeType inviteType, string culture = "", bool limitation = false)
@@ -446,7 +446,7 @@ public class StudioNotifyService(
 
         // the link is bound to this account, so a profile recreated with the same address is a new letter
         var objectId = user.Id.ToString();
-        if (await studioNotifyServiceHelper.IsRepeatAsync(profileDeleteNotifyAction, objectId, AddressRecipient(user.Email), EMailSenderName))
+        if (await studioNotifyServiceHelper.IsRepeatAsync(profileDeleteNotifyAction, objectId, AddressRecipient(user.Email), EMailSenderName, user.Email))
         {
             return false;
         }
@@ -576,7 +576,7 @@ public class StudioNotifyService(
         var owner = await userManager.GetUsersAsync(t.OwnerId);
         var action = serviceProvider.GetService<PortalDeactivateNotifyAction>();
 
-        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, owner, EMailSenderName, RepeatKeyTags.LinkAddress(owner));
+        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, owner, EMailSenderName, owner.Email);
     }
 
     // asked before the link is built, so a repeat builds no link
@@ -585,7 +585,7 @@ public class StudioNotifyService(
         var owner = await userManager.GetUsersAsync(t.OwnerId);
         var action = serviceProvider.GetService<PortalDeleteNotifyAction>();
 
-        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, checkActivation ? owner : AddressRecipient(owner.Email), EMailSenderName, RepeatKeyTags.LinkAddress(owner));
+        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, checkActivation ? owner : AddressRecipient(owner.Email), EMailSenderName, owner.Email);
     }
 
     public async Task SendMsgPortalDeactivationAsync(Tenant t, string deactivateUrl, string activateUrl)

@@ -118,11 +118,12 @@ public class NotifyRepeatOptInTests
     }
 
     [Theory]
-    // the letter goes to the owner's account, but its links are checked against the owner's address, so a request
-    // after an email change has to deliver links made for the new address
+    // the links are checked against the address exactly as stored, so a request after an email change - even one
+    // only in case - has to deliver links made for the new address
     [InlineData("portal_deactivate")]
     [InlineData("portal_delete")]
-    public void PortalLetter_TellsApartTheAddressOfItsLinks(string id)
+    [InlineData("profile_delete")]
+    public void LetterWithLinksBoundToAnAddress_TellsTheAddressApart(string id)
     {
         var action = Actions().Single(a => a.ID == id);
 
