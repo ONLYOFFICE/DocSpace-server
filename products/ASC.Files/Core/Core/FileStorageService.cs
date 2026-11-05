@@ -5920,14 +5920,14 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task SetEditorFieldRenamesAsync(int formId, int openedVersion, long sequence, List<FormFieldKeyChangeRequest> renames)
+    public async Task SetEditorFieldRenamesAsync(int formId, int openedVersion, long sequence, string sessionId, List<FormFieldKeyChangeRequest> renames)
     {
         var form = await GetStartedFormAsync(formId);
 
-        await formFillingReportCreator.SetEditorFieldRenamesAsync(form.Id, openedVersion, sequence, authContext.CurrentAccount.ID, renames.Select(r => r.Map()).ToList());
+        await formFillingReportCreator.SetEditorFieldRenamesAsync(form.Id, openedVersion, sequence, authContext.CurrentAccount.ID, sessionId, renames.Select(r => r.Map()).ToList());
     }
 
-    // The original PDF form of a form-filling room, started before, whose filling the caller may start.
+    // The original PDF form of a form-filling room whose filling the caller may start, started before or not yet.
     private async Task<File<int>> GetStartedFormAsync(int formId)
     {
         var fileDao = daoFactory.GetFileDao<int>();

@@ -164,6 +164,12 @@ public class FormSchemaProvider(
     // version, since the tools are built for every call the model makes.
     private async Task<IReadOnlyList<int>?> GetVersionsApartAsync(File<int> file, FormFillingProperties<int> formFilling, IReadOnlyList<int> inTable)
     {
+        // Every version writes to this table, as when the form never changed: no responses can be anywhere else.
+        if (Enumerable.Range(1, file.Version).All(inTable.Contains))
+        {
+            return [];
+        }
+
         var cacheKey = GetVersionsApartCacheKey(tenantManager.GetCurrentTenantId(), file.Id, file.Version);
 
         var cached = await fusionCache.TryGetAsync<List<int>?>(cacheKey);

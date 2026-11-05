@@ -1055,26 +1055,60 @@ public class FormFillingReportCreator(
         }
     }
 
+    // An editor opens the form this many times at most before the version is saved; more is not a person at work.
+    internal const int MaxEditorSessionsPerUser = 20;
+
     /// <summary>
     /// Keeps the fields a user renamed in an editor session, which the editor tracks by field id, relative to the version
     /// it opened; the version the session is saved as then continues the earlier answers of these fields under their new
-    /// names. A later report of the same user and session replaces the earlier one, and an older report arriving late is
-    /// dropped. A version the form does not have yet is ignored.
+    /// names. A later report of the same session replaces the earlier one, and an older report arriving late is dropped;
+    /// the sessions of one user are kept apart by their id, one opened on top of another's unsaved renames continues
+    /// them. A version the form does not have yet is ignored.
     /// </summary>
-    public async Task SetEditorFieldRenamesAsync(int originalFormId, int openedVersion, long sequence, Guid userId, List<FormFieldRename> renames)
+    public async Task SetEditorFieldRenamesAsync(int originalFormId, int openedVersion, long sequence, Guid userId, string sessionId, List<FormFieldRename> renames)
     {
         await UpdateVersionStateAsync(originalFormId, null, (form, state) =>
-            Task.FromResult(openedVersion <= form.Version && KeepEditorRenames(state, openedVersion, sequence, userId, renames)));
+        {
+            if (openedVersion > form.Version)
+            {
+                return Task.FromResult(false);
+            }
+
+            if (IsEditorSessionLimitReached(state, openedVersion, userId, sessionId))
+            {
+                logger.WarnEditorSessionLimitReached(originalFormId, openedVersion, userId);
+                return Task.FromResult(false);
+            }
+
+            return Task.FromResult(KeepEditorRenames(state, openedVersion, sequence, userId, sessionId, renames));
+        });
     }
 
-    // Each user's session keeps its place in the list, which is the order the sessions began to report in.
-    internal static bool KeepEditorRenames(FormFillingProperties<int> state, int openedVersion, long sequence, Guid userId, List<FormFieldRename> renames)
+    // A new session of a user who already has the most unsaved sessions on the version; an empty id is no id.
+    internal static bool IsEditorSessionLimitReached(FormFillingProperties<int> state, int openedVersion, Guid userId, string sessionId)
     {
+        sessionId = string.IsNullOrEmpty(sessionId) ? null : sessionId;
+        var sessions = (state.EditorFieldRenames ?? []).Where(r => r.OpenedVersion == openedVersion && r.UserId == userId && r.SavedVersion == null).ToList();
+
+        return sessions.Count >= MaxEditorSessionsPerUser && !sessions.Exists(r => r.SessionId == sessionId);
+    }
+
+    // Each session keeps its place in the list, which is the order the sessions began to report in: the renames of a
+    // session opened on top of another's are joined after them. A report without a session id, or with an empty one,
+    // stands for all the sessions of the user on the version, as the editors before the session id did.
+    internal static bool KeepEditorRenames(FormFillingProperties<int> state, int openedVersion, long sequence, Guid userId, string sessionId, List<FormFieldRename> renames)
+    {
+        if (IsEditorSessionLimitReached(state, openedVersion, userId, sessionId))
+        {
+            return false;
+        }
+
+        sessionId = string.IsNullOrEmpty(sessionId) ? null : sessionId;
         var sessions = state.EditorFieldRenames ??= [];
-        var session = sessions.Find(r => r.OpenedVersion == openedVersion && r.UserId == userId && r.SavedVersion == null);
+        var session = sessions.Find(r => r.OpenedVersion == openedVersion && r.UserId == userId && r.SavedVersion == null && r.SessionId == sessionId);
         if (session == null)
         {
-            session = new FormEditorFieldRenames { OpenedVersion = openedVersion, UserId = userId };
+            session = new FormEditorFieldRenames { OpenedVersion = openedVersion, UserId = userId, SessionId = sessionId };
             sessions.Add(session);
         }
         else if (sequence <= session.Sequence)

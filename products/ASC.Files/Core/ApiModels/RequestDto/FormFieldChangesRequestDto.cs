@@ -76,6 +76,15 @@ public class FormFieldChangesRequest
     public long Sequence { get; set; }
 
     /// <summary>
+    /// The editor session the report comes from: an id the editor makes up once each time it opens the form, such as a
+    /// GUID, of letters, digits, hyphens and underscores.
+    /// </summary>
+    /// <example>8f14e45f-ceea-4e7a-9a3b-1c2d3e4f5a6b</example>
+    [StringLength(64)]
+    [RegularExpression("^[A-Za-z0-9_-]+$")]
+    public string SessionId { get; set; }
+
+    /// <summary>
     /// Every field whose key the user changed since the editor opened the form, told apart by the field id the editor
     /// keeps; empty when no key changed. The other fields that differ from the opened form were added or removed.
     /// </summary>

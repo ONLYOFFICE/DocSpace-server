@@ -238,6 +238,11 @@ public class FormEditorFieldRenames
     public Guid UserId { get; set; }
 
     /// <summary>
+    /// The editor session that reported them, as the editor names it; null for the reports of an editor that names none.
+    /// </summary>
+    public string SessionId { get; set; }
+
+    /// <summary>
     /// The number of the report taken, growing within the session; an older report that arrives later is dropped.
     /// </summary>
     public long Sequence { get; set; }

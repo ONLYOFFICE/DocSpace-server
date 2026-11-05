@@ -99,6 +99,10 @@ internal static partial class FormFillingReportCreatorLogger
     public static partial void WarnEditorRenamesNotSaved(
         this ILogger<FormFillingReportCreator> logger, Exception exception, int formId, int version);
 
+    [LoggerMessage(LogLevel.Warning, "Forms DB: user {UserId} has the most editor sessions kept for version {Version} of form {FormId}; the field renames of a new one are ignored")]
+    public static partial void WarnEditorSessionLimitReached(
+        this ILogger<FormFillingReportCreator> logger, int formId, int version, Guid userId);
+
     [LoggerMessage(LogLevel.Warning, "Form report of form {FormId} lists only the first {Count} submissions")]
     public static partial void WarnFormReportTruncated(
         this ILogger<FormFillingReportCreator> logger, int formId, int count);

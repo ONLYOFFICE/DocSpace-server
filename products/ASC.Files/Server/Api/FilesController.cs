@@ -1197,23 +1197,18 @@ public abstract class FilesController<T>(
     }
 
     /// <remarks>
-    /// Reports which fields of a PDF form open in the editor the user renamed since the editor opened `version`, as the
-    /// editor tells them apart by the field ids it keeps. The editor reports them while the form is edited and before the
-    /// filling of a form-filling room is started from it; a later report of the same user's session replaces the earlier
-    /// one, and a report whose `sequence` is not above the last one taken is dropped, so a late request changes nothing.
-    /// The sessions of users editing the form together are kept apart.
-    /// The version the editor saves the session as, and the later ones, are then compared with the last version that has
-    /// responses by these renames, joined with those of the other editor sessions saved since: when the fields only got
-    /// new keys, were added or removed, the version continues the same table of the forms database and the same sheet of
-    /// the spreadsheet report, with the columns renamed, so the earlier responses are analysed together with the new
-    /// ones; when a field kept its key under another type, took the key of another field, or no field is left, the
-    /// version gets a table and a sheet of its own. Nothing is asked of the user either way. Without editor reports the
-    /// fields are paired by place only when the form kept its fields in the same order, of the same types and options,
-    /// and only keys changed; otherwise a field with a new key is taken for a new field: the version continues the
-    /// table, and the earlier answers of the field stay in its old column. A session the form moved past without saving
-    /// it is dropped, and a `version` the form does not have yet is ignored, so a repeated call is harmless. The caller
-    /// needs the right to start the filling of the form, which must have been started before. The call changes only the
-    /// stored renames.
+    /// Reports which fields of the original PDF form of a form-filling room the user renamed in the editor since it opened
+    /// `version`, told apart by the field ids the editor keeps. The editor sends it while the form is edited, before the
+    /// filling is started from it and when it is left. The caller needs the right to start the filling of the form,
+    /// started before or not yet. Only the stored renames change: a report replaces the previous one of the same
+    /// `sessionId`, and one whose `sequence` is not above the last of that session is dropped, so a repeated or late call
+    /// is harmless. Sessions of different users, and of one user who opens the form again, in another tab or on another
+    /// device before the version is saved, are kept apart and joined in the order they began to report; without
+    /// `sessionId` all sessions of the user replace one another. When the editor saves the version, a renamed field keeps
+    /// its earlier answers under its new name in the same table of the forms database and sheet of the spreadsheet
+    /// report; a field that kept its key under another type or took another field's key gives the version a table of its
+    /// own. Nothing is asked of the user. A `version` the form does not have yet is ignored, and past 20 sessions of one
+    /// user on one version a new one is ignored too.
     /// </remarks>
     /// <summary>
     /// Report renamed form fields
@@ -1221,13 +1216,13 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/fieldchanges</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The renames were stored for the version the editor session is saved as")]
-    [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, or a key is empty or longer than 255 characters")]
-    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, its filling was never started, it is a copy of a form, or the caller may not start its filling")]
+    [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, a key is empty or longer than 255 characters, or `sessionId` is longer than 64 characters or has other characters than letters, digits, hyphens and underscores")]
+    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, it is a copy of a form, or the caller may not start its filling")]
     [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpPut("file/{fileId}/fieldchanges")]
     public Task SetFormFieldChanges(FormFieldChangesRequestDto inDto)
     {
-        return fileStorageService.SetEditorFieldRenamesAsync(inDto.FileId, inDto.Changes.Version, inDto.Changes.Sequence, inDto.Changes.Renames);
+        return fileStorageService.SetEditorFieldRenamesAsync(inDto.FileId, inDto.Changes.Version, inDto.Changes.Sequence, inDto.Changes.SessionId, inDto.Changes.Renames);
     }
 
     /// <remarks>
