@@ -62,9 +62,17 @@ export type DocspaceProfile = Profile & {
   byokProvider?: string;
 };
 
+// The portal API path an `onlyoffice` profile is called through, whatever host
+// is put in front: the gateway proxy, or its BYOK route when the profile runs
+// on the portal's own provider key, so the key is sent along with the request.
+export function onlyofficeGatewayPath(profile: DocspaceProfile): string {
+  return profile.byokProvider
+    ? `${ONLYOFFICE_GATEWAY_PATH}/byok/${encodeURIComponent(profile.id)}`
+    : ONLYOFFICE_GATEWAY_PATH;
+}
+
 function gatewayBaseUrl(profile: DocspaceProfile): string {
-  const gateway = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`;
-  return profile.byokProvider ? `${gateway}/byok/${encodeURIComponent(profile.id)}` : gateway;
+  return `${aiServiceBaseUrl}${onlyofficeGatewayPath(profile)}`;
 }
 
 export function withOnlyofficeProviderOverrides(
@@ -314,7 +322,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // forwarded auth headers must never reach a client (Bug 82821). Read with
   // `forClient=true` like `readAllForClient`; get-by-id drops `key` and
   // `headers` on top for every caller.
-  async readByIdRaw(id: string): Promise<Profile | undefined> {
+  async readByIdRaw(id: string): Promise<DocspaceProfile | undefined> {
     const snapshot = readChatContext("profiles");
     if (snapshot) {
       return snapshot.profiles.find((p) => p.id === id);
