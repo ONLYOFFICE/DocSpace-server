@@ -34,7 +34,11 @@
 namespace ASC.AI.Integration.Profiles;
 
 [Scope]
-public class ByokKeyStorage(IDbContextFactory<AiIntegrationContext> dbContextFactory, InstanceCrypto crypto, IFusionCache fusionCache)
+public class ByokKeyStorage(
+    IDbContextFactory<AiIntegrationContext> dbContextFactory,
+    InstanceCrypto crypto,
+    IFusionCache fusionCache,
+    ILogger<ByokKeyStorage> logger)
 {
     private static readonly TimeSpan _cacheDuration = TimeSpan.FromMinutes(10);
 
@@ -55,7 +59,7 @@ public class ByokKeyStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             return null;
         }
 
-        var key = await DecryptKeyAsync(entry.Key);
+        var key = await DecryptKeyAsync(tenantId, id, entry.Key);
 
         return string.IsNullOrEmpty(key) ? null : new ByokCredentials(entry.Provider, key);
     }
@@ -124,7 +128,7 @@ public class ByokKeyStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             opt => opt.SetDuration(_cacheDuration).SetFailSafe(true));
     }
 
-    private async Task<string> DecryptKeyAsync(string encryptedKey)
+    private async Task<string> DecryptKeyAsync(int tenantId, Guid id, string encryptedKey)
     {
         try
         {
@@ -132,6 +136,7 @@ public class ByokKeyStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         }
         catch (Exception ex) when (ex is CryptographicException or FormatException)
         {
+            logger.WarningByokKeyUndecryptable(tenantId, id, ex);
             return string.Empty;
         }
     }

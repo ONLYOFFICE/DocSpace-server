@@ -53,6 +53,7 @@ global using ASC.Security.Cryptography;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
 
 global using NetEscapades.EnumGenerators;
 
