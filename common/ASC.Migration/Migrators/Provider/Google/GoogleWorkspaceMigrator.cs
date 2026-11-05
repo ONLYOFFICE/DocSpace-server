@@ -203,7 +203,14 @@ public class GoogleWorkspaceMigrator : Migrator
                     lastUser = user;
                 }
             }
-            catch (Exception ex) when (ex is not LargeBackupException)
+            catch (LargeBackupException ex)
+            {
+                // the limit counts every takeout unpacked so far, so the remaining ones cannot fit either: the parse stops here
+                MigrationInfo.FailedArchives.Add(key);
+                await ReportProgressAsync(100, ex.Message);
+                throw;
+            }
+            catch (Exception ex)
             {
                 MigrationInfo.FailedArchives.Add(key);
                 Log(MigrationResource.CanNotParseArchives, ex);

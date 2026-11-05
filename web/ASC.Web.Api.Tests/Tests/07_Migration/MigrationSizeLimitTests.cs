@@ -66,11 +66,12 @@ public class MigrationSizeLimitTests(
         // Assert
         status.IsCompleted.Should().BeTrue();
         status.Error.Should().Contain(LargeBackupError);
+        status.ParseResult.FailedArchives.Should().Equal("backup.tar.gz");
     }
 
     /// <summary>
-    /// The ONLYOFFICE backup is unpacked by the shared read operator in one go, so the sizes in the
-    /// tar headers are summed before anything is written.
+    /// The ONLYOFFICE backup is unpacked by the migrator in a single pass that stops once the bytes
+    /// written pass the quota.
     /// </summary>
     [Fact]
     public async Task Parse_WorkspaceBackupLargerThanQuota_FailsWithLargeBackup()
@@ -85,6 +86,39 @@ public class MigrationSizeLimitTests(
         // Assert
         status.IsCompleted.Should().BeTrue();
         status.Error.Should().Contain(LargeBackupError);
+        status.ParseResult.FailedArchives.Should().Equal("backup.tar.gz");
+    }
+
+    /// <summary>
+    /// A Google Takeout over the quota is listed as the archive that failed, as with the other
+    /// migrators, instead of the error passing the per-takeout catch with no archive named.
+    /// </summary>
+    [Fact]
+    public async Task Parse_GoogleTakeoutLargerThanQuota_FailsWithLargeBackup()
+    {
+        // Arrange
+        await UploadBackupAsync("takeout.zip", BuildZeroZip("Takeout/Drive/zeros.bin"));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("GoogleWorkspace", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().Contain(LargeBackupError);
+        status.ParseResult.FailedArchives.Should().Equal("takeout.zip");
+    }
+
+    private static byte[] BuildZeroZip(string entryName)
+    {
+        using var buffer = new MemoryStream();
+        using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+        using (var entry = zip.CreateEntry(entryName, CompressionLevel.Optimal).Open())
+        {
+            new ZeroStream(MaxExtractedSize + 1024 * 1024).CopyTo(entry);
+        }
+
+        return buffer.ToArray();
     }
 
     private static byte[] BuildZeroTarGz(string entryName)

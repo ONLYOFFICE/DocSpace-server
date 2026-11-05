@@ -87,8 +87,7 @@ public class WorkspaceMigrator : Migrator
         }
         try
         {
-            await CountDeclaredSizeAsync();
-            _dataReader = DataOperatorFactory.GetReadOperator(_backup, false, reportProgress ? _cancellationToken : CancellationToken.None);
+            _dataReader = await ExtractBackupAsync(reportProgress ? _cancellationToken : CancellationToken.None);
 
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
@@ -125,24 +124,37 @@ public class WorkspaceMigrator : Migrator
     }
 
     /// <summary>
-    /// The read operator unpacks the whole backup at once, writing each entry at the size its tar header
-    /// declares, so the headers are summed against the quota before anything reaches the disk.
+    /// Unpacks the backup in a single pass, counting the bytes actually written against the quota, into the folder
+    /// <see cref="DataOperatorFactory.GetReadOperator"/> would use. That operator unpacks everything in one go with no
+    /// way to stop it, and summing the tar headers ahead of it would decompress the whole backup a second time.
     /// </summary>
-    private async Task CountDeclaredSizeAsync()
+    private async Task<IDataReadOperator> ExtractBackupAsync(CancellationToken cancellationToken)
     {
-        if (MaxExtractedSize == long.MaxValue)
-        {
-            return;
-        }
+        var folder = Path.Combine(Path.GetDirectoryName(_backup), Path.GetFileNameWithoutExtension(_backup).Replace('>', '_').Replace(':', '_').Replace('?', '_'));
 
+        // each stream is disposed once, by its own declaration: neither the gzip stream nor the reader owns what it reads
         await using var file = File.OpenRead(_backup);
         // the same test DataOperatorFactory.GetReadOperator uses to pick a gzipped or a plain tar
-        await using Stream stream = _backup.EndsWith("tar.gz") ? new GZipStream(file, CompressionMode.Decompress) : file;
-        await using var reader = new TarReader(stream);
-        while (await reader.GetNextEntryAsync(cancellationToken: _cancellationToken) is { } entry)
+        await using var gzip = _backup.EndsWith("tar.gz") ? new GZipStream(file, CompressionMode.Decompress, leaveOpen: true) : null;
+        await using var reader = new TarReader(gzip ?? (Stream)file, leaveOpen: true);
+        while (await reader.GetNextEntryAsync(cancellationToken: cancellationToken) is { } entry)
         {
-            CountExtractedSize(entry.Length);
+            // symbolic and hard links are skipped: their target may lie outside the extraction folder
+            if (entry.EntryType == TarEntryType.Directory)
+            {
+                Directory.CreateDirectory(GetSafeExtractPath(folder, entry.Name));
+            }
+            else if (entry.EntryType is TarEntryType.RegularFile or TarEntryType.V7RegularFile or TarEntryType.ContiguousFile)
+            {
+                var destPath = GetSafeExtractPath(folder, entry.Name);
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                // replaced, not refused, as the shared read operator does: the parse that precedes a migration leaves
+                // its unpacked folder behind, and the migration parses the backup again into the same place
+                await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, true, cancellationToken);
+            }
         }
+
+        return new FolderReadOperator(folder, cancellationToken);
     }
 
     private async Task InnerParseAsync(bool reportProgress, int count = 1)
