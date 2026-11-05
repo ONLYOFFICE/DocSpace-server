@@ -99,8 +99,9 @@ public class GoogleWorkspaceMigrator : Migrator
             await ReportProgressAsync(5, MigrationResource.StartOfDataProcessing);
         }
 
-        var progressStep = 90 / _takeouts.Length;
-        var i = 1;
+        // each takeout has an equal share of 5-95%, filled while it unpacks
+        var progressStep = 90d / _takeouts.Length;
+        var i = 0;
         MigrationUser lastUser = null;
         foreach (var takeout in _takeouts)
         {
@@ -109,9 +110,11 @@ public class GoogleWorkspaceMigrator : Migrator
                 return null;
             }
 
+            var takeoutProgress = 5 + progressStep * i;
+            var takeoutStatus = MigrationResource.DataProcessing + $" {takeout} ({++i}/{_takeouts.Length})";
             if (reportProgress)
             {
-                await ReportProgressAsync(_lastProgressUpdate + progressStep, MigrationResource.DataProcessing + $" {takeout} ({i++}/{_takeouts.Length})");
+                await ReportProgressAsync(takeoutProgress, takeoutStatus);
             }
 
             var tmpFolder = Path.Combine(TmpFolder, Path.GetFileNameWithoutExtension(takeout));
@@ -120,8 +123,14 @@ public class GoogleWorkspaceMigrator : Migrator
             {
                 await using (var archive = await ZipFile.OpenReadAsync(takeout, _cancellationToken))
                 {
+                    var unpacked = 0;
                     foreach (var entry in archive.Entries)
                     {
+                        if (reportProgress)
+                        {
+                            await ReportUnzippingAsync(takeoutProgress + progressStep * ++unpacked / archive.Entries.Count, takeoutStatus);
+                        }
+
                         var destPath = GetSafeExtractPath(tmpFolder, entry.FullName);
                         if (string.IsNullOrEmpty(entry.Name))
                         {

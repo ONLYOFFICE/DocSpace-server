@@ -74,7 +74,32 @@ public class WorkspaceParseTests(
         user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
     }
 
-    private static byte[] BuildBackup(bool gzip)
+    /// <summary>
+    /// Every progress report publishes the operation state and writes a line to the migration log,
+    /// so unpacking reports at most once per whole percent of its 5-30% share - and does report
+    /// within it, rather than standing at 5% until the whole backup is unpacked. The extra entries
+    /// are random, so that a gzipped backup is read in many chunks too.
+    /// </summary>
+    [Theory]
+    [InlineData("backup.tar.gz")]
+    [InlineData("backup.tar")]
+    public async Task Parse_BackupWithManyEntries_ReportsUnpackingOncePerPercent(string fileName)
+    {
+        // Arrange
+        await UploadBackupAsync(fileName, BuildBackup(gzip: fileName.EndsWith(".gz"), extraFiles: 300));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Workspace", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+        var log = await GetMigrationLogAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        CountProgressReports(log, "progress: Unzipping...").Should().BeInRange(2, 26, log);
+    }
+
+    private static byte[] BuildBackup(bool gzip, int extraFiles = 0)
     {
         using var buffer = new MemoryStream();
         using (var compressed = gzip ? new GZipStream(buffer, CompressionLevel.Optimal, leaveOpen: true) : null)
@@ -100,6 +125,15 @@ public class WorkspaceParseTests(
 
             // files/folder_{(id / 1000 + 1) * 1000}/file_{id}/v{version}/content{extension}
             WriteTarEntry(tar, "files/folder_1000/file_1/v1/content.txt", FileContent);
+
+            // files no table refers to: they are unpacked and then ignored by the parse
+            var random = new Random(42);
+            for (var i = 0; i < extraFiles; i++)
+            {
+                var content = new byte[4096];
+                random.NextBytes(content);
+                WriteTarEntry(tar, $"extra/{i}.bin", new MemoryStream(content));
+            }
         }
 
         return buffer.ToArray();

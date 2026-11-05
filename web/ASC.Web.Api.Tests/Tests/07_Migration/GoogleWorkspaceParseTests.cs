@@ -71,7 +71,30 @@ public class GoogleWorkspaceParseTests(
         user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
     }
 
-    private static byte[] BuildTakeout(string localizedDriveName)
+    /// <summary>
+    /// Every progress report publishes the operation state and writes a line to the migration log,
+    /// so a takeout reports at most once per whole percent of its share while it unpacks - and does
+    /// report within it, rather than once per takeout however many files it holds.
+    /// </summary>
+    [Fact]
+    public async Task Parse_TakeoutWithManyEntries_ReportsUnpackingOncePerPercent()
+    {
+        // Arrange
+        await UploadBackupAsync("takeout.zip", BuildTakeout(localizedDriveName: "Drive", extraFiles: 300));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("GoogleWorkspace", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+        var log = await GetMigrationLogAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        // the one takeout has the whole 5-95% share: the report at its start, then one per percent crossed
+        CountProgressReports(log, "takeout.zip (1/1)").Should().BeInRange(2, 91, log);
+    }
+
+    private static byte[] BuildTakeout(string localizedDriveName, int extraFiles = 0)
     {
         using var buffer = new MemoryStream();
         using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
@@ -82,6 +105,10 @@ public class GoogleWorkspaceParseTests(
                 $"<h1 class=\"data-folder-name\" data-english-name=\"Drive\" data-folder-name=\"{localizedDriveName}\">Drive</h1>" +
                 "</body></html>");
             WriteZipEntry(zip, "Takeout/Drive/hello.txt", FileContent);
+            for (var i = 0; i < extraFiles; i++)
+            {
+                WriteZipEntry(zip, $"Takeout/Drive/extra/{i}.txt", FileContent);
+            }
         }
 
         return buffer.ToArray();

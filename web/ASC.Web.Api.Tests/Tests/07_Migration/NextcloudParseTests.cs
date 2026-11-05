@@ -246,17 +246,6 @@ public class NextcloudParseTests(
         return dump.Insert(end, "," + rows);
     }
 
-    /// <summary>
-    /// The SDK's <c>GetMigrationLogsWithHttpInfoAsync</c> is typed <c>Object</c> and parses the body as
-    /// JSON, while the endpoint answers <c>text/plain</c>, so the log is read over raw HTTP.
-    /// </summary>
-    private async Task<string> GetMigrationLogAsync()
-    {
-        using var response = await _webApiClient.GetAsync("api/2.0/migration/logs", TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        return await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-    }
-
     private static byte[] BuildArchive(string fileName, params (string Name, string Content)[] entries)
     {
         using var buffer = new MemoryStream();

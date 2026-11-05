@@ -87,11 +87,16 @@ public class WorkspaceMigrator : Migrator
         }
         try
         {
-            _dataReader = await ExtractBackupAsync(reportProgress ? _cancellationToken : CancellationToken.None);
+            _dataReader = await ExtractBackupAsync(reportProgress);
 
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
                 return null;
+            }
+
+            if (reportProgress)
+            {
+                await ReportProgressAsync(30, MigrationResource.UnzippingFinished);
             }
 
             var folders = _dataReader.GetDirectories("");
@@ -128,9 +133,11 @@ public class WorkspaceMigrator : Migrator
     /// <see cref="DataOperatorFactory.GetReadOperator"/> would use. That operator unpacks everything in one go with no
     /// way to stop it, and summing the tar headers ahead of it would decompress the whole backup a second time.
     /// </summary>
-    private async Task<IDataReadOperator> ExtractBackupAsync(CancellationToken cancellationToken)
+    private async Task<IDataReadOperator> ExtractBackupAsync(bool reportProgress)
     {
-        var folder = Path.Combine(Path.GetDirectoryName(_backup), Path.GetFileNameWithoutExtension(_backup).Replace('>', '_').Replace(':', '_').Replace('?', '_'));
+        var cancellationToken = reportProgress ? _cancellationToken : CancellationToken.None;
+        // the backup's own name, so it needs no sanitizing: it already names a file on this file system
+        var folder = Path.Combine(Path.GetDirectoryName(_backup), Path.GetFileNameWithoutExtension(_backup));
 
         // each stream is disposed once, by its own declaration: neither the gzip stream nor the reader owns what it reads
         await using var file = File.OpenRead(_backup);
@@ -139,6 +146,12 @@ public class WorkspaceMigrator : Migrator
         await using var reader = new TarReader(gzip ?? (Stream)file, leaveOpen: true);
         while (await reader.GetNextEntryAsync(cancellationToken: cancellationToken) is { } entry)
         {
+            if (reportProgress)
+            {
+                // unpacking has the 5-30% share; a tar has no entry count up front, so progress follows the file bytes read
+                await ReportUnzippingAsync(5 + 25d * file.Position / file.Length);
+            }
+
             // symbolic and hard links are skipped: their target may lie outside the extraction folder
             if (entry.EntryType == TarEntryType.Directory)
             {
@@ -159,10 +172,6 @@ public class WorkspaceMigrator : Migrator
 
     private async Task InnerParseAsync(bool reportProgress, int count = 1)
     {
-        if (reportProgress)
-        {
-            await ReportProgressAsync(_lastProgressUpdate + (double)25 / count, MigrationResource.UnzippingFinished);
-        }
         await ParseUsersAsync(reportProgress, count);
 
         if (reportProgress)

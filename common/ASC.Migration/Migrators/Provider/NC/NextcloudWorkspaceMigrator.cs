@@ -221,18 +221,6 @@ public class NextcloudWorkspaceMigrator : Migrator
         return file.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
     }
 
-    /// <summary>
-    /// Reports unpacking once per whole percent rather than per entry: every report publishes the operation state
-    /// and writes a line to the migration log, and a backup may hold hundreds of thousands of files.
-    /// </summary>
-    private async Task ReportUnzippingAsync(double progress)
-    {
-        if (Math.Floor(progress) > Math.Floor(_lastProgressUpdate))
-        {
-            await ReportProgressAsync(progress, MigrationResource.Unzipping);
-        }
-    }
-
     private async Task<bool> ExtractZipAsync(bool reportProgress)
     {
         double progress = 5;

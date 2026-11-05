@@ -86,6 +86,26 @@ public abstract class MigrationParseTestBase(
         }
     }
 
+    /// <summary>
+    /// The SDK's <c>GetMigrationLogsWithHttpInfoAsync</c> is typed <c>Object</c> and parses the body as
+    /// JSON, while the endpoint answers <c>text/plain</c>, so the log is read over raw HTTP.
+    /// </summary>
+    protected async Task<string> GetMigrationLogAsync()
+    {
+        using var response = await _webApiClient.GetAsync("api/2.0/migration/logs", TestContext.Current.CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        return await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>
+    /// The number of progress reports in the migration log whose status ends with <paramref name="status"/>;
+    /// each report is one line, <c>{progress} progress: {status}</c>.
+    /// </summary>
+    protected static int CountProgressReports(string log, string status)
+    {
+        return log.Split('\n').Count(line => line.TrimEnd().EndsWith(status, StringComparison.Ordinal) && line.Contains("progress: ", StringComparison.Ordinal));
+    }
+
     protected static void WriteZipEntry(ZipArchive zip, string name, string content)
     {
         using var writer = new StreamWriter(zip.CreateEntry(name).Open());
