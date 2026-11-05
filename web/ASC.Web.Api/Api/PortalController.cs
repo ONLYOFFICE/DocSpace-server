@@ -1006,20 +1006,19 @@ public class PortalController(
     /// records the request in the audit trail; the portal itself is not changed here. The caller has to be the portal
     /// owner and hold the portal-settings right, and on a server installation the last remaining space cannot be
     /// deactivated - the call is refused when every other space has limited access. The letter always goes to the
-    /// owner's own address, and the operation keeps working while the portal's payment has lapsed. It is mutating
-    /// only in that it sends a message, and a repeat within ten minutes (the server default) sends no second letter
-    /// while the links of the first one stay valid. It is rate-limited and answers 429 when the caller exceeds the
-    /// limit. Nothing is returned in the body, so a client cannot tell from the answer whether the mail was delivered.
-    /// The first link in the letter authorizes `PUT api/2.0/portal/suspend`, which
-    /// suspends the portal, and the second one authorizes `PUT api/2.0/portal/continue`, which makes it active again.
-    /// To remove the portal instead of pausing it, use `POST api/2.0/portal/delete`.
+    /// owner's own address, and the operation keeps working while the portal's payment has lapsed. A repeat within ten
+    /// minutes (the server default) does nothing - no new links, no second letter, no audit record - while the links
+    /// of the first letter stay valid. The call is rate-limited and answers 429 above the limit. Nothing is returned
+    /// in the body. The first link in the letter authorizes `PUT api/2.0/portal/suspend`, which suspends the portal,
+    /// and the second one authorizes `PUT api/2.0/portal/continue`, which makes it active again. To remove the portal
+    /// instead of pausing it, use `POST api/2.0/portal/delete`.
     /// </remarks>
     /// <summary>
     /// Send suspension instructions
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The request is accepted and recorded in the audit trail, and the deactivation letter is queued unless one already went out within the repeat period; the portal itself is still active and the response carries no content")]
+    [SwaggerResponse(200, "The request is accepted: the deactivation letter is queued and the request recorded in the audit trail, unless the same letter already went out within the repeat period; the portal itself is still active and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [AllowNotPayment]
@@ -1032,6 +1031,11 @@ public class PortalController(
         var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
+
+        if (await studioNotifyService.IsPortalDeactivationRepeatAsync(tenant))
+        {
+            return;
+        }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
         var suspendUrl = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalSuspend);
@@ -1048,10 +1052,9 @@ public class PortalController(
     /// installation the last remaining space cannot be removed - the call is refused when every other space has
     /// limited access. The letter goes to the owner's own address whoever asked for it, and it warns about the
     /// subscription that will stop renewing when the portal is on a paid plan. The operation keeps working while the
-    /// portal's payment has lapsed, is mutating only in that it sends a message, and a repeat within ten minutes (the
-    /// server default) sends no second letter while the link of the first one stays valid. It is rate-limited and
-    /// answers 429 when the caller exceeds the limit. Nothing is returned in the body.
-    /// The link in the letter authorizes `DELETE api/2.0/portal/delete`, which deletes the portal with all of its
+    /// portal's payment has lapsed. A repeat within ten minutes (the server default) does nothing - no new link, no
+    /// second letter - while the link of the first letter stays valid. The call is rate-limited and answers 429 above
+    /// the limit. Nothing is returned in the body. The link in the letter authorizes `DELETE api/2.0/portal/delete`, which deletes the portal with all of its
     /// rooms, files and accounts and cannot be undone. To pause the portal instead of deleting it, send the
     /// deactivation letter with `POST api/2.0/portal/suspend`.
     /// </remarks>
@@ -1073,6 +1076,11 @@ public class PortalController(
         var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
+
+        if (await studioNotifyService.IsPortalDeletionRepeatAsync(tenant))
+        {
+            return;
+        }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
@@ -1333,6 +1341,11 @@ public class PortalController(
         if (checkKeyResult != ValidationResult.Ok)
         {
             throw new SecurityException("Access Denied.");
+        }
+
+        if (await studioNotifyService.IsPortalDeletionRepeatAsync(tenant, false))
+        {
+            return;
         }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);

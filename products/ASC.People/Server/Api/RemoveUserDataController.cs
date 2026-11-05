@@ -105,8 +105,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
             throw new SecurityException();
         }
 
-        await studioNotifyService.SendMsgProfileDeletionAsync(user);
-        messageService.Send(MessageAction.UserSentDeleteInstructions);
+        if (await studioNotifyService.SendMsgProfileDeletionAsync(user))
+        {
+            messageService.Send(MessageAction.UserSentDeleteInstructions);
+        }
 
         return string.Format(Resource.SuccessfullySentNotificationDeleteUserInfoMessage, "<b>" + user.Email + "</b>");
     }

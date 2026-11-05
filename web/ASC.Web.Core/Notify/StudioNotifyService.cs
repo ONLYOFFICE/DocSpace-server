@@ -150,13 +150,31 @@ public class StudioNotifyService(
         messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, displayUserName);
     }
 
-    public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)
+    // false when the same letter already went out within the repeat period: no link is built and nothing is sent
+    public async Task<bool> SendEmailActivationInstructionsAsync(UserInfo user, string email)
     {
         var activateEmailNotifyAction = serviceProvider.GetService<ActivateEmailNotifyAction>();
-        await activateEmailNotifyAction.Init(user, email);
 
         // the link is bound to this account, so a profile recreated with the same address is a new letter
-        await studioNotifyServiceHelper.SendNoticeToAsync(activateEmailNotifyAction, user.Id.ToString(), await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+        var objectId = user.Id.ToString();
+        if (await studioNotifyServiceHelper.IsRepeatAsync(activateEmailNotifyAction, objectId, AddressRecipient(email), EMailSenderName))
+        {
+            return false;
+        }
+
+        await activateEmailNotifyAction.Init(user, email);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(activateEmailNotifyAction, objectId, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+
+        return true;
+    }
+
+    // asked before the invitation link is built, so a repeat builds no link and spends no invitation
+    public async Task<bool> IsEmailRoomInviteRepeatAsync(string email, string roomUniqId, EmployeeType inviteType, bool isAgent)
+    {
+        INotifyAction action = isAgent ? serviceProvider.GetService<SaasAgentInviteNotifyAction>() : serviceProvider.GetService<SaasRoomInviteNotifyAction>();
+
+        return await studioNotifyServiceHelper.IsRepeatAsync(action, roomUniqId, AddressRecipient(email), EMailSenderName, RepeatKeyTags.InviteType(inviteType));
     }
 
     public async Task SendEmailRoomInviteAsync(
@@ -192,6 +210,14 @@ public class StudioNotifyService(
         saasRoomInviteExistingUserNotifyAction.Init(user, roomTitle, roomUrl);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteExistingUserNotifyAction : saasRoomInviteExistingUserNotifyAction, roomUniqId, [user], [EMailSenderName]);
+    }
+
+    // asked before the invitation link is built, so a repeat builds no link and spends no invitation
+    public async Task<bool> IsDocSpaceInviteRepeatAsync(string email, EmployeeType inviteType)
+    {
+        var action = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
+
+        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, AddressRecipient(email), EMailSenderName, RepeatKeyTags.InviteType(inviteType));
     }
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, EmployeeType inviteType, string culture = "", bool limitation = false)
@@ -413,13 +439,23 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]);
     }
 
-    public async Task SendMsgProfileDeletionAsync(UserInfo user)
+    // false when the same letter already went out within the repeat period: no link is built and nothing is sent
+    public async Task<bool> SendMsgProfileDeletionAsync(UserInfo user)
     {
         var profileDeleteNotifyAction = serviceProvider.GetService<ProfileDeleteNotifyAction>();
-        await profileDeleteNotifyAction.Init(user);
 
         // the link is bound to this account, so a profile recreated with the same address is a new letter
-        await studioNotifyServiceHelper.SendNoticeToAsync(profileDeleteNotifyAction, user.Id.ToString(), await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+        var objectId = user.Id.ToString();
+        if (await studioNotifyServiceHelper.IsRepeatAsync(profileDeleteNotifyAction, objectId, AddressRecipient(user.Email), EMailSenderName))
+        {
+            return false;
+        }
+
+        await profileDeleteNotifyAction.Init(user);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(profileDeleteNotifyAction, objectId, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+
+        return true;
     }
 
     public async Task SendMsgProfileHasDeletedItselfAsync(UserInfo user)
@@ -533,6 +569,24 @@ public class StudioNotifyService(
     }
 
     #region Portal Deactivation & Deletion
+
+    // asked before the links are built, so a repeat builds no links and records nothing
+    public async Task<bool> IsPortalDeactivationRepeatAsync(Tenant t)
+    {
+        var owner = await userManager.GetUsersAsync(t.OwnerId);
+        var action = serviceProvider.GetService<PortalDeactivateNotifyAction>();
+
+        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, owner, EMailSenderName, RepeatKeyTags.LinkAddress(owner));
+    }
+
+    // asked before the link is built, so a repeat builds no link
+    public async Task<bool> IsPortalDeletionRepeatAsync(Tenant t, bool checkActivation = true)
+    {
+        var owner = await userManager.GetUsersAsync(t.OwnerId);
+        var action = serviceProvider.GetService<PortalDeleteNotifyAction>();
+
+        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, checkActivation ? owner : AddressRecipient(owner.Email), EMailSenderName, RepeatKeyTags.LinkAddress(owner));
+    }
 
     public async Task SendMsgPortalDeactivationAsync(Tenant t, string deactivateUrl, string activateUrl)
     {
@@ -971,5 +1025,14 @@ public class StudioNotifyService(
         }
 
         return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
+    }
+
+    // the recipient RecipientFromEmailAsync makes of an address, built without counting a letter against the spam
+    // limit of a free portal: asking whether a letter is a repeat sends nothing
+    private static DirectRecipient AddressRecipient(string email)
+    {
+        var address = email.ToLower();
+
+        return new DirectRecipient(address, null, [address], false);
     }
 }

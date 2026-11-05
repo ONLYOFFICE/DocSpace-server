@@ -40,7 +40,8 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
     TenantManager tenantManager,
     CommonLinkUtility commonLinkUtility,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    NotifyDeduplicationService notifyDeduplicationService)
 {
     public async Task SendNoticeAsync(INotifyAction action)
     {
@@ -64,6 +65,13 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
     public async Task SendNoticeToAsync(INotifyAction action, string objectId, IRecipient[] recipients, string[] senderNames)
     {
         await SendNoticeToAsync(action, objectId, recipients, senderNames, false, null);
+    }
+
+    // whether the letter SendNoticeToAsync would send with these values already reached the recipient through this
+    // channel within the repeat period; keyTags are the values of the action's DeduplicationTags, in their order
+    public async Task<bool> IsRepeatAsync(INotifyAction action, string objectId, IRecipient recipient, string senderName, params string[] keyTags)
+    {
+        return await notifyDeduplicationService.IsMarkedAsync(tenantManager.GetCurrentTenantId(), action, senderName, recipient.ID, objectId, keyTags);
     }
 
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri)

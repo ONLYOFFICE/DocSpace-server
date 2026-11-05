@@ -290,6 +290,49 @@ public class NotifyDeduplicationServiceTests
         repeat.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task AskingBeforehand_SeesTheMarkOfTheLetterSent()
+    {
+        // The sending code asks before it builds a link, with the values the letter will carry. A letter without an
+        // object reaches the engine with an empty object id, and the question passes none.
+        var service = CreateService();
+        var action = new TestAction("portal_deactivate", tags: ["LinkAddress"]);
+        string[] keyTags = ["owner@example.com"];
+
+        var before = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, null, keyTags);
+        await service.IsDuplicateAsync(Request(action, "", tags: [new TagValue("LinkAddress", "owner@example.com")]));
+        var after = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, null, keyTags);
+        var otherAddress = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, null, ["new@example.com"]);
+
+        before.Should().BeFalse();
+        after.Should().BeTrue();
+        otherAddress.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task AskingBeforehand_MarksNothing()
+    {
+        var service = CreateService();
+        var action = new TestAction("profile_delete");
+
+        await service.IsMarkedAsync(TenantId, action, EmailSender, "user@example.com", RoomId, []);
+        var letter = await service.IsDuplicateAsync(Request(action, RoomId, recipientId: "user@example.com"));
+
+        letter.Should().BeFalse("a question asked beforehand must not hold back the letter it asked about");
+    }
+
+    [Fact]
+    public async Task AskingBeforehand_AboutALetterNotOptedIn_IsNeverARepeat()
+    {
+        var service = CreateService();
+        var action = new TestAction("change_password_v115", suppressRepeats: false);
+
+        await service.IsDuplicateAsync(Request(action, null));
+        var marked = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, null, []);
+
+        marked.Should().BeFalse();
+    }
+
     private static NotifyDeduplicationService CreateService(string? period = null, string? visitInterval = null)
     {
         var configuration = new ConfigurationBuilder()

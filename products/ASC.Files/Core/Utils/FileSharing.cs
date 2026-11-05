@@ -431,18 +431,25 @@ public class FileSharingAceHelper(
 
             if (emailInvite && share != FileShare.None)
             {
-                var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
-                var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+                var inviteType = FileSecurity.GetTypeByShare(share);
+                var isAgent = entry is IFolder { FolderType: FolderType.AiRoom };
 
-                await studioNotifyService.SendEmailRoomInviteAsync(
-                    w.Email,
-                    entry.UniqID,
-                    entry.Title,
-                    shortenLink,
-                    FileSecurity.GetTypeByShare(share),
-                    entry is IFolder { FolderType: FolderType.AiRoom },
-                    culture,
-                    true);
+                // a repeat of the same invitation within the period builds no link and spends no invitation
+                if (!await studioNotifyService.IsEmailRoomInviteRepeatAsync(w.Email, entry.UniqID, inviteType, isAgent))
+                {
+                    var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
+                    var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+
+                    await studioNotifyService.SendEmailRoomInviteAsync(
+                        w.Email,
+                        entry.UniqID,
+                        entry.Title,
+                        shortenLink,
+                        inviteType,
+                        isAgent,
+                        culture,
+                        true);
+                }
             }
             else
             {

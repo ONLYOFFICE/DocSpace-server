@@ -60,6 +60,26 @@ public class NotifyDeduplicationService(
     // the recipient holding only an expired link, so no period may outlast it.
     private readonly TimeSpan _maxPeriod = EmailValidationKeyProvider.GetValidVisitLinkInterval(configuration);
 
+    private TimeSpan Period => _period > _maxPeriod ? _maxPeriod : _period;
+
+    /// <summary>
+    /// Tells, without marking anything, whether this letter already went out to the recipient within the period. The
+    /// sending code asks it before it builds what only a new letter needs - a confirmation link, an audit record, a
+    /// spent invitation - and has to pass exactly what the letter carries into its key. The mark is set once the
+    /// letter is sent, a moment after the request that queued it, so a burst of calls inside that moment still passes.
+    /// </summary>
+    public async Task<bool> IsMarkedAsync(int tenantId, INotifyAction action, string sender, string recipientId, string objectId, IEnumerable<string> discriminators)
+    {
+        if (!action.SuppressRepeats || Period <= TimeSpan.Zero)
+        {
+            return false;
+        }
+
+        var key = GetCacheKey(tenantId, action.ID, sender, recipientId, objectId, discriminators);
+
+        return (await hybridCache.TryGetAsync<bool>(key)).HasValue;
+    }
+
     public async Task<bool> IsDuplicateAsync(NotifyRequest request)
     {
         if (!request.NotifyAction.SuppressRepeats)
@@ -67,7 +87,7 @@ public class NotifyDeduplicationService(
             return false;
         }
 
-        var period = _period > _maxPeriod ? _maxPeriod : _period;
+        var period = Period;
         if (period <= TimeSpan.Zero)
         {
             return false;

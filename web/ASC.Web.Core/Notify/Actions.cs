@@ -62,7 +62,7 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 
         Tags =
         [
-            new TagValue(CommonTags.LinkAddress, user.Email?.ToLowerInvariant()),
+            new TagValue(CommonTags.LinkAddress, RepeatKeyTags.LinkAddress(user)),
             new TagValue(CommonTags.ActivateUrl, activateUrl),
             TagValues.OrangeButton(orangeButtonText, deactivateUrl),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
@@ -100,7 +100,7 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
 
         Tags =
         [
-            new TagValue(CommonTags.LinkAddress, user.Email?.ToLowerInvariant()),
+            new TagValue(CommonTags.LinkAddress, RepeatKeyTags.LinkAddress(user)),
             TagValues.OrangeButton(orangeButtonText, url),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
             new TagValue(CommonTags.AutoRenew, showAutoRenewText.ToString()),
@@ -1341,7 +1341,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         Tags = [
             new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
-            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.InviteType, RepeatKeyTags.InviteType(inviteType)),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1378,7 +1378,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         Tags = [
             new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
-            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.InviteType, RepeatKeyTags.InviteType(inviteType)),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1479,7 +1479,7 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
         Tags = [
 
             new TagValue(CommonTags.InviteLink, confirmationUrl),
-            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.InviteType, RepeatKeyTags.InviteType(inviteType)),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),

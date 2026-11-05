@@ -1697,6 +1697,7 @@ public class UserController(
         }
 
         Dictionary<Guid, UserRelation> userRelations = null;
+        List<UserInfo> sent = [];
 
         foreach (var user in users)
         {
@@ -1727,11 +1728,17 @@ public class UserController(
                     continue;
                 }
 
+                if (await studioNotifyService.IsDocSpaceInviteRepeatAsync(user.Email, type))
+                {
+                    continue;
+                }
+
                 var culture = user.GetCulture()?.Name;
                 var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
                 await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, type, culture);
+                sent.Add(user);
             }
             else
             {
@@ -1744,12 +1751,19 @@ public class UserController(
                     }
                 }
 
-                await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email);
+                if (await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email))
+                {
+                    sent.Add(user);
+                }
             }
         }
 
-        messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)),
-            users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        // only the accounts that got a letter: a repeat within the period is not mailed and not recorded
+        if (sent.Count > 0)
+        {
+            messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(sent.Select(x => x.Id)),
+                sent.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        }
 
         foreach (var user in users)
         {
