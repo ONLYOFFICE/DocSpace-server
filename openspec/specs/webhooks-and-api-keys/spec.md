@@ -100,12 +100,11 @@ audit trail and echo the saved setting. The default value is `false`.
 
 ### Requirement: Creating a webhook configuration
 
-`POST /api/2.0/settings/webhook` (`createWebhook`) SHALL create a subscription with a `name`, a `uri`, a
-`secretKey`, `enabled`, an optional `ssl`, `triggers` (a bitmask of trigger ids, `0` meaning every event the
-creator's role may receive) and an optional `targetId` that limits the subscription to one entity. The
-subscription SHALL belong to the caller and the answer SHALL be the stored configuration without the secret
-key. Every call adds another subscription. Creation is recorded in the audit trail (`WebhookCreated`) and
-announced to the portal's connected clients.
+`POST /api/2.0/settings/webhook` (`createWebhook`) SHALL create a subscription with `name`, `uri`, `secretKey`,
+`enabled`, optional `ssl`, `triggers` (a bitmask, `0` = every event the creator's role may receive) and an
+optional `targetId` limiting it to one entity. It SHALL belong to the caller; the answer is the stored
+configuration without the secret. Every call adds a subscription; creation is recorded in the audit trail
+(`WebhookCreated`) and announced to the connected clients.
 
 #### Scenario: Owner creates an enabled webhook
 
@@ -181,11 +180,10 @@ fails the rules SHALL be refused with 400.
 ### Requirement: Trigger catalogue and per-role availability
 
 `GET /api/2.0/settings/webhook/triggers` (`getWebhookTriggers`) SHALL return the fixed catalogue of events in
-display order, each with `name` (the event name used in payloads), `id` (the bit value) and `available`
-(whether the caller's user type may subscribe to it). A subscription whose `triggers` bitmask contains an event
-the subscription creator's type may not subscribe to SHALL be refused with 400 ("Trigger is not available");
-`triggers = 0` is accepted from every type that may use webhooks and stands for the events that type may
-receive.
+display order, each with `name` (as used in payloads), `id` (the bit value) and `available` (whether the
+caller's type may subscribe). A `triggers` bitmask holding an event the creator's type may not subscribe to
+SHALL be refused with 400 ("Trigger is not available"); `0` is accepted from every type and stands for the
+events that type may receive.
 
 #### Scenario: Catalogue is complete and ordered
 
@@ -246,12 +244,11 @@ of its most recent delivery, `0` when nothing has been delivered yet. The list i
 
 ### Requirement: Updating a webhook configuration
 
-`PUT /api/2.0/settings/webhook` (`updateWebhook`, the subscription addressed by `id` in the body) SHALL replace
-`name`, `uri`, `enabled`, `triggers` and `targetId` with the values of the request — fields left out take their
-defaults — and SHALL replace `secretKey` only when a non-empty one is sent and `ssl` only when it is sent. The
-subscription is looked up and its ownership checked first; then the same validation as on creation runs,
-trigger availability being judged by the creator's type. The answer carries `modifiedOn` and `modifiedBy`;
-the update is recorded in the audit trail (`WebhookUpdated`).
+`PUT /api/2.0/settings/webhook` (`updateWebhook`, `id` in the body) SHALL replace `name`, `uri`, `enabled`,
+`triggers` and `targetId` with the request's values (left-out fields take their defaults), and `secretKey`
+and `ssl` only when sent. Lookup and ownership check come first, then the validation of creation, trigger
+availability judged by the creator's type. The answer carries `modifiedOn` and `modifiedBy`; the update is
+recorded in the audit trail (`WebhookUpdated`).
 
 #### Scenario: Owner renames and re-targets
 
@@ -282,11 +279,10 @@ the update is recorded in the audit trail (`WebhookUpdated`).
 ### Requirement: Switching a webhook on or off
 
 `PUT /api/2.0/settings/webhook/enable` (`enableWebhook`) SHALL set `enabled` of the subscription addressed by
-`id` and leave every other stored value unchanged. Switching a subscription **on** SHALL re-run the validation
-against the stored values — URL, secret and the triggers against the creator's current type, not the target —
-switching **off** is not validated. While a subscription is off, its events SHALL be dropped, not queued. A
-DocSpace admin may switch any subscription; anybody else only their own. The change is announced to the
-connected clients.
+`id` and leave every other stored value unchanged. Switching **on** re-validates the stored URL, secret and
+triggers (against the creator's current type; not the target); switching **off** is not validated. While off,
+events SHALL be dropped, not queued. A DocSpace admin may switch any subscription; anybody else only their
+own. The change is announced to the connected clients.
 
 #### Scenario: Owner disables own webhook
 
@@ -334,11 +330,11 @@ connected clients.
 
 ### Requirement: Which actions emit which events, and to whom
 
-The server SHALL publish an event to every subscription of the portal that is enabled, whose `triggers` is `0`
-or contains the event, whose `targetId` (when set) equals the identifier of the entity concerned, whose
-creator may still receive the event at that moment — an active member whose current type may subscribe to it,
-a DocSpace admin while the Developer Tools are restricted — and whose creator is allowed to see the entity.
-The subscription's own creator always receives events about actions they perform themselves.
+The server SHALL publish an event to every enabled subscription whose `triggers` is `0` or contains the event,
+whose `targetId` (when set) equals the identifier of the entity, whose creator may still receive the event at
+that moment (an active member whose current type may subscribe to it; a DocSpace admin while the Developer
+Tools are restricted) and whose creator is allowed to see the entity. The creator always receives events
+about their own actions.
 
 #### Scenario: Visibility of the entity to the creator
 
@@ -406,10 +402,10 @@ numbers and timestamps in UTC whole seconds.
 ### Requirement: Published webhook contract
 
 The server SHALL publish the webhook contract — an OpenAPI 3.1 document, version 1.0.0, with one entry per
-event naming its payload schema, the REST operations that raise it and the roles that may subscribe, the
-headers, the serialization and retry rules and a machine-readable event-to-payload map — at
-`/openapi/docspace.webhooks/1.0.yaml`. The document SHALL be generated from the payload models, the trigger
-catalogue and the delivery settings, and the committed copy SHALL match what the code generates.
+event (payload schema, raising REST operations, subscribing roles), the headers, the serialization and retry
+rules and an event-to-payload map — at `/openapi/docspace.webhooks/1.0.yaml`. The document SHALL be generated
+from the payload models, the trigger catalogue and the delivery settings, and the committed copy SHALL match
+what the code generates.
 
 #### Scenario: Contract matches the code
 
@@ -480,10 +476,10 @@ deleted.
 ### Requirement: Delivery journal
 
 `GET /api/2.0/settings/webhooks/log` (`getWebhooksLogs`) SHALL return the delivery records of the portal,
-newest first, paged with `startIndex` and `count` (1–100, default 100; an out-of-range `count` answers 400),
-the total number of matching records reported beside the response. For a caller who is not a DocSpace admin
-the records SHALL be limited to the deliveries of their own subscriptions. Records whose attempts are over may
-be deleted after a configurable retention period; by default they are kept.
+newest first, paged with `startIndex` and `count` (1–100, default 100; out of range answers 400), the total
+of matching records reported beside the response. A caller who is not a DocSpace admin SHALL get only the
+records of their own subscriptions. Settled records may be deleted after a configurable retention period; by
+default they are kept.
 
 #### Scenario: Owner reads the journal
 
@@ -516,10 +512,10 @@ be deleted after a configurable retention period; by default they are kept.
 ### Requirement: Retrying a delivery
 
 `PUT /api/2.0/settings/webhook/{id}/retry` (`retryWebhook`, `id` being a delivery record) SHALL queue a new
-delivery record of the same event — same `eventId`, the stored body, the caller in `retriedBy` — and stop the
-automatic retries still due for that event. `PUT /api/2.0/settings/webhook/retry` (`retryWebhooks`, body
-`ids`, at most 100) SHALL do the same once per event, silently skipping what cannot be queued, and answer the
-new records. Both are rate limited (429) and recorded in the audit trail (`WebhookRetried`).
+record of the same event (same `eventId`, the stored body, the caller in `retriedBy`) and stop the automatic
+retries still due for it. `PUT /api/2.0/settings/webhook/retry` (`retryWebhooks`, body `ids`, at most 100)
+SHALL do the same once per event, silently skipping what cannot be queued. Both are rate limited (429) and
+recorded in the audit trail (`WebhookRetried`).
 
 #### Scenario: Single retry
 
