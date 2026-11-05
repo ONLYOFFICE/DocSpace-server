@@ -322,6 +322,7 @@ public sealed class PortalPayments(string portalId)
 
     private readonly Lock _walletLock = new();
     private (decimal Amount, string Currency)? _wallet;
+    private readonly JsonArray _payments = [];
 
     /// <summary>The number of the portal's account with accounting, unique across the run.</summary>
     public int AccountNumber { get; } = Interlocked.Increment(ref _lastAccountNumber);
@@ -369,11 +370,12 @@ public sealed class PortalPayments(string portalId)
 
     /// <summary>
     /// The portal has paid for <paramref name="quantity"/> of the product <paramref name="productId"/> until
-    /// <paramref name="endDate"/>: what billing lists among its active resources.
+    /// <paramref name="endDate"/>: billing lists it among the portal's active resources, next to what it has paid for
+    /// before.
     /// </summary>
     public PortalPayments Paid(int productId, int quantity, DateTime endDate, string email = "owner@example.com")
     {
-        var payments = new JsonArray(new JsonObject
+        var payment = new JsonObject
         {
             ["EndDate"] = endDate.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
             ["PaymentEmail"] = email,
@@ -381,9 +383,20 @@ public sealed class PortalPayments(string portalId)
             ["PaymentStatus"] = 1,
             ["ProductId"] = productId,
             ["Quantity"] = quantity
-        });
+        };
 
-        return On(PaymentService.Billing, "POST", "/billing/GetActiveResources", payments.ToJsonString());
+        lock (_walletLock)
+        {
+            _payments.Add(payment);
+        }
+
+        return On(PaymentService.Billing, "POST", "/billing/GetActiveResources", _ =>
+        {
+            lock (_walletLock)
+            {
+                return PaymentServiceAnswer.Json(_payments.ToJsonString());
+            }
+        });
     }
 
     /// <summary>
