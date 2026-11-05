@@ -47,8 +47,7 @@ public class AbortSessionRequestDto<T>
     public required string SessionId { get; set; }
 
     /// <summary>
-    /// The folder the session was opened against. It is part of the route only and is not matched against the
-    /// session, which is found by its own id.
+    /// The folder the session was opened against. Take it from the path the session was created on.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]

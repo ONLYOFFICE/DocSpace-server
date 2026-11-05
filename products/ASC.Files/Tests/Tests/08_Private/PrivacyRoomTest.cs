@@ -112,7 +112,7 @@ public class PrivacyRoomTest(AspireAppFixture fixture) : BaseTest(fixture)
         await using var encryptTempStream = new MemoryStream();
         await FileEncryptionStream.EncryptFileAsync(stream, encryptTempStream, aesKeyForEncrypt, TestContext.Current.CancellationToken);
 
-        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(createdRoom.Id, new SessionRequest("new.docx", encryptTempStream.Length), TestContext.Current.CancellationToken)).Response;
+        var createdSession = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(createdRoom.Id, new SessionRequest(Guid.NewGuid() + ".docx", encryptTempStream.Length, encrypted: true), TestContext.Current.CancellationToken)).Response;
         var chunkSize = (int)settings.ChunkUploadSize;
         var buffer = new byte[chunkSize];
         var chunkNumber = 1;

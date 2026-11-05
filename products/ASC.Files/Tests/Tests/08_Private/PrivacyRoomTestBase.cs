@@ -93,7 +93,7 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
 
         var session = (await _filesOperationsApi.CreateUploadSessionInFolderAsync(
             folderId,
-            new SessionRequest(title, content.Length, encrypted: true),
+            new SessionRequest(Guid.NewGuid() + Path.GetExtension(title), content.Length, encrypted: true),
             TestContext.Current.CancellationToken)).Response;
 
         await _filesOperationsApi.UploadAsyncSessionAsync(folderId, session.Id, 1, new FileParameter(new MemoryStream(content)), TestContext.Current.CancellationToken);
@@ -101,6 +101,25 @@ public abstract class PrivacyRoomTestBase(AspireAppFixture fixture) : RoomsPermi
         var file = (await _filesOperationsApi.FinalizeSessionAsync(folderId, session.Id, TestContext.Current.CancellationToken)).Response;
 
         return file.Id;
+    }
+
+    protected async Task<FileDto> UploadEncryptedFileInfo(int folderId, string title)
+    {
+        var fileId = await UploadEncryptedFile(folderId, title);
+
+        return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>Turns a file into one stored before private rooms refused open content: nothing can create it through the API any more.</summary>
+    protected async Task MakeFileOpen(int fileId)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE files_file SET encrypted = 0 WHERE id = @id;";
+        command.Parameters.AddWithValue("@id", fileId);
+
+        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
     }
 
     /// <summary>

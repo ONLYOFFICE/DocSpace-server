@@ -34,7 +34,7 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class FileUploader(
+public partial class FileUploader(
     FileUtility fileUtility,
     UserManager userManager,
     TenantManager tenantManager,
@@ -282,6 +282,21 @@ public class FileUploader(
 
         var (_, _, roomType) = folder != null ? await folderDao.GetParentRoomInfoFromFileEntryAsync(folder) : default;
 
+        if (folder != null && await folderDao.GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => f.IsRoom) is { SettingsPrivate: true })
+        {
+            // Refused here rather than at the end of the upload, where the write path would refuse it anyway.
+            if (!encrypted)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+            }
+
+            // The server sees this name in the clear, so a client only ever sends a generated one.
+            if (!EncryptedFileNameRegex().IsMatch(fileName))
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(fileName));
+            }
+        }
+
         if (folder is { FolderType: FolderType.Knowledge } || roomType == FolderType.KnowledgeRoom)
         {
             if (!vectorizationGlobalSettings.IsSupportedContentExtraction(fileName))
@@ -420,9 +435,29 @@ public class FileUploader(
         await Task.WhenAll(t1, t2);
     }
 
-    public async Task AbortUploadAsync<T>(string uploadId)
+    [GeneratedRegex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\\.[a-z0-9]+)?$")]
+    private static partial Regex EncryptedFileNameRegex();
+
+    /// <summary>Aborts a session reached through the folder it was opened against; any other folder has no such session.</summary>
+    public async Task AbortUploadAsync<T>(string uploadId, T folderId)
     {
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+
+        if (!Equals(uploadSession.FolderId, folderId))
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        await AbortUploadAsync(uploadSession);
+    }
+
+    public async Task AbortUploadAsync<T>(string uploadId)
+    {
+        await AbortUploadAsync(await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
+    }
+
+    private async Task AbortUploadAsync<T>(ChunkedUploadSession<T> uploadSession)
+    {
 
         // The endpoint used to check nothing at all: any authenticated caller who knew a session id
         // could abort somebody else's upload, whatever access they had to the room it was going into.

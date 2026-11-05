@@ -3960,6 +3960,8 @@ public class FileStorageService //: IFileStorageService
 
         _logger.InformationDeletePersonalData(userFromId);
 
+        await fileDao.DeleteFileKeysAsync(userFromId);
+
         var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userFromId);
         var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userFromId);
 

@@ -19200,13 +19200,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, or `fileSize` is negative"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format"
+            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -19379,13 +19379,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, or `fileSize` is negative"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format"
+            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -19505,7 +19505,7 @@
           "Files / Operations"
         ],
         "summary": "Abort an upload session",
-        "description": "Cancels a chunked upload opened with `POST api/2.0/files/{folderId}/session` and discards the parts already\r\nreceived, so nothing of it reaches the folder. The session is found by the id in the path alone: the folder\r\nsegment is not matched against it, and neither is the account that opened it, which makes the id the only\r\nsecret protecting the transfer. The call is destructive and is not safe to repeat, because the record is gone\r\nafterwards: a second attempt, a session already closed by\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` and a session that expired after twelve hours of\r\nsilence all fail rather than answer as missing. Finalizing removes the session too, so there is nothing left\r\nto abort once the file exists. The answer carries no body. An upload that is simply abandoned needs no call at\r\nall, since the session and its buffered parts are dropped when it expires.",
+        "description": "Cancels a chunked upload opened with `POST api/2.0/files/{folderId}/session` and discards the parts already\r\nreceived, so nothing of it reaches the folder. Only the account that opened the session may cancel it, and the\r\nfolder in the path has to be the one it was opened against. The call is destructive and is not safe to repeat, because the record is gone\r\nafterwards: a second attempt, a session already closed by\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` and a session that expired after twelve hours of\r\nsilence all fail rather than answer as missing. Finalizing removes the session too, so there is nothing left\r\nto abort once the file exists. The answer carries no body. An upload that is simply abandoned needs no call at\r\nall, since the session and its buffered parts are dropped when it expires.",
         "operationId": "abortUploadSession",
         "parameters": [
           {
@@ -19523,7 +19523,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The folder the session was opened against. It is part of the route only and is not matched against the\r\nsession, which is found by its own id.",
+            "description": "The folder the session was opened against. Take it from the path the session was created on.",
             "required": true,
             "schema": {
               "examples": [
@@ -19553,7 +19553,7 @@
             "description": "The session was opened by another account"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "401": {
             "description": "Unauthorized",
@@ -19635,7 +19635,7 @@
             {
               "name": "folderId",
               "in": "path",
-              "description": "The folder the session was opened against. It is part of the route only and is not matched against the\r\nsession, which is found by its own id.",
+              "description": "The folder the session was opened against. Take it from the path the session was created on.",
               "required": true,
               "schema": {
                 "examples": [
@@ -19733,7 +19733,7 @@
             "description": "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A file that is not a PDF is stored in a form-filling room"
@@ -19939,7 +19939,7 @@
             "description": "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room"
@@ -20104,7 +20104,7 @@
             "description": "Storing the file would exceed a storage quota or size limit"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A file that is not a PDF is stored in a form-filling room"
@@ -48706,6 +48706,7 @@
               "PrivacyRoomKeyUpdated",
               "PrivacyRoomKeyDeleted",
               "FileKeysSet",
+              "RoomFileKeysRevoked",
               "FileSavedButUserQuotaExceeded",
               "FileNotSavedDueToUserQuota",
               "FileSavedButRoomQuotaExceeded",
@@ -49089,6 +49090,7 @@
               5162,
               5163,
               5164,
+              5165,
               5201,
               5202,
               5203,
@@ -49467,6 +49469,7 @@
               "PrivacyRoomKeyUpdated",
               "PrivacyRoomKeyDeleted",
               "FileKeysSet",
+              "RoomFileKeysRevoked",
               "FileSavedButUserQuotaExceeded",
               "FileNotSavedDueToUserQuota",
               "FileSavedButRoomQuotaExceeded",

@@ -138,7 +138,6 @@ public class PrivateRoomFileKeysTests(AspireAppFixture fixture) : PrivacyRoomTes
         var newOwner = await InviteWithKeys(EmployeeType.RoomAdmin);
         await _filesClient.Authenticate(Owner);
         var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
-        await CreateFile("Plain.docx", room.Id);
 
         await ChangeOwner(room.Id, newOwner.Id);
 
@@ -176,6 +175,110 @@ public class PrivateRoomFileKeysTests(AspireAppFixture fixture) : PrivacyRoomTes
     }
 
     [Fact]
+    public async Task ChangeOwner_KeepsTheKeysOfTheNewOwner()
+    {
+        // Changing the owner removes the new owner's share first, which must not count as them leaving the room.
+        var newOwner = await InviteWithKeys(EmployeeType.RoomAdmin);
+        var (room, fileId) = await CreateRoomWithEncryptedFile();
+        await InviteToRoom(room.Id, newOwner, FileShare.RoomManager);
+        await WriteKeys(fileId, newOwner.Id);
+
+        await ChangeOwner(room.Id, newOwner.Id);
+
+        await _filesClient.Authenticate(newOwner);
+        (await GetMissing(room.Id, newOwner.Id)).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RemovingAMember_DeletesTheirKeysAndKeepsTheOthers()
+    {
+        var leaving = await InviteWithKeys(EmployeeType.User);
+        var staying = await InviteWithKeys(EmployeeType.User);
+        var (room, fileId) = await CreateRoomWithEncryptedFile();
+        await InviteToRoom(room.Id, leaving, FileShare.Read);
+        await InviteToRoom(room.Id, staying, FileShare.Read);
+        await WriteKeys(fileId, leaving.Id, staying.Id);
+
+        await InviteToRoom(room.Id, leaving, FileShare.None);
+
+        (await GetMissing(room.Id, leaving.Id, staying.Id)).Select(m => m.UserId).Should().BeEquivalentTo([leaving.Id]);
+
+        var recorded = await PollUntil(() => AuditEvents(5165, leaving.Id), count => count > 0);
+        recorded.Should().BeGreaterThan(0);
+    }
+
+    [Fact]
+    public async Task RemovingAMember_ReachesTheFilesInSubfolders()
+    {
+        var leaving = await InviteWithKeys(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        await SetFakeKeys(publicKeyPrefix: "owner");
+        var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
+        var subfolder = (await _foldersApi.CreateFolderAsync(room.Id, new CreateFolder("Subfolder"), TestContext.Current.CancellationToken)).Response;
+        var fileId = await UploadEncryptedFile(subfolder.Id, "Encrypted.docx");
+        await InviteToRoom(room.Id, leaving, FileShare.Read);
+        await WriteKeys(fileId, leaving.Id);
+
+        await InviteToRoom(room.Id, leaving, FileShare.None);
+
+        (await GetMissing(room.Id, leaving.Id)).Should().ContainSingle();
+    }
+
+    [Fact]
+    public async Task ChangingTheAccessOfAMember_KeepsTheirKeys()
+    {
+        var member = await InviteWithKeys(EmployeeType.RoomAdmin);
+        var (room, fileId) = await CreateRoomWithEncryptedFile();
+        await InviteToRoom(room.Id, member, FileShare.ContentCreator);
+        await WriteKeys(fileId, member.Id);
+
+        await InviteToRoom(room.Id, member, FileShare.Read);
+
+        (await GetMissing(room.Id, member.Id)).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task DeletingAUser_DeletesTheirKeys()
+    {
+        var leaving = await InviteWithKeys(EmployeeType.User);
+        var (room, fileId) = await CreateRoomWithEncryptedFile();
+        await InviteToRoom(room.Id, leaving, FileShare.Read);
+        await WriteKeys(fileId, leaving.Id);
+        (await FileKeyRows(leaving.Id)).Should().Be(1);
+
+        await TerminateUser(leaving);
+        await _peopleClient.Authenticate(Owner);
+        await _userDataApi.StartRemoveAsync(new TerminateRequestDto(leaving.Id), TestContext.Current.CancellationToken);
+
+        var rows = await PollUntil(() => FileKeyRows(leaving.Id), count => count == 0, TimeSpan.FromSeconds(60));
+
+        rows.Should().Be(0);
+    }
+
+    private async Task<long> FileKeyRows(Guid userId)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT COUNT(*) FROM files_file_keys WHERE user_id = @user;";
+        command.Parameters.AddWithValue("@user", userId.ToString());
+
+        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+    }
+
+    private async Task<long> AuditEvents(int action, Guid mentionedUser)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT COUNT(*) FROM audit_events WHERE action = @action AND description LIKE @user;";
+        command.Parameters.AddWithValue("@action", action);
+        command.Parameters.AddWithValue("@user", $"%{mentionedUser}%");
+
+        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task Missing_NamesTheFileOfTheListedUser_UntilTheKeyIsWritten()
     {
         var member = await InviteWithKeys(EmployeeType.User);
@@ -210,7 +313,7 @@ public class PrivateRoomFileKeysTests(AspireAppFixture fixture) : PrivacyRoomTes
         var member = await InviteWithKeys(EmployeeType.User);
         await _filesClient.Authenticate(Owner);
         var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
-        await CreateFile("Plain.docx", room.Id);
+        await MakeFileOpen(await UploadEncryptedFile(room.Id, "Plain.docx"));
 
         (await GetMissing(room.Id, member.Id)).Should().BeEmpty();
     }
