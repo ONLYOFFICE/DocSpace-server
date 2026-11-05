@@ -109,7 +109,7 @@ public class ProfileStorageService(
         await AssertUserHasAccessAsync(_writeTypes);
         AssertGatewayConfigured();
 
-        var name = (await FindByokModelAsync(id))?.Alias ?? id.ToString();
+        var name = await TryFindByokModelNameAsync(id) ?? id.ToString();
 
         if (!await byokKeyStorage.DeleteAsync(tenantManager.GetCurrentTenantId(), id))
         {
@@ -244,6 +244,18 @@ public class ProfileStorageService(
         var models = (await _aiGateway.GetAllModelsAsync()).Data;
 
         return models.FirstOrDefault(m => m.RevisionId == id);
+    }
+
+    private async Task<string?> TryFindByokModelNameAsync(Guid id)
+    {
+        try
+        {
+            return (await FindByokModelAsync(id))?.Alias;
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or TimeoutException or JsonException)
+        {
+            return null;
+        }
     }
 
     private static ByokKeyType? GetByokType(Model model)
