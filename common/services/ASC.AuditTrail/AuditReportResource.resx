@@ -963,6 +963,9 @@
   <data name="RoomRenamed" xml:space="preserve">
     <value>Room renamed: {0}</value>
   </data>
+  <data name="PrivateRoomTitle" xml:space="preserve">
+    <value>Private room</value>
+  </data>
   <data name="RoomsModule" xml:space="preserve">
     <value>Rooms</value>
   </data>

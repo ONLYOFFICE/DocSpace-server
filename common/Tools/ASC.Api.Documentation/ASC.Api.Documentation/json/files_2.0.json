@@ -1093,7 +1093,7 @@
             "description": "The file id, or the requested version of it, resolves to nothing"
           },
           "415": {
-            "description": "The file is in a format the editors can neither edit nor open for viewing"
+            "description": "The file is in a format the editors can neither edit nor open for viewing, or it is an encrypted file of a private room and the connected document server cannot work with encrypted files"
           },
           "500": {
             "description": "The file lies in a third-party storage that cannot deliver it"
@@ -27429,7 +27429,7 @@
             "description": "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota"
           },
           "403": {
-            "description": "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
+            "description": "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
           },
           "404": {
             "description": "`logo.tmpFile` names no uploaded picture, or one already used"
@@ -31714,7 +31714,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected"
+            "description": "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected"
           },
           "402": {
             "description": "The portal has reached the room limit of its pricing plan or its payment is overdue"

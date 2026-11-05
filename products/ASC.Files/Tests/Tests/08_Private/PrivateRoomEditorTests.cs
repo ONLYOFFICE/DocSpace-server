@@ -262,7 +262,7 @@ public class PrivateRoomEditorTests(AspireAppFixture fixture) : PrivacyRoomTestB
 
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 
-        document.RootElement.GetProperty("response").GetProperty("docServiceEncryptionSupported").ValueKind
-            .Should().BeOneOf(JsonValueKind.True, JsonValueKind.False);
+        // the test stack assumes the support (files:docservice:encryption-assume-supported)
+        document.RootElement.GetProperty("response").GetProperty("docServiceEncryptionSupported").GetBoolean().Should().BeTrue();
     }
 }

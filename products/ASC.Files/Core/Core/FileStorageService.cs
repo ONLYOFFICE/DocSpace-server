@@ -109,6 +109,7 @@ public class FileStorageService //: IFileStorageService
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
     EncryptionLoginProvider encryptionLoginProvider,
+    DocumentServiceEncryptionChecker documentServiceEncryptionChecker,
     AiAccessibility aiAccessibility)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
@@ -716,8 +717,26 @@ public class FileStorageService //: IFileStorageService
         });
     }
 
+    /// <summary>The creator needs a key to wrap the keys of the files with, and the editors have to be able to open them.</summary>
+    private async Task DemandPrivateRoomCanBeCreatedAsync()
+    {
+        await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
+
+        if (!await documentServiceEncryptionChecker.IsSupportedAsync())
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_DocServiceEncryptionNotSupported);
+        }
+    }
+
     public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
     {
+        // A connected storage has nowhere to keep the keys of its files, and its string ids do not fit the wrapping of
+        // those keys on the client, so nobody could ever open what is put into such a room.
+        if (privacy)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomOnThirdPartyNotSupported);
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var folderDao = daoFactory.GetFolderDao<string>();
@@ -1199,7 +1218,7 @@ public class FileStorageService //: IFileStorageService
 
         if (isRoom && privacy)
         {
-            await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
+            await DemandPrivateRoomCanBeCreatedAsync();
 
             // Indexing and a watermark need the content in the clear, which the server does not have,
             // and a lifetime would have it delete encrypted files on its own.
