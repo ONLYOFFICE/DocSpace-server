@@ -68,7 +68,10 @@ public enum SearchArea
     Forms,
 
     [Description("Form templates")]
-    FormTemplates
+    FormTemplates,
+
+    [Description("AiHub")]
+    AiHub
 }
 
 /// <summary>

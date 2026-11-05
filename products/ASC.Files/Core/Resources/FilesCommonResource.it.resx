@@ -285,6 +285,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Non è possibile utilizzare questa cartella per archiviare la stanza</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Indirizzo URL di connessione non valido</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Nome errato</value>
   </data>
@@ -613,13 +616,34 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Cerca nei metadati della cartella</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>La stanza contiene già la cartella .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>L'archiviazione non può essere disconnessa mentre una stanza la utilizza. Elimina invece la stanza</value>
   </data>
   <data name="IndexTitleFileMetadata" xml:space="preserve">
     <value>Cerca nei metadati del file</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Un progetto IA può collegare al massimo {0} stanze di istruzioni</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Un progetto IA può collegare al massimo {0} stanze di conoscenza</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Queste stanze non possono essere collegate al progetto IA: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>In una stanza di istruzioni è possibile aggiungere solo file Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Una stanza di istruzioni può contenere al massimo {0} skill</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>La descrizione della skill deve contenere da 1 a 1024 caratteri e non deve contenere tag XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Il file della skill deve iniziare con un blocco YAML frontmatter tra due righe ---, con i campi name e description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Il nome della skill deve contenere da 1 a 64 caratteri, solo lettere minuscole, cifre e trattini singoli, e non deve iniziare né terminare con un trattino</value>
   </data>
 </root>

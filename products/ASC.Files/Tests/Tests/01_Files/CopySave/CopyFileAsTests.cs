@@ -41,15 +41,10 @@ namespace ASC.Files.Tests.Tests._01_Files.CopySave;
 /// that fast path (<c>FileStorageService.CreateNewFileAsync</c>, a template-based copy) only when
 /// the source and destination extensions match; any mismatch — <c>toForm</c>, or a non-standard
 /// extension such as <c>.md</c> — falls through to <c>FileConverter.ExecAsync</c>, which asks the
-/// ONLYOFFICE document server for a real conversion. The integration-test AppHost provisions no
-/// document-server resource, so those cases cannot pass here; see the porting report for the two
-/// TS cases dropped for this reason (and one already <c>test.skip</c>'d in the source suite).
-/// </remarks>
-/// <remarks>
-/// <see cref="FileEntryBaseDto"/> — the type <see cref="FileEntryBaseWrapper.Response"/> is typed
-/// as — carries <c>Title</c> but neither <c>Id</c> nor <c>FolderId</c>, so the copy's destination
-/// is verified by listing the destination folder's content instead of reading the copy response
-/// directly. This is an SDK model gap, not a preference.
+/// ONLYOFFICE document server for a real conversion. The integration-test host runs one that reaches
+/// the portals, so those cases (the format pairs of <c>conversion.spec.ts</c>, <c>toForm</c>, bug 80745)
+/// can be ported; they are not yet. A <c>.docxf</c> → <c>.pdf</c> form is made this way by
+/// <c>FormsTestBase.ConvertToOoFormAsync</c>.
 /// </remarks>
 [Trait("Category", "CRUD")]
 [Trait("Feature", "Files")]
@@ -72,10 +67,13 @@ public class CopyFileAsTests(
         // Act
         var copied = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyRequest, TestContext.Current.CancellationToken)).Response;
 
-        // Assert
-        copied.Title.Should().Be("Autotest Copied File.docx");
+        // Assert - the copy response is declared as FileEntryBaseDto and arrives as the FileDto it is
+        var copiedFile = copied.Should().BeOfType<FileDto>().Subject;
+        copiedFile.Title.Should().Be("Autotest Copied File.docx");
+        copiedFile.FolderId.Should().Be(destRoom.Id);
 
         var destContent = (await _foldersApi.GetFolderByFolderIdAsync(destRoom.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        destContent.Files.Should().Contain(f => f.Title == "Autotest Copied File.docx");
+        (destContent.Files ?? []).OfType<FileDto>().Should().ContainSingle(f => f.Id == copiedFile.Id)
+            .Which.Title.Should().Be("Autotest Copied File.docx");
     }
 }

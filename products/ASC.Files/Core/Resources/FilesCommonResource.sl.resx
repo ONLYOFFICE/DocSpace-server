@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Te mape ni mogoče uporabiti za shranjevanje sobe</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Neveljaven URL naslov povezave</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Nepravilen naslov</value>
   </data>
@@ -607,9 +610,6 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Izhodi klepeta</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Soba že vsebuje mapo .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Shrambe ni mogoče odklopiti, medtem ko jo uporablja soba. Namesto tega izbrišite sobo</value>
   </data>
@@ -621,5 +621,29 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Iskanje v metapodatkih mape</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Projekt UI lahko poveže največ {0} sob z navodili</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Projekt UI lahko poveže največ {0} sob z znanjem</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Teh sob ni mogoče povezati s projektom UI: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>V sobo z navodili je mogoče dodati samo datoteke Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Soba z navodili lahko vsebuje največ {0} veščin</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Opis veščine mora imeti od 1 do 1024 znakov in ne sme vsebovati oznak XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Datoteka veščine se mora začeti z blokom YAML frontmatter med dvema vrsticama --- s poljema name in description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Ime veščine mora imeti od 1 do 64 znakov, vsebovati sme le male črke, števke in posamezne vezaje ter se ne sme začeti ali končati z vezajem</value>
   </data>
 </root>

@@ -88,6 +88,33 @@ tool-search listings, so the first sentence has to carry the operation's identit
 Make implicit knowledge explicit: specialized formats, niche internal terminology, the relationship
 between two resources. Write it the way you would brief a new hire who has never seen this product.
 
+### 2.1 Webhooks the operation raises
+
+**An action that causes a webhook to be published carries `[RaisesWebhook]`** (`ASC.Webhooks.Core`) — whether
+it publishes directly, through a service it calls, or through a queued operation it starts. The attribute is the
+only record of that fact: an OpenAPI filter turns it into the closing sentence of this operation's `description`
+and into `x-docspace-webhooks`, and the webhooks contract (`docspace-webhooks.yaml`) lists the operation under
+each trigger from there. An action without it is missing from both, even though the receiver gets the delivery.
+
+* Name the triggers by the enum (`WebhookTrigger.FileCreated`), never by string.
+* One attribute per condition. Leave `When` out when the action always raises the trigger; otherwise write it to
+  follow "Raises the `x` webhook": ``When = "only when `autosave` is true"``, `"for every listed file, once the
+  queued operation processes it"`, `"instead when the room is an AI agent"`. Triggers raised together under the
+  same condition share one attribute.
+* State the cases a receiver cannot guess: per item of a list, per nested entry or not, on completion of a
+  queued operation, when nothing actually changed, when the webhook is *not* raised although the data changed.
+* Do **not** mention the webhook in `<remarks>`. The filter writes the sentence; a second copy in prose
+  duplicates it and drifts.
+* An action hidden with `[ApiExplorerSettings(IgnoreApi = true)]` gets the attribute too, for the same reason
+  it gets its documentation (§0).
+* A new `WebhookManager.PublishAsync` / `UserWebhookManager.PublishAsync` call in a service: find every action
+  that reaches it (LSP `incomingCalls`) and annotate each. A publish no API action reaches — an editor callback,
+  a download handler, a background job of its own — belongs in `_otherSources` in
+  `common/Tools/ASC.Webhooks.Contract/ContractHeader.cs` instead.
+* After adding or changing an attribute, re-emit the API documents (stage A of the `generate-sdk` skill) and then
+  the contract (`dotnet run --project common/Tools/ASC.Webhooks.Contract`): the contract reads the operations from
+  the documents on disk, and its check compares against the same files, so it does not notice a stale document.
+
 ## 3. Parameters, DTO properties and responses
 
 Same audience, different unit — and the division of labour between the two is load-bearing. A
@@ -177,6 +204,8 @@ Before committing a new or changed endpoint, check that:
 - [ ] The first sentence identifies the operation on its own, out of context.
 - [ ] Preconditions, required access, and effects (mutating / destructive / idempotent / async) are stated.
 - [ ] Async operations name the operation to poll and the field that signals completion.
+- [ ] Every webhook the action raises, under every condition, is declared with `[RaisesWebhook]` (§2.1), and
+      `<remarks>` does not repeat it.
 - [ ] Cross-parameter and behavioural facts sit in this operation's `description` rather than on a
       DTO property, shared or single-use (`openapi-dto-docs.md` §3.3).
 - [ ] Every reachable status code has a `[SwaggerResponse]` whose text is specific to this operation.

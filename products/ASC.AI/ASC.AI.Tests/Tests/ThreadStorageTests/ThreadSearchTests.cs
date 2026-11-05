@@ -36,69 +36,71 @@ namespace ASC.AI.Tests.Tests.ThreadStorageTests;
 [Collection("Test Collection")]
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Threads")]
-public class ThreadSearchTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ThreadSearchTests(AspireAppFixture fixture) : ThreadTestBase(fixture)
 {
     [Fact]
     public async Task Search_BySubstring_ReturnsOnlyMatching()
     {
-        var report = await CreateThreadAsync("Annual report");
-        await CreateThreadAsync("Meeting notes");
+        var report = await CreateOwnThreadAsync("Annual report");
+        await CreateOwnThreadAsync("Meeting notes");
 
-        var page = await ReadThreadsPageAsync(10, query: "repo");
+        var page = await ListThreadsAsync(10, query: "repo");
 
-        page.Items.Should().ContainSingle(t => t.Id == report.Id);
+        page.Should().ContainSingle(t => t.ThreadId == report.ThreadId);
     }
 
     [Fact]
     public async Task Search_IsCaseInsensitive()
     {
-        var report = await CreateThreadAsync("Annual report");
+        var report = await CreateOwnThreadAsync("Annual report");
 
-        var page = await ReadThreadsPageAsync(10, query: "REPORT");
+        var page = await ListThreadsAsync(10, query: "REPORT");
 
-        page.Items.Should().ContainSingle(t => t.Id == report.Id);
+        page.Should().ContainSingle(t => t.ThreadId == report.ThreadId);
     }
 
     [Fact]
     public async Task Search_MultipleTokens_MatchAllInAnyOrder()
     {
-        var matching = await CreateThreadAsync("Annual report 2026");
-        await CreateThreadAsync("Annual report 2025");
+        var matching = await CreateOwnThreadAsync("Annual report 2026");
+        await CreateOwnThreadAsync("Annual report 2025");
 
-        var page = await ReadThreadsPageAsync(10, query: "2026 report");
+        var page = await ListThreadsAsync(10, query: "2026 report");
 
-        page.Items.Should().ContainSingle(t => t.Id == matching.Id);
+        page.Should().ContainSingle(t => t.ThreadId == matching.ThreadId);
     }
 
     [Fact]
     public async Task Search_EscapesLikeWildcards()
     {
-        var withPercent = await CreateThreadAsync("100% complete");
-        await CreateThreadAsync("fully complete");
+        var withPercent = await CreateOwnThreadAsync("100% complete");
+        await CreateOwnThreadAsync("fully complete");
 
-        var page = await ReadThreadsPageAsync(10, query: "%");
+        var page = await ListThreadsAsync(10, query: "%");
 
-        page.Items.Should().ContainSingle(t => t.Id == withPercent.Id);
+        page.Should().ContainSingle(t => t.ThreadId == withPercent.ThreadId);
     }
 
     [Fact]
     public async Task Search_NoMatches_ReturnsEmpty()
     {
-        await CreateThreadAsync("Annual report");
+        await CreateOwnThreadAsync("Annual report");
 
-        var page = await ReadThreadsPageAsync(10, query: "nonexistent");
+        var page = await ListThreadsAsync(10, query: "nonexistent");
 
-        page.Items.Should().BeEmpty();
+        page.Should().BeEmpty();
     }
 
+    // Internal contract: entityId scoping of the thread search has no public route (the chat service stores every
+    // thread under entityId null and ignores the entityId of the list, by design - Bug 82719).
     [Fact]
     public async Task Search_WithEntityId_ReturnsOnlyScopedThreads()
     {
         var roomId = await CreateRoomAsync();
-        await CreateThreadAsync("Annual report");
-        var scoped = await CreateThreadAsync("Annual report", entityId: roomId.ToString());
+        await CreateThreadInternalAsync("Annual report");
+        var scoped = await CreateThreadInternalAsync("Annual report", entityId: roomId.ToString());
 
-        var page = await ReadThreadsPageAsync(10, entityId: roomId.ToString(), query: "report");
+        var page = await ReadThreadsPageInternalAsync(10, entityId: roomId.ToString(), query: "report");
 
         page.Items.Should().ContainSingle(t => t.Id == scoped.Id);
     }

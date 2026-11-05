@@ -240,9 +240,6 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Voided</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>The room already contains the .ai folder</value>
-  </data>
   <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Bad request.</value>
   </data>
@@ -285,6 +282,12 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>The required folder was not found</value>
   </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Only Markdown files (.md) can be added to an instructions room</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>An instructions room can contain at most {0} skills</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>Invalid folder ID</value>
   </data>
@@ -293,6 +296,9 @@
   </data>
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>It is not possible to use this folder to store the room</value>
+  </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Invalid connection URL</value>
   </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Incorrect title</value>
@@ -357,6 +363,12 @@
   <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
     <value>You don't have permission to copy to this folder</value>
   </data>
+  <data name="ErrorMessage_DocServiceEncryptionNotSupported" xml:space="preserve">
+    <value>The document server connected to this portal cannot work with encrypted files</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnThirdPartyNotSupported" xml:space="preserve">
+    <value>A private room cannot be created on a third-party storage</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>You don't have enough permission to create</value>
   </data>
@@ -419,6 +431,15 @@
   </data>
   <data name="ErrorMessage_SharpBoxException" xml:space="preserve">
     <value>The content of third party folder are not available. Try to reconnect the account.</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>The skill description must be 1 to 1024 characters long and must not contain XML tags</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>The skill file must start with a YAML frontmatter block between two --- lines, with the name and description fields</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>The skill name must be 1 to 64 characters long, contain only lowercase letters, digits and single hyphens, and must not start or end with a hyphen</value>
   </data>
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>File editing start error</value>
@@ -622,5 +643,14 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>An AI agent's instruction cannot be longer than {0} characters</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>An AI project can link no more than {0} Instructions rooms</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>An AI project can link no more than {0} Knowledge rooms</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>These rooms cannot be linked to the AI project: {0}</value>
   </data>
 </root>

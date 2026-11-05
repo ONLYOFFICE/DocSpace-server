@@ -36,10 +36,6 @@ namespace ASC.Web.Api.Tests.Tests._08_OAuth2.ScopeManagement;
 /// <summary>
 /// GET /api/2.0/scopes (identity service) — the OAuth2 scope catalog. Any member with an
 /// <c>x-signature</c> JWT sees it; a request without the signature is refused with 403.
-///
-/// The positive cases read raw JSON: the generated <c>ScopeManagementApi.GetScopesAsync</c> is
-/// typed to return a single <c>ScopeResponse</c>, but the endpoint returns an array of them —
-/// an SDK/OpenAPI generation defect worth reporting.
 /// </summary>
 [Trait("Category", "OAuth2")]
 public class ScopeManagementTests(
@@ -69,21 +65,9 @@ public class ScopeManagementTests(
         await ApplySignatureAsync(user);
 
         // Act
-        using var response = await _identityClient.GetAsync("api/2.0/scopes", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var scopes = await _scopeManagementApi.GetScopesAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        using var json = JsonDocument.Parse(body);
-        json.RootElement.ValueKind.Should().Be(JsonValueKind.Array);
-
-        var scopes = json.RootElement.EnumerateArray()
-            .Select(s => (
-                Name: s.GetProperty("name").GetString(),
-                Group: s.GetProperty("group").GetString(),
-                Type: s.GetProperty("type").GetString()))
-            .ToList();
 
         foreach (var expected in ExpectedScopes)
         {

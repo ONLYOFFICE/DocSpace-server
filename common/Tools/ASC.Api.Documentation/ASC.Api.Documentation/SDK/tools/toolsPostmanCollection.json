@@ -9,6 +9,6 @@
   "outputDir": "postman-collection-sdk",
   "additionalProperties": {
     "packageName": "DocSpace API",
-    "packageVersion": "4.0.0"
+    "packageVersion": "4.1.0"
   }
 }

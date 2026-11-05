@@ -37,7 +37,6 @@ import date from "date-and-time";
 import { aiService, AiServiceHttpError, proxyBaseUrl, withTimeout } from "./httpClient.js";
 import {
   getFolderInfo,
-  getAgentResultStorageId,
   getMyDocumentsFolderId,
   canTakeUpload,
 } from "./docspaceFilesApi.js";
@@ -129,7 +128,7 @@ function extensionForMime(mime: string): string {
   }
 }
 
-// Upload a tool-generated image into the chat's `entityId` folder using the
+// Upload a tool-generated image into the round's folder using the
 // public DocSpace Files API (`POST api/2.0/files/{folderId}/insert`), acting on
 // behalf of the current user (forwarded auth cookies). Returns the new entry id
 // (internal int or thirdparty string, serialized as string).
@@ -340,8 +339,9 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     const result: (Attachment | null)[] = new Array(inputs.length).fill(null);
 
     // One line per create batch: the shape the engine handed us. A
-    // `source=tool` row with `entityId=-` is the silent no-scope case (the
-    // upload cannot run at all); `source=user` rows carry a DocSpace `path`.
+    // `source=tool` row with `entityId=-` is a round sent without a folder
+    // (the upload goes to My documents); `source=user` rows carry a DocSpace
+    // `path`.
     logger.info(
       `HttpAttachmentsStorage.createMany: ${inputs.length} input(s) ` +
         inputs
@@ -357,8 +357,8 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
 
     // 0.4.132+: tool-generated images (`generate_image`) arrive as raw base64
     // with `source === "tool"` and no DocSpace entry. Upload the bytes as a
-    // real file into the chat's `entityId` folder so they're persisted (and
-    // reclaimed by the message/thread cascade), rather than cached in-memory.
+    // real file into the round's folder so they're persisted (and reclaimed
+    // by the message/thread cascade), rather than cached in-memory.
     const toolTasks: Promise<void>[] = [];
     inputs.forEach((input, i) => {
       if (input.source !== "tool") return;
@@ -478,43 +478,39 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
   }
 
   // Persist a tool-generated image (raw base64, `source === "tool"`). The bytes
-  // are uploaded as a real DocSpace file into the chat's `entityId` folder via
-  // the public Files API; the resulting entry is then recorded as a normal
-  // image attachment through the existing entry-based flow, so reads serve a
+  // are uploaded as a real DocSpace file into the round's folder via the
+  // public Files API; the resulting entry is then recorded as a normal image
+  // attachment through the existing entry-based flow, so reads serve a
   // pre-signed URL exactly like a user upload. The lib keeps only the returned
   // attachment `id` as a lightweight ref.
+  //
+  // `input.entityId` is the folder the engine resolved for the round —
+  // `contextEntityId ?? entityId` of the request, i.e. the folder the user is
+  // in (or picked as the folder context), the project's folder context inside
+  // an AI project, or nothing at all for a chat opened outside the file tree.
   private async uploadToolImage(input: Omit<Attachment, "id" | "createdAt">): Promise<Attachment> {
     if (!input.base64) {
-      // Logged here, not only thrown: both of these throws are OUTSIDE the
-      // try below, so the engine catches them into its own console-only
-      // logger and the file log would show nothing at all.
+      // Logged here, not only thrown: the throw is OUTSIDE the try below, so
+      // the engine catches it into its own console-only logger and the file
+      // log would show nothing at all.
       logger.error(
         `uploadToolImage: no base64 payload (entityId=${input.entityId ?? "-"} title=${input.title ?? "-"}) ` +
           "— the generated image cannot be persisted",
       );
       throw new Error("tool image attachment is missing its base64 payload");
     }
-    if (!input.entityId) {
-      logger.error(
-        "uploadToolImage: no entityId (target folder) — the chat round was sent without an entity scope, " +
-          "so there is nowhere to upload the generated image; the engine keeps the raw base64 in the tool result " +
-          `(title=${input.title ?? "-"} base64=${input.base64.length}B)`,
-      );
-      throw new Error("tool image attachment is missing entityId (target folder)");
-    }
     logger.info(
-      `uploadToolImage: begin entityId=${input.entityId} title=${input.title ?? "-"} ` +
+      `uploadToolImage: begin entityId=${input.entityId ?? "-"} title=${input.title ?? "-"} ` +
         `base64=${input.base64.length}B payload=${input.base64.startsWith("data:") ? "data-url" : "bare-base64"}`,
     );
 
-    // Agent rooms must not hold generated files directly — artifacts belong
-    // in the agent's Result Storage system subfolder. A plain folder takes the
-    // upload as-is when it can hold one at all: the chat's scope follows the
-    // user's location, so it is regularly somewhere no file may be created —
-    // the "Rooms" root, an archived room, a room the user only reads. The
-    // Files API answers those with `Access denied`
-    // (`FileUploader.GetFolderIdAsync`), so such a scope falls back to the
-    // user's own "My documents" instead of losing the image.
+    // The round's folder takes the upload as-is when it can hold one at all:
+    // the folder follows the user's location, so it is regularly somewhere no
+    // file may be created — the "Rooms" root, an archived room, a room the
+    // user only reads. The Files API answers those with `Access denied`
+    // (`FileUploader.GetFolderIdAsync`), so such a folder — and a round that
+    // names no folder — falls back to the user's own "My documents" instead
+    // of losing the image.
     //
     // Every step is logged and `stage` names the one that failed for the catch
     // below: the engine swallows persist failures into its console-only
@@ -523,40 +519,37 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     let stage = "folder-info";
     try {
       let targetFolderId = input.entityId;
-      const folderInfo = await getFolderInfo(input.entityId);
-      logger.info(
-        `uploadToolImage: folder-info entityId=${input.entityId} -> ` +
-          (folderInfo
-            ? `isAgent=${folderInfo.isAgent} title=${folderInfo.title ?? "-"} ` +
-                `folderType=${folderInfo.folderType ?? "?"} canCreate=${folderInfo.canCreate ?? "?"}`
-            : "NOT FOUND (404 or unparseable) — the scope is not a folder this user can read"),
-      );
-      if (folderInfo?.isAgent) {
-        stage = "result-storage";
-        const resultStorageId = await getAgentResultStorageId(input.entityId);
-        if (!resultStorageId) {
-          throw new Error(
-            `agent ${input.entityId} has no accessible Result Storage folder for the generated image`,
-          );
-        }
-        targetFolderId = resultStorageId;
-      } else if (!canTakeUpload(folderInfo)) {
+      const folderInfo = input.entityId ? await getFolderInfo(input.entityId) : undefined;
+      if (input.entityId) {
+        logger.info(
+          `uploadToolImage: folder-info entityId=${input.entityId} -> ` +
+            (folderInfo
+              ? `title=${folderInfo.title ?? "-"} ` +
+                  `folderType=${folderInfo.folderType ?? "?"} canCreate=${folderInfo.canCreate ?? "?"}`
+              : "NOT FOUND (404 or unparseable) — the scope is not a folder this user can read"),
+        );
+      }
+      if (!targetFolderId || !canTakeUpload(folderInfo)) {
         stage = "my-documents";
         const myDocumentsId = await getMyDocumentsFolderId();
         if (!myDocumentsId) {
           throw new Error(
-            `the chat scope ${input.entityId} cannot take an upload and "My documents" could not be resolved`,
+            input.entityId
+              ? `the chat scope ${input.entityId} cannot take an upload and "My documents" could not be resolved`
+              : 'the round names no folder and "My documents" could not be resolved',
           );
         }
-        logger.warn(
-          `uploadToolImage: scope ${input.entityId} cannot take an upload ` +
-            `(folderType=${folderInfo?.folderType ?? "?"} canCreate=${folderInfo?.canCreate ?? "?"}) ` +
-            `-> falling back to My documents ${myDocumentsId}`,
-        );
+        if (input.entityId) {
+          logger.warn(
+            `uploadToolImage: scope ${input.entityId} cannot take an upload ` +
+              `(folderType=${folderInfo?.folderType ?? "?"} canCreate=${folderInfo?.canCreate ?? "?"}) ` +
+              `-> falling back to My documents ${myDocumentsId}`,
+          );
+        }
         targetFolderId = myDocumentsId;
       }
       logger.info(
-        `uploadToolImage: entityId=${input.entityId} isAgent=${folderInfo?.isAgent ?? "unknown"} -> target folder ${targetFolderId}`,
+        `uploadToolImage: entityId=${input.entityId ?? "-"} -> target folder ${targetFolderId}`,
       );
 
       stage = "insert";
@@ -601,14 +594,14 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       // — grep the same id in `readById` below to see whether the ref that
       // reached the browser resolved or 404'd.
       logger.info(
-        `uploadToolImage: ok entityId=${input.entityId} folder=${targetFolderId} ` +
+        `uploadToolImage: ok entityId=${input.entityId ?? "-"} folder=${targetFolderId} ` +
           `entryId=${entryId} ref=${attachment.id} ` +
           `title=${attachment.title} hasDataUrl=${attachment.base64 !== undefined}`,
       );
       return attachment;
     } catch (err) {
       logger.error(
-        `uploadToolImage: entityId=${input.entityId} FAILED at stage=${stage}: ${
+        `uploadToolImage: entityId=${input.entityId ?? "-"} FAILED at stage=${stage}: ${
           err instanceof Error ? `${err.message}${err.stack ? `\n${err.stack}` : ""}` : String(err)
         }`,
       );

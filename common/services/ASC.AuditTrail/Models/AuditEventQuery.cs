@@ -37,6 +37,9 @@ public record AuditEventQuery
 {
     public DbAuditEvent Event { get; init; }
     public UserData UserData { get; init; }
+
+    /// <summary>Set by the audit trail. The history of a room reads the same rows for its members and leaves it off.</summary>
+    public bool HidePrivateTitles { get; init; }
 }
 
 public record UserData

@@ -34,7 +34,7 @@
 namespace ASC.Web.Files.Utils;
 
 [Scope]
-public class FileUploader(
+public partial class FileUploader(
     FileUtility fileUtility,
     UserManager userManager,
     TenantManager tenantManager,
@@ -171,7 +171,7 @@ public class FileUploader(
 
             if (!string.IsNullOrEmpty(subFolderTitle))
             {
-                if (folder.FolderType is FolderType.Knowledge)
+                if (folder.FolderType is FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
                 }
@@ -204,6 +204,9 @@ public class FileUploader(
 
     public async Task<File<T>> VerifyChunkedUploadAsync<T>(T folderId, string fileName, long fileSize, bool updateIfExists, string relativePath = null)
     {
+        // a negative size opened a session that could never be finalized: no sum of parts equals it
+        ArgumentOutOfRangeException.ThrowIfNegative(fileSize);
+
         var maxUploadSize = await GetMaxFileSizeAsync(folderId, true);
 
         if (fileSize > maxUploadSize)
@@ -233,6 +236,9 @@ public class FileUploader(
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
+        // -1 is the size WebDAV sends when the body comes without Content-Length: the content is still saved over the file
+        ArgumentOutOfRangeException.ThrowIfLessThan(fileSize, -1);
+
         var maxUploadSize = await GetMaxFileSizeAsync(file.ParentId, true);
 
         if (fileSize > maxUploadSize)
@@ -257,6 +263,11 @@ public class FileUploader(
 
     public async Task<ChunkedUploadSession<T>> InitiateUploadAsync<T>(T folderId, T fileId, string fileName, long contentLength, bool encrypted, bool keepVersion = false, ApiDateTime createOn = null)
     {
+        // every way of opening a session ends here, the chunk handler's included, which skips the verify methods for a
+        // new file. -1 stands for a size not known in advance (WebDAV sends it for a body without Content-Length, and the
+        // third-party DAOs handle it); anything below it can never be completed
+        ArgumentOutOfRangeException.ThrowIfLessThan(contentLength, -1);
+
         var file = serviceProvider.GetService<File<T>>();
         file.Id = fileId;
         file.ParentId = folderId;
@@ -269,7 +280,24 @@ public class FileUploader(
 
         var folder = await folderDao.GetFolderAsync(folderId);
 
-        if (folder is { FolderType: FolderType.Knowledge })
+        var (_, _, roomType) = folder != null ? await folderDao.GetParentRoomInfoFromFileEntryAsync(folder) : default;
+
+        if (folder != null && await folderDao.GetParentFoldersAsync(folderId).FirstOrDefaultAsync(f => f.IsRoom) is { SettingsPrivate: true })
+        {
+            // Refused here rather than at the end of the upload, where the write path would refuse it anyway.
+            if (!encrypted)
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+            }
+
+            // The server sees this name in the clear, so a client only ever sends a generated one.
+            if (!EncryptedFileNameRegex().IsMatch(fileName))
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(fileName));
+            }
+        }
+
+        if (folder is { FolderType: FolderType.Knowledge } || roomType == FolderType.KnowledgeRoom)
         {
             if (!vectorizationGlobalSettings.IsSupportedContentExtraction(fileName))
             {
@@ -306,6 +334,13 @@ public class FileUploader(
         if (chunkLength > setupInfo.ChunkUploadSize)
         {
             throw FileSizeComment.GetFileSizeException(await setupInfo.MaxUploadSize(tenantManager, maxTotalSizeStatistic));
+        }
+
+        // parts are counted from 1: a part 0 or -1 used to be stored under a name the assembly never reads, and the
+        // call answered as if it had been taken
+        if (chunkNumber.HasValue)
+        {
+            ArgumentOutOfRangeException.ThrowIfLessThan(chunkNumber.Value, 1, nameof(chunkNumber));
         }
 
         var fileType = FileUtility.GetFileTypeByFileName(uploadSession.File.Title);
@@ -400,9 +435,29 @@ public class FileUploader(
         await Task.WhenAll(t1, t2);
     }
 
-    public async Task AbortUploadAsync<T>(string uploadId)
+    [GeneratedRegex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}(\\.[a-z0-9]+)?$")]
+    private static partial Regex EncryptedFileNameRegex();
+
+    /// <summary>Aborts a session reached through the folder it was opened against; any other folder has no such session.</summary>
+    public async Task AbortUploadAsync<T>(string uploadId, T folderId)
     {
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+
+        if (!Equals(uploadSession.FolderId, folderId))
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        await AbortUploadAsync(uploadSession);
+    }
+
+    public async Task AbortUploadAsync<T>(string uploadId)
+    {
+        await AbortUploadAsync(await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId));
+    }
+
+    private async Task AbortUploadAsync<T>(ChunkedUploadSession<T> uploadSession)
+    {
 
         // The endpoint used to check nothing at all: any authenticated caller who knew a session id
         // could abort somebody else's upload, whatever access they had to the room it was going into.

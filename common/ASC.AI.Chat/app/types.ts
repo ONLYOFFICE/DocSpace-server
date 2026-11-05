@@ -53,6 +53,10 @@ export interface RequestContext {
   // Names of the custom MCP servers resolved for this round's scope — see
   // setCustomServerNames in requestContext.ts.
   customServerNames?: string[];
+  // The knowledge rooms the composer connected for this round
+  // (`actionArgs.knowledgeRooms[].id`); the .NET knowledge search tool is
+  // scoped to them — see setKnowledgeRoomIds in requestContext.ts.
+  knowledgeRoomIds?: number[];
   // Entry ids of forms attached for analysis (per-file analyzeOnly); read by createMany.
   analyzeEntryIds?: string[];
   // In-flight `GET /files/folder/{id}` reads, keyed by folder id. A round
@@ -82,6 +86,13 @@ export interface RequestContext {
   upstreamCalls?: Record<string, number>;
   filesApiReads?: number;
   chatContextMisses?: string[];
+  // The profile the current chat round runs on, as the send handlers
+  // finalized it (thread prefill and AI-project binding applied). Read by
+  // the document agent tool, whose `callTool` carries no profile.
+  roundProfileId?: string;
+  // Attachment ref ids of the current user message, captured before the
+  // engine runs so an in-round tool call can hand the attached files on.
+  roundAttachmentIds?: string[];
 }
 
 export interface AppConfig {
@@ -111,6 +122,35 @@ export interface AwsCloudWatchConfig {
   logStreamName?: string;
 }
 
+// The external document agent (`ai.documentAgent` in the shared
+// `appsettings.json`): an A2A server that creates and edits office documents
+// in a sandbox of its own. Absent or without a URL and token, the tool that
+// delegates to it is not offered.
+export interface DocumentAgentSetting {
+  url?: string;
+  token?: string;
+  taskTimeoutSeconds?: number;
+  maxToolCalls?: number;
+  shareSystemServers?: boolean;
+  /** The portal API as the agent reaches it, for the portal's own model provider; the AI service's address by default. */
+  portalUrl?: string;
+  /** This service as the agent reaches it, for the file-link server it hands the agent; `http://localhost:<port>` by default. */
+  filesUrl?: string;
+}
+
+// Automatic history compaction (`ai.compaction` in the shared
+// `appsettings.json`): the library folds a thread that nears its model's
+// context window into a summary message before the round. On by default.
+export interface CompactionSetting {
+  enabled?: boolean;
+  /** Share of the context window at which to compact, 0..1; the library's 0.8 by default. */
+  threshold?: number;
+  /** Newest messages kept verbatim behind the summary; the library's 4 by default. */
+  keepRecent?: number;
+  /** The window assumed for a model the catalogue and the library's table do not know; 128000 by default. */
+  defaultContextWindow?: number;
+}
+
 export interface RootConfig {
   app: AppConfig;
   aws?: { cloudWatch?: AwsCloudWatchConfig };
@@ -118,7 +158,11 @@ export interface RootConfig {
   logPath?: string;
   logLevel?: string;
   // Merged from the shared DocSpace `appsettings.json` `ai` section.
-  ai?: { mcp?: McpServerSetting[] };
+  ai?: {
+    mcp?: McpServerSetting[];
+    documentAgent?: DocumentAgentSetting;
+    compaction?: CompactionSetting;
+  };
 }
 
 export interface ThreadDto {

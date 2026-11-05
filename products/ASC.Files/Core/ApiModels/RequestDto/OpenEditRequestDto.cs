@@ -71,8 +71,8 @@ public class OpenEditRequestDto<T>
     public EditorType EditorType { get; set; }
 
     /// <summary>
-    /// Asks for editing rather than viewing. On a form in a form-filling room this also records that the form is
-    /// being edited; the room may still turn the request into viewing or into filling.
+    /// Asks for editing rather than viewing; the room the file lies in may still turn the request into viewing or
+    /// into filling.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "edit")]

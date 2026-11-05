@@ -91,17 +91,10 @@ public class RebrandingSaveTests(AspireAppFixture fixture) : RebrandingTestBase(
     [Fact]
     public async Task SaveCompanyWhiteLabelSettings_Owner_ThrowsPaymentRequired()
     {
-        // Arrange: no email, so even an open gate ends in a validation failure, never a write
-        var request = new CompanyWhiteLabelSettingsRequestDto(new SaveCompanyInfoRequest(
-            companyName: "Autotest Co",
-            site: "https://example.com",
-            address: "Autotest address",
-            phone: "+10000000000"));
-
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await Rebranding.SaveCompanyWhiteLabelSettingsAsync(
-                request, TestContext.Current.CancellationToken));
+                CompanyRequest, TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(402);
@@ -110,19 +103,10 @@ public class RebrandingSaveTests(AspireAppFixture fixture) : RebrandingTestBase(
     [Fact]
     public async Task SaveAdditionalWhiteLabelSettings_Owner_ThrowsPaymentRequired()
     {
-        // Arrange: the built-in values, so an open gate would store what is already in effect
-        var request = new AdditionalWhiteLabelSettingsRequestDto(new SaveAdditionalResourcesRequest(
-            startDocsEnabled: true,
-            helpCenterEnabled: true,
-            feedbackAndSupportEnabled: true,
-            userForumEnabled: true,
-            videoGuidesEnabled: true,
-            licenseAgreementsEnabled: true));
-
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await Rebranding.SaveAdditionalWhiteLabelSettingsAsync(
-                request, TestContext.Current.CancellationToken));
+                AdditionalRequest, TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(402);

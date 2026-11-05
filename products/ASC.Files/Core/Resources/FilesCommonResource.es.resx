@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>No es posible utilizar esta carpeta para almacenar la sala</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Dirección URL de conexión no válida</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Título incorrecto</value>
   </data>
@@ -610,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Salidas del chat</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>La sala ya contiene la carpeta .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>El almacenamiento no puede desconectarse mientras una sala lo utiliza. Elimine la sala</value>
   </data>
@@ -621,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Buscar en metadatos de la carpeta</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Un proyecto de IA puede vincular como máximo {0} salas de instrucciones</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Un proyecto de IA puede vincular como máximo {0} salas de conocimiento</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Estas salas no se pueden vincular al proyecto de IA: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Solo se pueden añadir archivos Markdown (.md) a una sala de instrucciones</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Una sala de instrucciones puede contener como máximo {0} habilidades</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>La descripción de la habilidad debe tener entre 1 y 1024 caracteres y no puede contener etiquetas XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>El archivo de la habilidad debe empezar con un bloque YAML frontmatter entre dos líneas ---, con los campos name y description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>El nombre de la habilidad debe tener entre 1 y 64 caracteres, contener solo letras minúsculas, dígitos y guiones simples, y no puede empezar ni terminar con un guion</value>
   </data>
 </root>

@@ -141,7 +141,7 @@ public class ThirdpartyConfiguration(ThirdpartyConfigurationData configuration, 
 
         if (ThirdPartyProviders.Contains(KDriveKey))
         {
-            providers.Add(new ProviderDto("kDrive", webDavKey, true));
+            providers.Add(new ProviderDto("kDrive", webDavKey, true, RequiredConnectionUrl: true));
         }
 
         if (ThirdPartyProviders.Contains(YandexKey))

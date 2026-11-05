@@ -34,24 +34,42 @@
 namespace ASC.AI.Tests.ApiFactories;
 
 /// <summary>
-/// The AI suite's Aspire host: AI itself, plus Files and People for the entities an AI test needs
-/// (a room to scope preferences to, a member to act as).
+/// The AI suite's Aspire host: the Node chat service (the public <c>/api/2.0/ai</c> surface) and ASC.AI behind it,
+/// plus Files and People for the entities an AI test needs (a room to scope preferences to, a member to act as),
+/// and the stub model provider every profile of the run points at.
 /// </summary>
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
-    protected override IEnumerable<string> Resources => [ResourceNames.Ai, ResourceNames.Files, ResourceNames.People];
+    // The AI worker writes the exported files (the text-to-docx event) and runs the vectorization: the run waits for it
+    // so the first export does not go out before it subscribes. It reports no health check of its own, so "healthy" is
+    // "running", as for the backup worker of the backup suite.
+    protected override IEnumerable<string> Resources =>
+        [ResourceNames.AiChat, ResourceNames.Ai, ResourceNames.AiWorker, ResourceNames.Files, ResourceNames.People];
+
+    // Only the third-party room tests (NeedsLazyResources) connect to Nextcloud, and they wait for it themselves.
+    protected override IEnumerable<string> LazyResources => [ResourceNames.Nextcloud];
+
+    /// <summary>The model provider shared by the run: profiles are created against it, chats answered by it.</summary>
+    public StubModelProvider ModelProvider { get; } = StubModelProvider.CreateShared();
 
     protected override PortalClients CreateClients(PortalContext context)
     {
         return new PortalClients(context);
     }
 
+    protected override ValueTask OnDisposingAsync()
+    {
+        ModelProvider.Dispose();
+
+        return ValueTask.CompletedTask;
+    }
+
     protected override async ValueTask WarmUpAsync(PortalClients clients)
     {
-        await clients.AiHttpClient.Authenticate(clients.Owner);
+        await clients.AiChatHttpClient.Authenticate(clients.Owner);
         await clients.FilesHttpClient.Authenticate(clients.Owner);
 
-        using var profiles = await clients.Ai.GetAsync("/internal/ai/profiles", TestContext.Current.CancellationToken);
+        await clients.AiProfilesApi.AiProfilesListAsync(TestContext.Current.CancellationToken);
 
         // The owner's root folder tree is provisioned lazily on first access — warm that too,
         // it is what every test creating a room hits right after registration.

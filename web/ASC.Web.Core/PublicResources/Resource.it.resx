@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Costo del fornitore</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Il webhook è disabilitato. Abilitalo prima di ritentare le sue consegne</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>L’evento è in fase di invio. Riprova al termine del tentativo</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>La consegna è stata registrata in un formato webhook precedente e non può essere inviata di nuovo</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>La destinazione del webhook non è un utente o un gruppo esistente</value>
+  </data>
 </root>

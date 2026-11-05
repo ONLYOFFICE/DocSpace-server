@@ -96,7 +96,6 @@ public class BackupCoverageTests
         ["core_userdav"] = "T6 — WebDAV credentials",
         ["telegram_users"] = "T6 — Telegram binding",
         ["invitation_link"] = "T6 — invitation links",
-        ["app_settings"] = "T6 — app settings",
         ["core_user_api_key"] = "T7 — needs a security decision",
         ["files_thirdparty_app"] = "T7 — encrypted token, needs the files_thirdparty_account treatment",
         ["files_file_keys"] = "T7 — encrypted private key, may not survive a restore",

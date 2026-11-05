@@ -37,8 +37,9 @@ namespace ASC.Files.Tests.Tests._01_Files.Thumbnails;
 /// POST /files/thumbnails — queues thumbnail generation for a batch of files and/or folders. The
 /// endpoint only reports which file IDs were accepted into the queue; it does not wait for
 /// generation to finish, so these tests assert the accepted-ids response shape rather than any
-/// generated image. Thumbnail generation itself is a background job that needs the document
-/// server, which the integration-test host does not run, so it is out of scope here.
+/// generated image. Thumbnail generation itself is a background job of the Files worker (images are
+/// scaled there, documents are rendered by the document server); the generated thumbnails are not
+/// covered yet.
 /// </summary>
 [Trait("Category", "Files")]
 public class ThumbnailsCreateTests(

@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Strošek ponudnika</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook je onemogočen. Omogočite ga, preden ponovno poskusite njegove dostave</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Dogodek se trenutno pošilja. Poskusite znova, ko se poskus konča</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Dostava je bila zabeležena v starejši obliki webhooka in je ni mogoče znova poslati</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Cilj webhooka ni obstoječ uporabnik ali skupina</value>
+  </data>
 </root>

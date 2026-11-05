@@ -132,29 +132,22 @@ public abstract class EmptyTrashTestBase(
     }
 
     /// <summary>
-    /// Empties the Trash restricted to items originally located in the given section(s). The generated
-    /// SDK has no <c>folderType</c> parameter on <c>emptytrash</c>, so the request is issued directly.
+    /// Empties the Trash restricted to items originally located in the given section(s).
     /// </summary>
     protected async Task EmptyTrashForFolderTypesAndWaitAsync(bool single, params FolderType[] folderTypes)
     {
-        var url = $"api/2.0/files/fileops/emptytrash?single={(single ? "true" : "false")}";
-        url = folderTypes.Aggregate(url, (current, type) => current + $"&folderType={(int)type}");
+        var operations = (await _filesOperationsApi.EmptyTrashAsync(
+            single,
+            [.. folderTypes.Select(type => (int)type)],
+            TestContext.Current.CancellationToken)).Response;
 
-        using var response = await _filesClient.PutAsync(url, null, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        response.IsSuccessStatusCode.Should().BeTrue(body);
-
-        using var json = JsonDocument.Parse(body);
-        var operations = json.RootElement.GetProperty("response");
-
-        if (operations.GetArrayLength() == 0)
+        if (operations.Count == 0)
         {
             await WaitLongOperation();
             return;
         }
 
-        await WaitLongOperation(operations[0].GetProperty("id").GetString());
+        await WaitLongOperation(operations[0].Id);
     }
 
     /// <summary>

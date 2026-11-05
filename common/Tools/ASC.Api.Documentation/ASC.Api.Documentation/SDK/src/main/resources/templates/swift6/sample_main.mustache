@@ -11,7 +11,7 @@ do {
     // --- AUTH ---
     let authDto = AuthRequestDto(userName: "example@onlyoffice.com", password: "11111111")
 
-    let authResponse = try await AuthenticationAPIApi.authenticateMe(authRequestDto: authDto)
+    let authResponse = try await AuthenticationApi.authenticateMe(authRequestDto: authDto)
     guard let token = authResponse.response?.token else {
         print("The portal returned no token")
         exit(1)
@@ -20,28 +20,28 @@ do {
     configuration.customHeaders["Authorization"] = "Bearer \(token)"
 
     // --- FOLDERS ---
-    let myFolder = try await FilesFoldersAPIApi.getMyFolder(count: 100, startIndex: 0)
+    let myFolder = try await FilesFoldersApi.getMyFolder(count: 100, startIndex: 0)
     guard let myFolderId = myFolder.response?.current?.id else {
         print("The portal returned no My documents folder")
         exit(1)
     }
     print("My folder id: \(myFolderId)")
 
-    let created = try await FilesFoldersAPIApi.createFolder(folderId: myFolderId, createFolderRequest: CreateFolderRequest(title: "TestTitle"))
+    let created = try await FilesFoldersApi.createFolder(folderId: myFolderId, createFolderRequest: CreateFolderRequest(title: "TestTitle"))
     guard let newFolderId = created.response?.id else {
         print("The portal returned no folder id")
         exit(1)
     }
     print("Created folder: \(newFolderId)")
 
-    let renamed = try await FilesFoldersAPIApi.renameFolder(folderId: newFolderId, createFolderRequest: CreateFolderRequest(title: "Updated title"))
+    let renamed = try await FilesFoldersApi.renameFolder(folderId: newFolderId, createFolderRequest: CreateFolderRequest(title: "Updated title"))
     print("My folder title: \(renamed.response?.title ?? "")")
 
-    let deleted = try await FilesFoldersAPIApi.deleteFolder(folderId: newFolderId, deleteFolderRequest: DeleteFolderRequest(deleteAfter: false, immediately: true))
+    let deleted = try await FilesFoldersApi.deleteFolder(folderId: newFolderId, deleteFolderRequest: DeleteFolderRequest(deleteAfter: false, immediately: true))
     print("Folder deleted status: \(deleted.statusCode ?? 0)")
 
     // --- ROOMS ---
-    let rooms = try await RoomsAPIApi.getRoomsFolder(
+    let rooms = try await RoomsApi.getRoomsFolder(
         searchArea: .active,
         count: 100,
         startIndex: 0,
@@ -52,11 +52,11 @@ do {
     print("Rooms status: \(rooms.statusCode ?? 0)")
 
     // --- BACKUP ---
-    _ = try await BackupAPIApi.startBackup(startBackupRequestDto: StartBackupRequestDto(storageType: .DataStore, dump: false))
+    _ = try await BackupApi.startBackup(startBackupRequestDto: StartBackupRequestDto(storageType: .DataStore, dump: false))
     print("Backup started")
 
     while true {
-        let progress = try await BackupAPIApi.getBackupProgress()
+        let progress = try await BackupApi.getBackupProgress()
         if progress.response?.isCompleted == true {
             print("Backup completed")
             break

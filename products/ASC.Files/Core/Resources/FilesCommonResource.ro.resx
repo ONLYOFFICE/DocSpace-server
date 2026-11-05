@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Sala nu poate fi stocată în acest folder</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Adresă URL de conexiune nevalidă</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Titlu incorect</value>
   </data>
@@ -610,9 +613,6 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Ieșiri chat</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Camera conține deja folderul .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Spațiul de stocare nu poate fi deconectat cât timp o cameră îl utilizează. Ștergeți camera</value>
   </data>
@@ -621,5 +621,29 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Căutare în metadatele folderului</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Un proiect AI poate asocia cel mult {0} camere de instrucțiuni</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Un proiect AI poate asocia cel mult {0} camere de cunoștințe</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Aceste camere nu pot fi asociate proiectului AI: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Într-o cameră de instrucțiuni pot fi adăugate doar fișiere Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>O cameră de instrucțiuni poate conține cel mult {0} abilități</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Descrierea abilității trebuie să aibă între 1 și 1024 de caractere și nu poate conține etichete XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Fișierul abilității trebuie să înceapă cu un bloc YAML frontmatter între două linii ---, cu câmpurile name și description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Numele abilității trebuie să aibă între 1 și 64 de caractere, să conțină doar litere mici, cifre și cratime simple și nu poate începe sau se termina cu o cratimă</value>
   </data>
 </root>

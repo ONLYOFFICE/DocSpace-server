@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Threading.Channels;
-
 using ASC.Common.Threading;
 using ASC.MessagingSystem;
 using ASC.MessagingSystem.Data;
@@ -52,7 +50,6 @@ public static class WebStudioServiceExtensions
         services.RegisterQuotaFeature();
         services.AddHttpClient();
         services.AddHostedService<WorkerService>();
-        services.TryAddSingleton(new ConcurrentQueue<WebhookRequestIntegrationEvent>());
 
         services.AddSingleton(Channel.CreateUnbounded<EventData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
@@ -67,7 +64,7 @@ public static class WebStudioServiceExtensions
         services.AddActivePassiveHostedService<TopUpWalletService>(configuration);
         services.AddActivePassiveHostedService<RenewSubscriptionService>(configuration);
 
-        services.AddWebhookSenderHttpClient(configuration);
+        services.AddWebhookSenderHttpClient();
 
         return services;
     }
@@ -81,6 +78,16 @@ public static class WebStudioServiceExtensions
         {
             var endpoints = new Dictionary<string, string>();
             configuration.Bind("openApi:endpoints", endpoints);
+
+            // The webhook contract ships with the code rather than with a service of its own, so it is listed here and
+            // not in openApi:endpoints, and served from the copy built into ASC.Webhooks.Core.
+            endpoints[WebhookContract.DocumentName] = WebhookContract.Route;
+
+            app.UseEndpoints(endpointRouteBuilder => endpointRouteBuilder
+                .MapGet(WebhookContract.Route, () => Results.Stream(WebhookContract.OpenRead(), WebhookContract.ContentType))
+                .AllowAnonymous()
+                .ExcludeFromDescription());
+
             app.UseOpenApiUI(endpoints);
         }
 

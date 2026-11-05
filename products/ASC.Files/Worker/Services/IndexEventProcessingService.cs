@@ -40,6 +40,12 @@ public class IndexEventProcessingService(
     ChannelReader<IntegrationEvent> channelReader)
     : BackgroundService
 {
+    // The events are applied one at a time for the whole server, long after the request that raised them has
+    // answered, so nobody waits for a write here to become searchable. A forced refresh per write took about half
+    // of the time of an event and let the channel fill up under load - a new entry then waited ~25 s for the ones
+    // ahead of it. Without it the index shows the write at its next periodic refresh (index.refresh_interval, 1 s).
+    private const bool RefreshImmediately = false;
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await foreach (var @event in channelReader.ReadAllAsync(stoppingToken))
@@ -99,9 +105,9 @@ public class IndexEventProcessingService(
             var factoryIndexerFormData = serviceProvider.GetRequiredService<FactoryIndexerForm>();
             var factoryIndexerFileMetadata = serviceProvider.GetRequiredService<FactoryIndexerFileMetadata>();
 
-            await factoryIndexer.DeleteAsync(r => r.Where(a => a.Id, @event.FileId));
-            await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, @event.FileId));
-            await factoryIndexerFileMetadata.DeleteAsync(r => r.Where(a => a.Id, @event.FileId));
+            await factoryIndexer.DeleteAsync(r => r.Where(a => a.Id, @event.FileId), RefreshImmediately);
+            await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, @event.FileId), RefreshImmediately);
+            await factoryIndexerFileMetadata.DeleteAsync(r => r.Where(a => a.Id, @event.FileId), RefreshImmediately);
 
             return;
         }
@@ -123,14 +129,14 @@ public class IndexEventProcessingService(
         {
             case FileIndexAction.Index:
                 dbFile.Folders = await filesDbContext.DbFolderTreesAsync(dbFile.ParentId).ToListAsync();
-                await factoryIndexer.IndexAsync(dbFile);
+                await factoryIndexer.IndexAsync(dbFile, RefreshImmediately);
                 break;
             case FileIndexAction.UpdateInfo:
-                await factoryIndexer.UpdateAsync(dbFile, true, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
+                await factoryIndexer.UpdateAsync(dbFile, RefreshImmediately, r => r.Title, r => r.ModifiedBy, r => r.ModifiedOn);
                 break;
             case FileIndexAction.UpdateFolders:
                 dbFile.Folders = await filesDbContext.DbFolderTreesAsync(dbFile.ParentId).ToListAsync();
-                await factoryIndexer.UpdateAsync(dbFile, UpdateAction.Replace, w => w.Folders);
+                await factoryIndexer.UpdateAsync(dbFile, UpdateAction.Replace, w => w.Folders, RefreshImmediately);
                 break;
         }
     }
@@ -145,8 +151,8 @@ public class IndexEventProcessingService(
             {
                 var factoryIndexerFolderMetadata = serviceProvider.GetRequiredService<FactoryIndexerFolderMetadata>();
 
-                await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, @event.FolderIds.ToArray()));
-                await factoryIndexerFolderMetadata.DeleteAsync(r => r.In(a => a.Id, @event.FolderIds.ToArray()));
+                await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, @event.FolderIds.ToArray()), RefreshImmediately);
+                await factoryIndexerFolderMetadata.DeleteAsync(r => r.In(a => a.Id, @event.FolderIds.ToArray()), RefreshImmediately);
             }
 
             return;
@@ -159,7 +165,7 @@ public class IndexEventProcessingService(
         var dbFolder = await filesDbContext.FolderAsync(@event.TenantId, @event.FolderId);
         if (dbFolder != null)
         {
-            await factoryIndexer.IndexAsync(dbFolder);
+            await factoryIndexer.IndexAsync(dbFolder, RefreshImmediately);
         }
     }
 }

@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="YamlDotNet" />
+  </ItemGroup>
+
+  <!--
+    The assemblies that declare the webhook payload DTOs. Their XML documentation files are copied next to the
+    tool with them, and are where every description in the contract comes from.
+  -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\ASC.Api.Core\ASC.Api.Core.csproj" />
+    <ProjectReference Include="..\..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />
+  </ItemGroup>
+
+</Project>
