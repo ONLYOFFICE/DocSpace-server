@@ -111,7 +111,7 @@ public class AiGateway(
         return await GenerateKeyAsync(allowEmpty);
     }
 
-    public async Task<string> GetByokKeyAsync(string provider, string apiKey)
+    public async Task<string> GetByokKeyAsync(string provider, Guid revisionId, string apiKey)
     {
         if (!Configured)
         {
@@ -123,7 +123,7 @@ public class AiGateway(
             throw new AiServiceDisabledException();
         }
 
-        return await GenerateKeyAsync(byok: (provider, apiKey));
+        return await GenerateKeyAsync(byok: (provider, revisionId, apiKey));
     }
 
     public async Task<bool> VerifyByokKeyAsync(string provider, string apiKey)
@@ -180,7 +180,7 @@ public class AiGateway(
             opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
-    private async Task<string> GenerateKeyAsync(bool allowEmpty = false, (string Provider, string ApiKey)? byok = null)
+    private async Task<string> GenerateKeyAsync(bool allowEmpty = false, (string Provider, Guid RevisionId, string ApiKey)? byok = null)
     {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
@@ -200,7 +200,9 @@ public class AiGateway(
             id = user.Id,
             iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
             exp = DateTimeOffset.UtcNow.Add(aiGatewayConfiguration.Settings.TokenExpiration).ToUnixTimeSeconds(),
-            byok = byok.HasValue ? new { provider = byok.Value.Provider, apiKey = byok.Value.ApiKey } : null
+            byok = byok.HasValue
+                ? new { provider = byok.Value.Provider, revisionId = byok.Value.RevisionId, apiKey = byok.Value.ApiKey }
+                : null
         };
 
         return JsonWebToken.Encode(payload, aiGatewayConfiguration.Settings.Secret);
