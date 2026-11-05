@@ -96,6 +96,18 @@ public abstract class Migrator(
         MigrationLogger.Log($"{value:0.00} progress: {status}");
     }
 
+    /// <summary>
+    /// Reports unpacking once per whole percent rather than per entry: every report publishes the operation state
+    /// and writes a line to the migration log, and a backup may hold hundreds of thousands of files.
+    /// </summary>
+    protected async Task ReportUnzippingAsync(double progress, string status = null)
+    {
+        if (Math.Floor(progress) > Math.Floor(_lastProgressUpdate))
+        {
+            await ReportProgressAsync(progress, status ?? MigrationResource.Unzipping);
+        }
+    }
+
     public void Log(string msg, Exception exception = null)
     {
         MigrationLogger.Log(msg, exception);
