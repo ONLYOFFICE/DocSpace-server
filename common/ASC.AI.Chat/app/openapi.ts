@@ -372,6 +372,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiMetaFill:
     "Fills the metadata of one file from its text and writes the result. `kind` names the entry's table and `id` its integer identifier; only `file` is accepted for now, a folder or a room answers 400 until it is settled whether their metadata should describe the entry itself or its files; `prompt` is an optional note for the model on what to pay attention to, passed as a hint, never as an instruction; `overwrite` (default false) also replaces the fields that already carry a value, otherwise only the empty ones are filled and the rest are reported as `already_set`; `dryRun` (default true) resolves the values but writes nothing, so the caller shows them for confirmation and saves the accepted ones itself; only an explicit `dryRun: false` writes, and it is meant for a caller that has already collected the user's confirmation. The fields are the entry's own: every field of the visible templates it carries, assigned or inherited through a cascade - a hidden template is skipped as the UI and the search skip it - and its existing custom fields - no field is created here, use `POST api/2.0/ai/meta/generate` and the Files metadata API for that. The text is the file itself, converted to plain text under the caller's rights and cut to the same budgets as the generate route. The model bound to `GenerateMeta` (`Default` when that slot is empty) runs once, without tools, and is told to answer null for a value the text does not state. Each value is then checked the way the client's info panel checks a typed value - an integer for a number, a calendar date for a date, one of the field's own options for a choice - and the ones that pass are written with `PUT api/2.0/files/metadata/{kind}/{id}/values` and `.../customFields`, so the caller needs the rights those routes need; a write the portal refuses is reported per field as `write_failed`, and the call fails with the portal's status only when nothing was written at all. The answer carries `dryRun` as it was applied, the entry's metadata after the write (or as it stands, with `dryRun`), the values written or proposed, the fields left empty with the reason for each, and the documents that were read.",
 
+  // Skills.
+  aiSkillsGenerate:
+    "Writes the text of one skill from a title and the caller's description of the skill they need, for an Instructions room, without saving it: the caller shows the text for review and saves the version the user accepts as `<name>.md` through `POST api/2.0/files/{folderId}/insert`, where the Files service validates the frontmatter. `destId` is the integer id of the Instructions room, checked before the model runs: the caller has to be able to create files in it, and any other folder answers 400. `title` becomes the skill's `name`: it is lower-cased and every run of characters other than letters and digits is folded into one hyphen, so `Sales report` becomes `sales-report`. `description` is a specification of the skill, passed to the model as data, never as an instruction. The model bound to the `Chat` action - the `Default` slot when that action has no profile of its own - runs once, without tools, and writes the description and the body; the frontmatter is then rebuilt here, with the description flattened to one line, stripped of tags and cut to 1 024 characters, so the text as returned always passes the Files service's skill validation. The answer carries the skill's name and the whole file, frontmatter included.",
+
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
     "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
@@ -750,6 +754,20 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
     "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
     "504": "Reading the files or the model round did not finish within the time budget.",
+  },
+  aiSkillsGenerate: {
+    "400":
+      "`destId` is not an integer id, `title` or `description` is missing or too long, `title` has no letter or digit, or the folder is not an Instructions room.",
+    "403": "The caller cannot create files in the room.",
+    "404": "The room does not exist.",
+    "402":
+      "The model provider refused the request for lack of credit; `code` and `providerMessage` carry its own words.",
+    "429":
+      "The model provider is rate-limiting requests; `code` and `providerMessage` carry its own words.",
+    "502":
+      "The model request failed or returned an empty skill; `code` says how. `providerMessage` carries the provider's own words only for the portal's spending limit; other failures, an authentication one among them, leave it out.",
+    "503": "No profile is bound to `Chat` and the `Default` slot is empty too.",
+    "504": "The model round did not finish within the time budget.",
   },
   aiMetaFill: {
     "400":
@@ -1384,6 +1402,9 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "Whether it was a dry run, the entry's metadata, the values written or proposed, the fields left empty " +
     "with the reason for each, and the documents the values were read from.",
 
+  aiSkillsGenerate:
+    "The skill's name and the whole Markdown file, frontmatter included; nothing is saved.",
+
   aiOpenaiChatCompletions:
     "The provider's own response, relayed with its status and content type (a 5xx excepted).",
   aiOpenaiImagesGenerations:
@@ -1810,6 +1831,7 @@ const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, J
   aiWebSearchConfigure: { "400": WEB_SEARCH_OR_PLAIN_ERROR_SCHEMA },
   aiMetaGenerate: MODEL_CALL_ERRORS,
   aiMetaFill: MODEL_CALL_ERRORS,
+  aiSkillsGenerate: MODEL_CALL_ERRORS,
 };
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {

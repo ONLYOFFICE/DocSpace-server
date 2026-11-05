@@ -56,7 +56,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         SettingsManager settingsManager,
         IQuotaService quotaService,
         TenantManager tenantManager,
-        CoreSettings coreSettings)
+        CoreSettings coreSettings,
+        DocumentServiceEncryptionChecker documentServiceEncryptionChecker)
 {
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
@@ -263,6 +264,12 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             locatedInPrivateRoom = DocSpaceHelper.LocatedInPrivateRoom(room);
             options = GetOptions(room);
+        }
+
+        // The browser decrypts the file with a library the document server hands out, so without it nothing can be shown.
+        if (file.Encrypted && locatedInPrivateRoom && !await documentServiceEncryptionChecker.IsSupportedAsync())
+        {
+            throw new NotSupportedException(FilesCommonResource.ErrorMessage_DocServiceEncryptionNotSupported);
         }
 
         if (file.Encrypted && file.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)

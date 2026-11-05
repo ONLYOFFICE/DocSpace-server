@@ -307,7 +307,7 @@
             "description": "The portal has reached the AI agent limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota"
           },
           "403": {
-            "description": "The caller is a user or a guest, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for AI agents is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
+            "description": "The caller is a user or a guest, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for AI agents is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
           },
           "404": {
             "description": "`logo.tmpFile` names no uploaded picture, or one already used"

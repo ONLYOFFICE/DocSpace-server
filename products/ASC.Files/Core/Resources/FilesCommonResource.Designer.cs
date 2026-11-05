@@ -871,6 +871,24 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The document server connected to this portal cannot work with encrypted files.
+        /// </summary>
+        public static string ErrorMessage_DocServiceEncryptionNotSupported {
+            get {
+                return ResourceManager.GetString("ErrorMessage_DocServiceEncryptionNotSupported", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to A private room cannot be created on a third-party storage.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomOnThirdPartyNotSupported {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomOnThirdPartyNotSupported", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to You don&apos;t have enough permission to create.
         /// </summary>
         public static string ErrorMessage_SecurityException_Create {

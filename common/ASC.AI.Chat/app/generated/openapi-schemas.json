@@ -4605,6 +4605,52 @@
         "additionalProperties": false
       }
     },
+    "aiSkillsGenerate": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "destId": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The integer id of the Instructions room the skill is written for."
+          },
+          "title": {
+            "type": "string",
+            "description": "The skill's title, at most 64 characters; its kebab-case form is the skill's name."
+          },
+          "description": {
+            "type": "string",
+            "description": "What the skill should do, at most 2000 characters; a specification for the model."
+          }
+        },
+        "required": [
+          "destId",
+          "title",
+          "description"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The skill's name as written in the frontmatter; the file is saved as `<name>.md`."
+          },
+          "content": {
+            "type": "string",
+            "description": "The whole Markdown file, frontmatter included. Nothing is saved."
+          }
+        },
+        "required": [
+          "name",
+          "content"
+        ],
+        "additionalProperties": false
+      }
+    },
     "aiMetaFill": {
       "request": {
         "type": "object",

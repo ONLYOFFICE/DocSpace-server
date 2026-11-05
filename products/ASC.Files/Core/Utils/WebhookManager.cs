@@ -392,6 +392,10 @@ public class WebhookFileEntryAccessChecker<T>(FileSecurity fileSecurity) : IWebh
 
     public async Task<bool> CheckAccessAsync(FileEntry<T> fileEntry, Guid userId)
     {
+        // A check keeps the share record it found on the entry and would answer the next subscriber with it,
+        // which sends the event to somebody who has no access because a member was looked at before them.
+        fileEntry.ShareRecord = null;
+
         return await fileSecurity.CanReadAsync(fileEntry, userId);
     }
 }
@@ -412,6 +416,9 @@ public class WebhookSubmittedFormAccessChecker<T>(FileSecurity fileSecurity) : I
 
     public async Task<bool> CheckAccessAsync(SubmittedFormData<T> completedFormEntry, Guid userId)
     {
+        // see WebhookFileEntryAccessChecker
+        completedFormEntry.SubmittedForm.ShareRecord = null;
+
         return await fileSecurity.CanReadAsync(completedFormEntry.SubmittedForm, userId);
     }
 }
