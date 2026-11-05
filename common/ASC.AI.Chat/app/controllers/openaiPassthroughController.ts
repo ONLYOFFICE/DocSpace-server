@@ -244,10 +244,30 @@ function withOnlyofficeExtras(
     return body;
   }
   const next: Record<string, unknown> = { ...parsed };
-  if (parsed["stream"] === true && Array.isArray(parsed["messages"])) {
+  if (
+    parsed["stream"] === true &&
+    Array.isArray(parsed["messages"]) &&
+    !hasCacheBreakpoints(parsed["messages"])
+  ) {
     next["messages"] = markCacheBreakpoints(parsed["messages"]);
   }
   return spliceMetadata(Buffer.from(JSON.stringify(next), "utf8"), contentType, source);
+}
+
+// Whether the caller placed its own breakpoints. `@onlyoffice/ai-chat` marks
+// the message list itself since 1.0.2-progress.33 (on chat rounds and one-shot
+// actions alike), and a plugin built on it must keep what it sent: adding the
+// host's two markers on top would move the trailing breakpoint onto a `tool`
+// message the library deliberately skips, and push a long tool round past the
+// four breakpoints Anthropic allows. Older plugins send none, and keep getting
+// the host's.
+function hasCacheBreakpoints(messages: unknown[]): boolean {
+  return messages.some((message) => {
+    if (!isObject(message) || !Array.isArray(message["content"])) {
+      return false;
+    }
+    return message["content"].some((part) => isObject(part) && "cache_control" in part);
+  });
 }
 
 // The plugin's round-trip runs browser → CDN/reverse proxy → nginx → here, and
