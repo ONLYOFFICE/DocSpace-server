@@ -21,6 +21,8 @@ Everything that is not specific to one product is there, and every suite referen
 | `PortalClientsBase` / `PortalContext` | the per-portal HTTP clients, `Origin` binding, disposal |
 | `Initializer` | owner credentials, client-side password hashing, `HttpClient.Authenticate(user)`, `FakerMember` |
 | `RawApiClient` / `RawApiResponse<T>` | raw JSON access for endpoints the SDK does not expose |
+| `PortalSocket` | a real Socket.IO client on the running socket service, for tests of what an API call pushes to clients (`products/ASC.Files/Tests/Tests/05_Features/Socket/`); wait for the router first (`WaitForRouterAsync`), the service checks the cookie through it |
+| `FindSocketHubRefusalsAsync` | what the socket service refused in this run; `SocketContractTests` of each suite asks at the end, in a collection with `DisableParallelization`, because a failure in the fixture's disposal is reported once per test |
 | `User`, `Timing`, `RegisterPortalModel` … | the small shared data types |
 
 A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire resources it needs in

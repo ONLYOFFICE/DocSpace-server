@@ -32,6 +32,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.Diagnostics;
+global using System.Globalization;
+global using System.IO.Compression;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Net.Http.Json;
@@ -40,6 +42,7 @@ global using System.Runtime.CompilerServices;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Text.RegularExpressions;
 
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
@@ -62,8 +65,12 @@ global using Microsoft.Extensions.DependencyInjection;
 
 global using MySqlConnector;
 
+global using SocketIOClient;
+global using SocketIOClient.Common;
+
 global using Xunit;
 
 // Aliased, not imported: the AppHost namespace also has a `Constants` that would collide.
 global using AppHostConstants = ASC.AppHost.Configuration.Constants;
+global using AppPaths = ASC.AppHost.Configuration.AppPaths;
 global using TestArtifacts = ASC.AppHost.Configuration.TestArtifacts;
