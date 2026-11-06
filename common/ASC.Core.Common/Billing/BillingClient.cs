@@ -69,8 +69,7 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
             BackRef = [backUrl]
         });
 
-        var link = JsonSerializer.Deserialize<string>(result);
-        return link;
+        return ReadJsonString(result, "POST /billing/GetAccountLink");
     }
 
     public async Task<string> GetInvoiceLinkAsync(string portalId, string paymentRef)
@@ -83,8 +82,7 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
             PaymentRef = [paymentRef]
         });
 
-        var link = JsonSerializer.Deserialize<string>(result);
-        return link;
+        return ReadJsonString(result, "POST /billing/GetInvoiceLink");
     }
 
     public async Task<PaymentLast[]> GetCurrentPaymentsAsync(string portalId, bool refresh)
@@ -135,9 +133,7 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
         };
 
         var result = await billingApi.GetSinglePaymentUrlAsync(requestDto);
-        var paymentUrl = JsonSerializer.Deserialize<string>(result);
-
-        return paymentUrl;
+        return ReadJsonString(result, "POST /billing/GetSinglePaymentUrl");
     }
 
     public async Task<CustomerInfo> GetCustomerInfoAsync(string portalId)
@@ -306,6 +302,20 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
         var result = await billingApi.GetDocsCloudTrialAsync(requestDto);
 
         return result == "\"ok\"";
+    }
+
+    // The links come back as a JSON string the client reads itself, past the deserialization factory of Refit, so an
+    // answer that is not one is turned into the same contract failure here. The operation is the route of the call.
+    private static string ReadJsonString(string answer, string operation)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<string>(answer);
+        }
+        catch (JsonException exception)
+        {
+            throw new PaymentServiceContractException(BillingHttpClientExtension.ServiceName, operation, null, exception);
+        }
     }
 
     private void EnsureConfigured()
@@ -489,6 +499,9 @@ public class GetProductsPricesRequestDto
 
 public static class BillingHttpClientExtension
 {
+    /// <summary>How the service is named in the exceptions of its client.</summary>
+    internal const string ServiceName = "Billing";
+
     private const string ResiliencePipelineName = "billingResiliencePipeline";
     internal const string RetryOptionKey = "billingRetryEnabled";
 
@@ -557,12 +570,11 @@ public static class BillingHttpClientExtension
             });
     }
 
-    // An answer that is not the JSON the call expects (a proxy's HTML page, a changed contract) would otherwise surface
-    // as Refit.ApiException and escape the BillingException hierarchy the callers catch.
+    // An answer that is not the JSON the call expects (a proxy's HTML page, a changed contract) is no refusal of the
+    // service, so it leaves the BillingException hierarchy the callers handle as one - see PaymentServiceContractException.
     private static ValueTask<Exception> CreateDeserializationExceptionAsync(HttpResponseMessage response, Exception exception)
     {
-        return ValueTask.FromResult<Exception>(new BillingException(
-            $"Billing response to {response.RequestMessage?.RequestUri} ({(int)response.StatusCode}) could not be read: {exception.Message}", exception));
+        return PaymentServiceContractException.FromResponse(ServiceName, response, exception);
     }
 
     // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
@@ -575,7 +587,9 @@ public static class BillingHttpClientExtension
             return exception;
         }
 
-        return new BillingTransportException($"Billing request to {request.RequestUri} failed: {exception.Message}", exception);
+        // The route template, not the address: the address names the internal host and the portal key, and the message
+        // reaches the logs and the client of the API. What went wrong stays in the inner exception.
+        return new BillingTransportException($"Billing request {PaymentServiceOperation.Of(request)} failed", exception);
     }
     // The billing service reports errors as 200 OK with a '{"Message":"error...' body, so the content is inspected
     // for every response, not only for non-success status codes.

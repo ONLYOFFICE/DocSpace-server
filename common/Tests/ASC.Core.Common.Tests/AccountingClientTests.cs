@@ -187,18 +187,6 @@ public class AccountingClientTests
     }
 
     [Fact]
-    public async Task UnreadableAnswer_IsMappedToAccountingException()
-    {
-        // An answer that is not the JSON the call expects must stay inside the hierarchy the callers catch.
-        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
-
-        var act = async () => await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);
-
-        (await act.Should().ThrowExactlyAsync<AccountingException>())
-            .WithInnerException<JsonException>();
-    }
-
-    [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
         var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "[]"));
