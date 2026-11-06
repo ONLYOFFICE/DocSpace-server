@@ -440,7 +440,9 @@ public enum OperationType
     [Description("AiDebit")]
     AiDebit,
     [Description("AiCredit")]
-    AiCredit
+    AiCredit,
+    [Description("GoodwillExpiration")]
+    GoodwillExpiration
 }
 
 /// <summary>
@@ -1326,10 +1328,31 @@ public class Operation
     public OperationTokenUsage TokenUsage { get; set; }
 
     /// <summary>
+    /// The amount of the operation split by the sub-accounts of the customer it was taken from or put on.
+    /// </summary>
+    public List<OperationSource> Sources { get; set; }
+
+    /// <summary>
     /// Metadata of the operation.
     /// </summary>
     /// <example>{}</example>
     public Dictionary<string, string> Metadata { get; set; }
+}
+
+/// <summary>
+/// The part of an operation amount that falls on one sub-account of the customer.
+/// </summary>
+public class OperationSource
+{
+    /// <summary>
+    /// The sub-account of the customer: 0 for the money paid into the wallet, 53 for bonuses.
+    /// </summary>
+    public int SubAccount { get; init; }
+
+    /// <summary>
+    /// The part of the operation amount on the sub-account.
+    /// </summary>
+    public decimal Amount { get; init; }
 }
 
 /// <summary>

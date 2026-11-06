@@ -208,6 +208,13 @@ public class OperationDto
     /// </summary>
     public OperationTokenUsageDto TokenUsage { get; set; }
     /// <summary>
+    /// Which sub-accounts of the portal the amount was taken from or put on, and how much fell on each - one charge
+    /// may be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a movement
+    /// the billing service reported without the split.
+    /// </summary>
+    /// <example>[{"subAccount": 53, "amount": 4.5}, {"subAccount": 0, "amount": 9.5}]</example>
+    public List<OperationSourceDto> Sources { get; set; }
+    /// <summary>
     /// What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter
     /// matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not
     /// recognise.
@@ -238,6 +245,7 @@ public class OperationDto
         SourceTitle = sourceTitle;
         SourceId = sourceId;
         TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata)?.Map();
+        Sources = operation.Sources?.Map();
         Type = operation.Type;
     }
 }
