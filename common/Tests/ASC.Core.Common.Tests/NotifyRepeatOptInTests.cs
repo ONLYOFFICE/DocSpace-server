@@ -131,6 +131,18 @@ public class NotifyRepeatOptInTests
         action.DeduplicationTags.Should().Contain("LinkAddress");
     }
 
+    [Theory]
+    // the previous version sends these without the room id, so during an update only the room's address keeps an
+    // invitation to one room from being taken for a repeat of an invitation to another
+    [InlineData("saas_room_invite_existing_user")]
+    [InlineData("saas_agent_invite_existing_user")]
+    public void InvitationOfAnExistingUser_TellsTheRoomApartWithoutItsId(string id)
+    {
+        var action = Actions().Single(a => a.ID == id);
+
+        action.DeduplicationTags.Should().Contain("InviteLink");
+    }
+
     [Fact]
     public void EveryLetterKeyedOnTags_HasItsTagsCheckedAgainstInit()
     {
@@ -140,7 +152,8 @@ public class NotifyRepeatOptInTests
         [
             // LetterTestBase, through each letter's own test in ASC.Notify.Tests
             "portal_deactivate", "portal_delete", "profile_delete", "saas_docspace_invite", "saas_room_invite",
-            "saas_agent_invite", "user_type_changed", "user_role_changed", "user_agent_role_changed",
+            "saas_agent_invite", "saas_room_invite_existing_user", "saas_agent_invite_existing_user", "user_type_changed",
+            "user_role_changed", "user_agent_role_changed",
             // RoomRoleLetter_FillsTheAccessLevelItKeysOn below
             "RoomUpdateAccessForUser", "AgentUpdateAccessForUser",
             // not checked: Init needs the link utilities from the container, and a tag it left empty would only make

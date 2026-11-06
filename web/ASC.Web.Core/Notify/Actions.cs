@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -154,7 +154,7 @@ public sealed class PortalDeletedToSupportNotifyAction(DisplayUserSettingsHelper
         ];
     }
 
-    public void Init(UserInfo user, string tenantDomain,  CustomerInfo customerInfo)
+    public void Init(UserInfo user, string tenantDomain, CustomerInfo customerInfo)
     {
         Tags =
         [
@@ -710,7 +710,7 @@ public sealed class PhoneChangeNotifyAction(CommonLinkUtility commonLinkUtility,
 }
 
 [Scope]
-public sealed class TfaChangeNotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class TfaChangeNotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "change_tfa";
 
@@ -751,7 +751,7 @@ public sealed class UserHasJoinNotifyAction(TenantManager tenantManager) : Notif
 }
 
 [Scope]
-public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "join";
 
@@ -1401,6 +1401,10 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
     // a caller can repeat PUT files/rooms/{id}/share at will
     public override bool SuppressRepeats => true;
 
+    // the room's address tells two rooms apart even in a letter that carries no room id: one sent by a node of the
+    // previous version during an update, or queued before it; it is built from the room id, so a rename keeps it
+    public override string[] DeduplicationTags => [CommonTags.InviteLink];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1432,6 +1436,10 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
 
     // a caller can repeat PUT files/rooms/{id}/share at will
     public override bool SuppressRepeats => true;
+
+    // the room's address tells two rooms apart even in a letter that carries no room id: one sent by a node of the
+    // previous version during an update, or queued before it; it is built from the room id, so a rename keeps it
+    public override string[] DeduplicationTags => [CommonTags.InviteLink];
 
     public override List<Pattern> Patterns
     {
