@@ -80,16 +80,12 @@ public partial class SettingsController(
     private static partial Regex EmailDomainRegex();
 
     /// <remarks>
-    /// Returns the current portal's general configuration: branding, culture, feature flags, and DocSpace/Standalone
-    /// mode, everything the client needs to render its shell before or after login. No permission is required, but
-    /// the response shape depends on the caller's identity. An anonymous caller receives only the public subset
-    /// (culture, branding, DocSpace/Standalone flags, deep link data, setup-wizard and join-by-domain hints); once
-    /// authenticated, the response also includes tenant-specific fields such as the owner ID, time zone, invitation
-    /// limit, AI/banner/dev-tools flags, and, for a DocSpace administrator, the tenant wallet's low-balance flag.
-    /// This is a read-only, idempotent call. Pass `withPassword=true` to also receive the parameters (`salt`,
-    /// iteration count, hash size) used to hash the password client-side before it is sent to the authentication
-    /// endpoints; these are only added for an anonymous caller or when explicitly requested, never as part of the
-    /// default authenticated response.
+    /// Returns the general portal settings: culture, branding, feature flags, and installation type. Anyone can call
+    /// it without signing in, even when the portal is unpaid, suspended, or blocked. The call is read-only. The
+    /// fields depend on the caller. An anonymous caller gets only public fields, such as culture, branding, and setup
+    /// and join hints. A signed-in caller also gets the owner ID, time zone, invitation limit, and feature flags. A
+    /// DocSpace admin also gets the low wallet balance flag. Password hashing parameters come back to an anonymous
+    /// caller, or if `withPassword` is true. Use them to hash a password for the sign-in operations.
     /// </remarks>
     /// <summary>
     /// Get the portal settings
@@ -241,16 +237,13 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Overwrites the portal's trusted mail domain configuration, which controls which email domains are treated as
-    /// already verified when a user is invited or self-registers. Requires Owner or DocSpaceAdmin (the
-    /// EditPortalSettings permission). When the requested mode is a custom domain list, every domain is normalized to
-    /// lowercase and checked against the expected hostname format; a domain that fails the check, or an empty custom
-    /// list, causes the whole call to be rejected without saving anything. For the other modes the domain list in the
-    /// request is ignored. The `inviteUsersAsVisitors` flag controls whether users who join through a trusted domain
-    /// are added as full members or as visitors, and takes effect on the next join rather than retroactively. This is
-    /// a mutating, idempotent call: repeating it with the same body leaves the portal in the same state. On success
-    /// it returns a confirmation message, not the saved settings themselves; read them back from
-    /// `GET api/2.0/settings`.
+    /// Changes the trusted mail domains of the portal. People with an email address in these domains can join the
+    /// portal without an invitation. The `type` value picks the mode: no trusted domains, the domains of `domains`,
+    /// or any domain. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. The call changes data. You can repeat it with the same body. For the `Custom` mode, the
+    /// call trims and lowercases each domain. For other modes, it ignores `domains`. It returns a confirmation text,
+    /// not the saved settings. To read them, use `GET api/2.0/settings`. The call returns 400 for a missing field, an
+    /// empty `Custom` list, or an empty or malformed domain. In that case, it saves nothing.
     /// </remarks>
     /// <summary>
     /// Save the mail domain settings
@@ -300,7 +293,12 @@ public partial class SettingsController(
 
 
     /// <remarks>
-    /// Saves the user quota settings specified in the request to the current portal.
+    /// Sets the default storage quota for each user of the portal. Requires the EditPortalSettings permission, which
+    /// the portal owner and DocSpace admins have. Other callers get 403. If the plan of a SaaS portal lacks the
+    /// statistics feature, the call returns 402. The call changes data. You can repeat it with the same body. If
+    /// `enableQuota` is false, the portal does not apply the default size. A zero or negative size saves 0. It
+    /// returns the saved settings. The call returns 400 if the size is not a whole number or exceeds the storage
+    /// quota of the portal. It also returns 403 if `defaultQuota` is not a JSON number.
     /// </remarks>
     /// <summary>
     /// Save the user quota settings
@@ -367,12 +365,11 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the portal's per-user default storage quota: whether it is enabled and, if so, its size in bytes.
-    /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission); every other authenticated role, and an
-    /// anonymous caller, is refused. This is a read-only, idempotent call. When `enableQuota` is false, the size
-    /// value is not enforced and users get unlimited personal storage regardless of what it holds. The response
-    /// supports conditional requests: send the standard If-Modified-Since header with the previous `lastModified`
-    /// value, and an unchanged response comes back empty instead of resending the settings.
+    /// Returns the default storage quota for each user of the portal: whether it is on, and its size in bytes.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call is read-only. If `enableQuota` is false, the portal does not apply the default size. It supports
+    /// `If-Modified-Since` with the `Last-Modified` value of the last answer. If nothing changed, it returns 304 with
+    /// an empty body.
     /// </remarks>
     /// <summary>
     /// Get the user quota settings
@@ -393,13 +390,14 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets the portal's default per-room storage quota, applied to newly created rooms as their starting limit.
-    /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission), and on a paid SaaS tenant the portal's
-    /// plan must include the statistics feature, or the call is rejected as not covered by the plan. The requested
-    /// size cannot exceed the portal's own total storage quota, nor, on a Standalone install with a portal-wide quota
-    /// enabled, that quota's size. Disable enforcement by passing `enableQuota=false`; the size is then ignored for
-    /// new rooms. This is a mutating, idempotent call: sending the same body again leaves the quota unchanged. It
-    /// returns the saved settings, not the individual rooms' current usage.
+    /// Sets the default storage quota for rooms of the portal, the starting limit of each new room. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If the
+    /// plan of a SaaS portal lacks the statistics feature, the call returns 402. The call changes data. You can
+    /// repeat it with the same body. If `enableQuota` is false, the portal does not apply the size to new rooms. A
+    /// zero or negative size saves 0. It returns the saved settings, not the usage of rooms. The call returns 403 if
+    /// `defaultQuota` is not a JSON number. It returns 500 if the size is not a whole 64-bit number or exceeds the
+    /// portal storage quota. On a Standalone installation with a portal quota turned on, a size above that quota also
+    /// returns 500.
     /// </remarks>
     /// <summary>
     /// Save the room quota settings
@@ -460,13 +458,14 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets the portal's default storage quota for AI agents, applied as the starting limit for newly created agents.
-    /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission), and on a paid SaaS tenant the portal's
-    /// plan must include the statistics feature, or the call is rejected as not covered by the plan. The requested
-    /// size cannot exceed the portal's own total storage quota, nor, on a Standalone install with a portal-wide quota
-    /// enabled, that quota's size. Disable enforcement by passing `enableQuota=false`; the size is then ignored for
-    /// new agents. This is a mutating, idempotent call: sending the same body again leaves the quota unchanged. It
-    /// returns the saved settings, not any agent's current usage.
+    /// Sets the default storage quota for AI agents of the portal, the starting limit of each new agent. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If the
+    /// plan of a SaaS portal lacks the statistics feature, the call returns 402. The call changes data. You can
+    /// repeat it with the same body. If `enableQuota` is false, the portal does not apply the size to new agents. A
+    /// zero or negative size saves 0. It returns the saved settings, not the usage of agents. The call returns 403 if
+    /// `defaultQuota` is not a JSON number. It returns 500 if the size is not a whole 64-bit number or exceeds the
+    /// portal storage quota. On a Standalone installation with a portal quota turned on, a size above that quota also
+    /// returns 500.
     /// </remarks>
     /// <summary>
     /// Save the AI Agent quota settings
@@ -525,12 +524,11 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets how the portal responds when a client opens a DocSpace link on a mobile device: always in the browser,
-    /// always in the native app, or asking the user to choose each time. Requires Owner or DocSpaceAdmin (the
-    /// EditPortalSettings permission). The handling mode must be one of the documented enum values; anything else is
-    /// rejected without being saved. This is a mutating, idempotent call: sending the same mode again leaves the
-    /// setting unchanged. It returns the saved deep link settings, including the timestamp of the last change; read
-    /// the current value at any time, including anonymously, from `GET api/2.0/settings/deeplink`.
+    /// Sets how mobile devices open portal links: in the browser, in the app, or by asking the user. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call changes data. You can repeat it with the same body. It returns the saved settings. To read them without
+    /// signing in, use `GET api/2.0/settings/deeplink`. If the mode is not a defined value, the call returns 400 and
+    /// saves nothing. If the body has no `deepLinkSettings`, it returns 500.
     /// </remarks>
     /// <summary>
     /// Configure the deep link settings
@@ -559,12 +557,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns how the portal currently responds when a client opens a DocSpace link on a mobile device: always in
-    /// the browser, always in the native app, or asking the user to choose. No permission is required; anonymous
-    /// callers can read it too. This is a read-only, idempotent call. The response supports conditional requests:
-    /// send the standard If-Modified-Since header with the previous `lastModified` value, and an unchanged response
-    /// comes back empty instead of resending the settings. Change the mode with `POST api/2.0/settings/deeplink`,
-    /// which requires the EditPortalSettings permission.
+    /// Returns how mobile devices open portal links: in the browser, in the app, or by asking the user. Anyone can
+    /// call it without signing in. The call is read-only. It supports `If-Modified-Since` with the `Last-Modified`
+    /// value of the last answer. If nothing changed, it returns 304 with an empty body. To change the mode, use
+    /// `POST api/2.0/settings/deeplink`.
     /// </remarks>
     /// <summary>
     /// Get the deep link settings
@@ -584,12 +580,12 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets or removes the storage quota for a given tenant. Available only on a Standalone (self-hosted)
-    /// installation; on SaaS the call is always refused. Requires a DocSpace administrator, and the portal's plan
-    /// must include the statistics feature or the call is rejected as not covered by the plan. Pass a non-negative
-    /// `quota` in bytes to enable the limit for the tenant identified by `tenantId`, or a negative value to remove
-    /// any limit. This is a mutating, idempotent call: sending the same body again leaves the quota unchanged. It
-    /// returns the saved quota settings for that tenant, not its current usage.
+    /// Sets or removes the storage quota of a portal on a Standalone installation. A `quota` of 0 or more turns the
+    /// limit on with that size in bytes. A negative `quota` removes the limit. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. On SaaS, the call returns
+    /// 402 if the plan lacks the statistics feature, and 415 otherwise. The call changes data. You can repeat it with
+    /// the same body. It returns the saved quota settings of that portal, not its usage. If the body has no
+    /// `tenantId`, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Save the tenant quota settings
@@ -644,11 +640,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the two- or four-letter language codes of every culture currently enabled on the portal (for example
-    /// `en-US`), used to populate a language picker before or after login. No permission is required; anonymous
-    /// callers can read it too. This is a read-only, idempotent call, and the list is not paginated. The response
-    /// supports conditional requests: an unchanged result is signaled instead of resending the same list. The set of
-    /// enabled cultures is a portal-wide configuration value, not a per-user preference.
+    /// Returns the codes of the languages that the installation supports, such as `en-US`. Anyone can call it without
+    /// signing in, even when the portal is unpaid. The call is read-only. It returns the whole list without paging.
+    /// It supports `If-None-Match` with the `ETag` of the last answer. If the list did not change, it returns 304
+    /// with an empty body.
     /// </remarks>
     /// <summary>Get supported languages</summary>
     /// <path>api/2.0/settings/cultures</path>
@@ -667,12 +662,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns every time zone known to the host machine, each with its IANA identifier and a human-readable display
-    /// name, ordered from the most negative to the most positive UTC offset. This call is not for a normal logged-in
-    /// session: it requires a confirmation link bearing the Wizard or Administrators claim, of the kind generated
-    /// during initial portal setup or issued by an administrator, and the link is consumed as part of authenticating
-    /// the request. This is a read-only, idempotent call, and the list is not paginated. Use the returned `id` values
-    /// wherever the portal expects a time zone identifier; an unrecognized value is rejected there, not here.
+    /// Returns the time zones of the server, with the IANA ID and the display name of each. The list always includes
+    /// UTC and is sorted from the lowest UTC offset to the highest. Requires a DocSpace admin, or the confirmation
+    /// token of the setup wizard. Other callers are refused. The call is read-only. It returns the whole list without
+    /// paging. Use the returned `id` values where the portal asks for a time zone.
     /// </remarks>
     /// <summary>Get time zones</summary>
     /// <path>api/2.0/settings/timezones</path>
@@ -707,12 +700,11 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the hostname the current request arrived on, exactly as sent in the HTTP Host header, so a client
-    /// mid-setup can learn the address the portal is actually reachable at. This call is not for a normal logged-in
-    /// session: it requires a confirmation link bearing the Wizard claim, of the kind generated during initial portal
-    /// setup, and the link is consumed as part of authenticating the request. This is a read-only, idempotent call.
-    /// The value reflects whatever the caller connected through, including a reverse proxy's public name, and is not
-    /// necessarily the tenant's configured alias or mapped domain.
+    /// Returns the host name of the current request, as its `Host` header states it. Sign the request with the
+    /// confirmation token of the setup wizard. Other callers are refused. Take the token from `wizardToken` of
+    /// `GET api/2.0/settings` before setup is complete. The call is read-only. The value is the name that the caller
+    /// connected to, such as the public name of a proxy. It can differ from the alias or the custom domain of the
+    /// portal.
     /// </remarks>
     /// <summary>Get the portal hostname</summary>
     /// <path>api/2.0/settings/machine</path>
@@ -727,13 +719,13 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Maps a custom domain name onto the current tenant, or clears the mapping, so the portal becomes reachable
-    /// under the caller's own DNS name instead of only its default alias. Available only on a Standalone
-    /// (self-hosted) installation; on SaaS the call is always refused. Requires Owner or DocSpaceAdmin (the
-    /// EditPortalSettings permission). Disable the mapping by passing `enable=false`, in which case the domain name
-    /// in the request is ignored. A domain that collides with the portal's reserved base domain, or otherwise fails
-    /// validation, is rejected without changing the current mapping. This is a mutating, idempotent call. On success
-    /// the previous domain also stops answering, and any CSP configuration referencing it is updated to the new one.
+    /// Sets a custom domain for the portal on a Standalone installation, or removes it. The portal address then
+    /// changes to that domain. If `enable` is false or the name is empty, the call removes the custom domain. On
+    /// SaaS, the call returns 415. Requires the EditPortalSettings permission, which the portal owner and DocSpace
+    /// admins have. Other callers get 403. The call changes data. A repeated call with the same domain returns 500,
+    /// since this portal already uses it. After the change, CSP settings that named the old domain name the new one.
+    /// The call returns 500 if the installation hides the DNS settings, or the name is not a valid host name. It also
+    /// returns 500 for a name under the base domain, of a wrong length, reserved, or taken.
     /// </remarks>
     /// <summary>Save the DNS settings</summary>
     /// <path>api/2.0/settings/dns</path>
@@ -749,7 +741,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Starts the process of the quota recalculation.
+    /// Starts a recalculation of the storage that each user of the portal uses. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers are refused. The call queues work.
+    /// While a recalculation runs, a repeated call starts no new one. Repeat
+    /// `GET api/2.0/settings/checkrecalculatequota` until it returns false.
     /// </remarks>
     /// <summary>
     /// Recalculate the quota
@@ -766,7 +761,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Checks the process of the quota recalculation.
+    /// Returns whether a recalculation of user storage runs on the portal. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers are refused. This is the call to
+    /// poll. Repeat it until it returns false. It returns true while the recalculation runs, and false when it is
+    /// complete or never started.
     /// </remarks>
     /// <summary>
     /// Check the quota recalculation
@@ -785,12 +783,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the absolute URL of the portal's current logo image, already resolved against the active white-label
-    /// branding. Requires an authenticated session; every role, including Guest, can read it. This is a read-only,
-    /// idempotent call. The response supports conditional requests: send the standard If-Modified-Since header with
-    /// the previous `lastModified` value, and an unchanged response comes back empty instead of resending the same
-    /// URL. The URL points at whatever image is currently configured, including the default DocSpace logo when no
-    /// custom branding has been set.
+    /// Returns the absolute URL of the current logo of the portal. If the portal has no custom logo, the URL points
+    /// to the default DocSpace logo. Any signed-in user can call it, including a guest. The call is read-only. It
+    /// supports `If-Modified-Since` with the `Last-Modified` value of the last answer. If nothing changed, it returns
+    /// 304 with an empty body.
     /// </remarks>
     /// <summary>
     /// Get a portal logo
@@ -808,15 +804,14 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Finishes the initial portal setup wizard: sets the owner's password and locale, applies the supplied license
-    /// if one is required, and marks the wizard as completed so it is not shown again. This call is not for a normal
-    /// logged-in session: it requires a confirmation link bearing the Wizard claim, of the kind issued when a new
-    /// portal is created, and the link is consumed as part of authenticating the request; the caller must also hold
-    /// the EditPortalSettings permission. An empty password or a malformed email address is rejected without
-    /// completing the wizard, and so is a missing, invalid, or expired license, or a license whose user quota does
-    /// not cover the portal. This call is meant to run once per portal; running it again is accepted but has no
-    /// further effect once the wizard is already completed. It returns the resulting wizard settings, including the
-    /// completed flag.
+    /// Completes the first setup of the portal. It sets the email and password of the portal owner, the language, and
+    /// the time zone. It also applies the license if the installation needs one. Sign the request with the
+    /// confirmation token of the setup wizard. Its account also needs the EditPortalSettings permission. Otherwise,
+    /// the call returns 403. Take the token from `wizardToken` of `GET api/2.0/settings` before setup is complete.
+    /// The call changes data. Do not repeat it. After setup is complete, a repeated call returns 500. If the email
+    /// changes, the owner must confirm the new address. It returns the wizard settings with `completed` set. The call
+    /// returns 400 if `email` or `passwordHash` is missing, the email is malformed, or the license starts later. It
+    /// returns 500 for an empty password, a rejected email, a wrong AMI instance ID, or a bad license.
     /// </remarks>
     /// <summary>Complete the Wizard settings</summary>
     /// <path>api/2.0/settings/wizard/complete</path>
@@ -840,7 +835,8 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Closes the welcome pop-up notification.
+    /// Hides the welcome pop-up for the calling guest. It works only for a guest on the first visit. Other callers
+    /// are refused. The call changes data. After the first call, a repeated call is refused.
     /// </remarks>
     /// <summary>Close the welcome pop-up notification</summary>
     /// <path>api/2.0/settings/welcome/close</path>
@@ -864,12 +860,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the portal's color theme configuration: every saved custom theme, which one is currently selected, and
-    /// how many custom themes the plan still allows. No permission is required; anonymous callers can read it too.
-    /// This is a read-only, idempotent call. The response supports conditional requests: send the standard
-    /// If-Modified-Since header with the previous `lastModified` value, and an unchanged response comes back empty
-    /// instead of resending the same settings. A `limit` of `0` means the plan does not cap the number of custom
-    /// themes.
+    /// Returns the color themes of the portal, the selected theme, and the limit on their number. Anyone can call it
+    /// without signing in, even when the portal is unpaid, suspended, or blocked. The call is read-only. It supports
+    /// `If-Modified-Since` with the `Last-Modified` value of the last answer. If nothing changed, it returns 304 with
+    /// an empty body.
     /// </remarks>
     /// <summary>Get a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
@@ -887,14 +881,13 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Adds or updates a custom color theme, or changes which theme is selected, for the whole portal. Requires Owner
-    /// or DocSpaceAdmin (the EditPortalSettings permission). Pass `theme` to create or edit one: an existing theme is
-    /// matched and updated by its ID, a new one is appended, and an ID that collides with a built-in default theme is
-    /// treated as a request to create a new custom theme instead of overwriting the default. Once the plan's
-    /// custom-theme limit is reached, a new theme is silently not added rather than rejected with an error, so check
-    /// the returned `themes` count against `limit` before assuming it was saved. Pass `selected` to switch the active
-    /// theme; an ID that does not match any existing theme is ignored. This is a mutating call, not strictly
-    /// idempotent once the limit has been reached. It returns the full updated theme configuration.
+    /// Adds or changes a custom color theme of the portal, or selects the theme that the portal uses. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call changes data. With `theme`, the call changes the theme with the same ID or adds a new one. A repeated
+    /// call with a theme ID of 0 adds another theme. A built-in theme ID also adds a new theme and keeps the built-in
+    /// one. If the portal already has `limit` themes, the call skips a new theme and returns no error. So compare the
+    /// returned `themes` with what you sent. With `selected`, the call applies the theme with that ID. It ignores an
+    /// ID that no theme has. It returns all themes and the selected one.
     /// </remarks>
     /// <summary>Save a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
@@ -967,12 +960,11 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Removes a custom color theme from the portal by its ID. Requires Owner or DocSpaceAdmin (the
-    /// EditPortalSettings permission). An ID belonging to one of the built-in default themes is not removable; the
-    /// call succeeds but leaves the theme list unchanged. If the deleted theme was the currently selected one, the
-    /// theme with the lowest remaining ID is selected automatically. This is a mutating, idempotent call: deleting an
-    /// ID that is already gone succeeds without error and again leaves nothing changed. It returns the full updated
-    /// theme configuration, including the (possibly new) selected theme.
+    /// Deletes a custom color theme of the portal by its ID. Requires the EditPortalSettings permission, which the
+    /// portal owner and DocSpace admins have. Other callers get 403. The call changes data, and you can repeat it.
+    /// For the ID of a built-in or a deleted theme, it changes nothing and returns no error. If the deleted theme was
+    /// selected, the portal selects the theme with the lowest remaining ID. It returns all remaining themes and the
+    /// selected one.
     /// </remarks>
     /// <summary>Delete a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
@@ -1005,10 +997,9 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Dismisses the administrator helper tip for the caller, so it is not shown again on this account. Available
-    /// only to a DocSpace administrator, which includes the portal Owner, on a Standalone (self-hosted) installation
-    /// running outside white-label custom mode; every other caller is refused. This is a mutating, idempotent call
-    /// scoped to the calling account only; it never affects other administrators. It returns no data on success.
+    /// Hides the admin helper tip for the calling account. It does not hide the tip for other admins. Requires a
+    /// DocSpace admin on a Standalone installation outside custom mode. In other cases, the call returns 415. The
+    /// call changes data, and you can repeat it. It returns no data.
     /// </remarks>
     /// <summary>Close the admin helper</summary>
     /// <path>api/2.0/settings/closeadminhelper</path>
@@ -1029,7 +1020,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets the portal time zone and language specified in the request.
+    /// Changes the time zone and the language of the portal. Requires the EditPortalSettings permission, which the
+    /// portal owner and DocSpace admins have. Other callers are refused. The call changes data. You can repeat it
+    /// with the same body. It changes the language only to one that the installation supports, and ignores other
+    /// languages. It returns a confirmation text.
     /// </remarks>
     /// <summary>Set time zone and language</summary>
     /// <path>api/2.0/settings/timeandlanguage</path>
@@ -1073,11 +1067,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets which folder the current user's account opens into by default, such as My Documents, the rooms list, or
-    /// favorites. Requires an authenticated session; every role may set its own default, and the change never affects
-    /// any other user. Only folder types the client actually offers as a landing page are accepted; picking My
-    /// Documents (`USER`) as a Guest is rejected too, since guests have no personal storage. This is a mutating,
-    /// idempotent call. It returns the saved setting.
+    /// Sets the section that opens first for the calling user, such as My documents, rooms, or favorites. Any
+    /// signed-in user can call it, including a guest. It does not change the setting of other users. The call changes
+    /// data. You can repeat it with the same body. It returns the saved setting. The call returns 400 for a missing
+    /// or unsupported type, or for My documents chosen by a guest.
     /// </remarks>
     /// <summary>Set the default folder</summary>
     /// <path>api/2.0/settings/defaultFolder</path>
@@ -1119,11 +1112,9 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Updates the current user's own preference for whether the email confirmation prompt is displayed on their
-    /// account. Requires an authenticated session; every role may change its own setting, and the change never
-    /// affects any other user. This is a mutating, idempotent call. It returns the settings exactly as submitted,
-    /// without validating them against the account's actual email confirmation state, so `show` can be set to `true`
-    /// even after the address is already confirmed.
+    /// Sets whether the calling user sees the reminder to confirm their email address. Any signed-in user can call
+    /// it. It does not change the setting of other users. The call changes data. You can repeat it with the same
+    /// body. The call does not check whether the address is already confirmed. It returns the saved setting.
     /// </remarks>
     /// <summary>Update the email activation settings</summary>
     /// <path>api/2.0/settings/emailactivation</path>
@@ -1140,12 +1131,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the storage space used by one portal module, broken down per data category the module tracks (for
-    /// example per room type), together with a human-readable size and whether the category is disabled. Requires
-    /// Owner or DocSpaceAdmin (the EditPortalSettings permission). `id` identifies the module by the same GUID the
-    /// portal's module catalog uses; a module that does not exist, or one that does not report space usage at all,
-    /// returns an empty list rather than an error. This is a read-only, idempotent call, and the list is not
-    /// paginated. Sizes are already formatted as display strings (for example `1.5 GB`), not raw byte counts.
+    /// Returns the storage space that one module of the portal uses, per category of its data. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call is read-only. It returns the whole list without paging. Sizes are display texts, such as `1.5 GB`, not
+    /// byte counts. If no module has this `id`, or the module does not count space, the call returns an empty list.
     /// </remarks>
     /// <summary>Get the space usage statistics</summary>
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
@@ -1182,11 +1171,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the base URL of the portal's real-time notification hub (Socket.IO), which the client connects to for
-    /// live updates such as file changes, presence, or quota alerts. Requires an authenticated session; every role
-    /// can read it. This is a read-only, idempotent call. The value comes from server-side configuration and cannot
-    /// be changed through this API; an empty `url` means the portal has no notification hub configured and the client
-    /// should not attempt to connect.
+    /// Returns the base URL of the real-time notification hub of the portal. Apps connect to it to get live updates.
+    /// Any signed-in user can call it, including a guest. The call is read-only. The value comes from the server
+    /// configuration, and no API operation changes it. An empty `url` means that the portal has no hub, so do not
+    /// connect.
     /// </remarks>
     /// <summary>Get the socket settings</summary>
     /// <path>api/2.0/settings/socket</path>
@@ -1208,12 +1196,11 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the catalogue of third-party storage and authorization providers DocSpace can integrate with (for
-    /// example Amazon S3, Dropbox, Google, or Telegram), including whichever keys were last saved for each one that
-    /// currently has any configured. Requires Owner or DocSpaceAdmin (the EditPortalSettings permission). This is a
-    /// read-only, idempotent call, and the list is not paginated; entries are ordered by the provider's configured
-    /// display order. Only providers that expose at least one manageable key are included, so a provider with nothing
-    /// to configure is omitted entirely. Save or change a provider's keys with `POST api/2.0/settings/authservice`.
+    /// Returns the third-party providers that the portal can connect, such as Amazon S3, Dropbox, Google, or
+    /// Telegram. Each entry includes its keys with their saved values. Requires the EditPortalSettings permission,
+    /// which the portal owner and DocSpace admins have. Other callers get 403. The call is read-only. It returns the
+    /// whole list without paging, in the display order of the providers. The list skips providers that have no keys
+    /// to set. To save keys, use `POST api/2.0/settings/authservice`.
     /// </remarks>
     /// <summary>Get the authorization services</summary>
     /// <path>api/2.0/settings/authservice</path>
@@ -1237,15 +1224,14 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Saves the authorization keys for one third-party storage or authorization provider, identified by name, or
-    /// clears them when every submitted key is left empty. Requires Owner or DocSpaceAdmin (the EditPortalSettings
-    /// permission); a provider that does not allow its keys to be changed from the API rejects the call outright. A
-    /// provider that is only available on a paid plan additionally requires the portal's tariff to include
-    /// third-party storage, or Standalone licensing, before the call is accepted. Keys that fail the provider's own
-    /// validation are cleared and the call is rejected rather than left partially applied. This is a mutating,
-    /// idempotent call: resaving identical keys succeeds and reports no change. It returns whether the keys actually
-    /// changed, not the keys themselves; connecting Telegram or an external database through this call also triggers
-    /// the matching real-time connection update.
+    /// Saves the keys of one third-party provider, or clears them if every value is empty. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. It also
+    /// returns 403 for an unknown provider, or one whose keys you cannot set. The call returns 402 if the
+    /// installation hides third-party authorization. It also returns 402 for a paid provider that the plan lacks,
+    /// except on a Standalone installation. The call changes data. You can repeat it with the same body. It returns
+    /// true if any key changed, and false if all keys were the same. Clearing the keys always returns true. If the
+    /// provider rejects the keys, the call clears all its keys and returns 400. It also returns 400 if `name` or
+    /// `props` is missing. A key with no name, no value, or a too long value also returns 400.
     /// </remarks>
     /// <summary>Save the authorization keys</summary>
     /// <path>api/2.0/settings/authservice</path>
@@ -1325,12 +1311,10 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Probes connectivity to an external database using the settings supplied in the request, without saving them or
-    /// affecting the portal's own configuration. Requires Owner or DocSpaceAdmin (the EditPortalSettings permission).
-    /// SQLite is only accepted as a target on a Standalone (self-hosted) installation; requesting it on SaaS is
-    /// reported as a failed connection rather than an error. This is a read-only call, safe to retry. A failed
-    /// connection is not an HTTP error: the response always comes back as a normal success with `success=false` and
-    /// an `error` message describing what went wrong.
+    /// Tests a connection to an external database with the settings of the body. The call saves nothing. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call is read-only. A failed connection is not an HTTP error. The call returns 200 with `success` false and the
+    /// reason in `error`. On SaaS, an SQLite database always fails this way.
     /// </remarks>
     /// <summary>Test external database connection</summary>
     /// <path>api/2.0/settings/authservice/externaldb/test</path>
@@ -1353,11 +1337,9 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the portal's payment-related configuration: the sales contact email, the URL to buy or extend a
-    /// subscription, whether the portal is Standalone, the current license's trial status and expiration date, and
-    /// the maximum quota quantity that can be purchased at once. Requires Owner or DocSpaceAdmin (the
-    /// EditPortalSettings permission). This is a read-only, idempotent call. It remains reachable even while the
-    /// portal's own subscription payment is overdue, since this is how the caller finds the link to resolve it.
+    /// Returns the payment settings of the portal: sales email, purchase URL, license state, and purchase limit.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call is read-only. It works even when the portal is unpaid, so the caller can find the link to pay.
     /// </remarks>
     /// <summary>Get the payment settings</summary>
     /// <path>api/2.0/settings/payment</path>
@@ -1388,11 +1370,9 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns whether the portal currently restricts the `User` role from using the developer tools (API keys, OAuth
-    /// apps, webhooks). Requires an authenticated session; every role can read the restriction, even though it only
-    /// limits what a `User` may do, not what a `RoomAdmin` or `DocSpaceAdmin` may do. This is a read-only, idempotent
-    /// call. Change the restriction with `POST api/2.0/security/devtoolsaccess`, which requires the
-    /// EditPortalSettings permission.
+    /// Returns whether the portal blocks the developer tools for the user type `user`. The tools are API keys, OAuth
+    /// apps, and webhooks. Any signed-in user can call it, including a guest. The call is read-only. To change the
+    /// setting, use `POST api/2.0/settings/devtoolsaccess`.
     /// </remarks>
     /// <summary>
     /// Get the Developer Tools access settings
@@ -1409,16 +1389,15 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets whether the portal restricts the `User` role from using the developer tools (API keys, OAuth apps,
-    /// webhooks); `RoomAdmin` and `DocSpaceAdmin` are never affected by this setting. Requires Owner or DocSpaceAdmin
-    /// (the EditPortalSettings permission). This is a mutating, idempotent, portal-wide call: it applies to every
-    /// `User` on the tenant immediately. It returns the saved setting; read the current value at any time from
-    /// `GET api/2.0/settings/devtoolsaccess`.
+    /// Sets whether the portal blocks the developer tools for the user type `user`. The tools are API keys, OAuth
+    /// apps, and webhooks. Room admins and DocSpace admins keep access. Requires the EditPortalSettings permission,
+    /// which the portal owner and DocSpace admins have. Other callers get 403. The call changes data. You can repeat
+    /// it with the same body. The change applies to all users immediately. It returns the saved setting.
     /// </remarks>
     /// <summary>
     /// Set the Developer Tools access settings
     /// </summary>
-    /// <path>api/2.0/security/devtoolsaccess</path>
+    /// <path>api/2.0/settings/devtoolsaccess</path>
     [Tags("Security / Access to DevTools")]
     [SwaggerResponse(200, "Saved developer tools access restriction for the `User` role", typeof(TenantDevToolsAccessSettingsDto))]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
@@ -1437,11 +1416,9 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns whether the portal's promotional banners are currently hidden from every user's interface. Requires an
-    /// authenticated session; every role can read it, since the flag affects what they see regardless of their own
-    /// permissions. This is a read-only, idempotent call. The flag only takes effect on a Standalone (self-hosted)
-    /// installation; on SaaS, banners are always shown no matter what is saved here. Change the setting with
-    /// `POST api/2.0/settings/banner`, which additionally requires an Enterprise license.
+    /// Returns whether the portal hides its promotional banners from all users. The flag works only on a Standalone
+    /// installation, and SaaS portals always show the banners. Any signed-in user can call it, including a guest. The
+    /// call is read-only. To change the flag, use `POST api/2.0/settings/banner`.
     /// </remarks>
     /// <summary>
     /// Get the banners visibility
@@ -1458,12 +1435,11 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets whether the portal's promotional banners are hidden for every user. Available only on an Enterprise
-    /// license; every other plan is refused regardless of the caller's role. Requires Owner or DocSpaceAdmin (the
-    /// EditPortalSettings permission). The flag only takes effect on a Standalone (self-hosted) installation; on
-    /// SaaS, banners are always shown no matter what is saved here. This is a mutating, idempotent, portal-wide call:
-    /// it applies to every user on the tenant immediately. It returns the saved setting; read the current value at
-    /// any time from `GET api/2.0/settings/banner`.
+    /// Sets whether the portal hides its promotional banners from all users. The flag works only on a Standalone
+    /// installation, and SaaS portals always show the banners. If the installation has no Enterprise license, the
+    /// call returns 402. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. The call changes data. You can repeat it with the same body. It returns the saved
+    /// setting.
     /// </remarks>
     /// <summary>
     /// Set the banners visibility
@@ -1493,10 +1469,9 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns whether AI functionality (chat, agents, vectorization) is currently available on the portal at all; AI
-    /// is enabled by default. Requires an authenticated session; every role can read it. This is a read-only,
-    /// idempotent call. When the setting is disabled, every AI-specific endpoint and folder is unavailable regardless
-    /// of the caller's own permissions; this call only reports the portal-wide switch, not any per-user entitlement.
+    /// Returns whether AI features are turned on for the portal: chat, agents, and vectorization. They are on by
+    /// default. Any signed-in user can call it, including a guest. The call is read-only. If AI is turned off, all AI
+    /// operations and folders are unavailable to every user.
     /// </remarks>
     /// <summary>
     /// Get the AI access settings
@@ -1513,14 +1488,11 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Turns AI functionality (chat, agents, vectorization) on or off for the whole portal; AI is enabled by default.
-    /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission); every other caller is refused. Disabling
-    /// it immediately hides the AI Agents and AI rooms folders from root folder listings, refuses every access to the
-    /// AI rooms and their files with 403, makes AI status checks report disabled, and makes AI chat endpoints
-    /// unreachable for every user on the tenant, not only the caller; nothing is deleted, so turning AI back on
-    /// restores access. This is a mutating,
-    /// idempotent, portal-wide call, and the change is pushed to already-connected clients over the real-time
-    /// notification hub rather than waiting for their next request. It returns the saved setting.
+    /// Turns AI features on or off for the whole portal: chat, agents, and vectorization. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call changes data. You can repeat it with the same body. Turning AI off hides the AI agents and AI rooms
+    /// folders from all users. AI rooms and their files then return 403, and AI chat operations stop working. The
+    /// call deletes nothing, so turning AI on again restores access. It returns the saved setting.
     /// </remarks>
     /// <summary>
     /// Set the AI access settings
@@ -1558,11 +1530,9 @@ public partial class SettingsController(
 
 
     /// <remarks>
-    /// Returns whether the portal currently allows inviting new members and new guests at all. No permission is
-    /// required; anonymous callers can read it too, since the invitation flow itself may run before the caller has
-    /// signed in. This is a read-only, idempotent call. The response supports conditional requests: send the standard
-    /// If-Modified-Since header with the previous `lastModified` value, and an unchanged response comes back empty
-    /// instead of resending the same settings.
+    /// Returns whether the portal allows invitations of new members and of guests. Anyone can call it without signing
+    /// in. The call is read-only. It supports `If-Modified-Since` with the `Last-Modified` value of the last answer.
+    /// If nothing changed, it returns 304 with an empty body.
     /// </remarks>
     /// <summary>Get the user invitation settings</summary>
     /// <path>api/2.0/settings/invitationsettings</path>
@@ -1582,11 +1552,10 @@ public partial class SettingsController(
 
 
     /// <remarks>
-    /// Sets whether the portal allows inviting new members and new guests. Requires Owner or DocSpaceAdmin (the
-    /// EditPortalSettings permission). Disabling member or guest invitations only blocks creating new invitations
-    /// going forward; it does not revoke links already issued or remove members already invited. This is a mutating,
-    /// idempotent, portal-wide call. It returns the saved setting; read the current value at any time, including
-    /// anonymously, from `GET api/2.0/settings/invitationsettings`.
+    /// Sets whether the portal allows invitations of new members and of guests. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call changes data. You
+    /// can repeat it with the same body. Turning invitations off blocks only new ones. Links already sent keep
+    /// working, and invited people stay. It returns the saved setting.
     /// </remarks>
     /// <summary>Update the user invitation settings</summary>
     /// <path>api/2.0/settings/invitationsettings</path>

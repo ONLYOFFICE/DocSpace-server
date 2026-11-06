@@ -46,18 +46,19 @@ public class WebPluginsController(
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Installs a web plugin into the current portal from an uploaded package, and switches the plugin on straight
-    /// away. The package is sent as `multipart/form-data` with exactly one file: a `.zip` archive holding a
-    /// `config.json` manifest and a `plugin.js` entry point, under the configured size cap of 5 MB by default.
-    /// Editing the portal settings is required, so a portal owner or administrator, and the installation has to have
-    /// web plugins and plugin uploading enabled in its configuration. Pass `system=true` to install the plugin for
-    /// every portal of the installation, which is accepted on standalone installations only. The call is mutating and
-    /// not idempotent: a package whose manifest name is already installed replaces the stored files and keeps the
-    /// settings saved for that name, and the domains the manifest declares are added to the portal Content Security
-    /// Policy. It returns the freshly installed plugin, enabled, with the `url` its script is served from. A portal
-    /// holds up to 100 plugins by default, the manifest name has to be lower-case letters, digits, `_`, `.` or `-`,
-    /// and the package is rejected when another installed plugin registers the same JavaScript object under a
-    /// different name. List what is installed with `GET api/2.0/settings/webplugins`.
+    /// Installs a web plugin in the portal from an uploaded package and switches it on. Send the package as
+    /// `multipart/form-data`. The archive holds a `config.json` manifest and a `plugin.js` script. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If the
+    /// installation turns off web plugins or their upload, the call also returns 403. Set `system` to true to
+    /// install the plugin for every portal. If the installation is not standalone, `system` set to true returns 403.
+    /// The call changes data. You can repeat it with the same package. A package with an installed name
+    /// replaces its files and keeps its settings. The call adds the manifest domains to the portal Content Security
+    /// Policy. If this makes the policy header too large, the call returns 403, but the plugin stays installed. The
+    /// call returns 400 if the request has no file, several files, or a file that is not a `.zip`. It also returns
+    /// 400 for an empty or too large file, or a bad archive or manifest. A manifest name has only lowercase letters,
+    /// digits, `_`, `.`, and `-`. It also returns 400 if another plugin uses the same JavaScript object name,
+    /// `pluginName`. A new plugin also returns 400 if the portal already has the maximum, 100 plugins by default. To
+    /// list plugins, use `GET api/2.0/settings/webplugins`.
     /// </remarks>
     /// <summary>Add a web plugin</summary>
     /// <path>api/2.0/settings/webplugins</path>
@@ -96,16 +97,13 @@ public class WebPluginsController(
     }
 
     /// <remarks>
-    /// Lists the web plugins available in the current portal: the plugins installed for the whole installation first,
-    /// then the portal's own, with a portal plugin dropped when an installation-wide plugin already uses its name.
-    /// Any authenticated portal member may call it, no settings permission needed, and the installation has to have
-    /// web plugins enabled in its configuration. The call is read-only and idempotent. Pass `enabled=true` or
-    /// `enabled=false` to keep only the plugins in that state, and leave the parameter out to get every plugin. Each
-    /// entry carries the manifest data together with the state the portal stored for that plugin: `enabled`, the
-    /// `settings` string, `system` for an installation-wide plugin, and the `url` and `cssUrl` a client loads the
-    /// plugin from. An empty list means nothing is installed for this portal, not that plugins are switched off,
-    /// which is refused with 403 instead. The list is capped at the configured maximum, 100 plugins by default, and
-    /// is not paginated. For one plugin by its manifest name use `GET api/2.0/settings/webplugins/{name}`.
+    /// Returns the web plugins of the portal, including the plugins installed for the whole installation. The
+    /// installation-wide plugins come first, then the portal plugins. The list does not show a portal plugin with
+    /// the name of an installation-wide plugin. Any signed-in user can call it. If the installation turns off web
+    /// plugins, the call returns 403. The call is read-only. Each entry includes the `enabled` state and the
+    /// `settings` that the portal stored for the plugin. With `enabled` set, the call returns only the plugins in
+    /// that state. An empty list means that the portal has no plugins of this kind. The list has no paging and at
+    /// most 100 plugins by default. To get one plugin, use `GET api/2.0/settings/webplugins/{name}`.
     /// </remarks>
     /// <summary>Get web plugins</summary>
     /// <path>api/2.0/settings/webplugins</path>
@@ -135,16 +133,12 @@ public class WebPluginsController(
     }
 
     /// <remarks>
-    /// Returns one web plugin of the current portal by its manifest name, looked up over the same set as
-    /// `GET api/2.0/settings/webplugins`: the installation-wide plugins plus the portal's own. The `name` is the
-    /// manifest name published in the `name` field of that list, matched without regard to case; it is neither the
-    /// localized display name nor the JavaScript object name in `pluginName`, so it cannot be taken from the title
-    /// shown in the interface. Any authenticated portal member may call it, no settings permission needed, and the
-    /// installation has to have web plugins enabled in its configuration. The call is read-only and idempotent. The
-    /// response carries the manifest data along with the state the portal stored for that plugin: `enabled`, the
-    /// `settings` string, `system`, and the `url` and `cssUrl` a client loads it from. A name that is not installed
-    /// is rejected as not found, and 403 means web plugins are switched off for the installation. Change the state of
-    /// the plugin with `PUT api/2.0/settings/webplugins/{name}`.
+    /// Returns one web plugin of the portal by its manifest name. The call searches the same plugins as
+    /// `GET api/2.0/settings/webplugins`, including the installation-wide ones. Take the name from the `name` field
+    /// of that list. The call ignores the case of the name. Any signed-in user can call it. If the installation
+    /// turns off web plugins, the call returns 403. The call is read-only. The response includes the `enabled` state
+    /// and the `settings` that the portal stored for the plugin. If no plugin has this name, the call returns 404. To
+    /// change the state of the plugin, use `PUT api/2.0/settings/webplugins/{name}`.
     /// </remarks>
     /// <summary>Get a web plugin by name</summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
@@ -165,17 +159,15 @@ public class WebPluginsController(
     }
 
     /// <remarks>
-    /// Switches a web plugin of the current portal on or off and stores the settings string the portal keeps for it.
-    /// The plugin has to be installed already, so upload its package with `POST api/2.0/settings/webplugins` first,
-    /// and `name` is its manifest name as published by `GET api/2.0/settings/webplugins`, matched without regard to
-    /// case. Editing the portal settings is required, so a portal owner or administrator, and the installation has to
-    /// have web plugins enabled in its configuration. The body replaces the stored state instead of merging into it,
-    /// which makes the call idempotent; `settings` is required, so send `{}` when there is nothing to keep, and it is
-    /// limited to 255 characters and stored encrypted for this portal alone. Switching the plugin on adds the domains
-    /// its manifest declares to the portal Content Security Policy and switching it off takes them away again, and
-    /// the connected clients are notified of the new state. Nothing is returned on success. A name that is not
-    /// installed is rejected as not found, and 403 means web plugins are switched off or the caller may not edit the
-    /// portal settings.
+    /// Switches an installed web plugin of the portal on or off and saves its settings string. To install a plugin,
+    /// use `POST api/2.0/settings/webplugins`. Take the name from the `name` field of
+    /// `GET api/2.0/settings/webplugins`. The call ignores the case of the name. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. If the installation turns
+    /// off web plugins, the call also returns 403. The call changes data. The body replaces the stored state and
+    /// settings, so you can repeat the call with the same body. Switching the plugin on adds the domains of its
+    /// manifest to the portal Content Security Policy. Switching it off removes them. If the domains make the policy
+    /// header too large, the call returns 403, but saves the new state. The call returns 400 if the body has no
+    /// `settings` or `settings` is too long. If no plugin has this name, the call returns 404.
     /// </remarks>
     /// <summary>Update a web plugin</summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
@@ -199,17 +191,16 @@ public class WebPluginsController(
     }
 
     /// <remarks>
-    /// Picks up a web plugin whose files were replaced in storage without an upload, for example a new version of an
-    /// installation-wide plugin put in place during a deployment. The `name` is the manifest name published by
-    /// `GET api/2.0/settings/webplugins`, matched without regard to case. Editing the portal settings is required, so
-    /// a portal owner or administrator, and the installation has to have web plugins enabled in its configuration.
-    /// The server compares the version of the plugin it serves with the `version` of the manifest in storage and,
-    /// only when they differ or the plugin appeared in or vanished from storage, re-reads the plugin list on every
-    /// server: for all portals when the plugin is installation-wide, for this portal alone otherwise, and notifies
-    /// the connected clients of this portal. The call is idempotent: with matching versions nothing changes, so a
-    /// repeat is safe. The response is the plugin as served after the check. The stored state, the settings and the
-    /// Content Security Policy of the portal are left as they are. To install a new version use
-    /// `POST api/2.0/settings/webplugins` instead.
+    /// Reloads a web plugin whose files someone replaced in storage without an upload. For example, a deployment can
+    /// put a new version of an installation-wide plugin in storage. Take the name from the `name` field of
+    /// `GET api/2.0/settings/webplugins`. The call ignores the case of the name. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. If the installation turns
+    /// off web plugins, the call also returns 403. The call compares the version it serves with the `version` of the
+    /// manifest in storage. The server reloads the plugin list if they differ or the plugin appeared or disappeared.
+    /// For an installation-wide plugin, it reloads the list of every portal. The call changes data only then, so you
+    /// can repeat it. It does not change the stored state, the settings, or the Content Security Policy. The call
+    /// returns the plugin as the portal serves it after the check. If no plugin has this name after the check, the
+    /// call returns 404. To install a new version, use `POST api/2.0/settings/webplugins`.
     /// </remarks>
     /// <summary>Refresh a web plugin</summary>
     /// <path>api/2.0/settings/webplugins/{name}/refresh</path>
@@ -232,17 +223,16 @@ public class WebPluginsController(
     }
 
     /// <remarks>
-    /// Removes a web plugin from the current portal and deletes the files of its package from storage. The `name` is
-    /// the manifest name published by `GET api/2.0/settings/webplugins`, matched without regard to case. Editing the
-    /// portal settings is required, so a portal owner or administrator, and the installation has to have web plugins
-    /// and plugin deletion enabled in its configuration. An installation-wide plugin, the one whose `system` field is
-    /// true, can be removed on standalone installations only. The call is destructive and cannot be undone: the state
-    /// and the settings stored for the plugin are dropped along with its files, the domains its manifest declares are
-    /// taken out of the portal Content Security Policy, and the connected clients are notified. Getting the plugin
-    /// back means uploading its package again with `POST api/2.0/settings/webplugins`, and the settings it had are
-    /// gone. Nothing is returned on success, and a repeated call on a name that is no longer installed is rejected as
-    /// not found instead of answered as success. To keep a plugin installed but inactive, switch it off with
-    /// `PUT api/2.0/settings/webplugins/{name}` instead.
+    /// Deletes a web plugin from the portal together with the files of its package. Take the name from the `name`
+    /// field of `GET api/2.0/settings/webplugins`. The call ignores the case of the name. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If the
+    /// installation turns off web plugins or their deletion, the call also returns 403. A plugin with `system` set to
+    /// true is installation-wide. Only a standalone installation can delete it. Other installations get 403. Its
+    /// deletion removes the plugin from every portal. The call cannot be undone. It deletes the stored state and
+    /// settings of the plugin and removes its domains from the portal Content Security Policy. To restore the plugin,
+    /// upload its package again with `POST api/2.0/settings/webplugins`. Its old settings do not come back. If no
+    /// plugin has this name or its files are missing in storage, the call returns 404. A repeated call returns 404.
+    /// To keep the plugin but stop it, switch it off with `PUT api/2.0/settings/webplugins/{name}`.
     /// </remarks>
     /// <summary>Delete a web plugin</summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>

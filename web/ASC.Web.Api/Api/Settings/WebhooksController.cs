@@ -58,16 +58,14 @@ public class WebhooksController(
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Returns the webhook subscriptions of the current portal, each together with the outcome of its most recent
-    /// delivery. The portal owner and a `DocSpaceAdmin` see every subscription in the portal, while a `RoomAdmin` or
-    /// a `User` sees only the ones they created themselves, so the same call answers differently depending on who
-    /// asks. A `Guest` may not use webhooks at all and is refused, and so is any non-admin caller while the portal
-    /// keeps the developer tools restricted, which `GET api/2.0/settings/devtoolsaccess` reports. Every entry pairs
-    /// the stored configuration with `status`, the HTTP status code the target answered on the last attempt, where 0
-    /// means nothing has been delivered yet, while the secret key is not part of the response. The list is neither
-    /// paginated nor ordered, and an empty list simply means no subscription exists for the caller. Nothing is
-    /// written and the call is safe to repeat. Create a subscription with `POST api/2.0/settings/webhook`, and
-    /// inspect single deliveries with `GET api/2.0/settings/webhooks/log`.
+    /// Returns the webhook subscriptions of the portal, each with the outcome of its last delivery. Any signed-in
+    /// user can call it, except a guest. A guest gets 403. If the portal restricts the developer tools, only DocSpace
+    /// admins can call it. Other callers then get 403. To read this setting, use
+    /// `GET api/2.0/settings/devtoolsaccess`. The portal owner and DocSpace admins see every subscription. Other
+    /// users see only the subscriptions they created. The call is read-only. The response never contains the secret
+    /// key. The list has no paging and no fixed order. An empty list means that the caller has no subscriptions. To
+    /// create a subscription, use `POST api/2.0/settings/webhook`. To read single deliveries, use
+    /// `GET api/2.0/settings/webhooks/log`.
     /// </remarks>
     /// <summary>
     /// Get the portal webhooks
@@ -89,18 +87,19 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Creates a webhook subscription for the current portal: a target URL that the portal calls with a signed JSON
-    /// payload whenever one of the subscribed events happens. The target is checked before anything is stored: an
-    /// absolute `http` or `https` address outside the installation's own network that answers a HEAD request with a
-    /// success code, redirects not followed. `secretKey` is mandatory, has to satisfy the password rules of `GET
-    /// api/2.0/settings/security/password`, signs the payloads and never appears in a response. `triggers` is a bitmask
-    /// of the subscribed events, 0 standing for every event the creator's role may receive; a flag the caller's role may not use is rejected, so take
-    /// the allowed set from `GET api/2.0/settings/webhook/triggers`. `ssl` demands an `https` target with a valid
-    /// certificate, `false` leaves the certificate unchecked, and left out it is `true` for an `https` target and
-    /// `false` for an `http` one.
-    /// `targetId` limits the events to one entity, for user or group events a user or group the creator may see. A
-    /// subscription fires only while it is enabled, for events its creator may see and their current role may
-    /// subscribe to. Any role except `Guest` may create one, and each call adds another subscription.
+    /// Creates a webhook subscription of the portal. The portal then posts a signed JSON payload to `uri` when a
+    /// subscribed event happens. Any signed-in user can call it, except a guest. A guest gets 403. If the portal
+    /// restricts the developer tools, only DocSpace admins can call it. Other callers then get 403. The call changes
+    /// data. Do not repeat it. Each call creates another subscription. The response never contains the secret key.
+    /// Before saving, the call sends a HEAD request to `uri` and does not follow redirects. If you leave out `ssl`,
+    /// it is `true` for an `https` address and `false` for an `http` one. If `triggers` is 0, the subscription gets
+    /// every event that the role of its creator allows. To find the triggers your role allows, use
+    /// `GET api/2.0/settings/webhook/triggers`. A subscription delivers only while it is on, and only events that its
+    /// creator can see. The call returns 400 if `name` or `uri` is empty, a value is too long, or `uri` is not
+    /// allowed. It also returns 400 if `uri` answers the HEAD request with an error code. It also returns 400 if
+    /// `secretKey` breaks the password rules or your role does not allow a trigger. For user or group events,
+    /// `targetId` must name a user or group that you can see. If it does not, the call returns 400. If `uri` gives no
+    /// answer, or has an invalid certificate while `ssl` is `true`, the call returns 500.
     /// </remarks>
     /// <summary>
     /// Create a webhook
@@ -128,19 +127,19 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Replaces the stored parameters of one webhook subscription, addressed by `id` in the body rather than in the
-    /// path. Every field of the request overwrites the stored one, so a payload that leaves out `enabled`, `triggers`
-    /// or `targetId` resets them to off, the catch-all `0` and no target: read the current values with `GET
-    /// api/2.0/settings/webhook` first and send back whatever should stay. `secretKey` and `ssl` are the exceptions:
-    /// an empty `secretKey` keeps the existing secret, a new one having to satisfy the portal password rules, and a
-    /// left-out `ssl` keeps the stored setting, so pass it explicitly when moving the target between `http` and
-    /// `https`. A `DocSpaceAdmin`
-    /// may update any subscription in the portal, anyone else only their own, and a `Guest` is refused. Once the body
-    /// passes the schema checks (a missing `name` or `uri` gives 400 first), an unknown `id` gives 404 and another
-    /// member's subscription 403 before the target, the secret and the triggers are checked. The payload is then validated
-    /// as on creation, except that trigger flags are checked against the role of the subscription's creator rather than
-    /// the caller's. Sending the same payload twice leaves the same state. Use `PUT api/2.0/settings/webhook/enable` to
-    /// switch a subscription on or off without touching anything else.
+    /// Changes all parameters of a webhook subscription that the body names by `id`. The call overwrites every stored
+    /// field with the body. So a left-out `enabled`, `triggers`, or `targetId` becomes `false`, 0, or empty. First
+    /// read the current values with `GET api/2.0/settings/webhook`. Then send back the values that must stay. Two
+    /// fields are exceptions. An empty `secretKey` keeps the stored secret. A left-out `ssl` keeps the stored
+    /// setting. So pass `ssl` when you move the target between `http` and `https`. Any signed-in user can call it,
+    /// except a guest. A guest gets 403. The portal owner and DocSpace admins can change any subscription. Other
+    /// users can change only the subscriptions they created and get 403 for others. If the portal restricts the
+    /// developer tools, users who are not DocSpace admins get 403 too. The call changes data. You can repeat it with
+    /// the same body. A missing `name` or `uri` returns 400 before any other check. If no subscription has this `id`,
+    /// the call returns 404 before the access check. Then the call checks the body as `POST api/2.0/settings/webhook`
+    /// does. It checks the triggers against the role of the subscription's creator, not of the caller. If a check
+    /// fails, the call returns 400. If `uri` gives no answer, or has an invalid certificate while `ssl` is `true`,
+    /// the call returns 500. To turn a subscription on or off only, use `PUT api/2.0/settings/webhook/enable`.
     /// </remarks>
     /// <summary>
     /// Update a webhook
@@ -200,16 +199,18 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Switches one webhook subscription on or off, leaving the rest of its parameters as they are. Only `id` and
-    /// `enabled` are read from the body: `name` and `uri` must be present because the schema requires them, but their
-    /// values are ignored here, as are `secretKey`, `ssl`, `triggers` and `targetId` when sent - change any of them
-    /// with `PUT api/2.0/settings/webhook` instead. Switching a subscription on re-checks what is already stored: the
-    /// saved URL is probed with a HEAD request, the saved secret is checked against the current password rules, and the saved triggers against the current role of the
-    /// subscription's creator. The call is refused with 400 when any of these fails, so a subscription whose target has
-    /// gone away cannot be switched on until it is updated. Switching one off is not validated. While a subscription is
-    /// off its events are dropped rather than queued. A `DocSpaceAdmin` may switch any subscription in the portal,
-    /// anyone else only their own, and a `Guest` is refused. The response carries the subscription in its new state,
-    /// and repeating the call changes nothing further.
+    /// Turns a webhook subscription on or off and keeps its other parameters. The call reads only `id` and `enabled`
+    /// from the body. The schema still requires `name` and `uri`, but the call ignores their values. To change other
+    /// fields, use `PUT api/2.0/settings/webhook`. Any signed-in user can call it, except a guest. A guest gets 403.
+    /// The portal owner and DocSpace admins can switch any subscription. Other users can switch only the
+    /// subscriptions they created and get 403 for others. If the portal restricts the developer tools, users who are
+    /// not DocSpace admins get 403 too. The call changes data. You can repeat it with the same body. If no
+    /// subscription has this `id`, the call returns 404 before the access check. Turning a subscription off checks
+    /// nothing. Turning it on checks the stored values again. The call sends a HEAD request to the stored address. It
+    /// checks the stored secret against the current password rules. It checks the stored triggers against the current
+    /// role of the subscription's creator. If any of these checks fails, the call returns 400. So you cannot turn on
+    /// a subscription whose target no longer works. Update the subscription first. If the stored address gives no
+    /// answer, or has an invalid certificate while `ssl` is `true`, the call returns 500.
     /// </remarks>
     /// <summary>
     /// Switch a webhook on or off
@@ -257,16 +258,14 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Removes one webhook subscription from the current portal for good, addressed by `id` in the path. Deliveries
-    /// stop with it: matching events are no longer queued, and there is no undo, so a subscription dropped by mistake
-    /// has to be created again with `POST api/2.0/settings/webhook`, which gives it a new identifier and needs a new
-    /// secret key. To pause deliveries without losing the configuration, switch the subscription off with
-    /// `PUT api/2.0/settings/webhook/enable` instead. A `DocSpaceAdmin` may remove any subscription in the portal,
-    /// anyone else only the ones they created, and a `Guest` may not use webhooks at all. The response repeats the
-    /// subscription as it was just before the removal, so the caller can record what disappeared, again without the
-    /// secret key. An identifier that no longer exists gives 404, which is what a second removal of the same
-    /// subscription answers as well, so a repeated call is harmless but reports the state truthfully rather than
-    /// pretending to succeed.
+    /// Deletes a webhook subscription of the portal by its `id`. The portal then stops queueing its events. Any
+    /// signed-in user can call it, except a guest. A guest gets 403. The portal owner and DocSpace admins can delete
+    /// any subscription. Other users can delete only the subscriptions they created and get 403 for others. If the
+    /// portal restricts the developer tools, users who are not DocSpace admins get 403 too. The call cannot be
+    /// undone. A repeated call returns 404. The response returns the subscription as it was before the deletion,
+    /// without the secret key. To restore a subscription, create it again with `POST api/2.0/settings/webhook`. It
+    /// then gets a new `id`, and you must send the secret key again. To pause deliveries and keep the settings, use
+    /// `PUT api/2.0/settings/webhook/enable`. If no subscription has this `id`, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Remove a webhook
@@ -303,17 +302,15 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Returns the delivery log of the portal webhooks, one record per delivery of an event, updated in place by its
-    /// automatic retries: the trigger, the request and response headers and bodies, the HTTP `status` of the latest
-    /// attempt, 0 while no answer has come back, and the `delivery` moment, empty until an attempt succeeds. `attempts`
-    /// counts the tries so far and `nextAttemptOn` is set while another one is due. A manual retry adds a record of its
-    /// own, with a new `id`, the same `eventId` and the member in `retriedBy`. Records come newest first, paged with
-    /// `startIndex` and `count`, at most 100 at a time, with the number of matches as `total`. Filters combine with
-    /// AND: `deliveryFrom` and `deliveryTo` bound the delivery moment, `hookUri` matches the subscription URL exactly,
-    /// `configId` picks one subscription, `groupStatus` keeps the status classes it names (0 means no filter), and
-    /// `trigger` one event type (0 means all). `eventId` keeps every record of one event; the `id` of a record a manual
-    /// retry returned keeps that record alone. `userId` filters by the creator of the subscription and is forced to the
-    /// caller for anyone but a `DocSpaceAdmin`. A `Guest` is refused. Nothing is written.
+    /// Returns the delivery log of the portal webhooks, newest first. Each record is one delivery of an event.
+    /// Automatic retries update the same record. A manual retry adds a new record with the same `eventId`. Any
+    /// signed-in user can call it, except a guest. A guest gets 403. If the portal restricts the developer tools,
+    /// only DocSpace admins can call it. Other callers then get 403. Users who are not DocSpace admins see only the
+    /// deliveries of their own subscriptions. For them, the call replaces `userId` with their own ID. The call is
+    /// read-only. The call pages with `startIndex` and `count`, up to 100 records a page. The response gives the
+    /// number of matching records in `total`. All filters combine with AND. A `groupStatus` or `trigger` of 0 means
+    /// no filter. To get every record of one event, filter by its `eventId`. With the `id` of a manual retry record
+    /// as `eventId`, the call returns only that record. If `count` is out of its range, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Get the webhook delivery log
@@ -342,17 +339,19 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Sends one past webhook delivery again to its subscription. The `id` in the path is that of a delivery record
-    /// from `GET api/2.0/settings/webhooks/log`, not of a subscription. A `DocSpaceAdmin` may retry any delivery in the
-    /// portal, anyone else only deliveries of the subscriptions they created, and a `Guest` is refused. The work is
-    /// asynchronous: a new delivery record is queued and returned with its own `id`, the `eventId` of the retried one
-    /// and the caller in `retriedBy`; the retried record keeps its outcome, and automatic retries still due for the
-    /// event stop. The receiver gets the same `event.id` and `x-docspace-event-id` header in a body serialized and
-    /// signed anew. To learn the outcome, read the log with `eventId` set to the returned `id` until `nextAttemptOn` is
-    /// empty: `delivery` is then set on success and empty when the portal gave up after its automatic retries (on the
-    /// default schedule, six more tries over about 18 hours). An `id` of 0 gives 400 and an unknown one 404. 409 means
-    /// nothing was queued: a delivery of the event is being sent right now, the subscription is disabled, or the record
-    /// predates the current delivery format. Rate limited with 429.
+    /// Sends one past webhook delivery again. The path `id` is a delivery record from
+    /// `GET api/2.0/settings/webhooks/log`, not a subscription. Any signed-in user can call it, except a guest. A
+    /// guest gets 403. The portal owner and DocSpace admins can retry any delivery. Other users can retry only
+    /// deliveries of their own subscriptions and get 403 for others. If the portal restricts the developer tools,
+    /// users who are not DocSpace admins get 403 too. The call queues work. It returns a new delivery record with its
+    /// own `id`, the old `eventId`, and the caller in `retriedBy`. The old record keeps its outcome. Each call queues
+    /// a new delivery and stops the deliveries queued earlier for the event. The receiver gets the same event ID in a
+    /// body that the portal signs again. To learn the outcome, poll `GET api/2.0/settings/webhooks/log` with
+    /// `eventId` set to the returned `id`. Repeat it until `nextAttemptOn` is empty. Then a set `delivery` means
+    /// success, and an empty one means that the portal gave up. On the default schedule, the portal tries six more
+    /// times over about 18 hours. The call is rate limited. More calls return 429. If `id` is 0, the call
+    /// returns 400. If no delivery record has this `id`, the call returns 404. It returns 409 and queues nothing for
+    /// an event being sent now, a disabled subscription, or an outdated record.
     /// </remarks>
     /// <summary>
     /// Retry a webhook delivery
@@ -409,18 +408,20 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Sends a batch of past webhook deliveries again. `ids` holds identifiers of delivery records from `GET
-    /// api/2.0/settings/webhooks/log`; for each one a new delivery record of the same event is queued, with its own
-    /// `id`, the retried record's `eventId` and the caller in `retriedBy`, and the response lists those new records.
-    /// Each event is retried once per call, so a second identifier of the same event is passed over. Records that do
-    /// not exist, records of another member's subscription when the caller is not a `DocSpaceAdmin`, and records
-    /// that cannot be queued now (an event being sent right now, a disabled subscription, a record older than the
-    /// current delivery format) are skipped in silence, so compare the response with `ids`; an empty `ids` queues
-    /// nothing. A `Guest` is refused. Each receiver gets the same `event.id` and `x-docspace-event-id` header in a
-    /// body serialized and signed anew. The work is asynchronous: read the log with `eventId` for each returned
-    /// identifier until `nextAttemptOn` is empty; a set `delivery` then means success, an empty one that the portal
-    /// gave up. At most 100 identifiers per call, rate limited with 429. `PUT api/2.0/settings/webhook/{id}/retry`
-    /// reports why a single record was not queued.
+    /// Sends several past webhook deliveries again. The body lists delivery records from
+    /// `GET api/2.0/settings/webhooks/log` in `ids`. Any signed-in user can call it, except a guest. A guest
+    /// gets 403. If the portal restricts the developer tools, only DocSpace admins can call it. Other callers then
+    /// get 403. The call queues work. For each record, it queues a new delivery of the same event and returns the new
+    /// record. Each new record has its own `id`, the old `eventId`, and the caller in `retriedBy`. Each call also
+    /// stops the deliveries queued earlier for these events. The call retries each event once and skips other records
+    /// of the same event. It also skips unknown records and records that it cannot queue now. Users who are not
+    /// DocSpace admins can retry only records of their own subscriptions. The call skips other records for them. So
+    /// compare the response with `ids`. An empty `ids` queues nothing. Each receiver gets the same event ID in a body
+    /// that the portal signs again. To learn the outcome, poll `GET api/2.0/settings/webhooks/log` with `eventId` set
+    /// to each returned `id`. Repeat it until `nextAttemptOn` is empty. Then a set `delivery` means success, and an
+    /// empty one means that the portal gave up. The call is rate limited. More calls return 429. If `ids` has more
+    /// than 100 records, the call returns 400. To learn why the call skipped a record, use
+    /// `PUT api/2.0/settings/webhook/{id}/retry`.
     /// </remarks>
     /// <summary>
     /// Retry webhook deliveries
@@ -471,17 +472,13 @@ public class WebhooksController(
     }
 
     /// <remarks>
-    /// Returns the catalogue of events a webhook subscription can listen to, in the order the portal presents them:
-    /// user events, then group, file, folder, room, form and agent ones. Each entry carries the event name as it
-    /// appears in a payload, such as `file.created`, the bit value to put into the `triggers` bitmask of a
-    /// subscription, and `available`, telling whether the caller's own role may subscribe to that event at all: a
-    /// `User` cannot subscribe to the creation of users, groups or rooms, for instance, while a `RoomAdmin` can. Add
-    /// the bit values of the wanted events together to build `triggers`; the entry named `*` has the value 0 and
-    /// stands for every event the subscription creator's current role may subscribe to, so it is used on its own
-    /// rather than added. Events unavailable to the caller are listed all the same, but passing one to `POST
-    /// api/2.0/settings/webhook` or `PUT api/2.0/settings/webhook` is rejected as an invalid request. This is fixed
-    /// reference data: the same for every portal, not paginated, changing only with the product version, and readable
-    /// by any authenticated caller, a `Guest` included. Nothing is written.
+    /// Returns the events that a webhook subscription can listen to. Any signed-in user can call it, including a
+    /// guest. The developer tools restriction does not apply here. The call is read-only. The list is the same for
+    /// every portal and has no paging. It shows user, group, file, folder, room, form, and agent events, in this
+    /// order. To build `triggers`, add the `id` values of the wanted events. The entry `*` has the value 0 and means
+    /// every event that the role of the creator allows. Use it alone. The `available` field shows whether your role
+    /// can subscribe to the event. The list also includes the events that your role cannot use. The portal refuses
+    /// such an event when you create or change a subscription.
     /// </remarks>
     /// <summary>
     /// Get the webhook triggers

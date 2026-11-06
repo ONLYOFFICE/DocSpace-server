@@ -56,19 +56,19 @@ public class WhitelabelController(
     #region Logos
 
     /// <remarks>
-    /// Replaces the branding images of the current portal with the ones sent in the request, so that the logos on the
-    /// login page, in the left menu, in the editors and in letters come from this portal. Every entry of `logo` names
-    /// a logo slot in its `key` - the numeric type published by `GET api/2.0/settings/whitelabel/logos` - and carries
-    /// the light-theme and the dark-theme image in `light` and `dark`. An image is either a
-    /// `data:image/png;base64,...` payload (`png`, `jpg` and `svg` are accepted) or the name of a file already
-    /// uploaded to the temporary store; a slot left out of the request keeps its image. The dark image is stored only
-    /// for the slots that have a dark variant, that is `1`, `2`, `6`, `7` and `8`, and is ignored for the favicon and
-    /// the editor logos; saving slot `2` also rebuilds the notification logo `8` from it. Requires a DocSpace
-    /// administrator and a plan that includes customization, which `GET api/2.0/settings/enablewhitelabel` reports;
-    /// otherwise the call is refused as payment required. It answers `true` and is undone by
-    /// `PUT api/2.0/settings/whitelabel/logos/restore`. With `isDefault=true` it writes the installation-wide default
-    /// branding instead, which only a server installation allows. Uploaded files go to
-    /// `POST api/2.0/settings/whitelabel/logos/savefromfiles`.
+    /// Replaces logo images of the current portal. The portal shows them on the login page, in the menu, in editors,
+    /// and in letters. Each `logo` entry names a slot by its `type` number from
+    /// `GET api/2.0/settings/whitelabel/logos`. A slot left out of the request keeps its image. Only slots 1, 2, 6,
+    /// 7, and 8 have a dark image. For other slots, the call ignores `dark`. Saving slot 2 also rebuilds the
+    /// notification logo, slot 8, from the light image. The call reads only `logo` from the body. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If the
+    /// plan has no customization or the installation hides branding, the call returns 402. To check this first, use
+    /// `GET api/2.0/settings/enablewhitelabel`. The call changes data and returns `true`. You can repeat it with
+    /// base64 images. The call deletes a used temporary file, so a repeat must send that image again. To undo the
+    /// call, use `PUT api/2.0/settings/whitelabel/logos/restore`. With `isDefault=true`, the call changes the
+    /// installation-wide default logos instead. Only a self-hosted installation without limited space access allows
+    /// this. Elsewhere the call returns 403. The call also returns 400 if `logoText` is too long, although it does
+    /// not store the text. To upload image files, use `POST api/2.0/settings/whitelabel/logos/savefromfiles`.
     /// </remarks>
     /// <summary>Save the white label logos</summary>
     /// <path>api/2.0/settings/whitelabel/logos/save</path>
@@ -140,17 +140,18 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Replaces the branding images of the current portal with the files sent as `multipart/form-data`, which is the
-    /// way to upload image files directly instead of embedding them as base64 in
-    /// `POST api/2.0/settings/whitelabel/logos/save`. The form field names are not used: each file is routed by its
-    /// own name, which has to start with the numeric logo slot published by `GET api/2.0/settings/whitelabel/logos`
-    /// and end with the image extension, as in `2.png`; a name that also contains `dark`, as in `2.dark.png`, is
-    /// stored as the dark-theme image of that slot. Slots that get no file keep the image they have, and a dark file
-    /// is ignored for the favicon and the editor logos, which have no dark variant. A request that carries no file at
-    /// all is rejected. Requires a DocSpace administrator and a plan that includes customization, which
-    /// `GET api/2.0/settings/enablewhitelabel` reports; otherwise the call is refused as payment required. It answers
-    /// `true`, overwrites in place and is undone by `PUT api/2.0/settings/whitelabel/logos/restore`. With
-    /// `isDefault=true` it writes the installation-wide default branding, which only a server installation allows.
+    /// Replaces logo images of the current portal with files from a `multipart/form-data` request. The call ignores
+    /// form field names and reads each file name instead. A file name starts with the slot `type` number from
+    /// `GET api/2.0/settings/whitelabel/logos`. It ends with the image extension, as in `2.png`. A name that contains
+    /// `dark`, as in `2.dark.png`, sets the dark image of the slot. Only slots 1, 2, 6, 7, and 8 have a dark image.
+    /// For other slots, the call skips dark files. Slots without a file keep their image. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. A
+    /// request without files also returns 403. If the plan has no customization or the installation hides branding,
+    /// the call returns 402. The call changes data and returns `true`. You can repeat it with the same files. To undo
+    /// the call, use `PUT api/2.0/settings/whitelabel/logos/restore`. With `isDefault=true`, the call changes the
+    /// installation-wide default logos instead. Only a self-hosted installation without limited space access allows
+    /// this. Elsewhere the call returns 403. To send images as base64, use
+    /// `POST api/2.0/settings/whitelabel/logos/save`.
     /// </remarks>
     /// <summary>Save the logos from files</summary>
     /// <path>api/2.0/settings/whitelabel/logos/savefromfiles</path>
@@ -235,16 +236,13 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Lists the branding logo slots of the current portal together with the image URLs to render, which is what a
-    /// login page, an editor or a mail template needs before any user is known. No authentication is required, and
-    /// the portal is resolved from the address the request is made to. The call is read-only and idempotent. Each
-    /// item carries the slot as a number in `type`, its stable name in `name`, the size the image is fitted to in
-    /// `size` (`width` and `height` in pixels), and the URLs in `path`. When `isDark` is passed, only the matching
-    /// theme is filled in, `light` for `false` and `dark` for `true`; when it is omitted both are filled in and
-    /// `dark` comes back empty for the slots that have no separate dark image. The notification slot is not part of
-    /// this list, as it is derived from the login-page logo and used only in letters. Pass `isDefault=true` to read
-    /// the installation-wide default logos instead of this portal's. To learn which slots are still untouched use
-    /// `GET api/2.0/settings/whitelabel/logos/isdefault`.
+    /// Returns the logo slots of the current portal with the image URLs to show. Anyone can call it without signing
+    /// in. The call takes the portal from the request address. The call is read-only. Each item has the slot number
+    /// in `type`, its name, its image size, and the URLs in `path`. If `isDark` is `true`, the call fills only
+    /// `dark`. If `isDark` is `false`, it fills only `light`. Without `isDark`, the call fills both URLs. Then `dark`
+    /// is empty for a slot without a separate dark image. The list leaves out the notification slot 8, which only
+    /// letters use. With `isDefault=true`, the call returns the installation-wide default logos instead. To learn
+    /// which slots still have built-in images, use `GET api/2.0/settings/whitelabel/logos/isdefault`.
     /// </remarks>
     /// <summary>Get the white label logos</summary>
     /// <path>api/2.0/settings/whitelabel/logos</path>
@@ -322,15 +320,13 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Reports, slot by slot, whether the current portal still shows the built-in image or a logo that was uploaded
-    /// for it, which is what an interface needs to decide where a Restore action makes sense. Requires a DocSpace
-    /// administrator; the URLs themselves are public and come from `GET api/2.0/settings/whitelabel/logos`, which
-    /// needs no authentication. The call is read-only and idempotent. Every logo slot is returned, including the
-    /// notification logo that the public list leaves out, so the result has one entry more than that list. An entry
-    /// gives the stable slot name in `name` and `default` set to `true` while the slot has never been written, and to
-    /// `false` once an image has been stored for it, whether for the light or for the dark theme. A slot goes back to
-    /// `true` after `PUT api/2.0/settings/whitelabel/logos/restore`. Pass `isDefault=true` to inspect the
-    /// installation-wide default branding instead of this portal's. The logo text is reported separately by
+    /// Returns whether each logo slot of the current portal still has the built-in image. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call is read-only. The list includes the notification slot 8. So it has one entry more than
+    /// `GET api/2.0/settings/whitelabel/logos`. Each entry has the slot name in `name`. Its `default` is `true` until
+    /// the portal stores an image for the slot in either theme. Slot 8 always has the same `default` as the
+    /// login-page slot 2. With `isDefault=true`, the call checks the installation-wide default logos instead. To get
+    /// the logo URLs, use `GET api/2.0/settings/whitelabel/logos`. To check the logo text, use
     /// `GET api/2.0/settings/whitelabel/logotext/isdefault`.
     /// </remarks>
     /// <summary>Check the default white label logos</summary>
@@ -362,17 +358,15 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Drops every logo uploaded for the current portal and brings back the built-in images, so the portal looks
-    /// unbranded again on the login page, in the left menu, in the editors and in letters. Requires a DocSpace
-    /// administrator. Unlike the two save operations it does not need a plan that includes customization, so a portal
-    /// whose subscription no longer covers it can still be reset. The call is destructive: the stored image files are
-    /// deleted and cannot be recovered from the portal, only re-uploaded with
-    /// `POST api/2.0/settings/whitelabel/logos/save`. It is idempotent and answers `true` both when logos were
-    /// removed and when there was nothing to remove. All slots are reset together; there is no way to restore a
-    /// single one. For this portal the picture kept for the older mail templates is reset along with the logos, while
-    /// the logo text is left as it is and has its own `PUT api/2.0/settings/whitelabel/logotext/restore`. Pass
-    /// `isDefault=true` to reset the installation-wide default branding instead, which only a server installation
-    /// allows. Confirm the result with `GET api/2.0/settings/whitelabel/logos/isdefault`.
+    /// Deletes all logo images of the current portal and brings back the built-in ones. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. Unlike
+    /// the save calls, it works without a plan that includes customization. The call deletes the stored image files,
+    /// so it cannot be undone. To get the images back, upload them again with
+    /// `POST api/2.0/settings/whitelabel/logos/save`. You can repeat the call, and it returns `true` each time. It
+    /// resets all slots together, not one by one. For a portal, it also resets the logo of older letter templates. It
+    /// does not change the logo text. To reset the text, use `PUT api/2.0/settings/whitelabel/logotext/restore`. With
+    /// `isDefault=true`, the call resets the installation-wide default logos instead. Only a self-hosted installation
+    /// without limited space access allows this. Elsewhere the call returns 403.
     /// </remarks>
     /// <summary>Restore the white label logos</summary>
     /// <path>api/2.0/settings/whitelabel/logos/restore</path>
@@ -430,17 +424,16 @@ public class WhitelabelController(
     #region Logo Text
 
     /// <remarks>
-    /// Sets the wordmark that the portal prints next to or instead of a logo image, on the login page, in the editors
-    /// and in notification letters. Only `logoText` from the request body is used here, and it is limited to 40
-    /// characters; a longer value is rejected as an invalid request. Sending an empty or blank text, or exactly the
-    /// built-in `ONLYOFFICE`, clears the setting instead of storing it, which has the same effect as
-    /// `PUT api/2.0/settings/whitelabel/logotext/restore`. Requires a DocSpace administrator and a plan that includes
-    /// customization, which `GET api/2.0/settings/enablewhitelabel` reports; otherwise the call is refused as payment
-    /// required. The call is mutating and idempotent: the previous text is overwritten and `true` comes back. Logo
-    /// images are not touched - they are saved by `POST api/2.0/settings/whitelabel/logos/save` - and the text is not
-    /// rendered into them. Pass `isDefault=true` to write the installation-wide default wordmark instead of this
-    /// portal's, which only a server installation allows. Read the stored value back with
-    /// `GET api/2.0/settings/whitelabel/logotext`.
+    /// Changes the logo text of the current portal. The portal shows it next to or instead of a logo, on the login
+    /// page, in editors, and in letters. The call reads only `logoText` from the body. An empty or blank text, or
+    /// `ONLYOFFICE` itself, clears the setting. This has the same effect as
+    /// `PUT api/2.0/settings/whitelabel/logotext/restore`. Requires the EditPortalSettings permission, which the
+    /// portal owner and DocSpace admins have. Other callers get 403. If the plan has no customization or the
+    /// installation hides branding, the call returns 402. The call changes data and returns `true`. You can repeat it
+    /// with the same body. It does not change logo images and does not draw the text into them. With
+    /// `isDefault=true`, the call changes the installation-wide default text instead. Only a self-hosted installation
+    /// without limited space access allows this. Elsewhere the call returns 403. If the text is too long, the call
+    /// returns 400. To read the text, use `GET api/2.0/settings/whitelabel/logotext`.
     /// </remarks>
     /// <summary>Save the white label logo text</summary>
     /// <path>api/2.0/settings/whitelabel/logotext/save</path>
@@ -481,18 +474,13 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Returns the wordmark the current portal prints next to or instead of a logo image, as a bare string rather
-    /// than an object. Requires a DocSpace administrator, because this is the settings view of the value; the
-    /// branding a login page needs is served by `GET api/2.0/settings/whitelabel/logos`, which needs no
-    /// authentication. The call is read-only and idempotent. When nothing has been stored for the portal, the
-    /// built-in `ONLYOFFICE` is returned, so the answer is never empty and cannot be used to tell a custom text from
-    /// the default one - `GET api/2.0/settings/whitelabel/logotext/isdefault` answers that question. Pass
-    /// `isDefault=true` to read the installation-wide default wordmark instead of this portal's; without it the
-    /// portal's own value is returned even when the installation carries a different default. Change the text with
-    /// `POST api/2.0/settings/whitelabel/logotext/save` and clear it with
-    /// `PUT api/2.0/settings/whitelabel/logotext/restore`. The value is stored as it was typed, at most 40 characters
-    /// long, and is not translated for the caller's language, so the same wordmark is returned for every user of the
-    /// portal.
+    /// Returns the logo text of the current portal. The answer is a string, not an object. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call is read-only. If the portal has no stored text, the call returns `ONLYOFFICE`, even if the installation
+    /// default differs. To learn whether a text is stored, use `GET api/2.0/settings/whitelabel/logotext/isdefault`.
+    /// With `isDefault=true`, the call returns the installation-wide default text instead. The text is the same for
+    /// every user and is not translated. To get public branding without signing in, use
+    /// `GET api/2.0/settings/whitelabel/logos`.
     /// </remarks>
     /// <summary>Get the white label logo text</summary>
     /// <path>api/2.0/settings/whitelabel/logotext</path>
@@ -513,17 +501,14 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Reports whether the current portal still uses the built-in wordmark or one that was stored for it, which is
-    /// what an interface needs to decide whether a Restore action applies to the text. Requires a DocSpace
-    /// administrator. The call is read-only and idempotent. The answer has the same shape as one entry of
-    /// `GET api/2.0/settings/whitelabel/logos/isdefault`, with `name` fixed to `logotext` and `default` set to `true`
-    /// while no text has been stored and to `false` once one has. Because `GET api/2.0/settings/whitelabel/logotext`
-    /// falls back to `ONLYOFFICE` when nothing is stored, this operation is the only way to tell a portal that
-    /// deliberately kept the built-in wordmark from one that saved the very same text. Pass `isDefault=true` to
-    /// inspect the installation-wide default branding instead of this portal's. The flag turns back to `true` after
-    /// `PUT api/2.0/settings/whitelabel/logotext/restore`, and to `false` after
-    /// `POST api/2.0/settings/whitelabel/logotext/save`. Saving the built-in wordmark itself counts as clearing the
-    /// setting, so the flag stays `true` in that case as well.
+    /// Returns whether the current portal still uses the built-in logo text. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call is read-only. The
+    /// answer has `name` set to `logotext`. Its `default` is `true` while the portal has no stored text. Saving
+    /// `ONLYOFFICE` itself clears the setting, so `default` stays `true`. After
+    /// `POST api/2.0/settings/whitelabel/logotext/save` with another text, `default` becomes `false`. After
+    /// `PUT api/2.0/settings/whitelabel/logotext/restore`, it becomes `true` again. With `isDefault=true`, the call
+    /// checks the installation-wide default text instead. To check the logos, use
+    /// `GET api/2.0/settings/whitelabel/logos/isdefault`.
     /// </remarks>
     /// <summary>Check the default logo text</summary>
     /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>
@@ -547,18 +532,13 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Clears the wordmark stored for the current portal, so the built-in `ONLYOFFICE` is printed again next to or
-    /// instead of the logo images. Requires a DocSpace administrator. Unlike
-    /// `POST api/2.0/settings/whitelabel/logotext/save` it does not need a plan that includes customization, so a
-    /// portal whose subscription no longer covers customization can still be reset. The call is destructive for the
-    /// stored text, which is not kept anywhere and has to be typed again to come back, and it is idempotent: `true`
-    /// comes back both when a text was cleared and when there was none. Logo images are left untouched and have their
-    /// own `PUT api/2.0/settings/whitelabel/logos/restore`. Pass `isDefault=true` to reset the installation-wide
-    /// default wordmark instead of this portal's, which only a server installation allows. After the call
-    /// `GET api/2.0/settings/whitelabel/logotext` reports `ONLYOFFICE` and
-    /// `GET api/2.0/settings/whitelabel/logotext/isdefault` reports `default` as `true`. The wordmark is the only
-    /// setting this operation touches, so the company details and the help links of the installation are left as they
-    /// are.
+    /// Clears the logo text of the current portal. The portal then shows the built-in `ONLYOFFICE` again. Requires
+    /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403.
+    /// Unlike the save call, it works without a plan that includes customization. The call cannot be undone. To get
+    /// the old text back, save it again. You can repeat the call, and it returns `true` each time. It does not change
+    /// logo images. To reset them, use `PUT api/2.0/settings/whitelabel/logos/restore`. With `isDefault=true`, the
+    /// call clears the installation-wide default text instead. Only a self-hosted installation without limited space
+    /// access allows this. Elsewhere the call returns 403.
     /// </remarks>
     /// <summary>Restore the white label logo text</summary>
     /// <path>api/2.0/settings/whitelabel/logotext/restore</path>
@@ -597,16 +577,12 @@ public class WhitelabelController(
     #region Company
 
     /// <remarks>
-    /// Returns the licensor details - company name, site, support email, postal address and phone - that the About
-    /// page and the notification letters print as the vendor of the installation. Any authenticated user may call it,
-    /// as these details are shown in the interface to everyone; no administrator permission is required. The call is
-    /// read-only and idempotent. The list holds the details currently in effect as its first item; when they have
-    /// been replaced by a reseller and the replacement is not itself marked as the licensor, the built-in ONLYOFFICE
-    /// details are appended as a second item, so a caller can print both the reseller and the original vendor. A
-    /// single-item list therefore means that the current details are the only ones to show. The values are
-    /// installation-wide rather than per-portal, so every portal of a server installation reports the same ones. The
-    /// same data in the form the settings interface edits is served by `GET api/2.0/settings/rebranding/company`, and
-    /// it is written by `POST api/2.0/settings/rebranding/company`.
+    /// Returns the licensor details that the About page and letters show as the vendor. Any signed-in user can call
+    /// it. The call is read-only. The first item holds the details in effect. A reseller can replace them without
+    /// marking its details as the licensor. Then a second item holds the built-in ONLYOFFICE details, so the page can
+    /// show both. A single item means there is nothing else to show. The details apply to the whole installation, so
+    /// all its portals return the same list. To read the details in the form the settings page edits, use
+    /// `GET api/2.0/settings/rebranding/company`. To change them, use `POST api/2.0/settings/rebranding/company`.
     /// </remarks>
     /// <summary>Get the licensor data</summary>
     /// <path>api/2.0/settings/companywhitelabel</path>
@@ -631,16 +607,15 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Stores the company details - name, site, support email, postal address and phone - that the About page and the
-    /// notification letters print as the vendor. The whole set is replaced by the `settings` object of the request,
-    /// so send every field, not only the changed ones; a request without that object, or with an email or a site that
-    /// is not a valid value, is rejected as an invalid request. Requires a DocSpace administrator, a server
-    /// installation with unrestricted space access and a plan that includes customization, which
-    /// `GET api/2.0/settings/enablewhitelabel` reports; on a SaaS portal the call is refused. The values are
-    /// installation-wide, so the change reaches every portal of that installation. Two fields are not taken from the
-    /// request: the licensor flag is always stored as `false`, and hiding the About page is silently kept off unless
-    /// the plan allows it. The call is mutating and idempotent, and answers `true`. Read the result back with
-    /// `GET api/2.0/settings/rebranding/company` and undo it with `DELETE api/2.0/settings/rebranding/company`.
+    /// Changes the company details that the About page and letters show as the vendor. The `settings` object replaces
+    /// the whole set, so send every field. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. Only a self-hosted installation without limited space access
+    /// allows the call. Elsewhere, including a SaaS portal, it returns 403. If the plan has no customization or the
+    /// installation hides branding, the call returns 402. The details apply to the whole installation and reach all
+    /// its portals. The call always stores `isLicensor` as `false`. It stores `hideAbout` only if the plan includes
+    /// branding. The call changes data and returns `true`. You can repeat it with the same body. To undo the call,
+    /// use `DELETE api/2.0/settings/rebranding/company`. The call returns 400 if `settings`, `email`, or `site` is
+    /// missing or not valid.
     /// </remarks>
     /// <summary>Save the company white label settings</summary>
     /// <path>api/2.0/settings/rebranding/company</path>
@@ -691,16 +666,13 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Returns the company details that the About page and the notification letters print as the vendor, in the form
-    /// the settings interface edits them. Any authenticated user may call it; no administrator permission is
-    /// required, and a portal whose payment has lapsed is served as well. The call is read-only and idempotent.
-    /// Alongside the stored fields the answer carries `isLicensor`, which tells whether these details belong to the
-    /// vendor of the product itself, and `isDefault`, which tells whether they are still the built-in ONLYOFFICE
-    /// ones. The values are installation-wide, so every portal of a server installation reports the same ones. The
-    /// response is revalidatable: it carries `Last-Modified`, and sending that value back in `If-Modified-Since`
-    /// yields an empty body while the details have not changed, which makes polling cheap. For the About page, where
-    /// the built-in vendor has to be shown next to a reseller, use `GET api/2.0/settings/companywhitelabel` instead.
-    /// Change the details with `POST api/2.0/settings/rebranding/company`.
+    /// Returns the company details that the About page and letters show as the vendor. This is the form the settings
+    /// page edits. Any signed-in user can call it, even when the portal payment has lapsed. The call is read-only.
+    /// The details apply to the whole installation, so all its portals return the same values. The answer has a
+    /// `Last-Modified` header. Send that value in `If-Modified-Since` to check for changes. If nothing changed, the
+    /// call returns 304 with an empty body. To show both a reseller and the original vendor, use
+    /// `GET api/2.0/settings/companywhitelabel`. To change the details, use
+    /// `POST api/2.0/settings/rebranding/company`.
     /// </remarks>
     /// <summary>Get the company white label settings</summary>
     /// <path>api/2.0/settings/rebranding/company</path>
@@ -717,16 +689,14 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Discards the company details stored for the installation and brings back the built-in ONLYOFFICE name, site,
-    /// email, address and phone, so the About page and the notification letters print the original vendor again.
-    /// Requires a DocSpace administrator and a server installation with unrestricted space access; on a SaaS portal
-    /// the call is refused. Unlike `POST api/2.0/settings/rebranding/company` it does not need a plan that includes
-    /// customization, so an installation whose subscription no longer covers it can still be reset. The call is
-    /// destructive: the previous details are not kept anywhere and have to be entered again to come back. It is
-    /// idempotent, and instead of a flag it answers the details that are now in effect, so no follow-up read is
-    /// needed. The reset is installation-wide and reaches every portal. The help and support links are reset
-    /// separately by `DELETE api/2.0/settings/rebranding/additional`, and the logos and the wordmark of a single
-    /// portal by the restore operations under `api/2.0/settings/whitelabel`.
+    /// Deletes the stored company details of the installation and brings back the built-in ONLYOFFICE ones. The About
+    /// page and letters then show the original vendor. Requires the EditPortalSettings permission, which the portal
+    /// owner and DocSpace admins have. Other callers get 403. Only a self-hosted installation without limited space
+    /// access allows the call. Elsewhere, including a SaaS portal, it returns 403. Unlike the save call, it works
+    /// without a plan that includes customization. The call cannot be undone. To get the old details back, save them
+    /// again. You can repeat it. The call returns the built-in details that are now in effect. The reset reaches
+    /// every portal of the installation. To reset the help links, use
+    /// `DELETE api/2.0/settings/rebranding/additional`.
     /// </remarks>
     /// <summary>Delete the company white label settings</summary>
     /// <path>api/2.0/settings/rebranding/company</path>
@@ -754,16 +724,14 @@ public class WhitelabelController(
     #region Additional
 
     /// <remarks>
-    /// Stores which of the ONLYOFFICE help and community resources the interface offers: the sample documents, the
-    /// Help Center link, the Feedback and Support link, the user forum, the video guides and the license agreements.
-    /// The whole set is replaced by the `settings` object of the request, so send every flag, not only the changed
-    /// ones - a flag left out is stored as off. A request without that object is rejected as an invalid request.
-    /// Requires a DocSpace administrator, a server installation with unrestricted space access and a plan that
-    /// includes customization, which `GET api/2.0/settings/enablewhitelabel` reports; on a SaaS portal the call is
-    /// refused. The flags are installation-wide, so the change reaches every portal of that installation. The call is
-    /// mutating and idempotent, and answers `true`. Only the visibility of these entries is controlled here, not the
-    /// addresses behind them. Read the result back with `GET api/2.0/settings/rebranding/additional` and undo it with
-    /// `DELETE api/2.0/settings/rebranding/additional`.
+    /// Changes which help and community resources the interface shows. The `settings` object replaces the whole set,
+    /// so send every flag. The call stores a missing flag as `false`. Requires the EditPortalSettings permission,
+    /// which the portal owner and DocSpace admins have. Other callers get 403. Only a self-hosted installation
+    /// without limited space access allows the call. Elsewhere, including a SaaS portal, it returns 403. If the plan
+    /// has no customization or the installation hides branding, the call returns 402. The flags apply to the whole
+    /// installation and reach all its portals. They control only whether entries show, not their addresses. The call
+    /// changes data and returns `true`. You can repeat it with the same body. To undo the call, use
+    /// `DELETE api/2.0/settings/rebranding/additional`. If `settings` is missing, the call returns 400.
     /// </remarks>
     /// <summary>Save the additional white label settings</summary>
     /// <path>api/2.0/settings/rebranding/additional</path>
@@ -791,16 +759,11 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Returns which of the ONLYOFFICE help and community resources the interface may offer - the sample documents,
-    /// the Help Center link, the Feedback and Support link, the user forum, the video guides and the license
-    /// agreements - so a client can hide the entries that are switched off. Any authenticated user may call it; no
-    /// administrator permission is required, and a portal whose payment has lapsed is served as well. The call is
-    /// read-only and idempotent. Each flag is `true` when the entry may be shown and `false` when it must be hidden,
-    /// and `isDefault` tells whether the whole set is still the built-in one. The flags are installation-wide, so
-    /// every portal of a server installation reports the same ones. They say nothing about the caller's own
-    /// permissions, and the addresses behind the entries are not part of the answer. Change the flags with
-    /// `POST api/2.0/settings/rebranding/additional` and reset them with
-    /// `DELETE api/2.0/settings/rebranding/additional`.
+    /// Returns which help and community resources the interface may show. An app hides the entries whose flags are
+    /// `false`. Any signed-in user can call it, even when the portal payment has lapsed. The call is read-only. The
+    /// flags apply to the whole installation, so all its portals return the same values. They do not depend on the
+    /// permissions of the caller. The answer does not include the addresses of the entries. To change the flags, use
+    /// `POST api/2.0/settings/rebranding/additional`.
     /// </remarks>
     /// <summary>Get the additional white label settings</summary>
     /// <path>api/2.0/settings/rebranding/additional</path>
@@ -816,15 +779,13 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Discards the resource flags stored for the installation and brings back the built-in set, so the sample
-    /// documents, the Help Center link, the Feedback and Support link, the user forum, the video guides and the
-    /// license agreements are offered as they are out of the box. Requires a DocSpace administrator and a server
-    /// installation with unrestricted space access; on a SaaS portal the call is refused. Unlike
-    /// `POST api/2.0/settings/rebranding/additional` it does not need a plan that includes customization, so an
-    /// installation whose subscription no longer covers it can still be reset. The call is destructive for the stored
-    /// flags, which have to be set again to come back, and it is idempotent. Instead of a flag it answers the set
-    /// that is now in effect, so no follow-up read is needed. The reset is installation-wide and reaches every
-    /// portal, and it leaves the visibility of the About page alone. The company details are reset separately by
+    /// Deletes the stored resource flags of the installation and brings back the built-in set. The interface then
+    /// shows the help and community resources as it does by default. Requires the EditPortalSettings permission,
+    /// which the portal owner and DocSpace admins have. Other callers get 403. Only a self-hosted installation
+    /// without limited space access allows the call. Elsewhere, including a SaaS portal, it returns 403. Unlike the
+    /// save call, it works without a plan that includes customization. The call cannot be undone. To get the old
+    /// flags back, save them again. You can repeat it. The call returns the built-in flags that are now in effect.
+    /// The reset reaches every portal of the installation. To reset the company details, use
     /// `DELETE api/2.0/settings/rebranding/company`.
     /// </remarks>
     /// <summary>Delete the additional white label settings</summary>
@@ -924,17 +885,13 @@ public class WhitelabelController(
     #endregion
 
     /// <remarks>
-    /// Reports whether branding may be configured for the current portal at all, which is the check to make before
-    /// offering the rebranding interface or calling any of the save operations under `api/2.0/settings/whitelabel`.
-    /// Requires a DocSpace administrator. The call is read-only and idempotent. The answer is `true` only when both
-    /// conditions hold: the branding section is not switched off in the installation configuration, and the portal's
-    /// current plan includes customization. It comes back as `false` on a plan without customization, which is
-    /// exactly the case in which `POST api/2.0/settings/whitelabel/logos/save`,
-    /// `POST api/2.0/settings/whitelabel/logos/savefromfiles` and `POST api/2.0/settings/whitelabel/logotext/save`
-    /// are refused as payment required. The restore operations do not depend on this flag and stay available, so a
-    /// portal that loses branding can still be reset to the built-in logos and wordmark. The flag says nothing about
-    /// the installation-wide default branding, which additionally needs a server installation with unrestricted space
-    /// access, and nothing about the company details and help links under `api/2.0/settings/rebranding`.
+    /// Returns whether the current portal can change its branding. Requires the EditPortalSettings permission, which
+    /// the portal owner and DocSpace admins have. Other callers get 403. The call is read-only. The answer is `true`
+    /// only if the installation does not hide branding and the portal plan includes customization. If it is `false`,
+    /// every branding save call returns 402. This includes the logo and logo text saves under
+    /// `api/2.0/settings/whitelabel`. It also includes the company and help link saves under
+    /// `api/2.0/settings/rebranding`. The restore and delete calls work in both cases. The installation-wide branding
+    /// also needs a self-hosted installation, which this answer does not check.
     /// </remarks>
     /// <summary>Check the white label availability</summary>
     /// <path>api/2.0/settings/enablewhitelabel</path>

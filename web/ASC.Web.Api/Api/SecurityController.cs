@@ -78,10 +78,9 @@ public class SecurityController(
     /// Returns the 20 most recent login events of the portal, newest first. The list includes successful sign-ins,
     /// sign-outs, and failed attempts. Requires the EditPortalSettings permission, which the portal owner and
     /// DocSpace admins have. Other callers get 403. In a cloud installation, the call returns 402 if the login
-    /// history and audit trail section is turned off. The call is read-only and takes no parameters. In `actionText`,
-    /// the call cuts every inserted value to 50 characters. An empty list means the portal has recorded no login
-    /// events. To filter by user, action, or period, or to page through the history, use
-    /// `GET api/2.0/security/audit/login/filter`.
+    /// history and audit trail section is turned off. The call is read-only. In `actionText`, the call cuts every
+    /// inserted value to 50 characters. An empty list means the portal has recorded no login events. To filter by
+    /// user, action, or period, or to page through the history, use `GET api/2.0/security/audit/login/filter`.
     /// </remarks>
     /// <summary>
     /// Get recent login events
@@ -107,7 +106,7 @@ public class SecurityController(
     /// Returns the 20 most recent audit events of the portal, newest first. Audit events record what members created,
     /// changed, deleted, shared, or set. Requires the EditPortalSettings permission, which the portal owner and
     /// DocSpace admins have. Other callers get 403. In a cloud installation, the call returns 402 if the login
-    /// history and audit trail section is turned off. The call is read-only and takes no parameters. It looks back
+    /// history and audit trail section is turned off. The call is read-only. It looks back
     /// only as far as the audit trail lifetime of `GET api/2.0/security/audit/settings/lifetime`. In `actionText`,
     /// the call cuts every inserted value to 50 characters. An empty list means the portal recorded no audit events
     /// in that period. To filter by user, module, action, or period, use `GET api/2.0/security/audit/events/filter`.
@@ -140,10 +139,9 @@ public class SecurityController(
     /// <remarks>
     /// Returns the login events of the portal that match the query filters, newest first. You can filter by user,
     /// login action, and period. An omitted filter matches everything. Requires the EditPortalSettings permission,
-    /// which the portal owner and DocSpace admins have. Other callers get 403. If the pricing plan has no audit
-    /// option, the call ignores the filters. It then returns the 20 most recent events, as
-    /// `GET api/2.0/security/audit/login/last` does. In a cloud installation, the call returns 402 if the login
-    /// history and audit trail section is turned off. The call is read-only. It applies the filters first and the
+    /// which the portal owner and DocSpace admins have. Other callers get 403. Without the audit option of the
+    /// pricing plan, the call ignores the filters. It then returns the 20 most recent events. In a cloud installation,
+    /// the call returns 402 if the login history and audit trail section is turned off. The call is read-only. It applies the filters first and the
     /// page window of `startIndex` and `count` after them. So a full page means more matching events may exist, and
     /// there is no total count. To get the values of `action`, use `GET api/2.0/security/audit/types`. The call
     /// returns 400 for a parameter of the wrong type, a `count` out of range, or an invalid date.
@@ -178,13 +176,14 @@ public class SecurityController(
     /// <remarks>
     /// Returns the audit events of the portal that match the query filters, newest first. You can filter by user,
     /// module, action, action type, entry type, target, and period. An omitted filter matches everything. Requires
-    /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If
-    /// the pricing plan has no audit option, the call ignores the filters. It then returns the 20 most recent events,
-    /// as `GET api/2.0/security/audit/events/last` does. In a cloud installation, the call returns 402 if the login
-    /// history and audit trail section is turned off. The call is read-only. To get the filter values, use
-    /// `GET api/2.0/security/audit/types` and `GET api/2.0/security/audit/mappers`. If `action` is set, the call
-    /// matches only that action and ignores `moduleType` and `actionType`. The call matches `target` exactly. It
-    /// uses `target` only together with `action` or `entryType`. The call applies the filters first and the page
+    /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403.
+    /// Without the audit option of the pricing plan, the call ignores the filters. It then returns the 20 most
+    /// recent events. In a cloud installation, the call returns 402 if the login history and audit trail section is turned
+    /// off. The call is read-only. To get the filter values, use `GET api/2.0/security/audit/types` and
+    /// `GET api/2.0/security/audit/mappers`. If `action` is set, the call matches only that action and ignores
+    /// `moduleType` and `actionType`. With `action`, the call matches `target` exactly. With `entryType`, it keeps
+    /// the events whose `target` contains the value. It ignores `entryType` without `target`, and `target` without
+    /// `action` or `entryType`. The call applies the filters first and the page
     /// window after them. So a full page means more matching events may exist, and there is no total count. The call
     /// returns 400 for a parameter of the wrong type, a `count` out of range, or an invalid date.
     /// </remarks>
@@ -294,8 +293,8 @@ public class SecurityController(
     /// Starts a background job that builds a login history report of the portal, and returns the job state. Requires
     /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. In
     /// a cloud installation, the call returns 402 if the pricing plan has no audit option. It also returns 402 if the
-    /// login history and audit trail section is turned off. By default, the report covers the login history lifetime
-    /// of `GET api/2.0/security/audit/settings/lifetime`, up to now. You can narrow the period with `from` and `to`.
+    /// login history and audit trail section is turned off. Without `from` and `to`, the report covers the login
+    /// history lifetime of `GET api/2.0/security/audit/settings/lifetime`, up to now.
     /// The call moves an earlier `from` to the start of the lifetime and a future `to` to now. It ignores the other
     /// filters of `GET api/2.0/security/audit/login/filter`. The call queues work. Repeat
     /// `GET api/2.0/security/audit/login/report` until `isCompleted` is true. The portal saves the file in the
@@ -396,8 +395,8 @@ public class SecurityController(
     /// Starts a background job that builds an audit trail report of the portal, and returns the job state. Requires
     /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. In
     /// a cloud installation, the call returns 402 if the pricing plan has no audit option. It also returns 402 if the
-    /// login history and audit trail section is turned off. By default, the report covers the audit trail lifetime of
-    /// `GET api/2.0/security/audit/settings/lifetime`, up to now. You can narrow the period with `from` and `to`. The
+    /// login history and audit trail section is turned off. Without `from` and `to`, the report covers the audit trail
+    /// lifetime of `GET api/2.0/security/audit/settings/lifetime`, up to now. The
     /// call moves an earlier `from` to the start of the lifetime and a future `to` to now. It ignores the other
     /// filters of `GET api/2.0/security/audit/events/filter`. The call queues work. Repeat
     /// `GET api/2.0/security/audit/events/report` until `isCompleted` is true. The portal saves the file in the

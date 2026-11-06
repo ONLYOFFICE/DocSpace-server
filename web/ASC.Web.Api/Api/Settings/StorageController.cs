@@ -66,18 +66,15 @@ public class StorageController(
     private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Api");
 
     /// <remarks>
-    /// Returns the third-party storages the installation can keep portal data in, the providers the build ships with,
-    /// such as Amazon S3, Google Cloud Storage or Rackspace. The built-in local storage is not among them: when none
-    /// of the entries is `current`, the portal data sits in the local storage. Each entry carries the storage
-    /// identifier and title, the authentication keys the provider expects, `isSet` telling whether those keys are
-    /// already filled in on the server, and `current` marking the one the portal uses right now. Keys of the current
-    /// storage are read from the saved settings, keys of the others from the provider configuration, so a value that
-    /// was never configured comes back empty. The caller needs the permission to edit portal settings, which in
-    /// practice means the portal owner or a DocSpace admin, and the installation has to be a server one whose access
-    /// space is not restricted; otherwise the call is refused with 403. Nothing is written and the call is safe to
-    /// repeat. Use `PUT api/2.0/settings/storage` to switch the storage, `DELETE api/2.0/settings/storage` to go back
-    /// to the local one, and `GET api/2.0/settings/storage/cdn` or `GET api/2.0/settings/storage/backup` for the CDN
-    /// and backup targets.
+    /// Returns the third-party storages that can keep the portal data, such as Amazon S3 or Google Cloud Storage. The
+    /// built-in local storage is not in the list. If no entry is `current`, the portal keeps its data in the local
+    /// storage. Each entry shows its keys and whether the server has them set (`isSet`). Keys of the current storage
+    /// come from the saved settings. Keys of other storages come from the provider configuration and are empty if
+    /// nobody set them. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. The call also returns 403 if the installation is not self-hosted or limits the access
+    /// space. The call is read-only. To switch the storage, use `PUT api/2.0/settings/storage`. To return to the local
+    /// storage, use `DELETE api/2.0/settings/storage`. For the CDN and backup storages, use
+    /// `GET api/2.0/settings/storage/cdn` and `GET api/2.0/settings/storage/backup`.
     /// </remarks>
     /// <summary>
     /// Get the portal storages
@@ -105,17 +102,13 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Returns how far the current portal has got in moving its data to another storage, as a percentage from 0 to
-    /// 100. The migration itself is started by `PUT api/2.0/settings/storage` or `DELETE api/2.0/settings/storage`,
-    /// which put the portal into the migrating state; poll this operation until the value reaches 100, then the
-    /// portal is served from the new storage. A value of -1 means storage migration is not offered on this
-    /// installation, which is the case for every portal that is not a server one. Ask for the progress only once a
-    /// migration has actually been started: for a portal whose migration the server does not remember, the call fails
-    /// instead of answering with a zero. The response carries the percentage only, without the error flag the
-    /// migration service reports internally, so a value that stops advancing is a reason to check the portal state
-    /// with `GET api/2.0/portal` rather than proof of progress. The caller needs the permission to edit portal
-    /// settings, which in practice means the portal owner or a DocSpace admin, and the call is accepted even when the
-    /// portal payment has lapsed. Nothing is written and the call is safe to repeat.
+    /// Returns the progress of moving the portal data to another storage, as a percentage from 0 to 100. To start the
+    /// move, use `PUT api/2.0/settings/storage` or `DELETE api/2.0/settings/storage`. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call works even if the
+    /// portal is not paid. The call is read-only. This is the call to poll. Repeat it until the value reaches 100. Then
+    /// the portal works from the new storage. If the server has no migration for the portal, the call fails with a
+    /// server error. On an installation that is not self-hosted, the call returns -1. The value does not show migration
+    /// errors. If it stops growing, check the portal state with `GET api/2.0/portal`.
     /// </remarks>
     /// <summary>
     /// Get the storage migration progress
@@ -140,19 +133,18 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Queues encryption of everything the installation keeps in its local storage, or decryption of it when the data
-    /// is already encrypted: the saved encryption state decides the direction, so the same call encrypts a decrypted
-    /// installation and decrypts an encrypted one. It covers the whole server, not one portal, and only a server
-    /// installation with the feature switched on can run it, with neither the portal storage nor the CDN pointing at
-    /// a third-party provider: reset those first with `DELETE api/2.0/settings/storage` and
-    /// `DELETE api/2.0/settings/storage/cdn`. No backup may be running, and the backup schedules of all portals are
-    /// dropped as part of starting. The caller needs the permission to edit portal settings, that is the portal owner
-    /// or a DocSpace admin, and an unrestricted access space. This is a long, disruptive operation: every portal is
-    /// put into the encryption state and stays unavailable until it ends, so do not repeat the call while it runs,
-    /// and follow it with `GET api/2.0/settings/encryption/progress` instead. The password is generated on the server
-    /// and never returned by the API. Pass `notifyUsers=true` to mail every user before the portals go down. The
-    /// response is true once the job is queued, and false where encryption is switched off, nothing being started
-    /// then.
+    /// Starts encryption of the local storage of the installation, or decryption if the data is already encrypted. The
+    /// saved encryption state sets the direction. The run covers all portals of the installation. First, reset a
+    /// third-party storage with `DELETE api/2.0/settings/storage` and a CDN with `DELETE api/2.0/settings/storage/cdn`.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call also returns 403 if the installation is not self-hosted or limits the access space. The call
+    /// queues work and deletes the backup schedules of all portals. Every portal stays unavailable until the run ends.
+    /// Repeat `GET api/2.0/settings/encryption/progress` until it returns 100. Do not repeat this call during a run.
+    /// The server generates the password and never returns it. To email every user before the portals go down, set
+    /// `notifyUsers` to true. The call returns `true` when the run is queued. In a custom build, it returns `false` and
+    /// starts nothing. The call returns 415 if the installation does not offer encryption. It also returns 415 if the
+    /// current portal uses a third-party storage or CDN. If a backup of any portal is running, the call returns 500. If
+    /// the portal is not paid, the call returns 402.
     /// </remarks>
     /// <summary>
     /// Start the storage encryption
@@ -287,15 +279,13 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Returns the encryption state of the installation storage: the status, which is one of decrypted, encryption
-    /// started, encrypted or decryption started, and the flag saying whether users are mailed when an encryption run
-    /// begins. The encryption password is never returned. The caller is expected to have the permission to edit portal settings, which in practice means
-    /// the portal owner or a DocSpace admin, on a server installation with an unrestricted access space; on any other
-    /// installation, and whenever the check fails, the operation answers with an empty body instead of an error. An
-    /// empty answer is therefore not proof that encryption is off, only that the settings cannot be read in this
-    /// context. Nothing is written and the call is safe to repeat. Use `GET api/2.0/settings/encryption/progress` to
-    /// follow a run that is in flight, and `POST api/2.0/settings/encryption/start` to encrypt or decrypt the
-    /// storage.
+    /// Returns the encryption state of the installation storage and whether users get an email when a run starts. The
+    /// response never includes the encryption password. Requires the EditPortalSettings permission, which the portal
+    /// owner and DocSpace admins have. Other callers get an empty body, not an error. The call also returns an empty
+    /// body if the installation is not self-hosted. The same happens if it has no encryption or limits the access
+    /// space. It returns an empty body on any other error too. So an empty body does not mean that encryption is off.
+    /// The call is read-only. To follow a run, use `GET api/2.0/settings/encryption/progress`. To start one, use
+    /// `POST api/2.0/settings/encryption/start`.
     /// </remarks>
     /// <summary>
     /// Get the storage encryption settings
@@ -334,16 +324,13 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Returns how far the running encryption or decryption of the installation storage has got, as a percentage from
-    /// 0 to 100. It reports the run started by `POST api/2.0/settings/encryption/start`, whose direction, encryption
-    /// or decryption, is told by `GET api/2.0/settings/encryption/settings`. An empty response means no run is in
-    /// flight and no recent result is remembered: the value of a finished run is kept for one minute after it
-    /// completes and then dropped, so poll often enough not to miss the end of the operation. A value of -1 means the
-    /// build does not offer storage encryption at all, and on an installation that is not a server one the call is
-    /// refused rather than answered. Unlike the other encryption operations, this one asks for no portal-settings
-    /// permission: any authenticated member of the portal may read the progress, which is intentional, because the
-    /// portals are unavailable while the run is on and their users need to see when it ends. Nothing is written and
-    /// the call is safe to repeat.
+    /// Returns the progress of the encryption or decryption run of the installation storage, as a percentage from 0
+    /// to 100. To start a run, use `POST api/2.0/settings/encryption/start`. To see its direction, use
+    /// `GET api/2.0/settings/encryption/settings`. Any signed-in user can call it. The call is read-only. This is the
+    /// call to poll. Repeat it until the value reaches 100. The server keeps the final value for one minute after the
+    /// run ends. After that, and when no run exists, the response is empty. So poll at least once a minute. In a custom
+    /// build, the call returns -1. The call returns 415 if the installation does not offer encryption or is not
+    /// self-hosted.
     /// </remarks>
     /// <summary>
     /// Get the storage encryption progress
@@ -374,18 +361,15 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Points the current portal at another storage and saves the credentials it needs: `module` is the identifier of
-    /// one of the storages listed by `GET api/2.0/settings/storage`, and `props` carries that provider's
-    /// authentication keys as name and value pairs, for example the bucket, region and access key of an Amazon S3
-    /// storage. The provider has to be available on the server, which the `isSet` flag of the listing tells,
-    /// otherwise the request is rejected as invalid. Sending the module the portal already uses changes nothing and
-    /// returns the saved settings as they are. Any other module starts an asynchronous migration of the portal data:
-    /// the portal moves into the migrating state and stays unavailable until the transfer ends, so follow it with
-    /// `GET api/2.0/settings/storage/progress` and do not send a second switch while it runs. The caller needs the
-    /// permission to edit portal settings, which in practice means the portal owner or a DocSpace admin, on a server
-    /// installation with an unrestricted access space. The response is the stored configuration, module and
-    /// properties, not the state of the migration. To return to the built-in local storage call
-    /// `DELETE api/2.0/settings/storage`, and for the CDN use `PUT api/2.0/settings/storage/cdn`.
+    /// Switches the portal to another storage and starts moving the portal data to it. Set `module` to an entry of
+    /// `GET api/2.0/settings/storage` and `props` to the keys of that provider. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call also returns 403 if
+    /// the installation is not self-hosted or limits the access space. The call queues work. The portal stays
+    /// unavailable until the move ends. Repeat `GET api/2.0/settings/storage/progress` until it returns 100. Do not
+    /// send another switch during a move. If `module` is already the current storage, the call changes nothing and
+    /// returns the current settings. Otherwise, it returns the requested settings, not the state of the move. If the
+    /// provider of `module` is not set on the server (`isSet` is false), the call returns 400. To return to the local
+    /// storage, use `DELETE api/2.0/settings/storage`. To select a CDN, use `PUT api/2.0/settings/storage/cdn`.
     /// </remarks>
     /// <summary>
     /// Switch the portal storage
@@ -430,17 +414,14 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Drops the third-party storage configuration of the current portal, module and saved credentials alike, and
-    /// starts an asynchronous migration of the portal data back into the built-in local storage. The portal moves
-    /// into the migrating state and stays unavailable until the transfer ends, so follow it with
-    /// `GET api/2.0/settings/storage/progress`; the call itself returns as soon as the migration has been handed to
-    /// the storage service and gives back no body. The caller needs the permission to edit portal settings, which in
-    /// practice means the portal owner or a DocSpace admin, on a server installation with an unrestricted access
-    /// space. This is a mutating and slow operation rather than a destructive one: documents are copied back rather
-    /// than deleted, but the credentials of the previous storage are gone from the settings and have to be sent again
-    /// with `PUT api/2.0/settings/storage` to switch back. Repeating the call while a migration is running starts
-    /// another one, so poll instead. Resetting the storage is also the step that makes
-    /// `POST api/2.0/settings/encryption/start` possible, since encryption only covers the local storage.
+    /// Clears the third-party storage of the portal and starts moving the portal data back to the local storage.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call also returns 403 if the installation is not self-hosted or limits the access space. The call
+    /// queues work and returns no body. The portal stays unavailable until the move ends. Repeat
+    /// `GET api/2.0/settings/storage/progress` until it returns 100. Do not repeat this call during a move. Each call
+    /// starts a new move. The move copies the documents and does not delete them. The call deletes the saved keys of
+    /// the previous storage. To switch back, send them again with `PUT api/2.0/settings/storage`. Before
+    /// `POST api/2.0/settings/encryption/start`, reset the storage with this call.
     /// </remarks>
     /// <summary>
     /// Reset the storage settings
@@ -474,17 +455,14 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Returns the storages that can serve the static content of the portal through a content delivery network, which
-    /// is the subset of the providers of `GET api/2.0/settings/storage` that offer a CDN of their own. The entries
-    /// have the same shape as in the storage listing: identifier and title, the authentication keys the provider
-    /// expects, `isSet` telling whether those keys are filled in on the server, and `current` marking the CDN the
-    /// portal uses now. Keys of the current entry come from the saved CDN settings and keys of the others from the
-    /// provider configuration. An empty list means the build ships no CDN-capable provider, and a list where nothing
-    /// is current means the portal serves its static content itself. The caller needs the permission to edit portal
-    /// settings, which in practice means the portal owner or a DocSpace admin, on a server installation with an
-    /// unrestricted access space. Nothing is written and the call is safe to repeat. Use
-    /// `PUT api/2.0/settings/storage/cdn` to select a CDN and `DELETE api/2.0/settings/storage/cdn` to stop using
-    /// one.
+    /// Returns the storages that can serve the static content of the portal through a CDN. The list has only the
+    /// providers of `GET api/2.0/settings/storage` that offer a CDN. Each entry shows its keys, whether the server has
+    /// them set (`isSet`), and whether the portal uses it (`current`). Keys of the current entry come from the saved
+    /// CDN settings. If no entry is `current`, the portal serves its static content itself. An empty list means that
+    /// the build has no CDN provider. Requires the EditPortalSettings permission, which the portal owner and DocSpace
+    /// admins have. Other callers get 403. The call also returns 403 if the installation is not self-hosted or limits
+    /// the access space. The call is read-only. To select a CDN, use `PUT api/2.0/settings/storage/cdn`. To stop using
+    /// one, use `DELETE api/2.0/settings/storage/cdn`.
     /// </remarks>
     /// <summary>
     /// Get the CDN storages
@@ -512,18 +490,14 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Selects the content delivery network that serves the static content of the portal and saves the credentials it
-    /// needs: `module` is the identifier of one of the entries of `GET api/2.0/settings/storage/cdn`, and `props`
-    /// carries that provider's authentication keys as name and value pairs. The provider has to be available on the
-    /// server, which the `isSet` flag of the listing tells, otherwise the request is rejected as invalid. Sending the
-    /// module the portal already uses changes nothing and returns the saved settings as they are. Any other module is
-    /// saved and the upload of the static content is handed to the storage service; the settings come back only when
-    /// that hand-over succeeds, a failure being reported as a server error. Unlike the portal storage this has no
-    /// progress operation, so there is nothing to poll: the content appears on the CDN once the service has copied
-    /// it. Only static content is affected here, never documents; for those use `PUT api/2.0/settings/storage`. The
-    /// caller needs the permission to edit portal settings, which in practice means the portal owner or a DocSpace
-    /// admin, on a server installation with an unrestricted access space. The response is the stored CDN
-    /// configuration.
+    /// Selects the CDN that serves the static content of the portal and starts copying the content to it. Set `module`
+    /// to an entry of `GET api/2.0/settings/storage/cdn` and `props` to the keys of that provider. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The call
+    /// also returns 403 if the installation is not self-hosted or limits the access space. The call queues work. No
+    /// call shows its progress. The content appears on the CDN after the server copies it. You can repeat it. If
+    /// `module` is already the current CDN, the call changes nothing and returns the current settings. Otherwise, it
+    /// returns the requested CDN settings. If the provider of `module` is not set on the server (`isSet` is false), the
+    /// call returns 400. The call does not move documents. To move them, use `PUT api/2.0/settings/storage`.
     /// </remarks>
     /// <summary>
     /// Update the CDN storage
@@ -570,16 +544,14 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Drops the CDN configuration of the current portal, module and saved credentials alike, so that the static
-    /// content is served by the portal itself again. Nothing is uploaded or migrated, no state change is queued and
-    /// the call gives back no body: only the settings are cleared, and files already copied to the content delivery
-    /// network are left where they are, to be removed in the provider's own console if that is wanted. The change
-    /// takes effect for links built after it, so a page that is already open may keep pointing at the CDN until it is
-    /// reloaded. Repeating the call is harmless, because clearing an empty configuration does nothing. The caller
-    /// needs the permission to edit portal settings, which in practice means the portal owner or a DocSpace admin, on
-    /// a server installation with an unrestricted access space. Use `GET api/2.0/settings/storage/cdn` to see what is
-    /// configured now and `PUT api/2.0/settings/storage/cdn` to select a CDN again; the portal storage of the
-    /// documents is untouched by this operation and is reset with `DELETE api/2.0/settings/storage` instead.
+    /// Clears the CDN settings of the portal, so the portal serves its static content itself again. The call does not
+    /// upload, move, or delete files. Files on the CDN stay there until you delete them in the provider console. Links
+    /// that the portal builds after the call no longer use the CDN. An open page may use the CDN until you reload it.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call also returns 403 if the installation is not self-hosted or limits the access space. The call
+    /// changes data and returns no body. You can repeat it. To see the current CDN, use
+    /// `GET api/2.0/settings/storage/cdn`. To select a CDN again, use `PUT api/2.0/settings/storage/cdn`. To reset the
+    /// document storage, use `DELETE api/2.0/settings/storage`.
     /// </remarks>
     /// <summary>
     /// Reset the CDN storage settings
@@ -599,17 +571,12 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Returns the storages that can hold portal backups, with the one the saved backup schedule writes to marked as
-    /// `current` and its parameters filled in from that schedule; when no schedule is saved, or when the schedule
-    /// stores backups somewhere else than a third-party provider, none of the entries is current. Each entry has the
-    /// same shape as in `GET api/2.0/settings/storage`: identifier, title, the authentication keys the provider
-    /// expects, and `isSet` telling whether those keys are filled in on the server. Pass `dump=true` to read the
-    /// schedule of the whole server instead of the one of the current portal, which only makes sense on a server
-    /// installation. The caller needs the permission to edit portal settings, which in practice means the portal
-    /// owner or a DocSpace admin, and on an installation that is not a server one the call is also refused unless
-    /// backup is available there. Nothing is written and the call is safe to repeat. This operation says nothing
-    /// about where the portal data itself lives; the backup schedule is configured through the backup API, and the
-    /// storage of the documents through `PUT api/2.0/settings/storage`.
+    /// Returns the storages that can keep portal backups. The storage of the saved backup schedule is `current`, with
+    /// its keys from the schedule. If no schedule exists or it uses no third-party storage, no entry is `current`.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. If the installation is not self-hosted and offers no backup, the call also returns 403. The call is
+    /// read-only. It does not show where the portal keeps its data. To change that storage, use
+    /// `PUT api/2.0/settings/storage`.
     /// </remarks>
     /// <summary>
     /// Get the backup storages
@@ -655,16 +622,11 @@ public class StorageController(
     }
 
     /// <remarks>
-    /// Returns the Amazon regions the server knows about, each with its system name such as `eu-central-1`, the
-    /// display name to show a user, and the partition details the region belongs to: partition name, DNS suffix, the
-    /// pattern its region names match and the template its host names are built from. This is static reference data
-    /// compiled into the server rather than portal configuration: nothing is read from the settings, nothing is
-    /// written, the answer is the same for every portal and changes only when the server is updated, so it can be
-    /// cached by the caller. Use the system name of an entry as the region value in `props` when configuring an
-    /// Amazon S3 storage with `PUT api/2.0/settings/storage`, `PUT api/2.0/settings/storage/cdn` or a backup
-    /// schedule, and prefer picking a value from here over typing one, because a region the server does not know
-    /// cannot be reached. Any authenticated caller may read the list, no portal-settings permission is asked for, and
-    /// the result is neither paginated nor filtered.
+    /// Returns the Amazon regions that the server knows, with their display names and partition details. The list is
+    /// built into the server, so it is the same for every portal. It changes only with a server update, so you can
+    /// cache it. Use the system name of an entry as the region in `props` of an Amazon S3 storage. This applies to
+    /// `PUT api/2.0/settings/storage`, `PUT api/2.0/settings/storage/cdn`, and a backup schedule. Pick the region from
+    /// this list. Any signed-in user can call it. The call is read-only. The list has no paging or filters.
     /// </remarks>
     /// <summary>
     /// Get the Amazon S3 regions
