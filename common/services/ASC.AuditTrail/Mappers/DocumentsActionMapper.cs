@@ -325,7 +325,8 @@ internal class PrivacyRoomActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Delete, [
-                    MessageAction.PrivacyRoomKeyDeleted
+                    MessageAction.PrivacyRoomKeyDeleted,
+                    MessageAction.RoomFileKeysRevoked
                 ]
             }
         };

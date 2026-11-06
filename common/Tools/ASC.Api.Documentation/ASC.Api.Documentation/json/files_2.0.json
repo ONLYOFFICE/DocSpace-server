@@ -1093,7 +1093,7 @@
             "description": "The file id, or the requested version of it, resolves to nothing"
           },
           "415": {
-            "description": "The file is in a format the editors can neither edit nor open for viewing"
+            "description": "The file is in a format the editors can neither edit nor open for viewing, or it is an encrypted file of a private room and the connected document server cannot work with encrypted files"
           },
           "500": {
             "description": "The file lies in a third-party storage that cannot deliver it"
@@ -19200,13 +19200,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, or `fileSize` is negative"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format"
+            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -19379,13 +19379,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, or `fileSize` is negative"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format"
+            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -19505,7 +19505,7 @@
           "Files / Operations"
         ],
         "summary": "Abort an upload session",
-        "description": "Cancels a chunked upload opened with `POST api/2.0/files/{folderId}/session` and discards the parts already\r\nreceived, so nothing of it reaches the folder. The session is found by the id in the path alone: the folder\r\nsegment is not matched against it, and neither is the account that opened it, which makes the id the only\r\nsecret protecting the transfer. The call is destructive and is not safe to repeat, because the record is gone\r\nafterwards: a second attempt, a session already closed by\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` and a session that expired after twelve hours of\r\nsilence all fail rather than answer as missing. Finalizing removes the session too, so there is nothing left\r\nto abort once the file exists. The answer carries no body. An upload that is simply abandoned needs no call at\r\nall, since the session and its buffered parts are dropped when it expires.",
+        "description": "Cancels a chunked upload opened with `POST api/2.0/files/{folderId}/session` and discards the parts already\r\nreceived, so nothing of it reaches the folder. Only the account that opened the session may cancel it, and the\r\nfolder in the path has to be the one it was opened against. The call is destructive and is not safe to repeat, because the record is gone\r\nafterwards: a second attempt, a session already closed by\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` and a session that expired after twelve hours of\r\nsilence all fail rather than answer as missing. Finalizing removes the session too, so there is nothing left\r\nto abort once the file exists. The answer carries no body. An upload that is simply abandoned needs no call at\r\nall, since the session and its buffered parts are dropped when it expires.",
         "operationId": "abortUploadSession",
         "parameters": [
           {
@@ -19523,7 +19523,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The folder the session was opened against. It is part of the route only and is not matched against the\r\nsession, which is found by its own id.",
+            "description": "The folder the session was opened against. Take it from the path the session was created on.",
             "required": true,
             "schema": {
               "examples": [
@@ -19553,7 +19553,7 @@
             "description": "The session was opened by another account"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "401": {
             "description": "Unauthorized",
@@ -19635,7 +19635,7 @@
             {
               "name": "folderId",
               "in": "path",
-              "description": "The folder the session was opened against. It is part of the route only and is not matched against the\r\nsession, which is found by its own id.",
+              "description": "The folder the session was opened against. Take it from the path the session was created on.",
               "required": true,
               "schema": {
                 "examples": [
@@ -19733,7 +19733,7 @@
             "description": "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A file that is not a PDF is stored in a form-filling room"
@@ -19939,7 +19939,7 @@
             "description": "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room"
@@ -20104,7 +20104,7 @@
             "description": "Storing the file would exceed a storage quota or size limit"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A file that is not a PDF is stored in a form-filling room"
@@ -25812,7 +25812,7 @@
           "Files / Sharing"
         ],
         "summary": "Remove sharing rights in batch",
-        "description": "Revokes the access of every account and group on the files and folders listed in the request, and clears the\r\nentries from the caller's own favorites, recent and unread marks. The owner's own record is kept, since\r\nremoving it would take the entry away from the account that owns it, and external links survive untouched -\r\nremove those through the link operations of the entry. The caller must be allowed to change the access of each\r\nentry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;\r\na caller whose only access came through an external link may use this call to drop the entry from its own\r\nlist, while a directly invited member or an unrelated account is refused. The answer is always `true` and\r\nidentifiers that match nothing are skipped silently, so a successful answer is not proof that anything was\r\nrevoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To\r\ntake the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's\r\naccess set to `None`.",
+        "description": "Revokes the access of every account and group on the files and folders listed in the request, and clears the\r\nentries from the caller's own favorites, recent and unread marks. The owner's own record is kept, since\r\nremoving it would take the entry away from the account that owns it, and external links survive untouched -\r\nremove those through the link operations of the entry. The caller must be allowed to change the access of each\r\nentry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;\r\nany other caller who can read the entry may use this call to drop it from their own list, which takes a room\r\nmember out of the room, while an unrelated account is refused. A private room answers to its members alone: a\r\nportal administrator outside it is refused, and whoever loses access to it loses the wrapped file keys\r\n(`PUT api/2.0/files/file/{fileId}/access`) along with it, except its creator. The answer is always `true` and\r\nidentifiers that match nothing are skipped silently, so a successful answer is not proof that anything was\r\nrevoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To\r\ntake the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's\r\naccess set to `None`.",
         "operationId": "removeSecurityInfo",
         "requestBody": {
           "content": {
@@ -25847,7 +25847,7 @@
             }
           },
           "403": {
-            "description": "The caller may not change the access of a listed entry and may not drop it from their own list either, because it was shared with them directly or they cannot read it"
+            "description": "The caller may not change the access of a listed entry and cannot read it either, so it cannot be dropped from their own list. A portal administrator outside a private room gets this as well"
           },
           "500": {
             "description": "An id is a number that is not a 32-bit integer"
@@ -27429,7 +27429,7 @@
             "description": "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota"
           },
           "403": {
-            "description": "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
+            "description": "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
           },
           "404": {
             "description": "`logo.tmpFile` names no uploaded picture, or one already used"
@@ -31714,7 +31714,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected"
+            "description": "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected"
           },
           "402": {
             "description": "The portal has reached the room limit of its pricing plan or its payment is overdue"
@@ -48706,6 +48706,7 @@
               "PrivacyRoomKeyUpdated",
               "PrivacyRoomKeyDeleted",
               "FileKeysSet",
+              "RoomFileKeysRevoked",
               "FileSavedButUserQuotaExceeded",
               "FileNotSavedDueToUserQuota",
               "FileSavedButRoomQuotaExceeded",
@@ -49089,6 +49090,7 @@
               5162,
               5163,
               5164,
+              5165,
               5201,
               5202,
               5203,
@@ -49467,6 +49469,7 @@
               "PrivacyRoomKeyUpdated",
               "PrivacyRoomKeyDeleted",
               "FileKeysSet",
+              "RoomFileKeysRevoked",
               "FileSavedButUserQuotaExceeded",
               "FileNotSavedDueToUserQuota",
               "FileSavedButRoomQuotaExceeded",

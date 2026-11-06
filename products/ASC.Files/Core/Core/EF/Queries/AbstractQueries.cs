@@ -120,6 +120,18 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task DeleteFileKeysOfUsersAsync(int tenantId, IEnumerable<int> fileIds, IEnumerable<Guid> userIds)
+    {
+        return AbstractQueries.DeleteFileKeysOfUsersAsync(this, tenantId, fileIds, userIds);
+    }
+
+    [PreCompileQuery]
+    public Task DeleteAllFileKeysOfUserAsync(int tenantId, Guid userId)
+    {
+        return AbstractQueries.DeleteAllFileKeysOfUserAsync(this, tenantId, userId);
+    }
+
+    [PreCompileQuery]
     public Task DeleteFileKeysAsync(int tenantId, int fileId, IEnumerable<Guid> userIds)
     {
         return AbstractQueries.DeleteFileKeysByUsersAsync(this, tenantId, fileId, userIds);
@@ -128,6 +140,21 @@ public partial class FilesDbContext
 
 static file class AbstractQueries
 {
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<Guid>, Task> DeleteFileKeysOfUsersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<Guid> userIds) =>
+            ctx.DbFileKeys
+                .Where(x => x.TenantId == tenantId)
+                .Where(x => fileIds.Contains(x.FileId))
+                .Where(x => userIds.Contains(x.UserId))
+                .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, Guid, Task> DeleteAllFileKeysOfUserAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, Guid userId) =>
+            ctx.DbFileKeys
+                .Where(x => x.TenantId == tenantId)
+                .Where(x => x.UserId == userId)
+                .ExecuteDelete());
+
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Guid, IAsyncEnumerable<int>> FileIdsWithKeyAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, Guid userId) =>

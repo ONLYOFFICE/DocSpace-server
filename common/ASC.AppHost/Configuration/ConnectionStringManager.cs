@@ -668,6 +668,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         if (WebhookTestSettings)
         {
+            // Only for the tests: the official image of the document server does not carry the crypto library, and without
+            // it no private room can be created. They drive the save callback themselves and need no real editor.
+            // An encrypted file could not really be edited on this stack.
+            resourceBuilder.WithEnvironment("files:docservice:encryption-assume-supported", "true");
+
             // a blacklist the receiver passes (Constants.WebhookTestBlacklist), only for the services that reach the
             // receiver: it replaces the default list for every UrlValidator caller of a service, not only for webhooks
             if (Constants.WebhookTestBlacklistServices.Contains(resourceBuilder.Resource.Name))

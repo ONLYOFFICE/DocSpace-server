@@ -200,6 +200,53 @@ public class WebhookEntryContextTests(
         payload!.Model.QuotaLimit.Should().Be(RoomQuota, "the REST API shows the quota to an editor of the room");
     }
 
+    /// <summary>
+    /// The access check of every subscription leaves the share it found on the entry the payloads are cut from, so the
+    /// quota used to be decided by the share of whichever subscriber was checked last, not by the subscriber's own.
+    /// </summary>
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task RoomUpdated_QuotaLimit_FollowsTheShareOfEachSubscriber(bool editorSubscribesFirst)
+    {
+        // Arrange: an editor and a reader of one room, in both orders of the walk over the subscriptions
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var editor = await InviteContact(EmployeeType.User);
+        var reader = await InviteContact(EmployeeType.User);
+        var roomId = await CreateRoomWithQuotaAsync();
+
+        await _filesClient.Authenticate(Owner);
+        await _roomsApi.SetRoomSecurityAsync(
+            roomId,
+            new RoomInvitationRequest(
+                invitations:
+                [
+                    new RoomInvitation(editor.Id, DocSpace.API.SDK.Model.FileShare.Editing),
+                    new RoomInvitation(reader.Id, DocSpace.API.SDK.Model.FileShare.Read)
+                ],
+                notify: false),
+            cancellationToken);
+
+        var first = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated, editorSubscribesFirst ? editor : reader);
+        var second = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated, editorSubscribesFirst ? reader : editor);
+        var (editorSubscription, readerSubscription) = editorSubscribesFirst ? (first, second) : (second, first);
+
+        // Act
+        var title = $"room-{Guid.NewGuid():N}";
+
+        await _filesClient.Authenticate(Owner);
+        await _roomsApi.UpdateRoomAsync(roomId, new UpdateRoomRequest(title: title), cancellationToken);
+
+        // Assert
+        var editorPayload = await WaitForEventPayloadAsync<RoomPayload>(editorSubscription.Id, "room.updated", p => p.Title == title);
+        var readerPayload = await WaitForEventPayloadAsync<RoomPayload>(readerSubscription.Id, "room.updated", p => p.Title == title);
+
+        editorPayload.Should().NotBeNull("the editor may read the room");
+        editorPayload!.Model.QuotaLimit.Should().Be(RoomQuota, "the REST API shows the quota to an editor of the room");
+        readerPayload.Should().NotBeNull("the reader may read the room");
+        readerPayload!.Model.QuotaLimit.Should().BeNull("the reader may not edit the room");
+    }
+
     /// <summary>A custom room of the owner with a quota of its own; room quotas are turned on for it.</summary>
     private async Task<int> CreateRoomWithQuotaAsync()
     {

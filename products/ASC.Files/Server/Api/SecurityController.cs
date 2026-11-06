@@ -484,8 +484,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// removing it would take the entry away from the account that owns it, and external links survive untouched -
     /// remove those through the link operations of the entry. The caller must be allowed to change the access of each
     /// entry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;
-    /// a caller whose only access came through an external link may use this call to drop the entry from its own
-    /// list, while a directly invited member or an unrelated account is refused. The answer is always `true` and
+    /// any other caller who can read the entry may use this call to drop it from their own list, which takes a room
+    /// member out of the room, while an unrelated account is refused. A private room answers to its members alone: a
+    /// portal administrator outside it is refused, and whoever loses access to it loses the wrapped file keys
+    /// (`PUT api/2.0/files/file/{fileId}/access`) along with it, except its creator. The answer is always `true` and
     /// identifiers that match nothing are skipped silently, so a successful answer is not proof that anything was
     /// revoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To
     /// take the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's
@@ -495,7 +497,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Always true: the accounts and groups that had access to the listed entries no longer have it", typeof(bool))]
-    [SwaggerResponse(403, "The caller may not change the access of a listed entry and may not drop it from their own list either, because it was shared with them directly or they cannot read it")]
+    [SwaggerResponse(403, "The caller may not change the access of a listed entry and cannot read it either, so it cannot be dropped from their own list. A portal administrator outside a private room gets this as well")]
     [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfo(BaseBatchRequestDto inDto)
