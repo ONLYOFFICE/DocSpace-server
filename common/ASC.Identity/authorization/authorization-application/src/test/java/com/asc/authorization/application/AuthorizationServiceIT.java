@@ -765,8 +765,7 @@ public class AuthorizationServiceIT {
     }
 
     @Test
-    void
-        givenGrantsMadeAfterTenantRemoval_whenCleanupArrivesLate_thenOnlyEarlierGrantsRemoved() {
+    void givenGrantsMadeAfterTenantRemoval_whenCleanupArrivesLate_thenOnlyEarlierGrantsRemoved() {
       insertAuthorization("t9031-old-own", "t9031-user", 9031, 9031, "owner", -1, -1);
       insertConsent("t9031-old-own", "t9031-user", 9031, "owner", -1);
       insertAuthorization("t9031-old-foreign", "t9031-user", 9031, 9100, "owner", -1, -1);
