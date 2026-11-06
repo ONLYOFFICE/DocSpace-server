@@ -101,17 +101,18 @@ public abstract class EditorController<T>(
 {
 
     /// <remarks>
-    /// Replaces the content of an existing file with an edited copy and answers with the file as it now stands. The
-    /// content is the `File` part of a `multipart/form-data` body, and when no such part is sent the raw request body
-    /// is saved instead, so an empty body empties the file. The `DownloadUri` query parameter does not supply content
-    /// here; it is only read for the extension when `FileExtension` is empty. `fileExtension` names the format of the
-    /// content being sent, and when it differs from the stored format the portal converts the content, or keeps it
-    /// under a renamed copy when a third-party storage cannot convert it. The caller needs edit access to the file.
-    /// The call is mutating and not idempotent: an ordinary call adds a version to the file history, while
-    /// `forcesave=true` records an editor autosave, which overwrites the previous autosave revision instead of adding
-    /// another version and leaves a running editing session in place. It is refused with 403 when the file is locked,
-    /// lies in Trash, or is open in an editing session started by somebody else, and an unknown file id is reported
-    /// as missing. For content too large to post in one request use `POST api/2.0/files/file/{fileId}/edit_session`.
+    /// Replaces the content of a file with an edited copy and returns the file. Send the content as the `File` part
+    /// of a `multipart/form-data` body. Without that part, the call saves the raw request body. An empty body then
+    /// empties the file. The call does not download content from `downloadUri`. It reads only the extension from it,
+    /// when `fileExtension` is empty. If `fileExtension` differs from the stored format, the portal converts the
+    /// content. If a third-party storage cannot convert it, the portal saves a renamed copy. Requires editing access
+    /// to the file. Other callers get 403. The call changes data. Do not repeat it. Each call adds a version, or
+    /// replaces the version of an earlier autosave. With `forcesave` true, the call saves an autosave and keeps the
+    /// editing session open. Without it, the call closes a session opened with `editingAlone` true. The call returns
+    /// 403 if the file is locked by another user, is in Trash, or is encrypted. It also returns 403 for a file in a
+    /// private room. Without `forcesave`, it also returns 403 while the file is open for co-editing. If the file does
+    /// not exist, the call returns 404. If the content exceeds the storage quota, it returns 402. For large content,
+    /// use `POST api/2.0/files/file/{fileId}/edit_session`.
     /// </remarks>
     /// <summary>
     /// Save edited file content
@@ -133,16 +134,17 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Opens an editing session on the file and answers with the document key that identifies it, the value an editor
-    /// client passes to the document service in order to join the co-editing session for that exact revision. The
-    /// file is marked as being edited for as long as the session lasts, which keeps it from being deleted or moved.
-    /// With `editingAlone=false` the portal builds the editor configuration, requires write mode plus at least one of
-    /// the edit, review, comment, form-filling or filter permissions, and asks the document service to start tracking
-    /// the document. With `editingAlone=true` the caller claims the file for itself, and the call is refused with 403
-    /// when anybody is already editing it. The caller needs edit access: a member with read access, a guest and an
-    /// anonymous caller whose external link does not grant editing are all refused. The call is mutating and not
-    /// idempotent. Keep the session alive with `GET api/2.0/files/file/{fileId}/trackeditfile`, and end it by calling
-    /// that operation with `isFinish=true`.
+    /// Opens an editing session on the file and returns its document key. An editor app passes this key to the
+    /// document service to join co-editing of this revision. While the session lasts, nobody can delete or move the
+    /// file. With `editingAlone` false, the portal asks the document service to track the document. The caller then
+    /// needs the right to edit, review, comment, fill forms, or edit filters. With `editingAlone` true, the caller
+    /// claims the file alone. If anybody already edits the file, the call returns 403. Requires editing access to the
+    /// file. Other callers get 403. With `editingAlone` true, an anonymous caller without editing access gets 401.
+    /// The call changes data, but not the document. A repeated call with `editingAlone` true returns 403. The call
+    /// also returns 403 if the file is locked or in Trash, or if the document service rejects tracking. If the file
+    /// does not exist, it returns 404. If the editors cannot open its format, it returns 415. To keep the session
+    /// alive, call `GET api/2.0/files/file/{fileId}/trackeditfile`. To end it, call that operation with `isFinish`
+    /// true.
     /// </remarks>
     /// <summary>
     /// Open an editing session
@@ -164,15 +166,12 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Marks a PDF form in a form-filling room as open for filling out and answers with the form file. The portal
-    /// stores the filling properties on it - the room it belongs to, its title, the account that started it and the
-    /// id it keeps as the original form - so that later submissions are collected against this form. The file has to
-    /// be a PDF whose parent folder is a form-filling room; anything else is answered unchanged and nothing is
-    /// stored. Access follows room membership rather than portal role: a member holding only form-filling access on
-    /// the room may not start filling, and a caller with no access to the room at all is refused with 403 unless they
-    /// can manage it, which the room owner, a room administrator and a DocSpace administrator can. The call is
-    /// mutating and safe to repeat, since a repeat rewrites the same properties. Once a form is started, the answers
-    /// submitted for it can be collected into a spreadsheet with `POST api/2.0/files/file/{fileId}/xlsx`.
+    /// Starts filling of a PDF form in a form-filling room and returns the form. The portal saves the room, the
+    /// title, the starting account, and the original form id on the file. The portal then collects later submissions
+    /// for this form. For any other file, the call changes nothing and returns the file. Requires a role in the room
+    /// other than `FillForms`, or the right to edit the room. Other callers get 403. The call changes data, and you can repeat it. It also returns 403 for an encrypted
+    /// file. If the file does not exist, the call returns 404. To build a spreadsheet of the submitted answers, use
+    /// `POST api/2.0/files/file/{fileId}/xlsx`.
     /// </remarks>
     /// <summary>
     /// Start filling a form
@@ -191,17 +190,17 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Keeps an editing session on the file alive, or ends it; an editor client calls it repeatedly while a document
-    /// is open. `docKeyForTrack` has to be the document key of the file as it currently stands, the value
-    /// `POST api/2.0/files/file/{fileId}/startedit` returned, and a key matching neither the current revision nor the
-    /// one being edited is refused with 403. `tabId` names the client tab that holds the session, so several tabs and
-    /// several users are tracked on one file independently. Refreshing an entry requires one of the editing rights on
-    /// the file - editing, reviewing, commenting, filling or filter editing - so a reader is refused. With
-    /// `isFinish=false` the entry is refreshed and the file stays marked as being edited; with `isFinish=true` the
-    /// entry for that tab is dropped and the other clients are told that editing has stopped. The call changes the
-    /// tracking state and never the document, and repeating it is safe. It answers `key` true with an empty `value`
-    /// whenever it succeeds, so a failure arrives as an error rather than as a false key. An anonymous caller is
-    /// accepted only through an external share link.
+    /// Keeps an editing session on the file alive, or ends it. An editor app calls it repeatedly while a document is
+    /// open. Pass in `docKeyForTrack` the key that `POST api/2.0/files/file/{fileId}/startedit` returned. If the key
+    /// matches neither the current revision nor the edited one, the call returns 403. The call tracks each `tabId`
+    /// separately, so several tabs and users can edit one file. With `isFinish` false, the call refreshes the entry,
+    /// and the file stays marked as edited. With `isFinish` true, the call deletes the entry of this tab. A refresh
+    /// requires the right to edit, review, comment, fill forms, or edit filters. Other callers get 403. An
+    /// anonymous caller needs an external link. Without a link, it gets 401. A refresh through a link that does not
+    /// allow editing also returns 401. The call changes data of the session, not the document. You can repeat it. On
+    /// success, `key` is true and `value` is empty. A failure returns an error code, not a false `key`. If the file
+    /// does not exist, the call returns 404. If the file is locked by another user or is in Trash, a refresh
+    /// returns 500.
     /// </remarks>
     /// <summary>
     /// Track an editing session
@@ -224,25 +223,23 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Builds everything an editor client needs to open the file: the document descriptor with its download address,
-    /// title, type and document key, the editor configuration with the mode, the caller's permissions, the user and
-    /// the customization, the callback the editors report back to, and the signature token the document service
-    /// validates. `version` opens one entry of the file history and requires access to that history; left out, the
-    /// current revision is opened. `view`, `edit` and `fill` say what the client intends to do, and `editorType`
-    /// picks the desktop, mobile or embedded layout. For a PDF form the room decides the outcome and may overrule the
-    /// request: a form-filling room, a virtual data room, a public room and a user folder each produce their own
-    /// mode, and a form opened from the templates folder is read-only and, outside the mobile layout, framed as
-    /// embedded. In a form-filling room `edit=true` takes the form off filling only for a
-    /// caller who may edit it. When the portal is over its storage quota the configuration comes back read-only with the exceeded
-    /// scope named. In a private room the caller's encryption keys are added to the editor configuration. Payment is
-    /// not required and an anonymous caller opens through an external link.
+    /// Returns the editor configuration of the file. It holds the document data, the editor mode, the caller's
+    /// permissions, the callback URL, and the signature token. To open a past version, pass `version`. Without access
+    /// to the file history, the call then returns 403. For a PDF form, the room type sets the mode and can overrule
+    /// the request. A form from the templates folder opens read-only. Outside the mobile layout, it also opens
+    /// embedded. In a form-filling room, `edit` true stops the filling of the form for a caller who can edit it. If a
+    /// storage quota is exceeded, the configuration is read-only and names the exceeded scope. In a private room, the
+    /// configuration includes the encryption keys of the caller. Requires read access to the file through an
+    /// account or an external link. Other callers get 403. The call works without payment. The call is read-only,
+    /// except when it stops form filling. The call also returns 403 if the file is in Trash. If the file or version does
+    /// not exist, it returns 404. If the editors cannot open the format, it returns 415.
     /// </remarks>
     /// <summary>
     /// Get the editor configuration
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [RaisesWebhook(WebhookTrigger.FormStopped, When = "when a PDF form whose filling had started in a form-filling room is opened with `edit` true")]
+    [RaisesWebhook(WebhookTrigger.FormStopped, When = "when `edit` true stops the filling of a form in a form-filling room")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editor configuration for the requested file and mode", typeof(ConfigurationDto<int>))]
     [SwaggerResponse(403, "The caller cannot read the file, asked for a past version without access to the file history, or the file is in Trash")]
@@ -391,15 +388,12 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Returns a direct download address for the current content of the file together with the signature token that
-    /// the document service validates, which is what the portal hands over when the editors have to fetch the
-    /// document themselves. The address points at the portal's file stream endpoint and is rewritten to the host the
-    /// document service can reach, so on a deployment where the editors sit behind a private address it is not the
-    /// address a browser should follow. The answer also carries the extension of the stored document, leading dot
-    /// included. The caller needs read access to the file, and an unknown file id is reported as missing. The call
-    /// only reads, and each call mints a fresh address and token rather than reusing the previous one, so the value
-    /// is worth requesting again once a token has expired. For a link meant for a person, a plain address with no
-    /// token to put behind a download button, use `GET api/2.0/files/file/{fileId}/presigneduri` instead.
+    /// Returns a direct download URL of the current file content and a signature token for the document service. The
+    /// portal rewrites the URL to the host that the document service can reach. So a browser may not reach this URL.
+    /// The response also has the file extension, with the leading dot. Requires read access to the file. Other
+    /// callers get 403. The call is read-only. Each call creates a new URL and token. Request them again after a
+    /// token expires. If the file does not exist, the call returns 404. To get a link for a person, use
+    /// `GET api/2.0/files/file/{fileId}/presigneduri`.
     /// </remarks>
     /// <summary>
     /// Get a signed download address
@@ -416,15 +410,12 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Lists the portal members who can read the file, which is what an editor client offers when somebody types a
-    /// mention. The set holds the readers of the file plus everyone who reads it by role rather than by share - the
-    /// portal owner, the DocSpace administrators and the author of the file - while the caller themselves, the
-    /// subjects standing behind external links and deactivated accounts are left out. It is ordered by display name
-    /// as the portal renders it. A guest receives a single entry, the owner of the file, because a guest is not a
-    /// portal member and may not learn who else works on the document. The caller needs read access to the file, and
-    /// an unknown file id is reported as missing. The call only reads. A caller who reached the file through an
-    /// external link instead of an account is answered with nothing at all. For the users to offer when protecting a
-    /// document use `GET api/2.0/files/file/{fileId}/protectusers`.
+    /// Returns the portal members who can read the file, for mentions in the editor. The list has the readers of the
+    /// file, the portal owner, the DocSpace admins, and the file author. It excludes the caller, external links, and
+    /// deactivated accounts. The list is sorted by display name. A guest gets only the file owner. Requires read
+    /// access to the file. Other callers get 403. The call is read-only. A caller who opened the file through an
+    /// external link without an account gets an empty response. If the file does not exist, the call returns 404. To
+    /// get the users for document protection, use `GET api/2.0/files/file/{fileId}/protectusers`.
     /// </remarks>
     /// <summary>
     /// Get users to mention in a file
@@ -462,16 +453,17 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Resolves a reference that a formula in one spreadsheet makes to another document, and answers with the
-    /// descriptor the document service needs in order to read it: the title, the download address, the file type, the
-    /// document key of the co-editing session, the web editor link and the signature token. Three ways of naming the
-    /// target are tried in order, and the first that resolves wins: `fileKey` as a file id inside the portal named by
-    /// `instanceId`, then `path` looked up among the files sitting next to `sourceFileId`, then `link`, short links
-    /// included, from which the file id is read out. A link that points outside this portal is not resolved at all
-    /// and comes back unchanged as the address to follow. The caller needs read access to the source file and to its
-    /// folder, otherwise the call is refused. The call only reads. A reference that resolves to nothing is still
-    /// answered with 200, with the error text filled in and the rest of the descriptor empty, so read the error
-    /// before using any other field.
+    /// Resolves a reference from a formula in one spreadsheet to another document. It returns the data that the
+    /// document service needs to read that document. The data has the title, download URL, file type, document key,
+    /// editor link, and signature token. First, the call looks up `fileKey` as a file id in the portal that
+    /// `instanceId` names. Then, it looks for `path` among the files in the folder of `sourceFileId`. Then, it reads
+    /// the file id from `link`, including short links. The first match wins. The call does not resolve a link outside
+    /// this portal and returns it as the URL. Requires read access to the referenced file. Other callers get 403. For a
+    /// `path` lookup, the call also checks read access to the source file and its folder. It also returns 403
+    /// for an encrypted file or a file in a private room. The call is read-only. If nothing resolves, the call
+    /// returns 200 with `error` set and the other fields empty. So read `error` before you use other fields. The call
+    /// returns 400 if the body has no `fileKey` or `instanceId`. If `instanceId` names this portal and `fileKey` is
+    /// not a number, the call returns 500.
     /// </remarks>
     /// <summary>
     /// Resolve a spreadsheet reference
@@ -489,14 +481,13 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Lists the users the file is shared with, which is what a client offers when the author protects a document and
-    /// picks who may still edit it. The list is built from the whole access list of the file: every entry that is not
-    /// an explicit denial, with groups expanded into their members, the caller themselves and deleted accounts left
-    /// out, ordered by display name. Access inherited from the room counts, so a member who never received a share on
-    /// the file itself is listed too. A file kept in the legacy project storage always answers with an empty list
-    /// rather than with its team. The call only reads. A guest is refused, an anonymous caller is answered with
-    /// nothing, and a file id that resolves to nothing is refused as well instead of being reported as missing. For
-    /// the readers to offer as mentions inside the editor use `GET api/2.0/files/file/{fileId}/sharedusers`.
+    /// Returns the users the file is shared with, to pick who can still edit a protected document. The list comes
+    /// from the whole access list of the file, including access from the room. Groups expand into their members. The
+    /// list excludes explicit denials, the caller, and deleted accounts. It is sorted by display name. For a file in
+    /// the legacy project storage, the list is empty. Any signed-in user can call it, except a guest. A guest
+    /// gets 403. An anonymous caller gets an empty response. The call is read-only. If the file does not exist, the
+    /// call also returns 403. To get the readers to mention in the editor, use
+    /// `GET api/2.0/files/file/{fileId}/sharedusers`.
     /// </remarks>
     /// <summary>
     /// Get users for document protection
@@ -513,16 +504,16 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Queues generation of the spreadsheet that collects every answer submitted for a PDF form in a form-filling
-    /// room, and answers at once with the queued task, the original form and a flag telling whether the report file
-    /// is being created now or an existing one refreshed in place. Either identifier works: the id of the original
-    /// form, or the id of an XLSX or CSV result file inside the room's Complete folder, from which the portal
-    /// resolves the form behind it. The form must already have been opened for filling with
-    /// `PUT api/2.0/files/file/{fileId}/startfilling` and must still live in the form-filling room that started it.
-    /// The caller must be allowed to update that form's report. The call is mutating and asynchronous: the
-    /// spreadsheet is not ready when the response arrives, so poll `GET api/2.0/files/file/{fileId}/xlsx` with the
-    /// original form's id until the task reports completion, then take the produced file from the task. Calling it
-    /// again while a run is still going answers with that run instead of starting a second one.
+    /// Queues a spreadsheet with all answers to a PDF form in a form-filling room. It returns the
+    /// task, the original form, and whether the report file is new. Pass the id of the original form, or of an XLSX
+    /// or CSV result file in the Complete folder. For a result file, the portal finds the form behind it. Before this
+    /// call, start filling the form with `PUT api/2.0/files/file/{fileId}/startfilling`. The form must still be in
+    /// the room that started it. Requires a DocSpace admin, or the room role room manager or content creator. Other
+    /// callers get 403. It also returns 403 if form filling has not started or the room is not a form-filling room.
+    /// The call changes data and queues work. A repeated call during a run returns that run. The spreadsheet is not
+    /// ready when the response arrives. To track it, poll `GET api/2.0/files/file/{fileId}/xlsx` with the id of the
+    /// original form. When the task completes, take the file from the task. If the file or the form behind a result
+    /// file does not exist, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Generate a form answers report
@@ -546,15 +537,13 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Reports how far the spreadsheet of submitted form answers has got, the one queued by
-    /// `POST api/2.0/files/file/{fileId}/xlsx`. A run is kept per portal, per caller and per form, so this reports
-    /// the caller's own run and not one started by another member of the room; address it with the id of the original
-    /// form rather than with the id of the produced spreadsheet. The answer carries the completion flag, the progress
-    /// percentage, the error text when the run failed, and the id, name and address of the produced file once it is
-    /// there. Nothing at all comes back when no run is on record for this caller and form, which is the normal answer
-    /// before the first run and not an error. The call only reads and is meant to be polled until completion is
-    /// reported. Any authenticated caller may ask; whether the report may be built is decided when the run is queued,
-    /// not here.
+    /// Returns the state of the form answers spreadsheet that `POST api/2.0/files/file/{fileId}/xlsx` queued. Pass
+    /// the id of the original form, not of the spreadsheet. The portal keeps one run per portal, caller, and form. So
+    /// the call returns only the own run of the caller. The response has the completion flag, the progress, and the
+    /// error text of a failed run. Once the file exists, it also has its id, name, and URL. If no run exists for this
+    /// caller and form, the response is empty. This is normal before the first run. Any signed-in user can call it.
+    /// The portal checks access when it queues the run, not here. The call is read-only. This is the call to poll.
+    /// Repeat it until `isCompleted` is true.
     /// </remarks>
     /// <summary>
     /// Get form report generation status
@@ -582,18 +571,15 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Writes the portal-wide ONLYOFFICE Docs connection settings - the public Document Server address, its address
-    /// inside the private network, the address it calls this portal back on, the request signature secret and header,
-    /// and SSL verification - then verifies them against the running Document Server before keeping them. Every
-    /// address is optional: an empty value drops the portal's own setting so that the deployment default takes over
-    /// again. An address gets `http://` prepended when it carries no scheme, while an absolute address with a query
-    /// string is rejected with 400, as is a signature secret sent without its header. Only the portal owner and a
-    /// DocSpace administrator may call this; a room administrator, a user and a guest are refused with 403. The call
-    /// is mutating and safe to repeat with the same body. Verification is live - the editor api script, the
-    /// healthcheck, a test conversion, the command service and the document builder are all exercised - and when it
-    /// fails the previous settings are restored in full and nothing is changed. The answer is what
-    /// `GET api/2.0/files/docservice` returns with no version requested, so `version` comes back empty and the
-    /// signature secret is not echoed back.
+    /// Changes the ONLYOFFICE Docs connection settings of the portal and checks them on the running Document Server.
+    /// An empty address deletes the portal's own value, and the deployment default applies again. The portal adds
+    /// `http://` to an address without a scheme. Requires the EditPortalSettings permission, which the portal owner
+    /// and DocSpace admins have. Other callers get 403. The call changes data, and you can repeat it with the same
+    /// body. The check calls the editor api script, the healthcheck, the converter, the command service, and the
+    /// document builder. If one fails, the portal restores all previous settings. Then the call returns 500. It
+    /// returns what `GET api/2.0/files/docservice` returns without `version`. The call returns 400 if an address
+    /// cannot be parsed or is an absolute address with a query string. It also returns 400 for a secret without a
+    /// header. It also returns 400 for an `http` public address on a portal served over `https`.
     /// </remarks>
     /// <summary>
     /// Set the document service address
@@ -699,17 +685,12 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     }
 
     /// <remarks>
-    /// Reports where this portal expects ONLYOFFICE Docs to be: the public Document Server address, the URL of the
-    /// editor api script and of the preload page a client loads before opening a document, the address used inside
-    /// the private network, the address the Document Server calls this portal back on, the name of the request
-    /// signature header, whether SSL verification is on, and whether all of it is still at the deployment default.
-    /// The call is read-only and needs no authorization: an anonymous caller and every role from the portal owner
-    /// down to a guest read the same values. Pass `version=true` to have the editor version of the running Document
-    /// Server included in `version`; left out, `version` comes back empty and the portal answers without contacting
-    /// the Document Server at all. A version request never fails the call - when the Document Server does not answer,
-    /// a fallback version string is reported instead of an error, so the value is no proof that the server is
-    /// reachable. The signature secret is not part of the answer, only the header name it travels in. To change any
-    /// of these settings use `PUT api/2.0/files/docservice`.
+    /// Returns the ONLYOFFICE Docs connection settings of the portal and the editor script URLs. Anyone can call it
+    /// without signing in, and every caller gets the same values. The call is read-only. With `version` true, the
+    /// portal asks the Document Server for its editor version. Otherwise, `version` is empty and the call does not
+    /// contact the Document Server. If the Document Server does not answer, `version` holds a fallback value instead
+    /// of an error. So a version does not prove that the Document Server works. To change the settings, use
+    /// `PUT api/2.0/files/docservice`.
     /// </remarks>
     /// <summary>
     /// Get the document service address

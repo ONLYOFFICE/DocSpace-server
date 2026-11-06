@@ -44,16 +44,16 @@ public class GroupsController(
 {
 
     /// <remarks>
-    /// Creates a room group, a personal collection that gathers rooms the caller already works with under one name
-    /// and icon; it belongs to the account that created it and is never shown to other members of the portal. Pass
-    /// the group name, the identifier of one of the built-in covers offered by `GET api/2.0/files/rooms/covers`, and
-    /// a list of at least one room - a number for a room stored in the portal, a string for a room on a connected
-    /// third-party account. Any role may create its own group, a guest included: what is checked is read access to
-    /// each listed room, not the role of the caller. Repeated identifiers are collapsed, and a value that is not a
-    /// room identifier at all is rejected as an invalid request. When none of the listed rooms can be read the group
-    /// is not created; when only some of them can, the group is created with those rooms and the call is still
-    /// reported as failed, so re-read `GET api/2.0/files/group` before retrying. A room may sit in several groups,
-    /// and two groups of the same account may carry the same name. The answer is the stored group with its rooms.
+    /// Creates a room group, a personal collection of rooms with a name and an icon. Other members of the portal
+    /// never see the group. Any signed-in user can call it, including a guest. The call checks read access to each
+    /// listed room. It changes data. Do not repeat it. Each call creates another group. The call returns 400 for a
+    /// blank or too long name, or an unknown icon. It also returns 400 if `searchArea` is not `Active` or `Forms`.
+    /// It also returns 400 for a malformed room identifier or a disconnected storage account. An empty
+    /// `rooms` list returns 403. If no listed room can be added, the call creates no group. It returns 403 if a
+    /// listed identifier exists but is not a room the caller can read. If all existing rooms are readable but in
+    /// the other section, it returns 400. If no listed room exists, it returns 404. A string identifier that names
+    /// no third-party storage also returns 404. If only some rooms can be added, the call creates the group with
+    /// them but returns 403. So read `GET api/2.0/files/group` before you retry.
     /// </remarks>
     /// <summary>
     /// Add a new room group
@@ -101,16 +101,11 @@ public class GroupsController(
     }
 
     /// <remarks>
-    /// Returns one room group of the calling account together with the rooms it gathers. Groups are personal: an
-    /// identifier that belongs to another member is answered the same way as one that was never created or has
-    /// already been deleted, and a portal administrator is no exception to that rule. Take the identifier from
-    /// `GET api/2.0/files/group`, which lists the groups the caller owns. Set `includeMembers` to false to get the
-    /// group without the `rooms` array, which is the cheaper form when only the name, the icon and the number of
-    /// rooms are needed; `totalRooms` is filled either way. A room moved to the archive is left out of both `rooms`
-    /// and `totalRooms` while its membership survives, so taking the room out of the archive brings it back into the
-    /// group. A room the caller can no longer open is left out the same way, and comes back if access to it is
-    /// granted again. Rooms stored in the portal are listed before rooms on connected third-party accounts. The call is
-    /// read-only and changes nothing about the group or the rooms it refers to.
+    /// Returns one room group of the caller with its rooms. Any signed-in user can call it, including a guest. A
+    /// missing group or a group of another account returns 404, even for a DocSpace admin. The call is read-only. With `includeMembers` set to false, `rooms` is null, but `totalRooms` is still filled. The
+    /// `rooms` list skips archived rooms, rooms of the other section, and rooms the caller can no longer read. The
+    /// `totalRooms` count uses the same rule. A skipped room returns after it leaves the archive or the caller gets
+    /// access again. Rooms stored in the portal come before rooms of third-party storages.
     /// </remarks>
     /// <summary>
     /// Get room group info
@@ -127,16 +122,18 @@ public class GroupsController(
     }
 
     /// <remarks>
-    /// Applies changes to one of the caller's own room groups: a new name, rooms to attach, rooms to detach, or any
-    /// combination of the three in a single call. A body that carries none of the three (`{}`) is accepted and
-    /// changes nothing, while a body that names them and leaves every one of them empty asks for an update that
-    /// cannot be performed and is rejected as an invalid request. `roomsToAdd` is resolved the way creation resolves
-    /// its list: every identifier has to name a room the caller can read, repeats and rooms already in the group are
-    /// collapsed, and when only part of the list resolves the rest is still attached and the call is reported as
-    /// failed. `roomsToRemove` works the other way round - a room already in the group is always detached, even when
-    /// the caller has since lost access to it, whereas an identifier that is not in the group is resolved first and
-    /// refused when it names nothing. The steps are applied in order and are not rolled back when a later one fails.
-    /// A group of another account is answered as missing. The answer is the group as stored after the call.
+    /// Updates a room group of the caller. It can rename the group, add rooms, and remove rooms in one call. Any
+    /// signed-in user can call it, including a guest. A missing group or a group of another account returns 404, even
+    /// for a DocSpace admin. The call changes data. You can repeat it with the same body. It
+    /// applies the name first, then `roomsToAdd`, then `roomsToRemove`. A later failure does not undo the earlier
+    /// steps. An empty body changes nothing. If every field the body sends is null, the call returns 400. The call
+    /// always removes a room that is in the group, even if the caller lost access to it. If no room of `roomsToAdd`
+    /// can be added, the call fails. It returns 403 if a listed identifier exists but is not a
+    /// room the caller can read. If all existing rooms are readable but in the other section, it returns 400. If no
+    /// listed room exists, it returns 404. These rules also apply to the identifiers of `roomsToRemove` that are not
+    /// in the group, without the section check. If only some rooms can be applied, the call applies them but
+    /// returns 403. A string identifier that names no third-party storage also returns 404. The call returns 400 for
+    /// a blank or too long name, a malformed room identifier, or a disconnected storage account.
     /// </remarks>
     /// <summary>
     /// Update room group
@@ -195,15 +192,10 @@ public class GroupsController(
     }
 
     /// <remarks>
-    /// Replaces the icon of one of the caller's own room groups and returns the whole group, its name and its rooms
-    /// left as they were. Send the identifier of one of the built-in covers offered by
-    /// `GET api/2.0/files/rooms/covers`; an empty string strips the icon, after which the group comes back with an
-    /// empty `icon`, and any other value - including a word that merely reads like one, such as `none` - is rejected
-    /// as an invalid request. An uploaded image cannot be used here, unlike the logo of a room. Leaving `icon` out of
-    /// the body or sending it as null is accepted and changes nothing, whereas a request that carries no body at all,
-    /// or a body that is not JSON, is refused. Setting the icon the group already has is accepted as well, so
-    /// retrying the call is safe. Any role may re-icon its own group, and a group belonging to another account is
-    /// answered as missing rather than refused, exactly as reading it would be.
+    /// Changes the icon of a room group of the caller. Any signed-in user can call it, including a guest. A missing
+    /// group or a group of another account returns 404, even for a DocSpace admin. The call changes data. You can repeat it with the same body. An empty `icon` removes the icon, and a null or missing
+    /// `icon` changes nothing. The call returns 400 if `icon` is neither a built-in cover nor an empty string. It
+    /// also returns 400 if the body is missing or is not JSON.
     /// </remarks>
     /// <summary>
     /// Change room group icon
@@ -221,16 +213,14 @@ public class GroupsController(
     }
 
     /// <remarks>
-    /// Returns every room group of the calling account, each with the rooms it gathers. Only groups the caller
-    /// created are listed: groups of other members never appear here, and an account that has never made one gets an
-    /// empty array back. Set `includeMembers` to false to leave the `rooms` array out of every entry and keep the
-    /// name, the icon and `totalRooms` alone, which is the cheaper form when the list is only being shown as a menu.
-    /// Archived rooms are skipped in both the `rooms` array and the `totalRooms` count, and reappear once the room is
-    /// taken out of the archive; rooms the caller can no longer open are skipped the same way until access to them
-    /// is granted again. The listing is neither paged nor filtered - it always carries the whole set - and
-    /// the order of the entries is not contractual, so sort them on the client when the order matters. The call is
-    /// read-only. Use `GET api/2.0/files/group/{id}` when the identifier of a single group is already known, and
-    /// `POST api/2.0/files/group` to add one.
+    /// Returns the room groups of the caller in the Rooms or Forms section, each with its rooms. Groups of other
+    /// members never appear, even for a DocSpace admin. Any signed-in user can call it, including a guest. The call
+    /// is read-only. The list has no paging or total, and its order is not fixed. An empty array means the caller
+    /// has no groups in this section. With `includeMembers` set to false, `rooms` is null in every entry, but
+    /// `totalRooms` is still filled. Each `rooms` list skips archived rooms, rooms of the other section, and rooms
+    /// the caller can no longer read. The `totalRooms` count uses the same rule. A skipped room returns after it
+    /// leaves the archive or the caller gets access again. If `searchArea` is not `Active` or `Forms`, the call
+    /// returns 400. To get one group, use `GET api/2.0/files/group/{id}`.
     /// </remarks>
     /// <summary>
     /// List room groups
@@ -252,16 +242,11 @@ public class GroupsController(
     }
 
     /// <remarks>
-    /// Deletes one of the caller's own room groups. Only the collection goes away: the rooms it gathered, their
-    /// content and the shares on them are left exactly as they were, and a room that was in no other group simply
-    /// stops being grouped. Deleting a group of another account is refused, and an identifier that names nothing -
-    /// because it never existed, or because the group has already been deleted - is answered as missing, so repeating
-    /// the call after a successful delete does not report success a second time. The operation is destructive and
-    /// cannot be undone: there is no trash for groups, and rebuilding one means calling `POST api/2.0/files/group`
-    /// again with the same name, icon and rooms, which gives it a new identifier. Nothing is returned in the body.
-    /// The `includeMembers` parameter is accepted here because the route shares its contract with
-    /// `GET api/2.0/files/group/{id}`, and has no effect on what is deleted. Read the group first when the rooms it
-    /// gathers still have to be recorded somewhere.
+    /// Deletes a room group of the caller. The rooms of the group, their content, and their shares stay unchanged.
+    /// Any signed-in user can call it, including a guest. If the group belongs to another account, the call returns
+    /// 403, even for a DocSpace admin. The call cannot be undone, and a repeated call returns 404. If the group does
+    /// not exist, the call returns 404. The response body is empty. The call ignores `includeMembers`. To keep the
+    /// list of rooms, read the group first with `GET api/2.0/files/group/{id}`.
     /// </remarks>
     /// <summary>
     /// Delete a room group
