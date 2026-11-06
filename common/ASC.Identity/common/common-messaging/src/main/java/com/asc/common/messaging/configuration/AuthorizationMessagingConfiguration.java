@@ -157,7 +157,7 @@ public class AuthorizationMessagingConfiguration {
   }
 
   /**
-   * Defines the direct exchange for the delayed second run of every cleanup.
+   * Defines the direct exchange for the delayed second run of the cleanups published with one.
    *
    * @return the {@link DirectExchange} for delayed cleanups.
    */

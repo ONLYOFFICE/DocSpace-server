@@ -49,6 +49,13 @@ import org.springframework.data.repository.query.Param;
 public interface JpaConsentRepository
     extends JpaRepository<ConsentEntity, ConsentEntity.ConsentId> {
   /**
+   * Restricts a cleanup to the consents given up to {@code :cutoff}. A consent is dated by its last
+   * change, which only giving the consent again updates; consents without a date are treated as
+   * given before the cutoff.
+   */
+  String GIVEN_BY_CUTOFF = " AND (modified_at IS NULL OR modified_at <= :cutoff)";
+
+  /**
    * Deletes all consents associated with a specific principal (user) and client.
    *
    * @param principalId The unique identifier of the principal (user) for which the consents are to
@@ -90,15 +97,21 @@ public interface JpaConsentRepository
    *
    * @param principalId The unique identifier of the principal (user) for which the consents are to
    *     be deleted.
+   * @param cutoff Only consents given up to this moment are deleted.
    * @param limit The maximum number of consents to delete.
    * @return The number of consents deleted.
    */
   @Modifying
   @Query(
-      value = "DELETE FROM identity_consents WHERE principal_id = :principalId LIMIT :limit",
+      value =
+          "DELETE FROM identity_consents WHERE principal_id = :principalId"
+              + GIVEN_BY_CUTOFF
+              + " LIMIT :limit",
       nativeQuery = true)
   int deleteConsentsByPrincipalId(
-      @Param("principalId") String principalId, @Param("limit") int limit);
+      @Param("principalId") String principalId,
+      @Param("cutoff") ZonedDateTime cutoff,
+      @Param("limit") int limit);
 
   /**
    * Deletes up to {@code limit} consents given by the users of a specific tenant. Consents do not
@@ -112,6 +125,7 @@ public interface JpaConsentRepository
    * the chunked removal while consents are still left.
    *
    * @param tenantId The unique identifier of the tenant whose users' consents are to be deleted.
+   * @param cutoff Only consents given up to this moment are deleted.
    * @param limit The maximum number of consents to delete.
    * @return The number of consents deleted.
    */
@@ -128,26 +142,36 @@ public interface JpaConsentRepository
                 ON c.registered_client_id = a.registered_client_id
                AND c.principal_id = a.principal_id
               WHERE a.tenant_id = :tenantId
+                AND (c.modified_at IS NULL OR c.modified_at <= :cutoff)
               LIMIT :limit
             ) legacy)
           """,
       nativeQuery = true)
-  int deleteConsentsByTenantId(@Param("tenantId") long tenantId, @Param("limit") int limit);
+  int deleteConsentsByTenantId(
+      @Param("tenantId") long tenantId,
+      @Param("cutoff") ZonedDateTime cutoff,
+      @Param("limit") int limit);
 
   /**
    * Deletes up to {@code limit} consents given to a client owned by a specific tenant, whichever
    * tenant the consenting user belonged to.
    *
    * @param ownerTenantId The ID of the tenant owning the clients.
+   * @param cutoff Only consents given up to this moment are deleted.
    * @param limit The maximum number of consents to delete.
    * @return The number of consents deleted.
    */
   @Modifying
   @Query(
-      value = "DELETE FROM identity_consents WHERE owner_tenant_id = :ownerTenantId LIMIT :limit",
+      value =
+          "DELETE FROM identity_consents WHERE owner_tenant_id = :ownerTenantId"
+              + GIVEN_BY_CUTOFF
+              + " LIMIT :limit",
       nativeQuery = true)
   int deleteConsentsByOwnerTenantId(
-      @Param("ownerTenantId") long ownerTenantId, @Param("limit") int limit);
+      @Param("ownerTenantId") long ownerTenantId,
+      @Param("cutoff") ZonedDateTime cutoff,
+      @Param("limit") int limit);
 
   /**
    * Deletes up to {@code limit} consents given to a client created by a specific user, whichever
@@ -155,17 +179,22 @@ public interface JpaConsentRepository
    *
    * @param ownerTenantId The ID of the tenant owning the clients.
    * @param ownerUserId The ID of the user who created the clients.
+   * @param cutoff Only consents given up to this moment are deleted.
    * @param limit The maximum number of consents to delete.
    * @return The number of consents deleted.
    */
   @Modifying
   @Query(
       value =
-          "DELETE FROM identity_consents WHERE owner_tenant_id = :ownerTenantId AND owner_user_id = :ownerUserId LIMIT :limit",
+          "DELETE FROM identity_consents"
+              + " WHERE owner_tenant_id = :ownerTenantId AND owner_user_id = :ownerUserId"
+              + GIVEN_BY_CUTOFF
+              + " LIMIT :limit",
       nativeQuery = true)
   int deleteConsentsByOwner(
       @Param("ownerTenantId") long ownerTenantId,
       @Param("ownerUserId") String ownerUserId,
+      @Param("cutoff") ZonedDateTime cutoff,
       @Param("limit") int limit);
 
   /**

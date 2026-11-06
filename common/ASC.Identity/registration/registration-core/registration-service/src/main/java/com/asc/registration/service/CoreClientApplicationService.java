@@ -58,6 +58,7 @@ import com.asc.registration.service.transfer.response.PageableResponse;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -286,6 +287,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
     validate(command);
 
     var deleted = clientUpdateCommandHandler.deleteUserClients(command);
+    var removedAt = Instant.now();
 
     clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
 
@@ -295,6 +297,7 @@ public class CoreClientApplicationService implements ClientApplicationService {
         UserClientsRemovedEvent.builder()
             .userId(command.getUserId())
             .tenantId(command.getTenantId())
+            .removedAt(removedAt)
             .build());
 
     return deleted;
@@ -310,13 +313,17 @@ public class CoreClientApplicationService implements ClientApplicationService {
     validate(command);
 
     var deleted = clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());
+    var removedAt = Instant.now();
 
     clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
 
     clientCacheTenantRemoveMessagePublisher.publish(
         ClientCacheTenantRemoveEvent.builder().tenantId(command.getTenantId()).build());
     tenantClientsMessagePublisher.publish(
-        TenantClientsRemovedEvent.builder().tenantId(command.getTenantId()).build());
+        TenantClientsRemovedEvent.builder()
+            .tenantId(command.getTenantId())
+            .removedAt(removedAt)
+            .build());
 
     return deleted;
   }

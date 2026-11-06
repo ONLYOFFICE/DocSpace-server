@@ -55,9 +55,10 @@ public abstract class AuthorizationCleanupPublisher<E> implements AuthorizationM
   /**
    * @param publisher the publisher that keeps messages the broker could not take
    * @param background runs the sends off the caller's thread
-   * @param runAgainLater whether to publish the delayed second run too; only a cleanup scoped to
-   *     the removed clients may run again, since one scoped to a user or a tenant would also remove
-   *     grants made after it
+   * @param runAgainLater whether to publish the delayed second run too. A second run never removes
+   *     grants made after the removal: a cleanup scoped to the removed clients only reaches grants
+   *     of clients that no longer exist, and one scoped to a user or a tenant only removes grants
+   *     made up to the removal moment its event carries
    */
   protected AuthorizationCleanupPublisher(
       RabbitPersistableMessagePublisher publisher,

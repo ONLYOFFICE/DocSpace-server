@@ -206,7 +206,7 @@ public class AuthorizationMessagingCleanupListener {
         () -> {
           log.info("Removing authorizations and consents for user: {}", event.getUserId());
           authorizationMessagingCleanupService.onUserRemoved(
-              event.getTenantId(), event.getUserId());
+              event.getTenantId(), event.getUserId(), event.getRemovedAt());
           log.info("Authorizations and consents for user {} have been removed", event.getUserId());
         },
         () -> evictTenantClients(event.getTenantId(), "user " + event.getUserId()),
@@ -232,7 +232,8 @@ public class AuthorizationMessagingCleanupListener {
         channel,
         () -> {
           log.info("Removing authorizations and consents for tenant: {}", event.getTenantId());
-          authorizationMessagingCleanupService.onTenantRemoved(event.getTenantId());
+          authorizationMessagingCleanupService.onTenantRemoved(
+              event.getTenantId(), event.getRemovedAt());
           log.info(
               "Authorizations and consents for tenant {} have been removed", event.getTenantId());
         },

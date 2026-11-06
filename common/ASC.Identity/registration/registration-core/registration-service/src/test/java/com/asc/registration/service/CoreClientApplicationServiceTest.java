@@ -35,6 +35,7 @@ package com.asc.registration.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -48,8 +49,11 @@ import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.asc.registration.service.transfer.request.update.DeleteTenantClientsCommand;
 import com.asc.registration.service.transfer.request.update.DeleteUserClientsCommand;
 import jakarta.validation.Validator;
+import java.time.Instant;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 class CoreClientApplicationServiceTest {
   private static final long TENANT = 7L;
@@ -145,5 +149,44 @@ class CoreClientApplicationServiceTest {
     assertThrows(IllegalStateException.class, () -> service.deleteTenantClients(tenantCommand()));
 
     verifyNoInteractions(clientCacheService, cacheTenantRemovePublisher, tenantClientsPublisher);
+  }
+
+  @Test
+  void whenUserClientsDeleted_thenCleanupCarriesMomentAfterDelete() {
+    var deletedAt = new AtomicReference<Instant>();
+    when(clientUpdateCommandHandler.deleteUserClients(any()))
+        .thenAnswer(
+            _ -> {
+              deletedAt.set(Instant.now());
+              return 1;
+            });
+
+    service.deleteUserClients(userCommand());
+
+    var event = ArgumentCaptor.forClass(UserClientsRemovedEvent.class);
+    verify(userClientsPublisher).publish(event.capture());
+    assertEquals(USER, event.getValue().getUserId());
+    assertEquals(TENANT, event.getValue().getTenantId());
+    assertTrue(!event.getValue().getRemovedAt().isBefore(deletedAt.get()));
+    assertTrue(!event.getValue().getRemovedAt().isAfter(Instant.now()));
+  }
+
+  @Test
+  void whenTenantClientsDeleted_thenCleanupCarriesMomentAfterDelete() {
+    var deletedAt = new AtomicReference<Instant>();
+    when(clientUpdateCommandHandler.deleteTenantClients(TENANT))
+        .thenAnswer(
+            _ -> {
+              deletedAt.set(Instant.now());
+              return 1;
+            });
+
+    service.deleteTenantClients(tenantCommand());
+
+    var event = ArgumentCaptor.forClass(TenantClientsRemovedEvent.class);
+    verify(tenantClientsPublisher).publish(event.capture());
+    assertEquals(TENANT, event.getValue().getTenantId());
+    assertTrue(!event.getValue().getRemovedAt().isBefore(deletedAt.get()));
+    assertTrue(!event.getValue().getRemovedAt().isAfter(Instant.now()));
   }
 }

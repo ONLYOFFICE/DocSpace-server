@@ -179,7 +179,7 @@ public class DirectAuthorizationCleanupPublisher {
       log.info("Directly cleaning up authorizations for user: {}", message.getUserId());
       try {
         authorizationMessagingCleanupService.onUserRemoved(
-            message.getTenantId(), message.getUserId());
+            message.getTenantId(), message.getUserId(), message.getRemovedAt());
         log.info("Authorizations and consents for user {} have been removed", message.getUserId());
       } catch (Exception e) {
         log.error(
@@ -214,7 +214,8 @@ public class DirectAuthorizationCleanupPublisher {
     public void publish(TenantClientsRemovedEvent message) {
       log.info("Directly cleaning up authorizations for tenant: {}", message.getTenantId());
       try {
-        authorizationMessagingCleanupService.onTenantRemoved(message.getTenantId());
+        authorizationMessagingCleanupService.onTenantRemoved(
+            message.getTenantId(), message.getRemovedAt());
         log.info(
             "Authorizations and consents for tenant {} have been removed", message.getTenantId());
       } catch (Exception e) {
