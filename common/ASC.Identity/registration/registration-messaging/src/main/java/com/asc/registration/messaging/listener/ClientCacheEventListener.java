@@ -87,6 +87,15 @@ public class ClientCacheEventListener implements AutoCloseable {
    * commits. Evicting an entry that turns out to be still valid only costs a refill, while a
    * process that dies right after the commit would otherwise leave every region serving the old
    * value until it expires. The eviction and broadcast after the commit still run.
+   *
+   * <p>The commit waits up to {@link #BEFORE_COMMIT_WAIT} for the local eviction and for the
+   * broadcast to be handed to the broker, sent on this path rather than in the background so the
+   * wait covers it. Past that, or if either fails, the change commits without them.
+   *
+   * <p>What this guarantees is that a cached client is stale no longer than its entry lives, and
+   * usually not at all. A reader that loads the old row between this eviction and the commit can
+   * still cache it; the eviction after the commit removes it, unless the process dies first, in
+   * which case it stays until it expires.
    */
   private void evictBeforeCommit(Client client) {
     var tenantId =
@@ -97,7 +106,7 @@ public class ClientCacheEventListener implements AutoCloseable {
         CompletableFuture.runAsync(
             () -> {
               clientCacheService.evict(client.getId(), tenantId);
-              clientCacheRemoveMessagePublisher.publish(
+              clientCacheRemoveMessagePublisher.publishNow(
                   ClientCacheRemoveEvent.builder()
                       .clientId(client.getId().getValue().toString())
                       .tenantId(tenantId.getValue())

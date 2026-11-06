@@ -68,8 +68,12 @@ public abstract class ClientCacheEvictionPublisher<E> implements AuthorizationMe
   }
 
   private void broadcast(E message) {
-    template.convertAndSend(
-        ClientCacheMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
+    try {
+      template.convertAndSend(
+          ClientCacheMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
+    } catch (Exception e) {
+      log.error("Could not broadcast a client cache eviction to every region: {}", message, e);
+    }
 
     try {
       template.convertAndSend(Strings.EMPTY, localAuthorizationQueue, message);
@@ -82,5 +86,11 @@ public abstract class ClientCacheEvictionPublisher<E> implements AuthorizationMe
   public void publish(E message) {
     log.debug("Broadcasting a client cache eviction: {}", message);
     background.run(message, () -> broadcast(message));
+  }
+
+  @Override
+  public void publishNow(E message) {
+    log.debug("Broadcasting a client cache eviction now: {}", message);
+    broadcast(message);
   }
 }
