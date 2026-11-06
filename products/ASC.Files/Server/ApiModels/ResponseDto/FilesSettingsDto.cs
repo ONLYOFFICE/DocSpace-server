@@ -75,6 +75,13 @@ public class FilesSettingsDto
     public List<string> ExtsWebEncrypt { get; set; }
 
     /// <summary>
+    /// Whether the connected document server can edit end-to-end encrypted files. When false, an encrypted file cannot be
+    /// opened in the editors, whatever `extsWebEncrypt` lists.
+    /// </summary>
+    /// <example>true</example>
+    public bool DocServiceEncryptionSupported { get; set; }
+
+    /// <summary>
     /// Documents that support the reviewing mode, so that granting review access to them is meaningful.
     /// </summary>
     /// <example>[".docx"]</example>
@@ -483,7 +490,8 @@ public class FilesSettingsDtoConverter(
     FilesSettingsHelper filesSettingsHelper,
     SetupInfo setupInfo,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    SearchSettingsHelper searchSettingsHelper)
+    SearchSettingsHelper searchSettingsHelper,
+    DocumentServiceEncryptionChecker documentServiceEncryptionChecker)
 {
     public async Task<FilesSettingsDto> Get()
     {
@@ -494,6 +502,7 @@ public class FilesSettingsDtoConverter(
             ExtsWebPreviewed = fileUtility.ExtsWebPreviewed,
             ExtsWebEdited = fileUtility.ExtsWebEdited,
             ExtsWebEncrypt = fileUtility.ExtsWebEncrypt,
+            DocServiceEncryptionSupported = await documentServiceEncryptionChecker.IsSupportedAsync(),
             ExtsWebReviewed = fileUtility.ExtsWebReviewed,
             ExtsWebCustomFilterEditing = fileUtility.ExtsWebCustomFilterEditing,
             ExtsWebRestrictedEditing = fileUtility.ExtsWebRestrictedEditing,

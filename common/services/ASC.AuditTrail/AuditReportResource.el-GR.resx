@@ -1317,4 +1317,22 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Το αρχείο άνοιξε από σενάριο Document Builder: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Η εφαρμογή ενεργοποιήθηκε: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Η εφαρμογή απενεργοποιήθηκε: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Δωμάτια συνδέθηκαν με το έργο ΤΝ {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Δωμάτια αποσυνδέθηκαν από το έργο ΤΝ {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Το μοντέλο AI του έργου ΤΝ {0} άλλαξε σε {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Η παράδοση του webhook επαναλήφθηκε: {0}</value>
+  </data>
 </root>

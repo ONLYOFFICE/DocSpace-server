@@ -2136,14 +2136,34 @@ public class TariffService(
         await hybridCache.SetAsync(GetServiceLimitsCacheVersionKey(tenantId, groupName), Guid.NewGuid().ToString("N"), _serviceLimitsCacheVersionDuration);
     }
 
+    /// <summary>
+    /// Creates the service limit. A portal the accounting service does not know yet - a billing customer whose wallet
+    /// was never topped up - is refused as a missing customer, as a portal without billing is.
+    /// </summary>
     public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var serviceLimit = await accountingClient.CreateServiceLimitAsync(portalId, groupName, scope, customerParticipantName, amountValue, quantityValue, period);
+        var serviceLimit = await ChangeServiceLimitsAsync(tenantId,
+            () => accountingClient.CreateServiceLimitAsync(portalId, groupName, scope, customerParticipantName, amountValue, quantityValue, period));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
         return serviceLimit;
+    }
+
+    // The reads answer a portal the accounting service does not know as one without limits; a change has nothing to act
+    // on there, so it is refused as a missing customer instead of failing as an error of the accounting service.
+    private async Task<T> ChangeServiceLimitsAsync<T>(int tenantId, Func<Task<T>> change)
+    {
+        try
+        {
+            return await change();
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            throw new ItemNotFoundException("Customer could not be found", exception);
+        }
     }
 
     /// <summary>
@@ -2178,7 +2198,8 @@ public class TariffService(
     public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string groupName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var count = await accountingClient.SetParticipantServiceLimitsAsync(portalId, groupName, customerParticipantNames, amountValue, quantityValue, period);
+        var count = await ChangeServiceLimitsAsync(tenantId,
+            () => accountingClient.SetParticipantServiceLimitsAsync(portalId, groupName, customerParticipantNames, amountValue, quantityValue, period));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
@@ -2188,7 +2209,7 @@ public class TariffService(
     public async Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string groupName)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var count = await accountingClient.DisableParticipantServiceLimitsAsync(portalId, groupName);
+        var count = await ChangeServiceLimitsAsync(tenantId, () => accountingClient.DisableParticipantServiceLimitsAsync(portalId, groupName));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 

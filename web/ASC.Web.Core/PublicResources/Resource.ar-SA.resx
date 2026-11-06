@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>تكلفة المزوّد</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>الخطاف التلقائي (Webhook) معطّل. قم بتفعيله قبل إعادة محاولة عمليات التسليم الخاصة به</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>يتم إرسال الحدث الآن. أعد المحاولة بعد انتهاء المحاولة الحالية</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>تم تسجيل عملية التسليم بتنسيق خطاف تلقائي (Webhook) أقدم ولا يمكن إرسالها مرة أخرى</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>هدف الخطاف التلقائي (Webhook) ليس مستخدمًا أو مجموعة موجودة</value>
+  </data>
 </root>

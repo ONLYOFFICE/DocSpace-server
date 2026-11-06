@@ -99,5 +99,14 @@ public enum FilterType
     [EnumMember] DiagramsOnly = 25,
     
     [Description("Ai rooms")]
-    [EnumMember] AiRooms = 26
+    [EnumMember] AiRooms = 26,
+
+    [Description("Instructions rooms")]
+    [EnumMember] InstructionsRooms = 27,
+
+    [Description("Knowledge rooms")]
+    [EnumMember] KnowledgeRooms = 28,
+
+    [Description("AI project rooms")]
+    [EnumMember] AiProjectRooms = 29
 }

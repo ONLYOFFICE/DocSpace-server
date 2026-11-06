@@ -37,4 +37,37 @@ internal static partial class WebhookSenderLogger
 {
     [LoggerMessage(LogLevel.Debug, "Response: {response}")]
     public static partial void DebugResponse(this ILogger logger, HttpResponseMessage response);
+
+    [LoggerMessage(LogLevel.Debug, "Webhook log {logId}: attempt {attempts} failed, next attempt at {nextAttemptOn}")]
+    public static partial void DebugRetryScheduled(this ILogger<WebhookSender> logger, int logId, int attempts, DateTime nextAttemptOn);
+
+    [LoggerMessage(LogLevel.Debug, "Webhook log {logId}: the outcome was not recorded, the entry was requeued or claimed again during the attempt")]
+    public static partial void DebugLeaseLost(this ILogger<WebhookSender> logger, int logId);
+
+    [LoggerMessage(LogLevel.Warning, "Webhook log {logId}: the target did not answer within {timeout}")]
+    public static partial void WarningRequestTimeout(this ILogger<WebhookSender> logger, int logId, TimeSpan timeout);
+
+    [LoggerMessage(LogLevel.Warning, "Webhook log {logId}: giving up after {attempts} attempts")]
+    public static partial void WarningDeliveryGivenUp(this ILogger<WebhookSender> logger, int logId, int attempts);
+
+    [LoggerMessage(LogLevel.Error, "Failed to send webhook tenant: {tenantId}, log: {logId}")]
+    public static partial void ErrorFailedToSend(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "Failed to schedule the next attempt of webhook tenant: {tenantId}, log: {logId}")]
+    public static partial void ErrorFailedToRegisterAttempt(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Webhook tenant: {tenantId}, log: {logId} is not sent: its attempts kept failing before the request went out for longer than {retryWindow}")]
+    public static partial void WarningUnsentTooLong(this ILogger<WebhookSender> logger, int tenantId, int logId, TimeSpan retryWindow);
+
+    [LoggerMessage(LogLevel.Error, "Webhook log {logId}: the attempt is recorded, but the step after it failed: {step}")]
+    public static partial void ErrorAfterAttempt(this ILogger<WebhookSender> logger, int logId, string step, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "Failed to announce the change of webhook tenant: {tenantId}, log: {logId}")]
+    public static partial void ErrorFailedToAnnounce(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
+
+    [LoggerMessage(LogLevel.Debug, "Webhook log {logId}: not sent, another instance has claimed the entry since this one did")]
+    public static partial void DebugLeaseTakenOver(this ILogger<WebhookSender> logger, int logId);
+
+    [LoggerMessage(LogLevel.Information, "Webhook tenant: {tenantId}, log: {logId} is not sent: the creator of subscription {configId} may no longer receive {trigger}")]
+    public static partial void InfoCreatorNotEntitled(this ILogger<WebhookSender> logger, int tenantId, int logId, int configId, WebhookTrigger trigger);
 }

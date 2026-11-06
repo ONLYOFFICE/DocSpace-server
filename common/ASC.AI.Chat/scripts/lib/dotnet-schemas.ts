@@ -38,7 +38,7 @@ import { claim } from "./schema-names.js";
 
 // Reuse of the .NET AI service's OpenAPI document for the proxy routes.
 //
-// The `/agents/*` and `/config/*` routes forward verbatim to the .NET AI
+// The `/config/*` routes forward verbatim to the .NET AI
 // service and return its raw DocSpace response envelope (the `*Wrapper`
 // schemas). Rather than re-describe those responses by hand — and drift from
 // the C# DTOs' XML docs — this module reads the sibling `ai_2.0.json` (already
@@ -78,24 +78,17 @@ const SCHEMA_NAMESPACE = "Ai";
 // Local operationId → .NET AI operationId. Each local proxy route forwards
 // verbatim to the .NET AI service and returns the same-shaped response as the
 // .NET operation named here; kept in sync by hand with `apiCatalog.ts` (the
-// custom routes) and the .NET controllers (`AgentsController`,
-// `SettingsController`). Only operations with a JSON 200 response belong here —
+// custom routes) and the .NET controllers (`SettingsController`). Only operations with a JSON 200 response belong here —
 // fire-and-forget routes (e.g. `vectorization/tasks`, which returns no body)
 // are intentionally omitted and fall back to the generic response shape.
 const PROXY_RESPONSE_SOURCES: Readonly<Record<string, string>> = {
-  aiAgentsList: "getAgents",
-  aiAgentsCreate: "createAgent",
-  aiAgentsNews: "getAgentsNewItems",
-  aiAgentsGet: "getAgentInfo",
-  aiAgentsUpdate: "updateAgent",
-  aiAgentsDelete: "deleteAgent",
-  aiAgentsUpdateQuota: "updateAgentsQuota",
-  aiAgentsResetQuota: "resetAgentsQuota",
   aiSettingsGet: "getAiSettings",
   aiSettingsGetVectorization: "getVectorizationSettings",
   aiSettingsSetVectorization: "setVectorizationSettings",
   aiSettingsGetUser: "getAiUserSettings",
   aiSettingsSetUser: "setAiUserSettings",
+  aiSettingsGetToolMode: "getToolPermissionMode",
+  aiSettingsSetToolMode: "setToolPermissionMode",
 };
 
 type JsonObject = Record<string, unknown>;
@@ -110,9 +103,9 @@ export interface DotnetProxySchemas {
 
 function fail(message: string): never {
   throw new Error(
-    `Cannot enrich the proxy routes from ${AI_DOCUMENT}: ${message}. `
-    + "Build ASC.AI.Server (which emits ai_2.0.json) before generating the "
-    + "OpenAPI document for this service.",
+    `Cannot enrich the proxy routes from ${AI_DOCUMENT}: ${message}. ` +
+      "Build ASC.AI.Server (which emits ai_2.0.json) before generating the " +
+      "OpenAPI document for this service.",
   );
 }
 
@@ -129,6 +122,15 @@ function refName(ref: unknown): string | null {
   return match ? match[1]! : null;
 }
 
+// A lifted polymorphic base keeps its subtypes only by name: the copy of its
+// `discriminator` would map to the .NET components, and namespacing the mapping
+// would pull a whole `Ai` copy of every subtype into the SDKs, whose generators
+// also take the first copy's names for the inline schemas they share. The proxy
+// routes return the base as the .NET service does, so the copy goes without it.
+function isDiscriminator(key: string, value: unknown): boolean {
+  return key === "discriminator" && isObject(value) && typeof value["propertyName"] === "string";
+}
+
 // Every local component name referenced anywhere within `node`.
 function collectRefs(node: unknown, acc: Set<string>): void {
   if (Array.isArray(node)) {
@@ -142,7 +144,7 @@ function collectRefs(node: unknown, acc: Set<string>): void {
       const name = key === "$ref" ? refName(value) : null;
       if (name !== null) {
         acc.add(name);
-      } else {
+      } else if (!isDiscriminator(key, value)) {
         collectRefs(value, acc);
       }
     }
@@ -166,9 +168,11 @@ function namespaceRefs(node: unknown): unknown {
     const out: JsonObject = {};
     for (const [key, value] of Object.entries(node)) {
       const name = key === "$ref" ? refName(value) : null;
-      out[key] = name !== null
-        ? `#/components/schemas/${namespacedName(name)}`
-        : namespaceRefs(value);
+      if (name !== null) {
+        out[key] = `#/components/schemas/${namespacedName(name)}`;
+      } else if (!isDiscriminator(key, value)) {
+        out[key] = namespaceRefs(value);
+      }
     }
     return out;
   }

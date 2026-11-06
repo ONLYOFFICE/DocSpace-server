@@ -37,9 +37,9 @@ namespace ASC.Files.Tests.Tests._07_Settings.Editor;
 /// <c>PUT /files/docservice</c> — validation and access control only. A successful PUT is not
 /// reachable in this harness: even with an empty <c>docServiceUrl</c> the setting falls back to the
 /// configured default, so <c>DocumentServiceConnector.CheckDocServiceUrlAsync</c> always issues a
-/// live HEAD request to a document server the integration-test AppHost does not run
-/// (<c>products/ASC.Files/Core/Services/DocumentService/DocumentServiceConnector.cs:221</c>).
-/// The positive-path tests from the TypeScript suite are deliberately not ported.
+/// live request to the document server. The integration-test host runs one that reaches the portals,
+/// and the addresses are stored per portal, so the positive-path tests of the TypeScript suite can be
+/// ported; they are not yet.
 /// </summary>
 [Trait("Category", "Settings")]
 public class CheckDocServiceUrlTests(

@@ -1557,4 +1557,16 @@
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Provayder xərci</value>
   </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook deaktivdir. Çatdırılmaları yenidən cəhd etməzdən əvvəl onu aktiv edin</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Hadisə hazırda göndərilir. Cəhd bitdikdən sonra yenidən cəhd edin</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Çatdırılma daha əvvəlki webhook formatında qeydə alınıb və yenidən göndərilə bilməz</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook hədəfi mövcud istifadəçi və ya qrup deyil</value>
+  </data>
 </root>

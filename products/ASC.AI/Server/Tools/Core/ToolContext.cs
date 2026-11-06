@@ -44,12 +44,16 @@ public class ToolContext
     /// <summary>Set by the ASC.AI.Chat form-analysis sub-agent so the form-data tools are emitted for it
     /// only, and never for the main chat agent.</summary>
     public bool FormSubAgent { get; init; }
+
+    [MaxLength(AiHubService.MaxRoomsPerType)]
+    public HashSet<int> KnowledgeRoomIds { get; init; } = [];
 }
 
 public class ResolvedToolContext
 {
     public IFolder? Folder { get; init; }
     public FileEntry? Form { get; init; }
+    public IReadOnlyList<Folder<int>> KnowledgeRooms { get; init; } = [];
 
     /// <summary>
     /// True when the user launched form-response analysis for <see cref="Form"/> (resolved server-side

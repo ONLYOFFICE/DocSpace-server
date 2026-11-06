@@ -70,7 +70,8 @@ public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = 
 
     /// <summary>
     /// Whether an account of this service cannot be connected without `url`, which is the case for the WebDAV servers
-    /// whose address is not known in advance. The presets with a fixed address and the OAuth services do not need it.
+    /// whose address is not known in advance and for kDrive, whose address names the drive. The OAuth services do not
+    /// need it.
     /// </summary>
     /// <example>false</example>
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;

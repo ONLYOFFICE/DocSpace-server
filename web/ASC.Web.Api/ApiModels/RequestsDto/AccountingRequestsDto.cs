@@ -556,8 +556,9 @@ public class CreateServiceLimitRequestDto
     /// Whom the limit applies to.
     /// </summary>
     /// <example>Custom</example>
+    [Required]
     [EnumDataType(typeof(ServiceLimitScope))]
-    public ServiceLimitScope Scope { get; init; } = ServiceLimitScope.Total;
+    public ServiceLimitScope? Scope { get; init; }
 
     /// <summary>
     /// The ID of the portal user a personal limit is set for, as returned in `id` by the people operations.

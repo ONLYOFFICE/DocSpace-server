@@ -88,16 +88,12 @@ export interface ChatContextRequest {
 }
 
 // `ChatContextFolderDto` -> the shape the Files API helpers already consume.
-// The prompt is left raw here; `safeGetAgentInstruction` sanitizes it at the
-// point of use, exactly as for a folder fetched from the Files API.
 function parseFolder(raw: unknown): DocspaceFolderInfo | undefined {
   if (!isObject(raw) || getEntityId(raw, "id") === undefined) {
     return undefined;
   }
   const info: DocspaceFolderInfo = {
-    isAgent: getBoolean(raw, "isAgent") ?? false,
     title: getString(raw, "title"),
-    prompt: getString(raw, "prompt"),
   };
   const folderType = getNumber(raw, "folderType");
   if (folderType !== undefined) {
@@ -283,7 +279,7 @@ export async function primeChatContext(request: ChatContextRequest): Promise<voi
   logger.info(
     `chat-context: primed threadId=${request.threadId ?? "-"} entityId=${request.entityId ?? "-"} ` +
       `contextEntityId=${request.contextEntityId ?? "-"} profiles=${snapshot.profiles.length} ` +
-      `entity=${snapshot.entity ? (snapshot.entity.folder?.isAgent ? "agent" : "folder") : "none"} ` +
+      `entity=${snapshot.entity ? "folder" : "none"} ` +
       `thread=${snapshot.thread ? "yes" : "no"} messages=${snapshot.messages?.length ?? "-"} ` +
       `webSearch=${snapshot.webSearch ? "yes" : "no"}`,
   );

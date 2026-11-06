@@ -51,7 +51,8 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
     {
         var data = await ArrangeAsync();
 
-        var content = await data.SearchAsync(data.Eq(ClientField, "ACME"), expectedFolders: [data.MatchingFolderId], expectedFiles: []);
+        // the file holding the same value is listed too, so it is expected: the poll waits for the exact listing
+        var content = await data.SearchAsync(data.Eq(ClientField, "ACME"), expectedFolders: [data.MatchingFolderId], expectedFiles: [data.MatchingFileId]);
 
         // the sub-folder holding another value and the one without metadata at all must be filtered out
         content.FolderIds().Should().Equal(data.MatchingFolderId);
@@ -72,7 +73,7 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
     {
         var data = await ArrangeAsync();
 
-        var content = await data.SearchAsync(data.Eq(ClientField, "ACME"), expectedFolders: [data.MatchingFolderId], expectedFiles: []);
+        var content = await data.SearchAsync(data.Eq(ClientField, "ACME"), expectedFolders: [data.MatchingFolderId], expectedFiles: [data.MatchingFileId]);
 
         content.Folders.Should().ContainSingle()
             .Which.AssignedMetadataTemplates.Should().Contain(data.TemplateId);

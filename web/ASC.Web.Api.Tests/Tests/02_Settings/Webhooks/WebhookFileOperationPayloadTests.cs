@@ -1,0 +1,229 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
+
+/// <summary>
+/// The file events that come out of the background file operations (FileDeleteOperation, FileMoveCopyOperation):
+/// deleted, trashed, copied, moved and restored. Each one carries the file payload of the entry it is about. A
+/// deletion is published after the delete has been committed, from the entry read before it, so the payload still
+/// describes the file that is gone. The operations are asynchronous, so the events are polled for.
+/// </summary>
+[Trait("Category", "Settings")]
+public class WebhookFileOperationPayloadTests(
+    AspireAppFixture fixture)
+    : WebhookDeliveryTestBase(fixture)
+{
+    [Fact]
+    public async Task FileDeleted_Immediately_DescribesTheFileAsItWas()
+    {
+        // Arrange
+        var roomId = await CreateRoomAsync();
+        var file = await CreateFileAsync(roomId);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileDeleted);
+
+        // Act
+        await _filesClient.Authenticate(Owner);
+        await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken);
+
+        // Assert
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.deleted", p => IdIs(p, file.Id));
+
+        payload.Should().NotBeNull("an immediate delete publishes file.deleted once it has been committed");
+        payload!.Model.Title.Should().Be(file.Title);
+        payload.Model.ParentId.GetInt().Should().Be(roomId, "the payload is the file as it was before the delete");
+    }
+
+    [Fact]
+    public async Task FileTrashed_DescribesTheFile()
+    {
+        // Arrange
+        var roomId = await CreateRoomAsync();
+        var file = await CreateFileAsync(roomId);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileTrashed);
+
+        // Act
+        await TrashAsync(file.Id);
+
+        // Assert
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.trashed", p => IdIs(p, file.Id));
+
+        payload.Should().NotBeNull("a delete that is not immediate moves the file to the trash");
+        payload!.Model.Title.Should().Be(file.Title);
+    }
+
+    [Fact]
+    public async Task FileCopied_DescribesTheCopy()
+    {
+        // Arrange
+        var sourceRoomId = await CreateRoomAsync();
+        var targetRoomId = await CreateRoomAsync();
+        var file = await CreateFileAsync(sourceRoomId);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCopied);
+
+        // Act
+        await RunBatchAsync(copy: true, file.Id, targetRoomId);
+
+        // Assert: the payload is the new file, in the target room
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.copied", p => ParentIs(p, targetRoomId));
+
+        payload.Should().NotBeNull();
+        payload!.Model.Title.Should().Be(file.Title);
+        payload.Model.Id.GetInt().Should().NotBe(file.Id, "a copy is a file of its own");
+    }
+
+    [Fact]
+    public async Task FileMoved_DescribesTheFileInItsNewPlace()
+    {
+        // Arrange
+        var sourceRoomId = await CreateRoomAsync();
+        var targetRoomId = await CreateRoomAsync();
+        var file = await CreateFileAsync(sourceRoomId);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileMoved);
+
+        // Act
+        await RunBatchAsync(copy: false, file.Id, targetRoomId);
+
+        // Assert
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.moved", p => ParentIs(p, targetRoomId));
+
+        payload.Should().NotBeNull();
+        payload!.Model.Title.Should().Be(file.Title);
+    }
+
+    [Fact]
+    public async Task FileRestored_IsAMoveOutOfTheTrash()
+    {
+        // Arrange: a file in the trash. A catch-all subscription gets both events, told apart by event.trigger
+        var roomId = await CreateRoomAsync();
+        var file = await CreateFileAsync(roomId);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver());
+        await TrashAsync(file.Id);
+        (await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.trashed", p => IdIs(p, file.Id))).Should().NotBeNull();
+
+        // Act
+        await RunBatchAsync(copy: false, file.Id, roomId);
+
+        // Assert
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.restored", p => ParentIs(p, roomId));
+
+        payload.Should().NotBeNull("moving a file out of the trash publishes file.restored, not file.moved");
+        payload!.Model.Title.Should().Be(file.Title);
+    }
+
+    /// <summary>
+    /// The origin folder is one object for all the subscribers of an event, and an access check answers with the share
+    /// it finds on it: whoever was checked after somebody with access to the folder used to get its name and ID too.
+    /// </summary>
+    [Fact]
+    public async Task FileTrashed_Origin_FollowsTheAccessOfEachSubscriber()
+    {
+        // Arrange: a file of the owner's private folder, shared on its own with one member and through the folder with the other
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var inFolder = await InviteContact(EmployeeType.User);
+        var fileOnly = await InviteContact(EmployeeType.User);
+
+        await _filesClient.Authenticate(Owner);
+        var myDocuments = (await _foldersApi.GetMyFolderAsync(cancellationToken: cancellationToken)).Response.Current.Id;
+        var folderTitle = $"folder-{Guid.NewGuid():N}";
+        var folder = (await _foldersApi.CreateFolderAsync(myDocuments, new CreateFolderRequest(folderTitle), cancellationToken)).Response;
+        var file = await CreateFileAsync(folder.Id);
+
+        await _sharingApi.SetFolderSecurityInfoAsync(folder.Id, ReadShare(inFolder), cancellationToken);
+        await _sharingApi.SetFileSecurityInfoAsync(file.Id, ReadShare(fileOnly), cancellationToken);
+
+        // the member with access to the folder goes first
+        var inFolderSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileTrashed, inFolder);
+        var fileOnlySubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileTrashed, fileOnly);
+
+        // Act
+        await TrashAsync(file.Id);
+
+        // Assert
+        var inFolderPayload = await WaitForEventPayloadAsync<FilePayload>(inFolderSubscription.Id, "file.trashed", p => IdIs(p, file.Id));
+        var fileOnlyPayload = await WaitForEventPayloadAsync<FilePayload>(fileOnlySubscription.Id, "file.trashed", p => IdIs(p, file.Id));
+
+        inFolderPayload.Should().NotBeNull("the member may read the folder of the file");
+        inFolderPayload!.Model.OriginTitle.Should().Be(folderTitle);
+        fileOnlyPayload.Should().NotBeNull("the file is shared with the member");
+        fileOnlyPayload!.Model.OriginTitle.Should().BeNull("the member cannot read the folder the file was deleted from");
+    }
+
+    private static SecurityInfoSimpleRequestDto ReadShare(User user)
+    {
+        return new SecurityInfoSimpleRequestDto
+        {
+            Share = [new FileShareParams { ShareTo = user.Id, Access = DocSpace.API.SDK.Model.FileShare.Read }],
+            Notify = false
+        };
+    }
+
+    private async Task TrashAsync(int fileId)
+    {
+        await _filesClient.Authenticate(Owner);
+        await _filesApi.DeleteFileAsync(fileId, new DeleteFileRequest { Immediately = false }, true, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Copies or moves one file into <paramref name="destinationId"/> as the owner.</summary>
+    private async Task RunBatchAsync(bool copy, int fileId, int destinationId)
+    {
+        var request = new BatchRequestDto
+        {
+            ReturnSingleOperation = true,
+            FileIds = [new BatchRequestDtoAllOfFileIds(fileId)],
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(destinationId),
+            DeleteAfter = false
+        };
+
+        await _filesClient.Authenticate(Owner);
+
+        if (copy)
+        {
+            await _operationsApi.CopyBatchItemsAsync(request, TestContext.Current.CancellationToken);
+        }
+        else
+        {
+            await _operationsApi.MoveBatchItemsAsync(request, TestContext.Current.CancellationToken);
+        }
+    }
+
+    private static bool IdIs(FilePayload payload, int id)
+    {
+        return payload.Id?.ActualInstance is int value && value == id;
+    }
+
+    private static bool ParentIs(FilePayload payload, int parentId)
+    {
+        return payload.ParentId?.ActualInstance is int value && value == parentId;
+    }
+}

@@ -303,7 +303,8 @@ public class DiscDataStore(
         var target = GetTarget(domain, path + "chunks");
         if (Directory.Exists(target))
         {
-            Directory.Delete(target);
+            // the parts received so far are still in it: a non-recursive delete failed with "the directory is not empty"
+            Directory.Delete(target, true);
         }
         return Task.CompletedTask;
     }

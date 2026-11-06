@@ -491,7 +491,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
                (file.ShareRecord is
                     { IsLink: true, Share: not FileShare.Restrict } or
                     { Share: FileShare.Read, SubjectType: SubjectType.User or SubjectType.Group } ||
-               (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)));
+               (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive && await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)));
     }
 
     private async Task TryMarkAsRecent<T>(File<T> file)

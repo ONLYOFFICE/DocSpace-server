@@ -555,7 +555,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
-        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.Forms && !parent.ProviderEntry)
+        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
                 provider, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter, withAiFolder, metadataFilter);
@@ -653,8 +653,9 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesCount = count - folders.Count;
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
+                var filesParentType = room is { FolderType: FolderType.KnowledgeRoom } ? FolderType.KnowledgeRoom : parent.FolderType;
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                    excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto,
+                    excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, filesParentType, formsItemDto,
                     applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter, folderType: trashFolderType, metadataFilter: metadataFilter);
 
                 var files = await filesTask.ToListAsync();
@@ -1529,6 +1530,12 @@ public class EntryManager(IDaoFactory daoFactory,
         if (file.RootFolderType == FolderType.TRASH)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+        }
+
+        // Whatever comes here for end-to-end encrypted content is ciphertext; saved without the flag it would turn into an open file.
+        if (!encrypted && (file.Encrypted || await DocSpaceHelper.LocatedInPrivateRoomAsync(file, daoFactory.GetCacheFolderDao<T>())))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var currentExt = file.ConvertedExtension;

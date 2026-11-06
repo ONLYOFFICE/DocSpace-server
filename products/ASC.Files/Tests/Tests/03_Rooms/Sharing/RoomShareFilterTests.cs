@@ -134,13 +134,14 @@ public class RoomShareFilterTests(
     {
         var (room, _, groupId) = await CreateRoomWithUserAndGroup("Autotest Filter Paging");
 
-        var page = (await _roomsApi.GetRoomSecurityInfoAsync(
+        var answer = await _roomsApi.GetRoomSecurityInfoAsync(
             room.Id,
             ShareFilterType.UserOrGroup,
             count: 1,
             startIndex: 1,
-            cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var total = await ReadShareTotal($"api/2.0/files/rooms/{room.Id}/share?filterType=UserOrGroup&count=1&startIndex=1");
+            cancellationToken: TestContext.Current.CancellationToken);
+        var page = answer.Response;
+        var total = answer.Total;
 
         // the owner (room manager) sorts first, the group second, the invited user last
         page.Should().ContainSingle();
@@ -154,7 +155,7 @@ public class RoomShareFilterTests(
     {
         var (room, _, _) = await CreateRoomWithUserAndGroup("Autotest Filter Group Total");
 
-        var total = await ReadShareTotal($"api/2.0/files/rooms/{room.Id}/share?filterType=Group");
+        var total = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, ShareFilterType.Group, cancellationToken: TestContext.Current.CancellationToken)).Total;
 
         total.Should().Be(1);
     }
@@ -190,7 +191,7 @@ public class RoomShareFilterTests(
     {
         var templateId = await CreateTemplate("Autotest Filter Everyone Total", isPublic: true);
 
-        var total = await ReadShareTotal($"api/2.0/files/rooms/{templateId}/share?filterType=Group");
+        var total = (await _roomsApi.GetRoomSecurityInfoAsync(templateId, ShareFilterType.Group, cancellationToken: TestContext.Current.CancellationToken)).Total;
 
         total.Should().Be(1, "Everyone is the only group of a public template");
     }

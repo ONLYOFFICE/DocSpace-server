@@ -47,6 +47,12 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
     }
 
     @Override
+    public void preprocessOpenAPI(io.swagger.v3.oas.models.OpenAPI openAPI) {
+        Discriminators.strip(openAPI);
+        super.preprocessOpenAPI(openAPI);
+    }
+
+    @Override
     public void processOpts() {
         super.processOpts();
 

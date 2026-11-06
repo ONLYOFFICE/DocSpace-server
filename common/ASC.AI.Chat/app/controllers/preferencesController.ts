@@ -43,17 +43,15 @@ import { isReasoningLevel, REASONING_LEVELS } from "../storage/reasoningDepth.js
 
 const engine = new PreferencesEngine({ storage });
 
-// The scope a preference is written to. Preferences are keyed on a folder
-// (an agent room; any other accessible folder folds to the portal-wide
-// scope downstream), and folder ids are integers on the .NET side — so
-// anything else names no scope at all. A thread id in particular used to
-// fold to the portal-wide preference and answer `{ success: true }` for a
-// write that changed nothing the caller could observe (Bug 84026); it is
-// refused with 400 instead. An absent value is the portal-wide scope. Reads
-// used to stay lenient and serve the portal-wide value for any junk id,
-// which hid a wrong id behind a plausible answer; they are held to the same
-// rule now (Bug 84417). A well-formed id of a non-agent room still folds to
-// the portal-wide scope downstream, by design.
+// The `entityId` of a preference read or write. Preferences are one value
+// per user whatever folder the chat is opened from, so the id is only
+// validated, never used: the library still sends it, and folder ids are
+// integers on the .NET side — so anything else names no folder at all. A
+// thread id in particular used to answer `{ success: true }` for a write
+// that changed nothing the caller could observe (Bug 84026); it is refused
+// with 400 instead. Reads used to stay lenient and serve the value for any
+// junk id, which hid a wrong id behind a plausible answer; they are held to
+// the same rule now (Bug 84417). An absent value is the ordinary case.
 function scopeOf(value: unknown): string | undefined {
   if (value === undefined || value === null || value === "") {
     return undefined;

@@ -35,23 +35,53 @@ namespace ASC.AI.Tests.Tests.PreferencesStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Preferences")]
-public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class PreferencesUpsertTests(AspireAppFixture fixture) : PreferencesTestBase(fixture)
 {
     [Fact]
     public async Task Upsert_Global_InsertsAndIsReadable()
     {
-        using var response = await _ai.PutAsync(
-            PreferencesPath,
-            new { depth = ReasoningDepth.High },
-            TestContext.Current.CancellationToken);
+        await SetReasoningLevelAsync(AiReasoningLevel.High);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        var stored = await ReadPreferencesAsync();
-        stored.Should().NotBeNull();
-        stored!.Depth.Should().Be(ReasoningDepth.High);
+        (await IsDepthStoredAsync()).Should().BeTrue();
+        (await GetReasoningLevelAsync()).Should().Be(AiReasoningLevel.High);
     }
 
+    [Fact]
+    public async Task Upsert_Global_TwiceUpdatesValue()
+    {
+        await SetReasoningLevelAsync(AiReasoningLevel.High);
+        await SetReasoningLevelAsync(AiReasoningLevel.Off);
+
+        // "off" is a stored value, not an empty row.
+        (await IsDepthStoredAsync()).Should().BeTrue();
+        (await GetReasoningLevelAsync()).Should().Be(AiReasoningLevel.Off);
+    }
+
+    [Fact]
+    public async Task Upsert_UnknownDepth_Returns400()
+    {
+        using var response = await new RawApiClient(_aiChatClient).PutRawAsync(
+            PublicSetReasoningLevelPath,
+            """{ "value": "ultra" }""",
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await IsDepthStoredAsync()).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Upsert_NonNumericEntityId_Returns400()
+    {
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiPreferences.AiPreferencesSetReasoningLevelAsync(
+                new AiPreferencesSetReasoningLevelRequest(AiReasoningLevel.High, "not-a-room"),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
+        (await IsDepthStoredAsync()).Should().BeFalse();
+    }
+
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Upsert_WithEntityId_InsertsAndIsReadable()
     {
@@ -64,72 +94,65 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var stored = await ReadPreferencesAsync(roomId.ToString());
+        var stored = await ReadPreferencesInternalAsync(roomId.ToString());
         stored.Should().NotBeNull();
         stored!.Depth.Should().Be(ReasoningDepth.High);
     }
 
-    [Fact]
-    public async Task Upsert_Global_TwiceUpdatesValue()
-    {
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None);
-
-        var stored = await ReadPreferencesAsync();
-        stored.Should().NotBeNull();
-        stored!.Depth.Should().Be(ReasoningDepth.None);
-    }
-
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Upsert_WithEntityId_TwiceUpdatesValue()
     {
         var roomId = await CreateRoomAsync();
 
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
-        var stored = await ReadPreferencesAsync(roomId.ToString());
+        var stored = await ReadPreferencesInternalAsync(roomId.ToString());
         stored.Should().NotBeNull();
         stored!.Depth.Should().Be(ReasoningDepth.None);
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Upsert_WithEntityId_DoesNotAffectGlobal()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High);
 
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
-        var global = await ReadPreferencesAsync();
+        var global = await ReadPreferencesInternalAsync();
         global.Should().NotBeNull();
         global!.Depth.Should().Be(ReasoningDepth.High);
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Upsert_Global_DoesNotAffectScoped()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
 
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None);
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.None);
 
-        var scoped = await ReadPreferencesAsync(roomId.ToString());
+        var scoped = await ReadPreferencesInternalAsync(roomId.ToString());
         scoped.Should().NotBeNull();
         scoped!.Depth.Should().Be(ReasoningDepth.High);
     }
 
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes validate entityId and drop it).
     [Fact]
     public async Task Upsert_TwoDifferentEntities_AreIsolated()
     {
         var firstRoomId = await CreateRoomAsync();
         var secondRoomId = await CreateRoomAsync();
 
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: firstRoomId.ToString());
-        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: secondRoomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High, entityId: firstRoomId.ToString());
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.None, entityId: secondRoomId.ToString());
 
-        var first = await ReadPreferencesAsync(firstRoomId.ToString());
-        var second = await ReadPreferencesAsync(secondRoomId.ToString());
+        var first = await ReadPreferencesInternalAsync(firstRoomId.ToString());
+        var second = await ReadPreferencesInternalAsync(secondRoomId.ToString());
 
         first.Should().NotBeNull();
         first!.Depth.Should().Be(ReasoningDepth.High);
@@ -138,10 +161,11 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
         second!.Depth.Should().Be(ReasoningDepth.None);
     }
 
+    // Internal contract: a null depth has no public route (set-reasoning-level only accepts a level, and every level maps to a depth).
     [Fact]
     public async Task Upsert_NullDepth_Persisted()
     {
-        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesInternalAsync(depth: ReasoningDepth.High);
 
         using var response = await _ai.PutAsync(
             PreferencesPath,
@@ -149,22 +173,12 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var stored = await ReadPreferencesAsync();
+        var stored = await ReadPreferencesInternalAsync();
         stored.Should().NotBeNull();
         stored!.Depth.Should().BeNull();
     }
 
-    [Fact]
-    public async Task Upsert_UnknownDepth_Returns400()
-    {
-        using var response = await _ai.PutAsync(
-            PreferencesPath,
-            new { depth = "ultra" },
-            TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
+    // Internal contract: entity-scoped preferences have no public route (the Node preferences routes never forward entityId, so a nonexistent room is not looked up).
     [Fact]
     public async Task Upsert_NonExistentEntityId_Returns404()
     {

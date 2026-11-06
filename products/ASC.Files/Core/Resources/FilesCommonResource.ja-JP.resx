@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>このフォルダを使用してルームを保存することはできません</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>接続のURLアドレスが無効です</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>不適切なタイトル</value>
   </data>
@@ -610,9 +613,6 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>チャットの出力</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>ルームにはすでに .ai フォルダーが含まれています</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>ルームが使用中のため、ストレージを切断できません。代わりにルームを削除してください</value>
   </data>
@@ -621,5 +621,29 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="IndexTitleFileMetadata" xml:space="preserve">
     <value>ファイルメタデータで検索</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>AI プロジェクトにリンクできる指示ルームは最大 {0} 個です</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>AI プロジェクトにリンクできるナレッジルームは最大 {0} 個です</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>これらのルームは AI プロジェクトにリンクできません: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>指示ルームに追加できるのは Markdown (.md) ファイルのみです</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>指示ルームに含められるスキルは最大 {0} 個です</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>スキルの説明は 1～1024 文字で、XML タグを含めることはできません</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>スキルファイルは、name と description フィールドを含む 2 つの --- 行で囲まれた YAML フロントマターブロックで始まる必要があります</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>スキル名は 1～64 文字で、小文字、数字、単一のハイフンのみを使用でき、ハイフンで始めたり終えたりすることはできません</value>
   </data>
 </root>

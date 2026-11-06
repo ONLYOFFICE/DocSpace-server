@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Δεν είναι δυνατή η χρήση αυτού του φακέλου για την αποθήκευση του δωματίου</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Μη έγκυρη διεύθυνση URL σύνδεσης</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Εσφαλμένος τίτλος</value>
   </data>
@@ -610,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Έξοδοι συνομιλίας</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Το δωμάτιο περιέχει ήδη τον φάκελο .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Η αποθήκευση δεν μπορεί να αποσυνδεθεί ενώ ένα δωμάτιο τη χρησιμοποιεί. Διαγράψτε το δωμάτιο</value>
   </data>
@@ -621,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Αναζήτηση σε μεταδεδομένα φακέλου</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Ένα έργο ΤΝ μπορεί να συνδέσει έως {0} δωμάτια οδηγιών</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Ένα έργο ΤΝ μπορεί να συνδέσει έως {0} δωμάτια γνώσης</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Αυτά τα δωμάτια δεν μπορούν να συνδεθούν με το έργο ΤΝ: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Σε ένα δωμάτιο οδηγιών μπορούν να προστεθούν μόνο αρχεία Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Ένα δωμάτιο οδηγιών μπορεί να περιέχει έως {0} δεξιότητες</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Η περιγραφή της δεξιότητας πρέπει να έχει από 1 έως 1024 χαρακτήρες και να μην περιέχει ετικέτες XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Το αρχείο της δεξιότητας πρέπει να ξεκινά με ένα μπλοκ YAML frontmatter ανάμεσα σε δύο γραμμές ---, με τα πεδία name και description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Το όνομα της δεξιότητας πρέπει να έχει από 1 έως 64 χαρακτήρες, να περιέχει μόνο πεζά γράμματα, ψηφία και μεμονωμένες παύλες και να μην ξεκινά ή τελειώνει με παύλα</value>
   </data>
 </root>

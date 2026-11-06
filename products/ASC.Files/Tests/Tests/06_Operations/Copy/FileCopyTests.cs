@@ -437,33 +437,9 @@ public class FileCopyTests(
             roomRequest,
             TestContext.Current.CancellationToken)).Response;
 
-        var subFoldersResponse = await _foldersApi.GetFoldersWithHttpInfoAsync(aiRoom.Id, TestContext.Current.CancellationToken);
+        var subFolders = (await _foldersApi.GetFoldersAsync(aiRoom.Id, TestContext.Current.CancellationToken)).Response;
 
-        using var payload = JsonDocument.Parse(subFoldersResponse.RawContent);
-        var response = payload.RootElement.GetProperty("response");
-
-        int? knowledgeFolderId = null;
-
-        foreach (var folder in response.EnumerateArray())
-        {
-            var isKnowledgeByType = folder.TryGetProperty("type", out var rawType) &&
-                                    rawType.ValueKind == JsonValueKind.Number &&
-                                    rawType.TryGetInt32(out var folderTypeValue) &&
-                                    folderTypeValue == (int)FolderType.Knowledge;
-
-            if (!isKnowledgeByType)
-            {
-                continue;
-            }
-
-            if (folder.TryGetProperty("id", out var idProp) &&
-                idProp.ValueKind == JsonValueKind.Number &&
-                idProp.TryGetInt32(out var id))
-            {
-                knowledgeFolderId = id;
-                break;
-            }
-        }
+        var knowledgeFolderId = subFolders.OfType<FolderDto>().FirstOrDefault(f => f.Type == FolderType.Knowledge)?.Id;
 
         knowledgeFolderId.Should().HaveValue();
 

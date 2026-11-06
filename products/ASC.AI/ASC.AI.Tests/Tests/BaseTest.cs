@@ -63,12 +63,55 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    // ASC.AI's internal storage API (/internal/ai). The router does not publish it: only the Node chat service
+    // calls it. A test goes here only to check that internal contract, for what has no public route.
     protected HttpClient _aiClient = null!;
     protected RawApiClient _ai = null!;
+
+    // The public AI surface (/api/2.0/ai), served by the Node chat service. Tests go through these.
+    protected HttpClient _aiChatClient = null!;
+    protected AiProfilesApi _aiProfiles = null!;
+    protected AiThreadsApi _aiThreads = null!;
+    protected AiChatApi _aiChat = null!;
+    protected AiAssignmentsApi _aiAssignments = null!;
+    protected AiToolsApi _aiTools = null!;
+    protected AiPromptsApi _aiPrompts = null!;
+    protected AiPreferencesApi _aiPreferences = null!;
+    protected AiSettingsApi _aiSettings = null!;
+    protected AiContextApi _aiContext = null!;
+    protected AiExportApi _aiExport = null!;
+    protected DocSpace.API.SDK.Api.AI.AttachmentsApi _aiAttachments = null!;
+    protected DocSpace.API.SDK.Api.AI.EditorToolsApi _aiEditorTools = null!;
+    protected DocSpace.API.SDK.Api.AI.VectorizationApi _aiVectorization = null!;
+    protected DocSpace.API.SDK.Api.AI.WebSearchApi _aiWebSearch = null!;
+
+    /// <summary>The stub model provider every profile of the run points at.</summary>
+    protected StubModelProvider ModelProvider => fixture.ModelProvider;
+
+    /// <summary>Whether the suite's launch profile starts the resource (a container only some profiles include).</summary>
+    protected bool StackHasResource(string resourceName) => fixture.HasResource(resourceName);
+
+    /// <summary>
+    /// True for a class whose tests convert through the document server (an export that renders a .docx or a .pdf):
+    /// its setup then waits until that server is up, instead of each test waiting out its export timeout.
+    /// </summary>
+    protected virtual bool NeedsDocumentServer => false;
+
+    /// <summary>
+    /// True for a class whose tests use a service of <see cref="AspireAppFixture"/>'s <c>LazyResources</c> (Nextcloud):
+    /// its setup then waits until those are healthy, which the rest of the suite does not.
+    /// </summary>
+    protected virtual bool NeedsLazyResources => false;
 
     public async ValueTask InitializeAsync()
     {
         var setupSw = Stopwatch.StartNew();
+
+        if (NeedsLazyResources)
+        {
+            // the wait is shared by every class that needs them, so it is not cancelled itself: this test just stops waiting
+            await fixture.WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken);
+        }
 
         // Register a brand-new portal for this test and bind a fresh set of clients to it.
         _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
@@ -76,15 +119,43 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         _aiClient = _clients.AiHttpClient;
         _ai = _clients.Ai;
 
+        _aiChatClient = _clients.AiChatHttpClient;
+        _aiProfiles = _clients.AiProfilesApi;
+        _aiThreads = _clients.AiThreadsApi;
+        _aiChat = _clients.AiChatApi;
+        _aiAssignments = _clients.AiAssignmentsApi;
+        _aiTools = _clients.AiToolsApi;
+        _aiPrompts = _clients.AiPromptsApi;
+        _aiPreferences = _clients.AiPreferencesApi;
+        _aiSettings = _clients.AiSettingsApi;
+        _aiContext = _clients.AiContextApi;
+        _aiExport = _clients.AiExportApi;
+        _aiAttachments = _clients.AiAttachmentsApi;
+        _aiEditorTools = _clients.AiEditorToolsApi;
+        _aiVectorization = _clients.AiVectorizationApi;
+        _aiWebSearch = _clients.AiWebSearchApi;
+
         await _aiClient.Authenticate(Owner);
+        await _aiChatClient.Authenticate(Owner);
+
+        if (NeedsDocumentServer)
+        {
+            await fixture.WaitForDocumentServerAsync().WaitAsync(TestContext.Current.CancellationToken);
+        }
 
         Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
     }
 
-    public ValueTask DisposeAsync()
+    /// <summary>
+    /// Disposes the test's clients. xUnit calls only this on a class that implements <see cref="IAsyncLifetime"/>, never
+    /// <see cref="IDisposable.Dispose"/>: a class that owns more (a stub provider of its own) overrides it and calls base.
+    /// </summary>
+    public virtual ValueTask DisposeAsync()
     {
-        // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
-        _clients.Dispose();
+        // Each test owns its portal and clients; nothing is shared, so just dispose the clients. They are null when the
+        // setup failed before the portal was registered (a lazy resource that never came up): the setup's own exception
+        // is the one to report, not a NullReferenceException from here.
+        _clients?.Dispose();
         return ValueTask.CompletedTask;
     }
 
@@ -94,6 +165,230 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected Task<User> InviteContact(EmployeeType employeeType, CancellationToken cancellationToken)
     {
         return Invitations.InviteContactAsync(_clients.ProfilesApi, _clients.PeopleHttpClient, employeeType, Owner, cancellationToken);
+    }
+
+    /// <summary>An activated guest with a known password, invited by the owner.</summary>
+    protected Task<User> InviteGuest(CancellationToken cancellationToken)
+    {
+        return Invitations.InviteGuestAsync(_clients.PeopleHttpClient, Owner, cancellationToken);
+    }
+
+    /// <summary>
+    /// The status and error body an SDK call ended with: 200 and an empty body when it succeeded, the <see cref="ApiException"/>
+    /// code and content otherwise.
+    /// </summary>
+    protected static async Task<(int Status, string Error)> OutcomeOfAsync(Func<Task> call)
+    {
+        try
+        {
+            await call();
+            return (200, string.Empty);
+        }
+        catch (ApiException exception)
+        {
+            return (exception.ErrorCode, exception.ErrorContent?.ToString() ?? string.Empty);
+        }
+    }
+
+    /// <summary>The HTTP status an SDK call ended with: 200 when it succeeded, the <see cref="ApiException"/> code otherwise.</summary>
+    protected static async Task<int> StatusOfAsync(Func<Task> call) => (await OutcomeOfAsync(call)).Status;
+
+    // The Files service, for the rooms, folders and files a chat or an export works with. Its client starts unsigned:
+    // authenticate FilesHttpClient (as Owner or a member) before the first call.
+    protected HttpClient FilesHttpClient => _clients.FilesHttpClient;
+    protected FilesApi FilesApi => _clients.FilesApi;
+    protected FoldersApi FoldersApi => _clients.FoldersApi;
+    protected RoomsApi RoomsApi => _clients.RoomsApi;
+    protected OperationsApi OperationsApi => _clients.OperationsApi;
+    protected SharingApi SharingApi => _clients.SharingApi;
+    protected FilesQuotaApi FilesQuotaApi => _clients.FilesQuotaApi;
+    protected DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi ThirdPartyIntegrationApi => _clients.ThirdPartyIntegrationApi;
+    protected DocSpace.API.SDK.Api.Rooms.AIApi RoomsAiApi => _clients.RoomsAiApi;
+
+    // The People service: member profiles (culture, type). Starts unsigned: authenticate it before the first call.
+    protected HttpClient PeopleHttpClient => _clients.PeopleHttpClient;
+    protected ProfilesApi ProfilesApi => _clients.ProfilesApi;
+
+    // Web.Api, for portal settings and quotas. Starts unsigned: authenticate it before the first call.
+    protected HttpClient WebApiHttpClient => _clients.WebApiHttpClient;
+    protected SettingsQuotaApi SettingsQuotaApi => _clients.SettingsQuotaApi;
+    protected CommonSettingsApi CommonSettingsApi => _clients.CommonSettingsApi;
+    protected DocSpace.API.SDK.Api.Portal.QuotaApi QuotaApi => _clients.QuotaApi;
+
+    /// <summary>
+    /// The profile input a public create takes: an OpenAI-compatible provider on the stub, which the chat service
+    /// really dials to check the key and the model.
+    /// </summary>
+    protected AiCreateProfileInput BuildProfileInput(string? name = null) =>
+        new(
+            name: name ?? $"profile-{Guid.NewGuid():N}",
+            providerType: new AiProviderType(AiBuiltinProviderType.Openai),
+            baseUrl: ModelProvider.BaseUrl,
+            key: StubModelProvider.Key,
+            modelId: StubModelProvider.ModelId);
+
+    /// <summary>Creates a profile through the public API; fails the test when the chat service rejects it.</summary>
+    protected async Task<AiProfile> CreateProfileAsync(string? name = null)
+    {
+        var result = await _aiProfiles.AiProfilesCreateAsync(BuildProfileInput(name), TestContext.Current.CancellationToken);
+        ExpectProfileCreated(result, ModelProvider);
+
+        return result.Profile;
+    }
+
+    /// <summary>
+    /// Fails the test when profiles/create rejected the profile. The provider is described only then: the run-wide
+    /// provider's log holds every request of the run, and a reason string is built before the assertion runs, so
+    /// describing it on each success made every profile create walk all of it.
+    /// </summary>
+    protected static void ExpectProfileCreated(AiProfileMutationResult result, StubModelProvider provider)
+    {
+        if (!result.Success)
+        {
+            result.Success.Should().BeTrue($"profiles/create rejected the profile: {result.Error}\n{provider.Describe()}");
+        }
+    }
+
+    private AiProfile? _defaultProfile;
+
+    /// <summary>A profile on the stub provider, created once per test on first use.</summary>
+    protected async Task<AiProfile> GetDefaultProfileAsync() => _defaultProfile ??= await CreateProfileAsync();
+
+    /// <summary>
+    /// Creates a thread through the public API. Without a profile the route answers 404 when no model resolves for
+    /// the portal, so a thread is bound to the test's default profile unless one is given.
+    /// </summary>
+    protected async Task<AiThread> CreateThreadAsync(string? title = null, string? profileId = null, string? entityId = null)
+    {
+        profileId ??= (await GetDefaultProfileAsync()).Id;
+
+        return await _aiThreads.AiThreadsCreateAsync(
+            // The generated constructor is not annotated for nullability; null leaves the field out of the body.
+            new AiThreadsCreateRequest(title: title ?? $"thread-{Guid.NewGuid():N}", profileId: profileId!, entityId: entityId!),
+            TestContext.Current.CancellationToken);
+    }
+
+    protected static AiThreadMessageLike BuildUserMessage(string? text = null) =>
+        new(
+            role: AiThreadMessageLike.RoleEnum.User,
+            content: new AiMessageContent([new AiMessageContentBlock(type: "text", text: text ?? $"message-{Guid.NewGuid():N}")]));
+
+    /// <summary>Stores a user message on a thread without running the model; returns the message id.</summary>
+    protected async Task<string> AppendUserMessageAsync(string threadId, string? text = null)
+    {
+        // The route answers with the whole stored message under `messageId`; its id is the message id.
+        var result = await _aiThreads.AiThreadsAppendUserMessageAsync(
+            new AiThreadsAppendUserMessageRequest(threadId: threadId, message: BuildUserMessage(text)),
+            TestContext.Current.CancellationToken);
+
+        return result.MessageId.Id;
+    }
+
+    /// <summary>The text of a stored message: a plain string, or its text blocks joined.</summary>
+    protected static string? TextOf(AiThreadMessageLike message) => message.Content?.ActualInstance switch
+    {
+        string text => text,
+        List<AiMessageContentBlock> blocks => string.Concat(blocks.Select(b => b.Text)),
+        _ => null
+    };
+
+    /// <summary>
+    /// Creates a profile on a provider of the test's own — for a test that scripts what the model answers
+    /// (<see cref="StubModelProvider.Enqueue"/>) or asserts on what the provider received.
+    /// </summary>
+    protected async Task<AiProfile> CreateProfileOnAsync(StubModelProvider provider, string? name = null)
+    {
+        var input = BuildProfileInput(name);
+        input.BaseUrl = provider.BaseUrl;
+
+        var result = await _aiProfiles.AiProfilesCreateAsync(input, TestContext.Current.CancellationToken);
+        ExpectProfileCreated(result, provider);
+
+        return result.Profile;
+    }
+
+    /// <summary>
+    /// Sends one chat round through <c>ai/send-with-stream</c> as whoever <see cref="_aiChatClient"/> is signed in as,
+    /// and reads the whole ndjson stream.
+    /// </summary>
+    /// <remarks>
+    /// Raw on purpose — an SDK defect: the response is an ndjson stream of AiChatEvent frames, but the SDK declares it
+    /// as one AiChatEvent, so AiSendWithStreamAsync throws on the second frame. The request body is the SDK model.
+    /// </remarks>
+    protected async Task<ChatRound> SendWithStreamAsync(
+        string? threadId,
+        string text,
+        string? profileId = null,
+        string? entityId = null,
+        AiActionArgs? actionArgs = null)
+    {
+        var body = new AiSendStreamBody(
+            threadId: threadId!,
+            userMessage: BuildUserMessage(text),
+            actionArgs: actionArgs!,
+            entityId: entityId!,
+            profileId: profileId!);
+
+        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
+            "/api/2.0/ai/ai/send-with-stream",
+            body.ToJson(),
+            TestContext.Current.CancellationToken);
+
+        return ChatRound.Parse(response.StatusCode, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>Switches AI on or off for the whole portal (<c>settings/ai-access</c>), as the owner.</summary>
+    protected async Task SetPortalAiAccessAsync(bool enabled)
+    {
+        await _clients.WebApiHttpClient.Authenticate(Owner);
+        await _clients.CommonSettingsApi.SetTenantAiAccessSettingsAsync(
+            new TenantAiAccessSettingsRequestDto(enabled: enabled),
+            TestContext.Current.CancellationToken);
+
+        // Web.Api stores the switch; the AI service reads it through its own settings cache, which learns of the
+        // change over the cache backplane a moment later. Until then a gated route still answers as before, so wait
+        // until a gated read (threads/list) answers the way the new state says. Bounded and not asserted: a caller
+        // that may not list threads at all (a guest) simply proceeds after the deadline.
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+
+        while (DateTime.UtcNow < deadline)
+        {
+            if (await IsAiRefusedAsync() != enabled)
+            {
+                return;
+            }
+
+            await Task.Delay(100, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Switches AI off for the whole portal and fails unless a gated read (<c>threads/list</c>) is then refused for the
+    /// current caller. <see cref="SetPortalAiAccessAsync"/> waits for that refusal but does not require it, so a check
+    /// after it would also pass on a portal whose switch never took effect. Every AI route goes to the same AI service
+    /// behind the same <c>[AiFeature]</c> gate, so a refused <c>threads/list</c> stands for all of them; the probe is a
+    /// read, so it creates nothing.
+    /// </summary>
+    protected async Task SwitchPortalAiOffAsync()
+    {
+        await SetPortalAiAccessAsync(false);
+
+        (await IsAiRefusedAsync()).Should().BeTrue("the AI service must see the switch before the call under test");
+    }
+
+    /// <summary>Whether a gated read (<c>threads/list</c>) is refused with 403 for the current caller.</summary>
+    private async Task<bool> IsAiRefusedAsync()
+    {
+        try
+        {
+            await _aiThreads.AiThreadsListAsync(count: 1, cancellationToken: TestContext.Current.CancellationToken);
+
+            return false;
+        }
+        catch (ApiException e)
+        {
+            return e.ErrorCode == (int)HttpStatusCode.Forbidden;
+        }
     }
 
     protected static CreateProfileRequestDto BuildCreateDto(string? name = null) =>
@@ -124,14 +419,14 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             CanUseTool = false
         };
 
-    protected async Task<ProfileDto> CreateProfileAsync(CreateProfileRequestDto? dto = null)
+    protected async Task<ProfileDto> CreateProfileInternalAsync(CreateProfileRequestDto? dto = null)
     {
         dto ??= BuildCreateDto();
         using var response = await _ai.PostAsync(ProfilesPath, dto, TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<ProfileDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task CreateAssignmentAsync(string actionType, Guid profileId, string? entityId = null)
+    protected async Task CreateAssignmentInternalAsync(string actionType, Guid profileId, string? entityId = null)
     {
         using var response = await _ai.PostAsync(
             AssignmentsPath,
@@ -140,7 +435,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task<Guid?> ReadAssignmentAsync(string actionType, string? entityId = null)
+    protected async Task<Guid?> ReadAssignmentInternalAsync(string actionType, string? entityId = null)
     {
         var path = BuildScopedAssignmentPath(actionType, entityId);
         using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
@@ -152,7 +447,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return wrapper?.Response;
     }
 
-    protected async Task<Dictionary<string, Guid>> ReadAllAssignmentsAsync(string? entityId = null)
+    protected async Task<Dictionary<string, Guid>> ReadAllAssignmentsInternalAsync(string? entityId = null)
     {
         var path = entityId is null
             ? AssignmentsPath
@@ -162,7 +457,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<Dictionary<string, Guid>>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<ThreadDto> CreateThreadAsync(string? title = null, Guid? profileId = null, string? entityId = null)
+    protected async Task<ThreadDto> CreateThreadInternalAsync(string? title = null, Guid? profileId = null, string? entityId = null)
     {
         using var response = await _ai.PostAsync(
             ThreadsPath,
@@ -171,19 +466,19 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<ThreadDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<ThreadDto> ReadThreadAsync(Guid id)
+    protected async Task<ThreadDto> ReadThreadInternalAsync(Guid id)
     {
         using var response = await _ai.GetAsync($"{ThreadsPath}/{id}", TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<ThreadDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<List<ThreadDto>> ReadAllThreadsAsync(string? entityId = null)
+    protected async Task<List<ThreadDto>> ReadAllThreadsInternalAsync(string? entityId = null)
     {
-        var page = await ReadThreadsPageAsync(DefaultPageCount, entityId);
+        var page = await ReadThreadsPageInternalAsync(DefaultPageCount, entityId);
         return page.Items;
     }
 
-    protected async Task<ThreadsPageDto> ReadThreadsPageAsync(
+    protected async Task<ThreadsPageDto> ReadThreadsPageInternalAsync(
         int count,
         string? entityId = null,
         long? cursorLastEditDate = null,
@@ -230,7 +525,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             System.Text.Json.Nodes.JsonNode.Parse(right));
     }
 
-    protected async Task<MessageDto> CreateMessageAsync(Guid threadId, string? contents = null)
+    protected async Task<MessageDto> CreateMessageInternalAsync(Guid threadId, string? contents = null)
     {
         using var response = await _ai.PostAsync(
             $"{ThreadsPath}/{threadId}/messages",
@@ -239,19 +534,19 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<MessageDto> ReadMessageAsync(Guid id)
+    protected async Task<MessageDto> ReadMessageInternalAsync(Guid id)
     {
         using var response = await _ai.GetAsync($"{MessagesPath}/{id}", TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<List<MessageDto>> ReadMessagesByThreadAsync(Guid threadId, int count = DefaultPageCount)
+    protected async Task<List<MessageDto>> ReadMessagesByThreadInternalAsync(Guid threadId, int count = DefaultPageCount)
     {
-        var page = await ReadMessagesPageAsync(threadId, count);
+        var page = await ReadMessagesPageInternalAsync(threadId, count);
         return page.Items;
     }
 
-    protected async Task<MessagesPageDto> ReadMessagesPageAsync(
+    protected async Task<MessagesPageDto> ReadMessagesPageInternalAsync(
         Guid threadId,
         int count,
         DateTimeOffset? cursorCreatedAt = null,
@@ -301,7 +596,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return content.Current.Id;
     }
 
-    protected async Task<PreferencesDto?> ReadPreferencesAsync(string? entityId = null)
+    protected async Task<PreferencesDto?> ReadPreferencesInternalAsync(string? entityId = null)
     {
         var path = entityId is null
             ? PreferencesPath
@@ -316,7 +611,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return wrapper?.Response;
     }
 
-    protected async Task UpsertPreferencesAsync(ReasoningDepth? depth, string? entityId = null)
+    protected async Task UpsertPreferencesInternalAsync(ReasoningDepth? depth, string? entityId = null)
     {
         using var response = await _ai.PutAsync(
             PreferencesPath,
@@ -325,7 +620,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task<Dictionary<string, ToolPreference>> ReadToolPrefsAsync(string? entityId = null)
+    protected async Task<Dictionary<string, ToolPreference>> ReadToolPrefsInternalAsync(string? entityId = null)
     {
         var path = entityId is null
             ? ToolPrefsPath
@@ -335,7 +630,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<Dictionary<string, ToolPreference>>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task UpsertDisabledToolPrefsAsync(
+    protected async Task UpsertDisabledToolPrefsInternalAsync(
         IReadOnlyDictionary<string, HashSet<string>> disabled,
         string? entityId = null)
     {
@@ -346,7 +641,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task UpsertAllowAlwaysToolPrefsAsync(
+    protected async Task UpsertAllowAlwaysToolPrefsInternalAsync(
         IReadOnlyDictionary<string, HashSet<string>> allowAlways,
         string? entityId = null)
     {
@@ -384,7 +679,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return query.Count > 0 ? $"{ChatContextPath}?{string.Join("&", query)}" : ChatContextPath;
     }
 
-    protected async Task<ChatContextDto> ReadChatContextAsync(
+    protected async Task<ChatContextDto> ReadChatContextInternalAsync(
         Guid? threadId = null,
         string? entityId = null,
         string? contextEntityId = null,
@@ -403,7 +698,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected static string BuildMcpConfig(string? url = null) =>
         $$"""{"transport":"http","url":"{{url ?? "https://example.com/mcp"}}"}""";
 
-    protected async Task CreateMcpServerAsync(string name, string? config = null, string? entityId = null)
+    protected async Task CreateMcpServerInternalAsync(string name, string? config = null, string? entityId = null)
     {
         using var response = await _ai.PostAsync(
             McpServersPath,
@@ -412,7 +707,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         response.EnsureSuccessStatusCode();
     }
 
-    protected async Task<McpServerDto> ReadMcpServerAsync(string name, string? entityId = null)
+    protected async Task<McpServerDto> ReadMcpServerInternalAsync(string name, string? entityId = null)
     {
         var path = entityId is null
             ? $"{McpServersPath}/{name}"
@@ -422,7 +717,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<McpServerDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<List<McpServerDto>> ReadAllMcpServersAsync(string? entityId = null)
+    protected async Task<List<McpServerDto>> ReadAllMcpServersInternalAsync(string? entityId = null)
     {
         var path = entityId is null
             ? McpServersPath
@@ -432,7 +727,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<List<McpServerDto>>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<PromptFolderDto> CreatePromptFolderAsync(string? name = null)
+    protected async Task<PromptFolderDto> CreatePromptFolderInternalAsync(string? name = null)
     {
         using var response = await _ai.PostAsync(
             PromptFoldersPath,
@@ -441,13 +736,13 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<PromptFolderDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<PromptFolderDto> ReadPromptFolderAsync(Guid id)
+    protected async Task<PromptFolderDto> ReadPromptFolderInternalAsync(Guid id)
     {
         using var response = await _ai.GetAsync($"{PromptFoldersPath}/{id}", TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<PromptFolderDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<PromptDto> CreatePromptAsync(string? name = null, string? text = null, Guid? folderId = null)
+    protected async Task<PromptDto> CreatePromptInternalAsync(string? name = null, string? text = null, Guid? folderId = null)
     {
         using var response = await _ai.PostAsync(
             PromptsPath,
@@ -456,7 +751,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<PromptDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<PromptDto> ReadPromptAsync(Guid id)
+    protected async Task<PromptDto> ReadPromptInternalAsync(Guid id)
     {
         using var response = await _ai.GetAsync($"{PromptsPath}/{id}", TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<PromptDto>(response, TestContext.Current.CancellationToken);
