@@ -1005,6 +1005,23 @@ public class PaymentController(
         return (await tariffService.GetCustomerGoodwillAsync(tenant.Id))?.Map();
     }
 
+    // TODO: for testing only, remove before the release together with CreditBonusRequestDto.
+    [ApiExplorerSettings(IgnoreApi = true)]
+    [HttpPost("customer/bonus")]
+    public async Task<long> CreditBonus(CreditBonusRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+        var externalRef = string.IsNullOrEmpty(inDto.ExternalRef) ? Guid.NewGuid().ToString() : inDto.ExternalRef;
+
+        var result = await tariffService.CreditBonusAsync(tenant.Id, inDto.Amount, inDto.Currency, externalRef, inDto.ExpiresAt);
+
+        return result.OperationId;
+    }
+
     /// <remarks>
     /// Lists the money movements on the portal's wallet - top-ups, the charges of the wallet services, refunds and
     /// corrections - one page at a time, which is what a billing history is built from. Only a DocSpace administrator
