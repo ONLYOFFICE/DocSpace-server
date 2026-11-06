@@ -122,6 +122,7 @@ public class ServiceLimitTests(AspireAppFixture fixture) : BaseTest(fixture)
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _paymentApi.GetServiceLimitAsync(created.Id, TestContext.Current.CancellationToken));
         exception.ErrorCode.Should().Be(404);
+        exception.ErrorContent!.ToString().Should().Contain("Service limit could not be found");
     }
 
     [Fact]
@@ -139,7 +140,9 @@ public class ServiceLimitTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         read.ErrorCode.Should().Be(404);
+        read.ErrorContent!.ToString().Should().Contain("Service limit could not be found");
         delete.ErrorCode.Should().Be(404);
+        delete.ErrorContent!.ToString().Should().Contain("Service limit could not be found");
         PaymentServices.HasServiceLimit(foreignId).Should().BeTrue("a limit of another customer is never deleted");
     }
 
@@ -154,24 +157,6 @@ public class ServiceLimitTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(404);
-    }
-
-    [Theory]
-    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
-    public async Task CreateServiceLimit_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
-    {
-        // Arrange
-        Payments.Customer(Owner.Email).Balance(10m);
-        var member = await InviteMember(employeeType);
-        await _webApiClient.Authenticate(member);
-
-        // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.CreateServiceLimitAsync(
-                new CreateServiceLimitRequestDto(ServiceLimitScope.Total, amountValue: 50, period: ServiceLimitPeriod.Day),
-                TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("Customer could not be found");
     }
 }

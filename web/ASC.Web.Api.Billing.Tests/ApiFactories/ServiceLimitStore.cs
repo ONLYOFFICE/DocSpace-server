@@ -102,6 +102,18 @@ internal sealed class ServiceLimitStore
         return _limits.ContainsKey(id);
     }
 
+    /// <summary>
+    /// Every limit on the account <paramref name="accountNumber"/> as accounting holds it, in the order of their ids: two
+    /// snapshots are equal only when no limit of the account was created, changed or deleted in between.
+    /// </summary>
+    public string Snapshot(int accountNumber)
+    {
+        return new JsonArray([.. _limits.Values
+            .Where(limit => (int)limit["customerAccountNumber"]! == accountNumber)
+            .OrderBy(limit => (int)limit["id"]!)
+            .Select(limit => limit.DeepClone())]).ToJsonString();
+    }
+
     /// <summary>Puts a limit on the account <paramref name="accountNumber"/> as if another portal had created it.</summary>
     public int Add(int accountNumber, string scope, decimal amountValue, string period = "Day", string? participant = null)
     {

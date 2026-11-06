@@ -32,19 +32,36 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 
-namespace ASC.Web.Api.Billing.Tests.Tests.Wallet;
+namespace ASC.Web.Api.Billing.Tests.Tests.Checkout;
 
 /// <summary>
-/// The wallet services only a DocSpace administrator may change or read: buying them, the price of buying them, switching them on and off.
+/// Who may ask for the checkout address of a plan (<c>PUT payment/url</c>): every DocSpace administrator, the owner or
+/// not, and nobody below.
 /// </summary>
-public class WalletAdminPermissionsTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
+public class PaymentUrlPermissionsTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
-    public static TheoryData<string, EmployeeType> Cases => Matrix(WalletAdministratorOperations, NonAdministrators);
+    public static TheoryData<string, EmployeeType> Cases => Matrix(CheckoutAdministratorOperations, NonAdministrators);
+
+    public static TheoryData<string> Operations => [.. CheckoutAdministratorOperations];
 
     [Theory]
     [MemberData(nameof(Cases))]
     public async Task AdministratorOperation_NotAnAdministrator_ThrowsForbidden(string operation, EmployeeType role)
     {
         await AssertForbiddenAsync(operation, role);
+    }
+
+    [Theory]
+    [MemberData(nameof(Operations))]
+    public async Task AdministratorOperation_Owner_IsNotRefused(string operation)
+    {
+        await AssertOwnerNotRefusedAsync(operation);
+    }
+
+    [Theory]
+    [MemberData(nameof(Operations))]
+    public async Task AdministratorOperation_DocSpaceAdministratorWhoIsNotTheOwner_IsNotRefused(string operation)
+    {
+        await AssertAdministratorNotRefusedAsync(operation);
     }
 }

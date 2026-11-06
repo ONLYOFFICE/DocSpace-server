@@ -36,8 +36,8 @@ namespace ASC.Web.Api.Billing.Tests.Tests.DocsCloud;
 
 /// <summary>
 /// Moving a DocsCloud subscription to the developer pack: the price billing calculates for it
-/// (<c>settings/docscloud/calculatedevpack</c>) and who may ask for it or make the switch
-/// (<c>settings/docscloud/switchtodevpack</c>).
+/// (<c>settings/docscloud/calculatedevpack</c>), the switch billing is asked to make
+/// (<c>settings/docscloud/switchtodevpack</c>), and who may do either: every DocSpace administrator, and nobody below.
 /// </summary>
 public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -99,6 +99,74 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
         PaymentCalls.Should().NotContain(call => call.Route == "/billing/CalculateSwitchSubscription");
     }
 
+    [Fact]
+    public async Task SwitchToDevPack_DocsCloudSubscriber_AsksBillingToSwitchTheSubscription()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .Paid(Plans.DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1))
+            .On(PaymentService.Billing, "POST", "/billing/SwitchSubscription", "true");
+
+        // The switch reads the cached tariff, so it is re-read once the subscription is paid, as a client does.
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var switched = (await _docsCloudApi.SwitchToDevPackAsync(new DocsCloudDevPackRequestDto(12), TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        switched.Should().BeTrue();
+
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/billing/SwitchSubscription").Subject;
+        BillingValue(request, "FromProductId").Should().Be(Plans.DocsCloudProductId.ToString(CultureInfo.InvariantCulture));
+        BillingValue(request, "ToProductId").Should().Be(Plans.DocsCloudDevPackProductId.ToString(CultureInfo.InvariantCulture));
+        BillingValue(request, "ProductQty").Should().Be("12");
+        // The switch is charged to the caller as the participant of the customer.
+        BillingValue(request, "CustomerParticipantName").Should().Be(Owner.Id.ToString());
+    }
+
+    // Next to the refusals below, these pin the guard at the administrator: a guard narrowed to the owner would leave
+    // every refusal green.
+    [Fact]
+    public async Task CalculateDevPack_DocSpaceAdministratorWhoIsNotTheOwner_ReturnsTheSwitch()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .Paid(Plans.DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1))
+            .On(PaymentService.Billing, "POST", "/billing/CalculateSwitchSubscription",
+                """{"OperationId":78,"Amount":42.5,"Currency":"USD","Quantity":12}""");
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        var administrator = await InviteMember(EmployeeType.DocSpaceAdmin);
+        await _webApiClient.Authenticate(administrator);
+
+        // Act
+        var calculation = (await _docsCloudApi.CalculateDevPackAsync(new DocsCloudDevPackRequestDto(12), TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        calculation.OperationId.Should().Be(78);
+    }
+
+    [Fact]
+    public async Task SwitchToDevPack_DocSpaceAdministratorWhoIsNotTheOwner_SwitchesTheSubscription()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .Paid(Plans.DocsCloudProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1))
+            .On(PaymentService.Billing, "POST", "/billing/SwitchSubscription", "true");
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        var administrator = await InviteMember(EmployeeType.DocSpaceAdmin);
+        await _webApiClient.Authenticate(administrator);
+
+        // Act
+        var switched = (await _docsCloudApi.SwitchToDevPackAsync(new DocsCloudDevPackRequestDto(12), TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        switched.Should().BeTrue();
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/billing/SwitchSubscription").Subject;
+        BillingValue(request, "CustomerParticipantName").Should().Be(administrator.Id.ToString());
+    }
+
     // On the stack without payment services these were refused as "not configured" before the role was looked at.
     [Theory]
     [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
@@ -115,6 +183,7 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("Access denied");
     }
 
     [Theory]
@@ -132,6 +201,7 @@ public class DocsCloudDevPackTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("Access denied");
         PaymentCalls.Should().NotContain(call => call.Route == "/billing/SwitchSubscription");
     }
 }

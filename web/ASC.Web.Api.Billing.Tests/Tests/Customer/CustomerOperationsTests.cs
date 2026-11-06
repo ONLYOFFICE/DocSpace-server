@@ -90,21 +90,4 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
         report.TotalQuantity.Should().Be(2);
         report.Collection.Select(d => (d.Id, d.Amount, d.HasInvoice)).Should().Equal((15342, 40.0, true), (15343, 20.0, false));
     }
-
-    [Theory]
-    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
-    public async Task GetCustomerOperations_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
-    {
-        // Arrange
-        Payments.Customer(Owner.Email).Balance(10m);
-        var member = await InviteMember(employeeType);
-        await _webApiClient.Authenticate(member);
-
-        // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.GetCustomerOperationsAsync(cancellationToken: TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(403);
-    }
 }

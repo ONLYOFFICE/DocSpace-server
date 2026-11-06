@@ -140,6 +140,15 @@ public sealed class PaymentServiceStub : IDisposable
         return _serviceLimits.Contains(id);
     }
 
+    /// <summary>
+    /// The spending limits accounting holds on the account <paramref name="accountNumber"/>; equal before and after a
+    /// refused request when the refusal wrote nothing.
+    /// </summary>
+    public string ServiceLimitsOf(int accountNumber)
+    {
+        return _serviceLimits.Snapshot(accountNumber);
+    }
+
     public void Dispose()
     {
         _server.Stop();

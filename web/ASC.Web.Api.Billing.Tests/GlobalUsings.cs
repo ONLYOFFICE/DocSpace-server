@@ -32,9 +32,12 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 
+extern alias ASCWebApi;
+
 global using System.Collections.Concurrent;
 global using System.Globalization;
 global using System.Net;
+global using System.Reflection;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Nodes;
@@ -64,7 +67,9 @@ global using WireMock.Util;
 
 global using Xunit;
 
+global using HttpMethodAttribute = Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute;
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
+global using PaymentController = ASCWebApi::ASC.Web.Api.Controllers.PaymentController;
 global using PortalQuotaApi = DocSpace.API.SDK.Api.Portal.QuotaApi;
 global using Task = System.Threading.Tasks.Task;
 global using User = ASC.Tests.Common.Data.User;

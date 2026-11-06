@@ -67,21 +67,4 @@ public class CustomerBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
         balance.Should().BeNull();
         PaymentCalls.Should().NotContain(call => call.Service == PaymentService.Accounting && call.Route == "/customer/{portalId}/balance");
     }
-
-    [Theory]
-    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
-    public async Task GetCustomerBalance_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
-    {
-        // Arrange
-        Payments.Customer(Owner.Email).Balance(150.25m);
-        var member = await InviteMember(employeeType);
-        await _webApiClient.Authenticate(member);
-
-        // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.GetCustomerBalanceAsync(true, TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(403);
-    }
 }

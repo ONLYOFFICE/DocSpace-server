@@ -35,17 +35,41 @@
 namespace ASC.Web.Api.Billing.Tests.Tests.Checkout;
 
 /// <summary>
-/// The other side of <see cref="SubscriptionPayerPermissionsTests"/>: the owner, who pays for the portal, is let through
-/// every subscription operation, so the refusals there come from the role and not from a refusal of everybody.
+/// The other side of <see cref="SubscriptionPayerPermissionsTests"/>: the payer is let through every subscription
+/// operation - the owner who pays, and a member who pays for a portal somebody else owns - so the refusals there come
+/// from the role and not from a refusal of everybody; and an owner who does not pay is refused like any other caller,
+/// except on the billing account page, which the owner may always open.
 /// </summary>
 public class SubscriptionPermissionsControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
     public static TheoryData<string> PayerOperations => [.. SubscriptionPayerOperations];
+
+    public static TheoryData<string> PayerOnlyOperations => [.. SubscriptionPayerOperations.Where(operation => operation != PayerOrOwnerOperation)];
 
     [Theory]
     [MemberData(nameof(PayerOperations))]
     public async Task SubscriptionOperation_OwnerWhoIsThePayer_IsNotRefused(string operation)
     {
         await AssertOwnerNotRefusedAsync(operation);
+    }
+
+    [Theory]
+    [MemberData(nameof(PayerOperations))]
+    public async Task SubscriptionOperation_MemberWhoIsThePayer_IsNotRefused(string operation)
+    {
+        await AssertPayerNotRefusedAsync(operation);
+    }
+
+    [Theory]
+    [MemberData(nameof(PayerOnlyOperations))]
+    public async Task PayerOnlyOperation_OwnerWhoIsNotThePayer_ThrowsForbidden(string operation)
+    {
+        await AssertOwnerWhoIsNotThePayerForbiddenAsync(operation);
+    }
+
+    [Fact]
+    public async Task PaymentAccount_OwnerWhoIsNotThePayer_IsNotRefused()
+    {
+        await AssertOwnerWhoIsNotThePayerNotRefusedAsync(PayerOrOwnerOperation);
     }
 }

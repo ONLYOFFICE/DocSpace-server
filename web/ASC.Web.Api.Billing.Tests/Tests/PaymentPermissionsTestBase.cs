@@ -31,7 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-
 namespace ASC.Web.Api.Billing.Tests.Tests;
 
 /// <summary>
@@ -39,8 +38,28 @@ namespace ASC.Web.Api.Billing.Tests.Tests;
 /// every caller as "not configured" before it looks at the role. Here the portal is a billing customer whose payer is
 /// the owner, every request is one the owner may make, and a member of the role under test sends it.
 /// </summary>
+/// <remarks>
+/// Every payment operation with a role check has one request here, in one group of operations; a group has a class
+/// that sends it as every refused role and a class that sends it as the callers it lets through.
+/// <see cref="PaymentOperationsCoverageTests"/> holds the requests against the actions of the payment controller.
+/// </remarks>
 public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    private const string BackUrl = "https://portal.example.com/back";
+    private const string SuccessUrl = "https://portal.example.com/success";
+
+    /// <summary>The e-mail of a payer who is no user of the portal, so neither the owner nor a member pays.</summary>
+    protected const string ForeignPayer = "the-payer@example.com";
+
+    /// <summary>
+    /// The one payer operation the owner may use without being the payer (the billing account page): the others refuse
+    /// an owner who does not pay.
+    /// </summary>
+    protected const string PayerOrOwnerOperation = "GET payment/account";
+
+    // The limit the service limit operations read, change and delete; created by the owner before the role is switched.
+    private int _serviceLimitId;
+
     /// <summary>Every role but the owner, who is the payer: refused by the operations for the payer.</summary>
     protected static EmployeeType[] NotThePayer => [EmployeeType.DocSpaceAdmin, .. NonAdministrators];
 
@@ -50,7 +69,7 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         "PUT payment/update",
         "GET payment/subscription/balance",
         "POST payment/subscription/movetowallet",
-        "GET payment/account"
+        PayerOrOwnerOperation
     ];
 
     /// <summary>The wallet as the payer keeps it: topping it up, its automatic top-up, attaching a payment method.</summary>
@@ -59,6 +78,25 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         "POST payment/deposit",
         "POST payment/topupsettings",
         "GET payment/checkoutsetupurl"
+    ];
+
+    /// <summary>Buying a plan: the checkout address.</summary>
+    protected static string[] CheckoutAdministratorOperations =>
+    [
+        "PUT payment/url"
+    ];
+
+    /// <summary>
+    /// The billing customer and its wallet as an administrator reads them: the customer, the balance, the movements and
+    /// the top-ups with their invoices.
+    /// </summary>
+    protected static string[] CustomerAdministratorOperations =>
+    [
+        "GET payment/customerinfo",
+        "GET payment/customer/balance",
+        "GET payment/customer/operations",
+        "GET payment/customer/deposits",
+        "GET payment/customer/deposits/{id}/invoice"
     ];
 
     /// <summary>The spending of the wallet: the usage by service and by month, and the operations report.</summary>
@@ -82,50 +120,117 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         "DELETE payment/customer/usage/monthly/report"
     ];
 
-    /// <summary>The wallet services: buying them, the price of buying them, switching them on and off.</summary>
+    /// <summary>
+    /// The wallet services: buying them, the price of buying them, switching them on and off, the ones the portal has.
+    /// </summary>
     protected static string[] WalletAdministratorOperations =>
     [
         "PUT payment/updatewallet",
         "PUT payment/calculatewallet",
         "POST payment/servicestate",
-        "GET payment/servicessettings"
+        "GET payment/servicessettings",
+        "GET payment/activeservices"
     ];
 
+    /// <summary>What accounting sells: its currencies and the prices of a service.</summary>
+    protected static string[] AccountingAdministratorOperations =>
+    [
+        "GET payment/accounting/currencies",
+        "GET payment/accounting/prices/{serviceName}"
+    ];
+
+    /// <summary>The spending limits on the AI services as an administrator reads them.</summary>
+    protected static string[] ServiceLimitReadOperations =>
+    [
+        "GET payment/servicelimit/{id}",
+        "GET payment/servicelimit/total",
+        "GET payment/servicelimit/global",
+        "GET payment/servicelimit/participants"
+    ];
+
+    /// <summary>The spending limits on the AI services as an administrator sets them.</summary>
+    protected static string[] ServiceLimitWriteOperations =>
+    [
+        "POST payment/servicelimit",
+        "PUT payment/servicelimit",
+        "PUT payment/servicelimit/participants",
+        "PUT payment/servicelimit/participants/disable",
+        "DELETE payment/servicelimit/{id}"
+    ];
+
+    /// <summary>Every group of operations, each sent as the roles it refuses and as the callers it lets through.</summary>
+    internal static IEnumerable<string> GroupedOperations =>
+    [
+        .. SubscriptionPayerOperations, .. WalletPayerOperations, .. CheckoutAdministratorOperations,
+        .. CustomerAdministratorOperations, .. UsageOperations, .. UsageReportOperations, .. WalletAdministratorOperations,
+        .. AccountingAdministratorOperations, .. ServiceLimitReadOperations, .. ServiceLimitWriteOperations
+    ];
+
+    /// <summary>The operations with a request here, as <c>METHOD payment/route</c> with the route template of the action.</summary>
+    internal static IReadOnlyCollection<string> RequestedOperations => _requests.Keys;
+
     // One valid request per operation, as the owner would send it; the TypeScript suite's requests where it has them.
-    private static readonly Dictionary<string, Func<PaymentApi, CancellationToken, Task>> _requests = new()
+    private static readonly Dictionary<string, Func<PaymentPermissionsTestBase, CancellationToken, Task>> _requests = new()
     {
-        ["PUT payment/update"] = (api, ct) => api.UpdatePaymentAsync(new QuantityRequestDto(new Dictionary<string, int> { ["admin"] = 1 }), ct),
-        ["POST payment/deposit"] = (api, ct) => api.TopUpDepositAsync(new TopUpDepositRequestDto(100, "USD"), ct),
-        ["GET payment/subscription/balance"] = (api, ct) => api.GetSubscriptionBalanceInfoAsync(ct),
-        ["POST payment/subscription/movetowallet"] = (api, ct) =>
-            api.MoveSubscriptionToWalletAsync(new QuantityRequestDto(new Dictionary<string, int> { ["admin"] = 1 }), ct),
-        ["GET payment/account"] = (api, ct) => api.GetPaymentAccountAsync("https://portal.example.com/back", ct),
-        ["GET payment/checkoutsetupurl"] = (api, ct) =>
-            api.GetCheckoutSetupUrlAsync("https://portal.example.com/back", "https://portal.example.com/success", ct),
-        ["POST payment/topupsettings"] = (api, ct) => api.SetTenantWalletSettingsAsync(
+        ["PUT payment/update"] = (t, ct) => t._paymentApi.UpdatePaymentAsync(new QuantityRequestDto(new Dictionary<string, int> { ["admin"] = 1 }), ct),
+        ["POST payment/deposit"] = (t, ct) => t._paymentApi.TopUpDepositAsync(new TopUpDepositRequestDto(100, "USD"), ct),
+        ["GET payment/subscription/balance"] = (t, ct) => t._paymentApi.GetSubscriptionBalanceInfoAsync(ct),
+        ["POST payment/subscription/movetowallet"] = (t, ct) =>
+            t._paymentApi.MoveSubscriptionToWalletAsync(new QuantityRequestDto(new Dictionary<string, int> { ["admin"] = 1 }), ct),
+        ["GET payment/account"] = (t, ct) => t._paymentApi.GetPaymentAccountAsync(BackUrl, ct),
+        ["GET payment/checkoutsetupurl"] = (t, ct) => t._paymentApi.GetCheckoutSetupUrlAsync(BackUrl, SuccessUrl, ct),
+        ["POST payment/topupsettings"] = (t, ct) => t._paymentApi.SetTenantWalletSettingsAsync(
             new TenantWalletSettingsRequestDto(new SetWalletTopUpSettingsRequest(enabled: true, minBalance: 10, upToBalance: 50, currency: "USD")), ct),
 
-        ["PUT payment/updatewallet"] = (api, ct) => api.UpdateWalletPaymentAsync(
-            new WalletQuantityRequestDto(new Dictionary<string, int?> { ["storage"] = 100 }, ProductQuantityType.Add), ct),
-        ["PUT payment/calculatewallet"] = (api, ct) => api.CalculateWalletPaymentAsync(
-            new WalletQuantityRequestDto(new Dictionary<string, int?> { ["storage"] = 100 }, ProductQuantityType.Add), ct),
-        ["POST payment/servicestate"] = (api, ct) =>
-            api.ChangeTenantWalletServiceStateAsync(new ChangeWalletServiceStateRequestDto(TenantWalletService.AITools, true), ct),
-        ["GET payment/servicessettings"] = (api, ct) => api.GetTenantWalletServiceSettingsAsync(ct),
+        ["PUT payment/url"] = (t, ct) => t._paymentApi.GetPaymentUrlAsync(
+            new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [Plans.AdminPlanName] = 3 }), ct),
 
-        ["GET payment/customer/usage"] = (api, ct) => api.GetCustomerServiceUsageAsync(cancellationToken: ct),
-        ["GET payment/customer/usage/monthly"] = (api, ct) => api.GetCustomerMonthlyUsageAsync(cancellationToken: ct),
-        ["POST payment/customer/operationsreport"] = (api, ct) => api.CreateCustomerOperationsReportAsync(
+        ["GET payment/customerinfo"] = (t, ct) => t._paymentApi.GetCustomerInfoAsync(true, ct),
+        ["GET payment/customer/balance"] = (t, ct) => t._paymentApi.GetCustomerBalanceAsync(true, ct),
+        ["GET payment/customer/operations"] = (t, ct) => t._paymentApi.GetCustomerOperationsAsync(cancellationToken: ct),
+        ["GET payment/customer/deposits"] = (t, ct) => t._paymentApi.GetCustomerDepositsAsync(cancellationToken: ct),
+        ["GET payment/customer/deposits/{id}/invoice"] = (t, ct) => t._paymentApi.GetDepositInvoiceAsync(15342, ct),
+
+        ["GET payment/customer/usage"] = (t, ct) => t._paymentApi.GetCustomerServiceUsageAsync(cancellationToken: ct),
+        ["GET payment/customer/usage/monthly"] = (t, ct) => t._paymentApi.GetCustomerMonthlyUsageAsync(cancellationToken: ct),
+        ["POST payment/customer/operationsreport"] = (t, ct) => t._paymentApi.CreateCustomerOperationsReportAsync(
             new CustomerOperationsReportRequestDto(serviceName: ["ai-tools"], credit: true, debit: true), ct),
-        ["GET payment/customer/operationsreport"] = (api, ct) => api.GetCustomerOperationsReportAsync(ct),
-        ["DELETE payment/customer/operationsreport"] = (api, ct) => api.TerminateCustomerOperationsReportAsync(ct),
-        ["POST payment/customer/usage/report"] = (api, ct) => api.CreateCustomerServiceUsageReportAsync(new CustomerServiceUsageReportRequestDto(), ct),
-        ["GET payment/customer/usage/report"] = (api, ct) => api.GetCustomerServiceUsageReportAsync(ct),
-        ["DELETE payment/customer/usage/report"] = (api, ct) => api.TerminateCustomerServiceUsageReportAsync(ct),
-        ["POST payment/customer/usage/monthly/report"] = (api, ct) =>
-            api.CreateCustomerMonthlyUsageReportAsync(new CustomerMonthlyUsageReportRequestDto(), ct),
-        ["GET payment/customer/usage/monthly/report"] = (api, ct) => api.GetCustomerMonthlyUsageReportAsync(ct),
-        ["DELETE payment/customer/usage/monthly/report"] = (api, ct) => api.TerminateCustomerMonthlyUsageReportAsync(ct)
+        ["GET payment/customer/operationsreport"] = (t, ct) => t._paymentApi.GetCustomerOperationsReportAsync(ct),
+        ["DELETE payment/customer/operationsreport"] = (t, ct) => t._paymentApi.TerminateCustomerOperationsReportAsync(ct),
+        ["POST payment/customer/usage/report"] = (t, ct) =>
+            t._paymentApi.CreateCustomerServiceUsageReportAsync(new CustomerServiceUsageReportRequestDto(), ct),
+        ["GET payment/customer/usage/report"] = (t, ct) => t._paymentApi.GetCustomerServiceUsageReportAsync(ct),
+        ["DELETE payment/customer/usage/report"] = (t, ct) => t._paymentApi.TerminateCustomerServiceUsageReportAsync(ct),
+        ["POST payment/customer/usage/monthly/report"] = (t, ct) =>
+            t._paymentApi.CreateCustomerMonthlyUsageReportAsync(new CustomerMonthlyUsageReportRequestDto(), ct),
+        ["GET payment/customer/usage/monthly/report"] = (t, ct) => t._paymentApi.GetCustomerMonthlyUsageReportAsync(ct),
+        ["DELETE payment/customer/usage/monthly/report"] = (t, ct) => t._paymentApi.TerminateCustomerMonthlyUsageReportAsync(ct),
+
+        ["PUT payment/updatewallet"] = (t, ct) => t._paymentApi.UpdateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { ["storage"] = 100 }, ProductQuantityType.Add), ct),
+        ["PUT payment/calculatewallet"] = (t, ct) => t._paymentApi.CalculateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { ["storage"] = 100 }, ProductQuantityType.Add), ct),
+        ["POST payment/servicestate"] = (t, ct) =>
+            t._paymentApi.ChangeTenantWalletServiceStateAsync(new ChangeWalletServiceStateRequestDto(TenantWalletService.AITools, true), ct),
+        ["GET payment/servicessettings"] = (t, ct) => t._paymentApi.GetTenantWalletServiceSettingsAsync(ct),
+        ["GET payment/activeservices"] = (t, ct) => t._paymentApi.GetActiveServicesAsync(ct),
+
+        ["GET payment/accounting/currencies"] = (t, ct) => t.GetAccountingCurrenciesAsync(ct),
+        ["GET payment/accounting/prices/{serviceName}"] = (t, ct) =>
+            t._paymentApi.GetAccountingServicePricesAsync(PaymentServiceStub.CatalogueServiceName, true, ct),
+
+        ["GET payment/servicelimit/{id}"] = (t, ct) => t._paymentApi.GetServiceLimitAsync(t._serviceLimitId, ct),
+        ["GET payment/servicelimit/total"] = (t, ct) => t._paymentApi.GetTotalServiceLimitAsync(ct),
+        ["GET payment/servicelimit/global"] = (t, ct) => t._paymentApi.GetGlobalServiceLimitAsync(ct),
+        ["GET payment/servicelimit/participants"] = (t, ct) => t._paymentApi.GetParticipantServiceLimitsAsync(cancellationToken: ct),
+        ["POST payment/servicelimit"] = (t, ct) => t._paymentApi.CreateServiceLimitAsync(
+            new CreateServiceLimitRequestDto(ServiceLimitScope.Global, amountValue: 20, period: ServiceLimitPeriod.Day), ct),
+        ["PUT payment/servicelimit"] = (t, ct) =>
+            t._paymentApi.UpdateServiceLimitAsync(new UpdateServiceLimitRequestDto(t._serviceLimitId, amountValue: 75), ct),
+        ["PUT payment/servicelimit/participants"] = (t, ct) => t._paymentApi.SetParticipantServiceLimitsAsync(
+            new SetParticipantServiceLimitsRequestDto([t.Owner.Id], amountValue: 5, period: ServiceLimitPeriod.Day), ct),
+        ["PUT payment/servicelimit/participants/disable"] = (t, ct) => t._paymentApi.DisableParticipantServiceLimitsAsync(ct),
+        ["DELETE payment/servicelimit/{id}"] = (t, ct) => t._paymentApi.DeleteServiceLimitAsync(t._serviceLimitId, ct)
     };
 
     /// <summary>Every pairing of <paramref name="operations"/> with <paramref name="roles"/>.</summary>
@@ -150,7 +255,7 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
     /// </summary>
     protected async Task AssertOwnerNotRefusedAsync(string operation)
     {
-        Payments.Customer(Owner.Email).Balance(100m);
+        await ArrangeAsync(operation, Owner.Email);
 
         await AssertNotRefusedAsync(operation, $"the owner pays for the portal and may call {operation}");
     }
@@ -162,7 +267,7 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
     /// </summary>
     protected async Task AssertAdministratorNotRefusedAsync(string operation)
     {
-        Payments.Customer(Owner.Email).Balance(100m);
+        await ArrangeAsync(operation, Owner.Email);
 
         var administrator = await InviteMember(EmployeeType.DocSpaceAdmin);
         await _webApiClient.Authenticate(administrator);
@@ -170,12 +275,79 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         await AssertNotRefusedAsync(operation, $"every DocSpace administrator may call {operation}, not only the owner");
     }
 
+    /// <summary>
+    /// A DocSpace administrator who is not the owner but pays for the portal sends <paramref name="operation"/> and is
+    /// not refused for who it is: the guard is the payer, not the owner who usually is one.
+    /// </summary>
+    protected async Task AssertPayerNotRefusedAsync(string operation)
+    {
+        var payer = await InviteMember(EmployeeType.DocSpaceAdmin);
+
+        await ArrangeAsync(operation, payer.Email);
+        await _webApiClient.Authenticate(payer);
+
+        await AssertNotRefusedAsync(operation, $"the payer may call {operation}, whoever owns the portal");
+    }
+
+    /// <summary>
+    /// The owner sends <paramref name="operation"/> for a portal somebody else pays for, and is refused with 403
+    /// "Access denied" like any other caller who is not the payer.
+    /// </summary>
+    protected async Task AssertOwnerWhoIsNotThePayerForbiddenAsync(string operation)
+    {
+        await ArrangeAsync(operation, ForeignPayer);
+
+        await AssertRefusedAsync(operation, $"the owner does not pay for the portal and may not call {operation}");
+    }
+
+    /// <summary>
+    /// The owner sends <paramref name="operation"/> for a portal somebody else pays for, and is not refused for who it is.
+    /// </summary>
+    protected async Task AssertOwnerWhoIsNotThePayerNotRefusedAsync(string operation)
+    {
+        await ArrangeAsync(operation, ForeignPayer);
+
+        await AssertNotRefusedAsync(operation, $"the owner may call {operation} without paying for the portal");
+    }
+
+    /// <summary>
+    /// A member of <paramref name="role"/> sends <paramref name="operation"/> and is refused with 403 "Access denied" - the
+    /// answer of a role check, which a precondition refusing everybody with 403 does not give - and the spending limits
+    /// of the portal are as they were before the request.
+    /// </summary>
+    protected async Task AssertForbiddenAsync(string operation, EmployeeType role)
+    {
+        // A customer with a wallet, paid for by the owner: everything before the role check passes.
+        await ArrangeAsync(operation, Owner.Email);
+
+        var member = await InviteMember(role);
+        await _webApiClient.Authenticate(member);
+
+        await AssertRefusedAsync(operation, $"{role} may not call {operation}");
+    }
+
+    // The portal is a customer whose payer has the e-mail payerEmail, with a wallet; an operation on the spending limits
+    // also gets a limit to work on, created by the owner.
+    private async Task ArrangeAsync(string operation, string payerEmail)
+    {
+        Payments.Customer(payerEmail).Balance(100m);
+
+        if (operation.Contains("servicelimit", StringComparison.Ordinal))
+        {
+            await _webApiClient.Authenticate(Owner);
+
+            _serviceLimitId = (await _paymentApi.CreateServiceLimitAsync(
+                new CreateServiceLimitRequestDto(ServiceLimitScope.Total, amountValue: 50, period: ServiceLimitPeriod.Day),
+                TestContext.Current.CancellationToken)).Response.Id;
+        }
+    }
+
     // Whatever else the answer says, it is neither 401 nor 403.
     private async Task AssertNotRefusedAsync(string operation, string because)
     {
         try
         {
-            await _requests[operation](_paymentApi, TestContext.Current.CancellationToken);
+            await _requests[operation](this, TestContext.Current.CancellationToken);
         }
         catch (ApiException exception)
         {
@@ -183,18 +355,30 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         }
     }
 
-    /// <summary>A member of <paramref name="role"/> sends <paramref name="operation"/> and is refused with 403.</summary>
-    protected async Task AssertForbiddenAsync(string operation, EmployeeType role)
+    // 403 "Access denied", and the spending limits of the portal as they were before the request.
+    private async Task AssertRefusedAsync(string operation, string because)
     {
-        // A customer with a wallet, paid for by the owner: everything before the role check passes.
-        Payments.Customer(Owner.Email).Balance(100m);
-
-        var member = await InviteMember(role);
-        await _webApiClient.Authenticate(member);
+        var limitsBefore = PaymentServices.ServiceLimitsOf(Payments.AccountNumber);
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _requests[operation](_paymentApi, TestContext.Current.CancellationToken));
+            async () => await _requests[operation](this, TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(403, $"{role} may not call {operation}");
+        exception.ErrorCode.Should().Be(403, because);
+        exception.ErrorContent!.ToString().Should().Contain("Access denied", because);
+        PaymentServices.ServiceLimitsOf(Payments.AccountNumber).Should().Be(limitsBefore, "a refused request writes nothing");
+    }
+
+    // GET payment/accounting/currencies is hidden from the OpenAPI document and so from the SDK: it is sent over raw HTTP
+    // and fails as the SDK fails, so it runs through the same assertions as the other operations.
+    private async Task GetAccountingCurrenciesAsync(CancellationToken cancellationToken)
+    {
+        using var response = await _webApiClient.GetAsync("api/2.0/portal/payment/accounting/currencies", cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+            throw new ApiException((int)response.StatusCode, $"GET payment/accounting/currencies failed with {(int)response.StatusCode}", body);
+        }
     }
 }

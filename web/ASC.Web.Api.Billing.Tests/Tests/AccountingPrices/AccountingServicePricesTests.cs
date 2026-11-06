@@ -63,22 +63,6 @@ public class AccountingServicePricesTests(AspireAppFixture fixture) : BaseTest(f
 
         // Assert
         exception.ErrorCode.Should().Be(500);
-    }
-
-    [Theory]
-    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
-    public async Task GetAccountingServicePrices_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
-    {
-        // Arrange
-        var member = await InviteMember(employeeType);
-        await _webApiClient.Authenticate(member);
-
-        // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.GetAccountingServicePricesAsync(PaymentServiceStub.CatalogueServiceName, true,
-                TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("Resource not found");
     }
 }

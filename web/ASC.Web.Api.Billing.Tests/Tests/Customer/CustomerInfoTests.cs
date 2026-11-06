@@ -80,21 +80,4 @@ public class CustomerInfoTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Assert
         customer.Should().BeNull();
     }
-
-    [Theory]
-    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
-    public async Task GetCustomerInfo_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
-    {
-        // Arrange
-        Payments.Customer(Owner.Email);
-        var member = await InviteMember(employeeType);
-        await _webApiClient.Authenticate(member);
-
-        // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.GetCustomerInfoAsync(true, TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(403);
-    }
 }

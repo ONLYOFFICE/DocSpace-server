@@ -94,22 +94,4 @@ public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
         exception.ErrorCode.Should().Be(400);
         exception.ErrorContent!.ToString().Should().Contain("Only monthly product");
     }
-
-    [Theory]
-    [MemberData(nameof(NonAdministratorRoles), MemberType = typeof(BaseTest))]
-    public async Task GetPaymentUrl_NotAnAdministrator_ThrowsForbidden(EmployeeType employeeType)
-    {
-        // Arrange
-        var member = await InviteMember(employeeType);
-        await _webApiClient.Authenticate(member);
-
-        // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.GetPaymentUrlAsync(
-                new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [Plans.AdminPlanName] = 3 }),
-                TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(403);
-    }
 }

@@ -35,28 +35,32 @@
 namespace ASC.Web.Api.Billing.Tests.Tests.Wallet;
 
 /// <summary>
-/// The other side of <see cref="WalletPayerPermissionsTests"/> and <see cref="WalletAdminPermissionsTests"/>: the owner,
-/// who pays for the portal, is let through every wallet operation, and a DocSpace administrator who is not the owner
-/// through the ones for administrators - so the refusals come from the role, and the administrator guard sits at the
-/// administrator, not at the owner.
+/// The other side of <see cref="WalletPayerPermissionsTests"/>: the payer is let through every wallet operation - the
+/// owner who pays, and a member who pays for a portal somebody else owns - so the refusals there come from the role and
+/// not from a refusal of everybody; and an owner who does not pay is refused like any other caller.
 /// </summary>
 public class WalletPermissionsControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
-    public static TheoryData<string> AllWalletOperations => [.. WalletPayerOperations, .. WalletAdministratorOperations];
-
-    public static TheoryData<string> AdministratorOperations => [.. WalletAdministratorOperations];
+    public static TheoryData<string> PayerOperations => [.. WalletPayerOperations];
 
     [Theory]
-    [MemberData(nameof(AllWalletOperations))]
+    [MemberData(nameof(PayerOperations))]
     public async Task WalletOperation_OwnerWhoIsThePayer_IsNotRefused(string operation)
     {
         await AssertOwnerNotRefusedAsync(operation);
     }
 
     [Theory]
-    [MemberData(nameof(AdministratorOperations))]
-    public async Task AdministratorOperation_DocSpaceAdministratorWhoIsNotTheOwner_IsNotRefused(string operation)
+    [MemberData(nameof(PayerOperations))]
+    public async Task WalletOperation_MemberWhoIsThePayer_IsNotRefused(string operation)
     {
-        await AssertAdministratorNotRefusedAsync(operation);
+        await AssertPayerNotRefusedAsync(operation);
+    }
+
+    [Theory]
+    [MemberData(nameof(PayerOperations))]
+    public async Task WalletOperation_OwnerWhoIsNotThePayer_ThrowsForbidden(string operation)
+    {
+        await AssertOwnerWhoIsNotThePayerForbiddenAsync(operation);
     }
 }
