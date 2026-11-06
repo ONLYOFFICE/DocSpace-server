@@ -43,6 +43,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.SerializationException;
 
 /**
  * Two-tier cache: an {@link MemoryCache} in every application instance in front of Redis, which the
@@ -63,6 +64,10 @@ import org.springframework.data.redis.serializer.RedisSerializer;
  * an instance that missed a broadcast can keep serving a stale value. An entry whose eviction was
  * lost is served for at most the Redis lifetime plus the instance tier's, as an instance may have
  * promoted it just before it expired in Redis.
+ *
+ * <p>When Redis cannot be reached, lookups do not wait out a timeout on every call: the first
+ * failure opens the {@link RedisOutageLatch} this cache shares with its registry, and lookups then
+ * miss at once until it lets a probe through again. Evictions are always attempted.
  *
  * <p>Subclasses decide which tenant owns a value and how it is stored in Redis.
  *
@@ -139,6 +144,7 @@ public abstract class CompositeCache<V> {
   private final CacheNamespaceRegistry registry;
   private final RedisTemplate<String, Object> redisTemplate;
   private final Duration redisExpireAfterWrite;
+  private final RedisOutageLatch outage;
 
   /**
    * @param keyPrefix the prefix of this cache's Redis keys.
@@ -181,6 +187,7 @@ public abstract class CompositeCache<V> {
     this.redisTemplate = redisTemplate;
     this.redisExpireAfterWrite = redisExpireAfterWrite;
     this.registry = registry;
+    this.outage = registry.outage();
     var memoryExpireAfterWrite =
         redisExpireAfterWrite.compareTo(MEMORY_EXPIRE_AFTER_WRITE) < 0
             ? redisExpireAfterWrite
@@ -239,16 +246,52 @@ public abstract class CompositeCache<V> {
     var rawArgs = new Object[args.length];
     for (var i = 0; i < args.length; i++) rawArgs[i] = raw(args[i]);
 
-    return (T)
-        redisTemplate.execute(
-            (RedisScript) script,
-            RedisSerializer.byteArray(),
-            (RedisSerializer) VERSION_SERIALIZER,
-            List.of(
-                buildCacheKey(id),
-                buildCacheKey(id) + VERSION_SUFFIX,
-                keyPrefix + EVICTIONS_SUFFIX),
-            rawArgs);
+    try {
+      var result =
+          (T)
+              redisTemplate.execute(
+                  (RedisScript) script,
+                  RedisSerializer.byteArray(),
+                  (RedisSerializer) VERSION_SERIALIZER,
+                  List.of(
+                      buildCacheKey(id),
+                      buildCacheKey(id) + VERSION_SUFFIX,
+                      keyPrefix + EVICTIONS_SUFFIX),
+                  rawArgs);
+      outage.reset();
+      return result;
+    } catch (RuntimeException e) {
+      outage.trip();
+      throw e;
+    }
+  }
+
+  /**
+   * Reads the raw entry of {@code key}, recording on the outage latch whether Redis answered.
+   *
+   * @throws SerializationException if Redis answered but the entry cannot be deserialized.
+   */
+  private Object readStored(String key) {
+    try {
+      var stored = redisTemplate.opsForValue().get(key);
+      outage.reset();
+      return stored;
+    } catch (SerializationException e) {
+      outage.reset();
+      throw e;
+    } catch (RuntimeException e) {
+      outage.trip();
+      throw e;
+    }
+  }
+
+  private void deleteCorrupted(String key, Exception cause) {
+    log.error("Removing unreadable cache entry: {}", key, cause);
+    try {
+      redisTemplate.delete(key);
+    } catch (Exception e) {
+      log.error("Failed to delete corrupted cache entry: {}", key, e);
+    }
   }
 
   /**
@@ -268,7 +311,9 @@ public abstract class CompositeCache<V> {
    * Reads a value from the instance tier, then from Redis, accepting it only while the namespace it
    * was stamped with is still current. A value found in Redis is promoted to the instance tier.
    *
-   * <p>If reading Redis fails, the entry is assumed corrupted and removed.
+   * <p>An entry Redis returns but that cannot be decoded is removed. A failure to reach Redis is a
+   * miss that leaves the entry in place, and opens the outage latch so the lookups that follow skip
+   * Redis for a while instead of each waiting out a timeout.
    *
    * @param id the id of the value.
    * @return the value, or empty if absent or detached by a namespace advance.
@@ -281,22 +326,37 @@ public abstract class CompositeCache<V> {
       return cached;
     }
 
+    if (!outage.permits()) {
+      log.debug("Cache miss for key: {} without reading Redis: it is unreachable", key);
+      return Optional.empty();
+    }
+
     var generation = memoryCache.generation();
+    Object raw;
     try {
-      var stored = fromStored(redisTemplate.opsForValue().get(key));
-      var tenantId = stored == null ? null : tenantOf(stored.value());
-      if (tenantId != null && registry.isCurrent(tenantId, stored.namespace())) {
-        log.info("Cache hit for key: {}", key);
-        memoryCache.promote(key, tenantId, stored.namespace(), stored.value(), generation);
-        return Optional.of(stored.value());
-      }
+      raw = readStored(key);
+    } catch (SerializationException e) {
+      deleteCorrupted(key, e);
+      return Optional.empty();
     } catch (Exception e) {
       log.error("Failed to read cache entry: {}", key, e);
-      try {
-        redisTemplate.delete(key);
-      } catch (Exception dex) {
-        log.error("Failed to delete corrupted cache entry: {}", key, dex);
-      }
+      return Optional.empty();
+    }
+
+    Stamped<V> stored;
+    Long tenantId;
+    try {
+      stored = fromStored(raw);
+      tenantId = stored == null ? null : tenantOf(stored.value());
+    } catch (Exception e) {
+      deleteCorrupted(key, e);
+      return Optional.empty();
+    }
+
+    if (tenantId != null && registry.isCurrent(tenantId, stored.namespace())) {
+      log.info("Cache hit for key: {}", key);
+      memoryCache.promote(key, tenantId, stored.namespace(), stored.value(), generation);
+      return Optional.of(stored.value());
     }
 
     log.info("Cache miss for key: {}", key);
@@ -325,6 +385,11 @@ public abstract class CompositeCache<V> {
             || ticket.evictions() == null
             || memoryCache.generation() != ticket.generation())) {
       log.info("Skipped caching key: {} because it was invalidated while being read", key);
+      return;
+    }
+
+    if (ticket != null && !outage.permits()) {
+      log.debug("Skipped caching key: {} because Redis is unreachable", key);
       return;
     }
 
@@ -408,11 +473,13 @@ public abstract class CompositeCache<V> {
    * before reading the value from its source.
    *
    * @param id the id of the value about to be read.
-   * @return the ticket; its version is {@code null} if Redis could not be read, and such a ticket
-   *     caches nothing.
+   * @return the ticket; its version is {@code null} if Redis could not be read or the outage latch
+   *     is open, and such a ticket caches nothing.
    */
   public CacheTicket ticket(String id) {
     var generation = memoryCache.generation();
+    if (!outage.permits()) return new CacheTicket(generation, null);
+
     try {
       List<?> versions = runScript(READ_VERSION, id);
       return new CacheTicket(

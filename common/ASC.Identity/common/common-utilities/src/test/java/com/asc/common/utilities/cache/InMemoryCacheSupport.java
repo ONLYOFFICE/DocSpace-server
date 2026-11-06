@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -52,31 +53,58 @@ import org.springframework.data.redis.serializer.RedisSerializer;
 final class InMemoryCacheSupport {
   private InMemoryCacheSupport() {}
 
+  /** What both fakes share with the real Redis: one server, which can fail and counts its calls. */
+  static class Server {
+    final AtomicInteger calls = new AtomicInteger();
+    volatile RuntimeException failure;
+
+    void call() {
+      calls.incrementAndGet();
+      var failure = this.failure;
+      if (failure != null) throw failure;
+    }
+  }
+
   static class CounterStore implements CacheNamespaceCounterStore {
     private final Map<String, String> counters = new ConcurrentHashMap<>();
+    private final Server server;
+
+    CounterStore() {
+      this(new Server());
+    }
+
+    CounterStore(Server server) {
+      this.server = server;
+    }
 
     @Override
     public List<String> multiGet(List<String> keys) {
+      server.call();
       return keys.stream().map(counters::get).toList();
     }
 
     @Override
     public String get(String key) {
+      server.call();
       return counters.get(key);
     }
 
     @Override
     public boolean setIfAbsent(String key, String value, Duration ttl) {
+      server.call();
       return counters.putIfAbsent(key, value) == null;
     }
 
     @Override
     public void increment(String key, Duration ttl) {
+      server.call();
       counters.merge(key, "1", (a, b) -> String.valueOf(Long.parseLong(a) + 1));
     }
 
     @Override
-    public void refreshTtl(String key, Duration ttl) {}
+    public void refreshTtl(String key, Duration ttl) {
+      server.call();
+    }
   }
 
   static class Bus implements CacheInvalidationBus {
@@ -98,9 +126,19 @@ final class InMemoryCacheSupport {
     final Map<String, Long> expiresAt = new ConcurrentHashMap<>();
     final List<String> writes = new ArrayList<>();
     Runnable beforeScript = () -> {};
+
+    /** Thrown by GET after reaching the server, as a value that cannot be deserialized would be. */
+    volatile RuntimeException unreadable;
+
+    private final Server server;
     private long nowMillis;
 
     Redis() {
+      this(new Server());
+    }
+
+    Redis(Server server) {
+      this.server = server;
       setValueSerializer(RedisSerializer.string());
     }
 
@@ -130,12 +168,19 @@ final class InMemoryCacheSupport {
       @SuppressWarnings("unchecked")
       ValueOperations<String, Object> values = mock(ValueOperations.class);
       when(values.get(org.mockito.ArgumentMatchers.anyString()))
-          .thenAnswer(invocation -> data.get(invocation.<String>getArgument(0)));
+          .thenAnswer(
+              invocation -> {
+                server.call();
+                var unreadable = this.unreadable;
+                if (unreadable != null) throw unreadable;
+                return data.get(invocation.<String>getArgument(0));
+              });
       return values;
     }
 
     @Override
     public Boolean delete(String key) {
+      server.call();
       return data.remove(key) != null;
     }
 
@@ -150,6 +195,7 @@ final class InMemoryCacheSupport {
       var hook = beforeScript;
       beforeScript = () -> {};
       hook.run();
+      server.call();
 
       var value = keys.get(0);
       var version = keys.get(1);
