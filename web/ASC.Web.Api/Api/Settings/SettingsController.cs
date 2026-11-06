@@ -1096,6 +1096,7 @@ public partial class SettingsController(
             FolderType.Favorites,
             FolderType.Recent,
             FolderType.Forms,
+            FolderType.PrivateRooms,
             FolderType.AiHub,
             FolderType.DEFAULT
         ];

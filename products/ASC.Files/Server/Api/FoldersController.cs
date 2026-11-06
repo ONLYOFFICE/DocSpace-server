@@ -863,9 +863,13 @@ public class FoldersControllerCommon(
     SecurityContext securityContext,
     FilesSettingsHelper filesSettingsHelper,
     SettingsManager settingsManager,
-    MetadataFilterHelper metadataFilterHelper)
+    MetadataFilterHelper metadataFilterHelper,
+    AppSettingsService appSettingsService,
+    TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+    private const string PrivateRoomsAppId = "e2e-rooms";
+
     /// <remarks>
     /// Returns the detailed list of files and folders located in the "Common" section. `metadataTemplateId` and
     /// `metadataFilters` narrow the listing to the entries carrying the template and matching the conditions, the
@@ -1119,6 +1123,46 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFormsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
+    /// <remarks>
+    /// Returns the private rooms section: the flat list of end-to-end encrypted rooms the caller is a member of. Such
+    /// rooms are stored under the "Rooms" tree but are surfaced only here, so `GET api/2.0/files/rooms` leaves them out of
+    /// the active area and lists them when `searchArea` names the private rooms area instead. An administrator who is not
+    /// a member does not see a private room here either. The section is not expanded into room content, so `folders`
+    /// carries the rooms while `files` comes back empty; to read what is inside one of them, call
+    /// `GET api/2.0/files/{folderId}` with the room identifier. Nothing is modified, though passing `sortBy` saves the
+    /// requested order as the default order for this account. `filterType`, `filterValue`, `userIdOrGroupId` and the
+    /// sorting parameters narrow and order the room list, `metadataTemplateId` and `metadataFilters` keep only the rooms
+    /// carrying the template and matching the conditions, `count` and `startIndex` page through it, `total` reports how
+    /// many rooms match the request in full, and `current` describes the section folder itself. Archived private rooms
+    /// stay in the archive area; narrow it with `privacyFilter` of `GET api/2.0/files/rooms`.
+    /// </remarks>
+    /// <summary>Get the private rooms section</summary>
+    /// <path>api/2.0/files/@private</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "The private rooms section with one page of the private rooms the caller is a member of", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
+    [SwaggerResponse(403, "The caller is not allowed to read the private rooms section")]
+    [SwaggerResponse(404, "The end-to-end encrypted rooms app is turned off on this portal")]
+    [HttpGet("@private")]
+    public async Task<FolderContentDto<int>> GetPrivateRoomsFolder(GetCommonFolderRequestDto inDto)
+    {
+        if (!await IsPrivateRoomsAppEnabledAsync())
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivateRoomsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
+    }
+
+    private async Task<bool> IsPrivateRoomsAppEnabledAsync()
+    {
+        var app = await appSettingsService.GetAppAsync(tenantManager.GetCurrentTenantId(), PrivateRoomsAppId);
+
+        return app is { Enabled: true };
+    }
+
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var aiAccessSettingsTask = settingsManager.LoadAsync<TenantAiAccessSettings>();
@@ -1150,6 +1194,12 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderFormsAsync;
+
+        if (await IsPrivateRoomsAppEnabledAsync())
+        {
+            yield return await globalFolderHelper.FolderPrivateRoomsAsync;
+        }
+
         yield return await globalFolderHelper.FolderArchiveAsync;
 
         var aiAccessSettings = await aiAccessSettingsTask;

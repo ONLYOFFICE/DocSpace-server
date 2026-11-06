@@ -123,6 +123,9 @@
   <data name="AiHub" xml:space="preserve">
     <value>AI rooms</value>
   </data>
+  <data name="PrivateRooms" xml:space="preserve">
+    <value>Private</value>
+  </data>
   <data name="Forms" xml:space="preserve">
     <value>Forms</value>
   </data>
