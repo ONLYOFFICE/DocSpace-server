@@ -1276,8 +1276,8 @@ public abstract class FilesController<T>(
     /// key that `GET api/2.0/files/file/{fileId}/publickeys` reports for them. The keys of the accounts named in the
     /// request are replaced, and the keys of everybody else are left as they are, which makes the call idempotent for
     /// a given set of recipients while remaining a mutating one; sending no entry for a person does not revoke that
-    /// person's key. The file has to lie in a private room, and every account named in the request has to have read
-    /// access to it. The caller needs read access to the file and the right to create content in that room, which its
+    /// person's key. The file has to lie in a private room. An account named in the request that cannot read the file is skipped,
+    /// nothing is stored for it, and it comes back in `skippedUserIds`, while the keys of the others are stored. The caller needs read access to the file and the right to create content in that room, which its
     /// members with editing rights and its admins have; a caller without those rights, a file outside a private room
     /// and a file that does not exist are all refused with 403. Read the result back with
     /// `GET api/2.0/files/{fileId}/access`.

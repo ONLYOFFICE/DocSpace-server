@@ -106,7 +106,7 @@ public class RoomGroupCreateTests(
         var room = await CreatePrivateRoom("Private Group Room", RoomType.CustomRoom);
 
         // Act
-        var created = await CreateRoomGroup("Private Group", [room.Id]);
+        var created = await CreateRoomGroup("Private Group", [room.Id], searchArea: SearchArea.PrivateRooms);
 
         // Assert
         created.TotalRooms.Should().Be(1);
