@@ -145,7 +145,7 @@
     <value>서비스</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI 기능</value>
+    <value>AI 에이전트 및 도구</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>백업</value>
@@ -1177,7 +1177,7 @@
     <value>AI 검색</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI 기능</value>
+    <value>AI 에이전트 및 도구</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>로그인 및 작업 추적</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>공급자 비용</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>웹훅이 비활성화되어 있습니다. 전송을 재시도하기 전에 활성화하세요</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>이벤트를 지금 전송하고 있습니다. 시도가 끝난 후 다시 시도하세요</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>이 전송은 이전 웹훅 형식으로 기록되어 다시 보낼 수 없습니다</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>웹훅 대상이 기존 사용자 또는 그룹이 아닙니다</value>
   </data>
 </root>

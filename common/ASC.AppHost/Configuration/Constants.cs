@@ -44,6 +44,9 @@ public static class Constants
     public const int SocketIoPort = 9899;
     public const int SsoAuthPort = 9834;
     public const int AiChatPort = 9837;
+    public const int DocumentAgentPort = 9838;
+    /// <summary>The port the agent image listens on inside its container (its Dockerfile's default).</summary>
+    public const int AgentContainerPort = 8081;
     public const int WebDavPort = 1900;
     public const int IdentityRegistrationPort = 9090;
     public const int IdentityAuthorizationPort = 8080;
@@ -83,6 +86,7 @@ public static class Constants
     public const string OpensearchVersion = "3.5.0";
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
+    public const string DocumentAgentContainer = "onlyoffice-document-agent";
     public const string OtelCollectorContainer = "onlyoffice-otel-collector";
 
     public const string IdentityRegistrationContainer = "onlyoffice-identity-registration";
@@ -94,4 +98,33 @@ public static class Constants
     public const string NextcloudVersion = "33-apache";
     public const string NextcloudUser = "docspace";
     public const string NextcloudPassword = "docspace-tests";
+
+    // Where the webhook tests run the WireMock they subscribe to, in the test process: on a loopback alias the
+    // integration-test blacklist leaves open (ConnectionStringManager.AddBaseConfig) while 127.0.0.1 stays blocked.
+    public const int WebhookReceiverPort = 18089;
+    public const string WebhookReceiverHost = "127.0.0.2";
+
+    // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
+    // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,
+    // four attempts in all, instead of the production schedule of minutes to hours, and an attempt that gives up on a
+    // silent target after WebhookTestRequestTimeout instead of 30 seconds. The delivery tests in ASC.Web.Api.Tests
+    // (WebhookDeliveryTestBase) read the same values.
+    public const int WebhookTestRetryCount = 3;
+    public static TimeSpan WebhookTestRetryInterval { get; } = TimeSpan.FromMilliseconds(500);
+    public static TimeSpan WebhookTestRequestTimeout { get; } = TimeSpan.FromSeconds(12);
+
+    // UrlValidator.DefaultBlacklist with 127.0.0.0/8 narrowed to 127.0.0.1/32: the receiver is reached as
+    // WebhookReceiverHost, while localhost stays refused (bug 80980). A non-empty list replaces the default as a
+    // whole, so a test in ASC.Web.Api.Tests (WebhookTestProfileTests) keeps the two in step.
+    public static IReadOnlyList<string> WebhookTestBlacklist { get; } =
+    [
+        "0.0.0.0/8", "10.0.0.0/8", "100.64.0.0/10", "127.0.0.1/32", "169.254.0.0/16", "172.16.0.0/12",
+        "192.168.0.0/16", "::/128", "::1/128", "fc00::/8", "fd00::/8", "fe80::/10"
+    ];
+
+    // The services that get WebhookTestBlacklist: Web.Api checks the target of a subscription when it is saved, and
+    // Web.Studio sends the deliveries. Every other UrlValidator caller of the profile keeps the default list, so the
+    // SSRF tests of the other suites run against what production refuses.
+    public static IReadOnlyList<string> WebhookTestBlacklistServices { get; } =
+        [ProjectConfigurator.GetProjectName<ASC_Web_Api>(), ProjectConfigurator.GetProjectName<ASC_Web_Studio>()];
 }

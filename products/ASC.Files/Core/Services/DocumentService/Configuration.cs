@@ -230,7 +230,10 @@ public class DocumentConfig<T>(
         }
 
         var last = Permissions.Edit || Permissions.Review || Permissions.Comment;
-        _fileUri = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, last));
+        var url = pathProvider.GetFileStreamUrl(file, last);
+
+        // An encrypted file is downloaded by the browser, not by the document server, so it needs the public address.
+        _fileUri = file.Encrypted ? url : documentServiceConnector.ReplaceCommunityAddress(url);
 
         return _fileUri;
     }
@@ -882,7 +885,7 @@ public class CustomizationConfig<T>(
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderPrivacyAsync<T>());
             }
 
-            if (file.RootFolderType == FolderType.VirtualRooms &&
+            if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub &&
                 !canReadParent)
             {
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
@@ -923,13 +926,21 @@ public class CustomizationConfig<T>(
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
         return new SubmitFormDto
         {
-            Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true },
+            Visible = !file.Encrypted && file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true },
             ResultMessage = ""
         };
     }
 
     public async Task<AiConfigDto> GetAIConfigAsync()
     {
+        if (!authContext.IsAuthenticated)
+        {
+            return new AiConfigDto
+            {
+                Disabled = true
+            };
+        }
+
         var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
         return new AiConfigDto
         {

@@ -145,7 +145,7 @@
     <value>Service</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI features</value>
+    <value>AI agents &amp; tools</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
@@ -795,6 +795,18 @@
   <data name="EmailAndPasswordIncorrectEmail" xml:space="preserve">
     <value>Incorrect email address</value>
   </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>The webhook target is not an existing user or group</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>The webhook is disabled. Enable it before retrying its deliveries</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>The event is being sent right now. Retry it once the attempt has finished</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>The delivery was recorded in an earlier webhook format and cannot be sent again</value>
+  </data>
   <data name="ErrorAccessDenied" xml:space="preserve">
     <value>No permissions to perform this action</value>
   </data>
@@ -1210,7 +1222,7 @@
     <value>The number of AI agents should not exceed {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI features</value>
+    <value>AI agents &amp; tools</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Get access to a wide range of AI models through OpenRouter integration. Pay only for what you use, billed from your Wallet.</value>

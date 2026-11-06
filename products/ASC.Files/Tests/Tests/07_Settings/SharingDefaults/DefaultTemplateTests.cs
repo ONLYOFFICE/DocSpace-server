@@ -131,7 +131,9 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
     /// <summary>
     /// BUG 79837: uploading a template over 100MB made Kestrel abort the connection instead of
     /// answering. Fixed by putting <c>[DisableRequestSizeLimit]</c> on <c>UploadDefaultTemplate</c>
-    /// plus an explicit size check answering 400 with a message.
+    /// with a 100MB form limit of its own. That limit was first reported in the framework's words
+    /// ("Failed to read the request form. Multipart body length limit 104857600 exceeded.");
+    /// <c>[FormLimitError]</c> turns it into the portal's file-size message.
     /// </summary>
     [Fact]
     [Trait("Bug", "79837")]
@@ -146,7 +148,8 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
             async () => await _filesSettingsApi.UploadDefaultTemplateAsync(".docx", file, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
-        exception.ErrorContent?.ToString().Should().NotBeNullOrEmpty();
+        exception.ErrorContent?.ToString().Should().Contain("The maximum file size is exceeded (100 MB).")
+            .And.NotContain("Multipart body length limit");
     }
 
     /// <summary>

@@ -1,5 +1,22 @@
 # Change Log
 
+## 4.1.0
+
+### Added
+
+- Added the `Rooms / AI` folder (`/api/2.0/files/rooms`): get and set the chat model of an AI project (`{id}/model`), get, link and unlink the rooms of a project (`{id}/sources`), the skills of an Instructions room (`{id}/skills`) and the skills catalog (`skills`)
+- Added `AI / Context / Get knowledge folders` (`/api/2.0/ai/context/get-knowledge-folders`)
+- `AI / Assignments / Get all assignments` takes `expand=profile` to answer the assigned profiles themselves
+
+### Changed
+
+- **Breaking:** `AI / Attachments / Get suggested questions` sends the attachment ID itself as the body (a JSON string) instead of an object
+- The AI chat requests carry the fields the service reads: `contextEntityId` on send, stream, regenerate and tool-call requests, `contextRooms`, `knowledgeRooms`, `folderContext`, `toolInstructions` and `entityId` in the action arguments, and `format` (`Docx`, `Pdf` or `Md`) on `AI / Export / Start markdown export`
+
+### Removed
+
+- Removed the `AI / Agents` folder: the server no longer serves `/api/2.0/ai/agents`; an AI project takes the place of an agent
+
 ## 4.0.0
 
 ### Added

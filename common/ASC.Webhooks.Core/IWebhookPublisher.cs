@@ -35,11 +35,44 @@ namespace ASC.Webhooks.Core;
 
 public interface IWebhookPublisher
 {
-    Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data);
+    /// <summary>
+    /// Whether any active subscription of the portal listens to <paramref name="trigger"/>, from the cached list and
+    /// before any access check: a caller asks it first to skip the work of building an event nobody receives.
+    /// </summary>
+    Task<bool> HasWebhookConfigsAsync(WebhookTrigger trigger);
 
-    Task PublishAsync<T1, T2>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T1 data, T2 dataId);
+    Task<List<DbWebhooksConfig>> GetWebhookConfigsAsync<TSource>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source);
 
-    Task PublishAsync<T1, T2>(WebhookTrigger trigger, IWebhookAccessChecker<T1> checker, T1 data, T2 dataId);
+    /// <summary>
+    /// Writes the event to the journal of every subscription in <paramref name="webhookConfigs"/> and hands it to the
+    /// sender. Best effort: it is called once the action the event reports has taken effect, so a failure for one
+    /// subscription is logged and skipped, and nothing but a cancellation is thrown.
+    /// </summary>
+    Task PublishAsync<TPayload, TId>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, TPayload payload, TId dataId);
 
-    Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog);
+    Task<WebhookRetryResult> RetryPublishAsync(DbWebhooksLog webhookLog);
 }
+
+public enum WebhookRetryStatus
+{
+    Requeued,
+    NotFound,
+    InProgress,
+
+    /// <summary>
+    /// The subscription is disabled.
+    /// </summary>
+    Disabled,
+
+    /// <summary>
+    /// The event was written before the update that introduced the attempt counter; its body is in the old format.
+    /// </summary>
+    Outdated
+}
+
+/// <summary>
+/// The outcome of a manual retry. When it was queued, <paramref name="Log"/> is the new row and
+/// <paramref name="StoppedIds"/> the ids of the event's earlier rows, the original one and its earlier retries, whose
+/// automatic retries still due the new row ended; a row that had none left is listed as well.
+/// </summary>
+public record WebhookRetryResult(WebhookRetryStatus Status, DbWebhooksLog Log = null, IReadOnlyList<int> StoppedIds = null);

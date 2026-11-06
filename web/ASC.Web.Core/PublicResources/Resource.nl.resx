@@ -145,7 +145,7 @@
     <value>Service</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI-functies</value>
+    <value>AI-agenten en -tools</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Back-up</value>
@@ -1177,7 +1177,7 @@
     <value>AI-zoeken</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI-functies</value>
+    <value>AI-agenten en -tools</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Inloggegevens en acties bijhouden</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Kosten van de provider</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>De webhook is uitgeschakeld. Schakel deze in voordat u de leveringen opnieuw probeert</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>De gebeurtenis wordt op dit moment verzonden. Probeer het opnieuw zodra de poging is voltooid</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>De levering is vastgelegd in een eerder webhook-formaat en kan niet opnieuw worden verzonden</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Het webhookdoel is geen bestaande gebruiker of groep</value>
   </data>
 </root>

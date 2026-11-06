@@ -46,6 +46,7 @@ namespace ASC.Web.Api.Controllers;
 public class AppsController(
     AppSettingsService appSettingsService,
     AppsSocketManager appsSocketManager,
+    MessageService messageService,
     PermissionContext permissionContext,
     TenantManager tenantManager) : ControllerBase
 {
@@ -138,7 +139,8 @@ public class AppsController(
     /// so that they can show or hide it without being reloaded. The identifier must be an application declared in the
     /// installation configuration, as listed by `GET api/2.0/apps`. The caller must be a portal administrator allowed
     /// to edit the portal settings. The call is mutating and idempotent: it stores the flag for this portal, overriding
-    /// the default that the configuration gives the application, and repeating it with the same value changes nothing.
+    /// the default that the configuration gives the application, and repeating it with the same value changes nothing
+    /// in the state. Every call is recorded in the portal audit trail as the application being enabled or disabled.
     /// Disabling an application does not delete its settings document, which stays saved and applies again as soon as
     /// the application is enabled. The response is the application in its new state, including that settings document.
     /// Only the enabled flag is affected here: to change the settings document use `PUT api/2.0/apps/{id}/settings`.
@@ -160,6 +162,8 @@ public class AppsController(
 
         var tenantId = tenantManager.GetCurrentTenantId();
         var app = await appSettingsService.SetEnabledAsync(tenantId, inDto.Id, inDto.Body.Enabled);
+
+        messageService.Send(app.Enabled ? MessageAction.AppEnabled : MessageAction.AppDisabled, app.Id);
 
         await appsSocketManager.ChangeAppEnabledAsync(app.Id, app.Enabled);
 

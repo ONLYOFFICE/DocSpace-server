@@ -1317,4 +1317,22 @@
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Failu atvēra Document Builder skripts: {0}</value>
   </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Lietotne iespējota: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Lietotne atspējota: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Telpas piesaistītas MI projektam {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Telpas atsaistītas no MI projekta {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>MI projekta {0} AI modelis nomainīts uz {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Tika mēģināts atkārtoti piegādāt tīmekļa āķi: {0}</value>
+  </data>
 </root>

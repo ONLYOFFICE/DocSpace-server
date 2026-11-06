@@ -118,8 +118,10 @@ public class SharedWithMePdfFilterTests(
 
     /// <summary>
     /// Has the owner share a .docx, a plain PDF and an ONLYOFFICE PDF form from "My documents" with a
-    /// new user for reading. The TS source builds the plain PDF through <c>saveFileAsPdf</c>, which
-    /// needs a document server; a hand-built PDF without the form signature stands in for it here.
+    /// new user for reading. The TS source builds the plain PDF through <c>saveFileAsPdf</c>; a hand-built
+    /// PDF without the form signature is used instead, because the filter is the subject here, not the
+    /// conversion (see <see cref="FormsTestBase"/>; the PDF the document server writes is checked in
+    /// <see cref="IsFormPdfTests"/>).
     /// </summary>
     private async Task<(User User, string DocxTitle, string PdfTitle, string FormTitle)> ShareDocxPdfAndForm(string prefix)
     {

@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Saídas do chat</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>A sala já contém a pasta .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>O armazenamento não pode ser desconectado enquanto uma sala o utiliza. Exclua a sala</value>
   </data>
@@ -624,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Pesquisar nos metadados da pasta</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Um projeto de IA pode vincular no máximo {0} salas de instruções</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Um projeto de IA pode vincular no máximo {0} salas de conhecimento</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Estas salas não podem ser vinculadas ao projeto de IA: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Somente arquivos Markdown (.md) podem ser adicionados a uma sala de instruções</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Uma sala de instruções pode conter no máximo {0} habilidades</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>A descrição da habilidade deve ter de 1 a 1024 caracteres e não pode conter tags XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>O arquivo da habilidade deve começar com um bloco YAML frontmatter entre duas linhas ---, com os campos name e description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>O nome da habilidade deve ter de 1 a 64 caracteres, conter apenas letras minúsculas, dígitos e hifens simples, e não pode começar nem terminar com hífen</value>
   </data>
 </root>

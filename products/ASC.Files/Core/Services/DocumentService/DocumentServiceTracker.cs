@@ -425,6 +425,23 @@ public class DocumentServiceTrackerHelper(
             }
         }
 
+        // End-to-end encrypted content: a save without the flag would store ciphertext as an open file, a submitted form
+        // would go out in the clear, and somebody removed from the room has no business adding a version to it.
+        var fileToSave = await fileDao.GetFileAsync(fileId);
+        if (await DocSpaceHelper.LocatedInPrivateRoomAsync(fileToSave, daoFactory.GetCacheFolderDao<T>()) &&
+            (!fileData.Encrypted || fileData.ForceSaveType == TrackerData.ForceSaveInitiator.UserSubmit || !await documentServiceHelper.CanStayInEditorAsync(fileToSave, userId)))
+        {
+            logger.ErrorDocServiceSavingPrivateFile(fileId.ToString(), userId);
+
+            if (!forceSave)
+            {
+                await fileTracker.RemoveAsync(fileId);
+                await socketManager.StopEditAsync(fileId);
+            }
+
+            return new TrackResponse { Message = FilesCommonResource.ErrorMessage_SecurityException_EditFile };
+        }
+
         File<T> file = null;
         var saveMessage = "Not saved";
 

@@ -62,17 +62,63 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     private readonly Dictionary<string, Uri> _baseAddresses = [];
 
+    // Local and in whole seconds, like the dates in the log it is compared with.
+    private readonly DateTime _startedAt = new(DateTime.Now.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond);
+
     // A single connection pool shared by every per-test HttpClient. The clients stay per-test (so
     // their Origin/Authorization default headers never collide across parallel tests), but they all
     // reuse this one handler, which avoids creating a short-lived connection pool per test and the
     // socket churn / TIME_WAIT exhaustion that comes with it.
-    private readonly SocketsHttpHandler _sharedHandler = new() { UseCookies = false };
+    //
+    // The links a portal returns carry its own host, <alias>.docspace.localhost (see SetBaseDomainAsync).
+    // Windows does not resolve *.localhost, so the handler connects every such host to the loopback itself.
+    // "localhost" goes there too: Windows tries ::1 first, and the ports Docker publishes (identity, OpenSearch)
+    // listen on 127.0.0.1 only, so every new connection waited ~2 s for the refusal before falling back.
+    private readonly SocketsHttpHandler _sharedHandler = new() { UseCookies = false, ConnectCallback = ConnectAsync };
+
+    /// <summary>The base domain of the test portals: each one is <c>&lt;alias&gt;.docspace.localhost</c>.</summary>
+    public const string BaseDomain = "docspace.localhost";
+
+    private static async ValueTask<Stream> ConnectAsync(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+    {
+        var host = context.DnsEndPoint.Host;
+        EndPoint endPoint = host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || host.EndsWith(".localhost", StringComparison.OrdinalIgnoreCase)
+            ? new IPEndPoint(IPAddress.Loopback, context.DnsEndPoint.Port)
+            : context.DnsEndPoint;
+
+        var socket = new Socket(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
+
+        try
+        {
+            await socket.ConnectAsync(endPoint, cancellationToken);
+
+            return new NetworkStream(socket, ownsSocket: true);
+        }
+        catch
+        {
+            socket.Dispose();
+            throw;
+        }
+    }
 
     /// <summary>
     /// The services this suite needs on top of ApiSystem and WebApi, which are always started
     /// (portal registration and authentication). Names come from <see cref="ResourceNames"/>.
     /// </summary>
     protected abstract IEnumerable<string> Resources { get; }
+
+    /// <summary>
+    /// Services only some test classes of the suite need. They start with the stack and get their clients at once,
+    /// but the run does not wait for them: a test that uses them calls <see cref="WaitForLazyResourcesAsync"/>, so the
+    /// other classes start as soon as <see cref="Resources"/> are healthy.
+    /// </summary>
+    protected virtual IEnumerable<string> LazyResources => [];
+
+    private readonly Lock _routerLock = new();
+    private Task? _routerUp;
+
+    private readonly Lock _lazyResourcesLock = new();
+    private Task? _lazyResourcesHealthy;
 
     /// <summary>
     /// The AppHost launch profile this suite's stack is built from. The profile is where the resource
@@ -146,12 +192,14 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
                 + "went healthy is the one to read, not this.");
         }
 
-        foreach (var resource in resources)
+        foreach (var resource in resources.Union(LazyResources))
         {
             _baseAddresses[resource] = ResolveBaseAddress(resource);
         }
 
-        if (resources.Contains(ResourceNames.Nextcloud))
+        // A lazy Nextcloud counts too: its address is known once the stack runs, and the tests that use it wait for
+        // it themselves before they read these settings.
+        if (resources.Union(LazyResources).Contains(ResourceNames.Nextcloud))
         {
             PublishNextcloudSettings();
         }
@@ -164,6 +212,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         await DisableStartDocsAsync();
 
         await InitializePasswordSaltAsync();
+
+        await SetBaseDomainAsync();
 
         await OnStartedAsync();
 
@@ -224,6 +274,39 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     ///
     /// A failure is reported and left non-fatal: the suite still passes, just slower.
     /// </remarks>
+    /// <summary>
+    /// Gives the installation a base domain the way a server installation sets it: through ApiSystem
+    /// <c>settings/save</c>, stored for tenant -1. The services keep <c>core:base-domain=localhost</c>, which is
+    /// what switches the standalone mode on, but with only that every portal's domain is "localhost"
+    /// (<c>Tenant.GetTenantDomain</c>): the links the server hands the document server (a docbuilder script, a
+    /// file to convert, a callback) then led to the default portal and were refused there. With the base domain
+    /// each portal is <c>&lt;alias&gt;.docspace.localhost</c> and those links reach the portal that signed them.
+    /// On a server installation the call needs a DocSpace admin, so it is made as the owner of a portal of its own.
+    /// </summary>
+    private async Task SetBaseDomainAsync()
+    {
+        await Timing.Measure("basedomain.set", async () =>
+        {
+            using var clients = await CreatePortalAsync(TestContext.Current.CancellationToken);
+            await clients.WebApiHttpClient.Authenticate(clients.Owner);
+
+            using var apiSystem = CreateRawClient(_baseAddresses[ResourceNames.ApiSystem], $"http://{clients.PortalName}");
+            apiSystem.DefaultRequestHeaders.Authorization = clients.WebApiHttpClient.DefaultRequestHeaders.Authorization;
+
+            using var response = await apiSystem.PostAsJsonAsync(
+                "settings/save",
+                new { tenantId = -1, key = "BaseDomain", value = BaseDomain },
+                TestContext.Current.CancellationToken);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+                throw new HttpRequestException($"Setting the base domain failed ({(int)response.StatusCode}): {body}");
+            }
+        });
+    }
+
     private async Task DisableStartDocsAsync()
     {
         // AdditionalWhiteLabelSettings.ID, as EF stores it in the varchar(64) key column.
@@ -362,6 +445,13 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Whether the suite's launch profile starts the resource at all - the environment signal for a feature whose
+    /// container only some profiles include (<see cref="ResourceNames.DocSpaceMcp"/>).
+    /// </summary>
+    public bool HasResource(string resourceName) =>
+        _app.Services.GetRequiredService<DistributedApplicationModel>().Resources.Any(resource => resource.Name == resourceName);
+
+    /// <summary>
     /// A value of the AppHost configuration. The services read the same <c>buildtools/config</c>
     /// files, so a setting such as <c>core:machinekey</c> read here is the one they work with.
     /// </summary>
@@ -406,6 +496,177 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         Environment.SetEnvironmentVariable("NEXTCLOUD_URL", $"{origin}/remote.php/dav/files/{user}/");
         Environment.SetEnvironmentVariable("NEXTCLOUD_LOGIN", user);
         Environment.SetEnvironmentVariable("NEXTCLOUD_PASSWORD", ASC.AppHost.Configuration.Constants.NextcloudPassword);
+    }
+
+    /// <summary>
+    /// Waits until every service of <see cref="LazyResources"/> is healthy. The first caller starts the wait and the
+    /// others share it, so it costs the run once.
+    /// </summary>
+    public Task WaitForLazyResourcesAsync()
+    {
+        lock (_lazyResourcesLock)
+        {
+            return _lazyResourcesHealthy ??= WaitForHealthyAsync(LazyResources.ToList());
+        }
+    }
+
+    private readonly Lock _documentServerLock = new();
+    private Task? _documentServerReady;
+
+    /// <summary>
+    /// Waits until the document server has finished starting. Its container has no health check of its own, so the
+    /// services start as soon as it runs, and its start has two halves: a first docservice and converter answer within
+    /// a second, the fonts and caches are regenerated (~70 s, 2026-11-03), and then supervisor restarts both. A
+    /// conversion in flight at that restart hangs and fails with the router's HTML error page, while the test that
+    /// asked for it waits out its whole timeout for a file that never comes. The health check already answers in the
+    /// first half, so the wait is on the line the restart logs; the health check after it only confirms the router
+    /// reaches the new instance. The first caller starts the wait and the others share it, so it costs the run once.
+    /// </summary>
+    public Task WaitForDocumentServerAsync()
+    {
+        lock (_documentServerLock)
+        {
+            return _documentServerReady ??= WaitForDocumentServerStartAsync();
+        }
+    }
+
+    /// <summary>What supervisor logs once the converter is back after the fonts were regenerated.</summary>
+    private const string DocumentServerRestartedLine = "ds:converter: started";
+
+    /// <summary>
+    /// How long the restart line is waited for. An image that stops logging it must not stall the suite for the whole
+    /// start-up budget: past this the health check alone decides.
+    /// </summary>
+    private static readonly TimeSpan _documentServerRestartBudget = TimeSpan.FromMinutes(4);
+
+    private async Task WaitForDocumentServerStartAsync()
+    {
+        await WaitForDocumentServerRestartAsync();
+        await PollDocumentServerAsync();
+    }
+
+    private async Task WaitForDocumentServerRestartAsync()
+    {
+        using var restart = new CancellationTokenSource(_documentServerRestartBudget);
+        var editors = _app.Services.GetRequiredService<DistributedApplicationModel>().Resources
+            .Single(resource => resource.Name == ResourceNames.Editors);
+
+        try
+        {
+            // The watch replays the lines logged before it started, so a server that is long up is seen at once.
+            await foreach (var batch in _app.Services.GetRequiredService<ResourceLoggerService>().WatchAsync(editors).WithCancellation(restart.Token))
+            {
+                if (batch.Any(line => line.Content.Contains(DocumentServerRestartedLine, StringComparison.Ordinal)))
+                {
+                    return;
+                }
+            }
+        }
+        catch (OperationCanceledException) when (restart.IsCancellationRequested)
+        {
+            // Not logged within the budget: fall through to the health check.
+        }
+    }
+
+    /// <summary>
+    /// Waits, once per run, until the router passes requests on to the services. The run itself does not need the
+    /// router and starts without it, but the socket service checks a cookie through it (<c>API_HOST</c>), and until it
+    /// is up every connection is refused. Answered by People, because a socket connection asks it first.
+    /// </summary>
+    public Task WaitForRouterAsync()
+    {
+        lock (_routerLock)
+        {
+            return _routerUp ??= PollRouterAsync();
+        }
+    }
+
+    private async Task PollRouterAsync()
+    {
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+        using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
+        var probe = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/api/2.0/people/@self");
+
+        try
+        {
+            while (true)
+            {
+                try
+                {
+                    using var response = await client.GetAsync(probe, startUp.Token);
+
+                    // Anonymous, so 401 is the answer of a service that was reached.
+                    if ((int)response.StatusCode < 500)
+                    {
+                        return;
+                    }
+                }
+                catch (Exception exception) when (!startUp.IsCancellationRequested && exception is HttpRequestException or TaskCanceledException)
+                {
+                    // Not up yet: the connection is refused or dropped until the container listens.
+                }
+
+                await Task.Delay(TimeSpan.FromMilliseconds(500), startUp.Token);
+            }
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The router did not answer {probe} within {_startUpBudget.TotalMinutes} minutes. The log of the "
+                + "openresty container is the one to read.");
+        }
+    }
+
+    private async Task PollDocumentServerAsync()
+    {
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+        using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
+        // The router port the services reach the document server through.
+        var healthCheck = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/ds-vpath/healthcheck");
+
+        try
+        {
+            while (true)
+            {
+                try
+                {
+                    using var response = await client.GetAsync(healthCheck, startUp.Token);
+
+                    if (response.IsSuccessStatusCode && (await response.Content.ReadAsStringAsync(startUp.Token)).Trim() == "true")
+                    {
+                        return;
+                    }
+                }
+                catch (Exception exception) when (!startUp.IsCancellationRequested && exception is HttpRequestException or TaskCanceledException)
+                {
+                    // Not up yet: the router answers 502 or the connection is refused until the container listens.
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(2), startUp.Token);
+            }
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The document server did not answer {healthCheck} within {_startUpBudget.TotalMinutes} minutes. "
+                + "The editors container's log is the one to read.");
+        }
+    }
+
+    private async Task WaitForHealthyAsync(List<string> resources)
+    {
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+
+        try
+        {
+            await Task.WhenAll(resources.Select(r => _app.ResourceNotifications.WaitForResourceHealthyAsync(r, startUp.Token)));
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"{string.Join(", ", resources)} did not come up within {_startUpBudget.TotalMinutes} minutes. The log "
+                + "of whichever of them never went healthy is the one to read, not this.");
+        }
     }
 
     private Uri ResolveBaseAddress(string resourceName)
@@ -463,5 +724,18 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
 
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// The notifications the socket service refused so far in this run, as "route status" with how many times. Nothing
+    /// else would ever say so: the operation succeeds and the client stays stale. A suite asks at the very end of its
+    /// run, from a test in a collection with <c>DisableParallelization</c>, which xUnit runs after the parallel ones.
+    /// It is a test and not a failure of this fixture's disposal, because that is reported once for every test run.
+    /// </summary>
+    public Task<Dictionary<string, int>> FindSocketHubRefusalsAsync()
+    {
+        var logs = AppPaths.GetTestLogsDirectory(AppPaths.GetBasePath(Projects.ASC_AppHost.ProjectPath));
+
+        return SocketHubRefusals.FindAsync(logs, _startedAt);
     }
 }

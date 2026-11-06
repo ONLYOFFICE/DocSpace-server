@@ -35,37 +35,39 @@ namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
-public class AssignmentsReadTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class AssignmentsReadTests(AspireAppFixture fixture) : AssignmentsTestBase(fixture)
 {
     [Fact]
     public async Task ReadByType_Existing_ReturnsProfileId()
     {
-        var profile = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", profile.Id);
+        var profile = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.Chat, profile.Id);
 
-        (await ReadAssignmentAsync("Chat")).Should().Be(profile.Id);
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().Be(profile.Id);
     }
 
     [Fact]
     public async Task ReadByType_NonExisting_ReturnsNull()
     {
-        (await ReadAssignmentAsync("Chat")).Should().BeNull();
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().BeNull();
     }
 
+    // Internal contract: entity-scoped assignments have no public route (get-assignment takes no entityId and the Node adapter drops it).
     [Fact]
     public async Task ReadByType_WithEntityId_ReturnsScopedValue()
     {
-        var globalProfile = await CreateProfileAsync();
-        var scopedProfile = await CreateProfileAsync();
+        var globalProfile = await CreateProfileInternalAsync();
+        var scopedProfile = await CreateProfileInternalAsync();
         var roomId = await CreateRoomAsync();
 
-        await CreateAssignmentAsync("Chat", globalProfile.Id);
-        await CreateAssignmentAsync("Chat", scopedProfile.Id, roomId.ToString());
+        await CreateAssignmentInternalAsync("Chat", globalProfile.Id);
+        await CreateAssignmentInternalAsync("Chat", scopedProfile.Id, roomId.ToString());
 
-        (await ReadAssignmentAsync("Chat")).Should().Be(globalProfile.Id);
-        (await ReadAssignmentAsync("Chat", roomId.ToString())).Should().Be(scopedProfile.Id);
+        (await ReadAssignmentInternalAsync("Chat")).Should().Be(globalProfile.Id);
+        (await ReadAssignmentInternalAsync("Chat", roomId.ToString())).Should().Be(scopedProfile.Id);
     }
 
+    // Internal contract: entity-scoped assignments have no public route (get-assignment takes no entityId and the Node adapter drops it).
     [Fact]
     public async Task ReadByType_NonExistentEntityId_Returns404()
     {
@@ -79,39 +81,66 @@ public class AssignmentsReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ReadAll_Owner_ReturnsAllCreated()
     {
-        var chatProfile = await CreateProfileAsync();
-        var codeProfile = await CreateProfileAsync();
+        var chatProfile = await CreateAssignableProfileAsync();
+        var codeProfile = await CreateAssignableProfileAsync();
 
-        await CreateAssignmentAsync("Chat", chatProfile.Id);
-        await CreateAssignmentAsync("Code", codeProfile.Id);
+        await AssignAsync(AiActionType.Chat, chatProfile.Id);
+        await AssignAsync(AiActionType.Code, codeProfile.Id);
 
-        var all = await ReadAllAssignmentsAsync();
+        var all = await GetAllAssignmentsAsync();
 
-        all.Should().HaveCount(2);
-        all.Should().ContainKey("Chat").WhoseValue.Should().Be(chatProfile.Id);
-        all.Should().ContainKey("Code").WhoseValue.Should().Be(codeProfile.Id);
+        // The first profile of the portal also holds the Default slot.
+        all.Should().HaveCount(3);
+        all.Should().ContainKey(DefaultSlot).WhoseValue.Should().Be(chatProfile.Id);
+        all.Should().ContainKey(nameof(AiActionType.Chat)).WhoseValue.Should().Be(chatProfile.Id);
+        all.Should().ContainKey(nameof(AiActionType.Code)).WhoseValue.Should().Be(codeProfile.Id);
     }
 
     [Fact]
     public async Task ReadAll_Empty_ReturnsEmpty()
     {
-        var all = await ReadAllAssignmentsAsync();
+        var all = await GetAllAssignmentsAsync();
 
         all.Should().BeEmpty();
     }
 
     [Fact]
+    public async Task ReadAll_WithRoomEntityId_ReturnsPortalWideMap()
+    {
+        // The public map is portal-wide: an accessible room is accepted and answers the same map.
+        var profile = await CreateAssignableProfileAsync();
+        var roomId = await CreateRoomAsync();
+        await AssignAsync(AiActionType.Chat, profile.Id);
+
+        var global = await GetAllAssignmentsAsync();
+        var scoped = await GetAllAssignmentsAsync(roomId.ToString());
+
+        scoped.Should().BeEquivalentTo(global);
+        scoped.Should().ContainKey(nameof(AiActionType.Chat)).WhoseValue.Should().Be(profile.Id);
+    }
+
+    [Fact]
+    public async Task ReadAll_NonExistentEntityId_Returns404()
+    {
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await GetAllAssignmentsAsync("999999999"));
+
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    // Internal contract: entity-scoped assignments have no public route (get-all-assignments only validates entityId; the Node adapter drops it).
+    [Fact]
     public async Task ReadAll_WithEntityId_ReturnsOnlyScopedAssignments()
     {
-        var globalProfile = await CreateProfileAsync();
-        var scopedProfile = await CreateProfileAsync();
+        var globalProfile = await CreateProfileInternalAsync();
+        var scopedProfile = await CreateProfileInternalAsync();
         var roomId = await CreateRoomAsync();
 
-        await CreateAssignmentAsync("Chat", globalProfile.Id);
-        await CreateAssignmentAsync("Code", scopedProfile.Id, roomId.ToString());
+        await CreateAssignmentInternalAsync("Chat", globalProfile.Id);
+        await CreateAssignmentInternalAsync("Code", scopedProfile.Id, roomId.ToString());
 
-        var globalAssignments = await ReadAllAssignmentsAsync();
-        var scopedAssignments = await ReadAllAssignmentsAsync(roomId.ToString());
+        var globalAssignments = await ReadAllAssignmentsInternalAsync();
+        var scopedAssignments = await ReadAllAssignmentsInternalAsync(roomId.ToString());
 
         globalAssignments.Should().HaveCount(1).And.ContainKey("Chat");
         scopedAssignments.Should().HaveCount(1).And.ContainKey("Code");

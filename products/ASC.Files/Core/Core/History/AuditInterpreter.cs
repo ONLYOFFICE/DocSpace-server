@@ -59,6 +59,7 @@ public class AuditInterpreter(IServiceProvider serviceProvider)
     {
         { (int)MessageAction.FileCreated, new FileCreateInterpreter() },
         { (int)MessageAction.FileUploaded, new FileUploadedInterpreter() },
+        { (int)MessageAction.FileKeysSet, new FileUploadedInterpreter() },
         { (int)MessageAction.FileUploadedWithOverwriting, new FileUploadedInterpreter() },
         { (int)MessageAction.UserFileUpdated, _userFileUpdatedInterpreter },
         { (int)MessageAction.FileRenamed, new FileRenamedInterpreter() },

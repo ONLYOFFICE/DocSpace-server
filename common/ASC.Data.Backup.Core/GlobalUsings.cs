@@ -100,6 +100,7 @@ global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Core.SMS;
 global using ASC.Web.Studio.Core.TFA;
 global using ASC.Web.Studio.Utility;
+global using ASC.Webhooks.Core;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;

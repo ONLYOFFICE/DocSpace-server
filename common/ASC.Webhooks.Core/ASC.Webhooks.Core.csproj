@@ -17,4 +17,9 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <!-- The generated webhook contract, served as an OpenAPI document next to the REST ones (WebhookContract). -->
+  <ItemGroup>
+    <EmbeddedResource Include="Contract\docspace-webhooks.yaml" LogicalName="ASC.Webhooks.Core.Contract.docspace-webhooks.yaml" />
+  </ItemGroup>
+
 </Project>

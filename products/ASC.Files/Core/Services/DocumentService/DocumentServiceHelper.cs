@@ -56,7 +56,8 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         SettingsManager settingsManager,
         IQuotaService quotaService,
         TenantManager tenantManager,
-        CoreSettings coreSettings)
+        CoreSettings coreSettings,
+        DocumentServiceEncryptionChecker documentServiceEncryptionChecker)
 {
     public async Task<(File<T> File, bool LastVersion)> GetCurFileInfoAsync<T>(T fileId, int version)
     {
@@ -257,12 +258,18 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var locatedInPrivateRoom = false;
         Options options = null;
-        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             locatedInPrivateRoom = DocSpaceHelper.LocatedInPrivateRoom(room);
             options = GetOptions(room);
+        }
+
+        // The browser decrypts the file with a library the document server hands out, so without it nothing can be shown.
+        if (file.Encrypted && locatedInPrivateRoom && !await documentServiceEncryptionChecker.IsSupportedAsync())
+        {
+            throw new NotSupportedException(FilesCommonResource.ErrorMessage_DocServiceEncryptionNotSupported);
         }
 
         if (file.Encrypted && file.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
@@ -496,6 +503,33 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         return false;
     }
 
+    public async Task<bool> CanStayInEditorAsync<T>(File<T> file, Guid uid)
+    {
+        // A security check keeps the share record it found on the entry and reuses it for whoever is asked about next,
+        // so each user gets an instance of their own or the answer for the previous one comes back.
+        var entry = await daoFactory.GetFileDao<T>().GetFileAsync(file.Id);
+
+        return await fileSecurity.CanEditAsync(entry, uid)
+            || await fileSecurity.CanCustomFilterEditAsync(entry, uid)
+            || await fileSecurity.CanReviewAsync(entry, uid)
+            || await fileSecurity.CanFillFormsAsync(entry, uid)
+            || await fileSecurity.CanCommentAsync(entry, uid);
+    }
+
+    /// <summary>
+    /// A change of the members of a private room reaches its files through the room, so the sessions on those
+    /// files are checked here. Somebody removed from the room must not go on editing what they lost the key to.
+    /// </summary>
+    public async Task CheckRoomUsersForDropAsync<T>(Folder<T> room)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+
+        await foreach (var file in fileDao.GetFilesAsync(room.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true))
+        {
+            await CheckUsersForDropAsync(file);
+        }
+    }
+
     public async Task CheckUsersForDropAsync<T>(File<T> file)
     {
         var usersDrop = new List<string>();
@@ -508,11 +542,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
                 continue;
             }
 
-            if (!await fileSecurity.CanEditAsync(file, uid)
-                && !await fileSecurity.CanCustomFilterEditAsync(file, uid)
-                && !await fileSecurity.CanReviewAsync(file, uid)
-                && !await fileSecurity.CanFillFormsAsync(file, uid)
-                && !await fileSecurity.CanCommentAsync(file, uid))
+            if (!await CanStayInEditorAsync(file, uid))
             {
                 usersDrop.Add(uid.ToString());
             }
@@ -611,7 +641,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             return result;
         }
 
-        if (edit)
+        if (edit && await fileSecurity.CanEditAsync(file))
         {
             result.CanEdit = true;
             result.EditorType = editorType;

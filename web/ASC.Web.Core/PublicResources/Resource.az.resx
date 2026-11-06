@@ -145,7 +145,7 @@
     <value>Xidmət</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI xüsusiyyətləri</value>
+    <value>AI agentləri və alətlər</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Yedəkləmə</value>
@@ -1177,7 +1177,7 @@
     <value>Süni intellekt axtarışı</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI xüsusiyyətləri</value>
+    <value>AI agentləri və alətlər</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Giriş və hərəkətləri izləmək</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Provayder xərci</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook deaktivdir. Çatdırılmaları yenidən cəhd etməzdən əvvəl onu aktiv edin</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Hadisə hazırda göndərilir. Cəhd bitdikdən sonra yenidən cəhd edin</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Çatdırılma daha əvvəlki webhook formatında qeydə alınıb və yenidən göndərilə bilməz</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook hədəfi mövcud istifadəçi və ya qrup deyil</value>
   </data>
 </root>

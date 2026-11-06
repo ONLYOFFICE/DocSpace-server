@@ -35,6 +35,7 @@ import { randomUUID } from "crypto";
 import { aiService } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
 import {
+    getKnowledgeRoomIds,
     getResolvedFormId,
     setResolvedFormId,
     getResolvedAttachmentId,
@@ -56,6 +57,7 @@ const CALL_PATH = "/tools/call";
 import {
   DOCSPACE_INTEGRATION_SERVER_TYPE as SERVER_TYPE,
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+  getDocumentAgent,
 } from "../../config/index.js";
 
 export { DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE };
@@ -74,8 +76,8 @@ type ToolsList = {
 // Relative editor link for a DocSpace file — the same shape the knowledge
 // search citations use. Relative on purpose: the chat renders links as plain
 // anchors, so a page-relative or invented href (`?fileId=1`, `Report.docx`)
-// resolves against the current `/ai-agents/<id>` page and opens a new empty
-// chat instead of the file (Bug 84152).
+// resolves against the current page and opens something else than the file
+// (Bug 84152).
 export function fileEditorUrl(fileId: string | number): string {
     return `/doceditor?fileId=${encodeURIComponent(String(fileId))}`;
 }
@@ -106,14 +108,18 @@ export function withGeneratedFileUrl(value: unknown): unknown {
     return { ...value, [dataKey]: { ...data, url: fileEditorUrl(id) } };
 }
 
-// `ToolContext` on the C# side — `{ folderId, formId, attachmentId }`. `entityId`
-// is the opaque widget scope token; for room-bound chat it carries the room id.
+// `ToolContext` on the C# side — `{ folderId, formId, attachmentId, knowledgeRoomId, knowledgeRoomIds }`.
+// `entityId` is the opaque widget scope token; for room-bound chat it carries the room id.
 // `attachmentId` keys the per-attachment analyze intent that gates the form-data tools.
+// `knowledgeRoomIds` are the knowledge rooms the composer connected; `knowledgeRoomId` is the
+// first of them (0 = none), what an older .NET side reads.
 type ToolContextDto = {
     folderId: number;
     formId: number;
     attachmentId: string;
     formSubAgent: boolean;
+    knowledgeRoomId: number;
+    knowledgeRoomIds: number[];
 };
 
 // A ref-carrying content part encodes `{ref, title, kind}` as JSON in
@@ -207,19 +213,30 @@ async function toContext(
     formSubAgent = false,
 ): Promise<ToolContextDto> {
     const folderId = parseInt10(entityId, 0) ?? 0;
+    const knowledgeRoomIds = getKnowledgeRoomIds();
+    const knowledgeRoomId = knowledgeRoomIds[0] ?? 0;
     if (attachmentId && attachmentId.length > 0) {
         const resolved = await resolveForm(attachmentId);
         if (resolved.formId > 0) {
             setResolvedFormId(resolved.formId);
             setResolvedAttachmentId(resolved.attachmentId);
         }
-        return { folderId, formId: resolved.formId, attachmentId: resolved.attachmentId, formSubAgent };
+        return {
+            folderId,
+            formId: resolved.formId,
+            attachmentId: resolved.attachmentId,
+            formSubAgent,
+            knowledgeRoomId,
+            knowledgeRoomIds,
+        };
     }
     return {
         folderId,
         formId: getResolvedFormId() ?? 0,
         attachmentId: getResolvedAttachmentId() ?? "",
         formSubAgent,
+        knowledgeRoomId,
+        knowledgeRoomIds,
     };
 }
 
@@ -417,6 +434,11 @@ export class HttpToolsAdapter implements ToolsAdapter {
             `docspaceTools.list raw response: ${JSON.stringify(raw).slice(0, 1000)}`,
         );
         const parsed = parseList(raw);
+        // The generate tools only create an empty file; with a document agent
+        // configured the model gets `document_agent` instead, which fills it.
+        if (getDocumentAgent()) {
+            parsed.tools = parsed.tools.filter((tool) => !APPROVAL_TOOL_NAMES.has(tool.name));
+        }
         parsed.tools = withLinkHints(parsed.tools);
         const names = parsed.tools.map((t) => t.name).join(", ") || "<none>";
         logger.info(

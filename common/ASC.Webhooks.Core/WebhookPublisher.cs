@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,11 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
-using ASC.Core.Tenants;
-
 namespace ASC.Webhooks.Core;
 
 [Scope(typeof(IWebhookPublisher))]
@@ -43,17 +38,42 @@ public class WebhookPublisher(
     DbWorker dbWorker,
     IEventBus eventBus,
     TenantUtil tenantUtil,
-    AuthContext authContext)
+    AuthContext authContext,
+    UserManager userManager,
+    SettingsManager settingsManager,
+    WebhookSocketManager webhookSocketManager,
+    ILogger<WebhookPublisher> logger)
     : IWebhookPublisher
 {
-    private readonly JsonSerializerOptions _serializerOptions = new()
-    {
-        Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-    };
+    // One instance for the process: the serializer builds its metadata per options instance, so options created
+    // per scope would rebuild it for every event. The converter needs the TenantUtil of the publishing scope, which
+    // is handed to it for the duration of one synchronous Serialize call.
+    private static readonly AsyncLocal<TenantUtil> _serializingTenantUtil = new();
+    private static readonly JsonSerializerOptions _serializerOptions = CreateSerializerOptions(() => _serializingTenantUtil.Value);
 
-    private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>
+    /// <summary>
+    /// The options every webhook body is serialized with, the very instance the publisher uses: the payload tests and
+    /// the contract generator see exactly what goes on the wire, and nothing can allocate options per call. Outside a
+    /// publish no TenantUtil is set, so a <see cref="DateTimeKind.Local"/> value cannot be written there.
+    /// </summary>
+    public static JsonSerializerOptions SerializerOptions => _serializerOptions;
+
+    private static JsonSerializerOptions CreateSerializerOptions(Func<TenantUtil> tenantUtil)
+    {
+        return new JsonSerializerOptions
+        {
+            Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+        };
+    }
+
+    /// <summary>
+    /// How every timestamp of a webhook body is written: UTC, whole seconds, with the Z.
+    /// </summary>
+    public const string WholeSecondsUtcFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
+    private class TenantToUtcDateTimeJsonConverter(Func<TenantUtil> tenantUtil) : JsonConverter<DateTime>
     {
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
@@ -62,16 +82,53 @@ public class WebhookPublisher(
 
         public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(value.Kind == DateTimeKind.Local ? tenantUtil.DateTimeToUtc(value) : value.ToUniversalTime());
+            var utc = value.Kind switch
+            {
+                // TenantUtil marks a value it converted into the portal's time zone as Local
+                DateTimeKind.Local => tenantUtil().DateTimeToUtc(value),
+                // read back from the database, which stores every timestamp in UTC; ToUniversalTime would take it for
+                // the server's local time and shift it by the server's offset
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(value, DateTimeKind.Utc),
+                _ => value
+            };
+
+            // whole seconds, as the envelope: a fraction of up to seven digits is what Swift's ISO-8601 decoder refuses
+            writer.WriteStringValue(utc.ToString(WholeSecondsUtcFormat, CultureInfo.InvariantCulture));
         }
     }
 
+    private string Serialize<T>(T payload)
+    {
+        _serializingTenantUtil.Value = tenantUtil;
 
-    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
+        try
+        {
+            return JsonSerializer.Serialize(payload, _serializerOptions);
+        }
+        finally
+        {
+            _serializingTenantUtil.Value = null;
+        }
+    }
+
+    public async Task<bool> HasWebhookConfigsAsync(WebhookTrigger trigger)
+    {
+        var webhookConfigs = await dbWorker.GetActiveWebhookConfigsFromCache();
+
+        return webhookConfigs.Any(config => config.Triggers == WebhookTrigger.All || config.Triggers.HasFlag(trigger));
+    }
+
+    public async Task<List<DbWebhooksConfig>> GetWebhookConfigsAsync<TSource>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source)
     {
         var result = new List<DbWebhooksConfig>();
 
         var webhookConfigs = await dbWorker.GetActiveWebhookConfigsFromCache();
+        bool? devToolsLimited = null;
+
+        // one creator usually owns several subscriptions, and both answers below depend on the creator and the event
+        // only, so each is worked out once per creator for this event
+        var entitledCreators = new Dictionary<Guid, bool>();
+        var creatorsWithAccess = new Dictionary<Guid, bool>();
 
         foreach (var config in webhookConfigs)
         {
@@ -80,16 +137,40 @@ public class WebhookPublisher(
                 continue;
             }
 
+            // the creator was allowed to subscribe when the subscription was saved; what counts is what they may receive
+            // now. A catch-all subscription is narrowed the same way: it stands for the events the creator's role may
+            // subscribe to, not for every event of the portal
+            if (config.CreatedBy is { } creatorId)
+            {
+                if (!entitledCreators.TryGetValue(creatorId, out var entitled))
+                {
+                    devToolsLimited ??= (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+                    entitled = await IsCreatorEntitledAsync(userManager, creatorId, trigger, devToolsLimited.Value);
+                    entitledCreators[creatorId] = entitled;
+                }
+
+                if (!entitled)
+                {
+                    continue;
+                }
+            }
+
             if (checker != null)
             {
-                if (!string.IsNullOrEmpty(config.TargetId) && !checker.CheckIsTarget(data, config.TargetId))
+                if (!string.IsNullOrEmpty(config.TargetId) && !checker.CheckIsTarget(source, config.TargetId))
                 {
                     continue;
                 }
 
-                if (config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
+                if (config.CreatedBy is { } ownerId && authContext.CurrentAccount.ID != ownerId)
                 {
-                    if (!await checker.CheckAccessAsync(data, config.CreatedBy.Value))
+                    if (!creatorsWithAccess.TryGetValue(ownerId, out var hasAccess))
+                    {
+                        hasAccess = await checker.CheckAccessAsync(source, ownerId);
+                        creatorsWithAccess[ownerId] = hasAccess;
+                    }
+
+                    if (!hasAccess)
                     {
                         continue;
                     }
@@ -102,29 +183,55 @@ public class WebhookPublisher(
         return result;
     }
 
-    public async Task PublishAsync<T1, T2>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T1 data, T2 dataId)
+    /// <summary>
+    /// Whether the creator of a subscription may still receive <paramref name="trigger"/>: an active member whose
+    /// current role may subscribe to it, and a DocSpace admin while the developer tools are limited for users. A
+    /// creator who was removed, terminated, turned into a guest or downgraded to a role without that trigger gets
+    /// nothing, as the API would no longer let them subscribe to it. The sender asks the same before every attempt
+    /// (<see cref="WebhookCreatorEntitlement"/>), so the retries of an event stop as well.
+    /// </summary>
+    internal static async Task<bool> IsCreatorEntitledAsync(UserManager userManager, Guid creatorId, WebhookTrigger trigger, bool devToolsLimited)
+    {
+        var creator = await userManager.GetUsersAsync(creatorId);
+
+        if (creator.Equals(Constants.LostUser) || creator.Status != EmployeeStatus.Active)
+        {
+            return false;
+        }
+
+        var creatorType = await userManager.GetUserTypeAsync(creator);
+
+        if (devToolsLimited && creatorType != EmployeeType.DocSpaceAdmin)
+        {
+            return false;
+        }
+
+        return trigger.IsAvailableFor(creatorType);
+    }
+
+    public async Task PublishAsync<TPayload, TId>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, TPayload payload, TId dataId)
     {
         foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(trigger, config, data, dataId);
+            // every caller publishes after its action has taken effect (or right after removing what the event
+            // describes), so a failure here must neither fail that action nor drop the event for the other
+            // subscriptions. A row written before the event bus failed is still due, and the sender's sweep claims it
+            try
+            {
+                _ = await PublishAsync(trigger, config, payload, dataId);
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                logger.ErrorPublishWebhook(trigger, dataId?.ToString(), config.Id, e);
+            }
         }
     }
 
-    public async Task PublishAsync<T1, T2>(WebhookTrigger trigger, IWebhookAccessChecker<T1> checker, T1 data, T2 dataId)
+    private async Task<DbWebhooksLog> PublishAsync<TPayload, TId>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, TPayload data, TId dataId)
     {
-        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, data);
+        var payload = new WebhookPayload<TPayload, TId>(trigger, webhookConfig, data, dataId, authContext.CurrentAccount.ID);
 
-        foreach (var config in webhookConfigs)
-        {
-            _ = await PublishAsync(trigger, config, data, dataId);
-        }
-    }
-
-    private async Task<DbWebhooksLog> PublishAsync<T1, T2>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, T1 data, T2 dataId)
-    {
-        var payload = new WebhookPayload<T1, T2>(trigger, webhookConfig, data, dataId, authContext.CurrentAccount.ID);
-
-        var payloadStr = JsonSerializer.Serialize(payload, _serializerOptions);
+        var payloadStr = Serialize(payload);
 
         var webhooksLog = new DbWebhooksLog
         {
@@ -136,34 +243,84 @@ public class WebhookPublisher(
             RequestPayload = payloadStr
         };
 
-        return await PublishAsync(webhooksLog);
+        return await PublishAsync(webhooksLog, webhookConfig);
     }
 
 
-    public async Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog)
+    public async Task<WebhookRetryResult> RetryPublishAsync(DbWebhooksLog webhookLog)
     {
-        var webhooksLog = new DbWebhooksLog
+        var result = await dbWorker.RetryJournalAsync(webhookLog, authContext.CurrentAccount.ID);
+
+        if (result.Status != WebhookRetryStatus.Requeued)
         {
-            TenantId = webhookLog.TenantId,
-            ConfigId = webhookLog.ConfigId,
-            Uid = authContext.CurrentAccount.ID,
-            Trigger = webhookLog.Trigger,
-            CreationTime = DateTime.UtcNow,
-            RequestPayload = webhookLog.RequestPayload
-        };
+            return result;
+        }
 
-        return await PublishAsync(webhooksLog);
+        // the retry is committed: the event only wakes the sender sooner, and the sweep claims the due row without it,
+        // so a bus failure must not answer 500 and invite a second retry of the same event
+        try
+        {
+            await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, result.Log.TenantId, result.Log.Id));
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorRetryEventBus(result.Log.Id, e);
+        }
+
+        result.Log.Config = webhookLog.Config;
+
+        // the new record, and every earlier record of the event, the one retried among them: a retry ends the pending
+        // attempts of all of them, so a client watching any of them sees its nextAttemptOn go
+        await webhookSocketManager.AddWebhookLogAsync(webhookLog.Config, result.Log.Id);
+
+        foreach (var stoppedId in result.StoppedIds)
+        {
+            await webhookSocketManager.UpdateWebhookLogAsync(webhookLog.Config, stoppedId);
+        }
+
+        return result;
     }
 
-    private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)
+    // Once the row is written the delivery happens: the sender's sweep claims a due row whether or not the event that
+    // wakes it arrives. So the row is announced right after the write, and the event is best effort like the
+    // announcement (which logs its own failure): a bus that is down must not hide the record from the open journals.
+    // A bulk action writes a row per entry and subscription; the socket manager coalesces their announcements per
+    // subscription within the scope (WebhookSocketManager.AddWebhookLogAsync), so this stays one call per row.
+    private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog, DbWebhooksConfig webhookConfig)
     {
+        webhookLog.Attempts = 0;
+        webhookLog.NextAttemptOn = webhookLog.CreationTime;
+
         var newWebhooksLog = await dbWorker.WriteToJournal(webhookLog);
 
-        var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, newWebhooksLog.TenantId, newWebhooksLog.Id);
+        await webhookSocketManager.AddWebhookLogAsync(webhookConfig, newWebhooksLog.Id);
 
-        await eventBus.PublishAsync(@event);
+        try
+        {
+            await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, newWebhooksLog.TenantId, newWebhooksLog.Id));
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            logger.ErrorWakeSender(newWebhooksLog.Id, e);
+        }
 
         return newWebhooksLog;
     }
 
+}
+
+/// <summary>
+/// The entitlement check of <see cref="WebhookPublisher"/> for the sender: a subscription's creator who may no longer
+/// receive an event gets neither its automatic retries nor a manual retry, which carry the body stored at publish.
+/// Asks in the portal of the current tenant.
+/// </summary>
+[Scope]
+public class WebhookCreatorEntitlement(UserManager userManager, SettingsManager settingsManager)
+{
+    public async Task<bool> IsEntitledAsync(Guid creatorId, WebhookTrigger trigger)
+    {
+        var devToolsLimited = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
+
+        return await WebhookPublisher.IsCreatorEntitledAsync(userManager, creatorId, trigger, devToolsLimited);
+    }
 }

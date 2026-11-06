@@ -613,9 +613,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>مخرجات الدردشة</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>تحتوي الغرفة بالفعل على مجلد .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>لا يمكن فصل التخزين أثناء استخدام غرفة له. احذف الغرفة بدلاً من ذلك</value>
   </data>
@@ -624,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>البحث في بيانات المجلد الوصفية</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>يمكن ربط {0} من غرف التعليمات كحد أقصى بمشروع الذكاء الاصطناعي</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>يمكن ربط {0} من غرف المعرفة كحد أقصى بمشروع الذكاء الاصطناعي</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>لا يمكن ربط هذه الغرف بمشروع الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>يمكن إضافة ملفات Markdown (.md) فقط إلى غرفة التعليمات</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>يمكن أن تحتوي غرفة التعليمات على {0} من المهارات كحد أقصى</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>يجب أن يتراوح طول وصف المهارة بين 1 و1024 حرفًا وألا يحتوي على وسوم XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>يجب أن يبدأ ملف المهارة بكتلة YAML frontmatter بين سطرين ---، تتضمن الحقلين name وdescription</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>يجب أن يتراوح طول اسم المهارة بين 1 و64 حرفًا، وأن يحتوي فقط على أحرف صغيرة وأرقام وشرطات مفردة، وألا يبدأ أو ينتهي بشرطة</value>
   </data>
 </root>

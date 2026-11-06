@@ -25,8 +25,12 @@ everything below assumes it. `.claude/rules/csharp-style.md` applies as well.
 
 Inside the project, one folder per feature, holding every suite of that feature — functional,
 validation and permissions alike. Follow the existing layout of the target project: the base
-class, the fixture and the helper names differ between them. **`ASC.AI.Tests` does not use the
-generated SDK** — it calls a hand-rolled `AiApiClient` with string paths; match what is there.
+class, the fixture and the helper names differ between them. **`ASC.AI.Tests` goes through the
+public `/api/2.0/ai` surface** (the Node chat service `common/ASC.AI.Chat`) with the typed SDK
+clients `DocSpace.API.SDK.Api.AI.*` that its `BaseTest` exposes (`_aiProfiles`, `_aiThreads`, ...).
+The model is a stub in the test process (`StubModelProvider`): script what it answers with
+`Enqueue` instead of expecting a real model's behaviour. `/internal/ai` (raw `_ai`, the
+`*InternalAsync` helpers) is the internal storage API behind it — only for what has no public route.
 
 If the feature folder already exists, extend it rather than inventing a parallel one, and reuse
 the helpers already in its base class.

@@ -88,14 +88,16 @@ public class WebhooksConfigDto
 
     /// <summary>
     /// The events the subscription covers, as the bits of `GET api/2.0/settings/webhook/triggers` added
-    /// together. `0` is the catch-all and means every event, not none.
+    /// together. `0` is the catch-all, not none: it covers every event the subscription creator's current role may
+    /// receive, which can be fewer than all the events of the portal.
     /// </summary>
     /// <example>128</example>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
-    /// The single room or file the subscription is narrowed to, empty for a subscription that covers the whole
-    /// portal. It is kept as an opaque value, so both a numeric and a third-party identifier can appear.
+    /// The single entity the subscription is narrowed to, empty for a subscription that covers the whole portal. It
+    /// is the GUID of a user or group for user and group events, and the Files API entry ID of a file, folder or room
+    /// otherwise, kept as an opaque value, so a numeric ID, a third-party ID or a GUID can appear.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000001</example>
     public string TargetId { get; set; }

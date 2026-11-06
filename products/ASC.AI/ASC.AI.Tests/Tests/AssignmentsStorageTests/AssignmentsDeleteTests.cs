@@ -35,107 +35,173 @@ namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
-public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class AssignmentsDeleteTests(AspireAppFixture fixture) : AssignmentsTestBase(fixture)
 {
     [Fact]
     public async Task Delete_Existing_Removes()
     {
-        var profile = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", profile.Id);
+        var profile = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.Chat, profile.Id);
 
-        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+        var result = await _aiAssignments.AiAssignmentsUnassignAsync(nameof(AiActionType.Chat), TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadAssignmentAsync("Chat")).Should().BeNull();
+        result.Success.Should().BeTrue();
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().BeNull();
     }
 
     [Fact]
     public async Task Delete_Existing_NotReturnedByReadAll()
     {
-        var profile = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", profile.Id);
+        var profile = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.Chat, profile.Id);
 
-        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+        var result = await _aiAssignments.AiAssignmentsUnassignAsync(nameof(AiActionType.Chat), TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadAllAssignmentsAsync()).Should().BeEmpty();
+        result.Success.Should().BeTrue();
+        // Only the Default slot the first profile took on creation is left.
+        (await GetAllAssignmentsAsync()).Keys.Should().BeEquivalentTo(new[] { DefaultSlot });
     }
 
     [Fact]
     public async Task Delete_Twice_KeepsUnassigned()
     {
-        var profile = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", profile.Id);
+        var profile = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.Chat, profile.Id);
 
-        using var first = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
-        using var second = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+        var first = await _aiAssignments.AiAssignmentsUnassignAsync(nameof(AiActionType.Chat), TestContext.Current.CancellationToken);
+        var second = await _aiAssignments.AiAssignmentsUnassignAsync(nameof(AiActionType.Chat), TestContext.Current.CancellationToken);
 
-        first.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        second.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadAssignmentAsync("Chat")).Should().BeNull();
+        first.Success.Should().BeTrue();
+        second.Success.Should().BeTrue();
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().BeNull();
     }
 
     [Fact]
     public async Task Delete_ThenAssignAgain_Persists()
     {
-        var profile = await CreateProfileAsync();
-        var anotherProfile = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", profile.Id);
+        var profile = await CreateAssignableProfileAsync();
+        var anotherProfile = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.Chat, profile.Id);
 
-        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var result = await _aiAssignments.AiAssignmentsUnassignAsync(nameof(AiActionType.Chat), TestContext.Current.CancellationToken);
+        result.Success.Should().BeTrue();
 
-        await CreateAssignmentAsync("Chat", anotherProfile.Id);
+        await AssignAsync(AiActionType.Chat, anotherProfile.Id);
 
-        (await ReadAssignmentAsync("Chat")).Should().Be(anotherProfile.Id);
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().Be(anotherProfile.Id);
     }
 
     [Fact]
     public async Task Delete_TypeWithDefault_NotReturnedByReadAll()
     {
-        var profile = await CreateProfileAsync();
-        await CreateAssignmentAsync("ImageGeneration", profile.Id);
+        var profile = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.ImageGeneration, profile.Id);
 
-        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/ImageGeneration", TestContext.Current.CancellationToken);
+        var result = await _aiAssignments.AiAssignmentsUnassignAsync(nameof(AiActionType.ImageGeneration), TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadAssignmentAsync("ImageGeneration")).Should().BeNull();
-        (await ReadAllAssignmentsAsync()).Should().BeEmpty();
+        result.Success.Should().BeTrue();
+        (await GetAssignmentAsync(AiActionType.ImageGeneration)).Should().BeNull();
+        (await GetAllAssignmentsAsync()).Keys.Should().BeEquivalentTo(new[] { DefaultSlot });
     }
 
     [Fact]
     public async Task Delete_TypeWithDefault_ThenAssignAgain_Persists()
     {
-        var profile = await CreateProfileAsync();
-        var anotherProfile = await CreateProfileAsync();
-        await CreateAssignmentAsync("ImageGeneration", profile.Id);
+        var profile = await CreateAssignableProfileAsync();
+        var anotherProfile = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.ImageGeneration, profile.Id);
 
-        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/ImageGeneration", TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var result = await _aiAssignments.AiAssignmentsUnassignAsync(nameof(AiActionType.ImageGeneration), TestContext.Current.CancellationToken);
+        result.Success.Should().BeTrue();
 
-        await CreateAssignmentAsync("ImageGeneration", anotherProfile.Id);
+        await AssignAsync(AiActionType.ImageGeneration, anotherProfile.Id);
 
-        (await ReadAssignmentAsync("ImageGeneration")).Should().Be(anotherProfile.Id);
+        (await GetAssignmentAsync(AiActionType.ImageGeneration)).Should().Be(anotherProfile.Id);
     }
 
     [Fact]
     public async Task Delete_NonExisting_Succeeds()
     {
-        using var response = await _ai.DeleteAsync($"{AssignmentsPath}/Chat", TestContext.Current.CancellationToken);
+        var result = await _aiAssignments.AiAssignmentsUnassignAsync(nameof(AiActionType.Chat), TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
     }
 
+    // The bulk delete (DELETE /assignments with a list of types) is reached publicly only through
+    // cascade-profile-delete, which drops every slot bound to the given profile.
     [Fact]
     public async Task DeleteMany_RemovesAllListedTypes()
     {
-        var chatProfile = await CreateProfileAsync();
-        var codeProfile = await CreateProfileAsync();
-        var summarizationProfile = await CreateProfileAsync();
+        var defaultProfile = await CreateAssignableProfileAsync();
+        var chatAndCodeProfile = await CreateAssignableProfileAsync();
+        var summarizationProfile = await CreateAssignableProfileAsync();
 
-        await CreateAssignmentAsync("Chat", chatProfile.Id);
-        await CreateAssignmentAsync("Code", codeProfile.Id);
-        await CreateAssignmentAsync("Summarization", summarizationProfile.Id);
+        await AssignAsync(AiActionType.Chat, chatAndCodeProfile.Id);
+        await AssignAsync(AiActionType.Code, chatAndCodeProfile.Id);
+        await AssignAsync(AiActionType.Summarization, summarizationProfile.Id);
+
+        var result = await _aiAssignments.AiAssignmentsCascadeProfileDeleteAsync(
+            new AiAssignmentsCascadeProfileDeleteRequest(chatAndCodeProfile.Id),
+            TestContext.Current.CancellationToken);
+
+        result.Success.Should().BeTrue();
+
+        var all = await GetAllAssignmentsAsync();
+        all.Keys.Should().BeEquivalentTo(new[] { DefaultSlot, nameof(AiActionType.Summarization) });
+        all[DefaultSlot].Should().Be(defaultProfile.Id);
+        all[nameof(AiActionType.Summarization)].Should().Be(summarizationProfile.Id);
+    }
+
+    [Fact]
+    public async Task DeleteMany_ThenAssignAgain_Persists()
+    {
+        await CreateAssignableProfileAsync();
+        var chatProfile = await CreateAssignableProfileAsync();
+        var codeProfile = await CreateAssignableProfileAsync();
+
+        await AssignAsync(AiActionType.Chat, chatProfile.Id);
+
+        var result = await _aiAssignments.AiAssignmentsCascadeProfileDeleteAsync(
+            new AiAssignmentsCascadeProfileDeleteRequest(chatProfile.Id),
+            TestContext.Current.CancellationToken);
+
+        result.Success.Should().BeTrue();
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().BeNull();
+
+        await AssignAsync(AiActionType.Chat, codeProfile.Id);
+
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().Be(codeProfile.Id);
+    }
+
+    [Fact]
+    public async Task DeleteMany_EmptyList_Succeeds()
+    {
+        // A profile bound to no slot gives the cascade an empty list to drop: a no-op that still succeeds.
+        var defaultProfile = await CreateAssignableProfileAsync();
+        var unboundProfile = await CreateAssignableProfileAsync();
+
+        var result = await _aiAssignments.AiAssignmentsCascadeProfileDeleteAsync(
+            new AiAssignmentsCascadeProfileDeleteRequest(unboundProfile.Id),
+            TestContext.Current.CancellationToken);
+
+        result.Success.Should().BeTrue();
+
+        var all = await GetAllAssignmentsAsync();
+        all.Keys.Should().BeEquivalentTo(new[] { DefaultSlot });
+        all[DefaultSlot].Should().Be(defaultProfile.Id);
+    }
+
+    // Internal contract: an arbitrary list of types for the bulk delete has no public route (only cascade-profile-delete reaches it, with the slots of one profile).
+    [Fact]
+    public async Task DeleteMany_ArbitraryList_Internal_RemovesAllListedTypes()
+    {
+        var chatProfile = await CreateProfileInternalAsync();
+        var codeProfile = await CreateProfileInternalAsync();
+        var summarizationProfile = await CreateProfileInternalAsync();
+
+        await CreateAssignmentInternalAsync("Chat", chatProfile.Id);
+        await CreateAssignmentInternalAsync("Code", codeProfile.Id);
+        await CreateAssignmentInternalAsync("Summarization", summarizationProfile.Id);
 
         using var response = await _ai.DeleteAsync(
             AssignmentsPath,
@@ -144,32 +210,13 @@ public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        var all = await ReadAllAssignmentsAsync();
+        var all = await ReadAllAssignmentsInternalAsync();
         all.Should().HaveCount(1).And.ContainKey("Summarization");
     }
 
+    // Internal contract: an empty list for the bulk delete has no public route (the Node adapter never sends one).
     [Fact]
-    public async Task DeleteMany_ThenAssignAgain_Persists()
-    {
-        var chatProfile = await CreateProfileAsync();
-        var codeProfile = await CreateProfileAsync();
-
-        await CreateAssignmentAsync("Chat", chatProfile.Id);
-
-        using var response = await _ai.DeleteAsync(
-            AssignmentsPath,
-            new { actionTypes = new[] { "Chat" } },
-            TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        await CreateAssignmentAsync("Chat", codeProfile.Id);
-
-        (await ReadAssignmentAsync("Chat")).Should().Be(codeProfile.Id);
-    }
-
-    [Fact]
-    public async Task DeleteMany_EmptyList_Succeeds()
+    public async Task DeleteMany_EmptyList_Internal_Succeeds()
     {
         using var response = await _ai.DeleteAsync(
             AssignmentsPath,
@@ -178,5 +225,4 @@ public class AssignmentsDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
-
 }

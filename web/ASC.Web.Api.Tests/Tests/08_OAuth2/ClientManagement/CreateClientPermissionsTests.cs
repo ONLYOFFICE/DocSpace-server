@@ -212,18 +212,26 @@ public class CreateClientPermissionsTests(
             "logout redirect uri is expected to be passed as url");
     }
 
+    /// <remarks>
+    /// Sent over raw HTTP: the generated <c>CreateClientRequest</c> refuses a null logo on the client, so a typed
+    /// call never reaches the server (the "required constructor parameter" carve-out of tests.md). The body is the
+    /// valid request with <c>logo</c> taken out.
+    /// </remarks>
     [Fact]
     public async Task CreateClient_WithoutLogo_ThrowsValidationError()
     {
         // Arrange
         await ApplySignatureAsync();
+        var body = JsonNode.Parse(ValidCreateClientRequest().ToJson())!.AsObject();
+        body.Remove("logo");
 
         // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _clientManagementApi.CreateClientAsync(
-                ValidCreateClientRequest(logo: null), TestContext.Current.CancellationToken));
+        using var content = JsonContent.Create(body);
+        using var response = await _identityClient.PostAsync("api/2.0/oauth2/clients", content, TestContext.Current.CancellationToken);
+        var responseBody = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        AssertValidationError(exception, "logo", "EmptyFieldError", "client logo must not be empty");
+        AssertValidationError(
+            new ApiException((int)response.StatusCode, responseBody, responseBody), "logo", "EmptyFieldError", "client logo must not be empty");
     }
 }
