@@ -288,6 +288,24 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
             new BillingProductRequestDto { PortalId = [portalId], ProductId = [productId] });
     }
 
+    /// <summary>
+    /// Redeems a promo code for the portal; the billing service credits its bonus to the customer and returns what it
+    /// credited. A code it refuses comes back as a <see cref="BillingException"/>.
+    /// </summary>
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(string portalId, string promoCode, string customerParticipantName)
+    {
+        EnsureConfigured();
+
+        var requestDto = new PromoCodeRequestDto
+        {
+            PortalId = [portalId],
+            PromoCode = [promoCode],
+            CustomerParticipantName = Optional(customerParticipantName)
+        };
+
+        return await billingApi.ApplyPromoCodeAsync(requestDto);
+    }
+
     public async Task<bool> GetDocsCloudTrialAsync(string portalId, DocsCloudTrialCustomer customer)
     {
         EnsureConfigured();
@@ -432,6 +450,13 @@ public class DepositRequestDto : BillingPortalRequestDto
 
     /// <summary>Operation metadata serialized as a single JSON object string.</summary>
     public List<string> Metadata { get; set; }
+}
+
+/// <summary>Request to redeem a promo code for the portal.</summary>
+public class PromoCodeRequestDto : BillingPortalRequestDto
+{
+    public List<string> PromoCode { get; set; }
+    public List<string> CustomerParticipantName { get; set; }
 }
 
 /// <summary>Request to change (up/downgrade) the current subscription quantities.</summary>

@@ -933,6 +933,42 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Redeems a promo code for the portal and credits the bonus money it carries. Only a DocSpace administrator may
+    /// call it, and an installation without a billing service answers 403. The call changes the portal's money and is
+    /// not idempotent: whether a code may be redeemed more than once is up to the billing service, and a code it
+    /// refuses - unknown, used up or expired - fails with 400 without crediting anything. It is limited to ten requests
+    /// a minute per user by default, which keeps codes from being guessed. A redeemed code returns the bonus amount and
+    /// its currency; the money lands on the bonus balance, which `GET api/2.0/portal/payment/customer/goodwill` reads
+    /// together with the moment each bonus expires, while the money paid into the wallet is left as it was. The portal
+    /// clients are told over their socket connection that the balance changed. When the billing service cannot be
+    /// reached or does not know the portal yet, the call fails with 402; a request that timed out may still have
+    /// credited the bonus, so read the bonus balance before trying the same code again.
+    /// </remarks>
+    /// <summary>
+    /// Redeem a promo code
+    /// </summary>
+    /// <path>api/2.0/portal/payment/promoCode</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The bonus amount the code credited and its currency", typeof(PromoCodeDto))]
+    [SwaggerResponse(400, "`promoCode` is empty or longer than 100 characters, or the billing service refused the code")]
+    [SwaggerResponse(402, "The billing service could not be reached or does not know this portal yet")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [HttpPost("promoCode")]
+    [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
+    public async Task<PromoCodeDto> ApplyPromoCode(ApplyPromoCodeRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var result = await paymentHelper.ApplyPromoCodeAsync(tenant.Id, inDto.PromoCode, securityContext.CurrentAccount.ID.ToString());
+
+        return result.Map();
+    }
+
+    /// <remarks>
     /// Returns the money the portal has in its wallet as the accounting service holds it: the account with its own
     /// currency, one sub-account per currency with the amount on it, and the most recent credit movement. Only a
     /// DocSpace administrator may read it, an installation without a billing service answers 403, and a portal that

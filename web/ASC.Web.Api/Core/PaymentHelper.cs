@@ -378,6 +378,34 @@ public class PaymentHelper(
         return transfer;
     }
 
+    /// <summary>
+    /// Redeems a promo code for the portal, records it in the audit trail and tells the portal clients that the
+    /// balance changed.
+    /// </summary>
+    /// <exception cref="ArgumentException">The billing service refused the code.</exception>
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string customerParticipantName)
+    {
+        PromoCodeResult result;
+
+        try
+        {
+            result = await tariffService.ApplyPromoCodeAsync(tenantId, promoCode, customerParticipantName);
+        }
+        // TODO: until the billing service defines its answer for a refused code, every error answer about the code
+        // is taken for one. No answer at all, or a portal the billing service does not know, stays a billing failure.
+        catch (BillingException e) when (e is not (BillingTransportException or BillingNotFoundException or BillingNotConfiguredException))
+        {
+            throw new ArgumentException("The promo code is not valid", nameof(promoCode), e);
+        }
+
+        // The code itself stays out of the audit trail: anyone who reads the trail could redeem a reusable one.
+        messageService.Send(MessageAction.CustomerPromoCodeApplied, $"{result.Amount} {result.Currency?.ToUpperInvariant()}");
+
+        await quotaSocketManager.TopUpWallet(false);
+
+        return result;
+    }
+
     public async Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, string toProductName)
     {
         var result = await tariffService.SwitchSubscriptionAsync(tenantId, fromProductId, toProductId, quantity, customerParticipantName);

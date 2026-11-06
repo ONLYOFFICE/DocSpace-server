@@ -485,6 +485,14 @@ public class TariffService(
         return result;
     }
 
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string customerParticipantName)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var result = await billingClient.ApplyPromoCodeAsync(portalId, promoCode, customerParticipantName);
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return result;
+    }
+
     public async Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         if (!billingClient.Configured)

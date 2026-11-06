@@ -232,6 +232,25 @@ public class TopUpDepositRequestDto
 }
 
 /// <summary>
+/// The promo code to redeem for the portal.
+/// </summary>
+public class ApplyPromoCodeRequestDto
+{
+    /// <summary>
+    /// The promo code as it was handed out, sent to the billing service unchanged apart from surrounding whitespace.
+    /// Whether letter case matters is up to the billing service.
+    /// </summary>
+    /// <example>WELCOME2026</example>
+    [Required]
+    [StringLength(100)]
+    public string PromoCode
+    {
+        get;
+        set => field = value?.Trim();
+    }
+}
+
+/// <summary>
 /// Which wallet service is looked up in the billing catalogue.
 /// </summary>
 public class GetWalletServiceRequestDto

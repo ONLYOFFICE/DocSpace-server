@@ -109,6 +109,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.BannerSettingsChanged, MessageAction.CustomerWalletServicesSettingsUpdated,
                     MessageAction.CustomerServiceLimitUpdated, MessageAction.CustomerServiceLimitsSet, MessageAction.CustomerServiceLimitsDisabled,
                     MessageAction.SubscriptionBalanceMovedToWallet,
+                    MessageAction.CustomerPromoCodeApplied,
                     MessageAction.AIProviderUpdated,
                     MessageAction.AIDefaultProviderSet,
                     MessageAction.ServerUpdated,

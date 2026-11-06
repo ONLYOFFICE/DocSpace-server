@@ -309,6 +309,9 @@
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
     <value>Subscription balance moved to wallet: {0}</value>
   </data>
+  <data name="CustomerPromoCodeApplied" xml:space="preserve">
+    <value>Promo code applied: {0}</value>
+  </data>
   <data name="CustomNavigationSettingsUpdated" xml:space="preserve">
     <value>Custom Navigation Settings Updated</value>
   </data>

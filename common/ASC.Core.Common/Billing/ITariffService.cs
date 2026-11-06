@@ -48,6 +48,12 @@ public interface ITariffService
     Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency);
     Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(int tenantId, string productId);
     Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId);
+
+    /// <summary>
+    /// Redeems a promo code for the portal and drops the cached balance, so the next read shows the bonus. Failures
+    /// are not caught: a code the billing service refuses comes back as a <see cref="BillingException"/>.
+    /// </summary>
+    Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string customerParticipantName);
     Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity);
     Task<bool> GetDocsCloudTrialAsync(int tenantId, DocsCloudTrialCustomer customer);

@@ -565,6 +565,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Promo code applied: {0}.
+        /// </summary>
+        public static string CustomerPromoCodeApplied {
+            get {
+                return ResourceManager.GetString("CustomerPromoCodeApplied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Service spending limit created: {0}, {1}.
         /// </summary>
         public static string CustomerServiceLimitCreated {
