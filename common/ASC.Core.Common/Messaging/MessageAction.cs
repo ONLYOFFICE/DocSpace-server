@@ -656,6 +656,11 @@ public enum MessageAction
     /// </summary>
     FileKeysSet = 5164,
 
+    /// <summary>
+    /// File keys of those who left a private room removed
+    /// </summary>
+    RoomFileKeysRevoked = 5165,
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 

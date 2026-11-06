@@ -760,6 +760,23 @@ export type Res_aiMetaGenerate = {
   }[];
 };
 
+/* --------------------- Custom routes (skills) ------------------------- */
+
+export type Req_aiSkillsGenerate = {
+  /** The integer id of the Instructions room the skill is written for. */
+  destId: string | number;
+  /** The skill's title, at most 64 characters; its kebab-case form is the skill's name. */
+  title: string;
+  /** What the skill should do, at most 2000 characters; a specification for the model. */
+  description: string;
+};
+export type Res_aiSkillsGenerate = {
+  /** The skill's name as written in the frontmatter; the file is saved as `<name>.md`. */
+  name: string;
+  /** The whole Markdown file, frontmatter included. Nothing is saved. */
+  content: string;
+};
+
 export type Req_aiMetaFill = {
   /** The entry's table. Only `file` for now: a folder or a room answers 400. */
   kind: "file";

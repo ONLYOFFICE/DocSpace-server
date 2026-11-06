@@ -242,7 +242,8 @@ public class PrivateRoomEditorTests(AspireAppFixture fixture) : PrivacyRoomTestB
     {
         // The browser downloads an encrypted file, so the address must not be rewritten for the document server the way an open one is.
         var (room, fileId) = await CreateRoomWithEncryptedFile();
-        var plainId = (await CreateFile("Plain.docx", room.Id)).Id;
+        var plainId = await UploadEncryptedFile(room.Id, "Plain.docx");
+        await MakeFileOpen(plainId);
 
         var encrypted = (await _filesApi.OpenEditFileAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response.Document.Url;
         var plain = (await _filesApi.OpenEditFileAsync(plainId, cancellationToken: TestContext.Current.CancellationToken)).Response.Document.Url;
@@ -261,7 +262,7 @@ public class PrivateRoomEditorTests(AspireAppFixture fixture) : PrivacyRoomTestB
 
         using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 
-        document.RootElement.GetProperty("response").GetProperty("docServiceEncryptionSupported").ValueKind
-            .Should().BeOneOf(JsonValueKind.True, JsonValueKind.False);
+        // the test stack assumes the support (files:docservice:encryption-assume-supported)
+        document.RootElement.GetProperty("response").GetProperty("docServiceEncryptionSupported").GetBoolean().Should().BeTrue();
     }
 }

@@ -1105,6 +1105,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Private room.
+        /// </summary>
+        public static string PrivateRoomTitle {
+            get {
+                return ResourceManager.GetString("PrivateRoomTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to File keys issued for &quot;{0}&quot; to: {1}.
         /// </summary>
         public static string FileKeysSet {
@@ -2697,6 +2706,15 @@ namespace ASC.AuditTrail {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to File keys in the room &quot;{0}&quot; removed for: {1}.
+        /// </summary>
+        public static string RoomFileKeysRevoked {
+            get {
+                return ResourceManager.GetString("RoomFileKeysRevoked", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Added group: {0}. Role: {1}.
         /// </summary>

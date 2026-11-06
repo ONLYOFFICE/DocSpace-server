@@ -207,6 +207,11 @@ public class FilesMessageService(
             RootFolderTitle = rootFolderTitle
         };
 
+        if (IsInPrivateRoom(from, fromParents) || IsInPrivateRoom(to, toParents))
+        {
+            eventDescriptionTo.PrivateTitles = eventDescriptionFrom.PrivateTitles = GetPrivateTitles(target, [.. fromParents, from, .. toParents, to]);
+        }
+
         var crossEvent = true;
 
         if (from.RootFolderType == FolderType.VirtualRooms && to.RootFolderType == FolderType.VirtualRooms)
@@ -381,6 +386,11 @@ public class FilesMessageService(
 
         var desc = GetEventDescription(action, oldTitle, userid, userRole, room?.Id ?? -1, room?.Title, room is { FolderType: FolderType.AiRoom }, entry.CreateBy);
 
+        if (room is { SettingsPrivate: true })
+        {
+            desc.PrivateTitles = GetPrivateTitles(entry, parents, oldTitle);
+        }
+
         if (!HistoryService.TrackedActions.Contains(action))
         {
             return new FileEntryData(JsonSerializer.Serialize(desc, _serializerOptions), null);
@@ -475,6 +485,20 @@ public class FilesMessageService(
         return desc;
     }
 
+    /// <summary>
+    /// The folders on the way to the entry and the entry itself when it is a folder. The name of a file is not on the
+    /// list: in a private room it is a generated one and says nothing.
+    /// </summary>
+    private static List<string> GetPrivateTitles(FileEntry<int> entry, IEnumerable<Folder<int>> parents, string oldTitle = null)
+    {
+        return parents.Where(x => !x.IsRoot).Select(x => x.Title)
+            .Append(entry is Folder<int> ? entry.Title : null)
+            .Append(oldTitle)
+            .Where(title => !string.IsNullOrEmpty(title))
+            .Distinct()
+            .ToList();
+    }
+
     private static string[] Append(string[] description, string value)
     {
         var newArray = new string[description.Length + 1];
@@ -492,6 +516,11 @@ public class FilesMessageService(
             FolderType.TRASH => FilesUCResource.Trash,
             _ => null
         };
+    }
+
+    private static bool IsInPrivateRoom(Folder<int> folder, List<Folder<int>> parents)
+    {
+        return (folder.IsRoom ? folder : parents.Find(x => x.IsRoom)) is { SettingsPrivate: true };
     }
 
     private static Folder<T> FindRoom<T>(Folder<T> folder, List<Folder<T>> parents)

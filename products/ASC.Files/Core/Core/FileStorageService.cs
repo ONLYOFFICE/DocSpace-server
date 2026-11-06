@@ -109,6 +109,7 @@ public class FileStorageService //: IFileStorageService
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
     EncryptionLoginProvider encryptionLoginProvider,
+    DocumentServiceEncryptionChecker documentServiceEncryptionChecker,
     AiAccessibility aiAccessibility)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
@@ -716,8 +717,26 @@ public class FileStorageService //: IFileStorageService
         });
     }
 
+    /// <summary>The creator needs a key to wrap the keys of the files with, and the editors have to be able to open them.</summary>
+    private async Task DemandPrivateRoomCanBeCreatedAsync()
+    {
+        await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
+
+        if (!await documentServiceEncryptionChecker.IsSupportedAsync())
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_DocServiceEncryptionNotSupported);
+        }
+    }
+
     public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
     {
+        // A connected storage has nowhere to keep the keys of its files, and its string ids do not fit the wrapping of
+        // those keys on the client, so nobody could ever open what is put into such a room.
+        if (privacy)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomOnThirdPartyNotSupported);
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var folderDao = daoFactory.GetFolderDao<string>();
@@ -1199,7 +1218,7 @@ public class FileStorageService //: IFileStorageService
 
         if (isRoom && privacy)
         {
-            await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
+            await DemandPrivateRoomCanBeCreatedAsync();
 
             // Indexing and a watermark need the content in the clear, which the server does not have,
             // and a lifetime would have it delete encrypted files on its own.
@@ -3960,6 +3979,8 @@ public class FileStorageService //: IFileStorageService
 
         _logger.InformationDeletePersonalData(userFromId);
 
+        await fileDao.DeleteFileKeysAsync(userFromId);
+
         var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userFromId);
         var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userFromId);
 
@@ -4588,7 +4609,7 @@ public class FileStorageService //: IFileStorageService
 
                                                 var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
                                                 var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.SettingsPrivate ? null : folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
                                             }
                                             break;
                                     }
@@ -4683,8 +4704,10 @@ public class FileStorageService //: IFileStorageService
         async Task RemoveSharesAsync(FileEntry<T> entry)
         {
             // Revoking someone else's rights requires the same permission as granting them;
-            // a portal admin may always clean up.
-            if (await fileSharingHelper.CanSetAccessAsync(entry) || await global.IsDocSpaceAdministratorAsync)
+            // a portal admin may always clean up, except in a private room, which answers to its members alone.
+            var inPrivateRoom = entry is Folder<T> { IsRoom: true, SettingsPrivate: true } || await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, daoFactory.GetCacheFolderDao<T>());
+
+            if (await fileSharingHelper.CanSetAccessAsync(entry) || (!inPrivateRoom && await global.IsDocSpaceAdministratorAsync))
             {
                 // The entry owner's record stays: revoking it would delete the entry from its owner's list.
                 var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
@@ -4698,6 +4721,12 @@ public class FileStorageService //: IFileStorageService
                 foreach (var subject in subjects)
                 {
                     await fileSecurity.ShareAsync(entry.Id, entry.FileEntryType, subject, FileShare.None);
+                }
+
+                if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+                {
+                    // the caller's own keys go with the call below
+                    await fileSharingAceHelper.RevokeFileKeysAsync(privateRoom, subjects.Where(s => s != authContext.CurrentAccount.ID).ToList());
                 }
 
                 // keep the caller's own list-cleanup semantics (favorites / recent / new-marks)

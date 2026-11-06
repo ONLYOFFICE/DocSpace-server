@@ -108,6 +108,25 @@ public abstract class PortalClientsBase : IDisposable
         return _context.BaseAddresses[resourceName].ToString().TrimEnd('/');
     }
 
+    /// <summary>
+    /// Connects a Socket.IO client to this portal as <paramref name="user"/>, the way that user's browser would be.
+    /// The caller disposes it.
+    /// </summary>
+    public async Task<PortalSocket> ConnectSocketAsync(User user, CancellationToken cancellationToken)
+    {
+        if (user.Token is null)
+        {
+            // Only for the token it caches on the user: whoever this client was signed in as stays signed in.
+            var signedIn = WebApiHttpClient.DefaultRequestHeaders.Authorization;
+
+            await WebApiHttpClient.Authenticate(user);
+
+            WebApiHttpClient.DefaultRequestHeaders.Authorization = signedIn;
+        }
+
+        return await PortalSocket.ConnectAsync(PortalName, user.Token, cancellationToken);
+    }
+
     private HttpClient NewHttpClient(string resourceName)
     {
         if (!_context.BaseAddresses.TryGetValue(resourceName, out var baseAddress))

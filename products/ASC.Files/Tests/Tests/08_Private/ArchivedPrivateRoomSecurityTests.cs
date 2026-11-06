@@ -50,7 +50,7 @@ public class ArchivedPrivateRoomSecurityTests(AspireAppFixture fixture) : Privac
 
         var room = await CreatePrivateRoom("Autotest Privacy Room", RoomType.CustomRoom);
         var subfolder = (await _foldersApi.CreateFolderAsync(room.Id, new CreateFolder("Subfolder"), TestContext.Current.CancellationToken)).Response;
-        var file = await CreateFile("Encrypted.docx", room.Id);
+        var file = await UploadEncryptedFileInfo(room.Id, "Encrypted.docx");
 
         if (beforeArchive != null)
         {

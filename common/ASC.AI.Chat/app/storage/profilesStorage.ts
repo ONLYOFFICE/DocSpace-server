@@ -156,6 +156,13 @@ export function dtoToProfile(raw: unknown): DocspaceProfile | undefined {
   if (isCloudProvider !== undefined) {
     profile.isCloudProvider = isCloudProvider;
   }
+  // Not a C# column today: the gateway's model is looked up by id in the
+  // library's own table when the field is absent. Read anyway, so a DTO
+  // that grows the field feeds the engine's compaction without a change here.
+  const contextWindow = getNumber(raw, "contextWindow");
+  if (contextWindow !== undefined && contextWindow > 0) {
+    profile.contextWindow = contextWindow;
+  }
   return profile;
 }
 
@@ -433,6 +440,13 @@ function mapGatewayModel(raw: unknown): Model | undefined {
   if (reasoningSupport !== undefined) {
     model.reasoningSupport = reasoningSupport;
     model.reasoning = reasoningSupport.thinks;
+  }
+  // OpenRouter's field, which the gateway proxies; the profile editor copies
+  // it onto the profile so the engine measures a thread against the real
+  // window instead of the library's id-based table.
+  const contextWindow = getNumber(raw, "context_length");
+  if (contextWindow !== undefined && contextWindow > 0) {
+    model.contextWindow = contextWindow;
   }
   return model;
 }

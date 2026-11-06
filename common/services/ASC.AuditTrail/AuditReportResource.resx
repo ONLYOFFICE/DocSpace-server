@@ -309,6 +309,9 @@
   <data name="FileKeysSet" xml:space="preserve">
     <value>File keys issued for "{0}" to: {1}</value>
   </data>
+  <data name="RoomFileKeysRevoked" xml:space="preserve">
+    <value>File keys in the room "{0}" removed for: {1}</value>
+  </data>
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
     <value>Subscription balance moved to wallet: {0}</value>
   </data>
@@ -965,6 +968,9 @@
   </data>
   <data name="RoomRenamed" xml:space="preserve">
     <value>Room renamed: {0}</value>
+  </data>
+  <data name="PrivateRoomTitle" xml:space="preserve">
+    <value>Private room</value>
   </data>
   <data name="RoomsModule" xml:space="preserve">
     <value>Rooms</value>
