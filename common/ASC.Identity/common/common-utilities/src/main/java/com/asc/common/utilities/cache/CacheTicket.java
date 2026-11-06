@@ -43,5 +43,18 @@ package com.asc.common.utilities.cache;
  * @param version the version of the entry in the shared tier, or {@code null} where there is no
  *     shared tier or its version could not be read; a ticket without a version never writes to the
  *     shared tier.
+ * @param evictions the count of tenant-wide and cache-wide evictions in the shared tier, or {@code
+ *     null} where there is none or it could not be read. A fill cannot tell which tenant it reads
+ *     until it has read, so any such eviction in between stops it.
  */
-public record CacheTicket(long generation, Long version) {}
+public record CacheTicket(long generation, Long version, Long evictions) {
+  /**
+   * A ticket for a cache without a shared tier, or one whose shared tier could not be read.
+   *
+   * @param generation the invalidation generation of this instance's memory tier.
+   * @param version the version of the entry in the shared tier, if any.
+   */
+  public CacheTicket(long generation, Long version) {
+    this(generation, version, null);
+  }
+}

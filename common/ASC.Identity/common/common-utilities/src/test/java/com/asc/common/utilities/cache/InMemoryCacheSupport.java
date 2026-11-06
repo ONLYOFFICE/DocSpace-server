@@ -95,11 +95,34 @@ final class InMemoryCacheSupport {
 
   static class Redis extends RedisTemplate<String, Object> {
     final Map<String, String> data = new ConcurrentHashMap<>();
+    final Map<String, Long> expiresAt = new ConcurrentHashMap<>();
     final List<String> writes = new ArrayList<>();
     Runnable beforeScript = () -> {};
+    private long nowMillis;
 
     Redis() {
       setValueSerializer(RedisSerializer.string());
+    }
+
+    void advance(Duration duration) {
+      nowMillis += duration.toMillis();
+      expiresAt.forEach(
+          (key, at) -> {
+            if (at <= nowMillis) {
+              data.remove(key);
+              expiresAt.remove(key);
+            }
+          });
+    }
+
+    private void expire(String key, Object ttlMillis) {
+      expiresAt.put(key, nowMillis + Long.parseLong(text(ttlMillis)));
+    }
+
+    private long increment(String key) {
+      var next = Long.parseLong(data.getOrDefault(key, "0")) + 1;
+      data.put(key, String.valueOf(next));
+      return next;
     }
 
     @Override
@@ -130,24 +153,33 @@ final class InMemoryCacheSupport {
 
       var value = keys.get(0);
       var version = keys.get(1);
-      var current = data.getOrDefault(version, "0");
-      Long result;
+      var evictions = keys.get(2);
+      Object result;
       if (script == CompositeCache.READ_VERSION) {
-        result = Long.parseLong(current);
+        result =
+            List.of(
+                Long.parseLong(data.getOrDefault(version, "0")),
+                Long.parseLong(data.getOrDefault(evictions, "0")));
       } else if (script == CompositeCache.EVICT) {
-        data.put(version, String.valueOf(Long.parseLong(current) + 1));
+        result = increment(version);
+        expire(version, args[0]);
         data.remove(value);
-        result = Long.parseLong(data.get(version));
+      } else if (script == CompositeCache.EVICT_MANY) {
+        result = increment(evictions);
+        expire(evictions, args[0]);
       } else if (script == CompositeCache.WRITE) {
-        data.put(version, String.valueOf(Long.parseLong(current) + 1));
+        result = increment(version);
+        expire(version, args[2]);
         data.put(value, text(args[0]));
+        expire(value, args[1]);
         writes.add(text(args[0]));
-        result = Long.parseLong(data.get(version));
       } else if (script == CompositeCache.WRITE_IF_VERSION) {
-        if (!current.equals(text(args[2]))) {
+        if (!data.getOrDefault(version, "0").equals(text(args[2]))
+            || !data.getOrDefault(evictions, "0").equals(text(args[3]))) {
           result = 0L;
         } else {
           data.put(value, text(args[0]));
+          expire(value, args[1]);
           writes.add(text(args[0]));
           result = 1L;
         }

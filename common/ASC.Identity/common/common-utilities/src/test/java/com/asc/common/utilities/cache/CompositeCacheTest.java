@@ -35,9 +35,11 @@ package com.asc.common.utilities.cache;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.asc.common.utilities.cache.bus.CacheInvalidationBus;
+import java.time.Duration;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +56,14 @@ class CompositeCacheTest {
         CacheNamespaceRegistry registry,
         RedisTemplate<String, Object> redisTemplate) {
       super("test:client", bus, registry, redisTemplate);
+    }
+
+    StringCache(
+        CacheInvalidationBus bus,
+        CacheNamespaceRegistry registry,
+        RedisTemplate<String, Object> redisTemplate,
+        Duration ttl) {
+      super("test:client", bus, registry, redisTemplate, ttl);
     }
 
     @Override
@@ -88,11 +98,23 @@ class CompositeCacheTest {
     void evict() {
       remove(ID);
     }
+
+    void evictTenant() {
+      removeTenant(TENANT);
+    }
   }
 
   private InMemoryCacheSupport.Redis redis;
   private StringCache cacheA;
   private StringCache cacheB;
+
+  private static void await(Duration duration) {
+    try {
+      Thread.sleep(duration);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+    }
+  }
 
   @BeforeEach
   void setUp() {
@@ -163,5 +185,63 @@ class CompositeCacheTest {
     cacheA.cache("value", new CacheTicket(cacheA.ticket(ID).generation(), null));
 
     assertTrue(redis.writes.isEmpty());
+  }
+
+  @Test
+  void givenTenantEvictionWhoseBroadcastLost_whenCachingReadValue_thenNothingWritten() {
+    var store = new InMemoryCacheSupport.CounterStore();
+    var registryA = new CacheNamespaceRegistry(store, "test:ver");
+    var instanceA = new StringCache(new InMemoryCacheSupport.Bus(), registryA, redis);
+    var instanceB =
+        new StringCache(
+            new InMemoryCacheSupport.Bus(), new CacheNamespaceRegistry(store, "test:ver"), redis);
+    var ticket = instanceA.ticket(ID);
+
+    instanceB.evictTenant();
+    registryA.forgetAll();
+    instanceA.cache("deleted", ticket);
+
+    assertTrue(redis.writes.isEmpty());
+    assertTrue(instanceA.readValue().isEmpty());
+  }
+
+  @Test
+  void givenEvictionWhoseVersionWouldOutliveEntry_whenCachingReadValue_thenRedisRefuses() {
+    var ticket = cacheA.ticket(ID);
+    cacheB.evict();
+
+    redis.advance(Duration.ofMinutes(5));
+    cacheA.cache("stale", ticket);
+
+    assertTrue(redis.writes.isEmpty());
+  }
+
+  @Test
+  void givenNoPositiveLifetime_whenCreatingCache_thenRefused() {
+    var registry = new CacheNamespaceRegistry(new InMemoryCacheSupport.CounterStore(), "test:ver");
+    var bus = new InMemoryCacheSupport.Bus();
+
+    assertThrows(
+        IllegalArgumentException.class, () -> new StringCache(bus, registry, redis, Duration.ZERO));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> new StringCache(bus, registry, redis, Duration.ofSeconds(-1)));
+  }
+
+  @Test
+  void givenLifetimeShorterThanInstanceTier_whenCached_thenInstanceTierExpires() {
+    var shortLived =
+        new StringCache(
+            new InMemoryCacheSupport.Bus(),
+            new CacheNamespaceRegistry(new InMemoryCacheSupport.CounterStore(), "test:ver"),
+            redis,
+            Duration.ofMillis(50));
+
+    shortLived.put("value");
+    redis.data.clear();
+
+    assertEquals(Optional.of("value"), shortLived.readValue());
+    await(Duration.ofMillis(200));
+    assertTrue(shortLived.readValue().isEmpty());
   }
 }

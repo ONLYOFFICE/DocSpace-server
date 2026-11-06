@@ -54,11 +54,15 @@ import org.springframework.data.redis.serializer.RedisSerializer;
  * keyspace. Evicting one entry removes it from Redis, moves its version on, and broadcasts the
  * eviction so that every instance drops its own copy. The version, kept next to the entry, lets a
  * value read from the source after a cache miss be stored only if no eviction or write came first
- * (see {@link #writeUnlessInvalidated}).
+ * (see {@link #writeUnlessInvalidated}). Evicting a tenant or the whole cache also moves a counter
+ * of such evictions on, which a fill checks the same way: it cannot tell which tenant it reads
+ * until it has read, so any of them in between stops it.
  *
  * <p>Reads try the instance tier first and fall back to Redis, promoting what they find there.
  * Writes go to both tiers. The instance tier expires far sooner than Redis, which bounds how long
- * an instance that missed a broadcast can keep serving a stale value.
+ * an instance that missed a broadcast can keep serving a stale value. An entry whose eviction was
+ * lost is served for at most the Redis lifetime plus the instance tier's, as an instance may have
+ * promoted it just before it expired in Redis.
  *
  * <p>Subclasses decide which tenant owns a value and how it is stored in Redis.
  *
@@ -71,12 +75,20 @@ public abstract class CompositeCache<V> {
   private static final int MEMORY_MAX_SIZE = 10_000;
   private static final Duration DEFAULT_REDIS_EXPIRE_AFTER_WRITE = Duration.ofMinutes(3);
   private static final Duration MEMORY_EXPIRE_AFTER_WRITE = Duration.ofSeconds(10);
+  private static final Duration MIN_VERSION_EXPIRE = Duration.ofHours(1);
+
   private static final String VERSION_SUFFIX = ":version";
+  private static final String EVICTIONS_SUFFIX = "::evictions";
   private static final RedisSerializer<Long> VERSION_SERIALIZER =
       new GenericToStringSerializer<>(Long.class);
 
-  static final RedisScript<Long> READ_VERSION =
-      RedisScript.of("return tonumber(redis.call('GET', KEYS[2]) or '0')", Long.class);
+  @SuppressWarnings("rawtypes")
+  static final RedisScript<List> READ_VERSION =
+      RedisScript.of(
+          """
+          return {tonumber(redis.call('GET', KEYS[2]) or '0'),
+                  tonumber(redis.call('GET', KEYS[3]) or '0')}""",
+          List.class);
 
   static final RedisScript<Long> EVICT =
       RedisScript.of(
@@ -87,11 +99,19 @@ public abstract class CompositeCache<V> {
           return version""",
           Long.class);
 
+  static final RedisScript<Long> EVICT_MANY =
+      RedisScript.of(
+          """
+          local evictions = redis.call('INCR', KEYS[3])
+          redis.call('PEXPIRE', KEYS[3], ARGV[1])
+          return evictions""",
+          Long.class);
+
   static final RedisScript<Long> WRITE =
       RedisScript.of(
           """
           local version = redis.call('INCR', KEYS[2])
-          redis.call('PEXPIRE', KEYS[2], ARGV[2])
+          redis.call('PEXPIRE', KEYS[2], ARGV[3])
           redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2])
           return version""",
           Long.class);
@@ -100,6 +120,7 @@ public abstract class CompositeCache<V> {
       RedisScript.of(
           """
           if (redis.call('GET', KEYS[2]) or '0') ~= ARGV[3] then return 0 end
+          if (redis.call('GET', KEYS[3]) or '0') ~= ARGV[4] then return 0 end
           redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2])
           return 1""",
           Long.class);
@@ -139,7 +160,9 @@ public abstract class CompositeCache<V> {
    * @param registry the registry resolving per-tenant namespaces.
    * @param redisTemplate the Redis template storing the entries.
    * @param redisExpireAfterWrite how long a Redis entry lives after it was written; it bounds how
-   *     long a value whose eviction was lost can be served.
+   *     long a value whose eviction was lost can be served. It must be positive; the instance tier
+   *     keeps entries for no longer than this either.
+   * @throws IllegalArgumentException if {@code redisExpireAfterWrite} is not positive
    */
   protected CompositeCache(
       String keyPrefix,
@@ -147,11 +170,22 @@ public abstract class CompositeCache<V> {
       CacheNamespaceRegistry registry,
       RedisTemplate<String, Object> redisTemplate,
       Duration redisExpireAfterWrite) {
+    if (redisExpireAfterWrite == null
+        || redisExpireAfterWrite.isZero()
+        || redisExpireAfterWrite.isNegative())
+      throw new IllegalArgumentException(
+          "The cache under %s needs a positive lifetime, got %s"
+              .formatted(keyPrefix, redisExpireAfterWrite));
+
     this.keyPrefix = keyPrefix;
     this.redisTemplate = redisTemplate;
     this.redisExpireAfterWrite = redisExpireAfterWrite;
     this.registry = registry;
-    this.memoryCache = new MemoryCache<>(registry, bus, MEMORY_MAX_SIZE, MEMORY_EXPIRE_AFTER_WRITE);
+    var memoryExpireAfterWrite =
+        redisExpireAfterWrite.compareTo(MEMORY_EXPIRE_AFTER_WRITE) < 0
+            ? redisExpireAfterWrite
+            : MEMORY_EXPIRE_AFTER_WRITE;
+    this.memoryCache = new MemoryCache<>(registry, bus, MEMORY_MAX_SIZE, memoryExpireAfterWrite);
   }
 
   /**
@@ -188,22 +222,46 @@ public abstract class CompositeCache<V> {
     return String.valueOf(redisExpireAfterWrite.toMillis());
   }
 
+  private String versionTtlMillis() {
+    return String.valueOf(
+        Math.max(redisExpireAfterWrite.toMillis(), MIN_VERSION_EXPIRE.toMillis()));
+  }
+
   private static byte[] raw(Object arg) {
     return arg instanceof byte[] bytes
         ? bytes
         : String.valueOf(arg).getBytes(StandardCharsets.UTF_8);
   }
 
-  private Long runScript(RedisScript<Long> script, String id, Object... args) {
+  /** Runs a script over the entry of {@code id}, its version and the eviction counter. */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  private <T> T runScript(RedisScript<T> script, String id, Object... args) {
     var rawArgs = new Object[args.length];
     for (var i = 0; i < args.length; i++) rawArgs[i] = raw(args[i]);
 
-    return redisTemplate.execute(
-        script,
-        RedisSerializer.byteArray(),
-        VERSION_SERIALIZER,
-        List.of(buildCacheKey(id), buildCacheKey(id) + VERSION_SUFFIX),
-        rawArgs);
+    return (T)
+        redisTemplate.execute(
+            (RedisScript) script,
+            RedisSerializer.byteArray(),
+            (RedisSerializer) VERSION_SERIALIZER,
+            List.of(
+                buildCacheKey(id),
+                buildCacheKey(id) + VERSION_SUFFIX,
+                keyPrefix + EVICTIONS_SUFFIX),
+            rawArgs);
+  }
+
+  /**
+   * Moves the eviction counter on, so that fills already under way do not store what they read.
+   * Fills on every instance of the region see it, whether or not the eviction broadcast reaches
+   * them.
+   */
+  private void countEviction() {
+    try {
+      runScript(EVICT_MANY, "", versionTtlMillis());
+    } catch (Exception e) {
+      log.error("Failed to count an eviction under prefix: {}", keyPrefix, e);
+    }
   }
 
   /**
@@ -263,7 +321,9 @@ public abstract class CompositeCache<V> {
   private void store(String id, V value, CacheTicket ticket) {
     var key = buildCacheKey(id);
     if (ticket != null
-        && (ticket.version() == null || memoryCache.generation() != ticket.generation())) {
+        && (ticket.version() == null
+            || ticket.evictions() == null
+            || memoryCache.generation() != ticket.generation())) {
       log.info("Skipped caching key: {} because it was invalidated while being read", key);
       return;
     }
@@ -285,10 +345,13 @@ public abstract class CompositeCache<V> {
       var serializer = (RedisSerializer<Object>) redisTemplate.getValueSerializer();
       var stored = serializer.serialize(toStored(namespace, value));
       if (ticket == null) {
-        runScript(WRITE, id, stored, ttlMillis());
+        runScript(WRITE, id, stored, ttlMillis(), versionTtlMillis());
         memoryCache.put(key, tenantId, namespace, value);
       } else {
-        if (runScript(WRITE_IF_VERSION, id, stored, ttlMillis(), ticket.version()) == 0) {
+        Long written =
+            runScript(
+                WRITE_IF_VERSION, id, stored, ttlMillis(), ticket.version(), ticket.evictions());
+        if (written == null || written == 0) {
           log.info("Skipped caching key: {} because it was invalidated while being read", key);
           return;
         }
@@ -311,7 +374,7 @@ public abstract class CompositeCache<V> {
   protected void remove(String id) {
     var key = buildCacheKey(id);
     try {
-      runScript(EVICT, id, ttlMillis());
+      runScript(EVICT, id, versionTtlMillis());
       log.info("Evicted key: {}", key);
     } catch (Exception e) {
       log.error("Failed to evict key: {}", key, e);
@@ -327,20 +390,22 @@ public abstract class CompositeCache<V> {
    * @param tenantId the tenant whose values should be evicted.
    */
   protected void removeTenant(long tenantId) {
+    countEviction();
     memoryCache.invalidateTenant(tenantId);
     log.info("Evicted all cached entries of tenant: {} under prefix: {}", tenantId, keyPrefix);
   }
 
   /** Detaches every value by advancing the global namespace. */
   protected void removeAll() {
+    countEviction();
     memoryCache.invalidateAll();
     log.info("Evicted all cached entries under prefix: {}", keyPrefix);
   }
 
   /**
    * Takes the ticket a cache-miss fill hands to {@link #writeUnlessInvalidated}: the invalidation
-   * generation of this instance and the entry's version in Redis. Take it before reading the value
-   * from its source.
+   * generation of this instance, the entry's version in Redis and the eviction counter. Take it
+   * before reading the value from its source.
    *
    * @param id the id of the value about to be read.
    * @return the ticket; its version is {@code null} if Redis could not be read, and such a ticket
@@ -349,7 +414,11 @@ public abstract class CompositeCache<V> {
   public CacheTicket ticket(String id) {
     var generation = memoryCache.generation();
     try {
-      return new CacheTicket(generation, runScript(READ_VERSION, id));
+      List<?> versions = runScript(READ_VERSION, id);
+      return new CacheTicket(
+          generation,
+          ((Number) versions.get(0)).longValue(),
+          ((Number) versions.get(1)).longValue());
     } catch (Exception e) {
       log.warn("Failed to read the cache version of key: {}", buildCacheKey(id), e);
       return new CacheTicket(generation, null);
