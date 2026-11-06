@@ -108,7 +108,8 @@ public class FileStorageService //: IFileStorageService
     FormFillingReportCreator formFillingReportCreator,
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
-    EncryptionLoginProvider encryptionLoginProvider)
+    EncryptionLoginProvider encryptionLoginProvider,
+    DocumentServiceLicense documentServiceLicense)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
 
@@ -5923,6 +5924,12 @@ public class FileStorageService //: IFileStorageService
     public async Task SetEditorFieldRenamesAsync(int formId, int openedVersion, long sequence, string sessionId, List<FormFieldKeyChangeRequest> renames)
     {
         var form = await GetStartedFormAsync(formId);
+
+        // Community Edition editors cannot tell the fields of the open form.
+        if (await documentServiceLicense.IsFreeEditionAsync())
+        {
+            throw new InvalidOperationException();
+        }
 
         await formFillingReportCreator.SetEditorFieldRenamesAsync(form.Id, openedVersion, sequence, authContext.CurrentAccount.ID, sessionId, renames.Select(r => r.Map()).ToList());
     }

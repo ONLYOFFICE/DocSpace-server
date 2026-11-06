@@ -1207,8 +1207,9 @@ public abstract class FilesController<T>(
     /// `sessionId` all sessions of the user replace one another. When the editor saves the version, a renamed field keeps
     /// its earlier answers under its new name in the same table of the forms database and sheet of the spreadsheet
     /// report; a field that kept its key under another type or took another field's key gives the version a table of its
-    /// own. Nothing is asked of the user. A `version` the form does not have yet is ignored, and past 20 sessions of one
-    /// user on one version a new one is ignored too.
+    /// own. A `version` the form does not have yet is ignored, and past 20 sessions of one user on one version a new one
+    /// is ignored too. With Document Server Community Edition, which cannot tell the fields, the call is refused with 403
+    /// and the editor configuration has `trackFormFieldChanges` false.
     /// </remarks>
     /// <summary>
     /// Report renamed form fields
@@ -1217,7 +1218,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The renames were stored for the version the editor session is saved as")]
     [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, a key is empty or longer than 255 characters, or `sessionId` is longer than 64 characters or has other characters than letters, digits, hyphens and underscores")]
-    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, it is a copy of a form, or the caller may not start its filling")]
+    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, it is a copy of a form, the caller may not start its filling, or the document editors are Community Edition, which do not track renamed fields")]
     [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpPut("file/{fileId}/fieldchanges")]
     public Task SetFormFieldChanges(FormFieldChangesRequestDto inDto)

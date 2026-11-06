@@ -49,7 +49,8 @@ public class EditorControllerInternal(
     ConfigurationConverter<int> configurationConverter,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
-    EditorToolCallStateStore editorToolCallStateStore)
+    EditorToolCallStateStore editorToolCallStateStore,
+    DocumentServiceLicense documentServiceLicense)
     : EditorController<int>(
         fileStorageService,
         documentServiceHelper,
@@ -60,7 +61,8 @@ public class EditorControllerInternal(
         configurationConverter,
         securityContext,
         httpContextAccessor,
-        editorToolCallStateStore);
+        editorToolCallStateStore,
+        documentServiceLicense);
 
 [ApiEndpoint(Template = "file")]
 public class EditorControllerThirdparty(
@@ -73,7 +75,8 @@ public class EditorControllerThirdparty(
     ConfigurationConverter<string> configurationConverter,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
-    EditorToolCallStateStore editorToolCallStateStore)
+    EditorToolCallStateStore editorToolCallStateStore,
+    DocumentServiceLicense documentServiceLicense)
     : EditorController<string>(
         fileStorageService,
         documentServiceHelper,
@@ -84,7 +87,8 @@ public class EditorControllerThirdparty(
         configurationConverter,
         securityContext,
         httpContextAccessor,
-        editorToolCallStateStore);
+        editorToolCallStateStore,
+        documentServiceLicense);
 
 public abstract class EditorController<T>(
     FileStorageService fileStorageService,
@@ -96,7 +100,8 @@ public abstract class EditorController<T>(
         ConfigurationConverter<T> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor,
-        EditorToolCallStateStore editorToolCallStateStore)
+        EditorToolCallStateStore editorToolCallStateStore,
+        DocumentServiceLicense documentServiceLicense)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -360,6 +365,7 @@ public abstract class EditorController<T>(
                     result.StartFillingMode = rootFolder.FolderType == FolderType.FillingFormsRoom ? StartFillingMode.StartFillingFormRoom : StartFillingMode.ShareToFillOut;
                     result.StartFilling = formOpenSetup.CanStartFilling;
                     result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = rootFolder.FolderType == FolderType.FillingFormsRoom ? FilesCommonResource.StartFillingModeEnum_StartFilling : FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
+                    result.TrackFormFieldChanges = result.StartFillingMode == StartFillingMode.StartFillingFormRoom && !await documentServiceLicense.IsFreeEditionAsync();
                 }
             }
 
