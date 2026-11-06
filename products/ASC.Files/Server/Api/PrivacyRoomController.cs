@@ -48,16 +48,12 @@ public class PrivacyRoomControllerCommon(
     : ControllerBase
 {
     /// <remarks>
-    /// Stores a new encryption key pair for the calling user and answers with that user's whole key set. The material
-    /// is end-to-end: `publicKey` is the half other members use to encrypt file keys for this user, while
-    /// `privateKeyEnc` arrives already encrypted with the user's own password, so the portal keeps it as opaque text.
-    /// A member must hold at least one key before they can be invited to a private room, which makes this the first
-    /// call of the private-room flow. Every authenticated member manages their own keys and only their own, there is
-    /// no parameter for somebody else's, and a guest is refused, which is also why a guest cannot become a member of
-    /// a private room. The call is mutating and is not safe to repeat: `id` names the pair inside the caller's set
-    /// and an `id` that is already stored is answered with 409, while a request that omits or blanks either half is
-    /// rejected as invalid and stores nothing. A successful call answers 201 with every key the caller now holds. To
-    /// change the material of an existing pair use `PUT api/2.0/privacyroom/keys`.
+    /// Creates an encryption key pair for the calling user. A user needs at least one key before anyone can invite
+    /// them to a private room. Any signed-in user can call it, except a guest. A guest gets 403. The call changes data,
+    /// and a repeated call with the same `id` returns 409. It returns 201 with every key the caller now holds. Before
+    /// DocSpace 4.0, it returned 200 with the same body. To change an existing pair, use
+    /// `PUT api/2.0/privacyroom/keys`. The call returns 400 if the body is missing, `publicKey` or `privateKeyEnc` is
+    /// blank, or a key is too long. A malformed `id` also returns 400.
     /// </remarks>
     /// <summary>
     /// Create an encryption key
@@ -83,16 +79,14 @@ public class PrivacyRoomControllerCommon(
     }
 
     /// <remarks>
-    /// Rotates one encryption key pair of the calling user: the entry whose `id` matches is overwritten with the
-    /// submitted `publicKey` and `privateKeyEnc`, and the caller's other pairs are left untouched. The pair has to
-    /// exist already, an `id` that is not in the caller's set is answered with 404, and a first key is created with
-    /// `POST api/2.0/privacyroom/keys`. This is a full replacement rather than a merge: both halves are mandatory,
-    /// and a request that omits or blanks one of them is rejected as invalid with the stored pair surviving
-    /// unchanged, so a rotation that means to keep the private half has to send it again. Omitting `id` targets the
-    /// all-zero pair, the one a client that never sets an id keeps rotating. Every authenticated member rotates their
-    /// own keys and only their own, and a guest is refused. The call is mutating, and repeating it with the same body
-    /// leaves the same state. It answers with every key the caller holds afterwards, and from then on
-    /// `GET api/2.0/privacyroom/{roomId}/access` reports the new public half for this member.
+    /// Replaces the key material of one encryption key pair of the calling user. The call finds the pair by `id` and
+    /// leaves the other pairs unchanged. Without `id`, it replaces the pair with the all-zero `id`. The call replaces
+    /// both halves, so send the private half even when it does not change. Any signed-in user can call it, except a
+    /// guest. A guest gets 403. The call changes data, and you can repeat it with the same body. It returns every key
+    /// the caller holds after the change. After this call, `GET api/2.0/privacyroom/{roomId}/access` returns the new
+    /// public half. To create a pair, use `POST api/2.0/privacyroom/keys`. If the caller has no pair with this `id`,
+    /// the call returns 404. The call returns 400 if the body is missing, `publicKey` or `privateKeyEnc` is blank, or
+    /// a key is too long. A malformed `id` also returns 400. A 400 leaves the stored pair unchanged.
     /// </remarks>
     /// <summary>
     /// Rotate an encryption key
@@ -118,16 +112,12 @@ public class PrivacyRoomControllerCommon(
     }
 
     /// <remarks>
-    /// Returns every encryption key pair the calling user holds, the encrypted private half included, which is the
-    /// material a client needs in order to decrypt content in a private room. The set is personal and there is no
-    /// parameter for another user's keys: an authenticated caller reads only their own, and a guest, who cannot own
-    /// key material at all, always reads an empty set. The call is read-only. An empty answer, whether an empty list
-    /// or none at all, means no key has been created yet, and until `POST api/2.0/privacyroom/keys` creates one the
-    /// user cannot be invited to a private room. Each entry carries the pair's `id`, its owner in `userId`, the
-    /// moment the material was stored in `date`, the public half, the private half encrypted with the user's
-    /// password, and the portal-wide crypto engine in `cryptoEngineId`. For the keys that open a whole private room
-    /// use `GET api/2.0/privacyroom/{roomId}/access`, and for the keys a single file is shared with use
-    /// `GET api/2.0/files/file/{fileId}/publickeys`; this operation is about the caller alone.
+    /// Returns every encryption key pair of the calling user, including the encrypted private half. Any signed-in user
+    /// can call it. The call is read-only. If the caller has no key yet, the answer is an empty list or has no body. A
+    /// guest cannot create keys, so a guest always gets this empty answer. A user without a key cannot be invited to a
+    /// private room. To create a key, use `POST api/2.0/privacyroom/keys`. To get the keys of a private room, use
+    /// `GET api/2.0/privacyroom/{roomId}/access`. To get the keys of one file, use
+    /// `GET api/2.0/files/file/{fileId}/publickeys`.
     /// </remarks>
     /// <summary>
     /// Get own encryption keys
@@ -144,16 +134,13 @@ public class PrivacyRoomControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the encryption keys that give access to a private room: one entry per key held by each of its members,
-    /// which is what a client needs in order to encrypt a file key for everyone allowed to open the room's content.
-    /// Only the caller's own entries carry `privateKeyEnc`; another member's entry carries the public half alone, and
-    /// an entry with no public half is not reported as access at all. The room has to be a private one, a room
-    /// created without private mode holds no access keys and the call is refused, and it has to still exist: an
-    /// unknown room, or one already moved to Trash, is reported as missing, while an archived private room still
-    /// answers. Access follows room membership and not portal role: any member from read access upwards receives the
-    /// full set, whereas a DocSpace administrator who is not a member is refused, and so is a caller holding no key
-    /// of their own, the room creator included once they delete their last key. The call is read-only. For the keys
-    /// of a single file use `GET api/2.0/files/file/{fileId}/publickeys`.
+    /// Returns the encryption keys of all members of a private room, one entry per key. An app uses them to encrypt a
+    /// file key for every member. Requires membership in the room, with any access level, and a key of the caller's
+    /// own. Other callers get 403. A DocSpace admin who is not a member also gets 403. The call is read-only. Only the
+    /// caller's own entries include `privateKeyEnc`. The call skips entries without a public key. An archived private
+    /// room still returns its keys. To get the keys of one file, use `GET api/2.0/files/file/{fileId}/publickeys`. To
+    /// get the keys of users before you invite them, use `GET api/2.0/privacyroom/{roomId}/access/candidates`. If the
+    /// room is not private, the call returns 400. If the room is unknown or in Trash, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get private room access keys
@@ -177,17 +164,16 @@ public class PrivacyRoomControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the public encryption keys of people who are about to be invited to a private room, so that a client can
-    /// encrypt the room's file keys for them before it grants the access. `GET api/2.0/privacyroom/{roomId}/access`
-    /// covers members only, which makes this the call that comes first when inviting. The room has to be an active
-    /// private room: an archived one cannot change its access and is refused, and an unknown one is reported as missing.
-    /// The caller needs the right to change the room's access, which means its owner or a room manager; other members
-    /// and a DocSpace administrator who is not a member are refused. The call is read-only and grants nothing, and
-    /// `PUT api/2.0/files/rooms/{id}/share` still does the inviting. The answer holds one entry per key, and no entry
-    /// ever carries `privateKeyEnc`, not even the caller's own. A listed user who is absent cannot be invited as they
-    /// are: they have no key yet and need to create one with `POST api/2.0/privacyroom/keys`, or they are a guest, a
-    /// terminated user, or nobody on this portal. A duplicate id counts once, and no ids answer an empty list. A
-    /// malformed id, a room that is not private, or a folder inside a room is rejected as invalid.
+    /// Returns the public encryption keys of users that you plan to invite to a private room. Use them to encrypt the
+    /// file keys of the room for these users before you invite them. Requires the right to change the access of the
+    /// room, which the room owner and room managers have. Other callers get 403. A DocSpace admin who is not a member
+    /// also gets 403. It also returns 403 for an archived room. The call is read-only and invites nobody. To invite
+    /// the users, use `PUT api/2.0/files/rooms/{id}/share`. The answer has one entry per key and never includes
+    /// `privateKeyEnc`, even for the caller. It has no entry for a user without a key, a guest, a disabled user, or an
+    /// unknown user. A user without a key must first create one with `POST api/2.0/privacyroom/keys`. The call counts
+    /// a repeated user ID once. Without `userIds`, it returns an empty list. To get the keys of current members, use
+    /// `GET api/2.0/privacyroom/{roomId}/access`. The call returns 400 if the room is not private or `roomId` is a
+    /// folder inside a room. A malformed user ID also returns 400. If the room is unknown, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get public keys of room invitees
@@ -207,16 +193,16 @@ public class PrivacyRoomControllerCommon(
     }
 
     /// <remarks>
-    /// Reports which encrypted files of a private room each user cannot open yet, across all its folders, so that a
-    /// client can write exactly the missing keys with `PUT api/2.0/files/{fileId}/access` instead of trying every file.
-    /// The caller needs the right to change the room's access, which means its owner or a room manager; other members
-    /// and a DocSpace administrator who is not a member are refused, and an archived room, whose access cannot change,
-    /// is refused too. Listing `userIds` checks those people, members or not, which is what a client does before
-    /// `POST api/2.0/files/owner` answers 409 for a new owner; without it the members of the room are checked. The call
-    /// is read-only. The answer holds one entry per user who misses something and carries identifiers only, never a
-    /// key: an empty list means nothing is missing. A file stored in the clear needs no key and is never reported, and
-    /// an id that names nobody on this portal is ignored. A room that is not private, or a folder inside a room, is
-    /// rejected as invalid, as is a malformed id.
+    /// Returns the encrypted files of a private room that each user cannot open yet, in all folders of the room. An app
+    /// then writes only the missing keys with `PUT api/2.0/files/{fileId}/access`. With `userIds`, the call checks
+    /// these users, members or not. Without `userIds`, it checks the members of the room and the room owner. Before
+    /// you change the room owner with `POST api/2.0/files/owner`, check the new owner here. That call refuses a new
+    /// owner who misses a key. Requires the right to change the access of the room, which the room owner and room
+    /// managers have. Other callers get 403. A DocSpace admin who is not a member also gets 403. It also returns 403
+    /// for an archived room. The call is read-only. The answer has one entry per user who misses a key. An empty list
+    /// means that no key is missing. The call skips files stored without encryption and IDs of unknown users. The call
+    /// returns 400 if the room is not private or `roomId` is a folder inside a room.
+    /// A malformed user ID also returns 400. If the room is unknown, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get missing file keys of a room
@@ -236,16 +222,13 @@ public class PrivacyRoomControllerCommon(
     }
 
     /// <remarks>
-    /// Removes one encryption key pair from the calling user's own key set and answers 204 with no body. The pair is
-    /// named by the `id` of an entry of `GET api/2.0/privacyroom/keys`; the caller's other pairs stay as they are.
-    /// The call is destructive and cannot be repeated: the key material is gone for good, a second delete of the same
-    /// `id`, like an `id` that was never stored, is answered with 404, and there is no parameter for another user's
-    /// keys, so an authenticated member only ever deletes their own while a guest is refused. Deleting the last key
-    /// the caller holds locks them out of the private rooms they belong to, their own rooms included: the rooms and
-    /// their content survive untouched and stay listed as private, but `GET api/2.0/privacyroom/{roomId}/access` then
-    /// refuses the caller until a new key is stored with `POST api/2.0/privacyroom/keys`. Before DocSpace 4.0 the
-    /// call answered 200 with the caller's remaining keys, so a client that read that list has to call
-    /// `GET api/2.0/privacyroom/keys` instead.
+    /// Deletes one encryption key pair of the calling user. The other pairs stay unchanged. Any signed-in user can call
+    /// it, except a guest. A guest gets 403. The deletion cannot be undone, and a repeated call returns 404. The call
+    /// returns 204 with no body. Before DocSpace 4.0, it returned 200 with the remaining keys. To read the remaining
+    /// keys, use `GET api/2.0/privacyroom/keys`. After the caller deletes the last key,
+    /// `GET api/2.0/privacyroom/{roomId}/access` returns 403 for all their private rooms. The rooms and their content
+    /// stay unchanged. Access returns after the caller creates a key with `POST api/2.0/privacyroom/keys`. If the
+    /// caller has no pair with this `id`, the call returns 404. A malformed `id` returns 400.
     /// </remarks>
     /// <summary>
     /// Delete an encryption key
