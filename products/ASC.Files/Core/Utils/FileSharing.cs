@@ -452,7 +452,7 @@ public class FileSharingAceHelper(
                 var isAgent = entry is IFolder { FolderType: FolderType.AiRoom };
 
                 // a repeat of the same invitation within the period builds no link and spends no invitation
-                if (!await studioNotifyService.IsEmailRoomInviteRepeatAsync(w.Email, entry.UniqID, inviteType, isAgent))
+                if (await studioNotifyService.TryAcceptEmailRoomInviteAsync(w.Email, entry.UniqID, inviteType, isAgent))
                 {
                     var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                     var shortenLink = await urlShortener.GetShortenLinkAsync(link);

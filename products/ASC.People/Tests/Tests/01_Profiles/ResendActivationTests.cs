@@ -72,6 +72,25 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task ResendUserInvites_SixTimesInARow_AreAllAccepted()
+    {
+        // The endpoint is not rate-limited: a repeated letter is held back where letters are sent, so a client may
+        // call it as often as it likes. The old limit refused the sixth call within fifteen minutes with 429.
+        await _peopleClient.Authenticate(Owner);
+
+        var email = Initializer.Faker.Internet.Email();
+        var invited = await _profilesApi.InviteUsersAsync(new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]), TestContext.Current.CancellationToken);
+        var invitedUserId = invited.Response.Single(u => u.DisplayName == email).Id;
+
+        for (var call = 0; call < 6; call++)
+        {
+            var resent = await _profilesApi.ResendUserInvitesAsync(new UpdateMembersRequestDto([invitedUserId]), TestContext.Current.CancellationToken);
+
+            resent.Response.Single().Id.Should().Be(invitedUserId);
+        }
+    }
+
+    [Fact]
     public async Task ResendUserInvites_ByGuest_ShouldThrowAccessDenied()
     {
         var email = Initializer.Faker.Internet.Email();

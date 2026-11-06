@@ -168,6 +168,21 @@ public class RoomInvitationResendTests(
     }
 
     [Fact]
+    public async Task ResendInvitations_SixTimesInARow_AreAllAccepted()
+    {
+        // The endpoint is not rate-limited: a repeated letter is held back where letters are sent, so a client may
+        // call it as often as it likes. The old limit refused the sixth call within fifteen minutes with 429.
+        await _filesClient.Authenticate(Owner);
+        var (room, users) = await CreateRoomWithInvitedUsers(1);
+
+        for (var call = 0; call < 6; call++)
+        {
+            await _roomsApi.ResendEmailInvitationsAsync(
+                room.Id, new UserInvitation(usersIds: [users[0].Id]), TestContext.Current.CancellationToken);
+        }
+    }
+
+    [Fact]
     public async Task ResendInvitations_ToAlreadyActiveMember_IsNoOp()
     {
         // Arrange - an authenticated member already has an active account, not a pending invite

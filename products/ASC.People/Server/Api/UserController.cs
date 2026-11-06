@@ -547,7 +547,7 @@ public class UserController(
             user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture, false);
 
             // the same invitation already went out within the period: no new link, no record, no spent invitation
-            if (!await studioNotifyService.IsDocSpaceInviteRepeatAsync(user.Email, invite.Type))
+            if (await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, invite.Type))
             {
                 var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
@@ -1647,7 +1647,7 @@ public class UserController(
     /// The answer lists only the targeted accounts the caller is allowed to see, so it can be shorter than the
     /// request and is not a delivery report.
     /// An account that got this letter a short while ago is not mailed again, and the link it already has stays
-    /// valid, so repeating the call is safe but delivers nothing new; repeated calls are also throttled.
+    /// valid, so repeating the call is safe but delivers nothing new.
     /// To invite an address that has no profile yet, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
@@ -1661,7 +1661,6 @@ public class UserController(
     [SwaggerResponse(403, "A member or a guest asked for resendAll, or listed an account other than their own")]
     [AllowNotPayment]
     [HttpPut("invite")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvites(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
@@ -1733,7 +1732,7 @@ public class UserController(
                     continue;
                 }
 
-                if (await studioNotifyService.IsDocSpaceInviteRepeatAsync(user.Email, type))
+                if (!await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, type))
                 {
                     continue;
                 }

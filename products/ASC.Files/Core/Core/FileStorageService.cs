@@ -5725,7 +5725,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var inviteType = FileSecurity.GetTypeByShare(ace.Access);
-                if (await studioNotifyService.IsEmailRoomInviteRepeatAsync(user.Email, room.UniqID, inviteType, room.FolderType == FolderType.AiRoom))
+                if (!await studioNotifyService.TryAcceptEmailRoomInviteAsync(user.Email, room.UniqID, inviteType, room.FolderType == FolderType.AiRoom))
                 {
                     continue;
                 }
@@ -5764,7 +5764,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var inviteType = FileSecurity.GetTypeByShare(ace.Access);
-                if (await studioNotifyService.IsEmailRoomInviteRepeatAsync(user.Email, room.UniqID, inviteType, room.FolderType == FolderType.AiRoom))
+                if (!await studioNotifyService.TryAcceptEmailRoomInviteAsync(user.Email, room.UniqID, inviteType, room.FolderType == FolderType.AiRoom))
                 {
                     continue;
                 }

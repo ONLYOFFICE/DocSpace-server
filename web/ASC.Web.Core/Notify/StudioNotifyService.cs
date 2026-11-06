@@ -157,7 +157,7 @@ public class StudioNotifyService(
 
         // the link is bound to this account, so a profile recreated with the same address is a new letter
         var objectId = user.Id.ToString();
-        if (await studioNotifyServiceHelper.IsRepeatAsync(activateEmailNotifyAction, objectId, AddressRecipient(email), EMailSenderName))
+        if (!await studioNotifyServiceHelper.TryAcceptAsync(activateEmailNotifyAction, objectId, AddressRecipient(email), EMailSenderName))
         {
             return false;
         }
@@ -169,12 +169,12 @@ public class StudioNotifyService(
         return true;
     }
 
-    // asked before the invitation link is built, so a repeat builds no link and spends no invitation
-    public async Task<bool> IsEmailRoomInviteRepeatAsync(string email, string roomUniqId, EmployeeType inviteType, bool isAgent)
+    // asked before the invitation link is built: false for a repeat, which builds no link and spends no invitation
+    public async Task<bool> TryAcceptEmailRoomInviteAsync(string email, string roomUniqId, EmployeeType inviteType, bool isAgent)
     {
         INotifyAction action = isAgent ? serviceProvider.GetService<SaasAgentInviteNotifyAction>() : serviceProvider.GetService<SaasRoomInviteNotifyAction>();
 
-        return await studioNotifyServiceHelper.IsRepeatAsync(action, roomUniqId, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast());
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, roomUniqId, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast());
     }
 
     public async Task SendEmailRoomInviteAsync(
@@ -212,12 +212,12 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteExistingUserNotifyAction : saasRoomInviteExistingUserNotifyAction, roomUniqId, [user], [EMailSenderName]);
     }
 
-    // asked before the invitation link is built, so a repeat builds no link and spends no invitation
-    public async Task<bool> IsDocSpaceInviteRepeatAsync(string email, EmployeeType inviteType)
+    // asked before the invitation link is built: false for a repeat, which builds no link and spends no invitation
+    public async Task<bool> TryAcceptDocSpaceInviteAsync(string email, EmployeeType inviteType)
     {
         var action = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
 
-        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast());
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, null, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast());
     }
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, EmployeeType inviteType, string culture = "", bool limitation = false)
@@ -446,7 +446,7 @@ public class StudioNotifyService(
 
         // the link is bound to this account, so a profile recreated with the same address is a new letter
         var objectId = user.Id.ToString();
-        if (await studioNotifyServiceHelper.IsRepeatAsync(profileDeleteNotifyAction, objectId, AddressRecipient(user.Email), EMailSenderName, user.Email))
+        if (!await studioNotifyServiceHelper.TryAcceptAsync(profileDeleteNotifyAction, objectId, AddressRecipient(user.Email), EMailSenderName, user.Email))
         {
             return false;
         }
@@ -570,22 +570,22 @@ public class StudioNotifyService(
 
     #region Portal Deactivation & Deletion
 
-    // asked before the links are built, so a repeat builds no links and records nothing
-    public async Task<bool> IsPortalDeactivationRepeatAsync(Tenant t)
+    // asked before the links are built: false for a repeat, which builds no links and records nothing
+    public async Task<bool> TryAcceptPortalDeactivationAsync(Tenant t)
     {
         var owner = await userManager.GetUsersAsync(t.OwnerId);
         var action = serviceProvider.GetService<PortalDeactivateNotifyAction>();
 
-        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, owner, EMailSenderName, owner.Email);
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, null, owner, EMailSenderName, owner.Email);
     }
 
-    // asked before the link is built, so a repeat builds no link
-    public async Task<bool> IsPortalDeletionRepeatAsync(Tenant t, bool checkActivation = true)
+    // asked before the link is built: false for a repeat, which builds no link
+    public async Task<bool> TryAcceptPortalDeletionAsync(Tenant t, bool checkActivation = true)
     {
         var owner = await userManager.GetUsersAsync(t.OwnerId);
         var action = serviceProvider.GetService<PortalDeleteNotifyAction>();
 
-        return await studioNotifyServiceHelper.IsRepeatAsync(action, null, checkActivation ? owner : AddressRecipient(owner.Email), EMailSenderName, owner.Email);
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, null, checkActivation ? owner : AddressRecipient(owner.Email), EMailSenderName, owner.Email);
     }
 
     public async Task SendMsgPortalDeactivationAsync(Tenant t, string deactivateUrl, string activateUrl)

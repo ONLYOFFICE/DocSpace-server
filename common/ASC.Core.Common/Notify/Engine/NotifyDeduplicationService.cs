@@ -49,12 +49,22 @@ public class NotifyDeduplicationService(
     ILogger<NotifyDeduplicationService> logger)
 {
     private static readonly TimeSpan _defaultPeriod = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan _defaultAcceptedPeriod = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan _lockTimeout = TimeSpan.FromSeconds(10);
+
+    // The value of a letter's key: sent by the engine, or only accepted by the sending code.
+    private const bool Sent = true;
+    private const bool Accepted = false;
 
     private readonly TimeSpan _period =
         TimeSpan.TryParse(configuration["core:notify:deduplication:period"], CultureInfo.InvariantCulture, out var period) && period >= TimeSpan.Zero
             ? period
             : _defaultPeriod;
+
+    private readonly TimeSpan _acceptedPeriod =
+        TimeSpan.TryParse(configuration["core:notify:deduplication:accepted"], CultureInfo.InvariantCulture, out var accepted) && accepted >= TimeSpan.Zero
+            ? accepted
+            : _defaultAcceptedPeriod;
 
     // An invitation link expires this long after it is first opened. Suppressing a resend for longer could leave
     // the recipient holding only an expired link, so no period may outlast it.
@@ -62,28 +72,44 @@ public class NotifyDeduplicationService(
 
     private TimeSpan Period => _period > _maxPeriod ? _maxPeriod : _period;
 
+    private TimeSpan AcceptedPeriod => _acceptedPeriod > Period ? Period : _acceptedPeriod;
+
     /// <summary>
-    /// Tells, without marking anything, whether this letter already went out to the recipient within the period. The
-    /// sending code asks it before it builds what only a new letter needs - a confirmation link, an audit record, a
-    /// spent invitation - and has to pass exactly what the letter carries into its key. The mark is set once the
-    /// letter is sent, a moment after the request that queued it, so a burst of calls inside that moment still passes.
+    /// Decides, before the sending code builds what only a new letter needs (a confirmation link, an audit record, a
+    /// spent invitation), whether to go on. Returns false when the letter went out within the period or was accepted a
+    /// moment ago; otherwise accepts this request and returns true. The acceptance is the letter's own mark with a
+    /// shorter life: it holds back a burst of calls until the engine sends the letter and turns it into the mark, or
+    /// until it runs out for a letter that never reaches the engine (an address left out as not activated, a free
+    /// portal over its letter count). A failed delivery takes it back. The caller passes exactly what the letter will
+    /// carry into its key.
     /// </summary>
-    public async Task<bool> IsMarkedAsync(int tenantId, INotifyAction action, string sender, string recipientId, string objectId, IEnumerable<string> discriminators)
+    public async Task<bool> TryAcceptAsync(int tenantId, INotifyAction action, string sender, string recipientId, string objectId, IEnumerable<string> discriminators)
     {
-        if (!action.SuppressRepeats || Period <= TimeSpan.Zero)
+        if (!action.SuppressRepeats || AcceptedPeriod <= TimeSpan.Zero)
         {
-            return false;
+            return true;
         }
 
         var values = discriminators.ToArray();
         if (values.Length != action.DeduplicationTags.Length || !HasEveryValue(values))
         {
-            return false;
+            return true;
         }
 
         var key = GetCacheKey(tenantId, action.ID, sender, recipientId, objectId, values);
 
-        return (await hybridCache.TryGetAsync<bool>(key)).HasValue;
+        if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
+        {
+            logger.DebugDuplicateSuppressed(action.ID, sender, tenantId);
+            return false;
+        }
+
+        // No lock: it would cost two more round trips per recipient of every call. Two calls that both find no mark are
+        // both accepted, which costs one more link; the letter itself still goes out once, the engine checks it under
+        // its own lock.
+        await hybridCache.SetAsync(key, Accepted, options => options.SetDuration(AcceptedPeriod).SetSkipBackplaneNotifications(true));
+
+        return true;
     }
 
     public async Task<bool> IsDuplicateAsync(NotifyRequest request)
@@ -107,7 +133,7 @@ public class NotifyDeduplicationService(
 
         var key = GetCacheKey(request._tenantId, request.NotifyAction.ID, request.CurrentSender, request.Recipient.ID, request.ObjectID, discriminators);
 
-        if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
+        if (await IsSentAsync(key, fromMemory: true))
         {
             logger.DebugDuplicateSuppressed(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
             return true;
@@ -115,15 +141,17 @@ public class NotifyDeduplicationService(
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{key}_lock", _lockTimeout))
         {
-            if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
+            // Past the lock, memory may hold this node's own acceptance while another node has already sent the letter
+            // and left the mark only in the distributed cache.
+            if (await IsSentAsync(key, fromMemory: !hybridCache.HasDistributedCache))
             {
                 logger.DebugDuplicateSuppressed(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
                 return true;
             }
 
-            // a new mark replaces nothing another node holds in memory - a miss is never kept there - so the backplane
-            // message would only make every node evict a key it does not have, once per letter of a bulk send
-            await hybridCache.SetAsync(key, true, options => options.SetDuration(period).SetSkipBackplaneNotifications(true));
+            // No backplane message: another node holds at most the acceptance in memory, which refuses a repeat request
+            // just as the mark does, and the message would make every node evict the key once per letter of a bulk send.
+            await hybridCache.SetAsync(key, Sent, options => options.SetDuration(period).SetSkipBackplaneNotifications(true));
         }
 
         request.Properties[GetMarkProperty(request.CurrentSender)] = key;
@@ -133,8 +161,8 @@ public class NotifyDeduplicationService(
 
     /// <summary>
     /// Takes back the mark this request set, once its channel failed to deliver the letter, so that the next repeat
-    /// goes out instead of being dropped for a letter nobody got. A request that was itself suppressed set no mark and
-    /// releases nothing.
+    /// goes out instead of being dropped for a letter nobody got; the acceptance of the request for it goes with the
+    /// mark, as they share the key. A request that was itself suppressed set no mark and releases nothing.
     /// </summary>
     public async Task ReleaseAsync(NotifyRequest request)
     {
@@ -167,6 +195,13 @@ public class NotifyDeduplicationService(
     private static bool HasEveryValue(string[] discriminators)
     {
         return Array.TrueForAll(discriminators, value => !string.IsNullOrEmpty(value));
+    }
+
+    private async Task<bool> IsSentAsync(string key, bool fromMemory)
+    {
+        var mark = await hybridCache.TryGetAsync<bool>(key, options => options.SetSkipMemoryCacheRead(!fromMemory));
+
+        return mark.HasValue && mark.Value == Sent;
     }
 
     private static string GetMarkProperty(string sender)

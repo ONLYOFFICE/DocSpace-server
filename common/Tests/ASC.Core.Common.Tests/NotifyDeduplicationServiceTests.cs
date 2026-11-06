@@ -305,72 +305,7 @@ public class NotifyDeduplicationServiceTests
         second.Should().BeFalse();
     }
 
-    [Fact]
-    public async Task AskingBeforehand_WithoutEveryKeyTagValue_IsNeverARepeat()
-    {
-        // Marks lie under exactly the keys a question without every value would read, so only the check of the
-        // values can keep that question from finding one.
-        var cache = new FusionCache(new FusionCacheOptions());
-        var service = CreateService(cache: cache);
-        var action = new TestAction("user_role_changed", tags: ["AccessLevel"]);
-        await cache.SetAsync(NotifyDeduplicationService.GetCacheKey(TenantId, action.ID, EmailSender, Recipient, RoomId, []), true, TimeSpan.FromMinutes(1), token: TestContext.Current.CancellationToken);
-        await cache.SetAsync(NotifyDeduplicationService.GetCacheKey(TenantId, action.ID, EmailSender, Recipient, RoomId, [""]), true, TimeSpan.FromMinutes(1), token: TestContext.Current.CancellationToken);
-
-        await service.IsDuplicateAsync(Request(action, RoomId, tags: [new TagValue("AccessLevel", "Editing")]));
-        var noValues = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
-        var emptyValue = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, RoomId, [""]);
-        var fullKey = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, RoomId, ["Editing"]);
-
-        noValues.Should().BeFalse();
-        emptyValue.Should().BeFalse();
-        fullKey.Should().BeTrue();
-    }
-
-    [Fact]
-    public async Task AskingBeforehand_SeesTheMarkOfTheLetterSent()
-    {
-        // The sending code asks before it builds a link, with the values the letter will carry. A letter without an
-        // object reaches the engine with an empty object id, and the question passes none.
-        var service = CreateService();
-        var action = new TestAction("portal_deactivate", tags: ["LinkAddress"]);
-        string[] keyTags = ["owner@example.com"];
-
-        var before = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, null, keyTags);
-        await service.IsDuplicateAsync(Request(action, "", tags: [new TagValue("LinkAddress", "owner@example.com")]));
-        var after = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, null, keyTags);
-        var otherAddress = await service.IsMarkedAsync(TenantId, action, EmailSender, Recipient, null, ["new@example.com"]);
-
-        before.Should().BeFalse();
-        after.Should().BeTrue();
-        otherAddress.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task AskingBeforehand_MarksNothing()
-    {
-        var service = CreateService();
-        var action = new TestAction("profile_delete");
-
-        await service.IsMarkedAsync(TenantId, action, EmailSender, "user@example.com", RoomId, []);
-        var letter = await service.IsDuplicateAsync(Request(action, RoomId, recipientId: "user@example.com"));
-
-        letter.Should().BeFalse("a question asked beforehand must not hold back the letter it asked about");
-    }
-
-    [Fact]
-    public async Task AskingBeforehand_AboutALetterNotOptedIn_IsNeverARepeat()
-    {
-        // The mark is left while a letter of the same name still drops repeats; asked about now that it does not, the
-        // letter is no repeat.
-        var service = CreateService();
-        await service.IsDuplicateAsync(Request(new TestAction("change_password_v115"), null));
-
-        var marked = await service.IsMarkedAsync(TenantId, new TestAction("change_password_v115", suppressRepeats: false), EmailSender, Recipient, null, []);
-
-        marked.Should().BeFalse();
-    }
-
-    private static NotifyDeduplicationService CreateService(string? period = null, string? visitInterval = null, IFusionCache? cache = null)
+    private static NotifyDeduplicationService CreateService(string? period = null, string? visitInterval = null)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -382,7 +317,7 @@ public class NotifyDeduplicationServiceTests
 
         return new NotifyDeduplicationService(
             configuration,
-            cache ?? new FusionCache(new FusionCacheOptions()),
+            new FusionCache(new FusionCacheOptions()),
             new InMemoryLockProvider(),
             NullLogger<NotifyDeduplicationService>.Instance);
     }

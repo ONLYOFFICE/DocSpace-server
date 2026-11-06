@@ -67,11 +67,12 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
         await SendNoticeToAsync(action, objectId, recipients, senderNames, false, null);
     }
 
-    // whether the letter SendNoticeToAsync would send with these values already reached the recipient through this
-    // channel within the repeat period; keyTags are the values of the action's DeduplicationTags, in their order
-    public async Task<bool> IsRepeatAsync(INotifyAction action, string objectId, IRecipient recipient, string senderName, params string[] keyTags)
+    // whether to build the letter SendNoticeToAsync would send with these values: false when it is a repeat, true when
+    // it is not, and then the letter is booked for a moment so that a burst of calls builds it once; keyTags are the
+    // values of the action's DeduplicationTags, in their order
+    public async Task<bool> TryAcceptAsync(INotifyAction action, string objectId, IRecipient recipient, string senderName, params string[] keyTags)
     {
-        return await notifyDeduplicationService.IsMarkedAsync(tenantManager.GetCurrentTenantId(), action, senderName, recipient.ID, objectId, keyTags);
+        return await notifyDeduplicationService.TryAcceptAsync(tenantManager.GetCurrentTenantId(), action, senderName, recipient.ID, objectId, keyTags);
     }
 
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri)

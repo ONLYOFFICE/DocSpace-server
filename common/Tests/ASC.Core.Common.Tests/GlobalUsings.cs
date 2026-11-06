@@ -73,14 +73,18 @@ global using FluentAssertions;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Caching.Distributed;
+global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging.Abstractions;
+global using Microsoft.Extensions.Options;
 
 global using Polly;
 global using Polly.Retry;
 
 global using ZiggyCreatures.Caching.Fusion;
+global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
 global using DbQuota = ASC.Core.Common.EF.DbQuota;
 global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;

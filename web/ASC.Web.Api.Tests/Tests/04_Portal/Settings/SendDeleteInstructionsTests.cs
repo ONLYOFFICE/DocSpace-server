@@ -52,4 +52,17 @@ public class SendDeleteInstructionsTests(
         // Act & Assert
         await _portalSettingsApi.SendDeleteInstructionsAsync(TestContext.Current.CancellationToken);
     }
+
+    [Fact]
+    public async Task SendDeleteInstructions_SixTimesInARow_AreAllAccepted()
+    {
+        // The endpoint is not rate-limited: a repeated letter is held back where letters are sent, so a client may
+        // call it as often as it likes. The old limit refused the sixth call within fifteen minutes with 429.
+        await _webApiClient.Authenticate(Owner);
+
+        for (var call = 0; call < 6; call++)
+        {
+            await _portalSettingsApi.SendDeleteInstructionsAsync(TestContext.Current.CancellationToken);
+        }
+    }
 }

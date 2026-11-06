@@ -60,6 +60,22 @@ public class SendInstructionsToDeleteTests(AspireAppFixture fixture) : UserDataT
     }
 
     [Fact]
+    public async Task SendInstructionsToDelete_SixTimesInARow_AreAllAccepted()
+    {
+        // The endpoint is not rate-limited: a repeated letter is held back where letters are sent, so a client may
+        // call it as often as it likes. The old limit refused the sixth call within fifteen minutes with 429.
+        var member = await InviteMember(EmployeeType.User);
+        await _peopleClient.Authenticate(member);
+
+        for (var call = 0; call < 6; call++)
+        {
+            var result = await _userDataApi.SendInstructionsToDeleteAsync(TestContext.Current.CancellationToken);
+
+            result.Response.Should().Contain(member.Email);
+        }
+    }
+
+    [Fact]
     public async Task SendInstructionsToDelete_AsOwner_ThrowsAccessDenied()
     {
         await _peopleClient.Authenticate(Owner);
