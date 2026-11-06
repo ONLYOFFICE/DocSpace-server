@@ -548,7 +548,7 @@ public class OperationFilter : PagedFilter
     /// <summary>
     /// The operation type to filter by.
     /// </summary>
-    [AliasAs("types")]
+    [AliasAs("operationTypes")]
     public OperationType? Type { get; init; }
     /// <summary>
     /// The operation status to filter by.

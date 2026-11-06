@@ -78,7 +78,7 @@ public class AccountingClientTests
         query["debit"].Should().Be("false");
         query["offset"].Should().Be("5");
         query["limit"].Should().Be("50");
-        query["types"].Should().Be("Deposit");
+        query["operationTypes"].Should().Be("Deposit");
         query["status"].Should().Be("Completed");
         query["orderBy"].Should().Be("date");
         query["orderType"].Should().Be("Ascending");
