@@ -35,6 +35,7 @@ package com.asc.common.messaging.publisher;
 
 import com.asc.common.service.ports.output.repository.PendingMessageRepository;
 import com.asc.common.service.ports.output.repository.PendingMessageRepository.PendingMessage;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -146,8 +147,11 @@ public class RabbitPersistableMessagePublisher {
 
   /**
    * Sends the messages that are due again, oldest first, and stops at the first one the broker
-   * still does not take, so that an unavailable broker is not hammered. Messages kept for longer
-   * than {@link #MAX_PENDING_AGE} are given up instead.
+   * still does not take, so that an unavailable broker is not hammered. A message kept for longer
+   * than {@link #MAX_PENDING_AGE} gets one last attempt and is given up if that fails too, so that
+   * a message the broker never takes cannot hold back the ones behind it. Every message published
+   * here is safe to deliver late: cleanups scoped to a user or a tenant carry their removal moment.
+   * A message given up is logged with its body, which names what was not cleaned up.
    *
    * @param limit the maximum number of messages to send in this round
    * @return the number of messages sent
@@ -155,22 +159,26 @@ public class RabbitPersistableMessagePublisher {
   public int relayDue(int limit) {
     var sent = 0;
     for (var pending : store.findDue(limit)) {
-      if (pending.ageSeconds() > MAX_PENDING_AGE.toSeconds()) {
-        log.error(
-            "Giving up on pending message {} for exchange {} after {} attempts: kept longer than {}",
-            pending.id(),
-            pending.exchange(),
-            pending.attempts(),
-            MAX_PENDING_AGE);
-        store.delete(pending.id());
-        continue;
-      }
-
+      var expired = pending.ageSeconds() > MAX_PENDING_AGE.toSeconds();
       try {
         sendConfirmed(pending.exchange(), pending.routingKey(), toMessage(pending));
         store.delete(pending.id());
         sent++;
       } catch (Exception e) {
+        if (expired) {
+          log.error(
+              "Giving up on pending message {} for exchange {} after {} attempts, kept longer than"
+                  + " {}: {}. It was not delivered: {}",
+              pending.id(),
+              pending.exchange(),
+              pending.attempts() + 1,
+              MAX_PENDING_AGE,
+              e.getMessage(),
+              new String(pending.body(), StandardCharsets.UTF_8));
+          store.delete(pending.id());
+          continue;
+        }
+
         store.postpone(pending.id(), retryDelay(pending.attempts() + 1).toSeconds());
         log.warn(
             "Could not redeliver pending message {} (attempt {}): {}",

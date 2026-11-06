@@ -35,12 +35,17 @@ package com.asc.common.messaging.publisher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.asc.common.service.ports.output.repository.PendingMessageRepository;
 import com.asc.common.service.ports.output.repository.PendingMessageRepository.PendingMessage;
 import java.net.ConnectException;
@@ -49,7 +54,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpConnectException;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -203,24 +210,59 @@ class RabbitPersistableMessagePublisherTest {
   }
 
   @Test
-  void givenMessageKeptTooLong_whenRelaying_thenGivenUpAndNextOneStillSent() {
+  void givenMessageKeptTooLong_whenBrokerTakesIt_thenStillSent() {
     brokerConfirms(true);
 
     var tooOld = RabbitPersistableMessagePublisher.MAX_PENDING_AGE.toSeconds() + 1;
 
     when(store.findDue(10))
         .thenReturn(
-            List.of(
-                new PendingMessage(1, "gone", "", "{}", new byte[0], 150, tooOld),
-                new PendingMessage(2, EXCHANGE, "", "{}", new byte[0], 0, 10)));
+            List.of(new PendingMessage(1, EXCHANGE, "", "{}", "payload".getBytes(), 150, tooOld)));
 
     assertEquals(1, publisher.relayDue(10));
 
     verify(store).delete(1);
-    verify(store).delete(2);
-    verify(rabbitTemplate, never())
-        .send(eq("gone"), anyString(), any(Message.class), any(CorrelationData.class));
     verify(rabbitTemplate)
         .send(eq(EXCHANGE), anyString(), any(Message.class), any(CorrelationData.class));
+  }
+
+  @Test
+  void givenMessageKeptTooLong_whenRelaying_thenGivenUpAndNextOneStillSent() {
+    brokerConfirms(true);
+    doThrow(new AmqpException("no exchange 'gone'"))
+        .when(rabbitTemplate)
+        .send(eq("gone"), anyString(), any(Message.class), any(CorrelationData.class));
+
+    var tooOld = RabbitPersistableMessagePublisher.MAX_PENDING_AGE.toSeconds() + 1;
+    var body = "{\"tenant_id\":42,\"user_id\":\"user\"}";
+    var logger = (Logger) LoggerFactory.getLogger(RabbitPersistableMessagePublisher.class);
+    var appender = new ListAppender<ILoggingEvent>();
+
+    appender.start();
+    logger.addAppender(appender);
+    try {
+      when(store.findDue(10))
+          .thenReturn(
+              List.of(
+                  new PendingMessage(1, "gone", "", "{}", body.getBytes(), 150, tooOld),
+                  new PendingMessage(2, EXCHANGE, "", "{}", new byte[0], 0, 10)));
+
+      assertEquals(1, publisher.relayDue(10));
+    } finally {
+      logger.detachAppender(appender);
+    }
+
+    verify(store).delete(1);
+    verify(store).delete(2);
+    verify(store, never()).postpone(anyLong(), anyLong());
+    verify(rabbitTemplate)
+        .send(eq(EXCHANGE), anyString(), any(Message.class), any(CorrelationData.class));
+    assertTrue(
+        appender.list.stream()
+            .anyMatch(
+                event ->
+                    event.getLevel() == Level.ERROR
+                        && event.getFormattedMessage().contains(body)
+                        && event.getFormattedMessage().contains("gone")));
   }
 }
