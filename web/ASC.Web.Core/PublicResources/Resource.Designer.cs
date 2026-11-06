@@ -61,6 +61,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Credit (bonuses).
+        /// </summary>
+        public static string AccountingCustomerOperationBonusCredit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationBonusCredit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Debit (bonuses).
+        /// </summary>
+        public static string AccountingCustomerOperationBonusDebit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationBonusDebit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cached.
         /// </summary>
         public static string AccountingCustomerOperationCachedTokens {

@@ -76,6 +76,7 @@ public class OperationsReportBuilder(
 
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationServiceUnit));
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCredit, ReportColumnAlign.Right, Sum: true));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationBonusCredit, ReportColumnAlign.Right, Sum: true));
 
         if (isAiService)
         {
@@ -83,6 +84,7 @@ public class OperationsReportBuilder(
         }
 
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationDebit, ReportColumnAlign.Right, Sum: true));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationBonusDebit, ReportColumnAlign.Right, Sum: true));
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCurrency, Currency: true));
 
         if (isAiService)
@@ -249,8 +251,13 @@ public class OperationsReportBuilder(
                 }
             }
 
+            // Credit and debit stay the whole amount of the operation; the bonus columns say how much of it
+            // was put on or taken from the bonuses, so the money of the wallet itself is the difference.
+            var bonusAmount = GetBonusAmount(record);
+
             properties.Add(new PropertyValue(record.ServiceUnit, "@"));
             properties.Add(MoneyValue(record.Credit));
+            properties.Add(MoneyValue(record.Credit > 0 ? bonusAmount : 0));
 
             if (isAiService)
             {
@@ -258,6 +265,7 @@ public class OperationsReportBuilder(
             }
 
             properties.Add(MoneyValue(record.Debit));
+            properties.Add(MoneyValue(record.Debit > 0 ? bonusAmount : 0));
             properties.Add(new PropertyValue(record.Currency, "@"));
 
             if (isAiService)
@@ -271,5 +279,12 @@ public class OperationsReportBuilder(
         }
 
         return sb.ToString();
+    }
+
+    // The part of the operation that fell on the bonus sub-account. Taken as a magnitude: the direction is
+    // already given by whether the operation is a credit or a debit.
+    private static decimal GetBonusAmount(Operation operation)
+    {
+        return Math.Abs(operation.Sources?.Where(x => x.IsBonus).Sum(x => x.Amount) ?? 0);
     }
 }
