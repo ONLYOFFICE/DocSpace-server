@@ -223,6 +223,11 @@ public abstract class UploadController<T>(
             {
                 resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(inDto.SessionId);
             }
+            else
+            {
+                // A small session stored the file with this part, so it ends here as a large one does when finalized.
+                await chunkedUploadSessionHolder.RemoveSessionAsync(resumedSession);
+            }
 
             await fileUploader.DeleteLinkAndMarkAsync(resumedSession.File);
 
@@ -339,6 +344,11 @@ public abstract class UploadController<T>(
         if (session.UseChunks)
         {
             session = await fileUploader.FinalizeUploadSessionAsync<T>(inDto.SessionId);
+        }
+        else
+        {
+            // Left open, a small session could be aborted, finalized again or written to after this call.
+            await chunkedUploadSessionHolder.RemoveSessionAsync(session);
         }
 
         await fileUploader.DeleteLinkAndMarkAsync(session.File);
