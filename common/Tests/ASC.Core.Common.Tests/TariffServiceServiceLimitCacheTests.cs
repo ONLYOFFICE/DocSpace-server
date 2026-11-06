@@ -69,12 +69,14 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
     [Fact]
     public async Task GetCachedParticipantServiceLimits_PortalNotACustomer_ReturnsEmpty()
     {
-        var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance(),
             _ => Reply(HttpStatusCode.BadRequest, "Customer not found"));
 
         var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
         serviceLimits.Should().BeEmpty();
+        // The empty list comes from the answer, not from a failure before the request: TariffService turns either into it.
+        handler.Requests.Should().ContainSingle().Which.Path.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants");
     }
 
     [Theory]
@@ -84,12 +86,14 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
     {
         // The user lists read these limits; an unreachable accounting service, or one without the route, must not break
         // them. Null says the list is unknown - an empty one would claim no user has a personal limit.
-        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             _ => Reply(status, "boom"));
 
         var serviceLimits = await tariffService.GetCachedParticipantServiceLimitsAsync(TenantId, "ai-services");
 
         serviceLimits.Should().BeNull();
+        // The null comes from the failed answer, not from a failure before the request; a 500 may be asked again.
+        handler.Requests.Should().NotBeEmpty().And.OnlyContain(request => request.Path == $"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants");
     }
 
     [Fact]
@@ -97,7 +101,7 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
     {
         // The user may have a personal limit the failed list would have shown; the limit for every user must not take
         // its place.
-        var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request => IsGlobalRequest(request)
                 ? GlobalLimitResponse(enabled: true)
                 : Reply(HttpStatusCode.InternalServerError, "boom"));
@@ -105,6 +109,8 @@ public class TariffServiceServiceLimitCacheTests : TariffServiceServiceLimitTest
         var serviceLimit = await tariffService.GetCachedUserServiceLimitAsync(TenantId, "ai-services", Guid.Parse(UserA));
 
         serviceLimit.Should().BeNull();
+        // The list of the users was asked for and failed; the null is not a failure before the request.
+        handler.Requests.Should().Contain(request => request.Path == $"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/participants");
     }
 
     [Fact]

@@ -48,8 +48,8 @@ namespace ASC.Core.Common.Tests;
 /// the whole handler chain - authorization, resilience, transport - exactly as it does in production.
 /// </para>
 /// <para>
-/// Each stub has a path of its own, so parallel test classes never see each other's requests and no mapping ever
-/// has to be removed. A request is recorded the moment it arrives, before the answer is written: WireMock.Net adds
+/// Each stub has a path of its own, so parallel test classes never see each other's requests, and no stub has to be
+/// taken off for another one to work. A request is recorded the moment it arrives, before the answer is written: WireMock.Net adds
 /// its own log entry only after the answer has gone out, so a test reading that log right after the client call
 /// could miss the request, and a test waiting on a delayed answer could not see that it arrived at all.
 /// </para>

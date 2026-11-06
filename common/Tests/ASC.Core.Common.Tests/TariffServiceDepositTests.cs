@@ -136,11 +136,14 @@ public class TariffServiceDepositTests
     [InlineData("The limit is out of range")]
     public async Task GetCustomerDeposits_AccountingError_ReturnsNull(string body)
     {
-        var (tariffService, _) = CreateService(_ => Reply(HttpStatusCode.BadRequest, body));
+        var (tariffService, handler) = CreateService(_ => Reply(HttpStatusCode.BadRequest, body));
 
         var report = await tariffService.GetCustomerDepositsAsync(TenantId, new DepositFilter { Offset = 0, Limit = 25 });
 
         report.Should().BeNull();
+        // The null comes from the answer, not from a failure before the request: TariffService turns either into null.
+        // A 400 that names no missing customer is asked again, so only the route of every request is pinned.
+        handler.Requests.Should().NotBeEmpty().And.OnlyContain(request => request.Path == $"/api/customer/{PaymentRegion}{TenantId}/deposits");
     }
 
     private static (TariffService tariffService, HttpStub handler) CreateService(

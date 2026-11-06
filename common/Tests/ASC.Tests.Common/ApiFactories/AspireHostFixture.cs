@@ -160,6 +160,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Runs once the services of the app have stopped. For what they call until then - a stub of an external service
+    /// started in <see cref="OnStartingAsync"/> - so a service shutting down never meets a closed port, and its log
+    /// has no connection errors a test run did not cause.
+    /// </summary>
+    protected virtual ValueTask OnStoppedAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
     /// Suite-specific warmup, run once against a throwaway portal whose owner is already signed in
     /// on <see cref="PortalClientsBase.WebApiHttpClient"/>. Touch whatever every test hits first.
     /// </summary>
@@ -690,6 +700,15 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // all of them. Measured separately so a regression there is visible instead of invisible.
         await Timing.Measure("teardown.stop", async () => await _app.StopAsync());
         await Timing.Measure("teardown.dispose", async () => await _app.DisposeAsync());
+
+        try
+        {
+            await OnStoppedAsync();
+        }
+        catch (Exception ex)
+        {
+            await Console.Error.WriteLineAsync($"OnStoppedAsync failed for {GetType().Name}: {ex}");
+        }
 
         _sharedHandler.Dispose();
 

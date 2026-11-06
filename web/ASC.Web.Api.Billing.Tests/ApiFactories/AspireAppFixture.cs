@@ -62,7 +62,8 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
         return ValueTask.CompletedTask;
     }
 
-    protected override ValueTask OnDisposingAsync()
+    // The services ask billing until they stop, so the stub outlives them.
+    protected override ValueTask OnStoppedAsync()
     {
         Payments?.Dispose();
 

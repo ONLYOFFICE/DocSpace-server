@@ -137,7 +137,9 @@ internal static class PaymentStubs
 
     /// <summary>
     /// A <see cref="TariffService"/> over the given payment clients. Every dependency a test leaves out is null, so a
-    /// path that reaches one it was not meant to fails at once instead of quietly using a default.
+    /// path that reaches one it was not meant to throws rather than quietly using a default. Many reads of
+    /// <see cref="TariffService"/> catch every exception and answer null or an empty result, so such a throw can look
+    /// like the failure a test expects: a test of a failure also checks that the request it fails arrived.
     /// </summary>
     public static TariffService CreateTariffService(
         AccountingClient? accountingClient = null,

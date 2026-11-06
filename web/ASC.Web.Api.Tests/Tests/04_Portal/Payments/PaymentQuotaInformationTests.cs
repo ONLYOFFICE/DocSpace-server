@@ -36,10 +36,11 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 /// <summary>
 /// GET /api/2.0/portal/payment/quota — the current portal quota. The action only denies Guests
 /// explicitly (<c>IsGuestAsync</c>) and trims the answer for everyone below a DocSpace admin; it
-/// never calls <c>PaymentHelper.DemandConfigured</c>, so it answers the same free "Startup" plan
-/// here as it would in production before any tariff is set. Which plan that is depends on the SaaS quota catalogue,
-/// which this standalone host does not have; the plan itself is checked by <c>PaymentQuotaTests</c> in
-/// ASC.Web.Api.Billing.Tests.
+/// never calls <c>PaymentHelper.DemandConfigured</c>, so it answers on this host too, which has no
+/// payment services. The tests here pin only what holds for any plan - who is refused and what each
+/// caller type is shown - because the plan itself comes from the quota catalogue of the edition: this
+/// standalone host has its own, and the free "Startup" plan of a SaaS portal is checked by
+/// <c>PaymentQuotaTests</c> in ASC.Web.Api.Billing.Tests.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PaymentQuotaInformationTests(

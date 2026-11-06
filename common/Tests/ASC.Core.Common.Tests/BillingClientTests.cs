@@ -356,7 +356,7 @@ public class BillingClientTests
     }
 
     [Fact]
-    public async Task NotConfigured_ThrowsBillingNotConfiguredException_WithoutSendingRequest()
+    public async Task NotConfigured_ThrowsBillingNotConfiguredException()
     {
         var client = BuildProvider().GetRequiredService<BillingClient>();
 
