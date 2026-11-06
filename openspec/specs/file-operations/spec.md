@@ -13,29 +13,27 @@ editors ask for. Who may do each of these inside a room is specified in `room-ro
 quota) is in `room-types`; links are in `shared-links`; the lifecycle of a PDF form in `form-filling-workflow`.
 This specification does not restate those rules and refers to them where an operation depends on them.
 
-Sources: the integration tests of `products/ASC.Files/Tests/Tests/01_Files`, `02_Folders` and
-`06_Operations`, the OpenAPI contract `sdk/docspace-api-spec/docspace-backend.yaml` (operations are named by
-their `operationId`), the product release notes (v2.5 to v4.0), which say what was shipped and when, and the
-product code where a test leaves a point open (the upload helper, the file service, the template lookup and
-the thumbnail settings; the files are named per row in `verification.md`). Since v4.1 the integration host
-runs a document server that reaches the portals, so a queued conversion, a copy converted to another format
-and a PDF saved from a document are covered by tests; the content of a finished conversion and the generated
-thumbnails are not yet, and those points rest on the code and the API document, as recorded in
-`verification.md` next to this file. Where the release notes and the server disagree this specification
+Sources: the integration tests of the Files product, the OpenAPI contract (operations are named by their
+`operationId`), the product release notes (v2.5 to v4.0), which say what was shipped and when, and the product
+code where a test leaves a point open; each is named per row in the verification record next to this
+specification. Since v4.1 the integration host runs a document server that reaches the portals, so a queued
+conversion, a copy converted to another format and a PDF saved from a document are covered by tests; the
+content of a finished conversion and the generated thumbnails are not yet, and those points rest on the code
+and the API document, as that record says. Where the release notes and the server disagree this specification
 follows the server. HTTP status codes are stated where the tests assert them. Behaviour that looks like a
-defect is not written here as a requirement; it is listed under "Suspected defects" in `verification.md`,
-and a scenario that names a bug number describes what the server is meant to do while that bug is open.
+defect is not written here as a requirement; it is listed under "Suspected defects" in the verification
+record, and a scenario that names a bug number describes what the server is meant to do while that bug is
+open.
 
 ## Requirements
 
 ### Requirement: Creating a blank file by title
 
-`createFile` (`POST api/2.0/files/{folderId}/file`) and `createFileInMyDocuments` (`POST api/2.0/files/@my/file`)
-SHALL create a file from the portal's blank template, normalising the requested title to a format the portal
-can create. A title longer than 170 characters SHALL be rejected (400); a section root or a folder id the
-caller cannot resolve SHALL be refused (403). A Form filling room SHALL refuse the creation of anything but a
-PDF form. The `templateId` and `formId` sources of `createFile` are not covered by tests and are not
-specified here.
+`createFile` (`POST api/2.0/files/{folderId}/file`) and `createFileInMyDocuments` (`POST
+api/2.0/files/@my/file`) SHALL create a file from the portal's blank template, normalising the requested title
+to a format the portal can create. A title longer than 170 characters SHALL be rejected (400); a section root
+or a folder id the caller cannot resolve SHALL be refused (403). The `templateId` and `formId` sources are not
+covered by tests and are not specified here.
 
 #### Scenario: Title normalisation
 
@@ -46,7 +44,7 @@ specified here.
 #### Scenario: Template chosen by culture
 
 - **WHEN** a blank file is created
-- **THEN** the template is taken from the `new/<culture>/` folder of the template store when one exists for the caller's culture and from `new/default/` otherwise
+- **THEN** the template is taken from the template set of the caller's culture when one exists and from the default set otherwise
 - **AND** the release notes v3.0 describe the `en-US` templates as Letter and the default ones as A4
 
 #### Scenario: Every blank format
@@ -69,6 +67,7 @@ specified here.
 
 - **WHEN** a `.docx`, a text file or an HTML file is created directly in a Form filling room
 - **THEN** the system refuses the request with a client error and stores nothing (bug 84840: the refusal is reported as 500 today)
+- **AND** a Form filling room refuses the creation of anything but a PDF form
 
 ### Requirement: Creating a text or HTML file from content
 
@@ -107,11 +106,10 @@ omitted SHALL create another file with a numeric suffix.
 
 ### Requirement: Creating a folder
 
-`createFolder` SHALL create a folder with the given title under the given parent and return it with
-`parentId` equal to the parent and a positive id. Titles need not be unique: two folders with the same title
-may sit in one parent. A title of 166 characters SHALL be rejected (400); an empty title SHALL be rejected
-(400, bug 81507). Folders cannot be created in a section root, in the Knowledge folder of an AI room, nor in
-an Instructions, Knowledge or AI project room (403); a parent that does not exist is refused.
+`createFolder` SHALL create a folder with the given title under the given parent and return it with `parentId`
+equal to the parent and a positive id. A title of 166 characters SHALL be rejected (400); an empty title SHALL
+be rejected (400, bug 81507). Folders SHALL NOT be created in a section root, in the Knowledge folder of an AI
+room, nor in an Instructions, Knowledge or AI project room (403); a parent that does not exist is refused.
 
 #### Scenario: Folder in a room and in My documents
 
@@ -123,6 +121,7 @@ an Instructions, Knowledge or AI project room (403); a parent that does not exis
 
 - **WHEN** `Duplicate Folder` is created twice in My documents
 - **THEN** both calls succeed and the second folder has the same title and parent
+- **AND** titles need not be unique: two folders with the same title may sit in one parent
 
 #### Scenario: Refused parents and title length
 
@@ -135,8 +134,6 @@ an Instructions, Knowledge or AI project room (403); a parent that does not exis
 appended to the requested title. An empty or whitespace-only title SHALL leave the name unchanged (200).
 Characters a file name cannot hold are replaced with `_`. A title longer than 170 characters is rejected
 (400); a file id that does not exist answers 404. A file locked by another account SHALL NOT be renamed.
-`lastVersion` restores that version as described under versions; a `lastVersion` equal to the current version
-is rejected (400).
 
 #### Scenario: Extension handling
 
@@ -158,6 +155,7 @@ is rejected (400).
 
 - **WHEN** `updateFile` is sent with a `lastVersion` equal to the file's current version
 - **THEN** the system answers 400 "The new version cannot be the same as the current one" (bug 80773)
+- **AND** any other `lastVersion` restores that version, as described under the versions of a file
 
 #### Scenario: Locked by another member
 
@@ -185,12 +183,11 @@ answers 404 (bug 81508).
 
 ### Requirement: Single-request upload
 
-`uploadFile` (`POST api/2.0/files/{folderId}/upload`), `uploadFileToMy`, `insertFile`
-(`POST api/2.0/files/{folderId}/insert`) and `insertFileToMy` (`POST api/2.0/files/@my/insert`) SHALL store
-the uploaded part as a file of the target folder and answer with the file (the upload calls as a list holding
-exactly one file). `fileExst` follows the uploaded name and `pureContentLength` the uploaded size. On a name
-clash `createNewIfExist` `false` or omitted SHALL add a new version to the existing file, `true` SHALL keep
-both under a numeric suffix.
+`uploadFile` (`POST api/2.0/files/{folderId}/upload`), `uploadFileToMy`, `insertFile` (`POST
+api/2.0/files/{folderId}/insert`) and `insertFileToMy` (`POST api/2.0/files/@my/insert`) SHALL store the
+uploaded part as a file of the target folder and answer with the file (the upload calls as a list holding
+exactly one file). On a name clash `createNewIfExist` `false` or omitted SHALL add a new version to the
+existing file, `true` SHALL keep both under a numeric suffix.
 
 #### Scenario: Upload into a room, a subfolder and My documents
 
@@ -227,11 +224,9 @@ both under a numeric suffix.
 ### Requirement: Chunked upload session
 
 `createUploadSessionInFolder` (`POST api/2.0/files/{folderId}/session`) and the older `createUploadSession`
-(`POST .../upload/create_session`, answered inside a success envelope) SHALL reserve an upload for `fileName`
-and `fileSize` and answer a session whose 32-character `id` every later call quotes and whose `bytesTotal` is
-the declared size; nothing is stored until a part arrives. The parts go through the session routes and
-`finalizeSession` (`PUT .../session/{sessionId}/finalize`) produces the file. The session lapses twelve hours
-after the last part. Size, target and a negative `fileSize` (400) are checked first.
+(`POST .../upload/create_session`) SHALL reserve an upload for `fileName` and `fileSize`; size and target are
+checked first. Nothing is stored until a part arrives. The parts go through the session routes and
+`finalizeSession` (`PUT .../session/{sessionId}/finalize`) SHALL produce the file.
 
 #### Scenario: Whole file in chunks
 
@@ -255,14 +250,24 @@ after the last part. Size, target and a negative `fileSize` (400) are checked fi
 - **THEN** `createNewIfExist` has the upload meaning: `true` stores the file beside the same-named one under a numeric suffix, `false` adds a new version to it holding the new bytes
 - **AND** two sessions opened for one name with `createNewIfExist` true stay independent and produce two files with their own bytes
 
+#### Scenario: Session reserved
+
+- **WHEN** a session is opened on either route for a declared size
+- **THEN** the answer carries a 32-character `id` that every later call quotes and a `bytesTotal` equal to the declared size, and no file is listed
+- **AND** the older route answers inside a success envelope
+
+#### Scenario: Session lapses
+
+- **WHEN** twelve hours pass after the last part of a session
+- **THEN** the session lapses
+
 ### Requirement: Sending the parts of a session
 
 `uploadSession` (`POST .../session/{sessionId}`) SHALL append parts in arrival order, answering 200 with
 `uploaded:false` while bytes are missing and 201 with the stored file on the part that completes the declared
 size, after which the session is closed. `uploadAsyncSession` (`POST .../session/{sessionId}/upload`) SHALL
-store a part under `chunkNumber` (from 1), in any order, in parallel or resent, answering the session; the
-file appears on `finalizeSession` (201). A part above `chunkUploadSize` (402), no file part (400) or a
-`chunkNumber` below 1 (400) SHALL be refused without harming the session.
+store a part under `chunkNumber` (from 1), in any order, answering the session; the file appears on
+`finalizeSession` (201).
 
 #### Scenario: Sequential parts
 
@@ -285,6 +290,7 @@ file appears on `finalizeSession` (201). A part above `chunkUploadSize` (402), n
 
 - **WHEN** a session is finalized with a part missing, is sent a part above `chunkUploadSize`, an empty part, a request without a file part, or a part numbered 0 or -1
 - **THEN** the incomplete finalize answers 400 and stores nothing; the oversize part is refused (402), the missing part 400 and the bad numbers 400, and the session still completes byte-for-byte once the proper parts are sent
+- **AND** none of these refusals harms the session
 
 #### Scenario: Unknown session
 
@@ -295,9 +301,8 @@ file appears on `finalizeSession` (201). A part above `chunkUploadSize` (402), n
 
 Opening a session SHALL check the right to create in the folder; aborting one SHALL check the folder of the
 route and that the session belongs to the caller. An anonymous caller SHALL get 401 on every session route.
-Two accounts uploading at the same time SHALL each get their own file in their own folder, and a refused
-call SHALL leave the other account's session untouched. The part and finalize routes find the session by its
-id alone; who holds the id can write into it (see F24 in `verification.md`).
+Two accounts uploading at the same time SHALL each get their own file in their own folder, and a refused call
+SHALL leave the other account's session untouched.
 
 #### Scenario: Anonymous caller
 
@@ -313,6 +318,11 @@ id alone; who holds the id can write into it (see F24 in `verification.md`).
 
 - **WHEN** the Owner and a member each open a session in their own My documents and their parts are sent turn by turn, the member also trying to abort the Owner's session
 - **THEN** the abort answers 403, and each account's folder holds exactly one file with that account's bytes
+
+#### Scenario: Holder of the session id
+
+- **WHEN** a caller holding the id of another account's session sends a part or finalizes it
+- **THEN** the part and finalize routes find the session by its id alone, so who holds the id can write into it (suspected defect F24 of the verification record)
 
 ### Requirement: Aborting an upload session
 
@@ -359,11 +369,10 @@ equal to the number of clashes; an empty list answers an empty list. `filesTitle
 ### Requirement: Long-running operations
 
 Deletion, move, copy, duplication, bulk download, mark-as-read and emptying the Trash SHALL run in the
-background; the starting call returns the caller's operations of that kind, the new one last. `getOperationStatuses`
-(`GET api/2.0/files/fileops`, optional `id`) and `getOperationStatusesByType`
-(`GET api/2.0/files/fileops/{type}`) SHALL list only the caller's operations; a finished record is handed out
-once — by any read or by the answer to the next start — and then dropped. `returnSingleOperation` and
-`deleteAfter` SHALL narrow the answer and prune the record.
+background; the starting call returns the caller's operations of that kind, the new one last.
+`getOperationStatuses` (`GET api/2.0/files/fileops`, optional `id`) and `getOperationStatusesByType` (`GET
+api/2.0/files/fileops/{type}`) SHALL list only the caller's operations; a finished record is handed out once —
+by any read or by the answer to the next start — and then dropped.
 
 #### Scenario: Shape of an operation record
 
@@ -409,14 +418,15 @@ once — by any read or by the answer to the next start — and then dropped. `r
 - **WHEN** a move is started with `returnSingleOperation:true`
 - **THEN** the answer holds exactly one record with `Operation` Move — the operation just started
 - **AND** a move started with `deleteAfter:true` leaves `getOperationStatuses` empty once the file is at the destination, the record being removed as soon as the operation finishes
+- **AND** so `returnSingleOperation` narrows the answer and `deleteAfter` prunes the record
 
 ### Requirement: Cancelling an operation
 
 `terminateTasks` (`PUT api/2.0/files/fileops/terminate/{id}`, v4.0 "stop an operation") SHALL cancel the
-caller's operation with that id, an empty id cancelling every operation the caller is running, and answer
-with the caller's remaining operations (200). A cancelled job stops where it stands and is reported once
-afterwards, finished with `status` Canceled and the cancellation in `error`. Cancelling does not undo what
-was already done. An id that is not among the caller's operations cancels nothing and is not an error (200).
+caller's operation with that id, an empty id cancelling every operation the caller is running, and answer with
+the caller's remaining operations (200). A cancelled job stops where it stands and is reported once
+afterwards, finished with `status` Canceled and the cancellation in `error`. An id that is not among the
+caller's operations cancels nothing and is not an error (200).
 
 #### Scenario: Running operations of every kind
 
@@ -428,6 +438,7 @@ was already done. An id that is not among the caller's operations cancels nothin
 - **WHEN** a copy, a move of a folder's content, or a duplication of sixty files is terminated at 15 % and the record is read
 - **THEN** the record is finished at 100 with Canceled and a non-empty `error`; the copy left part of the files at the destination and the source whole; every moved file is in the source or the destination exactly once; the original of the duplication is whole and the partial copy stops growing; nothing keeps running
 - **AND** a second terminate of the same id answers an empty list and changes nothing
+- **AND** cancelling does not undo what was already done
 
 #### Scenario: Download stopped
 
@@ -453,11 +464,10 @@ was already done. An id that is not among the caller's operations cancels nothin
 ### Requirement: Moving files and folders
 
 `moveBatchItems` (`PUT api/2.0/files/fileops/move`) SHALL move the listed files and folders into
-`destFolderId` as one operation: a moved entry keeps its id, versions and bytes, a moved file reports the
-destination as `folderId`, a moved folder as `parentId` and keeps its content, and the source no longer lists
-the entry. With `content:true` only the folder's content moves. The caller needs create access at the
+`destFolderId` as one operation: a moved entry keeps its id, versions and bytes, and the source no longer
+lists it. With `content:true` only the folder's content moves. The caller needs create access at the
 destination and the right to remove every entry from its source (`room-role-permissions`); a batch the caller
-may not move as a whole SHALL be refused as a whole. An unknown file or folder id answers 404.
+may not move as a whole SHALL be refused as a whole.
 
 #### Scenario: File and folder moved
 
@@ -513,16 +523,16 @@ may not move as a whole SHALL be refused as a whole. An unknown file or folder i
 ### Requirement: Copying files and folders
 
 `copyBatchItems` (`PUT api/2.0/files/fileops/copy`) SHALL copy the listed files and folders into
-`destFolderId`, leaving the originals in place; `copyFileAs` (`POST api/2.0/files/file/{fileId}/copyas`)
-SHALL copy one file under a new title into a folder. A copy carries the latest content only and lives on its
-own afterwards; a copied folder arrives with its content; `content:true` copies the content alone;
-`deleteAfter:true` only removes the operation record. A destination the caller cannot write to, or a batch
-the caller cannot read in full, is refused as a whole (403); an unknown file id or destination answers 404.
+`destFolderId`, leaving the originals in place; `copyFileAs` (`POST api/2.0/files/file/{fileId}/copyas`) SHALL
+copy one file under a new title into a folder. A copy carries the latest content only and lives on its own
+afterwards. A destination the caller cannot write to, or a batch the caller cannot read in full, is refused as
+a whole (403).
 
 #### Scenario: Copy keeps the source
 
 - **WHEN** a file is copied from My documents into a Custom, Public, Collaboration or Virtual Data Room, into a subfolder several levels deep, from a room into My documents, between rooms, and two files are copied at once
 - **THEN** every copy is listed at the destination and every source is still listed where it was
+- **AND** `deleteAfter:true` keeps the source as well: it only removes the operation record
 
 #### Scenario: Latest content, then independent
 
@@ -571,10 +581,10 @@ the caller cannot read in full, is refused as a whole (403); an unknown file id 
 ### Requirement: Settling a name clash on move and copy
 
 `conflictResolveType` (`Skip`, `Overwrite`, `Duplicate`) SHALL decide what a move or copy does with an item
-whose title already exists at the destination, directly under a room or any level deep. `Skip` SHALL leave
-the destination unchanged and, for a move, leave the item at its source; `Overwrite` SHALL add the content
-as a new version of the existing entry (same id, no second file); `Duplicate` SHALL store the incoming entry
-next to the existing one under the first free numbered title, both keeping their bytes.
+whose title already exists at the destination. `Skip` SHALL leave the destination unchanged and, for a move,
+leave the item at its source; `Overwrite` SHALL add the content as a new version of the existing entry (same
+id, no second file); `Duplicate` SHALL store the incoming entry next to the existing one under the first free
+numbered title, both keeping their bytes.
 
 #### Scenario: Skip
 
@@ -585,6 +595,7 @@ next to the existing one under the first free numbered title, both keeping their
 
 - **WHEN** a same-titled file is copied or moved with `Overwrite`
 - **THEN** the destination still holds one file with the original id, now holding the incoming bytes; a copied source is untouched, a moved source is gone
+- **AND** the modes apply alike directly under a room and any level deep
 
 #### Scenario: Duplicate
 
@@ -593,12 +604,11 @@ next to the existing one under the first free numbered title, both keeping their
 
 ### Requirement: Checking a move or copy for name clashes
 
-`checkMoveOrCopyBatchItems` (`GET api/2.0/files/fileops/move`, flat query parameters `fileIds`,
-`folderIds`, `destFolderId`, `conflictResolveType`, `deleteAfter`, `content`) SHALL answer with the listed
-items — each once, with its id, title and, for a file, `folderId` — that already have a same-named entry at
-the destination, whatever `conflictResolveType` says, and an empty list when none clashes. With `content`
-true the listed folders are replaced by their content. A source id that resolves to nothing is passed over.
-Create access to the destination is required, the destination MUST be named, and nothing is changed.
+`checkMoveOrCopyBatchItems` (`GET api/2.0/files/fileops/move`, flat query parameters `fileIds`, `folderIds`,
+`destFolderId`, `conflictResolveType`, `deleteAfter`, `content`) SHALL answer with the listed items — each
+once, with its id, title and, for a file, `folderId` — that have a same-named entry at the destination,
+whatever `conflictResolveType` says, and an empty list when none clashes. Create access to the destination is
+required, the destination MUST be named, and nothing is changed.
 
 #### Scenario: Clash reported regardless of the resolve mode
 
@@ -616,6 +626,7 @@ Create access to the destination is required, the destination MUST be named, and
 
 - **WHEN** a folder whose two files both clash with the destination is checked with `content:true`
 - **THEN** the answer names both files, as the copy of the folder's content would settle them (a copy with `Skip` leaves the destination exactly as it was)
+- **AND** with `content` true the listed folders are replaced by their content
 
 #### Scenario: Destinations and batch shapes
 
@@ -639,23 +650,23 @@ Create access to the destination is required, the destination MUST be named, and
 
 ### Requirement: Checking whether a destination accepts the files
 
-`checkMoveOrCopyDestFolder` (`GET api/2.0/files/fileops/checkdestfolder`) SHALL report whether the
-destination accepts the listed files: `result` is `AllAllowed`, `PartAllowed` or `NoneAllowed` and `files`
-names the accepted ones, a file listed twice counting once. Every folder and room accepts every file except a
-Form filling room, which accepts only PDF forms. Folder ids, `conflictResolveType` and `deleteAfter` do not
-change the result; name clashes are not checked. An unwritable or unknown destination, a section root and a
-missing `destFolderId` SHALL be refused.
+`checkMoveOrCopyDestFolder` (`GET api/2.0/files/fileops/checkdestfolder`) SHALL report whether the destination
+accepts the listed files: `result` is `AllAllowed`, `PartAllowed` or `NoneAllowed` and `files` names the
+accepted ones. Every folder and room accepts every file except a Form filling room, which accepts only PDF
+forms. An unwritable or unknown destination, a section root and a missing `destFolderId` SHALL be refused.
 
 #### Scenario: Accepted files are listed
 
 - **WHEN** one or two files from My documents are checked against a Custom room
 - **THEN** `result` is AllAllowed and `files` holds exactly those titles; a Collaboration, Public or Virtual Data Room and a folder as source give AllAllowed too
 - **AND** a file listed twice gives AllAllowed naming it once, and a same-named file at the destination is not a reason to refuse
+- **AND** name clashes are not checked
 
 #### Scenario: Form filling room
 
 - **WHEN** a `.docx`, then a PDF form, then both together are checked against a Form filling room
 - **THEN** the results are NoneAllowed, AllAllowed and PartAllowed naming the form only; folder ids and `conflictResolveType` sent along change nothing, and an empty selection answers 200 naming no file
+- **AND** `deleteAfter` does not change the result either
 
 #### Scenario: Errors
 
@@ -673,15 +684,15 @@ missing `destFolderId` SHALL be refused.
 `duplicateBatchItems` (`PUT api/2.0/files/fileops/duplicate`, v2.6) SHALL copy each listed file and folder
 next to itself in the folder it lives in and answer with the caller's duplicate operations. The copy carries
 the latest content, keeps the original name with the first free index suffix so nothing is overwritten, and
-lives on its own; a duplicated folder carries its content; the `files` and `folders` of the finished
-operation name the copies. A batch the caller may not duplicate in full is refused as a whole (403).
-Duplicating a whole room is specified in `room-types`.
+lives on its own. A batch the caller may not duplicate in full is refused as a whole (403). Duplicating a
+whole room is specified in `room-types`.
 
 #### Scenario: Index suffix
 
 - **WHEN** `source_document.docx` in My documents, or a folder `folder`, is duplicated with `returnSingleOperation:true`
 - **THEN** the finished operation lists `source_document (1).docx` (or a folder `folder (1)`) and the parent now holds both
 - **AND** the suffix grows with every repetition: ` (1)`, then ` (2)` and so on, every copy holding the original's bytes; a taken `taken (1).bin` is skipped and never overwritten
+- **AND** the `files` and `folders` of the finished operation name the copies
 
 #### Scenario: Content and places
 
@@ -740,21 +751,21 @@ anonymous gets 401.
 ### Requirement: Deleting a batch
 
 `deleteBatchItems` (`PUT api/2.0/files/fileops/delete`) SHALL delete the listed files and folders in one
-operation with the same `immediately` semantics: `false` moves them to the Trash and removes them from the
-source, `true` removes them for good (a folder with its files), and a file that is already in the Trash is
-removed from it for good. A batch may mix files and folders; an empty selection answers 200; a batch naming
-an id that resolves to nothing (404) or an entry the caller may not delete (403) SHALL be refused as a whole
-before anything is queued; anonymous callers get 401.
+operation with the `immediately` semantics of a single deletion. A batch naming an id that resolves to nothing
+(404) or an entry the caller may not delete (403) SHALL be refused as a whole before anything is queued;
+anonymous callers get 401.
 
 #### Scenario: To Trash and for good
 
 - **WHEN** a file is deleted with `immediately:false`, another with `immediately:true`, and a folder holding a file with `immediately:true`
 - **THEN** the first is in the Trash and gone from the source, the second is in neither, and the folder is gone from its parent
+- **AND** `false` moves entries to the Trash and removes them from the source, `true` removes them for good, a folder with its files
 
 #### Scenario: Mixed batch and Trash item
 
 - **WHEN** two files and a folder are deleted together, and a file already in the Trash is deleted with `immediately:true`
 - **THEN** all three are gone from the source and the trashed file is gone from the Trash
+- **AND** a batch may mix files and folders, and an empty selection answers 200
 
 #### Scenario: Batch refused as a whole
 
@@ -765,11 +776,10 @@ before anything is queued; anonymous callers get 401.
 ### Requirement: The Trash remembers where an entry came from
 
 An entry in the Trash SHALL keep its origin: the Trash listing (`getFolderByFolderId` of the Trash,
-`getTrashFolder`) SHALL return every trashed file and folder when no filter is given, SHALL narrow the
-listing with `folderType` to entries that originally sat in a section or room of the listed types, and with
-`roomId` to entries from that room. Files inside a trashed folder are listed as trashed files themselves. A
-trashed file SHALL be restored by `moveBatchItems` out of the Trash, with its id, versions and bytes; its
-content is not handed out while it is in the Trash.
+`getTrashFolder`) SHALL return every trashed file and folder when no filter is given, SHALL narrow the listing
+with `folderType` to entries that originally sat in a section or room of the listed types, and with `roomId`
+to entries from that room. A trashed file SHALL be restored by `moveBatchItems` out of the Trash, with its id,
+versions and bytes.
 
 #### Scenario: Filter by origin
 
@@ -781,6 +791,7 @@ content is not handed out while it is in the Trash.
 
 - **WHEN** files and folders of one room are trashed and the Trash is read with that `roomId`
 - **THEN** every trashed entry of the room is listed, a file that was not deleted is not, and the file of a trashed subfolder is listed too
+- **AND** files inside a trashed folder are listed as trashed files themselves
 
 #### Scenario: Restored by a move out of the Trash
 
@@ -823,10 +834,8 @@ only; anonymous gets 401.
 
 Every file SHALL start at `version` 1 in `versionGroup` 1 with the comment `Created` and `fileStatus` None.
 `getFileVersionInfo` (`GET api/2.0/files/file/{fileId}/history`) SHALL list the versions, one record each;
-`getEditHistory` (`GET .../edit/history`) the editing revisions. `updateFile` with `lastVersion` N SHALL
-store that version's content again as a new version; `getFileInfo` with `version` SHALL return that version.
-Reading the history and opening a past version SHALL require the right to read the history: in a room its
-managers and content creators.
+`getEditHistory` (`GET .../edit/history`) the editing revisions. `updateFile` with `lastVersion` N SHALL store
+that version's content again as a new version; `getFileInfo` with `version` SHALL return that version.
 
 #### Scenario: New file
 
@@ -849,6 +858,7 @@ managers and content creators.
 
 - **WHEN** a member with Read access opens the current version and then `version=1` through `openedit`
 - **THEN** the current version opens and `version=1` is refused (403, bug 80683)
+- **AND** reading the history and opening a past version require the right to read the history: in a room its managers and content creators
 
 #### Scenario: Editing member reads the versions
 
@@ -857,12 +867,11 @@ managers and content creators.
 
 ### Requirement: Changing and restoring versions
 
-`changeVersionHistory` (`PUT .../history`, `version`, `continueVersion`) SHALL split the given version into
-a revision group of its own with `continueVersion:false` and fold it back with `true`. `restoreFileVersion`
-(`POST .../restoreversion`, `version` or `url`) SHALL store the chosen version's content on top of the
-history as a new version and answer the editing revisions, grown by one. Both answer 404 for an unknown file
-and 403 in an archived room; a file locked or edited by somebody else SHALL be refused; the restore route
-accepts POST only.
+`changeVersionHistory` (`PUT .../history`, `version`, `continueVersion`) SHALL split the given version into a
+revision group of its own with `continueVersion:false` and fold it back with `true`. `restoreFileVersion`
+(`POST .../restoreversion`, `version` or `url`) SHALL store the chosen version's content on top of the history
+as a new version and answer the editing revisions, grown by one. A file locked or edited by somebody else
+SHALL be refused.
 
 #### Scenario: Split and merge
 
@@ -875,6 +884,7 @@ accepts POST only.
 - **WHEN** version 1 of a two-version file is restored
 - **THEN** the answer lists the revisions, one more than before, each with id, key, version, group, user and `created`
 - **AND** a restore without `version` and `url` answers 400, of file 999999999 answers 404, in an archived room 403, and a GET to the route is not 200 and restores nothing (bug 78027)
+- **AND** the restore route accepts POST only
 
 #### Scenario: File held by somebody else
 
@@ -885,10 +895,9 @@ accepts POST only.
 
 `updateFileComment` (`PUT api/2.0/files/file/{fileId}/comment`, `version`, `comment`) SHALL set the comment of
 that one version, leaving the others alone, and answer the stored text; `getFileInfo` and `getFileVersionInfo`
-report it. An empty or null comment clears it; Unicode, quotes, line breaks and padding are stored verbatim.
-A comment longer than 255 characters is rejected (400, bug 82266) and the stored text stays; `version` 0, a
-negative version or a version the file does not have is rejected (400, bug 82271); an unknown file answers 404
-(bug 82268); a file in the Trash is refused.
+report it. An empty or null comment clears it. A comment longer than 255 characters, `version` 0, a negative
+version or a version the file does not have SHALL be rejected (400); an unknown file answers 404; a file in
+the Trash is refused.
 
 #### Scenario: Set, overwrite and clear
 
@@ -899,6 +908,7 @@ negative version or a version the file does not have is rejected (400, bug 82271
 
 - **WHEN** a 2000-character comment, version 999, version 0, version -1 or file id 999999999 is sent
 - **THEN** the system answers 400, 400, 400, 400 and 404
+- **AND** the bugs are 82266 for the length, where the stored text stays, 82271 for the versions and 82268 for the file
 
 #### Scenario: One version at a time
 
@@ -916,10 +926,8 @@ negative version or a version the file does not have is rejected (400, bug 82271
 
 `deleteFileVersions` (`PUT api/2.0/files/fileops/deleteversion`, `fileId`, `versions`, v3.1) SHALL remove the
 listed versions for good as a background operation, answering a list of operations; the file stays in its
-folder with the remaining versions and their own bytes. The current version is refused with a client error
-before anything is queued; a version the file does not have is passed over; an empty or null `versions` list
-deletes the whole file (200). The call needs the rights that deleting the file needs: an archived room and
-the Trash answer 403, an unknown file 404, anonymous 401.
+folder with the remaining versions and their own bytes. The current version SHALL be refused with a client
+error before anything is queued. The call needs the rights that deleting the file needs.
 
 #### Scenario: One and several versions
 
@@ -937,11 +945,13 @@ the Trash answer 403, an unknown file 404, anonymous 401.
 - **WHEN** the current version alone, or the current version with an old one, or the only version of a file is deleted
 - **THEN** the system answers a client error, queues nothing and leaves every version with its bytes
 - **AND** an empty list, or `versions` null, deletes the whole file: `getFileInfo` answers 404, a bystander file keeps its bytes
+- **AND** the call deleting the whole file answers 200
 
 #### Scenario: Ignored and refused
 
 - **WHEN** version 999 of a one-version file is deleted, a version already deleted is listed again, the file is in an archived room or in the Trash, or the file id is 999999999
 - **THEN** the version info is unchanged for the first two, and the others answer 403, 403 and 404
+- **AND** an anonymous caller gets 401
 
 ### Requirement: Locking and unlocking a file
 
@@ -1023,12 +1033,11 @@ resolves to nothing 404, an empty selection 200.
 
 ### Requirement: Converting a file
 
-`startFileConversion` (`PUT api/2.0/files/file/{fileId}/checkconversion`, `outputType`, `password`,
-`version`, `createNewIfExist`, `sync`) SHALL queue the conversion of a file whose format must be converted
-and answer the entries to poll; `checkConversionStatus` (`GET .../checkconversion`, `start`) reports them and
-starts the conversion with `start` true. Formats that need no conversion queue nothing (200, empty list);
-`outputType` the portal cannot produce is refused (400). Starting needs the right to convert (a manager or
-content creator), polling the right to read.
+`startFileConversion` (`PUT api/2.0/files/file/{fileId}/checkconversion`, `outputType`, `password`, `version`,
+`createNewIfExist`, `sync`) SHALL queue the conversion of a file whose format must be converted and answer the
+entries to poll; `checkConversionStatus` (`GET .../checkconversion`, `start`) reports them and starts the
+conversion with `start` true. Starting needs the right to convert (a manager or content creator), polling the
+right to read.
 
 #### Scenario: Conversion queued
 
@@ -1039,6 +1048,7 @@ content creator), polling the right to read.
 
 - **WHEN** a `.docx`, `.xlsx` or `.pptx`, a `.txt`, `.csv` or `.md`, a `.docx` with `outputType` `pdf`, or a `version` the file does not have is sent with `startConvert:true`
 - **THEN** the answer is an empty list, the status read is empty, no file and no version is added, and the source is byte for byte what was uploaded
+- **AND** the answer to the start is 200
 
 #### Scenario: Conversion that fails
 
@@ -1121,10 +1131,9 @@ when off) and `viewAccessibility.webCustomFilterEditing` true. An unknown file a
 
 `getNewFolderItems` (`GET api/2.0/files/{folderId}/news`) SHALL list the files of a folder that are new for
 the caller — created by another account since the caller's last visit — with `title`, `fileEntryType`,
-`createdBy` and `updated`; reading the folder clears the marks. `markAsRead`
-(`PUT api/2.0/files/fileops/markasread`) SHALL clear the caller's own marks of the listed files and of the
-files inside the listed folders as a MarkAsRead operation; it is idempotent, modifies nothing else, touches
-nobody else's marks and passes over ids it cannot read or that name nothing.
+`createdBy` and `updated`; reading the folder clears the marks. `markAsRead` (`PUT
+api/2.0/files/fileops/markasread`) SHALL clear the caller's own marks of the listed files and of the files
+inside the listed folders as a MarkAsRead operation.
 
 #### Scenario: Files by other members are new
 
@@ -1151,6 +1160,7 @@ nobody else's marks and passes over ids it cannot read or that name nothing.
 
 - **WHEN** two Read members see two new files and one of them marks the first as read, twice; or a member marks two files with one id repeated; or a readable room file together with the Owner's private file or with id 99999999
 - **THEN** that member's news keeps the second file only while the other member still sees both; both files are cleared; the readable file is cleared and the private or unknown id passed over — the private file keeps its bytes and the marked file its version and folder
+- **AND** `markAsRead` is idempotent and modifies nothing else
 
 #### Scenario: Lenient input
 

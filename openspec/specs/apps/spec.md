@@ -8,7 +8,8 @@ hold an opaque JSON settings document for. The specification covers the catalogu
 the lookup of one application and of its settings document (`GET /api/2.0/apps/{id}`,
 `GET /api/2.0/apps/{id}/settings`), the two writes (`PUT /api/2.0/apps/{id}/enabled`,
 `PUT /api/2.0/apps/{id}/settings`), who may read and write, the order in which a write is checked, the
-per-portal storage of the flag and the document, and the real-time event a switch produces. What an
+per-portal storage of the flag and the document, and the real-time event and the audit-trail record a
+switch produces. What an
 application does in the browser, how the client maps an identifier to a title and an icon, and which
 modules a given installation ships are the client's and the installation's business and are out of scope.
 The web plugins an administrator uploads are the `plugins` specification; the AI product behind the `ai-*`
@@ -159,7 +160,7 @@ application exists.
 
 `setEnabled` (`PUT /api/2.0/apps/{id}/enabled`) with body `{"enabled": <bool>}` SHALL store the flag for
 the current portal, overriding the configured default, and answer 200 with the application in its new
-state, the saved document untouched. Repeating the same value SHALL change nothing; the last request
+state, the saved document untouched. Repeating the same value SHALL change no state; the last request
 decides the final state. Switching one application SHALL leave every other application and the list
 length alone. Unknown identifier: 404 and nothing is created.
 
@@ -285,11 +286,11 @@ in the same way.
 
 ### Requirement: Per-portal storage and configured defaults
 
-The set of applications and the default `enabled` of each SHALL come from the installation configuration
-and SHALL NOT be changeable through the API. A portal SHALL hold no stored row for an application until
-its first write; the first write SHALL create the row with the configured default for the field it does
-not set. A stored flag or document SHALL belong to one portal only. Dropping the document SHALL keep the
-row with the flag; no operation removes a row.
+The applications and each default `enabled` SHALL come from the installation configuration and SHALL NOT
+be changeable through the API. A portal SHALL hold no stored row for an application until its first write,
+which SHALL create it with the configured default for the field it does not set. A stored flag or document
+SHALL belong to one portal only and SHALL survive its backup and restore. Dropping the document SHALL keep
+the row with the flag; no operation removes a row.
 
 #### Scenario: Default flag before any write
 
@@ -301,12 +302,17 @@ row with the flag; no operation removes a row.
 - **WHEN** portal A switches an application off
 - **THEN** portal B still reads the configured default for it
 
+#### Scenario: Restored portal
+
+- **WHEN** a portal that switched an application off and saved a document for it is backed up and restored
+- **THEN** the restored portal reports the same `id`, `enabled` and `settings` under its new tenant
+
 ### Requirement: Clients are told when an application is switched
 
 After `setEnabled` stores the flag the system SHALL queue a real-time event to the portal's connected
 clients naming the application `id` and its new `enabled`, so an open interface shows or hides the module
 without a reload; a failure to deliver SHALL NOT fail the call. `setSettings` SHALL send no event; clients
-pick a new document up on their next read. No audit-trail event is written for either write.
+pick a new document up on their next read.
 
 #### Scenario: Application switched off
 
@@ -317,6 +323,39 @@ pick a new document up on their next read. No audit-trail event is written for e
 
 - **WHEN** the owner saves a settings document
 - **THEN** no real-time event is sent
+
+### Requirement: Audit-trail record of a switch
+
+Every successful `setEnabled` SHALL add one event to the portal audit trail, read through
+`getAuditEventsByFilter`: application enabled or application disabled according to the new flag, with the
+application `id` in the event text, also when the call repeats the current value. The event SHALL be
+written asynchronously and can appear shortly after the answer. A refused `setEnabled`, one with an unknown
+identifier and every `setSettings` SHALL add no event.
+
+#### Scenario: Application switched off or on
+
+- **WHEN** the owner calls `setEnabled` once with `enabled` false (or true)
+- **THEN** the audit trail soon holds exactly one application disabled (or enabled) event naming the `id`
+
+#### Scenario: Off, then on
+
+- **WHEN** the owner switches an application off and, at least a second later, on
+- **THEN** the audit trail holds both events, the enabled event listed first as the newer one
+
+#### Scenario: Value repeated
+
+- **WHEN** the owner sends the value the application already has
+- **THEN** the state is unchanged and the audit trail still gains an event for the call
+
+#### Scenario: Refused or failed switch
+
+- **WHEN** a Room admin, a User or a Guest calls `setEnabled`, or the owner calls it with `no-such-app`
+- **THEN** no event is added
+
+#### Scenario: Document saved or dropped
+
+- **WHEN** the owner calls `setSettings`
+- **THEN** no event is added
 
 ### Requirement: Scope of the flag and the document
 

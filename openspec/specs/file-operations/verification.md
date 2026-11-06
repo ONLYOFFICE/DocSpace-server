@@ -16,7 +16,9 @@ Revised after the merge of release/v4.1.0 (`3533ad8a89`, previous state `d58816b
 runs a document server since `bbba22fbf1`, the 06_Operations suite gained the UploadSession, Statuses,
 BatchContent, CheckPreflight, CheckConversion, Comment, DeleteVersion, Duplicate and MarkAsRead content
 suites (`6109dd948e`, `04d7b2fb32`), the pre-checks, uploads and conversion were tightened in `e9cfda8d43`,
-and the listings publish `entryKind` (`7d641bf729`).
+and the listings publish `entryKind` (`7d641bf729`). The sources are the suites `01_Files`, `02_Folders` and
+`06_Operations`, the yaml and the product code named per row. No test was run in this revision: "red" means the
+test carries the mark or its summary says so, "red by code reading" means the path was read as well.
 
 ## Requirement rows
 
@@ -320,10 +322,21 @@ and the listings publish `entryKind` (`7d641bf729`).
 | Only the caller's marks (New marks of a folder and marking as read) | `MarkAsReadScopeTests.cs:54-170` | TEST-CONFIRMED |
 | Listing and copy read as their kind (Concrete kind of an entry in a mixed answer — new requirement) | `FileEntryDto.cs:49-58`; `FolderListing.cs:42-63`; `CheckPreflightTestBase.cs:136-144`; `CopyFileAsTests.cs:67-78` | TEST-CONFIRMED |
 
-Counts: 225 rows — TEST-CONFIRMED 196 (eleven of them open bugs or Nextcloud-gated, marked in the row; eight
-rows carry a CODE-ONLY or NOTES-ONLY part next to the TEST-CONFIRMED one), CODE-ONLY 26, NOTES-ONLY 3 (the
-Letter/A4 paper size, the format pairs of conversion and, as the reason for numbered chunks, the
-multi-threaded upload whose parallel case is now tested). Spec: 38 requirements, 139 scenarios.
+### Scenarios added in the 2026-11-06 length pass
+
+Requirement text was brought under 500 characters; what left it went into existing scenarios (covered by the
+rows above) or into these new ones. Requirement names are unchanged.
+
+| Scenario (requirement) | Source | Status |
+|---|---|---|
+| Session reserved (Chunked upload session) — the older route's envelope carries `id` and `bytes_total` | `UploadSessionTestBase.cs:79-110`; `UploadSessionLifecycleTests.cs:48-77` | TEST-CONFIRMED |
+| Session lapses (Chunked upload session) | yaml `createUploadSessionInFolder` (l. 23714); `ChunkedUploadSessionHolder.cs:46`; `FileUploader.cs:317` | CODE-ONLY |
+| Holder of the session id (Isolation of upload sessions) | `UploadSessionIsolationTests.cs:220-263` (observation only); `FileUploader.cs:314-411`; `UploadController.cs:336-345` (F24) | CODE-ONLY |
+| Template sets of the scenario "Template chosen by culture" are the `new/<culture>/` and `new/default/` folders of the template store | `products/ASC.Files/Core/Helpers/Global.cs:404-423` | CODE-ONLY |
+
+Counts: 251 rows, each under its strongest status (the one note row marked — is not counted): TEST-CONFIRMED
+230 (14 of them open bugs or Nextcloud-gated, marked in the row), CODE-ONLY 19, NOTES-ONLY 2; 9 rows carry a
+weaker part next to the stronger one. Spec: 38 requirements, 162 scenarios.
 
 ## Where the server differs from the release notes or the API document (spec follows the server)
 
@@ -390,7 +403,7 @@ multi-threaded upload whose parallel case is now tested). Spec: 38 requirements,
 
 ## Suspected defects (not written into the spec)
 
-Re-checked against `3533ad8a89`. FIXED rows keep their number so that `openspec/deviations.md` still resolves.
+Re-checked against `3533ad8a89`, by reading: no test was run. FIXED rows keep their number so that `openspec/deviations.md` still resolves.
 
 | # | Where | What the server does | Evidence | Verdict |
 |---|---|---|---|---|
@@ -407,14 +420,23 @@ Re-checked against `3533ad8a89`. FIXED rows keep their number so that `openspec/
 | F11 | text/HTML creation | `createNewIfExist` is inverted with respect to every upload call: `true` returns the existing file, `false` creates a new one. | `TextFileCreateTests.cs:73-118`; `HtmlFileCreateTests.cs:63-82` | STILL OPEN (written into the spec as the server does it) |
 | F12 | create file | `createFile` with a folder id that does not exist answers 403 instead of 404 (the text/HTML twin answers 404). | `FileCreateTests.cs:101-112` vs `TextFileCreateTests.cs:191-200` | STILL OPEN |
 | F13 | SDK contract | `checkMoveOrCopyBatchItems`, `checkMoveOrCopyDestFolder` and `deleteFileVersions` could not be called through the generated clients. | `CheckSdkSerializationBugTests.cs:51-83`; `CheckMoveCopyTestBase.cs:36-79`; `CheckDestFolderTestBase.cs:54-72`; `DeleteVersionTestBase.cs:62-81` (all typed now) | FIXED (`06eecdbd77`, bug 84727, for the pre-checks; `632c2fc262` for `deleteversion`) |
-| F14 | upload session | A session whose payload is below `chunkUploadSize` stores the file on the first `uploadAsyncSession` part, although the contract says that call never completes the upload: a 400-byte part of a declared 1000 bytes is listed as a truncated file; finalize answers 201 a second time; a part sent after finalize is accepted; abort after finalize answers 200; every repeated part adds a version to a brand-new file. | `UploadSessionDefectTests.cs:86-121, 164-245` (`Category=Bug`, no number yet) | NEW — open |
-| F15 | upload session | Finalize is not honest about a missing file: a session finalized without any part, or a 100-byte session that received 300 bytes, answers 201 with `uploaded` true and file id 0 and stores nothing; a short intermediate part makes finalize answer 500 ("smaller than the minimum allowed size") instead of a client error. | `UploadSessionDefectTests.cs:68-84, 123-140, 268-291` (`Category=Bug`) | NEW — open |
-| F16 | cancel | A terminate that arrives while the copy still waits for a free worker thread is dropped: the queue cancels only a task one of its threads has taken, so the copy runs to its end when the queue is busy. The sibling case (cancel before the first entry is processed ending with an empty error) is fixed in `e9cfda8d43`. | `TerminateRunningOperationsTests.cs:190-217` (`Category=Bug`); `common/ASC.Common/Threading/DistributedTaskQueue.cs` | NEW — open (flaky by load) |
-| F17 | version comments | A comment holding a character outside the Basic Multilingual Plane (an emoji) is echoed as sent but stored as `?`: the history column cannot hold it. | `CommentVersionTests.cs:128-153` (`Category=Bug`) | NEW — open |
-| F18 | move | A batch move of several folders is refused or fails as a whole when one of them holds a file open in an editing session; the folders that have nothing to do with the open file stay put. | `MoveBatchBugTests.cs:125-163` (bug 84725, red) | NEW — open |
-| F19 | create file | Creating a `.docx`, a text file or an HTML file directly in a Form filling room is refused through a plain `Exception` → 500 (the uploaded file is deleted first). | `FileDao.cs:814`; `FormsRoomNonPdfCreateTests.cs:63-92` (bug 84840, red); same root as D8 in `openspec/deviations.md` | NEW — open |
-| F20 | versions | `changeVersionHistory` on a file locked by somebody else answers 500 (plain exception "The file is currently locked by another user"); on a file open in somebody else's editing session it answers 200 and changes nothing. | `ChangeVersionHistoryHeldFileTests.cs:90-125` (bugs 84771, 84772, red) | NEW — open |
-| F21 | editing session | `startedit` on a file locked by somebody else is refused through a 500; `saveediting` into a file open in somebody else's editing session answers 200, replaces the content, grows the version and clears the editing flag. | `LockedFileStateTests.cs:94-113` (bug 84768); `EditedFileStateTests.cs:56-83` (bug 84769); both red | NEW — open |
-| F22 | rename | `updateFile` on a file locked by somebody else is refused through a 500 instead of a client error; the title stays. | `FileRenameLockedTests.cs:94-111` (bug 84842, red) | NEW — open |
-| F23 | version info | `getFileVersionInfo` answers the version list to a member invited with Editing access, although the document says only managers and content creators read the history. | `FileVersionInfoEditingAccessTests.cs:47-66` (bug 84774, red) | NEW — open |
-| F24 | upload session | The part and finalize routes find the session by its id alone: a caller without access to the target folder who holds the id can write parts into the Owner's session and finalize it into the Owner's folder; only abort checks the owner. The contract documents it; the test records the observation and pins nothing. | `UploadSessionIsolationTests.cs:220-263`; `FileUploader.cs:314-411` (no owner check) vs `423-438` | NEW — open (security smell, design decision pending) |
+| F14 | upload session | A session whose payload is below `chunkUploadSize` stores the file on the first `uploadAsyncSession` part, although the contract says that call never completes the upload: a 400-byte part of a declared 1000 bytes is listed as a truncated file; finalize answers 201 a second time; a part sent after finalize is accepted; abort after finalize answers 200; every repeated part adds a version to a brand-new file. | `UploadSessionDefectTests.cs:86-121, 164-245` (`Category=Bug`, no number yet) | STILL OPEN (new) — red by code reading: a session below the limit runs without chunks (`CommonChunkedUploadSessionHolder.cs:53-57`), the first part is saved whenever it fits the declared size and each repeat adds a version (`FileDao.cs:2140-2152, 2184-2191`), and finalize skips closing such a session (`UploadController.cs:336-345`) |
+| F15 | upload session | Finalize is not honest about a missing file: a session finalized without any part, or a 100-byte session that received 300 bytes, answers 201 with `uploaded` true and file id 0 and stores nothing; a short intermediate part makes finalize answer 500 ("smaller than the minimum allowed size") instead of a client error. | `UploadSessionDefectTests.cs:68-84, 123-140, 268-291` (`Category=Bug`) | STILL OPEN (new) — no part and over-declared size: red by code reading (nothing saved, finalize skipped, file id 0: `FileDao.cs:2147`, `UploadController.cs:336-345`); the short-chunk 500 rests on the test's summary, the storage refusal was not traced |
+| F16 | cancel | A terminate that arrives while the copy still waits for a free worker thread is dropped: the queue cancels only a task one of its threads has taken, so the copy runs to its end when the queue is busy. The sibling case (cancel before the first entry is processed ending with an empty error) is fixed in `e9cfda8d43`. | `TerminateRunningOperationsTests.cs:190-217` (`Category=Bug`); `common/ASC.Common/Threading/DistributedTaskQueue.cs` | STILL OPEN (new, flaky by load) — red by the test's remarks; the queue was not re-read |
+| F17 | version comments | A comment holding a character outside the Basic Multilingual Plane (an emoji) is echoed as sent but stored as `?`: the history column cannot hold it. | `CommentVersionTests.cs:128-153` (`Category=Bug`) | STILL OPEN (new) — red by the test's mark; the column was not re-read |
+| F18 | move | A batch move of several folders is refused or fails as a whole when one of them holds a file open in an editing session; the folders that have nothing to do with the open file stay put. | `MoveBatchBugTests.cs:125-163` (bug 84725, red) | STILL OPEN (new) — red by the test's mark; the operation was not traced |
+| F19 | create file | Creating a `.docx`, a text file or an HTML file directly in a Form filling room is refused through a plain `Exception` → 500 (the uploaded file is deleted first). | `FileDao.cs:814`; `FormsRoomNonPdfCreateTests.cs:63-92` (bug 84840, red); same root as D8 in `openspec/deviations.md` | STILL OPEN (new) — red by the test's mark and `FileDao.cs:814` |
+| F20 | versions | `changeVersionHistory` on a file locked by somebody else answers 500 (plain exception "The file is currently locked by another user"); on a file open in somebody else's editing session it answers 200 and changes nothing. | `ChangeVersionHistoryHeldFileTests.cs:90-125` (bugs 84771, 84772, red) | STILL OPEN (new) — red by the tests' marks |
+| F21 | editing session | `startedit` on a file locked by somebody else is refused through a 500; `saveediting` into a file open in somebody else's editing session answers 200, replaces the content, grows the version and clears the editing flag. | `LockedFileStateTests.cs:94-113` (bug 84768); `EditedFileStateTests.cs:56-83` (bug 84769); both red | STILL OPEN (new) — red by the tests' marks |
+| F22 | rename | `updateFile` on a file locked by somebody else is refused through a 500 instead of a client error; the title stays. | `FileRenameLockedTests.cs:94-111` (bug 84842, red) | STILL OPEN (new) — red by the test's mark |
+| F23 | version info | `getFileVersionInfo` answers the version list to a member invited with Editing access, although the document says only managers and content creators read the history. | `FileVersionInfoEditingAccessTests.cs:47-66` (bug 84774, red) | STILL OPEN (new) — red by the test's mark |
+| F24 | upload session | The part and finalize routes find the session by its id alone: a caller without access to the target folder who holds the id can write parts into the Owner's session and finalize it into the Owner's folder; only abort checks the owner. The contract documents it; the test records the observation and pins nothing. | `UploadSessionIsolationTests.cs:220-263`; `FileUploader.cs:314-411` (no owner check) vs `423-438` | STILL OPEN (new, security smell, design decision pending) — by code reading: no owner check on the part and finalize paths |
+| F25 | pre-checks | `checkMoveOrCopyDestFolder` counted a repeated id as refused (PartAllowed); `checkMoveOrCopyBatchItems` ignored `content`; both accepted the Rooms, Forms and AI Agents roots the copy refuses. | `CheckPreflightBugTests.cs:70-180`; `OperationController.cs:454-460`; `FileStorageService.cs:3304-3309, 3375-3378, 3432-3436` | FIXED (`e9cfda8d43`) — guards read in the code; the test should be green, not run |
+| F26 | conversion | An `outputType` the portal cannot produce was queued and silently converted to the internal format; a dot-less value (`pdf`) never matched. | `FileConversionOutputTypeBugTests.cs:48-77` (accepts 400 or an empty answer); `FileStorageService.cs:3567-3578`; `FileConverter.cs:311-313` | FIXED (`e9cfda8d43`) — guards read in the code; not run |
+| F27 | move | `moveBatchItems` with a folder id that does not exist answered 500. | `MoveBatchBugTests.cs:49-76` (bug 84436); `CopyPermissionsCheck.cs:224-237` | FIXED (`184d90789e`, the shared check of F3; no commit names 84436) |
+| F28 | move | A file moved with `Duplicate` onto a same-named file kept the clashing title. | `MoveBatchBugTests.cs:84-123` (bug 84437); `FileMoveCopyOperation.cs:805-812, 1059-1068` | FIXED (`77dd46d96a`) |
+| F29 | upload session | A numbered part without a file part answered 500; part 0 or -1 was stored under a name the assembly never reads; `fileSize` -1 opened a session that could never finish. | `UploadSessionDefectTests.cs:49-66, 142-162, 247-266`; `FileUploader.cs:207-208, 324-329`; `UploadController.cs:580-592, 611-627` | FIXED (`e9cfda8d43`) — the size and number guards read in the code; not run |
+
+Bug tests named in this revision and their rows: `UploadSessionDefectTests` F14, F15, F29; `CheckPreflightBugTests`
+F25; `CheckSdkSerializationBugTests` F13 (bug 84727, no new defect); `FileConversionOutputTypeBugTests` F26;
+`MoveBatchBugTests` F18, F27, F28.
