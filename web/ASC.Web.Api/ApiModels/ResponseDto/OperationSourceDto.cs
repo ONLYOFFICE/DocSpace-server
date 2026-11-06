@@ -40,11 +40,18 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class OperationSourceDto
 {
     /// <summary>
-    /// The sub-account the part fell on, by its number in the accounting service: `0` is the money paid into the
-    /// wallet, `53` the bonuses credited to the portal.
+    /// The sub-account the part fell on, by its number in the accounting service. To tell bonuses from the money paid
+    /// into the wallet, read `isBonus` rather than comparing this number.
     /// </summary>
     /// <example>53</example>
     public int SubAccount { get; init; }
+
+    /// <summary>
+    /// Whether the part fell on the bonuses credited to the portal; `false` means it fell on the money paid into the
+    /// wallet.
+    /// </summary>
+    /// <example>true</example>
+    public bool IsBonus { get; init; }
 
     /// <summary>
     /// The part of the movement's amount on that sub-account, in the `currency` of the movement.

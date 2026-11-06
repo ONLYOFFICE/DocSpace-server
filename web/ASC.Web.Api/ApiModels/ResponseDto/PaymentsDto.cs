@@ -212,7 +212,7 @@ public class OperationDto
     /// may be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a movement
     /// the billing service reported without the split.
     /// </summary>
-    /// <example>[{"subAccount": 53, "amount": 4.5}, {"subAccount": 0, "amount": 9.5}]</example>
+    /// <example>[{"subAccount": 53, "isBonus": true, "amount": 4.5}, {"subAccount": 0, "isBonus": false, "amount": 9.5}]</example>
     public List<OperationSourceDto> Sources { get; set; }
     /// <summary>
     /// What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter

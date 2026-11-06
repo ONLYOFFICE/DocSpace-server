@@ -1345,7 +1345,12 @@ public class Operation
 public class OperationSource
 {
     /// <summary>
-    /// The sub-account of the customer: 0 for the money paid into the wallet, 53 for bonuses.
+    /// The number of the sub-account the accounting service keeps the bonuses of a customer on.
+    /// </summary>
+    public const int BonusSubAccount = 53;
+
+    /// <summary>
+    /// The sub-account of the customer: 0 for the money paid into the wallet, <see cref="BonusSubAccount"/> for bonuses.
     /// </summary>
     public int SubAccount { get; init; }
 
@@ -1353,6 +1358,15 @@ public class OperationSource
     /// The part of the operation amount on the sub-account.
     /// </summary>
     public decimal Amount { get; init; }
+
+    /// <summary>
+    /// Whether the part fell on the bonuses rather than on the money paid into the wallet.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsBonus
+    {
+        get => SubAccount == BonusSubAccount;
+    }
 }
 
 /// <summary>
