@@ -55,18 +55,18 @@ import tools.jackson.databind.json.JsonMapper;
  * Publishes messages that must not be lost while the broker is unavailable.
  *
  * <p>Each message is sent and the broker's confirm awaited. If the broker cannot be reached, or
- * does not confirm the message, it is kept in {@link PendingMessageRepository} instead, and {@link
- * #relayDue(int)} sends it again later. In normal operation nothing is stored, so this costs one
- * confirm round trip per message and no database write. A message is only lost if the broker and
- * the database are both unavailable at the same moment, in which case {@link #send} throws.
+ * does not confirm the message, it is kept in {@link PendingMessageRepository} instead, and sends
+ * it again later. In normal operation nothing is stored, so this costs one confirm round trip per
+ * message and no database write. A message is only lost if the broker and the database are both
+ * unavailable at the same moment, in which case {@link #send} throws.
  */
 @Slf4j
 @Component
 @ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class RabbitPersistableMessagePublisher {
   static final Duration MAX_PENDING_AGE = Duration.ofHours(24);
+  static final long CONFIRM_TIMEOUT_MS = 5_000;
 
-  private static final long CONFIRM_TIMEOUT_MS = 5_000;
   private static final String CONTENT_TYPE_HEADER = "contentType";
   private static final Duration FIRST_RETRY_DELAY = Duration.ofSeconds(30);
   private static final Duration MAX_RETRY_DELAY = Duration.ofMinutes(10);
@@ -153,12 +153,25 @@ public class RabbitPersistableMessagePublisher {
    * here is safe to deliver late: cleanups scoped to a user or a tenant carry their removal moment.
    * A message given up is logged with its body, which names what was not cleaned up.
    *
+   * <p>The round also stops once {@code budget} has passed, leaving the rest for the next round.
+   * The messages read are not claimed, so a round must end while the lock that keeps other
+   * instances from relaying is still held, or they would read and send the same messages again. A
+   * message started before the budget ran out may still take up to the confirm timeout of {@value
+   * #CONFIRM_TIMEOUT_MS} ms.
+   *
    * @param limit the maximum number of messages to send in this round
+   * @param budget how long the round may go on starting new messages
    * @return the number of messages sent
    */
-  public int relayDue(int limit) {
+  public int relayDue(int limit, Duration budget) {
+    var deadline = System.nanoTime() + budget.toNanos();
     var sent = 0;
     for (var pending : store.findDue(limit)) {
+      if (System.nanoTime() - deadline >= 0) {
+        log.info("Relay round ran out of its {} budget; the rest waits for the next round", budget);
+        break;
+      }
+
       var expired = pending.ageSeconds() > MAX_PENDING_AGE.toSeconds();
       try {
         sendConfirmed(pending.exchange(), pending.routingKey(), toMessage(pending));

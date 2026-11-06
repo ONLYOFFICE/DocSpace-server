@@ -34,6 +34,7 @@
 package com.asc.authorization.application.service;
 
 import com.asc.common.messaging.publisher.RabbitPersistableMessagePublisher;
+import java.time.Duration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
@@ -45,7 +46,8 @@ import org.springframework.stereotype.Component;
  * Sends the messages the broker could not take once it is back.
  *
  * <p>Runs on one instance at a time per database, under a ShedLock lock, and sends a bounded batch
- * per round, so a long outage drains steadily instead of flooding the broker when it returns.
+ * per round within a time budget shorter than the lock, so a long outage drains steadily instead of
+ * flooding the broker when it returns.
  */
 @Slf4j
 @Component
@@ -53,6 +55,7 @@ import org.springframework.stereotype.Component;
 @ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class PendingMessageRelayService {
   private static final int BATCH_SIZE = 100;
+  private static final Duration ROUND_BUDGET = Duration.ofSeconds(40);
 
   private final RabbitPersistableMessagePublisher rabbitPersistableMessagePublisher;
 
@@ -61,7 +64,7 @@ public class PendingMessageRelayService {
   @SchedulerLock(name = "pending_messages_relay", lockAtMostFor = "PT1M")
   public void relay() {
     try {
-      rabbitPersistableMessagePublisher.relayDue(BATCH_SIZE);
+      rabbitPersistableMessagePublisher.relayDue(BATCH_SIZE, ROUND_BUDGET);
     } catch (Exception e) {
       log.error("Failed to relay pending messages", e);
     }

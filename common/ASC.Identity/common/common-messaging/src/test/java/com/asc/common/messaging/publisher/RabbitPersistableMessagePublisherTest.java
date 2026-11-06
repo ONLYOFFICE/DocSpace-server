@@ -50,6 +50,7 @@ import com.asc.common.service.ports.output.repository.PendingMessageRepository;
 import com.asc.common.service.ports.output.repository.PendingMessageRepository.PendingMessage;
 import java.net.ConnectException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,6 +67,7 @@ import org.springframework.amqp.support.converter.SimpleMessageConverter;
 
 class RabbitPersistableMessagePublisherTest {
   private static final String EXCHANGE = "exchange";
+  private static final Duration BUDGET = Duration.ofSeconds(40);
 
   private RabbitTemplate rabbitTemplate;
   private PendingMessageRepository store;
@@ -168,7 +170,7 @@ class RabbitPersistableMessagePublisherTest {
                 new PendingMessage(
                     7, EXCHANGE, "key", headers.getValue(), "payload".getBytes(), 0, 10)));
 
-    assertEquals(1, publisher.relayDue(10));
+    assertEquals(1, publisher.relayDue(10, BUDGET));
 
     var resent = ArgumentCaptor.forClass(Message.class);
 
@@ -191,7 +193,7 @@ class RabbitPersistableMessagePublisherTest {
                 new PendingMessage(1, EXCHANGE, "", "{}", new byte[0], 2, 10),
                 new PendingMessage(2, EXCHANGE, "", "{}", new byte[0], 0, 10)));
 
-    assertEquals(0, publisher.relayDue(10));
+    assertEquals(0, publisher.relayDue(10, BUDGET));
 
     verify(store).postpone(1, RabbitPersistableMessagePublisher.retryDelay(3).toSeconds());
     verify(store, never()).postpone(eq(2L), anyLong());
@@ -219,7 +221,7 @@ class RabbitPersistableMessagePublisherTest {
         .thenReturn(
             List.of(new PendingMessage(1, EXCHANGE, "", "{}", "payload".getBytes(), 150, tooOld)));
 
-    assertEquals(1, publisher.relayDue(10));
+    assertEquals(1, publisher.relayDue(10, BUDGET));
 
     verify(store).delete(1);
     verify(rabbitTemplate)
@@ -247,7 +249,7 @@ class RabbitPersistableMessagePublisherTest {
                   new PendingMessage(1, "gone", "", "{}", body.getBytes(), 150, tooOld),
                   new PendingMessage(2, EXCHANGE, "", "{}", new byte[0], 0, 10)));
 
-      assertEquals(1, publisher.relayDue(10));
+      assertEquals(1, publisher.relayDue(10, BUDGET));
     } finally {
       logger.detachAppender(appender);
     }
@@ -264,5 +266,35 @@ class RabbitPersistableMessagePublisherTest {
                     event.getLevel() == Level.ERROR
                         && event.getFormattedMessage().contains(body)
                         && event.getFormattedMessage().contains("gone")));
+  }
+
+  @Test
+  void givenSlowConfirms_whenRelaying_thenRoundEndsWithinBudget() {
+    var confirmDelayMs = 200L;
+    doAnswer(
+            invocation -> {
+              Thread.sleep(confirmDelayMs);
+              invocation
+                  .getArgument(3, CorrelationData.class)
+                  .getFuture()
+                  .complete(new CorrelationData.Confirm(true, null));
+              return null;
+            })
+        .when(rabbitTemplate)
+        .send(anyString(), anyString(), any(Message.class), any(CorrelationData.class));
+
+    var due = new ArrayList<PendingMessage>();
+    for (long id = 1; id <= 10; id++)
+      due.add(new PendingMessage(id, EXCHANGE, "", "{}", new byte[0], 0, 10));
+    when(store.findDue(10)).thenReturn(due);
+
+    var budget = Duration.ofMillis(500);
+    var started = System.nanoTime();
+    var sent = publisher.relayDue(10, budget);
+    var took = Duration.ofNanos(System.nanoTime() - started);
+
+    assertTrue(sent > 0 && sent < 10, "sent " + sent + " of 10");
+    assertTrue(took.compareTo(budget.plusMillis(confirmDelayMs * 2)) < 0, "the round took " + took);
+    verify(store, times(sent)).delete(anyLong());
   }
 }
