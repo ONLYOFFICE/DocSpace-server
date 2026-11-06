@@ -55,12 +55,12 @@ global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-global using ASC.Files.Core;
-global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Data.Backup;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
+global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Services.NotifyService;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
@@ -100,3 +100,8 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 
 global using MimeKit;
+
+global using ZiggyCreatures.Caching.Fusion;
+
+global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
+global using StudioNotifyServiceHelper = ASC.Web.Core.Notify.StudioNotifyServiceHelper;
