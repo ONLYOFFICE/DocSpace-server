@@ -233,6 +233,21 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     hasBody: true,
   },
   {
+    method: "GET",
+    path: "/document-agent/settings",
+    tag: "Settings",
+    operationId: "aiSettingsGetDocumentAgent",
+    summary: "Get the document agent settings",
+  },
+  {
+    method: "PUT",
+    path: "/document-agent/settings",
+    tag: "Settings",
+    operationId: "aiSettingsSetDocumentAgent",
+    summary: "Set the document agent settings",
+    hasBody: true,
+  },
+  {
     method: "POST",
     path: "/vectorization/tasks",
     tag: "Vectorization",
@@ -298,7 +313,8 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
 // (`operation-tag-defined`), so a new custom tag belongs here as well.
 export const CUSTOM_TAG_DOCS: Readonly<Record<string, string>> = {
   Export: "Markdown → docx export.",
-  Metadata: "AI-proposed custom metadata fields for files, and AI-filled values of an entry's fields.",
+  Metadata:
+    "AI-proposed custom metadata fields for files, and AI-filled values of an entry's fields.",
   Skills: "AI-written skills for Instructions rooms.",
   Settings: "Portal-wide, vectorization and per-user AI settings.",
   Vectorization: "Vectorization tasks over portal content.",

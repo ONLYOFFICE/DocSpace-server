@@ -462,6 +462,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), inside the service's `response` envelope, proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
   aiSettingsSetToolMode:
     "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum with 400; the answer is the stored mode inside the service's `response` envelope. The mode applies to every chat of the user in the portal.",
+  aiSettingsGetDocumentAgent:
+    "Returns the portal's document agent settings, as the Document Agent tab of the portal settings shows them: `enabled` (whether the `document_agent` tool is offered to the chat), `profileId` (the model profile its tasks run on, null for the chat's own model), `reasoning` (`default` for the model's own default, else `off`, `low`, `medium`, `high`, `max`), `maxToolCalls` and `maxFileBytes` (the limits of one task, at most the agent's own ceilings of 150 and 32 MiB), `taskLog` (whether every task leaves its full log as a file) and `taskLogFolderId` (where the logs go, null for next to the task's results). A portal that never saved any gets the defaults. Any signed-in user may read them.",
+  aiSettingsSetDocumentAgent:
+    "Replaces the portal's document agent settings and returns the stored result. The whole object is required, every field as `GET api/2.0/ai/document-agent/settings` returns it; a limit above the agent's ceiling, an unknown reasoning level or a missing field is rejected rather than coerced. Only a portal administrator may write.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -816,6 +820,10 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiPreferencesGetToolPermissionMode: { "400": "`entityId` is not a room ID." },
   aiSettingsSetUser: { "400": "`chatRecommendedModelVisible` is missing or not a boolean." },
   aiSettingsSetToolMode: { "400": "`mode` is not one of the `ToolPermissionMode` members." },
+  aiSettingsSetDocumentAgent: {
+    "400": "A field is missing, has the wrong type, or a limit is above the agent's ceiling.",
+    "403": "The caller is not a portal administrator.",
+  },
   aiPreferencesSetReasoningLevel: {
     "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
   },
@@ -1260,6 +1268,20 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
       "`{ mode }` with the AI service's `ToolPermissionMode` enum, proxied unchanged; the " +
       "service rejects anything outside the enum.",
     example: { mode: 1 },
+  },
+  aiSettingsSetDocumentAgent: {
+    description:
+      "The portal's document agent settings, every field required. Read the current one with " +
+      "`GET api/2.0/ai/document-agent/settings` and send it back changed.",
+    example: {
+      enabled: true,
+      profileId: null,
+      reasoning: "default",
+      maxToolCalls: 150,
+      maxFileBytes: 33554432,
+      taskLog: false,
+      taskLogFolderId: null,
+    },
   },
   aiSettingsSetVectorization: {
     description:

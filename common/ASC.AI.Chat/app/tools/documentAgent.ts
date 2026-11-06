@@ -58,6 +58,13 @@ import { DOCUMENT_AGENT_TYPE, getDocumentAgent } from "../../config/index.js";
 import type { DocumentAgentConfig } from "../../config/index.js";
 import { storage } from "../storage/index.js";
 import {
+  DOCUMENT_AGENT_DEFAULTS,
+  type DocumentAgentSettings as TenantSettings,
+  readDocumentAgentSettings,
+  type ReasoningLevel,
+} from "../storage/documentAgentSettingsStorage.js";
+import { reasoningFor } from "./documentAgentReasoning.js";
+import {
   canTakeUpload,
   getFolderInfo,
   getMyDocumentsFolderId,
@@ -150,8 +157,12 @@ const TOOL: TMCPItem = {
 };
 
 export const documentAgentTools: ToolsAdapter = {
+  // Offered when the server has an agent and the portal has not switched it off.
   async getTools(): Promise<Record<string, TMCPItem[]>> {
-    return getDocumentAgent() ? { [DOCUMENT_AGENT_TYPE]: [TOOL] } : {};
+    if (!getDocumentAgent()) {
+      return {};
+    }
+    return (await tenantSettings()).enabled ? { [DOCUMENT_AGENT_TYPE]: [TOOL] } : {};
   },
 
   async callTool(
@@ -221,7 +232,11 @@ async function run(
   entityId: string | undefined,
   onprogress: ProgressCallback | undefined,
 ): Promise<unknown> {
-  const profile = await resolveProfile();
+  const tenant = await tenantSettings();
+  if (!tenant.enabled) {
+    return { error: "The document agent is switched off on this portal." };
+  }
+  const profile = await resolveProfile(tenant.profileId);
   if (!profile) {
     return { error: "No model is configured for this chat, the document agent cannot run." };
   }
@@ -233,27 +248,34 @@ async function run(
   if (!targetFolderId) {
     return { error: "There is no folder the resulting files could be saved into." };
   }
+  const logFolderId = tenant.taskLog ? await resolveLogTarget(tenant, targetFolderId) : undefined;
 
   // The result files come back through this service (see documentAgentFiles.ts
   // receive): the agent posts each one here, with the shared token and the
   // user's session, and it is inserted into the target folder as the user.
-  const outputsUrl = new URL(`${config.filesUrl}${DOCUMENT_AGENT_OUTPUTS_PATH}`);
-  outputsUrl.searchParams.set(DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM, targetFolderId);
   const settings: DocumentAgentSettings = {
-    model: modelSettings(profile, config),
+    model: modelSettings(profile, config, reasoningFor(profile, tenant.reasoning)),
     mcpServers,
-    outputs: { url: outputsUrl.href, headers: ownServerHeaders(config) },
+    outputs: { url: outputsUrl(config, targetFolderId), headers: ownServerHeaders(config) },
+    // The task's log goes the same way as its results, into the folder the
+    // portal chose for logs (or the results' own), as task-log.md.
+    ...(logFolderId === undefined
+      ? {}
+      : { log: { url: outputsUrl(config, logFolderId), headers: ownServerHeaders(config) } }),
+    // The portal's limits, under the server's own: appsettings may still
+    // pin a lower tool budget, and the outputs endpoint takes no more than
+    // MAX_FILE_BYTES whatever the portal says.
     limits: {
       taskTimeoutSeconds: config.taskTimeoutSeconds,
-      maxFileBytes: MAX_FILE_BYTES,
-      ...(config.maxToolCalls === undefined ? {} : { maxToolCalls: config.maxToolCalls }),
+      maxFileBytes: Math.min(tenant.maxFileBytes, MAX_FILE_BYTES),
+      maxToolCalls: Math.min(tenant.maxToolCalls, config.maxToolCalls ?? Infinity),
     },
   };
   logger.info(
     `${DOCUMENT_AGENT_TOOL_NAME}: start entityId=${entityId ?? "-"} profile=${profile.id} ` +
       `model=${profile.modelId} files=[${inputFileIds.join(",")}] ` +
       `folders=[${folderIds.join(",")}] servers=[${Object.keys(mcpServers).join(",")}] ` +
-      `target=${targetFolderId}`,
+      `target=${targetFolderId} log=${logFolderId ?? "-"}`,
   );
 
   // The steps shown live are the agent's own, in the language of the request:
@@ -278,6 +300,7 @@ async function run(
   // address, so only the file id in it is ours. The title is read back: a
   // same-named file was saved under a numbered one.
   const saved: { id: string; title: string; url: string }[] = [];
+  let log: { id: string; title: string; url: string } | undefined;
   for (const artifact of result.artifacts) {
     const id = savedFileId(artifact.url);
     if (id === undefined) {
@@ -285,19 +308,31 @@ async function run(
       continue;
     }
     const info = await getFileInfo(id).catch(() => undefined);
-    saved.push({ id, title: info?.title ?? artifact.name, url: fileEditorUrl(id) });
+    const file = { id, title: info?.title ?? artifact.name, url: fileEditorUrl(id) };
+    // The task's log is not a result: it goes back on its own, for the chat
+    // to offer next to the files.
+    if (artifact.kind === "log") {
+      log = file;
+    } else {
+      saved.push(file);
+    }
   }
+  const extras = {
+    ...(saved.length > 0 ? { files: saved } : {}),
+    ...(log === undefined ? {} : { log }),
+  };
 
   if (result.state !== "completed") {
     return {
       error: `The document agent did not finish the task (${result.state}): ${result.text || "no details"}`,
-      ...(saved.length > 0 ? { data: { files: saved } } : {}),
+      ...(Object.keys(extras).length > 0 ? { data: extras } : {}),
     };
   }
   return {
     data: {
       summary: result.text,
       files: saved,
+      ...(log === undefined ? {} : { log }),
     },
   };
 }
@@ -312,12 +347,60 @@ function savedFileId(url: string): string | undefined {
   return id ? id : undefined;
 }
 
-// The chat's own model: the round's profile when the handler recorded one,
-// else the portal's chat default. Read raw,
+/** The outputs endpoint of this service with the folder the files go into. */
+function outputsUrl(config: DocumentAgentConfig, folderId: string): string {
+  const url = new URL(`${config.filesUrl}${DOCUMENT_AGENT_OUTPUTS_PATH}`);
+  url.searchParams.set(DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM, folderId);
+  return url.href;
+}
+
+// The portal's settings for the agent; a read that fails leaves the
+// defaults in force rather than the tool unavailable.
+async function tenantSettings(): Promise<TenantSettings> {
+  try {
+    return await readDocumentAgentSettings();
+  } catch (err) {
+    logger.warn(
+      `${DOCUMENT_AGENT_TOOL_NAME}: settings not read, defaults in force: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return DOCUMENT_AGENT_DEFAULTS;
+  }
+}
+
+// Where the task's log goes: the folder the portal chose when the user may
+// create there, else next to the results. A chosen folder the user cannot
+// write to would only make the agent's delivery fail.
+async function resolveLogTarget(tenant: TenantSettings, resultsFolderId: string): Promise<string> {
+  const chosen = tenant.taskLogFolderId;
+  if (chosen === null || chosen === resultsFolderId) {
+    return resultsFolderId;
+  }
+  const info = await getFolderInfo(chosen).catch(() => undefined);
+  if (canTakeUpload(info)) {
+    return chosen;
+  }
+  logger.warn(
+    `${DOCUMENT_AGENT_TOOL_NAME}: log folder ${chosen} is not writable for the user, logging next to the results`,
+  );
+  return resultsFolderId;
+}
+
+// The model the task runs on: the portal's pick for the agent when it has
+// one that still exists, else the chat's own (the round's profile when the
+// handler recorded one, else the portal's chat default). Read raw,
 // as the C# storage serves it: the in-process override would point an
 // `onlyoffice` profile at this service's own address, which the agent, on
 // another host, cannot reach (see modelSettings).
-async function resolveProfile(): Promise<Profile | undefined> {
+async function resolveProfile(pickedProfileId: string | null): Promise<Profile | undefined> {
+  if (pickedProfileId) {
+    const picked = await storage.profiles.readByIdRaw(pickedProfileId);
+    if (picked) {
+      return picked;
+    }
+    logger.warn(
+      `${DOCUMENT_AGENT_TOOL_NAME}: the portal's agent profile ${pickedProfileId} is gone, using the chat's`,
+    );
+  }
   const roundProfileId = getRoundProfileId();
   if (roundProfileId) {
     const profile = await storage.profiles.readByIdRaw(roundProfileId);
@@ -356,12 +439,13 @@ const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 function modelSettings(
   profile: Profile,
   config: DocumentAgentConfig,
+  reasoning: ReasoningLevel,
 ): DocumentAgentSettings["model"] {
   const model: DocumentAgentSettings["model"] = {
     provider: profile.providerType,
     baseUrl: profile.baseUrl,
     modelId: profile.modelId,
-    reasoning: reasoningOf(profile),
+    reasoning,
   };
   if (profile.key) {
     model.apiKey = profile.key;
@@ -408,17 +492,6 @@ function tenantHeaders(): Record<string, string> {
     ...(host ? { "x-forwarded-host": host } : {}),
     ...(proto ? { "x-forwarded-proto": proto } : {}),
   };
-}
-
-function reasoningOf(profile: Profile): DocumentAgentSettings["model"]["reasoning"] {
-  const support = profile.reasoningSupport;
-  const thinks = support
-    ? support.thinks && (!support.canDisable || profile.reasoning === true)
-    : profile.reasoning === true;
-  if (!thinks) {
-    return "off";
-  }
-  return support?.defaultDepth ?? "medium";
 }
 
 // The ids the model named plus the files attached to the message, once each.

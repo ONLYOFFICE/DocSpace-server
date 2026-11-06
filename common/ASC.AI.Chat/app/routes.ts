@@ -59,6 +59,7 @@ import { preferencesController } from "./controllers/preferencesController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
+import { documentAgentController } from "./controllers/documentAgentController.js";
 import { threadsController } from "./controllers/threadsController.js";
 import { toolsController } from "./controllers/toolsController.js";
 import { vectorizationController } from "./controllers/vectorizationController.js";
@@ -212,6 +213,8 @@ export default function registerRoutes(app: Application): void {
   router.put("/config/user", settingsController.setUserSettings);
   router.get("/config/tool-mode", settingsController.getToolMode);
   router.put("/config/tool-mode", settingsController.setToolMode);
+  router.get("/document-agent/settings", documentAgentController.getSettings);
+  router.put("/document-agent/settings", documentAgentController.setSettings);
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
 
