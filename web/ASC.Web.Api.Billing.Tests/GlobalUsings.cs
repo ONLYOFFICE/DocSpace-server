@@ -34,10 +34,13 @@
 
 extern alias ASCWebApi;
 
+global using System.Buffers.Text;
 global using System.Collections.Concurrent;
+global using System.Collections.Specialized;
 global using System.Globalization;
 global using System.Net;
 global using System.Reflection;
+global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Nodes;

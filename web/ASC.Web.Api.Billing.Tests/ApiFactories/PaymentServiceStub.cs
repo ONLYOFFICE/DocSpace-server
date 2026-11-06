@@ -141,6 +141,15 @@ public sealed class PaymentServiceStub : IDisposable
     }
 
     /// <summary>
+    /// The spending limit <paramref name="id"/> is deleted by somebody else just before the next request that changes or
+    /// deletes it reaches accounting - the race between the stack's own check that the limit is there and the change.
+    /// </summary>
+    public void ServiceLimitGoneBeforeNextChange(int id)
+    {
+        _serviceLimits.GoneBeforeNextChange(id);
+    }
+
+    /// <summary>
     /// The spending limits accounting holds on the account <paramref name="accountNumber"/>; equal before and after a
     /// refused request when the refusal wrote nothing.
     /// </summary>
@@ -160,6 +169,11 @@ public sealed class PaymentServiceStub : IDisposable
         var call = PaymentServiceCall.From(message);
         _calls.Enqueue(call);
 
+        if (!IsSigned(call.Service, Header(message, "Authorization")))
+        {
+            return PaymentServiceAnswer.Json(HttpStatusCode.Unauthorized, """{"title":"Unauthorized","status":401}""").ToResponse();
+        }
+
         var answer = call.PortalId is not null && _portals.TryGetValue(call.PortalId, out var portal)
             ? portal.AnswerFor(call)
             : null;
@@ -167,6 +181,48 @@ public sealed class PaymentServiceStub : IDisposable
         answer ??= _serviceLimits.TryAnswer(call, portalId => _portals.GetValueOrDefault(portalId));
 
         return (answer ?? DefaultAnswer(call)).ToResponse();
+    }
+
+    /// <summary>
+    /// Whether <paramref name="authorization"/> is how the client of <paramref name="service"/> signs a request with the
+    /// key and the secret the stack is given (<see cref="Constants.PaymentStubKey"/>, <see cref="Constants.PaymentStubSecret"/>):
+    /// <c>ASC {key}:{timestamp}:{hash}</c>, the hash an HMAC-SHA1 of the timestamp and the key on two lines under the
+    /// secret, in Base64Url for billing and accounting and in standard Base64 for docscloud. A request signed otherwise is
+    /// refused with 401, as the services refuse it, so a stack given another key or secret fails instead of passing
+    /// unnoticed.
+    /// </summary>
+    internal static bool IsSigned(PaymentService service, string? authorization)
+    {
+        const string scheme = "ASC ";
+
+        if (authorization is null || !authorization.StartsWith(scheme, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var parts = authorization[scheme.Length..].Split(':');
+        if (parts.Length != 3 || parts[0] != Constants.PaymentStubKey)
+        {
+            return false;
+        }
+
+        var hash = HMACSHA1.HashData(Encoding.UTF8.GetBytes(Constants.PaymentStubSecret), Encoding.UTF8.GetBytes($"{parts[1]}\n{parts[0]}"));
+        var expected = service == PaymentService.DocsCloud ? Convert.ToBase64String(hash) : Base64Url.EncodeToString(hash);
+
+        return parts[2] == expected;
+    }
+
+    /// <summary>A client of the stub's own address, for the tests of the stub itself.</summary>
+    public HttpClient CreateClient()
+    {
+        return _server.CreateClient();
+    }
+
+    private static string? Header(IRequestMessage message, string name)
+    {
+        var header = message.Headers?.FirstOrDefault(h => string.Equals(h.Key, name, StringComparison.OrdinalIgnoreCase));
+
+        return header?.Value is { Count: > 0 } values ? values[0] : null;
     }
 
     // What the services say about a portal they know nothing about.

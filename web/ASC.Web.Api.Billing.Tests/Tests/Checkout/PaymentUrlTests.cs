@@ -64,13 +64,10 @@ public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task GetPaymentUrl_PortalAlreadyACustomerOnAPaidTariff_ReturnsNothing()
+    public async Task GetPaymentUrl_CustomerWhoseTariffIsPaid_ReturnsNothing()
     {
-        // Arrange
-        Payments.Customer(Owner.Email).Paid(Plans.AdminProductId, quantity: 3, DateTime.UtcNow.Date.AddMonths(1));
-
-        // The checkout reads the cached tariff, so it is re-read once the plan is paid, as a client does.
-        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+        // Arrange: the free tariff a portal without payments has counts as paid as well.
+        Payments.Customer(Owner.Email);
 
         // Act
         var url = (await _paymentApi.GetPaymentUrlAsync(
@@ -78,7 +75,27 @@ public class PaymentUrlTests(AspireAppFixture fixture) : BaseTest(fixture)
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        url.Should().BeNull("a customer changes the quantity of its plan instead of buying it again");
+        url.Should().BeNull("a customer whose tariff is paid changes the quantity of its plan instead of buying one");
+    }
+
+    [Fact]
+    public async Task GetPaymentUrl_CustomerWhoseTariffHasRunOut_ReturnsTheCheckout()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Paid(Plans.AdminProductId, quantity: 3, DateTime.UtcNow.Date.AddMonths(-2));
+
+        // The checkout reads the cached tariff, so it is re-read once the plan has run out, as a client does.
+        var tariff = (await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken)).Response;
+        tariff.State.Should().NotBe(TariffState.Paid, "the plan ended two months ago");
+
+        // Act
+        var url = (await _paymentApi.GetPaymentUrlAsync(
+            new PaymentUrlRequestDto(BackUrl, SuccessUrl, new Dictionary<string, int> { [Plans.AdminPlanName] = 3 }),
+            TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        url.Should().StartWith(PaymentServiceStub.CheckoutUrl + "?");
+        HttpUtility.ParseQueryString(new Uri(url).Query)["portal"].Should().Be(Payments.PortalId);
     }
 
     [Fact]

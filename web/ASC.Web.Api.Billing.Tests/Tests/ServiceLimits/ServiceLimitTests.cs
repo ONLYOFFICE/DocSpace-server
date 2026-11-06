@@ -103,6 +103,47 @@ public class ServiceLimitTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task GetTotalServiceLimit_ComesWithTheSpendingOfTheCurrentPeriod()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Balance(10m);
+        await _paymentApi.CreateServiceLimitAsync(
+            new CreateServiceLimitRequestDto(ServiceLimitScope.Total, amountValue: 50, period: ServiceLimitPeriod.Day),
+            TestContext.Current.CancellationToken);
+
+        // Act
+        var total = (await _paymentApi.GetTotalServiceLimitAsync(TestContext.Current.CancellationToken)).Response;
+
+        // Assert: nothing has been spent yet, so the whole threshold is left for the day under way.
+        total.Usage.Should().NotBeNull("the limit of the portal is read with its spending");
+        total.Usage.AmountConsumed.Should().Be(0);
+        total.Usage.AmountAvailable.Should().Be(50);
+        total.Usage.PeriodStart.ToUniversalTime().Should().BeOnOrBefore(DateTime.UtcNow);
+        total.Usage.PeriodEnd!.Value.ToUniversalTime().Should().BeOnOrAfter(DateTime.UtcNow);
+    }
+
+    [Fact]
+    public async Task GetParticipantServiceLimits_ComeWithTheSpendingOfEachLimit()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Balance(10m);
+        var user = await InviteMember(EmployeeType.User);
+        await _paymentApi.SetParticipantServiceLimitsAsync(
+            new SetParticipantServiceLimitsRequestDto([user.Id], quantityValue: 100, period: ServiceLimitPeriod.Month),
+            TestContext.Current.CancellationToken);
+
+        // Act
+        var participants = (await _paymentApi.GetParticipantServiceLimitsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        var limit = participants.Collection.Should().ContainSingle().Subject;
+        limit.Usage.Should().NotBeNull("the list of the personal limits is read with their spending");
+        limit.Usage.QuantityConsumed.Should().Be(0);
+        limit.Usage.QuantityAvailable.Should().Be(100);
+        limit.Usage.AmountAvailable.Should().BeNull("the limit has no money threshold");
+    }
+
+    [Fact]
     public async Task UpdateAndDeleteServiceLimit_OwnLimit_ChangesItThenRemovesIt()
     {
         // Arrange

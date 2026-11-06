@@ -109,5 +109,6 @@ global using WireMock.Matchers;
 global using WireMock.RequestBuilders;
 global using WireMock.ResponseBuilders;
 global using WireMock.Server;
+global using WireMock.Settings;
 global using WireMock.Types;
 global using WireMock.Util;

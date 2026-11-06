@@ -43,14 +43,17 @@ public class PortalTariffTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task GetPortalTariff_PortalWithoutPayments_IsTheFreeStartupQuota()
     {
+        // Arrange: the portal was asked about when it was registered; only the requests of the read below count.
+        var askedBefore = ActiveResourcesRequests();
+
         // Act
         var tariff = (await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         tariff.State.Should().Be(TariffState.Paid);
         tariff.Quotas.Should().ContainSingle().Which.Id.Should().Be(Plans.StartupQuotaId);
-        PaymentCalls.Should().Contain(call => call.Service == PaymentService.Billing && call.Route == "/billing/GetActiveResources",
-            "the portal is asked about under a payment key of its own");
+        ActiveResourcesRequests().Should().BeGreaterThan(askedBefore,
+            "a refreshed read asks billing again, under the payment key of the portal");
     }
 
     [Fact]
@@ -67,5 +70,10 @@ public class PortalTariffTests(AspireAppFixture fixture) : BaseTest(fixture)
         tariff.State.Should().Be(TariffState.Paid);
         var quota = tariff.Quotas.Should().ContainSingle(q => q.Id == Plans.AdminQuotaId).Subject;
         quota.Quantity.Should().Be(10);
+    }
+
+    private int ActiveResourcesRequests()
+    {
+        return PaymentCalls.Count(call => call.Service == PaymentService.Billing && call.Route == "/billing/GetActiveResources");
     }
 }

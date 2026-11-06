@@ -54,8 +54,8 @@ namespace ASC.Core.Common.Tests;
 /// could miss the request, and a test waiting on a delayed answer could not see that it arrived at all.
 /// </para>
 /// <para>
-/// Every answer closes its connection. A client that reuses a pooled connection the server then drops silently
-/// sends the request once more, which a test counting requests would see as a retry the code never made.
+/// The servers listen on the loopback address only, and keep a connection open for the next request as a real service
+/// does; the shared one runs for the whole test process, so a pooled connection is never dropped under a request.
 /// </para>
 /// <para>
 /// Disposing a stub takes its mapping off the shared server, so a request that arrives after the test gets
@@ -148,7 +148,7 @@ public sealed class HttpStub : IDisposable
     /// </summary>
     public static HttpStub AtRoot(Func<StubRequest, StubResponse> respond)
     {
-        return new HttpStub(request => Task.FromResult(respond(request)), WireMockServer.Start());
+        return new HttpStub(request => Task.FromResult(respond(request)), StartOnLoopback());
     }
 
     public void Dispose()
@@ -214,7 +214,7 @@ public sealed class HttpStub : IDisposable
     // alone. One request at start-up pays it before any test runs.
     private static WireMockServer StartServer()
     {
-        var server = WireMockServer.Start();
+        var server = StartOnLoopback();
 
         server
             .Given(Request.Create().WithPath("/warm-up").UsingGet())
@@ -224,6 +224,21 @@ public sealed class HttpStub : IDisposable
         using var response = client.Send(new HttpRequestMessage(HttpMethod.Get, "/warm-up"));
 
         return server;
+    }
+
+    // Started without an address, WireMock listens on every interface of the machine; given one, it listens on that alone.
+    // The port is a free one of the loopback, taken a moment before the server binds it.
+    private static WireMockServer StartOnLoopback()
+    {
+        int port;
+
+        using (var probe = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+        {
+            probe.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+            port = ((IPEndPoint)probe.LocalEndPoint!).Port;
+        }
+
+        return WireMockServer.Start(new WireMockServerSettings { Urls = [$"http://127.0.0.1:{port}"] });
     }
 
     private async Task<IResponseMessage> HandleAsync(IRequestMessage message)
@@ -246,7 +261,6 @@ public sealed class HttpStub : IDisposable
             // service that went away gives - while the stub has still counted it.
             var redirect = new ResponseMessage { StatusCode = (int)HttpStatusCode.TemporaryRedirect };
             redirect.AddHeader("Location", _dropping.Value + request.Path);
-            redirect.AddHeader("Connection", "close");
 
             return redirect;
         }
@@ -258,7 +272,6 @@ public sealed class HttpStub : IDisposable
         };
 
         response.AddHeader("Content-Type", "application/json; charset=utf-8");
-        response.AddHeader("Connection", "close");
 
         return response;
     }
