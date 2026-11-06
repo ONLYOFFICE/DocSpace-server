@@ -90,6 +90,9 @@ public class IdentityAuthorization
     public bool? IsInvalidated { get; set; }
 
     public DateTime? ModifiedAt { get; set; }
+
+    public DateTime? PurgeAt { get; set; }
+
     public string? IdTokenValue { get; set; }
     public string? IdTokenClaims { get; set; }
     public string? IdTokenMetadata { get; set; }
@@ -143,7 +146,7 @@ public static class IdentityExtension
 
                 entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_authorizations_owner");
 
-                entity.HasIndex(e => e.ModifiedAt, "idx_identity_authorizations_modified_at");
+                entity.HasIndex(e => e.PurgeAt, "idx_identity_authorizations_purge_at");
 
                 entity.Property(e => e.PrincipalId).HasColumnName("principal_id");
                 entity.Property(e => e.RegisteredClientId)
@@ -197,6 +200,16 @@ public static class IdentityExtension
                 entity.Property(e => e.ModifiedAt)
                     .HasMaxLength(6)
                     .HasColumnName("modified_at");
+                entity.Property(e => e.PurgeAt)
+                    .HasColumnType("datetime(6)")
+                    .HasColumnName("purge_at")
+                    .HasComputedColumnSql(
+                        "GREATEST(COALESCE(modified_at, TIMESTAMP'1000-01-01 00:00:00'), " +
+                        "COALESCE(authorization_code_expires_at, TIMESTAMP'1000-01-01 00:00:00'), " +
+                        "COALESCE(access_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'), " +
+                        "COALESCE(refresh_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'), " +
+                        "COALESCE(id_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'))",
+                        stored: false);
                 entity.Property(e => e.RefreshTokenExpiresAt)
                     .HasMaxLength(6)
                     .HasColumnName("refresh_token_expires_at");
@@ -285,8 +298,6 @@ public static class IdentityExtension
 
                 entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_authorizations_owner");
 
-                entity.HasIndex(e => e.ModifiedAt, "idx_identity_authorizations_modified_at");
-
                 entity.Property(e => e.State)
                     .HasColumnType("text");
 
@@ -352,6 +363,9 @@ public static class IdentityExtension
 
                 entity.Property(e => e.ModifiedAt)
                     .HasColumnType("timestamptz");
+
+                // Only the MySQL purge event reads this column.
+                entity.Ignore(e => e.PurgeAt);
 
                 entity.HasOne(e => e.Tenant)
                     .WithMany()

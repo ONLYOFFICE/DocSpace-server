@@ -6107,6 +6107,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("owner_user_id");
 
+                    b.Property<DateTime?>("PurgeAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("purge_at")
+                        .HasComputedColumnSql("GREATEST(COALESCE(modified_at, TIMESTAMP'1000-01-01 00:00:00'), COALESCE(authorization_code_expires_at, TIMESTAMP'1000-01-01 00:00:00'), COALESCE(access_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'), COALESCE(refresh_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'), COALESCE(id_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'))", false)
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn);
+
                     b.Property<DateTime?>("RefreshTokenExpiresAt")
                         .HasMaxLength(6)
                         .HasColumnType("datetime(6)")
@@ -6152,9 +6159,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex(new[] { "Id" }, "idx_identity_authorizations_id");
 
-                    b.HasIndex(new[] { "ModifiedAt" }, "idx_identity_authorizations_modified_at");
-
                     b.HasIndex(new[] { "OwnerTenantId", "OwnerUserId" }, "idx_identity_authorizations_owner");
+
+                    b.HasIndex(new[] { "PurgeAt" }, "idx_identity_authorizations_purge_at");
 
                     b.HasIndex(new[] { "RefreshTokenHash" }, "idx_identity_authorizations_refresh_token_hash")
                         .HasAnnotation("MySql:IndexPrefixLength", new[] { 64 });
@@ -6496,6 +6503,25 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "DeliverAt" }, "idx_identity_pending_messages_deliver_at");
 
                     b.ToTable("identity_pending_messages", (string)null);
+                });
+
+            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityPurgeCursor", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("name")
+                        .HasAnnotation("MySql:CharSet", "ascii");
+
+                    b.Property<DateTime>("Position")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("position");
+
+                    b.HasKey("Name")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("identity_purge_cursors", (string)null);
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityScope", b =>
