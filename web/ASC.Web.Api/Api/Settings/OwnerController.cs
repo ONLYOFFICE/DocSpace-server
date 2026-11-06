@@ -54,17 +54,16 @@ public class OwnerController(
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Starts handing this portal over to another of its members: the confirmation letter goes to the current owner's
-    /// address, and nothing changes until the link in it is used. The owner's own email address has to be confirmed
-    /// first, otherwise the call is answered with 400; `GET api/2.0/people/@self` reports it as `activationStatus`.
-    /// The caller needs the portal-settings right of a DocSpace administrator, so a room administrator, an ordinary
-    /// member or a guest is refused with 403, as is naming a guest in `ownerId`. Only the portal owner can actually
-    /// start a transfer: an administrator who is not the owner, or a named user who is inactive or unknown here, gets
-    /// 200 with `status` 0 and a localized refusal instead of an error, so read `status` and not the HTTP code. A
-    /// started transfer answers `status` 1 and a `message` carrying the owner's address inside an HTML `mailto:`
-    /// anchor rather than as plain text. Ownership itself does not move here; every call issues a fresh link usable
-    /// for a limited period, seven days by default, and the attempt is recorded in the audit trail. Complete the
-    /// transfer with `PUT api/2.0/settings/owner`; changing what a member may do is `PUT api/2.0/people/type/{type}`.
+    /// Starts moving the portal to another owner. The portal sends a confirmation letter to the portal owner's email
+    /// address. Ownership moves only after `PUT api/2.0/settings/owner` with the link from this letter. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. A
+    /// DocSpace admin who is not the portal owner gets 200 with `status` 0 and a refusal text. The call also returns
+    /// `status` 0 for an unknown or inactive new owner. So read `status`, not the HTTP code. On success,
+    /// `status` is 1. The `message` then shows the owner's address as an HTML `mailto:` link. Do not repeat the
+    /// call. Each call sends a new letter with a new link. A link works for seven days by default. The call returns 400 if `ownerId`
+    /// is missing or the owner's email address is not confirmed. To check the address, read `activationStatus` from
+    /// `GET api/2.0/people/@self`. It also returns 403 if the new owner is a guest. To change a user type instead,
+    /// use `PUT api/2.0/people/type/{type}`.
     /// </remarks>
     /// <summary>
     /// Start the portal owner change
@@ -110,17 +109,17 @@ public class OwnerController(
     }
 
     /// <remarks>
-    /// Completes the portal owner change that `POST api/2.0/settings/owner` started, making the user named in
-    /// `ownerId` the owner of this portal. Authorization comes from the confirmation link in that letter, not from an
-    /// ordinary session: pass the link's `type`, `key`, `uid` and `encemail` parameters in the `confirm` request
-    /// header, and check with `POST api/2.0/authentication/confirm` that it is still usable, because it expires after
-    /// a limited period, seven days by default. A caller without such a link is refused whatever role it holds, and
-    /// so is a link whose address is no longer the owner's, which is what replaying a used link looks like. The named
-    /// user has to be an active member of the portal and must not be a guest. The call is mutating: a named user who
-    /// is not a DocSpace administrator yet is promoted to one first, and a promotion needing a paid seat the portal
-    /// lacks is refused before ownership moves. The previous owner keeps their account and role but loses the owner's
-    /// rights, and the change reaches the audit trail. The answer carries no payload: read the new `ownerId` from
-    /// `GET api/2.0/settings`, which needs no token. Only the new owner can start another transfer.
+    /// Completes the portal owner change that `POST api/2.0/settings/owner` started. The user in `ownerId` becomes the
+    /// portal owner. Sign the request with the confirmation link from that letter, not with a session. Pass the
+    /// link's `type`, `key`, `uid`, and `encemail` parameters in the `confirm` header. The call refuses a caller
+    /// without such a link, whatever their role. To check that the link still works, use `POST api/2.0/authentication/confirm`. A
+    /// link expires after seven days by default. The call changes data. If the new owner is not a DocSpace admin yet,
+    /// the call makes them one first. The previous owner keeps their account and role but loses the owner's rights.
+    /// The call returns no body. To read the new `ownerId`, use `GET api/2.0/settings`, which needs no token. After
+    /// this call, a new transfer needs the new owner. The call returns 500 if the new owner is unknown, a guest, or
+    /// not active. It also returns 500 if the link's address no longer belongs to the portal owner. So a repeated call
+    /// with the same link returns 500. If promoting the new owner needs a paid seat that the portal lacks, the call
+    /// returns 402. Then ownership does not move. Without `ownerId`, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Confirm the portal owner change

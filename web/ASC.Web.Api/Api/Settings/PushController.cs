@@ -43,18 +43,15 @@ public class PushController(
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Registers one mobile device of the calling user for the push notifications of the Documents application, by
-    /// storing the Firebase token that device was issued together with the initial `isSubscribed` state. The token is
-    /// handed out by Firebase to the mobile client, so obtain it there before calling: nothing here checks it, and it
-    /// is kept as an opaque string of up to 255 characters. Every signed-in member registers its own devices,
-    /// whatever its role - owner, administrator, user or guest - and a registration is bound to the caller and the
-    /// current portal, so another member's devices cannot be touched. The call is safe to repeat, but it is not an
-    /// update: a token already registered comes back as it stands and `isSubscribed` from the request is ignored, so
-    /// switch an existing registration on or off with `PUT api/2.0/settings/push/docsubscribe` instead. What comes
-    /// back is the stored registration, with `application` always `doc` and `isSubscribed` as stored. Only a
-    /// subscribed device is sent the room activity messages, such as an invitation to a room, a role change, an
-    /// archived room or a new document in a room, and only while the installation itself is configured with Firebase
-    /// credentials.
+    /// Registers a mobile device of the calling user for push notifications of the Documents app. First get the
+    /// device's Firebase token on the device. The call stores the token with the initial `isSubscribed` state. Any
+    /// signed-in user can call it, including a guest. Each registration belongs to the caller and the current portal.
+    /// The call changes data, and you can repeat it with the same body. If the token is already registered, the call
+    /// returns the stored registration unchanged. It then ignores `isSubscribed`. To turn an existing registration on
+    /// or off, use `PUT api/2.0/settings/push/docsubscribe`. In the response, `application` is always `doc`. Only a
+    /// subscribed device gets room activity messages, such as an invitation to a room or a new document. The
+    /// installation also needs Firebase credentials to send them. If the token is longer than 255 characters, the
+    /// database can refuse it, and the call returns 500.
     /// </remarks>
     /// <summary>Register a push device</summary>
     /// <path>api/2.0/settings/push/docregisterdevice</path>
@@ -70,18 +67,15 @@ public class PushController(
     }
 
     /// <remarks>
-    /// Switches the push notifications of the Documents application on or off for one already registered device of
-    /// the calling user: send that device's Firebase token together with `isSubscribed` true to let the messages
-    /// through or false to stop them. The device has to be registered first with
-    /// `POST api/2.0/settings/push/docregisterdevice`, and only the subscription state is written - the token is
-    /// matched, never changed. Every signed-in member manages its own devices, whatever its role - owner,
-    /// administrator, user or guest - and a token that belongs to another member or to another portal is not matched
-    /// at all, so nothing of theirs can be switched. Repeating the call with the same pair leaves the registration as
-    /// it is. What comes back is the updated registration, while an empty response means no registration of the
-    /// caller carries that token and nothing was stored - register the device and call again. A device switched off
-    /// keeps its token stored but is left out of the delivery, and the other devices of the same member are
-    /// unaffected. Which kinds of notification the account receives at all is a separate setting, read with
-    /// `GET api/2.0/settings/notification/{type}`.
+    /// Changes the push subscription of one registered device of the calling user in the Documents app. Send the
+    /// device's Firebase token with `isSubscribed` true to turn notifications on, or false to turn them off. First
+    /// register the device with `POST api/2.0/settings/push/docregisterdevice`. Any signed-in user can call it,
+    /// including a guest. The call matches only registrations of the caller on the current portal. It changes only
+    /// the subscription state, never the token. The call changes data, and you can repeat it with the same body. It
+    /// returns the updated registration. An empty response means that no registration of the caller has this token.
+    /// Then nothing changes, so register the device and call again. A device that is turned off keeps its token but
+    /// gets no messages. Other devices of the same account do not change. The kinds of notification an account gets
+    /// are a separate setting, returned by `GET api/2.0/settings/notification/{type}`.
     /// </remarks>
     /// <summary>Set push subscription</summary>
     /// <path>api/2.0/settings/push/docsubscribe</path>

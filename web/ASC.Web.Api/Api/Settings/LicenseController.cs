@@ -56,24 +56,22 @@ public class LicenseController(
     private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Api");
 
     /// <remarks>
-    /// Re-reads the license file of this self-hosted Enterprise installation and rewrites the portal-wide quota and
-    /// tariff from it, so a file replaced on disk or a renewal issued by the vendor takes effect without a restart. A
-    /// license staged by `POST api/2.0/settings/license` is promoted to the active one here as well, but the usual
-    /// first-time order is upload and then `POST api/2.0/settings/license/accept`; this operation is for later
-    /// refreshes. The caller only has to be signed in - no administrator right is checked. Despite the `GET`, the
-    /// call rewrites stored data, and it is idempotent: repeating it applies the same license again. The editing
-    /// service is asked to confirm the license as part of the check, and the license it reports must match the file.
-    /// The answer is `true` when the license was applied and `false` on an installation with no license path
-    /// configured at all, such as a SaaS or open-source portal, where nothing is read and nothing changes. A missing
-    /// or unreadable file, a mismatched customer or edition, and an editing service that rejects the license all fail
-    /// the call instead of answering `false`. The operation stays reachable while the portal is unpaid.
+    /// Re-reads the license file of this Enterprise installation and applies its quota and tariff to the portal. So a
+    /// replaced file or a renewed license takes effect without a restart. If a file was staged by
+    /// `POST api/2.0/settings/license`, the call activates it. For the first activation, use
+    /// `POST api/2.0/settings/license/accept` instead. Any signed-in user can call it. Despite the `GET`, the call
+    /// changes data. You can repeat it, and each call applies the same license again. The call returns `true` when
+    /// it applied the license. It returns `false` and changes nothing on a SaaS or open-source installation, which
+    /// has no license path. The call returns 402 if the file is missing, cannot be read, or has no customer id or
+    /// signature. It also returns 402 if the editing service does not confirm the license or reports another one. If
+    /// the license starts later, the call returns 400. The call works while the portal is unpaid.
     /// </remarks>
     /// <summary>Refresh the license</summary>
     /// <path>api/2.0/settings/license/refresh</path>
     [Tags("Settings / License")]
     [SwaggerResponse(200, "`true` when the license file was re-read and the portal quota and tariff rewritten from it, `false` on an installation that has no license path configured", typeof(bool))]
     [SwaggerResponse(400, "The license file does not start until a later date")]
-    [SwaggerResponse(402, "No license file is on disk, the file cannot be read as a license or carries no customer id or signature, it was issued for the other edition, or the editing service does not confirm it")]
+    [SwaggerResponse(402, "No license file is on disk, the file cannot be read as a license or carries no customer id or signature, or the editing service does not confirm it")]
     [HttpGet("refresh")]
     [AllowNotPayment]
     public async Task<bool> RefreshLicense()
@@ -88,17 +86,15 @@ public class LicenseController(
     }
 
     /// <remarks>
-    /// Activates the license staged by `POST api/2.0/settings/license` on this self-hosted Enterprise installation:
-    /// it records that the license was accepted, promotes the staged file to the active one and rewrites the
-    /// portal-wide quota and tariff from it. Upload a file first: with nothing staged and no license on disk there is
-    /// nothing to activate. The caller only has to be signed in, and the activation is recorded in the audit trail.
-    /// Repeating the call is safe: the acceptance stamp is written only once and the same license is simply applied
-    /// again. Read the outcome from the body rather than the status code - an empty string means the license is now
-    /// active, and any other string is a message explaining why it is not: no license key was found, the key is not
-    /// correct, the installed edition does not match the license type, or the license is expired or too small for the
-    /// current user count. The acceptance stamp survives a failed activation, so a corrected file needs nothing
-    /// extra. An installation with no license path configured answers that its pricing plan does not support the
-    /// option and changes nothing. The operation stays reachable while the portal is unpaid.
+    /// Activates the license file staged by `POST api/2.0/settings/license` on this Enterprise installation. The
+    /// call makes the staged file the active one and applies its quota and tariff to the portal. Without a staged
+    /// file, it applies the active license file again. Any signed-in user can call it. The call changes data, and
+    /// you can repeat it. Read the result from the body, not from the status code. An empty string means the license
+    /// is now active. Any other string is a message that explains why the activation failed. The call returns such a
+    /// message for a missing or incorrect file, or a license the editing service rejects. It also returns a message
+    /// if the license starts later. The call records the acceptance of the license even if the activation
+    /// fails. On a SaaS or open-source installation, the call changes nothing. It returns a message that the pricing
+    /// plan does not support the option. The call works while the portal is unpaid.
     /// </remarks>
     /// <summary>Activate a license</summary>
     /// <path>api/2.0/settings/license/accept</path>
@@ -147,7 +143,10 @@ public class LicenseController(
     }
 
     /// <remarks>
-    /// Activates a trial license for the portal.
+    /// Starts a 30-day trial license on this self-hosted installation. The trial keeps the current limits and
+    /// features of the portal. Requires a DocSpace admin. Other callers get 403. The call changes data and returns
+    /// `true` when it starts the trial. It returns `false` and changes nothing if the portal already has a trial,
+    /// license, or due date. So a repeated call returns `false`. On a SaaS portal, the call fails.
     /// </remarks>
     /// <summary>
     /// Activate a trial license
@@ -155,7 +154,7 @@ public class LicenseController(
     /// <path>api/2.0/settings/license/trial</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "Boolean value: true if the operation is successful", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the trial started, `false` when the portal already has a trial, a license, or a due date", typeof(bool))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("trial")]
     public async Task<bool> ActivateTrialLicense()
@@ -215,16 +214,15 @@ public class LicenseController(
     }
 
     /// <remarks>
-    /// Reports whether this installation still has to be given a license file before it can be used, which is the
-    /// question the setup wizard asks before offering its license upload step. No authentication is needed, so it can
-    /// be called on a portal nobody has signed in to yet, and the call is read-only. The answer is `true` only for a
-    /// self-hosted Enterprise build whose license file is not on disk yet; an open-source or SaaS portal, a portal
-    /// configured to let anyone in without an account, an installation whose configuration hides the pricing section,
-    /// and one that takes its setup from cloud-image metadata all answer `false`. A `false` answer therefore does not
-    /// mean the portal is licensed - it also covers every build that needs no license at all. Nothing here describes
-    /// a license already in place, neither its due date nor whether the editing service still accepts it, and the
-    /// answer turns to `false` only once a staged file has been activated by `POST api/2.0/settings/license/accept`,
-    /// not when it is uploaded. The operation stays reachable while the portal is unpaid.
+    /// Returns whether this installation still needs a license file. The setup wizard asks
+    /// this before it offers to upload a license. Anyone can call it without signing in. The call is read-only. It
+    /// returns `true` only for an Enterprise installation whose license file is not on disk yet. It returns `false`
+    /// on a SaaS or open-source installation, which needs no license. It also returns `false` if the portal lets
+    /// anyone in without an account, or hides the pricing section. The same applies to an installation set up from
+    /// cloud image metadata. So `false` does not mean that the portal has a license. The call does not describe the
+    /// active license or check it with the editing service. The answer becomes `false` only after a staged file is
+    /// activated, not after the upload. To activate it, use `POST api/2.0/settings/license/accept`. The call works
+    /// while the portal is unpaid.
     /// </remarks>
     /// <summary>Check if a license is required</summary>
     /// <path>api/2.0/settings/license/required</path>
@@ -241,17 +239,17 @@ public class LicenseController(
 
 
     /// <remarks>
-    /// Takes the license file of this self-hosted Enterprise installation as `multipart/form-data` and stages it for
-    /// activation; only the first entry of `Files` is read and the rest are ignored. The file is validated but not
-    /// put in force here - follow with `POST api/2.0/settings/license/accept` to activate it, and until then the
-    /// portal keeps the license it already had. The caller must be a DocSpace administrator, or hold a wizard or
-    /// administrator confirmation link while the setup wizard is still unfinished; after the wizard is complete such
-    /// a link alone is refused. An earlier staged file is overwritten, so the upload can be repeated safely. The
-    /// answer is a localized sentence, not a structured result: `Uploaded successfully` on its own, or the same words
-    /// plus the date since when support and updates are not covered, because a file already past its due date is
-    /// still accepted. A request carrying no file, and a license whose start date has not arrived yet, are rejected
-    /// as invalid; a file that cannot be read as a license, carries no customer id or signature, or was issued for
-    /// the other edition fails the call. Whether the editing service accepts it is only checked at activation.
+    /// Uploads a license file for this Enterprise installation as `multipart/form-data` and stages it. The call reads
+    /// only the first entry of `Files` and ignores the rest. It checks the file but does not activate it. To activate
+    /// it, use `POST api/2.0/settings/license/accept`. Until then, the portal keeps its current license. Requires a
+    /// DocSpace admin, or a wizard or admin link token before the setup wizard is complete. Other callers get 403,
+    /// including such a token after the wizard is complete. The call changes data. A
+    /// new upload replaces the staged file, so you can repeat it. The call returns a localized text that you can show
+    /// to the user. For a license past its due date, the text adds the date when support and updates ended. The call
+    /// still accepts such a license. The call returns 400 if the request has no file or the license starts
+    /// later. It returns 415 on a SaaS or open-source installation, which takes no license file. It returns 500 if the
+    /// file cannot be read as a license or has no customer id or signature. The editing service checks the license
+    /// only at activation.
     /// </remarks>
     /// <summary>Upload a license</summary>
     /// <path>api/2.0/settings/license</path>
@@ -260,7 +258,7 @@ public class LicenseController(
     [SwaggerResponse(400, "The request carried no license file, or the license does not start until a later date")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or a confirmation link was used after the setup wizard had already been completed")]
     [SwaggerResponse(415, "The installation has no license path configured, so it cannot be given a license file")]
-    [SwaggerResponse(500, "The file cannot be read as a license, carries no customer id or signature, or was issued for the other edition")]
+    [SwaggerResponse(500, "The file cannot be read as a license, or carries no customer id or signature")]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]

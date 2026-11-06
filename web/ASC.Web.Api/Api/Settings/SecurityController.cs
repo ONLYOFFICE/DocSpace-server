@@ -55,16 +55,13 @@ public class SecurityController(
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Reports how access to the portal's own modules is configured: for every module identifier sent in `ids`,
-    /// whether access is restricted at all and which users and groups are allowed to open the module. Send the
-    /// identifiers as repeated `ids` query values; each one has to be a GUID, and anything else is rejected as an
-    /// invalid request. Omitting `ids` asks about every module registered in the portal, which on a DocSpace
-    /// installation is none, so the answer is then an empty list rather than a failure. Any signed-in member may call
-    /// this; anonymous callers are not admitted. The operation is read-only and answers one entry per identifier, in
-    /// the order the identifiers were sent. `enabled` is `false` for a module nobody has ever configured, `groups`
-    /// and `users` name the subjects the rule was stored for, and `isSubItem` marks a module that hangs under another
-    /// one. Users the caller is not allowed to see are left out of `users`, so the same module can come back with
-    /// different lists for different callers. Change any of this with `PUT api/2.0/settings/security`.
+    /// Returns the access rules of portal modules, one entry per GUID in `ids`. Entries follow the order of `ids`. Each
+    /// entry says whether the module is enabled and which groups and users may open it. Without `ids`, the call reports
+    /// every module the portal registers. DocSpace registers none, so the list is then empty. Any signed-in user can call
+    /// it. The call is read-only. If an `ids` value is not a GUID, the call returns 400. A module that nobody configured
+    /// has `enabled` set to `false`. The `users` list leaves out users the caller cannot see. So two callers can get
+    /// different lists for one module. The `isSubItem` flag is `true` for a module nested under another module. To change
+    /// the rules, use `PUT api/2.0/settings/security`.
     /// </remarks>
     /// <summary>
     /// Get module access settings
@@ -127,16 +124,13 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Answers whether the module with the given identifier is available to the calling user right now, as a single
-    /// boolean. `id` is the module GUID and travels in the path; a value that is not a GUID does not match the route
-    /// at all. Any signed-in member may call this; anonymous callers are not admitted. The operation is read-only and
-    /// its answer is specific to the caller: `true` means a module with that identifier is registered in this portal,
-    /// is visible, and the caller is allowed to read it, while `false` covers every other case - the module is not
-    /// registered here, it is hidden for this portal, or the caller is outside the users and groups allowed to open
-    /// it. A `false` therefore does not tell those apart, and an unknown identifier is reported as unavailable
-    /// instead of failing. Read the allow-list behind the decision with `GET api/2.0/settings/security`, list the
-    /// modules the caller can actually open with `GET api/2.0/settings/security/modules`, and change access with
-    /// `PUT api/2.0/settings/security`.
+    /// Returns whether the calling user can open the portal module with the GUID `id`. The answer is a single boolean.
+    /// Any signed-in user can call it. The call is read-only, and the answer depends on the caller. The value `true`
+    /// means the module is registered and visible, and the caller may read it. The value `false` covers all other cases:
+    /// an unknown module, a hidden module, or a caller outside the allow-list. So `false` does not tell these cases
+    /// apart, and an unknown `id` is not an error. A value that is not a GUID does not match the route. To read the
+    /// allow-list, use `GET api/2.0/settings/security`. To list the modules the caller can open, use
+    /// `GET api/2.0/settings/security/modules`. To change access, use `PUT api/2.0/settings/security`.
     /// </remarks>
     /// <summary>
     /// Check module availability
@@ -153,15 +147,12 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Lists the portal modules the calling user can currently open, each as an `id` holding the module's product
-    /// class name and a `title` holding its display name, both HTML-encoded. Any signed-in member may call this;
-    /// anonymous callers are not admitted. The operation is read-only and takes no parameters, and the list is
-    /// specific to the caller: modules hidden for this portal, and modules whose access rules exclude the caller, are
-    /// left out, and sub-modules nested under another module are never listed. Entries follow the portal's own module
-    /// order rather than an alphabetical one. An empty list means the installation registers no such modules at all -
-    /// the case on DocSpace, where the classic modules do not exist - and is not a failure. The identifiers here are
-    /// display-oriented class names, not the GUIDs the access-settings operations work with, so do not feed them to
-    /// `GET api/2.0/settings/security/{id}`, which expects a module GUID.
+    /// Returns the portal modules that the calling user can open now. Each entry has the product class name in `id` and
+    /// the display name in `title`. Both values are HTML-encoded. Any signed-in user can call it. The call is read-only
+    /// and takes no parameters. The list depends on the caller. It leaves out hidden modules, modules whose access rules
+    /// exclude the caller, and nested sub-modules. Entries follow the portal's own module order, not the alphabet. An
+    /// empty list means the installation registers no such modules. This is the normal case on DocSpace, not an error.
+    /// The `id` values are class names, not module GUIDs. Do not pass them to `GET api/2.0/settings/security/{id}`.
     /// </remarks>
     /// <summary>
     /// Get enabled modules
@@ -181,16 +172,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the password policy of the current portal: the minimum length together with the flags that demand an
-    /// uppercase letter, a digit and a special symbol, plus the regular expressions a client can check a password
-    /// against before sending it anywhere. Any signed-in member may read it, and it is also reachable with the
-    /// parameters of a confirmation link, so an invited user or one resetting a password can validate the new
-    /// password before having a session; a portal whose payment has lapsed still answers. The operation is read-only
-    /// and honours `If-Modified-Since`: send back the `Last-Modified` value of an earlier answer and an unchanged
-    /// policy comes back as an empty not-modified response rather than a body. A portal nobody has configured
-    /// requires 8 characters with all three flags off. Whatever the policy says, the portal refuses a password longer
-    /// than 30 characters, a ceiling this answer does not carry. Change the policy with
-    /// `PUT api/2.0/settings/security/password`.
+    /// Returns the password policy of the portal. It has the minimum length and the flags that require an uppercase
+    /// letter, a digit, and a special symbol. It also has regular expressions to check a password before sending it. Any
+    /// signed-in user can call it. A request signed with the confirmation token from an emailed link also works. So an
+    /// invited user or a user who resets a password can check the new password. The call works even if the portal payment
+    /// is overdue. The call is read-only. It supports `If-Modified-Since` with the `Last-Modified` value of an earlier
+    /// answer. If the policy has not changed since then, the call returns 304 with an empty body. A portal that nobody
+    /// configured requires 8 characters with all three flags off. The portal also refuses passwords over 30 characters,
+    /// and the answer does not show this limit. To change the policy, use `PUT api/2.0/settings/security/password`.
     /// </remarks>
     /// <summary>
     /// Get password settings
@@ -210,15 +199,13 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Replaces the password policy of the whole portal with the four values sent: `minLength` and the three flags
-    /// that demand an uppercase letter, a digit and a special symbol. There is no partial update - a flag left out of
-    /// the body is stored as `false` - so read the current policy with `GET api/2.0/settings/security/password` and
-    /// send it back with your change applied. The caller needs the portal-settings right of a DocSpace administrator,
-    /// otherwise the call is refused. `minLength` has to sit between the floor the installation is configured with, 8
-    /// characters unless it was changed, and the ceiling of 30; anything outside is rejected as an invalid request.
-    /// The new policy applies to passwords set from now on: existing passwords keep working until their owners change
-    /// them, and nobody is asked to renew. The change is portal-wide, recorded in the audit trail, and sending the
-    /// same body twice changes nothing further. The answer is the stored policy with its regular expressions.
+    /// Updates the password policy of the portal with `minLength`, `upperCase`, `digits`, and `specSymbols`. The call
+    /// replaces all four values, and a flag left out of the body is stored as `false`. So first read the policy with
+    /// `GET api/2.0/settings/security/password`. Then send it back with your change. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call changes data, and you
+    /// can repeat it with the same body. The new policy applies only to passwords set after this call. Existing passwords
+    /// keep working, and nobody is asked to change them. The call returns 400 if the body cannot be read, `minLength` is
+    /// missing, or `minLength` is out of range. It returns the stored policy with its regular expressions.
     /// </remarks>
     /// <summary>
     /// Update password settings
@@ -253,15 +240,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Replaces the access rules of one portal module: `id` names the module, `enabled` says whether it may be
-    /// opened, and `subjects` lists the users and groups the rule is stored for. The caller needs the portal-settings
-    /// right of a DocSpace administrator, and the call is answered with 403 on an open portal, where everyone is
-    /// admitted and per-module rules would mean nothing. `id` has to be a GUID; anything else is rejected as an
-    /// invalid request. The rules stored before are dropped rather than extended, so send the full list of subjects
-    /// every time. Watch the empty cases: leaving `subjects` out applies `enabled` to everyone, while an empty
-    /// `subjects` array is stored as access for everyone whatever `enabled` says. The change is recorded in the audit
-    /// trail unless `subjects` was left out entirely. The answer is the module's resulting configuration as a
-    /// single-entry list, in the shape `GET api/2.0/settings/security` returns. To switch several modules at once use
+    /// Replaces the access rule of one portal module. The rule says whether the module may be opened, and for which users
+    /// and groups. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
+    /// callers get 403. The call also returns 403 on an open portal, where everyone is admitted. The call changes data,
+    /// and you can repeat it with the same body. It deletes the stored subjects instead of adding to them. So send the
+    /// full list of subjects every time. If `subjects` is left out, `enabled` applies to everyone. An empty `subjects`
+    /// array gives access to everyone, whatever `enabled` says. The call returns 400 if the body cannot be read, has no
+    /// `id`, or `id` is not a GUID. It returns the resulting rule as a list with one entry, in the shape of
+    /// `GET api/2.0/settings/security`. To switch several modules in one call, use
     /// `PUT api/2.0/settings/security/access`.
     /// </remarks>
     /// <summary>
@@ -314,16 +300,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Switches several portal modules on or off in one call: `items` carries an entry per module, its `key` the
-    /// module GUID and its `value` the new enabled flag. The caller needs the portal-settings right of a DocSpace
-    /// administrator, and the call is answered with 403 on an open portal, where everyone is admitted and per-module
-    /// rules would mean nothing. Every key has to be a GUID; anything else is rejected as an invalid request, and a
-    /// module listed twice is applied once, from its first entry. This operation carries no subject list of its own:
-    /// switching a product module on restores the users and groups it was last restricted to, while every other case
-    /// is stored as a plain allow or deny for everyone, so use `PUT api/2.0/settings/security` when the allow-list
-    /// itself has to change. The batch is recorded in the audit trail as one list update rather than module by
-    /// module. The answer is the resulting configuration of every module listed, in the shape
-    /// `GET api/2.0/settings/security` returns.
+    /// Turns several portal modules on or off in one call. Each `items` entry has a module GUID in `key` and the enabled
+    /// flag in `value`. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. The call also returns 403 on an open portal, where everyone is admitted. The call changes
+    /// data, and you can repeat it with the same body. If a module is listed twice, the call applies only its first
+    /// entry. The body has no list of users and groups. Turning a product module on restores its last list of users and
+    /// groups. In all other cases, the call allows or denies the module for everyone. To change that list, use
+    /// `PUT api/2.0/settings/security`. If the body cannot be read or a `key` is not a GUID, the call returns 400. It
+    /// returns the resulting rules of the listed modules in the shape of `GET api/2.0/settings/security`.
     /// </remarks>
     /// <summary>
     /// Set access to modules in bulk
@@ -375,16 +359,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Lists the users who administer the portal module identified by `productid` in the path. The all-zero GUID
-    /// stands for the portal itself: the answer then covers the DocSpace administrator group together with every
-    /// product group, and includes the portal owner, who administers everything by default. The caller needs the
-    /// portal-settings right of a DocSpace administrator, otherwise the call is refused. `productid` has to be a
-    /// GUID, and one that names no group is answered with an empty list rather than a failure. The operation is
-    /// read-only and returns whole user profiles, a heavier answer than a membership check, and a user who belongs to
-    /// more than one of the groups asked about is listed once per group. Entries arrive in group order, the DocSpace
-    /// administrator group first, the list is neither paged nor filterable, and a promotion made through the sibling
-    /// `PUT` shows up here at once. Use `GET api/2.0/settings/security/administrator` to test a single user against a
-    /// single module, and `PUT api/2.0/settings/security/administrator` to promote or demote somebody.
+    /// Returns the users who administer the portal module with the GUID `productId`. The all-zero GUID means the whole
+    /// portal. Then the list covers the DocSpace admin group and every product group, and it includes the portal owner.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call is read-only. If `productId` names no group, the call returns an empty list. Entries come in
+    /// group order, with the DocSpace admin group first. A user who is in several of these groups appears once per group.
+    /// The list has no paging and no filter. To check one user against one module, use
+    /// `GET api/2.0/settings/security/administrator`. To add or remove an administrator, use
+    /// `PUT api/2.0/settings/security/administrator`.
     /// </remarks>
     /// <summary>
     /// Get product administrators
@@ -407,17 +389,15 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Reports whether one user administers one portal module, as the identifiers asked about plus an `administrator`
-    /// flag. Both `productid` and `userid` are query parameters and both are required; the all-zero product GUID asks
-    /// about the portal itself rather than about a single module. The caller needs the portal-settings right of a
-    /// DocSpace administrator, otherwise the call is refused. The operation is read-only. The flag is `true` when the
-    /// user belongs to the DocSpace administrator group or to the module's own group, so a portal-wide administrator
-    /// is reported as an administrator of every module, whatever the module identifier says. Identifiers that name no
-    /// user and no group are answered with `false` instead of a failure, so a `false` does not prove the user exists.
-    /// The verdict is read out of group membership alone and says nothing about whether the module is enabled for
-    /// this portal, which `GET api/2.0/settings/security/{id}` reports. Use
-    /// `GET api/2.0/settings/security/administrator/{productId}` to list everyone who administers a module, and
-    /// `PUT api/2.0/settings/security/administrator` to change the membership.
+    /// Returns whether one user administers one portal module. The answer repeats `productId` and `userId` and adds the
+    /// `administrator` flag. The all-zero `productId` asks about the whole portal. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call is read-only. The
+    /// flag is `true` if the user is in the DocSpace admin group or in the module group. So a DocSpace admin is an
+    /// administrator of every module. Unknown user or module IDs give `false`, not an error. So `false` does not prove
+    /// that the user exists. The flag comes only from group membership and does not show whether the module is available.
+    /// To check that, use `GET api/2.0/settings/security/{id}`. To list all administrators of a module, use
+    /// `GET api/2.0/settings/security/administrator/{productId}`. To change the role, use
+    /// `PUT api/2.0/settings/security/administrator`.
     /// </remarks>
     /// <summary>
     /// Check product administrator
@@ -435,15 +415,15 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Promotes a portal member to administrator of one module, or takes that role away, according to the
-    /// `administrator` flag; the all-zero product GUID targets the DocSpace administrator role, which covers the
-    /// whole portal. The caller needs the portal-settings right of a DocSpace administrator, and granting the
-    /// portal-wide role additionally requires being the portal owner - anyone else is refused with 403. A free cloud
-    /// plan does not offer the option at all and answers 402, as does a promotion for which no paid seat is left,
-    /// since promoting a guest or a plain member turns them into a paid one. Taking the portal-wide role away also
-    /// removes the member from every product group. The change is immediate, portal-wide, recorded in the audit
-    /// trail, and sending the same body twice changes nothing further; it never creates a user, so invite the member
-    /// first. The answer echoes the identifiers and the flag as stored - re-read membership with
+    /// Adds a portal member to the administrators of one module, or removes the member, by the `administrator` flag. The
+    /// all-zero `productId` means the DocSpace admin role for the whole portal. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. Only the portal owner can
+    /// grant the DocSpace admin role or take any role away from a DocSpace admin. Other callers get 403 for these
+    /// changes. On a free cloud plan, the call returns 402. Promoting a guest or a user takes a paid seat. If no paid
+    /// seat is left, the call returns 402. Removing the DocSpace admin role also removes the member from every product
+    /// group. The call changes data immediately, and you can repeat it with the same body. It never creates a user, so
+    /// invite the member first. If the body cannot be read or has no `productId` or `userId`, the call returns 400. The
+    /// call returns the identifiers and the flag as sent. To check membership, use
     /// `GET api/2.0/settings/security/administrator`.
     /// </remarks>
     /// <summary>
@@ -492,16 +472,15 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Replaces the brute-force protection of the sign-in form for the whole portal: `attemptCount` failed attempts
-    /// inside a rolling window of `checkPeriod` seconds, after which the offender is blocked for `blockTime` seconds.
-    /// All three values are replaced together and each has to be between 1 and 9999, so read the current ones with
-    /// `GET api/2.0/settings/security/loginsettings` before changing only one of them; a value outside the range is
-    /// rejected as an invalid request. The caller needs the portal-settings right of a DocSpace administrator,
-    /// otherwise the call is refused. Failed attempts are counted per user name and client address, so one member's
-    /// lockout leaves the rest of the portal signing in normally, and a blocked pair is refused even once the
-    /// password is finally correct. The new numbers apply to attempts made from now on and leave counters and blocks
-    /// already running as they are. The change is recorded in the audit trail, and the answer is the stored settings
-    /// with the flag that says whether they still match the shipped defaults.
+    /// Updates the brute-force protection of the portal sign-in. After `attemptCount` failed attempts within
+    /// `checkPeriod` seconds, the portal blocks the sign-in for `blockTime` seconds. The call replaces all three values
+    /// together. So to change one value, first read the others with `GET api/2.0/settings/security/loginsettings`.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call changes data, and you can repeat it with the same body. The new values apply to attempts made
+    /// after this call. Running counters and blocks stay as they are. The portal counts failed attempts per user name and
+    /// IP address. So one blocked member does not block the rest of the portal. A blocked pair cannot sign in even with
+    /// the correct password. The call returns 400 if the body cannot be read, or a value is missing or out of range. It
+    /// returns the stored settings and whether they match the defaults.
     /// </remarks>
     /// <summary>
     /// Update login settings
@@ -531,18 +510,15 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the brute-force protection of the sign-in form for the current portal: how many failed attempts are
-    /// tolerated, how long the window they are counted in lasts, and how long an offender stays blocked. The caller
-    /// needs the portal-settings right of a DocSpace administrator; members without it are refused, and anonymous
-    /// callers are not admitted. The operation is read-only and honours `If-Modified-Since`: send back the
-    /// `Last-Modified` value of an earlier answer and unchanged settings come back as an empty not-modified response
-    /// rather than a body. `checkPeriod` and `blockTime` are counted in seconds. A portal nobody has configured
-    /// tolerates 5 failed attempts inside a window of 60 seconds and blocks for 60 seconds, and reports `isDefault`
-    /// true; the flag turns false as soon as any of the three values differs from that. The answer describes the
-    /// portal-wide policy only: it does not say which accounts or addresses are blocked at the moment, while a
-    /// lockout that has already happened is recorded in the login history and can be read with
-    /// `GET api/2.0/security/audit/login/filter`. Change the numbers with
-    /// `PUT api/2.0/settings/security/loginsettings`, or put them back with
+    /// Returns the brute-force protection of the portal sign-in. It has the tolerated failed attempts, the counting
+    /// window, and the block time. The window and the block time are in seconds. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call is read-only. It
+    /// supports `If-Modified-Since` with the `Last-Modified` value of an earlier answer. If the settings have not changed
+    /// since then, the call returns 304 with an empty body. A portal that nobody configured allows 5 failed attempts in
+    /// 60 seconds and blocks for 60 seconds. Then `isDefault` is `true`, and it becomes `false` when any of the three
+    /// values differs. The answer does not show which accounts or addresses are blocked now. To read past lockouts in the
+    /// login history, use `GET api/2.0/security/audit/login/filter`. To change the values, use
+    /// `PUT api/2.0/settings/security/loginsettings`. To restore the defaults, use
     /// `DELETE api/2.0/settings/security/loginsettings`.
     /// </remarks>
     /// <summary>
@@ -564,17 +540,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Puts the brute-force protection of the sign-in form back to what the portal shipped with: 5 tolerated failed
-    /// attempts, a counting window of 60 seconds and a block of 60 seconds. The caller needs the portal-settings
-    /// right of a DocSpace administrator, otherwise the call is refused. The operation takes no parameters and
-    /// overwrites whatever was configured before without asking, so read the current numbers with
-    /// `GET api/2.0/settings/security/loginsettings` first if they are worth keeping. Only the setting is reset:
-    /// sign-ins already blocked stay blocked until the block they were given runs out, and the attempt counters
-    /// running for other users are left alone. The reset is portal-wide, applies to attempts made from now on, is
-    /// recorded in the audit trail, and calling it twice changes nothing further. The restored numbers also decide
-    /// when the sign-in form starts asking for a captcha, which it does one attempt before the block. The answer is
-    /// the restored settings, with `isDefault` true. Store numbers of your own with
-    /// `PUT api/2.0/settings/security/loginsettings`.
+    /// Resets the brute-force protection of the portal sign-in to the defaults. The defaults are 5 failed attempts, a
+    /// window of 60 seconds, and a block of 60 seconds. Requires the EditPortalSettings permission, which the portal
+    /// owner and DocSpace admins have. Other callers get 403. The call changes data and takes no parameters. It
+    /// overwrites the current values without a confirmation. To keep them, first read them with
+    /// `GET api/2.0/settings/security/loginsettings`. You can repeat the call. The reset applies to attempts made after
+    /// this call. Sign-ins that are already blocked stay blocked until their block ends. Running attempt counters stay as
+    /// they are. The sign-in form asks for a captcha one attempt before the block. The call returns the restored settings
+    /// with `isDefault` set to `true`. To set your own values, use `PUT api/2.0/settings/security/loginsettings`.
     /// </remarks>
     /// <summary>
     /// Reset login settings
