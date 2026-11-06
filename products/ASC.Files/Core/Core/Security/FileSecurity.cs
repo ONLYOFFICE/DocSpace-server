@@ -73,6 +73,7 @@ public class FileSecurity(
     public readonly FileShare DefaultAiAgentsShare = FileShare.Restrict;
     public readonly FileShare DefaultAiHubShare = FileShare.Restrict;
     public readonly FileShare DefaultFormsShare = FileShare.Restrict;
+    public readonly FileShare DefaultPrivateRoomsShare = FileShare.Restrict;
 
     public static readonly HashSet<FileShare> PaidShares = [FileShare.RoomManager];
     private static HashSet<FileShare> DefaultFileAccess => [FileShare.Editing, FileShare.FillForms, FileShare.Review, FileShare.Comment, FileShare.Read, FileShare.None];
@@ -949,9 +950,10 @@ public class FileSecurity(
 
                 break;
             case FolderType.Forms:
+            case FolderType.PrivateRooms:
                 defaultRecords = null;
 
-                if (entry is not Folder<T> || entry is Folder<T> f3 && f3.FolderType != FolderType.Forms)
+                if (entry is not Folder<T> || entry is Folder<T> { FolderType: not (FolderType.Forms or FolderType.PrivateRooms) })
                 {
                     break;
                 }
@@ -1635,7 +1637,7 @@ public class FileSecurity(
                         return action is FilesSecurityActions.Create;
                     }
 
-                    if (folder.FolderType == FolderType.Forms && !isUser)
+                    if (folder.FolderType is FolderType.Forms or FolderType.PrivateRooms && !isUser)
                     {
                         return action is FilesSecurityActions.Create or FilesSecurityActions.MoveTo;
                     }
@@ -1669,7 +1671,7 @@ public class FileSecurity(
                     return true;
                 }
 
-                if (folder.FolderType == FolderType.Forms)
+                if (folder.FolderType is FolderType.Forms or FolderType.PrivateRooms)
                 {
                     return true;
                 }
@@ -1780,6 +1782,7 @@ public class FileSecurity(
             case FolderType.AiAgents:
             case FolderType.AiHub:
             case FolderType.Forms:
+            case FolderType.PrivateRooms:
                 // The administrator bypass below does not extend to end-to-end encrypted rooms.
                 // Membership there means holding a key, so an administrator who was never invited
                 // cannot read anything in one and must not be handed access to it by role alone. This
@@ -2181,6 +2184,7 @@ public class FileSecurity(
                 FolderType.AiAgents => DefaultAiAgentsShare,
                 FolderType.AiHub => DefaultAiHubShare,
                 FolderType.Forms => DefaultFormsShare,
+                FolderType.PrivateRooms => DefaultPrivateRoomsShare,
                 _ => DefaultCommonShare
             };
 
@@ -2974,6 +2978,20 @@ public class FileSecurity(
             }
         }
 
+        // The private rooms section is a view of the rooms tree. A client that asks for the Rooms area with the private
+        // filter means this section: the web client still builds it that way.
+        if (searchArea == SearchArea.Active && privacyFilter == RoomPrivacyFilter.Private)
+        {
+            searchArea = SearchArea.PrivateRooms;
+        }
+
+        privacyFilter = searchArea switch
+        {
+            SearchArea.PrivateRooms => RoomPrivacyFilter.Private,
+            SearchArea.Active => RoomPrivacyFilter.NotPrivate,
+            _ => privacyFilter
+        };
+
         if (isAdmin && searchArea is not (SearchArea.Templates or SearchArea.FormTemplates))
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
@@ -2989,6 +3007,7 @@ public class FileSecurity(
     // and shown only in Forms. The same split applies to room templates: they all physically live under
     // the RoomTemplates root, so FillingFormsRoom templates (including ones created before the split) are
     // excluded from the Rooms templates listing and shown only in the Forms templates listing.
+    // Private rooms are split off from Rooms the same way, by their own setting.
     // Non-room entries (subfolders) are never affected.
     private static bool MatchesFormsSplit<T>(Folder<T> room, SearchArea searchArea)
     {
@@ -2997,7 +3016,7 @@ public class FileSecurity(
             return true;
         }
 
-        return searchArea.MatchesRoomType(room.FolderType);
+        return searchArea.MatchesRoom(room);
     }
 
     private async Task<List<FileEntry>> GetAllVirtualRoomsAsync(
@@ -3035,7 +3054,7 @@ public class FileSecurity(
             SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
             SearchArea.AiHub => [await globalFolder.GetFolderAiHubAsync(daoFactory)],
-            SearchArea.Forms => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
+            SearchArea.Forms or SearchArea.PrivateRooms => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.FormTemplates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
@@ -3154,7 +3173,7 @@ public class FileSecurity(
             SearchArea.Templates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             SearchArea.AiAgents => [await globalFolder.GetFolderAiAgentsAsync(daoFactory)],
             SearchArea.AiHub => [await globalFolder.GetFolderAiHubAsync(daoFactory)],
-            SearchArea.Forms => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
+            SearchArea.Forms or SearchArea.PrivateRooms => [await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)],
             SearchArea.FormTemplates => [await globalFolder.GetFolderRoomTemplatesAsync(daoFactory)],
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
@@ -3222,6 +3241,7 @@ public class FileSecurity(
                 case SearchArea.AiAgents when entry.RootFolderType == FolderType.AiAgents:
                 case SearchArea.AiHub when entry.RootFolderType == FolderType.AiHub:
                 case SearchArea.Forms when entry.RootFolderType == FolderType.VirtualRooms:
+                case SearchArea.PrivateRooms when entry.RootFolderType == FolderType.VirtualRooms:
                     {
                         entry.ShareRecord = record;
                         entry.Access = record?.Share ?? FileShare.None;

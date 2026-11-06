@@ -487,7 +487,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// any other caller who can read the entry may use this call to drop it from their own list, which takes a room
     /// member out of the room, while an unrelated account is refused. A private room answers to its members alone: a
     /// portal administrator outside it is refused, and whoever loses access to it loses the wrapped file keys
-    /// (`PUT api/2.0/files/file/{fileId}/access`) along with it, except its creator. The answer is always `true` and
+    /// (`PUT api/2.0/files/{fileId}/access`) along with it, except its creator. The answer is always `true` and
     /// identifiers that match nothing are skipped silently, so a successful answer is not proof that anything was
     /// revoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To
     /// take the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's

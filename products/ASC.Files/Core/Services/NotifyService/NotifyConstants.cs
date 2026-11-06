@@ -474,7 +474,7 @@ public sealed class FolderCreatedInRoomNotifyAction(TenantManager tenantManager)
         Tags =
         [
             new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
-            new TagValue(NotifyConstants.FolderTitle, folder.Title),
+            new TagValue(NotifyConstants.FolderTitle, room.SettingsPrivate ? FilesPatternResource.PrivateFolderTitle : folder.Title),
             new TagValue(NotifyConstants.TagFolderID, folder.Id),
             new TagValue(NotifyConstants.TagFolderParentId, folder.ParentId),
             new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType)

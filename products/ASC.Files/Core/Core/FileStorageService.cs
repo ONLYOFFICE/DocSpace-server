@@ -409,12 +409,13 @@ public class FileStorageService //: IFileStorageService
             FolderType.AiAgents => SearchArea.AiAgents,
             FolderType.AiHub => SearchArea.AiHub,
             FolderType.Forms => SearchArea.Forms,
+            FolderType.PrivateRooms => SearchArea.PrivateRooms,
             _ => searchArea
         };
 
-        if (parent.FolderType == FolderType.Forms)
+        if (parent.FolderType is FolderType.Forms or FolderType.PrivateRooms)
         {
-            // Forms is a virtual section anchored on an empty folder: its rooms are resolved from the
+            // Forms and private rooms are virtual sections anchored on an empty folder: their rooms are resolved from the
             // VirtualRooms tree. Browsing it with subfolders would expand the whole VirtualRooms subtree
             // (including the container itself and other rooms' content), so it is kept as a flat room list.
             withSubfolders = false;
@@ -1206,7 +1207,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1953,6 +1954,7 @@ public class FileStorageService //: IFileStorageService
                             folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive &&
                             folder.FolderType != FolderType.Forms &&
+                            folder.FolderType != FolderType.PrivateRooms &&
                             folder.FolderType != FolderType.KnowledgeRoom;
 
             if (!canCreate)
@@ -3413,7 +3415,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         // a section root holds rooms only: the operation refuses any file there (PermissionCheckStarter.CheckFilesPermissionsAsync)
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms && filesId.Any())
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms && filesId.Any())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFile);
         }
@@ -3470,7 +3472,7 @@ public class FileStorageService //: IFileStorageService
         // the destinations the operation refuses (PermissionCheckStarter): a section root holds rooms only, so no file
         // goes there; a folder that is not a room goes neither there, nor into a knowledge folder or the archive; and a
         // room goes nowhere but the Rooms root and the archive
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms && filesId.Any())
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms && filesId.Any())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFile);
         }
@@ -3478,7 +3480,7 @@ public class FileStorageService //: IFileStorageService
         // only the folders the caller can read are looked at, so the answer tells nothing about the others
         var readableFolders = await fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).OfType<Folder<TFrom>>().ToListAsync();
 
-        if ((toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge
+        if ((toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms or FolderType.Knowledge
              || toFolder.RootFolderType == FolderType.Archive)
             && readableFolders.Any(f => !f.IsRoom))
         {
@@ -4609,7 +4611,7 @@ public class FileStorageService //: IFileStorageService
 
                                                 var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
                                                 var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.UniqID, folder.Title, url, ace.Access.ToStringFast(), role, folder.FolderType == FolderType.AiRoom);
+                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.UniqID, folder.SettingsPrivate ? null : folder.Title, url, ace.Access.ToStringFast(), role, folder.FolderType == FolderType.AiRoom);
                                             }
                                             break;
                                     }
@@ -6283,7 +6285,7 @@ public class FileStorageService //: IFileStorageService
             }
             // a room the caller can see, but of the other section: it is a bad request rather than a
             // permission problem, so it is counted apart from the denied ones
-            else if (!searchArea.MatchesRoomType(room.FolderType))
+            else if (!searchArea.MatchesRoom(room))
             {
                 wrongArea++;
             }

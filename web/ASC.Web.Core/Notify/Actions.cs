@@ -3657,7 +3657,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
 
         Tags =
         [
-            new TagValue("RoomTitle", roomTitle.HtmlEncode()),
+            new TagValue("RoomTitle", (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", culture)).HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
             new TagValue(CommonTags.AccessLevel, accessLevel),
             new TagValue("UserRole", userRole),
@@ -3693,7 +3693,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
 
         Tags =
         [
-            new TagValue("RoomTitle", roomTitle.HtmlEncode()),
+            new TagValue("RoomTitle", (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", culture)).HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
             new TagValue(CommonTags.AccessLevel, accessLevel),
             new TagValue("UserRole", userRole),

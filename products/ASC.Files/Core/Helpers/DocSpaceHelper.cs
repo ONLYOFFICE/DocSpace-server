@@ -85,7 +85,7 @@ public static class DocSpaceHelper
         /// </summary>
         public bool IsPublicSystemFolder()
         {
-            return folderType is FolderType.AiAgents or FolderType.AiHub or FolderType.Forms
+            return folderType is FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms
                 or FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates
                 or FolderType.SHARE or FolderType.Recent or FolderType.Favorites
                 or FolderType.COMMON or FolderType.Templates or FolderType.DefaultTemplates;
@@ -104,7 +104,7 @@ public static class DocSpaceHelper
 
     // the roots of the sections that hold rooms: a file is never placed in them directly
     public static bool IsRoomsSectionRoot(FolderType folderType) =>
-        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms;
+        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms or FolderType.PrivateRooms;
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
     {

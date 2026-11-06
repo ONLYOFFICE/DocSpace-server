@@ -84,6 +84,7 @@ internal class FolderDao(
     private const string AiAgents = "aiagents";
     private const string AiHub = "aihub";
     private const string Forms = "forms";
+    private const string PrivateRooms = "privaterooms";
     private const string DefaultTemplates = "defaulttemplates";
 
     public virtual async Task<Folder<int>> GetFolderAsync(int folderId)
@@ -1957,6 +1958,10 @@ internal class FolderDao(
                         folder.FolderType = FolderType.Forms;
                         folder.Title = Forms;
                         break;
+                    case PrivateRooms:
+                        folder.FolderType = FolderType.PrivateRooms;
+                        folder.Title = PrivateRooms;
+                        break;
                     default:
                         folder.FolderType = FolderType.BUNCH;
                         folder.Title = key;
@@ -2102,6 +2107,10 @@ internal class FolderDao(
                 case Forms:
                     folder.FolderType = FolderType.Forms;
                     folder.Title = Forms;
+                    break;
+                case PrivateRooms:
+                    folder.FolderType = FolderType.PrivateRooms;
+                    folder.Title = PrivateRooms;
                     break;
                 default:
                     folder.FolderType = FolderType.BUNCH;
@@ -2269,6 +2278,12 @@ internal class FolderDao(
         }
 
         return folderId;
+    }
+
+    public async Task<int> GetFolderIDPrivateRoomsAsync(bool createIfNotExists)
+    {
+        // Unlike Forms, nothing is counted in this root: the space of private rooms stays in the Rooms counter.
+        return await (this as IFolderDao<int>).GetFolderIDAsync(FileConstant.ModuleId, PrivateRooms, null, createIfNotExists);
     }
 
     public async IAsyncEnumerable<OriginData> GetOriginsDataAsync(IEnumerable<int> entriesIds)

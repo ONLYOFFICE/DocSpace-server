@@ -145,7 +145,7 @@
     <value>الخدمة</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>ميزات الذكاء الاصطناعي</value>
+    <value>وكلاء وأدوات الذكاء الاصطناعي</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>دعم</value>
@@ -1177,7 +1177,7 @@
     <value>بحث الذكاء الاصطناعي</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>ميزات الذكاء الاصطناعي</value>
+    <value>وكلاء وأدوات الذكاء الاصطناعي</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>تتبع عمليات تسجيل الدخول والإجراءات</value>
