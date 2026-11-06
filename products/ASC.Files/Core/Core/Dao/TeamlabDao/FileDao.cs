@@ -479,6 +479,18 @@ internal class FileDao(
         return await SaveFileAsync(file, fileStream, true, true, null, allowQuotaGrace);
     }
 
+    /// <summary>
+    /// A private room holds nothing but ciphertext, whichever way a file gets there. This sits on the write path
+    /// itself so that a new way of creating a file cannot walk around it.
+    /// </summary>
+    private async Task DemandEncryptedInPrivateRoomAsync(File<int> file, int roomId)
+    {
+        if (!file.Encrypted && roomId != -1 && await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(roomId) is { SettingsPrivate: true })
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
     public async Task<File<int>> SaveFormFileAsync(File<int> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream, true, checkFolder);
@@ -513,6 +525,8 @@ internal class FileDao(
         }
 
         var (roomId, _, roomType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+        await DemandEncryptedInPrivateRoomAsync(file, roomId);
+
         var inKnowledgeRoom = roomType == FolderType.KnowledgeRoom;
         if (inKnowledgeRoom)
         {
@@ -811,7 +825,7 @@ internal class FileDao(
                             {
                                 await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
 
-                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
                         }
                     }
@@ -960,7 +974,8 @@ internal class FileDao(
         DbFilesSkill previousSkill = null;
         if (fileStream != null)
         {
-            var (_, _, roomType) = await daoFactory.GetFolderDao<int>().GetParentRoomInfoFromFileEntryAsync(file);
+            var (roomId, _, roomType) = await daoFactory.GetFolderDao<int>().GetParentRoomInfoFromFileEntryAsync(file);
+            await DemandEncryptedInPrivateRoomAsync(file, roomId);
             if (roomType == FolderType.InstructionsRoom)
             {
                 (skill, fileStream) = await ReadSkillAsync(file, fileStream, null);
@@ -2531,6 +2546,33 @@ internal class FileDao(
                 r.UserId == userId)
             .Project()
             .ToListAsync();
+    }
+
+    public async Task DeleteFileKeysAsync(IEnumerable<int> fileIds, IEnumerable<Guid> userIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.DeleteFileKeysOfUsersAsync(tenantId, fileIds, userIds);
+    }
+
+    public async Task DeleteFileKeysAsync(Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.DeleteAllFileKeysOfUserAsync(tenantId, userId);
+    }
+
+    public async IAsyncEnumerable<int> GetFileIdsWithKeyAsync(IEnumerable<int> fileIds, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var fileId in filesDbContext.FileIdsWithKeyAsync(tenantId, fileIds, userId))
+        {
+            yield return fileId;
+        }
     }
 
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)

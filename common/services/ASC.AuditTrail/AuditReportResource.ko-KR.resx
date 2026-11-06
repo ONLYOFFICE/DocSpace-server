@@ -1332,4 +1332,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>AI 프로젝트 {0}의 AI 모델이 {1}(으)로 변경되었습니다</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>웹훅 전송을 재시도했습니다: {0}</value>
+  </data>
 </root>

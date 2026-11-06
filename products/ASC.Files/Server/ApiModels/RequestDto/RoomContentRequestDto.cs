@@ -123,7 +123,7 @@ public class RoomContentRequestDto
 
     /// <summary>
     /// Splits the rooms by whether they are private, that is encrypted rooms whose content the portal cannot read.
-    /// Omitting it returns both kinds.
+    /// Omitting it returns both kinds, except in the active rooms, which leave private rooms out.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "privacyFilter")]

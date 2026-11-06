@@ -435,6 +435,12 @@ public class EntryManager(IDaoFactory daoFactory,
             // folderType=FillingFormsRoom and no searchArea at all, and on this endpoint searchArea
             // is not nullable, so "not sent" arrives as Active and must not be read as "the Rooms
             // section, therefore not forms".
+            // Files are picked here by the type of their room, and a private room has no type of its own.
+            if (searchArea == SearchArea.PrivateRooms)
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(searchArea));
+            }
+
             if (folderType is not { Count: > 0 })
             {
                 folderType = searchArea switch
@@ -555,7 +561,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
-        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms && !parent.ProviderEntry)
+        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
                 provider, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter, withAiFolder, metadataFilter);
@@ -1530,6 +1536,12 @@ public class EntryManager(IDaoFactory daoFactory,
         if (file.RootFolderType == FolderType.TRASH)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+        }
+
+        // Whatever comes here for end-to-end encrypted content is ciphertext; saved without the flag it would turn into an open file.
+        if (!encrypted && (file.Encrypted || await DocSpaceHelper.LocatedInPrivateRoomAsync(file, daoFactory.GetCacheFolderDao<T>())))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var currentExt = file.ConvertedExtension;

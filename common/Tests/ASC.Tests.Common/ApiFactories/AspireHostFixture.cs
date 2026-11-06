@@ -62,6 +62,9 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     private readonly Dictionary<string, Uri> _baseAddresses = [];
 
+    // Local and in whole seconds, like the dates in the log it is compared with.
+    private readonly DateTime _startedAt = new(DateTime.Now.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond);
+
     // A single connection pool shared by every per-test HttpClient. The clients stay per-test (so
     // their Origin/Authorization default headers never collide across parallel tests), but they all
     // reuse this one handler, which avoids creating a short-lived connection pool per test and the
@@ -110,6 +113,9 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// other classes start as soon as <see cref="Resources"/> are healthy.
     /// </summary>
     protected virtual IEnumerable<string> LazyResources => [];
+
+    private readonly Lock _routerLock = new();
+    private Task? _routerUp;
 
     private readonly Lock _lazyResourcesLock = new();
     private Task? _lazyResourcesHealthy;
@@ -562,6 +568,55 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
     }
 
+    /// <summary>
+    /// Waits, once per run, until the router passes requests on to the services. The run itself does not need the
+    /// router and starts without it, but the socket service checks a cookie through it (<c>API_HOST</c>), and until it
+    /// is up every connection is refused. Answered by People, because a socket connection asks it first.
+    /// </summary>
+    public Task WaitForRouterAsync()
+    {
+        lock (_routerLock)
+        {
+            return _routerUp ??= PollRouterAsync();
+        }
+    }
+
+    private async Task PollRouterAsync()
+    {
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+        using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
+        var probe = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/api/2.0/people/@self");
+
+        try
+        {
+            while (true)
+            {
+                try
+                {
+                    using var response = await client.GetAsync(probe, startUp.Token);
+
+                    // Anonymous, so 401 is the answer of a service that was reached.
+                    if ((int)response.StatusCode < 500)
+                    {
+                        return;
+                    }
+                }
+                catch (Exception exception) when (!startUp.IsCancellationRequested && exception is HttpRequestException or TaskCanceledException)
+                {
+                    // Not up yet: the connection is refused or dropped until the container listens.
+                }
+
+                await Task.Delay(TimeSpan.FromMilliseconds(500), startUp.Token);
+            }
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The router did not answer {probe} within {_startUpBudget.TotalMinutes} minutes. The log of the "
+                + "openresty container is the one to read.");
+        }
+    }
+
     private async Task PollDocumentServerAsync()
     {
         using var startUp = new CancellationTokenSource(_startUpBudget);
@@ -669,5 +724,18 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
 
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// The notifications the socket service refused so far in this run, as "route status" with how many times. Nothing
+    /// else would ever say so: the operation succeeds and the client stays stale. A suite asks at the very end of its
+    /// run, from a test in a collection with <c>DisableParallelization</c>, which xUnit runs after the parallel ones.
+    /// It is a test and not a failure of this fixture's disposal, because that is reported once for every test run.
+    /// </summary>
+    public Task<Dictionary<string, int>> FindSocketHubRefusalsAsync()
+    {
+        var logs = AppPaths.GetTestLogsDirectory(AppPaths.GetBasePath(Projects.ASC_AppHost.ProjectPath));
+
+        return SocketHubRefusals.FindAsync(logs, _startedAt);
     }
 }

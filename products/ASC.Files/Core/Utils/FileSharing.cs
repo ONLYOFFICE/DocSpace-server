@@ -57,7 +57,8 @@ public class FileSharingAceHelper(
     ExternalShare externalShare,
     SettingsManager settingsManager,
     PasswordSettingsManager passwordSettingsManager,
-    EncryptionLoginProvider encryptionLoginProvider)
+    EncryptionLoginProvider encryptionLoginProvider,
+    FilesMessageService filesMessageService)
 {
     private const int MaxInvitationLinks = 1;
 
@@ -103,7 +104,16 @@ public class FileSharingAceHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        // Somebody who enters through a link holds no key, so a link cannot give access to end-to-end
+        // encrypted content. Revoking a link that already exists stays possible.
+        if (aceWrappers.Exists(r => r.IsLink && r.Access != FileShare.None) &&
+            (room is { SettingsPrivate: true } || (room == null && await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, cachedFolderDao))))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
+        var usersLeavingPrivateRoom = new List<Guid>();
 
 
         var roomUrl = room != null
@@ -429,6 +439,13 @@ public class FileSharingAceHelper(
             changed = true;
             handledAces.Add(new ProcessedItem<T>(eventType, existedShare, w, file != null ? file : folder));
 
+            // Before a change of owner the new owner's own share is what gets removed here: they are not leaving.
+            // Neither is the owner, who may hold a share of their own: the room stays theirs without it.
+            if (room is { SettingsPrivate: true } && eventType == EventType.Remove && !w.IsLink && !w.SubjectGroup && !beforeOwnerChange && w.Id != room.CreateBy)
+            {
+                usersLeavingPrivateRoom.Add(w.Id);
+            }
+
             if (emailInvite && share != FileShare.None)
             {
                 var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
@@ -436,7 +453,7 @@ public class FileSharingAceHelper(
 
                 await studioNotifyService.SendEmailRoomInviteAsync(
                     w.Email,
-                    entry.Title,
+                    entry is Folder<T> { SettingsPrivate: true } ? null : entry.Title,
                     shortenLink,
                     entry is IFolder { FolderType: FolderType.AiRoom },
                     culture,
@@ -448,7 +465,7 @@ public class FileSharingAceHelper(
                 {
                     var user = await userManager.GetUsersAsync(w.Id);
 
-                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
+                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.SettingsPrivate ? null : room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
                 }
             }
 
@@ -536,6 +553,11 @@ public class FileSharingAceHelper(
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
+        else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+        {
+            await RevokeFileKeysAsync(privateRoom, usersLeavingPrivateRoom);
+            await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
+        }
 
         if (recipients.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
         {
@@ -608,6 +630,16 @@ public class FileSharingAceHelper(
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
+        else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+        {
+            // The owner stays the owner whatever their own list says, and still has to open the files.
+            if (privateRoom.CreateBy != currentId)
+            {
+                await RevokeFileKeysAsync(privateRoom, [currentId]);
+            }
+
+            await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
+        }
 
         await fileMarker.RemoveMarkAsNewAsync(entry);
         await tagDao.RemoveTagsAsync(entry, tags.Select(t => t.Id).ToList());
@@ -618,6 +650,27 @@ public class FileSharingAceHelper(
         {
             await socketManager.RemoveFromSharedAsync(entry, users: [currentId]);
         }
+    }
+
+    /// <summary>
+    /// Somebody who leaves a private room has no business keeping the wrapped keys of its files. Done by the server, so it
+    /// does not depend on a client being online. Coming back means having the keys issued again.
+    /// </summary>
+    public async Task RevokeFileKeysAsync<T>(Folder<T> room, List<Guid> userIds)
+    {
+        if (userIds.Count == 0)
+        {
+            return;
+        }
+
+        var fileDao = daoFactory.GetFileDao<T>();
+        var fileIds = await fileDao.GetFilesAsync(room.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true)
+            .Select(f => f.Id)
+            .ToListAsync();
+
+        await fileDao.DeleteFileKeysAsync(fileIds, userIds);
+
+        await filesMessageService.SendAsync(MessageAction.RoomFileKeysRevoked, room, room.Title, string.Join(", ", userIds));
     }
 }
 

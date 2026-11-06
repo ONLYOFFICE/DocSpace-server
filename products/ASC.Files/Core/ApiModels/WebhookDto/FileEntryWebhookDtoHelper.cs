@@ -133,6 +133,9 @@ public class FileEntryWebhookDtoHelper(
 
         try
         {
+            // a check answers with the share it finds on the entry, which belongs to whoever was checked before
+            room.ShareRecord = null;
+
             if (await fileSecurity.CanEditRoomAsync(room, subscriberId) || await fileSecurity.CanCreateAsync(room, subscriberId))
             {
                 return true;
@@ -206,6 +209,12 @@ public class FileEntryWebhookDtoHelper(
         }
 
         var folder = await GetOriginFolderAsync(folderId);
+
+        if (folder != null)
+        {
+            // the folder is shared between the subscribers, and a check answers with the share it finds on it
+            folder.ShareRecord = null;
+        }
 
         canRead = folder != null && await fileSecurity.CanReadAsync(folder, subscriberId);
         _canReadOriginFolder[key] = canRead;

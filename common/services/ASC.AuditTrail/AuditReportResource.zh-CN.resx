@@ -1332,4 +1332,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>AI 项目 {0} 的 AI 模型已更改为 {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>已重试 Webhook 投递：{0}</value>
+  </data>
 </root>

@@ -209,7 +209,7 @@ public class EncryptionKeyPairDtoHelper(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
-        var locatedInPrivateRoom = file.RootFolderType == FolderType.VirtualRooms
+        var locatedInPrivateRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive
             && await DocSpaceHelper.LocatedInPrivateRoomAsync(file, folderDao);
 
         if (file.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
@@ -293,6 +293,104 @@ public class EncryptionKeyPairDtoHelper(
         }
 
         return SanitizeAccessKeys(fileKeysPair);
+    }
+
+    /// <summary>
+    /// Reads the public keys of the people about to be invited to a private room, so that a client can
+    /// encrypt the file keys for them before it grants the access. Only somebody who may change the
+    /// room's access gets an answer. A user who could not become a member is left out: the key rows
+    /// are not partitioned by tenant, so an id of another portal's user must not reach them.
+    /// </summary>
+    public async Task<List<EncryptionKeyDto>> GetKeyPairForRoomCandidatesAsync<T>(T roomId, IEnumerable<Guid> userIds)
+    {
+        await DemandRoomAccessManagerAsync(roomId);
+
+        var keys = new List<EncryptionKeyDto>();
+
+        foreach (var userId in userIds.Distinct())
+        {
+            var user = await userManager.GetUsersAsync(userId);
+            if (!userManager.UserExists(user) || user.Status == EmployeeStatus.Terminated || await userManager.IsGuestAsync(user))
+            {
+                continue;
+            }
+
+            var userKeys = await encryptionLoginProvider.GetKeysAsync(userId);
+            if (string.IsNullOrEmpty(userKeys))
+            {
+                continue;
+            }
+
+            keys.AddRange(ParseKeys(userKeys, userId).Where(r => !string.IsNullOrEmpty(r.PublicKey)));
+        }
+
+        // Unlike the room's own key set, this answer never carries a private half, not even the caller's.
+        keys.ForEach(r => r.PrivateKeyEnc = null);
+
+        return keys;
+    }
+
+    /// <summary>
+    /// Says which encrypted files of a private room each user cannot open yet, so that a client can
+    /// write the missing keys without trying every file. Without <paramref name="userIds"/> it covers
+    /// the members of the room; a user who has everything is left out of the answer.
+    /// </summary>
+    public async Task<List<RoomMissingFileKeysDto>> GetMissingFileKeysAsync(int roomId, IReadOnlyCollection<Guid> userIds)
+    {
+        var room = await DemandRoomAccessManagerAsync(roomId);
+
+        IEnumerable<Guid> subjects = userIds;
+        if (userIds.Count == 0)
+        {
+            var shares = await fileSharing.GetSharedInfoAsync(room);
+            subjects = shares.Where(share => !share.SubjectGroup && !share.IsLink).Select(share => share.Id).Append(room.CreateBy);
+        }
+
+        var fileDao = daoFactory.GetFileDao<int>();
+        var result = new List<RoomMissingFileKeysDto>();
+
+        foreach (var userId in subjects.Distinct())
+        {
+            if (!userManager.UserExists(await userManager.GetUsersAsync(userId)))
+            {
+                continue;
+            }
+
+            var fileIds = await DocSpaceHelper.GetEncryptedFilesWithoutKeyAsync(fileDao, roomId, userId);
+            if (fileIds.Count != 0)
+            {
+                result.Add(new RoomMissingFileKeysDto { UserId = userId, FileIds = fileIds });
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>Finds a private room and checks that the current user may change who has access to it.</summary>
+    private async Task<Folder<T>> DemandRoomAccessManagerAsync<T>(T roomId)
+    {
+        var room = await daoFactory.GetFolderDao<T>().GetFolderAsync(roomId);
+        if (room == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        if (!room.IsRoom || !DocSpaceHelper.LocatedInPrivateRoom(room))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomOnly);
+        }
+
+        if (!await fileSharing.CanSetAccessAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return room;
     }
 
     /// <summary>

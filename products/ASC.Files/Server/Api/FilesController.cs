@@ -309,7 +309,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension")]
     [SwaggerResponse(402, "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size")]
-    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, or the caller may not create files in it")]
+    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
     [SwaggerResponse(415, "The installation filters uploads and does not accept the format of the new title")]
     [SwaggerResponse(500, "The document service fails to convert the content, `destFolderId` is a fraction or outside the 32-bit range, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
@@ -346,7 +346,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the form gallery has no file of the title's format")]
+    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, the form gallery has no file of the title's format, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage")]
     [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the folder id is 0 and the caller is a guest without My documents")]
     [HttpPost("{folderId}/file")]
@@ -376,7 +376,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/html")]
     public async Task<FileDto<T>> CreateHtmlFile(CreateTextOrHtmlFileRequestDto<T> inDto)
@@ -405,7 +405,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/text")]
     public async Task<FileDto<T>> CreateTextFile(CreateTextOrHtmlFileRequestDto<T> inDto)
@@ -1276,8 +1276,8 @@ public abstract class FilesController<T>(
     /// key that `GET api/2.0/files/file/{fileId}/publickeys` reports for them. The keys of the accounts named in the
     /// request are replaced, and the keys of everybody else are left as they are, which makes the call idempotent for
     /// a given set of recipients while remaining a mutating one; sending no entry for a person does not revoke that
-    /// person's key. The file has to lie in a private room, and every account named in the request has to have read
-    /// access to it. The caller needs read access to the file and the right to create content in that room, which its
+    /// person's key. The file has to lie in a private room. An account named in the request that cannot read the file is skipped,
+    /// nothing is stored for it, and it comes back in `skippedUserIds`, while the keys of the others are stored. The caller needs read access to the file and the right to create content in that room, which its
     /// members with editing rights and its admins have; a caller without those rights, a file outside a private room
     /// and a file that does not exist are all refused with 403. Read the result back with
     /// `GET api/2.0/files/{fileId}/access`.
@@ -1287,13 +1287,13 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/{fileId}/access</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The file keys were stored")]
-    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, the file is not in a private room, or a recipient has no read access to it")]
+    [SwaggerResponse(200, "The file keys of the recipients who can read the file were stored; the others are listed in `skippedUserIds`", typeof(FileKeysWrittenDto))]
+    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, or the file is not in a private room")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPut("{fileId}/access")]
-    public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
+    public async Task<FileKeysWrittenDto> SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {
-        await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project());
+        return new FileKeysWrittenDto { SkippedUserIds = await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project()) };
     }
 }
 

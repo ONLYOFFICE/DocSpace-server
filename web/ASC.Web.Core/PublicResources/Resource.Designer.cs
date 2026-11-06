@@ -232,7 +232,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI features.
+        ///   Looks up a localized string similar to AI agents &amp; tools.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_tools {
             get {
@@ -2644,42 +2644,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The webhook target is not an existing user or group.
-        /// </summary>
-        public static string ErrorWebhookTargetNotFound {
-            get {
-                return ResourceManager.GetString("ErrorWebhookTargetNotFound", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to The webhook is disabled. Enable it before retrying its deliveries.
-        /// </summary>
-        public static string ErrorWebhookRetryDisabled {
-            get {
-                return ResourceManager.GetString("ErrorWebhookRetryDisabled", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to The event is being sent right now. Retry it once the attempt has finished.
-        /// </summary>
-        public static string ErrorWebhookRetryInProgress {
-            get {
-                return ResourceManager.GetString("ErrorWebhookRetryInProgress", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to The delivery was recorded in an earlier webhook format and cannot be sent again.
-        /// </summary>
-        public static string ErrorWebhookRetryOutdated {
-            get {
-                return ResourceManager.GetString("ErrorWebhookRetryOutdated", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to No permissions to perform this action.
         /// </summary>
         public static string ErrorAccessDenied {
@@ -3045,6 +3009,42 @@ namespace ASC.Web.Core.PublicResources {
         public static string ErrorUserNotFoundByEmail {
             get {
                 return ResourceManager.GetString("ErrorUserNotFoundByEmail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The webhook is disabled. Enable it before retrying its deliveries.
+        /// </summary>
+        public static string ErrorWebhookRetryDisabled {
+            get {
+                return ResourceManager.GetString("ErrorWebhookRetryDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The event is being sent right now. Retry it once the attempt has finished.
+        /// </summary>
+        public static string ErrorWebhookRetryInProgress {
+            get {
+                return ResourceManager.GetString("ErrorWebhookRetryInProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The delivery was recorded in an earlier webhook format and cannot be sent again.
+        /// </summary>
+        public static string ErrorWebhookRetryOutdated {
+            get {
+                return ResourceManager.GetString("ErrorWebhookRetryOutdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The webhook target is not an existing user or group.
+        /// </summary>
+        public static string ErrorWebhookTargetNotFound {
+            get {
+                return ResourceManager.GetString("ErrorWebhookTargetNotFound", resourceCulture);
             }
         }
         
@@ -3985,7 +3985,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI features.
+        ///   Looks up a localized string similar to AI agents &amp; tools.
         /// </summary>
         public static string TariffsFeature_aitools_wallet {
             get {

@@ -145,7 +145,7 @@
     <value>服务</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI 功能</value>
+    <value>AI 智能体和工具</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>备份</value>
@@ -1171,7 +1171,7 @@
     <value>AI 搜索</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI 功能</value>
+    <value>AI 智能体和工具</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>跟踪登录和操作</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>提供商成本</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>该 Webhook 已禁用。请先启用后再重试其投递</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>该事件正在发送中。请在本次尝试完成后重试</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>该投递记录采用较早的 Webhook 格式，无法再次发送</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook 目标不是现有的用户或群组</value>
   </data>
 </root>

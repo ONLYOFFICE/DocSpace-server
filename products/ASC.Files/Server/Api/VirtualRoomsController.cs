@@ -99,9 +99,9 @@ public class VirtualRoomsInternalController(
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`, which creates an AI agent in the Rooms section")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
-    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
     [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
     [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("")]
@@ -387,7 +387,7 @@ public class VirtualRoomsThirdPartyController(
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue")]
     [SwaggerResponse(403, "The caller is not the account that connected the storage or may not create rooms, the storage account was not connected for room storage or already backs a room, the room would be public while the portal forbids external sharing, or, with `createAsNewFolder`, the subfolder cannot be created, as when `title` is blank, `cover` is not a known cover, a tag name is empty or the logo cannot be applied")]
     [SwaggerResponse(404, "`id` is not a folder of a connected third-party storage: a plain number, an identifier with a storage type the portal does not know, or a folder the storage does not have")]
@@ -476,7 +476,7 @@ public abstract class VirtualRoomsController<T>(
     [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead when the ID is a folder inside a room rather than the room itself, which a manager of that room may pass and the operation does not refuse")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the update", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, a private room is given `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(402, "The new logo or watermark image does not fit into the portal storage quota")]
     [SwaggerResponse(403, "The caller may not edit this room, the room lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
     [SwaggerResponse(404, "No room has this id, the uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
@@ -525,7 +525,7 @@ public abstract class VirtualRoomsController<T>(
                 continue;
             }
 
-            folderTitles.Add(room.Title);
+            folderTitles.Add(NotifyConstants.GetRoomTitle(room));
             yield return await _folderDtoHelper.GetAsync(room);
         }
 
@@ -579,7 +579,7 @@ public abstract class VirtualRoomsController<T>(
                 continue;
             }
 
-            folderTitles.Add(room.Title);
+            folderTitles.Add(NotifyConstants.GetRoomTitle(room));
 
             yield return await _folderDtoHelper.GetAsync(room);
         }
@@ -862,7 +862,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Rooms")]
     [SwaggerResponse(200, "The link as it is after the change, or an empty body when nothing was created", typeof(FileShareDto))]
     [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "The caller may not manage the links of this room, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change")]
+    [SwaggerResponse(403, "The caller may not manage the links of this room, the room is private, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change")]
     [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "`linkType` is `Invitation` and `linkId` is the id of the room owner's account, or a third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/links")]
@@ -1393,7 +1393,7 @@ public class VirtualRoomsCommonController(
 
     /// <remarks>
     /// Lists one page of the rooms of a section narrowed by metadata: the active rooms by default, or the archive, the room
-    /// templates, the form templates or the Forms section, chosen with `searchArea`, while `type` narrows the room types.
+    /// templates, the form templates, the Forms section or the private rooms section, chosen with `searchArea`, while `type` narrows the room types. Private rooms are left out of the active rooms unless `privacyFilter` asks for them.
     /// The filter is a typed body: `metadataTemplateId` alone keeps the rooms the template is assigned to, every condition
     /// in `metadataFilters` must hold at once, and `filterValue` adds a text search over room titles and metadata values;
     /// the template and field IDs come from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the
@@ -1430,6 +1430,7 @@ public class VirtualRoomsCommonController(
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.FormTemplates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
+            SearchArea.PrivateRooms => await globalFolderHelper.GetFolderPrivateRoomsAsync(),
             SearchArea.AiHub => await globalFolderHelper.GetFolderAiHubAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };

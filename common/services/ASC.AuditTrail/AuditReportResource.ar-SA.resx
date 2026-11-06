@@ -1332,4 +1332,7 @@
   <data name="AiProjectProfileAssigned" xml:space="preserve">
     <value>تم تغيير نموذج الذكاء الاصطناعي لمشروع الذكاء الاصطناعي {0} إلى {1}</value>
   </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>تمت إعادة محاولة تسليم الخطاف التلقائي (Webhook): {0}</value>
+  </data>
 </root>

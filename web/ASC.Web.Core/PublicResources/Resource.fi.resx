@@ -145,7 +145,7 @@
     <value>Palvelu</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Tekoälyominaisuudet</value>
+    <value>AI-agentit ja -työkalut</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Varmuuskopio</value>
@@ -1177,7 +1177,7 @@
     <value>AI-haku</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Tekoälyominaisuudet</value>
+    <value>AI-agentit ja -työkalut</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Kirjautumisten ja toimien seuranta</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Palveluntarjoajan hinta</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook on poistettu käytöstä. Ota se käyttöön ennen sen toimitusten uudelleenyritystä</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Tapahtumaa lähetetään parhaillaan. Yritä uudelleen, kun yritys on päättynyt</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Toimitus tallennettiin aiemmassa webhook-muodossa, eikä sitä voi lähettää uudelleen</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhookin kohde ei ole olemassa oleva käyttäjä tai ryhmä</value>
   </data>
 </root>

@@ -100,6 +100,11 @@ public class EventTypeConverter(
         if (source.Event.DescriptionRaw != null)
         {
             dest.Description = JsonSerializer.Deserialize<IList<string>>(source.Event.DescriptionRaw);
+
+            if (source.HidePrivateTitles)
+            {
+                dest.Description = PrivateTitleMask.Apply(dest.Description, AuditReportResource.PrivateRoomTitle);
+            }
         }
 
         if (dest.UserId == Constants.CoreSystem.ID)

@@ -993,7 +993,7 @@
           "Files / Files"
         ],
         "summary": "Get the editor configuration",
-        "description": "Builds everything an editor client needs to open the file: the document descriptor with its download address,\r\ntitle, type and document key, the editor configuration with the mode, the caller's permissions, the user and\r\nthe customization, the callback the editors report back to, and the signature token the document service\r\nvalidates. `version` opens one entry of the file history and requires access to that history; left out, the\r\ncurrent revision is opened. `view`, `edit` and `fill` say what the client intends to do, and `editorType`\r\npicks the desktop, mobile or embedded layout. For a PDF form the room decides the outcome and may overrule the\r\nrequest: a form-filling room, a virtual data room, a public room and a user folder each produce their own\r\nmode, and a form opened from the templates folder is read-only and, outside the mobile layout, framed as\r\nembedded. When the portal is over its storage quota the configuration comes back read-only with the exceeded\r\nscope named. In a private room the caller's encryption keys are added to the editor configuration. Payment is\r\nnot required and an anonymous caller opens through an external link.\n\nRaises the `form.stopped` webhook when a PDF form whose filling had started in a form-filling room is opened with `edit` true.",
+        "description": "Builds everything an editor client needs to open the file: the document descriptor with its download address,\r\ntitle, type and document key, the editor configuration with the mode, the caller's permissions, the user and\r\nthe customization, the callback the editors report back to, and the signature token the document service\r\nvalidates. `version` opens one entry of the file history and requires access to that history; left out, the\r\ncurrent revision is opened. `view`, `edit` and `fill` say what the client intends to do, and `editorType`\r\npicks the desktop, mobile or embedded layout. For a PDF form the room decides the outcome and may overrule the\r\nrequest: a form-filling room, a virtual data room, a public room and a user folder each produce their own\r\nmode, and a form opened from the templates folder is read-only and, outside the mobile layout, framed as\r\nembedded. In a form-filling room `edit=true` takes the form off filling only for a\r\ncaller who may edit it. When the portal is over its storage quota the configuration comes back read-only with the exceeded\r\nscope named. In a private room the caller's encryption keys are added to the editor configuration. Payment is\r\nnot required and an anonymous caller opens through an external link.\n\nRaises the `form.stopped` webhook when a PDF form whose filling had started in a form-filling room is opened with `edit` true.",
         "operationId": "openEditFile",
         "parameters": [
           {
@@ -1044,7 +1044,7 @@
           {
             "name": "edit",
             "in": "query",
-            "description": "Asks for editing rather than viewing. On a form in a form-filling room this also records that the form is\r\nbeing edited; the room may still turn the request into viewing or into filling.",
+            "description": "Asks for editing rather than viewing; the room the file lies in may still turn the request into viewing or\r\ninto filling.",
             "schema": {
               "examples": [
                 false
@@ -1093,7 +1093,7 @@
             "description": "The file id, or the requested version of it, resolves to nothing"
           },
           "415": {
-            "description": "The file is in a format the editors can neither edit nor open for viewing"
+            "description": "The file is in a format the editors can neither edit nor open for viewing, or it is an encrypted file of a private room and the connected document server cannot work with encrypted files"
           },
           "500": {
             "description": "The file lies in a third-party storage that cannot deliver it"
@@ -2669,7 +2669,7 @@
             "description": "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size"
           },
           "403": {
-            "description": "The caller may not read the file, the destination folder does not exist, or the caller may not create files in it"
+            "description": "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room"
           },
           "404": {
             "description": "The file or the destination folder does not exist"
@@ -6064,7 +6064,7 @@
           "Files / Files"
         ],
         "summary": "Perform form filling action",
-        "description": "Drives the filling of a PDF form through its states, the action deciding which way. Action 2 starts the\r\nfilling: in a form-filling room the form is opened for filling, the members whose rights are limited to\r\nfilling forms are let in, and a form that has been changed since it was last started has the drafts of its\r\nprevious round dropped. Action 0 stops it, which in a virtual data room records who interrupted it and at\r\nwhich role and notifies the people who held the other roles, and in a form-filling room closes the form for\r\nfilling. Action 1 resumes a filling that was stopped, clearing that record. Action 3 puts the form back into\r\nediting, closing it for filling and remembering the version it was edited from. The file has to be a PDF form\r\nlying in a room. Starting needs the right to start the filling, which the room admin and a member with\r\ncontent-creator rights have, while stopping a filling that somebody else started belongs to room managers\r\nalone, so a content creator is refused with 403 there. The call is mutating; the state that resulted is read\r\nwith `GET api/2.0/files/file/{fileId}/formroles`.\n\nRaises the `form.stopped` webhook when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started.",
+        "description": "Drives the filling of a PDF form through its states, the action deciding which way. Action 2 starts the\r\nfilling: in a form-filling room the form is opened for filling, the members whose rights are limited to\r\nfilling forms are let in, and a form that has been changed since it was last started has the drafts of its\r\nprevious round dropped. Action 0 stops it, which in a virtual data room records who interrupted it and at\r\nwhich role and notifies the people who held the other roles, and in a form-filling room closes the form for\r\nfilling. Action 1 resumes a filling that was stopped, clearing that record. Action 3 puts the form back into\r\nediting, closing it for filling and remembering the version it was edited from. The file has to be a PDF form\r\nlying in a room. Starting needs the right to start the filling, which the room admin and a member with\r\ncontent-creator rights have, while stopping a filling that somebody else started belongs to room managers\r\nalone, so a content creator is refused with 403 there. In a form-filling room action 3 needs the right to\r\nedit the form. The call is mutating; the state that resulted is read\r\nwith `GET api/2.0/files/file/{fileId}/formroles`.\n\nRaises the `form.stopped` webhook when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started.",
         "operationId": "manageFormFilling",
         "parameters": [
           {
@@ -6106,7 +6106,7 @@
             "description": "The request body cannot be read or has no `formId`"
           },
           "403": {
-            "description": "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling, or `action` is not one of the known values"
+            "description": "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values"
           },
           "500": {
             "description": "The form has no filling properties yet, as when a filling that was never started is resumed, or the form lies in a third-party storage"
@@ -6437,7 +6437,7 @@
           "Files / Files"
         ],
         "summary": "Set file encryption information",
-        "description": "Issues the file keys that let the named people open one file of an end-to-end encrypted private room. Each\r\nentry of the body names the account the key is for, the public key it was encrypted with and the encrypted key\r\nitself, so the plain key never reaches the portal: the client encrypts it once per recipient with the public\r\nkey that `GET api/2.0/files/file/{fileId}/publickeys` reports for them. The keys of the accounts named in the\r\nrequest are replaced, and the keys of everybody else are left as they are, which makes the call idempotent for\r\na given set of recipients while remaining a mutating one; sending no entry for a person does not revoke that\r\nperson's key. The file has to lie in a private room, and every account named in the request has to have read\r\naccess to it. The caller needs read access to the file and the right to create content in that room, which its\r\nmembers with editing rights and its admins have; a caller without those rights, a file outside a private room\r\nand a file that does not exist are all refused with 403. Read the result back with\r\n`GET api/2.0/files/{fileId}/access`.",
+        "description": "Issues the file keys that let the named people open one file of an end-to-end encrypted private room. Each\r\nentry of the body names the account the key is for, the public key it was encrypted with and the encrypted key\r\nitself, so the plain key never reaches the portal: the client encrypts it once per recipient with the public\r\nkey that `GET api/2.0/files/file/{fileId}/publickeys` reports for them. The keys of the accounts named in the\r\nrequest are replaced, and the keys of everybody else are left as they are, which makes the call idempotent for\r\na given set of recipients while remaining a mutating one; sending no entry for a person does not revoke that\r\nperson's key. The file has to lie in a private room. An account named in the request that cannot read the file is skipped,\r\nnothing is stored for it, and it comes back in `skippedUserIds`, while the keys of the others are stored. The caller needs read access to the file and the right to create content in that room, which its\r\nmembers with editing rights and its admins have; a caller without those rights, a file outside a private room\r\nand a file that does not exist are all refused with 403. Read the result back with\r\n`GET api/2.0/files/{fileId}/access`.",
         "operationId": "setEncryptionInfo",
         "parameters": [
           {
@@ -6480,7 +6480,7 @@
         },
         "responses": {
           "200": {
-            "description": "The file keys were stored",
+            "description": "The file keys of the recipients who can read the file were stored; the others are listed in `skippedUserIds`",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -6491,10 +6491,17 @@
               "X-RateLimit-Reset": {
                 "$ref": "#/components/headers/X-RateLimit-Reset"
               }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FileKeysWrittenWrapper"
+                }
+              }
             }
           },
           "403": {
-            "description": "The file does not exist, the caller may not issue keys for it, the file is not in a private room, or a recipient has no read access to it"
+            "description": "The file does not exist, the caller may not issue keys for it, or the file is not in a private room"
           },
           "404": {
             "description": "The file does not exist"
@@ -10097,10 +10104,11 @@
                       "InstructionsRoom",
                       "KnowledgeRoom",
                       "AiProjectRoom",
-                      "AiHub"
+                      "AiHub",
+                      "PrivateRooms"
                     ],
                     "type": "string",
-                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms]"
+                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms, PrivateRooms - Private rooms]"
                   },
                   {
                     "examples": [
@@ -10141,10 +10149,11 @@
                       38,
                       39,
                       40,
-                      41
+                      41,
+                      42
                     ],
                     "type": "integer",
-                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms]",
+                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms, 42 - Private rooms]",
                     "x-enum-varnames": [
                       "DEFAULT",
                       "COMMON",
@@ -10180,7 +10189,8 @@
                       "InstructionsRoom",
                       "KnowledgeRoom",
                       "AiProjectRoom",
-                      "AiHub"
+                      "AiHub",
+                      "PrivateRooms"
                     ]
                   }
                 ]
@@ -12816,6 +12826,226 @@
           },
           "404": {
             "description": "The \"Forms\" section could not be resolved for this account"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/files/@private": {
+      "get": {
+        "tags": [
+          "Files / Folders"
+        ],
+        "summary": "Get the private rooms section",
+        "description": "Returns the private rooms section: the flat list of end-to-end encrypted rooms the caller is a member of. Such\r\nrooms are stored under the \"Rooms\" tree but are surfaced only here, so `GET api/2.0/files/rooms` leaves them out of\r\nthe active area and lists them when `searchArea` names the private rooms area instead. An administrator who is not\r\na member does not see a private room here either. The section is not expanded into room content, so `folders`\r\ncarries the rooms while `files` comes back empty; to read what is inside one of them, call\r\n`GET api/2.0/files/{folderId}` with the room identifier. Nothing is modified, though passing `sortBy` saves the\r\nrequested order as the default order for this account. `filterType`, `filterValue`, `userIdOrGroupId` and the\r\nsorting parameters narrow and order the room list, `metadataTemplateId` and `metadataFilters` keep only the rooms\r\ncarrying the template and matching the conditions, `count` and `startIndex` page through it, `total` reports how\r\nmany rooms match the request in full, and `current` describes the section folder itself. Archived private rooms\r\nstay in the archive area; narrow it with `privacyFilter` of `GET api/2.0/files/rooms`.",
+        "operationId": "getPrivateRoomsFolder",
+        "parameters": [
+          {
+            "name": "userIdOrGroupId",
+            "in": "query",
+            "description": "Restricts the listing to the entries authored by this portal member, or by the members of this group; the same\r\nparameter accepts either kind of identifier. Omit it to list everything the caller can read.",
+            "schema": {
+              "examples": [
+                "00000000-0000-0000-0000-000000000000"
+              ],
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "filterType",
+            "in": "query",
+            "description": "Narrows the listing to a single kind of entry, such as documents, images or one type of room. Omit it to list\r\nevery kind the section holds.",
+            "schema": {
+              "$ref": "#/components/schemas/FilterType"
+            },
+            "example": 1
+          },
+          {
+            "name": "count",
+            "in": "query",
+            "description": "The size of one page of section content. Pair it with `startIndex` to walk the listing, and compare the two\r\nwith `total` in the response to see when the last page has been read.",
+            "schema": {
+              "examples": [
+                25
+              ],
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "startIndex",
+            "in": "query",
+            "description": "The number of matching entries to skip before the returned page begins; add `count` to it to ask for the next\r\npage.",
+            "schema": {
+              "examples": [
+                0
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "description": "The name of the field the entries are ordered by, matched case-insensitively against the file sort fields:\r\n`DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,\r\n`CustomOrder`, `LastOpened` and `UsedSpace`. A recognized value is also saved as the default order of the\r\naccount and reused by later listings that omit the parameter, while a value matching none of the fields leaves\r\nthat saved order in place.",
+            "schema": {
+              "examples": [
+                "DateAndTime"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "description": "The direction in which the `sortBy` field is ordered. It is saved together with `sortBy` as the default order\r\nof the account.",
+            "schema": {
+              "$ref": "#/components/schemas/SortOrder"
+            },
+            "example": 1
+          },
+          {
+            "name": "filterValue",
+            "in": "query",
+            "description": "The search string the section is filtered by: it is matched as a substring of entry titles and, for files,\r\nagainst the indexed document content as well. Omit it to list the section unfiltered.",
+            "schema": {
+              "examples": [
+                "My Document"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "metadataTemplateId",
+            "in": "query",
+            "description": "The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries\r\ncarrying the template; together with the metadata filters it also pins the template the filtered fields belong to.\r\nThe third-party entries never carry metadata and are left out when the filter is set.",
+            "schema": {
+              "examples": [
+                1
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "metadataFilters",
+            "in": "query",
+            "description": "The URL-encoded JSON array of the metadata filter conditions,\r\ne.g. [{\"fieldId\":1,\"op\":\"contains\",\"value\":\"ACME\"},{\"fieldId\":2,\"op\":\"range\",\"from\":\"2026-01-01\",\"to\":\"2026-06-30\"},{\"fieldId\":3,\"op\":\"in\",\"optionIds\":[\"...\"]}].\r\nA string field takes \"eq\" or \"contains\"; a number or a date field takes \"range\" with inclusive bounds, or \"gt\", \"gte\", \"lt\", \"lte\" with the bound in \"value\";\r\na date-only bound covers the whole day. A custom field is addressed by its name instead of the fieldId: {\"name\":\"Client\",\"op\":\"eq\",\"value\":\"ACME\"}.",
+            "schema": {
+              "examples": [
+                "[{\"fieldId\":1,\"op\":\"eq\",\"value\":\"ACME\"}]"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeHiddenMetadata",
+            "in": "query",
+            "description": "Whether the text search, and the \"metadataMatches\" it reports, also look at the values of the hidden metadata\r\ntemplates (created with \"visible\" false for the metadata a service keeps for itself, which the web client never\r\nshows). False, the default, leaves them out, so an entry is not found by such a value; true takes them in.\r\n\"metadataTemplateId\" and \"metadataFilters\" are not concerned: a hidden template or field named there is searched\r\neither way.",
+            "schema": {
+              "examples": [
+                false
+              ],
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The private rooms section with one page of the private rooms the caller is a member of",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FolderContentWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field"
+          },
+          "403": {
+            "description": "The caller is not allowed to read the private rooms section"
+          },
+          "404": {
+            "description": "The end-to-end encrypted rooms app is turned off on this portal"
           },
           "401": {
             "description": "Unauthorized",
@@ -17571,10 +17801,11 @@
                       "InstructionsRoom",
                       "KnowledgeRoom",
                       "AiProjectRoom",
-                      "AiHub"
+                      "AiHub",
+                      "PrivateRooms"
                     ],
                     "type": "string",
-                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms]"
+                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms, PrivateRooms - Private rooms]"
                   },
                   {
                     "examples": [
@@ -17615,10 +17846,11 @@
                       38,
                       39,
                       40,
-                      41
+                      41,
+                      42
                     ],
                     "type": "integer",
-                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms]",
+                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms, 42 - Private rooms]",
                     "x-enum-varnames": [
                       "DEFAULT",
                       "COMMON",
@@ -17654,7 +17886,8 @@
                       "InstructionsRoom",
                       "KnowledgeRoom",
                       "AiProjectRoom",
-                      "AiHub"
+                      "AiHub",
+                      "PrivateRooms"
                     ]
                   }
                 ]
@@ -19193,13 +19426,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, or `fileSize` is negative"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format"
+            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -19372,13 +19605,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, has no `fileName`, or `fileSize` is negative"
+            "description": "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension"
           },
           "402": {
             "description": "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder"
           },
           "403": {
-            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format"
+            "description": "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format, or the file going into a private room is not marked `encrypted`"
           },
           "404": {
             "description": "No folder with the specified ID"
@@ -19498,7 +19731,7 @@
           "Files / Operations"
         ],
         "summary": "Abort an upload session",
-        "description": "Cancels a chunked upload opened with `POST api/2.0/files/{folderId}/session` and discards the parts already\r\nreceived, so nothing of it reaches the folder. The session is found by the id in the path alone: the folder\r\nsegment is not matched against it, and neither is the account that opened it, which makes the id the only\r\nsecret protecting the transfer. The call is destructive and is not safe to repeat, because the record is gone\r\nafterwards: a second attempt, a session already closed by\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` and a session that expired after twelve hours of\r\nsilence all fail rather than answer as missing. Finalizing removes the session too, so there is nothing left\r\nto abort once the file exists. The answer carries no body. An upload that is simply abandoned needs no call at\r\nall, since the session and its buffered parts are dropped when it expires.",
+        "description": "Cancels a chunked upload opened with `POST api/2.0/files/{folderId}/session` and discards the parts already\r\nreceived, so nothing of it reaches the folder. Only the account that opened the session may cancel it, and the\r\nfolder in the path has to be the one it was opened against. The call is destructive and is not safe to repeat, because the record is gone\r\nafterwards: a second attempt, a session already closed by\r\n`PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` and a session that expired after twelve hours of\r\nsilence all fail rather than answer as missing. Finalizing removes the session too, so there is nothing left\r\nto abort once the file exists. The answer carries no body. An upload that is simply abandoned needs no call at\r\nall, since the session and its buffered parts are dropped when it expires.",
         "operationId": "abortUploadSession",
         "parameters": [
           {
@@ -19516,7 +19749,7 @@
           {
             "name": "folderId",
             "in": "path",
-            "description": "The folder the session was opened against. It is part of the route only and is not matched against the\r\nsession, which is found by its own id.",
+            "description": "The folder the session was opened against. Take it from the path the session was created on.",
             "required": true,
             "schema": {
               "examples": [
@@ -19546,7 +19779,7 @@
             "description": "The session was opened by another account"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "401": {
             "description": "Unauthorized",
@@ -19628,7 +19861,7 @@
             {
               "name": "folderId",
               "in": "path",
-              "description": "The folder the session was opened against. It is part of the route only and is not matched against the\r\nsession, which is found by its own id.",
+              "description": "The folder the session was opened against. Take it from the path the session was created on.",
               "required": true,
               "schema": {
                 "examples": [
@@ -19726,7 +19959,7 @@
             "description": "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A file that is not a PDF is stored in a form-filling room"
@@ -19932,7 +20165,7 @@
             "description": "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room"
@@ -20097,7 +20330,7 @@
             "description": "Storing the file would exceed a storage quota or size limit"
           },
           "404": {
-            "description": "No open session with the specified ID: it never existed, was finalized or aborted, or has expired"
+            "description": "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder"
           },
           "500": {
             "description": "A file that is not a PDF is stored in a form-filling room"
@@ -25611,6 +25844,9 @@
           "403": {
             "description": "The new owner is not an active account allowed to manage rooms or has not set up encryption keys for a listed private room, the caller may not change the owner of a listed entry, a listed folder lies outside the rooms and common sections, or a listed file is locked, being edited or lies outside the common section"
           },
+          "409": {
+            "description": "The new owner holds no key for some encrypted files of a listed private room: `GET api/2.0/privacyroom/{roomId}/access/missing` names them, and the call can be repeated once their keys are written"
+          },
           "500": {
             "description": "An id is a number that is not a 32-bit integer"
           },
@@ -25802,7 +26038,7 @@
           "Files / Sharing"
         ],
         "summary": "Remove sharing rights in batch",
-        "description": "Revokes the access of every account and group on the files and folders listed in the request, and clears the\r\nentries from the caller's own favorites, recent and unread marks. The owner's own record is kept, since\r\nremoving it would take the entry away from the account that owns it, and external links survive untouched -\r\nremove those through the link operations of the entry. The caller must be allowed to change the access of each\r\nentry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;\r\na caller whose only access came through an external link may use this call to drop the entry from its own\r\nlist, while a directly invited member or an unrelated account is refused. The answer is always `true` and\r\nidentifiers that match nothing are skipped silently, so a successful answer is not proof that anything was\r\nrevoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To\r\ntake the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's\r\naccess set to `None`.",
+        "description": "Revokes the access of every account and group on the files and folders listed in the request, and clears the\r\nentries from the caller's own favorites, recent and unread marks. The owner's own record is kept, since\r\nremoving it would take the entry away from the account that owns it, and external links survive untouched -\r\nremove those through the link operations of the entry. The caller must be allowed to change the access of each\r\nentry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;\r\nany other caller who can read the entry may use this call to drop it from their own list, which takes a room\r\nmember out of the room, while an unrelated account is refused. A private room answers to its members alone: a\r\nportal administrator outside it is refused, and whoever loses access to it loses the wrapped file keys\r\n(`PUT api/2.0/files/{fileId}/access`) along with it, except its creator. The answer is always `true` and\r\nidentifiers that match nothing are skipped silently, so a successful answer is not proof that anything was\r\nrevoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To\r\ntake the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's\r\naccess set to `None`.",
         "operationId": "removeSecurityInfo",
         "requestBody": {
           "content": {
@@ -25837,7 +26073,7 @@
             }
           },
           "403": {
-            "description": "The caller may not change the access of a listed entry and may not drop it from their own list either, because it was shared with them directly or they cannot read it"
+            "description": "The caller may not change the access of a listed entry and cannot read it either, so it cannot be dropped from their own list. A portal administrator outside a private room gets this as well"
           },
           "500": {
             "description": "An id is a number that is not a 32-bit integer"
@@ -26961,7 +27197,7 @@
             "description": "The request body cannot be read or has no `roomId`, `title` is empty or longer than 400 characters, `color` is longer than 6 or `cover` longer than 50 characters, or `logo` has no `tmpFile` or a position or size outside 0-1280"
           },
           "403": {
-            "description": "The source room is archived, the caller cannot edit it, or `quota` is set while the storage quota for rooms (for an AI agent, for agents) is turned off"
+            "description": "The source room is archived or private, the caller cannot edit it, or `quota` is set while the storage quota for rooms (for an AI agent, for agents) is turned off"
           },
           "404": {
             "description": "No room with `roomId` exists in the Rooms section"
@@ -27413,13 +27649,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `title` or `roomType`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty"
+            "description": "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty"
           },
           "402": {
             "description": "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota"
           },
           "403": {
-            "description": "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
+            "description": "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
           },
           "404": {
             "description": "`logo.tmpFile` names no uploaded picture, or one already used"
@@ -27612,7 +27848,7 @@
           {
             "name": "privacyFilter",
             "in": "query",
-            "description": "Splits the rooms by whether they are private, that is encrypted rooms whose content the portal cannot read.\r\nOmitting it returns both kinds.",
+            "description": "Splits the rooms by whether they are private, that is encrypted rooms whose content the portal cannot read.\r\nOmitting it returns both kinds, except in the active rooms, which leave private rooms out.",
             "schema": {
               "$ref": "#/components/schemas/RoomPrivacyFilter"
             },
@@ -28681,7 +28917,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected"
+            "description": "The request body cannot be read or holds a property the room update does not define, a private room is given `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected"
           },
           "402": {
             "description": "The new logo or watermark image does not fit into the portal storage quota"
@@ -29600,7 +29836,7 @@
             "description": "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected"
           },
           "403": {
-            "description": "The caller may not manage the links of this room, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change"
+            "description": "The caller may not manage the links of this room, the room is private, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change"
           },
           "404": {
             "description": "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type"
@@ -31704,7 +31940,7 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected"
+            "description": "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected"
           },
           "402": {
             "description": "The portal has reached the room limit of its pricing plan or its payment is overdue"
@@ -31791,7 +32027,7 @@
           "Rooms"
         ],
         "summary": "Search the rooms by metadata",
-        "description": "Lists one page of the rooms of a section narrowed by metadata: the active rooms by default, or the archive, the room\r\ntemplates, the form templates or the Forms section, chosen with `searchArea`, while `type` narrows the room types.\r\nThe filter is a typed body: `metadataTemplateId` alone keeps the rooms the template is assigned to, every condition\r\nin `metadataFilters` must hold at once, and `filterValue` adds a text search over room titles and metadata values;\r\nthe template and field IDs come from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the\r\nsection unfiltered. A caller sees only the rooms they created or were invited to, a DocSpace admin sees all of\r\nthem, so an empty page means nothing visible matched. The call changes nothing but the sort order: a `sortBy` value\r\nis stored as the account's default order for later listings, and omitting it reuses the stored one. The rooms come\r\nin `folders` while `files` stays empty, and `total` counts every match before `count` and `startIndex` page through\r\nthem. An unknown template or field, a field outside the named template, more than 20 conditions, an unrecognised\r\n`sortBy` or a `count` out of range is refused with 400, a section the caller cannot read with 403. For the tag,\r\nmember, owner, storage, quota and privacy filters use `GET api/2.0/files/rooms`, which takes the same metadata\r\nfilter as a JSON string.",
+        "description": "Lists one page of the rooms of a section narrowed by metadata: the active rooms by default, or the archive, the room\r\ntemplates, the form templates, the Forms section or the private rooms section, chosen with `searchArea`, while `type` narrows the room types. Private rooms are left out of the active rooms unless `privacyFilter` asks for them.\r\nThe filter is a typed body: `metadataTemplateId` alone keeps the rooms the template is assigned to, every condition\r\nin `metadataFilters` must hold at once, and `filterValue` adds a text search over room titles and metadata values;\r\nthe template and field IDs come from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the\r\nsection unfiltered. A caller sees only the rooms they created or were invited to, a DocSpace admin sees all of\r\nthem, so an empty page means nothing visible matched. The call changes nothing but the sort order: a `sortBy` value\r\nis stored as the account's default order for later listings, and omitting it reuses the stored one. The rooms come\r\nin `folders` while `files` stays empty, and `total` counts every match before `count` and `startIndex` page through\r\nthem. An unknown template or field, a field outside the named template, more than 20 conditions, an unrecognised\r\n`sortBy` or a `count` out of range is refused with 400, a section the caller cannot read with 403. For the tag,\r\nmember, owner, storage, quota and privacy filters use `GET api/2.0/files/rooms`, which takes the same metadata\r\nfilter as a JSON string.",
         "operationId": "searchRooms",
         "requestBody": {
           "content": {
@@ -34070,7 +34306,7 @@
             }
           },
           "400": {
-            "description": "The `searchArea` names a section other than `Active` and `Forms`"
+            "description": "The `searchArea` names a section other than `Active`, `Forms` and `PrivateRooms`"
           },
           "401": {
             "description": "Unauthorized",
@@ -35019,6 +35255,282 @@
           },
           "403": {
             "description": "The caller has no read access to the room or holds no encryption key of their own"
+          },
+          "404": {
+            "description": "The room is not found"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/{roomId}/access/candidates": {
+      "get": {
+        "tags": [
+          "Rooms / Privacy room"
+        ],
+        "summary": "Get public keys of room invitees",
+        "description": "Returns the public encryption keys of people who are about to be invited to a private room, so that a client can\r\nencrypt the room's file keys for them before it grants the access. `GET api/2.0/privacyroom/{roomId}/access`\r\ncovers members only, which makes this the call that comes first when inviting. The room has to be an active\r\nprivate room: an archived one cannot change its access and is refused, and an unknown one is reported as missing.\r\nThe caller needs the right to change the room's access, which means its owner or a room manager; other members\r\nand a DocSpace administrator who is not a member are refused. The call is read-only and grants nothing, and\r\n`PUT api/2.0/files/rooms/{id}/share` still does the inviting. The answer holds one entry per key, and no entry\r\never carries `privateKeyEnc`, not even the caller's own. A listed user who is absent cannot be invited as they\r\nare: they have no key yet and need to create one with `POST api/2.0/privacyroom/keys`, or they are a guest, a\r\nterminated user, or nobody on this portal. A duplicate id counts once, and no ids answer an empty list. A\r\nmalformed id, a room that is not private, or a folder inside a room is rejected as invalid.",
+        "operationId": "getRoomCandidateKeys",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "description": "The private room the people are invited to. Take it from the `id` of the room returned by\r\n`POST api/2.0/files/rooms` or listed by `GET api/2.0/files/rooms`.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1234
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userIds",
+            "in": "query",
+            "description": "The people to read the keys of, repeated once per user (`userIds=...&userIds=...`). Take each from the `id` of\r\na user returned by `GET api/2.0/people`.",
+            "schema": {
+              "examples": [
+                [
+                  "9924256B-447C-4F19-9dbd-8ad8c39e8ff5"
+                ]
+              ],
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The public encryption keys of the listed users who can be invited",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EncryptionKeyArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The room is not a private room, or a user ID is malformed"
+          },
+          "403": {
+            "description": "The caller has no read access to the room or cannot change its access"
+          },
+          "404": {
+            "description": "The room is not found"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/api/2.0/privacyroom/{roomId}/access/missing": {
+      "get": {
+        "tags": [
+          "Rooms / Privacy room"
+        ],
+        "summary": "Get missing file keys of a room",
+        "description": "Reports which encrypted files of a private room each user cannot open yet, across all its folders, so that a\r\nclient can write exactly the missing keys with `PUT api/2.0/files/{fileId}/access` instead of trying every file.\r\nThe caller needs the right to change the room's access, which means its owner or a room manager; other members\r\nand a DocSpace administrator who is not a member are refused, and an archived room, whose access cannot change,\r\nis refused too. Listing `userIds` checks those people, members or not, which is what a client does before\r\n`POST api/2.0/files/owner` answers 409 for a new owner; without it the members of the room are checked. The call\r\nis read-only. The answer holds one entry per user who misses something and carries identifiers only, never a\r\nkey: an empty list means nothing is missing. A file stored in the clear needs no key and is never reported, and\r\nan id that names nobody on this portal is ignored. A room that is not private, or a folder inside a room, is\r\nrejected as invalid, as is a malformed id.",
+        "operationId": "getRoomMissingFileKeys",
+        "parameters": [
+          {
+            "name": "roomId",
+            "in": "path",
+            "description": "The private room to check. Take it from the `id` of the room returned by `POST api/2.0/files/rooms` or listed by\r\n`GET api/2.0/files/rooms`.",
+            "required": true,
+            "schema": {
+              "examples": [
+                1234
+              ],
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "userIds",
+            "in": "query",
+            "description": "The people to check, repeated once per user (`userIds=...&userIds=...`). Take each from the `id` of a user\r\nreturned by `GET api/2.0/people`.",
+            "schema": {
+              "examples": [
+                [
+                  "9924256B-447C-4F19-9dbd-8ad8c39e8ff5"
+                ]
+              ],
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The users who miss a file key and the files concerned",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoomMissingFileKeysArrayWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The room is not a private room, or a user ID is malformed"
+          },
+          "403": {
+            "description": "The caller has no read access to the room or cannot change its access"
           },
           "404": {
             "description": "The room is not found"
@@ -43221,6 +43733,78 @@
         },
         "description": "The encrypted file key issued to one user."
       },
+      "FileKeysWrittenDto": {
+        "required": [
+          "skippedUserIds"
+        ],
+        "type": "object",
+        "properties": {
+          "skippedUserIds": {
+            "examples": [
+              [
+                "9924256B-447C-4F19-9dbd-8ad8c39e8ff5"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The recipients whose key was not stored, because they can no longer read the file. Empty when every key was\r\nstored."
+          }
+        },
+        "description": "The outcome of issuing file keys."
+      },
+      "FileKeysWrittenWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The FileKeysWrittenDto object returned by the operation.",
+            "$ref": "#/components/schemas/FileKeysWrittenDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the FileKeysWrittenDto object."
+      },
       "FileLinkDto": {
         "required": [
           "filetype",
@@ -44526,6 +45110,13 @@
               "type": "string"
             },
             "description": "Documents that can be edited inside a private room, where the content is encrypted on the client."
+          },
+          "docServiceEncryptionSupported": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the connected document server can edit end-to-end encrypted files. When false, an encrypted file cannot be\r\nopened in the editors, whatever `extsWebEncrypt` lists."
           },
           "extsWebReviewed": {
             "examples": [
@@ -46285,10 +46876,11 @@
               "InstructionsRoom",
               "KnowledgeRoom",
               "AiProjectRoom",
-              "AiHub"
+              "AiHub",
+              "PrivateRooms"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms]"
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai, InstructionsRoom - Instructions room, KnowledgeRoom - Knowledge room, AiProjectRoom - AI project room, AiHub - AI rooms, PrivateRooms - Private rooms]"
           },
           {
             "examples": [
@@ -46329,10 +46921,11 @@
               38,
               39,
               40,
-              41
+              41,
+              42
             ],
             "type": "integer",
-            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms]",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai, 38 - Instructions room, 39 - Knowledge room, 40 - AI project room, 41 - AI rooms, 42 - Private rooms]",
             "x-enum-varnames": [
               "DEFAULT",
               "COMMON",
@@ -46368,7 +46961,8 @@
               "InstructionsRoom",
               "KnowledgeRoom",
               "AiProjectRoom",
-              "AiHub"
+              "AiHub",
+              "PrivateRooms"
             ]
           }
         ],
@@ -48340,6 +48934,8 @@
               "PrivacyRoomKeyCreated",
               "PrivacyRoomKeyUpdated",
               "PrivacyRoomKeyDeleted",
+              "FileKeysSet",
+              "RoomFileKeysRevoked",
               "FileSavedButUserQuotaExceeded",
               "FileNotSavedDueToUserQuota",
               "FileSavedButRoomQuotaExceeded",
@@ -48722,6 +49318,8 @@
               5161,
               5162,
               5163,
+              5164,
+              5165,
               5201,
               5202,
               5203,
@@ -49099,6 +49697,8 @@
               "PrivacyRoomKeyCreated",
               "PrivacyRoomKeyUpdated",
               "PrivacyRoomKeyDeleted",
+              "FileKeysSet",
+              "RoomFileKeysRevoked",
               "FileSavedButUserQuotaExceeded",
               "FileNotSavedDueToUserQuota",
               "FileSavedButRoomQuotaExceeded",
@@ -51852,6 +52452,91 @@
         },
         "description": "The link of a room to create, change or revoke."
       },
+      "RoomMissingFileKeysArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoomMissingFileKeysDto"
+            },
+            "description": "The list of RoomMissingFileKeysDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "How many items this response carries: the length of the page for a list, 1 for a single object",
+            "format": "int32"
+          },
+          "total": {
+            "type": "integer",
+            "description": "How many items the whole list holds across all pages, for working out how many pages to request. Sent only by the operations that page their results, and left out of every other response",
+            "format": "int64"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of RoomMissingFileKeysDto objects."
+      },
+      "RoomMissingFileKeysDto": {
+        "required": [
+          "fileIds",
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "examples": [
+              "9924256B-447C-4F19-9dbd-8ad8c39e8ff5"
+            ],
+            "type": "string",
+            "description": "The user the keys are missing for.",
+            "format": "uuid"
+          },
+          "fileIds": {
+            "examples": [
+              [
+                1234,
+                1235
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "The encrypted files that hold no key for this user, anywhere in the room. Never empty: a user who has every key\r\nis not listed at all."
+          }
+        },
+        "description": "One user who cannot open some encrypted files of a private room yet."
+      },
       "RoomNewItemsDto": {
         "type": "object",
         "properties": {
@@ -52611,10 +53296,11 @@
               "AiAgents",
               "Forms",
               "FormTemplates",
-              "AiHub"
+              "AiHub",
+              "PrivateRooms"
             ],
             "type": "string",
-            "description": "[Active - Active, Archive - Archive, Any - Any, RecentByLinks - Recent by links, Templates - Template, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AiAgents, Forms - Forms, FormTemplates - Form templates, AiHub - AiHub]"
+            "description": "[Active - Active, Archive - Archive, Any - Any, RecentByLinks - Recent by links, Templates - Template, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AiAgents, Forms - Forms, FormTemplates - Form templates, AiHub - AiHub, PrivateRooms - Private rooms]"
           },
           {
             "examples": [
@@ -52631,10 +53317,11 @@
               7,
               8,
               9,
-              10
+              10,
+              11
             ],
             "type": "integer",
-            "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents, 8 - Forms, 9 - Form templates, 10 - AiHub]",
+            "description": "[0 - Active, 1 - Archive, 2 - Any, 3 - Recent by links, 4 - Template, 5 - Knowledge, 6 - Result storage, 7 - AiAgents, 8 - Forms, 9 - Form templates, 10 - AiHub, 11 - Private rooms]",
             "x-enum-varnames": [
               "Active",
               "Archive",
@@ -52646,7 +53333,8 @@
               "AiAgents",
               "Forms",
               "FormTemplates",
-              "AiHub"
+              "AiHub",
+              "PrivateRooms"
             ]
           }
         ],

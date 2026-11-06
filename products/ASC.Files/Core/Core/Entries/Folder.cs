@@ -143,7 +143,13 @@ public enum FolderType
     AiProjectRoom = 40,
 
     [Description("AI rooms")]
-    AiHub = 41
+    AiHub = 41,
+
+    /// <summary>
+    /// The root of the private rooms section. It holds nothing itself: private rooms live under the rooms root.
+    /// </summary>
+    [Description("Private rooms")]
+    PrivateRooms = 42
 }
 
 /// <summary>

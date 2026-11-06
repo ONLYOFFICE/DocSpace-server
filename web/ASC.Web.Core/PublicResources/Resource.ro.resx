@@ -145,7 +145,7 @@
     <value>Serviciu</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Funcții de IA</value>
+    <value>Agenți și instrumente IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Copiere de rezervă</value>
@@ -1177,7 +1177,7 @@
     <value>Căutare IA</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Funcții de IA</value>
+    <value>Agenți și instrumente IA</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Urmărire conectări și acțiuni</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Costul furnizorului</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook-ul este dezactivat. Activați-l înainte de a reîncerca livrările sale</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Evenimentul este în curs de trimitere. Reîncercați după ce încercarea s-a finalizat</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Livrarea a fost înregistrată într-un format webhook anterior și nu poate fi retrimisă</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Ținta webhook-ului nu este un utilizator sau un grup existent</value>
   </data>
 </root>

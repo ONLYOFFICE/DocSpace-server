@@ -109,6 +109,7 @@ public class FileStorageService //: IFileStorageService
     ExportToXLSX exportToXLSX,
     ExternalDbSyncService externalDbSyncService,
     EncryptionLoginProvider encryptionLoginProvider,
+    DocumentServiceEncryptionChecker documentServiceEncryptionChecker,
     AiAccessibility aiAccessibility)
 {
     private readonly ILogger _logger = loggerFactory.CreateLogger("ASC.Files");
@@ -408,12 +409,13 @@ public class FileStorageService //: IFileStorageService
             FolderType.AiAgents => SearchArea.AiAgents,
             FolderType.AiHub => SearchArea.AiHub,
             FolderType.Forms => SearchArea.Forms,
+            FolderType.PrivateRooms => SearchArea.PrivateRooms,
             _ => searchArea
         };
 
-        if (parent.FolderType == FolderType.Forms)
+        if (parent.FolderType is FolderType.Forms or FolderType.PrivateRooms)
         {
-            // Forms is a virtual section anchored on an empty folder: its rooms are resolved from the
+            // Forms and private rooms are virtual sections anchored on an empty folder: their rooms are resolved from the
             // VirtualRooms tree. Browsing it with subfolders would expand the whole VirtualRooms subtree
             // (including the container itself and other rooms' content), so it is kept as a flat room list.
             withSubfolders = false;
@@ -716,8 +718,26 @@ public class FileStorageService //: IFileStorageService
         });
     }
 
+    /// <summary>The creator needs a key to wrap the keys of the files with, and the editors have to be able to open them.</summary>
+    private async Task DemandPrivateRoomCanBeCreatedAsync()
+    {
+        await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
+
+        if (!await documentServiceEncryptionChecker.IsSupportedAsync())
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_DocServiceEncryptionNotSupported);
+        }
+    }
+
     public async Task<Folder<string>> CreateThirdPartyRoomAsync(string title, RoomType roomType, string parentId, bool privacy, bool? indexing, bool createAsNewFolder, bool? denyDownload, string color, string cover, IEnumerable<string> tags, LogoRequest logo)
     {
+        // A connected storage has nowhere to keep the keys of its files, and its string ids do not fit the wrapping of
+        // those keys on the client, so nobody could ever open what is put into such a room.
+        if (privacy)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomOnThirdPartyNotSupported);
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var folderDao = daoFactory.GetFolderDao<string>();
@@ -836,7 +856,7 @@ public class FileStorageService //: IFileStorageService
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        if (room.FolderType.IsAiHubRoom())
+        if (room.FolderType.IsAiHubRoom() || room.SettingsPrivate)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1187,7 +1207,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1199,7 +1219,14 @@ public class FileStorageService //: IFileStorageService
 
         if (isRoom && privacy)
         {
-            await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
+            await DemandPrivateRoomCanBeCreatedAsync();
+
+            // Indexing and a watermark need the content in the clear, which the server does not have,
+            // and a lifetime would have it delete encrypted files on its own.
+            if (indexing == true || lifetime is { Enabled: not false } || watermark is { Enabled: not false })
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
+            }
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -1513,6 +1540,13 @@ public class FileStorageService //: IFileStorageService
         if (folder.FolderType.IsAiHubRoom() && (updateData.Indexing.HasValue || updateData.DenyDownload.HasValue || updateData.Lifetime != null || updateData.Watermark != null ||
                                                  updateData.SendFormToExternalDB.HasValue || updateData.SaveFormAsXLSX.HasValue ||
                                                  (updateData.Quota.HasValue && folder.FolderType == FolderType.AiProjectRoom)))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
+        }
+
+        // The same settings the creation of a private room refuses. Turning them off stays possible.
+        if (folder.SettingsPrivate &&
+            ((updateData.Indexing == true && !folder.SettingsIndexing) || updateData.Lifetime is { Enabled: not false } || updateData.Watermark is { Enabled: not false }))
         {
             throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(updateData));
         }
@@ -1920,6 +1954,7 @@ public class FileStorageService //: IFileStorageService
                             folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive &&
                             folder.FolderType != FolderType.Forms &&
+                            folder.FolderType != FolderType.PrivateRooms &&
                             folder.FolderType != FolderType.KnowledgeRoom;
 
             if (!canCreate)
@@ -2275,6 +2310,12 @@ public class FileStorageService //: IFileStorageService
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        // Filling hands the form to people who hold no key, and its result would be stored in the clear.
+        if (file.Encrypted)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var folder = await folderDao.GetFolderAsync(file.ParentId);
@@ -3374,7 +3415,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         // a section root holds rooms only: the operation refuses any file there (PermissionCheckStarter.CheckFilesPermissionsAsync)
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms && filesId.Any())
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms && filesId.Any())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFile);
         }
@@ -3431,7 +3472,7 @@ public class FileStorageService //: IFileStorageService
         // the destinations the operation refuses (PermissionCheckStarter): a section root holds rooms only, so no file
         // goes there; a folder that is not a room goes neither there, nor into a knowledge folder or the archive; and a
         // room goes nowhere but the Rooms root and the archive
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms && filesId.Any())
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms && filesId.Any())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFile);
         }
@@ -3439,7 +3480,7 @@ public class FileStorageService //: IFileStorageService
         // only the folders the caller can read are looked at, so the answer tells nothing about the others
         var readableFolders = await fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).OfType<Folder<TFrom>>().ToListAsync();
 
-        if ((toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge
+        if ((toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms or FolderType.Knowledge
              || toFolder.RootFolderType == FolderType.Archive)
             && readableFolders.Any(f => !f.IsRoom))
         {
@@ -3939,6 +3980,8 @@ public class FileStorageService //: IFileStorageService
         }
 
         _logger.InformationDeletePersonalData(userFromId);
+
+        await fileDao.DeleteFileKeysAsync(userFromId);
 
         var folderIdMy = await folderDao.GetFolderIDUserAsync(false, userFromId);
         var folderIdTrash = await folderDao.GetFolderIDTrashAsync(false, userFromId);
@@ -4568,7 +4611,7 @@ public class FileStorageService //: IFileStorageService
 
                                                 var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
                                                 var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.SettingsPrivate ? null : folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
                                             }
                                             break;
                                     }
@@ -4663,8 +4706,10 @@ public class FileStorageService //: IFileStorageService
         async Task RemoveSharesAsync(FileEntry<T> entry)
         {
             // Revoking someone else's rights requires the same permission as granting them;
-            // a portal admin may always clean up.
-            if (await fileSharingHelper.CanSetAccessAsync(entry) || await global.IsDocSpaceAdministratorAsync)
+            // a portal admin may always clean up, except in a private room, which answers to its members alone.
+            var inPrivateRoom = entry is Folder<T> { IsRoom: true, SettingsPrivate: true } || await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, daoFactory.GetCacheFolderDao<T>());
+
+            if (await fileSharingHelper.CanSetAccessAsync(entry) || (!inPrivateRoom && await global.IsDocSpaceAdministratorAsync))
             {
                 // The entry owner's record stays: revoking it would delete the entry from its owner's list.
                 var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
@@ -4678,6 +4723,12 @@ public class FileStorageService //: IFileStorageService
                 foreach (var subject in subjects)
                 {
                     await fileSecurity.ShareAsync(entry.Id, entry.FileEntryType, subject, FileShare.None);
+                }
+
+                if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+                {
+                    // the caller's own keys go with the call below
+                    await fileSharingAceHelper.RevokeFileKeysAsync(privateRoom, subjects.Where(s => s != authContext.CurrentAccount.ID).ToList());
                 }
 
                 // keep the caller's own list-cleanup semantics (favorites / recent / new-marks)
@@ -4957,6 +5008,12 @@ public class FileStorageService //: IFileStorageService
         }
 
         if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
+        // A reference is resolved by the document server, which sees nothing but ciphertext here.
+        if (file.Encrypted || await DocSpaceHelper.LocatedInPrivateRoomAsync(file, daoFactory.GetCacheFolderDao<T>()))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
@@ -5376,7 +5433,12 @@ public class FileStorageService //: IFileStorageService
     }
 
 
-    public async Task SetEncryptionInfoAsync<T>(T fileId, IEnumerable<FileKeyData> keys)
+    /// <summary>
+    /// Stores the file keys of the recipients who can read the file. One who cannot, say because they were
+    /// removed while another device was uploading with their key, must not cost everybody else theirs, so
+    /// such a recipient is skipped and reported back.
+    /// </summary>
+    public async Task<List<Guid>> SetEncryptionInfoAsync<T>(T fileId, IEnumerable<FileKeyData> keys)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var file = await fileDao.GetFileAsync(fileId);
@@ -5402,18 +5464,36 @@ public class FileStorageService //: IFileStorageService
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
+        var accepted = new List<FileKeyData>();
+        var skipped = new List<Guid>();
+
         foreach (var k in keys)
         {
-            if (!await fileSecurity.CanReadAsync(file, k.UserId))
+            // A security check keeps the share record it found on the entry and reuses it for whoever is asked about
+            // next, so each recipient gets an instance of their own or they would pass on the previous one's access.
+            if (await fileSecurity.CanReadAsync(await fileDao.GetFileAsync(fileId), k.UserId))
             {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+                accepted.Add(k);
+            }
+            else
+            {
+                skipped.Add(k.UserId);
             }
         }
 
-        await fileDao.SetFileKey(fileId, keys);
+        if (accepted.Count != 0)
+        {
+            await fileDao.SetFileKey(fileId, accepted);
+
+            await filesMessageService.SendAsync(MessageAction.FileKeysSet, file, file.Title, string.Join(", ", accepted.Select(k => k.UserId).Distinct()));
+        }
+
+        return skipped;
     }
 
-    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager)
+    // demandFileKeys refuses a private room whose encrypted files the new owner could not open. The call that reassigns the
+    // rooms of a user being deleted leaves it off: nobody is left there to issue the missing keys, and it must not stop the deletion.
+    public async IAsyncEnumerable<FileEntry> ChangeOwnerAsync<T>(IEnumerable<T> foldersId, IEnumerable<T> filesId, Guid userId, FileShare newShare = FileShare.RoomManager, bool demandFileKeys = false)
     {
         var userInfo = await userManager.GetUsersAsync(userId);
         if (Equals(userInfo, Constants.LostUser) ||
@@ -5449,6 +5529,12 @@ public class FileStorageService //: IFileStorageService
             if (isRoom && folder.SettingsPrivate)
             {
                 await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(userId);
+
+                if (demandFileKeys && folder.CreateBy != userId &&
+                    (await DocSpaceHelper.GetEncryptedFilesWithoutKeyAsync(daoFactory.GetFileDao<T>(), folder.Id, userId)).Count != 0)
+                {
+                    throw new CustomHttpException(HttpStatusCode.Conflict, "The new owner holds no key for some encrypted files of the room");
+                }
             }
 
             var newFolder = folder;
@@ -5639,7 +5725,7 @@ public class FileStorageService //: IFileStorageService
                 }
 
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, await urlShortener.GetShortenLinkAsync(link), room.FolderType == FolderType.AiRoom);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.SettingsPrivate ? null : room.Title, await urlShortener.GetShortenLinkAsync(link), room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
@@ -5674,7 +5760,7 @@ public class FileStorageService //: IFileStorageService
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.Title, shortenLink, room.FolderType == FolderType.AiRoom);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.SettingsPrivate ? null : room.Title, shortenLink, room.FolderType == FolderType.AiRoom);
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
@@ -6187,7 +6273,7 @@ public class FileStorageService //: IFileStorageService
             }
             // a room the caller can see, but of the other section: it is a bad request rather than a
             // permission problem, so it is counted apart from the denied ones
-            else if (!searchArea.MatchesRoomType(room.FolderType))
+            else if (!searchArea.MatchesRoom(room))
             {
                 wrongArea++;
             }

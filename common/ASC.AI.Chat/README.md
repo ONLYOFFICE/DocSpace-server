@@ -30,6 +30,25 @@ environment, which wins:
 | `ai.documentAgent.portalUrl`          | `AI__DOCUMENT_AGENT__PORTAL_URL`           | the AI service's address  |
 | `ai.documentAgent.filesUrl`           | `AI__DOCUMENT_AGENT__FILES_URL`            | `http://localhost:<port>` |
 
+### Automatic history compaction
+
+The chat engine can fold a thread that nears its model's context window into a summary message
+before the round, and send the summary in place of the older turns from then on. The summary is
+stored as an ordinary message of the thread (the marker lives in its `contents`), so the storage
+needs nothing new. On by default; switched off with `ai.compaction.enabled: false` in
+`appsettings.json` or `AI__COMPACTION__ENABLED=false` (or `0`). The environment wins over the file:
+
+| `appsettings.json`                   | Environment                             | Default   |
+| ------------------------------------ | --------------------------------------- | --------- |
+| `ai.compaction.enabled`              | `AI__COMPACTION__ENABLED`               | `true`    |
+| `ai.compaction.threshold`            | `AI__COMPACTION__THRESHOLD`             | `0.8`     |
+| `ai.compaction.keepRecent`           | `AI__COMPACTION__KEEP_RECENT`           | `4`       |
+| `ai.compaction.defaultContextWindow` | `AI__COMPACTION__DEFAULT_CONTEXT_WINDOW` | `128000`  |
+
+The window of a model comes from the library's id-based table, else the default above. The gateway
+catalogue's `context_length` reaches the model list, but a saved profile does not keep it yet (the
+C# side has no column for it).
+
 In the Docker install the two required values come from `DOCUMENT_AGENT_URL` and
 `DOCUMENT_AGENT_TOKEN` in `install/docker/.env`. For the URL and the token a variable that is set
 wins even when it is empty, so leaving either empty there switches the agent off whatever
