@@ -151,7 +151,7 @@
     <value>서비스</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI 기능</value>
+    <value>AI 에이전트 및 도구</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>백업</value>
@@ -1189,7 +1189,7 @@
     <value>AI 검색</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI 기능</value>
+    <value>AI 에이전트 및 도구</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>로그인 및 작업 추적</value>

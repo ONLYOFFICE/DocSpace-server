@@ -151,7 +151,7 @@
     <value>Услуга</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI функције</value>
+    <value>АИ агенти и алати</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Бекап</value>
@@ -1189,7 +1189,7 @@
     <value>AI претрага</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI функције</value>
+    <value>АИ агенти и алати</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Праћење пријава и радњи</value>

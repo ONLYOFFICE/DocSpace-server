@@ -4609,7 +4609,7 @@ public class FileStorageService //: IFileStorageService
 
                                                 var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
                                                 var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.SettingsPrivate ? null : folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
                                             }
                                             break;
                                     }

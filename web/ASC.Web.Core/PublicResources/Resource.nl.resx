@@ -151,7 +151,7 @@
     <value>Service</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI-functies</value>
+    <value>AI-agenten en -tools</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Back-up</value>
@@ -1189,7 +1189,7 @@
     <value>AI-zoeken</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI-functies</value>
+    <value>AI-agenten en -tools</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Inloggegevens en acties bijhouden</value>

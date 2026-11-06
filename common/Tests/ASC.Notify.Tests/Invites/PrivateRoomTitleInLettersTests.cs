@@ -41,6 +41,7 @@ namespace ASC.Notify.Tests.Invites;
 public class PrivateRoomTitleInLettersTests
 {
     private const string SecretTitle = "Autotest secret room title";
+    private const string SecretFolderTitle = "Autotest secret folder title";
 
     public static TheoryData<string> Actions =>
     [
@@ -68,7 +69,7 @@ public class PrivateRoomTitleInLettersTests
         file.Title = "Encrypted.docx";
 
         var folder = services.GetRequiredService<Folder<int>>();
-        folder.Title = "Subfolder";
+        folder.Title = SecretFolderTitle;
 
         NotifyAction action;
         switch (actionName)
@@ -133,6 +134,30 @@ public class PrivateRoomTitleInLettersTests
         }
     }
 
+    /// <summary>
+    /// The email about a new role in a room. Its caller passes no title for a private room: it used to pass the real one,
+    /// which reached the letter while the push about the same change was already neutral.
+    /// </summary>
+    [Fact]
+    public async Task RoleChangedLetters_WithNoTitle_NameTheRoomNeutrally()
+    {
+        var stack = await TestContext.Current.GetFixture<LetterStackFixture>()
+            ?? throw new InvalidOperationException($"No {nameof(LetterStackFixture)} in the test context.");
+
+        using var scope = await LetterScope.OpenAsync(stack, CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
+
+        var room = scope.Services.GetRequiredService<UserRoleChangedNotifyAction>();
+        room.Init(scope.Recipient, null, scope.PortalUrl, "Editor");
+
+        var agent = scope.Services.GetRequiredService<UserAgentRoleChangedNotifyAction>();
+        agent.Init(scope.Recipient, null, scope.PortalUrl, "Editor");
+
+        foreach (var tags in new[] { room.Tags, agent.Tags })
+        {
+            tags.Single(tag => tag.Tag == "RoomTitle").Value.Should().Be(WebstudioNotifyPatternResource.PrivateRoomTitle);
+        }
+    }
+
     [Theory]
     [MemberData(nameof(Actions))]
     public async Task PrivateRoom_IsNamedNeutrally(string actionName)
@@ -140,7 +165,7 @@ public class PrivateRoomTitleInLettersTests
         var tags = await TagsOf(actionName, isPrivate: true);
 
         tags.Should().ContainKey(NotifyConstants.RoomTitle).WhoseValue.Should().Be(FilesPatternResource.PrivateRoomTitle);
-        tags.Values.Should().NotContain(SecretTitle);
+        tags.Values.Should().NotContain(SecretTitle).And.NotContain(SecretFolderTitle);
     }
 
     [Theory]

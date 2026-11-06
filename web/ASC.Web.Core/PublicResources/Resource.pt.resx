@@ -151,7 +151,7 @@
     <value>Serviço</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Funcionalidades de IA</value>
+    <value>Agentes e ferramentas de IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Cópia de segurança</value>
@@ -1189,7 +1189,7 @@
     <value>Pesquisa com IA</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Funcionalidades de IA</value>
+    <value>Agentes e ferramentas de IA</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Rastreio de logins e ações</value>

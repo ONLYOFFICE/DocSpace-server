@@ -151,7 +151,7 @@
     <value>Shërbimi</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Funksionalitetet AI</value>
+    <value>Agjentët dhe mjetet e IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Kopje rezervë</value>
@@ -1189,7 +1189,7 @@
     <value>Kërkim me AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Funksionalitetet AI</value>
+    <value>Agjentët dhe mjetet e IA</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Gjurmimi i hyrjeve dhe veprimeve</value>

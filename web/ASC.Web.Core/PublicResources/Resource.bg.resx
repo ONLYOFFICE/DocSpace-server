@@ -151,7 +151,7 @@
     <value>Услуга</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI функции</value>
+    <value>ИИ агенти и инструменти</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервно копие</value>
@@ -1189,7 +1189,7 @@
     <value>AI търсене</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI функции</value>
+    <value>ИИ агенти и инструменти</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Проследяване на влизания и действия</value>

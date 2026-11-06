@@ -151,7 +151,7 @@
     <value>Ծառայություն</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>ԱԲ գործառույթներ</value>
+    <value>ԱԲ գործակալներ և գործիքներ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Պահուստավորում</value>
@@ -1189,7 +1189,7 @@
     <value>ԱԲ որոնում</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>ԱԲ գործառույթներ</value>
+    <value>ԱԲ գործակալներ և գործիքներ</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Մուտքերի և գործողությունների հետևում</value>

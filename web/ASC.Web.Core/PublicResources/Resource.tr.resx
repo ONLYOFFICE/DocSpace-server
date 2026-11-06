@@ -151,7 +151,7 @@
     <value>Hizmet</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Yapay Zeka özellikleri</value>
+    <value>AI ajanları ve araçları</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Yedekleme</value>
@@ -1189,7 +1189,7 @@
     <value>AI araması</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Yapay Zeka özellikleri</value>
+    <value>AI ajanları ve araçları</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Oturum açma ve eylemleri izleme</value>

@@ -151,7 +151,7 @@
     <value>Dienst</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>KI-Funktionen</value>
+    <value>KI-Agenten und Tools</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
@@ -1189,7 +1189,7 @@
     <value>KI-Suche</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>KI-Funktionen</value>
+    <value>KI-Agenten und Tools</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Verfolgen von Anmeldungen und Aktionen</value>
