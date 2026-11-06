@@ -96,7 +96,7 @@ class CoreClientApplicationServiceTest {
   }
 
   @Test
-  void whenUserClientsDeleted_thenCacheEvictedEverywhereAndCleanupPublishedAfterDelete() {
+  void whenUserClientsDeleted_thenCacheEvictedBeforeAndAfterDeleteAndCleanupPublishedAfter() {
     when(clientUpdateCommandHandler.deleteUserClients(any())).thenReturn(3);
 
     assertEquals(3, service.deleteUserClients(userCommand()));
@@ -107,6 +107,8 @@ class CoreClientApplicationServiceTest {
             clientCacheService,
             cacheTenantRemovePublisher,
             userClientsPublisher);
+    order.verify(clientCacheService).evictAllByTenantId(new TenantId(TENANT));
+    order.verify(cacheTenantRemovePublisher).publish(any(ClientCacheTenantRemoveEvent.class));
     order.verify(clientUpdateCommandHandler).deleteUserClients(any());
     order.verify(clientCacheService).evictAllByTenantId(new TenantId(TENANT));
     order.verify(cacheTenantRemovePublisher).publish(any(ClientCacheTenantRemoveEvent.class));
@@ -114,17 +116,19 @@ class CoreClientApplicationServiceTest {
   }
 
   @Test
-  void whenUserClientsDeleteFails_thenNothingEvictedOrPublished() {
+  void whenUserClientsDeleteFails_thenEvictedBeforeOnlyAndNoCleanupPublished() {
     when(clientUpdateCommandHandler.deleteUserClients(any()))
         .thenThrow(new IllegalStateException("rolled back"));
 
     assertThrows(IllegalStateException.class, () -> service.deleteUserClients(userCommand()));
 
-    verifyNoInteractions(clientCacheService, cacheTenantRemovePublisher, userClientsPublisher);
+    verify(clientCacheService, times(1)).evictAllByTenantId(new TenantId(TENANT));
+    verify(cacheTenantRemovePublisher, times(1)).publish(any(ClientCacheTenantRemoveEvent.class));
+    verifyNoInteractions(userClientsPublisher);
   }
 
   @Test
-  void whenTenantClientsDeleted_thenCacheEvictedAndEventsPublishedAfterDelete() {
+  void whenTenantClientsDeleted_thenCacheEvictedBeforeAndAfterDeleteAndCleanupPublishedAfter() {
     when(clientUpdateCommandHandler.deleteTenantClients(TENANT)).thenReturn(5);
 
     assertEquals(5, service.deleteTenantClients(tenantCommand()));
@@ -135,6 +139,8 @@ class CoreClientApplicationServiceTest {
             clientCacheService,
             cacheTenantRemovePublisher,
             tenantClientsPublisher);
+    order.verify(clientCacheService).evictAllByTenantId(new TenantId(TENANT));
+    order.verify(cacheTenantRemovePublisher).publish(any(ClientCacheTenantRemoveEvent.class));
     order.verify(clientUpdateCommandHandler).deleteTenantClients(TENANT);
     order.verify(clientCacheService).evictAllByTenantId(new TenantId(TENANT));
     order.verify(cacheTenantRemovePublisher).publish(any(ClientCacheTenantRemoveEvent.class));
@@ -142,13 +148,15 @@ class CoreClientApplicationServiceTest {
   }
 
   @Test
-  void whenTenantClientsDeleteFails_thenNothingEvictedOrPublished() {
+  void whenTenantClientsDeleteFails_thenEvictedBeforeOnlyAndNoCleanupPublished() {
     when(clientUpdateCommandHandler.deleteTenantClients(TENANT))
         .thenThrow(new IllegalStateException("rolled back"));
 
     assertThrows(IllegalStateException.class, () -> service.deleteTenantClients(tenantCommand()));
 
-    verifyNoInteractions(clientCacheService, cacheTenantRemovePublisher, tenantClientsPublisher);
+    verify(clientCacheService, times(1)).evictAllByTenantId(new TenantId(TENANT));
+    verify(cacheTenantRemovePublisher, times(1)).publish(any(ClientCacheTenantRemoveEvent.class));
+    verifyNoInteractions(tenantClientsPublisher);
   }
 
   @Test
@@ -188,5 +196,18 @@ class CoreClientApplicationServiceTest {
     assertEquals(TENANT, event.getValue().getTenantId());
     assertTrue(!event.getValue().getRemovedAt().isBefore(deletedAt.get()));
     assertTrue(!event.getValue().getRemovedAt().isAfter(Instant.now()));
+  }
+
+  @Test
+  void givenCacheFailingBeforeDelete_whenTenantClientsDeleted_thenStillDeleted() {
+    when(clientUpdateCommandHandler.deleteTenantClients(TENANT)).thenReturn(5);
+    doThrow(new IllegalStateException("cache down"))
+        .doNothing()
+        .when(clientCacheService)
+        .evictAllByTenantId(new TenantId(TENANT));
+
+    assertEquals(5, service.deleteTenantClients(tenantCommand()));
+
+    verify(tenantClientsPublisher).publish(any(TenantClientsRemovedEvent.class));
   }
 }

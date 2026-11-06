@@ -63,12 +63,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service class providing core client application functionalities. This service handles client
  * creation, update, deletion, and retrieval operations. It also manages client consent, visibility,
  * and activation states.
  */
+@Slf4j
 @RequiredArgsConstructor
 public class CoreClientApplicationService implements ClientApplicationService {
   private final Validator validator;
@@ -114,6 +116,34 @@ public class CoreClientApplicationService implements ClientApplicationService {
     var invalidScopes =
         scopes.stream().filter(s -> !validScopeNames.contains(s)).collect(Collectors.toSet());
     if (!invalidScopes.isEmpty()) throw new InvalidScopeException(invalidScopes);
+  }
+
+  /**
+   * Evicts the tenant's clients here and, through the broadcast, in every other region.
+   *
+   * @param tenantId the tenant whose clients to evict
+   */
+  private void evictTenantClients(long tenantId) {
+    clientCacheService.evictAllByTenantId(new TenantId(tenantId));
+    clientCacheTenantRemoveMessagePublisher.publish(
+        ClientCacheTenantRemoveEvent.builder().tenantId(tenantId).build());
+  }
+
+  /**
+   * Evicts the tenant's clients everywhere before a bulk delete, as single clients are evicted
+   * before their delete commits: a process that dies between the commit and the eviction after it
+   * would otherwise leave the deleted clients cached in every region until they expire. Evicting
+   * clients that turn out to stay only costs a refill, and a value refilled from the old rows in
+   * between is removed by the eviction after the delete. A failure here must not stop the delete.
+   *
+   * @param tenantId the tenant whose clients to evict
+   */
+  private void evictTenantClientsBeforeDelete(long tenantId) {
+    try {
+      evictTenantClients(tenantId);
+    } catch (Exception e) {
+      log.warn("Could not evict the clients of tenant {} before deleting them", tenantId, e);
+    }
   }
 
   /**
@@ -286,13 +316,11 @@ public class CoreClientApplicationService implements ClientApplicationService {
   public int deleteUserClients(DeleteUserClientsCommand command) {
     validate(command);
 
+    evictTenantClientsBeforeDelete(command.getTenantId());
     var deleted = clientUpdateCommandHandler.deleteUserClients(command);
     var removedAt = Instant.now();
 
-    clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
-
-    clientCacheTenantRemoveMessagePublisher.publish(
-        ClientCacheTenantRemoveEvent.builder().tenantId(command.getTenantId()).build());
+    evictTenantClients(command.getTenantId());
     userClientsMessagePublisher.publish(
         UserClientsRemovedEvent.builder()
             .userId(command.getUserId())
@@ -312,13 +340,11 @@ public class CoreClientApplicationService implements ClientApplicationService {
   public int deleteTenantClients(DeleteTenantClientsCommand command) {
     validate(command);
 
+    evictTenantClientsBeforeDelete(command.getTenantId());
     var deleted = clientUpdateCommandHandler.deleteTenantClients(command.getTenantId());
     var removedAt = Instant.now();
 
-    clientCacheService.evictAllByTenantId(new TenantId(command.getTenantId()));
-
-    clientCacheTenantRemoveMessagePublisher.publish(
-        ClientCacheTenantRemoveEvent.builder().tenantId(command.getTenantId()).build());
+    evictTenantClients(command.getTenantId());
     tenantClientsMessagePublisher.publish(
         TenantClientsRemovedEvent.builder()
             .tenantId(command.getTenantId())
