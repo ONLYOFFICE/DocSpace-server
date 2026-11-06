@@ -150,6 +150,12 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Dublējums</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus" xml:space="preserve">
+    <value>Bonusa ieskaitīšana</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus-expiration" xml:space="preserve">
+    <value>Bonusa derīguma termiņa beigas</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vektorizācija</value>
   </data>

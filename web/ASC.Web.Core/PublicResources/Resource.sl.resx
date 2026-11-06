@@ -150,6 +150,12 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Varnostno kopiraj</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus" xml:space="preserve">
+    <value>Pripis bonusa</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus-expiration" xml:space="preserve">
+    <value>Potek bonusa</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vektorizacija</value>
   </data>

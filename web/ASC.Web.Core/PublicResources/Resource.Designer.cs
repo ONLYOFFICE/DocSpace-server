@@ -250,6 +250,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Bonus credit.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_bonus {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_bonus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Bonus expiration.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_bonus_expiration {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_bonus-expiration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chat.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_chat {

@@ -150,6 +150,12 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Sauvegarde</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus" xml:space="preserve">
+    <value>Crédit de bonus</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus-expiration" xml:space="preserve">
+    <value>Expiration du bonus</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorisation</value>
   </data>
