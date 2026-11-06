@@ -1,0 +1,128 @@
+# private-rooms — verification
+
+Every requirement of `spec.md`, with where it was verified. Paths are relative to the repo root (`server/`). `yaml` is
+`sdk/docspace-api-spec/docspace-backend.yaml` (submodule `baf28cf`, 2026-11-06). Code read at `0ebdbb7c84`. `T/` is
+`products/ASC.Files/Tests/Tests/08_Private/`. `Helper` is `products/ASC.Files/Core/Core/Entries/EncryptionKeyPairDto.cs`,
+`Controller` is `products/ASC.Files/Server/Api/PrivacyRoomController.cs`, `Login` is
+`common/ASC.FederatedLogin/LoginProviders/EncryptionLoginProvider.cs`, `Sharing` is `products/ASC.Files/Core/Utils/FileSharing.cs`,
+`Storage` is `products/ASC.Files/Core/Core/FileStorageService.cs`.
+
+Status: **TEST-CONFIRMED** means a test asserts it and its assertion was read (via a digest of the `Should()` lines, with the bodies
+read where the name was unclear). **CODE-ONLY** means it was read from the code, the commit or the yaml with no test. No test was run for
+this document, so nothing here says that a test passed. Several `[Trait("Bug", ...)]` tests in `T/` still carry comments saying the API
+answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802, 82803); the assertions and the code (`Controller:82`, `:267`;
+`Helper:84-87`, `:103-106`, `:135-151`; `Login:64-67`) say the fixed behaviour, which is what is cited. Those comments are stale.
+
+| Claim | Source | Status |
+|---|---|---|
+| Creating a key: 201, new id adds a pair | T/SetKeysTests.cs:44-57, :213-229 | TEST-CONFIRMED |
+| Refused material: blank, missing, no body on create | T/SetKeysTests.cs:88-149 | TEST-CONFIRMED |
+| Refused material: partial, blank, no body on rotation | T/ReplaceKeyTests.cs:148-215 | TEST-CONFIRMED |
+| Oversized key 400, other pairs survive, 8192 stored | T/SetKeysTests.cs:153-189; T/ReplaceKeyTests.cs:220-240 | TEST-CONFIRMED |
+| Malformed id 400 | T/SetKeysTests.cs:193-208; T/ReplaceKeyTests.cs:102-112 | TEST-CONFIRMED |
+| Repeated id 409, stored pair unchanged | T/SetKeysTests.cs:62-81 | TEST-CONFIRMED |
+| Rotation: one pair, 404, all-zero id | T/ReplaceKeyTests.cs:44-98, :117-131 | TEST-CONFIRMED |
+| Reading own keys: fields, empty set | T/KeyFieldsAndIsolationTests.cs:46-96 | TEST-CONFIRMED |
+| Delete: 204, others remain, 404, repeat, 400, 405 | T/DeleteKeysTests.cs:45-140 | TEST-CONFIRMED |
+| Keys are personal | T/CrossUserIsolationTests.cs:46-144; T/KeyFieldsAndIsolationTests.cs:100-117 | TEST-CONFIRMED |
+| Guests refused, read empty; anonymous 401; other roles manage own | T/KeyAccessPermissionsTests.cs:54-309 | TEST-CONFIRMED |
+| Sign-in links kept | T/KeysAndLoginLinksTests.cs:51-85 | TEST-CONFIRMED |
+| Old-format key | T/LegacyKeysFormatTests.cs:49-105 | TEST-CONFIRMED |
+| Room access keys: set per member, own private half only | T/RoomAccessKeysPermissionsTests.cs:110-168, :193-221; T/RoomAccessKeysTests.cs:45-116 | TEST-CONFIRMED |
+| Membership change and rotation reach the set | T/PrivacyRoomIntegrationTests.cs:77-133 | TEST-CONFIRMED |
+| Archived private room still answers | T/RoomAccessKeysTests.cs:169-180 | TEST-CONFIRMED |
+| Refusals: non-member, admin 403; no key 403 | T/RoomAccessKeysPermissionsTests.cs:55-102; T/RoomAccessKeysTests.cs:120-142 | TEST-CONFIRMED |
+| Refusals: ordinary 400, Trash and unknown 404 | T/RoomAccessKeysTests.cs:184-231 | TEST-CONFIRMED |
+| Candidates: public half only, left-outs, duplicates | T/RoomCandidateKeysTests.cs:74-156 | TEST-CONFIRMED |
+| Candidates: who may ask, refusals | T/RoomCandidateKeysTests.cs:160-250 | TEST-CONFIRMED |
+| Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:261-305 | TEST-CONFIRMED |
+| Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED |
+| Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED |
+| File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:242-252 | TEST-CONFIRMED |
+| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5529-5537 | TEST-CONFIRMED |
+| Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED |
+| Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:172-216 | TEST-CONFIRMED |
+| Revocation does not depend on a client being online | Sharing:RevokeFileKeysAsync; commit cc60512acd | CODE-ONLY |
+| Clearing access: member and owner | T/PrivateRoomLeaveTests.cs:58-98 | TEST-CONFIRMED |
+| Owner keeps the room and keys | T/PrivateRoomLeaveTests.cs:102-160 | TEST-CONFIRMED |
+| Non-member admin cannot clear; ordinary room can | T/PrivateRoomLeaveTests.cs:176-194 | TEST-CONFIRMED |
+| Deleting a user deletes file keys | T/PrivateRoomFileKeysTests.cs:220-234 | TEST-CONFIRMED |
+| Keys and file keys not backed up | common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:68, :101 | TEST-CONFIRMED |
+| Room types that can be private; 403 otherwise | T/PrivateRoomCreateTests.cs:47-60, :67-102 | TEST-CONFIRMED |
+| Empty key set counts as no key | T/PrivateRoomContentRulesTests.cs:129-139; Login:97-105 | TEST-CONFIRMED |
+| Editors without the library: 403 create, 415 open | Storage:DemandPrivateRoomCanBeCreatedAsync; DocumentServiceHelper hunk of b562fc3fb1; yaml openEditFile 415 | CODE-ONLY |
+| `docServiceEncryptionSupported` true on the test stack | T/PrivateRoomEditorTests.cs:255-266 | TEST-CONFIRMED |
+| Connected storage refused 400 (test skipped unless Nextcloud is configured) | products/ASC.Files/Tests/Tests/03_Rooms/ThirdParty/ThirdPartyPrivateRoomTests.cs:49 | TEST-CONFIRMED |
+| Settings refused, off and rename allowed, template fails | T/PrivateRoomSettingsTests.cs:51-143 | TEST-CONFIRMED |
+| Inviting needs a key; guest always refused | T/PrivacyRoomIntegrationTests.cs:137-165; T/RoomAccessKeysPermissionsTests.cs:172-186; T/PrivacyRoomTest.cs:179-221 | TEST-CONFIRMED |
+| No links | T/PrivateRoomContentBoundaryTests.cs:93-102 | TEST-CONFIRMED |
+| Revoking an existing link stays possible | Sharing hunk of bd89a24dcd (`Access != None`) | CODE-ONLY |
+| No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:106-140 | TEST-CONFIRMED |
+| Copy across the border 403 | T/PrivacyRoomTest.cs:225-277 | TEST-CONFIRMED |
+| Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:144-176 | TEST-CONFIRMED |
+| Copy-as refused | T/PrivateRoomContentBoundaryTests.cs:195-238 | TEST-CONFIRMED |
+| Plaintext: createFile and session 403; ordinary room accepts | T/PrivateRoomContentRulesTests.cs:62-91, :119-125 | TEST-CONFIRMED |
+| Generated names | T/PrivateRoomContentRulesTests.cs:99-115; products/ASC.Files/Core/Utils/FileUploader.cs regex of cc60512acd | TEST-CONFIRMED |
+| Abort bound to folder | T/PrivateRoomContentRulesTests.cs:143-157 | TEST-CONFIRMED |
+| Save callback refused and allowed; saveediting | T/PrivateRoomEditorTests.cs:105-187 | TEST-CONFIRMED |
+| Restore, reference data, start filling, form flag | T/PrivateRoomEditorTests.cs:191-237 | TEST-CONFIRMED |
+| Public document address | T/PrivateRoomEditorTests.cs:241-251 | TEST-CONFIRMED |
+| Archived: non-member refused; ordinary unchanged | T/ArchivedPrivateRoomSecurityTests.cs:66-113, :177-193 | TEST-CONFIRMED |
+| Archived: no copy; creator and member rights | T/ArchivedPrivateRoomSecurityTests.cs:117-173; T/PrivateRoomContentBoundaryTests.cs:180-189 | TEST-CONFIRMED |
+| Section split by area and filter | T/PrivateRoomSectionTests.cs:64-85 | TEST-CONFIRMED |
+| Section endpoint, root, browse by id | T/PrivateRoomSectionTests.cs:89-120 | TEST-CONFIRMED |
+| App off | T/PrivateRoomSectionTests.cs:124-137 | TEST-CONFIRMED |
+| Non-member not listed; invited listed (in the section only the DocSpace admin is asserted; the Owner only on the default Active area) | T/PrivateRoomSectionTests.cs:141-165; T/PrivateRoomVisibilityTests.cs:55-91 | TEST-CONFIRMED |
+| Archived in the Archive area | T/PrivateRoomSectionTests.cs:169-178 | TEST-CONFIRMED |
+| New marks | T/PrivateRoomSectionTests.cs:182-201 | TEST-CONFIRMED |
+| Recent 400 | T/PrivateRoomSectionTests.cs:205-213 | TEST-CONFIRMED |
+| Groups of the section | T/PrivateRoomSectionTests.cs:217-238 | TEST-CONFIRMED |
+| Audit trail hides titles, keeps record and user names | web/ASC.Web.Api.Tests/Tests/05_Security/AuditTrail/AuditPrivateRoomTitleTests.cs:85-199 | TEST-CONFIRMED |
+| History keeps titles for members | same file:203-222 | TEST-CONFIRMED |
+| Letters use the neutral title (tags of the action, not rendered pushes) | common/Tests/ASC.Notify.Tests/Invites/PrivateRoomTitleInLettersTests.cs:115-177 | TEST-CONFIRMED |
+| Webhooks: outsider gets nothing | web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/WebhookPrivateRoomAccessTests.cs:71-109 | TEST-CONFIRMED |
+
+## Differences between the yaml and the server
+
+| Operation | yaml | Server |
+|---|---|---|
+| deleteKeys | No 405 | A call without an id reaches the collection route, which has no DELETE: 405 (T/DeleteKeysTests.cs:90-98). Framework behaviour, not a contract promise |
+| getRoomCandidateKeys, getRoomMissingFileKeys | "owner or a room manager" | Decided by the right to change access, which also applies the archived refusal; matches, stated more narrowly in the yaml |
+| getPrivateRoomsFolder | Tagged Files / Folders, not Rooms / Privacy room | Named here because this spec describes the section; another spec may own the tag |
+
+No other difference was found in the seven operations of the tag. Their status codes in the yaml match the `[SwaggerResponse]`s and the tests.
+
+## Left out
+
+All seven operations of `Rooms / Privacy room` are in requirements. These facts are left out of `spec.md`:
+
+| What | Why |
+|---|---|
+| The section as default start page; used space staying in the Rooms counter; private room's group link kept but not shown in a Rooms group | From commit c866c055e1 only, not read in code or tests |
+| The 30-second memory of an unresponsive document server; the development setting that assumes editor support | Configuration detail, not API behaviour |
+| Dropping an editor session when a member is removed; socket recipients; the hidden submit button of a form | The commits say the test stack cannot observe them; not checked in code |
+| Audit report and history report outputs | Commit b562fc3fb1 says no test of their own; the API events are covered |
+| How wrapped keys are bound to ids | Client behaviour (see PR4) |
+
+## Suspected defects
+
+| # | Where | What the server does | Evidence | Evidence kind |
+|---|---|---|---|---|
+| PR1 | Deleting a subfolder of a private room | It still goes to Trash | Commit c866c055e1 "Not addressed here" | per commit message |
+| PR2 | Favorites | A private room or its subfolder can be added to Favorites | Commit c866c055e1 "Not addressed here" | per commit message |
+| PR3 | Audit trail | Events written before b562fc3fb1 keep showing a private room's titles, because the list of titles to hide is stored with new events only | Commit b562fc3fb1; `common/services/ASC.AuditTrail/Models/Mappings/PrivateTitleMask.cs` | per commit message, code reading of the mask |
+| PR4 | Backup and restore | Key pairs and file keys are skipped, and a module restore assigns new user and file ids, so a restored private room's content cannot be opened. Nothing in what was read warns about this | BackupCoverageTests.cs:68, :101; notes of 2026-11-05 from code reading, no live restore | red by code reading |
+| PR5 | Per-user security check | A check on one entry instance reuses the share record of the previous user. Callers in the private-room paths reset it, and the core is unchanged, so another caller checking several users on one instance answers for the wrong one | Commits 1259577f63, 20262fdcb5 | per commit message |
+| PR6 | Letters | The neutral title exists in the default culture only, so a letter in another language names the room in that default language | Commit 1259577f63 | per commit message |
+
+## Not verified
+
+- Whether a group can be invited to a private room. `Sharing:270-276` checks keys through a user lookup of the subject id, which suggests a refusal, and `Helper:269` and the revocation skip group subjects. If a group can be a member, its people would get 403 on `getUserKeysForRoom` and keep their file keys on removal. No test covers it.
+- `searchArea=Any` for a non-member administrator: the split accepts any room for that area (`products/ASC.Files/Core/Core/VirtualRooms/SearchArea.cs:90-98`), and no test asserts the listing. The same goes for the Archive area listing to a non-member administrator.
+- `getUserKeysForRoom` with a subfolder id: the code has no room check there, unlike `candidates` and `missing` (`Helper:260` against `Helper:381`). No test.
+- `setEncryptionInfo` refusals (403 for missing rights and for a file outside a private room): read in the yaml only.
+
+## Points for other specs
+
+- `room-types` says room groups take `Active` or `Forms` and that a private room can be grouped: the area `PrivateRooms` now exists, and a private room in an `Active` group answers 400 (T/PrivateRoomSectionTests.cs:217-238).
+- `openspec/deviations.md` R1 (bug 82956, private room listed to a non-member) is marked OPEN. T/PrivateRoomVisibilityTests.cs now reads as satisfied by the section split, but that test calls the default Active area, which leaves every private room out for anyone.

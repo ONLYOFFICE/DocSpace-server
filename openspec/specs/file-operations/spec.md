@@ -66,7 +66,7 @@ covered by tests and are not specified here.
 #### Scenario: Non-PDF file in a Form filling room
 
 - **WHEN** a `.docx`, a text file or an HTML file is created directly in a Form filling room
-- **THEN** the system refuses the request with a client error and stores nothing (bug 84840: the refusal is reported as 500 today)
+- **THEN** the system answers 403 and stores nothing
 - **AND** a Form filling room refuses the creation of anything but a PDF form
 
 ### Requirement: Creating a text or HTML file from content
@@ -221,12 +221,18 @@ existing file, `true` SHALL keep both under a numeric suffix.
 - **WHEN** a file is uploaded into an archived room, into folder id 0 or into folder id 999999999
 - **THEN** the system answers 403 for the archived room and 404 for the ids
 
+#### Scenario: Non-PDF file uploaded to a Form filling room
+
+- **WHEN** a text file is sent to a Form filling room through `uploadFile` or `insertFile`
+- **THEN** the system answers 403 and the room stays empty
+
 ### Requirement: Chunked upload session
 
 `createUploadSessionInFolder` (`POST api/2.0/files/{folderId}/session`) and the older `createUploadSession`
 (`POST .../upload/create_session`) SHALL reserve an upload for `fileName` and `fileSize`; size and target are
 checked first. Nothing is stored until a part arrives. The parts go through the session routes and
-`finalizeSession` (`PUT .../session/{sessionId}/finalize`) SHALL produce the file.
+`finalizeSession` (`PUT .../session/{sessionId}/finalize`) SHALL produce the file. What a private room demands of
+a session is in `private-rooms`.
 
 #### Scenario: Whole file in chunks
 
@@ -273,7 +279,7 @@ store a part under `chunkNumber` (from 1), in any order, answering the session; 
 
 - **WHEN** a payload below `chunkUploadSize` is sent as one part, and a larger one as two parts in order
 - **THEN** the small one answers 201 at once with `uploaded` true, `version` 1 and the title; the large one answers 200 with `uploaded` false after the first part and 201 with the file after the last, no file being listed in between
-- **AND** afterwards finalize and another part answer 404, and the folder lists the file once with the exact bytes
+- **AND** afterwards finalize, an abort and another part answer 404, and the folder lists the file once with the exact bytes at version 1
 
 #### Scenario: Numbered parts in any order
 
@@ -283,8 +289,13 @@ store a part under `chunkNumber` (from 1), in any order, answering the session; 
 
 #### Scenario: Finalized session is closed
 
-- **WHEN** a large session is finalized and then finalized, sent a part or aborted again
+- **WHEN** a session, large or small, is finalized and then finalized, sent a part or aborted again
 - **THEN** every later call answers 404, the folder holds the file once at version 1 with the uploaded bytes
+
+#### Scenario: Small payload sent as one numbered part
+
+- **WHEN** a payload below `chunkUploadSize` is sent as part 1 through `uploadAsyncSession` and the session is finalized
+- **THEN** the finalize answers 201 with `uploaded` true and `version` 1, and the folder holds the file once with the exact bytes
 
 #### Scenario: Incomplete and malformed parts
 
@@ -296,6 +307,11 @@ store a part under `chunkNumber` (from 1), in any order, answering the session; 
 
 - **WHEN** a session id that never existed, or a value that is not even shaped like one, is finalized, sent a part on either route, or aborted
 - **THEN** every call answers 404
+
+#### Scenario: Non-PDF session in a Form filling room
+
+- **WHEN** a session for a text file is opened in a Form filling room
+- **THEN** a small payload is refused with 403 on its part, on either route, and a large one on `finalizeSession`, and the room stays empty
 
 ### Requirement: Isolation of upload sessions
 
@@ -329,14 +345,19 @@ SHALL leave the other account's session untouched.
 `abortUploadSession` (`DELETE .../session/{sessionId}`) SHALL drop a session that was opened by the caller,
 before any part or after some, without creating a file and without touching another open session; the
 aborted session answers 404 on every later call. A session of another account is refused (403, bug 82276), a
-session that no longer exists — unknown, aborted or finalized — answers 404 (bug 82278), and an anonymous
-caller gets 401.
+session that no longer exists — unknown, aborted or finalized — answers 404 (bug 82278), as does one opened
+against another folder, which stays open; an anonymous caller gets 401.
 
 #### Scenario: Session aborted
 
 - **WHEN** a session is aborted before any part, or after its first part while a neighbouring session holds a part too
 - **THEN** the call succeeds, no file with that title appears, the aborted session answers 404 to a part, a finalize and a second abort, and the neighbouring session still completes byte-for-byte
 - **AND** aborting a session opened in a Custom room succeeds as well
+
+#### Scenario: Session of another folder
+
+- **WHEN** a session is aborted through a folder other than the one it was opened against
+- **THEN** the system answers 404 and the session stays open
 
 #### Scenario: Who may abort
 

@@ -311,6 +311,7 @@ list"), changing nobody else's rights. It answers `true`.
 
 - **WHEN** a DocSpace admin calls `removeSecurityInfo` for the owner's file, or a Room admin for a file in their own room
 - **THEN** the call succeeds (200, `true`)
+- **AND** a DocSpace admin outside a private room is refused (403, see `private-rooms`)
 
 #### Scenario: Recipient removes the entry from their own list
 

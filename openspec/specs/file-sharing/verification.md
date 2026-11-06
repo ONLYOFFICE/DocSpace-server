@@ -185,6 +185,14 @@ revoke, 84873 on a custom room's primary link revoked the way the client does it
 Product-side, `changeDefaultAccessRights` and the external-sharing switches are untouched; the only
 sharing-code change outside the AI rooms is the `RaisesWebhook` declarations on `changeFileOwner`.
 
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| `removeSecurityInfo`: an administrator outside a private room gets 403; ordinary rooms unchanged; the rest of that case in `private-rooms` | `20262fdcb5`; `private-rooms`, "An administrator outside cannot empty a private room" and "Clearing access on a private room" | CROSS-REFERENCE |
+| `removeSecurityInfo` text corrected: a directly invited member is not refused, the call takes them out of their own list | `20262fdcb5`, endpoint description only. Matches "Recipient removes the entry from their own list", no spec change | READ |
+| Recent with `searchArea=PrivateRooms` answers 400 | `private-rooms`, "Recent has no private rooms area" | CROSS-REFERENCE, not repeated here |
+
 ## Suspected defects
 
 Re-check of the items `openspec/deviations.md` assigns to this area, and what the new tests add.

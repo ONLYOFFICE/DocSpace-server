@@ -172,6 +172,14 @@ schedule and `PortalRetentionJobTests.cs` the job's decisions with a recording n
 | Recipient culture (tenant fallback), `${LetterLogoText}` resolved from the white-label settings, letter logo attached or `$TopGif`, links absolutized, no raw tags, no hard-coded product name or URL | `common/Tests/ASC.Notify.Tests/Infrastructure/LetterTestBase.cs` (`Letter_Renders` checks per culture); `web/ASC.Web.Core/Notify/NotifyConfiguration.cs:60-140`; `.claude/skills/notify-emails/SKILL.md` §4-5, §9 | TEST-CONFIRMED |
 | Spam cap for unactivated addresses on hosted free/trial portals (`core:notify:countspam`, per day) | `web/ASC.Web.Core/Notify/StudioNotifyHelper.cs:96-150`; `web/ASC.Web.Core/Notify/SpamEmailSettings.cs` | CODE-ONLY |
 
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| Invitations, room letters and pushes name a private room neutrally and hide its folder titles | `private-rooms`, "Titles in letters"; `1259577f63`, `4162789259` | CROSS-REFERENCE, not repeated here |
+| What's-new letters name a private room neutrally too, because they read the audit repository | `b562fc3fb1` message | per commit message |
+| New marks of private rooms count in their section; the Rooms badge no longer counts them or the Forms rooms on its first read | `c866c055e1` message; `private-rooms`, "New marks count in the section". This spec states no count of that badge, so no text changed | per commit message |
+
 ## Where the server differs from the release notes or the OpenAPI document (spec follows the server)
 
 | Release note / document | Server |

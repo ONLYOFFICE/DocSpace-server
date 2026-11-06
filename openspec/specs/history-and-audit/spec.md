@@ -109,7 +109,7 @@ lifecycle and settings, room links, room members, forms (see `form-filling-workf
 #### Scenario: The complete tracked set
 
 - **WHEN** an action of the tracked set is performed on an entry
-- **THEN** a history entry is written for the file actions `FileCreated`, `FileUploaded`, `FileUploadedWithOverwriting`, `UserFileUpdated`, `FileRenamed`, `FileMoved`, `FileMovedWithOverwriting`, `FileMovedToTrash`, `FileCopied`, `FileCopiedWithOverwriting`, `FileVersionRemoved`, `FileDeleted`, `FileConverted`, `FileRestoreVersion`, `FileIndexChanged`, `FileLocked`, `FileUnlocked`, `FileCustomFilterEnabled`, `FileCustomFilterDisabled`, `FileSavedButUserQuotaExceeded`, `FileNotSavedDueToUserQuota`, `FileSavedButRoomQuotaExceeded` and `FileNotSavedDueToRoomQuota`
+- **THEN** a history entry is written for the file actions `FileCreated`, `FileUploaded`, `FileUploadedWithOverwriting`, `UserFileUpdated`, `FileRenamed`, `FileMoved`, `FileMovedWithOverwriting`, `FileMovedToTrash`, `FileCopied`, `FileCopiedWithOverwriting`, `FileVersionRemoved`, `FileDeleted`, `FileConverted`, `FileRestoreVersion`, `FileIndexChanged`, `FileLocked`, `FileUnlocked`, `FileCustomFilterEnabled`, `FileCustomFilterDisabled`, `FileSavedButUserQuotaExceeded`, `FileNotSavedDueToUserQuota`, `FileSavedButRoomQuotaExceeded`, `FileNotSavedDueToRoomQuota` and `FileKeysSet`
 - **AND** for the folder actions `FolderCreated`, `FolderRenamed`, `FolderMoved`, `FolderMovedWithOverwriting`, `FolderCopied`, `FolderCopiedWithOverwriting`, `FolderMovedToTrash`, `FolderDeleted`, `FolderIndexChanged` and `FolderIndexReordered`
 - **AND** for the room actions `RoomCreated`, `RoomCopied`, `RoomRenamed`, `RoomArchived`, `RoomUnarchived`, `AddedRoomTags`, `DeletedRoomTags`, `RoomLogoCreated`, `RoomLogoDeleted`, `RoomColorChanged`, `RoomCoverChanged`, `RoomIndexingEnabled`, `RoomIndexingDisabled`, `RoomLifeTimeSet`, `RoomLifeTimeDisabled`, `RoomDenyDownloadEnabled`, `RoomDenyDownloadDisabled`, `RoomWatermarkSet`, `RoomWatermarkDisabled` and `RoomIndexExportSaved`
 - **AND** for the link actions `RoomExternalLinkCreated`, `RoomExternalLinkRenamed`, `RoomExternalLinkDeleted` and `RoomExternalLinkRevoked`
@@ -304,13 +304,20 @@ and a third-party file has no revisions.
 
 The system SHALL record every action whose identifier (`actionId`) is 2000 or more as an audit event and
 every action below 2000 as a login event. An audit event SHALL carry the account, the action, where it
-came from and what it touched, with the date in the portal time zone.
+came from and what it touched, with the date in the portal time zone. How the titles of a private room read
+in these events is in `private-rooms`.
 
 #### Scenario: Audit event shape
 
 - **WHEN** the owner sends password-change instructions to a member and reads the audit events
 - **THEN** an event appears with a non-zero id, a user id and name, an action text and `actionId`, a non-null `ip`, a date and a non-null `context`
 - **AND** an event carries the event id, the account (`user`, `userId`), the readable action text and its `actionId`, the IP address with any port removed, the country and city resolved from the IP (empty when unknown), browser, platform, page, the mapped `actionType`, `product`, `location`, the `target` items, the `entries` types and the `context`
+
+#### Scenario: File key events of a private room
+
+- **WHEN** file keys are issued for a file of a private room, or a member leaves such a room and loses them
+- **THEN** the audit trail records `FileKeysSet` with its recipients, or `RoomFileKeysRevoked` with the members concerned
+- **AND** the file's history shows `FileKeysSet` without the recipients, and `RoomFileKeysRevoked` is not in the tracked set
 
 #### Scenario: Special accounts are named
 

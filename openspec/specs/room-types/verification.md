@@ -108,7 +108,7 @@ is left to `ai-agents`, whose "`.ai` skills folder" requirement predates this ch
 | Validation of the request (400 / 404) | 03_Rooms/Templates/RoomFromTemplateValidationTests.cs:47-247 [Bug 81667, 81669] | TEST-CONFIRMED |
 | Who may create a room from a template: admin+public OK; User/Guest 403; admin on foreign private 403; source access only 403; 401 | 03_Rooms/Templates/RoomFromTemplatePermissionsTests.cs:44-230 [Bug 81662, 81663, 81664] | TEST-CONFIRMED |
 | **Room groups** — name, icon, rooms, searchArea, per-account | yaml `addRoomGroup` (400/403/404 text), `RoomGroupRequestDto.searchArea`; release note v3.7 | CODE-ONLY |
-| Group created over rooms of several types; private room grouped | 03_Rooms/Groups/RoomGroupCreateTests.cs:43-114, 262-291 | TEST-CONFIRMED |
+| Group created over rooms of several types; private room grouped in the `PrivateRooms` area | 03_Rooms/Groups/RoomGroupCreateTests.cs:43-114, 262-291 (`Create_PrivateRoom_Succeeds` now passes `PrivateRooms`) | TEST-CONFIRMED |
 | Name and icon validation (400; non-BMP name refused with 500; trimmed) | 03_Rooms/Groups/RoomGroupCreateNameIconValidationTests.cs:53-166 [Bug 80921]; 03_Rooms/Groups/RoomGroupCreateTests.cs:176-258 [Bug 82573] | TEST-CONFIRMED (the non-BMP refusal answers 500, not 400) |
 | Rooms list validation (403 empty; 400 shapes; 404 none existing) | 03_Rooms/Groups/RoomGroupCreateRoomsValidationTests.cs:52-218 [Bug 82575, 82576, 82577, 82587] | TEST-CONFIRMED |
 | Section of a group (Forms vs Active; refused areas; numeric value) | 03_Rooms/Groups/RoomGroupSearchAreaTests.cs:49-199 | TEST-CONFIRMED |
@@ -159,7 +159,7 @@ is left to `ai-agents`, whose "`.ai` skills folder" requirement predates this ch
 | File within the quota | 07_Settings/Quota/QuotaTests.cs:281-339 | TEST-CONFIRMED |
 | Quota smaller than the file | 07_Settings/Quota/QuotaTests.cs:342-361; 07_Settings/Quota/RoomQuotaInfoTests.cs:48-62 | TEST-CONFIRMED |
 | Soft overrun allowed once; >2x refused; upload 402 "quota" | 07_Settings/Quota/QuotaTests.cs:364-577 | TEST-CONFIRMED |
-| **Private rooms** — flag, keys required, immutable, hidden in client | yaml `CreateRoomRequestDto.private`, `createRoom` 403 ("`private` is set while the caller has no encryption keys"), `getRoomsFolder` private filter; release note v4.0 (Privacy rooms) | CODE-ONLY |
+| **Private rooms** — flag, keys required, immutable | yaml `CreateRoomRequestDto.private`, `createRoom` 403 ("`private` is set while the caller has no encryption keys"), `getRoomsFolder` private filter. The v4.0 note on hiding them in the client left the spec: the section now exists (`c866c055e1`, `private-rooms`) | CODE-ONLY |
 | Private room created by Owner / DocSpace admin / Room admin; logo applies; grouped | 03_Rooms/Permissions/RoomCreatePermissionsTests.cs:154-194 (via `CreatePrivateRoom`, Tests/BaseTest.cs:345-349, which sets keys first); 03_Rooms/Logos/RoomLogoCreateTests.cs:64-77; 03_Rooms/Groups/RoomGroupCreateTests.cs:103-113 | TEST-CONFIRMED |
 | User and Guest cannot create a private room (403); anonymous 401 | 03_Rooms/Permissions/RoomCreatePermissionsTests.cs:198-251 | TEST-CONFIRMED |
 | Default is not private | 03_Rooms/Create/RoomCreateTests.cs:69-81 | TEST-CONFIRMED |
@@ -172,6 +172,14 @@ is left to `ai-agents`, whose "`.ai` skills folder" requirement predates this ch
 | Subject filters | 03_Rooms/Listing/RoomsFolderFilterTests.cs:331-390; 03_Rooms/RoomsApiTests.cs:229-275 | TEST-CONFIRMED |
 | Visibility by role; 401 cases | 03_Rooms/Listing/RoomsFolderVisibilityTests.cs:45-171 | TEST-CONFIRMED |
 | `getRoomInfo` 404 after deletion, idempotent reads, current metadata | 03_Rooms/Deletion/RoomDeleteTests.cs:67-69; 03_Rooms/Read/RoomInfoTests.cs:142-159; 03_Rooms/Listing/RoomsFolderFilterTests.cs:45-83 | TEST-CONFIRMED |
+
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| Room group areas are Active, Forms and PrivateRooms; a private room in an Active group and an ordinary room in a PrivateRooms group answer 400 | 08_Private/PrivateRoomSectionTests.cs:217-238; `c866c055e1` | TEST-CONFIRMED |
+| New owner of a private room needs a key to its encrypted files (409) | `private-rooms`, "The new owner must hold the file keys"; `1259577f63` | CROSS-REFERENCE |
+| Connected storage 400, editors that cannot encrypt 403, settings in the clear 400, no duplicate or template | `private-rooms` requirements of those names; `b562fc3fb1`, `bd89a24dcd` | CROSS-REFERENCE, not repeated here |
 
 ## Release notes versus server (specification follows the server)
 

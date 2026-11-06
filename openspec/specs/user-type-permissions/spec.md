@@ -92,8 +92,8 @@ only to their members, the DocSpace Owner and DocSpace admins included.
 
 #### Scenario: Private room is hidden from a non-member admin
 
-- **WHEN** a DocSpace admin who is not a member lists rooms
-- **THEN** the list does not include private rooms
+- **WHEN** a DocSpace admin or the Owner who is not a member lists rooms, in the Rooms section or in the `PrivateRooms` area
+- **THEN** the list does not include the private room; once invited, they see it in the `PrivateRooms` area (see `private-rooms`)
 
 ### Requirement: Room creation and management in the Rooms section
 
@@ -201,6 +201,11 @@ removals and link management are refused to every non-member.
 
 - **WHEN** a Room admin attempts to archive, copy or change the owner of a room owned by someone else
 - **THEN** the system rejects the request (403)
+
+#### Scenario: Private room of someone else
+
+- **WHEN** a DocSpace admin or the Owner who is not a member acts on an archived private room, or a DocSpace admin outside it clears its access
+- **THEN** the system answers 403 where an ordinary room would allow it (see `private-rooms`)
 
 ### Requirement: Archive section actions
 

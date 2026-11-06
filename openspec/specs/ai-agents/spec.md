@@ -504,6 +504,17 @@ move leaves the file where it was. The room takes no folder (403).
 - **WHEN** the owner uploads a new version of a skill, moves it to another Instructions room, then to the trash, and restores it
 - **THEN** the catalogue shows the new version, then the other room, loses the skill in the trash and gets it back
 
+### Requirement: Generating a skill for review
+
+`aiSkillsGenerate` SHALL write a skill from a title and a description and return it for the author to review, saving
+nothing in the Instructions room. Saving is an ordinary upload under "Skills of an Instructions room". The requests,
+the result and the failures of the operation are in `portal-settings`.
+
+#### Scenario: Nothing appears until the author saves
+
+- **WHEN** a member generates a skill for an Instructions room
+- **THEN** the answer holds the Markdown file and the room's skills are unchanged
+
 ### Requirement: Listing the skills
 
 `getRoomSkills` SHALL answer the skills of an Instructions room (sorted by file title) or of a project's
@@ -881,6 +892,28 @@ thread.
 
 - **WHEN** the thread's model can only draw images
 - **THEN** the reply fails and the question is kept
+
+### Requirement: Compacting a long thread
+
+A thread that nears the context window of its model SHALL be folded into a summary before the round, and later rounds
+SHALL send the summary in place of the older turns. The summary is stored as an ordinary message of the thread. This
+is on by default; an installation can turn it off, which takes effect from the next round without a restart.
+
+#### Scenario: Long thread
+
+- **WHEN** a member sends a message in a thread that nears the model's window
+- **THEN** the round runs on the summary and the recent turns, and the summary is among the thread's messages
+
+### Requirement: The window a thread is measured against
+
+The window SHALL be `contextWindow` of the model: for the gateway's catalogue that is the gateway's `context_length`,
+reported in the model list. Without it the window SHALL come from the known window of that model id, else from a
+default. A saved profile does not keep the value.
+
+#### Scenario: Model from the gateway
+
+- **WHEN** the gateway reports a positive `context_length` for a model
+- **THEN** the model list carries it as `contextWindow`
 
 ### Requirement: One-shot sends
 

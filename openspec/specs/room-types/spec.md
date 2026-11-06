@@ -538,14 +538,14 @@ The caller must be able to read the template and be allowed to create rooms.
 The system SHALL let every account group the rooms it can read into personal room groups (v3.7) with
 `addRoomGroup`, `getRoomGroups`, `getRoomGroupInfo`, `updateRoomGroup`, `changeRoomGroupIcon` and
 `deleteRoomGroup`. A group has a `name`, an `icon` from a fixed set, a non-empty `rooms` list and a
-`searchArea` of `Active` (default) or `Forms`, which fixes the section the group belongs to. Groups are private
+`searchArea` of `Active` (default), `Forms` or `PrivateRooms`, which fixes its section. Groups are private
 to their creator. A room may be in several groups and two groups may share a name.
 
 #### Scenario: Group created over rooms of several types
 
 - **WHEN** the Owner creates a group over a Custom, a Collaboration, a Public and a VDR room
 - **THEN** the group has the given name, a positive id, `totalRooms` 4 equal to the length of `rooms`, the icon `star` and `searchArea` Active; `getRoomGroupInfo` and `getRoomGroups` return it
-- **AND** a private (encrypted) room can be grouped as well, and the group keeps its rooms whether `getRoomGroups` is called with or without `includeMembers`
+- **AND** a private (encrypted) room can be grouped in the `PrivateRooms` area (see `private-rooms`), and the group keeps its rooms whether `getRoomGroups` is called with or without `includeMembers`
 
 #### Scenario: Name and icon validation
 
@@ -563,6 +563,11 @@ to their creator. A room may be in several groups and two groups may share a nam
 - **WHEN** a group is created over a Form filling room with `searchArea=Forms`, and another over a Custom room without `searchArea`
 - **THEN** the first has `searchArea` Forms and is listed by `getRoomGroups(searchArea=Forms)` only; the second has Active and is listed by `Active` and by the default call only
 - **AND** a Forms group accepts Form filling rooms only and an Active group the other types only: a Forms group over a Custom room, an Active group over a form room, and a group with `searchArea` Archive, Any, Templates or FormTemplates are refused (400); a numeric `searchArea` value is accepted
+
+#### Scenario: Private rooms and the sections of a group
+
+- **WHEN** a group is created over a private room in the `Active` area, or over an ordinary room in the `PrivateRooms` area
+- **THEN** the system answers 400; the rules of that section are in `private-rooms`
 
 #### Scenario: Partially valid room list
 
@@ -767,7 +772,7 @@ list and is specified in `room-role-permissions` (the Owner cannot leave).
 
 - **WHEN** ownership is transferred to a Room admin whose account was disabled
 - **THEN** the system rejects the request (403, "You cannot select this user")
-- **AND** for a private room the new owner must have encryption keys
+- **AND** for a private room the new owner must have encryption keys, and a key to its encrypted files (409, see `private-rooms`)
 
 #### Scenario: User cannot become the owner
 
@@ -833,13 +838,12 @@ outright (an upload session answers 402 with a message naming the quota).
 The system SHALL accept `private:true` on `createRoom` for a room whose files are end-to-end encrypted on the
 client (v4.0). The flag cannot be changed after creation, is reported as `private` in the room, and the
 listing can be split by it. Creation requires that the caller has encryption keys set up (403 otherwise) and is
-allowed to create rooms. The v4.0 release notes say private rooms are hidden in the client until
-production-ready; the API exposes them as described here.
+allowed to create rooms. The further refusals, the section and the file keys are in `private-rooms`.
 
 #### Scenario: Private room created by an account with keys
 
 - **WHEN** the Owner, a DocSpace admin or a Room admin with encryption keys creates a Custom room with `private:true`
-- **THEN** the room is created with a positive id and reports `private:true`; a logo can be applied to it and it can be grouped
+- **THEN** the room is created with a positive id and reports `private:true`; a logo can be applied to it and it can be grouped in the `PrivateRooms` area
 
 #### Scenario: User and Guest cannot create a private room
 

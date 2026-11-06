@@ -56,7 +56,7 @@ are unchanged (verdicts below).
 | Room admin sees own rooms and the rooms they joined, nothing else | `RoomsApiTests.cs:1363-1393`; `RoomsFolderVisibilityTests.cs:61-85` | TEST-CONFIRMED |
 | User / Guest see only rooms they joined | `RoomsFolderVisibilityTests.cs:87-137`; `02_Folders/Subfolders/RootFoldersPermissionsTests.cs:171-188` | TEST-CONFIRMED |
 | Same rules in the Archive section | no per-type archive listing test; same listing operation | CODE-ONLY |
-| Private room hidden from a non-member Owner / DocSpace admin | `08_Private/PrivateRoomVisibilityTests.cs:53-92` (bug 82956 — the tests assert the spec, their remarks say the bug is still open, so they are expected red); `deviations.md`, matrix table row "Owner and DocSpace admin see all rooms / Not private rooms" | LIVE-CONFIRMED (see R1) |
+| Private room hidden from a non-member Owner / DocSpace admin | `08_Private/PrivateRoomSectionTests.cs:141-153` (the Owner in the `PrivateRooms` area, then the creator); `products/ASC.Files/Core/Core/Security/FileSecurity.cs:3069-3073` (the administrator's view, Owner and DocSpace admin alike). `PrivateRoomVisibilityTests.cs:53-92` no longer proves it: it calls the default Active area, which leaves private rooms out for everyone | TEST-CONFIRMED (Owner), CODE-ONLY (DocSpace admin; Archive and `Any` areas) |
 | **Room creation and management in the Rooms section** | | |
 | Create rooms: Owner, DocSpace admin, Room admin succeed; User, Guest → 403 ("You don't have enough permission to create"); a User → 403 for an AI project too | `03_Rooms/Permissions/RoomCreatePermissionsTests.cs:41-107, 182-236`; `03_Rooms/AiHub/AiProjectRoomTests.cs:62-74` | TEST-CONFIRMED |
 | Pin: every invited member of every type pins; non-member User / Guest → 403 | `RoomPinPermissionsTests.cs:50-71, 90-109`; `RoomPinInvitedMemberPermissionsTests.cs:41-59` | TEST-CONFIRMED |
@@ -143,13 +143,21 @@ room, contradicted by `room-types` — kept in the table as the matrix states it
 cross-reference. Spec: 12 requirements, 57 scenarios (before the reshaping: 12 requirements, 46 scenarios;
 the 11 new scenarios are the matrix containers and the split prose, no fact added or dropped).
 
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| R1 re-judged on the section split and the listing code | `c866c055e1`; `73aa4e8ab8`; `private-rooms/verification.md` "Points for other specs" | CODE-ONLY plus one Owner test |
+| Provider-based (third-party) rooms are listed outside the private filter of the administrator's view; a new private room on a connected storage is refused since `b562fc3fb1`, existing ones stay | `FileSecurity.cs` the `thirdPartyRoomsEntries` query after `:3073` | NOT VERIFIED: whether such a room can reach a non-member through Active, Archive or `Any` |
+| Non-member administrator refused on an archived private room and on clearing its access | `private-rooms`, "An archived private room keeps its protection", "An administrator outside cannot empty a private room" | CROSS-REFERENCE |
+
 ## Where the server differs from the product matrix (spec follows the server)
 
 | Matrix (sheet "Types") | Server | Reference |
 |---|---|---|
 | Users and Guests may invite to a room ("ships in the next version") | Inviting needs the Room manager role, which they cannot hold; 403 | `deviations.md`, matrix table rows 1-7 of user-type-permissions |
 | Nobody sees the links of someone else's public room | A non-member DocSpace admin reads the primary link | same |
-| Owner and DocSpace admin see all rooms | Not private (end-to-end encrypted) rooms — and today not even that: bug 82956 is open, the non-member Owner / admin DOES see a private room | same; R1 |
+| Owner and DocSpace admin see all rooms | Not private (end-to-end encrypted) rooms, unless they are members | same; R1 |
 | A Room admin requests promotion of a User to Room admin, confirmed in Accounts | No such operation in the API | same |
 | A Room admin shares files with own guests and guests of own rooms | Only guests the Room admin invited | same |
 | Forms in rooms other than FFR / VDR are shared "for editing only" | Editing, comment and read links are offered; filling is refused | same |
@@ -191,6 +199,6 @@ D-numbers are the ones of `openspec/deviations.md` ("Suspected defects"); R-numb
 | D7 | My documents | `POST files/@my/file` as a Guest answers 500 (null reference); `@my/text` and `@my/html` answer 404. | `deviations.md` D7 (live run); the 404 of text / html: `TextFileCreatePermissionsTests.cs:102-113`, `HtmlFileCreatePermissionsTests.cs`; `products/ASC.Files/Server/Api/FilesController.cs:1325-1340` | STILL OPEN (2026-11-04: the action changed only in its webhook declaration) |
 | D9 | Inviting users by type | `GET portal/users/invite/{type}` never refuses: a disallowed pair answers 200 with an empty string, and for the Guest type it returns a real link to the Owner, a DocSpace admin and a Room admin. | `deviations.md` D9 (live run); `04_Portal/Users/InvitationLinkGetDeprecatedTests.cs`; `web/ASC.Web.Api/Api/PortalController.cs:196-215` | STILL OPEN (2026-11-04: `PortalController.cs` is outside the range) |
 | D10 | Disabling and deleting | `PUT people/delete` by a DocSpace admin on a disabled DocSpace admin answers 200 with the account echoed and deletes nothing; `DELETE people/{id}` answers 403. | `deviations.md` D10 (live run); `UserController.cs:1563-1630` (`removeUsers`: the skipped account is still returned) | STILL OPEN (2026-11-04: the action was rewrapped for the `user.deleted` webhook, the skip is as before) |
-| R1 | Room visibility | A private (end-to-end encrypted) room is listed to a non-member Owner and DocSpace admin, against the spec and the matrix note. | `08_Private/PrivateRoomVisibilityTests.cs:44-92` (bug 82956, remarks say still open, tests red) | STILL OPEN (2026-11-04: the room listing of `FileSecurity.cs` changed only for the AI rooms section; the test keeps its "expected to fail" remark) |
+| R1 | Room visibility | A private room was listed to a non-member Owner and DocSpace admin (bug 82956). The administrator's listing has dropped such a room since `73aa4e8ab8`; the earlier STILL OPEN came from the stale "expected to fail" remark of `PrivateRoomVisibilityTests.cs:44-92`, which still stands although those tests now pass trivially after `c866c055e1`, for members as well. | `FileSecurity.cs:3069-3073`; `git log -S` on that comment; `PrivateRoomSectionTests.cs:141-153` is the assertion that can fail | FIXED (`73aa4e8ab8`). Third-party rooms do not pass through that filter, see the revision rows. `openspec/deviations.md` R1 still says OPEN |
 | R2 | Disabling users | A DocSpace admin can deactivate another DocSpace admin and the Owner; the spec, the matrix and the tests say 403. | `03_UserStatus/UserStatusUpdatePermissionsTests.cs:59-98` (bug 79900, comment says the product allows it, tests red) | STILL OPEN (2026-11-04: `updateUserStatus` changed only in its webhook declaration; the commit "fix Bug 79900" of 2026-02 predates the previous revision and the test still asserts against the product) |
 | R3 | Inviting users by type | The invitation-link endpoint refuses the Guest type with 400 ("EmployeeType"), the people endpoints with 403 "Access denied": the same rule, two status codes. | `InvitationLinkCreateTests.cs:116-135`; `InviteUsersTests.cs:74-98`; `PortalController.cs:253-256` | STILL OPEN (2026-11-04: `PortalController.cs` is outside the range) |

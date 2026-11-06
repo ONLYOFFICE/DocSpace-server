@@ -84,8 +84,8 @@ that a client can refuse it before uploading.
 
 #### Scenario: Uploading a non-PDF file
 
-- **WHEN** a member with upload rights uploads a docx or copies one from My documents into the room
-- **THEN** the system rejects the file ("The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form.")
+- **WHEN** a member with upload rights uploads a docx, creates one in the room or copies one from My documents into the room
+- **THEN** the system rejects the file with 403 ("The file cannot be uploaded to this room. Please try to upload the ONLYOFFICE PDF form.") and stores nothing
 
 #### Scenario: Copying an ONLYOFFICE PDF form from My documents
 

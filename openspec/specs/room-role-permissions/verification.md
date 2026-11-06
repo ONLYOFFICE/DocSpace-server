@@ -121,6 +121,12 @@ Counts: 64 rows — TEST-CONFIRMED 42, CODE-ONLY 15, LIVE-CONFIRMED 6, MATRIX-ON
 plus 1 cross-reference. Spec: 7 requirements, 42 scenarios (before the reshaping: 7 requirements, 31
 scenarios; 40 before revision 2026-11-04).
 
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| Non-member administrator gets 403 on an archived private room; an archived ordinary room is unchanged | `08_Private/ArchivedPrivateRoomSecurityTests.cs:66-113, 177-193` as cited in `private-rooms/verification.md`; `3b9c527a6e` | TEST-CONFIRMED by that spec's citation, assertions not re-read here |
+
 ## Where the server differs from the product matrix (spec follows the server)
 
 | Matrix (sheet "Roles") | Server | Reference |

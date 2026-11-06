@@ -137,6 +137,15 @@ Counts: 93 rows — TEST-CONFIRMED 64, CODE-ONLY 29, NOTES-ONLY 0 (nothing was w
 the strength of the release notes alone; a row carrying both statuses is counted under TEST-CONFIRMED).
 Before the 4.1.0 revision: 88 rows, 58 / 30. Spec: 23 requirements, 85 scenarios (was 81).
 
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| `FileKeysSet` in the tracked set, shown without recipients; in the audit trail with them | `1259577f63` (message, and the history wiring in its diff); private-rooms T/PrivateRoomFileKeysTests | per commit message; the recipients' absence not traced in code |
+| `RoomFileKeysRevoked` is an audit event only | `cc60512acd`: only the send in `FileSharing`, no history wiring in the diff | CODE-ONLY |
+| Titles of a private room hidden on reading the audit trail, kept in the entry history for members | `private-rooms`, "Titles in the audit trail"; `b562fc3fb1` | CROSS-REFERENCE, not repeated here |
+| ASC.AuditTrail, 37 changed files: 30 resource files (the two new action texts, `Private room`), the title mask, the query flag, the action mapping. Nothing else behavioural | `git diff --stat`; commits `b562fc3fb1`, `cc60512acd`, `1259577f63`, `21ba02998e` | READ |
+
 ## Where the server differs from the release notes or the OpenAPI text (spec follows the server)
 
 | Source says | Server |

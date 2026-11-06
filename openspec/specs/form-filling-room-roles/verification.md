@@ -50,7 +50,7 @@ moved from `FileSecurity.cs:197-207` to `:199-209`. D1, D6, D8 and D13 are uncha
 | Form Filler / Content creator cannot invite | Custom-room analogue; `FileSharing.cs:101` | CODE-ONLY |
 | **Only PDF files enter a Form filling room** | | |
 | docx copied or moved into the room (root or subfolder) → 403; destination check "none allowed" | `06_Operations/Copy/FileCopyTests.cs:219-245, 334-362`; `06_Operations/Move/FileMoveRoomTypeTests.cs:113-136`; `06_Operations/CheckDestFolder/CheckDestFolderTests.cs:96-109` | TEST-CONFIRMED |
-| docx uploaded or created in the room: refused with the message (500 on upload, see D8) | `deviations.md` D8 (live run) | LIVE-CONFIRMED |
+| docx uploaded or created in the room: refused with 403 and nothing stored; no test asserts the message | `02_Folders/Upload/FormsRoomNonPdfUploadTests.cs:57-86`, `01_Files/Create/FormsRoomNonPdfCreateTests.cs:63-95` (bug 84840) | TEST-CONFIRMED |
 | An ordinary PDF that is not a form is accepted; the destination check warns | `deviations.md` D13 and matrix row "Only ONLYOFFICE PDF forms enter the room / Any PDF (see D13)" | LIVE-CONFIRMED |
 | ONLYOFFICE form copied from My documents (also with `toFillOut`) → in the room | `FileCopyTests.cs:531-561`; destination check "all allowed" `CheckDestFolderTests.cs:111-122` | TEST-CONFIRMED |
 | Moving a form into the room: arrives, source emptied; collecting started and visible to Form Fillers | `FileMoveRoomTypeTests.cs:138-172` (arrival); started state: `deviations.md` D13 ("auto-started on move") | TEST-CONFIRMED (arrival) / LIVE-CONFIRMED (started) |
@@ -82,6 +82,13 @@ Counts: 36 rows — TEST-CONFIRMED 19 (2 owner-only), CODE-ONLY 9, LIVE-CONFIRME
 requirements, 24 scenarios (before the reshaping: 5 requirements, 19 scenarios; 23 before revision
 2026-11-04). Flag: no FFR test refuses a Form Filler a start / cancel, a create or a rename; no test produces
 a result in "In process" / "Complete".
+
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| Upload, create and session routes refuse a non-PDF with 403 (Uploading a non-PDF file) | same tests as D8 | TEST-CONFIRMED |
+| D13 (PDF by extension only) | `1a1d539775` changed the exception type only | STILL OPEN |
 
 ## Where the server differs from the product matrix (spec follows the server)
 
@@ -117,5 +124,5 @@ D-numbers are the ones of `openspec/deviations.md`; no new ones.
 |---|-------|----------------------|----------|--------|
 | D1 | Form collection lifecycle | `manageFormFilling` checks permissions only for Start and Stop; Resume and Edit answer 200 for a Viewer, a Form Filler without a role, and a non-member User or Guest. | `deviations.md` D1 (live run); `FileStorageService.cs:5861-5960` | STILL OPEN (2026-11-04: the method is untouched in the range) |
 | D6 | PDF forms by role | A Form Filler copies a not-started form, hidden from them in the listing and 403/404 by id, to My documents through the copy operation (200, copied). | `deviations.md` D6 (live run); the by-id refusal is now asserted as 403 (`FormFillingRoomOwnerAccessTests.cs:120-137`) | STILL OPEN (2026-11-04: the copy path `CopyPermissionsCheck.cs` changed only for the AI rooms section) |
-| D8 | Only PDF files enter | A docx uploaded or created in an FFR answers 500 with the "cannot be uploaded to this room" message; the copy of the same docx answers 403. | `deviations.md` D8 (live run); the 403 of copy / move `FileCopyTests.cs:219-245`, `FileMoveRoomTypeTests.cs:113-136`; `products/ASC.Files/Server/Api/UploadController.cs` still documents the 500 ("a file that is not a PDF is stored in a form-filling room"); `FileDao.cs:774-814` throws a plain exception | STILL OPEN (2026-11-04: the upload fix of the range covers a multipart request without the file part, not this) |
+| D8 | Only PDF files enter | A docx uploaded or created in an FFR used to answer 500; it now answers 403, the same as the copy of that docx. | `file-operations/verification.md` F19; `FileDao.cs:826-828`; `FormsRoomNonPdfUploadTests.cs:57-86`; `UploadSessionFormsRoomTests.cs:56-99`; the `SwaggerResponse` of the upload routes moved from 500 to 403 | FIXED (`1a1d539775`); `openspec/deviations.md` D8 still has the old text |
 | D13 | Only PDF files enter | The rule is enforced by extension only, so an ordinary PDF enters the room and is auto-started on move; the form-signature check exists only in the advisory destination check. | `deviations.md` D13 (live run); `FileDao.cs:774-814` (`file.IsPdf`) | STILL OPEN (2026-11-04: untouched in the range) |

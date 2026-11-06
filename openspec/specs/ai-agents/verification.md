@@ -390,6 +390,17 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Switch audited (scenario) | `SettingsController.cs` (`MessageAction`); `Web/05_Security/AuditTrail/` tests the audit API only | CODE-ONLY |
 | Reads not audited (scenario); socket events | absence of a message in read paths; `AI/Server/Service/AiSocketManager.cs:46-52` | CODE-ONLY |
 
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| `aiSkillsGenerate` returns the skill for review and saves nothing | `770819a4fc`, `7efeb43643`; `portal-settings`, "Result of generating a skill" | CROSS-REFERENCE; `app/skills/__tests__/generateSkill.test.ts` asserts it (unit test, not run) |
+| The provider's text on that route only for spending limit, rate limit, lack of credit; a description reaches the model as written | `72adbfaa14`; `skillsController.ts:72-83`; `portal-settings`, "Failures of generating a skill" | CODE-ONLY; the metadata routes keep the old relay, see A26 |
+| Long threads compacted, on by default, summary stored as an ordinary message; off without a restart | `6fbbf9ecf3`; `aiController.ts` (`compaction`); `common/ASC.AI.Chat/README.md:33-50`; `app/__tests__/compactionConfig.test.ts` (settings only) | CODE-ONLY; no .NET test drives a compaction, and the folding itself is in the library, not read |
+| `context_length` becomes `contextWindow` in the gateway's model list; fallback to the id table, then a default; a saved profile keeps nothing | `303ac12711`; `profilesStorage.ts` (`mapGatewayModel`, `dtoToProfile`); README | CODE-ONLY |
+| Cache breakpoints (`396266ebe9`, `cd37150ab8`) and library bumps | Internal to a round, no contract change | LEFT OUT |
+| Chat and vectorization in a private room are denied | `bd89a24dcd` (`FileSecurity`); `private-rooms` | per diff; the answers of the chat routes there not traced, no spec text added |
+
 ## Where the server differs from the contract and the TypeScript expectations (spec follows the server)
 
 | Document / test | Server |
@@ -461,3 +472,4 @@ Re-checked 2026-11-06. No test was run; "red by code reading" means the assertio
 | A23 | `aiThreadsOpenOrCreate` without a message | No `threadId`, no `firstMessage`: 500 from the engine. | `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:156` (82826) | NEW, per the test comment |
 | A24 | Concurrent add of one name | Losers answer 403, not the soft "already registered". | `T/McpTests/McpServerConcurrencyTests.cs:62` | NEW, per the test comment |
 | A25 | Profile `createdAt` | The create answer has milliseconds no later read reproduces. | `T/ProfileStorageTests/ProfileReadTests.cs:47` | NEW, per the test comment |
+| A26 | Metadata routes | A failed model call relays the provider's text for every failure, while `aiSkillsGenerate` was narrowed to a rate limit, a lack of credit and the portal's spending limit because an authentication failure quotes the masked API key. | `common/ASC.AI.Chat/app/controllers/metaController.ts:137` against `skillsController.ts:72-83`; `72adbfaa14` | NEW, red by code reading; whether a provider's auth text reaches a caller without provider rights not traced |

@@ -181,12 +181,19 @@ rows above, which stay the primary evidence.
 | D1 | `manageformfilling` Resume/Edit without a permission check | STILL OPEN | `FileStorageService.ManageFormFilling` did not change in the range (no hunk of the `FileStorageService.cs` diff touches it). |
 | D5 | Form Filler without a role reads a hidden VDR form by id | STILL OPEN | The only change to the PDF branch of `FileSecurity.FilterEntryAsync` is the owner exemption of bug 84849 (`FileSecurity.cs:1303-1307`); the VDR role branch is untouched. |
 | D6 | Form Filler copies a hidden form out through `fileops/copy` | STILL OPEN | `FileMoveCopyOperation.cs` changed only for the AI rooms and the duplicate-title rule; `CopyPermissionsCheck.cs` changed only for the AI rooms. |
-| D13 | Only-PDF rule by extension; an ordinary PDF enters and is auto-started | STILL OPEN | `FileDao.cs:774-779` and `CopyPermissionsCheck.cs` unchanged for form rooms. A new red test extends it: `01_Files/Create/FormsRoomNonPdfCreateTests.cs:257-285` (bug 84840) demands a 4xx for `create` of a `.docx`, a text and an HTML file in a Form filling room, while `FileStorageService.CreateNewFileAsync` (1899-1927) checks only the folder type, not the file type, and `FileDao.SaveFileAsync` (768-779) writes any non-PDF without a check — F1 below. |
-| F1 | Non-PDF created in a Form filling room (bug 84840) | NEW, STILL OPEN | `POST files/{folderId}/file`, `…/text` and `…/html` answer 200 and create a `.docx`, `.txt` or `.html` in a Form filling room; the test asserts a 4xx. Evidence: `FileStorageService.CreateNewFileAsync` (1899-1927), `FileDao.cs:774-779` (only a PDF or a results file gets the form treatment; nothing refuses the rest), `FormsRoomNonPdfCreateTests.cs:257-285`. |
+| D13 | Only-PDF rule by extension; an ordinary PDF enters and is auto-started | STILL OPEN | `FileDao.cs:774-779` and `CopyPermissionsCheck.cs` unchanged for form rooms: `1a1d539775` changed what a non-PDF is answered (F1), not how a PDF is recognised. |
+| F1 | Non-PDF created in a Form filling room (bug 84840) | FIXED (`1a1d539775`) | `POST files/{folderId}/file`, `…/text` and `…/html` now answer 403 and store nothing. The earlier text said these calls answer 200; the test's remark and `file-operations` F19 say 500, which is what the fix replaced. Evidence: `FileDao.cs:826-828`, `ResponseWrapper.cs:86-88`, `01_Files/Create/FormsRoomNonPdfCreateTests.cs:63-95` (asserts 400-499). |
 | F2 | By-id read of a hidden form: 403, the roles spec says 404 | NEW (documentation) | `FileStorageService.GetFileAsync` (1848-1864) throws `InvalidOperationException` (403) when `CanReadAsync` is false, and `FormFillingRoomOwnerAccessTests.cs:119-137` asserts 403; `form-filling-room-roles` "Form Filler does not see a form that is not started" and D6 record 404 from a live run. One of the two is stale; this spec follows the test and the code. |
 - **Role matrices** (who may start, stop, collect, configure, see what): `form-filling-room-roles` and
   `vdr-room-roles`, referenced rather than restated; the permission tests under `01_Files/FormFilling/*Permissions*`
   and `01_Files/Forms/*Permissions*` are cited here only for the status codes of the lifecycle endpoints.
+
+## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
+
+| Claim | Source | Status |
+|---|---|---|
+| Non-PDF refused with 403; the rule stays in `form-filling-room-roles`, so this spec has no scenario to change | F1 above | TEST-CONFIRMED (the range), CODE-ONLY (the exact 403) |
+| `startFillingFile` on an encrypted form answers 403 | `private-rooms`, "Operations that need open content are refused" | CROSS-REFERENCE, no spec change |
 
 ## Release notes versus server
 

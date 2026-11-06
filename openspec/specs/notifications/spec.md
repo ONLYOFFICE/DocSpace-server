@@ -8,7 +8,8 @@ per-user notification settings (`settings/notification/*`: badges, room activity
 muted rooms), the Telegram link of a profile, the push device registration, the administrator-side
 SMTP settings with the test message, the sign-in page contact form and join invitation, and the
 catalogue of letters: which event sends which letter, to whom, over which channel, and whether a
-subscription setting silences it. Letter texts are named by the subject a reader sees. Real-time
+subscription setting silences it. Letter texts are named by the subject a reader sees. How a letter names a
+private room and its folders is in `private-rooms`. Real-time
 socket events, the audit trail, webhooks, the invitation letters' triggers and the blocking,
 unblocking and removal of a portal behind the retention letters are other capabilities
 (`history-and-audit`, `webhooks-and-api-keys`, `invitations`, `backup-and-restore`,

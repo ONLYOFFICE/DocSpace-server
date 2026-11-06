@@ -336,6 +336,7 @@ version history to Editor and above; restoring and deleting the room to the Room
 
 - **WHEN** the DocSpace Owner or a DocSpace admin who is not a member restores or deletes an archived room
 - **THEN** the operation succeeds (see `user-type-permissions`); a Guest cannot copy out to My documents, having no such section
+- **AND** an archived private room is the exception: such an administrator gets 403 (see `private-rooms`)
 
 #### Scenario: Editor cannot edit in an archived room
 
