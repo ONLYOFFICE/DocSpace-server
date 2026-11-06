@@ -54,6 +54,13 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return await accountingApi.GetCustomerBalanceAsync(portalId, cancellationToken);
     }
 
+    public async Task<GoodwillBalance> GetCustomerGoodwillAsync(string portalId, CancellationToken cancellationToken = default)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetCustomerGoodwillAsync(portalId, cancellationToken);
+    }
+
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
         int quantity, int duration)
     {
@@ -728,6 +735,40 @@ public class TransactionInfo : CurrencyAmount
 /// </summary>
 public class SubAccount : CurrencyAmount
 {
+}
+
+/// <summary>
+/// The goodwill balance of a customer: the goodwill account with its sub-accounts, and the goodwill credits on it that
+/// can still be spent.
+/// </summary>
+public class GoodwillBalance : Balance
+{
+    /// <summary>
+    /// The goodwill credits that have not expired and are not fully spent, in the order they are spent.
+    /// </summary>
+    public List<GoodwillLot> Lots { get; init; }
+}
+
+/// <summary>
+/// A goodwill credit that can still be spent. <see cref="CurrencyAmount.Amount"/> is the credited amount and
+/// <see cref="TransactionInfo.Date"/> the date of the credit.
+/// </summary>
+public class GoodwillLot : TransactionInfo
+{
+    /// <summary>
+    /// The ID of the goodwill credit operation.
+    /// </summary>
+    public long OperationId { get; init; }
+
+    /// <summary>
+    /// The part of the credited amount left to spend.
+    /// </summary>
+    public decimal Remaining { get; init; }
+
+    /// <summary>
+    /// The moment the rest of the credit expires, or <c>null</c> for a credit that never expires.
+    /// </summary>
+    public DateTime? ExpiresAt { get; init; }
 }
 
 /// <summary>

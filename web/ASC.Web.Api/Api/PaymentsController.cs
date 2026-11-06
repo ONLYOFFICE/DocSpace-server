@@ -968,6 +968,44 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Returns the goodwill balance of the portal: the bonus money credited to it, which the accounting service holds
+    /// on an account of its own rather than on the wallet, together with every bonus credit that can still be spent.
+    /// Only a DocSpace administrator may read it, an installation without a billing service answers 403, and a portal
+    /// that has never been a customer gets an empty result. The call is read-only and is answered by the accounting
+    /// service on every request, so a bonus shows up as soon as it is credited. The account part has the same shape as
+    /// the wallet balance - one sub-account per currency with the amount left on it, and the most recent credit -
+    /// while `lots` lists the individual credits that have neither expired nor been spent in full, in the order they
+    /// are spent, each with the amount credited, the amount remaining and the moment it expires, all in UTC. An empty
+    /// `lots` means no bonus is left. The money paid into the wallet is read with
+    /// `GET api/2.0/portal/payment/customer/balance` instead. An empty result is also what the portal gets when the
+    /// accounting service cannot be reached, so a client should treat it as "nothing to show" rather than as zero.
+    /// </remarks>
+    /// <summary>
+    /// Get the goodwill balance
+    /// </summary>
+    /// <path>api/2.0/portal/payment/customer/goodwill</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The goodwill account with its sub-account per currency and the bonus credits left to spend, or an empty result when the portal has no billing customer or the accounting service could not be read", typeof(GoodwillBalanceDto))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [HttpGet("customer/goodwill")]
+    public async Task<GoodwillBalanceDto> GetCustomerGoodwill()
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        return (await tariffService.GetCustomerGoodwillAsync(tenant.Id))?.Map();
+    }
+
+    /// <remarks>
     /// Lists the money movements on the portal's wallet - top-ups, the charges of the wallet services, refunds and
     /// corrections - one page at a time, which is what a billing history is built from. Only a DocSpace administrator
     /// may read it, a portal with no billing customer answers with an empty result, and the call is read-only. Every

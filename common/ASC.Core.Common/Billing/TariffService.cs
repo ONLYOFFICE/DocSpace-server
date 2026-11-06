@@ -1673,6 +1673,31 @@ public class TariffService(
         return balance;
     }
 
+    public async Task<GoodwillBalance> GetCustomerGoodwillAsync(int tenantId)
+    {
+        if (!accountingClient.Configured)
+        {
+            return null;
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerGoodwillAsync(portalId);
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+        }
+
+        return null;
+    }
+
     public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);

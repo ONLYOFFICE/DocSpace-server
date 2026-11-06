@@ -61,6 +61,12 @@ public interface ITariffService
     Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
 
     /// <summary>
+    /// The goodwill balance of the portal with the goodwill credits that can still be spent, read from the accounting
+    /// service on every call; null when the portal is not a customer or the accounting service could not be read.
+    /// </summary>
+    Task<GoodwillBalance> GetCustomerGoodwillAsync(int tenantId);
+
+    /// <summary>
     /// Whether money is left on the portal's wallet: true or false when the accounting service answered
     /// (a portal it does not know has no wallet, so false), null when it could not be asked or did not answer
     /// before <paramref name="cancellationToken"/> was cancelled.

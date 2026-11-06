@@ -43,6 +43,9 @@ public interface IAccountingApi
     [Get("/customer/{portalId}/balance")]
     Task<Balance> GetCustomerBalanceAsync(string portalId, CancellationToken cancellationToken = default);
 
+    [Get("/customer/{portalId}/goodwill")]
+    Task<GoodwillBalance> GetCustomerGoodwillAsync(string portalId, CancellationToken cancellationToken = default);
+
     [Post("/session/open")]
     Task<Session> OpenCustomerSessionAsync([Body] SessionOpenOperation data);
 
