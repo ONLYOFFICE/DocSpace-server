@@ -273,17 +273,14 @@ public class GetCommonFolderRequestDto
     /// <summary>
     /// The name of the field the entries are ordered by, matched case-insensitively against the file sort fields:
     /// `DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,
-    /// `CustomOrder`, `LastOpened` and `UsedSpace`. A recognized value is also saved as the default order of the
-    /// account and reused by later listings that omit the parameter, while a value matching none of the fields leaves
-    /// that saved order in place.
+    /// `CustomOrder`, `LastOpened` and `UsedSpace`. Omit it to use the saved default order of the account.
     /// </summary>
     /// <example>DateAndTime</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
-    /// The direction in which the `sortBy` field is ordered. It is saved together with `sortBy` as the default order
-    /// of the account.
+    /// The direction in which the `sortBy` field is ordered.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "sortOrder")]
@@ -382,25 +379,21 @@ public class GetMyTrashFolderRequestDto
     /// <summary>
     /// The name of the field the entries are ordered by, matched case-insensitively against the file sort fields:
     /// `DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,
-    /// `CustomOrder`, `LastOpened` and `UsedSpace`. A recognized value is also saved as the default order of the
-    /// account and reused by later listings that omit the parameter, while a value matching none of the fields leaves
-    /// that saved order in place.
+    /// `CustomOrder`, `LastOpened` and `UsedSpace`. Omit it to use the saved default order of the account.
     /// </summary>
     /// <example>DateAndTime</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
-    /// The direction in which the `sortBy` field is ordered. It is saved together with `sortBy` as the default order
-    /// of the account.
+    /// The direction in which the `sortBy` field is ordered.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
-    /// The search string the section is filtered by, matched as a substring of entry titles. Omit it to list the
-    /// section unfiltered.
+    /// The text to search for in the section. Omit it to list the section unfiltered.
     /// </summary>
     /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
@@ -486,17 +479,14 @@ public class GetRootFolderRequestDto
     /// <summary>
     /// The name of the field the entries are ordered by, matched case-insensitively against the file sort fields:
     /// `DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,
-    /// `CustomOrder`, `LastOpened` and `UsedSpace`. A recognized value is also saved as the default order of the
-    /// account and reused by later listings that omit the parameter, while a value matching none of the fields leaves
-    /// that saved order in place.
+    /// `CustomOrder`, `LastOpened` and `UsedSpace`. Omit it to use the saved default order of the account.
     /// </summary>
     /// <example>DateAndTime</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
-    /// The direction in which the `sortBy` field is ordered. It is saved together with `sortBy` as the default order
-    /// of the account.
+    /// The direction in which the `sortBy` field is ordered.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "sortOrder")]
@@ -541,16 +531,14 @@ public class GetRecentFolderRequestDto
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Chooses which half of a listing `filterType` and `filterValue` are applied to. The "Recent" section holds
-    /// files only, so the value does not change what comes back.
+    /// Chooses which half of a listing `filterType` and `filterValue` are applied to: files, folders, or both.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
-    /// The area a listing is taken from. The "Recent" section is assembled from the caller's own open history rather
-    /// than from an area, so the value does not change which files are returned.
+    /// The area of the portal that the recent files must come from. Omitted, it means `Active`.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "searchArea")]
@@ -584,19 +572,14 @@ public class GetRecentFolderRequestDto
     /// <summary>
     /// The name of the field the entries are ordered by, matched case-insensitively against the file sort fields:
     /// `DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,
-    /// `CustomOrder`, `LastOpened` and `UsedSpace`. A recognized value is also saved as the default order of the
-    /// account and reused by later listings that omit the parameter, while a value matching none of the fields leaves
-    /// that saved order in place. The "Recent" section keeps its own newest-first order, so the value does not
-    /// reorder this listing.
+    /// `CustomOrder`, `LastOpened` and `UsedSpace`.
     /// </summary>
     /// <example>DateAndTime</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
-    /// The direction in which the `sortBy` field is ordered. It is saved together with `sortBy` as the default order
-    /// of the account. The "Recent" section keeps its own newest-first order, so the value does not reorder this
-    /// listing.
+    /// The direction in which the `sortBy` field is ordered.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "sortOrder")]
