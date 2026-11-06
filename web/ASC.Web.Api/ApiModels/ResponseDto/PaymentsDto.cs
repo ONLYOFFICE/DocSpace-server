@@ -325,7 +325,8 @@ public class CustomerMonthlyUsageDto
 ///   "totalAmount": 49.99,
 ///   "operationCount": 2,
 ///   "price": 0.14,
-///   "subscription": true
+///   "subscription": true,
+///   "byok": false
 /// }
 /// </example>
 public class CustomerServiceUsageDto
@@ -390,6 +391,13 @@ public class CustomerServiceUsageDto
     /// <example>true</example>
     public bool Subscription { get; set; }
 
+    /// <summary>
+    /// Whether the total is AI consumption paid with the portal's own provider keys rather than from the wallet. It
+    /// is `false` on a total into which that consumption was merged, which mixes the two.
+    /// </summary>
+    /// <example>false</example>
+    public bool Byok { get; set; }
+
     public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, TenantQuota> walletQuotas, Dictionary<string, string> customUom)
     {
         var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(usage.Service, customUom);
@@ -408,6 +416,7 @@ public class CustomerServiceUsageDto
         OperationCount = usage.OperationCount;
         Price = quota?.Price ?? 0;
         Subscription = !string.IsNullOrEmpty(quota?.ProductId);
+        Byok = WalletServiceDescriptionManager.IsByokService(usage.Service);
     }
 }
 

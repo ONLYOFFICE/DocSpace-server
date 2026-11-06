@@ -969,16 +969,18 @@ public class PaymentController(
 
     /// <remarks>
     /// Lists the money movements on the portal's wallet - top-ups, the charges of the wallet services, refunds and
-    /// corrections - one page at a time, which is what a billing history is built from. Only a DocSpace administrator
+    /// corrections - one page at a time, as a billing history. Only a DocSpace administrator
     /// may read it, a portal with no billing customer answers with an empty result, and the call is read-only. Every
     /// filter is optional: `startDate` and `endDate` are read in the portal time zone and default to the portal
     /// creation date and the present moment, `serviceName` narrows to particular wallet services and fails with 404
     /// on a name this installation does not sell, `participantName`, `type` and `status` narrow to who caused a
-    /// movement and how it ended, and `credit` and `debit` include or exclude the two directions. `offset` and
-    /// `limit` page through the result and default to 0 and 25, `orderBy` and `orderType` sort it, and the answer
-    /// repeats them next to `totalQuantity`, `totalPage` and `currentPage` so a client can page without counting. The
-    /// same data as a downloadable file is `POST api/2.0/portal/payment/customer/operationsreport`, and the figures
-    /// added up per service are `GET api/2.0/portal/payment/customer/usage`.
+    /// movement and how it ended, and `credit` and `debit` include or exclude the two directions. AI consumption paid
+    /// with the portal's own provider keys is filed under `ai-tools-byok` and `ai-search-byok`, which `serviceName`
+    /// accepts; such a movement reads like its AI service with `byok` set. `offset` and `limit` page through the
+    /// result and default to 0 and 25, `orderBy` and `orderType` sort it, and the answer repeats them next to
+    /// `totalQuantity`, `totalPage` and `currentPage`. The same data as a downloadable file is
+    /// `POST api/2.0/portal/payment/customer/operationsreport`, and the figures added up per service are
+    /// `GET api/2.0/portal/payment/customer/usage`.
     /// </remarks>
     /// <summary>
     /// Get the wallet operations
@@ -1226,9 +1228,12 @@ public class PaymentController(
     /// to who consumed and how the operation ended, `startDate` and `endDate` bound the period in the portal time
     /// zone, `metadata` matches the key and value pairs a service records with its usage, and `offset`, `limit`,
     /// `orderBy` and `orderType` page and sort the result. Amounts come with the unit the service is sold in, except
-    /// AI tools, whose consumption is reported in tokens rather than in AI credits. The individual charges behind
-    /// these totals are `GET api/2.0/portal/payment/customer/operations`, and the same figures as a downloadable file
-    /// are `POST api/2.0/portal/payment/customer/usage/report`.
+    /// AI tools, whose consumption is reported in tokens rather than in AI credits. AI consumption paid with the
+    /// portal's own provider keys is a total of its own, `ai-tools-byok` or `ai-search-byok`, titled like its AI
+    /// service and flagged by `byok`; `serviceName` accepts these names, and `mergeByok=true` folds them into their AI
+    /// services. The individual charges behind these totals are
+    /// `GET api/2.0/portal/payment/customer/operations`, and the same figures as a downloadable file are
+    /// `POST api/2.0/portal/payment/customer/usage/report`.
     /// </remarks>
     /// <summary>
     /// Get the customer service usage
@@ -1272,7 +1277,9 @@ public class PaymentController(
             OrderType = inDto.OrderType
         };
 
-        var report = await tariffService.GetCustomerServiceUsageAsync(tenant.Id, filter);
+        var report = inDto.MergeByok == true
+            ? await paymentHelper.GetServiceUsageWithByokMergedAsync(tenant.Id, filter)
+            : await tariffService.GetCustomerServiceUsageAsync(tenant.Id, filter);
         if (report == null)
         {
             return null;
@@ -1332,7 +1339,8 @@ public class PaymentController(
     /// DocSpace administrator. The body takes the same filters as `GET api/2.0/portal/payment/customer/operations` -
     /// the service names, the date range, the participant, the operation type and status, the credit and debit
     /// directions and the ordering - and an empty body reports everything from the portal creation date to now; a
-    /// service name this installation does not sell fails with 404. Poll
+    /// service name this installation does not sell fails with 404, and the own-key AI services `ai-tools-byok` and
+    /// `ai-search-byok` are marked BYOK in the file. Poll
     /// `GET api/2.0/portal/payment/customer/operationsreport` until `isCompleted` is true, then take the file from
     /// `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's own My documents section,
     /// where it counts against the portal storage like any other file. One operations report per user is tracked at a
@@ -1451,15 +1459,15 @@ public class PaymentController(
     /// <remarks>
     /// Queues the usage of the wallet services as an `xlsx` file and returns the task that will build it; the file is
     /// not ready when the response arrives. The portal needs a billing customer and the caller has to be a DocSpace
-    /// administrator. The body takes the same filters as `GET api/2.0/portal/payment/customer/usage` - the service
-    /// names, the date range, the participant, the operation status, the usage metadata and the ordering - and an
-    /// empty body reports every service from the portal creation date to now; a service name this installation does
-    /// not sell fails with 404. Poll `GET api/2.0/portal/payment/customer/usage/report` until `isCompleted` is true,
-    /// then take the file from `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's
-    /// own My documents section, where it counts against the portal storage like any other file. One service usage
-    /// report per user is tracked at a time - a call made while the previous one is still running answers with that
-    /// task - and `DELETE api/2.0/portal/payment/customer/usage/report` stops it. It is a different report from the
-    /// operations one and does not interfere with it: per-movement history is
+    /// administrator. The body takes the filters of `GET api/2.0/portal/payment/customer/usage` except `mergeByok` -
+    /// the service names, the date range, the participant, the operation status, the usage metadata and the ordering
+    /// - and an empty body reports every service from the portal creation date to now; a service name this
+    /// installation does not sell fails with 404, and `ai-tools-byok` and `ai-search-byok` stay totals of their own,
+    /// marked BYOK. Poll `GET api/2.0/portal/payment/customer/usage/report` until `isCompleted` is true, then take the
+    /// file from `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's own My documents
+    /// section, where it counts against the portal storage like any other file. One service usage report per user is
+    /// tracked at a time - a call made while the previous one is still running answers with that task - and
+    /// `DELETE api/2.0/portal/payment/customer/usage/report` stops it. Per-movement history is the separate
     /// `POST api/2.0/portal/payment/customer/operationsreport`.
     /// </remarks>
     /// <summary>

@@ -52,6 +52,12 @@ public class PaymentHelper(
     TenantWalletSettingsConfig walletSettingsConfig,
     ILogger<PaymentHelper> logger)
 {
+    // The page size the accounting service applies when none is asked for.
+    private const int DefaultUsagePageSize = 25;
+
+    // The page size the usage totals are read with when they are merged; a portal has far fewer services than this.
+    private const int UsageReadPageSize = 1000;
+
     public void DemandConfigured()
     {
         if (!tariffService.IsConfigured())
@@ -230,11 +236,76 @@ public class PaymentHelper(
         var correctedList = new List<string>();
         foreach (var serviceName in serviceNames.Where(serviceName => !string.IsNullOrEmpty(serviceName)))
         {
+            // The accounting service names are lower case; the quota match below ignores case as well.
+            var lowerServiceName = serviceName.ToLowerInvariant();
+
+            // A BYOK service has no quota of its own: it is checked as its AI service.
+            if (WalletServiceDescriptionManager.IsByokService(lowerServiceName))
+            {
+                _ = CheckWalletServiceName(quotaList, WalletServiceDescriptionManager.GetBaseServiceName(lowerServiceName));
+                correctedList.Add(lowerServiceName);
+                continue;
+            }
+
             var (_, correctServiceName) = CheckWalletServiceName(quotaList, serviceName);
             correctedList.Add(correctServiceName);
         }
 
         return correctedList;
+    }
+
+    /// <summary>
+    /// One page of the service usage matching the filter, with the BYOK consumption of an AI service added into the
+    /// total of that service. Every total is read first and the page is cut here: a BYOK total and the total of its AI
+    /// service may lie on different pages of the accounting service. <see cref="PagedFilter.Offset"/> and
+    /// <see cref="PagedFilter.Limit"/> of the filter select the page of the merged totals.
+    /// </summary>
+    public async Task<UsageReport> GetServiceUsageWithByokMergedAsync(int tenantId, UsageFilter filter)
+    {
+        var offset = filter.Offset is > 0 ? filter.Offset.Value : 0;
+        var limit = filter.Limit is > 0 ? filter.Limit.Value : DefaultUsagePageSize;
+
+        // The page walk sends the offset in a parameter of its own and reads with a page size of its own.
+        filter.Offset = null;
+        filter.Limit = UsageReadPageSize;
+
+        var records = new List<CustomerServiceUsage>();
+
+        try
+        {
+            await foreach (var page in tariffService.GetCustomerServiceUsagePagesAsync(tenantId, filter))
+            {
+                records.AddRange(page?.Collection ?? []);
+            }
+        }
+        catch (AccountingCustomerNotFoundException)
+        {
+            return null;
+        }
+
+        // Kept in the order the accounting service sorted them in, by the first total of each service.
+        var merged = records
+            .GroupBy(r => (Service: WalletServiceDescriptionManager.GetBaseServiceName(r.Service), r.Currency))
+            .Select(g => new CustomerServiceUsage
+            {
+                Service = g.Key.Service,
+                ServiceUnit = (g.FirstOrDefault(r => r.Service == g.Key.Service) ?? g.First()).ServiceUnit,
+                Currency = g.Key.Currency,
+                TotalQuantity = g.Sum(r => r.TotalQuantity),
+                TotalAmount = g.Sum(r => r.TotalAmount),
+                OperationCount = g.Sum(r => r.OperationCount)
+            })
+            .ToList();
+
+        return new UsageReport
+        {
+            Collection = merged.Skip(offset).Take(limit).ToList(),
+            Offset = offset,
+            Limit = limit,
+            TotalQuantity = merged.Count,
+            TotalPage = (merged.Count + limit - 1) / limit,
+            CurrentPage = offset / limit + 1
+        };
     }
 
     /// <summary>
