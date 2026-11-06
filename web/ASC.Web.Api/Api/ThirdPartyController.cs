@@ -49,18 +49,17 @@ namespace ASC.Web.Api.Controllers;
 public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase
 {
     /// <remarks>
-    /// Builds and returns, as a string, the OAuth 2.0 consent URL of one external provider - the address a client
-    /// opens in a browser so that the user can grant this portal access to their account. The provider's client id,
-    /// secret and redirect URI have to be saved for the portal first with `POST api/2.0/settings/authservice`;
-    /// without them the URL has no `client_id` and the provider refuses it. Any signed-in portal user may call it,
-    /// and the call is read-only and safe to repeat. The URL carries `response_type=code`, the portal's `client_id`,
-    /// the provider's `redirect_uri`, the scope the portal needs (Drive with offline access for Google, `signature`
-    /// for DocuSign) and a `state` pointing back at this portal's `thirdparty/{provider}/code` page, where the code
-    /// arrives in the URL fragment as `#code=...`, or `#error/...` when the user declines. Only Google `1`, Dropbox
-    /// `2`, Docusign `3`, Box `4`, OneDrive `5`, Wordpress `10` and Github `13` produce a URL; any other value is
-    /// answered with 200 and no URL instead of an error. With `desktop=true`, the whole query string is copied into
-    /// `state` and comes back on the callback. The code is not exchanged here: pass it on as `token` to
-    /// `POST api/2.0/files/thirdparty` to connect the account.
+    /// Returns the OAuth 2.0 consent URL of an external provider as a string. The user opens it in a browser to give
+    /// the portal access to their account. First, save the client ID, secret, and redirect URI of the provider with
+    /// `POST api/2.0/settings/authservice`. Without them, the URL has no `client_id`, and the provider refuses it.
+    /// Any signed-in user can call it. The call is read-only. The URL also asks for the scopes the portal needs, such
+    /// as Drive with offline access for Google. Its `state` points to the `thirdparty/{provider}/code` page of the
+    /// portal. There, the provider returns the code, or an error if the user declines. Only Google, Dropbox,
+    /// DocuSign, Box, OneDrive, WordPress, and GitHub produce a URL. For any other provider, the call returns 200
+    /// with no URL. If the provider is not a valid value, the call returns 400. If the installation does not
+    /// register the provider, the call returns 500. With `desktop=true` in the query, the call copies the query
+    /// string into `state` for the callback. This call does not exchange the code. To
+    /// connect a storage account, pass the code as `token` to `POST api/2.0/files/thirdparty`.
     /// </remarks>
     /// <summary>
     /// Get provider consent URL
