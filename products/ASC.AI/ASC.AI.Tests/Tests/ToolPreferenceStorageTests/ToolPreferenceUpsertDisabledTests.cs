@@ -35,225 +35,222 @@ namespace ASC.AI.Tests.Tests.ToolPreferenceStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/ToolPreferences")]
-public class ToolPreferenceUpsertDisabledTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ToolPreferenceUpsertDisabledTests(AspireAppFixture fixture) : McpServerStorageTests.PublicToolsTestBase(fixture)
 {
     [Fact]
     public async Task UpsertDisabled_Global_McpServer_PersistsValue()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1");
 
-        using var response = await _ai.PutAsync(
-            $"{ToolPrefsPath}/disabled",
-            new
-            {
-                disabled = new Dictionary<string, HashSet<string>>
-                {
-                    ["server-1"] = ["tool-a", "tool-b"]
-                }
-            },
+        var result = await _aiTools.AiToolsSetDisabledAsync(
+            new AiToolsSetDisabledRequest(serverType: "server-1", toolNames: ["tool-a", "tool-b"]),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
 
-        var stored = await ReadToolPrefsAsync();
-        stored.Should().ContainKey("server-1");
-        stored["server-1"].Disabled.Should().BeEquivalentTo(["tool-a", "tool-b"]);
+        (await GetDisabledAsync()).Should().ContainKey("server-1").WhoseValue.Should().BeEquivalentTo(["tool-a", "tool-b"]);
     }
 
     [Fact]
     public async Task UpsertDisabled_Global_SystemTools_PersistsValue()
     {
-        using var response = await _ai.PutAsync(
-            $"{ToolPrefsPath}/disabled",
-            new
-            {
-                disabled = new Dictionary<string, HashSet<string>>
-                {
-                    [SystemToolsServerType] = ["search"]
-                }
-            },
+        var result = await _aiTools.AiToolsSetDisabledAsync(
+            new AiToolsSetDisabledRequest(serverType: WebSearchServerType, toolNames: ["search"]),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
 
-        var stored = await ReadToolPrefsAsync();
-        stored.Should().ContainKey(SystemToolsServerType);
-        stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["search"]);
+        (await GetDisabledAsync()).Should().ContainKey(WebSearchServerType).WhoseValue.Should().BeEquivalentTo(["search"]);
     }
 
+    // A server type the round's tool filter cannot match is refused rather than stored inert (Bug 83013), the
+    // legacy system-tools GUID of the internal storage tests among them.
+    [Fact]
+    public async Task UpsertDisabled_UnknownServerType_Returns400()
+    {
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiTools.AiToolsSetDisabledAsync(
+                new AiToolsSetDisabledRequest(serverType: SystemToolsServerType, toolNames: ["search"]),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
+
+        (await GetDisabledAsync()).Should().BeEmpty();
+    }
+
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertDisabled_WithEntityId_McpServer_PersistsValue()
     {
         var roomId = await CreateRoomAsync();
-        await CreateMcpServerAsync("server-1", entityId: roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", entityId: roomId.ToString());
 
-        await UpsertDisabledToolPrefsAsync(
+        await UpsertDisabledToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 ["server-1"] = ["tool-a"]
             },
             roomId.ToString());
 
-        var stored = await ReadToolPrefsAsync(roomId.ToString());
+        var stored = await ReadToolPrefsInternalAsync(roomId.ToString());
         stored["server-1"].Disabled.Should().BeEquivalentTo(["tool-a"]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertDisabled_WithEntityId_SystemTools_PersistsValue()
     {
         var roomId = await CreateRoomAsync();
 
-        await UpsertDisabledToolPrefsAsync(
+        await UpsertDisabledToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["search", "preview"]
             },
             roomId.ToString());
 
-        var stored = await ReadToolPrefsAsync(roomId.ToString());
+        var stored = await ReadToolPrefsInternalAsync(roomId.ToString());
         stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["search", "preview"]);
     }
 
     [Fact]
     public async Task UpsertDisabled_Twice_UpdatesValue()
     {
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["search"]
-        });
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["upload", "delete"]
-        });
+        await SetDisabledAsync(WebSearchServerType, "search");
+        await SetDisabledAsync(WebSearchServerType, "upload", "delete");
 
-        var stored = await ReadToolPrefsAsync();
-        stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["upload", "delete"]);
+        (await GetDisabledAsync()).Should().ContainKey(WebSearchServerType).WhoseValue.Should().BeEquivalentTo(["upload", "delete"]);
     }
 
     [Fact]
     public async Task UpsertDisabled_DoesNotOverwriteAllowAlways()
     {
-        await UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["preview"]
-        });
+        await SetAllowAlwaysAsync(WebSearchServerType, "preview");
 
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["search"]
-        });
+        await SetDisabledAsync(WebSearchServerType, "search");
 
-        var stored = await ReadToolPrefsAsync();
-        stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["search"]);
-        stored[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["preview"]);
+        (await GetDisabledAsync()).Should().ContainKey(WebSearchServerType).WhoseValue.Should().BeEquivalentTo(["search"]);
+        (await GetAllowAlwaysAsync()).Should().BeEquivalentTo([Token(WebSearchServerType, "preview")]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertDisabled_Global_DoesNotAffectScoped()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertDisabledToolPrefsAsync(
+        await UpsertDisabledToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["scoped-tool"]
             },
             roomId.ToString());
 
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        await UpsertDisabledToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = ["global-tool"]
         });
 
-        var scoped = await ReadToolPrefsAsync(roomId.ToString());
+        var scoped = await ReadToolPrefsInternalAsync(roomId.ToString());
         scoped[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["scoped-tool"]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertDisabled_WithEntityId_DoesNotAffectGlobal()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        await UpsertDisabledToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = ["global-tool"]
         });
 
-        await UpsertDisabledToolPrefsAsync(
+        await UpsertDisabledToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["scoped-tool"]
             },
             roomId.ToString());
 
-        var global = await ReadToolPrefsAsync();
+        var global = await ReadToolPrefsInternalAsync();
         global[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["global-tool"]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task UpsertDisabled_TwoDifferentEntities_AreIsolated()
     {
         var firstRoomId = await CreateRoomAsync();
         var secondRoomId = await CreateRoomAsync();
 
-        await UpsertDisabledToolPrefsAsync(
+        await UpsertDisabledToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["tool-a"]
             },
             firstRoomId.ToString());
-        await UpsertDisabledToolPrefsAsync(
+        await UpsertDisabledToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["tool-b"]
             },
             secondRoomId.ToString());
 
-        var first = await ReadToolPrefsAsync(firstRoomId.ToString());
-        var second = await ReadToolPrefsAsync(secondRoomId.ToString());
+        var first = await ReadToolPrefsInternalAsync(firstRoomId.ToString());
+        var second = await ReadToolPrefsInternalAsync(secondRoomId.ToString());
 
         first[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["tool-a"]);
         second[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["tool-b"]);
     }
 
+    // The public write takes one server type per call; writing a second one must keep the first.
     [Fact]
-    public async Task UpsertDisabled_MultipleServerTypesInOneCall_AllPersisted()
+    public async Task UpsertDisabled_MultipleServerTypes_AllPersisted()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1");
 
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            ["server-1"] = ["mcp-tool"],
-            [SystemToolsServerType] = ["search"]
-        });
+        await SetDisabledAsync("server-1", "mcp-tool");
+        await SetDisabledAsync(WebSearchServerType, "search");
 
-        var stored = await ReadToolPrefsAsync();
-        stored.Should().HaveCount(2);
-        stored["server-1"].Disabled.Should().BeEquivalentTo(["mcp-tool"]);
-        stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["search"]);
+        var disabled = await GetDisabledAsync();
+        disabled.Should().HaveCount(2);
+        disabled["server-1"].Should().BeEquivalentTo(["mcp-tool"]);
+        disabled[WebSearchServerType].Should().BeEquivalentTo(["search"]);
     }
 
     [Fact]
-    public async Task UpsertDisabled_EmptyDictionary_Returns204_NoOp()
+    public async Task UpsertDisabled_EmptyList_NothingStored_NoOp()
     {
-        using var response = await _ai.PutAsync(
-            $"{ToolPrefsPath}/disabled",
-            new { disabled = new Dictionary<string, HashSet<string>>() },
-            TestContext.Current.CancellationToken);
+        await SetDisabledAsync(WebSearchServerType);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        var stored = await ReadToolPrefsAsync();
-        stored.Should().BeEmpty();
+        (await GetDisabledAsync()).Should().BeEmpty();
     }
 
+    // An explicit empty list is the documented "switch everything back on": the server type leaves the map, the
+    // other server types stay.
+    [Fact]
+    public async Task UpsertDisabled_EmptyList_ClearsServerType()
+    {
+        await SetDisabledAsync(WebSearchServerType, "search");
+        await SetDisabledAsync(ImageGenerationServerType, "generate");
+
+        await SetDisabledAsync(WebSearchServerType);
+
+        var disabled = await GetDisabledAsync();
+        disabled.Should().NotContainKey(WebSearchServerType);
+        disabled.Should().ContainKey(ImageGenerationServerType).WhoseValue.Should().BeEquivalentTo(["generate"]);
+    }
+
+    // Internal contract: an empty stored set per server type has no public route (an empty public list removes the
+    // server type); the chat service relies on this to clear a server type it drops from the map.
     [Fact]
     public async Task UpsertDisabled_EmptyToolSetForServerType_IsPersisted()
     {
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        await UpsertDisabledToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = []
         });
 
-        var stored = await ReadToolPrefsAsync();
+        var stored = await ReadToolPrefsInternalAsync();
         stored.Should().ContainKey(SystemToolsServerType);
         stored[SystemToolsServerType].Disabled.Should().BeEmpty();
     }
@@ -261,18 +258,13 @@ public class ToolPreferenceUpsertDisabledTests(AspireAppFixture fixture) : BaseT
     [Fact]
     public async Task UpsertDisabled_NonExistentEntityId_Returns404()
     {
-        using var response = await _ai.PutAsync(
-            $"{ToolPrefsPath}/disabled",
-            new
-            {
-                disabled = new Dictionary<string, HashSet<string>>
-                {
-                    [SystemToolsServerType] = ["search"]
-                },
-                entityId = "999999999"
-            },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiTools.AiToolsSetDisabledAsync(
+                new AiToolsSetDisabledRequest(serverType: WebSearchServerType, toolNames: ["search"], entityId: MissingEntityId),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
+
+        (await GetDisabledAsync()).Should().BeEmpty();
     }
 }

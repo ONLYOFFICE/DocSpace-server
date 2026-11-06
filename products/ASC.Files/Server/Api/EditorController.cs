@@ -237,7 +237,8 @@ public abstract class EditorController<T>(
     /// picks the desktop, mobile or embedded layout. For a PDF form the room decides the outcome and may overrule the
     /// request: a form-filling room, a virtual data room, a public room and a user folder each produce their own
     /// mode, and a form opened from the templates folder is read-only and, outside the mobile layout, framed as
-    /// embedded. When the portal is over its storage quota the configuration comes back read-only with the exceeded
+    /// embedded. In a form-filling room `edit=true` takes the form off filling only for a
+    /// caller who may edit it. When the portal is over its storage quota the configuration comes back read-only with the exceeded
     /// scope named. In a private room the caller's encryption keys are added to the editor configuration. Payment is
     /// not required and an anonymous caller opens through an external link.
     /// </remarks>
@@ -251,7 +252,7 @@ public abstract class EditorController<T>(
     [SwaggerResponse(200, "The editor configuration for the requested file and mode", typeof(ConfigurationDto<int>))]
     [SwaggerResponse(403, "The caller cannot read the file, asked for a past version without access to the file history, or the file is in Trash")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
-    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
+    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing, or it is an encrypted file of a private room and the connected document server cannot work with encrypted files")]
     [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [AllowNotPayment]
@@ -290,7 +291,9 @@ public abstract class EditorController<T>(
 
             formOpenSetup.RootFolder = rootFolder;
 
-            if (inDto.Edit && rootFolder.FolderType == FolderType.FillingFormsRoom)
+            // the editor re-requests the configuration in its own mode ("edit" even while filling), so only a
+            // caller who may edit the form takes it off filling
+            if (inDto.Edit && formOpenSetup.CanEdit && rootFolder.FolderType == FolderType.FillingFormsRoom)
             {
                 await fileStorageService.ManageFormFilling(file.Id, FormFillingManageAction.Edit);
             }

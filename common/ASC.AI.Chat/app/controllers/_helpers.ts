@@ -159,9 +159,9 @@ function clientError(err: unknown): { status: number; message: string } {
     return { status: err.status, message: err.statusText || "Upstream error" };
   }
   // A failure relayed from the DocSpace Files API with the caller's own
-  // credentials — e.g. a 403 when resolving an agent room the caller cannot
+  // credentials — e.g. a 403 when resolving a room the caller cannot
   // access, or a 404 for a room that does not exist (Bugs 82715, 82816, and
-  // every /ai/* route that resolves an agent entityId). Forward its real
+  // every /ai/* route that resolves an entityId). Forward its real
   // status instead of masking it as a generic 500. `message` embeds the
   // internal proxy URL, so relay only the status/reason phrase.
   if (err instanceof DocspaceApiHttpError) {

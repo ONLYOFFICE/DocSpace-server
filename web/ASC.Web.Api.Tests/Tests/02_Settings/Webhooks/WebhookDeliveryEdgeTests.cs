@@ -50,7 +50,7 @@ public class WebhookDeliveryEdgeTests(
     public async Task Delivery_TargetAnswers404_IsAFailureAndRetried()
     {
         // Arrange: the first answer is the one under test, the retry gets 200
-        var receiver = await WebhookReceiver.CreateSequenceAsync(_webhookReceiverClient, 404, 200);
+        var receiver = WebhookReceiver.CreateSequence(404, 200);
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -61,7 +61,7 @@ public class WebhookDeliveryEdgeTests(
 
         record.Status.Should().Be(200);
         record.Attempts.Should().Be(2, "404 failed the first attempt");
-        (await receiver.GetDeliveriesAsync()).Should().HaveCount(2);
+        receiver.GetDeliveries().Should().HaveCount(2);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class WebhookDeliveryEdgeTests(
     {
         // Arrange: the first answer is a 302 to another path of the receiver, which would answer 200; the retry
         // gets 200 where it was sent
-        var receiver = await WebhookReceiver.CreateRedirectAsync(_webhookReceiverClient);
+        var receiver = WebhookReceiver.CreateRedirect();
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -80,15 +80,15 @@ public class WebhookDeliveryEdgeTests(
 
         record.Status.Should().Be(200);
         record.Attempts.Should().Be(2, "the redirect failed the first attempt");
-        (await receiver.GetDeliveriesAsync()).Should().HaveCount(2);
-        (await receiver.CountRedirectedRequestsAsync()).Should().Be(0, "a sender that followed the redirect would have asked there");
+        receiver.GetDeliveries().Should().HaveCount(2);
+        receiver.CountRedirectedRequests().Should().Be(0, "a sender that followed the redirect would have asked there");
     }
 
     [Fact]
     public async Task Delivery_ResponseBodyOver8KB_IsStoredCutTo8KB()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync(body: new string('a', MaxStoredResponseBytes * 2));
+        var receiver = CreateReceiver(body: new string('a', MaxStoredResponseBytes * 2));
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -105,7 +105,7 @@ public class WebhookDeliveryEdgeTests(
     public async Task Delivery_ResponseBodyWithNulCharacters_IsStoredWithoutThem()
     {
         // Arrange: a NUL would fail the write of the whole record on PostgreSQL
-        var receiver = await CreateReceiverAsync(body: "before\0after");
+        var receiver = CreateReceiver(body: "before\0after");
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -122,7 +122,7 @@ public class WebhookDeliveryEdgeTests(
     public async Task Delivery_TargetFails_RecordsTheFailureOnTheSubscription()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync(500);
+        var receiver = CreateReceiver(500);
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -144,7 +144,7 @@ public class WebhookDeliveryEdgeTests(
     {
         // Arrange: response_payload is utf8 (three bytes at most), so the emoji would fail the write of the whole
         // record in strict mode; only a delivered answer is stored (a failed one is stored as the error text)
-        var receiver = await CreateReceiverAsync(body: "\U0001F525 ok");
+        var receiver = CreateReceiver(body: "\U0001F525 ok");
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -162,8 +162,8 @@ public class WebhookDeliveryEdgeTests(
     {
         // Arrange: the status and headers come at once, the body is dribbled out over longer than the limit of an
         // attempt. This test takes that long by design: nothing shorter crosses the limit
-        var receiver = await WebhookReceiver.CreateSlowBodyAsync(
-            _webhookReceiverClient, 200, "accepted, slowly", chunks: 4, bodyDuration: ProfileRequestTimeout + TimeSpan.FromSeconds(4));
+        var receiver = WebhookReceiver.CreateSlowBody(
+            200, "accepted, slowly", chunks: 4, bodyDuration: ProfileRequestTimeout + TimeSpan.FromSeconds(4));
         var subscription = await CreateSubscriptionAsync(receiver);
 
         // Act
@@ -176,6 +176,6 @@ public class WebhookDeliveryEdgeTests(
         record.Delivery.Should().NotBeNull();
         record.Attempts.Should().Be(1);
         record.NextAttemptOn.Should().BeNull("a delivered event is not sent again");
-        (await receiver.GetDeliveriesAsync()).Should().ContainSingle();
+        receiver.GetDeliveries().Should().ContainSingle();
     }
 }

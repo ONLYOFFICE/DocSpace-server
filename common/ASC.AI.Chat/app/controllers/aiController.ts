@@ -42,14 +42,17 @@ import type {
   DenyToolCallInput,
 } from "@onlyoffice/ai-chat/core";
 import logger from "../log.js";
-import { agentAssignedProfileId } from "./agentProfile.js";
 import {
   markForwardHeadersToProvider,
   getCustomServerNames,
   getChatContextSnapshot,
   getSourceMeta,
+  setKnowledgeRoomIds,
+  setRoundAttachmentIds,
+  setRoundProfileId,
 } from "../requestContext.js";
 import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
+import { applyAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
@@ -66,7 +69,9 @@ import {
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
-import { primeSourceMeta, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
+import { documentAgentTools } from "../tools/documentAgent.js";
+import { DOCUMENT_AGENT_TYPE, getCompaction } from "../../config/index.js";
+import { primeSourceMeta } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -99,10 +104,35 @@ function withRequestSignal<T>(res: Response, body: T): T {
   // has stopped waiting. Create the object when missing so cancellation works
   // for every caller.
   const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
+  // The knowledge bases the composer connected ride in `actionArgs`; the
+  // engine never reads them, the tool context does (every action handler
+  // passes through here, so the ids are in place before `getTools`).
+  setKnowledgeRoomIds(knowledgeRoomIdsOf(actionArgs));
   return {
     ...body,
     actionArgs: { ...actionArgs, signal: responseAbortSignal(res) },
   };
+}
+
+// `actionArgs.knowledgeRooms[].id` as the room ids the .NET side expects —
+// each a DocSpace room id, once, in the order sent. An older widget sends a
+// single `actionArgs.knowledgeRoom`; it is read the same way.
+function knowledgeRoomIdsOf(actionArgs: Record<string, unknown>): number[] {
+  const list = Array.isArray(actionArgs["knowledgeRooms"])
+    ? (actionArgs["knowledgeRooms"] as unknown[])
+    : [actionArgs["knowledgeRoom"]];
+  const ids: number[] = [];
+  for (const room of list) {
+    if (!isObject(room)) {
+      continue;
+    }
+    const id = room["id"];
+    const parsed = typeof id === "string" ? Number.parseInt(id, 10) : typeof id === "number" ? id : NaN;
+    if (Number.isInteger(parsed) && parsed > 0 && !ids.includes(parsed)) {
+      ids.push(parsed);
+    }
+  }
+  return ids;
 }
 
 // Fold the DocSpace tools system-prompt fragment into the action's prompt
@@ -130,18 +160,103 @@ function appendActionPrompt<T>(body: T, fragment: string): T {
   } as T;
 }
 
-// The round's context scope: `contextEntityId` (agent workspace picked from
-// outside its room — the thread stays under `entityId`) wins over `entityId`.
-// Mirrors the engine's own `contextEntityId ?? entityId` resolution.
-function contextScopeOf(body: unknown): string | undefined {
+// The two ids a chat request may carry, as the client sends them:
+//
+// - `entityId` is present only inside an AI project and is the project id
+//   (`applyAiProjectChatContext` binds the round to the project from it);
+//   everywhere else it is absent. Threads and the per-user AI data are
+//   global, so it scopes nothing else.
+// - `contextEntityId` is the folder or room the user is in (the Files
+//   section). Inside a project the client sends none and
+//   `applyAiProjectChatContext` sets it to the picked folder context or to
+//   My documents.
+//
+// The engine itself resolves `contextEntityId ?? entityId` as the id it
+// hands the tools adapters and the attachments storage (the folder a
+// generated image is uploaded into), so a project round without a folder
+// context would otherwise run its tools against the project id.
+function stringField(body: unknown, key: string): string | undefined {
   if (!isObject(body)) {
     return undefined;
   }
-  const context = body["contextEntityId"];
-  if (typeof context === "string") {
-    return context;
+  const value = body[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+// `actionArgs.folderContext.id`: the folder the user connected as context
+// in the composer, or `undefined` when none is connected.
+function folderContextIdOf(body: unknown): string | undefined {
+  if (!isObject(body)) {
+    return undefined;
   }
-  return typeof body["entityId"] === "string" ? body["entityId"] : undefined;
+  const actionArgs = body["actionArgs"];
+  if (!isObject(actionArgs)) {
+    return undefined;
+  }
+  const folderContext = actionArgs["folderContext"];
+  if (!isObject(folderContext)) {
+    return undefined;
+  }
+  const id = folderContext["id"];
+  return typeof id === "string" && id.length > 0 ? id : undefined;
+}
+
+// The id the engine hands the tools adapters for the round — mirrors its
+// own `contextEntityId ?? entityId` resolution, so the tools fragment of the
+// prompt describes the tool set the engine actually wires up.
+function toolsScopeOf(body: unknown): string | undefined {
+  return stringField(body, "contextEntityId") ?? stringField(body, "entityId");
+}
+
+// The folder the user works in for this round: the folder context they
+// picked in the composer, else the folder or room they are in. The location
+// line of the prompt.
+function locationOf(body: unknown): string | undefined {
+  return folderContextIdOf(body) ?? stringField(body, "contextEntityId");
+}
+
+// The entry the round is attributed to for usage accounting: the location
+// when there is one, else the project the chat runs in.
+function sourceScopeOf(body: unknown): string | undefined {
+  return locationOf(body) ?? stringField(body, "entityId");
+}
+
+// The round's profile and attachments for a request that resumes a round
+// (tool-call approval): the profile the round runs on, ranked as
+// sendWithStream ranks it (the caller's explicit choice, then the thread's
+// own), and the attachments of the thread's last user message, the one the
+// resumed round answers. Best-effort: a failed read leaves the document
+// agent tool to its own fallbacks.
+async function primeRoundFromThread(
+  threadId: unknown,
+  requestedProfileId: unknown,
+): Promise<void> {
+  if (typeof threadId !== "string" || threadId.length === 0) {
+    return;
+  }
+  try {
+    const [thread, history] = await Promise.all([
+      storage.threads.readById(threadId),
+      storage.messages.readByThread(threadId),
+    ]);
+    const requested = typeof requestedProfileId === "string" ? requestedProfileId : undefined;
+    setRoundProfileId(requested ?? thread?.profileId ?? undefined);
+    let lastUser: unknown;
+    for (let i = history.length - 1; i >= 0; i--) {
+      const message: unknown = history[i];
+      if (isObject(message) && message["role"] === "user") {
+        lastUser = message;
+        break;
+      }
+    }
+    setRoundAttachmentIds(lastUser ? extractAttachmentRefIds(lastUser) : []);
+  } catch (err) {
+    logger.warn(
+      `primeRoundFromThread: thread ${threadId} not resolved: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
 }
 
 // Attachment refs from the thread's persisted history, newest message first
@@ -180,13 +295,16 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
     return body;
   }
   // The tools fragment describes the tool set the engine actually wires up
-  // for the round, so it follows the round's context scope (the agent when
-  // one is picked), unlike the location fragment below.
-  const contextScope = contextScopeOf(body);
+  // for the round, so it follows the id the engine hands the adapters,
+  // unlike the location fragment below.
+  const contextScope = toolsScopeOf(body);
   // Keep form-data tools active for the whole conversation: when the current
   // message has no attachment of its own, fall back to the form(s) already in
   // the thread history so follow-up questions still resolve it.
   let attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  // The message's own attachments, for the document agent tool: it hands
+  // them to the agent, and `callTool` carries no refs of its own.
+  setRoundAttachmentIds(attachmentId);
   if (attachmentId.length === 0) {
     attachmentId = await historyAttachmentRefIds(body["threadId"]);
   }
@@ -194,9 +312,9 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
   return fragment ? appendActionPrompt(body, fragment) : body;
 }
 
-// Build the context fragment that tells the agent where it is operating and
-// how to scope tool calls. The location lines are emitted only when an
-// `entityId` (the folder/room the chat is opened from) is present.
+// Build the context fragment that tells the model where it is operating and
+// how to scope tool calls. The location lines are emitted only when the
+// round has a location (see `locationOf`).
 function buildContextFragment(entityId: string | undefined): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
@@ -222,49 +340,16 @@ function withContextPrompt<T>(body: T): T {
   if (!isObject(body)) {
     return body;
   }
-  // Always the folder/room the chat is invoked from (`entityId`), even when
-  // the round runs against an agent's context (`contextEntityId`): the
-  // location line must tell the model where the USER is — picking agent 10
-  // while browsing folder 2 keeps the location at 2. The agent's own scope
-  // reaches the model through the tools fragment and tool execution.
-  const entityId =
-    typeof body["entityId"] === "string" ? body["entityId"] : undefined;
-  return appendActionPrompt(body, buildContextFragment(entityId));
+  // The location line must tell the model where the USER is: the folder
+  // they connected as context in the composer (`actionArgs.folderContext`)
+  // when they picked one to work in, else the folder or room they are in
+  // (`contextEntityId`). The project id (`entityId`) is never a location —
+  // inside a project `applyAiProjectChatContext` supplies the folder context.
+  return appendActionPrompt(body, buildContextFragment(locationOf(body)));
 }
 
-// Fold the picked agent's stored instruction (`chatSettings.prompt`, set on
-// the agent room) into the action's prompt override. Scoped to the round's
-// context (the agent room when one is picked, like the tools fragment) so a
-// plain chat in a regular folder gets nothing. Applied innermost so the
-// instruction leads the system prompt, ahead of the tools/context fragments.
-async function withAgentInstruction<T>(body: T): Promise<T> {
-  if (!isObject(body)) {
-    return body;
-  }
-  // A per-request `{mode: "replace"}` prompt override substitutes the
-  // agent's stored instructions for this round (Bug 83236) — without this
-  // skip, appendActionPrompt would concatenate the instruction into the
-  // replace text and the agent's marker would win. This helper runs
-  // innermost, so the override seen here is still the client's own; the
-  // tools/context fragments appended later are round infrastructure (tool
-  // list, location, date) and stay regardless of the mode. The stored
-  // instructions themselves are untouched — the skip is per-request.
-  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
-  const prompt = actionArgs["prompt"];
-  if (
-    isObject(prompt) &&
-    prompt["mode"] === "replace" &&
-    typeof prompt["text"] === "string" &&
-    prompt["text"].trim().length > 0
-  ) {
-    return body;
-  }
-  const instruction = await safeGetAgentInstruction(contextScopeOf(body));
-  return instruction ? appendActionPrompt(body, instruction) : body;
-}
-
-// Attribute the round to the DocSpace entry it runs for — the agent whose
-// chat this is, or else the folder the user is in. The resolved source lands
+// Attribute the round to the DocSpace entry it runs for — the folder the
+// user works in, or else the project the chat runs in. The resolved source lands
 // on the request context; the engine reads it through its `resolveSource`
 // dep and the library's ONLYOFFICE provider turns it into the request's
 // `metadata` object (`source_id` / `source_type` / `source_title`) on every
@@ -278,22 +363,22 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
 // carries no top-level scope of its own (see {@link customScopeOf}). It is only
 // ever a hint: the source itself is always re-resolved here.
 async function withSourceMetadata<T>(body: T, scope?: string): Promise<T> {
-  await primeSourceMeta(scope ?? contextScopeOf(body));
+  await primeSourceMeta(scope ?? sourceScopeOf(body));
   return body;
 }
 
 // Scope of a `sendCustom` round. `SendCustomInput` is `isStream` /
 // `systemPrompt` / `userMessage` / `actionArgs` / `profileId` — it has no
-// `entityId` of its own, so the only place a caller can name the agent is
+// `entityId` of its own, so the only place a caller can name the entry is
 // `actionArgs.entityId` (the field the library once carried the metadata pair
 // in). Treated as a hint and re-resolved server-side by `withSourceMetadata`,
 // so a client still cannot claim someone else's entry (mirrors
 // threads/regenerate-title).
 //
-// `contextScopeOf` still wins when present: a host that sends the round with an
-// explicit top-level scope keeps describing it that way.
+// `sourceScopeOf` still wins when present: a host that sends the round with
+// an explicit top-level scope keeps describing it that way.
 function customScopeOf(body: unknown): string | undefined {
-  const scope = contextScopeOf(body);
+  const scope = sourceScopeOf(body);
   if (scope) {
     return scope;
   }
@@ -335,6 +420,10 @@ const engine = new AIEngine({
   // Being wired, the hook also makes the library ignore any `source` a
   // client put in `actionArgs`.
   resolveSource: () => getSourceMeta(),
+  // A tool the engine runs reports MCP-shaped progress (the document agent's
+  // steps, an MCP server's `notifications/progress`), and the engine streams
+  // it on the pending tool card until the result arrives.
+  toolProgress: true,
   // System (host-configured MCP) tools and registered custom MCP servers
   // run server-side and pause for UI approval; most DocSpace integration
   // tools run silently. Compose all three — before customToolsSource was
@@ -342,11 +431,14 @@ const engine = new AIEngine({
   // tools never reached the model (Bugs 82989 / 82990).
   // formAnalysisSubAgent adds the `analyze_form` delegating tool; its serverType is silent
   // (absent from systemServerTypes), so it runs without UI approval.
+  // documentAgentTools adds the `document_agent` delegating tool when an agent is configured;
+  // its serverType is approval-required, a delegated task may run for minutes.
   toolsAdapter: composeToolsAdapters(
     systemToolsSource,
     customToolsSource,
     toolsAdapter,
     formAnalysisSubAgent,
+    documentAgentTools,
   ),
   // Approval-required server types: the MCP servers (host-configured and
   // custom — the latter resolved per request, see primeCustomServers) plus
@@ -356,7 +448,14 @@ const engine = new AIEngine({
     ...systemToolsSource.getServerTypes(),
     ...getCustomServerNames(),
     DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+    DOCUMENT_AGENT_TYPE,
   ],
+  // Fold a thread that nears its model's context window into a summary
+  // message before the round. The summary is stored through the ordinary
+  // messages route (`contents` keeps the whole message, marker included),
+  // so the C# side needs nothing new. On unless `ai.compaction.enabled`
+  // / `AI__COMPACTION__ENABLED` is false; resolved per round.
+  compaction: () => getCompaction(),
 });
 
 function isAsyncIterable(value: unknown): value is AsyncIterable<unknown> {
@@ -700,10 +799,19 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
-    await primeCustomServers(contextScopeOf(req.body));
+    await primeCustomServers();
     const result = await engine.send(await withSourceMetadata(req.body));
     res.json(result);
   }),
@@ -747,7 +855,7 @@ export const aiController = {
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
-    await primeCustomServers(contextScopeOf(req.body));
+    await primeCustomServers();
     // Attribute the round to its source for the backend's usage accounting, as
     // every other model-bound route does. The engine's `resolveSource` reads it
     // from the request context, so both the streaming (`sendMessage`) and
@@ -782,10 +890,19 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
-    await primeCustomServers(contextScopeOf(req.body));
+    await primeCustomServers();
     // Reject an empty prompt before opening the stream: a user message with
     // neither non-whitespace text nor an attachment otherwise reaches the
     // provider and streams back nothing (Bug 82720). A file-only message
@@ -825,36 +942,14 @@ export const aiController = {
         req.body.profileId = thread.profileId;
       }
     }
-    // The caller's explicit profileId must reference an existing profile
-    // even when an agent's assignment overrides it for the round below —
-    // otherwise a bogus id is silently swapped for the agent's model and
-    // the request looks honored (Bug 83160 reopen: the regular-room 400
-    // never fired in agent scope because the substitution ran first).
-    // Billing is not checked here: it applies to the effective profile,
-    // which the post-substitution pre-flight still validates.
-    {
-      const callerError = await unknownProfileIdError(req.body.profileId);
-      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
-        res.status(400).json({ error: callerError });
-        return;
-      }
-    }
-    // The agent's assigned profile is authoritative for rounds in its scope:
-    // substitute it over whatever the caller (or the thread prefill above)
-    // put in profileId, so an agent's chat cannot be re-run on a different
-    // model (Bug 82914). No agent in scope, or an agent with no resolvable
-    // assignment, leaves the value untouched.
-    {
-      const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
-      if (agentProfileId) {
-        req.body.profileId = agentProfileId;
-      }
-    }
+    // The effective profile, for the document agent tool: it runs the agent
+    // on the chat's own model, and `callTool` carries no profile.
+    setRoundProfileId(req.body.profileId);
     // The effective profileId must reference an existing profile BEFORE the
     // stream opens: a malformed or unknown id otherwise surfaces only as an
     // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
     // engine silently falls back to another model (Bug 83160). Runs after
-    // the thread prefill and the agent substitution, so only the value that
+    // the thread prefill and the AI-project binding, so only the value that
     // will actually be used is checked.
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
@@ -868,14 +963,11 @@ export const aiController = {
       }
     }
     const body = withContextPrompt(
-      await withToolsPrompt(
-        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
-      ),
+      await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
-    // The round's scope as the client sent it. `entityId` is what an
-    // in-engine tool upload (a generated image) targets — the engine resolves
-    // it as `contextEntityId ?? entityId` — so a `-` here means an
-    // unscoped round: nothing can be uploaded and the image cannot persist.
+    // The round's ids as the client sent them (see `toolsScopeOf`). An
+    // in-engine tool upload (a generated image) targets
+    // `contextEntityId ?? entityId`; with neither it goes to My documents.
     logger.info(
       `ai/send-with-stream: round threadId=${req.body.threadId ?? "<new>"} ` +
         `entityId=${req.body.entityId ?? "-"} contextEntityId=${req.body.contextEntityId ?? "-"} ` +
@@ -897,26 +989,20 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
-    // Resolve the round's custom MCP servers into the request context so
-    // the engine's sync systemServerTypes callback sees their names
-    // (approval gating) before the tools adapter fires.
-    await primeCustomServers(contextScopeOf(req.body));
-    // Reject a caller-supplied unknown profileId before the agent
-    // substitution masks it — see sendWithStream (Bug 83160 reopen).
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
     {
-      const callerError = await unknownProfileIdError(req.body.profileId);
-      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
-        res.status(400).json({ error: callerError });
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
         return;
       }
     }
-    // Agent scope pins the model — see sendWithStream (Bug 82914).
-    {
-      const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
-      if (agentProfileId) {
-        req.body.profileId = agentProfileId;
-      }
-    }
+    // Resolve the round's custom MCP servers into the request context so
+    // the engine's sync systemServerTypes callback sees their names
+    // (approval gating) before the tools adapter fires.
+    await primeCustomServers();
+    setRoundProfileId(req.body.profileId);
     // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
@@ -930,9 +1016,7 @@ export const aiController = {
       }
     }
     const body = withContextPrompt(
-      await withToolsPrompt(
-        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
-      ),
+      await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
     await streamOpenAiSse(
       res,
@@ -947,16 +1031,23 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
-    await primeCustomServers(contextScopeOf(req.body));
+    await primeCustomServers();
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
     const body = withContextPrompt(
-      await withToolsPrompt(
-        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
-      ),
+      await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
     await streamNdjson(
       res,
@@ -971,15 +1062,25 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
-    await primeCustomServers(contextScopeOf(req.body));
+    await primeCustomServers();
+    // An approved tool runs in THIS request, not in the one that streamed the
+    // round: the document agent tool needs the round's profile and the
+    // attachments of the message it answers, resolved from the thread.
+    await primeRoundFromThread(req.body.threadId, req.body.profileId);
     const body = await withSourceMetadata(withRequestSignal(res, req.body));
-    await streamNdjson(
-      res,
-      tapStream("ai/approve-tool-call", engine.approveToolCall(body)),
-    );
+    await streamNdjson(res, tapStream("ai/approve-tool-call", engine.approveToolCall(body)));
   }),
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
@@ -989,10 +1090,19 @@ export const aiController = {
       entityId: req.body.entityId,
       contextEntityId: req.body.contextEntityId,
     });
+    // A round inside an AI project runs on the project's model and linked
+    // rooms, whatever the composer sent (see storage/aiProjectChatContext.ts).
+    {
+      const refusal = await applyAiProjectChatContext(req.body);
+      if (refusal) {
+        res.status(refusal.status).json(refusal.body);
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
-    await primeCustomServers(contextScopeOf(req.body));
+    await primeCustomServers();
     const body = await withSourceMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,

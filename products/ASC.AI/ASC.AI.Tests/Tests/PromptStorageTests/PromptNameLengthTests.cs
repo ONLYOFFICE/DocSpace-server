@@ -44,15 +44,11 @@ public class PromptNameLengthTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var name = new string('a', MaxNameLength);
 
-        using var response = await _ai.PostAsync(
-            PromptsPath,
-            new { name, text = "body", folderId = (Guid?)null },
-            TestContext.Current.CancellationToken);
+        var result = await _aiPrompts.AiPromptsCreateAsync(new AiCreatePromptInput(name: name, text: "body"), TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var created = await _ai.ReadAsync<PromptDto>(response, TestContext.Current.CancellationToken);
-        created.Name.Should().Be(name);
+        result.Success.Should().BeTrue($"prompts/create rejected the prompt: {result.Error}");
+        result.Prompt.Name.Should().Be(name);
+        (await _aiPrompts.AiPromptsGetByIdAsync(result.Prompt.Id, TestContext.Current.CancellationToken)).Name.Should().Be(name);
     }
 
     [Theory]
@@ -61,14 +57,15 @@ public class PromptNameLengthTests(AspireAppFixture fixture) : BaseTest(fixture)
     [InlineData(5000)]
     public async Task Create_NameOverLimit_Returns400(int length)
     {
-        using var response = await _ai.PostAsync(
-            PromptsPath,
-            new { name = new string('a', length), text = "body", folderId = (Guid?)null },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _aiPrompts.AiPromptsCreateAsync(
+            new AiCreatePromptInput(name: new string('a', length), text: "body"),
+            TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
+        (await _aiPrompts.AiPromptsListAsync(cancellationToken: TestContext.Current.CancellationToken)).Should().BeEmpty();
     }
 
+    // Internal contract: the prompt batch create has no public route (the chat service's createMany fans out to single creates, so import-bundle never reaches /prompts/batch).
     [Theory]
     [InlineData(MaxNameLength + 1)]
     [InlineData(1024)]
@@ -96,13 +93,13 @@ public class PromptNameLengthTests(AspireAppFixture fixture) : BaseTest(fixture)
         var created = await CreatePromptAsync("original");
         var name = new string('a', MaxNameLength);
 
-        using var response = await _ai.PutAsync(
-            $"{PromptsPath}/{created.Id}",
-            new { name, text = "body", changeFolder = false, folderId = (Guid?)null },
+        var result = await _aiPrompts.AiPromptsUpdateAsync(
+            new AiPromptsUpdateRequest(id: created.Id, updates: new AiPromptsUpdateRequestUpdates(name: name, text: "body")),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        (await ReadPromptAsync(created.Id)).Name.Should().Be(name);
+        result.Success.Should().BeTrue($"prompts/update rejected the prompt: {result.Error}");
+        result.Prompt.Name.Should().Be(name);
+        (await _aiPrompts.AiPromptsGetByIdAsync(created.Id, TestContext.Current.CancellationToken)).Name.Should().Be(name);
     }
 
     [Theory]
@@ -113,12 +110,19 @@ public class PromptNameLengthTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         var created = await CreatePromptAsync("original");
 
-        using var response = await _ai.PutAsync(
-            $"{PromptsPath}/{created.Id}",
-            new { name = new string('a', length), text = "body", changeFolder = false, folderId = (Guid?)null },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _aiPrompts.AiPromptsUpdateAsync(
+            new AiPromptsUpdateRequest(id: created.Id, updates: new AiPromptsUpdateRequestUpdates(name: new string('a', length), text: "body")),
+            TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        (await ReadPromptAsync(created.Id)).Name.Should().Be("original");
+        exception.ErrorCode.Should().Be(400);
+        (await _aiPrompts.AiPromptsGetByIdAsync(created.Id, TestContext.Current.CancellationToken)).Name.Should().Be("original");
+    }
+
+    private async Task<AiPrompt> CreatePromptAsync(string name)
+    {
+        var result = await _aiPrompts.AiPromptsCreateAsync(new AiCreatePromptInput(name: name, text: "body"), TestContext.Current.CancellationToken);
+        result.Success.Should().BeTrue($"prompts/create rejected the prompt: {result.Error}");
+
+        return result.Prompt;
     }
 }

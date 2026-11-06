@@ -44,6 +44,7 @@ public class UploadTests(
     : UploadTestBase(fixture)
 {
     [Fact]
+    [Trait("Bug", "81536")]
     public async Task UploadFile_ToRoom_ReturnsUploadedFile()
     {
         var room = await CreateCustomRoom("Autotest Room Upload File");

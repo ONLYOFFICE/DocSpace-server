@@ -34,12 +34,14 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The query that reads one page of the contents of the .ai folder of a room.
+/// The query that reads one page of the root contents of an Instructions room: the Markdown files that are the skills
+/// of the AI chat.
 /// </summary>
 public class GetRoomAiFolderRequestDto
 {
     /// <summary>
-    /// The room whose .ai folder is listed, named by the identifier that `GET api/2.0/files/rooms` reports for it.
+    /// The Instructions room whose skills are listed, named by the identifier that `GET api/2.0/files/rooms` reports
+    /// for it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]

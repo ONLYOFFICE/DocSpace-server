@@ -104,38 +104,4 @@ public class LegacyKeysFormatTests(AspireAppFixture fixture) : PrivacyRoomTestBa
 
         keys.Should().BeEmpty();
     }
-
-    /// <summary>
-    /// Writes the user's <c>e2e</c> row exactly as the single-pair release did. Must run before
-    /// anything reads that user's keys: the services keep linked profiles in a per-node memory cache
-    /// for ten minutes, and a row written behind their back is not seen until it expires.
-    /// </summary>
-    private async Task PlantLegacyKeys(Guid userId, string publicKey, string privateKeyEnc)
-    {
-        // Property order and casing as JsonSerializer.Serialize(EncryptionKeyPairDto) produced them.
-        var legacyJson = JsonSerializer.Serialize(new { PrivateKeyEnc = privateKeyEnc, PublicKey = publicKey, UserId = userId });
-
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["core:machinekey"] = Fixture.GetAppHostSetting("core:machinekey") })
-            .Build();
-        var encrypted = await new InstanceCrypto(new MachinePseudoKeys(configuration)).EncryptAsync(legacyJson);
-
-        // LoginProfile.ToString(): Id, provider (APr) and name (N), joined by '→' and '·'.
-        var profile = $"Id→{userId}·APr→e2e·N→{encrypted}";
-
-        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
-        await using var command = connection.CreateCommand();
-
-        command.CommandText =
-            """
-            INSERT INTO account_links (id, uid, provider, profile, linked)
-            VALUES (@id, @uid, 'e2e', @profile, UTC_TIMESTAMP());
-            """;
-
-        command.Parameters.AddWithValue("@id", userId.ToString());
-        command.Parameters.AddWithValue("@uid", HashHelper.MD5($"e2e/{userId}"));
-        command.Parameters.AddWithValue("@profile", profile);
-
-        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
-    }
 }

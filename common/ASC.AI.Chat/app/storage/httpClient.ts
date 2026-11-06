@@ -119,7 +119,10 @@ const PROXY_BASE_URL = resolveProxyUrl();
 const AI_BASE_URL = resolveAiServiceUrl();
 const API_PREFIX = "/internal/ai";
 
-export type QueryValue = string | number | boolean | null | undefined;
+// A string array is sent as a repeated parameter (`tags=a&tags=b`), the
+// way ASP.NET binds a list from the query.
+export type QueryValue =
+  string | number | boolean | null | undefined | readonly (string | number | boolean)[];
 
 export interface RequestOptions {
   body?: unknown;
@@ -151,7 +154,11 @@ async function jsonRequest(
   if (query && Object.keys(query).length > 0) {
     const params = new URLSearchParams();
     for (const [k, v] of Object.entries(query)) {
-      if (v !== undefined && v !== null) {
+      if (Array.isArray(v)) {
+        for (const item of v) {
+          params.append(k, String(item));
+        }
+      } else if (v !== undefined && v !== null) {
         params.set(k, String(v));
       }
     }

@@ -1323,4 +1323,16 @@
   <data name="AppDisabled" xml:space="preserve">
     <value>Aplicação desativada: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Salas associadas ao projeto de IA {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Salas desassociadas do projeto de IA {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Modelo de IA do projeto de IA {0} alterado para {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Entrega do webhook repetida: {0}</value>
+  </data>
 </root>

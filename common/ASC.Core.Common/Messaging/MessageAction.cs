@@ -651,6 +651,16 @@ public enum MessageAction
     [Description("Private room encryption key deleted")]
     PrivacyRoomKeyDeleted = 5163,
 
+    /// <summary>
+    /// File keys issued
+    /// </summary>
+    FileKeysSet = 5164,
+
+    /// <summary>
+    /// File keys of those who left a private room removed
+    /// </summary>
+    RoomFileKeysRevoked = 5165,
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 
@@ -1091,6 +1101,15 @@ public enum MessageAction
     /// </summary>
     [Description("Webhook delivery retried")]
     WebhookRetried = 6117,
+
+    [Description("Rooms linked to AI project")]
+    RoomsLinkedToAiProject = 6121,
+
+    [Description("Rooms unlinked from AI project")]
+    RoomsUnlinkedFromAiProject = 6122,
+
+    [Description("AI project model changed")]
+    AiProjectProfileAssigned = 6123,
 
     #endregion
 

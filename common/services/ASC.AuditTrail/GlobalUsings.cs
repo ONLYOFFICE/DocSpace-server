@@ -35,6 +35,8 @@ global using System.Collections;
 global using System.ComponentModel;
 global using System.Runtime.CompilerServices;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
+global using System.Text.RegularExpressions;
 
 global using ASC.AuditTrail.Log;
 global using ASC.AuditTrail.Mappers;

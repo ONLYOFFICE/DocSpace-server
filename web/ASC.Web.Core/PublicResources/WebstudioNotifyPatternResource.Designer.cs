@@ -2401,6 +2401,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Private room.
+        /// </summary>
+        public static string PrivateRoomTitle {
+            get {
+                return ResourceManager.GetString("PrivateRoomTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Please activate your email address.
         /// </summary>
         public static string subject_activate_email {

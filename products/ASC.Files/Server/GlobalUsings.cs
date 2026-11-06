@@ -96,6 +96,7 @@ global using ASC.Web.Core;
 global using ASC.Web.Core.Files;
 global using ASC.Web.Core.PublicResources;
 global using ASC.Web.Core.Users;
+global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Web.Files;
 global using ASC.Web.Files.Classes;
 global using ASC.Web.Files.Configuration;
@@ -130,4 +131,5 @@ global using Swashbuckle.AspNetCore.Annotations;
 global using ZiggyCreatures.Caching.Fusion;
 
 global using FileShare = ASC.Files.Core.Security.FileShare;
+global using Profile = ASC.AI.Integration.Profiles.Profile;
 global using SecurityContext = ASC.Core.SecurityContext;

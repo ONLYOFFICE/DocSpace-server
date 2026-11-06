@@ -52,8 +52,7 @@ const isOutputFormat = (value: unknown): value is OutputFormat =>
 // it with the caller's credentials. The conversion itself is asynchronous —
 // the AI Worker renders the markdown into the requested format via
 // DocumentService (`Md` is stored verbatim instead) and saves the file into
-// the target folder (an agent room resolves to its Result Storage
-// subfolder); completion surfaces to the client as the standard
+// the target folder; completion surfaces to the client as the standard
 // `s:modify-folder` create-file socket event for every format. The source URL
 // the worker hands to DocumentService is rebased via ReplaceCommunityAddress
 // (`files.docservice.url.portal`) on the .NET side.

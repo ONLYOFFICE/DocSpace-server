@@ -76,6 +76,7 @@ public class BaseTest(
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
+    protected UserDataApi _userDataApi = null!;
     protected PhotosApi _photosApi = null!;
     protected ProfilesApi _profilesApi = null!;
 
@@ -137,6 +138,7 @@ public class BaseTest(
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;
+        _userDataApi = _clients.UserDataApi;
         _photosApi = _clients.PhotosApi;
         _profilesApi = _clients.ProfilesApi;
 
@@ -164,6 +166,22 @@ public class BaseTest(
     protected Task<User> InviteContact(EmployeeType employeeType, User? user = null)
     {
         return Invitations.InviteContactAsync(_clients.ProfilesApi, _peopleClient, employeeType, user ?? Owner, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Connects a Socket.IO client to this test's portal as the given user. The test disposes it.</summary>
+    protected async Task<PortalSocket> ConnectSocket(User user)
+    {
+        await fixture.WaitForRouterAsync().WaitAsync(TestContext.Current.CancellationToken);
+
+        return await _clients.ConnectSocketAsync(user, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Connects with the given auth cookie, or with none: for what the service does with a bad one.</summary>
+    protected async Task<PortalSocket> ConnectSocket(string? token)
+    {
+        await fixture.WaitForRouterAsync().WaitAsync(TestContext.Current.CancellationToken);
+
+        return await PortalSocket.ConnectAsync(_clients.PortalName, token, TestContext.Current.CancellationToken);
     }
 
     protected Task<User> InviteGuest(User? user = null)

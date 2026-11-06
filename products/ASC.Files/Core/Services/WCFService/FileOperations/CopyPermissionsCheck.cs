@@ -314,7 +314,7 @@ public class PermissionCheckStarter<T, TTo>(
             }
         }
 
-        if (copy && !(isRoom && toFolder.FolderType == FolderType.VirtualRooms) && !await security.CanCopyToAsync(toFolder))
+        if (copy && !(isRoom && toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiHub) && !await security.CanCopyToAsync(toFolder))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_CopyToFolder;
             if (check)
@@ -454,18 +454,23 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge || toFolder.RootFolderType == FolderType.Archive))
+        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom || toFolder.RootFolderType == FolderType.Archive))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
-            if (check)
-            {
-                throw new SecurityException(errorMsg);
-            }
-
-            return errorMsg;
+            return check ? throw new SecurityException(errorMsg) : errorMsg;
         }
 
-        if (isRoom && toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
+        // a room of the AI rooms root is never archived and never leaves its root: the only
+        // operation that lands it anywhere is a duplicate into the same root
+        if (isRoom && folder.RootFolderType == FolderType.AiHub && (!copy || toFolder.FolderType != FolderType.AiHub))
+        {
+            errorMsg = toFolder.FolderType == FolderType.Archive
+                ? FilesCommonResource.ErrorMessage_SecurityException_ArchiveRoom
+                : FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
+            return check ? throw new SecurityException(errorMsg) : errorMsg;
+        }
+
+        if (isRoom && folder.RootFolderType != FolderType.AiHub && toFolder.FolderType != FolderType.VirtualRooms && toFolder.FolderType != FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_UnarchiveRoom;
             if (check)
@@ -476,7 +481,9 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (!isRoom && folder.SettingsPrivate && !await CompliesPrivateRoomRulesAsync(copy, folder, parentFolders))
+        // Only a room carries the private flag, so a folder is judged by the rooms around it: it stays
+        // inside its private room, and an open folder does not enter one.
+        if (!isRoom && !await CompliesPrivateRoomRulesAsync(copy, folder, parentFolders))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             if (check)
@@ -614,7 +621,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive)
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)
@@ -693,32 +700,21 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (toFolder.FolderType is FolderType.Knowledge && !vectorizationSettings.IsSupportedContentExtraction(file.Title))
+        var toKnowledgeBase = toFolder.FolderType is FolderType.Knowledge || parentFolders.Exists(f => f.FolderType == FolderType.KnowledgeRoom);
+        switch (toKnowledgeBase)
         {
-            errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
-            if (check)
-            {
-                throw new NotSupportedException(errorMsg);
-            }
-
-            return errorMsg;
-        }
-
-        if (toFolder.FolderType is FolderType.Knowledge &&
-            file.ContentLength > vectorizationSettings.MaxContentLength)
-        {
-            errorMsg = FileSizeComment.GetFileSizeExceptionString(vectorizationSettings.MaxContentLength);
-            if (check)
-            {
-                throw new InvalidOperationException(errorMsg);
-            }
-
-            return errorMsg;
+            case true when !vectorizationSettings.IsSupportedContentExtraction(file.Title):
+                errorMsg = FilesCommonResource.ErrorMessage_NotSupportedFormat;
+                return check ? throw new NotSupportedException(errorMsg) : errorMsg;
+            case true when
+                file.ContentLength > vectorizationSettings.MaxContentLength:
+                errorMsg = FileSizeComment.GetFileSizeExceptionString(vectorizationSettings.MaxContentLength);
+                return check ? throw new InvalidOperationException(errorMsg) : errorMsg;
         }
 
         if (!check)
         {
-            return errorMsg;
+            return null;
         }
 
         if (toFolder.RootFolderType == FolderType.VirtualRooms &&
@@ -731,7 +727,7 @@ public class PermissionCheckStarter<T, TTo>(
         var conflict = resolveType == FileConflictResolveType.Duplicate ||
                                file.RootFolderType == FolderType.Privacy ||
                                file.Encrypted ||
-                               toFolder.FolderType == FolderType.Knowledge
+                               toKnowledgeBase
                     ? null
                     : await ttoFileDao.GetFileAsync(toFolder.Id, file.Title);
 

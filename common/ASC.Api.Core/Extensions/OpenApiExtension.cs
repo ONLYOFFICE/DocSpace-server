@@ -82,7 +82,7 @@ public static class OpenApiExtension
             var openApiInfo = new OpenApiInfo
             {
                 Title = "ONLYOFFICE DocSpace API",
-                Version = "4.0.0",
+                Version = "4.1.0",
                 // One Info object serves every service document (a single AddOpenApi call site in
                 // BaseStartup), so the text has to hold for all of them - do not make it service-specific.
                 Description = "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, " +

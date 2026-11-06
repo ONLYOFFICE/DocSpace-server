@@ -1311,7 +1311,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
+            new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1341,7 +1341,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
+            new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1370,7 +1370,7 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
+            new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, roomUrl),
             TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1399,7 +1399,7 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
+            new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, roomUrl),
             TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),

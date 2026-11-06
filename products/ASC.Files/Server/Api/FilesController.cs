@@ -309,7 +309,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension")]
     [SwaggerResponse(402, "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size")]
-    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, or the caller may not create files in it")]
+    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
     [SwaggerResponse(415, "The installation filters uploads and does not accept the format of the new title")]
     [SwaggerResponse(500, "The document service fails to convert the content, `destFolderId` is a fraction or outside the 32-bit range, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
@@ -1174,7 +1174,8 @@ public abstract class FilesController<T>(
     /// editing, closing it for filling and remembering the version it was edited from. The file has to be a PDF form
     /// lying in a room. Starting needs the right to start the filling, which the room admin and a member with
     /// content-creator rights have, while stopping a filling that somebody else started belongs to room managers
-    /// alone, so a content creator is refused with 403 there. The call is mutating; the state that resulted is read
+    /// alone, so a content creator is refused with 403 there. In a form-filling room action 3 needs the right to
+    /// edit the form. The call is mutating; the state that resulted is read
     /// with `GET api/2.0/files/file/{fileId}/formroles`.
     /// </remarks>
     /// <summary>
@@ -1185,7 +1186,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
-    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling, or `action` is not one of the known values")]
+    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values")]
     [SwaggerResponse(500, "The form has no filling properties yet, as when a filling that was never started is resumed, or the form lies in a third-party storage")]
     // Same shape as formrolemapping above: the id travels in the body, the route placeholder is
     // unbound, and the client fills both with the same value.
@@ -1317,13 +1318,13 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/{fileId}/access</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The file keys were stored")]
-    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, the file is not in a private room, or a recipient has no read access to it")]
+    [SwaggerResponse(200, "The file keys of the recipients who can read the file were stored; the others are listed in `skippedUserIds`", typeof(FileKeysWrittenDto))]
+    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, or the file is not in a private room")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPut("{fileId}/access")]
-    public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
+    public async Task<FileKeysWrittenDto> SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {
-        await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project());
+        return new FileKeysWrittenDto { SkippedUserIds = await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project()) };
     }
 }
 

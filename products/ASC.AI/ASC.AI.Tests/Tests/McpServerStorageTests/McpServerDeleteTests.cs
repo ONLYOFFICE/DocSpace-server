@@ -35,35 +35,35 @@ namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
-public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class McpServerDeleteTests(AspireAppFixture fixture) : PublicToolsTestBase(fixture)
 {
     [Fact]
     public async Task Delete_Existing_Removes()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1");
 
-        using var response = await _ai.DeleteAsync(
-            $"{McpServersPath}/server-1",
+        var result = await _aiTools.AiToolsRemoveCustomServerAsync(
+            new AiToolsRemoveCustomServerRequest(name: "server-1"),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
 
-        using var readResponse = await _ai.GetAsync(
-            $"{McpServersPath}/server-1",
-            TestContext.Current.CancellationToken);
-        readResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        // An unregistered name reads back as a null body with status 200.
+        (await GetCustomServerAsync("server-1")).Should().BeNull();
+        (await ListCustomServersAsync()).Should().NotContainKey("server-1");
     }
 
     [Fact]
     public async Task Delete_NonExisting_NoContent()
     {
-        using var response = await _ai.DeleteAsync(
-            $"{McpServersPath}/missing",
+        var result = await _aiTools.AiToolsRemoveCustomServerAsync(
+            new AiToolsRemoveCustomServerRequest(name: "missing"),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task Delete_WithEntityId_RemovesOnlyScoped()
     {
@@ -71,15 +71,15 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         var globalConfig = BuildMcpConfig("https://example.com/global");
         var scopedConfig = BuildMcpConfig("https://example.com/scoped");
 
-        await CreateMcpServerAsync("server-1", globalConfig);
-        await CreateMcpServerAsync("server-1", scopedConfig, roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", globalConfig);
+        await CreateMcpServerInternalAsync("server-1", scopedConfig, roomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             $"{McpServersPath}/server-1?entityId={roomId}",
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        JsonEquals((await ReadMcpServerAsync("server-1")).Config, globalConfig).Should().BeTrue();
+        JsonEquals((await ReadMcpServerInternalAsync("server-1")).Config, globalConfig).Should().BeTrue();
 
         using var scopedRead = await _ai.GetAsync(
             $"{McpServersPath}/server-1?entityId={roomId}",
@@ -87,6 +87,7 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         scopedRead.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task Delete_Global_DoesNotAffectScoped()
     {
@@ -94,8 +95,8 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
         var globalConfig = BuildMcpConfig("https://example.com/global");
         var scopedConfig = BuildMcpConfig("https://example.com/scoped");
 
-        await CreateMcpServerAsync("server-1", globalConfig);
-        await CreateMcpServerAsync("server-1", scopedConfig, roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", globalConfig);
+        await CreateMcpServerInternalAsync("server-1", scopedConfig, roomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             $"{McpServersPath}/server-1",
@@ -107,18 +108,21 @@ public class McpServerDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
             TestContext.Current.CancellationToken);
         globalRead.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
-        JsonEquals((await ReadMcpServerAsync("server-1", roomId.ToString())).Config, scopedConfig).Should().BeTrue();
+        JsonEquals((await ReadMcpServerInternalAsync("server-1", roomId.ToString())).Config, scopedConfig).Should().BeTrue();
     }
 
     [Fact]
     public async Task Delete_NonExistentEntityId_Returns404()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1");
 
-        using var response = await _ai.DeleteAsync(
-            $"{McpServersPath}/server-1?entityId=999999999",
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiTools.AiToolsRemoveCustomServerAsync(
+                new AiToolsRemoveCustomServerRequest(name: "server-1", entityId: MissingEntityId),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
+
+        ConfigEquals(await GetCustomServerAsync("server-1")).Should().BeTrue();
     }
 }

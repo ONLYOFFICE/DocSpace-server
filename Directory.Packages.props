@@ -9,8 +9,8 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Company>Ascensio System SIA</Company>
-    <AssemblyVersion>4.0.0</AssemblyVersion>
-    <ProductVersion>4.0.0</ProductVersion>
+    <AssemblyVersion>4.1.0</AssemblyVersion>
+    <ProductVersion>4.1.0</ProductVersion>
     <Copyright>(c) Ascensio System SIA. All rights reserved</Copyright>
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest</AnalysisLevel>
@@ -63,7 +63,8 @@
     <PackageVersion Include="CsvHelper" Version="33.1.0" />
     <PackageVersion Include="DistributedLock.Redis" Version="1.1.1" />
     <PackageVersion Include="DistributedLock.ZooKeeper" Version="1.0.0" />
-    <PackageVersion Include="DocSpace.API.SDK" Version="4.0.0" />
+    <PackageVersion Include="DocSpace.API.SDK" Version="4.1.0" />
+    <PackageVersion Include="DocSpace.Webhooks.SDK" Version="4.1.0" />
     <PackageVersion Include="DocuSign.eSign.dll" Version="8.4.0" />
     <PackageVersion Include="DotNetOpenAuth.Ultimate" Version="4.3.4.13329" />
     <PackageVersion Include="Dropbox.Api" Version="7.0.0" />
@@ -181,6 +182,7 @@
     <PackageVersion Include="SkiaSharp" Version="4.153.1" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="4.153.1" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.153.1" />
+    <PackageVersion Include="SocketIOClient" Version="4.0.5" />
     <PackageVersion Include="Spectre.Console" Version="0.57.2" />
     <PackageVersion Include="Spectre.Console.Cli" Version="0.55.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
@@ -198,6 +200,7 @@
     <PackageVersion Include="Twilio" Version="7.13.5" />
     <PackageVersion Include="UAParser" Version="3.1.47" />
     <PackageVersion Include="WebDav.Client" Version="2.9.0" />
+    <PackageVersion Include="WireMock.Net" Version="2.21.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
     <PackageVersion Include="xunit.v3" Version="4.0.2" />
     <PackageVersion Include="xunit.v3.extensibility.core" Version="4.0.2" />

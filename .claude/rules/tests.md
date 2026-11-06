@@ -21,6 +21,8 @@ Everything that is not specific to one product is there, and every suite referen
 | `PortalClientsBase` / `PortalContext` | the per-portal HTTP clients, `Origin` binding, disposal |
 | `Initializer` | owner credentials, client-side password hashing, `HttpClient.Authenticate(user)`, `FakerMember` |
 | `RawApiClient` / `RawApiResponse<T>` | raw JSON access for endpoints the SDK does not expose |
+| `PortalSocket` | a real Socket.IO client on the running socket service, for tests of what an API call pushes to clients (`products/ASC.Files/Tests/Tests/05_Features/Socket/`); wait for the router first (`WaitForRouterAsync`), the service checks the cookie through it |
+| `FindSocketHubRefusalsAsync` | what the socket service refused in this run; `SocketContractTests` of each suite asks at the end, in a collection with `DisableParallelization`, because a failure in the fixture's disposal is reported once per test |
 | `User`, `Timing`, `RegisterPortalModel` … | the small shared data types |
 
 A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire resources it needs in
@@ -29,9 +31,20 @@ A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire re
 service and wires the typed SDK clients onto it. ApiSystem and Web.Api are always started — portal
 registration and authentication — so `WebApiHttpClient` and `WebApi` come from the base.
 Services only some classes need go in `LazyResources` instead: they start with the stack but the run
-does not wait for them, and a class that uses them overrides `NeedsLazyResources` (so far only in the
-Web.Api `BaseTest`), which awaits `WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken)`
-before the portal is registered.
+does not wait for them, and a class that uses them overrides `NeedsLazyResources` (in the Web.Api and the
+AI `BaseTest`), which awaits `WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken)`
+before the portal is registered. A lazy Nextcloud still gets its `NEXTCLOUD_*` settings published at start-up.
+
+The document server has no health check of its own and restarts its converter ~70 s after the container
+starts, so a class that converts through it (an export to .docx/.pdf) overrides `NeedsDocumentServer` in the
+AI `BaseTest`; its setup awaits `WaitForDocumentServerAsync()`, which waits for that restart once per run.
+Set it on the classes that convert; a shared base gets it only when every class under it converts (the
+TextToDocx base), so the others do not wait.
+
+In the AI suite a test class cleans up in an override of `BaseTest.DisposeAsync` (calling base in a
+`finally`), never in `Dispose`: xUnit v3 calls only `DisposeAsync` on an `IAsyncLifetime` class. The other
+suites' `BaseTest.DisposeAsync` is not virtual yet; a class there that owns something to release needs that
+made virtual first.
 
 Do not copy any of this back into a suite. If a suite needs something the base does not do, extend
 the base.
@@ -39,7 +52,7 @@ the base.
 ## The SDK is the source of truth for signatures
 
 Tests call the API through the generated `DocSpace.API.SDK` (pinned in
-`Directory.Packages.props`, currently 4.0.0). **Read its source from the repo, never guess a
+`Directory.Packages.props`, currently 4.1.0). **Read its source from the repo, never guess a
 signature and never dig through the NuGet cache.** Paths are relative to the repo root
 (`server/`):
 
@@ -263,14 +276,19 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
 Filters use **Microsoft.Testing.Platform** syntax and go after `--`: `--filter-class`,
 `--filter-method`. VSTest's `--filter Name~...` does not apply.
 
-The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to a WireMock
-receiver that the `integration-test` profile publishes on the loopback alias `127.0.0.2:18089`
+The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to `WebhookReceiver`, a
+WireMock.Net server in the test process, started on first use on the loopback alias `127.0.0.2:18089`
 (`WebhookReceiverHost`/`WebhookReceiverPort` in `common/ASC.AppHost/Configuration/Constants.cs`;
 `127.0.0.1` stays blocked by the webhook blacklist). Windows and Linux answer on all of
 `127.0.0.0/8`; macOS does not, and without `sudo ifconfig lo0 alias 127.0.0.2` (lost on reboot)
-the receiver container cannot bind. The receiver is a lazy resource, so the rest of the suite
-still runs, but every class that creates a subscription (`NeedsLazyResources`) fails on waiting
-for it — an environment problem, not a product regression.
+the server cannot bind. The rest of the suite still runs, but every test that creates a
+subscription fails on starting it — an environment problem, not a product regression.
+
+Those tests read what the receiver and the delivery log got through `DocSpace.Webhooks.SDK` (`.nuget/packages`): a
+payload that stops matching the contract fails the parse. An optional value of a model is nullable, so a field left
+out reads as `null`, not as 0 (`Model.QuotaLimit.Should().BeNull()`). `DeliveredPayload<T>.Json` is the same payload as
+it went out, for the two things a model cannot say: that a field no model declares is not there, and the format of a
+value on the wire. Use it for those only.
 
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both

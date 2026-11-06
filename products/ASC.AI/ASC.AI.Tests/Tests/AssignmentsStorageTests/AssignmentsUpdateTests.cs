@@ -35,28 +35,26 @@ namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
-public class AssignmentsUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class AssignmentsUpdateTests(AspireAppFixture fixture) : AssignmentsTestBase(fixture)
 {
     [Fact]
     public async Task Update_Existing_PersistsNewProfile()
     {
-        var firstProfile = await CreateProfileAsync();
-        var secondProfile = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", firstProfile.Id);
+        // The public assign is an upsert: a second assign of a bound slot replaces its profile.
+        var firstProfile = await CreateAssignableProfileAsync();
+        var secondProfile = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.Chat, firstProfile.Id);
 
-        using var response = await _ai.PutAsync(
-            $"{AssignmentsPath}/Chat",
-            new { profileId = secondProfile.Id },
-            TestContext.Current.CancellationToken);
+        await AssignAsync(AiActionType.Chat, secondProfile.Id);
 
-        response.EnsureSuccessStatusCode();
-        (await ReadAssignmentAsync("Chat")).Should().Be(secondProfile.Id);
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().Be(secondProfile.Id);
     }
 
+    // Internal contract: the strict update (PUT /assignments/{type}) of an empty slot has no public route (public assign upserts; only the cascade's Default promotion updates, and only an existing slot).
     [Fact]
     public async Task Update_NonExisting_Returns404()
     {
-        var profile = await CreateProfileAsync();
+        var profile = await CreateProfileInternalAsync();
 
         using var response = await _ai.PutAsync(
             $"{AssignmentsPath}/Chat",
@@ -66,16 +64,17 @@ public class AssignmentsUpdateTests(AspireAppFixture fixture) : BaseTest(fixture
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    // Internal contract: entity-scoped assignments have no public route (the Node assign takes no entityId and its storage adapter drops it).
     [Fact]
     public async Task Update_WithEntityId_AffectsOnlyScopedRow()
     {
-        var globalProfile = await CreateProfileAsync();
-        var scopedProfile = await CreateProfileAsync();
-        var replacementProfile = await CreateProfileAsync();
+        var globalProfile = await CreateProfileInternalAsync();
+        var scopedProfile = await CreateProfileInternalAsync();
+        var replacementProfile = await CreateProfileInternalAsync();
         var roomId = await CreateRoomAsync();
 
-        await CreateAssignmentAsync("Chat", globalProfile.Id);
-        await CreateAssignmentAsync("Chat", scopedProfile.Id, roomId.ToString());
+        await CreateAssignmentInternalAsync("Chat", globalProfile.Id);
+        await CreateAssignmentInternalAsync("Chat", scopedProfile.Id, roomId.ToString());
 
         using var response = await _ai.PutAsync(
             $"{AssignmentsPath}/Chat",
@@ -83,14 +82,15 @@ public class AssignmentsUpdateTests(AspireAppFixture fixture) : BaseTest(fixture
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        (await ReadAssignmentAsync("Chat", roomId.ToString())).Should().Be(replacementProfile.Id);
-        (await ReadAssignmentAsync("Chat")).Should().Be(globalProfile.Id);
+        (await ReadAssignmentInternalAsync("Chat", roomId.ToString())).Should().Be(replacementProfile.Id);
+        (await ReadAssignmentInternalAsync("Chat")).Should().Be(globalProfile.Id);
     }
 
+    // Internal contract: entity-scoped assignments have no public route (the Node assign takes no entityId and its storage adapter drops it).
     [Fact]
     public async Task Update_NonExistentEntityId_Returns404()
     {
-        var profile = await CreateProfileAsync();
+        var profile = await CreateProfileInternalAsync();
 
         using var response = await _ai.PutAsync(
             $"{AssignmentsPath}/Chat",

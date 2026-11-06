@@ -180,6 +180,9 @@
   <data name="AiProfileUpdated" xml:space="preserve">
     <value>AI model profile updated: {0}</value>
   </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI model of AI project {0} changed to {1}</value>
+  </data>
   <data name="AIProviderCreated" xml:space="preserve">
     <value>AI provider created: {0}</value>
   </data>
@@ -296,6 +299,12 @@
   </data>
   <data name="CustomerWalletTopUpSettingsUpdated" xml:space="preserve">
     <value>Customer wallet top up settings updated</value>
+  </data>
+  <data name="FileKeysSet" xml:space="preserve">
+    <value>File keys issued for "{0}" to: {1}</value>
+  </data>
+  <data name="RoomFileKeysRevoked" xml:space="preserve">
+    <value>File keys in the room "{0}" removed for: {1}</value>
   </data>
   <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
     <value>Subscription balance moved to wallet: {0}</value>
@@ -954,6 +963,9 @@
   <data name="RoomRenamed" xml:space="preserve">
     <value>Room renamed: {0}</value>
   </data>
+  <data name="PrivateRoomTitle" xml:space="preserve">
+    <value>Private room</value>
+  </data>
   <data name="RoomsModule" xml:space="preserve">
     <value>Rooms</value>
   </data>
@@ -1325,5 +1337,11 @@
   </data>
   <data name="AppDisabled" xml:space="preserve">
     <value>App disabled: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Rooms linked to AI project {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Rooms unlinked from AI project {0}: [{1}]</value>
   </data>
 </root>

@@ -1323,4 +1323,16 @@
   <data name="AppDisabled" xml:space="preserve">
     <value>앱이 비활성화되었습니다: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>AI 프로젝트 {0}에 연결된 방: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>AI 프로젝트 {0}에서 연결 해제된 방: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI 프로젝트 {0}의 AI 모델이 {1}(으)로 변경되었습니다</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>웹훅 전송을 재시도했습니다: {0}</value>
+  </data>
 </root>

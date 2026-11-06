@@ -48,6 +48,15 @@ public static class ResourceNames
     public const string Files = "onlyoffice-files";
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
+
+    /// <summary>
+    /// The AI worker: it writes the files a text-to-docx export produces and runs the vectorization. Without it an
+    /// export is accepted (202) and never lands.
+    /// </summary>
+    public const string AiWorker = "onlyoffice-ai-worker";
+
+    /// <summary>The Node chat service (common/ASC.AI.Chat) that serves <c>/api/2.0/ai</c> and talks to the model.</summary>
+    public const string AiChat = "onlyoffice-aiChat";
     public const string Backup = "onlyoffice-data-backup";
     public const string BackupWorker = "onlyoffice-data-backup-worker";
 
@@ -57,6 +66,18 @@ public static class ResourceNames
     /// it or the history it asserts on is never written.
     /// </summary>
     public const string WebStudio = "onlyoffice-web-studio";
+
+    /// <summary>
+    /// The document server container (conversions, editors). Not something a suite lists in <c>Resources</c>: it has
+    /// no health check, so <see cref="AspireHostFixture{TClients}.WaitForDocumentServerAsync"/> is the wait for it.
+    /// </summary>
+    public const string Editors = "onlyoffice-editors";
+
+    /// <summary>
+    /// The DocSpace MCP server container that offers the AI chat its DocSpace REST tools. Not every launch profile starts
+    /// it; <see cref="AspireHostFixture{TClients}.HasResource"/> tells.
+    /// </summary>
+    public const string DocSpaceMcp = "onlyoffice-docspace-mcp";
 
     /// <summary>The identity (OAuth2) containers — Spring services built from common/ASC.Identity.</summary>
     public const string IdentityRegistration = "onlyoffice-identity-registration";
@@ -78,11 +99,4 @@ public static class ResourceNames
     /// account configured from outside in charge.
     /// </summary>
     public const string Nextcloud = "nextcloud";
-
-    /// <summary>
-    /// The WireMock the webhook delivery tests subscribe to. Its admin API (<c>/__admin</c>) is reached
-    /// through this resource; the portal itself sends to it as
-    /// <c>ASC.AppHost.Configuration.Constants.WebhookReceiverHost</c> on the same port.
-    /// </summary>
-    public const string WebhookReceiver = ASC.AppHost.Configuration.Constants.WebhookReceiverContainer;
 }

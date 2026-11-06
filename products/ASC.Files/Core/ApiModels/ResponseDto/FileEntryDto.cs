@@ -358,6 +358,21 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     public List<int> AssignedMetadataTemplates { get; set; }
 
     /// <summary>
+    /// Whether the entry has a metadata field a user can see and fill, by hand or with the AI filling: a field of a
+    /// visible assigned template, or a custom field. False when the entry has no metadata, when its assigned templates
+    /// are all hidden, or when they have no fields. It says nothing about the values: it stays true once every field is
+    /// filled, and nothing about the caller's rights: writing the values still needs the right to edit the entry
+    /// (`security.Edit`). It cannot be derived from `assignedMetadataTemplates`, which lists hidden templates too and
+    /// never lists the custom fields. Present, with a value, in the folder listing and in the file and folder info
+    /// responses; absent in the other responses that carry an entry (the answer to a creation, an upload or a rename),
+    /// which do not compute it, and for an entry of a third-party storage, which has no metadata. The same flag is
+    /// answered by `GET api/2.0/files/metadata/file/{fileId}` and `GET api/2.0/files/metadata/folder/{folderId}`.
+    /// </summary>
+    /// <example>true</example>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? HasMetadataFields { get; set; }
+
+    /// <summary>
     /// Where the search text of the listing was met in the metadata of the entry: one item per string value holding
     /// the text, in the order of the fields. Present only in a listing filtered by text, and only for the entries whose
     /// metadata contain it; an entry found by its title alone carries nothing here.
@@ -422,14 +437,26 @@ public class FileEntryDtoHelper(
     }
 
     /// <summary>
-    /// Fills the metadata of the entries of one page: their assigned templates, and, when the page was filtered by a search
-    /// text, where that text was met in their values (in the hidden templates too when the search looked there). One
-    /// round trip per kind, over the files and the folders together, and nothing at all for a tenant without templates,
-    /// which has no links and no values: the listing is the hottest read path.
+    /// Fills the metadata of the entries of one page: their assigned templates, whether they have a field to fill, and,
+    /// when the page was filtered by a search text, where that text was met in their values (in the hidden templates too
+    /// when the search looked there). One round trip per kind, over the files and the folders together, and nothing at
+    /// all for a tenant without templates, which has no links and no values: the listing is the hottest read path.
     /// </summary>
     public async Task SetMetadataAsync(IReadOnlyCollection<FileEntryDto<int>> dtos, string searchText = null, bool includeHiddenTemplates = false)
     {
-        if (dtos.Count == 0 || !await metadataTemplatesCache.HasTemplatesAsync())
+        if (dtos.Count == 0)
+        {
+            return;
+        }
+
+        // the flag is answered for every entry of the page, false included: an absent flag means "not computed here",
+        // and a client must be able to tell that from "nothing to fill"
+        foreach (var dto in dtos)
+        {
+            dto.HasMetadataFields = false;
+        }
+
+        if (!await metadataTemplatesCache.HasTemplatesAsync())
         {
             return;
         }
@@ -442,6 +469,13 @@ public class FileEntryDtoHelper(
 
         Assign(dtos, links.ToLookup(l => (l.EntryType, (int)l.EntryId), l => l.TemplateId),
             (dto, templateIds) => dto.AssignedMetadataTemplates = templateIds.Distinct().ToList());
+
+        // a separate question from the links: a custom field is a value without a link, and a linked template may be
+        // hidden or empty
+        var withFields = await metadataDao.GetEntriesWithFieldsAsync(fileIds, folderIds);
+
+        Assign(dtos, withFields.ToLookup(e => (e.EntryType, e.EntryId)),
+            (dto, _) => dto.HasMetadataFields = true);
 
         if (string.IsNullOrWhiteSpace(searchText))
         {
@@ -516,7 +550,7 @@ public class FileEntryDtoHelper(
             entry = await _fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).FirstAsync();
         }
 
-        if (entry.RootFolderType == FolderType.VirtualRooms && entry.ParentRoomType == null && entry is not Folder<TId> { IsRoom: true })
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub && entry.ParentRoomType == null && entry is not Folder<TId> { IsRoom: true })
         {
             var room = await _daoFactory.GetCacheFolderDao<TId>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(r => r.IsRoom);
             if (room != null)

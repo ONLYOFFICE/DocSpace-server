@@ -1323,4 +1323,16 @@
   <data name="AppDisabled" xml:space="preserve">
     <value>Sovellus otettu pois käytöstä: {0}</value>
   </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Huoneet linkitetty tekoälyprojektiin {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Huoneiden linkitys tekoälyprojektiin {0} poistettu: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Tekoälyprojektin {0} AI-malli vaihdettu: {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook-toimitusta yritettiin uudelleen: {0}</value>
+  </data>
 </root>

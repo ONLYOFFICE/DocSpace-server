@@ -59,7 +59,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
-    private IResourceBuilder<ContainerResource>? WebhookReceiverResource { get; set; }
+    private bool WebhookTestSettings { get; set; }
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
     private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
@@ -411,20 +411,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     }
 
     /// <summary>
-    /// The receiver the webhook delivery tests subscribe to (WireMock). A test stubs the answer for a
-    /// path of its own through the admin API and reads back from the request journal what the portal
-    /// sent. Adding it also switches the services to the test webhook settings in
-    /// <see cref="AddBaseConfig{T}"/>: a blacklist the receiver passes and short retry intervals.
+    /// Switches the services to the test webhook settings in <see cref="AddBaseConfig{T}"/>: a blacklist the
+    /// receiver of the webhook tests passes (a WireMock in the test process, on
+    /// <see cref="Constants.WebhookReceiverHost"/>) and short retry intervals.
     /// </summary>
-    public ConnectionStringManager AddWebhookReceiver()
+    public ConnectionStringManager UseWebhookTestSettings()
     {
-        WebhookReceiverResource = builder.AddContainer(Constants.WebhookReceiverContainer, "wiremock/wiremock", Constants.WireMockVersion)
-            .WithHttpEndpoint(port: Constants.WebhookReceiverPort, targetPort: 8080, name: "http", isProxied: false)
-            // published on that loopback alias rather than the default localhost (127.0.0.1), which the
-            // test blacklist keeps refusing
-            .WithEndpoint("http", e => e.TargetHost = Constants.WebhookReceiverHost)
-            .WithArgs("--disable-banner", "--max-request-journal-entries", "10000")
-            .WithHttpHealthCheck("/__admin/mappings");
+        WebhookTestSettings = true;
 
         return this;
     }
@@ -673,8 +666,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("core:notify:postman", "mailpit");
         }
 
-        if (WebhookReceiverResource != null)
+        if (WebhookTestSettings)
         {
+            // Only for the tests: the official image of the document server does not carry the crypto library, and without
+            // it no private room can be created. They drive the save callback themselves and need no real editor.
+            // An encrypted file could not really be edited on this stack.
+            resourceBuilder.WithEnvironment("files:docservice:encryption-assume-supported", "true");
+
             // a blacklist the receiver passes (Constants.WebhookTestBlacklist), only for the services that reach the
             // receiver: it replaces the default list for every UrlValidator caller of a service, not only for webhooks
             if (Constants.WebhookTestBlacklistServices.Contains(resourceBuilder.Resource.Name))

@@ -610,9 +610,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Излази чата</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Соба већ садржи фасциклу .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Складиште не може бити искључено док га соба користи. Уместо тога избришите собу</value>
   </data>
@@ -624,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Претражи у метаподацима фасцикле</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>AI пројекат може да повеже највише {0} соба са упутствима</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>AI пројекат може да повеже највише {0} соба знања</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Ове собе не могу да се повежу са AI пројектом: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>У собу са упутствима могу да се додају само Markdown (.md) датотеке</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Соба са упутствима може да садржи највише {0} вештина</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Опис вештине мора да има од 1 до 1024 знака и не сме да садржи XML ознаке</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Датотека вештине мора да почиње YAML frontmatter блоком између два реда --- са пољима name и description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Назив вештине мора да има од 1 до 64 знака, да садржи само мала слова, цифре и појединачне цртице и не сме да почиње или да се завршава цртицом</value>
   </data>
 </root>
