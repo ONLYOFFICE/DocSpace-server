@@ -43,6 +43,9 @@ import org.springframework.amqp.core.AmqpTemplate;
  * Publishes a client cache eviction to every region, and at once to the authorization service of
  * the region it originates from.
  *
+ * <p>An eviction is sent once and never kept: one lost to a broker outage or to the process dying
+ * before the send leaves the cached client in place until its entry expires on its own.
+ *
  * @param <E> the type of the eviction message
  */
 @Slf4j

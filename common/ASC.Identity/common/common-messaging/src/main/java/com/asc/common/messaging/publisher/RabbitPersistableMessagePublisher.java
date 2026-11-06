@@ -57,8 +57,11 @@ import tools.jackson.databind.json.JsonMapper;
  * <p>Each message is sent and the broker's confirm awaited. If the broker cannot be reached, or
  * does not confirm the message, it is kept in {@link PendingMessageRepository} instead, and sends
  * it again later. In normal operation nothing is stored, so this costs one confirm round trip per
- * message and no database write. A message is only lost if the broker and the database are both
- * unavailable at the same moment, in which case {@link #send} throws.
+ * message and no database write. A message is lost if the broker and the database are both
+ * unavailable at the same moment, in which case {@link #send} throws, or if the process dies after
+ * the caller handed the message over but before the broker confirmed it or it was kept: nothing is
+ * written ahead of the send. {@link AuthorizationCleanupPublisher} describes what that costs a
+ * cleanup.
  */
 @Slf4j
 @Component

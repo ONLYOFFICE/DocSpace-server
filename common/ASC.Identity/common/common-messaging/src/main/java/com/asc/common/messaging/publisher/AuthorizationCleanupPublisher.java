@@ -44,6 +44,25 @@ import org.apache.logging.log4j.util.Strings;
  * which removes grants those requests wrote after the first run. Every message goes through {@link
  * RabbitPersistableMessagePublisher}, so a broker outage delays the cleanup instead of losing it.
  *
+ * <p>This is not a transactional outbox: the cleanup is kept in the database only once a send has
+ * failed, and the clients may live in another store than the kept messages (DynamoDB in SaaS), so
+ * the removal and the message cannot share a transaction. Until then the cleanup exists only in
+ * this process's memory, from the commit of the removal through the background send, which may wait
+ * up to the broker's connection and confirm timeouts. A graceful shutdown finishes the sends in
+ * progress; a process killed or run out of memory in that window loses the cleanup, and nothing
+ * sends it again:
+ *
+ * <ul>
+ *   <li>a single client's leftovers are removed when a request presents them ({@code
+ *       RemovedClientReporter});
+ *   <li>a user's or a tenant's cleanup is restored only by calling the bulk removal again, which
+ *       publishes the cleanup even when no clients are left to remove. DocSpace does not repeat the
+ *       call on its own, and the removal usually answers before the send, so a lost cleanup leaves
+ *       the user's or the tenant's grants in place.
+ * </ul>
+ *
+ * <p>The window was accepted as narrower than the cost of an outbox spanning two stores.
+ *
  * @param <E> the type of the cleanup event
  */
 @Slf4j
