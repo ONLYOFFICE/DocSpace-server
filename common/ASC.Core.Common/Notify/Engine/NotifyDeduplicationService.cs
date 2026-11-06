@@ -38,6 +38,10 @@ namespace ASC.Notify.Engine;
 /// channel only once per period, however many times the event that produces it is repeated. The mark lives in the
 /// distributed cache because letters of one tenant are produced by several services and their replicas; the lock
 /// keeps parallel sends from slipping past the check.
+/// The mark is set before the letter is delivered, not after it. A repeat that arrives while the first letter is still
+/// on its way is dropped; if that delivery then fails, the mark is released for the next repeat, but the dropped one
+/// is not sent again. The same holds for a request the sending code refused while an earlier one was only accepted.
+/// The window lasts one delivery, or the acceptance of a letter that never reaches the engine.
 /// With <c>Redis:Enabled=false</c> the cache has no distributed level, so the mark is seen only by the process that
 /// set it and a repeat produced by another process goes out - enough for a single-node installation, not for a cluster.
 /// </summary>
