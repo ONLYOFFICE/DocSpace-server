@@ -844,31 +844,22 @@ public class FormFillingReportCreator(
                 return true;
             }
 
-            var link = await CompareWithPreviousVersionAsync(form, state);
+            var (link, comparedVersion) = await CompareWithPreviousVersionAsync(form, state);
             if (link == null)
             {
                 return false;
             }
 
-            ConsumeEditorRenames(state, form.Version);
-
-            var pending = state.PendingVersionLinks ??= [];
-
             // An earlier version left without submissions has nothing to decide: this one was compared past it.
-            foreach (var stale in pending.Where(p => p.Version < form.Version).ToList())
+            foreach (var stale in state.PendingVersionLinks?.Where(p => p.Version < form.Version).ToList() ?? [])
             {
                 if (!await HasDataAsync(db, form.Id, stale.Version, state.RoomId))
                 {
-                    pending.Remove(stale);
+                    state.PendingVersionLinks.Remove(stale);
                 }
             }
 
-            pending.RemoveAll(p => p.Version == form.Version);
-
-            if (link.Version > 0)
-            {
-                pending.Add(link);
-            }
+            ApplyVersionDecision(state, form.Version, link, comparedVersion);
 
             MarkChecked(state, form);
             return true;
@@ -887,6 +878,24 @@ public class FormFillingReportCreator(
         if (state.EditorFieldRenames?.Count == 0)
         {
             state.EditorFieldRenames = null;
+        }
+    }
+
+    /// <summary>
+    /// The decision about a version, applied to the state. A link carries the editor sessions saved up to it on, so they
+    /// go. A version that took none, with no data of its own, is compared past by the next one, which still needs the
+    /// sessions after the version this one was compared with: their keys are the ones its own sessions start from.
+    /// </summary>
+    internal static void ApplyVersionDecision(FormFillingProperties<int> state, int version, FormVersionLink link, int comparedVersion)
+    {
+        ConsumeEditorRenames(state, link.Version > 0 || comparedVersion == 0 ? version : comparedVersion);
+
+        var pending = state.PendingVersionLinks ??= [];
+        pending.RemoveAll(p => p.Version == version);
+
+        if (link.Version > 0)
+        {
+            pending.Add(link);
         }
     }
 
@@ -949,8 +958,9 @@ public class FormFillingReportCreator(
              .Where(s => s.OriginalFormVersion, version));
     }
 
-    // The link the version may take; one with no version when it takes none. Null when the index could not be read.
-    private async Task<FormVersionLink> CompareWithPreviousVersionAsync(File<int> form, FormFillingProperties<int> formFilling)
+    // The link the version may take, one with no version when it takes none, and the version it was compared with (0 when
+    // none). A null link when the index could not be read.
+    private async Task<(FormVersionLink Link, int ComparedVersion)> CompareWithPreviousVersionAsync(File<int> form, FormFillingProperties<int> formFilling)
     {
         var none = new FormVersionLink();
         var roomId = formFilling.RoomId;
@@ -961,7 +971,7 @@ public class FormFillingReportCreator(
              .Where(s => s.RoomId, roomId));
         if (!metaSuccess)
         {
-            return null;
+            return (null, 0);
         }
 
         // Compared with the last version whose data is in a table: submitted or linked. A version saved in between and
@@ -978,7 +988,7 @@ public class FormFillingReportCreator(
             var (submittedSuccess, submitted) = await CountSubmissionsAsync(form.Id, candidate.OriginalFormVersion, roomId);
             if (!submittedSuccess)
             {
-                return null;
+                return (null, 0);
             }
 
             if (submitted > 0)
@@ -990,13 +1000,13 @@ public class FormFillingReportCreator(
 
         if (previous == null)
         {
-            return none;
+            return (none, 0);
         }
 
         var (currentSuccess, currentSubmitted) = await CountSubmissionsAsync(form.Id, form.Version, roomId);
         if (!currentSuccess)
         {
-            return null;
+            return (null, 0);
         }
 
         // A submitted version is described in the index by its submissions; an unfilled one is read from its file, which
@@ -1030,22 +1040,23 @@ public class FormFillingReportCreator(
         // Empty for a file that is not an ONLYOFFICE form and for a form without fields.
         if (metadata.Count == 0)
         {
-            return none;
+            return (none, 0);
         }
 
         var tableVersion = GetTableVersion(formFilling, previous.OriginalFormVersion);
-        var renames = MatchFields(form.Version, tableVersion, previous, metadata, formFilling);
+        var renames = MatchFields(form.Version, tableVersion, previous, metadata, formFilling,
+            GetTableColumns(formFilling, tableVersion, metaResult, form.Version));
         if (renames == null)
         {
-            return none;
+            return (none, previous.OriginalFormVersion);
         }
 
-        return new FormVersionLink
+        return (new FormVersionLink
         {
             Version = form.Version,
             TableVersion = tableVersion,
             Renames = renames
-        };
+        }, previous.OriginalFormVersion);
     }
 
     /// <summary>
@@ -1056,34 +1067,44 @@ public class FormFillingReportCreator(
     /// changed is the same form under new keys; otherwise a field with a new name is a new field, so answers to different
     /// questions do not share a column.
     /// </summary>
-    internal static List<FormFieldRename> MatchFields(int version, int tableVersion, DbFormsMetadataSearch previousVersion, List<FormMetadata> current, FormFillingProperties<int> formFilling)
+    internal static List<FormFieldRename> MatchFields(int version, int tableVersion, DbFormsMetadataSearch previousVersion, List<FormMetadata> current, FormFillingProperties<int> formFilling,
+        IReadOnlyCollection<string> tableColumns = null)
     {
         var since = previousVersion.OriginalFormVersion;
         var decided = (formFilling.PendingVersionLinks ?? [])
             .Where(p => p.Version > since && p.Version < version && p.TableVersion == tableVersion)
-            .Select(p => (Version: p.Version, p.Renames));
+            .Select(p => (Version: p.Version, OpenedVersion: 0, p.Renames));
         // The sessions saved as one version, by several users, in the order they began to report.
         var sessions = (formFilling.EditorFieldRenames ?? [])
             .Where(r => r.SavedVersion > since && r.SavedVersion <= version && r.OpenedVersion >= since)
-            .Select(r => (Version: r.SavedVersion.Value, r.Renames))
+            .Select(r => (Version: r.SavedVersion.Value, r.OpenedVersion, r.Renames))
             .ToList();
 
         // A key of the previous version to its key after the known renames, applied in the order of the versions.
         var known = new Dictionary<string, string>();
-        foreach (var (_, renames) in decided.Concat(sessions).OrderBy(r => r.Version))
+        var renamedAt = new Dictionary<string, int>();
+        foreach (var (savedVersion, openedVersion, renames) in decided.Concat(sessions).OrderBy(r => r.Version))
         {
-            ComposeRenames(known, renames);
+            ComposeRenames(known, renamedAt, renames, savedVersion, openedVersion);
         }
 
         var tracked = sessions.Count > 0;
 
         var before = NormalizeMetadata(previousVersion.Metadata).ToList();
         var after = NormalizeMetadata(current).ToList();
+
+        // Columns of the table no field of the previous version writes to: those of fields an earlier version removed.
+        var decidedState = WithDecidedLinksBefore(formFilling, version);
+        var occupied = before.Select(f => MapToTableColumn(decidedState, since, NormalizeColumnName(f.Key))).ToHashSet();
+        var foreign = (tableColumns ?? []).Where(c => !occupied.Contains(c)).ToHashSet();
+
         var applied = new List<FormFieldRename>();
         foreach (var (oldKey, newKey) in known.Where(k => k.Key != k.Value && before.Exists(f => f.Key == k.Key) && after.Exists(f => f.Key == k.Value)))
         {
             // Swapped names, or the name of another field of the previous version: its column holds that field's answers.
-            if (before.Exists(f => f.Key != oldKey && NormalizeColumnName(f.Key) == NormalizeColumnName(newKey)))
+            // The same holds for the column a removed field left in the table.
+            if (before.Exists(f => f.Key != oldKey && NormalizeColumnName(f.Key) == NormalizeColumnName(newKey))
+                || foreign.Contains(NormalizeColumnName(newKey)))
             {
                 return null;
             }
@@ -1106,6 +1127,11 @@ public class FormFillingReportCreator(
 
         if (!tracked && FormFieldMatcher.MatchSameLayout(renamed, after) is { } positional)
         {
+            if (positional.Exists(r => foreign.Contains(NormalizeColumnName(r.NewKey))))
+            {
+                return null;
+            }
+
             return applied.Concat(positional).OrderBy(r => after.FindIndex(f => f.Key == r.NewKey)).ToList();
         }
 
@@ -1117,16 +1143,65 @@ public class FormFillingReportCreator(
         return applied.OrderBy(r => after.FindIndex(f => f.Key == r.NewKey)).ToList();
     }
 
-    // The renames of one version or one editor session happen at once, so swapped keys stay swapped.
-    private static void ComposeRenames(Dictionary<string, string> known, IEnumerable<FormFieldRename> renames)
+    /// <summary>
+    /// The columns of the table under their latest names: the fields of every version linked to it before the given one,
+    /// a field later versions removed among them. A decided link renames them; the fields of its version become columns
+    /// only with its first submission.
+    /// </summary>
+    internal static HashSet<string> GetTableColumns(FormFillingProperties<int> formFilling, int tableVersion, IEnumerable<DbFormsMetadataSearch> metadata, int version)
     {
-        var composed = (renames ?? [])
-            .Select(r => (Origin: known.FirstOrDefault(k => k.Value == r.OldKey).Key ?? r.OldKey, r.NewKey))
-            .ToList();
+        var decidedState = WithDecidedLinksBefore(formFilling, version);
+        var linked = new FormFillingProperties<int> { VersionLinks = formFilling?.VersionLinks?.Where(l => l.Version < version).ToList() };
+        var byVersion = (metadata ?? []).GroupBy(m => m.OriginalFormVersion).ToDictionary(g => g.Key, g => g.First().Metadata);
+
+        return GetTableVersions(linked, tableVersion)
+            .Where(v => v < version && byVersion.ContainsKey(v))
+            .SelectMany(v => NormalizeMetadata(byVersion[v] ?? []).Select(f => MapToTableColumn(decidedState, v, NormalizeColumnName(f.Key))))
+            .ToHashSet();
+    }
+
+    // The decided links of the versions before the given one: a version checked again does not count its own earlier
+    // decision.
+    private static FormFillingProperties<int> WithDecidedLinksBefore(FormFillingProperties<int> formFilling, int version)
+    {
+        return WithDecidedLinks(new FormFillingProperties<int>
+        {
+            VersionLinks = formFilling?.VersionLinks?.Where(l => l.Version < version).ToList(),
+            PendingVersionLinks = formFilling?.PendingVersionLinks?.Where(p => p.Version < version).ToList()
+        });
+    }
+
+    // The renames of one version or one editor session happen at once, so swapped keys stay swapped. A session reports
+    // from the version it opened: a key a decided link renamed away in that version or before now names a field the
+    // earlier versions did not have. Only a decided link vouches that the key was vacated: it was matched against the
+    // saved fields, while a session's last report may be older than the version it was saved as.
+    private static void ComposeRenames(Dictionary<string, string> known, Dictionary<string, int> renamedAt, IEnumerable<FormFieldRename> renames,
+        int version, int openedVersion)
+    {
+        var composed = new List<(string Origin, string NewKey)>();
+        foreach (var rename in renames ?? [])
+        {
+            var origin = known.FirstOrDefault(k => k.Value == rename.OldKey).Key;
+            if (origin == null && renamedAt.TryGetValue(rename.OldKey, out var renamedVersion) && renamedVersion <= openedVersion)
+            {
+                continue;
+            }
+
+            composed.Add((origin ?? rename.OldKey, rename.NewKey));
+        }
 
         foreach (var (origin, newKey) in composed)
         {
             known[origin] = newKey;
+            if (origin == newKey)
+            {
+                renamedAt.Remove(origin);
+            }
+            // The version the key was vacated at, not the latest one that renamed the field further.
+            else if (openedVersion == 0)
+            {
+                renamedAt.TryAdd(origin, version);
+            }
         }
     }
 
