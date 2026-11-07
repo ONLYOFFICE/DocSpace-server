@@ -1,5 +1,7 @@
 # ai-agents — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 Every requirement and scenario group of `spec.md`, with where it was verified. Paths are relative to the repo root
 (`server/`); `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml` at submodule commit `5ea4dc6` (line numbers are
 of that commit; the working tree of the submodule is at `baf28cf`, which adds private-room and skills-generation
@@ -40,13 +42,13 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Claim | Source | Status |
 |---|---|---|
 | **Portal AI switch** | | |
-| Read by every member, on by default | `Web/02_Settings/Common/AiAccessGetTests.cs:46,65`; `common/ASC.Core.Common/Tenants/TenantAiAccessSettings.cs:9-12` | TEST-CONFIRMED |
-| Written by owner / DocSpace admin; others 403; anonymous 401; scenarios "turns AI off for everyone", "Room admin cannot flip" | `T/SettingsTests/SettingsAiAccessTests.cs:55,81,99,108` | TEST-CONFIRMED |
-| Every AI route 403 while off, before the target is looked up | `T/ProfileTests/ProfileAiDisabledTests.cs:51,111`; `T/AssignmentTests/AssignmentAiDisabledTests.cs:46`; `T/ChatTests/ChatAiDisabledTests.cs:66,115`; `T/McpTests/McpToolsAiDisabledTests.cs:58`; `T/PromptTests/PromptAiDisabledTests.cs:50`; `T/ThreadStorageTests/ThreadsAiDisabledTests.cs:57` | TEST-CONFIRMED |
-| AI rooms section hidden while off, back on restores (scenarios "AI rooms are hidden", "Switching back on") | `Hub/AiHubAiAccessTests.cs:45-174`; `T/SettingsTests/SettingsAiDisabledTests.cs:110,139` | TEST-CONFIRMED |
+| Read by every member, on by default | `Web/02_Settings/Common/AiAccessGetTests.cs:46,65`; `common/ASC.Core.Common/Tenants/TenantAiAccessSettings.cs:9-12` | TEST-CONFIRMED [run: PASS] |
+| Written by owner / DocSpace admin; others 403; anonymous 401; scenarios "turns AI off for everyone", "Room admin cannot flip" | `T/SettingsTests/SettingsAiAccessTests.cs:55,81,99,108` | TEST-CONFIRMED [run: PASS] |
+| Every AI route 403 while off, before the target is looked up | `T/ProfileTests/ProfileAiDisabledTests.cs:51,111`; `T/AssignmentTests/AssignmentAiDisabledTests.cs:46`; `T/ChatTests/ChatAiDisabledTests.cs:66,115`; `T/McpTests/McpToolsAiDisabledTests.cs:58`; `T/PromptTests/PromptAiDisabledTests.cs:50`; `T/ThreadStorageTests/ThreadsAiDisabledTests.cs:57` | TEST-CONFIRMED [run: PASS] |
+| AI rooms section hidden while off, back on restores (scenarios "AI rooms are hidden", "Switching back on") | `Hub/AiHubAiAccessTests.cs:45-174`; `T/SettingsTests/SettingsAiDisabledTests.cs:110,139` | TEST-CONFIRMED [run: PASS] |
 | Audited and pushed to clients | `web/ASC.Web.Api/Api/Settings/SettingsController.cs` (`ChangeAiAccessSettingsAsync`, audit message) | CODE-ONLY |
 | **AI readiness reported to the portal** | | |
-| Every role incl. Guest, same fields, anonymous 401; read while off; self-hosted `aiReady` needs a profile (scenario "Read while the switch is off") | `T/SettingsTests/SettingsGetTests.cs:77,91,102,133,153`; `T/SettingsTests/SettingsAiDisabledTests.cs:83,124` | TEST-CONFIRMED |
+| Every role incl. Guest, same fields, anonymous 401; read while off; self-hosted `aiReady` needs a profile (scenario "Read while the switch is off") | `T/SettingsTests/SettingsGetTests.cs:77,91,102,133,153`; `T/SettingsTests/SettingsAiDisabledTests.cs:83,124` | TEST-CONFIRMED [run: PASS] |
 | Hosted: first three true only while on and paid (scenario "Unpaid hosted portal") | `TS/settings/settings.ai-disabled.spec.ts:174`; `AI/Core/Settings/AiSettingsService.cs` | TS-ONLY |
 | **The AI Tools wallet service gates inference only** | | |
 | Send and regenerate 402, nothing stored (scenario "Send refused while unpaid") | `TS/chat/chat.ai-disabled.spec.ts:352`; `Chat/controllers/aiController.ts` | TS-ONLY (TS block skipped) |
@@ -55,303 +57,303 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **AI tools version of the editors** | | |
 | `aiTools` next to the editors' version, null when off or old (scenario) | `web/ASC.Web.Api/Core/BuildVersion.cs:55,83`; `products/ASC.Files/Core/Helpers/DocumentService.cs` | CODE-ONLY |
 | **Per-user AI chat settings** | | |
-| Own value, true for new user, every role, while off (scenario "One user's preference is private") | `T/SettingsTests/SettingsUserConfigTests.cs:46,64,110,223`; `SettingsUserConfigPermissionsTests.cs:51,70,88`; `SettingsAiDisabledTests.cs:98,139` | TEST-CONFIRMED |
-| Non-boolean, empty, missing, non-object 400; unknown field ignored; 200 means stored (scenario "Non-boolean value") | `T/SettingsTests/SettingsUserConfigBodyTests.cs:79,96,113,125,137,157` | TEST-CONFIRMED |
+| Own value, true for new user, every role, while off (scenario "One user's preference is private") | `T/SettingsTests/SettingsUserConfigTests.cs:46,64,110,223`; `SettingsUserConfigPermissionsTests.cs:51,70,88`; `SettingsAiDisabledTests.cs:98,139` | TEST-CONFIRMED [run: PASS] |
+| Non-boolean, empty, missing, non-object 400; unknown field ignored; 200 means stored (scenario "Non-boolean value") | `T/SettingsTests/SettingsUserConfigBodyTests.cs:79,96,113,125,137,157` | TEST-CONFIRMED [run: PASS] |
 | **Tool permission mode of a user** | | |
-| Three modes, auto default, both read pairs, other preference leaves it (scenario "Modes round-trip") | `T/McpTests/McpToolPermissionModeSettingsTests.cs:65,76,127`; `T/PreferenceTests/PreferencePermissionTests.cs:162` | TEST-CONFIRMED |
-| Outside the three 400 (scenario "Value outside the three"); per user (scenario "Modes are per user") | `T/McpTests/McpToolPermissionModeSettingsTests.cs:89,105` | TEST-CONFIRMED |
-| Steers the pause; next tool call (scenario "Mode steers the approval pause") | `T/McpTests/McpToolPermissionModeChatTests.cs:91,121,137,153,166,200` | TEST-CONFIRMED |
+| Three modes, auto default, both read pairs, other preference leaves it (scenario "Modes round-trip") | `T/McpTests/McpToolPermissionModeSettingsTests.cs:65,76,127`; `T/PreferenceTests/PreferencePermissionTests.cs:162` | TEST-CONFIRMED [run: PASS] |
+| Outside the three 400 (scenario "Value outside the three"); per user (scenario "Modes are per user") | `T/McpTests/McpToolPermissionModeSettingsTests.cs:89,105` | TEST-CONFIRMED [run: PASS] |
+| Steers the pause; next tool call (scenario "Mode steers the approval pause") | `T/McpTests/McpToolPermissionModeChatTests.cs:91,121,137,153,166,200` | TEST-CONFIRMED [run: PASS] |
 | `ask` ignores a saved pre-approval (scenario "Pre-approval in ask") | `Lib/dist/core/services/ai/types.d.ts:503` ("under ask never"); `T/McpTests/McpToolPermissionModeChatTests.cs:111` asserts the opposite and is red by code reading (see differences) | CODE-ONLY |
 | **Gates on the tool permission mode routes** | | |
-| Guest 403 on all four, invalid value from Guest 403 (scenario "Guest on the two read routes") | `T/PreferenceTests/PreferencePermissionTests.cs:198` (bug 84303; line 212 reads the `aiSettingsGetUser` default) | TEST-CONFIRMED |
-| AI off 403 first, mode survives | `T/PreferenceTests/PreferenceAiDisabledTests.cs:76` (bug 84302) | TEST-CONFIRMED |
+| Guest 403 on all four, invalid value from Guest 403 (scenario "Guest on the two read routes") | `T/PreferenceTests/PreferencePermissionTests.cs:198` (bug 84303; line 212 reads the `aiSettingsGetUser` default) | TEST-CONFIRMED [run: FAIL-BUG] |
+| AI off 403 first, mode survives | `T/PreferenceTests/PreferenceAiDisabledTests.cs:76` (bug 84302) | TEST-CONFIRMED [run: FAIL-BUG] |
 | **Profile catalogue** | | |
-| Identical description to reading roles, get-by-id has no key or headers | `T/ProfileTests/ProfileCatalogueTests.cs:56,96,133,178`; `ProfileAccessReadTests.cs:91` | TEST-CONFIRMED |
-| Guest 403, anonymous 401, malformed / empty 400, unknown 404 (scenarios "Guest cannot read", "Unknown id") | `T/ProfileTests/ProfileAccessGuestTests.cs:47,58`; `ProfileAccessReadTests.cs:52`; `ProfileIdBoundaryTests.cs:46,54,73` | TEST-CONFIRMED |
-| List carries the key to an administrator (scenario) | `T/ProfileTests/ProfileAccessReadTests.cs:108`; every member too, see A15 | TEST-CONFIRMED |
+| Identical description to reading roles, get-by-id has no key or headers | `T/ProfileTests/ProfileCatalogueTests.cs:56,96,133,178`; `ProfileAccessReadTests.cs:91` | TEST-CONFIRMED [run: PASS] |
+| Guest 403, anonymous 401, malformed / empty 400, unknown 404 (scenarios "Guest cannot read", "Unknown id") | `T/ProfileTests/ProfileAccessGuestTests.cs:47,58`; `ProfileAccessReadTests.cs:52`; `ProfileIdBoundaryTests.cs:46,54,73` | TEST-CONFIRMED [run: PASS] |
+| List carries the key to an administrator (scenario) | `T/ProfileTests/ProfileAccessReadTests.cs:108`; every member too, see A15 | TEST-CONFIRMED [run: PASS] |
 | Hosted catalogue: gateway list, no embedding, restricted leaves (scenario "Restricted model leaves") | `TS/profiles/profiles.spec.ts:1477,1513`; `AI/Server/Service/ProfileStorageService.cs` | TS-ONLY |
 | **Models offered by a stored profile's provider** | | |
-| Missing / malformed 400, unknown 404, every reading role, lists models | `T/ProfileTests/ProfileIdBoundaryTests.cs:85,93,113,128`; `ProfileAccessReadTests.cs:153` | TEST-CONFIRMED |
-| Guest and AI off refused before the dial (scenario) | `T/ProfileTests/ProfileAccessGuestTests.cs:82`; `ProfileAiDisabledTests.cs:73` | TEST-CONFIRMED |
+| Missing / malformed 400, unknown 404, every reading role, lists models | `T/ProfileTests/ProfileIdBoundaryTests.cs:85,93,113,128`; `ProfileAccessReadTests.cs:153` | TEST-CONFIRMED [run: PASS] |
+| Guest and AI off refused before the dial (scenario) | `T/ProfileTests/ProfileAccessGuestTests.cs:82`; `ProfileAiDisabledTests.cs:73` | TEST-CONFIRMED [run: PASS] |
 | Key rejected 400, no answer 502 | yaml `aiProfilesListModels`; `T/ProfileTests/ProfileProviderReachabilityTests.cs:45` (discovery sibling) | CODE-ONLY |
 | **Managing profiles** | | |
-| DocSpace admin only; others 403; anonymous 401 before validation; AI off first (scenario "Room admin cannot delete") | `T/ProfileTests/ProfileWriteGuardTests.cs:110,132`; `ProfileAccessReadTests.cs:73`; `ProfileAiDisabledTests.cs:152,173`; `T/ProfileStorageTests/ProfileDeleteTests.cs:62,79` | TEST-CONFIRMED |
-| Round trip (scenario "Self-hosted admin round-trips") | `T/ProfileStorageTests/ProfileCreateTests.cs:43`; `ProfileUpdateTests.cs:41`; `ProfileDeleteTests.cs:41`; `T/ProfileTests/ProfileCatalogueTests.cs:56` | TEST-CONFIRMED |
-| Unusable profile refused before connecting (scenario) | `T/ProfileTests/ProfileWriteGuardTests.cs:50,67,84`; `ProfileProviderTypeTests.cs:110,138,152` | TEST-CONFIRMED |
+| DocSpace admin only; others 403; anonymous 401 before validation; AI off first (scenario "Room admin cannot delete") | `T/ProfileTests/ProfileWriteGuardTests.cs:110,132`; `ProfileAccessReadTests.cs:73`; `ProfileAiDisabledTests.cs:152,173`; `T/ProfileStorageTests/ProfileDeleteTests.cs:62,79` | TEST-CONFIRMED [run: PASS] |
+| Round trip (scenario "Self-hosted admin round-trips") | `T/ProfileStorageTests/ProfileCreateTests.cs:43`; `ProfileUpdateTests.cs:41`; `ProfileDeleteTests.cs:41`; `T/ProfileTests/ProfileCatalogueTests.cs:56` | TEST-CONFIRMED [run: PASS] |
+| Unusable profile refused before connecting (scenario) | `T/ProfileTests/ProfileWriteGuardTests.cs:50,67,84`; `ProfileProviderTypeTests.cs:110,138,152` | TEST-CONFIRMED [run: PASS] |
 | Hosted: every write 403 (scenario "Owner on a hosted portal") | `AI/Server/Service/ProfileStorageService.cs` (`AssertGatewayNotConfigured`); TS `profiles/profiles.spec.ts` hosted block | TS-ONLY |
 | Base URL ≤ 2048, key ≤ 4096; audited | `AI/Server/Models/RequestDto/AiIntegrationLimits.cs`; `ProfileStorageService.cs` (`AiProfileCreated/Updated/Deleted`) | CODE-ONLY |
 | **Provider discovery** | | |
-| Required fields named, empty body, malformed URL, bad key header 400 | `T/ProfileTests/ProfileProviderValidationTests.cs:63,85,104,118,144,164` | TEST-CONFIRMED |
-| Private address, scheme refused before dialling (scenario) | `T/ProfileTests/ProfileProviderUrlGuardTests.cs:56,74,100`; `ProfileProviderReachabilityTests.cs:87` | TEST-CONFIRMED |
-| Wrong key (scenario); 502; no echo, nothing stored | `T/ProfileTests/ProfileProviderModelsTests.cs:134,149`; `ProfileProviderReachabilityTests.cs:45`; `ProfileProviderValidationTests.cs:191` | TEST-CONFIRMED |
-| Local types (scenario "Local provider"), every model named; Guest and AI off | `T/ProfileTests/ProfileProviderReachabilityTests.cs:60,72`; `ProfileProviderModelsTests.cs:104`; `ProfileAccessGuestTests.cs:103`; `ProfileAiDisabledTests.cs:90` | TEST-CONFIRMED |
+| Required fields named, empty body, malformed URL, bad key header 400 | `T/ProfileTests/ProfileProviderValidationTests.cs:63,85,104,118,144,164` | TEST-CONFIRMED [run: PASS] |
+| Private address, scheme refused before dialling (scenario) | `T/ProfileTests/ProfileProviderUrlGuardTests.cs:56,74,100`; `ProfileProviderReachabilityTests.cs:87` | TEST-CONFIRMED [run: PASS] |
+| Wrong key (scenario); 502; no echo, nothing stored | `T/ProfileTests/ProfileProviderModelsTests.cs:134,149`; `ProfileProviderReachabilityTests.cs:45`; `ProfileProviderValidationTests.cs:191` | TEST-CONFIRMED [run: PASS] |
+| Local types (scenario "Local provider"), every model named; Guest and AI off | `T/ProfileTests/ProfileProviderReachabilityTests.cs:60,72`; `ProfileProviderModelsTests.cs:104`; `ProfileAccessGuestTests.cs:103`; `ProfileAiDisabledTests.cs:90` | TEST-CONFIRMED [run: PASS] |
 | **Connection check of a stored profile** | | |
-| Bare id or wrapper; missing / malformed 400; unknown 404; flat verdict (scenario) | `T/ProfileTests/ProfileTestConnectionTests.cs:47,58,74,107,118,128` | TEST-CONFIRMED |
-| Same verdict per role; Guest 403, malformed id before the role check | `T/ProfileTests/ProfileAccessReadTests.cs:153`; `ProfileAccessGuestTests.cs:69,119,136` | TEST-CONFIRMED |
+| Bare id or wrapper; missing / malformed 400; unknown 404; flat verdict (scenario) | `T/ProfileTests/ProfileTestConnectionTests.cs:47,58,74,107,118,128` | TEST-CONFIRMED [run: PASS] |
+| Same verdict per role; Guest 403, malformed id before the role check | `T/ProfileTests/ProfileAccessReadTests.cs:153`; `ProfileAccessGuestTests.cs:69,119,136` | TEST-CONFIRMED [run: PASS] |
 | **Model restrictions and prices of a hosted portal** | | |
-| Null entry 400 before the action (scenario "Null entry"); valid body reaches the 403 of the test portal | `Web/04_Portal/Payments/PaymentAiModelRestrictionsValidationTests.cs:55,73,89,107` | TEST-CONFIRMED |
+| Null entry 400 before the action (scenario "Null entry"); valid body reaches the 403 of the test portal | `Web/04_Portal/Payments/PaymentAiModelRestrictionsValidationTests.cs:55,73,89,107` | TEST-CONFIRMED [run: PASS] |
 | `getAiPrices`, `getRestrictedAiModels`, the rest of `setRestrictedAiModels` | `Payments` (three actions); yaml 53405-53546 at `baf28cf`, `getAiPrices` etc. at 5ea4dc6 | CODE-ONLY |
 | Restriction reaches an open conversation (scenario) | `TS/messages/messages.spec.ts`, `TS/agents/agents.spec.ts` restriction blocks | TS-ONLY (TS block skipped) |
 | **Tasks and the scope of the assignments** | | |
-| The eleven tasks | `common/ASC.AI.Integration/Assignments/ActionType.cs`; yaml 69851 (`GenerateMeta`); `T/AssignmentTests/AssignmentAssignTests.cs:100` | TEST-CONFIRMED |
-| Unknown scope 404 (scenario); unopenable 403; Room is the portal map (scenario) | `T/AssignmentTests/AssignmentEntityScopeTests.cs:51,67,81`; `T/ChatTests/ChatRoomModelTests.cs:46,122`; `T/AssignmentsStorageTests/AssignmentsReadTests.cs:108,123` | TEST-CONFIRMED |
-| Unknown task 400 | `T/AssignmentTests/AssignmentReadTests.cs:85`; `AssignmentRemoveTests.cs:61` | TEST-CONFIRMED |
+| The eleven tasks | `common/ASC.AI.Integration/Assignments/ActionType.cs`; yaml 69851 (`GenerateMeta`); `T/AssignmentTests/AssignmentAssignTests.cs:100` | TEST-CONFIRMED [run: PASS] |
+| Unknown scope 404 (scenario); unopenable 403; Room is the portal map (scenario) | `T/AssignmentTests/AssignmentEntityScopeTests.cs:51,67,81`; `T/ChatTests/ChatRoomModelTests.cs:46,122`; `T/AssignmentsStorageTests/AssignmentsReadTests.cs:108,123` | TEST-CONFIRMED [run: PASS-ON-RERUN] |
+| Unknown task 400 | `T/AssignmentTests/AssignmentReadTests.cs:85`; `AssignmentRemoveTests.cs:61` | TEST-CONFIRMED [run: PASS] |
 | **Who may read and write assignments** | | |
-| Reads for three roles, Guest 403, anonymous 401, AI off 403 (scenario "Guest cannot read") | `T/AssignmentTests/AssignmentPermissionTests.cs:46,80`; `AssignmentAiDisabledTests.cs:46` | TEST-CONFIRMED |
-| Writes DocSpace-admin only; refused writes nothing (scenario "Room admin cannot bind") | `T/AssignmentTests/AssignmentPermissionTests.cs:134`; `AssignmentAiDisabledTests.cs:73` | TEST-CONFIRMED |
+| Reads for three roles, Guest 403, anonymous 401, AI off 403 (scenario "Guest cannot read") | `T/AssignmentTests/AssignmentPermissionTests.cs:46,80`; `AssignmentAiDisabledTests.cs:46` | TEST-CONFIRMED [run: PASS] |
+| Writes DocSpace-admin only; refused writes nothing (scenario "Room admin cannot bind") | `T/AssignmentTests/AssignmentPermissionTests.cs:134`; `AssignmentAiDisabledTests.cs:73` | TEST-CONFIRMED [run: PASS] |
 | **Resolving the model of a task** | | |
-| Own binding, then Default; FormAnalysis independent (scenario "Unassigned falls back") | `T/AssignmentTests/AssignmentReadTests.cs:68`; `AssignmentResolutionTests.cs:51,72,87,109` | TEST-CONFIRMED |
-| 404 not 500; try-resolve 200 null; image default (scenarios "Default holds an image model", "Chat and a profile that cannot chat") | `T/AssignmentTests/AssignmentResolutionTests.cs:121,139,153,175` (84450 asserts not-500; the 404 is Chat `assignmentsController.ts:80-100`) | TEST-CONFIRMED |
-| `expand` `profile` with totals | `T/AssignmentTests/AssignmentEntityScopeTests.cs:91` | TEST-CONFIRMED |
+| Own binding, then Default; FormAnalysis independent (scenario "Unassigned falls back") | `T/AssignmentTests/AssignmentReadTests.cs:68`; `AssignmentResolutionTests.cs:51,72,87,109` | TEST-CONFIRMED [run: PASS] |
+| 404 not 500; try-resolve 200 null; image default (scenarios "Default holds an image model", "Chat and a profile that cannot chat") | `T/AssignmentTests/AssignmentResolutionTests.cs:121,139,153,175` (84450 asserts not-500; the 404 is Chat `assignmentsController.ts:80-100`) | TEST-CONFIRMED [run: PASS] |
+| `expand` `profile` with totals | `T/AssignmentTests/AssignmentEntityScopeTests.cs:91` | TEST-CONFIRMED [run: PASS] |
 | Hosted defaults (scenario) | `TS/assignments/assignments.spec.ts:33` (two bindings); `AI/Server/Service/AssignmentsResolver.cs:11-32` (FormAnalysis) | TS-ONLY |
 | **Writing assignments** | | |
-| Capability check; unknown profile refused (scenario); missing field 400 | `T/AssignmentTests/AssignmentCapabilityTests.cs:64`; `AssignmentAssignTests.cs:151,169` | TEST-CONFIRMED |
-| Bulk all or nothing (scenario), empty map (scenario) | `T/AssignmentTests/AssignmentBulkTests.cs:42,62,87,99,122,149` | TEST-CONFIRMED |
-| Unassign, cascade | `T/AssignmentTests/AssignmentRemoveTests.cs:42,61,75,102` | TEST-CONFIRMED |
+| Capability check; unknown profile refused (scenario); missing field 400 | `T/AssignmentTests/AssignmentCapabilityTests.cs:64`; `AssignmentAssignTests.cs:151,169` | TEST-CONFIRMED [run: PASS] |
+| Bulk all or nothing (scenario), empty map (scenario) | `T/AssignmentTests/AssignmentBulkTests.cs:42,62,87,99,122,149` | TEST-CONFIRMED [run: PASS] |
+| Unassign, cascade | `T/AssignmentTests/AssignmentRemoveTests.cs:42,61,75,102` | TEST-CONFIRMED [run: PASS] |
 | Audited (scenario) | `AI/Server/Service/AssignmentsStorageService.cs` (`AiProfileAssigned`, `AiProfileUnassigned`) | CODE-ONLY |
 | **The AI rooms section** | | |
-| Created by owner / admin / Room admin, User 403; section root (scenario "Section listing") | `Hub/AiHubRootTests.cs:48,63,124`; `Hub/AiProjectRoomTests.cs:46,63,77,87,101,132,164` | TEST-CONFIRMED |
-| Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,69,80,93,106` | TEST-CONFIRMED |
-| Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED |
+| Created by owner / admin / Room admin, User 403; section root (scenario "Section listing") | `Hub/AiHubRootTests.cs:48,63,124`; `Hub/AiProjectRoomTests.cs:46,63,77,87,101,132,164` | TEST-CONFIRMED [run: PASS] |
+| Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,69,80,93,106` | TEST-CONFIRMED [run: PASS] |
+| Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
 | Knowledge room needs vectorization 403 | `Security:1422,1441`; `AI/Core/Settings` | CODE-ONLY |
 | **Members of the AI rooms** | | |
-| Guest not in a project (scenario); User joins through a link as Member | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED |
-| Member reads, manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,95,124`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED |
+| Guest not in a project (scenario); User joins through a link as Member | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
+| Member reads, manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,95,124`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
 | DocSpace admin outside a project cannot read model, sources or skills | `Hub/AiProjectSourcesLinkTests.cs:248`, `Hub/AiRoomSkillsTests.cs:118` cover a User; admin by `Security` | CODE-ONLY |
 | **The model of an AI project** | | |
-| Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,111,185` | TEST-CONFIRMED |
-| Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:124,141,155,168` | TEST-CONFIRMED |
-| Image profile refused (scenario) | `T/ChatTests/ChatProjectModelTests.cs:238,255` | TEST-CONFIRMED |
-| Member reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60`; `T/ChatTests/ChatProjectModelTests.cs:129` (the read half; the round half is A16) | TEST-CONFIRMED |
-| Model moved (scenario) | `T/ChatTests/ChatProjectModelTests.cs:94` | TEST-CONFIRMED |
+| Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,111,185` | TEST-CONFIRMED [run: PASS] |
+| Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:124,141,155,168` | TEST-CONFIRMED [run: PASS] |
+| Image profile refused (scenario) | `T/ChatTests/ChatProjectModelTests.cs:238,255` | TEST-CONFIRMED [run: PASS] |
+| Member reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60`; `T/ChatTests/ChatProjectModelTests.cs:129` (the read half; the round half is A16) | TEST-CONFIRMED [run: FAIL-BUG] |
+| Model moved (scenario) | `T/ChatTests/ChatProjectModelTests.cs:94` | TEST-CONFIRMED [run: PASS] |
 | Audited, pushed | `products/ASC.Files/Server/Api/VirtualRoomsController.cs` (`setProjectModel`) | CODE-ONLY |
 | **Sources of an AI project** | | |
-| Sorted; duplicates once (scenario) | `Hub/AiProjectSourcesLinkTests.cs:42,56,77` | TEST-CONFIRMED |
-| Refused whole: other type, unknown, deleted, empty, over 40, unreadable, Viewer (scenario "Room not linkable") | `Hub/AiProjectSourcesLinkTests.cs:94,111,125,138,153,166,179,197,217` | TEST-CONFIRMED |
-| Over the limit (scenario); deleted room (scenario); unlink | `Hub/AiProjectSourcesUnlinkTests.cs:42,60,113,129` | TEST-CONFIRMED |
-| Manager only | `Hub/AiProjectSourcesLinkTests.cs:231`; `Hub/AiProjectSourcesUnlinkTests.cs:73,91` | TEST-CONFIRMED |
+| Sorted; duplicates once (scenario) | `Hub/AiProjectSourcesLinkTests.cs:42,56,77` | TEST-CONFIRMED [run: PASS] |
+| Refused whole: other type, unknown, deleted, empty, over 40, unreadable, Viewer (scenario "Room not linkable") | `Hub/AiProjectSourcesLinkTests.cs:94,111,125,138,153,166,179,197,217` | TEST-CONFIRMED [run: PASS] |
+| Over the limit (scenario); deleted room (scenario); unlink | `Hub/AiProjectSourcesUnlinkTests.cs:42,60,113,129` | TEST-CONFIRMED [run: PASS] |
+| Manager only | `Hub/AiProjectSourcesLinkTests.cs:231`; `Hub/AiProjectSourcesUnlinkTests.cs:73,91` | TEST-CONFIRMED [run: PASS] |
 | Audited and pushed | `products/ASC.Files/Core` (share and socket calls in the link service) | CODE-ONLY |
 | **Access through a project** | | |
-| Member and group read linked room; non-member 403; not listed in members | `Hub/AiProjectMemberAccessTests.cs:45,67,85,160` | TEST-CONFIRMED |
-| Unlink / removal ends it (scenario); own role not lowered | `Hub/AiProjectMemberAccessTests.cs:103,122,140` | TEST-CONFIRMED |
-| Skills for a member | `Hub/AiProjectMemberAccessTests.cs:177`; `Hub/AiRoomSkillsTests.cs:62` | TEST-CONFIRMED |
+| Member and group read linked room; non-member 403; not listed in members | `Hub/AiProjectMemberAccessTests.cs:45,67,85,160` | TEST-CONFIRMED [run: PASS] |
+| Unlink / removal ends it (scenario); own role not lowered | `Hub/AiProjectMemberAccessTests.cs:103,122,140` | TEST-CONFIRMED [run: PASS] |
+| Skills for a member | `Hub/AiProjectMemberAccessTests.cs:177`; `Hub/AiRoomSkillsTests.cs:62` | TEST-CONFIRMED [run: PASS] |
 | **Skills of an Instructions room** | | |
-| Front matter rules, upload, chunked, new version (scenario "Invalid name") | `Instr/SkillUploadTests.cs:41-221` | TEST-CONFIRMED |
-| Copy and move refused; no folder | `Instr/SkillMoveCopyTests.cs:58,90,107`; `Instr/InstructionsRoomFolderTests.cs:41,56,75,91` | TEST-CONFIRMED |
-| Skill follows its file (scenario) | `Hub/RoomsSkillsLifecycleTests.cs:41,58,73,88,105,124,139,155`; `Instr/SkillMoveCopyTests.cs:123,157` | TEST-CONFIRMED |
+| Front matter rules, upload, chunked, new version (scenario "Invalid name") | `Instr/SkillUploadTests.cs:41-221` | TEST-CONFIRMED [run: PASS] |
+| Copy and move refused; no folder | `Instr/SkillMoveCopyTests.cs:58,90,107`; `Instr/InstructionsRoomFolderTests.cs:41,56,75,91` | TEST-CONFIRMED [run: PASS] |
+| Skill follows its file (scenario) | `Hub/RoomsSkillsLifecycleTests.cs:41,58,73,88,105,124,139,155`; `Instr/SkillMoveCopyTests.cs:123,157` | TEST-CONFIRMED [run: PASS] |
 | **Listing the skills** | | |
-| `getRoomSkills` | `Hub/AiRoomSkillsTests.cs:46,62,82,95,108,118,134` | TEST-CONFIRMED |
-| `getRoomsSkills` (scenario "Unreadable room left out") | `Hub/RoomsSkillsTests.cs:41,61,76,94,107,120,137,147` | TEST-CONFIRMED |
-| `getRoomAiFolder` (scenario "Room without a skill") | `T/SkillTests/SkillFolderListingTests.cs:48,58,69` | TEST-CONFIRMED |
+| `getRoomSkills` | `Hub/AiRoomSkillsTests.cs:46,62,82,95,108,118,134` | TEST-CONFIRMED [run: PASS] |
+| `getRoomsSkills` (scenario "Unreadable room left out") | `Hub/RoomsSkillsTests.cs:41,61,76,94,107,120,137,147` | TEST-CONFIRMED [run: PASS] |
+| `getRoomAiFolder` (scenario "Room without a skill") | `T/SkillTests/SkillFolderListingTests.cs:48,58,69` | TEST-CONFIRMED [run: PASS] |
 | `getRoomAiFolder` non-reader 403; `withAiFolder` (scenario) | `products/ASC.Files/Server/Api/VirtualRoomsController.cs`; yaml 30261 | CODE-ONLY |
 | **Using the skills in a chat** | | |
-| Index and `read_skill`; body only on request (scenario "Model reads one skill") | `T/SkillTests/SkillChatTests.cs:46,73,93` | TEST-CONFIRMED |
-| Member yes, outsider, Guest, revoked no (scenario "Outsider") | `T/SkillTests/SkillPermissionTests.cs:80,98,138,153,183,209` | TEST-CONFIRMED |
+| Index and `read_skill`; body only on request (scenario "Model reads one skill") | `T/SkillTests/SkillChatTests.cs:46,73,93` | TEST-CONFIRMED [run: PASS] |
+| Member yes, outsider, Guest, revoked no (scenario "Outsider") | `T/SkillTests/SkillPermissionTests.cs:80,98,138,153,183,209` | TEST-CONFIRMED [run: PASS] |
 | Composer lists the rooms (scenario) | `Chat/controllers/contextController.ts`; yaml `aiContextGetContextFolders`, `aiContextGetRoomSkills` | CODE-ONLY |
 | **An AI agent as a room: the deltas** | | |
-| Roles, Guest Viewer only (scenario "Guest as Content creator") | `T/AttachmentTests/AttachmentDeviceAccessTests.cs:77,115`; `T/ChatTests/ChatPermissionGuestTests.cs:186` | TEST-CONFIRMED |
-| Root holds no files; Viewer, Content creator (scenario "Upload to the agent root") | `T/AttachmentTests/AttachmentDestinationTests.cs:107,152`; `AttachmentDeviceAccessTests.cs:46,97` | TEST-CONFIRMED |
-| Knowledge: no subfolders | `T/AttachmentTests/AttachmentDestinationTests.cs:127` | TEST-CONFIRMED |
+| Roles, Guest Viewer only (scenario "Guest as Content creator") | `T/AttachmentTests/AttachmentDeviceAccessTests.cs:77,115`; `T/ChatTests/ChatPermissionGuestTests.cs:186` | TEST-CONFIRMED [run: PASS] |
+| Root holds no files; Viewer, Content creator (scenario "Upload to the agent root") | `T/AttachmentTests/AttachmentDestinationTests.cs:107,152`; `AttachmentDeviceAccessTests.cs:46,97` | TEST-CONFIRMED [run: PASS] |
+| Knowledge: no subfolders | `T/AttachmentTests/AttachmentDestinationTests.cs:127` | TEST-CONFIRMED [run: PASS] |
 | Knowledge: indexable formats only | `TS/vectorization/vectorization.validation.spec.ts:144`; `Security` | TS-ONLY (TS block skipped) |
-| Imposes no model (scenario); stored prompt (scenario) | `T/ChatTests/ChatAiRoomTests.cs:46`; `T/ChatTests/ChatComposerAgentTests.cs:53,108` | TEST-CONFIRMED |
+| Imposes no model (scenario); stored prompt (scenario) | `T/ChatTests/ChatAiRoomTests.cs:46`; `T/ChatTests/ChatComposerAgentTests.cs:53,108` | TEST-CONFIRMED [run: PASS-ON-RERUN] |
 | No template (scenario) | `TS/agents/agents.spec.ts` template block | TS-ONLY (TS block skipped) |
 | **Starting a chat thread** | | |
-| Roles; Guest 403 | `T/ChatTests/ChatStartTests.cs:49`; `ChatPermissionGuestTests.cs:93`; `ChatPermissionAnonymousTests.cs:74` | TEST-CONFIRMED |
-| Blank title (scenario), no body | `T/ThreadStorageTests/ThreadsCreateTests.cs:102,114,131`; `T/ChatTests/ChatFirstMessageTests.cs:78,93` | TEST-CONFIRMED |
-| Limit (scenario); parallel (scenario); verbatim | `T/ThreadStorageTests/ThreadTitleLengthTests.cs:43,57`; `ThreadsCreateTests.cs:89,199` | TEST-CONFIRMED |
-| `profileId` malformed 400, unknown 404; no profile (scenario) | `T/ChatTests/ChatThreadModelRulesTests.cs:84,144`; `T/ThreadStorageTests/ThreadCreateTests.cs:98` | TEST-CONFIRMED |
-| Listed empty until a message; creator alone | `T/ChatTests/ChatFirstMessageTests.cs:49`; `ChatGlobalEntryTests.cs:89` | TEST-CONFIRMED |
+| Roles; Guest 403 | `T/ChatTests/ChatStartTests.cs:49`; `ChatPermissionGuestTests.cs:93`; `ChatPermissionAnonymousTests.cs:74` | TEST-CONFIRMED [run: PASS] |
+| Blank title (scenario), no body | `T/ThreadStorageTests/ThreadsCreateTests.cs:102,114,131`; `T/ChatTests/ChatFirstMessageTests.cs:78,93` | TEST-CONFIRMED [run: PASS] |
+| Limit (scenario); parallel (scenario); verbatim | `T/ThreadStorageTests/ThreadTitleLengthTests.cs:43,57`; `ThreadsCreateTests.cs:89,199` | TEST-CONFIRMED [run: PASS] |
+| `profileId` malformed 400, unknown 404; no profile (scenario) | `T/ChatTests/ChatThreadModelRulesTests.cs:84,144`; `T/ThreadStorageTests/ThreadCreateTests.cs:98` | TEST-CONFIRMED [run: PASS] |
+| Listed empty until a message; creator alone | `T/ChatTests/ChatFirstMessageTests.cs:49`; `ChatGlobalEntryTests.cs:89` | TEST-CONFIRMED [run: PASS] |
 | **Where a thread may be started** | | |
-| Omitted / null ordinary; malformed and unknown 404; any accessible folder | `T/ThreadStorageTests/ThreadsCreateTests.cs:143,170,184`; `T/ChatTests/ChatPermissionValidationTests.cs:64` | TEST-CONFIRMED |
+| Omitted / null ordinary; malformed and unknown 404; any accessible folder | `T/ThreadStorageTests/ThreadsCreateTests.cs:143,170,184`; `T/ChatTests/ChatPermissionValidationTests.cs:64` | TEST-CONFIRMED [run: PASS] |
 | Empty or 0 as ordinary | `Chat/storage/docspaceFilesApi.ts:472-478` (empty); 0 by `IntegrationServiceBase` | CODE-ONLY |
-| Non-member (scenario); Read member (scenario) | `T/ChatTests/ChatPermissionNonMemberTests.cs:57,64,79,104`; `ChatPermissionRevokedTests.cs:52` | TEST-CONFIRMED |
-| Outsider of a project (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:48` | TEST-CONFIRMED |
+| Non-member (scenario); Read member (scenario) | `T/ChatTests/ChatPermissionNonMemberTests.cs:57,64,79,104`; `ChatPermissionRevokedTests.cs:52` | TEST-CONFIRMED [run: PASS] |
+| Outsider of a project (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:48` | TEST-CONFIRMED [run: PASS] |
 | **Thread privacy** | | |
-| Creator only on every route (scenario "Two members") | `T/ThreadStorageTests/ThreadsPermissionTests.cs:67`; `ThreadsLifecycleTests.cs:209`; `T/ChatTests/ChatPermissionIsolationTests.cs:77`; `ChatPermissionIsolationSendTests.cs:51` | TEST-CONFIRMED |
-| Removed member (scenario) | `T/ChatTests/ChatPermissionRevokedTests.cs:52,67,90` | TEST-CONFIRMED |
-| Regeneration by a fellow member (scenario) | `T/MessageStorageTests/MessageRegenerateAccessTests.cs:55,79` | TEST-CONFIRMED |
+| Creator only on every route (scenario "Two members") | `T/ThreadStorageTests/ThreadsPermissionTests.cs:67`; `ThreadsLifecycleTests.cs:209`; `T/ChatTests/ChatPermissionIsolationTests.cs:77`; `ChatPermissionIsolationSendTests.cs:51` | TEST-CONFIRMED [run: PASS] |
+| Removed member (scenario) | `T/ChatTests/ChatPermissionRevokedTests.cs:52,67,90` | TEST-CONFIRMED [run: PASS] |
+| Regeneration by a fellow member (scenario) | `T/MessageStorageTests/MessageRegenerateAccessTests.cs:55,79` | TEST-CONFIRMED [run: PASS] |
 | **One thread list per user** | | |
-| Rooms share one list (scenario); third-party | `T/ChatTests/ChatEntityContextTests.cs:71,108,139`; `ChatGlobalEntryTests.cs:146`; `T/ThirdPartyTests/ThirdPartyThreadTests.cs:68` (bug 82855, by design) | TEST-CONFIRMED |
-| Unopenable room lists the same | `T/ChatTests/ChatRoomAcrossUsersTests.cs:47`; `T/ThirdPartyTests/ThirdPartyThreadTests.cs:88` | TEST-CONFIRMED |
-| Room deleted (scenario) | `T/ChatTests/ChatRoomGoneTests.cs:45,86` | TEST-CONFIRMED |
+| Rooms share one list (scenario); third-party | `T/ChatTests/ChatEntityContextTests.cs:71,108,139`; `ChatGlobalEntryTests.cs:146`; `T/ThirdPartyTests/ThirdPartyThreadTests.cs:68` (bug 82855, by design) | TEST-CONFIRMED [run: PASS] |
+| Unopenable room lists the same | `T/ChatTests/ChatRoomAcrossUsersTests.cs:47`; `T/ThirdPartyTests/ThirdPartyThreadTests.cs:88` | TEST-CONFIRMED [run: PASS] |
+| Room deleted (scenario) | `T/ChatTests/ChatRoomGoneTests.cs:45,86` | TEST-CONFIRMED [run: PASS] |
 | **Listing, paging and searching threads** | | |
-| Newest first, `count`, 0 → 400, deleted leaves | `T/ChatTests/ChatThreadListingTests.cs:46,73`; `T/ThreadStorageTests/ThreadsListTests.cs:46,73,92` | TEST-CONFIRMED |
-| Cursor (scenario); search (scenario) | `T/ThreadStorageTests/ThreadsListTests.cs:102,137`; `ThreadReadTests.cs:151`; `ThreadSearchTests.cs:53,74` | TEST-CONFIRMED |
-| Touch moves only that thread, never back | `T/ChatTests/ChatThreadManagementTests.cs:46`; `T/ThreadStorageTests/ThreadsTouchTests.cs:72` | TEST-CONFIRMED |
+| Newest first, `count`, 0 → 400, deleted leaves | `T/ChatTests/ChatThreadListingTests.cs:46,73`; `T/ThreadStorageTests/ThreadsListTests.cs:46,73,92` | TEST-CONFIRMED [run: PASS] |
+| Cursor (scenario); search (scenario) | `T/ThreadStorageTests/ThreadsListTests.cs:102,137`; `ThreadReadTests.cs:151`; `ThreadSearchTests.cs:53,74` | TEST-CONFIRMED [run: PASS] |
+| Touch moves only that thread, never back | `T/ChatTests/ChatThreadManagementTests.cs:46`; `T/ThreadStorageTests/ThreadsTouchTests.cs:72` | TEST-CONFIRMED [run: PASS] |
 | **Renaming, deleting and clearing a thread** | | |
-| Rename verbatim, refused body, unknown | `T/ThreadStorageTests/ThreadsRenameTests.cs:57,97,119,137`; `T/ChatTests/ChatThreadValidationTests.cs:54` | TEST-CONFIRMED |
-| Delete; gone everywhere (scenario) | `T/ThreadStorageTests/ThreadsDeleteClearTests.cs:48,75,88`; `T/ChatTests/ChatThreadValidationTests.cs:90,111` | TEST-CONFIRMED |
-| Clear; cleared carries on (scenario) | `T/ThreadStorageTests/ThreadsDeleteClearTests.cs:100,144`; `T/ChatTests/ChatClearedThreadTests.cs:50`; `ChatThreadValidationTests.cs:140` | TEST-CONFIRMED |
-| Rename mid-reply (scenario) | `T/ChatTests/ChatMutatedWhileWritingTests.cs:57` | TEST-CONFIRMED |
-| Malformed id 400 | `T/ChatTests/ChatThreadValidationTests.cs:76` | TEST-CONFIRMED |
+| Rename verbatim, refused body, unknown | `T/ThreadStorageTests/ThreadsRenameTests.cs:57,97,119,137`; `T/ChatTests/ChatThreadValidationTests.cs:54` | TEST-CONFIRMED [run: PASS] |
+| Delete; gone everywhere (scenario) | `T/ThreadStorageTests/ThreadsDeleteClearTests.cs:48,75,88`; `T/ChatTests/ChatThreadValidationTests.cs:90,111` | TEST-CONFIRMED [run: PASS] |
+| Clear; cleared carries on (scenario) | `T/ThreadStorageTests/ThreadsDeleteClearTests.cs:100,144`; `T/ChatTests/ChatClearedThreadTests.cs:50`; `ChatThreadValidationTests.cs:140` | TEST-CONFIRMED [run: PASS] |
+| Rename mid-reply (scenario) | `T/ChatTests/ChatMutatedWhileWritingTests.cs:57` | TEST-CONFIRMED [run: PASS] |
+| Malformed id 400 | `T/ChatTests/ChatThreadValidationTests.cs:76` | TEST-CONFIRMED [run: PASS] |
 | **Touching and reopening a thread** | | |
-| Touch | `T/ThreadStorageTests/ThreadsTouchTests.cs:49,91,107` | TEST-CONFIRMED |
-| Replay; another profile (scenario); no profile object 404 | `T/ChatTests/ChatOpenOrCreateTests.cs:67,104,137,168`; `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:47,108` | TEST-CONFIRMED |
-| Opened by the first message (scenario) | `T/ChatTests/ChatOpenOrCreateTests.cs:198`; `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:132` | TEST-CONFIRMED |
+| Touch | `T/ThreadStorageTests/ThreadsTouchTests.cs:49,91,107` | TEST-CONFIRMED [run: PASS] |
+| Replay; another profile (scenario); no profile object 404 | `T/ChatTests/ChatOpenOrCreateTests.cs:67,104,137,168`; `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:47,108` | TEST-CONFIRMED [run: PASS] |
+| Opened by the first message (scenario) | `T/ChatTests/ChatOpenOrCreateTests.cs:198`; `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:132` | TEST-CONFIRMED [run: PASS] |
 | **Regenerating a thread title** | | |
-| Refused request (scenario) | `T/ThreadStorageTests/ThreadsRegenerateTitleTests.cs:52,78`; `T/ChatTests/ChatRegenerateTitleTests.cs:73` | TEST-CONFIRMED |
-| Title from a conversation (scenario), repeat | `T/ThreadStorageTests/ThreadsRegenerateTitleTests.cs:102`; `T/ChatTests/ChatRegenerateTitleTests.cs:51` | TEST-CONFIRMED |
-| Foreign 403, AI off | `T/ThreadStorageTests/ThreadsPermissionTests.cs:67`; `ThreadsAiDisabledTests.cs:57` | TEST-CONFIRMED |
+| Refused request (scenario) | `T/ThreadStorageTests/ThreadsRegenerateTitleTests.cs:52,78`; `T/ChatTests/ChatRegenerateTitleTests.cs:73` | TEST-CONFIRMED [run: PASS] |
+| Title from a conversation (scenario), repeat | `T/ThreadStorageTests/ThreadsRegenerateTitleTests.cs:102`; `T/ChatTests/ChatRegenerateTitleTests.cs:51` | TEST-CONFIRMED [run: PASS] |
+| Foreign 403, AI off | `T/ThreadStorageTests/ThreadsPermissionTests.cs:67`; `ThreadsAiDisabledTests.cs:57` | TEST-CONFIRMED [run: PASS] |
 | **Messages of a thread** | | |
-| Append verbatim, no answer; parallel (scenario) | `T/MessageStorageTests/ThreadMessagesAppendTests.cs:43,70,82,122` | TEST-CONFIRMED |
-| Refusals; assistant by hand (scenario) | `T/MessageStorageTests/ThreadMessagesAppendValidationTests.cs:51,75,103,124,145,165` | TEST-CONFIRMED |
-| Too many attachments (scenario) | `Chat/controllers/_helpers.ts:44-72`, `threadsController.ts:253`, `aiController.ts:780`; `T/AttachmentTests/AttachmentComposerRuleTests.cs:91,108,129` (accept a refusal or trim, status < 500) | TEST-CONFIRMED |
-| Reading one message (scenario) | `T/MessageStorageTests/ThreadMessagesGetByIdTests.cs:46,70,101`; `MessageReadOneTests.cs:46` | TEST-CONFIRMED |
-| Update in place (scenario "Edited question") | `T/MessageStorageTests/ThreadMessagesUpdateTests.cs:43`; `ThreadMessagesUpdateValidationTests.cs:52,103,131`; `MessageRewriteQuestionTests.cs:49,95` | TEST-CONFIRMED |
-| Deleting a message (scenario) | `T/MessageStorageTests/ThreadMessagesDeleteTests.cs:99,118` | TEST-CONFIRMED |
-| Another user's message 403 | `T/MessageStorageTests/MessageCrossUserTests.cs:46,66` | TEST-CONFIRMED |
+| Append verbatim, no answer; parallel (scenario) | `T/MessageStorageTests/ThreadMessagesAppendTests.cs:43,70,82,122` | TEST-CONFIRMED [run: PASS] |
+| Refusals; assistant by hand (scenario) | `T/MessageStorageTests/ThreadMessagesAppendValidationTests.cs:51,75,103,124,145,165` | TEST-CONFIRMED [run: PASS] |
+| Too many attachments (scenario) | `Chat/controllers/_helpers.ts:44-72`, `threadsController.ts:253`, `aiController.ts:780`; `T/AttachmentTests/AttachmentComposerRuleTests.cs:91,108,129` (accept a refusal or trim, status < 500) | TEST-CONFIRMED [run: FAIL-BUG] |
+| Reading one message (scenario) | `T/MessageStorageTests/ThreadMessagesGetByIdTests.cs:46,70,101`; `MessageReadOneTests.cs:46` | TEST-CONFIRMED [run: PASS] |
+| Update in place (scenario "Edited question") | `T/MessageStorageTests/ThreadMessagesUpdateTests.cs:43`; `ThreadMessagesUpdateValidationTests.cs:52,103,131`; `MessageRewriteQuestionTests.cs:49,95` | TEST-CONFIRMED [run: PASS] |
+| Deleting a message (scenario) | `T/MessageStorageTests/ThreadMessagesDeleteTests.cs:99,118` | TEST-CONFIRMED [run: PASS] |
+| Another user's message 403 | `T/MessageStorageTests/MessageCrossUserTests.cs:46,66` | TEST-CONFIRMED [run: PASS] |
 | **Reading the history** | | |
-| Oldest first, count, 400, 404, missing id | `T/MessageStorageTests/ThreadMessagesReadTests.cs:47,100,118,132,158` | TEST-CONFIRMED |
-| Paging back (scenario); cursor (scenario); bare id | `T/MessageStorageTests/MessageReadTests.cs:153,192`; `MessagePagingTests.cs:51` | TEST-CONFIRMED |
-| Raw markdown, growing snapshots | `T/MessageStorageTests/MessageCopyTests.cs:47,78`; `MessageMarkdownReplyTests.cs:47,143` | TEST-CONFIRMED |
+| Oldest first, count, 400, 404, missing id | `T/MessageStorageTests/ThreadMessagesReadTests.cs:47,100,118,132,158` | TEST-CONFIRMED [run: PASS] |
+| Paging back (scenario); cursor (scenario); bare id | `T/MessageStorageTests/MessageReadTests.cs:153,192`; `MessagePagingTests.cs:51` | TEST-CONFIRMED [run: PASS] |
+| Raw markdown, growing snapshots | `T/MessageStorageTests/MessageCopyTests.cs:47,78`; `MessageMarkdownReplyTests.cs:47,143` | TEST-CONFIRMED [run: PASS] |
 | **Sending a message with a streamed reply** | | |
-| Stored, NDJSON; first send (scenario) | `T/ChatTests/ChatSendTests.cs:52`; `ChatReplyStreamTests.cs:55`; `ChatFirstMessageTests.cs:114,164` | TEST-CONFIRMED |
-| Context stays inside (scenario) | `T/ChatTests/ChatSendTests.cs:72,102` | TEST-CONFIRMED |
-| Hang-up (scenario); provider refuses (scenario) | `T/MessageStorageTests/MessageStopTests.cs:58,91`; `T/ChatTests/ChatProviderFailureTests.cs:51` | TEST-CONFIRMED |
+| Stored, NDJSON; first send (scenario) | `T/ChatTests/ChatSendTests.cs:52`; `ChatReplyStreamTests.cs:55`; `ChatFirstMessageTests.cs:114,164` | TEST-CONFIRMED [run: PASS] |
+| Context stays inside (scenario) | `T/ChatTests/ChatSendTests.cs:72,102` | TEST-CONFIRMED [run: PASS] |
+| Hang-up (scenario); provider refuses (scenario) | `T/MessageStorageTests/MessageStopTests.cs:58,91`; `T/ChatTests/ChatProviderFailureTests.cs:51` | TEST-CONFIRMED [run: PASS] |
 | **Refusals of a send** | | |
-| Empty, unknown thread, foreign, Guest, AI off | `T/ChatTests/ChatPermissionValidationTests.cs:81,98`; `ChatPermissionIsolationSendTests.cs:51`; `ChatPermissionGuestTests.cs:118`; `ChatAiDisabledTests.cs:115` | TEST-CONFIRMED |
-| Unknown profile (scenario), malformed | `T/ChatTests/ChatThreadModelRulesTests.cs:168`; `ChatHiddenFailureTests.cs:46` | TEST-CONFIRMED |
-| Non-member of project; oversized (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:84`; `ChatHiddenFailureTests.cs:77` | TEST-CONFIRMED |
+| Empty, unknown thread, foreign, Guest, AI off | `T/ChatTests/ChatPermissionValidationTests.cs:81,98`; `ChatPermissionIsolationSendTests.cs:51`; `ChatPermissionGuestTests.cs:118`; `ChatAiDisabledTests.cs:115` | TEST-CONFIRMED [run: PASS] |
+| Unknown profile (scenario), malformed | `T/ChatTests/ChatThreadModelRulesTests.cs:168`; `ChatHiddenFailureTests.cs:46` | TEST-CONFIRMED [run: PASS] |
+| Non-member of project; oversized (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:84`; `ChatHiddenFailureTests.cs:77` | TEST-CONFIRMED [run: PASS] |
 | Unpaid 402 | `TS/chat/chat.ai-disabled.spec.ts:352` | TS-ONLY (TS block skipped) |
 | Project without a usable model 409 (scenario) | `Chat/storage/aiProjectChatContext.ts:216-250`; `Chat/storage/__tests__/aiProjectChatContext.test.ts`; yaml 743 ff. | CODE-ONLY |
 | **The model of a chat** | | |
-| Project answers on its model (scenario); blank, unknown | `T/ChatTests/ChatProjectModelTests.cs:47,74,186,212,278` | TEST-CONFIRMED |
-| Thread created in a project (scenario) | `T/ChatTests/ChatProjectModelTests.cs:157,314` | TEST-CONFIRMED |
-| Thread's own, Chat, Default; rebinding moves nothing | `T/ChatTests/ChatThreadModelTests.cs:50,99,198`; `ChatThreadModelRulesTests.cs:49,113,183`; `ChatOtherActorTests.cs:45`; `ChatRoomModelTests.cs:87` | TEST-CONFIRMED |
-| Picker switches (scenario) | `T/ChatTests/ChatThreadModelTests.cs:129,165` | TEST-CONFIRMED |
-| Image-only (scenario) | `T/ChatTests/ChatImageTests.cs:84` | TEST-CONFIRMED |
+| Project answers on its model (scenario); blank, unknown | `T/ChatTests/ChatProjectModelTests.cs:47,74,186,212,278` | TEST-CONFIRMED [run: FAIL-BUG] |
+| Thread created in a project (scenario) | `T/ChatTests/ChatProjectModelTests.cs:157,314` | TEST-CONFIRMED [run: FAIL-BUG] |
+| Thread's own, Chat, Default; rebinding moves nothing | `T/ChatTests/ChatThreadModelTests.cs:50,99,198`; `ChatThreadModelRulesTests.cs:49,113,183`; `ChatOtherActorTests.cs:45`; `ChatRoomModelTests.cs:87` | TEST-CONFIRMED [run: PASS] |
+| Picker switches (scenario) | `T/ChatTests/ChatThreadModelTests.cs:129,165` | TEST-CONFIRMED [run: PASS] |
+| Image-only (scenario) | `T/ChatTests/ChatImageTests.cs:84` | TEST-CONFIRMED [run: PASS] |
 | **One-shot sends** | | |
-| No thread, no history (scenario) | `T/MessageStorageTests/MessageOneShotSendTests.cs:49,189`; `MessageOneShotSendCustomTests.cs:137` | TEST-CONFIRMED |
-| Empty, malformed, Default, entity rules, `systemPrompt`, `isStream` | `T/MessageStorageTests/MessageOneShotSendTests.cs:89,116,144,160`; `MessageOneShotSendCustomTests.cs:46,80,95` | TEST-CONFIRMED |
-| Guest 403 | `T/ChatTests/ChatPermissionGuestTests.cs:118` | TEST-CONFIRMED |
+| No thread, no history (scenario) | `T/MessageStorageTests/MessageOneShotSendTests.cs:49,189`; `MessageOneShotSendCustomTests.cs:137` | TEST-CONFIRMED [run: PASS] |
+| Empty, malformed, Default, entity rules, `systemPrompt`, `isStream` | `T/MessageStorageTests/MessageOneShotSendTests.cs:89,116,144,160`; `MessageOneShotSendCustomTests.cs:46,80,95` | TEST-CONFIRMED [run: PASS] |
+| Guest 403 | `T/ChatTests/ChatPermissionGuestTests.cs:118` | TEST-CONFIRMED [run: PASS] |
 | **OpenAI-shaped send** | | |
-| Stream (scenario), persist, model, hang-up | `T/MessageStorageTests/MessageOpenAiStreamTests.cs:45`; `MessageOpenAiStreamThreadTests.cs:47,74,106,165` | TEST-CONFIRMED |
-| Tool call (scenario); failure inside the stream | `T/MessageStorageTests/MessageOpenAiStreamTests.cs:73,149` | TEST-CONFIRMED |
+| Stream (scenario), persist, model, hang-up | `T/MessageStorageTests/MessageOpenAiStreamTests.cs:45`; `MessageOpenAiStreamThreadTests.cs:47,74,106,165` | TEST-CONFIRMED [run: PASS] |
+| Tool call (scenario); failure inside the stream | `T/MessageStorageTests/MessageOpenAiStreamTests.cs:73,149` | TEST-CONFIRMED [run: PASS] |
 | **Regenerating a reply** | | |
-| Last reply replaced; multi-turn (scenario) | `T/MessageStorageTests/MessageRegenerateTests.cs:48,117,160` | TEST-CONFIRMED |
-| Thread's model, project's model | `T/MessageStorageTests/MessageRegenerateModelTests.cs:50`; `MessageRegenerateProjectTests.cs:47` | TEST-CONFIRMED |
-| Tool chain whole; abandoned (scenario) | `T/McpTests/McpToolCallRegenerateTests.cs:71,107,139`; `T/MessageStorageTests/MessageStopTests.cs:130` | TEST-CONFIRMED |
-| Nothing to regenerate, unknown, foreign, AI off | `T/MessageStorageTests/MessageRegenerateTests.cs:87,104`; `MessageRegenerateAccessTests.cs:55,107` | TEST-CONFIRMED |
+| Last reply replaced; multi-turn (scenario) | `T/MessageStorageTests/MessageRegenerateTests.cs:48,117,160` | TEST-CONFIRMED [run: PASS] |
+| Thread's model, project's model | `T/MessageStorageTests/MessageRegenerateModelTests.cs:50`; `MessageRegenerateProjectTests.cs:47` | TEST-CONFIRMED [run: PASS] |
+| Tool chain whole; abandoned (scenario) | `T/McpTests/McpToolCallRegenerateTests.cs:71,107,139`; `T/MessageStorageTests/MessageStopTests.cs:130` | TEST-CONFIRMED [run: PASS] |
+| Nothing to regenerate, unknown, foreign, AI off | `T/MessageStorageTests/MessageRegenerateTests.cs:87,104`; `MessageRegenerateAccessTests.cs:55,107` | TEST-CONFIRMED [run: PASS] |
 | **Tool calls and the approval pause** | | |
-| Pause, approve string / structured, deny (scenario "Deny") | `T/McpTests/McpToolCallPauseTests.cs:54,89,123,140` | TEST-CONFIRMED |
-| Two-hop (scenario) | `T/McpTests/McpToolCallPauseTests.cs:165` | TEST-CONFIRMED |
-| Announcement (scenario) | `T/McpTests/McpToolCallAnnouncementTests.cs:81,112,138,156` | TEST-CONFIRMED |
-| Opt-out and pre-approved | `T/McpTests/McpAllowAlwaysPauseTests.cs:66,80,92` | TEST-CONFIRMED |
-| Unavailable, withdrawn, server left; switched off (scenario) | `T/McpTests/McpHostToolsChatTests.cs:115,184,210`; `McpRegisteredServerChatTests.cs:137,160` | TEST-CONFIRMED |
+| Pause, approve string / structured, deny (scenario "Deny") | `T/McpTests/McpToolCallPauseTests.cs:54,89,123,140` | TEST-CONFIRMED [run: PASS] |
+| Two-hop (scenario) | `T/McpTests/McpToolCallPauseTests.cs:165` | TEST-CONFIRMED [run: PASS] |
+| Announcement (scenario) | `T/McpTests/McpToolCallAnnouncementTests.cs:81,112,138,156` | TEST-CONFIRMED [run: PASS] |
+| Opt-out and pre-approved | `T/McpTests/McpAllowAlwaysPauseTests.cs:66,80,92` | TEST-CONFIRMED [run: PASS] |
+| Unavailable, withdrawn, server left; switched off (scenario) | `T/McpTests/McpHostToolsChatTests.cs:115,184,210`; `McpRegisteredServerChatTests.cs:137,160` | TEST-CONFIRMED [run: PASS] |
 | **Decisions on a tool call** | | |
-| Nothing to decide (scenario), unknown, out of range 409 | `T/McpTests/McpToolCallDecisionTests.cs:70,91` | TEST-CONFIRMED |
-| Anonymous, non-member, AI off | `T/McpTests/McpToolCallDecisionTests.cs:103,120,143` | TEST-CONFIRMED |
-| Replay (scenarios "Replayed approval", "Replayed denial"), stale | `T/McpTests/McpToolCallReplayTests.cs:63,76,89,106,123` | TEST-CONFIRMED |
+| Nothing to decide (scenario), unknown, out of range 409 | `T/McpTests/McpToolCallDecisionTests.cs:70,91` | TEST-CONFIRMED [run: PASS] |
+| Anonymous, non-member, AI off | `T/McpTests/McpToolCallDecisionTests.cs:103,120,143` | TEST-CONFIRMED [run: PASS] |
+| Replay (scenarios "Replayed approval", "Replayed denial"), stale | `T/McpTests/McpToolCallReplayTests.cs:63,76,89,106,123` | TEST-CONFIRMED [run: PASS] |
 | `message` snapshot ignored | `common/ASC.AI.Chat/scripts/schema/schemaTypes.ts:215-245`; yaml 71724 (`message` optional) | CODE-ONLY |
 | **Deep mode and reasoning level** | | |
-| Off and unset; on, off, clear; on after off (scenario) | `T/PreferenceTests/PreferenceDeepModeStateTests.cs:46-120` | TEST-CONFIRMED |
-| Levels | `T/PreferenceTests/PreferenceReasoningLevelTests.cs:47,55,70` | TEST-CONFIRMED |
-| One user's value (scenario) | `T/PreferenceTests/PreferencePermissionTests.cs:92,133` | TEST-CONFIRMED |
-| Reasoning reaches the client (scenario) | `T/PreferenceTests/PreferenceDeepModeChatTests.cs:87,119` | TEST-CONFIRMED |
+| Off and unset; on, off, clear; on after off (scenario) | `T/PreferenceTests/PreferenceDeepModeStateTests.cs:46-120` | TEST-CONFIRMED [run: PASS] |
+| Levels | `T/PreferenceTests/PreferenceReasoningLevelTests.cs:47,55,70` | TEST-CONFIRMED [run: PASS] |
+| One user's value (scenario) | `T/PreferenceTests/PreferencePermissionTests.cs:92,133` | TEST-CONFIRMED [run: PASS] |
+| Reasoning reaches the client (scenario) | `T/PreferenceTests/PreferenceDeepModeChatTests.cs:87,119` | TEST-CONFIRMED [run: PASS] |
 | **Scope and refusals of the preferences** | | |
-| Room is no scope (scenario); unopenable, unknown | `T/PreferenceTests/PreferenceScopeTests.cs:52,66,83,100,116,126`; `PreferencePermissionTests.cs:111` | TEST-CONFIRMED |
-| Thread as scope (scenario); malformed; empty and 0 | `T/PreferenceTests/PreferenceEntityIdTests.cs:73,90,106,126,146` | TEST-CONFIRMED |
-| Non-boolean, empty, bad depth | `T/PreferenceTests/PreferenceDeepModeValidationTests.cs:49,62,84`; `PreferenceReasoningLevelTests.cs:89`; `PreferenceClearTests.cs:52` | TEST-CONFIRMED |
-| Guest, anonymous, AI off | `T/PreferenceTests/PreferencePermissionTests.cs:47,78`; `PreferenceAiDisabledTests.cs:57` | TEST-CONFIRMED |
+| Room is no scope (scenario); unopenable, unknown | `T/PreferenceTests/PreferenceScopeTests.cs:52,66,83,100,116,126`; `PreferencePermissionTests.cs:111` | TEST-CONFIRMED [run: PASS] |
+| Thread as scope (scenario); malformed; empty and 0 | `T/PreferenceTests/PreferenceEntityIdTests.cs:73,90,106,126,146` | TEST-CONFIRMED [run: PASS] |
+| Non-boolean, empty, bad depth | `T/PreferenceTests/PreferenceDeepModeValidationTests.cs:49,62,84`; `PreferenceReasoningLevelTests.cs:89`; `PreferenceClearTests.cs:52` | TEST-CONFIRMED [run: PASS] |
+| Guest, anonymous, AI off | `T/PreferenceTests/PreferencePermissionTests.cs:47,78`; `PreferenceAiDisabledTests.cs:57` | TEST-CONFIRMED [run: PASS] |
 | **Custom MCP servers** | | |
-| Roles (scenario "Member cannot register") | `T/McpTests/McpToolsManagePermissionsTests.cs:46`; `McpToolsMemberPermissionsTests.cs:46`; `McpToolsAccessTests.cs:138`; `McpToolsAnonymousTests.cs:58` | TEST-CONFIRMED |
-| Round trip (scenario), no dial, verbatim, flag (scenario) | `T/McpTests/McpServerRegistryTests.cs:50,93,135,349,366` | TEST-CONFIRMED |
-| Unregistered name (scenario) | `T/McpTests/McpServerRegistryTests.cs:260` | TEST-CONFIRMED |
-| AI off (scenario), off period (scenario) | `T/McpTests/McpToolsAiDisabledTests.cs:58,82`; `McpToolsAccessTests.cs:286` | TEST-CONFIRMED |
+| Roles (scenario "Member cannot register") | `T/McpTests/McpToolsManagePermissionsTests.cs:46`; `McpToolsMemberPermissionsTests.cs:46`; `McpToolsAccessTests.cs:138`; `McpToolsAnonymousTests.cs:58` | TEST-CONFIRMED [run: PASS] |
+| Round trip (scenario), no dial, verbatim, flag (scenario) | `T/McpTests/McpServerRegistryTests.cs:50,93,135,349,366` | TEST-CONFIRMED [run: PASS] |
+| Unregistered name (scenario) | `T/McpTests/McpServerRegistryTests.cs:260` | TEST-CONFIRMED [run: PASS] |
+| AI off (scenario), off period (scenario) | `T/McpTests/McpToolsAiDisabledTests.cs:58,82`; `McpToolsAccessTests.cs:286` | TEST-CONFIRMED [run: PASS] |
 | Audited | `AI/Server/Service/McpServerStorageService.cs` (`ServerCreated/Updated/Deleted`) | CODE-ONLY |
 | **One registry per portal** | | |
-| Registered from a room (scenario); folder | `T/McpTests/McpServerEntityScopeTests.cs:49,66,77,97`; `T/ThirdPartyTests/ThirdPartyToolsTests.cs:68,80` (skips on the stand) | TEST-CONFIRMED |
-| Unknown room (scenario), deleted, unopenable | `T/McpTests/McpServerEntityScopeTests.cs:160,190`; `McpToolsAccessTests.cs:208` | TEST-CONFIRMED |
-| Reads ignore the entity (scenario) | `T/McpTests/McpServerEntityScopeTests.cs:146` | TEST-CONFIRMED |
-| Name without config | `T/McpTests/McpServerRegistryTests.cs:236,247` | TEST-CONFIRMED |
+| Registered from a room (scenario); folder | `T/McpTests/McpServerEntityScopeTests.cs:49,66,77,97`; `T/ThirdPartyTests/ThirdPartyToolsTests.cs:68,80` (skips on the stand) | TEST-CONFIRMED [run: PASS-ON-RERUN] |
+| Unknown room (scenario), deleted, unopenable | `T/McpTests/McpServerEntityScopeTests.cs:160,190`; `McpToolsAccessTests.cs:208` | TEST-CONFIRMED [run: PASS] |
+| Reads ignore the entity (scenario) | `T/McpTests/McpServerEntityScopeTests.cs:146` | TEST-CONFIRMED [run: PASS] |
+| Name without config | `T/McpTests/McpServerRegistryTests.cs:236,247` | TEST-CONFIRMED [run: PASS] |
 | **Server names** | | |
-| Limit (scenario); hard refusals; blank | `T/McpTests/McpServerNameTests.cs:59,83,94,242`; `McpServerReplaceAllTests.cs:200` | TEST-CONFIRMED |
-| Underscore (scenario); replace-all per entry | `T/McpTests/McpServerNameTests.cs:137,148` | TEST-CONFIRMED |
-| Unicode (scenario) | `T/McpTests/McpServerNameTests.cs:206,223` | TEST-CONFIRMED |
-| Casing, whitespace; soft refusals (scenario); removal (scenario) | `T/McpTests/McpServerRegistryTests.cs:170,184,195,209,222,305,332` | TEST-CONFIRMED |
+| Limit (scenario); hard refusals; blank | `T/McpTests/McpServerNameTests.cs:59,83,94,242`; `McpServerReplaceAllTests.cs:200` | TEST-CONFIRMED [run: PASS] |
+| Underscore (scenario); replace-all per entry | `T/McpTests/McpServerNameTests.cs:137,148` | TEST-CONFIRMED [run: PASS] |
+| Unicode (scenario) | `T/McpTests/McpServerNameTests.cs:206,223` | TEST-CONFIRMED [run: PASS] |
+| Casing, whitespace; soft refusals (scenario); removal (scenario) | `T/McpTests/McpServerRegistryTests.cs:170,184,195,209,222,305,332` | TEST-CONFIRMED [run: PASS] |
 | **Server configurations and replace-all** | | |
-| Both url and command (scenario); wrong type; empty; missing | `T/McpTests/McpServerConfigValidationTests.cs:56,67,79,110,124,142,164` | TEST-CONFIRMED |
-| Unusable map (scenario) | `T/McpTests/McpServerReplaceAllTests.cs:93,107,121,134` | TEST-CONFIRMED |
-| Exact map; empty; one bad entry (scenario); case twins (scenario) | `T/McpTests/McpServerReplaceAllTests.cs:50,81,145,162,227` | TEST-CONFIRMED |
+| Both url and command (scenario); wrong type; empty; missing | `T/McpTests/McpServerConfigValidationTests.cs:56,67,79,110,124,142,164` | TEST-CONFIRMED [run: PASS] |
+| Unusable map (scenario) | `T/McpTests/McpServerReplaceAllTests.cs:93,107,121,134` | TEST-CONFIRMED [run: PASS] |
+| Exact map; empty; one bad entry (scenario); case twins (scenario) | `T/McpTests/McpServerReplaceAllTests.cs:50,81,145,162,227` | TEST-CONFIRMED [run: PASS] |
 | **Switching tools off** | | |
-| Disable, re-enable (scenario), replacement, read routes | `T/McpTests/McpDisabledToolsTests.cs:49,64,109,133,248,258,267` | TEST-CONFIRMED |
-| Server type and list refusals (scenario "Refused list") | `T/McpTests/McpDisabledToolsTests.cs:164,186,201,217,233` | TEST-CONFIRMED |
-| Per user | `T/McpTests/McpToolPrefsLifecycleTests.cs:146`; `McpToolsSettingsPermissionsTests.cs:46` | TEST-CONFIRMED |
-| Dropped server (scenario) | `T/McpTests/McpToolPrefsLifecycleTests.cs:45,81`; `T/McpServerStorageTests/McpServerReplaceTests.cs:139` | TEST-CONFIRMED |
-| Guest, AI off naming a server (scenario) | `T/McpTests/McpToolsAccessTests.cs:318,338` | TEST-CONFIRMED |
+| Disable, re-enable (scenario), replacement, read routes | `T/McpTests/McpDisabledToolsTests.cs:49,64,109,133,248,258,267` | TEST-CONFIRMED [run: PASS] |
+| Server type and list refusals (scenario "Refused list") | `T/McpTests/McpDisabledToolsTests.cs:164,186,201,217,233` | TEST-CONFIRMED [run: PASS] |
+| Per user | `T/McpTests/McpToolPrefsLifecycleTests.cs:146`; `McpToolsSettingsPermissionsTests.cs:46` | TEST-CONFIRMED [run: PASS] |
+| Dropped server (scenario) | `T/McpTests/McpToolPrefsLifecycleTests.cs:45,81`; `T/McpServerStorageTests/McpServerReplaceTests.cs:139` | TEST-CONFIRMED [run: PASS] |
+| Guest, AI off naming a server (scenario) | `T/McpTests/McpToolsAccessTests.cs:318,338` | TEST-CONFIRMED [run: PASS] |
 | Portal-wide list for everyone (`scope` `tenant`) | `Chat/controllers/toolsController.ts` (`parseToolPrefsScope`, bug 84381) | CODE-ONLY |
 | **Pre-approving tools** | | |
-| Flat tokens, idempotent, revoke, falsy, string, missing | `T/McpTests/McpAllowAlwaysTests.cs:46,57,67,127,144,158,173,186` | TEST-CONFIRMED |
-| One user's approval (scenario); independent of disabled | `T/McpTests/McpToolPrefsLifecycleTests.cs:101,128` | TEST-CONFIRMED |
-| Approval with `allowAlways` (scenario) | `T/McpTests/McpAllowAlwaysPauseTests.cs:92,122,136`; `McpRegisteredServerChatTests.cs:116` | TEST-CONFIRMED |
-| Same name on another server (scenario) | `T/McpTests/McpAllowAlwaysTests.cs:96,110` | TEST-CONFIRMED |
+| Flat tokens, idempotent, revoke, falsy, string, missing | `T/McpTests/McpAllowAlwaysTests.cs:46,57,67,127,144,158,173,186` | TEST-CONFIRMED [run: PASS] |
+| One user's approval (scenario); independent of disabled | `T/McpTests/McpToolPrefsLifecycleTests.cs:101,128` | TEST-CONFIRMED [run: PASS] |
+| Approval with `allowAlways` (scenario) | `T/McpTests/McpAllowAlwaysPauseTests.cs:92,122,136`; `McpRegisteredServerChatTests.cs:116` | TEST-CONFIRMED [run: PASS] |
+| Same name on another server (scenario) | `T/McpTests/McpAllowAlwaysTests.cs:96,110` | TEST-CONFIRMED [run: PASS] |
 | **Tools catalogue** | | |
-| Groups, no twin, every role, Guest, AI off, entity | `T/McpTests/McpToolsCatalogueTests.cs:47,59,91,107,125,137`; `McpToolsAiDisabledTests.cs:82` | TEST-CONFIRMED |
-| Unreachable server (scenario) | `T/McpTests/McpToolsCatalogueTests.cs:74`; `McpRegisteredServerChatTests.cs:95` | TEST-CONFIRMED |
-| Registered tools reach the model | `T/McpTests/McpRegisteredServerChatTests.cs:85` | TEST-CONFIRMED |
+| Groups, no twin, every role, Guest, AI off, entity | `T/McpTests/McpToolsCatalogueTests.cs:47,59,91,107,125,137`; `McpToolsAiDisabledTests.cs:82` | TEST-CONFIRMED [run: PASS] |
+| Unreachable server (scenario) | `T/McpTests/McpToolsCatalogueTests.cs:74`; `McpRegisteredServerChatTests.cs:95` | TEST-CONFIRMED [run: PASS] |
+| Registered tools reach the model | `T/McpTests/McpRegisteredServerChatTests.cs:85` | TEST-CONFIRMED [run: PASS] |
 | **Web-search configuration on a self-hosted portal** | | |
-| Probe; wrong key (scenario); unreachable; malformed; business 400 | `T/WebSearchTests/WebSearchConfigureTests.cs:46,62,78,95,112` | TEST-CONFIRMED |
-| `aiWebSearchSetActiveConfig`; refused writes (scenario) | `T/WebSearchTests/WebSearchSetActiveConfigTests.cs:62,75,94,108,118,131`; `WebSearchConfigureTests.cs:121,135` | TEST-CONFIRMED |
-| Guest with a malformed body (scenario); AI off first | `T/WebSearchTests/WebSearchSetActiveConfigTests.cs:148,168`; `WebSearchConfigureTests.cs:154,170` | TEST-CONFIRMED |
+| Probe; wrong key (scenario); unreachable; malformed; business 400 | `T/WebSearchTests/WebSearchConfigureTests.cs:46,62,78,95,112` | TEST-CONFIRMED [run: PASS] |
+| `aiWebSearchSetActiveConfig`; refused writes (scenario) | `T/WebSearchTests/WebSearchSetActiveConfigTests.cs:62,75,94,108,118,131`; `WebSearchConfigureTests.cs:121,135` | TEST-CONFIRMED [run: PASS] |
+| Guest with a malformed body (scenario); AI off first | `T/WebSearchTests/WebSearchSetActiveConfigTests.cs:148,168`; `WebSearchConfigureTests.cs:154,170` | TEST-CONFIRMED [run: PASS] |
 | Audited | `AI/Server/Service/WebSearchStorageService.cs` | CODE-ONLY |
 | **Clearing and the hosted add-on** | | |
-| Room admin cannot clear (scenario); admin clears; unconfigured; entity body (scenario) | `T/WebSearchTests/WebSearchPermissionsTests.cs:100,112,125`; `WebSearchStateTests.cs:90,102,123` | TEST-CONFIRMED |
+| Room admin cannot clear (scenario); admin clears; unconfigured; entity body (scenario) | `T/WebSearchTests/WebSearchPermissionsTests.cs:100,112,125`; `WebSearchStateTests.cs:90,102,123` | TEST-CONFIRMED [run: PASS] |
 | Clearing audited (scenario) | `AI/Server/Service/WebSearchStorageService.cs` | CODE-ONLY |
 | Add-on, every scope, tool (hosted) | `TS/web-search/web-search.spec.ts:128,624`; `T/WebSearchTests/WebSearchChatToolTests.cs:52` (tool only while configured) | TS-ONLY |
 | Owner cannot clear the add-on config (scenario); writes 403 | `TS/web-search/web-search.spec.ts:345`; `TS/web-search/web-search.config.spec.ts:57` | TS-ONLY |
 | **Reading and probing the web-search configuration** | | |
-| Roles (scenario "Guest cannot read"), anonymous, entity rules | `T/WebSearchTests/WebSearchPermissionsTests.cs:68,79`; `T/SettingsTests/SettingsWebSearchPermissionsTests.cs:52,79,104`; `WebSearchStateTests.cs:144,155,171` | TEST-CONFIRMED |
-| Off period (scenario) | `T/WebSearchTests/WebSearchPermissionsTests.cs:142` | TEST-CONFIRMED |
-| Probe; Guest and off dial nothing | `T/WebSearchTests/WebSearchTestConnectionTests.cs:70,89,102,152`; `WebSearchPermissionsTests.cs:167,181,200` | TEST-CONFIRMED |
-| Private base URL (scenario), everywhere (scenario) | `T/WebSearchTests/WebSearchEgressGuardTests.cs:80,92,109`; `WebSearchBaseUrlFormatTests.cs:69` | TEST-CONFIRMED |
+| Roles (scenario "Guest cannot read"), anonymous, entity rules | `T/WebSearchTests/WebSearchPermissionsTests.cs:68,79`; `T/SettingsTests/SettingsWebSearchPermissionsTests.cs:52,79,104`; `WebSearchStateTests.cs:144,155,171` | TEST-CONFIRMED [run: PASS] |
+| Off period (scenario) | `T/WebSearchTests/WebSearchPermissionsTests.cs:142` | TEST-CONFIRMED [run: PASS] |
+| Probe; Guest and off dial nothing | `T/WebSearchTests/WebSearchTestConnectionTests.cs:70,89,102,152`; `WebSearchPermissionsTests.cs:167,181,200` | TEST-CONFIRMED [run: PASS] |
+| Private base URL (scenario), everywhere (scenario) | `T/WebSearchTests/WebSearchEgressGuardTests.cs:80,92,109`; `WebSearchBaseUrlFormatTests.cs:69` | TEST-CONFIRMED [run: PASS] |
 | **Web-search passthrough** | | |
-| Relay, query and key (scenario); roles; no provider (scenario) | `T/WebSearchTests/WebSearchPassthroughTests.cs:66,75,92,104,129,191`; `WebSearchPassthroughAccessTests.cs:54,80` | TEST-CONFIRMED |
-| Wrong shape 400; 4xx relayed; 5xx and unreachable 502 | `T/WebSearchTests/WebSearchPassthroughValidationTests.cs:84,101,117`; `WebSearchPassthroughTests.cs:149,164,178` | TEST-CONFIRMED |
-| Attributed to a document (scenario) | `T/WebSearchTests/WebSearchPassthroughAccessTests.cs:99` | TEST-CONFIRMED |
+| Relay, query and key (scenario); roles; no provider (scenario) | `T/WebSearchTests/WebSearchPassthroughTests.cs:66,75,92,104,129,191`; `WebSearchPassthroughAccessTests.cs:54,80` | TEST-CONFIRMED [run: PASS] |
+| Wrong shape 400; 4xx relayed; 5xx and unreachable 502 | `T/WebSearchTests/WebSearchPassthroughValidationTests.cs:84,101,117`; `WebSearchPassthroughTests.cs:149,164,178` | TEST-CONFIRMED [run: PASS] |
+| Attributed to a document (scenario) | `T/WebSearchTests/WebSearchPassthroughAccessTests.cs:99` | TEST-CONFIRMED [run: PASS] |
 | **OpenAI-compatible passthrough** | | |
 | Relay; every optional field (scenario); stream; image on a text model | `TS/openai-passthrough/openai-passthrough.spec.ts:58,109,143` | TS-ONLY |
 | Guest (scenario), anonymous, AI off | `TS/openai-passthrough/openai-passthrough.permission.spec.ts:37,58`; `openai-passthrough.ai-disabled.spec.ts:15,46` | TS-ONLY |
 | Gateway proxy path list | `AI/Server/Api/AiGatewayProxyController.cs` | CODE-ONLY |
 | **Editor tools catalogue** | | |
-| Names, schema, approval; repeated reads | `T/EditorToolTests/EditorToolListTests.cs:51,64,102,111,149,165,186` | TEST-CONFIRMED |
-| Guest catalogue (scenario); non-guest same; anonymous; AI off | `T/EditorToolTests/EditorToolPermissionTests.cs:49,63,163`; `EditorToolAiDisabledTests.cs:53` | TEST-CONFIRMED (skips on the stand) |
+| Names, schema, approval; repeated reads | `T/EditorToolTests/EditorToolListTests.cs:51,64,102,111,149,165,186` | TEST-CONFIRMED [run: PASS] |
+| Guest catalogue (scenario); non-guest same; anonymous; AI off | `T/EditorToolTests/EditorToolPermissionTests.cs:49,63,163`; `EditorToolAiDisabledTests.cs:53` | TEST-CONFIRMED [run: PASS] (skips on the stand) |
 | **Calling an editor tool** | | |
-| Name rules, argument rules | `T/EditorToolTests/EditorToolCallTests.cs:79,89,104,122`; `EditorToolArgumentTests.cs:45,71,102` | TEST-CONFIRMED |
-| Guest; AI off (scenario) | `T/EditorToolTests/EditorToolPermissionTests.cs:101,113,137`; `EditorToolAiDisabledTests.cs:66,88,104,116` | TEST-CONFIRMED |
-| Tool never exceeds the member (scenario); failure inside `result` | `T/EditorToolTests/EditorToolRestToolTests.cs:92,167` | TEST-CONFIRMED (skips on the stand) |
-| Generator in a room (scenario); no write (scenario); entity names nothing (scenario) | `T/EditorToolTests/EditorToolEntityIdTests.cs:78,93,110,127,156,182` | TEST-CONFIRMED (skips on the stand) |
+| Name rules, argument rules | `T/EditorToolTests/EditorToolCallTests.cs:79,89,104,122`; `EditorToolArgumentTests.cs:45,71,102` | TEST-CONFIRMED [run: PASS] |
+| Guest; AI off (scenario) | `T/EditorToolTests/EditorToolPermissionTests.cs:101,113,137`; `EditorToolAiDisabledTests.cs:66,88,104,116` | TEST-CONFIRMED [run: PASS] |
+| Tool never exceeds the member (scenario); failure inside `result` | `T/EditorToolTests/EditorToolRestToolTests.cs:92,167` | TEST-CONFIRMED [run: SKIP] (skips on the stand) |
+| Generator in a room (scenario); no write (scenario); entity names nothing (scenario) | `T/EditorToolTests/EditorToolEntityIdTests.cs:78,93,110,127,156,182` | TEST-CONFIRMED [run: SKIP] (skips on the stand) |
 | **Creating chat attachments** | | |
-| Attach by id (scenario), large, picture | `T/AttachmentTests/AttachmentStoredFileTests.cs:80,177,218`; `AttachmentSaveFileTests.cs:46,178` | TEST-CONFIRMED |
-| `path` refusals; no text; archive (scenario) | `T/AttachmentTests/AttachmentSaveFileValidationTests.cs:100,112,184`; `AttachmentSaveFileTests.cs:211`; `AttachmentStoredFileTests.cs:106,136,153,252`; `AttachmentComposerRuleTests.cs:58,72` | TEST-CONFIRMED |
-| Guest (scenario), anonymous, AI off | `T/AttachmentTests/AttachmentPermissionTests.cs:63,103`; `AttachmentAiDisabledTests.cs:150,162,178` | TEST-CONFIRMED |
-| Batch (scenarios "Batch with one bad element", "Batch") | `T/AttachmentTests/AttachmentSaveFilesManyTests.cs:45,97,141,214,230`; `AttachmentCrossUserTests.cs:236` | TEST-CONFIRMED |
-| Fields stored as sent (scenario) | `T/AttachmentTests/AttachmentSaveFileTypeTests.cs:47,75`; `AttachmentSaveFileValidationTests.cs:155`; `AttachmentSaveFileTests.cs:115` | TEST-CONFIRMED |
+| Attach by id (scenario), large, picture | `T/AttachmentTests/AttachmentStoredFileTests.cs:80,177,218`; `AttachmentSaveFileTests.cs:46,178` | TEST-CONFIRMED [run: PASS] |
+| `path` refusals; no text; archive (scenario) | `T/AttachmentTests/AttachmentSaveFileValidationTests.cs:100,112,184`; `AttachmentSaveFileTests.cs:211`; `AttachmentStoredFileTests.cs:106,136,153,252`; `AttachmentComposerRuleTests.cs:58,72` | TEST-CONFIRMED [run: PASS] |
+| Guest (scenario), anonymous, AI off | `T/AttachmentTests/AttachmentPermissionTests.cs:63,103`; `AttachmentAiDisabledTests.cs:150,162,178` | TEST-CONFIRMED [run: PASS] |
+| Batch (scenarios "Batch with one bad element", "Batch") | `T/AttachmentTests/AttachmentSaveFilesManyTests.cs:45,97,141,214,230`; `AttachmentCrossUserTests.cs:236` | TEST-CONFIRMED [run: PASS] |
+| Fields stored as sent (scenario) | `T/AttachmentTests/AttachmentSaveFileTypeTests.cs:47,75`; `AttachmentSaveFileValidationTests.cs:155`; `AttachmentSaveFileTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | **Reading and deleting attachments** | | |
-| Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED |
-| Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:71,103,131` | TEST-CONFIRMED |
-| Immediately readable, gone; source kept | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:85,172` | TEST-CONFIRMED |
-| Draft reaches the model (scenario) | `T/AttachmentTests/AttachmentSendTests.cs:68,91`; `T/ReasoningTests/ReasoningAttachTests.cs:48` | TEST-CONFIRMED |
+| Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED [run: PASS] |
+| Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:71,103,131` | TEST-CONFIRMED [run: PASS] |
+| Immediately readable, gone; source kept | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:85,172` | TEST-CONFIRMED [run: PASS] |
+| Draft reaches the model (scenario) | `T/AttachmentTests/AttachmentSendTests.cs:68,91`; `T/ReasoningTests/ReasoningAttachTests.cs:48` | TEST-CONFIRMED [run: FAIL-BUG] |
 | Unpaid portal (scenario) | `TS/attachments/attachments.ai-disabled.spec.ts` | TS-ONLY |
 | **Linking attachments to a message** | | |
-| Dies with the message (scenario), thread | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:68,89,199,218` | TEST-CONFIRMED |
-| 400 / 404 / 403 refusals; foreign draft | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:111,122,133,145,156,166,177,190`; `AttachmentCrossUserTests.cs:139,265` | TEST-CONFIRMED |
+| Dies with the message (scenario), thread | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:68,89,199,218` | TEST-CONFIRMED [run: PASS] |
+| 400 / 404 / 403 refusals; foreign draft | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:111,122,133,145,156,166,177,190`; `AttachmentCrossUserTests.cs:139,265` | TEST-CONFIRMED [run: PASS] |
 | **Suggested questions for a form attachment** | | |
-| 200 status and list; unknown (scenario); foreign; bad id; anonymous; AI off | `T/AttachmentTests/AttachmentSuggestedQuestionsTests.cs:63,87,98,106,119,133`; `AttachmentAiDisabledTests.cs:225` | TEST-CONFIRMED |
+| 200 status and list; unknown (scenario); foreign; bad id; anonymous; AI off | `T/AttachmentTests/AttachmentSuggestedQuestionsTests.cs:63,87,98,106,119,133`; `AttachmentAiDisabledTests.cs:225` | TEST-CONFIRMED [run: PASS] |
 | **Exporting markdown into a document** | | |
-| 202 no id, rendered | `T/TextToDocxTests/TextToDocxExportTests.cs:69,91,158`; `T/MessageStorageTests/MessageMarkdownDocxTests.cs:46` | TEST-CONFIRMED |
-| Format (scenario "Unknown format") | `T/TextToDocxTests/TextToDocxFormatTests.cs:70,86`; `TextToDocxShapesTests.cs:62` | TEST-CONFIRMED |
-| Required; whitespace (scenario); folder refusals | `T/TextToDocxTests/TextToDocxValidationTests.cs:49,75,91`; `TextToDocxFolderIdTests.cs:50,67,84,98,116` | TEST-CONFIRMED |
-| Size limit (scenario) | `T/TextToDocxTests/TextToDocxSizeLimitTests.cs:52,71,101,125` | TEST-CONFIRMED |
-| Before the switch | `T/MessageStorageTests/MessagesAiDisabledTests.cs:59,85,104` | TEST-CONFIRMED |
-| Into Chat outputs (scenario) | `T/TextToDocxTests/TextToDocxThreadExportTests.cs:115` | TEST-CONFIRMED |
+| 202 no id, rendered | `T/TextToDocxTests/TextToDocxExportTests.cs:69,91,158`; `T/MessageStorageTests/MessageMarkdownDocxTests.cs:46` | TEST-CONFIRMED [run: PASS] |
+| Format (scenario "Unknown format") | `T/TextToDocxTests/TextToDocxFormatTests.cs:70,86`; `TextToDocxShapesTests.cs:62` | TEST-CONFIRMED [run: PASS] |
+| Required; whitespace (scenario); folder refusals | `T/TextToDocxTests/TextToDocxValidationTests.cs:49,75,91`; `TextToDocxFolderIdTests.cs:50,67,84,98,116` | TEST-CONFIRMED [run: PASS] |
+| Size limit (scenario) | `T/TextToDocxTests/TextToDocxSizeLimitTests.cs:52,71,101,125` | TEST-CONFIRMED [run: PASS] |
+| Before the switch | `T/MessageStorageTests/MessagesAiDisabledTests.cs:59,85,104` | TEST-CONFIRMED [run: PASS] |
+| Into Chat outputs (scenario) | `T/TextToDocxTests/TextToDocxThreadExportTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | Unpaid portal (scenario) | `TS/messages/messages.ai-disabled.spec.ts` | TS-ONLY |
 | **Where an export may land** | | |
-| Author; right to create; Viewer (scenario) | `T/MessageStorageTests/MessagesPermissionRoomAccessTests.cs:52,79,103,128`; `MessagesPermissionForeignFolderTests.cs:46,61,77`; `MessagesPermissionOwnFolderTests.cs:55,73` | TEST-CONFIRMED |
-| Archive, Trash | `T/TextToDocxTests/TextToDocxTargetsTests.cs:47,62,85` | TEST-CONFIRMED |
-| Same title (scenario); truncation; cleared; simultaneous | `T/TextToDocxTests/TextToDocxNamingTests.cs:47,74`; `TextToDocxThreadExportTests.cs:231`; `TextToDocxConcurrencyTests.cs:100` | TEST-CONFIRMED |
+| Author; right to create; Viewer (scenario) | `T/MessageStorageTests/MessagesPermissionRoomAccessTests.cs:52,79,103,128`; `MessagesPermissionForeignFolderTests.cs:46,61,77`; `MessagesPermissionOwnFolderTests.cs:55,73` | TEST-CONFIRMED [run: PASS] |
+| Archive, Trash | `T/TextToDocxTests/TextToDocxTargetsTests.cs:47,62,85` | TEST-CONFIRMED [run: PASS] |
+| Same title (scenario); truncation; cleared; simultaneous | `T/TextToDocxTests/TextToDocxNamingTests.cs:47,74`; `TextToDocxThreadExportTests.cs:231`; `TextToDocxConcurrencyTests.cs:100` | TEST-CONFIRMED [run: PASS] |
 | **Vectorization of knowledge** | | |
-| AI off 403, missing file 404 | `T/SettingsTests/SettingsAiDisabledTests.cs:66` | TEST-CONFIRMED |
+| AI off 403, missing file 404 | `T/SettingsTests/SettingsAiDisabledTests.cs:66` | TEST-CONFIRMED [run: PASS] |
 | File in My documents (scenario), list rules, Guest, repeats, no handle | `TS/vectorization/vectorization.validation.spec.ts:58,95`; `products/ASC.Files/Core/Vectorization/VectorizationTaskPublisher.cs:55-90`; `Security:681-691,2693-2706` | TS-ONLY (TS block skipped) |
 | Status and socket; Knowledge room rights (scenario) | `Security:1428-1447`; `VectorizationTaskPublisher.cs` | CODE-ONLY |
 | Knowledge room without vectorization (scenario) | `Security:1441`; room creation in `products/ASC.Files/Core/Core/FileStorageService.cs` | CODE-ONLY |
@@ -359,19 +361,19 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | One query, room filter, 20-room cap (scenario) | `products/ASC.AI/Core/Knowledge/KnowledgeSearchEngine.cs:46-75` (`roomIds.Contains`); `Chat/storage/aiProjectChatContext.ts` | CODE-ONLY |
 | Tool offered only while enabled; `aiContextGetKnowledgeFolders` | `Chat/controllers/contextController.ts`; yaml 1806 | CODE-ONLY |
 | **Vectorization settings** | | |
-| Self-hosted roles (scenario "Room admin"), anonymous, reset, body (scenario) | `T/SettingsTests/SettingsVectorizationPermissionsTests.cs:58,80,100,116,135,146` | TEST-CONFIRMED |
+| Self-hosted roles (scenario "Room admin"), anonymous, reset, body (scenario) | `T/SettingsTests/SettingsVectorizationPermissionsTests.cs:58,80,100,116,135,146` | TEST-CONFIRMED [run: PASS] |
 | Hosted 403 (scenario) | `TS/settings/settings.permission.spec.ts:439,512` | TS-ONLY |
 | Key verified; audited | `AI/Core/Settings/AiSettingsService.cs` | CODE-ONLY |
 | **Prompt library** | | |
-| Roles | `T/PromptTests/PromptRoleTests.cs:49,71`; `PromptGuestTests.cs:47`; `PromptAnonymousTests.cs:46`; `PromptAiDisabledTests.cs:50` | TEST-CONFIRMED |
-| Private (scenario "Libraries are private"); foreign prompt (scenario); foreign folder (scenario) | `T/PromptTests/PromptIsolationTests.cs:54,74,136,157,172,231,260` | TEST-CONFIRMED |
-| Folder read by id (scenario); folder delete cascades | `T/PromptTests/PromptFolderLifecycleTests.cs:109,130,177`; `PromptIntegrityTests.cs:215` | TEST-CONFIRMED |
-| Operations | `T/PromptTests/PromptLifecycleTests.cs:47,68,91`; `PromptMoveTests.cs:47`; `PromptExportTests.cs:49`; `PromptReadAndListTests.cs:47,176` | TEST-CONFIRMED |
+| Roles | `T/PromptTests/PromptRoleTests.cs:49,71`; `PromptGuestTests.cs:47`; `PromptAnonymousTests.cs:46`; `PromptAiDisabledTests.cs:50` | TEST-CONFIRMED [run: PASS] |
+| Private (scenario "Libraries are private"); foreign prompt (scenario); foreign folder (scenario) | `T/PromptTests/PromptIsolationTests.cs:54,74,136,157,172,231,260` | TEST-CONFIRMED [run: PASS] |
+| Folder read by id (scenario); folder delete cascades | `T/PromptTests/PromptFolderLifecycleTests.cs:109,130,177`; `PromptIntegrityTests.cs:215` | TEST-CONFIRMED [run: PASS] |
+| Operations | `T/PromptTests/PromptLifecycleTests.cs:47,68,91`; `PromptMoveTests.cs:47`; `PromptExportTests.cs:49`; `PromptReadAndListTests.cs:47,176` | TEST-CONFIRMED [run: PASS] |
 | **Prompt names, texts and bundles** | | |
-| Name limit (scenario), not a string, rename | `T/PromptStorageTests/PromptNameLengthTests.cs:43,58`; `T/PromptFolderStorageTests/PromptFolderNameLengthTests.cs:43,61`; `T/PromptTests/PromptFolderLifecycleTests.cs:231`; `PromptCreateValidationTests.cs:53` | TEST-CONFIRMED |
-| Unique, case-insensitive; same name elsewhere (scenario); recheck (scenario) | `T/PromptTests/PromptCreateValidationTests.cs:127,149`; `PromptLifecycleTests.cs:154`; `PromptMoveTests.cs:129,159,185` | TEST-CONFIRMED |
-| Text | `T/PromptTests/PromptLifecycleTests.cs:141,204`; `PromptTextSizeTests.cs:114,128` | TEST-CONFIRMED |
-| Import modes (scenario); refused bundle (scenario) | `T/PromptTests/PromptImportTests.cs:81,108,129`; `PromptImportRoundTripTests.cs:98,119`; `PromptImportValidationTests.cs:94,120,136,154,169,181`; `PromptImportRefusalTests.cs:67,85,104` | TEST-CONFIRMED |
+| Name limit (scenario), not a string, rename | `T/PromptStorageTests/PromptNameLengthTests.cs:43,58`; `T/PromptFolderStorageTests/PromptFolderNameLengthTests.cs:43,61`; `T/PromptTests/PromptFolderLifecycleTests.cs:231`; `PromptCreateValidationTests.cs:53` | TEST-CONFIRMED [run: PASS] |
+| Unique, case-insensitive; same name elsewhere (scenario); recheck (scenario) | `T/PromptTests/PromptCreateValidationTests.cs:127,149`; `PromptLifecycleTests.cs:154`; `PromptMoveTests.cs:129,159,185` | TEST-CONFIRMED [run: PASS] |
+| Text | `T/PromptTests/PromptLifecycleTests.cs:141,204`; `PromptTextSizeTests.cs:114,128` | TEST-CONFIRMED [run: PASS] |
+| Import modes (scenario); refused bundle (scenario) | `T/PromptTests/PromptImportTests.cs:81,108,129`; `PromptImportRoundTripTests.cs:98,119`; `PromptImportValidationTests.cs:94,120,136,154,169,181`; `PromptImportRefusalTests.cs:67,85,104` | TEST-CONFIRMED [run: PASS] |
 | **Metadata fields proposed for a file** | | |
 | Route rules, trim, dedupe, 50, nothing written (scenario `kind` `folder`) | `Chat/controllers/metaController.ts`; `Chat/meta/generateMeta.ts`; `Chat/meta/__tests__/generateMeta.test.ts`; yaml 5631 | CODE-ONLY |
 | **Metadata values filled from a file** | | |
@@ -381,8 +383,8 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Billing of AI usage on a hosted portal** | | |
 | Charges; source (scenario); off stops | `TS/billing/billing.spec.ts:145,255,350,437` | TS-ONLY (TS block skipped) |
 | **Spending limits on the AI services** | | |
-| Scope left out (scenario) | `Web/04_Portal/Payments/PaymentServiceLimitValidationTests.cs:54,73` | TEST-CONFIRMED |
-| Service layer: owner, cache, read, errors | `CoreTests/TariffServiceServiceLimit{Cache,Owner,Read}Tests.cs`; `CoreTests/AccountingClientServiceLimit{Error,Request}Tests.cs` | TEST-CONFIRMED |
+| Scope left out (scenario) | `Web/04_Portal/Payments/PaymentServiceLimitValidationTests.cs:54,73` | TEST-CONFIRMED [run: PASS] |
+| Service layer: owner, cache, read, errors | `CoreTests/TariffServiceServiceLimit{Cache,Owner,Read}Tests.cs`; `CoreTests/AccountingClientServiceLimit{Error,Request}Tests.cs` | TEST-CONFIRMED [run: NO-LINK] |
 | Portal limit reached (scenario), personal wins | `TS/limits/limits.enforcement.spec.ts:191,287`; `TS/limits/limits.per-user.spec.ts` | TS-ONLY |
 | Roles, 403, 404, 409, audit (scenario) | `Payments` (nine `*ServiceLimit*` actions); `TS/limits/limits.crud.spec.ts`; yaml 52223 | CODE-ONLY |
 | **Audit trail and real-time events of AI changes** | | |

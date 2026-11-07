@@ -1,5 +1,7 @@
 # files-settings — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 Every requirement of `spec.md` with where it was verified. No test was run for this document: TEST-CONFIRMED means a
 test of this repository asserts the claim (read at the cited lines, or "by name" where only its name was read), not that
 the test is green. Many cited tests carry a numbered `Bug` trait; it may mark an open bug or a regression guard, and the
@@ -26,143 +28,143 @@ None of those specs was edited.
 | Claim | Source | Status |
 |---|---|---|
 | **Personal file settings switches** | | |
-| Hide-cancel, room-lifetime, keep-name, same-tab: returns value, both ways, idempotent, `{}` = false, in settings, per user, every role, 401 anonymous/terminated | `T/07_Settings/Editor/SettingsToggleTestBase.cs:70-181`, derived by `HideConfirmCancelOperationTests`, `HideConfirmRoomLifetimeTests`, `KeepNewFileNameTests`, `SetOpenEditorInSameTabTests` | TEST-CONFIRMED |
-| `displayRecent`: same behaviours; `{}` answers a boolean | `T/07_Settings/Storage/DisplayRecentTests.cs:49-115` (85-96 read, others by name), `DisplayRecentPermissionsTests.cs:46-88` by name | TEST-CONFIRMED |
-| `displayFileExtension` | `T/07_Settings/Storage/DisplayFileExtensionTests.cs:49-115`, `DisplayFileExtensionPermissionsTests.cs:46-88` by name | TEST-CONFIRMED |
-| `storeOriginal` | `T/07_Settings/Storage/StoreOriginalTests.cs:48-114` (84-95 read), `StoreOriginalPermissionsTests.cs:46-88` by name | TEST-CONFIRMED |
-| `changeDeleteConfirm` | `T/07_Settings/SharingDefaults/ChangeDeleteConfirmTests.cs:56-149` (84-94 read, others by name) | TEST-CONFIRMED |
+| Hide-cancel, room-lifetime, keep-name, same-tab: returns value, both ways, idempotent, `{}` = false, in settings, per user, every role, 401 anonymous/terminated | `T/07_Settings/Editor/SettingsToggleTestBase.cs:70-181`, derived by `HideConfirmCancelOperationTests`, `HideConfirmRoomLifetimeTests`, `KeepNewFileNameTests`, `SetOpenEditorInSameTabTests` | TEST-CONFIRMED [run: NOT-IN-RUN] |
+| `displayRecent`: same behaviours; `{}` answers a boolean | `T/07_Settings/Storage/DisplayRecentTests.cs:49-115` (85-96 read, others by name), `DisplayRecentPermissionsTests.cs:46-88` by name | TEST-CONFIRMED [run: PASS] |
+| `displayFileExtension` | `T/07_Settings/Storage/DisplayFileExtensionTests.cs:49-115`, `DisplayFileExtensionPermissionsTests.cs:46-88` by name | TEST-CONFIRMED [run: PASS] |
+| `storeOriginal` | `T/07_Settings/Storage/StoreOriginalTests.cs:48-114` (84-95 read), `StoreOriginalPermissionsTests.cs:46-88` by name | TEST-CONFIRMED [run: PASS] |
+| `changeDeleteConfirm` | `T/07_Settings/SharingDefaults/ChangeDeleteConfirmTests.cs:56-149` (84-94 read, others by name) | TEST-CONFIRMED [run: PASS] |
 | **Switches for quick actions and room grouping** | | |
 | Stored per account, boolean answer | `S:495-499`, `S:739-744`, their remarks | CODE-ONLY |
 | `getRoomsFolder` not affected by the grouping | `S` remark at 722-734 (not traced further) | CODE-ONLY |
 | **Conversion prompt can only be hidden** | | |
-| Always true, two independent flags, `{}` true | `T/07_Settings/Editor/HideConfirmConvertTests.cs:67-116` | TEST-CONFIRMED |
-| Isolated per user, every role, 401 | same file 120-168 by name | TEST-CONFIRMED |
+| Always true, two independent flags, `{}` true | `T/07_Settings/Editor/HideConfirmConvertTests.cs:67-116` | TEST-CONFIRMED [run: PASS] |
+| Isolated per user, every role, 401 | same file 120-168 by name | TEST-CONFIRMED [run: NO-LINK] |
 | **Download archive format** | | |
-| Value readable through `downloadTarGz`, per user | `T/07_Settings/SharingDefaults/DownloadTarGzTests.cs:58-68`, 97 by name | TEST-CONFIRMED |
+| Value readable through `downloadTarGz`, per user | `T/07_Settings/SharingDefaults/DownloadTarGzTests.cs:58-68`, 97 by name | TEST-CONFIRMED [run: PASS] |
 | Answer object does not confirm the choice | `S` remark 100-114 | CODE-ONLY |
 | **Compatibility stubs store nothing** | | |
-| `storeForcesave` equals the settings value | `T/07_Settings/Storage/ForceSaveTests.cs:77-84` | TEST-CONFIRMED |
+| `storeForcesave` equals the settings value | `T/07_Settings/Storage/ForceSaveTests.cs:77-84` | TEST-CONFIRMED [run: PASS] |
 | `storeForcesave` returns the constant false | `S:409-414` | CODE-ONLY |
 | `updateFileIfExist` returns the constant false | `S:517-521` | CODE-ONLY |
 | **Trash auto-clearing** | | |
-| Enable with gap, disable, without gap, gap alone, `{}` | `T/07_Settings/Storage/AutoCleanupTests.cs:55-161` | TEST-CONFIRMED |
-| Reflected in read and in settings, per user | same file 165-251 by name | TEST-CONFIRMED |
-| Roles and 401 | `T/07_Settings/Storage/AutoCleanupPermissionsTests.cs:49-146` by name | TEST-CONFIRMED |
+| Enable with gap, disable, without gap, gap alone, `{}` | `T/07_Settings/Storage/AutoCleanupTests.cs:55-161` | TEST-CONFIRMED [run: PASS] |
+| Reflected in read and in settings, per user | same file 165-251 by name | TEST-CONFIRMED [run: NO-LINK] |
+| Roles and 401 | `T/07_Settings/Storage/AutoCleanupPermissionsTests.cs:49-146` by name | TEST-CONFIRMED [run: PASS] |
 | **Permission to connect third-party storages** | | |
-| Answer and settings value | `T/07_Settings/Storage/ThirdPartyAccessTests.cs:50-103` by name | TEST-CONFIRMED |
-| Non-admin 403; deleted/terminated/anonymous 401 | `T/07_Settings/Storage/ThirdPartyAccessPermissionsTests.cs:46,79-91,102-118,122` | TEST-CONFIRMED |
-| `saveThirdParty` refused when off | `T/07_Settings/Storage/ThirdPartyAccessTests.cs:116-136` | TEST-CONFIRMED |
-| **Module description** | `T/07_Settings/Editor/GetFilesModuleTests.cs:52-61`; 65-97 by name | TEST-CONFIRMED |
+| Answer and settings value | `T/07_Settings/Storage/ThirdPartyAccessTests.cs:50-103` by name | TEST-CONFIRMED [run: PASS] |
+| Non-admin 403; deleted/terminated/anonymous 401 | `T/07_Settings/Storage/ThirdPartyAccessPermissionsTests.cs:46,79-91,102-118,122` | TEST-CONFIRMED [run: PASS] |
+| `saveThirdParty` refused when off | `T/07_Settings/Storage/ThirdPartyAccessTests.cs:116-136` | TEST-CONFIRMED [run: PASS] |
+| **Module description** | `T/07_Settings/Editor/GetFilesModuleTests.cs:52-61`; 65-97 by name | TEST-CONFIRMED [run: PASS] |
 | **Document Server address is readable without signing in** | | |
-| `isDefault`, version true/false, anonymous read | `T/07_Settings/Editor/GetDocServiceUrlTests.cs:56-62,77-93,97-107` | TEST-CONFIRMED |
+| `isDefault`, version true/false, anonymous read | `T/07_Settings/Editor/GetDocServiceUrlTests.cs:56-62,77-93,97-107` | TEST-CONFIRMED [run: PASS] |
 | **Document Server address is changed with verification** | | |
-| 403 "Access denied", 401 anonymous/terminated | `T/07_Settings/Editor/CheckDocServiceUrlTests.cs:61-112` | TEST-CONFIRMED |
+| 403 "Access denied", 401 anonymous/terminated | `T/07_Settings/Editor/CheckDocServiceUrlTests.cs:61-112` | TEST-CONFIRMED [run: PASS] |
 | Validation, mixed content, rollback, 500 on failed verification | `E:609-700`, yaml `checkDocServiceUrl` | CODE-ONLY |
 | **Default templates are read with the settings permission** | `S:628-634`, `DT:67-85` | CODE-ONLY |
 | **Default template from an existing file** | | |
-| Missing `selectedFile` 400 | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:45-55` | TEST-CONFIRMED |
-| Administrator on owner's file 403 | same file 65-80 | TEST-CONFIRMED |
-| Extension mismatch 400 | same file 98-109; `DT:218-221` (throws the 400 exception; the test's "still red" comment is stale by that code) | TEST-CONFIRMED |
-| Unknown file 404 | same file 119-128; `DT:210-211` | TEST-CONFIRMED |
+| Missing `selectedFile` 400 | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:45-55` | TEST-CONFIRMED [run: PASS] |
+| Administrator on owner's file 403 | same file 65-80 | TEST-CONFIRMED [run: NO-LINK] |
+| Extension mismatch 400 | same file 98-109; `DT:218-221` (throws the 400 exception; the test's "still red" comment is stale by that code) | TEST-CONFIRMED [run: NO-LINK] |
+| Unknown file 404 | same file 119-128; `DT:210-211` | TEST-CONFIRMED [run: NO-LINK] |
 | Copy, previous file deleted, unknown extension is a silent 200 | `DT:87-123` | CODE-ONLY |
 | **Default template from an upload** | | |
-| Over 100 MB 400 with the message | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:140-151`; `S:710-712` | TEST-CONFIRMED |
-| Declared extension contradicted 400 | same file 165-213; `DT:129-134` (the comments saying 403 are stale by that code) | TEST-CONFIRMED |
+| Over 100 MB 400 with the message | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:140-151`; `S:710-712` | TEST-CONFIRMED [run: PASS] |
+| Declared extension contradicted 400 | same file 165-213; `DT:129-134` (the comments saying 403 are stale by that code) | TEST-CONFIRMED [run: NO-LINK] |
 | PDF not a form 403; storing and previous file deleted | `DT:143-168`; `InvalidOperationException` maps to 403 per `common/ASC.Api.Core/Middleware/ResponseWrapper.cs` | CODE-ONLY |
 | **Default template reset** | `S:681-687`, `DT:87-123` | CODE-ONLY |
 | **Editing a file alone** | | |
-| Owner and invited manager get a key | `T/01_Files/Editing/EditingStartTests.cs:52-62`, 73 by name | TEST-CONFIRMED |
-| Second claim 403 | same file 116-136 | TEST-CONFIRMED |
-| 401 anonymous, 403 guest and read-only, 404 unknown | `T/01_Files/Editing/EditingStartPermissionsTests.cs:46-59,63-80`, 84 by name; `EditingStartTests.cs:92` by name | TEST-CONFIRMED |
+| Owner and invited manager get a key | `T/01_Files/Editing/EditingStartTests.cs:52-62`, 73 by name | TEST-CONFIRMED [run: PASS] |
+| Second claim 403 | same file 116-136 | TEST-CONFIRMED [run: NO-LINK] |
+| 401 anonymous, 403 guest and read-only, 404 unknown | `T/01_Files/Editing/EditingStartPermissionsTests.cs:46-59,63-80`, 84 by name; `EditingStartTests.cs:92` by name | TEST-CONFIRMED [run: PASS] |
 | **Starting a shared editing session** | | |
-| `{}` or false: 403 "File editing start error" | `T/01_Files/Editing/EditingStartCoAuthoringTests.cs:47-59,65-80` (integration host has no Document Server tracking) | TEST-CONFIRMED |
+| `{}` or false: 403 "File editing start error" | `T/01_Files/Editing/EditingStartCoAuthoringTests.cs:47-59,65-80` (integration host has no Document Server tracking) | TEST-CONFIRMED [run: PASS] |
 | Key on success | `FSS:2365-2381` | CODE-ONLY |
 | **Tracking an editing session** | | |
-| `key` true, empty `value` | `T/01_Files/Editing/EditingTrackTests.cs:126-140`; 51,81 | TEST-CONFIRMED |
-| 401, 403 guest/read, 404, administrator allowed | `T/01_Files/Editing/EditingTrackPermissionsTests.cs:46-117`, 85 by name; `EditingTrackTests.cs:112-122` | TEST-CONFIRMED |
+| `key` true, empty `value` | `T/01_Files/Editing/EditingTrackTests.cs:126-140`; 51,81 | TEST-CONFIRMED [run: PASS] |
+| 401, 403 guest/read, 404, administrator allowed | `T/01_Files/Editing/EditingTrackPermissionsTests.cs:46-117`, 85 by name; `EditingTrackTests.cs:112-122` | TEST-CONFIRMED [run: PASS] |
 | Stale `docKeyForTrack` 403; `isFinish` drops the tab | yaml `trackEditFile` | CODE-ONLY |
 | **Users offered for document protection** | | |
-| Guest 403 "Access denied" | `T/01_Files/Editing/ProtectUsersPermissionsTests.cs:47-67` | TEST-CONFIRMED |
+| Guest 403 "Access denied" | `T/01_Files/Editing/ProtectUsersPermissionsTests.cs:47-67` | TEST-CONFIRMED [run: PASS] |
 | List content, unknown id 403 | yaml `getProtectedFileUsers` | CODE-ONLY |
 | **Address of a version's changes** | | |
-| Latest is version 0, API-bumped and first version have no `previous` | `T/01_Files/EditDiff/GetEditDiffTests.cs:44-57,77-92,96-106` | TEST-CONFIRMED |
-| 404 message | same file 115-122 | TEST-CONFIRMED |
-| Comment, no access, anonymous 403; read and guest | `T/01_Files/EditDiff/GetEditDiffPermissionsTests.cs:103-120,145-177`; 124,181 by name | TEST-CONFIRMED |
+| Latest is version 0, API-bumped and first version have no `previous` | `T/01_Files/EditDiff/GetEditDiffTests.cs:44-57,77-92,96-106` | TEST-CONFIRMED [run: PASS] |
+| 404 message | same file 115-122 | TEST-CONFIRMED [run: NO-LINK] |
+| Comment, no access, anonymous 403; read and guest | `T/01_Files/EditDiff/GetEditDiffPermissionsTests.cs:103-120,145-177`; 124,181 by name | TEST-CONFIRMED [run: PASS] |
 | **Chunked session overwriting a file** | | |
-| Fields, without size, 404 | `T/01_Files/EditSession/EditSessionTests.cs:54-96` | TEST-CONFIRMED |
-| Read access and guest 403, anonymous 401 | `T/01_Files/EditSession/EditSessionPermissionsTests.cs:88-125`, 129 by name | TEST-CONFIRMED |
+| Fields, without size, 404 | `T/01_Files/EditSession/EditSessionTests.cs:54-96` | TEST-CONFIRMED [run: PASS] |
+| Read access and guest 403, anonymous 401 | `T/01_Files/EditSession/EditSessionPermissionsTests.cs:88-125`, 129 by name | TEST-CONFIRMED [run: PASS] |
 | **Bulk order of entries** | | |
-| Entry fields, count | `T/01_Files/Order/FilesBulkOrderTests.cs:49-65,298-315` | TEST-CONFIRMED |
-| Reflected in content, equal values | same file 92,122,243 by name | TEST-CONFIRMED |
-| Empty list, 0 is 400, maximum accepted, 404 unknown and wrong type | same file 172-181,192-205,226-239,264-294 | TEST-CONFIRMED |
-| Guest and read 403, anonymous 401, room manager allowed | `T/01_Files/Order/FilesBulkOrderPermissionsTests.cs:67-84,117-134`; 47,97 by name; `FSS:2832` | TEST-CONFIRMED |
+| Entry fields, count | `T/01_Files/Order/FilesBulkOrderTests.cs:49-65,298-315` | TEST-CONFIRMED [run: PASS] |
+| Reflected in content, equal values | same file 92,122,243 by name | TEST-CONFIRMED [run: NO-LINK] |
+| Empty list, 0 is 400, maximum accepted, 404 unknown and wrong type | same file 172-181,192-205,226-239,264-294 | TEST-CONFIRMED [run: NO-LINK] |
+| Guest and read 403, anonymous 401, room manager allowed | `T/01_Files/Order/FilesBulkOrderPermissionsTests.cs:67-84,117-134`; 47,97 by name; `FSS:2832` | TEST-CONFIRMED [run: PASS] |
 | **Saving a file as PDF** | | |
-| Title ends with `.pdf` | `T/01_Files/Forms/IsFormPdfTests.cs:159-168` | TEST-CONFIRMED |
-| 404, archived 403, nothing created | `T/01_Files/CopySave/SaveFileAsPdfTests.cs:53-107` | TEST-CONFIRMED |
-| No create access, other room 403; no access, anonymous | `T/01_Files/CopySave/SaveFileAsPdfPermissionsTests.cs:52-75,131-156`; 81,107 by name | TEST-CONFIRMED |
+| Title ends with `.pdf` | `T/01_Files/Forms/IsFormPdfTests.cs:159-168` | TEST-CONFIRMED [run: PASS] |
+| 404, archived 403, nothing created | `T/01_Files/CopySave/SaveFileAsPdfTests.cs:53-107` | TEST-CONFIRMED [run: PASS] |
+| No create access, other room 403; no access, anonymous | `T/01_Files/CopySave/SaveFileAsPdfPermissionsTests.cs:52-75,131-156`; 81,107 by name | TEST-CONFIRMED [run: PASS] |
 | **HTML file in My documents** | | |
-| Created, 400, true same id, omitted new id | `T/01_Files/Create/HtmlFileCreateTests.cs:85-96,101-108,112-124,145-155`; 128 by name | TEST-CONFIRMED |
-| Roles, guest 404, anonymous 401 | `T/01_Files/Create/HtmlFileCreatePermissionsTests.cs:102-111`; 47-88,115 by name | TEST-CONFIRMED |
+| Created, 400, true same id, omitted new id | `T/01_Files/Create/HtmlFileCreateTests.cs:85-96,101-108,112-124,145-155`; 128 by name | TEST-CONFIRMED [run: PASS] |
+| Roles, guest 404, anonymous 401 | `T/01_Files/Create/HtmlFileCreatePermissionsTests.cs:102-111`; 47-88,115 by name | TEST-CONFIRMED [run: PASS] |
 | `true` updates the content with a version | yaml `createHtmlFileInMyDocuments` (not in the spec text beyond "use the file") | CODE-ONLY |
 | **Encryption data of a file** | | |
-| Keys returned | `T/08_Private/PrivacyRoomTest.cs:149-159` | TEST-CONFIRMED |
+| Keys returned | `T/08_Private/PrivacyRoomTest.cs:149-159` | TEST-CONFIRMED [run: PASS] |
 | Read access required | yaml `getEncryptionInfo` | CODE-ONLY |
 | **Primary external link of a file** | | |
-| Shape, lazily created | `T/01_Files/Links/FileLinkPrimaryTests.cs:47-67`; `FSS:4491-4542` | TEST-CONFIRMED |
-| Same id, roles | same file 89,104-151 by name | TEST-CONFIRMED |
-| Anonymous 401, no access 403 | same file 174-186,195-209 (the "currently 200" comment at 190 is stale by `FSS:4523`) | TEST-CONFIRMED |
+| Shape, lazily created | `T/01_Files/Links/FileLinkPrimaryTests.cs:47-67`; `FSS:4491-4542` | TEST-CONFIRMED [run: PASS] |
+| Same id, roles | same file 89,104-151 by name | TEST-CONFIRMED [run: NO-LINK] |
+| Anonymous 401, no access 403 | same file 174-186,195-209 (the "currently 200" comment at 190 is stale by `FSS:4523`) | TEST-CONFIRMED [run: NO-LINK] |
 | **Primary external link of a folder or room** | | |
-| Shape, `count` 0, `startIndex` | `T/02_Folders/LinksPrimary/FolderLinkPrimaryGetTests.cs:46-66,146-172` | TEST-CONFIRMED |
-| Same link | `T/02_Folders/Links/FolderLinkCreateTests.cs:255-268` | TEST-CONFIRMED |
-| No `access`: 200, count 0 | same file 158-170 | TEST-CONFIRMED |
-| Refusals, 404s | same file 189-200,277-290,339-355,382-398; 361,404,423 by name; `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:260-297`; `FolderLinkPrimaryGetTests.cs:104-114`, 118,132 by name | TEST-CONFIRMED |
+| Shape, `count` 0, `startIndex` | `T/02_Folders/LinksPrimary/FolderLinkPrimaryGetTests.cs:46-66,146-172` | TEST-CONFIRMED [run: PASS] |
+| Same link | `T/02_Folders/Links/FolderLinkCreateTests.cs:255-268` | TEST-CONFIRMED [run: PASS] |
+| No `access`: 200, count 0 | same file 158-170 | TEST-CONFIRMED [run: NO-LINK] |
+| Refusals, 404s | same file 189-200,277-290,339-355,382-398; 361,404,423 by name; `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:260-297`; `FolderLinkPrimaryGetTests.cs:104-114`, 118,132 by name | TEST-CONFIRMED [run: PASS] |
 | **Revoked primary link stays revoked on read** | | |
-| Folder: 404 after revoke | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:195-214` | TEST-CONFIRMED |
+| Folder: 404 after revoke | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:195-214` | TEST-CONFIRMED [run: PASS] |
 | File: same path; `primary` true clears the state; replaced in Public and Form filling rooms | `FSS:4491-4503,6622-6660` | CODE-ONLY |
 | **Setting an external link of a file** | | |
-| Structure and fields | `T/01_Files/Links/FileLinkSetTests.cs:46-197` by name | TEST-CONFIRMED |
-| ReadWrite 403, unknown id creates, 404, 401, 403 | same file 214-228,237-251,255-268,343-379; 383 by name | TEST-CONFIRMED |
-| Roles | same file 272-325 by name | TEST-CONFIRMED |
+| Structure and fields | `T/01_Files/Links/FileLinkSetTests.cs:46-197` by name | TEST-CONFIRMED [run: PASS] |
+| ReadWrite 403, unknown id creates, 404, 401, 403 | same file 214-228,237-251,255-268,343-379; 383 by name | TEST-CONFIRMED [run: NO-LINK] |
+| Roles | same file 272-325 by name | TEST-CONFIRMED [run: NO-LINK] |
 | **Setting an external link of a folder or room** | | |
-| Revoke answer, past expiration, ReadWrite 403, unknown id | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:170-184,263-274,334-350,354-366` | TEST-CONFIRMED |
-| Fields, same id | same file 46-150,278,370,387 by name | TEST-CONFIRMED |
-| Roles, 401, 404 | `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:50-178` by name; `FolderLinkPrimarySetTests.cs:218-248` by name | TEST-CONFIRMED |
+| Revoke answer, past expiration, ReadWrite 403, unknown id | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:170-184,263-274,334-350,354-366` | TEST-CONFIRMED [run: PASS] |
+| Fields, same id | same file 46-150,278,370,387 by name | TEST-CONFIRMED [run: NO-LINK] |
+| Roles, 401, 404 | `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:50-178` by name; `FolderLinkPrimarySetTests.cs:218-248` by name | TEST-CONFIRMED [run: PASS] |
 | **Listing the links of a file** | | |
-| Empty, 401, 403 | `T/01_Files/Links/FileLinkListTests.cs:45-56,206-243` | TEST-CONFIRMED |
-| Paging, created link, roles | same file 76-190 by name | TEST-CONFIRMED |
+| Empty, 401, 403 | `T/01_Files/Links/FileLinkListTests.cs:45-56,206-243` | TEST-CONFIRMED [run: PASS] |
+| Paging, created link, roles | same file 76-190 by name | TEST-CONFIRMED [run: NO-LINK] |
 | **Listing the links of a folder or room** | | |
-| Empty, revoked, 404 zero id, read-only empty | `T/02_Folders/Links/FolderLinkListTests.cs:66-76,221-240,277-287,347-364` | TEST-CONFIRMED |
-| 403, 401, other 404s | same file 263,291,374,396,417 by name | TEST-CONFIRMED |
+| Empty, revoked, 404 zero id, read-only empty | `T/02_Folders/Links/FolderLinkListTests.cs:66-76,221-240,277-287,347-364` | TEST-CONFIRMED [run: PASS] |
+| 403, 401, other 404s | same file 263,291,374,396,417 by name | TEST-CONFIRMED [run: NO-LINK] |
 | **Folder path** | | |
-| Order, trash, 404, 403 message | `T/02_Folders/Read/FolderPathTests.cs:58-72,132-139,166-171`; `FolderPathPermissionsTests.cs:67-78` | TEST-CONFIRMED |
-| Room, section, archived, favourites, recent, 401 | `FolderPathTests.cs:90-154`, `FolderPathPermissionsTests.cs:54` by name | TEST-CONFIRMED |
+| Order, trash, 404, 403 message | `T/02_Folders/Read/FolderPathTests.cs:58-72,132-139,166-171`; `FolderPathPermissionsTests.cs:67-78` | TEST-CONFIRMED [run: PASS] |
+| Room, section, archived, favourites, recent, 401 | `FolderPathTests.cs:90-154`, `FolderPathPermissionsTests.cs:54` by name | TEST-CONFIRMED [run: PASS] |
 | **Subfolders** | | |
-| Direct only, empty, count, virtual, 404, deleted | `T/02_Folders/Subfolders/SubfoldersTests.cs:89-146,151-177,228-238` | TEST-CONFIRMED |
-| Public room 403; others | `T/02_Folders/Subfolders/SubfoldersPermissionsTests.cs:130-141`; 43,56,95,227,265 by name; `SubfoldersTests.cs:182,214` by name | TEST-CONFIRMED |
+| Direct only, empty, count, virtual, 404, deleted | `T/02_Folders/Subfolders/SubfoldersTests.cs:89-146,151-177,228-238` | TEST-CONFIRMED [run: PASS] |
+| Public room 403; others | `T/02_Folders/Subfolders/SubfoldersPermissionsTests.cs:130-141`; 43,56,95,227,265 by name; `SubfoldersTests.cs:182,214` by name | TEST-CONFIRMED [run: PASS] |
 | **Changing a room's cover** | | |
-| Answer, twice, idempotent, template, private, 404, archived | `T/03_Rooms/Covers/RoomCoverChangeTests.cs:66-85,162-209,234-255,285-319,344-371` | TEST-CONFIRMED |
-| Colour alone, cover alone, every type, every cover, survive archive, deleted | same file 89,106,213,263,323,375 by name | TEST-CONFIRMED |
-| Too short colour 400, empty colour, empty body | `T/03_Rooms/Covers/RoomCoverValidationTests.cs:73-87,128-174`; 49,91 by name | TEST-CONFIRMED |
-| Foreign, invited user, anonymous | `T/03_Rooms/Covers/RoomCoverPermissionsTests.cs:180-198,234-254,285-301` | TEST-CONFIRMED |
+| Answer, twice, idempotent, template, private, 404, archived | `T/03_Rooms/Covers/RoomCoverChangeTests.cs:66-85,162-209,234-255,285-319,344-371` | TEST-CONFIRMED [run: PASS] |
+| Colour alone, cover alone, every type, every cover, survive archive, deleted | same file 89,106,213,263,323,375 by name | TEST-CONFIRMED [run: NO-LINK] |
+| Too short colour 400, empty colour, empty body | `T/03_Rooms/Covers/RoomCoverValidationTests.cs:73-87,128-174`; 49,91 by name | TEST-CONFIRMED [run: PASS] |
+| Foreign, invited user, anonymous | `T/03_Rooms/Covers/RoomCoverPermissionsTests.cs:180-198,234-254,285-301` | TEST-CONFIRMED [run: PASS] |
 | **Removing a room's logo** | | |
-| Removed, no logo, 404, archived, repeated, deleted, restores cover, template and derived room | `T/03_Rooms/Logos/RoomLogoDeleteTests.cs:46-57,76-115,153-164,238-252,273-293,316-356` | TEST-CONFIRMED |
-| Sharing preserved (assertion is on the room id) | same file 360-375 | TEST-CONFIRMED |
-| Foreign, anonymous, invited user, editor | `T/03_Rooms/Logos/RoomLogoDeletePermissionsTests.cs:65-96,148-163,190-205` | TEST-CONFIRMED |
+| Removed, no logo, 404, archived, repeated, deleted, restores cover, template and derived room | `T/03_Rooms/Logos/RoomLogoDeleteTests.cs:46-57,76-115,153-164,238-252,273-293,316-356` | TEST-CONFIRMED [run: PASS] |
+| Sharing preserved (assertion is on the room id) | same file 360-375 | TEST-CONFIRMED [run: NO-LINK] |
+| Foreign, anonymous, invited user, editor | `T/03_Rooms/Logos/RoomLogoDeletePermissionsTests.cs:65-96,148-163,190-205` | TEST-CONFIRMED [run: PASS] |
 | **Creating a tag in the catalogue** | | |
-| Empty, blank, long 400; repeated once; case; recreated; missing/null/non-string | `T/03_Rooms/Tags/RoomTagCreateTests.cs` assertions at 123,142,206,216-223,237-240,264-275; 151-183 per index (BadRequest) | TEST-CONFIRMED |
-| Roles | `T/03_Rooms/Permissions/RoomTagCreatePermissionsTests.cs:45,69,87,103` by name; `Tags:47-53` | TEST-CONFIRMED |
+| Empty, blank, long 400; repeated once; case; recreated; missing/null/non-string | `T/03_Rooms/Tags/RoomTagCreateTests.cs` assertions at 123,142,206,216-223,237-240,264-275; 151-183 per index (BadRequest) | TEST-CONFIRMED [run: PASS] |
+| Roles | `T/03_Rooms/Permissions/RoomTagCreatePermissionsTests.cs:45,69,87,103` by name; `Tags:47-53` | TEST-CONFIRMED [run: PASS] |
 | **Deleting tags from the catalogue** | | |
-| Attached, duplicates, unknown, long 400, similar names, reuse | `T/03_Rooms/Tags/RoomCustomTagDeleteTests.cs:70-87,120-142,171-183,268-288`; 308 by name | TEST-CONFIRMED |
-| Validation of the body | `T/03_Rooms/Permissions/RoomCustomTagValidationPermissionsTests.cs:47-60,91-100,112-122,131-140` | TEST-CONFIRMED |
-| Roles | `T/03_Rooms/Permissions/RoomTagDeletePermissionsTests.cs:45-103` | TEST-CONFIRMED |
+| Attached, duplicates, unknown, long 400, similar names, reuse | `T/03_Rooms/Tags/RoomCustomTagDeleteTests.cs:70-87,120-142,171-183,268-288`; 308 by name | TEST-CONFIRMED [run: PASS] |
+| Validation of the body | `T/03_Rooms/Permissions/RoomCustomTagValidationPermissionsTests.cs:47-60,91-100,112-122,131-140` | TEST-CONFIRMED [run: PASS] |
+| Roles | `T/03_Rooms/Permissions/RoomTagDeletePermissionsTests.cs:45-103` | TEST-CONFIRMED [run: PASS] |
 | **Checking whether a tag is used** | | |
-| Detached, deleted room, unknown/blank, query decides | `T/03_Rooms/Tags/RoomTagHasLinksTests.cs:67-89,114-156,194-209` | TEST-CONFIRMED |
-| Roles | `T/03_Rooms/Permissions/RoomTagDeletePermissionsTests.cs:111-178` | TEST-CONFIRMED |
+| Detached, deleted room, unknown/blank, query decides | `T/03_Rooms/Tags/RoomTagHasLinksTests.cs:67-89,114-156,194-209` | TEST-CONFIRMED [run: PASS] |
+| Roles | `T/03_Rooms/Permissions/RoomTagDeletePermissionsTests.cs:111-178` | TEST-CONFIRMED [run: PASS] |
 | **Group members with their access** | | |
-| Guest 403 on the file operation | `T/04_Security/Sharing/GroupAndOwnerSharingTests.cs:49-85` | TEST-CONFIRMED |
+| Guest 403 on the file operation | `T/04_Security/Sharing/GroupAndOwnerSharingTests.cs:49-85` | TEST-CONFIRMED [run: PASS] |
 | Fields, paging, folder operation, empty list | `Sec:320-345`, yaml `getGroupsMembersWithFolderSecurity` | CODE-ONLY |
 | **Unlocking a password-protected link** | | |
-| `InvalidPassword`, `Ok` | `T/04_Security/RoomShareTests.cs:434-439` | TEST-CONFIRMED |
+| `InvalidPassword`, `Ok` | `T/04_Security/RoomShareTests.cs:434-439` | TEST-CONFIRMED [run: PASS] |
 | Attempt limit 403 | yaml `applyExternalSharePassword` | CODE-ONLY |
 
 ## Differences between the yaml and the server

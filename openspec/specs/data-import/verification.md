@@ -1,5 +1,7 @@
 # data-import — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
 root (`server/`); `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml`; `Controller` is
 `web/ASC.Web.Api/Api/MigrationController.cs`, `StatusDto` is `web/ASC.Web.Api/ApiModels/ResponseDto/MigrationStatusDto.cs`,
@@ -41,14 +43,14 @@ that range the product side changed only in `Controller:228-230` (three `RaisesW
 |---|---|---|
 | **Who may use data import** | | |
 | DocSpace administrator right on every controller action; 403 "Access denied" | `Controller:356-362` (`DemandPermissionAsync`, called at 77, 105, 134, 178, 204, 237, 291, 333); `Upload:54-57` | CODE-ONLY |
-| Owner and DocSpace admin get 200 on list/status, 404 on logs of a fresh portal | `Tests/MigrationTests.cs:54-141`; `TS/migration.spec.ts` | TEST-CONFIRMED |
-| Room admin, User, Guest → 403 "Access denied" on list, status, logs | `Tests/MigrationPermissionsTests.cs:61-78, 94-111, 127-144`; `TS/migration.permissions.spec.ts` | TEST-CONFIRMED |
-| Anonymous → 401 on list, status, logs | `Tests/MigrationPermissionsTests.cs:47-59, 80-92, 113-125` | TEST-CONFIRMED |
-| Room admin, User, Guest → 403 "Access denied" and anonymous → 401 on cancel, clear, finish, migrate, init | `Tests/MigrationWritePermissionsTests.cs:226-264` (`Endpoints` theory data at 224) | TEST-CONFIRMED |
+| Owner and DocSpace admin get 200 on list/status, 404 on logs of a fresh portal | `Tests/MigrationTests.cs:54-141`; `TS/migration.spec.ts` | TEST-CONFIRMED [run: PASS] |
+| Room admin, User, Guest → 403 "Access denied" on list, status, logs | `Tests/MigrationPermissionsTests.cs:61-78, 94-111, 127-144`; `TS/migration.permissions.spec.ts` | TEST-CONFIRMED [run: PASS] |
+| Anonymous → 401 on list, status, logs | `Tests/MigrationPermissionsTests.cs:47-59, 80-92, 113-125` | TEST-CONFIRMED [run: PASS] |
+| Room admin, User, Guest → 403 "Access denied" and anonymous → 401 on cancel, clear, finish, migrate, init | `Tests/MigrationWritePermissionsTests.cs:226-264` (`Endpoints` theory data at 224) | TEST-CONFIRMED [run: PASS] |
 | No edition/tariff gate | no quota, tariff or standalone check in `Controller`, `Core`, `Worker`, `Operation`; the `migration.enabled` key of `appsettings.json:272-274` is read nowhere in the server (see deviations) | CODE-ONLY |
 | **Listing the import sources** | | |
 | Names from the registered migrators, registration order, case-insensitive match later | `Core:44-49`; `Workspace:59`, `Google:72`, `Nextcloud:63` (the three names) | CODE-ONLY |
-| List contains `Workspace`, `Nextcloud`, `GoogleWorkspace`; `count` = length; `links[0].action` GET | `Tests/MigrationTests.cs:54-83`; yaml `listMigrations` (45430-45501) | TEST-CONFIRMED |
+| List contains `Workspace`, `Nextcloud`, `GoogleWorkspace`; `count` = length; `links[0].action` GET | `Tests/MigrationTests.cs:54-83`; yaml `listMigrations` (45430-45501) | TEST-CONFIRMED [run: PASS] |
 | **Uploading the source backup** | | |
 | Route `migrationFileUpload.ashx` served by the Web.Api; proxied by nginx | `web/ASC.Web.Api/Extensions/WebApiServiceExtensions.cs:87-89`; `nginx:698-700` | CODE-ONLY |
 | `Init=true`: previous folder deleted, random new folder in the `migration` storage module, path cached for a day, chunk size from `files:uploader:chunk-size` (10 MB default) | `Upload:61-86`; `appsettings.json:123-124`; `storage.json:126-133` | CODE-ONLY |
@@ -59,9 +61,9 @@ that range the product side changed only in `Controller:228-230` (three `RaisesW
 | Nextcloud: first `.zip`, else "Archive must be .zip"; needs a `.bak`/`.sql` dump ("*.bak file not found" wrapped as "Couldn't parse <name> archive"); `data/<uid>/files` | `Nextcloud:73-87, 141-146, 225-231, 386-389`; `Resx:138-140` | CODE-ONLY |
 | Google: every `.zip`, name order, root `Takeout` required; per-archive failure listed, all failing → "Couldn't parse archives" | `Google:82-92, 145-150, 205-213`; `Resx:141-143` | CODE-ONLY |
 | **Parsing the uploaded backup** | | |
-| Queue only, 200 empty body; event published to the bus — for a known and an unknown name alike, with nothing uploaded | `Controller:103-108`; `Core:51-57`; yaml `uploadAndInitializeMigration` (45502-45595); `Tests/MigrationWriteTests.cs:106-119` | TEST-CONFIRMED |
-| Worker runs the job: migrator resolved by name; an unknown name ends the job with `isCompleted` true and a non-empty `error` | `Handler:46-54`; `Worker:45-48, 55-83`; `Operation:84-121`; `Tests/MigrationWriteTests.cs:106-119` (asserts `isCompleted` and `error` not empty for `TotallyNotARealMigrator`) — the message is not the documented "No such migration provider", see M11 | TEST-CONFIRMED (outcome) / CODE-ONLY (message) |
-| A parse without an upload ends with `isCompleted` true and a non-empty `error` (the cached folder is null) | `Operation:120`; `Nextcloud:66-73` (`Directory.GetFiles(null)` throws after the logger was initialised); `Tests/MigrationWriteTests.cs:106-119` (`Nextcloud`) | TEST-CONFIRMED |
+| Queue only, 200 empty body; event published to the bus — for a known and an unknown name alike, with nothing uploaded | `Controller:103-108`; `Core:51-57`; yaml `uploadAndInitializeMigration` (45502-45595); `Tests/MigrationWriteTests.cs:106-119` | TEST-CONFIRMED [run: FAIL-BUG] |
+| Worker runs the job: migrator resolved by name; an unknown name ends the job with `isCompleted` true and a non-empty `error` | `Handler:46-54`; `Worker:45-48, 55-83`; `Operation:84-121`; `Tests/MigrationWriteTests.cs:106-119` (asserts `isCompleted` and `error` not empty for `TotallyNotARealMigrator`) — the message is not the documented "No such migration provider", see M11 | TEST-CONFIRMED [run: FAIL-BUG] (outcome) / CODE-ONLY (message) |
+| A parse without an upload ends with `isCompleted` true and a non-empty `error` (the cached folder is null) | `Operation:120`; `Nextcloud:66-73` (`Directory.GetFiles(null)` throws after the logger was initialised); `Tests/MigrationWriteTests.cs:106-119` (`Nextcloud`) | TEST-CONFIRMED [run: FAIL-BUG] |
 | `parseResult` fields (`operation` lower-cased, users of the three lists, groups, `files`, `failedArchives`) | `Info:53-69`; `User:44-56`; `ApiInfo`; yaml `MigrationApiInfo` (96575-96711), `MigratingApiUser` (96527-96574) | CODE-ONLY |
 | Progress 100 and `isCompleted` at the end; upload kept after a successful parse, deleted after a failure | `Workspace:119-122`, `Google:222-225`, `Nextcloud:232-235`; `Operation:143-183` (`clearMigrationFolder` only on error or after an import) | CODE-ONLY |
 | **Classifying the users found** | | |
@@ -71,10 +73,10 @@ that range the product side changed only in `Controller:228-230` (three `RaisesW
 | `MaxTotalSize` of the tenant quota compared with the folder size (archives excluded for an import); "Backup is larger than the total size of the portal" | `Operation:123-141`; `Resx:180-182`; release notes v3.0 line 31 (client warning dialog) | CODE-ONLY |
 | **Reading the job state** | | |
 | Null job → empty 200; `progress`, `error` (exception message or ""), `isCompleted`, `parseResult` | `Controller:132-155`; `StatusDto`; yaml `getMigrationStatus` (45596-45675), `MigrationStatusDto` (96712-96752) | CODE-ONLY |
-| 200 on a fresh portal (owner, DocSpace admin) | `Tests/MigrationTests.cs:85-107` | TEST-CONFIRMED |
+| 200 on a fresh portal (owner, DocSpace admin) | `Tests/MigrationTests.cs:85-107` | TEST-CONFIRMED [run: PASS] |
 | **Starting the import** | | |
 | Body required (`ArgumentNullException` → 400); `[EmailAddress]` on `email`; `userType` is a string enum (unknown name → 400); 200 empty body; queued | `Controller:233-266`; `ApiUser:54-55, 83`; `common/ASC.Core.Common/Core/EmployeeType.cs:40`; yaml `startMigration` (45816-45901) | CODE-ONLY |
-| An empty parse result (`{}`) is accepted with 200 on a portal where nothing was parsed | `Tests/MigrationWriteTests.cs:96-104` (no exception); the queued job then resolves no migrator (`migratorName` null, `Core:46-49`) and ends with an error (`Operation:108`, see M11) | TEST-CONFIRMED (200) / CODE-ONLY (job outcome) |
+| An empty parse result (`{}`) is accepted with 200 on a portal where nothing was parsed | `Tests/MigrationWriteTests.cs:96-104` (no exception); the queued job then resolves no migrator (`migratorName` null, `Core:46-49`) and ends with an error (`Operation:108`, see M11) | TEST-CONFIRMED [run: PASS] (200) / CODE-ONLY (job outcome) |
 | `startMigration` declares `room.created`, `folder.created` and `room.updated` for the rooms and folders the import creates and hands over | `Controller:228-230` (`RaisesWebhook`); `Migrator:159-185, 346-379` | CODE-ONLY |
 | Only `apiInfo.Users` is read for the selection; `existUsers`/`withoutEmailUsers` of the parse are merged into the pool and matched by `key`; an empty source e-mail takes the request's | `Info:71-98` | CODE-ONLY |
 | Users-only mode = all `import...` flags false (storage `ShouldImport` false → nothing created) | `Info:95-112`; `Migrator:330-333` | CODE-ONLY |
@@ -100,16 +102,16 @@ that range the product side changed only in `Controller:228-230` (three `RaisesW
 | Semaphore; existing completed job dequeued and replaced; running job kept and only republished | `Worker:55-83` | CODE-ONLY |
 | **Cancelling a parse** | | |
 | Dequeues only jobs with `operation` "parse" for the tenant, then deletes the upload folder; 200 always | `Controller:176-181`; `Core:67-70`; `Worker:85-95`; yaml `cancelMigration` (45676-45745) | CODE-ONLY |
-| Cancel with nothing running, twice → 200 both times, status stays empty | `Tests/MigrationWriteTests.cs:47-56` | TEST-CONFIRMED |
+| Cancel with nothing running, twice → 200 both times, status stays empty | `Tests/MigrationWriteTests.cs:47-56` | TEST-CONFIRMED [run: PASS] |
 | **Clearing a finished import** | | |
 | Dequeues completed jobs with `operation` "migration"; folder deleted; 200 always | `Controller:202-207`; `Worker:97-107`; yaml `clearMigration` (45746-45815) | CODE-ONLY |
-| Clear with nothing to clear, twice → 200 both times, status stays empty | `Tests/MigrationWriteTests.cs:58-67` | TEST-CONFIRMED |
+| Clear with nothing to clear, twice → 200 both times, status stays empty | `Tests/MigrationWriteTests.cs:58-67` | TEST-CONFIRMED [run: PASS] |
 | A finished *parse* job is not cleared (the filter is `operation == "migration"`); the test with bug trait 84792 demands that a failed parse is removed — see M13 | `Worker:99`; `Tests/MigrationWriteTests.cs:125-140` | CODE-ONLY (the test asserts the opposite) |
 | **Finishing the import** | | |
 | `isSendWelcomeEmail` `required` (400); true → activation mail for each imported, not active user; no job → `Exception` → 500 "No migration is in progress"; then clear | `Controller:331-354`; `FinishDto:46`; `Resx:195-197`; yaml `finishMigration` (45976-46053), `FinishDto` (94990-95004) | CODE-ONLY |
-| Empty body → 400; `isSendWelcomeEmail: false` without a job → 200 | `Tests/MigrationWriteTests.cs:73-94` | TEST-CONFIRMED |
+| Empty body → 400; `isSendWelcomeEmail: false` without a job → 200 | `Tests/MigrationWriteTests.cs:73-94` | TEST-CONFIRMED [run: PASS] |
 | **Downloading the log** | | |
-| 404 "No migration is in progress" without a job | `Controller:289-297`; `Tests/MigrationTests.cs:113-141` (bug trait 81653, asserts 404); `TS/migration.spec.ts` ("BUG 81653") | TEST-CONFIRMED |
+| 404 "No migration is in progress" without a job | `Controller:289-297`; `Tests/MigrationTests.cs:113-141` (bug trait 81653, asserts 404); `TS/migration.spec.ts` ("BUG 81653") | TEST-CONFIRMED [run: PASS] |
 | A failed parse that initialised its logger answers 200 with its (near-empty) log; the test with bug trait 84791 demands 404 — see M12 | `Nextcloud:68` (`MigrationLogger.Init()` before the failure); `Operation:170-171` (`LogName` and `SaveLogAsync` in `finally`); `Controller:293-305`; `Tests/MigrationWriteTests.cs:146-160` | CODE-ONLY (the test asserts the opposite) |
 | `text/plain; charset=UTF-8`, attachment `migration.log`, per-job name, lines `yyyy-MM-ddTHH:mm:ss: msg` + exception message; stored in the `migration_log` module | `Controller:298-305`; `Logger:48-100`; `storage.json:134-141`; yaml `getMigrationLogs` (45902-45975) | CODE-ONLY |
 | **Jobs run in the background** | | |

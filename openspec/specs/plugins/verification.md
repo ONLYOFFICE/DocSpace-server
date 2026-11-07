@@ -1,5 +1,7 @@
 # plugins — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
 root (`server/`); `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml`; `Manager` is
 `web/ASC.Web.Core/WebPluginManager.cs`, `Controller` is `web/ASC.Web.Api/Api/Settings/WebPluginsController.cs`,
@@ -39,12 +41,12 @@ both marked `test.fail`.
 | **Uploading a plugin package** | | |
 | Portal-settings right; no file 400 "No input file"; several 400 "Too many input files"; non-form request → `InvalidOperationException` from `Request.Form` → 403 | `Controller:69-96`; `Resource.resx:945-953`; yaml `addWebPluginFromFile` (65530-65625) | CODE-ONLY |
 | Extension must equal the configured one (`.zip`), length > 0, length ≤ configured max (5 MB) | `Manager:148-161`; `ConfigSettings:54-64`; `appsettings:395-397` | CODE-ONLY |
-| Package stored, switched on, audit "Webplugin uploaded", plugin returned with `url` | `Manager:188-211`; `Controller:89-95`; `Tests/DeleteWebPluginTests.cs:58-60` and `Tests/UpdateWebPluginTests.cs:54-56` assert the upload answers success (`IsSuccessStatusCode`) | TEST-CONFIRMED (success), CODE-ONLY (body) |
+| Package stored, switched on, audit "Webplugin uploaded", plugin returned with `url` | `Manager:188-211`; `Controller:89-95`; `Tests/DeleteWebPluginTests.cs:58-60` and `Tests/UpdateWebPluginTests.cs:54-56` assert the upload answers success (`IsSuccessStatusCode`) | TEST-CONFIRMED [run: PASS] (success), CODE-ONLY (body) |
 | **Contents of a plugin package** | | |
 | `config.json` and `plugin.js` required, `plugin.css` optional, assets under `assets/`; allowed asset extensions `.jpg .jpeg .png .svg`, at most 10 kept, others skipped | `Manager:624-721` (`SafeExtractPluginToTemp`); `appsettings:398-399`; `ConfigSettings:66-76` | CODE-ONLY |
 | Entry count ≤ assets max + 3 (13), unknown/zero size, per-entry size ≤ 5 MB, ratio 100:1, depth 2, unsafe paths; declared-size and running-size checks while extracting | `Manager:171-173, 571-622` (`AnalyzeZip`), `751-778` (`ExtractWithSizeMonitoring`) | CODE-ONLY |
 | Every failure inside the archive handling is wrapped as 400 "Wrong plugin archive. <reason>" | `Manager:213-216`; `Resource.resx:924-926` | CODE-ONLY |
-| Minimal valid package = `config.json` + `plugin.js` (the shared builder of the suite) | `Tests/WebPluginsTestData.cs:50-75` | TEST-CONFIRMED |
+| Minimal valid package = `config.json` + `plugin.js` (the shared builder of the suite) | `Tests/WebPluginsTestData.cs:50-75` | TEST-CONFIRMED [run: NO-LINK] |
 | `cssUrl` derived from `url` when `plugin.css` exists | `Manager:202-205, 379-382` | CODE-ONLY |
 | **Plugin name and uniqueness** | | |
 | `name` regex `^[a-z0-9_.-]+$`, no leading dot; `pluginName` regex `^[0-9a-zA-Z_$]+$`; "Wrong plugin name" | `Manager:119-123, 226-238`; `Resource.resx:942-944` | CODE-ONLY |
@@ -62,7 +64,7 @@ both marked `test.fail`.
 | v3.6: deletable on standalone when the config allows | release notes v3.6 line 45; `Manager:549-552` | CODE-ONLY |
 | **Switching a plugin on or off and storing its settings** | | |
 | Portal-settings right; body replaces state; `settings` required, `[StringLength(255)]`; encrypted with the instance key; empty → null; 200 empty; audit "Webplugin updated" | `Controller:188-199`; `RequestDto:36-80` (`[StringLength(255)]` at 55, `required` at 56); `Manager:482-487, 510-541`; yaml `updateWebPlugin` (65816-65920), `WebPluginRequest` (103561-103590) | CODE-ONLY |
-| Owner uploads, then `updateWebPlugin` `enabled:false, settings:"{}"` → 200 (name `files-autotest`) | `Tests/UpdateWebPluginTests.cs:46-70`; `TS:197-217` | TEST-CONFIRMED |
+| Owner uploads, then `updateWebPlugin` `enabled:false, settings:"{}"` → 200 (name `files-autotest`) | `Tests/UpdateWebPluginTests.cs:46-70`; `TS:197-217` | TEST-CONFIRMED [run: PASS] |
 | Settings decrypted on every read, returned verbatim | `Manager:289-315` | CODE-ONLY |
 | **Stored state of a plugin** | | |
 | Row kept only while `enabled || settings != null`, otherwise removed; manifest values apply when no row exists | `Manager:510-531` (`UpdateWebPluginAsync`), `289-315` (state applied only when a row exists), `395-404` (manifest deserialised into the same object, `enabled` and `settings` included) | CODE-ONLY |
@@ -71,8 +73,8 @@ both marked `test.fail`.
 | `cspDomains` comma-separated; added on upload and on enable, removed on disable and delete; `InvalidOperationException` (403) when the header exceeds `csp:default.maxSize` (15 KB default); state saved before the CSP call | `Controller:91, 198, 264, 267-290`; `products/ASC.Files/Core/Helpers/CspSettingsHelper.cs:119-124, 396`; `Manager:50` | CODE-ONLY |
 | **Deleting a plugin** | | |
 | Portal-settings right; delete flag; case-insensitive lookup (404); system plugin only on standalone (403); folder missing → 404; folder deleted, cache reset, state removed, audit "Webplugin deleted", CSP domains removed, 200 empty | `Controller:254-265`; `Manager:543-568`; yaml `deleteWebPlugin` (65921-65980) | CODE-ONLY |
-| Owner uploads then deletes `files-autotest` → 200 | `Tests/DeleteWebPluginTests.cs:50-68`; `TS:176-195` | TEST-CONFIRMED |
-| Reserved-prefix names reach the controller: the proxy routes `^/api/2.0/settings/webplugins(?:/|$)` before `/(files|privacyroom)` | `nginx:601-603` (before 605) — the fix for bug 83425; the tests still carry `[Trait("Bug", "83425")]` and the TS suite `test.fail` | TEST-CONFIRMED (asserts 200) |
+| Owner uploads then deletes `files-autotest` → 200 | `Tests/DeleteWebPluginTests.cs:50-68`; `TS:176-195` | TEST-CONFIRMED [run: PASS] |
+| Reserved-prefix names reach the controller: the proxy routes `^/api/2.0/settings/webplugins(?:/|$)` before `/(files|privacyroom)` | `nginx:601-603` (before 605) — the fix for bug 83425; the tests still carry `[Trait("Bug", "83425")]` and the TS suite `test.fail` | TEST-CONFIRMED [run: NO-LINK] (asserts 200) |
 | **Refreshing a plugin replaced in storage** | | |
 | Portal-settings right; name lower-cased and validated (404); version compared per scope (−1 and portal); cache reset and socket event only when outdated; returns the served plugin | `Controller:221-232`; `Manager:406-471` | CODE-ONLY |
 | Refresh leaves stored state, settings and CSP domains untouched (only the served list and the clients are refreshed) | `Manager:406-471` (no write to the settings or the CSP) | CODE-ONLY |

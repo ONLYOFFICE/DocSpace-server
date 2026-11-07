@@ -1,5 +1,7 @@
 # vdr-room-roles — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
 root (`server/`); Files test paths omit the `products/ASC.Files/Tests/Tests/` prefix. `yaml` is
 `sdk/docspace-api-spec/docspace-backend.yaml` (submodule `a0fc3a2`). Status: **TEST-CONFIRMED** (an
@@ -32,38 +34,38 @@ untouched, so D1 and D5 stand. Line references below were refreshed; the spec te
 | Claim | Source | Status |
 |---|---|---|
 | **VDR role set** | | |
-| Reviewer and Commentator → 403, member absent; Viewer, Editor, Form Filler, Content creator accepted | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:73-80, 104-114` | TEST-CONFIRMED |
-| Room manager accepted in a VDR (for a Room admin) | `01_Files/Update/FileUpdateTests.cs:140-182` (Arrange) | TEST-CONFIRMED |
+| Reviewer and Commentator → 403, member absent; Viewer, Editor, Form Filler, Content creator accepted | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:73-80, 104-114` | TEST-CONFIRMED [run: PASS] |
+| Room manager accepted in a VDR (for a Room admin) | `01_Files/Update/FileUpdateTests.cs:140-182` (Arrange) | TEST-CONFIRMED [run: PASS] |
 | **VDR room management by role** | | |
-| Edit the room: owner changes indexing, deny-download, watermark, lifetime | `03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:46-168` (owner only) | TEST-CONFIRMED (owner) |
+| Edit the room: owner changes indexing, deny-download, watermark, lifetime | `03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:46-168` (owner only) | TEST-CONFIRMED [run: PASS] (owner) |
 | Edit the room by role (Room manager yes, others 403) | Custom-room analogue `03_Rooms/Permissions/RoomUpdatePermissionsTests.cs:166-199` | CODE-ONLY |
 | Invite / assign / change roles / remove: Room manager yes, lower roles 403 | Custom-room analogue `RoomSharePermissionsTests.cs:104-145, 196-242`; `FileSharing.cs:87-104` | CODE-ONLY |
 | View member list / history / info by every role | Custom-room analogue `RoomReadPermissionsTests.cs:130-135`; `RoomShareReadPermissionsTests.cs:84-170` | CODE-ONLY |
 | Archive / delete: owner only | Custom-room analogue `RoomArchivePermissionsTests.cs:87-101, 241-280`; `RoomDeletePermissionsTests.cs:187-230` | CODE-ONLY |
 | **VDR files and folders by role** | | |
-| Form Filler sees folders and no file before a form role is assigned, the form after | `04_Security/RoomShareTests.cs:1039-1097` (bug 80322) | TEST-CONFIRMED |
+| Form Filler sees folders and no file before a form role is assigned, the form after | `04_Security/RoomShareTests.cs:1039-1097` (bug 80322) | TEST-CONFIRMED [run: PASS] |
 | Form Filler requesting a non-form file → 403 | `deviations.md` matrix row "A Form Filler views only forms they take part in / Non-form files are refused; see D5 for PDFs" | LIVE-CONFIRMED |
 | Download by every role; deny-download restriction on a Viewer (download, view URL, copy to My documents → 403); Editor not restricted | `deviations.md` shared-links row "VDR: deny-download … the room setting still blocks the download"; the room flag itself `RoomUpdateVdrFieldsTests.cs:79-93`; `room-types` ("Room settings", `denyDownload`: members without editing rights cannot download or print) | LIVE-CONFIRMED |
 | Comment: Viewer 403 | Custom-room analogue `04_Security/RoomShareTests.cs:605-672` (Viewer: comment flag false) | CODE-ONLY |
 | Review / Edit: Editor yes, Form Filler and Viewer no | Custom-room analogue `01_Files/EditSession/EditSessionPermissionsTests.cs:64-125` | CODE-ONLY |
 | View version history: Editor yes, Form Filler / Viewer no | Custom-room analogue `01_Files/History/EditHistoryPermissionsTests.cs:57-196` | CODE-ONLY |
 | Create / upload: Content creator yes; Editor, Form Filler, Viewer 403 | Custom-room analogue `01_Files/Create/TextFileCreatePermissionsTests.cs:144-205`; `02_Folders/Upload/UploadPermissionsTests.cs:86-151` | CODE-ONLY |
-| Copy from My documents: Content creator yes; Viewer / Editor 403; owner moves a docx into a VDR, destination check "all allowed" | `06_Operations/Move/FileMoveRoomTypeTests.cs:46-83` (VDR row); `06_Operations/CheckDestFolder/CheckDestFolderTests.cs:77-94`; Custom-room analogue `06_Operations/Copy/CopyPermissionsTests.cs:143-161, 255-300` | TEST-CONFIRMED (owner) / CODE-ONLY (roles) |
-| Lock: Room manager / Content creator lock own file; Editor, Form Filler, Viewer 403 (VDR); Room manager unlocks another manager's lock; Content creator cannot unlock another Content creator's lock | `01_Files/Update/FileUpdateTests.cs:140-280` (runs on a VDR) | TEST-CONFIRMED |
+| Copy from My documents: Content creator yes; Viewer / Editor 403; owner moves a docx into a VDR, destination check "all allowed" | `06_Operations/Move/FileMoveRoomTypeTests.cs:46-83` (VDR row); `06_Operations/CheckDestFolder/CheckDestFolderTests.cs:77-94`; Custom-room analogue `06_Operations/Copy/CopyPermissionsTests.cs:143-161, 255-300` | TEST-CONFIRMED [run: PASS] (owner) / CODE-ONLY (roles) |
+| Lock: Room manager / Content creator lock own file; Editor, Form Filler, Viewer 403 (VDR); Room manager unlocks another manager's lock; Content creator cannot unlock another Content creator's lock | `01_Files/Update/FileUpdateTests.cs:140-280` (runs on a VDR) | TEST-CONFIRMED [run: PASS] |
 | Manage version history: Content creator and above | Custom-room analogue `01_Files/Versions/ChangeVersionHistoryPermissionsTests.cs:98-216` | CODE-ONLY |
 | Delete / move / rename own vs others' (Content creator own only; Room manager any) | Custom-room analogues `01_Files/Deletion/FileDeletePermissionsTests.cs:111-189`; `06_Operations/Move/FileMovePermissionsTests.cs:221-315`; `01_Files/Update/FileUpdatePermissionsTests.cs:82-204`; `02_Folders/Crud/FolderRenamePermissionsTests.cs:46-53, 117-132`; `deviations.md` matrix rows "Rename …" and "Copy of other members' files …" (VDR listed) | LIVE-CONFIRMED |
 | Copy out of the room: every role | `deviations.md` row above | LIVE-CONFIRMED |
 | Copy within the room: Content creator | Custom-room analogue `CopyPermissionsTests.cs:327-347` | CODE-ONLY |
-| File and folder links: owner's folder / file primary link in a VDR is internal-only, access not editable; external room link → 403 | `04_Security/FolderShareTests.cs:304-321`; `04_Security/ShareInheritanceTests.cs:760-809`; `03_Rooms/Links/RoomLinkReadTests.cs:352-363`; `04_Security/RoomShareTests.cs:115-133`; role split: `shared-links` | TEST-CONFIRMED (shape) / CODE-ONLY (role split) |
+| File and folder links: owner's folder / file primary link in a VDR is internal-only, access not editable; external room link → 403 | `04_Security/FolderShareTests.cs:304-321`; `04_Security/ShareInheritanceTests.cs:760-809`; `03_Rooms/Links/RoomLinkReadTests.cs:352-363`; `04_Security/RoomShareTests.cs:115-133`; role split: `shared-links` | TEST-CONFIRMED [run: PASS] (shape) / CODE-ONLY (role split) |
 | Third-party version history unavailable | `room-role-permissions` row | CODE-ONLY (cross-reference) |
 | **PDF form filling in a VDR** | | |
-| Create / upload PDF forms: owner (Arrange) | `RoomShareTests.cs:1049` | TEST-CONFIRMED (owner) |
-| Form Filler does not see a not-configured form | `RoomShareTests.cs:1058-1066` | TEST-CONFIRMED |
+| Create / upload PDF forms: owner (Arrange) | `RoomShareTests.cs:1049` | TEST-CONFIRMED [run: PASS] (owner) |
+| Form Filler does not see a not-configured form | `RoomShareTests.cs:1058-1066` | TEST-CONFIRMED [run: PASS] |
 | Viewer / Editor see not-configured forms; Editor edits them | read / edit rights of the role; `FileSecurity` PDF branch (`deviations.md` D5 evidence) | CODE-ONLY |
-| Configure filling (assign participants): owner saves the role mapping | `RoomShareTests.cs:1068-1086` (`saveFormRoleMapping`, yaml 12847; `getAllFormRoles` 12930) | TEST-CONFIRMED (owner) |
+| Configure filling (assign participants): owner saves the role mapping | `RoomShareTests.cs:1068-1086` (`saveFormRoleMapping`, yaml 12847; `getAllFormRoles` 12930) | TEST-CONFIRMED [run: PASS] (owner) |
 | Content creator configures the owner's form; Editor / Viewer / Form Filler cannot configure or stop | `yaml` `saveFormRoleMapping` (12847) remarks; `manageFormFilling` (13046) | CODE-ONLY |
 | Stop filling of own forms: Content creator; cannot stop the owner's form even if they configured it | `deviations.md` matrix row "A Content creator stops filling of own forms and forms they organized / Only forms they created"; FFR analogue `01_Files/FormFilling/ManageFormFillingPermissionsTests.cs:88-145` | LIVE-CONFIRMED |
-| Form Filler sees a configured form they take part in | `RoomShareTests.cs:1088-1096` | TEST-CONFIRMED |
+| Form Filler sees a configured form they take part in | `RoomShareTests.cs:1088-1096` | TEST-CONFIRMED [run: PASS] |
 | Form Filler does not see a configured form they do not take part in; sees only own complete forms | `deviations.md` D5 evidence (`FileSecurity` PDF branch) and matrix row "A Form Filler sees a configured form only when their turn has come / Visible as soon as assigned" | LIVE-CONFIRMED |
 | Form Filler before their turn: visible, filling not available | `deviations.md` matrix row above | LIVE-CONFIRMED |
 | Viewer sees configured forms regardless of participation | read right of the Viewer; `FileSecurity` PDF branch | CODE-ONLY |

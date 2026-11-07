@@ -1,5 +1,7 @@
 # apps — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 **Revision after `release/v4.1.0` (`d58816bece..3533ad8a89`, checked by code and test reading; nothing was run).**
 Two behaviour changes: `setEnabled` now writes an audit-trail event (bug 84747, `250b3a7f03`, tests adjusted in
 `e9cfda8d43`), which reverses the old "no audit event" claim; and `app_settings` entered the WebStudio backup module
@@ -39,76 +41,76 @@ management with database table and API endpoints"); the controller texts were re
 | Claim | Source | Status |
 |---|---|---|
 | **Catalogue of portal applications** | | |
-| 200, non-empty unique ids, `count` = length | `Tests/AppsGetAllTests.cs` `GetAll_Owner_ReturnsApplications`; `TS apps.read.spec.ts:16` | TEST-CONFIRMED |
-| Fresh portal: every entry without `settings` | `Tests/AppsGetAllTests.cs` `GetAll_PortalThatNeverSavedSettings_ReportsNone` | TEST-CONFIRMED |
-| Repeated calls identical, change nothing | `Tests/AppsGetAllTests.cs` `GetAll_RepeatedCalls_ReturnSameListAndChangeNothing` | TEST-CONFIRMED |
-| Unknown query parameters ignored | `Tests/AppsGetAllTests.cs` `GetAll_UnknownQueryParameters_AreIgnored` | TEST-CONFIRMED |
-| List shows the new flag and document, same length | `Tests/AppsGetAllTests.cs` `GetAll_AfterChange_ShowsEnabledAndSettings` | TEST-CONFIRMED |
+| 200, non-empty unique ids, `count` = length | `Tests/AppsGetAllTests.cs` `GetAll_Owner_ReturnsApplications`; `TS apps.read.spec.ts:16` | TEST-CONFIRMED [run: PASS] |
+| Fresh portal: every entry without `settings` | `Tests/AppsGetAllTests.cs` `GetAll_PortalThatNeverSavedSettings_ReportsNone` | TEST-CONFIRMED [run: PASS] |
+| Repeated calls identical, change nothing | `Tests/AppsGetAllTests.cs` `GetAll_RepeatedCalls_ReturnSameListAndChangeNothing` | TEST-CONFIRMED [run: PASS] |
+| Unknown query parameters ignored | `Tests/AppsGetAllTests.cs` `GetAll_UnknownQueryParameters_AreIgnored` | TEST-CONFIRMED [run: PASS] |
+| List shows the new flag and document, same length | `Tests/AppsGetAllTests.cs` `GetAll_AfterChange_ShowsEnabledAndSettings` | TEST-CONFIRMED [run: PASS] |
 | Order of the configuration, no paging/filter, default `enabled` from config, override per portal | `Service:41-65` (`GetAppsAsync` iterates `defaults`, `o?.Enabled ?? d.Enabled`); `Config:73`; `Controller:72-78`; yaml `getAll` (47091-47164), `AppArrayWrapper` (95532) | CODE-ONLY |
-| Anonymous 401 | `Tests/AppsAnonymousAccessTests.cs` `GetAll_Anonymous_ReturnsUnauthorized`; yaml 401 row | TEST-CONFIRMED |
+| Anonymous 401 | `Tests/AppsAnonymousAccessTests.cs` `GetAll_Anonymous_ReturnsUnauthorized`; yaml 401 row | TEST-CONFIRMED [run: PASS] |
 | **Reading one application** | | |
-| 200, `count` 1, equals the list entry | `Tests/AppGetTests.cs` `Get_Owner_ReturnsApplicationById`; `Tests/AppsGetAllTests.cs` `GetAll_EveryListedApplication_MatchesGetAndGetSettings` | TEST-CONFIRMED |
-| Reading changes nothing | `Tests/AppGetTests.cs` `Get_Reading_DoesNotChangeEnabledOrSettings` | TEST-CONFIRMED |
-| Reports the enabled and the disabled state, the saved document | `Tests/AppGetTests.cs` `Get_ReturnsEnabledAndDisabledApplication`, `Get_ReturnsSavedSettingsDocument` | TEST-CONFIRMED |
-| 404 with the id in the message | `Tests/AppGetTests.cs` `Get_UnknownId_ReturnsNotFound` (asserts the body contains `no-such-app`); `Controller:103-104` (`App '{id}' not found`) | TEST-CONFIRMED |
-| Blanks, non-ASCII, markup, `a/b`, `../settings`, 2000 chars → 404 | `Tests/AppGetTests.cs` `Get_IdThatCannotBeAnApplication_ReturnsNotFound`, `Get_VeryLongId_ReturnsNotFound` (typed client since `632c2fc262`; `a/b` and `../settings` reach the server as one escaped segment) | TEST-CONFIRMED |
-| Case-sensitive match | `Tests/AppGetTests.cs` `Get_IdIsCaseSensitive`; `Service:70` (`x.Id == id`, ordinal) | TEST-CONFIRMED |
-| Empty id routes to the list | `Tests/AppGetTests.cs` `Get_EmptyId_IsRoutedToTheListNotToAnApplication` | TEST-CONFIRMED |
-| Anonymous 401 | `Tests/AppsAnonymousAccessTests.cs` `Get_Anonymous_ReturnsUnauthorized` | TEST-CONFIRMED |
+| 200, `count` 1, equals the list entry | `Tests/AppGetTests.cs` `Get_Owner_ReturnsApplicationById`; `Tests/AppsGetAllTests.cs` `GetAll_EveryListedApplication_MatchesGetAndGetSettings` | TEST-CONFIRMED [run: PASS] |
+| Reading changes nothing | `Tests/AppGetTests.cs` `Get_Reading_DoesNotChangeEnabledOrSettings` | TEST-CONFIRMED [run: PASS] |
+| Reports the enabled and the disabled state, the saved document | `Tests/AppGetTests.cs` `Get_ReturnsEnabledAndDisabledApplication`, `Get_ReturnsSavedSettingsDocument` | TEST-CONFIRMED [run: PASS] |
+| 404 with the id in the message | `Tests/AppGetTests.cs` `Get_UnknownId_ReturnsNotFound` (asserts the body contains `no-such-app`); `Controller:103-104` (`App '{id}' not found`) | TEST-CONFIRMED [run: PASS] |
+| Blanks, non-ASCII, markup, `a/b`, `../settings`, 2000 chars → 404 | `Tests/AppGetTests.cs` `Get_IdThatCannotBeAnApplication_ReturnsNotFound`, `Get_VeryLongId_ReturnsNotFound` (typed client since `632c2fc262`; `a/b` and `../settings` reach the server as one escaped segment) | TEST-CONFIRMED [run: PASS] |
+| Case-sensitive match | `Tests/AppGetTests.cs` `Get_IdIsCaseSensitive`; `Service:70` (`x.Id == id`, ordinal) | TEST-CONFIRMED [run: PASS] |
+| Empty id routes to the list | `Tests/AppGetTests.cs` `Get_EmptyId_IsRoutedToTheListNotToAnApplication` | TEST-CONFIRMED [run: PASS] |
+| Anonymous 401 | `Tests/AppsAnonymousAccessTests.cs` `Get_Anonymous_ReturnsUnauthorized` | TEST-CONFIRMED [run: PASS] |
 | **Reading the settings document** | | |
-| Never saved → empty `response`, `count` 0 | `Tests/AppSettingsGetTests.cs` `GetSettings_NeverSaved_ComesBackEmpty`; `Controller:127-135, 224-227` (`ParseSettings` → null); yaml `JsonValueWrapper` (100817) | TEST-CONFIRMED |
-| Falsy documents kept, `count` 1 | `Tests/AppSettingsGetTests.cs` `GetSettings_FalsyDocument_IsKeptNotTreatedAsEmpty` | TEST-CONFIRMED |
-| Readable while disabled | `Tests/AppSettingsGetTests.cs` `GetSettings_WhileApplicationIsDisabled_StillReadable` | TEST-CONFIRMED |
-| 404 unknown / unusable id; anonymous 401 | `Tests/AppSettingsGetTests.cs` `GetSettings_UnknownId_ReturnsNotFound`, `GetSettings_IdThatCannotBeAnApplication_ReturnsNotFound`; `Tests/AppsAnonymousAccessTests.cs` `GetSettings_Anonymous_ReturnsUnauthorized` | TEST-CONFIRMED |
+| Never saved → empty `response`, `count` 0 | `Tests/AppSettingsGetTests.cs` `GetSettings_NeverSaved_ComesBackEmpty`; `Controller:127-135, 224-227` (`ParseSettings` → null); yaml `JsonValueWrapper` (100817) | TEST-CONFIRMED [run: PASS] |
+| Falsy documents kept, `count` 1 | `Tests/AppSettingsGetTests.cs` `GetSettings_FalsyDocument_IsKeptNotTreatedAsEmpty` | TEST-CONFIRMED [run: PASS] |
+| Readable while disabled | `Tests/AppSettingsGetTests.cs` `GetSettings_WhileApplicationIsDisabled_StillReadable` | TEST-CONFIRMED [run: PASS] |
+| 404 unknown / unusable id; anonymous 401 | `Tests/AppSettingsGetTests.cs` `GetSettings_UnknownId_ReturnsNotFound`, `GetSettings_IdThatCannotBeAnApplication_ReturnsNotFound`; `Tests/AppsAnonymousAccessTests.cs` `GetSettings_Anonymous_ReturnsUnauthorized` | TEST-CONFIRMED [run: PASS] |
 | **Who may read and who may write** | | |
-| Owner reads and writes through all five operations | `Tests/AppsRolePermissionsTests.cs` `Owner_ReadsAndWritesThroughAllFiveMethods` | TEST-CONFIRMED |
-| DocSpace admin writes; Room admin, User, Guest read but get 403 on both writes and on the reset, enabled and disabled application alike | `Tests/AppsRolePermissionsTests.cs` `Member_ReadsEnabledApplication_AndWritesOnlyWithPortalSettingsRight`, `Member_ReadsDisabledApplication_AndWritesOnlyWithPortalSettingsRight`, `User_WriteIsDenied_ForEnabledAndDisabledApplicationAlike`; `Controller:161, 197` (`EditPortalSettings`), no demand on the three reads | TEST-CONFIRMED |
-| Anonymous write 401 and nothing changes | `Tests/AppsAnonymousAccessTests.cs` `SetEnabled_Anonymous_ReturnsUnauthorizedAndChangesNothing`, `SetSettings_Anonymous_ReturnsUnauthorizedAndChangesNothing` | TEST-CONFIRMED |
+| Owner reads and writes through all five operations | `Tests/AppsRolePermissionsTests.cs` `Owner_ReadsAndWritesThroughAllFiveMethods` | TEST-CONFIRMED [run: PASS] |
+| DocSpace admin writes; Room admin, User, Guest read but get 403 on both writes and on the reset, enabled and disabled application alike | `Tests/AppsRolePermissionsTests.cs` `Member_ReadsEnabledApplication_AndWritesOnlyWithPortalSettingsRight`, `Member_ReadsDisabledApplication_AndWritesOnlyWithPortalSettingsRight`, `User_WriteIsDenied_ForEnabledAndDisabledApplicationAlike`; `Controller:161, 197` (`EditPortalSettings`), no demand on the three reads | TEST-CONFIRMED [run: PASS] |
+| Anonymous write 401 and nothing changes | `Tests/AppsAnonymousAccessTests.cs` `SetEnabled_Anonymous_ReturnsUnauthorizedAndChangesNothing`, `SetSettings_Anonymous_ReturnsUnauthorizedAndChangesNothing` | TEST-CONFIRMED [run: PASS] |
 | **Order of checks on a write** | | |
-| 403 for an unknown id, same message as for a real one | `Tests/AppsRolePermissionsTests.cs` `Member_WithoutRight_GetsForbiddenBeforeTheIdIsLookedUp` (compares `error.message`) | TEST-CONFIRMED |
-| Unbindable bodies → 400 for a caller without the right; bindable-but-empty → 403 | same test, the two body loops | TEST-CONFIRMED |
-| 415 first (no body), then binding, then permission, then lookup | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndChangesNothing`; `Controller:161-164, 197-206` (demand before the service call; the service throws 404) | TEST-CONFIRMED |
+| 403 for an unknown id, same message as for a real one | `Tests/AppsRolePermissionsTests.cs` `Member_WithoutRight_GetsForbiddenBeforeTheIdIsLookedUp` (compares `error.message`) | TEST-CONFIRMED [run: PASS] |
+| Unbindable bodies → 400 for a caller without the right; bindable-but-empty → 403 | same test, the two body loops | TEST-CONFIRMED [run: NO-LINK] |
+| 415 first (no body), then binding, then permission, then lookup | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndChangesNothing`; `Controller:161-164, 197-206` (demand before the service call; the service throws 404) | TEST-CONFIRMED [run: PASS] |
 | **Switching an application on or off** | | |
-| 200 with `id` and new `enabled`; `get` and `getAll` agree | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_Owner_FlipsTheFlagAndItIsReadBack` | TEST-CONFIRMED |
-| Idempotent; last request decides | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RepeatedRequest_IsIdempotent`, `SetEnabled_Sequence_LastRequestDecidesTheFinalState` | TEST-CONFIRMED |
-| Document untouched by a switch | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_Switching_DoesNotTouchTheSettingsDocument`; `Service:89-106` (mutates `Enabled` only) | TEST-CONFIRMED |
-| Other applications and the count untouched | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_OneApplication_LeavesTheOthersAndTheCountAlone` | TEST-CONFIRMED |
-| Unknown id 404, nothing created | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_UnknownId_ReturnsNotFoundAndCreatesNothing`; `Service:91-93` | TEST-CONFIRMED |
+| 200 with `id` and new `enabled`; `get` and `getAll` agree | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_Owner_FlipsTheFlagAndItIsReadBack` | TEST-CONFIRMED [run: PASS] |
+| Idempotent; last request decides | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RepeatedRequest_IsIdempotent`, `SetEnabled_Sequence_LastRequestDecidesTheFinalState` | TEST-CONFIRMED [run: PASS] |
+| Document untouched by a switch | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_Switching_DoesNotTouchTheSettingsDocument`; `Service:89-106` (mutates `Enabled` only) | TEST-CONFIRMED [run: PASS] |
+| Other applications and the count untouched | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_OneApplication_LeavesTheOthersAndTheCountAlone` | TEST-CONFIRMED [run: PASS] |
+| Unknown id 404, nothing created | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_UnknownId_ReturnsNotFoundAndCreatesNothing`; `Service:91-93` | TEST-CONFIRMED [run: PASS] |
 | **Body rules of the switch** | | |
-| `{}` → 400, state kept (bug 84498) | `Tests/SetAppEnabledTests.cs` `SetAppEnabled_BodyWithoutEnabled_ReturnsBadRequestAndKeepsState` (`[Trait("Bug","84498")]`); `RequestDto:52` (`required bool`), fix commit `c8e3cb2543`; `TS apps.write.spec.ts:201` | TEST-CONFIRMED |
-| `null`, strings, numbers, array, object, malformed, bare `null` → 400 | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_UnusableBody_ReturnsBadRequestAndChangesNothing` | TEST-CONFIRMED |
-| No body → 415 | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndChangesNothing` | TEST-CONFIRMED |
+| `{}` → 400, state kept (bug 84498) | `Tests/SetAppEnabledTests.cs` `SetAppEnabled_BodyWithoutEnabled_ReturnsBadRequestAndKeepsState` (`[Trait("Bug","84498")]`); `RequestDto:52` (`required bool`), fix commit `c8e3cb2543`; `TS apps.write.spec.ts:201` | TEST-CONFIRMED [run: PASS] |
+| `null`, strings, numbers, array, object, malformed, bare `null` → 400 | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_UnusableBody_ReturnsBadRequestAndChangesNothing` | TEST-CONFIRMED [run: PASS] |
+| No body → 415 | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndChangesNothing` | TEST-CONFIRMED [run: PASS] |
 | **Saving the settings document** | | |
-| 200 with the document; `getSettings`, `get`, `getAll` agree | `Tests/SetAppSettingsTests.cs` `SetSettings_Owner_ResponseCarriesTheStoredDocumentAndEveryReaderAgrees` | TEST-CONFIRMED |
-| Every JSON kind round-trips (20 documents incl. Unicode, control characters, nested null, odd keys) | `Tests/AppSettingsRoundTripTests.cs` + `Tests/AppsTestData.cs` `JsonValues`; `Controller:201-204` (`GetRawText`), `Entity:46-48, 70-71` (`json` / `jsonb` column) | TEST-CONFIRMED |
-| Idempotent save; deep nesting stored whole | `Tests/SetAppSettingsTests.cs` `SetSettings_SameDocumentTwice_IsIdempotent`, `SetSettings_DeeplyNestedDocument_IsStoredWhole` | TEST-CONFIRMED |
-| Saving does not change `enabled`; saved while disabled applies after enabling | `Tests/SetAppSettingsTests.cs` `SetSettings_Saving_DoesNotChangeEnabled`, `SetSettings_SavedWhileDisabled_ApplyAfterEnabling` | TEST-CONFIRMED |
-| Replace, never merge (object→object, object→array, array→object, →`{}`) | `Tests/SetAppSettingsTests.cs` `SetSettings_NewDocument_ReplacesTheOldOneNeverMerges` | TEST-CONFIRMED |
-| Two applications independent | `Tests/SetAppSettingsTests.cs` `SetSettings_OneApplication_LeavesAnothersAlone` | TEST-CONFIRMED |
-| Unknown id 404, nothing created | `Tests/SetAppSettingsTests.cs` `SetSettings_UnknownId_ReturnsNotFoundAndCreatesNothing`; `Service:110-111` | TEST-CONFIRMED |
+| 200 with the document; `getSettings`, `get`, `getAll` agree | `Tests/SetAppSettingsTests.cs` `SetSettings_Owner_ResponseCarriesTheStoredDocumentAndEveryReaderAgrees` | TEST-CONFIRMED [run: PASS] |
+| Every JSON kind round-trips (20 documents incl. Unicode, control characters, nested null, odd keys) | `Tests/AppSettingsRoundTripTests.cs` + `Tests/AppsTestData.cs` `JsonValues`; `Controller:201-204` (`GetRawText`), `Entity:46-48, 70-71` (`json` / `jsonb` column) | TEST-CONFIRMED [run: PASS] |
+| Idempotent save; deep nesting stored whole | `Tests/SetAppSettingsTests.cs` `SetSettings_SameDocumentTwice_IsIdempotent`, `SetSettings_DeeplyNestedDocument_IsStoredWhole` | TEST-CONFIRMED [run: PASS] |
+| Saving does not change `enabled`; saved while disabled applies after enabling | `Tests/SetAppSettingsTests.cs` `SetSettings_Saving_DoesNotChangeEnabled`, `SetSettings_SavedWhileDisabled_ApplyAfterEnabling` | TEST-CONFIRMED [run: PASS] |
+| Replace, never merge (object→object, object→array, array→object, →`{}`) | `Tests/SetAppSettingsTests.cs` `SetSettings_NewDocument_ReplacesTheOldOneNeverMerges` | TEST-CONFIRMED [run: PASS] |
+| Two applications independent | `Tests/SetAppSettingsTests.cs` `SetSettings_OneApplication_LeavesAnothersAlone` | TEST-CONFIRMED [run: PASS] |
+| Unknown id 404, nothing created | `Tests/SetAppSettingsTests.cs` `SetSettings_UnknownId_ReturnsNotFoundAndCreatesNothing`; `Service:110-111` | TEST-CONFIRMED [run: PASS] |
 | **Dropping the settings document** | | |
-| `null` drops, repeatable, `count` 0, `enabled` kept, re-save works | `Tests/SetAppSettingsTests.cs` `SetSettings_Null_DropsTheDocumentAndIsRepeatable`; `Controller:201-204` (Undefined/Null → null) | TEST-CONFIRMED |
-| Body without the member resets like null | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_BodyWithoutSettingsMember_ResetsTheDocumentLikeNull` | TEST-CONFIRMED |
+| `null` drops, repeatable, `count` 0, `enabled` kept, re-save works | `Tests/SetAppSettingsTests.cs` `SetSettings_Null_DropsTheDocumentAndIsRepeatable`; `Controller:201-204` (Undefined/Null → null) | TEST-CONFIRMED [run: PASS] |
+| Body without the member resets like null | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_BodyWithoutSettingsMember_ResetsTheDocumentLikeNull` | TEST-CONFIRMED [run: PASS] |
 | **Body rules of the settings write** | | |
-| Nine malformed bodies → 400, document survives | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_UnusableBody_ReturnsBadRequestAndTheSavedDocumentSurvives` | TEST-CONFIRMED |
-| No body → 415 | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndTheSavedDocumentSurvives` | TEST-CONFIRMED |
+| Nine malformed bodies → 400, document survives | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_UnusableBody_ReturnsBadRequestAndTheSavedDocumentSurvives` | TEST-CONFIRMED [run: PASS] |
+| No body → 415 | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndTheSavedDocumentSurvives` | TEST-CONFIRMED [run: PASS] |
 | **Consistency of the three readers** | | |
-| Lifecycle save → off → on → restore → drop returns to the original snapshot | `Tests/AppsScenariosTests.cs` `Lifecycle_SettingsThenDisableThenEnableThenRestore`, `GetGetSettingsAndGetAll_StayConsistentAfterEveryChange` | TEST-CONFIRMED |
-| Unknown application rejected by all four id operations, never appears | `Tests/AppsScenariosTests.cs` `UnknownApplication_IsRejectedEverywhereAndNeverAppears` | TEST-CONFIRMED |
-| Every configured application reachable, switchable, configurable | `Tests/AppsScenariosTests.cs` `EveryModule_IsReachableAndCanBeSwitchedAndConfigured` | TEST-CONFIRMED |
+| Lifecycle save → off → on → restore → drop returns to the original snapshot | `Tests/AppsScenariosTests.cs` `Lifecycle_SettingsThenDisableThenEnableThenRestore`, `GetGetSettingsAndGetAll_StayConsistentAfterEveryChange` | TEST-CONFIRMED [run: PASS] |
+| Unknown application rejected by all four id operations, never appears | `Tests/AppsScenariosTests.cs` `UnknownApplication_IsRejectedEverywhereAndNeverAppears` | TEST-CONFIRMED [run: PASS] |
+| Every configured application reachable, switchable, configurable | `Tests/AppsScenariosTests.cs` `EveryModule_IsReachableAndCanBeSwitchedAndConfigured` | TEST-CONFIRMED [run: PASS] |
 | **Per-portal storage and configured defaults** | | |
 | Set and defaults from the `apps` section, read once, not writable through the API | `Config:73`; `appsettings:3-11`; `Service` (every method starts from `DefaultApps`); no write path to the configuration | CODE-ONLY |
 | No row until the first write; the first write copies the configured `enabled` into the new row; rows keyed by portal + id; a drop keeps the row | `Service:138-169` (`UpsertAsync`: `Enabled = defaults...?.Enabled ?? false`, `SaveChangesAsync`); `Entity:40-44` (key `TenantId`,`Id`); no delete anywhere in `Service` | CODE-ONLY |
 | Default flag visible before any write (tests toggle "the opposite of the current value", so the default is only read, never asserted to a value) | `Tests/AppsScenariosTests.cs`, `Tests/SetAppEnabledStateTests.cs` (snapshots `before`) | CODE-ONLY |
 | Two portals independent | `Service:46-48, 77-78` (every query filtered by `TenantId`); every .NET test owns one portal, no cross-portal test | CODE-ONLY |
-| A restored portal keeps id, flag, document and last-modified under the new tenant | `common/ASC.Data.Backup.Core/Tasks/Modules/WebStudioModuleSpecifics.cs:49`; `common/Tests/ASC.Data.Backup.Core.Tests/WebStudioModuleSpecificsTests.cs:393-429` `TryPrepareRow_AppSettings_RemapsTenantAndKeepsState` (row preparation only, no full backup and restore cycle); `BackupCoverageTests` no longer lists the table as a gap; `openspec/specs/backup-and-restore/spec.md` "Application settings are restored" | TEST-CONFIRMED |
+| A restored portal keeps id, flag, document and last-modified under the new tenant | `common/ASC.Data.Backup.Core/Tasks/Modules/WebStudioModuleSpecifics.cs:49`; `common/Tests/ASC.Data.Backup.Core.Tests/WebStudioModuleSpecificsTests.cs:393-429` `TryPrepareRow_AppSettings_RemapsTenantAndKeepsState` (row preparation only, no full backup and restore cycle); `BackupCoverageTests` no longer lists the table as a gap; `openspec/specs/backup-and-restore/spec.md` "Application settings are restored" | TEST-CONFIRMED [run: PASS] |
 | **Clients are told when an application is switched** | | |
 | `change-app-enabled` with `{room: "<tenant>-apps", id, enabled}` queued after the save; delivered as `s:change-app-enabled` `{id, enabled}` to that room; nothing on `setSettings` | `Controller:168` (after `SetEnabledAsync`, nothing in `SetSettingsAsync`); `Socket` (`AppsSocketManager:46-57`); `SocketServiceClient.MakeRequest:65-81` (channel write, no awaited HTTP); `common/ASC.Socket.IO/app/controllers/files.js:117`, `hubs/files.js:452-455` | CODE-ONLY |
 | Delivery failure does not fail the call | `SocketServiceClient:132-180` (`SocketService` background loop catches and logs) | CODE-ONLY |
 | **Audit-trail record of a switch** | | |
-| One event per call, `AppDisabled` / `AppEnabled` by the new flag, id in the event text, polled for up to 30 s | `Tests/AppsAuditTrailTests.cs` `SetEnabled_Owner_IsRecordedInTheAuditTrail` (`ContainSingle` on action and id); `Controller:166`; `common/ASC.Core.Common/Messaging/MessageAction.cs`; `common/services/ASC.AuditTrail/Mappers/SettingsActionMapper.cs` | TEST-CONFIRMED |
-| Off then on: both events, newest first, once the two fall into different seconds (the stored date has second precision, so same-second order is undefined) | `Tests/AppsAuditTrailTests.cs` `SetEnabled_OffThenOn_RecordsBothSwitchesInOrder` | TEST-CONFIRMED |
-| The event is asynchronous: published to the event bus and persisted by the Web.Studio subscriber | `web/ASC.Web.Api.Tests/ApiFactories/AspireAppFixture.cs` (adds Web.Studio for this suite, its comment names the subscriber); the polling in `Tests/AppsAuditTrailTests.cs` | TEST-CONFIRMED |
+| One event per call, `AppDisabled` / `AppEnabled` by the new flag, id in the event text, polled for up to 30 s | `Tests/AppsAuditTrailTests.cs` `SetEnabled_Owner_IsRecordedInTheAuditTrail` (`ContainSingle` on action and id); `Controller:166`; `common/ASC.Core.Common/Messaging/MessageAction.cs`; `common/services/ASC.AuditTrail/Mappers/SettingsActionMapper.cs` | TEST-CONFIRMED [run: PASS] |
+| Off then on: both events, newest first, once the two fall into different seconds (the stored date has second precision, so same-second order is undefined) | `Tests/AppsAuditTrailTests.cs` `SetEnabled_OffThenOn_RecordsBothSwitchesInOrder` | TEST-CONFIRMED [run: PASS] |
+| The event is asynchronous: published to the event bus and persisted by the Web.Studio subscriber | `web/ASC.Web.Api.Tests/ApiFactories/AspireAppFixture.cs` (adds Web.Studio for this suite, its comment names the subscriber); the polling in `Tests/AppsAuditTrailTests.cs` | TEST-CONFIRMED [run: PASS] |
 | A repeated value is recorded too | `Controller:166` (`Send` is unconditional), controller text "Every call is recorded"; the `true` case of the theory hits it only if the test configuration enables the first application by default, which the test does not assert | CODE-ONLY |
 | No event for a refused call or an unknown id | `Controller:161, 164` (the demand and the service's 404 throw before `Send` at 166); no test checks the absence | CODE-ONLY |
 | No event for `setSettings` | `Controller:195-209` (no `Send`); no test checks the absence | CODE-ONLY |

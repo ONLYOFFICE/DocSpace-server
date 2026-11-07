@@ -1,5 +1,7 @@
 # storage-and-integrations — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 Paths are relative to the repo root (`server/`). `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml`. Aliases:
 `TP/` = `products/ASC.Files/Tests/Tests/03_Rooms/ThirdParty/`; `FS/` = `products/ASC.Files/Tests/Tests/07_Settings/Storage/`;
 `ST/` = `web/ASC.Web.Api.Tests/Tests/02_Settings/Storage/`; `DC/` = `web/ASC.Web.Api.Tests/Tests/02_Settings/DocsCloud/`;
@@ -25,107 +27,107 @@ rows rest on `[SwaggerResponse]` and the yaml.
 | Claim | Source | Status |
 |---|---|---|
 | **Storage services a portal offers** | | |
-| Known names, non-empty name and key | `TP/ThirdPartyProvidersTests.cs:60` | TEST-CONFIRMED |
-| Nextcloud key `WebDav`, oauth false | `TP/ThirdPartyProvidersTests.cs:74` | TEST-CONFIRMED |
-| kDrive `requiredConnectionUrl` true | `TP/ThirdPartyKDriveConnectBugTests.cs:62` | TEST-CONFIRMED |
-| Configured OAuth service has redirect URL and client id (skips where not configured) | `TP/ThirdPartyProvidersTests.cs:89` | TEST-CONFIRMED |
+| Known names, non-empty name and key | `TP/ThirdPartyProvidersTests.cs:60` | TEST-CONFIRMED [run: PASS] |
+| Nextcloud key `WebDav`, oauth false | `TP/ThirdPartyProvidersTests.cs:74` | TEST-CONFIRMED [run: PASS] |
+| kDrive `requiredConnectionUrl` true | `TP/ThirdPartyKDriveConnectBugTests.cs:62` | TEST-CONFIRMED [run: PASS] |
+| Configured OAuth service has redirect URL and client id (skips where not configured) | `TP/ThirdPartyProvidersTests.cs:89` | TEST-CONFIRMED [run: SKIP] |
 | All five presets share key `WebDav`; which require the address | `TC:107-164` | CODE-ONLY |
-| **WebDAV family can be left out** | `TP/ThirdPartyProvidersTests.cs:115,129` | TEST-CONFIRMED |
+| **WebDAV family can be left out** | `TP/ThirdPartyProvidersTests.cs:115,129` | TEST-CONFIRMED [run: PASS] |
 | **Provider lists need a signed-in non-guest** | | |
-| Anonymous 401 on both | `TP/ThirdPartyProvidersTests.cs:143,174` | TEST-CONFIRMED |
+| Anonymous 401 on both | `TP/ThirdPartyProvidersTests.cs:143,174` | TEST-CONFIRMED [run: PASS] |
 | Guest or switch off: 200 and `[]` | `FC:424-427` | CODE-ONLY |
 | **Compact list** | | |
-| `WebDav` and `kDrive` as first items | `TP/ThirdPartyProvidersTests.cs:161` | TEST-CONFIRMED |
+| `WebDav` and `kDrive` as first items | `TP/ThirdPartyProvidersTests.cs:161` | TEST-CONFIRMED [run: PASS] |
 | OAuth elements add client id and redirect URL | `TC:170-190` | CODE-ONLY |
 | **Connecting a third-party account** | | |
 | Credentials checked before the insert | `PAD:150-153` | CODE-ONLY |
-| `providerId` > 0 and listed | `TP/ThirdPartyCredentialIsolationTests.cs:89` (arrange assertion), `:136` | TEST-CONFIRMED |
+| `providerId` > 0 and listed | `TP/ThirdPartyCredentialIsolationTests.cs:89` (arrange assertion), `:136` | TEST-CONFIRMED [run: PASS] |
 | Admin and room admin 200; user and guest 403; anonymous 401 | `FSS:3060`; `TS-TP:55,75,95,115,131` | CODE-ONLY |
-| Switch off: 403 (the requirement is in `files-settings`) | `FS/ThirdPartyAccessTests.cs:116` | TEST-CONFIRMED |
+| Switch off: 403 (the requirement is in `files-settings`) | `FS/ThirdPartyAccessTests.cs:116` | TEST-CONFIRMED [run: PASS] |
 | Always room storage: the controller sets it, no request field | `FC:299-311` | CODE-ONLY |
 | **Rejected credentials store nothing** | | |
-| Wrong password 403 "Access denied" | `TP/ThirdPartyCredentialIsolationTests.cs:54` | TEST-CONFIRMED |
-| No session carried over; title not saved (bug 83399) | `TP/ThirdPartyCredentialIsolationTests.cs:89` | TEST-CONFIRMED |
-| Invalid Box code below 500 (bug 83265) | `TP/ThirdPartyProviderConnectBugTests.cs:52` | TEST-CONFIRMED |
-| **Server address of a new connection** (bug 84672) | `TP/ThirdPartyKDriveConnectBugTests.cs:86` (kDrive only; other WebDAV presets by comment `PAD:500`) | TEST-CONFIRMED |
+| Wrong password 403 "Access denied" | `TP/ThirdPartyCredentialIsolationTests.cs:54` | TEST-CONFIRMED [run: PASS] |
+| No session carried over; title not saved (bug 83399) | `TP/ThirdPartyCredentialIsolationTests.cs:89` | TEST-CONFIRMED [run: PASS] |
+| Invalid Box code below 500 (bug 83265) | `TP/ThirdPartyProviderConnectBugTests.cs:52` | TEST-CONFIRMED [run: PASS] |
+| **Server address of a new connection** (bug 84672) | `TP/ThirdPartyKDriveConnectBugTests.cs:86` (kDrive only; other WebDAV presets by comment `PAD:500`) | TEST-CONFIRMED [run: PASS] |
 | **Re-authenticating and renaming** | | |
-| Rename (bug 83303) | `TP/ThirdPartyProviderConnectBugTests.cs:80` | TEST-CONFIRMED |
+| Rename (bug 83303) | `TP/ThirdPartyProviderConnectBugTests.cs:80` | TEST-CONFIRMED [run: PASS] |
 | Another member 403 | `FSS:3107-3111` | CODE-ONLY |
 | Unknown id 404 | `PAD:71-76` | CODE-ONLY |
 | Room account keeps its address | `PAD:201` | CODE-ONLY |
-| Account without address not refused for the address | `TP/ThirdPartyKDriveConnectBugTests.cs:112` | TEST-CONFIRMED |
+| Account without address not refused for the address | `TP/ThirdPartyKDriveConnectBugTests.cs:112` | TEST-CONFIRMED [run: PASS] |
 | **A member's list** | | |
-| No `auth_data` property | `TP/ThirdPartyCredentialIsolationTests.cs:136` | TEST-CONFIRMED |
+| No `auth_data` property | `TP/ThirdPartyCredentialIsolationTests.cs:136` | TEST-CONFIRMED [run: PASS] |
 | Own accounts only, no backup account | `products/ASC.Files/Core/Core/EF/Queries/ProviderAccountQueries.cs:115-125` | CODE-ONLY |
 | Empty for a user; anonymous 401 | `TS-TP:148,157` + the query above | CODE-ONLY |
 | **Disconnecting** | | |
 | Returned folder id, delete rights check, removal of security, tags and group links | `FC:135-146`, `FSS:3241-3276`, `PAD:436-457` | CODE-ONLY |
 | Unrelated user 403; anonymous 401 | `FSS:3253`; `TS-TP:193,208` | CODE-ONLY |
 | Unknown id 404 | `PAD:71-76` | CODE-ONLY |
-| Room group still listed (bug 83264) | `TP/ThirdPartyProviderDeletionBugTests.cs:88` | TEST-CONFIRMED |
-| **Account behind a room** (bug 83305) | `TP/ThirdPartyProviderDeletionBugTests.cs:54` | TEST-CONFIRMED |
-| **Legacy Common section** | `TP/ThirdPartyProvidersTests.cs:188` | TEST-CONFIRMED |
+| Room group still listed (bug 83264) | `TP/ThirdPartyProviderDeletionBugTests.cs:88` | TEST-CONFIRMED [run: PASS] |
+| **Account behind a room** (bug 83305) | `TP/ThirdPartyProviderDeletionBugTests.cs:54` | TEST-CONFIRMED [run: PASS] |
+| **Legacy Common section** | `TP/ThirdPartyProvidersTests.cs:188` | TEST-CONFIRMED [run: PASS] |
 | **Backup storage account** | | |
 | Admin-only | `FC:339-342` | CODE-ONLY |
 | Switch off 403, single account, update path checks credentials | `FSS:3185-3228`, `PAD:369-434` | CODE-ONLY |
 | **Reading the backup account** | `FSS` `GetBackupThirdPartyAsync` (read 2996-3013 in this revision), `FC:239-249` | CODE-ONLY |
 | **Backup account removes its schedule** | `FC:140-143` | CODE-ONLY |
 | **Content of a connected account** | | |
-| New file fields | `TP/ThirdPartyFileTests.cs:55` | TEST-CONFIRMED |
-| Delete final, then 404 | `TP/ThirdPartyFileTests.cs:186` | TEST-CONFIRMED |
-| Copy from My documents | `TP/ThirdPartyFileTests.cs:211` | TEST-CONFIRMED |
+| New file fields | `TP/ThirdPartyFileTests.cs:55` | TEST-CONFIRMED [run: PASS] |
+| Delete final, then 404 | `TP/ThirdPartyFileTests.cs:186` | TEST-CONFIRMED [run: PASS] |
+| Copy from My documents | `TP/ThirdPartyFileTests.cs:211` | TEST-CONFIRMED [run: PASS] |
 | **Recent section** (bug 84528) | | |
-| Removal | `TP/ThirdPartyRecentDeleteTests.cs:53` | TEST-CONFIRMED |
-| Missing from the service | `TP/ThirdPartyRecentDeleteTests.cs:81` | TEST-CONFIRMED |
-| `openEditFile` not failing | `TP/ThirdPartyRecentMissingFileTests.cs:61` | TEST-CONFIRMED |
+| Removal | `TP/ThirdPartyRecentDeleteTests.cs:53` | TEST-CONFIRMED [run: PASS] |
+| Missing from the service | `TP/ThirdPartyRecentDeleteTests.cs:81` | TEST-CONFIRMED [run: PASS] |
+| `openEditFile` not failing | `TP/ThirdPartyRecentMissingFileTests.cs:61` | TEST-CONFIRMED [run: PASS] |
 | **OAuth consent URL** | | |
-| Owner and user 200 with the consent address; anonymous 401 | `OA/ThirdPartyOAuthGetCodeTests.cs:45`, `OA/ThirdPartyOAuthGetCodePermissionsTests.cs:43,57` | TEST-CONFIRMED |
-| Other provider 200 no URL; out of range 400 | `OA/ThirdPartyOAuthGetCodeTests.cs:60,74` | TEST-CONFIRMED |
-| `desktop` state | `OA/ThirdPartyOAuthGetCodeTests.cs:87` | TEST-CONFIRMED |
+| Owner and user 200 with the consent address; anonymous 401 | `OA/ThirdPartyOAuthGetCodeTests.cs:45`, `OA/ThirdPartyOAuthGetCodePermissionsTests.cs:43,57` | TEST-CONFIRMED [run: PASS] |
+| Other provider 200 no URL; out of range 400 | `OA/ThirdPartyOAuthGetCodeTests.cs:60,74` | TEST-CONFIRMED [run: PASS] |
+| `desktop` state | `OA/ThirdPartyOAuthGetCodeTests.cs:87` | TEST-CONFIRMED [run: PASS] |
 | The seven providers | `TPC:83-104` | CODE-ONLY |
 | **Access to the storage settings** | | |
-| Anonymous 401 on all six | `ST/StoragePermissionsTests.cs:145` | TEST-CONFIRMED |
+| Anonymous 401 on all six | `ST/StoragePermissionsTests.cs:145` | TEST-CONFIRMED [run: PASS] |
 | Hosted portal 403 for the owner | `web/ASC.Web.Core/Utility/TenantExtra.cs:108-114`; remark in `ST/StorageTestBase.cs` | CODE-ONLY |
 | **Data storages** | | |
-| Owner gets a list (non-null only) | `ST/StorageReadTests.cs:75` | TEST-CONFIRMED |
+| Owner gets a list (non-null only) | `ST/StorageReadTests.cs:75` | TEST-CONFIRMED [run: PASS] |
 | Fields and meaning of no `current` entry | yaml `getAllStorages`, `SC:91-105` | CODE-ONLY |
 | **Switching the data storage** | | |
-| Not configured 400 | `ST/StorageUpdateTests.cs:43` | TEST-CONFIRMED |
-| Empty body 400, both routes | `ST/StorageUpdateTests.cs:68` | TEST-CONFIRMED |
+| Not configured 400 | `ST/StorageUpdateTests.cs:43` | TEST-CONFIRMED [run: PASS] |
+| Empty body 400, both routes | `ST/StorageUpdateTests.cs:68` | TEST-CONFIRMED [run: PASS] |
 | Same module no-op; other: Migrating and request published | `SC:414-423`, `SC:648-655` | CODE-ONLY |
 | **Returning to built-in storage** | `SC:452-473`; the test base says it is deliberately not called | CODE-ONLY |
 | **Migration progress** | | |
-| User 403, anonymous 401 | `ST/StoragePermissionsTests.cs:111,125` | TEST-CONFIRMED |
+| User 403, anonymous 401 | `ST/StoragePermissionsTests.cs:111,125` | TEST-CONFIRMED [run: PASS] |
 | Hosted -1; lapsed portals allowed | `SC:127-136` | CODE-ONLY |
-| **CDN storages** | `ST/StorageReadTests.cs:85`; `SC:498-512` | TEST-CONFIRMED |
+| **CDN storages** | `ST/StorageReadTests.cs:85`; `SC:498-512` | TEST-CONFIRMED [run: PASS] |
 | **Selecting a CDN** | | |
-| Not configured 400 | `ST/StorageUpdateTests.cs:54` | TEST-CONFIRMED |
-| Empty body 400 | `ST/StorageUpdateTests.cs:68` | TEST-CONFIRMED |
+| Not configured 400 | `ST/StorageUpdateTests.cs:54` | TEST-CONFIRMED [run: PASS] |
+| Empty body 400 | `ST/StorageUpdateTests.cs:68` | TEST-CONFIRMED [run: PASS] |
 | Same module no-op; publish | `SC:549-562`, `MSC:101-112` | CODE-ONLY |
 | **Clearing CDN** | `SC:592-599` | CODE-ONLY |
-| **Amazon S3 regions** | `ST/StorageReadTests.cs:42`; `ST/StoragePermissionsTests.cs:43,56` | TEST-CONFIRMED |
+| **Amazon S3 regions** | `ST/StorageReadTests.cs:42`; `ST/StoragePermissionsTests.cs:43,56` | TEST-CONFIRMED [run: PASS] |
 | **Starting storage encryption** | `SC:167-226`; 415 from yaml `startStorageEncryption` | CODE-ONLY |
 | **What a started encryption does** | `SC:228-283` | CODE-ONLY |
 | **Reading the encryption settings** | | |
-| Owner: empty `password` | `ST/EncryptionSettingsGetTests.cs:46` | TEST-CONFIRMED |
+| Owner: empty `password` | `ST/EncryptionSettingsGetTests.cs:46` | TEST-CONFIRMED [run: PASS] |
 | Any failure answers 200 empty | `SC:307-334` | CODE-ONLY |
 | **Encryption progress** | `SC:356-374`, yaml `getStorageEncryptionProgress` | CODE-ONLY |
 | **Access to Docs Connect tenant operations** | | |
-| 403 "Access denied" for the three roles, 401 anonymous | `DC/DocsCloudTrialPermissionsTests.cs:50,57`, `DC/DocsCloudTenantGetPermissionsTests.cs:48,55`, `DC/DocsCloudTenantInfoPermissionsTests.cs:48,55`, `DC/DocsCloudTenantConfigGetPermissionsTests.cs:48,55`, `DC/DocsCloudTenantConfigUpdatePermissionsTests.cs:48,56`, `DC/DocsCloudTenantQuotaPermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportCreatePermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportGetPermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportTerminatePermissionsTests.cs:48,55`, `DC/DocsCloudTenantUsagePermissionsTests.cs:48,55`; assertions in `DC/DocsCloudTestBase.cs` | TEST-CONFIRMED |
+| 403 "Access denied" for the three roles, 401 anonymous | `DC/DocsCloudTrialPermissionsTests.cs:50,57`, `DC/DocsCloudTenantGetPermissionsTests.cs:48,55`, `DC/DocsCloudTenantInfoPermissionsTests.cs:48,55`, `DC/DocsCloudTenantConfigGetPermissionsTests.cs:48,55`, `DC/DocsCloudTenantConfigUpdatePermissionsTests.cs:48,56`, `DC/DocsCloudTenantQuotaPermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportCreatePermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportGetPermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportTerminatePermissionsTests.cs:48,55`, `DC/DocsCloudTenantUsagePermissionsTests.cs:48,55`; assertions in `DC/DocsCloudTestBase.cs` | TEST-CONFIRMED [run: PASS] |
 | **Docs Connect trial** | `DCC:88-139`, CSP `DCC:555-569` | CODE-ONLY |
 | **Moving to Dev Pack** | | |
-| Anonymous 401 | `DC/DocsCloudCalculateDevPackPermissionsTests.cs:55`, `DC/DocsCloudSwitchToDevPackPermissionsTests.cs:55` | TEST-CONFIRMED |
+| Anonymous 401 | `DC/DocsCloudCalculateDevPackPermissionsTests.cs:55`, `DC/DocsCloudSwitchToDevPackPermissionsTests.cs:55` | TEST-CONFIRMED [run: PASS] |
 | No billing service 403 for every signed-in caller | remark in `DC/DocsCloudCalculateDevPackPermissionsTests.cs`; `PH:136-140` | CODE-ONLY |
 | Preconditions and minimum | `DCC:579-` (`PrepareSwitchAsync`) | CODE-ONLY |
 | Serialized switches | `DCC:175-180` | CODE-ONLY |
 | **Reading the tenant** | `DCC:244-249`, `DCC:268-300`, `DCC:330-335`, `DCC:398-403`, `DCC:547`, yaml; 400 without a tenant from `[SwaggerResponse]` only | CODE-ONLY |
 | **Updating the configuration** | | |
-| 256 characters 400 naming the field (bug 83327) | `DC/DocsCloudTenantConfigValidationTests.cs:53,70,87,104` | TEST-CONFIRMED |
-| 9999999999 gives 400 (bug 83326) | `DC/DocsCloudTenantConfigValidationTests.cs:127` | TEST-CONFIRMED |
+| 256 characters 400 naming the field (bug 83327) | `DC/DocsCloudTenantConfigValidationTests.cs:53,70,87,104` | TEST-CONFIRMED [run: PASS] |
+| 9999999999 gives 400 (bug 83326) | `DC/DocsCloudTenantConfigValidationTests.cs:127` | TEST-CONFIRMED [run: PASS] |
 | Audit entry | `PH:553-560` | CODE-ONLY |
 | **Quota report** | | |
-| Start, owner and admin | `DC/DocsCloudQuotaReportCreateTests.cs:48,67` | TEST-CONFIRMED |
-| Cancel, owner and admin | `DC/DocsCloudQuotaReportTerminateTests.cs:47,58` | TEST-CONFIRMED |
+| Start, owner and admin | `DC/DocsCloudQuotaReportCreateTests.cs:48,67` | TEST-CONFIRMED [run: PASS] |
+| Cancel, owner and admin | `DC/DocsCloudQuotaReportTerminateTests.cs:47,58` | TEST-CONFIRMED [run: PASS] |
 | Own job only; no tenant check at start | `DCC:429-493`; yaml | CODE-ONLY |
 
 ## Differences between the yaml and the server

@@ -1,5 +1,7 @@
 # private-rooms — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 Every requirement of `spec.md`, with where it was verified. Paths are relative to the repo root (`server/`). `yaml` is
 `sdk/docspace-api-spec/docspace-backend.yaml` (submodule `baf28cf`, 2026-11-06). Code read at `0ebdbb7c84`. `T/` is
 `products/ASC.Files/Tests/Tests/08_Private/`. `Helper` is `products/ASC.Files/Core/Core/Entries/EncryptionKeyPairDto.cs`,
@@ -15,72 +17,72 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 
 | Claim | Source | Status |
 |---|---|---|
-| Creating a key: 201, new id adds a pair | T/SetKeysTests.cs:44-57, :213-229 | TEST-CONFIRMED |
-| Refused material: blank, missing, no body on create | T/SetKeysTests.cs:88-149 | TEST-CONFIRMED |
-| Refused material: partial, blank, no body on rotation | T/ReplaceKeyTests.cs:148-215 | TEST-CONFIRMED |
-| Oversized key 400, other pairs survive, 8192 stored | T/SetKeysTests.cs:153-189; T/ReplaceKeyTests.cs:220-240 | TEST-CONFIRMED |
-| Malformed id 400 | T/SetKeysTests.cs:193-208; T/ReplaceKeyTests.cs:102-112 | TEST-CONFIRMED |
-| Repeated id 409, stored pair unchanged | T/SetKeysTests.cs:62-81 | TEST-CONFIRMED |
-| Rotation: one pair, 404, all-zero id | T/ReplaceKeyTests.cs:44-98, :117-131 | TEST-CONFIRMED |
-| Reading own keys: fields, empty set | T/KeyFieldsAndIsolationTests.cs:46-96 | TEST-CONFIRMED |
-| Delete: 204, others remain, 404, repeat, 400, 405 | T/DeleteKeysTests.cs:45-140 | TEST-CONFIRMED |
-| Keys are personal | T/CrossUserIsolationTests.cs:46-144; T/KeyFieldsAndIsolationTests.cs:100-117 | TEST-CONFIRMED |
-| Guests refused, read empty; anonymous 401; other roles manage own | T/KeyAccessPermissionsTests.cs:54-309 | TEST-CONFIRMED |
-| Sign-in links kept | T/KeysAndLoginLinksTests.cs:51-85 | TEST-CONFIRMED |
-| Old-format key | T/LegacyKeysFormatTests.cs:49-105 | TEST-CONFIRMED |
-| Room access keys: set per member, own private half only | T/RoomAccessKeysPermissionsTests.cs:110-168, :193-221; T/RoomAccessKeysTests.cs:45-116 | TEST-CONFIRMED |
-| Membership change and rotation reach the set | T/PrivacyRoomIntegrationTests.cs:77-133 | TEST-CONFIRMED |
-| Archived private room still answers | T/RoomAccessKeysTests.cs:169-180 | TEST-CONFIRMED |
-| Refusals: non-member, admin 403; no key 403 | T/RoomAccessKeysPermissionsTests.cs:55-102; T/RoomAccessKeysTests.cs:120-142 | TEST-CONFIRMED |
-| Refusals: ordinary 400, Trash and unknown 404 | T/RoomAccessKeysTests.cs:184-231 | TEST-CONFIRMED |
-| Candidates: public half only, left-outs, duplicates | T/RoomCandidateKeysTests.cs:74-156 | TEST-CONFIRMED |
-| Candidates: who may ask, refusals | T/RoomCandidateKeysTests.cs:160-250 | TEST-CONFIRMED |
-| Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:261-305 | TEST-CONFIRMED |
-| Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED |
-| Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED |
-| File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:242-252 | TEST-CONFIRMED |
-| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5529-5537 | TEST-CONFIRMED |
-| Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED |
-| Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:172-216 | TEST-CONFIRMED |
+| Creating a key: 201, new id adds a pair | T/SetKeysTests.cs:44-57, :213-229 | TEST-CONFIRMED [run: PASS] |
+| Refused material: blank, missing, no body on create | T/SetKeysTests.cs:88-149 | TEST-CONFIRMED [run: PASS] |
+| Refused material: partial, blank, no body on rotation | T/ReplaceKeyTests.cs:148-215 | TEST-CONFIRMED [run: PASS] |
+| Oversized key 400, other pairs survive, 8192 stored | T/SetKeysTests.cs:153-189; T/ReplaceKeyTests.cs:220-240 | TEST-CONFIRMED [run: PASS] |
+| Malformed id 400 | T/SetKeysTests.cs:193-208; T/ReplaceKeyTests.cs:102-112 | TEST-CONFIRMED [run: PASS] |
+| Repeated id 409, stored pair unchanged | T/SetKeysTests.cs:62-81 | TEST-CONFIRMED [run: PASS] |
+| Rotation: one pair, 404, all-zero id | T/ReplaceKeyTests.cs:44-98, :117-131 | TEST-CONFIRMED [run: PASS] |
+| Reading own keys: fields, empty set | T/KeyFieldsAndIsolationTests.cs:46-96 | TEST-CONFIRMED [run: PASS] |
+| Delete: 204, others remain, 404, repeat, 400, 405 | T/DeleteKeysTests.cs:45-140 | TEST-CONFIRMED [run: PASS] |
+| Keys are personal | T/CrossUserIsolationTests.cs:46-144; T/KeyFieldsAndIsolationTests.cs:100-117 | TEST-CONFIRMED [run: PASS] |
+| Guests refused, read empty; anonymous 401; other roles manage own | T/KeyAccessPermissionsTests.cs:54-309 | TEST-CONFIRMED [run: PASS] |
+| Sign-in links kept | T/KeysAndLoginLinksTests.cs:51-85 | TEST-CONFIRMED [run: PASS] |
+| Old-format key | T/LegacyKeysFormatTests.cs:49-105 | TEST-CONFIRMED [run: PASS] |
+| Room access keys: set per member, own private half only | T/RoomAccessKeysPermissionsTests.cs:110-168, :193-221; T/RoomAccessKeysTests.cs:45-116 | TEST-CONFIRMED [run: PASS] |
+| Membership change and rotation reach the set | T/PrivacyRoomIntegrationTests.cs:77-133 | TEST-CONFIRMED [run: PASS] |
+| Archived private room still answers | T/RoomAccessKeysTests.cs:169-180 | TEST-CONFIRMED [run: PASS] |
+| Refusals: non-member, admin 403; no key 403 | T/RoomAccessKeysPermissionsTests.cs:55-102; T/RoomAccessKeysTests.cs:120-142 | TEST-CONFIRMED [run: PASS] |
+| Refusals: ordinary 400, Trash and unknown 404 | T/RoomAccessKeysTests.cs:184-231 | TEST-CONFIRMED [run: PASS] |
+| Candidates: public half only, left-outs, duplicates | T/RoomCandidateKeysTests.cs:74-156 | TEST-CONFIRMED [run: PASS] |
+| Candidates: who may ask, refusals | T/RoomCandidateKeysTests.cs:160-250 | TEST-CONFIRMED [run: PASS] |
+| Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:261-305 | TEST-CONFIRMED [run: PASS] |
+| Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED [run: PASS] |
+| Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED [run: PASS] |
+| File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:242-252 | TEST-CONFIRMED [run: PASS] |
+| New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5529-5537 | TEST-CONFIRMED [run: PASS] |
+| Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED [run: PASS] |
+| Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:172-216 | TEST-CONFIRMED [run: PASS] |
 | Revocation does not depend on a client being online | Sharing:RevokeFileKeysAsync; commit cc60512acd | CODE-ONLY |
-| Clearing access: member and owner | T/PrivateRoomLeaveTests.cs:58-98 | TEST-CONFIRMED |
-| Owner keeps the room and keys | T/PrivateRoomLeaveTests.cs:102-160 | TEST-CONFIRMED |
-| Non-member admin cannot clear; ordinary room can | T/PrivateRoomLeaveTests.cs:176-194 | TEST-CONFIRMED |
-| Deleting a user deletes file keys | T/PrivateRoomFileKeysTests.cs:220-234 | TEST-CONFIRMED |
-| Keys and file keys not backed up | common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:68, :101 | TEST-CONFIRMED |
-| Room types that can be private; 403 otherwise | T/PrivateRoomCreateTests.cs:47-60, :67-102 | TEST-CONFIRMED |
-| Empty key set counts as no key | T/PrivateRoomContentRulesTests.cs:129-139; Login:97-105 | TEST-CONFIRMED |
+| Clearing access: member and owner | T/PrivateRoomLeaveTests.cs:58-98 | TEST-CONFIRMED [run: PASS] |
+| Owner keeps the room and keys | T/PrivateRoomLeaveTests.cs:102-160 | TEST-CONFIRMED [run: PASS] |
+| Non-member admin cannot clear; ordinary room can | T/PrivateRoomLeaveTests.cs:176-194 | TEST-CONFIRMED [run: PASS] |
+| Deleting a user deletes file keys | T/PrivateRoomFileKeysTests.cs:220-234 | TEST-CONFIRMED [run: PASS] |
+| Keys and file keys not backed up | common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:68, :101 | TEST-CONFIRMED [run: NOT-IN-RUN] |
+| Room types that can be private; 403 otherwise | T/PrivateRoomCreateTests.cs:47-60, :67-102 | TEST-CONFIRMED [run: PASS] |
+| Empty key set counts as no key | T/PrivateRoomContentRulesTests.cs:129-139; Login:97-105 | TEST-CONFIRMED [run: PASS] |
 | Editors without the library: 403 create, 415 open | Storage:DemandPrivateRoomCanBeCreatedAsync; DocumentServiceHelper hunk of b562fc3fb1; yaml openEditFile 415 | CODE-ONLY |
-| `docServiceEncryptionSupported` true on the test stack | T/PrivateRoomEditorTests.cs:255-266 | TEST-CONFIRMED |
-| Connected storage refused 400 (test skipped unless Nextcloud is configured) | products/ASC.Files/Tests/Tests/03_Rooms/ThirdParty/ThirdPartyPrivateRoomTests.cs:49 | TEST-CONFIRMED |
-| Settings refused, off and rename allowed, template fails | T/PrivateRoomSettingsTests.cs:51-143 | TEST-CONFIRMED |
-| Inviting needs a key; guest always refused | T/PrivacyRoomIntegrationTests.cs:137-165; T/RoomAccessKeysPermissionsTests.cs:172-186; T/PrivacyRoomTest.cs:179-221 | TEST-CONFIRMED |
-| No links | T/PrivateRoomContentBoundaryTests.cs:93-102 | TEST-CONFIRMED |
+| `docServiceEncryptionSupported` true on the test stack | T/PrivateRoomEditorTests.cs:255-266 | TEST-CONFIRMED [run: PASS] |
+| Connected storage refused 400 (test skipped unless Nextcloud is configured) | products/ASC.Files/Tests/Tests/03_Rooms/ThirdParty/ThirdPartyPrivateRoomTests.cs:49 | TEST-CONFIRMED [run: PASS] |
+| Settings refused, off and rename allowed, template fails | T/PrivateRoomSettingsTests.cs:51-143 | TEST-CONFIRMED [run: PASS] |
+| Inviting needs a key; guest always refused | T/PrivacyRoomIntegrationTests.cs:137-165; T/RoomAccessKeysPermissionsTests.cs:172-186; T/PrivacyRoomTest.cs:179-221 | TEST-CONFIRMED [run: PASS] |
+| No links | T/PrivateRoomContentBoundaryTests.cs:93-102 | TEST-CONFIRMED [run: PASS] |
 | Revoking an existing link stays possible | Sharing hunk of bd89a24dcd (`Access != None`) | CODE-ONLY |
-| No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:106-140 | TEST-CONFIRMED |
-| Copy across the border 403 | T/PrivacyRoomTest.cs:225-277 | TEST-CONFIRMED |
-| Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:144-176 | TEST-CONFIRMED |
-| Copy-as refused | T/PrivateRoomContentBoundaryTests.cs:195-238 | TEST-CONFIRMED |
-| Plaintext: createFile and session 403; ordinary room accepts | T/PrivateRoomContentRulesTests.cs:62-91, :119-125 | TEST-CONFIRMED |
-| Generated names | T/PrivateRoomContentRulesTests.cs:99-115; products/ASC.Files/Core/Utils/FileUploader.cs regex of cc60512acd | TEST-CONFIRMED |
-| Abort bound to folder | T/PrivateRoomContentRulesTests.cs:143-157 | TEST-CONFIRMED |
-| Save callback refused and allowed; saveediting | T/PrivateRoomEditorTests.cs:105-187 | TEST-CONFIRMED |
-| Restore, reference data, start filling, form flag | T/PrivateRoomEditorTests.cs:191-237 | TEST-CONFIRMED |
-| Public document address | T/PrivateRoomEditorTests.cs:241-251 | TEST-CONFIRMED |
-| Archived: non-member refused; ordinary unchanged | T/ArchivedPrivateRoomSecurityTests.cs:66-113, :177-193 | TEST-CONFIRMED |
-| Archived: no copy; creator and member rights | T/ArchivedPrivateRoomSecurityTests.cs:117-173; T/PrivateRoomContentBoundaryTests.cs:180-189 | TEST-CONFIRMED |
-| Section split by area and filter | T/PrivateRoomSectionTests.cs:64-85 | TEST-CONFIRMED |
-| Section endpoint, root, browse by id | T/PrivateRoomSectionTests.cs:89-120 | TEST-CONFIRMED |
-| App off | T/PrivateRoomSectionTests.cs:124-137 | TEST-CONFIRMED |
-| Non-member not listed; invited listed (in the section only the DocSpace admin is asserted; the Owner only on the default Active area) | T/PrivateRoomSectionTests.cs:141-165; T/PrivateRoomVisibilityTests.cs:55-91 | TEST-CONFIRMED |
-| Archived in the Archive area | T/PrivateRoomSectionTests.cs:169-178 | TEST-CONFIRMED |
-| New marks | T/PrivateRoomSectionTests.cs:182-201 | TEST-CONFIRMED |
-| Recent 400 | T/PrivateRoomSectionTests.cs:205-213 | TEST-CONFIRMED |
-| Groups of the section | T/PrivateRoomSectionTests.cs:217-238 | TEST-CONFIRMED |
-| Audit trail hides titles, keeps record and user names | web/ASC.Web.Api.Tests/Tests/05_Security/AuditTrail/AuditPrivateRoomTitleTests.cs:85-199 | TEST-CONFIRMED |
-| History keeps titles for members | same file:203-222 | TEST-CONFIRMED |
-| Letters use the neutral title (tags of the action, not rendered pushes) | common/Tests/ASC.Notify.Tests/Invites/PrivateRoomTitleInLettersTests.cs:115-177 | TEST-CONFIRMED |
-| Webhooks: outsider gets nothing | web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/WebhookPrivateRoomAccessTests.cs:71-109 | TEST-CONFIRMED |
+| No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:106-140 | TEST-CONFIRMED [run: PASS] |
+| Copy across the border 403 | T/PrivacyRoomTest.cs:225-277 | TEST-CONFIRMED [run: PASS] |
+| Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:144-176 | TEST-CONFIRMED [run: PASS] |
+| Copy-as refused | T/PrivateRoomContentBoundaryTests.cs:195-238 | TEST-CONFIRMED [run: PASS] |
+| Plaintext: createFile and session 403; ordinary room accepts | T/PrivateRoomContentRulesTests.cs:62-91, :119-125 | TEST-CONFIRMED [run: PASS] |
+| Generated names | T/PrivateRoomContentRulesTests.cs:99-115; products/ASC.Files/Core/Utils/FileUploader.cs regex of cc60512acd | TEST-CONFIRMED [run: PASS] |
+| Abort bound to folder | T/PrivateRoomContentRulesTests.cs:143-157 | TEST-CONFIRMED [run: PASS] |
+| Save callback refused and allowed; saveediting | T/PrivateRoomEditorTests.cs:105-187 | TEST-CONFIRMED [run: PASS] |
+| Restore, reference data, start filling, form flag | T/PrivateRoomEditorTests.cs:191-237 | TEST-CONFIRMED [run: PASS] |
+| Public document address | T/PrivateRoomEditorTests.cs:241-251 | TEST-CONFIRMED [run: PASS] |
+| Archived: non-member refused; ordinary unchanged | T/ArchivedPrivateRoomSecurityTests.cs:66-113, :177-193 | TEST-CONFIRMED [run: PASS] |
+| Archived: no copy; creator and member rights | T/ArchivedPrivateRoomSecurityTests.cs:117-173; T/PrivateRoomContentBoundaryTests.cs:180-189 | TEST-CONFIRMED [run: PASS] |
+| Section split by area and filter | T/PrivateRoomSectionTests.cs:64-85 | TEST-CONFIRMED [run: PASS] |
+| Section endpoint, root, browse by id | T/PrivateRoomSectionTests.cs:89-120 | TEST-CONFIRMED [run: PASS] |
+| App off | T/PrivateRoomSectionTests.cs:124-137 | TEST-CONFIRMED [run: PASS] |
+| Non-member not listed; invited listed (in the section only the DocSpace admin is asserted; the Owner only on the default Active area) | T/PrivateRoomSectionTests.cs:141-165; T/PrivateRoomVisibilityTests.cs:55-91 | TEST-CONFIRMED [run: PASS] |
+| Archived in the Archive area | T/PrivateRoomSectionTests.cs:169-178 | TEST-CONFIRMED [run: PASS] |
+| New marks | T/PrivateRoomSectionTests.cs:182-201 | TEST-CONFIRMED [run: PASS] |
+| Recent 400 | T/PrivateRoomSectionTests.cs:205-213 | TEST-CONFIRMED [run: PASS] |
+| Groups of the section | T/PrivateRoomSectionTests.cs:217-238 | TEST-CONFIRMED [run: PASS] |
+| Audit trail hides titles, keeps record and user names | web/ASC.Web.Api.Tests/Tests/05_Security/AuditTrail/AuditPrivateRoomTitleTests.cs:85-199 | TEST-CONFIRMED [run: PASS] |
+| History keeps titles for members | same file:203-222 | TEST-CONFIRMED [run: NO-LINK] |
+| Letters use the neutral title (tags of the action, not rendered pushes) | common/Tests/ASC.Notify.Tests/Invites/PrivateRoomTitleInLettersTests.cs:115-177 | TEST-CONFIRMED [run: PASS] |
+| Webhooks: outsider gets nothing | web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/WebhookPrivateRoomAccessTests.cs:71-109 | TEST-CONFIRMED [run: PASS] |
 
 ## Differences between the yaml and the server
 

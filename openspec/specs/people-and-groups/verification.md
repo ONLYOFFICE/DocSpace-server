@@ -1,5 +1,7 @@
 # people-and-groups — verification
 
+> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 Paths are relative to the repo root. `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml` (working tree of the
 submodule, HEAD `baf28cf`, 2026-11-06). Tests are under `products/ASC.People/Tests/Tests/`, by folder: `P/`
 `01_Profiles`, `T/` `02_UserType`, `S/` `03_UserStatus`, `E/` `04_Email`, `F/` `06_Photos`, `Q/` `08_Search`, `H/`
@@ -19,143 +21,143 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Claim | Source | Status |
 |---|---|---|
 | **Reading another profile by ID** | | |
-| Owner, DocSpace admin, Room admin read a Room admin; `id`, `email` returned | `P/GetProfileByUserIdTests.cs:41-52` | TEST-CONFIRMED |
-| User 403 "Access denied" on the Owner | `P/GetProfileByUserIdTests.cs:58` | TEST-CONFIRMED |
-| Guest 403; removed profile 404; anonymous 401 | `P/GetProfileByUserIdTests.cs:71,84,98` | TEST-CONFIRMED (by name) |
+| Owner, DocSpace admin, Room admin read a Room admin; `id`, `email` returned | `P/GetProfileByUserIdTests.cs:41-52` | TEST-CONFIRMED [run: PASS] |
+| User 403 "Access denied" on the Owner | `P/GetProfileByUserIdTests.cs:58` | TEST-CONFIRMED [run: PASS] |
+| Guest 403; removed profile 404; anonymous 401 | `P/GetProfileByUserIdTests.cs:71,84,98` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Reading a profile by email** | | |
-| Own address, every type, same as self profile | `P/GetProfileByEmailTests.cs:49` | TEST-CONFIRMED |
-| Owner→admin, admin→Room admin, Room admin→User succeed | `P/GetProfileByEmailTests.cs:78` | TEST-CONFIRMED |
-| User/Guest on another 403; unknown 404; anonymous 401 | `P/GetProfileByEmailTests.cs:116,130,102,91` | TEST-CONFIRMED (by name) |
+| Own address, every type, same as self profile | `P/GetProfileByEmailTests.cs:49` | TEST-CONFIRMED [run: PASS] |
+| Owner→admin, admin→Room admin, Room admin→User succeed | `P/GetProfileByEmailTests.cs:78` | TEST-CONFIRMED [run: PASS] |
+| User/Guest on another 403; unknown 404; anonymous 401 | `P/GetProfileByEmailTests.cs:116,130,102,91` | TEST-CONFIRMED [run: PASS] (by name) |
 | `encemail` decrypted; no address 400 | `User:1211-1220` | CODE-ONLY |
 | **Own profile and profile list** | | |
-| Self profile; Guest has no personal folder | `P/GetSelfProfileTests.cs:45,62,87` | TEST-CONFIRMED (by name) |
-| List with flags for Owner/admin; User, Guest 403; anonymous 401 | `P/GetAllProfilesTests.cs:46,78,91,104` | TEST-CONFIRMED (by name) |
+| Self profile; Guest has no personal folder | `P/GetSelfProfileTests.cs:45,62,87` | TEST-CONFIRMED [run: PASS] (by name) |
+| List with flags for Owner/admin; User, Guest 403; anonymous 401 | `P/GetAllProfilesTests.cs:46,78,91,104` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Checking whether an email is taken** | | |
 | Roles LinkInvite, GuestShareLink, Authenticated; `exists`, `status`; blank → 400 | `User:1169-1187`, yaml `checkUserExistsByEmail` | CODE-ONLY |
 | **Token diagnostics** | | |
 | `name`, `claims` as `type:value` | `User:121-131`, yaml `getClaims` | CODE-ONLY |
 | **Editing a profile** | | |
-| Own names persist; `displayName` built from them (letters only, see PG-1) | `P/UpdateMemberTests.cs:49-70` | TEST-CONFIRMED |
-| `12345` → 400 "Incorrect firstname or lastname" | `P/UpdateMemberTests.cs:126` | TEST-CONFIRMED |
-| Overlong names 400 (User, Guest); unknown 404; anonymous 401 | `P/UpdateMemberTests.cs:139,156,187,173` | TEST-CONFIRMED (by name) |
+| Own names persist; `displayName` built from them (letters only, see PG-1) | `P/UpdateMemberTests.cs:49-70` | TEST-CONFIRMED [run: PASS] |
+| `12345` → 400 "Incorrect firstname or lastname" | `P/UpdateMemberTests.cs:126` | TEST-CONFIRMED [run: PASS] |
+| Overlong names 400 (User, Guest); unknown 404; anonymous 401 | `P/UpdateMemberTests.cs:139,156,187,173` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Nobody else edits the Owner** | | |
-| 403 for the listed actors, bug 79724 | `P/UpdateMemberTests.cs:105-120`; `00_Regressions/UserTest.cs:67` | TEST-CONFIRMED |
+| 403 for the listed actors, bug 79724 | `P/UpdateMemberTests.cs:105-120`; `00_Regressions/UserTest.cs:67` | TEST-CONFIRMED [run: PASS] |
 | **Interface language of a profile** | | |
-| Own `es` persists | `P/UpdateMemberCultureTests.cs:50-62` | TEST-CONFIRMED |
-| Owner, admin, Room admin, User, Guest on others 403, bug 65478 | `P/UpdateMemberCultureTests.cs:66-85,105-127` | TEST-CONFIRMED |
-| Overlong 400 (bug 79918); unknown 404; anonymous 401 | `P/UpdateMemberCultureTests.cs:180,165,151` | TEST-CONFIRMED (by name) |
+| Own `es` persists | `P/UpdateMemberCultureTests.cs:50-62` | TEST-CONFIRMED [run: PASS] |
+| Owner, admin, Room admin, User, Guest on others 403, bug 65478 | `P/UpdateMemberCultureTests.cs:66-85,105-127` | TEST-CONFIRMED [run: PASS] |
+| Overlong 400 (bug 79918); unknown 404; anonymous 401 | `P/UpdateMemberCultureTests.cs:180,165,151` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Deleting one disabled profile** | | |
-| Disabled target deleted, Guest included (bug 80753) | `P/DeleteMemberTests.cs:54-76` | TEST-CONFIRMED |
-| Not disabled 403 (bug 79560); unknown 404 | `P/DeleteMemberTests.cs:82,96,126` | TEST-CONFIRMED (by name) |
+| Disabled target deleted, Guest included (bug 80753) | `P/DeleteMemberTests.cs:54-76` | TEST-CONFIRMED [run: PASS] |
+| Not disabled 403 (bug 79560); unknown 404 | `P/DeleteMemberTests.cs:82,96,126` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Deleting several disabled profiles** | | |
-| Both returned with status and flags | `P/RemoveUsersTests.cs:47-62` | TEST-CONFIRMED |
-| Wrong field name 400, bug 80048 (body text "Value cannot be null. (Parameter 'inDto?.UserIds')") | `P/RemoveUsersTests.cs:140-157` | TEST-CONFIRMED |
-| Not disabled 403 (79560, 79876); non-admin 403; anonymous 401 | `P/RemoveUsersTests.cs:71,87,105,124` | TEST-CONFIRMED (by name) |
+| Both returned with status and flags | `P/RemoveUsersTests.cs:47-62` | TEST-CONFIRMED [run: PASS] |
+| Wrong field name 400, bug 80048 (body text "Value cannot be null. (Parameter 'inDto?.UserIds')") | `P/RemoveUsersTests.cs:140-157` | TEST-CONFIRMED [run: PASS] |
+| Not disabled 403 (79560, 79876); non-admin 403; anonymous 401 | `P/RemoveUsersTests.cs:71,87,105,124` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Deleted profile leaves the contact list** | | |
-| Plain and after reassignment, bug 83188 | `P/DeletedUserVisibilityTests.cs:46,61` | TEST-CONFIRMED (by name) |
+| Plain and after reassignment, bug 83188 | `P/DeletedUserVisibilityTests.cs:46,61` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Disabling and re-enabling accounts** | | |
-| Four types, status and flag each | `S/UserStatusUpdateTests.cs:43-65` | TEST-CONFIRMED |
-| Re-activation; denied pairs in `user-type-permissions` | `S/UserStatusUpdateTests.cs:76`; `S/UserStatusUpdatePermissionsTests.cs:100-131` | TEST-CONFIRMED (by name) |
+| Four types, status and flag each | `S/UserStatusUpdateTests.cs:43-65` | TEST-CONFIRMED [run: PASS] |
+| Re-activation; denied pairs in `user-type-permissions` | `S/UserStatusUpdateTests.cs:76`; `S/UserStatusUpdatePermissionsTests.cs:100-131` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Listing accounts by status** | | |
-| Owner, admin, Room admin lists; Room admin Terminated empty 200; User, Guest 403 | `S/UserStatusGetTests.cs:43,106,174,199`; `S/UserStatusGetPermissionsTests.cs:44,62,86` | TEST-CONFIRMED (by name) |
+| Owner, admin, Room admin lists; Room admin Terminated empty 200; User, Guest 403 | `S/UserStatusGetTests.cs:43,106,174,199`; `S/UserStatusGetPermissionsTests.cs:44,62,86` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Activation status through a confirmation link** | | |
 | Roles Activation, EmailActivation; list must be the caller alone, else 400; welcome letter once | `User:2117-2159` | CODE-ONLY |
 | **Who may start an email change** | | |
-| Allowed pairs | `E/EmailChangeInstructionsTests.cs:43-55,100-110` | TEST-CONFIRMED |
-| Denied pairs 403 "Access denied" | `E/EmailChangeInstructionsPermissionsTests.cs:42-73` | TEST-CONFIRMED |
-| Anonymous 401 | `E/EmailChangeInstructionsPermissionsTests.cs:134` | TEST-CONFIRMED (by name) |
+| Allowed pairs | `E/EmailChangeInstructionsTests.cs:43-55,100-110` | TEST-CONFIRMED [run: PASS] |
+| Denied pairs 403 "Access denied" | `E/EmailChangeInstructionsPermissionsTests.cs:42-73` | TEST-CONFIRMED [run: PASS] |
+| Anonymous 401 | `E/EmailChangeInstructionsPermissionsTests.cs:134` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Immediate change versus instructions** | | |
-| Owner on self: 200, sign-in with the new address | `E/EmailChangeInstructionsTests.cs:70-90` | TEST-CONFIRMED |
+| Owner on self: 200, sign-in with the new address | `E/EmailChangeInstructionsTests.cs:70-90` | TEST-CONFIRMED [run: PASS] |
 | Non-admin only gets a letter; admin path writes the address | `User:1924-1985` | CODE-ONLY |
 | **Validation of an email change** | | |
-| Malformed 400 naming the Email field; unknown 404 message | `E/EmailChangeInstructionsPermissionsTests.cs:86-115` | TEST-CONFIRMED |
-| Longer than 255 → 400 | `E/EmailChangeInstructionsPermissionsTests.cs:117` | TEST-CONFIRMED (by name) |
+| Malformed 400 naming the Email field; unknown 404 message | `E/EmailChangeInstructionsPermissionsTests.cs:86-115` | TEST-CONFIRMED [run: PASS] |
+| Longer than 255 → 400 | `E/EmailChangeInstructionsPermissionsTests.cs:117` | TEST-CONFIRMED [run: PASS] (by name) |
 | Disabled/pending 404, taken address 400, same address 400 | `User:1924-1985` | CODE-ONLY |
 | **Applying an email change from a link** | | |
 | Role EmailChange; 403 cases; lower-cased; Activated; empty 400 | `User:684-737` | CODE-ONLY |
 | **Reading a user photo** | | |
-| Own; Owner/admin on anyone; Room admin except Guest | `F/PhotoGetTests.cs:49-85` | TEST-CONFIRMED |
-| Room admin→Guest 403; User/Guest→others 403 | `F/PhotoGetPermissionsTests.cs:48-100` | TEST-CONFIRMED |
-| Anonymous 401; unknown 404 | `F/PhotoEdgeCaseTests.cs:48,63` | TEST-CONFIRMED (by name) |
+| Own; Owner/admin on anyone; Room admin except Guest | `F/PhotoGetTests.cs:49-85` | TEST-CONFIRMED [run: PASS] |
+| Room admin→Guest 403; User/Guest→others 403 | `F/PhotoGetPermissionsTests.cs:48-100` | TEST-CONFIRMED [run: PASS] |
+| Anonymous 401; unknown 404 | `F/PhotoEdgeCaseTests.cs:48,63` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Uploading a photo** | | |
-| Own upload `success` true (bug 80569) | `F/PhotoUploadTests.cs:49-70` | TEST-CONFIRMED |
+| Own upload `success` true (bug 80569) | `F/PhotoUploadTests.cs:49-70` | TEST-CONFIRMED [run: PASS] |
 | `autosave` versus temporary file | `Photo:298-335` | CODE-ONLY |
 | **A refused upload answers 200** | | |
-| Other account: `success` false, "Security error." | `F/PhotoUploadPermissionsTests.cs:50-58` | TEST-CONFIRMED |
-| 20 MB → message about 5 MB; SVG → `success` false; no part 400 | `F/PhotoEdgeCaseTests.cs:108-165` | TEST-CONFIRMED |
-| Anonymous 401 | `F/PhotoEdgeCaseTests.cs:126` | TEST-CONFIRMED |
+| Other account: `success` false, "Security error." | `F/PhotoUploadPermissionsTests.cs:50-58` | TEST-CONFIRMED [run: PASS] |
+| 20 MB → message about 5 MB; SVG → `success` false; no part 400 | `F/PhotoEdgeCaseTests.cs:108-165` | TEST-CONFIRMED [run: PASS] |
+| Anonymous 401 | `F/PhotoEdgeCaseTests.cs:126` | TEST-CONFIRMED [run: PASS] |
 | **Setting a photo from a URL** | | |
 | Own only, empty 400, same URL skips download | `Photo:224-251`, yaml `updateMemberPhoto` | CODE-ONLY |
 | **Cropping a photo** | | |
 | Own only; `tmpFile` flow; zero size = whole image | `Photo:84-126`, yaml `createMemberPhotoThumbnails` | CODE-ONLY |
 | **Deleting a photo** | | |
-| Own, every type; others 403 | `F/PhotoDeleteTests.cs:48-58`; `F/PhotoDeletePermissionsTests.cs:48-60` | TEST-CONFIRMED |
-| Anonymous 401; unknown 404 | `F/PhotoEdgeCaseTests.cs:78,93` | TEST-CONFIRMED (by name) |
+| Own, every type; others 403 | `F/PhotoDeleteTests.cs:48-58`; `F/PhotoDeletePermissionsTests.cs:48-60` | TEST-CONFIRMED [run: PASS] |
+| Anonymous 401; unknown 404 | `F/PhotoEdgeCaseTests.cs:78,93` | TEST-CONFIRMED [run: PASS] (by name) |
 | **People search reads the stored names** | | |
 | Plain query over stored columns, decoded name needed; never index lag | `common/ASC.Core.Common/Users/UserQueryHelper.cs:53`, `common/ASC.Core.Common/Data/DbUserService.cs:973`; comment and decode in `Q/SearchTestBase.cs:42-46` and its poll | CODE-ONLY (test helper comment agrees) |
 | **Filtered people lists** | | |
-| Every type found for Owner | `Q/FilterSearchTests.cs:43-52` | TEST-CONFIRMED |
-| Room admin does not see Owner's guest | `Q/FilterSearchPermissionsTests.cs:44-60` | TEST-CONFIRMED |
-| admin, Room admin finds; User/Guest 403; anonymous 401, both operations | `Q/FilterSearchTests.cs:59,75,105,122`; `Q/FilterSearchPermissionsTests.cs:64,77,90,100,118,131,144` | TEST-CONFIRMED (by name) |
+| Every type found for Owner | `Q/FilterSearchTests.cs:43-52` | TEST-CONFIRMED [run: PASS] |
+| Room admin does not see Owner's guest | `Q/FilterSearchPermissionsTests.cs:44-60` | TEST-CONFIRMED [run: PASS] |
+| admin, Room admin finds; User/Guest 403; anonymous 401, both operations | `Q/FilterSearchTests.cs:59,75,105,122`; `Q/FilterSearchPermissionsTests.cs:64,77,90,100,118,131,144` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Type flags in search results** | | |
-| Owner flags, bug 80587 | `Q/FilterSearchTests.cs:140-150` | TEST-CONFIRMED |
+| Owner flags, bug 80587 | `Q/FilterSearchTests.cs:140-150` | TEST-CONFIRMED [run: PASS] |
 | **Administrator-only searches** | | |
-| Owner finds each role | `Q/GlobalSearchTests.cs:50-60` | TEST-CONFIRMED |
-| admin finds; Room admin, User, Guest 403 on all three; anonymous 401 | `Q/GlobalSearchTests.cs:66,82,98`; `Q/GlobalSearchPermissionsTests.cs:48-213` | TEST-CONFIRMED (by name) |
+| Owner finds each role | `Q/GlobalSearchTests.cs:50-60` | TEST-CONFIRMED [run: PASS] |
+| admin finds; Room admin, User, Guest 403 on all three; anonymous 401 | `Q/GlobalSearchTests.cs:66,82,98`; `Q/GlobalSearchPermissionsTests.cs:48-213` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Searching by status** | | |
-| Active then Terminated | `Q/GlobalSearchTests.cs:114-122` | TEST-CONFIRMED |
+| Active then Terminated | `Q/GlobalSearchTests.cs:114-122` | TEST-CONFIRMED [run: PASS] |
 | **People an entry can be shared with** | | |
-| Invited User finds a fellow member | `Q/SharedSearchTests.cs:168-185,446-460` | TEST-CONFIRMED |
-| User NOT invited 403 (the tests say "RoomMember" but never invite him) | `Q/SharedSearchPermissionsTests.cs:116-126,312-322` | TEST-CONFIRMED |
-| Invited Guest 403, bug 79218 | `Q/SharedSearchPermissionsTests.cs:343-360` | TEST-CONFIRMED |
+| Invited User finds a fellow member | `Q/SharedSearchTests.cs:168-185,446-460` | TEST-CONFIRMED [run: PASS] |
+| User NOT invited 403 (the tests say "RoomMember" but never invite him) | `Q/SharedSearchPermissionsTests.cs:116-126,312-322` | TEST-CONFIRMED [run: PASS] |
+| Invited Guest 403, bug 79218 | `Q/SharedSearchPermissionsTests.cs:343-360` | TEST-CONFIRMED [run: PASS] |
 | Rule: can read and not a guest; unknown 404 | `User:3257-3265,3338` | CODE-ONLY |
-| Folder variants; Owner, admin, Room admin finds; anonymous 401 | `Q/SharedSearchTests.cs:111-148,250-307,389-426`; `Q/SharedSearchPermissionsTests.cs:132,148,214-246,328,368` | TEST-CONFIRMED (by name) |
+| Folder variants; Owner, admin, Room admin finds; anonymous 401 | `Q/SharedSearchTests.cs:111-148,250-307,389-426`; `Q/SharedSearchPermissionsTests.cs:132,148,214-246,328,368` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Accounts and groups an entry can be shared with** | | |
-| Room manager finds; invited User with editing 403; outside admin 403 | `Q/SharedSearchTests.cs:89-104`; `Q/SharedSearchPermissionsTests.cs:47-82` | TEST-CONFIRMED |
+| Room manager finds; invited User with editing 403; outside admin 403 | `Q/SharedSearchTests.cs:89-104`; `Q/SharedSearchPermissionsTests.cs:47-82` | TEST-CONFIRMED [run: PASS] |
 | Rule: can edit access | `Accounts:175-180` | CODE-ONLY |
-| Folder and room variants; Guest 403; anonymous 401 | `Q/SharedSearchTests.cs:190-228,329-367`; `Q/SharedSearchPermissionsTests.cs:83,101,163-199,261-297` | TEST-CONFIRMED (by name) |
+| Folder and room variants; Guest 403; anonymous 401 | `Q/SharedSearchTests.cs:190-228,329-367`; `Q/SharedSearchPermissionsTests.cs:83,101,163-199,261-297` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Accounts search needs a text** | | |
 | Empty text → count and total 0 | `Accounts:193-197` | CODE-ONLY |
 | **Theme of an account** | | |
-| Default System; cycles through three themes, every type | `H/ThemeTests.cs:43-85,88-95` | TEST-CONFIRMED |
+| Default System; cycles through three themes, every type | `H/ThemeTests.cs:43-85,88-95` | TEST-CONFIRMED [run: PASS] |
 | Stored per caller | `User:1810-1815` (loaded for the current user) | CODE-ONLY |
-| Anonymous 401 | `H/ThemePermissionsTests.cs:42,53` | TEST-CONFIRMED (by name) |
+| Anonymous 401 | `H/ThemePermissionsTests.cs:42,53` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Whether a reassignment is necessary** | | |
-| Owner, admin true; non-admin 403. The tests send no `userId`, so they prove only "true when rooms exist", not "this user's rooms" | `D/NecessaryReassignTests.cs:43-78` | TEST-CONFIRMED |
+| Owner, admin true; non-admin 403. The tests send no `userId`, so they prove only "true when rooms exist", not "this user's rooms" | `D/NecessaryReassignTests.cs:43-78` | TEST-CONFIRMED [run: PASS] |
 | Peer admin 403; Guest conversion counts shared entries | `Reassign:199-217` | CODE-ONLY |
 | **Starting a data reassignment** | | |
-| Owner starts; active source 400; non-admin 403 | `D/ReassignStartTests.cs:43-55,77-108` | TEST-CONFIRMED |
-| admin starts; anonymous 401 | `D/ReassignStartTests.cs:59,110` | TEST-CONFIRMED (by name) |
+| Owner starts; active source 400; non-admin 403 | `D/ReassignStartTests.cs:43-55,77-108` | TEST-CONFIRMED [run: PASS] |
+| admin starts; anonymous 401 | `D/ReassignStartTests.cs:59,110` | TEST-CONFIRMED [run: PASS] (by name) |
 | Recipient rule, Owner and self as source | `Reassign:106-135` | CODE-ONLY |
 | **Watching a data reassignment** | | |
-| Completed, `error` empty; peer admin 403 (bug 78957) | `D/ReassignProgressTests.cs:43-58,105-125` | TEST-CONFIRMED |
-| admin; non-admin 403; anonymous 401 | `D/ReassignProgressTests.cs:62,83,98` | TEST-CONFIRMED (by name) |
+| Completed, `error` empty; peer admin 403 (bug 78957) | `D/ReassignProgressTests.cs:43-58,105-125` | TEST-CONFIRMED [run: PASS] |
+| admin; non-admin 403; anonymous 401 | `D/ReassignProgressTests.cs:62,83,98` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Cancelling a data reassignment** | | |
-| Canceled, `isCompleted` true | `D/ReassignTerminateTests.cs:43-60` | TEST-CONFIRMED |
-| admin; non-admin 403; peer admin 403 (bug 79320); anonymous 401 | `D/ReassignTerminateTests.cs:64,87,110,131` | TEST-CONFIRMED (by name) |
+| Canceled, `isCompleted` true | `D/ReassignTerminateTests.cs:43-60` | TEST-CONFIRMED [run: PASS] |
+| admin; non-admin 403; peer admin 403 (bug 79320); anonymous 401 | `D/ReassignTerminateTests.cs:64,87,110,131` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Starting a data removal** | | |
-| Room passes to the Owner, bug 80714 | `D/RemoveStartTests.cs:44-74` | TEST-CONFIRMED |
-| Owner, admin start; non-admin 403; anonymous 401 | `D/RemoveStartTests.cs:77,92,109,125` | TEST-CONFIRMED (by name) |
+| Room passes to the Owner, bug 80714 | `D/RemoveStartTests.cs:44-74` | TEST-CONFIRMED [run: PASS] |
+| Owner, admin start; non-admin 403; anonymous 401 | `D/RemoveStartTests.cs:77,92,109,125` | TEST-CONFIRMED [run: PASS] (by name) |
 | 400 cases | `Remove:132-151` | CODE-ONLY |
 | **Watching and cancelling a data removal** | | |
-| Progress `error` empty; terminate succeeds (Owner) | `D/RemoveProgressTests.cs:43-52`; `D/RemoveTerminateTests.cs:44-52` | TEST-CONFIRMED |
-| admin; non-admin 403; anonymous 401 | `D/RemoveProgressTests.cs:57,73,88`; `D/RemoveTerminateTests.cs:56,70,89` | TEST-CONFIRMED (by name) |
+| Progress `error` empty; terminate succeeds (Owner) | `D/RemoveProgressTests.cs:43-52`; `D/RemoveTerminateTests.cs:44-52` | TEST-CONFIRMED [run: PASS] |
+| admin; non-admin 403; anonymous 401 | `D/RemoveProgressTests.cs:57,73,88`; `D/RemoveTerminateTests.cs:56,70,89` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Asking to delete one's own profile** | | |
-| Member gets own email in the answer; Owner 403 | `D/SendInstructionsToDeleteTests.cs:52-72` | TEST-CONFIRMED |
+| Member gets own email in the answer; Owner 403 | `D/SendInstructionsToDeleteTests.cs:52-72` | TEST-CONFIRMED [run: PASS] |
 | LDAP 403 | `Remove:102-105` | CODE-ONLY |
 | **Deleting a guest's personal folder** | | |
-| All five types 403 (a fresh Guest has no folder) | `D/DeletePersonalFolderTests.cs:43-62`; `Remove:219-224`; `Queue:147-154` | TEST-CONFIRMED |
+| All five types 403 (a fresh Guest has no folder) | `D/DeletePersonalFolderTests.cs:43-62`; `Remove:219-224`; `Queue:147-154` | TEST-CONFIRMED [run: PASS] |
 | A Guest with a folder gets the job | `Remove:224-226`; `common/ASC.Data.Reassigns/DeletePersonalFolderProgressItem.cs:59-117` | CODE-ONLY |
 | **Watching the personal folder deletion** | | |
 | Caller only, empty body when nothing queued | `Remove:243-250`, yaml `getDeletePersonalFolderProgress` | CODE-ONLY |
 | **Watching a type conversion** | | |
-| 100, `isCompleted`, `error` empty | `T/UserTypeChangeTests.cs:153-162` | TEST-CONFIRMED |
-| Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:44,63,82` | TEST-CONFIRMED (by name) |
+| 100, `isCompleted`, `error` empty | `T/UserTypeChangeTests.cs:153-162` | TEST-CONFIRMED [run: PASS] |
+| Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:44,63,82` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Cancelling a type conversion** | | |
-| Admin cancels the Owner's; Canceled; target unchanged | `T/UserTypeChangeTests.cs:188-208` | TEST-CONFIRMED |
-| Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:101-212` | TEST-CONFIRMED (by name) |
+| Admin cancels the Owner's; Canceled; target unchanged | `T/UserTypeChangeTests.cs:188-208` | TEST-CONFIRMED [run: PASS] |
+| Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:101-212` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Listing third-party providers** | | |
-| No linked entry, each names a provider, env empty list | `X/ThirdPartyAuthProvidersTests.cs:48-75` | TEST-CONFIRMED |
+| No linked entry, each names a provider, env empty list | `X/ThirdPartyAuthProvidersTests.cs:48-75` | TEST-CONFIRMED [run: PASS] |
 | Anonymous allowed, login URL | `Third:93-135` | CODE-ONLY |
 | **Linking a third-party account** | | |
 | 400, 403, cancellation (live OAuth not tested) | `Third:156-183`, yaml `linkThirdPartyAccount` | CODE-ONLY |
@@ -164,63 +166,63 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | **Joining through a third-party account** | | |
 | Anonymous, invitation check, cancellation empty body | `Third:207-300`, yaml `signupThirdPartyAccount` | CODE-ONLY |
 | **Who may manage groups** | | |
-| User manager forbidden: `removeMembersFrom`, `setMembersTo` | `G/GroupPermissionRemoveMembersTests.cs:227-235`; `G/GroupPermissionSetMembersTests.cs:165` | TEST-CONFIRMED |
-| DocSpace admin allowed, non-admin 403, anonymous 401, each operation | `G/GroupPermission*Tests.cs` (`_DocSpaceAdmin_`, `_NonAdminRoles_Forbidden`, `_Anonymous_Unauthorized`); `G/GroupPermissionDeleteGroupTests.cs:72,86` | TEST-CONFIRMED (by name) |
+| User manager forbidden: `removeMembersFrom`, `setMembersTo` | `G/GroupPermissionRemoveMembersTests.cs:227-235`; `G/GroupPermissionSetMembersTests.cs:165` | TEST-CONFIRMED [run: PASS] |
+| DocSpace admin allowed, non-admin 403, anonymous 401, each operation | `G/GroupPermission*Tests.cs` (`_DocSpaceAdmin_`, `_NonAdminRoles_Forbidden`, `_Anonymous_Unauthorized`); `G/GroupPermissionDeleteGroupTests.cs:72,86` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Who may read groups** | | |
-| `getGroup`: admins and Room admin yes, User and Guest 403 | `G/GroupPermissionGetGroupTests.cs:83-110` | TEST-CONFIRMED |
-| `getGroupByUserId` own 403; `getGroups` matrix | `G/GroupPermissionGetByUserIdTests.cs:77,90,102,116,128,142`; `G/GroupPermissionGetGroupsListTests.cs:46,61,77` | TEST-CONFIRMED (by name) |
+| `getGroup`: admins and Room admin yes, User and Guest 403 | `G/GroupPermissionGetGroupTests.cs:83-110` | TEST-CONFIRMED [run: PASS] |
+| `getGroupByUserId` own 403; `getGroups` matrix | `G/GroupPermissionGetByUserIdTests.cs:77,90,102,116,128,142`; `G/GroupPermissionGetGroupsListTests.cs:46,61,77` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Creating a group** | | |
-| Missing, empty names and manager; unknown manager, member; dedupe; manager-only count 1 | `G/GroupPermissionCreateTests.cs:52-115,190-197`; `G/GroupCreateTests.cs:76-84` | TEST-CONFIRMED |
-| Overlong (255 chars) 400 | `G/GroupPermissionCreateTests.cs:146-155` | TEST-CONFIRMED |
-| Wrong types, blank name, special and unicode names | `G/GroupPermissionCreateTests.cs:119,128,137,159,170,180` | TEST-CONFIRMED (by name) |
+| Missing, empty names and manager; unknown manager, member; dedupe; manager-only count 1 | `G/GroupPermissionCreateTests.cs:52-115,190-197`; `G/GroupCreateTests.cs:76-84` | TEST-CONFIRMED [run: PASS] |
+| Overlong (255 chars) 400 | `G/GroupPermissionCreateTests.cs:146-155` | TEST-CONFIRMED [run: PASS] |
+| Wrong types, blank name, special and unicode names | `G/GroupPermissionCreateTests.cs:119,128,137,159,170,180` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Reading a group** | | |
-| Malformed 404 | `G/GroupPermissionGetGroupTests.cs:55-59` | TEST-CONFIRMED |
-| `includeMembers` default and false; unknown 404 | `G/GroupReadTests.cs:50,65,81`; `G/GroupPermissionGetGroupTests.cs:46` | TEST-CONFIRMED (by name) |
+| Malformed 404 | `G/GroupPermissionGetGroupTests.cs:55-59` | TEST-CONFIRMED [run: PASS] |
+| `includeMembers` default and false; unknown 404 | `G/GroupReadTests.cs:50,65,81`; `G/GroupPermissionGetGroupTests.cs:46` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Groups of a user** | | |
-| Malformed 404; unknown empty | `G/GroupPermissionGetByUserIdTests.cs:46-61` | TEST-CONFIRMED |
-| Lists and follows changes | `G/GroupReadTests.cs:110-191` | TEST-CONFIRMED (by name) |
+| Malformed 404; unknown empty | `G/GroupPermissionGetByUserIdTests.cs:46-61` | TEST-CONFIRMED [run: PASS] |
+| Lists and follows changes | `G/GroupReadTests.cs:110-191` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Listing and filtering groups** | | |
-| Filters, paging, sort, bad parameters | `G/GroupsQueryTests.cs:54-217`; `G/GroupPermissionGetGroupsListTests.cs:94-119` | TEST-CONFIRMED (by name) |
+| Filters, paging, sort, bad parameters | `G/GroupsQueryTests.cs:54-217`; `G/GroupPermissionGetGroupsListTests.cs:94-119` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Updating a group** | | |
-| Remove beats add; empty body unchanged | `G/GroupPermissionUpdateGroupTests.cs:104-118`; `G/GroupUpdateTests.cs:147-158` | TEST-CONFIRMED |
-| Each field; all at once; unknown 404 | `G/GroupUpdateTests.cs:42-117`; `G/GroupPermissionUpdateGroupTests.cs:46` | TEST-CONFIRMED (by name) |
+| Remove beats add; empty body unchanged | `G/GroupPermissionUpdateGroupTests.cs:104-118`; `G/GroupUpdateTests.cs:147-158` | TEST-CONFIRMED [run: PASS] |
+| Each field; all at once; unknown 404 | `G/GroupUpdateTests.cs:42-117`; `G/GroupPermissionUpdateGroupTests.cs:46` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Update ignores unknown users** | | |
-| Unknown manager, unknown added, non-member removed | `G/GroupPermissionUpdateGroupTests.cs:58-102` | TEST-CONFIRMED |
+| Unknown manager, unknown added, non-member removed | `G/GroupPermissionUpdateGroupTests.cs:58-102` | TEST-CONFIRMED [run: PASS] |
 | **Deleting a group** | | |
-| Second delete 404 | `G/GroupPermissionDeleteGroupTests.cs:55-62` | TEST-CONFIRMED |
-| Gone from get and list; unknown 404 | `G/GroupDeleteTests.cs:49,57,69`; `G/GroupPermissionDeleteGroupTests.cs:46` | TEST-CONFIRMED (by name) |
+| Second delete 404 | `G/GroupPermissionDeleteGroupTests.cs:55-62` | TEST-CONFIRMED [run: PASS] |
+| Gone from get and list; unknown 404 | `G/GroupDeleteTests.cs:49,57,69`; `G/GroupPermissionDeleteGroupTests.cs:46` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Moving members between groups** | | |
-| One member; same group (bug 81710); target manager kept | `G/GroupMembersMoveTests.cs:49-60`; `G/GroupPermissionMoveMembersTests.cs:54-72,116-130`; `Groups:376-380` | TEST-CONFIRMED |
-| Many, overlap, empty source, counts (81497), idempotent, 404s | `G/GroupMembersMoveTests.cs:65-192`; `G/GroupPermissionMoveMembersTests.cs:74,88,102` | TEST-CONFIRMED (by name) |
+| One member; same group (bug 81710); target manager kept | `G/GroupMembersMoveTests.cs:49-60`; `G/GroupPermissionMoveMembersTests.cs:54-72,116-130`; `Groups:376-380` | TEST-CONFIRMED [run: PASS] |
+| Many, overlap, empty source, counts (81497), idempotent, 404s | `G/GroupMembersMoveTests.cs:65-192`; `G/GroupPermissionMoveMembersTests.cs:74,88,102` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Replacing the members of a group** | | |
-| Manager left out; manager kept once | `G/GroupMembersReplaceTests.cs:169-198` | TEST-CONFIRMED |
-| Unknown ID 400; malformed 400; disabled only 400 (bug 79368) | `G/GroupPermissionSetMembersTests.cs:70-90`; `M/GroupMembersTests.cs:44-66` | TEST-CONFIRMED |
-| Empty and null lists 400; unknown group 404 | `G/GroupPermissionSetMembersTests.cs:47,93,105,118,130` | TEST-CONFIRMED (by name) |
+| Manager left out; manager kept once | `G/GroupMembersReplaceTests.cs:169-198` | TEST-CONFIRMED [run: PASS] |
+| Unknown ID 400; malformed 400; disabled only 400 (bug 79368) | `G/GroupPermissionSetMembersTests.cs:70-90`; `M/GroupMembersTests.cs:44-66` | TEST-CONFIRMED [run: PASS] |
+| Empty and null lists 400; unknown group 404 | `G/GroupPermissionSetMembersTests.cs:47,93,105,118,130` | TEST-CONFIRMED [run: PASS] (by name) |
 | Valid + unknown mix keeps the valid ones (any-valid check) | `Groups:427-455` | CODE-ONLY |
 | **Adding members to a group** | | |
-| All clauses, null list bug 81484 | `G/GroupMembersAddTests.cs:49-137`; `G/GroupPermissionAddMembersTests.cs:46,57,70,84` | TEST-CONFIRMED (by name) |
+| All clauses, null list bug 81484 | `G/GroupMembersAddTests.cs:49-137`; `G/GroupPermissionAddMembersTests.cs:46,57,70,84` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Removing members from a group** | | |
-| null `members` unchanged (bug 81509); mixed malformed: status below 500, unchanged | `G/GroupPermissionRemoveMembersTests.cs:141-150,190-207` | TEST-CONFIRMED |
-| Rest | `G/GroupMembersRemoveTests.cs:53-219`; `G/GroupPermissionRemoveMembersTests.cs:46,67,98,114,175` | TEST-CONFIRMED (by name) |
+| null `members` unchanged (bug 81509); mixed malformed: status below 500, unchanged | `G/GroupPermissionRemoveMembersTests.cs:141-150,190-207` | TEST-CONFIRMED [run: PASS] |
+| Rest | `G/GroupMembersRemoveTests.cs:53-219`; `G/GroupPermissionRemoveMembersTests.cs:46,67,98,114,175` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Setting the group manager** | | |
-| New manager added, members stay; unknown user 404; empty `userId` 400 | `G/GroupManagerTests.cs:92-108`; `G/GroupPermissionSetManagerTests.cs:57-77` | TEST-CONFIRMED |
-| Rest | `G/GroupManagerTests.cs:49-156`; `G/GroupPermissionSetManagerTests.cs:46,80,91` | TEST-CONFIRMED (by name) |
+| New manager added, members stay; unknown user 404; empty `userId` 400 | `G/GroupManagerTests.cs:92-108`; `G/GroupPermissionSetManagerTests.cs:57-77` | TEST-CONFIRMED [run: PASS] |
+| Rest | `G/GroupManagerTests.cs:49-156`; `G/GroupPermissionSetManagerTests.cs:46,80,91` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Groups an entry is shared with** | | |
-| With and without access | `R/GroupFileSharedTests.cs:107-118` | TEST-CONFIRMED |
-| Rest, all three operations | `R/GroupFileSharedTests.cs:48-227`; `R/GroupFolderSharedTests.cs:47-327`; `R/GroupRoomSharedTests.cs:49-135`; `R/GroupRoomSharedValidationTests.cs:81-120` | TEST-CONFIRMED (by name) |
+| With and without access | `R/GroupFileSharedTests.cs:107-118` | TEST-CONFIRMED [run: PASS] |
+| Rest, all three operations | `R/GroupFileSharedTests.cs:48-227`; `R/GroupFolderSharedTests.cs:47-327`; `R/GroupRoomSharedTests.cs:49-135`; `R/GroupRoomSharedValidationTests.cs:81-120` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Everyone in the group lists** | | |
-| System and shared; fresh portal count 1; through parent | `R/GroupEveryoneSharedTests.cs:49-70,146-152` | TEST-CONFIRMED |
-| Name search, exclude, paging, folder | `R/GroupEveryoneSharedTests.cs:73-128,156-180` | TEST-CONFIRMED (by name) |
+| System and shared; fresh portal count 1; through parent | `R/GroupEveryoneSharedTests.cs:49-70,146-152` | TEST-CONFIRMED [run: PASS] |
+| Name search, exclude, paging, folder | `R/GroupEveryoneSharedTests.cs:73-128,156-180` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Filtering the group lists** | | |
-| All clauses | `R/GroupFileSharedTests.cs:159`; `R/GroupFolderSharedTests.cs:146-219`; `R/GroupRoomSharedTests.cs:162-272` | TEST-CONFIRMED (by name) |
+| All clauses | `R/GroupFileSharedTests.cs:159`; `R/GroupFolderSharedTests.cs:146-219`; `R/GroupRoomSharedTests.cs:162-272` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Who may read the group lists** | | |
-| File owner yes; admin on Owner's 403; invited Read 403; rule can edit access | `R/GroupSearchPermissionsTests.cs:43-72,195-225,260-275`; `Groups:828-830` | TEST-CONFIRMED |
-| Others | `R/GroupSearchPermissionsTests.cs:75,91,107,119-183,228,244,278` | TEST-CONFIRMED (by name) |
+| File owner yes; admin on Owner's 403; invited Read 403; rule can edit access | `R/GroupSearchPermissionsTests.cs:43-72,195-225,260-275`; `Groups:828-830` | TEST-CONFIRMED [run: PASS] |
+| Others | `R/GroupSearchPermissionsTests.cs:75,91,107,119-183,228,244,278` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Unknown entries in the group lists** | | |
-| Non-numeric, empty, negative | `R/GroupFileSharedTests.cs:185-197`; `R/GroupRoomSharedValidationTests.cs:55-78` | TEST-CONFIRMED |
-| Others, deleted folder | `R/GroupFileSharedTests.cs:174`; `R/GroupFolderSharedTests.cs:235-261`; `R/GroupRoomSharedValidationTests.cs:46` | TEST-CONFIRMED (by name) |
+| Non-numeric, empty, negative | `R/GroupFileSharedTests.cs:185-197`; `R/GroupRoomSharedValidationTests.cs:55-78` | TEST-CONFIRMED [run: PASS] |
+| Others, deleted folder | `R/GroupFileSharedTests.cs:174`; `R/GroupFolderSharedTests.cs:235-261`; `R/GroupRoomSharedValidationTests.cs:46` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Guests of a Room admin's list** | | |
-| All clauses, bug 80628 | `U/GuestsApiTests.cs:46,72`; `U/GuestsPermissionsTests.cs:44-156` | TEST-CONFIRMED (by name) |
+| All clauses, bug 80628 | `U/GuestsApiTests.cs:46,72`; `U/GuestsPermissionsTests.cs:44-156` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Marking the gift message as read** | | |
 | Per-account flag; error only logged | `Portal:838-851`, yaml `markGiftMessageAsRead` | CODE-ONLY |
 | **Letters after portal registration** | | |
