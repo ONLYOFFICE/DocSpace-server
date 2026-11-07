@@ -346,7 +346,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the form gallery has no file of the title's format")]
+    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, the form gallery has no file of the title's format, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage")]
     [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the folder id is 0 and the caller is a guest without My documents")]
     [HttpPost("{folderId}/file")]
@@ -376,7 +376,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/html")]
     public async Task<FileDto<T>> CreateHtmlFile(CreateTextOrHtmlFileRequestDto<T> inDto)
@@ -405,7 +405,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/text")]
     public async Task<FileDto<T>> CreateTextFile(CreateTextOrHtmlFileRequestDto<T> inDto)
