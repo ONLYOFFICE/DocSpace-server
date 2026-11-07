@@ -477,7 +477,8 @@ With a method on, `authenticateMe` SHALL ask for the second factor instead of is
 #### Scenario: Missing entity ID
 
 - **WHEN** the configuration has no IdP entity ID
-- **THEN** the call fails and the stored settings do not change
+- **THEN** the call fails with a 500, not a client error, and the stored settings do not change (bug 84685)
+- **AND** a missing SSO URL, a malformed SLO URL and an incomplete field mapping answer 500 too
 
 ### Requirement: Switching single sign-on off
 

@@ -39,7 +39,8 @@ They prove the no-signature refusal only. Only the `CQ/` guest tests (`GetClient
 | Claim | Source | Status |
 |---|---|---|
 | No signature 403 on write operations | `CM/CreateClientPermissionsTests.cs:57`, `CM/UpdateClientPermissionsTests.cs:59`, `CM/DeleteClientPermissionsTests.cs:56`, `CM/DeleteUserClientsPermissionsTests.cs:56`, `CM/DeleteTenantClientsPermissionsTests.cs:56`, `CM/RegenerateSecretPermissionsTests.cs:57`, `CM/ChangeActivationPermissionsTests.cs:59`, `CM/RevokeUserClientPermissionsTests.cs:57` | TEST-CONFIRMED [run: PASS] |
-| No signature 403 on read operations | `CQ/GetClientTests.cs:102`, `CQ/GetClientInfoTests.cs:100`, `CQ/GetClientsTests.cs:200`, `CQ/GetClientsInfoTests.cs:201`, `CQ/GetConsentsTests.cs:89`, `SM:89` | TEST-CONFIRMED [run: FAIL-BUG] |
+| No signature 403 on read operations | `CQ/GetClientTests.cs:102`, `CQ/GetClientInfoTests.cs:100`, `CQ/GetClientsTests.cs:200`, `CQ/GetClientsInfoTests.cs:201`, `CQ/GetConsentsTests.cs:89`, `SM:89` | TEST-CONFIRMED [run: PASS] (`GetConsents_Guest_ThrowsForbidden` beside it is OA3) |
+| Guest on `getConsents` answers 500 | failure text of `GetConsents_Guest_ThrowsForbidden` in run 365d87fe60 (OA3); the body of the 500 was not kept, a stand cause is not excluded | CODE-ONLY |
 | Portal session without a signature 403 | `CM/CreateClientPermissionsTests.cs:74`, `CM/UpdateClientPermissionsTests.cs:78`, `CM/DeleteClientPermissionsTests.cs:72`, `CM/DeleteUserClientsPermissionsTests.cs:72`, `CM/DeleteTenantClientsPermissionsTests.cs:72`, `CM/RegenerateSecretPermissionsTests.cs:74`, `CM/ChangeActivationPermissionsTests.cs:78`, `CM/RevokeUserClientPermissionsTests.cs:74`, `SM:107` | TEST-CONFIRMED [run: PASS] |
 
 ## Registering a client
@@ -183,6 +184,6 @@ contract beyond the status), and the `OAuth 2.0 / Discovery` operations (not amo
 |---|---|---|---|---|
 | OA1 | `updateClient` | Accepts a `name` outside 3 to 256 characters (200), while `createClient` refuses it and the yaml declares the same bound on the update | `CM/UpdateClientPermissionsTests.cs:100-134` (`Bug` 81670); `TS/clientManagement/clientManagement.permissions.spec.ts:468,498`; yaml `UpdateClientRequest` | per test comment |
 | OA2 | `getPublicClientInfo` | An unknown id does not answer 404, though the yaml declares 404 | `CQ/GetPublicClientInfoTests.cs:115-130` (`Bug` 81728); `TS/clientQuerying/clientQuerying.permissions.spec.ts:287` | per test comment |
-| OA3 | `getConsents` | A Guest with their own signature gets 200; the test expects 403, the yaml documents guests as allowed. The spec follows the yaml, so the test and the bug may be the wrong side | `CQ/GetConsentsTests.cs:92-107` (`Bug` 81729); `TS/clientQuerying/clientQuerying.spec.ts:612`; yaml `getConsents` | per test comment |
+| OA3 | `getConsents` | A Guest with their own signature gets 500 in run 365d87fe60 (the earlier text said 200); the test expects 403, the yaml documents guests as allowed. The spec follows the yaml, so the test and the bug may be the wrong side | `CQ/GetConsentsTests.cs:92-107` (`Bug` 81729); `TS/clientQuerying/clientQuerying.spec.ts:612`; yaml `getConsents` | OPEN — red test, run 365d87fe60; the cause of the 500 was not read |
 
 Not a defect, a coverage gap: no test reads a client back after `updateClient` or `changeActivation` (`CM/UpdateClientTests.cs:49-59`, `CM/ChangeActivationTests.cs:60,77`), so neither change is proven to be stored.

@@ -65,8 +65,8 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Steers the pause; next tool call (scenario "Mode steers the approval pause") | `T/McpTests/McpToolPermissionModeChatTests.cs:91,121,137,153,166,200` | TEST-CONFIRMED [run: PASS] |
 | `ask` ignores a saved pre-approval (scenario "Pre-approval in ask") | `Lib/dist/core/services/ai/types.d.ts:503` ("under ask never"); `T/McpTests/McpToolPermissionModeChatTests.cs:111` asserts the opposite and is red by code reading (see differences) | CODE-ONLY |
 | **Gates on the tool permission mode routes** | | |
-| Guest 403 on all four, invalid value from Guest 403 (scenario "Guest on the two read routes") | `T/PreferenceTests/PreferencePermissionTests.cs:198` (bug 84303; line 212 reads the `aiSettingsGetUser` default) | TEST-CONFIRMED [run: FAIL-BUG] |
-| AI off 403 first, mode survives | `T/PreferenceTests/PreferenceAiDisabledTests.cs:76` (bug 84302) | TEST-CONFIRMED [run: FAIL-BUG] |
+| Guest 403 on the routes (scenario "Guest on the two read routes"); invalid value from Guest 400, not 403 | `T/PreferenceTests/PreferencePermissionTests.cs:198` to line 212; the 400: failure text of `ToolPermissionMode_Guest_CannotReadOrChangeIt` in run 365d87fe60 (bug 84303, A27) | CODE-ONLY (the test failed at line 217, so the read assertions before it held but the test is red) |
+| AI off: invalid value 400, validation first | failure text of `PreferenceAiDisabledTests.ToolPermissionMode_AiDisabled_ReadAndWriteReturn403` in run 365d87fe60 (bug 84302, A27) | CODE-ONLY |
 | **Profile catalogue** | | |
 | Identical description to reading roles, get-by-id has no key or headers | `T/ProfileTests/ProfileCatalogueTests.cs:56,96,133,178`; `ProfileAccessReadTests.cs:91` | TEST-CONFIRMED [run: PASS] |
 | Guest 403, anonymous 401, malformed / empty 400, unknown 404 (scenarios "Guest cannot read", "Unknown id") | `T/ProfileTests/ProfileAccessGuestTests.cs:47,58`; `ProfileAccessReadTests.cs:52`; `ProfileIdBoundaryTests.cs:46,54,73` | TEST-CONFIRMED [run: PASS] |
@@ -125,7 +125,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,111,185` | TEST-CONFIRMED [run: PASS] |
 | Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:124,141,155,168` | TEST-CONFIRMED [run: PASS] |
 | Image profile refused (scenario) | `T/ChatTests/ChatProjectModelTests.cs:238,255` | TEST-CONFIRMED [run: PASS] |
-| Member reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60`; `T/ChatTests/ChatProjectModelTests.cs:129` (the read half; the round half is A16) | TEST-CONFIRMED [run: FAIL-BUG] |
+| Member reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60` | TEST-CONFIRMED [run: PASS] (`ChatProjectModelTests.GetModel_ProjectMember_…` fails later, at the round on the project's model: A16, not this claim) |
 | Model moved (scenario) | `T/ChatTests/ChatProjectModelTests.cs:94` | TEST-CONFIRMED [run: PASS] |
 | Audited, pushed | `products/ASC.Files/Server/Api/VirtualRoomsController.cs` (`setProjectModel`) | CODE-ONLY |
 | **Sources of an AI project** | | |
@@ -198,7 +198,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Messages of a thread** | | |
 | Append verbatim, no answer; parallel (scenario) | `T/MessageStorageTests/ThreadMessagesAppendTests.cs:43,70,82,122` | TEST-CONFIRMED [run: PASS] |
 | Refusals; assistant by hand (scenario) | `T/MessageStorageTests/ThreadMessagesAppendValidationTests.cs:51,75,103,124,145,165` | TEST-CONFIRMED [run: PASS] |
-| Too many attachments (scenario) | `Chat/controllers/_helpers.ts:44-72`, `threadsController.ts:253`, `aiController.ts:780`; `T/AttachmentTests/AttachmentComposerRuleTests.cs:91,108,129` (accept a refusal or trim, status < 500) | TEST-CONFIRMED [run: FAIL-BUG] |
+| Too many attachments: 200 and stored with all 11 (scenario) | failure text of `AttachmentComposerRuleTests.AppendUserMessage_MoreAttachmentsThanTheClientAllows_IsNotStoredWhole` and `SendWithStream_MoreAttachmentsThanTheClientAllows_IsNotStoredWhole` in run 365d87fe60 (bug 82894, A28) | CODE-ONLY |
 | Reading one message (scenario) | `T/MessageStorageTests/ThreadMessagesGetByIdTests.cs:46,70,101`; `MessageReadOneTests.cs:46` | TEST-CONFIRMED [run: PASS] |
 | Update in place (scenario "Edited question") | `T/MessageStorageTests/ThreadMessagesUpdateTests.cs:43`; `ThreadMessagesUpdateValidationTests.cs:52,103,131`; `MessageRewriteQuestionTests.cs:49,95` | TEST-CONFIRMED [run: PASS] |
 | Deleting a message (scenario) | `T/MessageStorageTests/ThreadMessagesDeleteTests.cs:99,118` | TEST-CONFIRMED [run: PASS] |
@@ -218,8 +218,9 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Unpaid 402 | `TS/chat/chat.ai-disabled.spec.ts:352` | TS-ONLY (TS block skipped) |
 | Project without a usable model 409 (scenario) | `Chat/storage/aiProjectChatContext.ts:216-250`; `Chat/storage/__tests__/aiProjectChatContext.test.ts`; yaml 743 ff. | CODE-ONLY |
 | **The model of a chat** | | |
-| Project answers on its model (scenario); blank, unknown | `T/ChatTests/ChatProjectModelTests.cs:47,74,186,212,278` | TEST-CONFIRMED [run: FAIL-BUG] |
-| Thread created in a project (scenario) | `T/ChatTests/ChatProjectModelTests.cs:157,314` | TEST-CONFIRMED [run: FAIL-BUG] |
+| Project answers on its model, for a manager (scenario); blank, unknown | `T/ChatTests/ChatProjectModelTests.cs:47,74,186,212`; `Send_OtherProfileInProject_CannotOverrideTheFixedModel(asMember: False)` | TEST-CONFIRMED [run: PASS] |
+| The same send by a read member misses the project's model | failure text of `Send_OtherProfileInProject_CannotOverrideTheFixedModel(asMember: True)` in run 365d87fe60 (bug 82914, A16) | CODE-ONLY |
+| Thread created in a project on another profile: stored (scenario) | failure text of `Create_ThreadInProjectOnAnotherModel_DoesNotStoreIt` (both cases) in run 365d87fe60 (bug 82915, A29); `OpenOrCreate_ProjectThreadWithAnotherProfile_DoesNotStampIt` at line 157 passes and covers the other route | CODE-ONLY |
 | Thread's own, Chat, Default; rebinding moves nothing | `T/ChatTests/ChatThreadModelTests.cs:50,99,198`; `ChatThreadModelRulesTests.cs:49,113,183`; `ChatOtherActorTests.cs:45`; `ChatRoomModelTests.cs:87` | TEST-CONFIRMED [run: PASS] |
 | Picker switches (scenario) | `T/ChatTests/ChatThreadModelTests.cs:129,165` | TEST-CONFIRMED [run: PASS] |
 | Image-only (scenario) | `T/ChatTests/ChatImageTests.cs:84` | TEST-CONFIRMED [run: PASS] |
@@ -333,7 +334,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED [run: PASS] |
 | Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:71,103,131` | TEST-CONFIRMED [run: PASS] |
 | Immediately readable, gone; source kept | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:85,172` | TEST-CONFIRMED [run: PASS] |
-| Draft reaches the model (scenario) | `T/AttachmentTests/AttachmentSendTests.cs:68,91`; `T/ReasoningTests/ReasoningAttachTests.cs:48` | TEST-CONFIRMED [run: FAIL-BUG] |
+| Draft does not reach the model (scenario) | failure text of `AttachmentSendTests.SendWithStream_DraftPassedAsAttachmentsIdOnly_ReachesTheModel` and `SendWithStream_FullyInlinedAttachmentRecord_ReachesTheModelToo` in run 365d87fe60 (bug 82773, A30); `T/ReasoningTests/ReasoningAttachTests.cs:48` passes and does not decide it | CODE-ONLY |
 | Unpaid portal (scenario) | `TS/attachments/attachments.ai-disabled.spec.ts` | TS-ONLY |
 | **Linking attachments to a message** | | |
 | Dies with the message (scenario), thread | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:68,89,199,218` | TEST-CONFIRMED [run: PASS] |
@@ -464,7 +465,7 @@ Re-checked 2026-11-06. No test was run; "red by code reading" means the assertio
 | A13 | Metadata gate | `assertAiAccess` borrows the gate through a throwaway tool-prefs read, now on four routes. | `Chat/controllers/aiAccess.ts:51`; `metaController.ts:148,161`; `profilesController.ts:253`; `editorToolsController.ts:130` | STILL OPEN |
 | A14 | Contract drift | See the contract table. | yaml `5ea4dc6` | FIXED except the `aiTools` build field and its route (STILL OPEN) |
 | A15 | Provider key leak | `aiProfilesList` hands the key to every member: Chat sends `forClient=true`, the storage controller reads no such flag and the service does not strip. | `Chat/storage/profilesStorage.ts:225,321`; `AI/Server/Api/ProfileStorageController.cs` (`ReadAllAsync`); `T/ProfileTests/ProfileAccessReadTests.cs:125` | NEW, red by code reading |
-| A16 | Read member of a project | A round is not bound to the project: chat context drops a folder without `CanUseAi` (Room manager or Content creator), and the fallback reads `type` from the folder DTO, null for a room. The round runs on what the composer sent, without the project's model and sources. | `Security:2723-2735`; `AI/Server/Service/ChatContextService.cs:157-172`; `Chat/storage/docspaceFilesApi.ts:166,450-458`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:158,406-416`; `T/ChatTests/ChatProjectModelTests.cs:129` | NEW, red by code reading |
+| A16 | Read member of a project | A round is not bound to the project: chat context drops a folder without `CanUseAi` (Room manager or Content creator), and the fallback reads `type` from the folder DTO, null for a room. The round runs on what the composer sent, without the project's model and sources. | `Security:2723-2735`; `AI/Server/Service/ChatContextService.cs:157-172`; `Chat/storage/docspaceFilesApi.ts:166,450-458`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:158,406-416`; `T/ChatTests/ChatProjectModelTests.cs:129` | OPEN — red test, run 365d87fe60: `GetModel_ProjectMember_…` and `Send_OtherProfileInProject_…(asMember: True)`; the manager's case passes |
 | A17 | Thread create in a project | Same null `type`: `aiThreadsCreate` never sees a project, so a DocSpace admin outside it creates a thread, and no model answers the generic 404, not 409. | `Chat/controllers/threadsController.ts:125-147`; `T/ChatTests/ChatProjectAccessTests.cs:71,111` | NEW, red by code reading |
 | A18 | Web-search key | `aiWebSearchGetActiveConfig` returns the stored key to a User. | `Chat/controllers/webSearchController.ts:144-152`; `T/WebSearchTests/WebSearchStateTests.cs:194` | NEW, red by code reading |
 | A19 | Resolve key | `aiAssignmentsResolveForAction` echoes the profile with its key. | `T/AssignmentTests/AssignmentPermissionTests.cs:116` (controller read only up to the resolve call) | NEW, per the test's comment, not fully traced |
@@ -474,4 +475,8 @@ Re-checked 2026-11-06. No test was run; "red by code reading" means the assertio
 | A23 | `aiThreadsOpenOrCreate` without a message | No `threadId`, no `firstMessage`: 500 from the engine. | `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:156` (82826) | NEW, per the test comment |
 | A24 | Concurrent add of one name | Losers answer 403, not the soft "already registered". | `T/McpTests/McpServerConcurrencyTests.cs:62` | NEW, per the test comment |
 | A25 | Profile `createdAt` | The create answer has milliseconds no later read reproduces. | `T/ProfileStorageTests/ProfileReadTests.cs:47` | NEW, per the test comment |
+| A27 | Tool mode gates | An invalid value to the write route from a Guest or while AI is off answers 400: validation comes before the Guest and switch checks. | `ToolPermissionMode_Guest_CannotReadOrChangeIt` (84303), `ToolPermissionMode_AiDisabled_ReadAndWriteReturn403` (84302) | OPEN — red test, run 365d87fe60 |
+| A28 | Attachment cap | More attachments than the composer allows are answered 200 and stored whole on `aiThreadsAppendUserMessage` and the send (11 stored). | `AttachmentComposerRuleTests`, the two `MoreAttachmentsThanTheClientAllows` tests (82894) | OPEN — red test, run 365d87fe60 |
+| A29 | Thread create in a project | `aiThreadsCreate` naming another profile stores it on a project thread, for a manager and a member. | `Create_ThreadInProjectOnAnotherModel_DoesNotStoreIt` (82915) | OPEN — red test, run 365d87fe60 |
+| A30 | Attachment to the model | A round with a draft by id, an inline record, a device file or an image ends healthy but no streamed request to the stub carries the text. Whether the stand's file reading plays a part was not traced. | `AttachmentSendTests`, four tests (82773) | OPEN — red test, run 365d87fe60 |
 | A26 | Metadata routes | A failed model call relays the provider's text for every failure, while `aiSkillsGenerate` was narrowed to a rate limit, a lack of credit and the portal's spending limit because an authentication failure quotes the masked API key. | `common/ASC.AI.Chat/app/controllers/metaController.ts:137` against `skillsController.ts:72-83`; `72adbfaa14` | NEW, red by code reading; whether a provider's auth text reaches a caller without provider rights not traced |

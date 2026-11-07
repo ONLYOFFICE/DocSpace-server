@@ -156,8 +156,8 @@ SHALL be one value per user for every chat, written through `aiSettingsSetToolMo
 ### Requirement: Gates on the tool permission mode routes
 
 All four tool permission mode routes SHALL refuse a Guest (403) and answer 403 while the AI switch is off,
-authorization before validation: an invalid value from a Guest or while AI is off is a 403, not a 400, and
-the stored mode survives the off period.
+with one exception: validation comes first on the write, so an invalid value from a Guest or while AI is off is
+a 400 (bugs 84303, 84302). The stored mode survives the off period.
 
 #### Scenario: Guest on the two read routes
 
@@ -784,7 +784,7 @@ empty text, a null message, one without content, a role other than `user` or an 
 #### Scenario: Too many attachments
 
 - **WHEN** a message carries more than five file or more than five image attachments
-- **THEN** `aiThreadsAppendUserMessage` and the sends answer 400 and store nothing
+- **THEN** `aiThreadsAppendUserMessage` and the send answer 200 and the message is stored with all of them: 11 attachments in the test (bug 82894)
 
 #### Scenario: Reading one message
 
@@ -877,6 +877,7 @@ thread.
 
 - **WHEN** a project manager sends into a project thread naming another profile
 - **THEN** the reply runs on the project's model and the thread still reports that model
+- **AND** when a read member sends the same, the request does not reach the project's model (bug 82914)
 
 #### Scenario: Picker switches the thread's model
 
@@ -886,7 +887,7 @@ thread.
 #### Scenario: Thread created in a project on another profile
 
 - **WHEN** a thread is created with a project as `entityId` naming another profile
-- **THEN** that profile is not stored on the thread
+- **THEN** that profile is stored on the thread, whether a manager or a member creates it (bug 82915)
 
 #### Scenario: Image-only chat model
 
@@ -1463,7 +1464,7 @@ leave the DocSpace file it was made from.
 #### Scenario: Draft reaches the model
 
 - **WHEN** the owner sends a message carrying a draft by id only, and then one carrying the whole record inline
-- **THEN** the draft's text reaches the model both times
+- **THEN** the round ends healthy but no streamed request to the model carries the draft's text, either time (bug 82773)
 
 #### Scenario: Unpaid portal
 

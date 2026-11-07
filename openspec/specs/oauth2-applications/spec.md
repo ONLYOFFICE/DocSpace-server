@@ -336,12 +336,17 @@ nothing to delete. A Room admin or a User SHALL be refused with 403.
 
 ### Requirement: Listing a user's consents
 
-`getConsents` (`GET /api/2.0/oauth2/clients/consents`) SHALL return one page of the caller's own consents, whatever
-the caller's role and with no parameter that widens it to another user, each with the scopes granted, the moment of
+`getConsents` (`GET /api/2.0/oauth2/clients/consents`) SHALL return one page of the caller's own consents,
+for every role but a Guest, with no parameter that widens it to another user, each with the scopes granted, the moment of
 the last change and the client's consent-facing details. `limit` is required, 1 to 50, and `last_modified_on` asks
 for the next page.
 
 #### Scenario: No consents yet
+
+- **WHEN** a Guest with their own signature calls `getConsents`
+- **THEN** the system answers 500 (bug 81729)
+
+#### Scenario: Member without consents
 
 - **WHEN** a member who has authorized no client calls `getConsents` with `limit` 50
 - **THEN** the call answers 200 with an empty `data` and `limit` 50

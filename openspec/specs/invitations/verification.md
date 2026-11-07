@@ -32,10 +32,10 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Equal or higher privilege refused (403), bug 79500 | PT/01_Profiles/InviteUsersTests.cs:112-124 | TEST-CONFIRMED [run: PASS] |
 | Overlong address 400 "maximum length of '255'", bug 79527 | PT/01_Profiles/InviteUsersTests.cs:129-138 | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | PT/01_Profiles/InviteUsersTests.cs:141-150 | TEST-CONFIRMED [run: PASS] |
-| Existing address: related to inviter, type raised, not mailed | UC:525-545; yaml `inviteUsers` description | CODE-ONLY |
-| Disabled account → 400 | UC:527-530; yaml `inviteUsers` 400 | CODE-ONLY |
+| Existing address: related to inviter, type raised, not mailed | UC:525-545; yaml `inviteUsers` description ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:59-69 | TEST-CONFIRMED [run: PASS] (type raised) / CODE-ONLY (relation, not mailed) |
+| Disabled account → 400 | UC:527-530; yaml `inviteUsers` 400 ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:46-57 | TEST-CONFIRMED [run: PASS] |
 | Not enough paid seats → 402 before anything is sent | UC:500-511; yaml `inviteUsers` 402 | CODE-ONLY |
-| Answer lists every pending profile the caller may see | UC:558-570; yaml description | CODE-ONLY |
+| Answer lists every pending profile the caller may see | UC:558-570; yaml description ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:71-82 (owner sees earlier pending profiles) | TEST-CONFIRMED [run: PASS] |
 
 ## Adding a member directly
 
@@ -69,7 +69,7 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Guest resends for another account → 403 | PT/01_Profiles/ResendActivationTests.cs:75-91 | TEST-CONFIRMED [run: PASS] |
 | User resends for another account → 403, bug 79545 | PT/01_Profiles/ResendActivationTests.cs:96-112 | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | PT/01_Profiles/ResendActivationTests.cs:115-125 | TEST-CONFIRMED [run: PASS] |
-| Skipped accounts and resendAll: active / disabled skipped; activation instructions for non-confirmed; new link each time; resendAll admin-only; own id only for User/Guest | UC:1680-1770 (the `IsActive || Terminated` skip at `:1701`); yaml `resendUserInvites` | CODE-ONLY |
+| Skipped accounts and resendAll: active / disabled skipped; activation instructions for non-confirmed; new link each time; resendAll admin-only; own id only for User/Guest | UC:1680-1770 (the `IsActive || Terminated` skip at `:1701`); yaml `resendUserInvites` ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:97-157 | TEST-CONFIRMED [run: PASS] (resendAll refused for User and Guest, allowed for Room admin; own id accepted for User; active and disabled accounts keep their status) / CODE-ONLY (letters, new link) |
 | Throttling 5 per 15 minutes → 429 | UC `[EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]`; yaml `resendUserInvites` 429 header text | CODE-ONLY |
 
 ## Portal invitation links per user type
@@ -77,7 +77,7 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Claim | Source | Status |
 |---|---|---|
 | Create for a type the caller may invite (id, type, URL) | WT/04_Portal/Users/InvitationLinkCreateTests.cs:52-67 | TEST-CONFIRMED [run: PASS] |
-| One link per type → 400 | PC:279-287 (`ArgumentException`); yaml `createInvitationLink` 400 | CODE-ONLY |
+| One link per type → 400 | PC:279-287 (`ArgumentException`); yaml `createInvitationLink` 400 ; web/ASC.Web.Api.Tests/Tests/04_Portal/Users/InvitationLinkRulesTests.cs:51-60 | TEST-CONFIRMED [run: PASS] |
 | Link shared between admins (read by DocSpace admin / Room admin, created by owner) | WT/04_Portal/Users/InvitationLinkGetTests.cs:52-66 | TEST-CONFIRMED [run: PASS] |
 | Any allowed role deletes the owner's User link | WT/04_Portal/Users/InvitationLinkDeleteTests.cs:72-85 | TEST-CONFIRMED [run: PASS] |
 | Type above the caller's reach → 403 (create) | WT/04_Portal/Users/InvitationLinkCreateTests.cs:145-159 | TEST-CONFIRMED [run: PASS] |
@@ -85,7 +85,7 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | … (delete) | WT/04_Portal/Users/InvitationLinkDeleteTests.cs:120-155 | TEST-CONFIRMED [run: PASS] |
 | … (update, User / Guest) | WT/04_Portal/Users/InvitationLinkUpdateTests.cs:149-164 | TEST-CONFIRMED [run: PASS] |
 | Guest type → 400 naming `EmployeeType` (create, read) | InvitationLinkCreateTests.cs:121-135; InvitationLinkGetTests.cs:83-92 | TEST-CONFIRMED [run: PASS] |
-| `maxUseCount` 1001 → 400 (create, update); past expiration → 400 (create) | InvitationLinkCreateTests.cs:162-190; InvitationLinkUpdateTests.cs:102-115; PC update path check | TEST-CONFIRMED [run: PASS] (past expiration on update: CODE-ONLY, PC:397-406) |
+| `maxUseCount` 1001 → 400 (create, update); past expiration → 400 (create) | InvitationLinkCreateTests.cs:162-190; InvitationLinkUpdateTests.cs:102-115; past expiration on update: web/ASC.Web.Api.Tests/Tests/04_Portal/Users/InvitationLinkRulesTests.cs:62-71 | TEST-CONFIRMED [run: PASS] |
 | Limits stored (maxUseCount 1000 / currentUseCount 0; future expiration not expired) | InvitationLinkCreateTests.cs:70-98 | TEST-CONFIRMED [run: PASS] |
 | Updating maxUseCount / expiration, own link by DocSpace admin / Room admin | InvitationLinkUpdateTests.cs:46-99 | TEST-CONFIRMED [run: PASS] |
 | Unknown link → 404 (update, delete) | InvitationLinkUpdateTests.cs:118-128; InvitationLinkDeleteTests.cs:88-98 | TEST-CONFIRMED [run: PASS] |
@@ -130,11 +130,11 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 
 | Claim | Source | Status |
 |---|---|---|
-| Unknown address → pending Guest profile created by caller, share recorded, room invitation email with `roomId` | FS:291-318, 412-426; IS:61-66; `UserManagerWrapper.cs:101-130` | CODE-ONLY |
-| Existing pending account → related, access set, invitation resent | FS:293-311 | CODE-ONLY |
-| Address of an existing active account → related, access set, no invitation email, existing-user notice when `notify` | FS:305-311, 432-451 | CODE-ONLY |
-| Guest invitations disabled → 403 for the whole request | VRC `SetRoomSecurity` (`newGuestsInvited` / `AllowInvitingGuests`); yaml `setRoomSecurity` 403 | CODE-ONLY |
-| Malformed or overlong address → 400 | `common/ASC.Api.Core/Model/EmailInvitationDto.cs:59-61`; yaml `setRoomSecurity` 400 | CODE-ONLY |
+| Unknown address → pending Guest profile created by caller, share recorded, room invitation email with `roomId` | FS:291-318, 412-426; IS:61-66; `UserManagerWrapper.cs:101-130` ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:59-73 | TEST-CONFIRMED [run: PASS] (pending Guest profile, share recorded) / CODE-ONLY (letter, created by caller) |
+| Existing pending account → related, access set, invitation resent | FS:293-311 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:75-88 | TEST-CONFIRMED [run: PASS] (access set) / CODE-ONLY (relation, resend) |
+| Address of an existing active account → related, access set, no invitation email, existing-user notice when `notify` | FS:305-311, 432-451 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:90-104 | TEST-CONFIRMED [run: PASS] (access set, account stays Active) / CODE-ONLY (relation, letters) |
+| Guest invitations disabled → 403 for the whole request | VRC `SetRoomSecurity` (`newGuestsInvited` / `AllowInvitingGuests`); yaml `setRoomSecurity` 403 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:106-130 | TEST-CONFIRMED [run: PASS] |
+| Malformed or overlong address → 400 | `common/ASC.Api.Core/Model/EmailInvitationDto.cs:59-61`; yaml `setRoomSecurity` 400 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:132-153 | TEST-CONFIRMED [run: PASS] |
 | Address rejected during profile creation → `warning`, other entries applied | FS:312-325 | CODE-ONLY |
 | An email entry into an AI project → 403 "The role is not available for this user type" (the address resolves to no account; the project refuses the guest it would create) | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:61-79; FS:275-281 | TEST-CONFIRMED [run: PASS] |
 
@@ -178,13 +178,13 @@ The AI-project test above is the only integration test that sends an `email` ent
 
 | Claim | Source | Status |
 |---|---|---|
-| Existing account not in room → added during the check, `UserExisted`, room data | IS:96-205 (`ResolveAccessAsync` → `ProcessShare`), 210-216; release notes v2.6; for an AI project: FT/03_Rooms/AiHub/AiProjectInvitationLinkTests.cs:44-68 (`UserExisted`, member with Read) | CODE-ONLY (TEST-CONFIRMED [run: PASS] for an AI project) |
-| Existing member → `UserExisted`, no new share | IS:109-128, 210-216 | CODE-ONLY |
+| Existing account not in room → added during the check, `UserExisted`, room data | IS:96-205 (`ResolveAccessAsync` → `ProcessShare`), 210-216; release notes v2.6; for an AI project: FT/03_Rooms/AiHub/AiProjectInvitationLinkTests.cs:44-68 (`UserExisted`, member with Read) ; custom room: products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:73-83 | TEST-CONFIRMED [run: PASS] (`UserExisted`, added with the link's access) / CODE-ONLY (room data in the answer) |
+| Existing member → `UserExisted`, no new share | IS:109-128, 210-216 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:85-96 | TEST-CONFIRMED [run: PASS] |
 | Unknown person → `Ok`, email, room data; registration creates, counts use, joins room | IS:220-224; UC:273-290, 395-398, 430-433; IS:330-360 | CODE-ONLY |
 | Check not Ok → `POST /people` 403 | UC:283-290; yaml `addMember` 403 | CODE-ONLY |
-| Previously removed member → `UserExcluded` | IS:130-164 | CODE-ONLY |
+| Previously removed member → `UserExcluded` | IS:130-164 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:98-110 | TEST-CONFIRMED [run: PASS] |
 | Use limit reached → `QuotaFailed` | IS:292-297, 445-450 | CODE-ONLY |
-| Expired / Invalid (expiration, foreign key, creator disabled or removed) | IS:272-290; IV:54-69, 191-218 | CODE-ONLY |
+| Expired / Invalid (expiration, foreign key, creator disabled or removed) | IS:272-290; IV:54-69, 191-218 ; unusable key: products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:112-120 | TEST-CONFIRMED [run: PASS] (unusable key → `Invalid`) / CODE-ONLY (expiration, creator disabled or removed) |
 | Paid role for User / Guest lowered to highest free role, `QuotaFailed` when none | IS:165-182 (`ProcessForAgent`, `TrySetHighFreeRole`), 336-349, 424-431; a User joining an AI project through its Room manager link lands as Read: AiProjectInvitationLinkTests.cs:44-68 | CODE-ONLY (TEST-CONFIRMED [run: PASS] for an AI project) |
 | Guest into an AI agent with a creator role → Viewer | IS:403-422 | CODE-ONLY |
 | Guest into an AI project through its link → `QuotaFailed`, not added | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:81-103; IS:165-171, 403-413 (`ProcessForAgent` returns false for a Guest and an AI project) | TEST-CONFIRMED [run: PASS] |
@@ -205,8 +205,8 @@ itself writes the share (IS:181, `ProcessShare`) and the audit event. The spec f
 | Anonymous read (200), 304 on `If-Modified-Since` | InvitationSettingsTests.cs:57-68 (anonymous 200); `web/ASC.Web.Api/Api/Settings/SettingsController.cs:1571-1580`; yaml | TEST-CONFIRMED [run: PASS] (anonymous read) / CODE-ONLY (304) |
 | Update needs the portal-settings right: Owner and DocSpace admin 200 and the read reflects the values, User 403, anonymous 401 | InvitationSettingsTests.cs:70-83, 109-153; SettingsController.cs:1596-1611 | TEST-CONFIRMED [run: PASS] |
 | Omitted switch is stored as off (a body with `allowInvitingGuests` only resets `allowInvitingMembers` to false) | InvitationSettingsTests.cs:85-107 (raw body); SettingsController.cs:1600-1604 (a new settings object from the two booleans, no merge) | TEST-CONFIRMED [run: PASS] |
-| Members off blocks invite by email, direct add, invitation links (CRUD), legacy link | UC:480-484, 312-317; PC:200-204, 248-252, 329-333, 384-388, 454-458 | CODE-ONLY |
-| Guests off blocks email entries in a room invitation and guest creation | VRC `SetRoomSecurity`; UC:154-158, 305-310 | CODE-ONLY |
+| Members off blocks invite by email, direct add, invitation links (CRUD), legacy link | UC:480-484, 312-317; PC:200-204, 248-252, 329-333, 384-388, 454-458 ; links create, update, delete: web/ASC.Web.Api.Tests/Tests/04_Portal/Users/InvitationLinkRulesTests.cs:73-105; invite by email: products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:84-95 | TEST-CONFIRMED [run: PASS] (invite by email; link create, update, delete) / CODE-ONLY (direct add, legacy link) |
+| Guests off blocks email entries in a room invitation and guest creation | VRC `SetRoomSecurity`; UC:154-158, 305-310 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:106-130 | TEST-CONFIRMED [run: PASS] (email entries in a room invitation) / CODE-ONLY (guest creation) |
 | Stored link cannot be accepted while its type is blocked | UC:300-320 (settings checked after the link resolved the type) | CODE-ONLY |
 
 `InvitationSettingsTests` toggles the switches but no test exercises an invitation while a switch is off; the

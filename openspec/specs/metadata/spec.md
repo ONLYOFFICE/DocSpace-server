@@ -893,6 +893,11 @@ unchanged from `getTemplate` and the metadata reads.
 - **WHEN** `Привет 模板 ™ ✓ é ☃ ❤ ☺` is used in a template name, a field name, an option, a string value and a custom field
 - **THEN** every read returns the text unchanged
 
+#### Scenario: Character outside the Basic Multilingual Plane
+
+- **WHEN** a template, a field or a file value is written with an emoji in its text
+- **THEN** the write fails with a 500 from saving; the text is not stored as sent
+
 ### Requirement: Assigned templates in the listings
 
 Every file and folder returned by a listing, by `getFileInfo` and by `getFolderInfo` SHALL carry

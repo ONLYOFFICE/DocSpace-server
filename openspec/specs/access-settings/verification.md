@@ -102,7 +102,8 @@ and from the method body where a row needed the request; test line numbers point
 | 402 for an administrator; anonymous `false` without the plan | `Sso:77-96,325-337` | CODE-ONLY |
 | **Single sign-on template and constants** | `S/Sso/SsoReadTests.cs:43,55`; `S/Sso/SsoPermissionsTests.cs:45,59,72,86,99` | TEST-CONFIRMED [run: PASS] |
 | **Saving single sign-on settings** | | |
-| Stored and read back; label cut; type normalised (unrecognised to 4, 1 and 3 kept); empty 400; roles | `S/Sso/SsoSaveTests.cs:47,64,75,88,99`; `S/Sso/SsoPermissionsTests.cs:131,145` | TEST-CONFIRMED [run: FAIL-BUG] |
+| Stored and read back; label cut; type normalised (unrecognised to 4, 1 and 3 kept); empty 400; roles | `S/Sso/SsoSaveTests.cs:47,64,75,88,99`; `S/Sso/SsoPermissionsTests.cs:131,145` | TEST-CONFIRMED [run: PASS] (the four red `SaveSsoSettings_*_ThrowsBadRequest` tests beside them are AC-1) |
+| Invalid configuration answers 500 (scenario "Missing entity ID") | failure text of `SsoSaveTests.SaveSsoSettings_MissingEntityId_ThrowsBadRequest`, `MissingSsoUrl`, `MalformedSloUrl`, `IncompleteFieldMapping` in run 365d87fe60 | CODE-ONLY (the stored settings not changing was not reached) |
 | **Required single sign-on fields** | `Sso:206-226` (thrown before the save at 242). The status is AC-1 to AC-4 | CODE-ONLY |
 | **Switching single sign-on off** | | |
 | Reset restores defaults; roles | `S/Sso/SsoResetTests.cs:41`; `S/Sso/SsoPermissionsTests.cs:161,175` | TEST-CONFIRMED [run: PASS] |
@@ -162,7 +163,7 @@ No test was run. "Red by code reading" means the code as read would fail that te
 
 | # | Where | What the server does | Evidence | Evidence kind |
 |---|---|---|---|---|
-| AC-1 | `saveSsoSettingsV2` | No IdP entity ID answers 500; the test expects 400 (bug 84685) | `SsoSaveTests.cs:111`; `Sso:206-209`; `Wrap` default branch | red by code reading |
+| AC-1 | `saveSsoSettingsV2` | No IdP entity ID, no SSO URL, a malformed SLO URL or an incomplete field mapping answers 500; the tests expect 400 (bug 84685) | `SsoSaveTests.cs:111`; `Sso:206-209`; `Wrap` default branch | red test, run 365d87fe60 |
 | AC-2 | `saveSsoSettingsV2` | Missing or invalid SSO URL answers 500; the test expects 400 (bug 84686) | `SsoSaveTests.cs:129`; `Sso:211-214` | red by code reading |
 | AC-3 | `saveSsoSettingsV2` | Incomplete field mapping answers 500; the test expects 400 (bug 84687) | `SsoSaveTests.cs:147`; `Sso:221-226` | red by code reading |
 | AC-4 | `saveSsoSettingsV2` | Malformed SLO URL answers 500; the test expects 400 (bug 84688) | `SsoSaveTests.cs:165`; `Sso:216-219` | red by code reading |

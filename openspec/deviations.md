@@ -79,6 +79,7 @@ this register labels them FW1 and FW2. Within a table, rows are ordered by how m
 
 Evidence column:
 
+- **red test, run 365d87fe60**: an exception to "no test was run": the test failed in the full run of that commit and its failure text was read; it was not re-run.
 - **red by code reading**: the assertion of a test was compared with the code; the test was not run.
 - **red test**: the `verification.md` records the test as red or marked as failing; not run here.
 - **red test by reading**: the `verification.md` read a test recorded as red; not run here.
@@ -115,14 +116,18 @@ Evidence column:
 | SI6 | storage-and-integrations | `saveThirdParty` does not check a WebDAV `url` for loopback, link-local or private ranges before the outbound request (bug 82560, test skipped while it is open). | per test comment | OPEN |
 | FX5 | files-settings | The anonymous answer of `getDocServiceUrl` includes the internal Document Server address, the portal address as the service sees it, the signature header name and the SSL flag. | red by code reading | OPEN |
 | FX1 | files-settings | Any refused `startEditFile` drops the file's whole tracker, so a second person's refused claim or a reader's refused start ends the first person's editing mark and the next claim succeeds. | red by code reading (no test covers the state after the refusal) | OPEN |
-| A16 | ai-agents | A chat round is not bound to the project for a read member: the context drops the folder and the fallback reads a null `type`, so the round runs on what the composer sent, without the project's model and sources. | red by code reading | OPEN |
+| A16 | ai-agents | A chat round is not bound to the project for a read member: the context drops the folder and the fallback reads a null `type`, so the round runs on what the composer sent, without the project's model and sources. | red test, run 365d87fe60 (cause by code reading) | OPEN |
+| A27 | ai-agents | An invalid tool mode from a Guest or while AI is off answers 400, not 403: validation comes first. | red test, run 365d87fe60 (bugs 84303, 84302) | OPEN |
+| A28 | ai-agents | More attachments than the composer allows are answered 200 and stored whole (11 stored). | red test, run 365d87fe60 (bug 82894) | OPEN |
+| A29 | ai-agents | `aiThreadsCreate` naming another profile stores it on a project thread. | red test, run 365d87fe60 (bug 82915) | OPEN |
+| A30 | ai-agents | A round with a draft, inline record, device file or image attachment ends healthy but no streamed request carries the text; the stand's part was not traced. | red test, run 365d87fe60 (bug 82773) | OPEN |
 | A17 | ai-agents | `aiThreadsCreate` never sees a project because of the same null `type`: a DocSpace admin outside it creates a thread, and no model answers the generic 404, not 409. | red by code reading | OPEN |
 | F24 | file-operations | The upload part and finalize routes find a session by id alone: a caller without access to the target folder who holds the id writes into and finalizes the Owner's session; only abort checks the owner. Security smell, design decision pending. | static (by code reading; the test pins nothing) | OPEN |
-| R7 | shared-links | `getFilePrimaryExternalLink` answers 200 to a caller without access to the file. | red test (bug 81572) | OPEN |
+| R7 | shared-links | `getFilePrimaryExternalLink` answers 200 to a caller without access to the file. | test passes, run 365d87fe60 | NOT REPRODUCED; no fixing commit identified |
 | R4 | room-role-permissions | `POST folder/{id}/link` by a Content creator, Viewer, non-member admin, Guest or on an archived room answers 200 with an empty list instead of 403. | red test (bug 81575) | OPEN |
-| F23 | file-operations | `getFileVersionInfo` answers the version list to a member invited with Editing access, although the document says only managers and content creators read the history (see H6). | red test (bug 84774) | OPEN |
-| H6 | history-and-audit | Same bug as F23, recorded differently: the version list is open to Editing through the read-history right, the new test contradicts the sibling `EditHistoryPermissionsTests`, and the spec follows the server. | bug test (84774) | OPEN |
-| F21 | file-operations | `saveediting` into a file open in somebody else's editing session answers 200, replaces the content, grows the version and clears the editing flag; `startedit` on a file locked by somebody else is refused through a 500. | red test (bugs 84769, 84768) | OPEN |
+| F23 | file-operations | `getFileVersionInfo` answers the version list to a member invited with Editing access, although the document says only managers and content creators read the history (see H6). | red test, run 365d87fe60 | OPEN |
+| H6 | history-and-audit | Same bug as F23, recorded differently: the version list is open to Editing through the read-history right, the new test contradicts the sibling `EditHistoryPermissionsTests`, and the spec follows the server. | red test, run 365d87fe60 | OPEN |
+| F21 | file-operations | `saveediting` into a file open in somebody else's editing session answers 200, replaces the content, grows the version and clears the editing flag; `startedit` on a file locked by somebody else is refused through a 500. | red test, run 365d87fe60 (`saveediting` failed on the bytes first; the 200, version and flag rest on the test's summary) | OPEN |
 | H3 | history-and-audit | `PUT security/activeconnections/logout/{loginEventId}` checks ownership only when the login event has a `UserId`; an event stored without one can be closed by any signed-in user. | static | OPEN |
 | S2 | webhooks-and-api-keys | `PUT keys/{id}` on an expired key answers `200 false` before the ownership check: a non-owner learns that a foreign key exists and is expired instead of 403. | static | OPEN |
 | S1 | webhooks-and-api-keys | Updating an API key with `permissions: ["*", "files:read"]` is stored as-is and the auth handler then grants unrestricted `*:write`; creation normalises the same input to "unrestricted". | static (no test) | OPEN |
@@ -146,12 +151,12 @@ Evidence column:
 | B4 | backup-and-restore | Restore from a Documents file demands the create right on the folder although reading is all it needs. | static | OPEN |
 | B11 | backup-and-restore | `backup/backuptmp` returns the worker's absolute temporary folder to any DocSpace admin. | static | OPEN |
 | B12 | backup-and-restore | The portal-wide 403 while restoring is a path-suffix allowlist (`portal`, `settings`, …); any route ending in one of those words passes. | static | OPEN |
-| F14 | file-operations | A session below `chunkUploadSize` still stores the file on the first part, so a truncated file is listed and each repeated part adds a version, while a second finalize, a part after finalize and an abort after finalize are fixed by `ae457bdff6`. | red by code reading (`Category=Bug`, no bug number) | OPEN, narrowed |
-| F15 | file-operations | Finalize without any part, or of a 100-byte session that received 300 bytes, answers 201 with `uploaded` true and file id 0 and stores nothing; a short intermediate part makes finalize answer 500. | red by code reading (the 500 rests on the test's summary, not traced) | OPEN |
-| MD10 | metadata | A character outside the Basic Multilingual Plane in a template name, field name, option, string value or custom field is echoed intact but stored as `?`: the columns are three-byte `utf8` and the write does not refuse it. | red test (four tests, `Category=Bug`) | OPEN |
-| F17 | file-operations | A version comment holding a character outside the Basic Multilingual Plane is echoed as sent but stored as `?`. | red test (`Category=Bug`; the column was not re-read) | OPEN |
-| F16 | file-operations | A terminate that arrives while the copy still waits for a free worker thread is dropped, so the copy runs to its end when the queue is busy. | red test (per the test's remarks, flaky by load; the queue was not re-read) | OPEN |
-| F18 | file-operations | A batch move of several folders is refused or fails as a whole when one of them holds a file open in an editing session. | red test (bug 84725; the operation was not traced) | OPEN |
+| F14 | file-operations | A session below `chunkUploadSize` still stores the file on the first part, so a truncated file is listed and each repeated part adds a version, while a second finalize, a part after finalize and an abort after finalize are fixed by `ae457bdff6`. | red test, run 365d87fe60 | OPEN, narrowed |
+| F15 | file-operations | Finalize without any part, or of a 100-byte session that received 300 bytes, stores nothing though it reports a file; a short intermediate part leaves a file listed after finalize. | red test, run 365d87fe60 (short part: a file is listed after finalize, the status was not reached) | OPEN |
+| MD10 | metadata | A character outside the Basic Multilingual Plane in a template name, field name, option, string value or custom field fails on write with a 500 (`An error occurred while saving the entity changes`); the earlier "echoed intact, stored as `?`" was wrong on this run's MySQL stand. | red test, run 365d87fe60 | OPEN |
+| F17 | file-operations | A version comment holding a character outside the Basic Multilingual Plane fails on write with a 500 from MySQL (`Incorrect string value`); the earlier "stored as `?`" was wrong. | red test, run 365d87fe60 | OPEN |
+| F16 | file-operations | A terminate that arrives while the copy still waits for a free worker thread is dropped, so the copy runs to its end when the queue is busy. | red test, run 365d87fe60 (the failure is at the record lookup: the record is gone right after the terminate; the rest per the test's remarks) | OPEN |
+| F18 | file-operations | A batch move of several folders is refused or fails as a whole when one of them holds a file open in an editing session. | red test, run 365d87fe60 | OPEN |
 | S11 | webhooks-and-api-keys | The room and agent quota endpoints accept the id of a plain folder (or an ordinary room for the agent ones) and write a quota on it. Belongs to `quotas` as well. | static (contract text) | OPEN |
 | B18 | backup-and-restore | A webhook-journal statement that keeps failing after five attempts is skipped with a log line, so a dump restore can silently lose part of the journal while reporting success. | static | OPEN |
 | AP3 | apps | The first write freezes the then-current configured `enabled` default into the row; a portal that only saved settings stops following later configuration changes of the default. | static | OPEN |
@@ -184,8 +189,8 @@ Evidence column:
 | H1 | history-and-audit | `GET security/audit/events/filter` with any non-default `moduleType` dereferences a null module mapper → 500. | static (no test) | OPEN |
 | Q1 | quotas | A default room or AI-agent quota above the total storage throws a plain `Exception` → 500; the user-quota siblings answer 400 for the same condition. | static | OPEN |
 | A23 | ai-agents | `aiThreadsOpenOrCreate` with no `threadId` and no `firstMessage` answers 500 from the engine. | per test (comment, bug 82826) | OPEN |
-| F20 | file-operations | `changeVersionHistory` on a file locked by somebody else answers 500; on a file open in somebody else's editing session it answers 200 and changes nothing. | red test (bugs 84771, 84772) | OPEN |
-| F22 | file-operations | `updateFile` on a file locked by somebody else is refused through a 500 instead of a client error; the title stays. | red test (bug 84842) | OPEN |
+| F20 | file-operations | `changeVersionHistory` on a file locked by somebody else answers 500; on a file open in somebody else's editing session it answers 200 and changes nothing. | red test, run 365d87fe60 | OPEN |
+| F22 | file-operations | `updateFile` on a file locked by somebody else is refused through a 500 instead of a client error; the title stays. | red test, run 365d87fe60 | OPEN |
 | F12, F10, H2 | file-operations, history-and-audit | 403 instead of 404 for a missing folder in `createFile` and a missing file in `getFileVersionInfo`; 403 instead of 401 for an anonymous caller of `file/{id}/history`; the sibling endpoints answer 404 / correctly. | test pins | OPEN |
 | F6 | file-operations | `GET fileops/convert` and `fileops/import` → 400 instead of an empty list; `GET fileops/move` is shadowed by the check endpoint. | bug test (82225) | OPEN |
 | Q3 | quotas | `setTenantQuotaSettings` reports a non-admin caller or a hosted portal with `NotSupportedException` → 415 instead of 403. | static | OPEN |
@@ -201,11 +206,11 @@ Evidence column:
 | W12 | billing | `getCustomerDeposits` swallows every accounting failure into an empty result, so "no top-ups" looks like "service down"; the sibling `getDepositInvoice` answers 402. | static (unit test) | OPEN |
 | SI10 | storage-and-integrations | `getStorageEncryptionSettings` catches every exception, so missing rights, a hosted portal and real failures all look like 200 with an empty body; the yaml documents this. | red by code reading | OPEN |
 | N3 | notifications | `getNotificationSettings` with an undefined but bindable `type` (e.g. 7) answers 500 "Incorrect parameters" instead of 400; `setNotificationSettings` with it answers 200 and stores nothing. | static | OPEN |
-| N10 | notifications | `linkTelegram` without a bot publishes a token and answers an empty link, then `checkTelegram` reports status 2 for 20 minutes although no link exists; the test expects 0. | bug test (84692) | OPEN |
+| N10 | notifications | `linkTelegram` without a bot publishes a token and answers an empty link, then `checkTelegram` reports status 2 for 20 minutes although no link exists; the test expects 0. | red test, run 365d87fe60 | OPEN |
 | L4, L5 | branding-and-licensing | A logo file whose name does not start with the slot number, or a `data:` URI in an unsupported format, answers 500 instead of 400. | static | OPEN |
 | L9 | branding-and-licensing | An unparsable licence or one lacking customer id/signature answers 500 "License is not correct" instead of a client error. | static | OPEN |
 | L10 | branding-and-licensing | Greeting title save answers 500 on a `localhost` installation with more than one portal (alias rewritten to `localhost`, unique index); the .NET tests are commented out. | static | OPEN |
-| AC-1 | access-settings | `saveSsoSettingsV2` with no IdP entity ID answers 500; the test expects 400 (bug 84685). | red by code reading | OPEN |
+| AC-1 | access-settings | `saveSsoSettingsV2` with no IdP entity ID, no SSO URL, a malformed SLO URL or an incomplete field mapping answers 500; the tests expect 400 (bug 84685). | red test, run 365d87fe60 | OPEN |
 | AC-2 | access-settings | `saveSsoSettingsV2` with a missing or invalid SSO URL answers 500; the test expects 400 (bug 84686). | red by code reading | OPEN |
 | AC-3 | access-settings | `saveSsoSettingsV2` with an incomplete field mapping answers 500; the test expects 400 (bug 84687). | red by code reading | OPEN |
 | AC-4 | access-settings | `saveSsoSettingsV2` with a malformed SLO URL answers 500; the test expects 400 (bug 84688). | red by code reading | OPEN |
@@ -235,11 +240,11 @@ Evidence column:
 | R8 | shared-links | The link-limit refusal is produced as an operation warning with the entry skipped, not as an error; invalid `linkType`/`access` answer 403 instead of 400. | bug test (82370, 82371) | OPEN |
 | OA1 | oauth2-applications | `updateClient` accepts a `name` outside 3 to 256 characters (200), while `createClient` refuses it and the yaml declares the same bound on the update (bug 81670). | per test comment | OPEN |
 | OA2 | oauth2-applications | `getPublicClientInfo` with an unknown id does not answer the 404 the yaml declares (bug 81728). | per test comment | OPEN |
-| OA3 | oauth2-applications | `getConsents` gives a Guest with their own signature 200; the test expects 403 and the yaml allows guests, so the spec follows the yaml and the test and bug may be the wrong side (bug 81729). | per test comment | OPEN |
+| OA3 | oauth2-applications | `getConsents` answers a Guest with their own signature 500 in the run; the test expects 403 and the yaml allows guests. The earlier "200" was wrong or changed. | red test, run 365d87fe60, cause not read | OPEN |
 | R3 | user-type-permissions | The invitation-link endpoint refuses the Guest type with 400 "EmployeeType" while the people endpoints answer 403 for the same refusal. | static | OPEN |
-| R9 | shared-links | Revoking a Custom room's primary link without the `primary` field leaves `getRoomsPrimaryExternalLink` at 404 for good; a revocation with `primary:true` lets it be minted again. | red test (bug 84873) | OPEN |
-| R10 | shared-links | After a file's primary link is revoked, `createFilePrimaryExternalLink` answers 404 from then on, while `setFileExternalLink` can still make one. | red test (bug 84872) | OPEN |
-| FX3 | files-settings | Same bug as R10, on `createFilePrimaryExternalLink` and the folder one: after a revocation the POST answers 404 because create shares the read path, while `setFileExternalLink` with `primary` true still works (bug 84872). | red test by reading | OPEN |
+| R9 | shared-links | Revoking a Custom room's primary link without the `primary` field leaves `getRoomsPrimaryExternalLink` at 404 for good; a revocation with `primary:true` lets it be minted again. | red test, run 365d87fe60 (bug 84873) | OPEN |
+| R10 | shared-links | After a file's primary link is revoked, `createFilePrimaryExternalLink` answers 404 from then on, while `setFileExternalLink` can still make one. | red test, run 365d87fe60 (bug 84872) | OPEN |
+| FX3 | files-settings | Same bug as R10, on `createFilePrimaryExternalLink` and the folder one: after a revocation the POST answers 404 because create shares the read path, while `setFileExternalLink` with `primary` true still works (bug 84872). | red test, run 365d87fe60 (bug 84872) | OPEN |
 | FX4 | files-settings | `get*PrimaryExternalLink` and `create*PrimaryExternalLink` check the revocation before the sharing right, so a caller with no access to a revoked entry gets 404, while an unrevoked entry gives 403. | red by code reading | OPEN |
 | AP2 | apps | An application id longer than 64 characters in the configuration reads fine but every write fails at the database → 500; no start-up validation. | static | OPEN |
 | MD3 | metadata | Raw exception text is returned in the cascade `error` field to any reader. | static | OPEN |
@@ -279,7 +284,7 @@ Evidence column:
 | P3, P6 | plugins | A portal plugin shadowed by a same-name installation-wide plugin can be neither listed nor deleted; the count limit counts the de-duplicated list, re-upload bypasses it, the list is silently truncated. | static | OPEN |
 | M5 | data-import | The upload folder path is cached for one day; a later parse ends with a generic "file not found" and the folder is never cleaned; deletion is fire-and-forget. | static | OPEN |
 | M7 | data-import | The group loop returns instead of continuing; the per-group `shouldImport` of the contract is dead. | static | OPEN |
-| M13 | data-import | `clearMigration` removes only completed jobs whose `operation` is "migration", so a failed parse stays queued until a new parse replaces it, and `cancelMigration` skips an unknown-migrator job too. | bug test (84792) | OPEN |
+| M13 | data-import | `clearMigration` removes only completed jobs whose `operation` is "migration", so a failed parse stays queued until a new parse replaces it, and `cancelMigration` skips an unknown-migrator job too. | red test, run 365d87fe60 | OPEN |
 | N4 | notifications | A file updated or renamed by somebody else is not reported as new. | bug test (81713; TS `test.fail`) | OPEN |
 | N5 | notifications | `setRoomsNotificationStatus` stores any id forever; no cleanup. | static | OPEN |
 | N6 | notifications | SMTP save accepts and drops `useNtlm`; validation is only DTO attributes (TODO in the controller). | static | OPEN |

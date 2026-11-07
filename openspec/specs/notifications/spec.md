@@ -146,7 +146,7 @@ nothing was linked. The bot keys are offered to the admin on every tariff, the f
 #### Scenario: Portal without a bot
 
 - **WHEN** a member calls `linkTelegram` on a portal whose Telegram keys are empty
-- **THEN** the system answers 200 with an empty link and `checkTelegram` never reaches status 1
+- **THEN** the system answers 200 with an empty link and `checkTelegram` then reports status 2, never 1 (bug 84692)
 - **AND** before any link request `checkTelegram` answers status 0 with an empty `username`
 
 #### Scenario: Unlink without a link

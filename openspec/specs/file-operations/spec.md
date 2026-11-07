@@ -21,9 +21,8 @@ conversion, a copy converted to another format and a PDF saved from a document a
 content of a finished conversion and the generated thumbnails are not yet, and those points rest on the code
 and the API document, as that record says. Where the release notes and the server disagree this specification
 follows the server. HTTP status codes are stated where the tests assert them. Behaviour that looks like a
-defect is not written here as a requirement; it is listed under "Suspected defects" in the verification
-record, and a scenario that names a bug number describes what the server is meant to do while that bug is
-open.
+defect is listed under "Suspected defects" in the verification record; a scenario states what the server does,
+also where a bug is open, as the full test run of 365d87fe60 showed it.
 
 ## Requirements
 
@@ -160,7 +159,7 @@ Characters a file name cannot hold are replaced with `_`. A title longer than 17
 #### Scenario: Locked by another member
 
 - **WHEN** a Content creator renames a file of the room that the Owner locked
-- **THEN** the rename is refused, the title and the lock are unchanged, and the refusal is a client error (bug 84842: reported as 500 today)
+- **THEN** the rename is refused, the title and the lock are unchanged, and the refusal is a 500, not a client error (bug 84842)
 
 ### Requirement: Renaming a folder
 
@@ -296,6 +295,16 @@ store a part under `chunkNumber` (from 1), in any order, answering the session; 
 
 - **WHEN** a payload below `chunkUploadSize` is sent as part 1 through `uploadAsyncSession` and the session is finalized
 - **THEN** the finalize answers 201 with `uploaded` true and `version` 1, and the folder holds the file once with the exact bytes
+
+#### Scenario: Small session before and at finalize
+
+- **WHEN** a session below `chunkUploadSize` is sent a numbered part and not yet finalized, is sent repeated parts, or is finalized with no part or with more bytes than declared
+- **THEN** the file is listed from the first part, short of the declared size if the part is short; repeated parts grow its version (3 after finalize in the test); the finalize with no part or too many bytes stores nothing
+
+#### Scenario: Short intermediate part
+
+- **WHEN** a part of a large session is shorter than `chunkUploadSize` and the session is finalized
+- **THEN** a file is listed after the finalize
 
 #### Scenario: Incomplete and malformed parts
 
@@ -539,7 +548,7 @@ may not move as a whole SHALL be refused as a whole.
 #### Scenario: Folder holding a file open in the editor
 
 - **WHEN** a folder holding a file open in an editing session and an unrelated folder are moved together
-- **THEN** the unrelated folder arrives at the destination whatever becomes of the other one (bug 84725: the whole selection stays put today)
+- **THEN** the unrelated folder stays where it was: the whole selection stays put (bug 84725)
 
 ### Requirement: Copying files and folders
 
@@ -879,12 +888,12 @@ that version's content again as a new version; `getFileInfo` with `version` SHAL
 
 - **WHEN** a member with Read access opens the current version and then `version=1` through `openedit`
 - **THEN** the current version opens and `version=1` is refused (403, bug 80683)
-- **AND** reading the history and opening a past version require the right to read the history: in a room its managers and content creators
+- **AND** opening a past version requires the right to read the history: in a room its managers and content creators; `getFileVersionInfo` also answers an Editing member, see the next scenario
 
 #### Scenario: Editing member reads the versions
 
 - **WHEN** a member invited with Editing access reads `getFileVersionInfo` of a room file with two versions
-- **THEN** the system answers 403 (bug 84774: the list is answered today)
+- **THEN** the call succeeds and the list is answered, although the API document reserves it for managers and content creators (bug 84774)
 
 ### Requirement: Changing and restoring versions
 
@@ -892,7 +901,7 @@ that version's content again as a new version; `getFileInfo` with `version` SHAL
 revision group of its own with `continueVersion:false` and fold it back with `true`. `restoreFileVersion`
 (`POST .../restoreversion`, `version` or `url`) SHALL store the chosen version's content on top of the history
 as a new version and answer the editing revisions, grown by one. A file locked or edited by somebody else
-SHALL be refused.
+SHALL keep its versions.
 
 #### Scenario: Split and merge
 
@@ -910,7 +919,7 @@ SHALL be refused.
 #### Scenario: File held by somebody else
 
 - **WHEN** a Content creator changes the version history of a file the Owner locked, or of a file open in the Owner's editing session
-- **THEN** the number of versions is unchanged in both cases, and the call is refused with a client error — not 500 for the locked file (bug 84771) and not 200 for the edited one (bug 84772)
+- **THEN** the number of versions is unchanged in both cases; the locked file answers 500 (bug 84771) and the edited one answers 200 (bug 84772), neither a client error
 
 ### Requirement: Version comments
 
@@ -942,6 +951,11 @@ the Trash is refused.
 - **WHEN** a Content creator comments on their own and on the Owner's file of the room, a Room manager on the Owner's file, and the Owner comments on a file lying in the Trash
 - **THEN** the first three are stored; the trashed file is refused with a client error and shows its earlier comment once restored
 - **AND** five concurrent writes to one version all answer with their own text and the stored one is one of them; concurrent writes to three versions each land on their version
+
+#### Scenario: Character outside the Basic Multilingual Plane
+
+- **WHEN** a note holding an emoji is sent
+- **THEN** the write fails with a 500 from the database on MySQL; the note is not stored as sent
 
 ### Requirement: Deleting versions
 
@@ -1001,12 +1015,12 @@ by someone with manager rights. Unknown file 404, no access 403, anonymous 401. 
 #### Scenario: Lock blocks others
 
 - **WHEN** another account tries to delete or copy a file that is locked, to save new content into it through the editor's save route, to claim it for editing, or to rename it
-- **THEN** the deletion, the copy and the save are refused (403) and the file keeps its title, version, bytes and lock; the claim and the rename are refused too, with a client error (bugs 84768 and 84842: reported as 500 today)
+- **THEN** the deletion, the copy and the save are refused (403) and the file keeps its title, version, bytes and lock; the claim and the rename are refused through a 500, not a client error (bugs 84768 and 84842)
 
 #### Scenario: Editing session blocks others
 
 - **WHEN** a Content creator saves new content into a file open in the Owner's editing session
-- **THEN** the save is refused (403) and the file keeps its version, bytes and editing flag (bug 84769: the content is replaced today)
+- **THEN** the save is not refused and the file's bytes are replaced by the uploaded ones (bug 84769)
 
 ### Requirement: Downloading a file
 

@@ -391,6 +391,11 @@ Afterwards `getMigrationStatus` SHALL return an empty result and `getMigrationLo
 - **WHEN** the owner calls `clearMigration` after the import reported `isCompleted`
 - **THEN** the system answers 200, `getMigrationStatus` returns an empty result and the imported users and files stay
 
+#### Scenario: Failed parse stays
+
+- **WHEN** the owner calls `clearMigration` after a parse that failed
+- **THEN** the failed job stays: `getMigrationStatus` still answers it with its `error` (bug 84792)
+
 #### Scenario: Nothing to clear
 
 - **WHEN** the owner calls `clearMigration` on a portal without a job, once or twice in a row
