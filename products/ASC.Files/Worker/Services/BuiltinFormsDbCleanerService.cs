@@ -34,8 +34,8 @@
 namespace ASC.Files.Worker.Services;
 
 /// <summary>
-/// Drops the built-in forms database tables nobody has submitted to or analysed for the idle period. They are restored
-/// from the search index on the next submission or analysis.
+/// Drops the built-in forms database tables nobody has submitted to or analysed for the idle period, when the search
+/// index can restore them whole on the next submission or analysis; the others are kept.
 /// </summary>
 [Singleton]
 public class BuiltinFormsDbCleanerService(
@@ -100,13 +100,22 @@ public class BuiltinFormsDbCleanerService(
             }
 
             var client = scope.ServiceProvider.GetRequiredService<BuiltinFormsDatabaseClient>();
+            var reportCreator = scope.ServiceProvider.GetRequiredService<FormFillingReportCreator>();
             var dropped = 0;
 
             foreach (var tableName in await client.GetIdleTablesAsync(cutoff))
             {
-                if (await client.DropIdleTableAsync(tableName, cutoff))
+                // One table that cannot be checked now leaves the others to be dropped; it is checked again next time.
+                try
                 {
-                    dropped++;
+                    if (await reportCreator.DropIdleBuiltinTableAsync(tableName, cutoff))
+                    {
+                        dropped++;
+                    }
+                }
+                catch (Exception e)
+                {
+                    logger.WarnIdleTableNotChecked(e, tenantId, tableName);
                 }
             }
 
@@ -126,4 +135,7 @@ internal static partial class BuiltinFormsDbCleanerServiceLogger
 {
     [LoggerMessage(LogLevel.Information, "Built-in forms DB: dropped {count} idle tables of tenant {tenantId}")]
     public static partial void InfoIdleTablesDropped(this ILogger<BuiltinFormsDbCleanerService> logger, int tenantId, int count);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: idle table {tableName} of tenant {tenantId} could not be checked")]
+    public static partial void WarnIdleTableNotChecked(this ILogger<BuiltinFormsDbCleanerService> logger, Exception exception, int tenantId, string tableName);
 }

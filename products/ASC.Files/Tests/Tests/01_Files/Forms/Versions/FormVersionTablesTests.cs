@@ -118,6 +118,35 @@ public class FormVersionTablesTests
         result.Should().Equal(("col_a", "col_b"), ("col_first_name", "col_firstname"), ("col_b", "col_c"));
     }
 
+    // A table rebuilt from the index holds the answers of every version in it: an option a later version removed stays.
+    [Fact]
+    public void MergeColumn_OptionRemovedLater_KeepsBothLists()
+    {
+        var earlier = new DbColumnDefinition("col_kind", DbColumnType.Enum, ["Paid", "Legacy"]);
+        var later = new DbColumnDefinition("col_kind", DbColumnType.Enum, ["Paid", "Unpaid"]);
+
+        FormFillingReportCreator.MergeColumn(earlier, later).EnumValues.Should().Equal("Paid", "Unpaid", "Legacy");
+    }
+
+    [Fact]
+    public void MergeColumn_OneVersionTookAnyText_LeavesNoList()
+    {
+        var earlier = new DbColumnDefinition("col_kind", DbColumnType.Enum);
+        var later = new DbColumnDefinition("col_kind", DbColumnType.Enum, ["Paid", "Unpaid"]);
+
+        FormFillingReportCreator.MergeColumn(earlier, later).EnumValues.Should().BeNull();
+        FormFillingReportCreator.MergeColumn(later, earlier).EnumValues.Should().BeNull();
+    }
+
+    [Fact]
+    public void MergeColumn_NotAList_TakesTheLatestDefinition()
+    {
+        var earlier = new DbColumnDefinition("col_days", DbColumnType.Text, Label: "Days");
+        var later = new DbColumnDefinition("col_days", DbColumnType.Text, Label: "Days off");
+
+        FormFillingReportCreator.MergeColumn(earlier, later).Should().Be(later);
+    }
+
     private static FormFieldRename Rename(string oldKey, string newKey) => new() { OldKey = oldKey, NewKey = newKey };
 
     private static FormVersionLink Link(int version, int tableVersion, params FormFieldRename[] renames) =>

@@ -116,14 +116,14 @@ public class BuiltinFormsDatabaseClient(
     }
 
     /// <summary>
-    /// Drops the table if it is still unused since <paramref name="cutoff"/> (UTC); the check and the drop are one
-    /// transaction. Returns whether it was dropped.
+    /// Drops the table if it is still unused since <paramref name="cutoff"/> (UTC) and holds no more than
+    /// <paramref name="maxRows"/> rows, when given; the checks and the drop are one transaction.
     /// </summary>
-    public async Task<bool> DropIdleTableAsync(string tableName, DateTime cutoff)
+    public async Task<IdleTableDrop> DropIdleTableAsync(string tableName, DateTime cutoff, long? maxRows = null)
     {
         if (!_formTableRegex.IsMatch(tableName))
         {
-            return false;
+            return IdleTableDrop.Kept;
         }
 
         await using var connection = await CreateConnectionAsync(DatabaseType);
@@ -138,7 +138,13 @@ public class BuiltinFormsDatabaseClient(
 
         if (await deleteCmd.ExecuteNonQueryAsync() == 0)
         {
-            return false;
+            return IdleTableDrop.Kept;
+        }
+
+        // More rows than the index can give back: the index lost some, and a rebuilt table would miss them.
+        if (maxRows != null && await CountRowsAsync(connection, tx, tableName) > maxRows)
+        {
+            return IdleTableDrop.MoreRowsThanIndex;
         }
 
         await using var dropCmd = connection.CreateCommand();
@@ -149,7 +155,24 @@ public class BuiltinFormsDatabaseClient(
         await tx.CommitAsync();
         await _cache.RemoveAndNotifyAsync(GetActivityCacheKey(tenantManager.GetCurrentTenantId(), tableName));
 
-        return true;
+        return IdleTableDrop.Dropped;
+    }
+
+    private static async Task<long> CountRowsAsync(DbConnection connection, DbTransaction tx, string tableName)
+    {
+        await using var existsCmd = connection.CreateCommand();
+        existsCmd.Transaction = tx;
+        existsCmd.CommandText = "SELECT to_regclass(quote_ident(@tableName)) IS NOT NULL";
+        existsCmd.Parameters.Add(new NpgsqlParameter("@tableName", tableName));
+        if (await existsCmd.ExecuteScalarAsync() is not true)
+        {
+            return 0;
+        }
+
+        await using var countCmd = connection.CreateCommand();
+        countCmd.Transaction = tx;
+        countCmd.CommandText = $"SELECT count(*) FROM \"{tableName}\"";
+        return Convert.ToInt64(await countCmd.ExecuteScalarAsync());
     }
 
     /// <summary>
@@ -215,4 +238,16 @@ public class BuiltinFormsDatabaseClient(
 
         await cmd.ExecuteNonQueryAsync();
     }
+}
+
+/// <summary>What became of an idle built-in table the cleanup tried to drop.</summary>
+public enum IdleTableDrop
+{
+    Dropped,
+
+    /// <summary>Used again since the cutoff, or not a form table.</summary>
+    Kept,
+
+    /// <summary>Holds more rows than the search index, so a table rebuilt from it would miss some.</summary>
+    MoreRowsThanIndex
 }

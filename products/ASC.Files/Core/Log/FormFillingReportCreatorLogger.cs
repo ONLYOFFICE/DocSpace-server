@@ -103,6 +103,15 @@ internal static partial class FormFillingReportCreatorLogger
     public static partial void WarnEditorSessionLimitReached(
         this ILogger<FormFillingReportCreator> logger, int formId, int version, Guid userId);
 
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: idle table {tableName} is kept, the search index cannot be read to restore it")]
+    public static partial void WarnIdleTableKeptIndexUnavailable(this ILogger<FormFillingReportCreator> logger, string tableName);
+
+    [LoggerMessage(LogLevel.Information, "Built-in forms DB: idle table {tableName} is kept, its {count} submissions are more than one restore reads")]
+    public static partial void InfoIdleTableKeptTooLarge(this ILogger<FormFillingReportCreator> logger, string tableName, long count);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: idle table {tableName} is kept, it holds more rows than the {count} submissions of the search index")]
+    public static partial void WarnIdleTableKeptIndexBehind(this ILogger<FormFillingReportCreator> logger, string tableName, long count);
+
     [LoggerMessage(LogLevel.Warning, "Form report of form {FormId} lists only the first {Count} submissions")]
     public static partial void WarnFormReportTruncated(
         this ILogger<FormFillingReportCreator> logger, int formId, int count);

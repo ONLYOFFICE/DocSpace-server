@@ -60,6 +60,8 @@ public class FormFillingReportCreator(
 
     private static readonly TimeSpan _fieldsReadTimeout = TimeSpan.FromSeconds(10);
 
+    private static readonly Regex _builtinTableNameRegex = new(@"^form_(\d+)_v(\d+)$", RegexOptions.Compiled);
+
     private static readonly HashSet<string> _checkboxOffStates =
         new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
 
@@ -354,6 +356,63 @@ public class FormFillingReportCreator(
         }
     }
 
+    /// <summary>
+    /// Drops a built-in table unused since <paramref name="cutoff"/> (UTC) only when the search index can rebuild it
+    /// whole on the next use: the table is the one its versions write to, and the index holds at least as many of their
+    /// submissions as the table, fewer than one rebuild reads. The table of a form that no longer exists is dropped.
+    /// </summary>
+    public async Task<bool> DropIdleBuiltinTableAsync(string tableName, DateTime cutoff)
+    {
+        var name = _builtinTableNameRegex.Match(tableName);
+        if (!name.Success
+            || !int.TryParse(name.Groups[1].Value, out var originalFormId)
+            || !int.TryParse(name.Groups[2].Value, out var tableVersion))
+        {
+            return false;
+        }
+
+        await using (await AcquireTableLockAsync(tableName))
+        {
+            if (await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId) == null)
+            {
+                return await builtinFormsDatabaseClient.DropIdleTableAsync(tableName, cutoff) == IdleTableDrop.Dropped;
+            }
+
+            // A table whose versions now write elsewhere waits for its merge, which checks every row before dropping.
+            var formFilling = await GetFormFillingAsync(originalFormId);
+            if (formFilling is not { RoomId: > 0 } || GetTableVersion(formFilling, tableVersion) != tableVersion)
+            {
+                return false;
+            }
+
+            var versions = GetTableVersions(formFilling, tableVersion);
+            var (success, count) = await factoryIndexerForm.TryCountAsync(r =>
+                r.Where(s => s.RoomId, formFilling.RoomId)
+                 .Where(s => s.OriginalFormId, originalFormId)
+                 .In(s => s.OriginalFormVersion, versions));
+
+            if (!success)
+            {
+                logger.WarnIdleTableKeptIndexUnavailable(tableName);
+                return false;
+            }
+
+            if (count >= BaseIndexer<DbFormsItemDataSearch>.QueryLimit)
+            {
+                logger.InfoIdleTableKeptTooLarge(tableName, count);
+                return false;
+            }
+
+            var result = await builtinFormsDatabaseClient.DropIdleTableAsync(tableName, cutoff, count);
+            if (result == IdleTableDrop.MoreRowsThanIndex)
+            {
+                logger.WarnIdleTableKeptIndexBehind(tableName, count);
+            }
+
+            return result == IdleTableDrop.Dropped;
+        }
+    }
+
     // Created and filled in one transaction; holds every version linked to the table, under the latest column names.
     private async Task<bool> RestoreTableAsync(ExternalDatabaseClient db, string tableName, int originalFormId, int tableVersion, int roomId, FormFillingProperties<int> formFilling)
     {
@@ -422,7 +481,9 @@ public class FormFillingReportCreator(
             foreach (var column in BuildColumnDefinitions(normalizedMeta))
             {
                 var tableColumn = column with { Name = MapToTableColumn(formFilling, version, column.Name) };
-                columns[tableColumn.Name] = tableColumn;
+                columns[tableColumn.Name] = columns.TryGetValue(tableColumn.Name, out var earlier)
+                    ? MergeColumn(earlier, tableColumn)
+                    : tableColumn;
             }
 
             foreach (var item in versionSubmissions)
@@ -436,6 +497,20 @@ public class FormFillingReportCreator(
         }
 
         return (columns, rows, incomplete);
+    }
+
+    // A column shared by several versions accepts the answers of all of them, as a merge of their tables widens it.
+    internal static DbColumnDefinition MergeColumn(DbColumnDefinition earlier, DbColumnDefinition later)
+    {
+        if (earlier.Type != DbColumnType.Enum || later.Type != DbColumnType.Enum)
+        {
+            return later;
+        }
+
+        // A version that took any text leaves the column without a list.
+        return earlier.EnumValues is { Count: > 0 } && later.EnumValues is { Count: > 0 }
+            ? later with { EnumValues = later.EnumValues.Union(earlier.EnumValues, StringComparer.Ordinal).ToList() }
+            : later with { EnumValues = null };
     }
 
     private Task<IDistributedLockHandle> AcquireTableLockAsync(string tableName)
