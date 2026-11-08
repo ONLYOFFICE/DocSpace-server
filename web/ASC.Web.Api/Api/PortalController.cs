@@ -1103,7 +1103,8 @@ public class PortalController(
     /// Content Security Policy and refreshes its base domain, and a portal that is already active is simply left
     /// active. Nothing is returned in the body; read the result from `status` in `GET api/2.0/portal`. Deactivating
     /// the portal again means asking for a fresh letter with `POST api/2.0/portal/suspend`, because each link is
-    /// issued for one operation. This operation cannot bring back a removed portal: the deletion behind
+    /// issued for one operation; asked shortly after the previous letter, it sends none, and the deactivation link of
+    /// that letter still works. This operation cannot bring back a removed portal: the deletion behind
     /// `DELETE api/2.0/portal/delete` is final, and a removed portal has to be restored from a backup instead.
     /// </remarks>
     /// <summary>
@@ -1319,7 +1320,8 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Sends the instructions to remove a portal of a user with the ID specified in the request.
+    /// Sends the instructions to remove a portal of a user with the ID specified in the request. A repeat shortly after
+    /// the letter went out sends nothing, and the link of that letter stays valid.
     /// </remarks>
     /// <summary>Send removal instructions to the user</summary>
     /// <path>api/2.0/portal/sendremoveinstructions</path>

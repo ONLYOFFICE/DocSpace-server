@@ -42,6 +42,11 @@ namespace ASC.Notify.Engine;
 /// on its way is dropped; if that delivery then fails, the mark is released for the next repeat, but the dropped one
 /// is not sent again. The same holds for a request the sending code refused while an earlier one was only accepted.
 /// The window lasts one delivery, or the acceptance of a letter that never reaches the engine.
+/// The acceptance costs what the sending code builds before it sends - a link, an audit record - so a letter that never
+/// reaches the engine (an address left out as not activated, a free portal over its letter count) costs that once per
+/// acceptance rather than once per call.
+/// A zero <c>core:notify:deduplication:period</c> turns the check off, and with it the only bound on the endpoints that
+/// send these letters: they carry no rate limit.
 /// With <c>Redis:Enabled=false</c> the cache has no distributed level, so the mark is seen only by the process that
 /// set it and a repeat produced by another process goes out - enough for a single-node installation, not for a cluster.
 /// </summary>

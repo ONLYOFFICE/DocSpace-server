@@ -441,22 +441,17 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Invites people to the portal by email, creating a pending profile for each address and mailing it an
-    /// invitation link.
-    /// The caller has to be a room admin or a DocSpace admin - a member or a guest is rejected - the portal has to
-    /// allow inviting members, and inviting a room admin additionally requires DocSpace admin rights while inviting
-    /// another DocSpace admin requires the portal owner; a `Guest` type is not accepted here at all.
-    /// An address that already belongs to a profile is not mailed again: the existing account is only related to the
-    /// caller, and its type is raised when the invitation asks for a higher one, while a disabled account rejects
-    /// the whole call with 400.
-    /// The whole call is rejected before anything is sent when the invitations would need more paid seats than the
-    /// tariff has left, and a malformed or punycode address is rejected with 400, so the list is validated as a
-    /// batch but applied one address at a time - a failure partway through leaves the earlier invitations sent.
-    /// The answer is not the result of this call: it lists every profile of the portal that is still pending and
-    /// that the caller may see, so previously invited people appear in it as well.
-    /// Repeated calls are throttled.
-    /// Use `PUT api/2.0/people/invite` to send the invitation email again, and `POST api/2.0/people` to create a
-    /// profile without mailing anybody.
+    /// Invites people to the portal by email, creating a pending profile for each address and mailing it an invitation
+    /// link. The caller has to be a room admin or a DocSpace admin and the portal has to allow inviting members; only a
+    /// DocSpace admin invites a room admin, only the owner a DocSpace admin, and `Guest` is not accepted. An address
+    /// that already has a profile is not mailed: the account is only related to the caller and raised to a higher type
+    /// when asked, while a disabled account rejects the call with 400. Nothing is sent when the invitations need more
+    /// paid seats than the tariff has left, or for a malformed or punycode address (400); otherwise the addresses are
+    /// applied one by one, so a failure partway leaves earlier invitations sent. The answer lists every pending profile
+    /// the caller may see, not only this call's. Inviting an address again shortly after its invitation went out -
+    /// after its pending profile was deleted - sends no second letter, and the link already sent still opens. Repeated
+    /// calls are throttled. Use `PUT api/2.0/people/invite` to resend the invitation, and `POST api/2.0/people` to
+    /// create a profile without mailing anybody.
     /// </remarks>
     /// <summary>
     /// Invite users
@@ -1935,7 +1930,8 @@ public class UserController(
     /// stays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userId}/email`.
     /// A DocSpace administrator acting on somebody else changes the address immediately instead: the account is
     /// marked as not activated, every session of it is ended, and activation instructions are sent to the new
-    /// address - and passing the address the account already has is then rejected with 400.
+    /// address - and passing the address the account already has is then rejected with 400. Changing it back to an
+    /// address that got activation instructions a moment ago sends no new letter, and the link of that letter works.
     /// A caller who is not an administrator may only address their own account, nobody but the owner may change the
     /// owner's address, and only the owner may change the address of another DocSpace administrator.
     /// The target has to be an account that is neither disabled nor a pending invitation, otherwise the operation

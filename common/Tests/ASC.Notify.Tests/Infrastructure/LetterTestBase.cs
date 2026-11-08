@@ -197,8 +197,8 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 
         await InitAsync(action, scope);
 
-        // A tag the repeat check keys on but Init leaves out makes every letter of the action look alike, and the
-        // one the recipient needs is dropped as a repeat.
+        // A tag the repeat check keys on but Init leaves out turns the check off for the letter: without the value it
+        // cannot be told from another letter of its kind, so it goes out every time.
         foreach (var keyTag in action.DeduplicationTags)
         {
             action.Tags.Should().Contain(
