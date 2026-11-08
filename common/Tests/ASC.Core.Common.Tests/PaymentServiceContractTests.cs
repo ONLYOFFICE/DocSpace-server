@@ -96,6 +96,20 @@ public class PaymentServiceContractTests
 
     [Theory]
     [MemberData(nameof(BillingOkCalls))]
+    public async Task NullAnswer_IsAContractFailure(string route)
+    {
+        // JSON, but no string: it says no more about the outcome than a proxy's page does.
+        using var stub = new HttpStub(_ => Reply(HttpStatusCode.OK, "null"));
+        var (client, _) = CreateBillingClient(stub);
+
+        var exception = (await BillingStringCall(client, route).Should().ThrowExactlyAsync<PaymentServiceContractException>()).Which;
+
+        exception.Operation.Should().Be("POST " + route);
+        exception.InnerException.Should().BeAssignableTo<JsonException>();
+    }
+
+    [Theory]
+    [MemberData(nameof(BillingOkCalls))]
     public async Task ReadableAnswerOtherThanOk_IsARefusal(string route)
     {
         using var stub = new HttpStub(_ => Reply(HttpStatusCode.OK, "\"declined\""));

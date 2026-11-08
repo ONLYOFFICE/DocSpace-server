@@ -174,6 +174,8 @@ public class ServiceLimitParticipantTests(AspireAppFixture fixture) : BaseTest(f
         var expected = users.Select(user => user.ToString()).Order(StringComparer.Ordinal).Select(Guid.Parse).ToList();
         firstPage.TotalQuantity.Should().Be(3);
         secondPage.TotalQuantity.Should().Be(3);
+        (firstPage.TotalPage, firstPage.CurrentPage).Should().Be((2, 1));
+        (secondPage.Offset, secondPage.Limit, secondPage.CurrentPage).Should().Be((2, 2, 2));
         firstPage.Collection.Select(limit => limit.UserId).Should().Equal(expected[0], expected[1]);
         secondPage.Collection.Select(limit => limit.UserId).Should().Equal(expected[2]);
     }

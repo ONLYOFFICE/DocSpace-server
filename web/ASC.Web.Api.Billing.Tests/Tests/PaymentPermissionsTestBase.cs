@@ -352,7 +352,8 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
 
     // The portal is a customer whose payer has the e-mail payerEmail, with a wallet. An operation on the spending limits
     // also gets limits to work on, created by the owner: the one of the portal, which it reads, changes and deletes, and a
-    // personal one switched on, which the participant operations replace or switch off.
+    // personal one switched on, which the participant operations replace or switch off. Its values differ from the ones
+    // PUT payment/servicelimit/participants sets, or a refused request that wrote them would leave the snapshot as it was.
     private async Task ArrangeAsync(string operation, string payerEmail)
     {
         Payments.Customer(payerEmail).Balance(100m);
@@ -366,7 +367,7 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
                 TestContext.Current.CancellationToken)).Response.Id;
 
             await _paymentApi.CreateServiceLimitAsync(
-                new CreateServiceLimitRequestDto(ServiceLimitScope.Custom, userId: Owner.Id, amountValue: 5, period: ServiceLimitPeriod.Day),
+                new CreateServiceLimitRequestDto(ServiceLimitScope.Custom, userId: Owner.Id, amountValue: 7, period: ServiceLimitPeriod.Week),
                 TestContext.Current.CancellationToken);
         }
     }

@@ -149,7 +149,8 @@ internal static class PaymentStubs
         IConfiguration? configuration = null,
         ICache? cache = null,
         IServiceProvider? serviceProvider = null,
-        IDistributedLockProvider? distributedLockProvider = null)
+        IDistributedLockProvider? distributedLockProvider = null,
+        DocsCloudClient? docsCloudClient = null)
     {
         return new TariffService(
             quotaService: null!,
@@ -164,7 +165,7 @@ internal static class PaymentStubs
             logger: NullLogger<TariffService>.Instance,
             billingClient: billingClient!,
             accountingClient: accountingClient!,
-            docsCloudClient: null!,
+            docsCloudClient: docsCloudClient!,
             serviceProvider: serviceProvider!,
             resiliencePipelineProvider: null!,
             tenantExtraConfig: null!);

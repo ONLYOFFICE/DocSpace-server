@@ -43,7 +43,8 @@ namespace ASC.Web.Api.Billing.Tests.ApiFactories;
 /// <remarks>
 /// It answers as <c>AccountingClient</c> documents the service: a missing limit is 404 on a read and 400
 /// "Service limit 'N' not found" on a change or a deletion; a second limit of the same scope, or for the same user, is
-/// 409; the list of the participants holds the limit in force for each of them, the switched-off ones left out; the
+/// 409; the list of the participants holds the limit in force for each of them, the switched-off ones left out, a page
+/// of 25 unless asked otherwise, with its paging echoed; the
 /// reads that are asked for it carry the spending of the current period, all of it still available.
 /// </remarks>
 internal sealed class ServiceLimitStore
@@ -51,6 +52,7 @@ internal sealed class ServiceLimitStore
     private const string LimitsPath = "/serviceLimit";
     private const string ParticipantsPath = "/serviceLimit/participants";
     private const string Custom = "Custom";
+    private const int DefaultPageSize = 25;
 
     private static readonly Regex _byCustomer = new(
         @"^/serviceLimit/by-customer/\{portalId\}/by-group/(?<group>[^/]+)/(?<kind>total|global|participants|participants/disable)$",
@@ -327,21 +329,37 @@ internal sealed class ServiceLimitStore
                 ? inForce.OrderBy(limit => (int)limit["id"]!).ThenBy(limit => (string)limit["participant"]!, StringComparer.Ordinal)
                 : inForce.OrderByDescending(limit => (int)limit["id"]!).ThenBy(limit => (string)limit["participant"]!, StringComparer.Ordinal);
 
-        var offset = int.TryParse(query["offset"], NumberStyles.None, CultureInfo.InvariantCulture, out var from) ? from : 0;
-        var page = ordered.Skip(offset);
-
-        if (int.TryParse(query["limit"], NumberStyles.None, CultureInfo.InvariantCulture, out var size))
+        // A page of 25 unless asked otherwise; a value that is no number, a negative offset or a page size below one is
+        // refused as accounting refuses it.
+        if (!TryReadPaging(query["offset"], 0, 0, out var offset) || !TryReadPaging(query["limit"], DefaultPageSize, 1, out var limit))
         {
-            page = page.Take(size);
+            return PaymentServiceAnswer.Json(HttpStatusCode.BadRequest,
+                """{"title":"Bad request","status":400,"detail":"The offset must not be negative and the limit must be positive"}""");
         }
 
         var withUsage = query["includeUsage"] != "false";
 
         return PaymentServiceAnswer.Json(new JsonObject
         {
-            ["collection"] = new JsonArray([.. page.Select(limit => WithUsage(limit, withUsage))]),
-            ["totalQuantity"] = inForce.Count
+            ["collection"] = new JsonArray([.. ordered.Skip(offset).Take(limit).Select(item => WithUsage(item, withUsage))]),
+            ["offset"] = offset,
+            ["limit"] = limit,
+            ["totalQuantity"] = inForce.Count,
+            ["totalPage"] = (inForce.Count + limit - 1) / limit,
+            ["currentPage"] = offset / limit + 1
         }.ToJsonString());
+    }
+
+    private static bool TryReadPaging(string? value, int fallback, int minimum, out int result)
+    {
+        if (value is null)
+        {
+            result = fallback;
+
+            return true;
+        }
+
+        return int.TryParse(value, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out result) && result >= minimum;
     }
 
     private IEnumerable<JsonObject> OfAccount(int accountNumber, string group)
