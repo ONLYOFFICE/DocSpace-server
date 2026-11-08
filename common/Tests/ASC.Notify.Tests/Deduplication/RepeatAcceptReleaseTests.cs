@@ -59,6 +59,51 @@ public class RepeatAcceptReleaseTests
         });
     }
 
+    [Fact]
+    public async Task DocSpaceInvite_TheSendKeepsTheAcceptance()
+    {
+        // The letter is completed as soon as it has left, before what the send does next (spending an invitation of
+        // the free plan): a failure there must not let the next call build the letter again.
+        await AssertTheSendKeepsTheAcceptanceAsync(
+            (service, email) => service.TryAcceptDocSpaceInviteAsync(email, EmployeeType.RoomAdmin),
+            (service, scope, email, acceptance) => service.SendDocSpaceInviteAsync(email, scope.PortalUrl, EmployeeType.RoomAdmin, acceptance: acceptance));
+    }
+
+    [Fact]
+    public async Task RoomInvite_TheSendKeepsTheAcceptance()
+    {
+        var roomId = $"folder_{Guid.NewGuid():N}";
+
+        await AssertTheSendKeepsTheAcceptanceAsync(
+            (service, email) => service.TryAcceptEmailRoomInviteAsync(email, roomId, EmployeeType.User, false),
+            (service, scope, email, acceptance) => service.SendEmailRoomInviteAsync(email, roomId, "Room", scope.PortalUrl, EmployeeType.User, false, acceptance: acceptance));
+    }
+
+    private static async Task AssertTheSendKeepsTheAcceptanceAsync(
+        Func<StudioNotifyService, string, Task<NotifyAcceptance>> ask,
+        Func<StudioNotifyService, LetterScope, string, NotifyAcceptance, Task> send)
+    {
+        var stack = await LetterStackFixture.CurrentAsync();
+
+        using var scope = await LetterScope.OpenAsync(stack, CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
+
+        var helper = ActivatorUtilities.CreateInstance<StudioNotifyServiceHelper>(scope.Services, new RecordingEventBus());
+        var service = ActivatorUtilities.CreateInstance<StudioNotifyService>(scope.Services, helper);
+        var email = $"repeat-{Guid.NewGuid():N}@preview.onlyoffice.com";
+
+        // as a caller that fails after the send: the acceptance is disposed without being completed by the caller
+        await using (var acceptance = await ask(service, email))
+        {
+            acceptance.Accepted.Should().BeTrue();
+
+            await send(service, scope, email, acceptance);
+        }
+
+        await using var repeat = await ask(service, email);
+
+        repeat.Accepted.Should().BeFalse("the letter left, so its acceptance stays");
+    }
+
     private static async Task AssertRepeatGoesOutAsync(Func<StudioNotifyService, LetterScope, string, Task<bool>> send)
     {
         var stack = await LetterStackFixture.CurrentAsync();

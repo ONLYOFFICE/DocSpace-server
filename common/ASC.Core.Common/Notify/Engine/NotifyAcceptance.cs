@@ -43,28 +43,30 @@ namespace ASC.Notify.Engine;
 public sealed class NotifyAcceptance : IAsyncDisposable
 {
     /// <summary>The letter is a repeat: build nothing.</summary>
-    public static readonly NotifyAcceptance Refused = new(false, null, null);
+    public static readonly NotifyAcceptance Refused = new(false, null, null, null);
 
     /// <summary>The letter is not checked for repeats, or no acceptance was recorded: build it.</summary>
-    public static readonly NotifyAcceptance Unchecked = new(true, null, null);
+    public static readonly NotifyAcceptance Unchecked = new(true, null, null, null);
 
     private readonly NotifyDeduplicationService _service;
     private readonly string _acceptedKey;
+    private readonly string _token;
     private bool _completed;
 
-    private NotifyAcceptance(bool accepted, NotifyDeduplicationService service, string acceptedKey)
+    private NotifyAcceptance(bool accepted, NotifyDeduplicationService service, string acceptedKey, string token)
     {
         Accepted = accepted;
         _service = service;
         _acceptedKey = acceptedKey;
+        _token = token;
     }
 
     /// <summary>True when the letter may be built and sent.</summary>
     public bool Accepted { get; }
 
-    internal static NotifyAcceptance Recorded(NotifyDeduplicationService service, string acceptedKey)
+    internal static NotifyAcceptance Recorded(NotifyDeduplicationService service, string acceptedKey, string token)
     {
-        return new NotifyAcceptance(true, service, acceptedKey);
+        return new NotifyAcceptance(true, service, acceptedKey, token);
     }
 
     /// <summary>The letter is on its way: keep the acceptance until it runs out or the engine marks the letter.</summary>
@@ -82,6 +84,6 @@ public sealed class NotifyAcceptance : IAsyncDisposable
 
         _completed = true;
 
-        await _service.ReleaseAcceptanceAsync(_acceptedKey);
+        await _service.ReleaseAcceptanceAsync(_acceptedKey, _token);
     }
 }

@@ -548,8 +548,7 @@ public class UserController(
                 var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, invite.Type, inDto.Culture, true);
-                acceptance.Complete();
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, invite.Type, inDto.Culture, true, acceptance);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
             }
 

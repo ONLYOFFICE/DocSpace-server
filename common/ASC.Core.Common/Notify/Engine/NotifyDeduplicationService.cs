@@ -47,6 +47,9 @@ namespace ASC.Notify.Engine;
 /// acceptance rather than once per call.
 /// A zero <c>core:notify:deduplication:period</c> turns the check off, and with it the only bound on the endpoints that
 /// send these letters: they carry no rate limit.
+/// With a distributed level the marks are read and written there only, never kept in a node's memory: a copy in memory
+/// would outlive a release whose backplane message that node missed, and refuse the next request until the period ran
+/// out.
 /// With <c>Redis:Enabled=false</c> the cache has no distributed level, so the mark is seen only by the process that
 /// set it and a repeat produced by another process goes out - enough for a single-node installation, not for a cluster.
 /// </summary>
@@ -105,8 +108,8 @@ public class NotifyDeduplicationService(
         var key = GetCacheKey(tenantId, action.ID, sender, recipientId, objectId, values);
         var acceptedKey = GetAcceptedKey(key);
 
-        var sent = hybridCache.TryGetAsync<bool>(key).AsTask();
-        var accepted = hybridCache.TryGetAsync<bool>(acceptedKey).AsTask();
+        var sent = hybridCache.TryGetAsync<bool>(key, InDistributedLevel).AsTask();
+        var accepted = hybridCache.TryGetAsync<string>(acceptedKey, InDistributedLevel).AsTask();
 
         if ((await sent).HasValue || (await accepted).HasValue)
         {
@@ -123,14 +126,22 @@ public class NotifyDeduplicationService(
         // No lock: it would cost two more round trips per recipient of every call. Two calls that both find no mark are
         // both accepted, which costs one more link; the letter itself still goes out once, the engine checks it under
         // its own lock.
-        await hybridCache.SetAsync(acceptedKey, true, options => options.SetDuration(AcceptedPeriod).SetSkipBackplaneNotifications(true));
+        var token = Guid.NewGuid().ToString("N");
+        await hybridCache.SetAsync(acceptedKey, token, options => InDistributedLevel(options.SetDuration(AcceptedPeriod).SetSkipBackplaneNotifications(true)));
 
-        return NotifyAcceptance.Recorded(this, acceptedKey);
+        return NotifyAcceptance.Recorded(this, acceptedKey, token);
     }
 
-    // with the backplane notification: a repeat checked on another node may have taken the acceptance into its memory
-    internal async Task ReleaseAcceptanceAsync(string acceptedKey)
+    // Only while the key still holds this acceptance: a request that failed late, or one accepted in parallel, must not
+    // take back the acceptance of a request whose letter went out.
+    internal async Task ReleaseAcceptanceAsync(string acceptedKey, string token)
     {
+        var current = await hybridCache.TryGetAsync<string>(acceptedKey, InDistributedLevel);
+        if (!current.HasValue || current.Value != token)
+        {
+            return;
+        }
+
         await hybridCache.RemoveAsync(acceptedKey);
     }
 
@@ -155,7 +166,7 @@ public class NotifyDeduplicationService(
 
         var key = GetCacheKey(request._tenantId, request.NotifyAction.ID, request.CurrentSender, request.Recipient.ID, request.ObjectID, discriminators);
 
-        if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
+        if ((await hybridCache.TryGetAsync<bool>(key, InDistributedLevel)).HasValue)
         {
             logger.DebugDuplicateSuppressed(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
             return true;
@@ -163,15 +174,15 @@ public class NotifyDeduplicationService(
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{key}_lock", _lockTimeout))
         {
-            if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
+            if ((await hybridCache.TryGetAsync<bool>(key, InDistributedLevel)).HasValue)
             {
                 logger.DebugDuplicateSuppressed(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
                 return true;
             }
 
-            // a new mark replaces nothing another node holds in memory - a miss is never kept there - so the backplane
-            // message would only make every node evict a key it does not have, once per letter of a bulk send
-            await hybridCache.SetAsync(key, true, options => options.SetDuration(period).SetSkipBackplaneNotifications(true));
+            // no node holds a mark in memory, so the backplane message would only make every node evict a key it does
+            // not have, once per letter of a bulk send
+            await hybridCache.SetAsync(key, true, options => InDistributedLevel(options.SetDuration(period).SetSkipBackplaneNotifications(true)));
         }
 
         request.Properties[GetMarkProperty(request.CurrentSender)] = key;
@@ -194,9 +205,8 @@ public class NotifyDeduplicationService(
 
         request.Properties.Remove(property);
 
-        // with the backplane notification: another node may hold the mark in memory since a repeat it checked
-        await hybridCache.RemoveAsync(key);
-        await hybridCache.RemoveAsync(GetAcceptedKey(key));
+        await hybridCache.RemoveAsync(key, InDistributedLevel);
+        await hybridCache.RemoveAsync(GetAcceptedKey(key), InDistributedLevel);
 
         logger.DebugMarkReleased(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
     }
@@ -216,6 +226,12 @@ public class NotifyDeduplicationService(
     private static bool HasEveryValue(string[] discriminators)
     {
         return Array.TrueForAll(discriminators, value => !string.IsNullOrEmpty(value));
+    }
+
+    // Past memory whenever there is a distributed level, so that no node keeps a mark another node has released.
+    private void InDistributedLevel(FusionCacheEntryOptions options)
+    {
+        options.SetSkipMemoryCache(hybridCache.HasDistributedCache);
     }
 
     /// <summary>

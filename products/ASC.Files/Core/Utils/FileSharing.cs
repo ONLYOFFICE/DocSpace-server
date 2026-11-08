@@ -466,8 +466,8 @@ public class FileSharingAceHelper(
                         inviteType,
                         isAgent,
                         culture,
-                        true);
-                    acceptance.Complete();
+                        true,
+                        acceptance);
                 }
             }
             else

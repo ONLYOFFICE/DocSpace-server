@@ -188,7 +188,8 @@ public class StudioNotifyService(
         EmployeeType inviteType,
         bool isAgent,
         string culture = null,
-        bool limitation = false)
+        bool limitation = false,
+        NotifyAcceptance acceptance = null)
     {
         var saasAgentInviteNotifyAction = serviceProvider.GetService<SaasAgentInviteNotifyAction>();
         saasAgentInviteNotifyAction.Init(culture, roomTitle, confirmationUrl, inviteType);
@@ -197,6 +198,9 @@ public class StudioNotifyService(
         saasRoomInviteNotifyAction.Init(culture, roomTitle, confirmationUrl, inviteType);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteNotifyAction : saasRoomInviteNotifyAction, roomUniqId, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+
+        // the letter has left: what fails from here on must not take its acceptance back
+        acceptance?.Complete();
 
         if (limitation)
         {
@@ -224,12 +228,15 @@ public class StudioNotifyService(
         return await studioNotifyServiceHelper.TryAcceptAsync(action, null, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast(), tenantManager.GetCurrentTenant().Alias);
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, EmployeeType inviteType, string culture = "", bool limitation = false)
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, EmployeeType inviteType, string culture = "", bool limitation = false, NotifyAcceptance acceptance = null)
     {
         var saasDocSpaceInviteNotifyAction = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
         saasDocSpaceInviteNotifyAction.Init(confirmationUrl, inviteType, culture);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(saasDocSpaceInviteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+
+        // the letter has left: what fails from here on must not take its acceptance back
+        acceptance?.Complete();
 
         if (limitation)
         {

@@ -238,6 +238,65 @@ public class NotifyRepeatAcceptTests
     }
 
     [Fact]
+    public async Task AcceptanceOfAnotherRequest_IsNotTakenBack()
+    {
+        // A request failed long after its acceptance ran out; meanwhile another request was accepted and its letter went
+        // out. The late failure must leave the second acceptance alone, or the next call builds the letter again.
+        var service = CreateService(accepted: "00:00:01");
+        var action = new TestAction("profile_delete");
+
+        var failed = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
+        var sent = await AcceptAsync(service, action);
+        await failed.DisposeAsync();
+        var again = await AcceptAsync(service, action);
+
+        failed.Accepted.Should().BeTrue();
+        sent.Should().BeTrue("the first acceptance had run out");
+        again.Should().BeFalse("the late failure took back only its own acceptance");
+    }
+
+    [Fact]
+    public async Task ReleaseANodeMissed_DoesNotHoldBackTheNextLetter()
+    {
+        // Node B saw the mark while suppressing a repeat; node A's delivery then failed and took the mark back, and the
+        // message telling B so never came (there is no backplane here). B must not keep refusing from its memory.
+        var distributed = new HookedDistributedCache();
+        var locks = new InMemoryLockProvider();
+        var nodeA = CreateService(cache: CreateNodeCache(distributed), locks: locks);
+        var nodeB = CreateService(cache: CreateNodeCache(distributed), locks: locks);
+        var action = new TestAction("profile_delete");
+
+        var failed = Request(action, RoomId);
+        await nodeA.IsDuplicateAsync(failed);
+        var suppressed = await nodeB.IsDuplicateAsync(Request(action, RoomId));
+        await nodeA.ReleaseAsync(failed);
+        var next = await nodeB.IsDuplicateAsync(Request(action, RoomId));
+
+        suppressed.Should().BeTrue();
+        next.Should().BeFalse("nobody got the letter, and the mark is gone from the distributed level");
+    }
+
+    [Fact]
+    public async Task ReleaseANodeMissed_DoesNotHoldBackTheNextRequest()
+    {
+        var distributed = new HookedDistributedCache();
+        var locks = new InMemoryLockProvider();
+        var nodeA = CreateService(cache: CreateNodeCache(distributed), locks: locks);
+        var nodeB = CreateService(cache: CreateNodeCache(distributed), locks: locks);
+        var action = new TestAction("profile_delete");
+
+        var failed = Request(action, RoomId);
+        await nodeA.IsDuplicateAsync(failed);
+        var refused = await AcceptAsync(nodeB, action);
+        await nodeA.ReleaseAsync(failed);
+        var next = await AcceptAsync(nodeB, action);
+
+        refused.Should().BeFalse();
+        next.Should().BeTrue("nobody got the letter, and the mark is gone from the distributed level");
+    }
+
+    [Fact]
     public async Task AnotherAddress_IsAcceptedSeparately()
     {
         var service = CreateService();
