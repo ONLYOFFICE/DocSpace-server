@@ -36,148 +36,195 @@ namespace ASC.Notify.Tests.Deduplication;
 
 /// <summary>
 /// The sending code asks whether a letter is a repeat before it builds the letter, from values of its own
-/// (<c>StudioNotifyService.TryAccept*</c> and the methods that ask it themselves); the engine asks again when it
-/// sends the letter, from what the letter carries. Both have to arrive at the same key. Otherwise the API accepts
-/// a repeat the engine then drops, after a link, an audit record or an invitation has been spent on it, or keeps
-/// refusing a letter the engine has never seen.
+/// (<c>StudioNotifyService.TryAccept*</c> and the methods that ask it themselves); the engine marks the letter when it
+/// sends it, from what the letter carries. Both have to arrive at the same key. Otherwise the API accepts a repeat the
+/// engine then drops, after a link, an audit record or an invitation has been spent on it, or keeps refusing a letter
+/// the engine has never seen.
 ///
-/// Each case runs the sending code as production runs it, catches the letter on its way to the notify service and
-/// checks that the acceptance lies under the key the engine makes of that letter. How the engine turns a request
-/// into the key is covered by <c>NotifyDeduplicationServiceTests</c>; this class covers the six letters the API
-/// asks about first, whose two sides are written apart and can drift.
+/// Each case runs the sending code as production runs it and catches the letter on its way to the notify service; the
+/// call fails right after the letter left, so the acceptance is taken back. The letter then goes the way the notify
+/// service takes it: <c>StudioNotifyWorker</c> makes the request with the client <c>WorkContext</c> registers, and the
+/// request's interceptors run where the engine runs them before a channel sends. The repeat asked for afterwards can
+/// then be refused by nothing but the engine's mark. The engine's channels themselves do not run: the letter host is
+/// built but never started, so no sender is registered.
 /// </summary>
 public class RepeatAcceptKeyTests
 {
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task RoomInvite_IsAcceptedUnderTheEngineKey(bool isAgent)
+    public async Task RoomInvite_IsRefusedByTheEngineMark(bool isAgent)
     {
-        await AssertAcceptedUnderTheEngineKeyAsync(async (service, scope) =>
-        {
-            var email = UniqueEmail();
-            var roomId = $"folder_{Guid.NewGuid():N}";
+        var email = UniqueEmail();
+        var roomId = $"folder_{Guid.NewGuid():N}";
 
-            await using var acceptance = await service.TryAcceptEmailRoomInviteAsync(email, roomId, EmployeeType.User, isAgent);
-            acceptance.Accepted.Should().BeTrue();
+        await AssertTheEngineMarkRefusesTheRepeatAsync(
+            async (service, scope) =>
+            {
+                await using var acceptance = await service.TryAcceptEmailRoomInviteAsync(email, roomId, EmployeeType.User, isAgent);
+                acceptance.Accepted.Should().BeTrue();
 
-            await service.SendEmailRoomInviteAsync(email, roomId, "Room", scope.PortalUrl, EmployeeType.User, isAgent);
-            acceptance.Complete();
-        });
+                await service.SendEmailRoomInviteAsync(email, roomId, "Room", scope.PortalUrl, EmployeeType.User, isAgent);
+                acceptance.Complete();
+            },
+            async (service, _) =>
+            {
+                await using var acceptance = await service.TryAcceptEmailRoomInviteAsync(email, roomId, EmployeeType.User, isAgent);
+
+                return acceptance.Accepted;
+            });
     }
 
     [Fact]
-    public async Task DocSpaceInvite_IsAcceptedUnderTheEngineKey()
+    public async Task DocSpaceInvite_IsRefusedByTheEngineMark()
     {
-        await AssertAcceptedUnderTheEngineKeyAsync(async (service, scope) =>
-        {
-            var email = UniqueEmail();
+        var email = UniqueEmail();
 
-            await using var acceptance = await service.TryAcceptDocSpaceInviteAsync(email, EmployeeType.RoomAdmin);
-            acceptance.Accepted.Should().BeTrue();
+        await AssertTheEngineMarkRefusesTheRepeatAsync(
+            async (service, scope) =>
+            {
+                await using var acceptance = await service.TryAcceptDocSpaceInviteAsync(email, EmployeeType.RoomAdmin);
+                acceptance.Accepted.Should().BeTrue();
 
-            await service.SendDocSpaceInviteAsync(email, scope.PortalUrl, EmployeeType.RoomAdmin);
-            acceptance.Complete();
-        });
+                await service.SendDocSpaceInviteAsync(email, scope.PortalUrl, EmployeeType.RoomAdmin);
+                acceptance.Complete();
+            },
+            async (service, _) =>
+            {
+                await using var acceptance = await service.TryAcceptDocSpaceInviteAsync(email, EmployeeType.RoomAdmin);
+
+                return acceptance.Accepted;
+            });
     }
 
     [Fact]
-    public async Task EmailActivation_IsAcceptedUnderTheEngineKey()
+    public async Task EmailActivation_IsRefusedByTheEngineMark()
     {
-        await AssertAcceptedUnderTheEngineKeyAsync(async (service, scope) =>
-        {
-            (await service.SendEmailActivationInstructionsAsync(scope.Recipient, UniqueEmail())).Should().BeTrue();
-        });
+        var email = UniqueEmail();
+
+        await AssertTheEngineMarkRefusesTheRepeatAsync(
+            (service, scope) => service.SendEmailActivationInstructionsAsync(scope.Recipient, email),
+            (service, scope) => service.SendEmailActivationInstructionsAsync(scope.Recipient, email));
     }
 
     [Fact]
-    public async Task ProfileDeletion_IsAcceptedUnderTheEngineKey()
+    public async Task ProfileDeletion_IsRefusedByTheEngineMark()
     {
-        await AssertAcceptedUnderTheEngineKeyAsync(async (service, scope) =>
-        {
-            var user = (UserInfo)scope.Recipient.Clone();
-            user.Email = UniqueEmail();
+        var email = UniqueEmail();
 
-            (await service.SendMsgProfileDeletionAsync(user)).Should().BeTrue();
-        });
+        await AssertTheEngineMarkRefusesTheRepeatAsync(
+            (service, scope) => service.SendMsgProfileDeletionAsync(WithEmail(scope.Recipient, email)),
+            (service, scope) => service.SendMsgProfileDeletionAsync(WithEmail(scope.Recipient, email)));
     }
 
     [Fact]
-    public async Task PortalDeactivation_IsAcceptedUnderTheEngineKey()
+    public async Task PortalDeactivation_IsRefusedByTheEngineMark()
     {
-        await AssertAcceptedUnderTheEngineKeyAsync(async (service, scope) =>
-        {
-            await using var acceptance = await service.TryAcceptPortalDeactivationAsync(scope.Tenant);
-            acceptance.Accepted.Should().BeTrue();
+        await AssertTheEngineMarkRefusesTheRepeatAsync(
+            async (service, scope) =>
+            {
+                await using var acceptance = await service.TryAcceptPortalDeactivationAsync(scope.Tenant);
+                acceptance.Accepted.Should().BeTrue();
 
-            await service.SendMsgPortalDeactivationAsync(scope.Tenant, scope.PortalUrl, scope.PortalUrl);
-            acceptance.Complete();
-        });
+                await service.SendMsgPortalDeactivationAsync(scope.Tenant, scope.PortalUrl, scope.PortalUrl);
+                acceptance.Complete();
+            },
+            async (service, scope) =>
+            {
+                await using var acceptance = await service.TryAcceptPortalDeactivationAsync(scope.Tenant);
+
+                return acceptance.Accepted;
+            });
     }
 
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
-    public async Task PortalDeletion_IsAcceptedUnderTheEngineKey(bool checkActivation)
+    public async Task PortalDeletion_IsRefusedByTheEngineMark(bool checkActivation)
     {
         // The two ways differ in the recipient: the owner as a user, or the owner's address alone.
-        await AssertAcceptedUnderTheEngineKeyAsync(async (service, scope) =>
-        {
-            await using var acceptance = await service.TryAcceptPortalDeletionAsync(scope.Tenant, checkActivation);
-            acceptance.Accepted.Should().BeTrue();
+        await AssertTheEngineMarkRefusesTheRepeatAsync(
+            async (service, scope) =>
+            {
+                await using var acceptance = await service.TryAcceptPortalDeletionAsync(scope.Tenant, checkActivation);
+                acceptance.Accepted.Should().BeTrue();
 
-            await service.SendMsgPortalDeletionAsync(scope.Tenant, scope.PortalUrl, false, checkActivation);
-            acceptance.Complete();
-        });
+                await service.SendMsgPortalDeletionAsync(scope.Tenant, scope.PortalUrl, false, checkActivation);
+                acceptance.Complete();
+            },
+            async (service, scope) =>
+            {
+                await using var acceptance = await service.TryAcceptPortalDeletionAsync(scope.Tenant, checkActivation);
+
+                return acceptance.Accepted;
+            });
     }
 
-    private static async Task AssertAcceptedUnderTheEngineKeyAsync(Func<StudioNotifyService, LetterScope, Task> send)
+    private static async Task AssertTheEngineMarkRefusesTheRepeatAsync(
+        Func<StudioNotifyService, LetterScope, Task> send,
+        Func<StudioNotifyService, LetterScope, Task<bool>> askAgain)
     {
         var stack = await LetterStackFixture.CurrentAsync();
 
         using var scope = await LetterScope.OpenAsync(stack, CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
 
-        // The real sending code, publishing to a bus that keeps the letter instead of handing it to the notify service.
-        var bus = new RecordingEventBus();
+        // The real sending code, publishing to a bus that keeps the letter and then fails, as a broker could: the
+        // acceptance of the request is taken back, so it cannot be what refuses the repeat below.
+        var bus = new RecordingEventBus { FailAfterRecording = true };
         var helper = ActivatorUtilities.CreateInstance<StudioNotifyServiceHelper>(scope.Services, bus);
         var service = ActivatorUtilities.CreateInstance<StudioNotifyService>(scope.Services, helper);
 
-        await send(service, scope);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => send(service, scope));
+        bus.FailAfterRecording = false;
 
         var letter = bus.Published.OfType<NotifyItemIntegrationEvent>().Should().ContainSingle().Subject;
 
-        // The action as StudioNotifyWorker resolves it before handing the letter to the engine. The worker asks
-        // Type.GetType from ASC.Web.Core, which holds the actions, so the name is looked up there.
-        var actionType = typeof(StudioNotifyService).Assembly.GetType(letter.Action.NotifyActionType, throwOnError: true)!;
-        var action = (INotifyAction)scope.Services.GetRequiredService(actionType);
-        action.SuppressRepeats.Should().BeTrue($"{action.ID} is a letter the API asks about before it builds it");
+        await PassThroughTheEngineAsync(scope, letter);
 
-        letter.SenderNames.Should().NotBeEmpty();
-        letter.Recipients.Should().NotBeEmpty().And.OnlyContain(r => !r.IsGroup);
+        var accepted = await askAgain(service, scope);
 
-        var cache = scope.Services.GetRequiredService<IFusionCache>();
+        accepted.Should().BeFalse($"the engine marked {letter.Action.Id} under the key the sending code reads");
+    }
 
-        foreach (var sender in letter.SenderNames)
+    // What the notify service does with a letter up to the moment a channel would send it.
+    private static async Task PassThroughTheEngineAsync(LetterScope scope, NotifyItemIntegrationEvent letter)
+    {
+        await scope.Services.GetRequiredService<StudioNotifyWorker>().OnMessageAsync(letter);
+
+        var queue = scope.Services.GetRequiredService<ChannelReader<NotifyRequest>>();
+        var requests = new List<NotifyRequest>();
+
+        while (queue.TryRead(out var request))
         {
-            foreach (var recipient in letter.Recipients)
-            {
-                var key = EngineKey(letter, action, sender, recipient.Id);
-                var acceptance = await cache.TryGetAsync<bool>(NotifyDeduplicationService.GetAcceptedKey(key), token: TestContext.Current.CancellationToken);
-                var mark = await cache.TryGetAsync<bool>(key, token: TestContext.Current.CancellationToken);
+            requests.Add(request);
+        }
 
-                acceptance.HasValue.Should().BeTrue($"the API accepted {action.ID} for {recipient.Id} through {sender} beside the key the engine reads");
-                mark.HasValue.Should().BeFalse("the letter is only accepted, the engine has not sent it");
+        requests.Should().NotBeEmpty("StudioNotifyWorker queues a request for every recipient of the letter");
+
+        using var engineScope = scope.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+        foreach (var request in requests)
+        {
+            request._interceptors.Should().Contain(i => i is DuplicateMessageInterceptor, "the notify client WorkContext registers carries the repeat check");
+
+            foreach (var sender in request._senderNames)
+            {
+                // as NotifyEngine does for each channel before it hands the letter over
+                request.CurrentSender = sender;
+
+                var prevented = await request.Intercept(InterceptorPlace.MessageSend, engineScope);
+
+                prevented.Should().BeFalse("the first letter goes out, and the repeat check marks it");
             }
         }
     }
 
-    // What the engine keys a letter on once StudioNotifyWorker has made a request of it: the tenant, the action, the
-    // channel, the recipient, the object, and the values of the action's DeduplicationTags among the letter's tags.
-    private static string EngineKey(NotifyItemIntegrationEvent letter, INotifyAction action, string sender, string recipientId)
+    private static UserInfo WithEmail(UserInfo user, string email)
     {
-        var values = action.DeduplicationTags.Select(tag => letter.Tags.Find(t => t.Key == tag)?.Value);
+        var copy = (UserInfo)user.Clone();
+        copy.Email = email;
 
-        return NotifyDeduplicationService.GetCacheKey(letter.TenantId, action.ID, sender, recipientId, letter.ObjectId, values);
+        return copy;
     }
 
     private static string UniqueEmail()

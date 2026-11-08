@@ -54,15 +54,22 @@ public class SendSuspendInstructionsTests(
     }
 
     [Fact]
-    public async Task SendSuspendInstructions_SixTimesInARow_AreAllAccepted()
+    public async Task SendSuspendInstructions_SixTimesInARow_SendOneLetter()
     {
-        // The endpoint is not rate-limited: a repeated letter is held back where letters are sent, so a client may
-        // call it as often as it likes. The old limit refused the sixth call within fifteen minutes with 429.
+        // A repeat of a letter that already went out builds nothing: no link, no audit record, no letter. A letter is
+        // handed to the notify service inside the request, so the bus shows each one the calls built.
         await _webApiClient.Authenticate(Owner);
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
 
         for (var call = 0; call < 6; call++)
         {
             await _portalSettingsApi.SendSuspendInstructionsAsync(TestContext.Current.CancellationToken);
         }
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.PortalDeactivateNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("the first call sends the letter, and none of the five repeats builds another");
     }
 }

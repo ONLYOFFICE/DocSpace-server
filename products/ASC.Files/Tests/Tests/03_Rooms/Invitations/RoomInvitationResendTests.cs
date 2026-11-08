@@ -168,18 +168,26 @@ public class RoomInvitationResendTests(
     }
 
     [Fact]
-    public async Task ResendInvitations_SixTimesInARow_AreAllAccepted()
+    public async Task ResendInvitations_SixTimesInARow_SendOneLetter()
     {
-        // The endpoint is not rate-limited: a repeated letter is held back where letters are sent, so a client may
-        // call it as often as it likes. The old limit refused the sixth call within fifteen minutes with 429.
+        // The member was added by id, so no invitation letter went out before: the first resend sends one, and the
+        // five repeats build nothing - no link, no audit record, no letter. A letter is handed to the notify service
+        // inside the request, so the bus shows each one the calls built.
         await _filesClient.Authenticate(Owner);
         var (room, users) = await CreateRoomWithInvitedUsers(1);
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
 
         for (var call = 0; call < 6; call++)
         {
             await _roomsApi.ResendEmailInvitationsAsync(
                 room.Id, new UserInvitation(usersIds: [users[0].Id]), TestContext.Current.CancellationToken);
         }
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.SaasRoomInviteNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("the first resend sends the letter, and none of the five repeats builds another");
     }
 
     [Fact]

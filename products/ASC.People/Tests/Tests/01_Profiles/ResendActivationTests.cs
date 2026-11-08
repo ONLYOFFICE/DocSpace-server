@@ -72,11 +72,12 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task ResendUserInvites_SixTimesInARow_AreAllAccepted()
+    public async Task ResendUserInvites_SixTimesInARow_SendNoSecondLetter()
     {
-        // The endpoint is not rate-limited: a repeated letter is held back where letters are sent, so a client may
-        // call it as often as it likes. The old limit refused the sixth call within fifteen minutes with 429.
+        // A repeat of a letter that already went out builds nothing: no link, no audit record, no letter. A letter is
+        // handed to the notify service inside the request, so the bus shows each one the calls built.
         await _peopleClient.Authenticate(Owner);
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
 
         var email = Initializer.Faker.Internet.Email();
         var invited = await _profilesApi.InviteUsersAsync(new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]), TestContext.Current.CancellationToken);
@@ -88,6 +89,12 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
 
             resent.Response.Single().Id.Should().Be(invitedUserId);
         }
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.SaasDocSpaceInviteNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("the invitation went out once, and none of the six resends builds another");
     }
 
     [Fact]

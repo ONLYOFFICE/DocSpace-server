@@ -60,12 +60,13 @@ public class SendInstructionsToDeleteTests(AspireAppFixture fixture) : UserDataT
     }
 
     [Fact]
-    public async Task SendInstructionsToDelete_SixTimesInARow_AreAllAccepted()
+    public async Task SendInstructionsToDelete_SixTimesInARow_SendOneLetter()
     {
-        // The endpoint is not rate-limited: a repeated letter is held back where letters are sent, so a client may
-        // call it as often as it likes. The old limit refused the sixth call within fifteen minutes with 429.
+        // A repeat of a letter that already went out builds nothing: no link, no audit record, no letter. A letter is
+        // handed to the notify service inside the request, so the bus shows each one the calls built.
         var member = await InviteMember(EmployeeType.User);
         await _peopleClient.Authenticate(member);
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
 
         for (var call = 0; call < 6; call++)
         {
@@ -73,6 +74,12 @@ public class SendInstructionsToDeleteTests(AspireAppFixture fixture) : UserDataT
 
             result.Response.Should().Contain(member.Email);
         }
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.ProfileDeleteNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("the first call sends the letter, and none of the five repeats builds another");
     }
 
     [Fact]

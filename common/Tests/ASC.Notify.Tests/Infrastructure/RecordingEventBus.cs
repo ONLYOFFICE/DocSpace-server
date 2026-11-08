@@ -46,6 +46,9 @@ internal sealed class RecordingEventBus : IEventBus
     /// <summary>How many of the next publications fail, for a case about what a failure leaves behind.</summary>
     public int FailuresLeft { get; set; }
 
+    /// <summary>Whether a publication fails after the letter was kept, as when a broker drops the connection late.</summary>
+    public bool FailAfterRecording { get; set; }
+
     public Task PublishAsync(IntegrationEvent @event)
     {
         if (FailuresLeft > 0)
@@ -56,6 +59,11 @@ internal sealed class RecordingEventBus : IEventBus
         }
 
         Published.Add(@event);
+
+        if (FailAfterRecording)
+        {
+            throw new InvalidOperationException("Publishing failed after the letter left, as the case asked.");
+        }
 
         return Task.CompletedTask;
     }
