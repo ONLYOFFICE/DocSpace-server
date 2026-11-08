@@ -270,6 +270,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     {
         ValidateTableName(tableName);
         var dbType = DatabaseType;
+        columns = ToStoredColumns(tableName, columns, dbType, new HashSet<string>());
         await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
@@ -388,6 +389,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     {
         ValidateTableName(tableName);
         var dbType = DatabaseType;
+        renames = ToStoredRenames(renames, dbType);
+        columns = ToStoredColumns(tableName, columns, dbType, new HashSet<string>());
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         await using var connection = await CreateConnectionAsync(dbType);
@@ -458,6 +461,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         ValidateTableName(targetTable);
         ValidateTableName(sourceTable);
         var dbType = DatabaseType;
+        renames = ToStoredRenames(renames, dbType);
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         await using var connection = await CreateConnectionAsync(dbType);
@@ -824,6 +828,85 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     private static string ValidateColumnName(string name)
     {
         return _tableNameRegex.IsMatch(name) ? name : throw new ArgumentException($"Invalid column name: {name}", nameof(name));
+    }
+
+    /// <summary>
+    /// The column name as the database keeps it, to compare with the names it reports: PostgreSQL keeps 63 characters of
+    /// a name and cuts the rest without an error, MySQL 64.
+    /// </summary>
+    internal static string ToStoredColumnName(string name, ExternalDatabaseType dbType)
+    {
+        var maxLength = dbType switch
+        {
+            ExternalDatabaseType.PostgreSql => 63,
+            ExternalDatabaseType.MySql => 64,
+            _ => int.MaxValue
+        };
+
+        name = ValidateColumnName(name);
+        return name.Length > maxLength ? name[..maxLength] : name;
+    }
+
+    private static IReadOnlyCollection<(string OldName, string NewName)> ToStoredRenames(IEnumerable<(string OldName, string NewName)> renames, ExternalDatabaseType dbType)
+    {
+        return renames.Select(r => (ToStoredColumnName(r.OldName, dbType), ToStoredColumnName(r.NewName, dbType))).ToList();
+    }
+
+    /// <summary>The columns of the table as the database keeps them, the ones it would take for another column left out.</summary>
+    public List<DbColumnDefinition> GetStoredColumns(IEnumerable<DbColumnDefinition> columns) => ToStoredColumns(columns, DatabaseType, null);
+
+    // Quoted names are case sensitive in PostgreSQL only.
+    private static StringComparer GetColumnNameComparer(ExternalDatabaseType dbType) =>
+        dbType == ExternalDatabaseType.PostgreSql ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+
+    // Two fields whose names the database cuts to one would make one column: the first keeps it, the others are left out.
+    internal static List<DbColumnDefinition> ToStoredColumns(IEnumerable<DbColumnDefinition> columns, ExternalDatabaseType dbType, ISet<string>? leftOut)
+    {
+        var names = new HashSet<string>(GetColumnNameComparer(dbType));
+        var stored = new List<DbColumnDefinition>();
+        foreach (var column in columns)
+        {
+            var name = ToStoredColumnName(column.Name, dbType);
+            if (!names.Add(name))
+            {
+                leftOut?.Add(column.Name);
+                continue;
+            }
+
+            stored.Add(column with { Name = name });
+        }
+
+        return stored;
+    }
+
+    private List<DbColumnDefinition> ToStoredColumns(string tableName, IEnumerable<DbColumnDefinition> columns, ExternalDatabaseType dbType, ISet<string> leftOut)
+    {
+        var stored = ToStoredColumns(columns, dbType, leftOut);
+        foreach (var column in leftOut)
+        {
+            logger.WarnColumnNameTaken(tableName, column, ToStoredColumnName(column, dbType));
+        }
+
+        return stored;
+    }
+
+    /// <summary>
+    /// The values of a row under the column names the database keeps. The value of a field left out of the columns is
+    /// left out too, so the column keeps the values of the field it was made for; of other keys cut to one name the
+    /// first stays.
+    /// </summary>
+    internal static Dictionary<string, object> ToStoredRow(Dictionary<string, object> row, ExternalDatabaseType dbType, ISet<string>? leftOut = null)
+    {
+        var stored = new Dictionary<string, object>(GetColumnNameComparer(dbType));
+        foreach (var (name, value) in row)
+        {
+            if (leftOut?.Contains(name) != true)
+            {
+                stored.TryAdd(ToStoredColumnName(name, dbType), value);
+            }
+        }
+
+        return stored;
     }
 
     private static async Task ExecuteAsync(DbConnection connection, DbTransaction? tx, IEnumerable<string> statements)
@@ -1765,6 +1848,9 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         ValidateTableName(tableName);
 
         var dbType = DatabaseType;
+        var leftOut = new HashSet<string>();
+        columns = ToStoredColumns(tableName, columns, dbType, leftOut);
+        rows = rows.Select(r => ToStoredRow(r, dbType, leftOut)).ToList();
         await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
@@ -1898,6 +1984,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 throw new ArgumentException("Data dictionary is empty.", nameof(data));
             }
             var dbType = DatabaseType;
+            data = ToStoredRow(data, dbType);
             await using var connection = await CreateConnectionAsync(dbType);
             await connection.OpenAsync();
             await SetupSqliteAsync(connection, dbType);
@@ -2003,6 +2090,9 @@ internal static partial class ExternalDatabaseClientLogger
 {
     [LoggerMessage(LogLevel.Error, "Insert into table {TableName} failed")]
     public static partial void ErrorInsertFailed(this ILogger<ExternalDatabaseClient> logger, Exception exception, string tableName);
+
+    [LoggerMessage(LogLevel.Warning, "Forms DB: column {column} of table {tableName} is left out, the database keeps its name as {storedName}, which another field took")]
+    public static partial void WarnColumnNameTaken(this ILogger<ExternalDatabaseClient> logger, string tableName, string column, string storedName);
 }
 
 public enum FormTableChange

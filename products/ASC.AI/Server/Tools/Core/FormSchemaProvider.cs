@@ -211,7 +211,8 @@ public class FormSchemaProvider(
 
             var client = externalDatabaseClient.IsEnabled() ? externalDatabaseClient : builtinFormsDatabaseClient;
             var rowCount = await client.CountAsync(tableName);
-            var columns = (await formFillingReportCreator.GetColumnDefinitionsAsync(file.Id, file.Version)).ToList();
+            // The columns as the table holds them: a field whose name the database cuts to another field's is not there.
+            var columns = client.GetStoredColumns(await formFillingReportCreator.GetColumnDefinitionsAsync(file.Id, file.Version));
             var inTable = FormFillingReportCreator.GetVersionsInTable(formFilling, file.Version);
             var apart = withVersionsApart ? await GetVersionsApartAsync(file, formFilling, inTable) : null;
 
