@@ -111,9 +111,18 @@ public class HttpStubTests
     {
         var stubUri = new Uri(url);
 
-        (await AnswersAsync(stubUri, IPAddress.Loopback, marker, TimeSpan.FromSeconds(10))).Should().BeTrue("the client under test reaches the stub over the loopback");
+        // One client for the test; each attempt bounds its own wait.
+        using var client = new HttpClient { Timeout = Timeout.InfiniteTimeSpan };
 
-        var addresses = (await Dns.GetHostAddressesAsync(Dns.GetHostName(), TestContext.Current.CancellationToken))
+        (await AnswersAsync(client, stubUri, IPAddress.Loopback, marker, TimeSpan.FromSeconds(10))).Should()
+            .BeTrue("the client under test reaches the stub over the loopback");
+
+        // The addresses of the interfaces themselves: a lookup of the host name fails on a host whose name resolves to
+        // nothing, before the test could skip.
+        var addresses = NetworkInterface.GetAllNetworkInterfaces()
+            .Where(networkInterface => networkInterface.OperationalStatus == OperationalStatus.Up)
+            .SelectMany(networkInterface => networkInterface.GetIPProperties().UnicastAddresses)
+            .Select(unicast => unicast.Address)
             .Where(address => address.AddressFamily == AddressFamily.InterNetwork && !IPAddress.IsLoopback(address))
             .ToList();
 
@@ -122,7 +131,8 @@ public class HttpStubTests
             Assert.Skip("The machine has no address on a network to try the stub on.");
         }
 
-        var attempts = await Task.WhenAll(addresses.Select(async address => (Address: address, Answered: await AnswersAsync(stubUri, address, marker, TimeSpan.FromSeconds(2)))));
+        var attempts = await Task.WhenAll(addresses.Select(async address =>
+            (Address: address, Answered: await AnswersAsync(client, stubUri, address, marker, TimeSpan.FromSeconds(2)))));
 
         attempts.Where(attempt => attempt.Answered).Select(attempt => attempt.Address).Should()
             .BeEmpty("the stub must not be reachable from the network");
@@ -130,21 +140,22 @@ public class HttpStubTests
 
     // A slow answer over the loopback is still an answer, so that wait is generous; over the network a timeout can only
     // make the stub look unreachable, so a short one does not make the test fail by itself.
-    private static async Task<bool> AnswersAsync(Uri stubUri, IPAddress address, string marker, TimeSpan timeout)
+    private static async Task<bool> AnswersAsync(HttpClient client, Uri stubUri, IPAddress address, string marker, TimeSpan timeout)
     {
         var target = new UriBuilder(stubUri) { Host = address.ToString(), Path = stubUri.AbsolutePath.TrimEnd('/') + "/probe" }.Uri;
 
-        using var client = new HttpClient { Timeout = timeout };
+        using var wait = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        wait.CancelAfter(timeout);
 
         try
         {
-            return await client.GetStringAsync(target, TestContext.Current.CancellationToken) == marker;
+            return await client.GetStringAsync(target, wait.Token) == marker;
         }
         catch (HttpRequestException)
         {
             return false;
         }
-        catch (TaskCanceledException) when (!TestContext.Current.CancellationToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (!TestContext.Current.CancellationToken.IsCancellationRequested)
         {
             return false;
         }

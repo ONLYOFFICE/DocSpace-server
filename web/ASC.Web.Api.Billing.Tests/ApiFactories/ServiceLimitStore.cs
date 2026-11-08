@@ -43,7 +43,8 @@ namespace ASC.Web.Api.Billing.Tests.ApiFactories;
 /// <remarks>
 /// It answers as <c>AccountingClient</c> documents the service: a missing limit is 404 on a read and 400
 /// "Service limit 'N' not found" on a change or a deletion; a second limit of the same scope, or for the same user, is
-/// 409; the reads that are asked for it carry the spending of the current period, all of it still available.
+/// 409; the list of the participants holds the limit in force for each of them, the switched-off ones left out; the
+/// reads that are asked for it carry the spending of the current period, all of it still available.
 /// </remarks>
 internal sealed class ServiceLimitStore
 {
@@ -270,7 +271,7 @@ internal sealed class ServiceLimitStore
         return PaymentServiceAnswer.Json(count.ToString(CultureInfo.InvariantCulture));
     }
 
-    // The limit of the portal comes with its spending when it is asked for; the list of the personal limits comes with it
+    // The limit of the portal comes with its spending when it is asked for; the list of the participants comes with it
     // unless it is asked not to, as accounting attaches it by default; the limit for every user never does.
     private PaymentServiceAnswer ByCustomer(int accountNumber, string group, string kind, NameValueCollection query)
     {
@@ -278,14 +279,7 @@ internal sealed class ServiceLimitStore
 
         if (kind == "participants")
         {
-            var withUsage = query["includeUsage"] != "false";
-            var custom = limits.Where(limit => (string?)limit["scope"] == Custom).Select(limit => WithUsage(limit, withUsage)).ToArray();
-
-            return PaymentServiceAnswer.Json(new JsonObject
-            {
-                ["collection"] = new JsonArray(custom),
-                ["totalQuantity"] = custom.Length
-            }.ToJsonString());
+            return Participants(limits, query);
         }
 
         var scope = kind == "total" ? "Total" : "Global";
@@ -294,6 +288,60 @@ internal sealed class ServiceLimitStore
         return found is null
             ? NotFound()
             : PaymentServiceAnswer.Json(WithUsage(found, kind == "total" && query["includeUsage"] == "true").ToJsonString());
+    }
+
+    // The limit in force for each participant, as AccountingClient documents the list: the personal one when it is
+    // switched on, or else the limit for every user, its ID repeated for each participant it applies to. A switched-off
+    // limit is not listed. Accounting knows the participants that have used the services; here, the ones that have ever
+    // had a personal limit. Newest limits first unless asked otherwise, then paged by offset and limit.
+    private static PaymentServiceAnswer Participants(List<JsonObject> limits, NameValueCollection query)
+    {
+        var personal = limits.Where(limit => (string?)limit["scope"] == Custom).ToList();
+        var forEveryUser = limits.FirstOrDefault(limit => (string?)limit["scope"] == "Global" && (bool)limit["enabled"]!);
+
+        var inForce = new List<JsonObject>();
+
+        foreach (var participant in personal.Select(limit => (string)limit["participant"]!).Distinct())
+        {
+            var own = personal.FirstOrDefault(limit => (string?)limit["participant"] == participant && (bool)limit["enabled"]!);
+
+            if (own is not null)
+            {
+                inForce.Add(own);
+            }
+            else if (forEveryUser is not null)
+            {
+                var shared = (JsonObject)forEveryUser.DeepClone();
+                shared["participant"] = participant;
+                inForce.Add(shared);
+            }
+        }
+
+        // A limit is created with the next id, so the id is the order of creation.
+        var ascending = query["orderType"] == "Ascending";
+        IEnumerable<JsonObject> ordered = query["orderBy"] == "Participant"
+            ? ascending
+                ? inForce.OrderBy(limit => (string)limit["participant"]!, StringComparer.Ordinal)
+                : inForce.OrderByDescending(limit => (string)limit["participant"]!, StringComparer.Ordinal)
+            : ascending
+                ? inForce.OrderBy(limit => (int)limit["id"]!).ThenBy(limit => (string)limit["participant"]!, StringComparer.Ordinal)
+                : inForce.OrderByDescending(limit => (int)limit["id"]!).ThenBy(limit => (string)limit["participant"]!, StringComparer.Ordinal);
+
+        var offset = int.TryParse(query["offset"], NumberStyles.None, CultureInfo.InvariantCulture, out var from) ? from : 0;
+        var page = ordered.Skip(offset);
+
+        if (int.TryParse(query["limit"], NumberStyles.None, CultureInfo.InvariantCulture, out var size))
+        {
+            page = page.Take(size);
+        }
+
+        var withUsage = query["includeUsage"] != "false";
+
+        return PaymentServiceAnswer.Json(new JsonObject
+        {
+            ["collection"] = new JsonArray([.. page.Select(limit => WithUsage(limit, withUsage))]),
+            ["totalQuantity"] = inForce.Count
+        }.ToJsonString());
     }
 
     private IEnumerable<JsonObject> OfAccount(int accountNumber, string group)

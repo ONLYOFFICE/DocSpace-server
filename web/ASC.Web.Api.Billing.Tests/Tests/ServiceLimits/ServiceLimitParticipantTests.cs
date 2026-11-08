@@ -36,7 +36,9 @@ namespace ASC.Web.Api.Billing.Tests.Tests.ServiceLimits;
 
 /// <summary>
 /// The personal spending limits set for many users at once (<c>PUT payment/servicelimit/participants</c>) and switched
-/// off all together (<c>PUT payment/servicelimit/participants/disable</c>), as the list of the personal limits shows them.
+/// off all together (<c>PUT payment/servicelimit/participants/disable</c>), as the list of the limits in force for each
+/// user shows them (<c>GET payment/servicelimit/participants</c>): a switched-off limit left out, the limit for every
+/// user in its place, one page at a time.
 /// </summary>
 public class ServiceLimitParticipantTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -112,11 +114,68 @@ public class ServiceLimitParticipantTests(AspireAppFixture fixture) : BaseTest(f
         // Assert
         disabled.Should().Be(2);
         disabledAgain.Should().Be(0, "a repeated call switches off nothing more");
-        (await ParticipantLimitsAsync()).Should().HaveCount(2).And.AllSatisfy(limit => limit.Enabled.Should().BeFalse());
+        (await ParticipantLimitsAsync()).Should().BeEmpty("a switched-off limit is kept but no longer listed");
 
         var portalLimit = (await _paymentApi.GetTotalServiceLimitAsync(TestContext.Current.CancellationToken)).Response;
         portalLimit.Id.Should().Be(total.Id);
         portalLimit.Enabled.Should().BeTrue("the limit of the portal as a whole is no personal limit");
+    }
+
+    [Fact]
+    public async Task DisableParticipantServiceLimits_LimitForEveryUserSet_ListsThatOneForEachUser()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Balance(10m);
+        var first = await InviteMember(EmployeeType.User);
+        var second = await InviteMember(EmployeeType.User);
+        await _paymentApi.SetParticipantServiceLimitsAsync(
+            new SetParticipantServiceLimitsRequestDto([first.Id, second.Id], amountValue: 5, period: ServiceLimitPeriod.Day),
+            TestContext.Current.CancellationToken);
+        var forEveryUser = (await _paymentApi.CreateServiceLimitAsync(
+            new CreateServiceLimitRequestDto(ServiceLimitScope.Global, amountValue: 20, period: ServiceLimitPeriod.Week),
+            TestContext.Current.CancellationToken)).Response;
+
+        // Act
+        await _paymentApi.DisableParticipantServiceLimitsAsync(TestContext.Current.CancellationToken);
+
+        // Assert: with their own limits off, the limit for every user is the one in force for each of them.
+        var limits = await ParticipantLimitsAsync();
+        limits.Select(limit => limit.UserId).Should().BeEquivalentTo([first.Id, second.Id]);
+        limits.Should().AllSatisfy(limit =>
+        {
+            limit.Id.Should().Be(forEveryUser.Id);
+            limit.Scope.Should().Be(ServiceLimitScope.Global);
+            limit.AmountValue.Should().Be(20);
+        });
+    }
+
+    [Fact]
+    public async Task GetParticipantServiceLimits_PagedByUser_SplitsTheListAndCountsItWhole()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Balance(10m);
+        var users = new List<Guid>();
+        for (var i = 0; i < 3; i++)
+        {
+            users.Add((await InviteMember(EmployeeType.User)).Id);
+        }
+
+        await _paymentApi.SetParticipantServiceLimitsAsync(
+            new SetParticipantServiceLimitsRequestDto(users, amountValue: 5, period: ServiceLimitPeriod.Day),
+            TestContext.Current.CancellationToken);
+
+        // Act
+        var firstPage = (await _paymentApi.GetParticipantServiceLimitsAsync(0, 2, ServiceLimitOrderBy.Participant, OperationOrderType.Ascending,
+            TestContext.Current.CancellationToken)).Response;
+        var secondPage = (await _paymentApi.GetParticipantServiceLimitsAsync(2, 2, ServiceLimitOrderBy.Participant, OperationOrderType.Ascending,
+            TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        var expected = users.Select(user => user.ToString()).Order(StringComparer.Ordinal).Select(Guid.Parse).ToList();
+        firstPage.TotalQuantity.Should().Be(3);
+        secondPage.TotalQuantity.Should().Be(3);
+        firstPage.Collection.Select(limit => limit.UserId).Should().Equal(expected[0], expected[1]);
+        secondPage.Collection.Select(limit => limit.UserId).Should().Equal(expected[2]);
     }
 
     private async Task<List<ServiceLimitDto>> ParticipantLimitsAsync()

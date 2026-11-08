@@ -753,16 +753,22 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // Teardown is a large, easily-overlooked share of a run's wall clock — it is Aspire/DCP
         // stopping every project process, and one service that ignores its shutdown token holds up
         // all of them. Measured separately so a regression there is visible instead of invisible.
-        await Timing.Measure("teardown.stop", async () => await _app.StopAsync());
-        await Timing.Measure("teardown.dispose", async () => await _app.DisposeAsync());
-
         try
         {
-            await OnStoppedAsync();
+            await Timing.Measure("teardown.stop", async () => await _app.StopAsync());
+            await Timing.Measure("teardown.dispose", async () => await _app.DisposeAsync());
         }
-        catch (Exception ex)
+        finally
         {
-            await Console.Error.WriteLineAsync($"OnStoppedAsync failed for {GetType().Name}: {ex}");
+            // Also when stopping the stack fails: a stub left running would hold its fixed port until the process ends.
+            try
+            {
+                await OnStoppedAsync();
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync($"OnStoppedAsync failed for {GetType().Name}: {ex}");
+            }
         }
 
         _sharedHandler.Dispose();

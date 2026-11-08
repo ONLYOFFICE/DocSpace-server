@@ -36,12 +36,19 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Wallet;
 
 /// <summary>
 /// The other side of <see cref="WalletPayerPermissionsTests"/>: the payer is let through every wallet operation - the
-/// owner who pays, and a member who pays for a portal somebody else owns - so the refusals there come from the role and
-/// not from a refusal of everybody; and an owner who does not pay is refused like any other caller.
+/// owner who pays, and a member who pays for a portal somebody else owns, whatever the member's role - so the refusals
+/// there come from the role and not from a refusal of everybody; attaching a payment method asks for a DocSpace
+/// administrator as well, so a payer below one is refused it; and an owner who does not pay is refused like any other
+/// caller.
 /// </summary>
 public class WalletPermissionsControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
     public static TheoryData<string> PayerOperations => [.. WalletPayerOperations];
+
+    public static TheoryData<string, EmployeeType> PayerOnlyOperationsByPayersBelowAdministrator =>
+        Matrix([.. WalletPayerOperations.Where(operation => operation != PayerAndAdministratorOperation)], PayersBelowAdministrator);
+
+    public static TheoryData<EmployeeType> PayerRolesBelowAdministrator => [.. PayersBelowAdministrator];
 
     [Theory]
     [MemberData(nameof(PayerOperations))]
@@ -55,6 +62,20 @@ public class WalletPermissionsControlTests(AspireAppFixture fixture) : PaymentPe
     public async Task WalletOperation_MemberWhoIsThePayer_IsNotRefused(string operation)
     {
         await AssertPayerNotRefusedAsync(operation);
+    }
+
+    [Theory]
+    [MemberData(nameof(PayerOnlyOperationsByPayersBelowAdministrator))]
+    public async Task PayerOnlyOperation_PayerBelowAdministrator_IsNotRefused(string operation, EmployeeType role)
+    {
+        await AssertPayerNotRefusedAsync(operation, role);
+    }
+
+    [Theory]
+    [MemberData(nameof(PayerRolesBelowAdministrator))]
+    public async Task CheckoutSetupUrl_PayerBelowAdministrator_ThrowsForbidden(EmployeeType role)
+    {
+        await AssertPayerForbiddenAsync(PayerAndAdministratorOperation, role);
     }
 
     [Theory]

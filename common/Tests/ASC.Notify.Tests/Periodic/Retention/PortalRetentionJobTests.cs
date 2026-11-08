@@ -737,16 +737,18 @@ public class PortalRetentionJobTests
 
         await using var accountingServices = accounting;
 
-        var job = CreateJob(scope, logger, new Dictionary<string, string?> { ["balanceTimeoutSeconds"] = "1" }, tariffService);
+        // Three seconds, not one: on a busy machine the request may take a while to reach the stub, and the test checks
+        // that it did.
+        var job = CreateJob(scope, logger, new Dictionary<string, string?> { ["balanceTimeoutSeconds"] = "3" }, tariffService);
         var waited = Stopwatch.StartNew();
 
         var leaveAlone = await job.ApplyAsync(PeriodicLetterContexts.Free(InMemoryTenant(scope), _today, _today.AddDays(-30)), _policyStart, client, _senderName);
 
-        waited.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(15), "the request is cut off after the configured second, not the client's minute");
+        waited.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(15), "the request is cut off after the configured seconds, not the client's minute");
         // The wait is the request that hung, not a failure before it was sent: accounting was asked once, and the job
-        // gave up on it no sooner than the configured second.
+        // gave up on it no sooner than the configured seconds.
         stub.Asked.Should().Be(1);
-        waited.Elapsed.Should().BeGreaterThanOrEqualTo(TimeSpan.FromSeconds(0.9));
+        waited.Elapsed.Should().BeGreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9));
         leaveAlone.Should().BeFalse();
         logger.Messages.Should().ContainSingle(m => m.Contains("the wallet balance could not be read"));
         client.Sent.Should().BeEmpty("not knowing which schedule applies, the portal waits for the next run");

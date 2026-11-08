@@ -72,12 +72,21 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         PayerOrOwnerOperation
     ];
 
+    /// <summary>
+    /// The one payer operation that also asks for a DocSpace administrator (attaching a payment method): a payer with a
+    /// role below is refused it, while the other payer operations look at the payer alone.
+    /// </summary>
+    protected const string PayerAndAdministratorOperation = "GET payment/checkoutsetupurl";
+
+    /// <summary>The roles below a DocSpace administrator a member who pays for the portal may have.</summary>
+    protected static EmployeeType[] PayersBelowAdministrator => [EmployeeType.RoomAdmin, EmployeeType.User];
+
     /// <summary>The wallet as the payer keeps it: topping it up, its automatic top-up, attaching a payment method.</summary>
     protected static string[] WalletPayerOperations =>
     [
         "POST payment/deposit",
         "POST payment/topupsettings",
-        "GET payment/checkoutsetupurl"
+        PayerAndAdministratorOperation
     ];
 
     /// <summary>Buying a plan: the checkout address.</summary>
@@ -276,17 +285,32 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
     }
 
     /// <summary>
-    /// A DocSpace administrator who is not the owner but pays for the portal sends <paramref name="operation"/> and is
-    /// not refused for who it is: the guard is the payer, not the owner who usually is one.
+    /// A member of <paramref name="role"/> - a DocSpace administrator unless said otherwise - who is not the owner but
+    /// pays for the portal sends <paramref name="operation"/> and is not refused for who it is: the guard is the payer,
+    /// not the owner who usually is one, nor an administrator.
     /// </summary>
-    protected async Task AssertPayerNotRefusedAsync(string operation)
+    protected async Task AssertPayerNotRefusedAsync(string operation, EmployeeType role = EmployeeType.DocSpaceAdmin)
     {
-        var payer = await InviteMember(EmployeeType.DocSpaceAdmin);
+        var payer = await InviteMember(role);
 
         await ArrangeAsync(operation, payer.Email);
         await _webApiClient.Authenticate(payer);
 
-        await AssertNotRefusedAsync(operation, $"the payer may call {operation}, whoever owns the portal");
+        await AssertNotRefusedAsync(operation, $"the payer may call {operation}, whoever owns the portal and whatever the payer's role");
+    }
+
+    /// <summary>
+    /// A member of <paramref name="role"/> who pays for the portal sends <paramref name="operation"/>, which asks for a
+    /// DocSpace administrator as well, and is refused with 403 "Access denied".
+    /// </summary>
+    protected async Task AssertPayerForbiddenAsync(string operation, EmployeeType role)
+    {
+        var payer = await InviteMember(role);
+
+        await ArrangeAsync(operation, payer.Email);
+        await _webApiClient.Authenticate(payer);
+
+        await AssertRefusedAsync(operation, $"{operation} asks for a DocSpace administrator as well as the payer, and {role} is none");
     }
 
     /// <summary>
@@ -326,8 +350,9 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         await AssertRefusedAsync(operation, $"{role} may not call {operation}");
     }
 
-    // The portal is a customer whose payer has the e-mail payerEmail, with a wallet; an operation on the spending limits
-    // also gets a limit to work on, created by the owner.
+    // The portal is a customer whose payer has the e-mail payerEmail, with a wallet. An operation on the spending limits
+    // also gets limits to work on, created by the owner: the one of the portal, which it reads, changes and deletes, and a
+    // personal one switched on, which the participant operations replace or switch off.
     private async Task ArrangeAsync(string operation, string payerEmail)
     {
         Payments.Customer(payerEmail).Balance(100m);
@@ -339,6 +364,10 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
             _serviceLimitId = (await _paymentApi.CreateServiceLimitAsync(
                 new CreateServiceLimitRequestDto(ServiceLimitScope.Total, amountValue: 50, period: ServiceLimitPeriod.Day),
                 TestContext.Current.CancellationToken)).Response.Id;
+
+            await _paymentApi.CreateServiceLimitAsync(
+                new CreateServiceLimitRequestDto(ServiceLimitScope.Custom, userId: Owner.Id, amountValue: 5, period: ServiceLimitPeriod.Day),
+                TestContext.Current.CancellationToken);
         }
     }
 
@@ -359,6 +388,14 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
     private async Task AssertRefusedAsync(string operation, string because)
     {
         var limitsBefore = PaymentServices.ServiceLimitsOf(Payments.AccountNumber);
+
+        if (operation.Contains("servicelimit", StringComparison.Ordinal))
+        {
+            // An equal snapshot proves nothing about a refused change when there was nothing it could have changed.
+            JsonNode.Parse(limitsBefore)!.AsArray().Should()
+                .Contain(limit => (string?)limit!["scope"] == "Total")
+                .And.Contain(limit => (string?)limit!["scope"] == "Custom" && (bool)limit!["enabled"]!);
+        }
 
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _requests[operation](this, TestContext.Current.CancellationToken));

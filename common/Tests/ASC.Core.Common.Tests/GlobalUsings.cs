@@ -35,6 +35,7 @@ global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Net;
+global using System.Net.NetworkInformation;
 global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Security.Cryptography;

@@ -36,13 +36,16 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Checkout;
 
 /// <summary>
 /// The other side of <see cref="SubscriptionPayerPermissionsTests"/>: the payer is let through every subscription
-/// operation - the owner who pays, and a member who pays for a portal somebody else owns - so the refusals there come
-/// from the role and not from a refusal of everybody; and an owner who does not pay is refused like any other caller,
-/// except on the billing account page, which the owner may always open.
+/// operation - the owner who pays, and a member who pays for a portal somebody else owns, whatever the member's role -
+/// so the refusals there come from the role and not from a refusal of everybody; and an owner who does not pay is
+/// refused like any other caller, except on the billing account page, which the owner may always open.
 /// </summary>
 public class SubscriptionPermissionsControlTests(AspireAppFixture fixture) : PaymentPermissionsTestBase(fixture)
 {
     public static TheoryData<string> PayerOperations => [.. SubscriptionPayerOperations];
+
+    public static TheoryData<string, EmployeeType> PayerOperationsByPayersBelowAdministrator =>
+        Matrix(SubscriptionPayerOperations, PayersBelowAdministrator);
 
     public static TheoryData<string> PayerOnlyOperations => [.. SubscriptionPayerOperations.Where(operation => operation != PayerOrOwnerOperation)];
 
@@ -58,6 +61,13 @@ public class SubscriptionPermissionsControlTests(AspireAppFixture fixture) : Pay
     public async Task SubscriptionOperation_MemberWhoIsThePayer_IsNotRefused(string operation)
     {
         await AssertPayerNotRefusedAsync(operation);
+    }
+
+    [Theory]
+    [MemberData(nameof(PayerOperationsByPayersBelowAdministrator))]
+    public async Task SubscriptionOperation_PayerBelowAdministrator_IsNotRefused(string operation, EmployeeType role)
+    {
+        await AssertPayerNotRefusedAsync(operation, role);
     }
 
     [Theory]
