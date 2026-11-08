@@ -39,19 +39,20 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public class BuiltinDbConnectionDto
 {
     /// <summary>
-    /// The database server host.
+    /// Host of the PostgreSQL server, as the DocSpace server reaches it; a name inside the server's own network may need
+    /// a route or a tunnel from outside. Empty when the server's connection has no host.
     /// </summary>
     /// <example>db.example.com</example>
     public string Host { get; set; }
 
     /// <summary>
-    /// The database server port.
+    /// Port of the PostgreSQL server, as the DocSpace server reaches it.
     /// </summary>
     /// <example>5432</example>
     public int Port { get; set; }
 
     /// <summary>
-    /// The database name.
+    /// The PostgreSQL database that holds the schemas of all portals; this portal's tables are in its own schema there.
     /// </summary>
     /// <example>formsdb</example>
     public string Database { get; set; }
@@ -63,15 +64,17 @@ public class BuiltinDbConnectionDto
     public string User { get; set; }
 
     /// <summary>
-    /// The read-only user password.
+    /// Password of the read-only account. It changes when the account has to be set up again; ask for the details again
+    /// when it stops signing in.
     /// </summary>
-    /// <example>xK9mR2pL...</example>
+    /// <example>Qp7vT2k9LmXa</example>
     public string Password { get; set; }
 
     /// <summary>
-    /// The full PostgreSQL connection string with read-only access restricted to this portal's schema.
+    /// The same details as an Npgsql connection string, with the portal's schema as the search path so that tables are
+    /// found by their names alone.
     /// </summary>
-    /// <example>Host=db.example.com;Port=5432;Database=formsdb;Username=forms_t42_ro;Password=xK9mR2pL...</example>
+    /// <example>Host=db.example.com;Port=5432;Database=formsdb;Username=forms_t42_ro;Password=Qp7vT2k9LmXa;Search Path=tenant_42;Timezone=UTC;Maximum Pool Size=5;Connection Idle Lifetime=60</example>
     public string ConnectionString { get; set; }
 }
 

@@ -46,14 +46,16 @@ public class FormsDatabaseController(
     /// database, which stores the submissions of every form filling room while the portal has no external database
     /// configured, whatever the room's send-to-database setting. The server must have the built-in forms database configured,
     /// otherwise the call is refused with 403. Only a portal administrator who can change portal settings may call
-    /// it. The first call for a portal creates its schema and database accounts; every later call returns the same
-    /// credentials, so the call is safe to repeat. The answer carries the host, port, database name, the read-only
-    /// user and its password, and a ready connection string. That account can only read the tables of this
-    /// portal's schema: one table per form version, named `form_{formId}_v{version}`, with one row per completed
-    /// form. The operation does not configure an external database; that is done in the portal settings.
+    /// it. The first call for a portal creates its schema and database accounts; a later call returns the same
+    /// credentials while they still sign in, and sets new passwords when they do not (the schema was lost, or the stored
+    /// passwords cannot be read after a move to another server), so the call is safe to repeat. The read-only account
+    /// can only read the tables of this portal's schema, with one row per completed form: a table named
+    /// `form_{formId}_v{version}` after the first version it holds, shared by later versions that only renamed fields.
+    /// A table nobody submitted to or analysed for a long time may be dropped and is restored from the search index on
+    /// its next use. The operation does not configure an external database; that is done in the portal settings.
     /// </remarks>
     /// <summary>Get built-in forms database connection</summary>
-    /// <path>api/2.0/files/builtindb/connectionstring</path>
+    /// <path>api/2.0/files/builtinDb/connectionString</path>
     [Tags("Files / Built-in Database")]
     [SwaggerResponse(200, "Read-only connection details for the portal's schema in the built-in forms database", typeof(BuiltinDbConnectionDto))]
     [SwaggerResponse(403, "The caller cannot change portal settings, or the server has no built-in forms database configured")]

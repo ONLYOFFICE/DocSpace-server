@@ -1226,7 +1226,7 @@ public class FileStorageService //: IFileStorageService
             if (indexing == true || lifetime is { Enabled: not false } || watermark is { Enabled: not false })
             {
                 throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
-        }
+            }
         }
 
         var tenantId = tenantManager.GetCurrentTenantId();
@@ -5477,7 +5477,7 @@ public class FileStorageService //: IFileStorageService
             else
             {
                 skipped.Add(k.UserId);
-        }
+            }
         }
 
         if (accepted.Count != 0)
@@ -5485,7 +5485,7 @@ public class FileStorageService //: IFileStorageService
             await fileDao.SetFileKey(fileId, accepted);
 
             await filesMessageService.SendAsync(MessageAction.FileKeysSet, file, file.Title, string.Join(", ", accepted.Select(k => k.UserId).Distinct()));
-    }
+        }
 
         return skipped;
     }
@@ -5533,7 +5533,7 @@ public class FileStorageService //: IFileStorageService
                     (await DocSpaceHelper.GetEncryptedFilesWithoutKeyAsync(daoFactory.GetFileDao<T>(), folder.Id, userId)).Count != 0)
                 {
                     throw new CustomHttpException(HttpStatusCode.Conflict, "The new owner holds no key for some encrypted files of the room");
-            }
+                }
             }
 
             var newFolder = folder;
