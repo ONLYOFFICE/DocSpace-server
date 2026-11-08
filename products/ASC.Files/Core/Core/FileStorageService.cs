@@ -4450,6 +4450,11 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    /// <summary>
+    /// Answers with the primary external link of an entry, creating it when the entry has none. An explicitly
+    /// revoked primary link is created again only when <c>recreateRevoked</c> is set: a read leaves it unset and
+    /// reports the revoked link as missing instead of resurrecting it, an explicit create request sets it.
+    /// </summary>
     public async Task<AceWrapper> GetPrimaryExternalLinkAsync<T>(
         T entryId,
         FileEntryType entryType,
@@ -4459,7 +4464,8 @@ public class FileStorageService //: IFileStorageService
         bool denyDownload = false,
         bool? requiredAuth = null,
         string password = null,
-        bool allowUnlimitedDate = false)
+        bool allowUnlimitedDate = false,
+        bool recreateRevoked = false)
     {
         await DemandAuthenticatedOrLinkAsync();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -4491,9 +4497,10 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
-            // An explicitly revoked primary link stays revoked: reading it reports 404 instead of
-            // silently resurrecting the link. Entries that never had one keep the lazy creation.
-            var revoked = await daoFactory.GetTagDao<T>()
+            // An explicitly revoked primary link stays revoked for a read: it reports 404 instead of
+            // silently resurrecting the link. Entries that never had one keep the lazy creation, and an
+            // explicit create request makes a new link, which also clears the revocation mark.
+            var revoked = !recreateRevoked && await daoFactory.GetTagDao<T>()
                 .GetTagsAsync([TagType.PrimaryLinkRevoked], [entry])
                 .AnyAsync();
 

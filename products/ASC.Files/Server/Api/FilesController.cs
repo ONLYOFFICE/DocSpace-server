@@ -876,8 +876,9 @@ public abstract class FilesController<T>(
     /// `internal` whether only signed-in members may follow it, `denyDownload` whether the content may only be
     /// viewed, and `password` a secret to be asked for. A PDF form gets the rights it needs for filling out whatever
     /// was asked for, and a form in a form-filling room is answered with the link of the room instead. The caller
-    /// needs the right to share the file and is otherwise refused with 403; a link that was deliberately revoked is
-    /// not recreated but answered with 404. Read the address from `sharedTo.shareLink`.
+    /// needs the right to share the file and is otherwise refused with 403. A primary link that was revoked is
+    /// created anew by this call, with a new identifier, while `GET api/2.0/files/file/{id}/link` keeps answering
+    /// such a link with 404. Read the address from `sharedTo.shareLink`.
     /// </remarks>
     /// <summary>
     /// Create the file primary external link
@@ -887,7 +888,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
     [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
     [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms")]
-    [SwaggerResponse(404, "The file does not exist, or its primary link was revoked")]
+    [SwaggerResponse(404, "The file does not exist")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
     {
@@ -899,7 +900,8 @@ public abstract class FilesController<T>(
             requiredAuth: inDto.File.Internal,
             allowUnlimitedDate: true,
             denyDownload: inDto.File.DenyDownload,
-            password: inDto.File.Password);
+            password: inDto.File.Password,
+            recreateRevoked: true);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
