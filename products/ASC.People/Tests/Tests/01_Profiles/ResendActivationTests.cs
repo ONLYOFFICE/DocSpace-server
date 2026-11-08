@@ -74,8 +74,9 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task ResendUserInvites_SixTimesInARow_SendNoSecondLetter()
     {
-        // A repeat of a letter that already went out builds nothing: no link, no audit record, no letter. A letter is
-        // handed to the notify service inside the request, so the bus shows each one the calls built.
+        // A repeat builds nothing: no link, no audit record, no letter. In this stack no notify service marks letters,
+        // so the repeats are held back by the acceptance the first call records; the engine's mark is covered by
+        // RepeatAcceptKeyTests. A letter is handed to the notify service inside the request, so the bus shows each one.
         await _peopleClient.Authenticate(Owner);
         await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
 
@@ -154,6 +155,28 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
         await _profilesApi.ResendUserInvitesAsync(new UpdateMembersRequestDto([invitedUserId]), TestContext.Current.CancellationToken);
 
         (await GetLastModifiedAsync(invitedUserId)).Should().Be(setBack);
+    }
+
+    [Fact]
+    public async Task InviteUsers_AgainAfterThePendingProfileWasDeleted_SendNoSecondLetter()
+    {
+        // The second invitation of the address creates a new pending profile, but the letter it would send is the one
+        // that just went out, and its link still opens.
+        await _peopleClient.Authenticate(Owner);
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
+
+        var email = Initializer.Faker.Internet.Email();
+        var invited = await _profilesApi.InviteUsersAsync(new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]), TestContext.Current.CancellationToken);
+        var invitedUserId = invited.Response.Single(u => u.DisplayName == email).Id;
+        await TerminateUser(new User(email, string.Empty) { Id = invitedUserId });
+        await _profilesApi.DeleteMemberAsync(invitedUserId.ToString(), TestContext.Current.CancellationToken);
+        await _profilesApi.InviteUsersAsync(new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]), TestContext.Current.CancellationToken);
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.SaasDocSpaceInviteNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("the second invitation asks for the letter that just went out");
     }
 
     [Fact]

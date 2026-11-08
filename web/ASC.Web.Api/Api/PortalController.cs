@@ -1320,8 +1320,11 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Sends the instructions to remove a portal of a user with the ID specified in the request. A repeat shortly after
-    /// the letter went out sends nothing, and the link of that letter stays valid.
+    /// Mails the portal owner the confirmation link that removes this portal; nothing about the portal changes until
+    /// that link is used. The call needs no authentication token: it works only on a server installation, for the
+    /// portal owner's ID, with a key issued for that ID and the removal, valid for an hour - anything else answers
+    /// 403. The letter goes to the owner's address as it is, without waiting for the address to be activated. A repeat
+    /// shortly after the letter went out sends nothing, and the link of that letter stays valid.
     /// </remarks>
     /// <summary>Send removal instructions to the user</summary>
     /// <path>api/2.0/portal/sendremoveinstructions</path>

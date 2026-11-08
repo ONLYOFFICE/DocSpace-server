@@ -56,8 +56,9 @@ public class SendDeleteInstructionsTests(
     [Fact]
     public async Task SendDeleteInstructions_SixTimesInARow_SendOneLetter()
     {
-        // A repeat of a letter that already went out builds nothing: no link, no audit record, no letter. A letter is
-        // handed to the notify service inside the request, so the bus shows each one the calls built.
+        // A repeat builds nothing: no link, no audit record, no letter. In this stack no notify service marks letters,
+        // so the repeats are held back by the acceptance the first call records; the engine's mark is covered by
+        // RepeatAcceptKeyTests. A letter is handed to the notify service inside the request, so the bus shows each one.
         await _webApiClient.Authenticate(Owner);
         await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
 

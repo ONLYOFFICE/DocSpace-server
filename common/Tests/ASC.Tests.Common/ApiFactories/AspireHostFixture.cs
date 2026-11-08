@@ -444,7 +444,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     /// <summary>
     /// An open connection to the stack's database, for a test that has to plant a row no API call
-    /// writes any more — data left behind by an older release that the current code must still read.
+    /// writes any more — data left behind by an older release that the current code must still read —
+    /// or to set or read a value the API does not expose; such a test says why next to the query.
     /// </summary>
     public async Task<MySqlConnection> OpenDatabaseAsync(CancellationToken cancellationToken = default)
     {

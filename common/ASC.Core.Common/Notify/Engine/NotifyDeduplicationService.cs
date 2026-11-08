@@ -74,11 +74,19 @@ public class NotifyDeduplicationService(
             ? accepted
             : _defaultAcceptedPeriod;
 
-    // An invitation link expires this long after it is first opened. Suppressing a resend for longer could leave
-    // the recipient holding only an expired link, so no period may outlast it.
-    private readonly TimeSpan _maxPeriod = EmailValidationKeyProvider.GetValidVisitLinkInterval(configuration);
+    // The links these letters carry expire: an invitation this long after it is first opened, every confirmation link
+    // this long after it was made. Suppressing a resend for longer could leave the recipient holding only an expired
+    // link, so no period may outlast either.
+    private readonly TimeSpan _maxPeriod = Min(
+        EmailValidationKeyProvider.GetValidVisitLinkInterval(configuration),
+        EmailValidationKeyProvider.GetValidEmailKeyInterval(configuration));
 
     private TimeSpan Period => _period > _maxPeriod ? _maxPeriod : _period;
+
+    private static TimeSpan Min(TimeSpan first, TimeSpan second)
+    {
+        return first < second ? first : second;
+    }
 
     private TimeSpan AcceptedPeriod => _acceptedPeriod > Period ? Period : _acceptedPeriod;
 

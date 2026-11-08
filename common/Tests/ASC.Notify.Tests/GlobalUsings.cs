@@ -59,6 +59,7 @@ global using ASC.Core.Users;
 global using ASC.Data.Backup;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
+global using ASC.EventBus.Serializers;
 global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Services.NotifyService;

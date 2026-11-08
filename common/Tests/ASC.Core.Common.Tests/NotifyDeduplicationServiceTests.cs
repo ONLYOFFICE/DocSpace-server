@@ -246,6 +246,21 @@ public class NotifyDeduplicationServiceTests
     }
 
     [Fact]
+    public async Task PeriodLongerThanTheConfirmationLinks_IsCappedByThem()
+    {
+        // An hour configured, confirmation links valid for a second: the link of the letter sent is dead after a second,
+        // so a repeat may not stay suppressed for longer than that.
+        var service = CreateService(period: "01:00:00", emailInterval: "00:00:01");
+        var action = new TestAction("portal_deactivate");
+
+        await service.IsDuplicateAsync(Request(action, null));
+        await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
+        var afterTheLinkExpired = await service.IsDuplicateAsync(Request(action, null));
+
+        afterTheLinkExpired.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task LetterTheChannelFailedToDeliver_DoesNotHoldBackTheRepeat()
     {
         var service = CreateService();
@@ -305,13 +320,14 @@ public class NotifyDeduplicationServiceTests
         second.Should().BeFalse();
     }
 
-    private static NotifyDeduplicationService CreateService(string? period = null, string? visitInterval = null)
+    private static NotifyDeduplicationService CreateService(string? period = null, string? visitInterval = null, string? emailInterval = null)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["core:notify:deduplication:period"] = period,
-                ["visit:validinterval"] = visitInterval
+                ["visit:validinterval"] = visitInterval,
+                ["email:validinterval"] = emailInterval
             })
             .Build();
 

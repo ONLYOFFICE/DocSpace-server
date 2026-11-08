@@ -53,11 +53,11 @@ public sealed class EventBusProbe : IAsyncDisposable
 
     private static readonly TimeSpan _settle = TimeSpan.FromMilliseconds(300);
 
-    // The serializer numbers the subtypes of an event by the assemblies loaded when it is built, so the event types
-    // have to be loaded first.
+    // The serializer registers the subtypes of the events declared in the assemblies already loaded when it is built,
+    // so the assembly of the event types is loaded first.
     private static readonly Lazy<ProtobufSerializer> _serializer = new(() =>
     {
-        RuntimeHelpers.RunClassConstructor(typeof(ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent).TypeHandle);
+        _ = typeof(ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent).Assembly;
 
         return new ProtobufSerializer();
     });
@@ -76,15 +76,27 @@ public sealed class EventBusProbe : IAsyncDisposable
     internal static async Task<EventBusProbe> StartAsync(string connectionString, string eventName, CancellationToken cancellationToken)
     {
         var connection = await new ConnectionFactory { Uri = new Uri(connectionString) }.CreateConnectionAsync(cancellationToken);
-        var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
+        IChannel? channel = null;
 
-        // declared the way the services declare it, so the call is a no-op once they have
-        await channel.ExchangeDeclareAsync(Exchange, ExchangeType.Direct, cancellationToken: cancellationToken);
+        try
+        {
+            channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        var queue = await channel.QueueDeclareAsync(queue: "", durable: false, exclusive: true, autoDelete: true, cancellationToken: cancellationToken);
-        await channel.QueueBindAsync(queue.QueueName, Exchange, eventName, cancellationToken: cancellationToken);
+            // declared the way the services declare it, so the call is a no-op once they have
+            await channel.ExchangeDeclareAsync(Exchange, ExchangeType.Direct, cancellationToken: cancellationToken);
 
-        return new EventBusProbe(connection, channel, queue.QueueName);
+            var queue = await channel.QueueDeclareAsync(queue: "", durable: false, exclusive: true, autoDelete: true, cancellationToken: cancellationToken);
+            await channel.QueueBindAsync(queue.QueueName, Exchange, eventName, cancellationToken: cancellationToken);
+
+            return new EventBusProbe(connection, channel, queue.QueueName);
+        }
+        catch
+        {
+            channel?.Dispose();
+            connection.Dispose();
+
+            throw;
+        }
     }
 
     /// <summary>
@@ -124,11 +136,22 @@ public sealed class EventBusProbe : IAsyncDisposable
         }
     }
 
+    // Closing is best effort: a channel the broker already closed must not replace the failure of the test with its own.
     public async ValueTask DisposeAsync()
     {
-        await _channel.CloseAsync();
-        await _connection.CloseAsync();
-        _channel.Dispose();
-        _connection.Dispose();
+        try
+        {
+            await _channel.CloseAsync();
+            await _connection.CloseAsync();
+        }
+        catch (Exception)
+        {
+            // the queue is exclusive, so it goes with the connection anyway
+        }
+        finally
+        {
+            _channel.Dispose();
+            _connection.Dispose();
+        }
     }
 }

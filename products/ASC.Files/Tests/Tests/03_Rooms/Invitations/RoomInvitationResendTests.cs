@@ -171,8 +171,9 @@ public class RoomInvitationResendTests(
     public async Task ResendInvitations_SixTimesInARow_SendOneLetter()
     {
         // The member was added by id, so no invitation letter went out before: the first resend sends one, and the
-        // five repeats build nothing - no link, no audit record, no letter. A letter is handed to the notify service
-        // inside the request, so the bus shows each one the calls built.
+        // five repeats build nothing - no link, no audit record, no letter. In this stack no notify service marks
+        // letters, so the repeats are held back by the acceptance the first resend records. A letter is handed to the
+        // notify service inside the request, so the bus shows each one the calls built.
         await _filesClient.Authenticate(Owner);
         var (room, users) = await CreateRoomWithInvitedUsers(1);
         await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
@@ -188,6 +189,59 @@ public class RoomInvitationResendTests(
             TestContext.Current.CancellationToken);
 
         letters.Should().ContainSingle("the first resend sends the letter, and none of the five repeats builds another");
+    }
+
+    [Fact]
+    public async Task ResendAll_SixTimesInARow_SendNoSecondLetter()
+    {
+        // The address was invited by email, which sent its letter; a resend to every pending member then builds
+        // nothing for it, however often it is asked for.
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Resend All Room");
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
+        await InviteByEmail(room.Id, $"resend-{Guid.NewGuid():N}@example.com", FileShare.Read);
+
+        for (var call = 0; call < 6; call++)
+        {
+            await _roomsApi.ResendEmailInvitationsAsync(room.Id, new UserInvitation(resendAll: true), TestContext.Current.CancellationToken);
+        }
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.SaasRoomInviteNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("the invitation went out once, and none of the six resends builds another");
+    }
+
+    [Fact]
+    [Trait("Bug", "79410")]
+    public async Task InviteByEmail_AccessSwitchedBackAndForth_SendOneLetter()
+    {
+        // Switching the access of an address invited by email re-sends the invitation every time. The account type of
+        // the link does not change between these two levels, so the letter goes out once.
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Access Switch Room");
+        var email = $"switch-{Guid.NewGuid():N}@example.com";
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
+
+        for (var call = 0; call < 6; call++)
+        {
+            await InviteByEmail(room.Id, email, call % 2 == 0 ? FileShare.Read : FileShare.Editing);
+        }
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.SaasRoomInviteNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("each switch asks for the same letter again");
+    }
+
+    private async Task InviteByEmail(int roomId, string email, FileShare access)
+    {
+        await _roomsApi.SetRoomSecurityAsync(
+            roomId,
+            new RoomInvitationRequest { Invitations = [new RoomInvitation { Email = email, Access = access }], Notify = true },
+            cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]

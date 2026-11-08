@@ -62,8 +62,9 @@ public class SendInstructionsToDeleteTests(AspireAppFixture fixture) : UserDataT
     [Fact]
     public async Task SendInstructionsToDelete_SixTimesInARow_SendOneLetter()
     {
-        // A repeat of a letter that already went out builds nothing: no link, no audit record, no letter. A letter is
-        // handed to the notify service inside the request, so the bus shows each one the calls built.
+        // A repeat builds nothing: no link, no audit record, no letter. In this stack no notify service marks letters,
+        // so the repeats are held back by the acceptance the first call records; the engine's mark is covered by
+        // RepeatAcceptKeyTests. A letter is handed to the notify service inside the request, so the bus shows each one.
         var member = await InviteMember(EmployeeType.User);
         await _peopleClient.Authenticate(member);
         await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);

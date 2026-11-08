@@ -194,12 +194,18 @@ public class RepeatAcceptKeyTests
         var queue = scope.Services.GetRequiredService<ChannelReader<NotifyRequest>>();
         var requests = new List<NotifyRequest>();
 
+        // the queue belongs to the whole letter host: take only the requests made of this letter
+        var recipients = letter.Recipients.Select(r => r.Id).ToHashSet();
+
         while (queue.TryRead(out var request))
         {
-            requests.Add(request);
+            if (request.NotifyAction.GetType().FullName == letter.Action.NotifyActionType && recipients.Contains(request.Recipient.ID))
+            {
+                requests.Add(request);
+            }
         }
 
-        requests.Should().NotBeEmpty("StudioNotifyWorker queues a request for every recipient of the letter");
+        requests.Should().HaveCount(recipients.Count, "StudioNotifyWorker queues a request for every recipient of the letter");
 
         using var engineScope = scope.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
 

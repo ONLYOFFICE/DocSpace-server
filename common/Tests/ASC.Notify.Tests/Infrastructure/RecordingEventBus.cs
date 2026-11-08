@@ -41,6 +41,14 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// </summary>
 internal sealed class RecordingEventBus : IEventBus
 {
+    // the services' own serializer, so a member the bus does not carry is missing here as well
+    private static readonly Lazy<ProtobufSerializer> _serializer = new(() =>
+    {
+        _ = typeof(NotifyItemIntegrationEvent).Assembly;
+
+        return new ProtobufSerializer();
+    });
+
     public List<IntegrationEvent> Published { get; } = [];
 
     /// <summary>How many of the next publications fail, for a case about what a failure leaves behind.</summary>
@@ -58,7 +66,9 @@ internal sealed class RecordingEventBus : IEventBus
             throw new InvalidOperationException("Publishing failed, as the case asked.");
         }
 
-        Published.Add(@event);
+        // what the notify service receives is the event as it comes off the wire, not the sender's object
+        var wire = _serializer.Value.Serialize(@event);
+        Published.Add((IntegrationEvent)_serializer.Value.Deserialize(wire, @event.GetType()));
 
         if (FailAfterRecording)
         {
