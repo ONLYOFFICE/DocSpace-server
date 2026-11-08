@@ -177,7 +177,7 @@ public class StudioNotifyService(
     {
         INotifyAction action = isAgent ? serviceProvider.GetService<SaasAgentInviteNotifyAction>() : serviceProvider.GetService<SaasRoomInviteNotifyAction>();
 
-        return await studioNotifyServiceHelper.TryAcceptAsync(action, roomUniqId, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast());
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, roomUniqId, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast(), tenantManager.GetCurrentTenant().Alias);
     }
 
     public async Task SendEmailRoomInviteAsync(
@@ -221,7 +221,7 @@ public class StudioNotifyService(
     {
         var action = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
 
-        return await studioNotifyServiceHelper.TryAcceptAsync(action, null, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast());
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, null, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast(), tenantManager.GetCurrentTenant().Alias);
     }
 
     public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, EmployeeType inviteType, string culture = "", bool limitation = false)

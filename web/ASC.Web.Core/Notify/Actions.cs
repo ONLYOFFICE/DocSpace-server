@@ -1327,8 +1327,9 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
     // a caller can repeat PUT files/rooms/{id}/share and POST files/rooms/{id}/resend at will
     public override bool SuppressRepeats => true;
 
-    // the link carries the account type the invitee joins with, so a re-invite with another type is a new letter
-    public override string[] DeduplicationTags => [CommonTags.InviteType];
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
 
     public override List<Pattern> Patterns
     {
@@ -1349,6 +1350,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
             new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1364,8 +1366,9 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
     // a caller can repeat PUT files/rooms/{id}/share and POST files/rooms/{id}/resend at will
     public override bool SuppressRepeats => true;
 
-    // the link carries the account type the invitee joins with, so a re-invite with another type is a new letter
-    public override string[] DeduplicationTags => [CommonTags.InviteType];
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
 
     public override List<Pattern> Patterns
     {
@@ -1386,6 +1389,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
             new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1473,8 +1477,9 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
     // a caller can repeat PUT people/invite at will
     public override bool SuppressRepeats => true;
 
-    // the link carries the account type the invitee joins with, so a re-invite with another type is a new letter
-    public override string[] DeduplicationTags => [CommonTags.InviteType];
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
 
     public override List<Pattern> Patterns
     {
@@ -1495,6 +1500,7 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
 
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),

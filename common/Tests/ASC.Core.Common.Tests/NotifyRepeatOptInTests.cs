@@ -119,6 +119,19 @@ public class NotifyRepeatOptInTests
     }
 
     [Theory]
+    // the invitation link is signed with the portal's alias, so a re-invite after the portal was renamed has to
+    // deliver a link that still opens
+    [InlineData("saas_docspace_invite")]
+    [InlineData("saas_room_invite")]
+    [InlineData("saas_agent_invite")]
+    public void InvitationLetter_TellsApartThePortalAliasItsLinkIsSignedWith(string id)
+    {
+        var action = Actions().Single(a => a.ID == id);
+
+        action.DeduplicationTags.Should().Contain("PortalAlias");
+    }
+
+    [Theory]
     // the links are checked against the address exactly as stored, so a request after an email change - even one
     // only in case - has to deliver links made for the new address
     [InlineData("portal_deactivate")]
