@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -1312,6 +1312,14 @@ public class TariffService(
         return defaultQuota;
     }
 
+    private static IEnumerable<string> MessagesOf(Exception error)
+    {
+        for (var current = error; current != null; current = current.InnerException)
+        {
+            yield return current.Message;
+        }
+    }
+
     private void LogError(Exception error, string tenantId = null)
     {
         if (error is BillingNotFoundException)
@@ -1330,7 +1338,9 @@ public class TariffService(
             }
             else
             {
-                logger.ErrorBilling(tenantId, error.Message);
+                // No stack at this level, but the cause: the message of a payment client names only the call, and the
+                // timeout, DNS or TLS failure behind it is in the inner exception.
+                logger.ErrorBilling(tenantId, string.Join(" <- ", MessagesOf(error)));
             }
         }
     }

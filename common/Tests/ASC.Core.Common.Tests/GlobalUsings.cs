@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -46,6 +46,8 @@ global using ASC.Api.Core.Middleware;
 global using ASC.Api.Core.Webhook.Payloads;
 global using ASC.Common.Caching;
 global using ASC.Common.Notify.Patterns;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.InMemoryLock;
 global using ASC.Common.Web;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;

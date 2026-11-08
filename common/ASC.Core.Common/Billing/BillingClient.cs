@@ -159,7 +159,8 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
         };
 
         var result = await billingApi.DepositAsync(requestDto);
-        return result == "\"ok\"";
+
+        return IsOk(result, "POST /billing/Deposit");
     }
 
     public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity,
@@ -301,7 +302,15 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
 
         var result = await billingApi.GetDocsCloudTrialAsync(requestDto);
 
-        return result == "\"ok\"";
+        return IsOk(result, "POST /billing/getwdocstrial");
+    }
+
+    // A deposit and a trial are answered with the JSON string "ok" when billing did what was asked; another string is
+    // its refusal. An answer that is no JSON string at all says nothing about the outcome - the request may well have
+    // been applied - so it is a contract failure, never false: a caller retrying after a refusal could pay twice.
+    private static bool IsOk(string answer, string operation)
+    {
+        return ReadJsonString(answer, operation) == "ok";
     }
 
     // The links come back as a JSON string the client reads itself, past the deserialization factory of Refit, so an

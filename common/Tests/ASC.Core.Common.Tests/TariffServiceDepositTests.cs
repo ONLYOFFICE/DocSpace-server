@@ -35,7 +35,8 @@ namespace ASC.Core.Common.Tests;
 
 /// <summary>
 /// The balance top-ups of <see cref="TariffService"/> over a faked accounting service: the lookup of one top-up by
-/// its ID, which walks the pages of a period, and the single page of the list, which swallows the failures.
+/// its ID, which walks the pages of a period, the single page of the list, which swallows the failures, and the
+/// top-up of the wallet, which must not deposit twice when it cannot tell whether a deposit was applied.
 /// </summary>
 /// <remarks>
 /// The portal key comes from a real <see cref="CoreSettings"/> over a tenant service that knows no tenants, and every
@@ -144,6 +145,27 @@ public class TariffServiceDepositTests
         // The null comes from the answer, not from a failure before the request: TariffService turns either into null.
         // A 400 that names no missing customer is asked again, so only the route of every request is pinned.
         handler.Requests.Should().NotBeEmpty().And.OnlyContain(request => request.Path == $"/api/customer/{PaymentRegion}{TenantId}/deposits");
+    }
+
+    [Fact]
+    public async Task EnsureWalletBalance_DepositAnswerUnreadable_StopsAfterThatDeposit()
+    {
+        // A proxy's page in place of billing's "ok" says nothing about the deposit: it may have been applied. Another
+        // deposit for the same shortfall would then charge the customer twice, so the top-up stops instead.
+        using var billing = new HttpStub(_ => Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
+        var (billingClient, _) = CreateBillingClient(billing);
+        var (accountingClient, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
+            """{"accountNumber":42,"accountCurrency":"USD","subAccounts":[{"currency":"USD","amount":10}]}"""));
+
+        var tariffService = PaymentStubs.CreateTariffService(accountingClient, billingClient,
+            hybridCache: new FusionCache(new FusionCacheOptions()),
+            coreSettings: CreateCoreSettings(PaymentRegion),
+            distributedLockProvider: new InMemoryLockProvider());
+
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+
+        covered.Should().BeFalse("the balance never reached the required amount");
+        billing.Requests.Where(request => request.Path == "/billing/Deposit").Should().ContainSingle("one deposit of unknown outcome is the last");
     }
 
     private static (TariffService tariffService, HttpStub handler) CreateService(

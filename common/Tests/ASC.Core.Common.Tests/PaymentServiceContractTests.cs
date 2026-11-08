@@ -46,7 +46,18 @@ public class PaymentServiceContractTests
 
     public static TheoryData<string> Services => ["Billing", "Accounting", "DocsCloud"];
 
-    public static TheoryData<string> BillingLinks => ["AccountLink", "InvoiceLink", "PaymentUrl"];
+    /// <summary>The billing calls that take the answer as a raw string and read the JSON string in it themselves.</summary>
+    public static TheoryData<string> BillingStringCalls =>
+    [
+        "/billing/GetAccountLink",
+        "/billing/GetInvoiceLink",
+        "/billing/GetSinglePaymentUrl",
+        "/billing/Deposit",
+        "/billing/getwdocstrial"
+    ];
+
+    /// <summary>The billing calls whose answer is the JSON string "ok" when the service did what was asked.</summary>
+    public static TheoryData<string> BillingOkCalls => ["/billing/Deposit", "/billing/getwdocstrial"];
 
     [Theory]
     [MemberData(nameof(Services))]
@@ -66,27 +77,45 @@ public class PaymentServiceContractTests
     }
 
     [Theory]
-    [MemberData(nameof(BillingLinks))]
-    public async Task UnreadableBillingLink_IsAContractFailure(string link)
+    [MemberData(nameof(BillingStringCalls))]
+    public async Task UnreadableBillingString_IsAContractFailure(string route)
     {
-        // These three calls take the answer as a raw string and read the JSON string in it themselves, so the factory
-        // of the client never sees what they cannot read.
+        // The factory of the client never sees what these calls cannot read. A deposit or a trial answered with a proxy's
+        // page may well have been applied, so the answer must not read as the service saying no.
         using var stub = new HttpStub(_ => Reply(HttpStatusCode.OK, ProxyPage));
         var (client, _) = CreateBillingClient(stub);
 
-        Func<Task> act = link switch
-        {
-            "AccountLink" => () => client.GetAccountLinkAsync(PortalId, "https://portal/back"),
-            "InvoiceLink" => () => client.GetInvoiceLinkAsync(PortalId, "pi_3QabcDEF"),
-            _ => () => client.GetPaymentUrlAsync(PortalId, ["product-1"], backUrl: "https://portal/back")
-        };
-
-        var exception = (await act.Should().ThrowExactlyAsync<PaymentServiceContractException>()).Which;
+        var exception = (await BillingStringCall(client, route).Should().ThrowExactlyAsync<PaymentServiceContractException>()).Which;
 
         exception.Service.Should().Be("Billing");
-        exception.Operation.Should().StartWith("POST /billing/Get");
+        exception.Operation.Should().Be("POST " + route);
         exception.InnerException.Should().BeAssignableTo<JsonException>();
+        stub.Last!.Path.Should().Be(route);
         ShouldNotNameTheRequest(exception, stub.Url);
+    }
+
+    [Theory]
+    [MemberData(nameof(BillingOkCalls))]
+    public async Task ReadableAnswerOtherThanOk_IsARefusal(string route)
+    {
+        using var stub = new HttpStub(_ => Reply(HttpStatusCode.OK, "\"declined\""));
+        var (client, _) = CreateBillingClient(stub);
+
+        var accepted = await BillingOkCall(client, route);
+
+        accepted.Should().BeFalse("billing answered, and not with ok");
+    }
+
+    [Theory]
+    [MemberData(nameof(BillingOkCalls))]
+    public async Task OkAnswer_IsAcceptance(string route)
+    {
+        using var stub = new HttpStub(_ => Reply(HttpStatusCode.OK, "\"ok\""));
+        var (client, _) = CreateBillingClient(stub);
+
+        var accepted = await BillingOkCall(client, route);
+
+        accepted.Should().BeTrue();
     }
 
     [Theory]
@@ -116,6 +145,24 @@ public class PaymentServiceContractTests
         typeof(PaymentServiceContractException).Should().NotBeAssignableTo<BillingException>()
             .And.NotBeAssignableTo<AccountingException>()
             .And.NotBeAssignableTo<DocsCloudException>();
+    }
+
+    private static Func<Task> BillingStringCall(BillingClient client, string route)
+    {
+        return route switch
+        {
+            "/billing/GetAccountLink" => () => client.GetAccountLinkAsync(PortalId, "https://portal/back"),
+            "/billing/GetInvoiceLink" => () => client.GetInvoiceLinkAsync(PortalId, "pi_3QabcDEF"),
+            "/billing/GetSinglePaymentUrl" => () => client.GetPaymentUrlAsync(PortalId, ["product-1"], backUrl: "https://portal/back"),
+            _ => () => BillingOkCall(client, route)
+        };
+    }
+
+    private static Task<bool> BillingOkCall(BillingClient client, string route)
+    {
+        return route == "/billing/Deposit"
+            ? client.TopUpDepositAsync(PortalId, 100, "USD", null, "portal.example.com")
+            : client.GetDocsCloudTrialAsync(PortalId, new DocsCloudTrialCustomer("owner@example.com", "https://portal.example.com", "Owner", null, "en-US", null));
     }
 
     private static Func<Task> Call(string service, HttpStub stub)

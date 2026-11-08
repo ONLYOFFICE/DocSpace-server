@@ -148,7 +148,8 @@ internal static class PaymentStubs
         CoreSettings? coreSettings = null,
         IConfiguration? configuration = null,
         ICache? cache = null,
-        IServiceProvider? serviceProvider = null)
+        IServiceProvider? serviceProvider = null,
+        IDistributedLockProvider? distributedLockProvider = null)
     {
         return new TariffService(
             quotaService: null!,
@@ -159,7 +160,7 @@ internal static class PaymentStubs
             coreDbContextManager: null!,
             cache: cache!,
             hybridCache: hybridCache!,
-            distributedLockProvider: null!,
+            distributedLockProvider: distributedLockProvider!,
             logger: NullLogger<TariffService>.Instance,
             billingClient: billingClient!,
             accountingClient: accountingClient!,
