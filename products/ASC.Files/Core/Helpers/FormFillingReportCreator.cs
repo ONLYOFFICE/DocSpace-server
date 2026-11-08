@@ -1339,6 +1339,7 @@ public class FormFillingReportCreator(
         }
 
         var tableName = GetTableName(form.Id, tableVersion);
+        var tableChanged = false;
 
         try
         {
@@ -1357,6 +1358,7 @@ public class FormFillingReportCreator(
                     return;
                 }
 
+                tableChanged = true;
                 link.TableVersion = tableVersion;
                 AddLink(state, link);
 
@@ -1366,9 +1368,40 @@ public class FormFillingReportCreator(
         catch (Exception e)
         {
             logger.WarnVersionLinkFailed(e, tableName, form.Version);
-            state.VersionLinks?.RemoveAll(l => l.Version == link.Version);
+            KeepLinkAfterFailure(state, link, tableChanged, IsTransient(e));
         }
     }
+
+    /// <summary>
+    /// A link whose columns the table already took stays, or the table and the state would disagree; the caller saves it.
+    /// One that failed before on a passing fault (a lock or the connection) goes back to wait: the submission meanwhile
+    /// gives the version a table of its own, and the next one moves it into the shared table, skipping renames already
+    /// made on MySQL, whose ALTER commits at once. Any other failure would only repeat, so the version keeps its table.
+    /// </summary>
+    internal static void KeepLinkAfterFailure(FormFillingProperties<int> state, FormVersionLink link, bool tableChanged, bool transient)
+    {
+        if (tableChanged)
+        {
+            AddLink(state, link);
+            return;
+        }
+
+        state.VersionLinks?.RemoveAll(l => l.Version == link.Version);
+        if (!transient)
+        {
+            return;
+        }
+
+        state.PendingVersionLinks ??= [];
+        if (!state.PendingVersionLinks.Exists(p => p.Version == link.Version))
+        {
+            state.PendingVersionLinks.Add(link);
+        }
+    }
+
+    // A fault that may pass if the step is repeated later.
+    internal static bool IsTransient(Exception exception) =>
+        exception is DistributedLockException or TimeoutException || exception is DbException { IsTransient: true };
 
     // Under the version lock. The table of the version and of the versions continuing it are moved into the shared table:
     // rows are copied first and the links saved next. A built-in table is dropped last, only with all its rows in the

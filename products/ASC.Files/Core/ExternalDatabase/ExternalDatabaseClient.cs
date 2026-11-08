@@ -243,6 +243,12 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 {
     private static readonly Regex _tableNameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
     private static readonly Regex _quotedOptionRegex = new("'((?:[^']|'')*)'", RegexOptions.Compiled);
+    private static readonly IEqualityComparer<string> _mySqlInsensitiveOptions =
+        new MySqlOptionComparer(StringComparer.Create(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace));
+    private static readonly IEqualityComparer<string> _mySqlAccentSensitiveOptions =
+        new MySqlOptionComparer(StringComparer.Create(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase));
+    private static readonly IEqualityComparer<string> _mySqlCaseSensitiveOptions = new MySqlOptionComparer(StringComparer.Ordinal);
+    private static readonly Regex _varcharRegex = new(@"^varchar\((\d+)\)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static void ValidateTableName(string tableName)
     {
@@ -267,11 +273,12 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
+        var optionComparer = await GetOptionComparerAsync(connection, dbType, null);
 
         await using var cmd = connection.CreateCommand();
         cmd.CommandText = dbType switch
         {
-            ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
+            ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns, optionComparer),
             ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
             ExternalDatabaseType.PostgreSql => BuildPgCreateTable(tableName, columns),
             _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
@@ -279,11 +286,11 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         await cmd.ExecuteNonQueryAsync();
     }
 
-    private static string BuildMySqlCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns)
+    private static string BuildMySqlCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns, IEqualityComparer<string> optionComparer)
     {
         var colDefs = columns.Select(c =>
         {
-            var type = MapMySqlType(c);
+            var type = MapMySqlType(c, optionComparer);
             return c.IsPrimaryKey ? $"`{c.Name}` {type} PRIMARY KEY" : $"`{c.Name}` {type}";
         });
         return $"CREATE TABLE IF NOT EXISTS `{tableName}` ({string.Join(", ", colDefs)});";
@@ -335,14 +342,14 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         _ => "TEXT"
     };
 
-    private static string MapMySqlType(DbColumnDefinition col) => col.Type switch
+    private static string MapMySqlType(DbColumnDefinition col, IEqualityComparer<string>? optionComparer = null) => col.Type switch
     {
         DbColumnType.Integer => "INT",
         DbColumnType.Boolean => "BOOLEAN",
         DbColumnType.Date => "DATE",
         DbColumnType.DateTime => "DATETIME",
         DbColumnType.Enum when col.EnumValues?.Count > 0 =>
-            $"ENUM({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("\\", "\\\\").Replace("'", "''")}'"))})",
+            $"ENUM({string.Join(", ", col.EnumValues.Distinct(optionComparer ?? GetOptionComparer(ExternalDatabaseType.MySql)).Select(v => $"'{v.Replace("\\", "\\\\").Replace("'", "''")}'"))})",
         DbColumnType.Enum => "VARCHAR(255)",
         _ => "TEXT"
     };
@@ -394,6 +401,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             return FormTableChange.Missing;
         }
 
+        var optionComparer = await GetOptionComparerAsync(connection, dbType, tableName);
         var statements = new List<string>();
         if (!TryRename(tableName, q, existing, renames, statements))
         {
@@ -409,7 +417,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         foreach (var column in columns)
         {
-            var type = MapType(column, dbType);
+            var type = MapType(column, dbType, optionComparer);
             if (existing.TryGetValue(ValidateColumnName(column.Name), out var existingType))
             {
                 if (GetTypeClass(existingType) != GetTypeClass(type))
@@ -418,7 +426,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 }
 
                 if (column is { Type: DbColumnType.Enum, EnumValues.Count: > 0 }
-                    && !await TryWidenOptionsAsync(connection, tx, tableName, column.Name, existingType, column.EnumValues, dbType, statements))
+                    && !await TryWidenOptionsAsync(connection, tx, tableName, column.Name, existingType, column.EnumValues, dbType, optionComparer, statements))
                 {
                     return FormTableChange.Conflict;
                 }
@@ -441,8 +449,9 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     /// <summary>
     /// Renames the columns of the target table, adds the columns of the source one and copies its rows; one transaction
-    /// except on MySQL, where the conflicts are found before anything changes. A row whose form_id the target already
-    /// holds is kept as it is there. Changes nothing on the same conflicts as <see cref="AlterTableAsync"/>.
+    /// except on MySQL, where the conflicts, a source value the target column cannot take among them, are found before
+    /// anything changes. A row whose form_id the target already holds is kept as it is there. Changes nothing on the same
+    /// conflicts as <see cref="AlterTableAsync"/>.
     /// </summary>
     public async Task<FormTableChange> MergeTableAsync(string targetTable, string sourceTable, IReadOnlyCollection<(string OldName, string NewName)> renames)
     {
@@ -463,6 +472,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             return FormTableChange.Missing;
         }
 
+        var optionComparer = await GetOptionComparerAsync(connection, dbType, targetTable);
+
         var statements = new List<string>();
         if (!TryRename(targetTable, q, target, renames, statements))
         {
@@ -479,15 +490,17 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         {
             if (target.TryGetValue(ValidateColumnName(name), out var targetType))
             {
-                if (GetTypeClass(targetType) != GetTypeClass(type))
+                if (GetTypeClass(targetType) != GetTypeClass(type)
+                    || dbType == ExternalDatabaseType.MySql && !await MySqlCopyFitsAsync(connection, sourceTable, name, type, targetType, optionComparer))
                 {
                     return FormTableChange.Conflict;
                 }
 
-                // A source column with any text keeps the target's list: a value outside it fails the copy, which says so.
+                // A source column with any text keeps the target's list. A value outside it is a conflict found above on
+                // MySQL; elsewhere the copy fails, which says so.
                 var (sourceOptions, _) = await GetColumnOptionsAsync(connection, tx, sourceTable, name, type, dbType);
                 if (sourceOptions != null
-                    && !await TryWidenOptionsAsync(connection, tx, targetTable, name, targetType, sourceOptions, dbType, statements))
+                    && !await TryWidenOptionsAsync(connection, tx, targetTable, name, targetType, sourceOptions, dbType, optionComparer, statements))
                 {
                     return FormTableChange.Conflict;
                 }
@@ -562,9 +575,66 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return columns;
     }
 
+    // MySQL commits each ALTER at once, so a copy that would fail after the columns were renamed is found first.
+    private static async Task<bool> MySqlCopyFitsAsync(DbConnection connection, string sourceTable, string column, string sourceType, string targetType,
+        IEqualityComparer<string> optionComparer)
+    {
+        var check = BuildMySqlCopyCheck(sourceTable, column, sourceType, targetType, optionComparer);
+        if (check == null)
+        {
+            return true;
+        }
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = check.Value.Sql;
+        AddParameters(cmd, check.Value.Parameters);
+
+        return Convert.ToInt64(await cmd.ExecuteScalarAsync()) == 0;
+    }
+
+    /// <summary>
+    /// The query that finds a source value the target column cannot take, null when every value fits: one outside the
+    /// options of the target list, widened by those of a source list, or longer than the target VARCHAR holds. Trailing
+    /// spaces do not count, as MySQL drops them storing a value there; whether two spellings are one option is left to the
+    /// collation of the source column.
+    /// </summary>
+    internal static (string Sql, Dictionary<string, object?> Parameters)? BuildMySqlCopyCheck(string sourceTable, string column, string sourceType, string targetType,
+        IEqualityComparer<string>? optionComparer = null)
+    {
+        var value = $"TRIM(TRAILING ' ' FROM `{column}`)";
+        var parameters = new Dictionary<string, object?>();
+        string condition;
+        if (targetType.StartsWith("enum(", StringComparison.OrdinalIgnoreCase))
+        {
+            var options = ParseOptions(targetType, ExternalDatabaseType.MySql);
+            if (sourceType.StartsWith("enum(", StringComparison.OrdinalIgnoreCase))
+            {
+                options = WidenOptions(options, ParseOptions(sourceType, ExternalDatabaseType.MySql), optionComparer ?? GetOptionComparer(ExternalDatabaseType.MySql));
+            }
+
+            for (var i = 0; i < options.Count; i++)
+            {
+                parameters[$"@option{i}"] = options[i];
+            }
+
+            condition = $"{value} NOT IN ({string.Join(", ", parameters.Keys)})";
+        }
+        else if (_varcharRegex.Match(targetType) is { Success: true } varchar && !string.Equals(sourceType, targetType, StringComparison.OrdinalIgnoreCase))
+        {
+            condition = $"CHAR_LENGTH({value}) > {varchar.Groups[1].Value}";
+        }
+        else
+        {
+            return null;
+        }
+
+        return ($"SELECT EXISTS (SELECT 1 FROM `{sourceTable}` WHERE `{column}` IS NOT NULL AND {condition})", parameters);
+    }
+
     // A list column takes the options it lacks, old ones kept, as its values must still fit; a column with any text takes
     // anything already. False when the list cannot be changed in place (SQLite).
-    private static async Task<bool> TryWidenOptionsAsync(DbConnection connection, DbTransaction? tx, string tableName, string column, string type, IEnumerable<string> options, ExternalDatabaseType dbType, List<string> statements)
+    private static async Task<bool> TryWidenOptionsAsync(DbConnection connection, DbTransaction? tx, string tableName, string column, string type, IEnumerable<string> options,
+        ExternalDatabaseType dbType, IEqualityComparer<string> optionComparer, List<string> statements)
     {
         var (current, constraint) = await GetColumnOptionsAsync(connection, tx, tableName, column, type, dbType);
         if (current == null)
@@ -572,7 +642,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             return true;
         }
 
-        var widen = BuildWidenOptions(tableName, column, current, options, constraint, dbType);
+        var widen = BuildWidenOptions(tableName, column, current, options, constraint, dbType, optionComparer);
         if (widen == null)
         {
             return false;
@@ -626,21 +696,74 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             .ToList();
     }
 
+    // The current options and, after them, the given ones the list lacks.
+    private static List<string> WidenOptions(IReadOnlyList<string> current, IEnumerable<string> options, IEqualityComparer<string> optionComparer) =>
+        [.. current, .. options.Where(o => !current.Contains(o, optionComparer)).Distinct(optionComparer)];
+
+    /// <summary>
+    /// How the database tells two options of a list apart. MySQL does it by the collation, so options differing only in
+    /// case, accents or trailing spaces may be one option there and must not both be declared: a *_bin or *_cs collation
+    /// keeps case apart, an *_as_* one accents; null takes the default case and accent insensitive one.
+    /// </summary>
+    internal static IEqualityComparer<string> GetOptionComparer(ExternalDatabaseType dbType, string? collation = null)
+    {
+        if (dbType != ExternalDatabaseType.MySql)
+        {
+            return StringComparer.Ordinal;
+        }
+
+        var name = collation?.ToLowerInvariant() ?? string.Empty;
+        if (name.EndsWith("_bin", StringComparison.Ordinal) || name.EndsWith("_cs", StringComparison.Ordinal))
+        {
+            return _mySqlCaseSensitiveOptions;
+        }
+
+        return name.Contains("_as_", StringComparison.Ordinal) ? _mySqlAccentSensitiveOptions : _mySqlInsensitiveOptions;
+    }
+
+    // By the collation the columns of the table take, or the one of the database for a table yet to be created.
+    private static async Task<IEqualityComparer<string>> GetOptionComparerAsync(DbConnection connection, ExternalDatabaseType dbType, string? tableName)
+    {
+        if (dbType != ExternalDatabaseType.MySql)
+        {
+            return GetOptionComparer(dbType);
+        }
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = tableName == null
+            ? "SELECT @@collation_database"
+            : "SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = @tableName";
+        if (tableName != null)
+        {
+            AddParameters(cmd, new Dictionary<string, object?> { ["@tableName"] = tableName });
+        }
+
+        return GetOptionComparer(dbType, await cmd.ExecuteScalarAsync() as string);
+    }
+
+    // MySQL drops the trailing spaces of the options it declares.
+    private sealed class MySqlOptionComparer(StringComparer collation) : IEqualityComparer<string>
+    {
+        public bool Equals(string? x, string? y) => collation.Equals(x?.TrimEnd(' '), y?.TrimEnd(' '));
+
+        public int GetHashCode(string obj) => collation.GetHashCode(obj.TrimEnd(' '));
+    }
+
     // The statements that let a list column take the given options besides its own; empty when it has them all, null when
     // the list cannot be changed in place.
-    internal static List<string>? BuildWidenOptions(string tableName, string column, IReadOnlyList<string> current, IEnumerable<string> options, string? constraint, ExternalDatabaseType dbType)
+    internal static List<string>? BuildWidenOptions(string tableName, string column, IReadOnlyList<string> current, IEnumerable<string> options, string? constraint,
+        ExternalDatabaseType dbType, IEqualityComparer<string>? optionComparer = null)
     {
-        var added = options.Where(o => !current.Contains(o, StringComparer.Ordinal)).Distinct(StringComparer.Ordinal).ToList();
-        if (added.Count == 0)
+        optionComparer ??= GetOptionComparer(dbType);
+        var all = WidenOptions(current, options, optionComparer);
+        if (all.Count == current.Count)
         {
             return [];
         }
 
-        List<string> all = [.. current, .. added];
-
         return dbType switch
         {
-            ExternalDatabaseType.MySql => [$"ALTER TABLE `{tableName}` MODIFY COLUMN `{column}` {MapMySqlType(new DbColumnDefinition(column, DbColumnType.Enum, all))}"],
+            ExternalDatabaseType.MySql => [$"ALTER TABLE `{tableName}` MODIFY COLUMN `{column}` {MapMySqlType(new DbColumnDefinition(column, DbColumnType.Enum, all), optionComparer)}"],
             ExternalDatabaseType.PostgreSql when constraint != null =>
             [
                 $"ALTER TABLE \"{tableName}\" DROP CONSTRAINT \"{constraint}\"",
@@ -674,9 +797,9 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return true;
     }
 
-    internal static string MapType(DbColumnDefinition column, ExternalDatabaseType dbType) => dbType switch
+    internal static string MapType(DbColumnDefinition column, ExternalDatabaseType dbType, IEqualityComparer<string>? optionComparer = null) => dbType switch
     {
-        ExternalDatabaseType.MySql => MapMySqlType(column),
+        ExternalDatabaseType.MySql => MapMySqlType(column, optionComparer),
         ExternalDatabaseType.Sqlite => MapSqliteType(column),
         _ => MapPgType(column)
     };
@@ -1649,6 +1772,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         // MySQL DDL (CREATE TABLE) causes an implicit commit,
         // making it impossible to wrap CREATE TABLE + INSERT in one atomic transaction.
         DbTransaction? tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
+        var optionComparer = await GetOptionComparerAsync(connection, dbType, null);
 
         try
         {
@@ -1656,7 +1780,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             createCmd.Transaction = tx;
             createCmd.CommandText = dbType switch
             {
-                ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
+                ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns, optionComparer),
                 ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
                 ExternalDatabaseType.PostgreSql => BuildPgCreateTable(tableName, columns),
                 _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")

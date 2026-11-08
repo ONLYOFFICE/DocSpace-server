@@ -130,6 +130,71 @@ public class FormVersionLinksTests
         FormFillingReportCreator.GetVersionsInTable(null, 1).Should().Equal(1);
     }
 
+    // The table took the renames before the state could be saved: the link stays, or the columns and the state disagree.
+    [Fact]
+    public void KeepLinkAfterFailure_TableChanged_KeepsTheLink()
+    {
+        var state = new FormFillingProperties();
+        var link = Link(2, 1, Rename("a", "b"));
+
+        FormFillingReportCreator.KeepLinkAfterFailure(state, link, tableChanged: true, transient: false);
+
+        state.VersionLinks.Should().ContainSingle().Which.Should().BeSameAs(link);
+        state.PendingVersionLinks.Should().BeNull();
+    }
+
+    // Nothing changed yet and the fault may pass: the decision waits for the next submission, once.
+    [Fact]
+    public void KeepLinkAfterFailure_TransientFault_GoesBackToPending()
+    {
+        var link = Link(2, 1, Rename("a", "b"));
+        var state = new FormFillingProperties { VersionLinks = [Link(2, 1)], PendingVersionLinks = [Link(2, 1)] };
+
+        FormFillingReportCreator.KeepLinkAfterFailure(state, link, tableChanged: false, transient: true);
+
+        state.VersionLinks.Should().BeEmpty();
+        state.PendingVersionLinks.Should().ContainSingle("the decision is not queued twice");
+
+        var fresh = new FormFillingProperties();
+        FormFillingReportCreator.KeepLinkAfterFailure(fresh, link, tableChanged: false, transient: true);
+
+        fresh.PendingVersionLinks.Should().ContainSingle().Which.Should().BeSameAs(link);
+    }
+
+    // A fault that would only repeat: the version keeps its own table instead of retrying for ever.
+    [Fact]
+    public void KeepLinkAfterFailure_LastingFault_DropsTheLink()
+    {
+        var state = new FormFillingProperties { VersionLinks = [Link(2, 1)] };
+
+        FormFillingReportCreator.KeepLinkAfterFailure(state, Link(2, 1), tableChanged: false, transient: false);
+
+        state.VersionLinks.Should().BeEmpty();
+        state.PendingVersionLinks.Should().BeNull();
+    }
+
+    [Fact]
+    public void IsTransient_TellsPassingFaultsFromLastingOnes()
+    {
+        FormFillingReportCreator.IsTransient(new TimeoutException()).Should().BeTrue();
+        FormFillingReportCreator.IsTransient(new DistributedLockException(LockStatus.NotAcquired, "forms_db_table", 30000)).Should().BeTrue();
+        FormFillingReportCreator.IsTransient(new InvalidOperationException()).Should().BeFalse();
+    }
+
+    // The database drivers tell a lost connection or a deadlock from a value that does not fit.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void IsTransient_DatabaseFault_FollowsTheDriver(bool transient)
+    {
+        FormFillingReportCreator.IsTransient(new DriverException(transient)).Should().Be(transient);
+    }
+
+    private sealed class DriverException(bool transient) : DbException
+    {
+        public override bool IsTransient => transient;
+    }
+
     private static FormFieldRename Rename(string oldKey, string newKey) => new() { OldKey = oldKey, NewKey = newKey };
 
     private static FormVersionLink Link(int version, int tableVersion, params FormFieldRename[] renames) =>

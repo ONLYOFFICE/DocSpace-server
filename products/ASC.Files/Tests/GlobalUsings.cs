@@ -36,6 +36,7 @@ extern alias ASCFilesService;
 extern alias ASCPeople;
 extern alias ASCWebApi;
 
+global using System.Data.Common;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.IO.Compression;
@@ -82,6 +83,7 @@ global using DbColumnDefinition = ASC.Files.Core.ExternalDatabase.DbColumnDefini
 global using DbColumnType = ASC.Files.Core.ExternalDatabase.DbColumnType;
 global using DbFilesMetadataValue = ASC.Files.Core.EF.DbFilesMetadataValue;
 global using DbFormsMetadataSearch = ASC.Files.Core.DbFormsMetadataSearch;
+global using DistributedLockException = ASC.Common.Threading.DistributedLock.Common.DistributedLockException;
 global using ExternalDatabaseClient = ASC.Files.Core.ExternalDatabase.ExternalDatabaseClient;
 global using ExternalShareRequestParam = DocSpace.API.SDK.Model.ExternalShareRequestParam;
 global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
@@ -99,6 +101,7 @@ global using FormVersionLink = ASC.Files.Core.FormVersionLink;
 global using HashHelper = ASC.FederatedLogin.Helpers.HashHelper;
 global using InstanceCrypto = ASC.Security.Cryptography.InstanceCrypto;
 global using LinkType = DocSpace.API.SDK.Model.LinkType;
+global using LockStatus = ASC.Common.Threading.DistributedLock.Common.LockStatus;
 global using MachinePseudoKeys = ASC.Security.Cryptography.MachinePseudoKeys;
 global using MetadataCascadeResolver = ASC.Files.Core.MetadataCascadeResolver;
 global using MetadataField = ASC.Files.Core.MetadataField;
