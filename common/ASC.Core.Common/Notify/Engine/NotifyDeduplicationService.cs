@@ -76,7 +76,9 @@ public class NotifyDeduplicationService(
 
     // The links these letters carry expire: an invitation this long after it is first opened, every confirmation link
     // this long after it was made. Suppressing a resend for longer could leave the recipient holding only an expired
-    // link, so no period may outlast either.
+    // link, so no period may outlast either. The cap applies to every letter, those without a link too: it bites only
+    // when the period is configured above both intervals, and then a link-less letter is held back for less than
+    // configured - one more letter, never a lost one.
     private readonly TimeSpan _maxPeriod = Min(
         EmailValidationKeyProvider.GetValidVisitLinkInterval(configuration),
         EmailValidationKeyProvider.GetValidEmailKeyInterval(configuration));
@@ -150,7 +152,7 @@ public class NotifyDeduplicationService(
             return;
         }
 
-        await hybridCache.RemoveAsync(acceptedKey);
+        await hybridCache.RemoveAsync(acceptedKey, InDistributedLevel);
     }
 
     public async Task<bool> IsDuplicateAsync(NotifyRequest request)
