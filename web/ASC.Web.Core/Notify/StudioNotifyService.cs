@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -61,7 +61,7 @@ public class StudioNotifyService(
     public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message, string culture)
     {
         var userMessageToAdminNotifyAction = serviceProvider.GetService<UserMessageToAdminNotifyAction>();
-        userMessageToAdminNotifyAction.Init(email, message,culture);
+        userMessageToAdminNotifyAction.Init(email, message, culture);
 
         await studioNotifyServiceHelper.SendNoticeAsync(userMessageToAdminNotifyAction);
     }
@@ -157,7 +157,8 @@ public class StudioNotifyService(
 
         // the link is bound to this account, so a profile recreated with the same address is a new letter
         var objectId = user.Id.ToString();
-        if (!await studioNotifyServiceHelper.TryAcceptAsync(activateEmailNotifyAction, objectId, AddressRecipient(email), EMailSenderName))
+        await using var acceptance = await studioNotifyServiceHelper.TryAcceptAsync(activateEmailNotifyAction, objectId, AddressRecipient(email), EMailSenderName);
+        if (!acceptance.Accepted)
         {
             return false;
         }
@@ -165,12 +166,14 @@ public class StudioNotifyService(
         await activateEmailNotifyAction.Init(user, email);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(activateEmailNotifyAction, objectId, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+        acceptance.Complete();
 
         return true;
     }
 
-    // asked before the invitation link is built: false for a repeat, which builds no link and spends no invitation
-    public async Task<bool> TryAcceptEmailRoomInviteAsync(string email, string roomUniqId, EmployeeType inviteType, bool isAgent)
+    // asked before the invitation link is built: refused for a repeat, which builds no link and spends no invitation;
+    // the caller completes the answer once the letter is sent and disposes it, which releases it after a failure
+    public async Task<NotifyAcceptance> TryAcceptEmailRoomInviteAsync(string email, string roomUniqId, EmployeeType inviteType, bool isAgent)
     {
         INotifyAction action = isAgent ? serviceProvider.GetService<SaasAgentInviteNotifyAction>() : serviceProvider.GetService<SaasRoomInviteNotifyAction>();
 
@@ -212,8 +215,9 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteExistingUserNotifyAction : saasRoomInviteExistingUserNotifyAction, roomUniqId, [user], [EMailSenderName]);
     }
 
-    // asked before the invitation link is built: false for a repeat, which builds no link and spends no invitation
-    public async Task<bool> TryAcceptDocSpaceInviteAsync(string email, EmployeeType inviteType)
+    // asked before the invitation link is built: refused for a repeat, which builds no link and spends no invitation;
+    // the caller completes the answer once the letter is sent and disposes it, which releases it after a failure
+    public async Task<NotifyAcceptance> TryAcceptDocSpaceInviteAsync(string email, EmployeeType inviteType)
     {
         var action = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
 
@@ -446,7 +450,8 @@ public class StudioNotifyService(
 
         // the link is bound to this account, so a profile recreated with the same address is a new letter
         var objectId = user.Id.ToString();
-        if (!await studioNotifyServiceHelper.TryAcceptAsync(profileDeleteNotifyAction, objectId, AddressRecipient(user.Email), EMailSenderName, user.Email))
+        await using var acceptance = await studioNotifyServiceHelper.TryAcceptAsync(profileDeleteNotifyAction, objectId, AddressRecipient(user.Email), EMailSenderName, user.Email);
+        if (!acceptance.Accepted)
         {
             return false;
         }
@@ -454,6 +459,7 @@ public class StudioNotifyService(
         await profileDeleteNotifyAction.Init(user);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(profileDeleteNotifyAction, objectId, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+        acceptance.Complete();
 
         return true;
     }
@@ -570,8 +576,9 @@ public class StudioNotifyService(
 
     #region Portal Deactivation & Deletion
 
-    // asked before the links are built: false for a repeat, which builds no links and records nothing
-    public async Task<bool> TryAcceptPortalDeactivationAsync(Tenant t)
+    // asked before the links are built: refused for a repeat, which builds no links and records nothing; the caller
+    // completes the answer once the letter is sent and disposes it, which releases it after a failure
+    public async Task<NotifyAcceptance> TryAcceptPortalDeactivationAsync(Tenant t)
     {
         var owner = await userManager.GetUsersAsync(t.OwnerId);
         var action = serviceProvider.GetService<PortalDeactivateNotifyAction>();
@@ -579,8 +586,9 @@ public class StudioNotifyService(
         return await studioNotifyServiceHelper.TryAcceptAsync(action, null, owner, EMailSenderName, owner.Email);
     }
 
-    // asked before the link is built: false for a repeat, which builds no link
-    public async Task<bool> TryAcceptPortalDeletionAsync(Tenant t, bool checkActivation = true)
+    // asked before the link is built: refused for a repeat, which builds no link; the caller completes the answer once
+    // the letter is sent and disposes it, which releases it after a failure
+    public async Task<NotifyAcceptance> TryAcceptPortalDeletionAsync(Tenant t, bool checkActivation = true)
     {
         var owner = await userManager.GetUsersAsync(t.OwnerId);
         var action = serviceProvider.GetService<PortalDeleteNotifyAction>();
@@ -839,7 +847,7 @@ public class StudioNotifyService(
     {
         var storageEncryptionErrorNotifyAction = serviceProvider.GetService<StorageEncryptionErrorNotifyAction>();
 
-        var users =  await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
+        var users = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
 
         foreach (var u in users)
         {

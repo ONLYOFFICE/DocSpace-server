@@ -31,15 +31,18 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
 /// The question the sending code asks before it builds what only a new letter needs - a confirmation link, an audit
 /// record, a spent invitation: a letter already sent, or a request for it accepted a moment ago, is refused, and an
-/// accepted request books the letter for a moment so that a burst of calls builds it once.
+/// accepted request books the letter for a moment so that a burst of calls builds it once. The booking lives on a key
+/// of its own and is taken back when the sending code fails before it hands the letter over.
 /// </summary>
 /// <remarks>
-/// Each test gets a cache of its own; the cache is memory-only and the lock in-memory.
+/// Each test gets a cache of its own; the cache is memory-only and the lock in-memory, except where two nodes share a
+/// distributed level.
 /// </remarks>
 public class NotifyRepeatAcceptTests
 {
@@ -56,9 +59,9 @@ public class NotifyRepeatAcceptTests
 
         // The engine passes an empty object id for a letter without an object, the sending code passes none.
         await service.IsDuplicateAsync(Request(action, "", [new TagValue("LinkAddress", "owner@example.com")]));
-        var accepted = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, null, ["owner@example.com"]);
+        await using var acceptance = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, null, ["owner@example.com"]);
 
-        accepted.Should().BeFalse();
+        acceptance.Accepted.Should().BeFalse();
     }
 
     [Fact]
@@ -69,8 +72,8 @@ public class NotifyRepeatAcceptTests
         var service = CreateService();
         var action = new TestAction("profile_delete");
 
-        var first = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
-        var second = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        var first = await AcceptAsync(service, action);
+        var second = await AcceptAsync(service, action);
 
         first.Should().BeTrue();
         second.Should().BeFalse();
@@ -82,7 +85,7 @@ public class NotifyRepeatAcceptTests
         var service = CreateService();
         var action = new TestAction("profile_delete");
 
-        await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        await AcceptAsync(service, action);
         var letter = await service.IsDuplicateAsync(Request(action, RoomId));
 
         letter.Should().BeFalse("the request was accepted so that this letter goes out");
@@ -91,14 +94,14 @@ public class NotifyRepeatAcceptTests
     [Fact]
     public async Task AfterTheAcceptance_ARequestIsAcceptedAgain()
     {
-        // The engine never marked the letter (its delivery failed, or it never reached the engine), so once the
-        // acceptance runs out the letter may be asked for again.
+        // The engine never marked the letter (it never reached the engine), so once the acceptance runs out the letter
+        // may be asked for again.
         var service = CreateService(accepted: "00:00:01");
         var action = new TestAction("profile_delete");
 
-        await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        await AcceptAsync(service, action);
         await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
-        var again = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        var again = await AcceptAsync(service, action);
 
         again.Should().BeTrue();
     }
@@ -106,47 +109,52 @@ public class NotifyRepeatAcceptTests
     [Fact]
     public async Task SentLetter_StaysRefusedAfterTheAcceptanceRunsOut()
     {
-        // The acceptance and the engine's mark share the key, so the mark has to replace the acceptance with its own
-        // life rather than run out with it.
         var service = CreateService(accepted: "00:00:01");
         var action = new TestAction("profile_delete");
 
-        await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        await AcceptAsync(service, action);
         await service.IsDuplicateAsync(Request(action, RoomId));
         await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
-        var again = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        var again = await AcceptAsync(service, action);
 
         again.Should().BeFalse();
     }
 
     [Fact]
-    public async Task FailedDelivery_TakesTheAcceptanceBack()
+    public async Task LateAcceptance_LeavesTheSentMarkInPlace()
     {
-        var service = CreateService();
+        // A request reads no mark; before it records its acceptance, another node sends the letter and marks it. The
+        // acceptance written after that must not take the place of the mark, or the letter could go out again once the
+        // acceptance runs out.
+        var distributed = new HookedDistributedCache();
+        var locks = new InMemoryLockProvider();
+        var nodeA = CreateService(cache: CreateNodeCache(distributed), locks: locks);
+        var nodeB = CreateService(accepted: "00:00:01", cache: CreateNodeCache(distributed), locks: locks);
         var action = new TestAction("profile_delete");
+        var mark = NotifyDeduplicationService.GetCacheKey(TenantId, action.ID, EmailSender, Recipient, RoomId, []);
 
-        await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
-        var request = Request(action, RoomId);
-        await service.IsDuplicateAsync(request);
-        await service.ReleaseAsync(request);
-        var again = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        distributed.AfterFirstRead(mark, async () => await nodeA.IsDuplicateAsync(Request(action, RoomId)));
 
-        again.Should().BeTrue("nobody got the letter, so asking for it again must not wait for the acceptance to run out");
+        var late = await AcceptAsync(nodeB, action);
+        await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
+        var again = await AcceptAsync(nodeB, action);
+
+        late.Should().BeTrue("the request read no mark before the other node sent the letter");
+        again.Should().BeFalse("the letter went out within the period");
     }
 
     [Fact]
     public async Task LetterSentByAnotherNode_IsHeldBackDespiteTheAcceptanceInMemory()
     {
         // Two nodes share the distributed level and the lock. Node B accepted the request and holds the acceptance in
-        // its own memory; node A sends the letter first. B's engine must see A's mark in the distributed level rather
-        // than its own stale acceptance.
-        var distributed = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        // its own memory; node A sends the letter first. B's engine must see A's mark rather than let its own letter go.
+        var distributed = new HookedDistributedCache();
         var locks = new InMemoryLockProvider();
         var nodeA = CreateService(cache: CreateNodeCache(distributed), locks: locks);
         var nodeB = CreateService(cache: CreateNodeCache(distributed), locks: locks);
         var action = new TestAction("profile_delete");
 
-        await nodeB.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
+        await AcceptAsync(nodeB, action);
         var sentByA = await nodeA.IsDuplicateAsync(Request(action, RoomId));
         var sentByB = await nodeB.IsDuplicateAsync(Request(action, RoomId));
 
@@ -155,13 +163,88 @@ public class NotifyRepeatAcceptTests
     }
 
     [Fact]
+    public async Task FailedDelivery_TakesTheAcceptanceBack()
+    {
+        var service = CreateService();
+        var action = new TestAction("profile_delete");
+
+        await AcceptAsync(service, action);
+        var request = Request(action, RoomId);
+        await service.IsDuplicateAsync(request);
+        await service.ReleaseAsync(request);
+        var again = await AcceptAsync(service, action);
+
+        again.Should().BeTrue("nobody got the letter, so asking for it again must not wait for the acceptance to run out");
+    }
+
+    [Fact]
+    public async Task AcceptanceNotCompleted_IsTakenBack()
+    {
+        // The sending code failed before it handed the letter over - the link, the audit record or the publishing
+        // threw - so the repeat right after the failure must build the letter rather than be refused for one never sent.
+        var service = CreateService();
+        var action = new TestAction("profile_delete");
+
+        await using (var failed = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []))
+        {
+            failed.Accepted.Should().BeTrue();
+        }
+
+        var again = await AcceptAsync(service, action);
+
+        again.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task CompletedAcceptance_IsKept()
+    {
+        var service = CreateService();
+        var action = new TestAction("profile_delete");
+
+        await using (var sent = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []))
+        {
+            sent.Complete();
+        }
+
+        var again = await AcceptAsync(service, action);
+
+        again.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ZeroAcceptance_StillRefusesALetterAlreadySent()
+    {
+        // A zero acceptance turns off holding back a burst, not the check of a letter the engine already sent.
+        var service = CreateService(accepted: "00:00:00");
+        var action = new TestAction("profile_delete");
+
+        await service.IsDuplicateAsync(Request(action, RoomId));
+        var again = await AcceptAsync(service, action);
+
+        again.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task ZeroAcceptance_RecordsNothing()
+    {
+        var service = CreateService(accepted: "00:00:00");
+        var action = new TestAction("profile_delete");
+
+        var first = await AcceptAsync(service, action);
+        var second = await AcceptAsync(service, action);
+
+        first.Should().BeTrue();
+        second.Should().BeTrue();
+    }
+
+    [Fact]
     public async Task AnotherAddress_IsAcceptedSeparately()
     {
         var service = CreateService();
         var action = new TestAction("portal_deactivate", tags: ["LinkAddress"]);
 
-        await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, null, ["owner@example.com"]);
-        var otherAddress = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, null, ["new@example.com"]);
+        await AcceptAsync(service, action, objectId: null, "owner@example.com");
+        var otherAddress = await AcceptAsync(service, action, objectId: null, "new@example.com");
 
         otherAddress.Should().BeTrue();
     }
@@ -175,8 +258,8 @@ public class NotifyRepeatAcceptTests
         await service.IsDuplicateAsync(Request(new TestAction("change_password_v115"), null));
         var action = new TestAction("change_password_v115", suppressRepeats: false);
 
-        var first = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, null, []);
-        var second = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, null, []);
+        var first = await AcceptAsync(service, action, objectId: null);
+        var second = await AcceptAsync(service, action, objectId: null);
 
         first.Should().BeTrue();
         second.Should().BeTrue();
@@ -193,11 +276,20 @@ public class NotifyRepeatAcceptTests
         await cache.SetAsync(NotifyDeduplicationService.GetCacheKey(TenantId, action.ID, EmailSender, Recipient, RoomId, []), true, TimeSpan.FromMinutes(1), token: TestContext.Current.CancellationToken);
         await cache.SetAsync(NotifyDeduplicationService.GetCacheKey(TenantId, action.ID, EmailSender, Recipient, RoomId, [""]), true, TimeSpan.FromMinutes(1), token: TestContext.Current.CancellationToken);
 
-        var noValues = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, []);
-        var emptyValue = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, RoomId, [""]);
+        var noValues = await AcceptAsync(service, action);
+        var emptyValue = await AcceptAsync(service, action, RoomId, "");
 
         noValues.Should().BeTrue();
         emptyValue.Should().BeTrue();
+    }
+
+    // Asks, and hands the letter over when accepted, as the sending code does on success.
+    private static async Task<bool> AcceptAsync(NotifyDeduplicationService service, INotifyAction action, string? objectId = RoomId, params string[] values)
+    {
+        await using var acceptance = await service.TryAcceptAsync(TenantId, action, EmailSender, Recipient, objectId, values);
+        acceptance.Complete();
+
+        return acceptance.Accepted;
     }
 
     private static NotifyDeduplicationService CreateService(string? accepted = null, IFusionCache? cache = null, InMemoryLockProvider? locks = null)
@@ -232,6 +324,71 @@ public class NotifyRepeatAcceptTests
             CurrentSender = EmailSender,
             Arguments = tags ?? []
         };
+    }
+
+    /// <summary>
+    /// A distributed level shared by the nodes of a test, which can let something happen right after a node read a
+    /// key and before it acts on what it read.
+    /// </summary>
+    private sealed class HookedDistributedCache : IDistributedCache
+    {
+        private readonly MemoryDistributedCache _inner = new(Options.Create(new MemoryDistributedCacheOptions()));
+        private string? _hookedKey;
+        private Func<Task>? _hook;
+
+        public void AfterFirstRead(string key, Func<Task> hook)
+        {
+            _hookedKey = key;
+            _hook = hook;
+        }
+
+        public byte[]? Get(string key)
+        {
+            return _inner.Get(key);
+        }
+
+        public async Task<byte[]?> GetAsync(string key, CancellationToken token = default)
+        {
+            var value = await _inner.GetAsync(key, token);
+
+            // FusionCache adds a prefix of its own to the keys it stores on this level
+            if (_hookedKey is not null && key.EndsWith(_hookedKey, StringComparison.Ordinal) && Interlocked.Exchange(ref _hook, null) is { } hook)
+            {
+                await hook();
+            }
+
+            return value;
+        }
+
+        public void Set(string key, byte[] value, DistributedCacheEntryOptions options)
+        {
+            _inner.Set(key, value, options);
+        }
+
+        public Task SetAsync(string key, byte[] value, DistributedCacheEntryOptions options, CancellationToken token = default)
+        {
+            return _inner.SetAsync(key, value, options, token);
+        }
+
+        public void Refresh(string key)
+        {
+            _inner.Refresh(key);
+        }
+
+        public Task RefreshAsync(string key, CancellationToken token = default)
+        {
+            return _inner.RefreshAsync(key, token);
+        }
+
+        public void Remove(string key)
+        {
+            _inner.Remove(key);
+        }
+
+        public Task RemoveAsync(string key, CancellationToken token = default)
+        {
+            return _inner.RemoveAsync(key, token);
+        }
     }
 
     private sealed class TestAction(string id, bool suppressRepeats = true, string[]? tags = null) : INotifyAction

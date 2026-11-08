@@ -86,7 +86,7 @@ public class FileSharingAceHelper(
         var selfLeave = aceWrappers.Count > 0 && aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None);
 
         if (!selfLeave &&
-            !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r,_) =>
+            !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r, _) =>
             {
                 var roomType = room?.FolderType;
 
@@ -452,7 +452,8 @@ public class FileSharingAceHelper(
                 var isAgent = entry is IFolder { FolderType: FolderType.AiRoom };
 
                 // a repeat of the same invitation within the period builds no link and spends no invitation
-                if (await studioNotifyService.TryAcceptEmailRoomInviteAsync(w.Email, entry.UniqID, inviteType, isAgent))
+                await using var acceptance = await studioNotifyService.TryAcceptEmailRoomInviteAsync(w.Email, entry.UniqID, inviteType, isAgent);
+                if (acceptance.Accepted)
                 {
                     var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
                     var shortenLink = await urlShortener.GetShortenLinkAsync(link);
@@ -466,6 +467,7 @@ public class FileSharingAceHelper(
                         isAgent,
                         culture,
                         true);
+                    acceptance.Complete();
                 }
             }
             else
@@ -612,7 +614,7 @@ public class FileSharingAceHelper(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagRecent = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync();
-        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry), ..tagRecent];
+        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry), .. tagRecent];
 
         var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
         var currentShareIsNullOrEmpty = currentShare == null || !currentShare.Any();

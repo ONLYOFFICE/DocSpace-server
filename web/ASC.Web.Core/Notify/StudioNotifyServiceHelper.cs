@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -50,7 +50,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
 
         await SendNoticeToAsync(action, recipients, null, false, null);
     }
-    
+
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames)
     {
         await SendNoticeToAsync(action, recipients, senderNames, false, null);
@@ -67,10 +67,11 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
         await SendNoticeToAsync(action, objectId, recipients, senderNames, false, null);
     }
 
-    // whether to build the letter SendNoticeToAsync would send with these values: false when it is a repeat, true when
-    // it is not, and then the letter is booked for a moment so that a burst of calls builds it once; keyTags are the
-    // values of the action's DeduplicationTags, in their order
-    public async Task<bool> TryAcceptAsync(INotifyAction action, string objectId, IRecipient recipient, string senderName, params string[] keyTags)
+    // whether to build the letter SendNoticeToAsync would send with these values: refused when it is a repeat,
+    // accepted when it is not, and then the letter is booked for a moment so that a burst of calls builds it once; the
+    // caller disposes the answer and completes it once the letter is sent, so a failure before that releases the
+    // booking; keyTags are the values of the action's DeduplicationTags, in their order
+    public async Task<NotifyAcceptance> TryAcceptAsync(INotifyAction action, string objectId, IRecipient recipient, string senderName, params string[] keyTags)
     {
         return await notifyDeduplicationService.TryAcceptAsync(tenantManager.GetCurrentTenantId(), action, senderName, recipient.ID, objectId, keyTags);
     }
@@ -119,7 +120,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
 
         if (action.Tags != null)
         {
-            item.Tags = action.Tags.Select(Tag (r) => new Tag{ Key = r.Tag, Value = r.Value?.ToString() }).ToList();
+            item.Tags = action.Tags.Select(Tag (r) => new Tag { Key = r.Tag, Value = r.Value?.ToString() }).ToList();
         }
 
         await eventBus.PublishAsync(item);

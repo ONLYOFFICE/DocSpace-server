@@ -56,10 +56,6 @@ public class NotifyDeduplicationService(
     private static readonly TimeSpan _defaultAcceptedPeriod = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan _lockTimeout = TimeSpan.FromSeconds(10);
 
-    // The value of a letter's key: sent by the engine, or only accepted by the sending code.
-    private const bool Sent = true;
-    private const bool Accepted = false;
-
     private readonly TimeSpan _period =
         TimeSpan.TryParse(configuration["core:notify:deduplication:period"], CultureInfo.InvariantCulture, out var period) && period >= TimeSpan.Zero
             ? period
@@ -80,40 +76,57 @@ public class NotifyDeduplicationService(
 
     /// <summary>
     /// Decides, before the sending code builds what only a new letter needs (a confirmation link, an audit record, a
-    /// spent invitation), whether to go on. Returns false when the letter went out within the period or was accepted a
-    /// moment ago; otherwise accepts this request and returns true. The acceptance is the letter's own mark with a
-    /// shorter life: it holds back a burst of calls until the engine sends the letter and turns it into the mark, or
-    /// until it runs out for a letter that never reaches the engine (an address left out as not activated, a free
-    /// portal over its letter count). A failed delivery takes it back. The caller passes exactly what the letter will
+    /// spent invitation), whether to go on. Refuses when the letter went out within the period or was accepted a moment
+    /// ago; otherwise accepts this request. The acceptance holds back a burst of calls until the engine sends the letter,
+    /// or until it runs out for a letter that never reaches the engine (an address left out as not activated, a free
+    /// portal over its letter count). It lives on a key of its own, which the engine never reads or writes, so a late
+    /// acceptance cannot replace the engine's mark. The caller disposes the answer and completes it once the letter is
+    /// handed over; a failure before that takes the acceptance back. The caller passes exactly what the letter will
     /// carry into its key.
     /// </summary>
-    public async Task<bool> TryAcceptAsync(int tenantId, INotifyAction action, string sender, string recipientId, string objectId, IEnumerable<string> discriminators)
+    public async Task<NotifyAcceptance> TryAcceptAsync(int tenantId, INotifyAction action, string sender, string recipientId, string objectId, IEnumerable<string> discriminators)
     {
-        if (!action.SuppressRepeats || AcceptedPeriod <= TimeSpan.Zero)
+        if (!action.SuppressRepeats || Period <= TimeSpan.Zero)
         {
-            return true;
+            return NotifyAcceptance.Unchecked;
         }
 
         var values = discriminators.ToArray();
         if (values.Length != action.DeduplicationTags.Length || !HasEveryValue(values))
         {
-            return true;
+            return NotifyAcceptance.Unchecked;
         }
 
         var key = GetCacheKey(tenantId, action.ID, sender, recipientId, objectId, values);
+        var acceptedKey = GetAcceptedKey(key);
 
-        if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
+        var sent = hybridCache.TryGetAsync<bool>(key).AsTask();
+        var accepted = hybridCache.TryGetAsync<bool>(acceptedKey).AsTask();
+
+        if ((await sent).HasValue || (await accepted).HasValue)
         {
             logger.DebugDuplicateSuppressed(action.ID, sender, tenantId);
-            return false;
+            return NotifyAcceptance.Refused;
+        }
+
+        // a zero acceptance turns off holding back a burst, not the check of a letter already sent above
+        if (AcceptedPeriod <= TimeSpan.Zero)
+        {
+            return NotifyAcceptance.Unchecked;
         }
 
         // No lock: it would cost two more round trips per recipient of every call. Two calls that both find no mark are
         // both accepted, which costs one more link; the letter itself still goes out once, the engine checks it under
         // its own lock.
-        await hybridCache.SetAsync(key, Accepted, options => options.SetDuration(AcceptedPeriod).SetSkipBackplaneNotifications(true));
+        await hybridCache.SetAsync(acceptedKey, true, options => options.SetDuration(AcceptedPeriod).SetSkipBackplaneNotifications(true));
 
-        return true;
+        return NotifyAcceptance.Recorded(this, acceptedKey);
+    }
+
+    // with the backplane notification: a repeat checked on another node may have taken the acceptance into its memory
+    internal async Task ReleaseAcceptanceAsync(string acceptedKey)
+    {
+        await hybridCache.RemoveAsync(acceptedKey);
     }
 
     public async Task<bool> IsDuplicateAsync(NotifyRequest request)
@@ -137,7 +150,7 @@ public class NotifyDeduplicationService(
 
         var key = GetCacheKey(request._tenantId, request.NotifyAction.ID, request.CurrentSender, request.Recipient.ID, request.ObjectID, discriminators);
 
-        if (await IsSentAsync(key, fromMemory: true))
+        if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
         {
             logger.DebugDuplicateSuppressed(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
             return true;
@@ -145,17 +158,15 @@ public class NotifyDeduplicationService(
 
         await using (await distributedLockProvider.TryAcquireLockAsync($"{key}_lock", _lockTimeout))
         {
-            // Past the lock, memory may hold this node's own acceptance while another node has already sent the letter
-            // and left the mark only in the distributed cache.
-            if (await IsSentAsync(key, fromMemory: !hybridCache.HasDistributedCache))
+            if ((await hybridCache.TryGetAsync<bool>(key)).HasValue)
             {
                 logger.DebugDuplicateSuppressed(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
                 return true;
             }
 
-            // No backplane message: another node holds at most the acceptance in memory, which refuses a repeat request
-            // just as the mark does, and the message would make every node evict the key once per letter of a bulk send.
-            await hybridCache.SetAsync(key, Sent, options => options.SetDuration(period).SetSkipBackplaneNotifications(true));
+            // a new mark replaces nothing another node holds in memory - a miss is never kept there - so the backplane
+            // message would only make every node evict a key it does not have, once per letter of a bulk send
+            await hybridCache.SetAsync(key, true, options => options.SetDuration(period).SetSkipBackplaneNotifications(true));
         }
 
         request.Properties[GetMarkProperty(request.CurrentSender)] = key;
@@ -165,8 +176,8 @@ public class NotifyDeduplicationService(
 
     /// <summary>
     /// Takes back the mark this request set, once its channel failed to deliver the letter, so that the next repeat
-    /// goes out instead of being dropped for a letter nobody got; the acceptance of the request for it goes with the
-    /// mark, as they share the key. A request that was itself suppressed set no mark and releases nothing.
+    /// goes out instead of being dropped for a letter nobody got; the acceptance of the request for it goes too. A
+    /// request that was itself suppressed set no mark and releases nothing.
     /// </summary>
     public async Task ReleaseAsync(NotifyRequest request)
     {
@@ -180,6 +191,7 @@ public class NotifyDeduplicationService(
 
         // with the backplane notification: another node may hold the mark in memory since a repeat it checked
         await hybridCache.RemoveAsync(key);
+        await hybridCache.RemoveAsync(GetAcceptedKey(key));
 
         logger.DebugMarkReleased(request.NotifyAction.ID, request.CurrentSender, request._tenantId);
     }
@@ -201,11 +213,12 @@ public class NotifyDeduplicationService(
         return Array.TrueForAll(discriminators, value => !string.IsNullOrEmpty(value));
     }
 
-    private async Task<bool> IsSentAsync(string key, bool fromMemory)
+    /// <summary>
+    /// The key of the acceptance the sending code records for the letter whose mark lies under <paramref name="key"/>.
+    /// </summary>
+    public static string GetAcceptedKey(string key)
     {
-        var mark = await hybridCache.TryGetAsync<bool>(key, options => options.SetSkipMemoryCacheRead(!fromMemory));
-
-        return mark.HasValue && mark.Value == Sent;
+        return key + "accepted";
     }
 
     private static string GetMarkProperty(string sender)

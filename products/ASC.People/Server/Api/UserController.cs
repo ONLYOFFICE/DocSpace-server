@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -282,7 +282,7 @@ public class UserController(
         }
         else
         {
-            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type),Constants.Action_AddRemoveUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type), Constants.Action_AddRemoveUser);
             var tenant = tenantManager.GetCurrentTenant();
             var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
@@ -547,12 +547,14 @@ public class UserController(
             user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture, false);
 
             // the same invitation already went out within the period: no new link, no record, no spent invitation
-            if (await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, invite.Type))
+            await using var acceptance = await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, invite.Type);
+            if (acceptance.Accepted)
             {
                 var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
                 await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, invite.Type, inDto.Culture, true);
+                acceptance.Complete();
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
             }
 
@@ -1732,7 +1734,8 @@ public class UserController(
                     continue;
                 }
 
-                if (!await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, type))
+                await using var acceptance = await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, type);
+                if (!acceptance.Accepted)
                 {
                     continue;
                 }
@@ -1742,6 +1745,7 @@ public class UserController(
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
                 await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, type, culture);
+                acceptance.Complete();
                 sent.Add(user);
             }
             else
@@ -3364,7 +3368,7 @@ public class UserControllerAdditional<T>(
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         var securityDao = daoFactory.GetSecurityDao<T>();
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
 
         var offset = inDto.StartIndex;
         var count = inDto.Count;

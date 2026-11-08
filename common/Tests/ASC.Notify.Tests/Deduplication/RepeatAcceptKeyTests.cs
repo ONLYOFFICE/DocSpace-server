@@ -58,9 +58,11 @@ public class RepeatAcceptKeyTests
             var email = UniqueEmail();
             var roomId = $"folder_{Guid.NewGuid():N}";
 
-            (await service.TryAcceptEmailRoomInviteAsync(email, roomId, EmployeeType.User, isAgent)).Should().BeTrue();
+            await using var acceptance = await service.TryAcceptEmailRoomInviteAsync(email, roomId, EmployeeType.User, isAgent);
+            acceptance.Accepted.Should().BeTrue();
 
             await service.SendEmailRoomInviteAsync(email, roomId, "Room", scope.PortalUrl, EmployeeType.User, isAgent);
+            acceptance.Complete();
         });
     }
 
@@ -71,9 +73,11 @@ public class RepeatAcceptKeyTests
         {
             var email = UniqueEmail();
 
-            (await service.TryAcceptDocSpaceInviteAsync(email, EmployeeType.RoomAdmin)).Should().BeTrue();
+            await using var acceptance = await service.TryAcceptDocSpaceInviteAsync(email, EmployeeType.RoomAdmin);
+            acceptance.Accepted.Should().BeTrue();
 
             await service.SendDocSpaceInviteAsync(email, scope.PortalUrl, EmployeeType.RoomAdmin);
+            acceptance.Complete();
         });
     }
 
@@ -103,9 +107,11 @@ public class RepeatAcceptKeyTests
     {
         await AssertAcceptedUnderTheEngineKeyAsync(async (service, scope) =>
         {
-            (await service.TryAcceptPortalDeactivationAsync(scope.Tenant)).Should().BeTrue();
+            await using var acceptance = await service.TryAcceptPortalDeactivationAsync(scope.Tenant);
+            acceptance.Accepted.Should().BeTrue();
 
             await service.SendMsgPortalDeactivationAsync(scope.Tenant, scope.PortalUrl, scope.PortalUrl);
+            acceptance.Complete();
         });
     }
 
@@ -117,9 +123,11 @@ public class RepeatAcceptKeyTests
         // The two ways differ in the recipient: the owner as a user, or the owner's address alone.
         await AssertAcceptedUnderTheEngineKeyAsync(async (service, scope) =>
         {
-            (await service.TryAcceptPortalDeletionAsync(scope.Tenant, checkActivation)).Should().BeTrue();
+            await using var acceptance = await service.TryAcceptPortalDeletionAsync(scope.Tenant, checkActivation);
+            acceptance.Accepted.Should().BeTrue();
 
             await service.SendMsgPortalDeletionAsync(scope.Tenant, scope.PortalUrl, false, checkActivation);
+            acceptance.Complete();
         });
     }
 
@@ -153,10 +161,12 @@ public class RepeatAcceptKeyTests
         {
             foreach (var recipient in letter.Recipients)
             {
-                var mark = await cache.TryGetAsync<bool>(EngineKey(letter, action, sender, recipient.Id), token: TestContext.Current.CancellationToken);
+                var key = EngineKey(letter, action, sender, recipient.Id);
+                var acceptance = await cache.TryGetAsync<bool>(NotifyDeduplicationService.GetAcceptedKey(key), token: TestContext.Current.CancellationToken);
+                var mark = await cache.TryGetAsync<bool>(key, token: TestContext.Current.CancellationToken);
 
-                mark.HasValue.Should().BeTrue($"the API accepted {action.ID} for {recipient.Id} through {sender} under the key the engine reads");
-                mark.Value.Should().BeFalse("the letter is only accepted, the engine has not sent it");
+                acceptance.HasValue.Should().BeTrue($"the API accepted {action.ID} for {recipient.Id} through {sender} beside the key the engine reads");
+                mark.HasValue.Should().BeFalse("the letter is only accepted, the engine has not sent it");
             }
         }
     }

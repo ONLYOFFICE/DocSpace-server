@@ -43,8 +43,18 @@ internal sealed class RecordingEventBus : IEventBus
 {
     public List<IntegrationEvent> Published { get; } = [];
 
+    /// <summary>How many of the next publications fail, for a case about what a failure leaves behind.</summary>
+    public int FailuresLeft { get; set; }
+
     public Task PublishAsync(IntegrationEvent @event)
     {
+        if (FailuresLeft > 0)
+        {
+            FailuresLeft--;
+
+            throw new InvalidOperationException("Publishing failed, as the case asked.");
+        }
+
         Published.Add(@event);
 
         return Task.CompletedTask;

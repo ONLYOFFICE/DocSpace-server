@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -1031,7 +1031,8 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
-        if (!await studioNotifyService.TryAcceptPortalDeactivationAsync(tenant))
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeactivationAsync(tenant);
+        if (!acceptance.Accepted)
         {
             return;
         }
@@ -1041,6 +1042,7 @@ public class PortalController(
         var continueUrl = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalContinue);
 
         await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, await urlShortener.GetShortenLinkAsync(suspendUrl), await urlShortener.GetShortenLinkAsync(continueUrl));
+        acceptance.Complete();
 
         messageService.Send(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
@@ -1075,7 +1077,8 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
-        if (!await studioNotifyService.TryAcceptPortalDeletionAsync(tenant))
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeletionAsync(tenant);
+        if (!acceptance.Accepted)
         {
             return;
         }
@@ -1089,6 +1092,7 @@ public class PortalController(
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
+        acceptance.Complete();
     }
 
     /// <remarks>
@@ -1341,7 +1345,8 @@ public class PortalController(
             throw new SecurityException("Access Denied.");
         }
 
-        if (!await studioNotifyService.TryAcceptPortalDeletionAsync(tenant, false))
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeletionAsync(tenant, false);
+        if (!acceptance.Accepted)
         {
             return;
         }
@@ -1350,6 +1355,7 @@ public class PortalController(
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), false, false);
+        acceptance.Complete();
     }
 
     private async Task DemandPermissionToDeleteTenantAsync(Tenant tenant)
