@@ -194,9 +194,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The versions of the file after the change", typeof(IAsyncEnumerable<FileDto<int>>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `version`")]
     [SwaggerResponse(402, "Completing the current version needs more space than the room or user storage quota leaves")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, or the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
-    [SwaggerResponse(500, "The file is locked by somebody else, or, when the current version is completed, the file is encrypted, another update of it is in progress, or storing the new version fails")]
+    [SwaggerResponse(500, "When the current version is completed, the file is encrypted, another update of it is in progress, or storing the new version fails")]
     [HttpPut("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> ChangeVersionHistory(ChangeHistoryRequestDto<T> inDto)
     {
@@ -747,9 +747,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The editing revisions of the file after the restore", typeof(IAsyncEnumerable<EditHistoryDto>))]
     [SwaggerResponse(400, "The version is missing or is already the current one")]
     [SwaggerResponse(402, "The restored content does not fit into the storage quota")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file, or, with `url`, may not edit the file or the file is locked by somebody else or being edited")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, the file is locked by somebody else, or, with `url`, may not edit the file or the file is being edited")]
     [SwaggerResponse(404, "Without `url`, the file id or the requested version resolves to nothing")]
-    [SwaggerResponse(500, "The file is locked by somebody else or being edited, another restore of it is in progress, or storing the new version fails; with `url`, also when the file or the version does not exist or the address cannot be fetched")]
+    [SwaggerResponse(500, "The file is being edited, another restore of it is in progress, or storing the new version fails; with `url`, also when the file or the version does not exist or the address cannot be fetched")]
     [AllowAnonymous]
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
@@ -837,9 +837,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "The title is longer than 165 characters, or `lastVersion` is the current version")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(402, "Restoring `lastVersion` needs more space than the room or user storage quota leaves")]
-    [SwaggerResponse(403, "The caller may not read or rename the file or change its version")]
+    [SwaggerResponse(403, "The caller may not read or rename the file or change its version, or the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id, or `lastVersion` of it, resolves to nothing, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
-    [SwaggerResponse(500, "The file is locked by somebody else, a third-party file is renamed while it is being edited, or restoring `lastVersion` fails because the file is being edited, another update of it is in progress or the new version cannot be stored")]
+    [SwaggerResponse(500, "A third-party file is renamed while it is being edited, or restoring `lastVersion` fails because the file is being edited, another update of it is in progress or the new version cannot be stored")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFile(UpdateFileRequestDto<T> inDto)

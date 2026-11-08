@@ -155,7 +155,7 @@ public abstract class EditorController<T>(
     [SwaggerResponse(403, "The caller cannot edit the file, the file is locked or in Trash, somebody is already editing it and the session was claimed alone, or the document service did not accept the tracking request")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
-    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it, or, with `editingAlone=true`, the file is locked by somebody else or lies in Trash")]
+    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it, or, with `editingAlone=true`, the file lies in Trash")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<string> StartEditFile(StartEditRequestDto<T> inDto)
@@ -211,9 +211,9 @@ public abstract class EditorController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The session was refreshed or closed", typeof(ItemKeyValuePair<bool, string>))]
     [SwaggerResponse(401, "An anonymous caller has no external link, or refreshes the session through a link that does not grant editing")]
-    [SwaggerResponse(403, "The document key does not match the revision being edited, or the caller has none of the editing rights on the file")]
+    [SwaggerResponse(403, "The document key does not match the revision being edited, the caller has none of the editing rights on the file, or the session is refreshed while the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
-    [SwaggerResponse(500, "The session is refreshed while the file is locked by somebody else or lies in Trash")]
+    [SwaggerResponse(500, "The session is refreshed while the file lies in Trash")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<ItemKeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
