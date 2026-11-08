@@ -33,80 +33,14 @@
 
 package com.asc.registration.container.service;
 
-import com.asc.common.application.proto.ClientRegistrationServiceGrpc;
-import com.asc.common.application.proto.ClientResponse;
-import com.asc.common.application.proto.GetClientRequest;
+import com.asc.registration.application.service.AbstractGrpcClientRegistrationService;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
-import com.google.protobuf.Timestamp;
-import io.grpc.Status;
-import io.grpc.stub.StreamObserver;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
 
-/**
- * gRPC service implementation for client registration.
- *
- * <p>This service provides a gRPC endpoint to fetch client details by client ID. It extends {@link
- * ClientRegistrationServiceGrpc.ClientRegistrationServiceImplBase} to integrate with gRPC
- * infrastructure and handle requests.
- */
-@Slf4j
+/** Answers authorization's lookups of a client by its id. */
 @GrpcService
-@RequiredArgsConstructor
-public class GrpcClientRegistrationService
-    extends ClientRegistrationServiceGrpc.ClientRegistrationServiceImplBase {
-
-  private final ClientApplicationService clientApplicationService;
-
-  /**
-   * Fetches client details for the given client ID.
-   *
-   * <p>Constructs a {@link ClientResponse} containing the client's details and sends it back to the
-   * caller. If the client is not found, an appropriate error is returned.
-   *
-   * @param request the {@link GetClientRequest} containing the client ID.
-   * @param responseObserver the {@link StreamObserver} to send the {@link ClientResponse}.
-   */
-  public void getClient(GetClientRequest request, StreamObserver<ClientResponse> responseObserver) {
-    try {
-      var client = clientApplicationService.getClient(request.getClientId());
-      responseObserver.onNext(
-          ClientResponse.newBuilder()
-              .setClientId(client.getClientId())
-              .setClientSecret(client.getClientSecret())
-              .setDescription(client.getDescription() != null ? client.getDescription() : "")
-              .setWebsiteUrl(client.getWebsiteUrl() != null ? client.getWebsiteUrl() : "")
-              .setTermsUrl(client.getTermsUrl() != null ? client.getTermsUrl() : "")
-              .setPolicyUrl(client.getPolicyUrl() != null ? client.getPolicyUrl() : "")
-              .addAllAuthenticationMethods(client.getAuthenticationMethods())
-              .setTenant(client.getTenant())
-              .addAllRedirectUris(client.getRedirectUris())
-              .addAllAllowedOrigins(client.getAllowedOrigins())
-              .addAllLogoutRedirectUris(client.getLogoutRedirectUri())
-              .addAllScopes(client.getScopes())
-              .setCreatedOn(
-                  Timestamp.newBuilder()
-                      .setSeconds(client.getCreatedOn().toEpochSecond())
-                      .setNanos(client.getCreatedOn().getNano())
-                      .build())
-              .setCreatedBy(client.getCreatedBy())
-              .setModifiedOn(
-                  Timestamp.newBuilder()
-                      .setSeconds(client.getModifiedOn().toEpochSecond())
-                      .setNanos(client.getModifiedOn().getNano())
-                      .build())
-              .setModifiedBy(client.getModifiedBy())
-              .setEnabled(client.isEnabled())
-              .setIsPublic(client.isPublic())
-              .build());
-      responseObserver.onCompleted();
-    } catch (Exception e) {
-      log.error("Failed to retrieve client with id: {}", request.getClientId(), e);
-      responseObserver.onError(
-          Status.NOT_FOUND
-              .withDescription("Could not find client with id " + request.getClientId())
-              .asRuntimeException());
-    }
+public class GrpcClientRegistrationService extends AbstractGrpcClientRegistrationService {
+  public GrpcClientRegistrationService(ClientApplicationService clientApplicationService) {
+    super(clientApplicationService);
   }
 }
