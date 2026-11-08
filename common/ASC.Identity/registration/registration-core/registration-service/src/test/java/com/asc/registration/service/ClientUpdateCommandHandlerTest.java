@@ -320,5 +320,51 @@ public class ClientUpdateCommandHandlerTest {
     assertThrows(
         ClientNotFoundException.class,
         () -> clientUpdateCommandHandler.deleteClient(audit, Role.ROLE_ADMIN, command));
+    verify(authorizationMessagePublisher, never()).publish(any(ClientRemovedEvent.class));
+  }
+
+  @Test
+  public void whenClientDeleted_thenRemovalPublishedAfterDelete() {
+    var command =
+        DeleteTenantClientCommand.builder()
+            .tenantId(1)
+            .clientId(client.getId().getValue().toString())
+            .build();
+
+    when(clientQueryRepository.findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class)))
+        .thenReturn(Optional.of(client));
+    when(clientDomainService.deleteClient(any(Audit.class), any(Client.class)))
+        .thenReturn(mock(ClientDeletedEvent.class));
+
+    clientUpdateCommandHandler.deleteClient(audit, Role.ROLE_ADMIN, command);
+
+    var order = inOrder(clientCommandRepository, authorizationMessagePublisher);
+    order
+        .verify(clientCommandRepository)
+        .deleteByTenantIdAndClientId(
+            any(ClientEvent.class), any(TenantId.class), any(ClientId.class));
+    order.verify(authorizationMessagePublisher).publish(any(ClientRemovedEvent.class));
+  }
+
+  @Test
+  public void whenClientDeleteFails_thenRemovalNotPublished() {
+    var command =
+        DeleteTenantClientCommand.builder()
+            .tenantId(1)
+            .clientId(client.getId().getValue().toString())
+            .build();
+
+    when(clientQueryRepository.findByClientIdAndTenantId(any(ClientId.class), any(TenantId.class)))
+        .thenReturn(Optional.of(client));
+    when(clientDomainService.deleteClient(any(Audit.class), any(Client.class)))
+        .thenReturn(mock(ClientDeletedEvent.class));
+    when(clientCommandRepository.deleteByTenantIdAndClientId(
+            any(ClientEvent.class), any(TenantId.class), any(ClientId.class)))
+        .thenThrow(new IllegalStateException("rolled back"));
+
+    assertThrows(
+        IllegalStateException.class,
+        () -> clientUpdateCommandHandler.deleteClient(audit, Role.ROLE_ADMIN, command));
+    verify(authorizationMessagePublisher, never()).publish(any(ClientRemovedEvent.class));
   }
 }

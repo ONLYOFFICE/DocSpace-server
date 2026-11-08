@@ -73,11 +73,23 @@ public class AuthorizationMessagingConfiguration {
   /** The entry queue for processing authorization cleanup messages. */
   public static final String ENTRY_QUEUE = "asc_identity_authorization_cleanup_queue";
 
+  /**
+   * The exchange for the second, delayed run of every cleanup. It catches grants written while the
+   * first run was on its way, by requests that were already in flight when the client went away.
+   */
+  public static final String DELAYED_ENTRY_EXCHANGE =
+      "asc_identity_authorization_cleanup_delayed_exchange";
+
+  /** The queue holding cleanups for their second run until {@link #DELAYED_QUEUE_TTL_MS} passes. */
+  public static final String DELAYED_ENTRY_QUEUE =
+      "asc_identity_authorization_cleanup_delayed_queue";
+
   /** The routing key prefix for RPC messages. Region will be appended (e.g., "rpc.eu"). */
   public static final String AUTHORIZATION_RPC_ROUTING_KEY_PREFIX = "rpc.";
 
   private static final int MAX_QUEUE_SIZE = 15_000;
   private static final int QUEUE_TTL_MS = 3000;
+  private static final int DELAYED_QUEUE_TTL_MS = 60_000;
 
   /**
    * Defines the topic exchange for authorization RPC messages.
@@ -145,10 +157,42 @@ public class AuthorizationMessagingConfiguration {
   }
 
   /**
-   * Defines the fanout exchange for regional message distribution.
+   * Defines the direct exchange for the delayed second run of the cleanups published with one.
    *
-   * @return the {@link FanoutExchange} for regional queues.
+   * @return the {@link DirectExchange} for delayed cleanups.
    */
+  @Bean
+  public DirectExchange authorizationDelayedEntryExchange() {
+    return new DirectExchange(DELAYED_ENTRY_EXCHANGE);
+  }
+
+  /**
+   * Defines the queue that holds cleanups for {@value #DELAYED_QUEUE_TTL_MS}ms before handing them
+   * to the same fanout exchange as the first run.
+   *
+   * @return the {@link Queue} for delayed cleanups.
+   */
+  @Bean
+  public Queue authorizationDelayedEntryQueue() {
+    return QueueBuilder.durable(DELAYED_ENTRY_QUEUE)
+        .withArgument("x-message-ttl", DELAYED_QUEUE_TTL_MS)
+        .withArgument("x-dead-letter-exchange", FANOUT_EXCHANGE)
+        .withArgument("x-max-length", MAX_QUEUE_SIZE)
+        .build();
+  }
+
+  /**
+   * Binds the delayed cleanup queue to its exchange.
+   *
+   * @return the {@link Binding} for delayed cleanups.
+   */
+  @Bean
+  public Binding authorizationDelayedEntryQueueBinding() {
+    return BindingBuilder.bind(authorizationDelayedEntryQueue())
+        .to(authorizationDelayedEntryExchange())
+        .with(Strings.EMPTY);
+  }
+
   @Bean
   public FanoutExchange authorizationFanoutExchange() {
     return new FanoutExchange(FANOUT_EXCHANGE);

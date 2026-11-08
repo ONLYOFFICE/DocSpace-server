@@ -15,6 +15,9 @@ spring:
           max-interval: ${RABBIT_LISTENER_RETRY_MAX_INTERVAL:3000}
           multiplier: ${RABBIT_LISTENER_RETRY_MULTIPLIER:3}
     password: ${RABBIT_PASSWORD:guest}
+    publisher-confirm-type: ${RABBIT_PUBLISHER_CONFIRM_TYPE:correlated}
+    connection-timeout: ${RABBIT_CONNECTION_TIMEOUT:5s}
+    channel-rpc-timeout: ${RABBIT_CHANNEL_RPC_TIMEOUT:5s}
     port: ${RABBIT_PORT:5672}
     username: ${RABBIT_USER_NAME:guest}
     virtual-host: ${RABBIT_VIRTUAL_HOST:}

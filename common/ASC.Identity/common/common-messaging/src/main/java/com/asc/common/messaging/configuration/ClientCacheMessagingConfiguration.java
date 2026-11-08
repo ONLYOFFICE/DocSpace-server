@@ -76,6 +76,16 @@ public class ClientCacheMessagingConfiguration {
   private static final int QUEUE_TTL_MS = 3000;
 
   /**
+   * Returns the queue through which the authorization service of a region evicts its client cache.
+   *
+   * @param region the region the queue belongs to
+   * @return the queue name
+   */
+  public static String authorizationRegionQueue(String region) {
+    return "asc_identity_authorization_client_cache_" + region.toLowerCase() + "_queue";
+  }
+
+  /**
    * Defines the direct exchange for client cache cleanup entry messages.
    *
    * @return the {@link DirectExchange} for the entry queue.

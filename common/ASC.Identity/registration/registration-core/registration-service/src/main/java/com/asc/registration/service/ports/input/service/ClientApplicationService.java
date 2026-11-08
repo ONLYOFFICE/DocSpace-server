@@ -86,6 +86,15 @@ public interface ClientApplicationService {
   ClientResponse getClient(@NotBlank String clientId);
 
   /**
+   * Retrieves detailed information for a client straight from the store, bypassing the cache. For
+   * callers that cache clients themselves and must not cache a stale answer again.
+   *
+   * @param clientId the unique identifier of the client.
+   * @return a {@link ClientResponse} containing the detailed information of the specified client.
+   */
+  ClientResponse getStoredClient(@NotBlank String clientId);
+
+  /**
    * Retrieves basic client information based on the provided query.
    *
    * <p>Access control:

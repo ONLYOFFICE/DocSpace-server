@@ -74,6 +74,8 @@ public class BackupCoverageTests
         ["notify_info"] = "Transient notification state.",
         ["event_bus_integration_event_log"] = "Transient event-bus outbox.",
         ["hosting_instance_registration"] = "Instance registry of the source installation; also in _ignoredTables.",
+        ["identity_pending_messages"] = "Transient outbox of messages the broker did not confirm; no tenant column.",
+        ["identity_purge_cursors"] = "Where the stale-grant purge event resumes; it starts over on its own.",
         ["identity_shedlock"] = "Distributed lock state.",
         ["dbip_lookup"] = "GeoIP reference data, rebuilt from its own source.",
         ["webstudio_index"] = "Search index bookkeeping, rebuilt on demand.",
