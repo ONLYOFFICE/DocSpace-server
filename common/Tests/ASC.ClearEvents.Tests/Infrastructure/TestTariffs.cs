@@ -48,6 +48,7 @@ public static class TestTariffs
 {
     private static readonly ConcurrentDictionary<int, (TariffState State, bool FreeQuota)> _tariffs = new();
     private static readonly ConcurrentDictionary<int, int> _lookups = new();
+    private static readonly ConcurrentDictionary<int, bool> _failing = new();
 
     public static ITariffService Service { get; } = DispatchProxy.Create<ITariffService, TariffServiceProxy>();
 
@@ -69,6 +70,15 @@ public static class TestTariffs
         _tariffs[tenantId] = (state, freeQuota);
     }
 
+    /// <summary>
+    /// Makes every lookup of the tariff of <paramref name="tenantId"/> fail, as a billing outage would. Not recorded
+    /// in <see cref="UnexpectedCalls"/>: the call is one the cleanup is expected to make.
+    /// </summary>
+    public static void Fail(int tenantId)
+    {
+        _failing[tenantId] = true;
+    }
+
     private static (TariffState State, bool FreeQuota) Get(int tenantId)
     {
         return _tariffs.TryGetValue(tenantId, out var tariff) ? tariff : (TariffState.Trial, true);
@@ -85,6 +95,11 @@ public static class TestTariffs
                     var tenantId = (int)args![0]!;
 
                     _lookups.AddOrUpdate(tenantId, 1, (_, count) => count + 1);
+
+                    if (_failing.ContainsKey(tenantId))
+                    {
+                        return Task.FromException<Tariff>(new InvalidOperationException($"The tariff of tenant {tenantId} is unavailable."));
+                    }
 
                     return Task.FromResult(new Tariff { Id = tenantId, State = Get(tenantId).State, DueDate = DateTime.MaxValue, Quotas = [] });
 

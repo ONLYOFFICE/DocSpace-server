@@ -40,9 +40,10 @@ namespace ASC.ClearEvents.Tests.Infrastructure;
 /// when a pass runs and with which settings.
 /// </summary>
 /// <remarks>
-/// One thing is replaced: <see cref="ITariffService"/>, with <see cref="TestTariffs"/>. The stack runs as a
-/// standalone installation, where every portal shares the one tariff of the installation, so a paid portal next
-/// to a free one cannot be made any other way.
+/// One thing is replaced unless asked otherwise: <see cref="ITariffService"/>, with <see cref="TestTariffs"/>. The
+/// stack runs as a standalone installation, where every portal shares the one tariff of the installation, so a paid
+/// portal next to a free one cannot be made any other way. A host built with the real service is what shows that
+/// the service's own graph resolves and answers in this one.
 /// </remarks>
 internal sealed class CleanerHost : IAsyncDisposable
 {
@@ -59,7 +60,7 @@ internal sealed class CleanerHost : IAsyncDisposable
         _app = app;
     }
 
-    public static async Task<CleanerHost> BuildAsync(string connectionString)
+    public static async Task<CleanerHost> BuildAsync(string connectionString, bool substituteTariffs = true)
     {
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions { Args = [] });
 
@@ -94,8 +95,11 @@ internal sealed class CleanerHost : IAsyncDisposable
 
         await new Startup(builder.Configuration).ConfigureServices(builder);
 
-        // After the Startup, so that it is the registration resolved.
-        builder.Services.AddScoped(_ => TestTariffs.Service);
+        if (substituteTariffs)
+        {
+            // After the Startup, so that it is the registration resolved.
+            builder.Services.AddScoped(_ => TestTariffs.Service);
+        }
 
         builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
         {

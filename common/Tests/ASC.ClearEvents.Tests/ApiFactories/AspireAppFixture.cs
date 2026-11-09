@@ -42,11 +42,29 @@ namespace ASC.ClearEvents.Tests.ApiFactories;
 public sealed class AspireAppFixture : AspireHostFixture<PortalClients>
 {
     private CleanerHost? _cleaner;
+    private Task<CleanerHost>? _realTariffCleaner;
+    private readonly Lock _realTariffCleanerLock = new();
+    private string? _connectionString;
 
     /// <summary>The service graph a test runs a cleanup pass in and reads the audit trail through.</summary>
     internal CleanerHost Cleaner => _cleaner
         ?? throw new InvalidOperationException(
             "The cleanup host was not built: InitializeAsync did not get that far. The failure that stopped it is the one to read, not this.");
+
+    /// <summary>
+    /// The same service graph with the real <see cref="ITariffService"/> in it, built on first use: only the test
+    /// that checks the real service resolves and answers needs it.
+    /// </summary>
+    internal Task<CleanerHost> RealTariffCleanerAsync()
+    {
+        var connectionString = _connectionString
+            ?? throw new InvalidOperationException("The stack has not started: InitializeAsync did not get that far.");
+
+        lock (_realTariffCleanerLock)
+        {
+            return _realTariffCleaner ??= CleanerHost.BuildAsync(connectionString, substituteTariffs: false);
+        }
+    }
 
     protected override IEnumerable<string> Resources => [ResourceNames.Files, ResourceNames.WebStudio];
 
@@ -59,6 +77,7 @@ public sealed class AspireAppFixture : AspireHostFixture<PortalClients>
     {
         var connectionString = await GetConnectionStringAsync(ResourceNames.Database, TestContext.Current.CancellationToken);
 
+        _connectionString = connectionString;
         _cleaner = await Timing.Measure("cleanerhost.build", () => CleanerHost.BuildAsync(connectionString));
     }
 
@@ -68,6 +87,11 @@ public sealed class AspireAppFixture : AspireHostFixture<PortalClients>
         if (_cleaner is not null)
         {
             await _cleaner.DisposeAsync();
+        }
+
+        if (_realTariffCleaner is { IsCompletedSuccessfully: true })
+        {
+            await (await _realTariffCleaner).DisposeAsync();
         }
     }
 }

@@ -35,8 +35,9 @@ namespace ASC.ClearEvents.Tests.Tests.AuditTrail;
 
 /// <summary>
 /// The daily pass is registered only when the cleanup is enabled: registered, its active/passive pair polls and
-/// writes the instance registration on every replica for a pass that returns at once. Only the disabled case is
-/// checked here — registering the enabled one in this process would claim the worker name it may hold only once.
+/// writes the instance registration on every replica for a pass that returns at once. The enabled case claims the
+/// worker name, which a process may register only once; the in-process hosts of the suite run with the cleanup
+/// disabled, so the single test here that enables it is the one claim in the process — a second would fail.
 /// </summary>
 public class AuditTrailCleanupRegistrationTests
 {
@@ -80,5 +81,23 @@ public class AuditTrailCleanupRegistrationTests
 
         implementations.Should().Contain(typeof(ClearEventsService));
         implementations.Should().NotContain(typeof(ClearAuditEventsService));
+    }
+
+    [Fact]
+    public void AddClearEventsServices_CleanupEnabled_RegistersTheAuditTrailCleanup()
+    {
+        // Arrange
+        var configuration = RetentionSection.Of(("enabled", "true"));
+
+        var services = new ServiceCollection();
+
+        // Act
+        services.AddClearEventsServices(configuration);
+
+        // Assert
+        var implementations = services.Select(d => d.ImplementationType).ToList();
+
+        implementations.Should().Contain(typeof(ClearEventsService));
+        implementations.Should().Contain(typeof(ClearAuditEventsService));
     }
 }
