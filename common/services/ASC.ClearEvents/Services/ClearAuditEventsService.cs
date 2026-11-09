@@ -49,7 +49,7 @@ public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<Cle
         : base(logger, scopeFactory)
     {
         _cleaner = cleaner;
-        _retention = configuration.GetSection(AuditTrailRetentionConfiguration.SectionName).Get<AuditTrailRetentionConfiguration>() ?? new();
+        _retention = AuditTrailRetentionConfiguration.Read(configuration);
 
         // A period Task.Delay rejects would fault the background service, and with it the host, after the first pass.
         ExecuteTaskPeriod = _retention.IsPeriodUsable ? _retention.Period : _defaults.Period;

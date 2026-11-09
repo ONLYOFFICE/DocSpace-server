@@ -40,9 +40,9 @@ public static class ServiceCollectionExtension
 
         // Only when enabled: registered, the active/passive pair keeps an instance registration row up to date and
         // has every passive replica poll it each second, for a pass that would return at once.
-        var retention = configuration.GetSection(AuditTrailRetentionConfiguration.SectionName).Get<AuditTrailRetentionConfiguration>();
+        var retention = AuditTrailRetentionConfiguration.Read(configuration);
 
-        if (retention?.Enabled == true)
+        if (retention.Enabled)
         {
             services.AddActivePassiveHostedService<ClearAuditEventsService>(configuration);
         }

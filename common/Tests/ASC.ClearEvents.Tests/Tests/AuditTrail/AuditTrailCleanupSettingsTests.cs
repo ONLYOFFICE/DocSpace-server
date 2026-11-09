@@ -41,9 +41,16 @@ namespace ASC.ClearEvents.Tests.Tests.AuditTrail;
 public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
     private const int MinLifeTimeDays = AuditTrailRetentionConfiguration.MinLifeTimeDays;
+    private const int MaxLifeTimeDays = AuditTrailRetentionConfiguration.MaxLifeTimeDays;
+    private const int MaxBatchSize = AuditTrailRetentionConfiguration.MaxBatchSize;
+
+    private const int DayMinutes = 24 * 60;
+
+    /// <summary>Just under the shortest period between passes (an hour).</summary>
+    private const int BelowMinPeriodMinutes = 59;
 
     /// <summary>Just past the longest delay Task.Delay accepts (about 49.7 days).</summary>
-    private const int BeyondMaxPeriodHours = 50 * 24;
+    private const int BeyondMaxPeriodMinutes = 50 * DayMinutes;
 
     [Fact]
     public async Task ClearAsync_Disabled_RemovesNothing()
@@ -82,17 +89,47 @@ public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest
         (await RemainingEventsAsync([expired, recent])).Should().BeEquivalentTo([recent]);
     }
 
+    [Fact]
+    public async Task ClearAsync_LifeTimeAtTheMaximum_IsUsed()
+    {
+        // Arrange: a paid life time at the maximum must neither be refused nor fail the date arithmetic of the pass.
+        var expired = await SeedEventAsync(FreeLifeTimeDays + 30);
+
+        // Act
+        await RunCleanupAsync(Retention(paidLifeTimeDays: MaxLifeTimeDays));
+
+        // Assert
+        (await RemainingEventsAsync([expired])).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ClearAsync_BatchSizeAtTheMaximum_IsUsed()
+    {
+        // Arrange
+        var expired = await SeedEventAsync(FreeLifeTimeDays + 30);
+
+        // Act
+        await RunCleanupAsync(Retention(batchSize: MaxBatchSize));
+
+        // Assert
+        (await RemainingEventsAsync([expired])).Should().BeEmpty();
+    }
+
     [Theory]
-    [InlineData(0, PaidLifeTimeDays, 1000, 24)]
-    [InlineData(-1, PaidLifeTimeDays, 1000, 24)]
-    [InlineData(1, PaidLifeTimeDays, 1000, 24)]
-    [InlineData(MinLifeTimeDays - 1, PaidLifeTimeDays, 1000, 24)]
-    [InlineData(FreeLifeTimeDays, 0, 1000, 24)]
-    [InlineData(PaidLifeTimeDays, FreeLifeTimeDays, 1000, 24)]
-    [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 0, 24)]
+    [InlineData(0, PaidLifeTimeDays, 1000, DayMinutes)]
+    [InlineData(-1, PaidLifeTimeDays, 1000, DayMinutes)]
+    [InlineData(1, PaidLifeTimeDays, 1000, DayMinutes)]
+    [InlineData(MinLifeTimeDays - 1, PaidLifeTimeDays, 1000, DayMinutes)]
+    [InlineData(FreeLifeTimeDays, 0, 1000, DayMinutes)]
+    [InlineData(PaidLifeTimeDays, FreeLifeTimeDays, 1000, DayMinutes)]
+    [InlineData(FreeLifeTimeDays, MaxLifeTimeDays + 1, 1000, DayMinutes)]
+    [InlineData(FreeLifeTimeDays, 1_000_000, 1000, DayMinutes)]
+    [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 0, DayMinutes)]
+    [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, MaxBatchSize + 1, DayMinutes)]
     [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 1000, 0)]
-    [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 1000, BeyondMaxPeriodHours)]
-    public async Task ClearAsync_UnusableSettings_RemovesNothing(int freeLifeTimeDays, int paidLifeTimeDays, int batchSize, int periodHours)
+    [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 1000, BelowMinPeriodMinutes)]
+    [InlineData(FreeLifeTimeDays, PaidLifeTimeDays, 1000, BeyondMaxPeriodMinutes)]
+    public async Task ClearAsync_UnusableSettings_RemovesNothing(int freeLifeTimeDays, int paidLifeTimeDays, int batchSize, int periodMinutes)
     {
         // Arrange: older than every life time in the rows, so any of them that ran would remove it.
         var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
@@ -102,7 +139,22 @@ public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest
             freeLifeTimeDays: freeLifeTimeDays,
             paidLifeTimeDays: paidLifeTimeDays,
             batchSize: batchSize,
-            period: TimeSpan.FromHours(periodHours)));
+            period: TimeSpan.FromMinutes(periodMinutes)));
+
+        // Assert
+        (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
+    }
+
+    [Fact]
+    public async Task ClearAsync_UnreadableSection_RemovesNothing()
+    {
+        // Arrange
+        var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
+
+        var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(("enabled", "true"), ("period", "1d")));
+
+        // Act
+        await RunCleanupAsync(retention);
 
         // Assert
         (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);

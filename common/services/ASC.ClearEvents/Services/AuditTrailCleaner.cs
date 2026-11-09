@@ -49,6 +49,12 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
             return;
         }
 
+        if (retention.BindingError is not null)
+        {
+            logger.WarningUnreadableConfiguration(AuditTrailRetentionConfiguration.SectionName, retention.BindingError);
+            return;
+        }
+
         if (!retention.IsUsable)
         {
             logger.WarningInvalidConfiguration(
@@ -57,6 +63,9 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
                 retention.BatchSize,
                 retention.Period,
                 AuditTrailRetentionConfiguration.MinLifeTimeDays,
+                AuditTrailRetentionConfiguration.MaxLifeTimeDays,
+                AuditTrailRetentionConfiguration.MaxBatchSize,
+                AuditTrailRetentionConfiguration.MinPeriod,
                 AuditTrailRetentionConfiguration.MaxPeriod);
             return;
         }

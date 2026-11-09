@@ -46,12 +46,7 @@ public class AuditTrailCleanupRegistrationTests
     public void AddClearEventsServices_CleanupNotEnabled_RegistersOnlyTheLoginHistoryCleanup(string? enabled)
     {
         // Arrange
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                [$"{AuditTrailRetentionConfiguration.SectionName}:enabled"] = enabled
-            })
-            .Build();
+        var configuration = RetentionSection.Of(("enabled", enabled));
 
         var services = new ServiceCollection();
 
@@ -59,6 +54,28 @@ public class AuditTrailCleanupRegistrationTests
         services.AddClearEventsServices(configuration);
 
         // Assert
+        var implementations = services.Select(d => d.ImplementationType).ToList();
+
+        implementations.Should().Contain(typeof(ClearEventsService));
+        implementations.Should().NotContain(typeof(ClearAuditEventsService));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("false")]
+    public void AddClearEventsServices_UnreadableSection_DoesNotThrow(string? enabled)
+    {
+        // Arrange: a period the binder cannot convert, which used to throw out of the registration and stop the host.
+        var configuration = RetentionSection.Of(("enabled", enabled), ("period", "1d"));
+
+        var services = new ServiceCollection();
+
+        // Act
+        var register = () => services.AddClearEventsServices(configuration);
+
+        // Assert
+        register.Should().NotThrow();
+
         var implementations = services.Select(d => d.ImplementationType).ToList();
 
         implementations.Should().Contain(typeof(ClearEventsService));

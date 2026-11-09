@@ -43,6 +43,18 @@ public class AuditTrailRetentionConfiguration
     /// </summary>
     public const int MinLifeTimeDays = TenantAuditSettings.MaxLifeTime;
 
+    /// <summary>
+    /// The longest life time a pass accepts, a century. Far beyond any retention policy, and far enough from the
+    /// smallest <see cref="DateTime"/> that subtracting it from today cannot fail.
+    /// </summary>
+    public const int MaxLifeTimeDays = 100 * 365;
+
+    /// <summary>The largest batch a pass accepts: its ids travel to the database as one IN list.</summary>
+    public const int MaxBatchSize = 10_000;
+
+    /// <summary>The shortest period between passes: a pass walks every portal with old events.</summary>
+    public static readonly TimeSpan MinPeriod = TimeSpan.FromHours(1);
+
     /// <summary>The longest period between passes: the longest delay <see cref="Task.Delay(TimeSpan)"/> accepts.</summary>
     public static readonly TimeSpan MaxPeriod = TimeSpan.FromMilliseconds(uint.MaxValue - 1);
 
@@ -56,15 +68,48 @@ public class AuditTrailRetentionConfiguration
 
     public int BatchSize { get; init; } = 1000;
 
-    public bool IsPeriodUsable => Period > TimeSpan.Zero && Period <= MaxPeriod;
+    /// <summary>
+    /// Why the section could not be read, such as a period written as <c>1d</c>; null when it was. The other values
+    /// are then the defaults, and no pass runs.
+    /// </summary>
+    public string BindingError { get; private init; }
+
+    public bool IsPeriodUsable => Period >= MinPeriod && Period <= MaxPeriod;
 
     /// <summary>
     /// Whether a pass may run with these settings. A life time of a few days would delete almost the whole audit
-    /// trail of every portal, and a free life time above the paid one would keep the events of free portals longer.
+    /// trail of every portal, a free life time above the paid one would keep the events of free portals longer, and
+    /// values past the upper bounds would fail every pass or run them back to back.
     /// </summary>
     public bool IsUsable =>
+        BindingError is null &&
         FreeLifeTimeDays >= MinLifeTimeDays &&
         PaidLifeTimeDays >= FreeLifeTimeDays &&
-        BatchSize > 0 &&
+        PaidLifeTimeDays <= MaxLifeTimeDays &&
+        BatchSize is > 0 and <= MaxBatchSize &&
         IsPeriodUsable;
+
+    /// <summary>
+    /// Reads the <see cref="SectionName"/> section. A value that does not convert does not throw: it would stop the
+    /// service, and the whole monolith with it, even with the cleanup disabled. The settings come back unusable
+    /// instead, with <see cref="BindingError"/> set and <see cref="Enabled"/> read on its own, so that an enabled
+    /// cleanup reports the error on every pass rather than going quiet.
+    /// </summary>
+    public static AuditTrailRetentionConfiguration Read(IConfiguration configuration)
+    {
+        var section = configuration.GetSection(SectionName);
+
+        try
+        {
+            return section.Get<AuditTrailRetentionConfiguration>() ?? new();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return new AuditTrailRetentionConfiguration
+            {
+                Enabled = bool.TryParse(section[nameof(Enabled)], out var enabled) && enabled,
+                BindingError = ex.InnerException?.Message is { } inner ? $"{ex.Message} {inner}" : ex.Message
+            };
+        }
+    }
 }
