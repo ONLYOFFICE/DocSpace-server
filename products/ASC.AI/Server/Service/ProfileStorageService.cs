@@ -164,6 +164,7 @@ public class ProfileStorageService(
                 {
                     Id = g.Key,
                     Name = g.First().Provider.Name,
+                    Image = AiModelImages.Get(GetSingleOwner(g.Select(x => x.Model))),
                     Models = [.. g.Select(x => new ByokModelDto { Id = x.Model.RevisionId, Name = x.Model.Alias })]
                 })
                 .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
@@ -256,6 +257,12 @@ public class ProfileStorageService(
         {
             return null;
         }
+    }
+
+    private static string? GetSingleOwner(IEnumerable<Model> models)
+    {
+        var owners = models.Select(m => m.OwnedBy).Distinct(StringComparer.OrdinalIgnoreCase).Take(2).ToList();
+        return owners.Count == 1 ? owners[0] : null;
     }
 
     private static ByokKeyType? GetByokType(Model model)

@@ -46,7 +46,6 @@ public class PaymentHelper(
     AiGateway aiGateway,
     ByokKeyStorage byokKeyStorage,
     DocsCloudClient docsCloudClient,
-    WalletStaticProvider walletStaticProvider,
     CoreSettings coreSettings,
     ITenantQuotaFeatureStat<MaxTotalSizeFeature, long> maxTotalSizeStatistic,
     TenantWalletSettingsConfig walletSettingsConfig,
@@ -539,23 +538,6 @@ public class PaymentHelper(
         var aiPrices = await aiGateway.GetPricesAsync();
         var byokProviders = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId()))
             .ToDictionary(k => k.Id, k => k.Provider);
-        var icons = new Dictionary<string, string>();
-
-        var providers = aiPrices.Chat.Select(m => m.OwnedBy.ToLower())
-            .Concat(aiPrices.Image.Select(m => m.OwnedBy.ToLower()))
-            .Distinct();
-
-        var searchTypes = aiPrices.Search.Select(s => s.Id).Distinct();
-
-        foreach (var provider in providers)
-        {
-            icons[provider] = await walletStaticProvider.GetImageAsync(provider);
-        }
-
-        foreach (var searchType in searchTypes)
-        {
-            icons[searchType] = await walletStaticProvider.GetImageAsync(searchType);
-        }
 
         var chat = aiPrices.Chat.Select(m =>
         {
@@ -564,7 +546,7 @@ public class PaymentHelper(
             return new AiEntryPricingDto<AiChatPriceDto>
             {
                 Id = m.Id,
-                Image = icons[m.OwnedBy.ToLower()],
+                Image = AiModelImages.Get(m.OwnedBy),
                 Alias = m.Alias,
                 Provider = provider.Name,
                 Price = new AiChatPriceDto
@@ -580,7 +562,7 @@ public class PaymentHelper(
             };
         }).ToList();
 
-        var embeddingImage = await walletStaticProvider.GetImageAsync("embedding");
+        var embeddingImage = AiModelImages.Get("embedding");
 
         var embedding = aiPrices.Embedding.Select(e =>
         {
@@ -605,7 +587,7 @@ public class PaymentHelper(
             return new AiEntryPricingDto<AiImagePriceDto>
             {
                 Id = m.Id,
-                Image = icons[m.OwnedBy.ToLower()],
+                Image = AiModelImages.Get(m.OwnedBy),
                 Alias = m.Alias,
                 Provider = provider.Name,
                 Price = new AiImagePriceDto
@@ -623,7 +605,7 @@ public class PaymentHelper(
         {
             Id = s.Id,
             Alias = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{s.Id}"),
-            Image = icons[s.Id],
+            Image = AiModelImages.Get(s.Id),
             Provider = s.Provider,
             Price = s.Price,
             Link = s.Link

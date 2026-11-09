@@ -556,6 +556,9 @@ public record Model
     public required string Alias { get; init; }
     public IEnumerable<string> Capabilities { get; init; }
 
+    [JsonPropertyName("owned_by")]
+    public string OwnedBy { get; init; }
+
     [JsonConverter(typeof(ModelTierJsonConverter))]
     public ModelTier? Tier { get; init; }
 

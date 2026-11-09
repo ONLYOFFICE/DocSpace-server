@@ -65,6 +65,8 @@ export interface ByokProvider {
   id: string;
   /** Provider display name. */
   name: string;
+  /** SVG markup of the logo of the provider's models' owner. */
+  image?: string;
   /** Models that can be called through this provider with the portal's own key. */
   models: ByokModel[];
 }
@@ -134,5 +136,6 @@ function dtoToByokProvider(raw: JsonObject): ByokProvider | undefined {
     const model = dtoToByokModel(item);
     return model ? [model] : [];
   });
-  return { id, name, models };
+  const image = getString(raw, "image");
+  return image === undefined ? { id, name, models } : { id, name, image, models };
 }

@@ -37,6 +37,7 @@ public class ByokProviderDto
 {
     public required string Id { get; init; }
     public required string Name { get; init; }
+    public string? Image { get; init; }
     public required List<ByokModelDto> Models { get; init; }
 }
 

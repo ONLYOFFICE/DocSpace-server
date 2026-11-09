@@ -31,50 +31,35 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Core;
+namespace ASC.Core.Common.AI;
 
-[Singleton]
-public class WalletStaticProvider
+public static class AiModelImages
 {
-    private readonly ConcurrentDictionary<string, string> _cache = new();
-
-    private static readonly Assembly _assembly = typeof(WalletStaticProvider).Assembly;
-    private static readonly string _assemblyName = _assembly.GetName().Name;
-
     private const string DefaultKey = "default";
+    private const string Suffix = ".svg";
 
-    public async ValueTask<string> GetImageAsync(string key)
+    private static readonly FrozenDictionary<string, string> _images = Load();
+
+    public static string Get(string key)
     {
-        if (_cache.TryGetValue(key, out var img))
-        {
-            return img;
-        }
-
-        img = await ReadSvgResourceAsync(key);
-        if (img == null && key != DefaultKey)
-        {
-            img = await GetImageAsync(DefaultKey);
-        }
-
-        if (img != null)
-        {
-            _cache.TryAdd(key, img);
-        }
-
-        return img;
+        return key is not null && _images.TryGetValue(key, out var image) ? image : _images.GetValueOrDefault(DefaultKey);
     }
 
-    private static async Task<string> ReadSvgResourceAsync(string key)
+    private static FrozenDictionary<string, string> Load()
     {
-        await using var stream = _assembly.GetManifestResourceStream($"{_assemblyName}.img.{key}.svg");
+        var assembly = typeof(AiModelImages).Assembly;
+        var prefix = $"{assembly.GetName().Name}.AI.img.";
 
-        if (stream == null)
-        {
-            return null;
-        }
-
-        using var reader = new StreamReader(stream);
-
-        return await reader.ReadToEndAsync();
+        return assembly.GetManifestResourceNames()
+            .Where(name => name.StartsWith(prefix, StringComparison.Ordinal) && name.EndsWith(Suffix, StringComparison.Ordinal))
+            .ToFrozenDictionary(
+                name => name[prefix.Length..^Suffix.Length],
+                name =>
+                {
+                    using var stream = assembly.GetManifestResourceStream(name) ?? throw new InvalidOperationException($"Embedded resource {name} is missing");
+                    using var reader = new StreamReader(stream);
+                    return reader.ReadToEnd();
+                },
+                StringComparer.OrdinalIgnoreCase);
     }
 }
