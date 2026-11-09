@@ -2312,6 +2312,12 @@ public class FileStorageService //: IFileStorageService
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
+        // Every file is answered back as a FileDto, so a caller who cannot read it must not get one.
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+        }
+
         // Filling hands the form to people who hold no key, and its result would be stored in the clear.
         if (file.Encrypted)
         {

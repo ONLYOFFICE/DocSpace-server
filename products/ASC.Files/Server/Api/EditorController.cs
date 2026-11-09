@@ -168,7 +168,8 @@ public abstract class EditorController<T>(
     /// stores the filling properties on it - the room it belongs to, its title, the account that started it and the
     /// id it keeps as the original form - so that later submissions are collected against this form. The file has to
     /// be a PDF whose parent folder is a form-filling room; anything else is answered unchanged and nothing is
-    /// stored. Access follows room membership rather than portal role: a member holding only form-filling access on
+    /// stored. Whatever the file, a caller who cannot read it is refused with 403. Inside a form-filling room access
+    /// follows room membership rather than portal role: a member holding only form-filling access on
     /// the room may not start filling, and a caller with no access to the room at all is refused with 403 unless they
     /// can manage it, which the room owner, a room administrator and a DocSpace administrator can. The call is
     /// mutating and safe to repeat, since a repeat rewrites the same properties. Once a form is started, the answers
@@ -180,7 +181,7 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The form file, with the filling properties now stored on it", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "The caller holds only form-filling access on the room, or no access to it at all")]
+    [SwaggerResponse(403, "The caller cannot read the file, or holds only form-filling access on the room, or no access to it at all")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
