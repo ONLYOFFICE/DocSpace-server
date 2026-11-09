@@ -34,18 +34,26 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The bonus a redeemed promo code credited to the portal.
+/// The bonus a redeemed promo code credits to the portal.
 /// </summary>
 /// <example>
 /// {
+///   "status": "Completed",
 ///   "amount": 10,
-///   "currency": "USD"
+///   "currency": "USD",
+///   "expiresAt": "2027-02-07T12:00:00Z"
 /// }
 /// </example>
 public class PromoCodeDto
 {
     /// <summary>
-    /// How much bonus money the code credited, in `currency`. It lands on the bonus balance, read with
+    /// Whether the bonus is on the bonus balance already or is credited later.
+    /// </summary>
+    /// <example>Completed</example>
+    public PromoCodeStatus Status { get; init; }
+
+    /// <summary>
+    /// How much bonus money the code credits, in `currency`. It lands on the bonus balance, read with
     /// `GET api/2.0/portal/payment/customer/goodwill`, not on the money paid into the wallet.
     /// </summary>
     /// <example>10</example>
@@ -56,6 +64,13 @@ public class PromoCodeDto
     /// </summary>
     /// <example>USD</example>
     public string Currency { get; init; }
+
+    /// <summary>
+    /// The moment the bonus expires, in UTC; whatever is left of it can no longer be spent after that. Null for a bonus
+    /// that never expires.
+    /// </summary>
+    /// <example>2027-02-07T12:00:00Z</example>
+    public DateTime? ExpiresAt { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
@@ -64,7 +79,7 @@ public static partial class PromoCodeDtoMapper
     [MapProperty(nameof(PromoCodeResult.Currency), nameof(PromoCodeDto.Currency), Use = nameof(ToUpperCurrency))]
     public static partial PromoCodeDto Map(this PromoCodeResult source);
 
-    // The billing service may spell the code in lower case, as it does for a subscription moved to the wallet.
+    // The billing service may spell the currency in lower case, as it does for a subscription moved to the wallet.
     private static string ToUpperCurrency(string currency)
     {
         return currency?.ToUpperInvariant();

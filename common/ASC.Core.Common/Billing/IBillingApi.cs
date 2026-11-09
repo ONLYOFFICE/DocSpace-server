@@ -92,8 +92,8 @@ public interface IBillingApi
     [Post("/billing/SubscriptionBalanceToWallet")]
     Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync([Body] BillingProductRequestDto requestDto);
 
-    // TODO: the path and the answer are placeholders until the billing service publishes the method.
-    [Post("/billing/ApplyPromoCode")]
+    /// <remarks>A code the billing service refuses comes back as a <see cref="BillingPromoCodeException"/>.</remarks>
+    [Post("/billing/applypromocode")]
     Task<PromoCodeResult> ApplyPromoCodeAsync([Body] PromoCodeRequestDto requestDto);
 
     /// <remarks>Returns the raw response body; the billing service answers with the JSON string <c>"ok"</c> on success.</remarks>

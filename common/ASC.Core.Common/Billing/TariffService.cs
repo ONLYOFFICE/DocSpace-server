@@ -485,10 +485,10 @@ public class TariffService(
         return result;
     }
 
-    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string customerParticipantName)
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string initiator)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await billingClient.ApplyPromoCodeAsync(portalId, promoCode, customerParticipantName);
+        var result = await billingClient.ApplyPromoCodeAsync(portalId, promoCode, initiator);
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return result;
     }

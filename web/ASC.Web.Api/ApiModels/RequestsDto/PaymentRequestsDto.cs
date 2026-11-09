@@ -237,10 +237,9 @@ public class TopUpDepositRequestDto
 public class ApplyPromoCodeRequestDto
 {
     /// <summary>
-    /// The promo code as it was handed out, sent to the billing service unchanged apart from surrounding whitespace.
-    /// Whether letter case matters is up to the billing service.
+    /// The promo code as it was handed out; its letter case, spaces and dashes do not matter.
     /// </summary>
-    /// <example>WELCOME2026</example>
+    /// <example>K7QX-M42P-9TRB</example>
     [Required]
     [StringLength(100)]
     public string PromoCode

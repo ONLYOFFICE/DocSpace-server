@@ -289,18 +289,19 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
     }
 
     /// <summary>
-    /// Redeems a promo code for the portal; the billing service credits its bonus to the customer and returns what it
-    /// credited. A code it refuses comes back as a <see cref="BillingException"/>.
+    /// Redeems a promo code for the portal; the billing service credits its bonus to the customer, at once or later,
+    /// and returns what it credits. A code it refuses comes back as a <see cref="BillingPromoCodeException"/>.
     /// </summary>
-    public async Task<PromoCodeResult> ApplyPromoCodeAsync(string portalId, string promoCode, string customerParticipantName)
+    /// <param name="initiator">The e-mail of the user who redeems the code, kept in the billing audit.</param>
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(string portalId, string promoCode, string initiator)
     {
         EnsureConfigured();
 
         var requestDto = new PromoCodeRequestDto
         {
             PortalId = [portalId],
-            PromoCode = [promoCode],
-            CustomerParticipantName = Optional(customerParticipantName)
+            Code = [promoCode],
+            Initiator = Optional(initiator)
         };
 
         return await billingApi.ApplyPromoCodeAsync(requestDto);
@@ -455,8 +456,11 @@ public class DepositRequestDto : BillingPortalRequestDto
 /// <summary>Request to redeem a promo code for the portal.</summary>
 public class PromoCodeRequestDto : BillingPortalRequestDto
 {
-    public List<string> PromoCode { get; set; }
-    public List<string> CustomerParticipantName { get; set; }
+    /// <summary>The promo code; the billing service ignores its letter case, spaces and dashes.</summary>
+    public List<string> Code { get; set; }
+
+    /// <summary>The e-mail of the user who redeems the code, kept in the billing audit.</summary>
+    public List<string> Initiator { get; set; }
 }
 
 /// <summary>Request to change (up/downgrade) the current subscription quantities.</summary>
@@ -519,6 +523,7 @@ public static class BillingHttpClientExtension
 
     private const string ErrorMarker = "{\"Message\":\"error";
     private const string NotFoundMarker = "{\"Message\":\"error: cannot find ";
+    private const string PromoCodeErrorMarker = "{\"Message\":\"error: promo_";
 
     public static void AddBillingHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
@@ -604,6 +609,11 @@ public static class BillingHttpClientExtension
             return new BillingNotConfiguredException("Billing response is null");
         }
 
+        if (content.StartsWith(PromoCodeErrorMarker, StringComparison.OrdinalIgnoreCase))
+        {
+            return new BillingPromoCodeException(GetErrorCode(content));
+        }
+
         if (content.StartsWith(ErrorMarker, StringComparison.OrdinalIgnoreCase))
         {
             return content.Contains(NotFoundMarker)
@@ -617,6 +627,32 @@ public static class BillingHttpClientExtension
         }
 
         return null;
+    }
+
+    // A refused promo code is answered as {"Message":"error: promo_not_found"}, possibly with the code in "Code" as well.
+    private static string GetErrorCode(string content)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(content);
+            var root = document.RootElement;
+
+            if (root.TryGetProperty("Code", out var code) && code.ValueKind == JsonValueKind.String)
+            {
+                return code.GetString();
+            }
+
+            if (root.TryGetProperty("Message", out var message) && message.ValueKind == JsonValueKind.String)
+            {
+                return message.GetString()?.Replace("error:", "", StringComparison.OrdinalIgnoreCase).Trim();
+            }
+        }
+        catch (JsonException)
+        {
+            // Not a JSON body: the marker matched the start of it, so the text itself carries the code.
+        }
+
+        return content;
     }
 }
 
@@ -632,6 +668,14 @@ public class BillingException : Exception
 }
 
 public class BillingNotFoundException(string message) : BillingException(message);
+
+/// <summary>
+/// The billing service refused a promo code; <see cref="Code"/> says why, e.g. <c>promo_not_found</c>.
+/// </summary>
+public class BillingPromoCodeException(string code) : BillingException($"Promo code refused: {code}")
+{
+    public string Code { get; } = code;
+}
 
 /// <summary>
 /// The billing service gave no answer (DNS, connect, TLS, timeout). Unlike an error response, this does not

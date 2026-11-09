@@ -379,29 +379,32 @@ public class PaymentHelper(
     }
 
     /// <summary>
-    /// Redeems a promo code for the portal, records it in the audit trail and tells the portal clients that the
-    /// balance changed.
+    /// Redeems a promo code for the portal, records it in the audit trail and, once the bonus is credited, tells the
+    /// portal clients that the balance changed.
     /// </summary>
-    /// <exception cref="ArgumentException">The billing service refused the code.</exception>
-    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string customerParticipantName)
+    /// <exception cref="ArgumentException">The billing service refused the code; the message is its reason code, such
+    /// as <c>promo_not_found</c>, for the client to show its own text.</exception>
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string initiator)
     {
         PromoCodeResult result;
 
         try
         {
-            result = await tariffService.ApplyPromoCodeAsync(tenantId, promoCode, customerParticipantName);
+            result = await tariffService.ApplyPromoCodeAsync(tenantId, promoCode, initiator);
         }
-        // TODO: until the billing service defines its answer for a refused code, every error answer about the code
-        // is taken for one. No answer at all, or a portal the billing service does not know, stays a billing failure.
-        catch (BillingException e) when (e is not (BillingTransportException or BillingNotFoundException or BillingNotConfiguredException))
+        catch (BillingPromoCodeException e)
         {
-            throw new ArgumentException("The promo code is not valid", nameof(promoCode), e);
+            throw new ArgumentException(e.Code, e);
         }
 
         // The code itself stays out of the audit trail: anyone who reads the trail could redeem a reusable one.
         messageService.Send(MessageAction.CustomerPromoCodeApplied, $"{result.Amount} {result.Currency?.ToUpperInvariant()}");
 
-        await quotaSocketManager.TopUpWallet(false);
+        // A pending bonus is not on the balance yet, so there is nothing new for the clients to read.
+        if (result.Status == PromoCodeStatus.Completed)
+        {
+            await quotaSocketManager.TopUpWallet(false);
+        }
 
         return result;
     }

@@ -935,23 +935,24 @@ public class PaymentController(
     /// <remarks>
     /// Redeems a promo code for the portal and credits the bonus money it carries. Only a DocSpace administrator may
     /// call it, and an installation without a billing service answers 403. The call changes the portal's money and is
-    /// not idempotent: whether a code may be redeemed more than once is up to the billing service, and a code it
-    /// refuses - unknown, used up or expired - fails with 400 without crediting anything. It is limited to ten requests
-    /// a minute per user by default, which keeps codes from being guessed. A redeemed code returns the bonus amount and
-    /// its currency; the money lands on the bonus balance, which `GET api/2.0/portal/payment/customer/goodwill` reads
-    /// together with the moment each bonus expires, while the money paid into the wallet is left as it was. The portal
-    /// clients are told over their socket connection that the balance changed. When the billing service cannot be
-    /// reached or does not know the portal yet, the call fails with 402; a request that timed out may still have
-    /// credited the bonus, so read the bonus balance before trying the same code again.
+    /// not idempotent: whether a code may be redeemed again is up to the billing service, and a code it refuses fails
+    /// with 400 without crediting anything, the error message being the billing reason code such as `promo_not_found`
+    /// or `promo_expired` for the client to show its own text. The letter case, spaces and dashes of the code do not
+    /// matter. It is limited to ten requests a minute per user by default. The answer says whether the bonus is
+    /// credited already or later (`status`), its amount, currency and expiry; the money lands on the bonus balance,
+    /// read with `GET api/2.0/portal/payment/customer/goodwill`, and the portal clients are told over their socket
+    /// connection once it is there. When the billing service cannot be reached, fails, or does not know the portal
+    /// yet, the call fails with 402; a request that timed out may still have credited the bonus, so read the bonus
+    /// balance before trying the same code again.
     /// </remarks>
     /// <summary>
     /// Redeem a promo code
     /// </summary>
     /// <path>api/2.0/portal/payment/promoCode</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The bonus amount the code credited and its currency", typeof(PromoCodeDto))]
-    [SwaggerResponse(400, "`promoCode` is empty or longer than 100 characters, or the billing service refused the code")]
-    [SwaggerResponse(402, "The billing service could not be reached or does not know this portal yet")]
+    [SwaggerResponse(200, "Whether the bonus is credited already or later, with its amount, currency and expiry", typeof(PromoCodeDto))]
+    [SwaggerResponse(400, "`promoCode` is empty or longer than 100 characters, or the billing service refused the code; the message is its reason code, such as `promo_not_found`")]
+    [SwaggerResponse(402, "The billing service could not be reached, failed, or does not know this portal yet")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpPost("promoCode")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
@@ -963,7 +964,9 @@ public class PaymentController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var result = await paymentHelper.ApplyPromoCodeAsync(tenant.Id, inDto.PromoCode, securityContext.CurrentAccount.ID.ToString());
+        var initiator = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+
+        var result = await paymentHelper.ApplyPromoCodeAsync(tenant.Id, inDto.PromoCode, initiator.Email);
 
         return result.Map();
     }

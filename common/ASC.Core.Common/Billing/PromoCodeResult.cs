@@ -34,10 +34,15 @@
 namespace ASC.Core.Billing;
 
 /// <summary>
-/// The bonus the billing service credited for a redeemed promo code.
+/// The bonus the billing service credits for a redeemed promo code.
 /// </summary>
 public class PromoCodeResult
 {
+    /// <summary>
+    /// Whether the bonus is already credited or will be credited later.
+    /// </summary>
+    public PromoCodeStatus Status { get; set; }
+
     /// <summary>
     /// The bonus amount credited to the customer.
     /// </summary>
@@ -47,4 +52,28 @@ public class PromoCodeResult
     /// The currency code of the amount, as returned by the billing service.
     /// </summary>
     public string Currency { get; set; }
+
+    /// <summary>
+    /// The moment the bonus expires, in UTC, or <c>null</c> for a bonus that never expires.
+    /// </summary>
+    public DateTime? ExpiresAt { get; set; }
+}
+
+/// <summary>
+/// What became of the bonus of a redeemed promo code.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PromoCodeStatus
+{
+    /// <summary>
+    /// The bonus is on the bonus balance already.
+    /// </summary>
+    [Description("Completed")]
+    Completed,
+
+    /// <summary>
+    /// The code is accepted, and the bonus is credited later.
+    /// </summary>
+    [Description("Pending")]
+    Pending
 }
