@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -37,3 +37,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: Guid("3ff04204-4b22-4899-bcde-07edfcbb5355")]
 [assembly: InternalsVisibleTo("ASC.Core.Common.Tests")]
+[assembly: InternalsVisibleTo("ASC.Notify.Tests")]
