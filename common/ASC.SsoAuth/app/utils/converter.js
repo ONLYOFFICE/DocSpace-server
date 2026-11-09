@@ -36,7 +36,7 @@
 const config = require("../../config").get();
 const saml = require("samlify");
 const validator = require("@authenio/samlify-node-xmllint");
-const urn = require("samlify/build/src/urn");
+const urn = saml.Constants;
 const _ = require("lodash");
 const fs = require("fs");
 const path = require("path");
@@ -160,6 +160,11 @@ module.exports = function () {
           ssoConfig.SpCertificateAdvanced.SigningAlgorithm,
         dataEncryptionAlgorithm:
           ssoConfig.SpCertificateAdvanced.EncryptAlgorithm,
+
+        // samlify refuses TripleDES-encrypted assertions unless allowed; the portal still offers TripleDES.
+        allowInsecureDecryptionAlgorithms:
+          ssoConfig.IdpCertificateAdvanced.DecryptAlgorithm ===
+          urn.algorithms.encryption.data.TRI_DEC,
 
         assertionConsumerService: [
           {

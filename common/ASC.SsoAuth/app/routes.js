@@ -39,17 +39,18 @@ module.exports = function (app, config) {
   const logger = require("./log.js");
   const urlResolver = require("./utils/resolver")();
   const coder = require("./utils/coder");
-  const urn = require("samlify/build/src/urn");
+  const urn = saml.Constants;
   const fileManager = require('./fileManager');
   const forge = require('node-forge');
   const path = require('path');
-  const formidable = require('formidable');
+  const { IncomingForm } = require('formidable');
+  const os = require('os');
   const UserModel = require("./model/user");
   const LogoutModel = require("./model/logout");
   const fs = require('fs');
   const crypto = require('crypto');
 
-  let uploadDir = "";
+  const uploadDir = os.tmpdir();
   const selfSignedDomain = "myselfsigned.crt";
   const machineKey = config["core"].machinekey ? config["core"].machinekey : config.app.machinekey;
 
@@ -109,37 +110,43 @@ module.exports = function (app, config) {
         return;
       }
 
-      if (!files || !files.metadata) {
+      const metadata = files && files.metadata && files.metadata[0];
+
+      if (!metadata) {
         res.status(500).send("Metadata file not transferred").end();
         return;
       }
 
-      if (!files.metadata.name.toLowerCase().endsWith(".xml")) {
-        fileManager.deleteFile(files.metadata.path);
+      if (!(metadata.originalFilename || "").toLowerCase().endsWith(".xml")) {
+        fileManager.deleteFile(metadata.filepath);
         res.status(500).send("Incorrect metadata file type. A .xml file is required.").end();
         return;
       }
 
-      const idp = saml.IdentityProvider({
-        metadata: fs.readFileSync(files.metadata.path)
-      });
-      const idpMetadata = idp.entityMeta;
+      let idpMetadata;
+      try {
+        const idp = saml.IdentityProvider({
+          metadata: fs.readFileSync(metadata.filepath)
+        });
+        idpMetadata = idp.entityMeta;
+      } catch (e) {
+        logger.error(`onUploadMetadata ${getError(e)}`);
+      }
 
       if (!idpMetadata ||
         !idpMetadata.meta ||
         !idpMetadata.meta.entityDescriptor ||
         !idpMetadata.meta.singleSignOnService) {
-        fileManager.deleteFile(files.metadata.path);
+        fileManager.deleteFile(metadata.filepath);
         res.status(500).send("Invalid metadata xml file").end();
         return;
       }
 
-      fileManager.deleteFile(files.metadata.path);
+      fileManager.deleteFile(metadata.filepath);
       res.status(200).send(idpMetadata).end();
     }
 
-    const form = new formidable.IncomingForm();
-    form.uploadDir = uploadDir;
+    const form = new IncomingForm({ uploadDir, maxFiles: 1 });
     form.parse(req, formParse);
   }
 
@@ -195,7 +202,7 @@ module.exports = function (app, config) {
     cert.setSubject(attr);
     cert.setIssuer(attr);
 
-    cert.sign(keys.privateKey);
+    cert.sign(keys.privateKey, forge.md.sha256.create());
 
     let crt = pki.certificateToPem(cert);
     let key = pki.privateKeyToPem(keys.privateKey);
@@ -367,27 +374,29 @@ module.exports = function (app, config) {
     }
   };
 
+  // The Redirect binding signs the raw query parameters, so samlify needs them exactly
+  // as received: SAMLRequest|SAMLResponse, RelayState, SigAlg (saml-bindings 3.4.4.1).
+  function setOctetString(req) {
+    const queryIndex = req.originalUrl.indexOf("?");
+    if (queryIndex === -1) return;
+
+    const pairs = req.originalUrl.slice(queryIndex + 1).split("&");
+    const keys = [
+      urn.wording.urlParams.samlRequest,
+      urn.wording.urlParams.samlResponse,
+      urn.wording.urlParams.relayState,
+      urn.wording.urlParams.sigAlg,
+    ];
+
+    req.octetString = keys
+      .map((key) => pairs.find((pair) => pair.startsWith(key + "=")))
+      .filter(Boolean)
+      .join("&");
+  }
+
   const parseLoginResponse = (sp, idp, method, req) => {
     return sp.parseLoginResponse(idp, method, req).catch((e) => {
-      const message = getError(e);
-      if (message == "ERR_FAILED_TO_VERIFY_SIGNATURE") {
-        if (
-          idp.entitySetting.messageSigningOrder == urn.MessageSignatureOrder.ETS
-        ) {
-          idp.entitySetting.messageSigningOrder = urn.MessageSignatureOrder.STE;
-        } else {
-          idp.entitySetting.messageSigningOrder = urn.MessageSignatureOrder.ETS;
-        }
-
-        logger.info(
-          `parseLoginResponse -> Changing urn.MessageSignatureOrder to ${idp.entitySetting.messageSigningOrder}`
-        );
-
-        return sp.parseLoginResponse(idp, method, req);
-      } else {
-        logger.error(`parseLoginResponse failed ${message}`);
-      }
-
+      logger.error(`parseLoginResponse failed ${getError(e)}`);
       return Promise.reject(e);
     });
   };
@@ -405,6 +414,10 @@ module.exports = function (app, config) {
         req.method === "POST"
           ? urn.wording.binding.post
           : urn.wording.binding.redirect;
+
+      if (method === urn.wording.binding.redirect) {
+        setOctetString(req);
+      }
 
       const requestInfo = await parseLoginResponse(sp, idp, method, req);
 
@@ -701,6 +714,10 @@ module.exports = function (app, config) {
         ? urn.wording.binding.post
         : urn.wording.binding.redirect;
       const isResponse = req.query.SAMLResponse || req.body.SAMLResponse;
+
+      if (!isPost) {
+        setOctetString(req);
+      }
 
       if (isResponse) {
         try {
