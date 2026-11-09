@@ -34,8 +34,8 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// The setup shared by the service limit suites of <see cref="TariffService"/>: a service over a faked accounting
-/// service, and the answers it gives.
+/// The setup shared by the service limit suites of <see cref="TariffService"/>: a service over an accounting service
+/// stubbed with <see cref="HttpStub"/>, and the answers it gives.
 /// </summary>
 /// <remarks>
 /// The tenant's balance is seeded into the cache under the key <see cref="TariffService"/> reads it from, so the
@@ -58,18 +58,19 @@ public abstract class TariffServiceServiceLimitTestBase
     protected const string ServiceLimitNotFoundBody =
         """{"title":"Bad request","status":400,"detail":"Service limit '42' not found","instance":"/api/serviceLimit"}""";
 
-    private protected static async Task<(TariffService tariffService, AccountingClientTests.CapturingHandler handler)> CreateTariffServiceAsync(
-        Balance balance, Func<HttpRequestMessage, HttpResponseMessage> responder, CustomerInfo? customerInfo = null)
+    private protected static async Task<(TariffService tariffService, HttpStub handler)> CreateTariffServiceAsync(
+        Balance balance, Func<StubRequest, StubResponse> responder, CustomerInfo? customerInfo = null)
     {
-        var (accountingClient, handler) = AccountingClientTests.CreateClient(responder);
+        var (accountingClient, handler) = CreateAccountingClient(responder);
 
         var hybridCache = new FusionCache(new FusionCacheOptions());
         await hybridCache.SetAsync(TariffService.GetAccountingBalanceCacheKey(TenantId), balance, TimeSpan.FromMinutes(5),
             token: TestContext.Current.CancellationToken);
 
         // Nothing about the billing customer is cached unless a test says so; an empty customer is what TariffService
-        // caches for a portal that is not one. The billing client and the distributed lock are null, so a test fails at
-        // once should the lists of users ever ask the billing service.
+        // caches for a portal that is not one. The billing client and the distributed lock are null, so should the lists
+        // of users ever ask the billing service, the read throws - and where TariffService catches that, the tests see it
+        // through the requests the accounting stub got.
         if (customerInfo != null)
         {
             await hybridCache.SetAsync(TariffService.GetBillingCustomerCacheKey(TenantId), customerInfo, TimeSpan.FromMinutes(5),
@@ -77,69 +78,32 @@ public abstract class TariffServiceServiceLimitTestBase
         }
 
         // A SaaS portal unknown to the tenant service gets the portal ID "<payment region><tenant ID>".
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["core:payment:region"] = PaymentRegion })
-            .Build();
-        var coreSettings = new CoreSettings(DefaultResultProxy<ITenantService>.Create(), new CoreBaseSettings(configuration), configuration, null!);
-
-        var tariffService = new TariffService(
-            quotaService: null!,
-            tenantService: null!,
-            coreBaseSettings: null!,
-            coreSettings: coreSettings,
-            configuration: null!,
-            coreDbContextManager: null!,
-            cache: null!,
-            hybridCache: hybridCache,
-            distributedLockProvider: null!,
-            logger: NullLogger<TariffService>.Instance,
-            billingClient: null!,
-            accountingClient: accountingClient,
-            docsCloudClient: null!,
-            serviceProvider: null!,
-            resiliencePipelineProvider: null!,
-            tenantExtraConfig: null!);
+        var tariffService = CreateTariffService(accountingClient, hybridCache: hybridCache, coreSettings: CreateCoreSettings(PaymentRegion));
 
         return (tariffService, handler);
     }
 
-    // A body that takes its time to arrive: the client waits for it asynchronously, as it does for a hanging service.
-    protected sealed class DelayedContent(string json, TimeSpan delay) : HttpContent
-    {
-        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
-        {
-            await Task.Delay(delay);
-            await stream.WriteAsync(Encoding.UTF8.GetBytes(json));
-        }
-
-        protected override bool TryComputeLength(out long length)
-        {
-            length = -1;
-            return false;
-        }
-    }
-
-    protected static HttpResponseMessage ParticipantLimitsPage(params string[] participants)
+    protected static StubResponse ParticipantLimitsPage(params string[] participants)
     {
         var limits = participants.Select((participant, index) =>
             $$"""{"id":{{100 + index}},"serviceGroupName":"ai-services","scope":"Custom","customerAccountNumber":{{OwnAccountNumber}},"participant":"{{participant}}","amountValue":40,"currency":"USD","period":"Day","enabled":true}""");
 
-        return AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", limits)}}],"totalQuantity":{{TotalParticipantLimits}}}""");
+        return Reply(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", limits)}}],"totalQuantity":{{TotalParticipantLimits}}}""");
     }
 
-    protected static bool IsBalanceRequest(HttpRequestMessage request)
+    protected static bool IsBalanceRequest(StubRequest request)
     {
-        return request.RequestUri!.AbsolutePath.EndsWith("/balance", StringComparison.Ordinal);
+        return request.Path.EndsWith("/balance", StringComparison.Ordinal);
     }
 
-    protected static bool IsGlobalRequest(HttpRequestMessage request)
+    protected static bool IsGlobalRequest(StubRequest request)
     {
-        return request.RequestUri!.AbsolutePath.EndsWith("/global", StringComparison.Ordinal);
+        return request.Path.EndsWith("/global", StringComparison.Ordinal);
     }
 
-    protected static HttpResponseMessage GlobalLimitResponse(bool enabled)
+    protected static StubResponse GlobalLimitResponse(bool enabled)
     {
-        return AccountingClientTests.Json(HttpStatusCode.OK,
+        return Reply(HttpStatusCode.OK,
             $$"""{"id":43,"serviceGroupName":"ai-services","customerAccountNumber":{{OwnAccountNumber}},"scope":"Global","amountValue":50,"currency":"USD","period":"Day","enabled":{{(enabled ? "true" : "false")}}}""");
     }
 
@@ -149,14 +113,14 @@ public abstract class TariffServiceServiceLimitTestBase
     }
 
     // One page holding every row, so the paged read stops after it.
-    protected static HttpResponseMessage ParticipantRows(params string[] rows)
+    protected static StubResponse ParticipantRows(params string[] rows)
     {
-        return AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", rows)}}],"totalQuantity":{{rows.Length}}}""");
+        return Reply(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", rows)}}],"totalQuantity":{{rows.Length}}}""");
     }
 
-    protected static HttpResponseMessage ServiceLimitResponse(int customerAccountNumber)
+    protected static StubResponse ServiceLimitResponse(int customerAccountNumber)
     {
-        return AccountingClientTests.Json(HttpStatusCode.OK,
+        return Reply(HttpStatusCode.OK,
             $$"""{"id":42,"serviceGroupName":"ai-services","scope":"Custom","customerAccountNumber":{{customerAccountNumber}},"amountValue":50,"currency":"USD","period":"Day","enabled":true}""");
     }
 }

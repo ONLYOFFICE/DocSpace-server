@@ -33,6 +33,7 @@
 
 package com.asc.authorization.application.controller;
 
+import com.asc.authorization.application.security.SecurityUtils;
 import com.asc.common.utilities.HttpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -96,7 +97,9 @@ public class FallbackController extends AbstractErrorController {
     response.sendRedirect(
         String.format(
             "%s://%s/login?type=oauth2&client_id=%s",
-            request.getScheme(), httpUtils.getFirstForwardedHost(request), clientId));
+            request.getScheme(),
+            httpUtils.getFirstForwardedHost(request),
+            SecurityUtils.redirectableClientId(clientId).orElse("error")));
   }
 
   /**

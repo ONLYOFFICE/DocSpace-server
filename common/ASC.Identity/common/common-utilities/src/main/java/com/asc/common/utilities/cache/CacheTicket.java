@@ -31,50 +31,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.registration.application.service;
-
-import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
-import java.time.Duration;
-import java.util.List;
-import org.springframework.data.redis.core.RedisTemplate;
+package com.asc.common.utilities.cache;
 
 /**
- * Redis-backed {@link CacheNamespaceCounterStore} backing this service's {@link
- * com.asc.common.utilities.cache.CacheNamespaceRegistry}.
+ * What a cache-miss fill shows when it stores the value it read: the state of invalidations taken
+ * before the value was read from its source. The value is not cached if either part moved in the
+ * meantime, since the source may then have answered with a value that was already changed or
+ * removed.
  *
- * <p>A thin adapter: it holds no policy of its own, only translating the store's contract onto
- * {@link RedisTemplate} calls.
+ * @param generation the invalidation generation of this instance's memory tier.
+ * @param version the version of the entry in the shared tier, or {@code null} where there is no
+ *     shared tier or its version could not be read; a ticket without a version never writes to the
+ *     shared tier.
+ * @param evictions the count of tenant-wide and cache-wide evictions in the shared tier, or {@code
+ *     null} where there is none or it could not be read. A fill cannot tell which tenant it reads
+ *     until it has read, so any such eviction in between stops it.
  */
-public class RedisCacheNamespaceCounterStore implements CacheNamespaceCounterStore {
-  private final RedisTemplate<String, String> redisTemplate;
-
-  public RedisCacheNamespaceCounterStore(RedisTemplate<String, String> redisTemplate) {
-    this.redisTemplate = redisTemplate;
-  }
-
-  @Override
-  public List<String> multiGet(List<String> keys) {
-    return redisTemplate.opsForValue().multiGet(keys);
-  }
-
-  @Override
-  public String get(String key) {
-    return redisTemplate.opsForValue().get(key);
-  }
-
-  @Override
-  public boolean setIfAbsent(String key, String value, Duration ttl) {
-    return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, ttl));
-  }
-
-  @Override
-  public void increment(String key, Duration ttl) {
-    redisTemplate.opsForValue().increment(key);
-    redisTemplate.expire(key, ttl);
-  }
-
-  @Override
-  public void refreshTtl(String key, Duration ttl) {
-    redisTemplate.expire(key, ttl);
+public record CacheTicket(long generation, Long version, Long evictions) {
+  /**
+   * A ticket for a cache without a shared tier, or one whose shared tier could not be read.
+   *
+   * @param generation the invalidation generation of this instance's memory tier.
+   * @param version the version of the entry in the shared tier, if any.
+   */
+  public CacheTicket(long generation, Long version) {
+    this(generation, version, null);
   }
 }

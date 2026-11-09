@@ -35,6 +35,7 @@ package com.asc.registration.service.ports.output.resilience;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.utilities.cache.CacheTicket;
 import com.asc.registration.core.domain.entity.Client;
 import java.util.Optional;
 
@@ -55,6 +56,25 @@ public interface ClientCacheService {
    * @param client The client entity to store in the cache.
    */
   void put(Client client);
+
+  /**
+   * Returns a ticket identifying the current state of invalidations of a client. Take it before
+   * reading the client from the store and hand it to {@link #putUnlessInvalidated}.
+   *
+   * @param clientId The client about to be read.
+   * @return the ticket.
+   */
+  CacheTicket ticket(ClientId clientId);
+
+  /**
+   * Stores a client read from the store after a cache miss, unless the cache was invalidated since
+   * {@code ticket} was taken: the store may have answered with a client that was changed or removed
+   * while the answer was on its way, and caching it would bring the old client back.
+   *
+   * @param client The client read from the store.
+   * @param ticket The ticket taken with {@link #ticket(ClientId)} before the store was read.
+   */
+  void putUnlessInvalidated(Client client, CacheTicket ticket);
 
   /**
    * Retrieves a client from the cache by its client ID and tenant ID.

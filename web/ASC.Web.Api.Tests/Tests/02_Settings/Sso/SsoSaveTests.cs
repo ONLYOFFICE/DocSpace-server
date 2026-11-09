@@ -36,9 +36,10 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Sso;
 /// and the validation of its required fields.
 /// </summary>
 /// <remarks>
-/// BUG 84685, 84686, 84687 and 84688 share one shape: the handler reports each missing or malformed required
-/// field with a bare <c>throw new Exception(...)</c>, which the global handler turns into a 500 with a stack
-/// trace instead of a validation error.
+/// BUG 84685, 84686, 84687 and 84688 shared one shape: the handler reported each missing or malformed required
+/// field with a bare <c>throw new Exception(...)</c>, which the global handler turned into a 500 with a stack
+/// trace instead of a validation error; a missing <c>idpSettings</c> or <c>fieldMapping</c> object and a body that
+/// is not valid JSON crashed the same way. Fixed by refusing all of them with an <c>ArgumentException</c> (400).
 /// </remarks>
 [Trait("Category", "Settings")]
 public class SsoSaveTests(AspireAppFixture fixture) : SsoTestBase(fixture)
@@ -176,6 +177,44 @@ public class SsoSaveTests(AspireAppFixture fixture) : SsoTestBase(fixture)
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await SaveAsync(settings));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    [Trait("Bug", "84687")]
+    [Fact]
+    public async Task SaveSsoSettings_MissingFieldMapping_ThrowsBadRequest()
+    {
+        // Arrange
+        var settings = SettingsJson(s => s.Remove("fieldMapping"));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await SaveAsync(settings));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    [Trait("Bug", "84685")]
+    [Fact]
+    public async Task SaveSsoSettings_MissingIdpSettings_ThrowsBadRequest()
+    {
+        // Arrange
+        var settings = SettingsJson(s => s.Remove("idpSettings"));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await SaveAsync(settings));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    [Fact]
+    public async Task SaveSsoSettings_NotValidJson_ThrowsBadRequest()
+    {
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await SaveAsync("{\"enableSso\": tru"));
 
         // Assert
         exception.ErrorCode.Should().Be(400);

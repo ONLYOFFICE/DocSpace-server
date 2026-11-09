@@ -97,9 +97,10 @@ public class SmsManager(UserManager userManager,
             throw new Exception(Resource.ErrorUserNotFound);
         }
 
+        // Answered the way PUT settings/tfaapp reports SMS that is not available: 405, not an unmapped 500.
         if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync() || !await studioSmsNotificationSettingsHelper.TfaEnabledForUserAsync(user.Id))
         {
-            throw new MethodAccessException();
+            throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.SmsNotAvailable);
         }
 
         var mobilePhone = SmsSender.GetPhoneValueDigits(user.MobilePhone);

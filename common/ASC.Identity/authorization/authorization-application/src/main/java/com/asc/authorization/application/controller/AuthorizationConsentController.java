@@ -33,6 +33,7 @@
 
 package com.asc.authorization.application.controller;
 
+import com.asc.authorization.application.security.SecurityUtils;
 import com.asc.common.utilities.HttpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -82,7 +83,7 @@ public class AuthorizationConsentController {
                       "%s://%s", request.getScheme(), httpUtils.getFirstForwardedHost(request)))
               .path("login")
               .queryParam("type", "oauth2")
-              .queryParam("client_id", clientId)
+              .queryParamIfPresent("client_id", SecurityUtils.redirectableClientId(clientId))
               .build());
     } finally {
       MDC.clear();

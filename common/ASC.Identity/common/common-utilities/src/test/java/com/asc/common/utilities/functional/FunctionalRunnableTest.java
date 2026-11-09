@@ -72,7 +72,7 @@ class FunctionalRunnableTest {
 
   @Test
   void givenExtractedValueIsBlank_whenRunning_thenDoesNothing() throws Exception {
-    var action = (CheckedFunction<String, String>) value -> "ignored";
+    var action = (CheckedFunction<String, String>) val -> "ignored";
     Supplier<String> extractor = () -> "   ";
     var setter = new RecordingConsumer<String>();
 
@@ -85,7 +85,7 @@ class FunctionalRunnableTest {
 
   @Test
   void givenAllFieldsPresent_whenRunning_thenAppliesActionAndSetsResult() throws Exception {
-    var action = (CheckedFunction<String, String>) value -> value + "-ok";
+    var action = (CheckedFunction<String, String>) val -> val + "-ok";
     Supplier<String> extractor = () -> "value";
     var setter = new RecordingConsumer<String>();
 

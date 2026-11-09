@@ -42,6 +42,7 @@ import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
 import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
 import com.rabbitmq.client.Channel;
 import java.io.IOException;
+import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,6 +51,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorizationMessagingCleanupListenerTest {
+  private static final Instant REMOVED_AT = Instant.parse("2022-11-06T10:10:30.123456Z");
   @InjectMocks AuthorizationMessagingCleanupListener cleanupListener;
   @Mock private Channel channel;
   @Mock private AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
@@ -79,9 +81,27 @@ class AuthorizationMessagingCleanupListenerTest {
 
     cleanupListener.receiveClientRemovedMessage(event, channel, 1L);
 
+    verify(authorizationMessagingCleanupService, times(3)).onClientRemoved("client");
     verify(registeredClientCacheService, never()).evict(anyString(), anyLong());
     verify(channel, never()).basicAck(anyLong(), anyBoolean());
     verify(channel).basicNack(1L, false, false);
+  }
+
+  @Test
+  void whenClientRemovedEvent_andCleanupFailsOnce_thenRetriesAndAcks() throws IOException {
+    var event = mock(ClientRemovedEvent.class);
+
+    when(event.getClientId()).thenReturn("client");
+    doThrow(new RuntimeException("Lock wait timeout"))
+        .doNothing()
+        .when(authorizationMessagingCleanupService)
+        .onClientRemoved("client");
+
+    cleanupListener.receiveClientRemovedMessage(event, channel, 1L);
+
+    verify(authorizationMessagingCleanupService, times(2)).onClientRemoved("client");
+    verify(channel).basicAck(1L, false);
+    verify(channel, never()).basicNack(anyLong(), anyBoolean(), anyBoolean());
   }
 
   @Test
@@ -89,10 +109,11 @@ class AuthorizationMessagingCleanupListenerTest {
     var event = mock(UserClientsRemovedEvent.class);
     when(event.getUserId()).thenReturn("user");
     when(event.getTenantId()).thenReturn(42L);
+    when(event.getRemovedAt()).thenReturn(REMOVED_AT);
 
     cleanupListener.receiveUserClientsRemovedMessage(event, channel, 2L);
 
-    verify(authorizationMessagingCleanupService).onUserRemoved(42L, "user");
+    verify(authorizationMessagingCleanupService).onUserRemoved(42L, "user", REMOVED_AT);
     verify(registeredClientCacheService).evictAllByTenantId(42L);
     verify(channel).basicAck(2L, false);
   }
@@ -105,7 +126,7 @@ class AuthorizationMessagingCleanupListenerTest {
 
     cleanupListener.receiveUserClientsRemovedMessage(event, channel, 2L);
 
-    verify(authorizationMessagingCleanupService).onUserRemoved(0L, "user");
+    verify(authorizationMessagingCleanupService).onUserRemoved(0L, "user", null);
     verify(registeredClientCacheService, never()).evictAllByTenantId(anyLong());
     verify(channel).basicAck(2L, false);
   }
@@ -116,7 +137,7 @@ class AuthorizationMessagingCleanupListenerTest {
     when(event.getUserId()).thenReturn("user");
     doThrow(new RuntimeException("Database Exception"))
         .when(authorizationMessagingCleanupService)
-        .onUserRemoved(anyLong(), eq("user"));
+        .onUserRemoved(anyLong(), eq("user"), any());
 
     cleanupListener.receiveUserClientsRemovedMessage(event, channel, 2L);
 
@@ -129,10 +150,11 @@ class AuthorizationMessagingCleanupListenerTest {
   void whenTenantClientsRemovedEvent_thenDeletesAuthorizationsAndConsents() throws IOException {
     var event = mock(TenantClientsRemovedEvent.class);
     when(event.getTenantId()).thenReturn(42L);
+    when(event.getRemovedAt()).thenReturn(REMOVED_AT);
 
     cleanupListener.receiveTenantClientsRemovedMessage(event, channel, 3L);
 
-    verify(authorizationMessagingCleanupService).onTenantRemoved(42L);
+    verify(authorizationMessagingCleanupService).onTenantRemoved(42L, REMOVED_AT);
     verify(registeredClientCacheService).evictAllByTenantId(42L);
     verify(channel).basicAck(3L, false);
   }

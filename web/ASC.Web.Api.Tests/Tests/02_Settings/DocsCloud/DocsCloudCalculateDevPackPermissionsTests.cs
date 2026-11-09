@@ -42,9 +42,10 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.DocsCloud;
 /// project does not have, so it is not ported here.
 /// </summary>
 /// <remarks>
-/// The per-role denials of the TypeScript suite are not ported either: on this host
-/// <c>PaymentHelper.DemandConfigured</c> refuses every authenticated caller with 403 "Tariff service is
-/// not configured" before the role is checked, so such a test would pass for the wrong reason.
+/// The per-role denials are not checked here: on this host <c>PaymentHelper.DemandConfigured</c> refuses every
+/// authenticated caller with 403 "Tariff service is not configured" before the role is checked, so such a test would
+/// pass for the wrong reason. They are in <c>DocsCloudDevPackTests</c> of ASC.Web.Api.Billing.Tests, whose stack has
+/// payment services.
 /// </remarks>
 [Trait("Category", "Settings")]
 public class DocsCloudCalculateDevPackPermissionsTests(

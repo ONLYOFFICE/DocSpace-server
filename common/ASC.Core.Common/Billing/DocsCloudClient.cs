@@ -650,6 +650,9 @@ public class DocsCloudQuotaUser
 
 public static class DocsCloudHttpClientExtension
 {
+    /// <summary>How the service is named in the exceptions of its client.</summary>
+    internal const string ServiceName = "DocsCloud";
+
     private const string ResiliencePipelineName = "docsCloudResiliencePipeline";
 
     public static void AddDocsCloudHttpClient(this IServiceCollection services, IConfiguration configuration)
@@ -670,7 +673,8 @@ public static class DocsCloudHttpClientExtension
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 }),
                 ExceptionFactory = CreateExceptionAsync,
-                TransportExceptionFactory = CreateTransportException
+                TransportExceptionFactory = CreateTransportException,
+                DeserializationExceptionFactory = CreateDeserializationExceptionAsync
             })
             .ConfigureHttpClient((sp, client) =>
             {
@@ -711,6 +715,13 @@ public static class DocsCloudHttpClientExtension
             });
     }
 
+    // An answer that is not the JSON the call expects (a proxy's HTML page, a changed contract) is no refusal of the
+    // service, so it leaves the DocsCloudException hierarchy the callers handle as one - see PaymentServiceContractException.
+    private static ValueTask<Exception> CreateDeserializationExceptionAsync(HttpResponseMessage response, Exception exception)
+    {
+        return PaymentServiceContractException.FromResponse(ServiceName, response, exception);
+    }
+
     // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
     // surface as Refit.ApiRequestException and escape the DocsCloudException hierarchy the callers catch.
     private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
@@ -721,7 +732,9 @@ public static class DocsCloudHttpClientExtension
             return exception;
         }
 
-        return new DocsCloudException($"DocsCloud request to {request.RequestUri} failed: {exception.Message}", exception);
+        // The route template, not the address: the address names the internal host and the portal key, and the message
+        // reaches the logs and the client of the API. What went wrong stays in the inner exception.
+        return new DocsCloudException($"DocsCloud request {PaymentServiceOperation.Of(request)} failed", exception);
     }
     // Maps non-success responses to the domain exceptions the callers expect (resource not found / authorization
     // failed), and wraps any other failure into DocsCloudException with the status code and response body.

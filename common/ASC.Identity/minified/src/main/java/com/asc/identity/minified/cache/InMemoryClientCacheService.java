@@ -35,12 +35,14 @@ package com.asc.identity.minified.cache;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.utilities.cache.CacheTicket;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
@@ -59,6 +61,7 @@ import org.springframework.stereotype.Service;
 public class InMemoryClientCacheService implements ClientCacheService {
   private static final String CACHE_KEY_SEPARATOR = "_";
   private final Cache<String, Client> cache;
+  private final AtomicLong generation = new AtomicLong();
 
   public InMemoryClientCacheService() {
     this.cache =
@@ -102,6 +105,37 @@ public class InMemoryClientCacheService implements ClientCacheService {
     var key = buildCacheKey(client.getClientTenantInfo().tenantId(), client.getId());
     cache.put(key, client);
     log.debug("Cached client with ID: {}, key: {}", client.getId().getValue(), key);
+  }
+
+  /**
+   * Returns a ticket carrying the eviction generation of this cache. The cache lives in this one
+   * process, so the generation alone sees every eviction.
+   *
+   * @param clientId The client about to be read.
+   * @return the ticket.
+   */
+  @Override
+  public CacheTicket ticket(ClientId clientId) {
+    return new CacheTicket(generation.get(), null);
+  }
+
+  /**
+   * Stores a client read from the store, unless an eviction happened since {@code ticket} was
+   * taken. The client is removed again if an eviction lands while it is being stored.
+   *
+   * @param client The client read from the store.
+   * @param ticket The ticket taken with {@link #ticket(ClientId)} before the store was read.
+   */
+  @Override
+  public void putUnlessInvalidated(Client client, CacheTicket ticket) {
+    var generation = ticket.generation();
+    if (this.generation.get() != generation) return;
+    if (client == null || client.getId() == null || client.getClientTenantInfo() == null) return;
+    if (client.getClientTenantInfo().tenantId() == null) return;
+
+    var key = buildCacheKey(client.getClientTenantInfo().tenantId(), client.getId());
+    cache.put(key, client);
+    if (this.generation.get() != generation) cache.asMap().remove(key, client);
   }
 
   /**
@@ -170,6 +204,7 @@ public class InMemoryClientCacheService implements ClientCacheService {
     }
 
     var key = buildCacheKey(tenantId, clientId);
+    generation.incrementAndGet();
     cache.invalidate(key);
     log.debug(
         "Evicted client from cache with ID: {} for tenant: {}",
@@ -189,6 +224,7 @@ public class InMemoryClientCacheService implements ClientCacheService {
       return;
     }
 
+    generation.incrementAndGet();
     var prefix = tenantId.getValue() + CACHE_KEY_SEPARATOR;
     var keysToRemove =
         cache.asMap().keySet().stream().filter(key -> key.startsWith(prefix)).toList();
@@ -203,6 +239,7 @@ public class InMemoryClientCacheService implements ClientCacheService {
   /** Clears the entire client cache. */
   @Override
   public void clear() {
+    generation.incrementAndGet();
     cache.invalidateAll();
     log.debug("Cleared entire client cache");
   }

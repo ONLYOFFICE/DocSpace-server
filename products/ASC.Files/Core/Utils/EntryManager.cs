@@ -1767,7 +1767,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (await lockerManager.FileLockedForMeAsync(file.Id, userId))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
@@ -1832,7 +1832,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (await lockerManager.FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (checkRight && await fileTracker.IsEditingAsync(file.Id))
@@ -2023,7 +2023,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (await lockerManager.FileLockedForMeAsync(fileVersion.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (fileVersion.RootFolderType == FolderType.TRASH)
@@ -2081,7 +2081,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (await lockerManager.FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (file.ProviderEntry && await fileTracker.IsEditingAsync(file.Id))

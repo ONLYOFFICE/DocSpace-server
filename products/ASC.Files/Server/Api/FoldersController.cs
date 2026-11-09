@@ -706,8 +706,10 @@ public abstract class FoldersController<T>(
     /// be viewed, and `password` a secret to be asked for. Sending `access` with the value that grants nothing
     /// creates no link and answers with nothing. The caller needs the right to manage the links of the room the
     /// folder belongs to, which its manager and a portal administrator acting as room manager have, and a member with
-    /// content-creator or read access is refused with 403; an unknown folder is answered with 404. Read the address
-    /// from `sharedTo.shareLink`.
+    /// content-creator or read access is refused with 403; an unknown folder is answered with 404. A primary link
+    /// that was revoked is created anew by this call, with a new identifier, while
+    /// `GET api/2.0/files/folder/{id}/link` keeps answering such a link with 404. Read the address from
+    /// `sharedTo.shareLink`.
     /// </remarks>
     /// <summary>
     /// Create the folder primary external link
@@ -717,7 +719,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
     [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms")]
-    [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{id}/link")]
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
@@ -730,7 +732,8 @@ public abstract class FoldersController<T>(
             requiredAuth: inDto.FolderLink.Internal,
             allowUnlimitedDate: true,
             denyDownload: inDto.FolderLink.DenyDownload,
-            password: inDto.FolderLink.Password);
+            password: inDto.FolderLink.Password,
+            recreateRevoked: true);
 
         return await fileShareDtoHelper.Get(linkAce);
     }

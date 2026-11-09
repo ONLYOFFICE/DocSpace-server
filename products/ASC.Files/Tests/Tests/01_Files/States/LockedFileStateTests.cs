@@ -91,8 +91,23 @@ public class LockedFileStateTests(
         (await ReadState(fileId)).Should().BeEquivalentTo(before);
     }
 
+    /// <summary>A file locked by the owner, with a room manager who may rename it and change its versions.</summary>
+    private async Task<(User Manager, int FileId)> LockedByOwnerWithManager()
+    {
+        var (roomId, fileId) = await CreateRoomWithHtml();
+        var manager = await InviteContact(EmployeeType.RoomAdmin);
+
+        await _filesClient.Authenticate(Owner);
+        await InviteToRoom(roomId, manager, FileShare.RoomManager);
+        await _filesApi.LockFileAsync(fileId, new LockFileRequest(true), TestContext.Current.CancellationToken);
+
+        return (manager, fileId);
+    }
+
     /// <summary>
-    /// The claim of a locked file is refused, but through an unhandled exception (500) instead of a client error.
+    /// The claim of a locked file was refused, but through an unhandled exception (500) instead of a client error: the
+    /// lock check of the editing session threw a bare exception. Fixed by refusing it the way the other lock checks do,
+    /// with 403.
     /// </summary>
     [Fact]
     [Trait("Bug", "84768")]
@@ -110,5 +125,48 @@ public class LockedFileStateTests(
         // Assert
         (await ReadState(fileId)).Should().BeEquivalentTo(before);
         status.Should().BeInRange(400, 499);
+    }
+
+    /// <summary>
+    /// BUG 84768, rename side: renaming a file locked by somebody else hit the same bare exception and answered 500.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "84768")]
+    public async Task Rename_LockedByOwner_ForbiddenAndNothingChanges()
+    {
+        // Arrange
+        var (manager, fileId) = await LockedByOwnerWithManager();
+        var before = await ReadState(fileId);
+        await _filesClient.Authenticate(manager);
+
+        // Act
+        var status = await StatusOf(async () => await _filesApi.UpdateFileAsync(
+            fileId, new UpdateFileRequest(title: "Autotest Renamed"), TestContext.Current.CancellationToken));
+
+        // Assert
+        status.Should().Be(403);
+        (await ReadState(fileId)).Should().BeEquivalentTo(before);
+    }
+
+    /// <summary>
+    /// BUG 84768, version-history side: changing the version history of a file locked by somebody else hit the same
+    /// bare exception and answered 500.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "84768")]
+    public async Task ChangeVersionHistory_LockedByOwner_ForbiddenAndNothingChanges()
+    {
+        // Arrange
+        var (manager, fileId) = await LockedByOwnerWithManager();
+        var before = await ReadState(fileId);
+        await _filesClient.Authenticate(manager);
+
+        // Act
+        var status = await StatusOf(async () => await _filesApi.ChangeVersionHistoryAsync(
+            fileId, new ChangeHistoryRequest(version: 1, continueVersion: true), TestContext.Current.CancellationToken));
+
+        // Assert
+        status.Should().Be(403);
+        (await ReadState(fileId)).Should().BeEquivalentTo(before);
     }
 }
