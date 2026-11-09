@@ -48,13 +48,11 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     : ApiControllerBase
 {
     /// <remarks>
-    /// Returns the current state of the data deletion queued for the user with the ID specified in the request.
-    /// A deletion must have been queued by `POST api/2.0/people/remove/start` first: when nothing is queued for that
-    /// user the operation answers 200 with an empty body.
-    /// The caller needs the permission to edit users.
-    /// The call is read-only and is the polling operation of the deletion flow - repeat it until `isCompleted` is
-    /// true, reading `percentage` for the 0 to 100 progress and `error` for the message left by a failed job.
-    /// Use `PUT api/2.0/people/remove/terminate` to cancel a job that is still running.
+    /// Returns the progress of the job that deletes the data of a user.
+    /// To start the job, use `POST api/2.0/people/remove/start`. Requires a DocSpace admin. Other callers get 403.
+    /// The call is read-only. This is the call to poll. Repeat it until `isCompleted` is true.
+    /// If no job exists for the user, the response has no progress object. If the job fails, `error` holds the reason.
+    /// To cancel a running job, use `PUT api/2.0/people/remove/terminate`.
     /// </remarks>
     /// <summary>Get the deletion progress</summary>
     /// <path>api/2.0/people/remove/progress/{userId}</path>
@@ -73,17 +71,14 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <remarks>
-    /// Emails the caller a confirmation link that lets them delete their own profile, and is the first step of the
-    /// self-service profile removal.
-    /// It acts on the authenticated account only and takes no parameters, so it cannot be used to remove somebody
-    /// else - an administrator removes another user through `DELETE api/2.0/people/{userId}`.
-    /// The caller has to be a regular portal account: the portal owner and an account imported from LDAP are
-    /// rejected, because neither can delete itself.
-    /// The call sends mail and does not change the profile; the deletion happens later, when the caller follows the
-    /// emailed link and the client calls `DELETE api/2.0/people/@self` with the confirmation token from it.
-    /// The answer is a ready-to-display message naming the address the link was sent to, and the address is wrapped
-    /// in bold HTML markup, so strip the markup before showing it outside a web page.
-    /// Repeated calls are throttled, and each one sends a new link.
+    /// Emails the caller a link that confirms the deletion of their own profile.
+    /// Any signed-in user can call it. The portal owner and LDAP accounts get 403.
+    /// The call changes no data and sends an email. A repeated call sends a new link.
+    /// To delete the profile, the app calls `DELETE api/2.0/people/@self` with the confirmation token from the link.
+    /// To delete another account, use `DELETE api/2.0/people/{userId}`.
+    /// The call returns a text that you can show to the user, with the email address of the link.
+    /// The address is wrapped in HTML bold tags. Remove them before you show the text outside a web page.
+    /// By default, the limit is 5 calls in 15 minutes per user. More calls return 429.
     /// </remarks>
     /// <summary>
     /// Send the deletion instructions
@@ -111,20 +106,23 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <remarks>
-    /// Queues an asynchronous job that erases the data of the user with the ID specified in the request.
-    /// The account must already have the `Terminated` status - disable it through
-    /// `PUT api/2.0/people/status/{status}` first - and it cannot be the portal owner or the caller.
-    /// The caller needs the permission to edit users, has to be a DocSpace admin to erase the data of a room admin,
-    /// and has to be the portal owner to erase the data of another DocSpace admin.
-    /// The erasure does not finish within this call: poll `GET api/2.0/people/remove/progress/{userId}` with the same
-    /// user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/remove/terminate`.
-    /// This operation destroys the data and cannot be undone; to keep the rooms and the shared files of the account
-    /// instead, transfer them first through `POST api/2.0/people/reassign/start`.
-    /// An unknown ID and a rejected precondition both answer 400 and name the ID they rejected.
+    /// Starts a job that deletes the data and the profile of a disabled user.
+    /// The job deletes the personal files of the account. It moves the rooms and third-party storage accounts to the
+    /// caller. Files and folders that the account shared from the personal section move to a new folder of the caller.
+    /// First, disable the account through `PUT api/2.0/people/status/{status}`.
+    /// Requires a DocSpace admin. Other callers get 403.
+    /// Only the portal owner can delete the data of another DocSpace admin. Other DocSpace admins get 403 for it.
+    /// The call queues work, and the deletion cannot be undone.
+    /// Repeat `GET api/2.0/people/remove/progress/{userId}` with the same user ID until `isCompleted` is true.
+    /// While a job for the account runs, a repeated call returns that job and starts nothing new.
+    /// The portal emails the caller when the job succeeds or fails.
+    /// To cancel a running job, use `PUT api/2.0/people/remove/terminate`.
+    /// To move the data to a user you choose, use `POST api/2.0/people/reassign/start` instead.
+    /// The call returns 400 if the user is unknown, the portal owner, the caller, or not disabled.
     /// </remarks>
     /// <summary>Start the data deletion</summary>
     /// <path>api/2.0/people/remove/start</path>
-    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none")]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "when the job moves shared files of the account to a new folder of the caller")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued deletion", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`, no user has the specified ID, or the account is the portal owner, the caller, or is not disabled")]
@@ -167,14 +165,14 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <remarks>
-    /// Cancels the data deletion queued for the user with the ID specified in the request.
-    /// The caller needs the permission to edit users.
-    /// The operation is idempotent and returns no body: it drops the job from the queue, and doing so when nothing is
-    /// queued, or when the job has already finished, changes nothing and still answers 200.
-    /// Cancelling does not restore the data the job has already erased, and a cancelled job cannot be resumed - start
-    /// a new one through `POST api/2.0/people/remove/start`.
-    /// To find out whether the job is still running, read
-    /// `GET api/2.0/people/remove/progress/{userId}` before and after this call.
+    /// Cancels the job that deletes the data of a user.
+    /// Requires a DocSpace admin. Other callers get 403.
+    /// The call changes data. It removes the job from the queue and returns no body.
+    /// It does not restore the data that the job already deleted. You cannot resume the job.
+    /// To start again, use `POST api/2.0/people/remove/start`.
+    /// If no job exists for the user, nothing changes. So you can repeat the call.
+    /// To check whether the job still runs, use `GET api/2.0/people/remove/progress/{userId}`.
+    /// The call returns 400 if the body has no `userId`.
     /// </remarks>
     /// <summary>Terminate the data deletion</summary>
     /// <path>api/2.0/people/remove/terminate</path>
@@ -192,19 +190,17 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <remarks>
-    /// Queues an asynchronous job that empties the personal folder of the authenticated account.
-    /// The operation takes no parameters and always acts on the caller, so it cannot be used to empty the folder of
-    /// another user.
-    /// Only an account whose type is `Guest` may call it; every other type is rejected, because only a guest has a
-    /// personal folder that can be emptied this way.
-    /// The job does not finish within this call: poll `GET api/2.0/people/delete/personal/progress` until
-    /// `isCompleted` is true.
-    /// The job deletes the files permanently and cannot be undone or cancelled - there is no terminate operation for
-    /// this flow, unlike the user data deletion.
+    /// Starts a job that deletes the personal folder of the caller.
+    /// Only a guest can call it. Other callers get 403. If the guest has no personal folder, the call also returns 403.
+    /// Files and folders that the caller shared from the folder move to a new folder of another member.
+    /// That member last changed the personal folder. If that member is a guest, the portal owner gets the new folder.
+    /// The call queues work, and the deletion cannot be undone. You cannot cancel the job.
+    /// Repeat `GET api/2.0/people/delete/personal/progress` until `isCompleted` is true.
+    /// While the job runs, a repeated call returns that job. After the job succeeds, a repeated call returns 403.
     /// </remarks>
     /// <summary>Delete the personal folder</summary>
     /// <path>api/2.0/people/delete/personal/start</path>
-    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued job creates the folder that takes over the files and folders the caller shared from the personal folder, in the personal section of the member who last changed that folder or of the portal owner; not when the caller shared none")]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "when the job moves shared files of the caller to a new folder of another member")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued personal folder deletion", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(403, "The caller is not a guest, or is a guest whose personal folder has not been created")]
@@ -227,14 +223,11 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <remarks>
-    /// Returns the current state of the personal folder deletion queued for the authenticated account.
-    /// The job must have been queued by `POST api/2.0/people/delete/personal/start` first: when nothing is queued for
-    /// the caller the operation answers 200 with an empty body.
-    /// It takes no parameters and reports on the caller only, so an administrator cannot watch the folder deletion of
-    /// another user through it.
-    /// The call is read-only and is the polling operation of this flow - repeat it until `isCompleted` is true, and
-    /// read `error` for the message left by a failed job.
-    /// A queued personal folder deletion cannot be cancelled, so the only outcome to wait for is its completion.
+    /// Returns the progress of the job that deletes the personal folder of the caller.
+    /// To start the job, use `POST api/2.0/people/delete/personal/start`. Any signed-in user can call it.
+    /// The call is read-only. This is the call to poll. Repeat it until `isCompleted` is true.
+    /// If no job exists for the caller, the response has no progress object.
+    /// If the job fails, `error` holds the reason. You cannot cancel the job.
     /// </remarks>
     /// <summary>Get the personal folder deletion progress</summary>
     /// <path>api/2.0/people/delete/personal/progress</path>
