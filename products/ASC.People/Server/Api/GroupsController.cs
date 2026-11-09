@@ -55,16 +55,13 @@ public class GroupController(
     : ControllerBase
 {
     /// <remarks>
-    /// Returns the groups of the portal, one page at a time, with the summary information about each of them - the
-    /// ID, the name and the manager - but without the member list.
-    /// The caller needs the permission to read groups.
-    /// The call is read-only, and the number of groups that match the filters is reported in the total count of the
-    /// response, so a client can page through them with `count` and `startIndex`.
-    /// Narrow the result with `filterValue` on the group name, with `userId` to keep only the groups that account
-    /// belongs to, and with `manager` set to true to keep only the groups it manages; order it with `sortBy` and
-    /// `sortOrder`, and an unknown `sortBy` falls back to sorting by title.
-    /// The entries carry no members - read `GET api/2.0/group/{id}` with `includeMembers` for one group, or
-    /// `GET api/2.0/group/user/{userId}` to find the groups of a single account.
+    /// Returns the groups of the portal, one page at a time. Each entry has the ID, the name, and the manager, but no
+    /// members. Requires a DocSpace admin or a room admin. Other callers get 403. The call is read-only. The
+    /// response reports the total number of matching groups, so you can page with `count` and `startIndex`. The
+    /// call matches `filterValue` against any part of the group name and ignores case. With `userId`, it keeps only
+    /// the groups of that account. With `manager` set to true, it keeps only the groups that account manages. An
+    /// unknown `sortBy` value orders the groups by title. The call returns 400 if `count` is out of range or a
+    /// parameter has the wrong type. To read the members of one group, use `GET api/2.0/group/{id}`.
     /// </remarks>
     /// <summary>
     /// Get groups
@@ -103,13 +100,10 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Returns one group by its ID, with its name, its manager and - when asked for - the accounts that belong to
-    /// it.
-    /// The caller needs the permission to read groups, and the ID has to belong to a group that has not been
-    /// deleted, otherwise the operation answers 404.
-    /// The call is read-only, and the member list is left out unless `includeMembers` is set to true, so ask for it
-    /// only when the members are actually needed.
-    /// Use `GET api/2.0/group` to look a group up by name or to page through them all.
+    /// Returns one group by its ID, with its name, its manager, and its members. Requires a DocSpace admin or a room
+    /// admin. Other callers get 403. The call is read-only. Set `includeMembers` to false to leave out the members
+    /// of a large group. If no group has this ID or the group is deleted, the call returns 404. To find a group by
+    /// name, use `GET api/2.0/group`.
     /// </remarks>
     /// <summary>
     /// Get a group
@@ -128,12 +122,10 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Returns every group the account with the ID in the route belongs to, as a flat list of ID and name pairs.
-    /// The caller needs the permission to read groups.
-    /// The call is read-only, is not paged, and answers an empty list both for an account that belongs to no group
-    /// and for an ID that matches no account, so an empty answer does not prove the account exists.
-    /// The entries are summaries and carry neither the manager nor the members - read `GET api/2.0/group/{id}` for
-    /// the full picture of one of them.
+    /// Returns all groups that an account belongs to, as ID and name pairs. Requires a DocSpace admin or a room
+    /// admin. Other callers get 403, even for their own groups. The call is read-only and does not page the list.
+    /// The entries have no manager and no members. An empty list means the account is in no group or does not
+    /// exist. To read one group in full, use `GET api/2.0/group/{id}`.
     /// </remarks>
     /// <summary>
     /// Get user groups
@@ -159,20 +151,18 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Creates a group with the given name and, optionally, a manager and a first set of members.
-    /// The caller needs the permissions to edit groups and to add and remove users.
-    /// The name is required and cannot be blank, and unlike the operations that add members later, this one checks
-    /// every listed account upfront and rejects the whole call with 400 if any of them is unusable - a guest, a
-    /// disabled account or an ID that matches nobody.
-    /// The call is not idempotent: names are not unique, so repeating it creates a second group with the same name.
-    /// The answer holds the new group with its members included.
-    /// Members can be changed afterwards through `PUT api/2.0/group/{id}` or the dedicated member operations.
+    /// Creates a group with a name and, optionally, a manager and members. The manager also becomes a member.
+    /// Requires a DocSpace admin. Other callers get 403. A room admin can read groups but also gets 403 here. The
+    /// call changes data. Do not repeat it. Group names are not unique, so each call creates another group. The
+    /// response is the new group with its members. The call returns 400 if the name is missing, blank, or too long.
+    /// It also returns 400 if the manager or any member is a guest, a disabled account, or an unknown ID. In that
+    /// case, the call creates nothing.
     /// </remarks>
     /// <summary>
     /// Add a new group
     /// </summary>
     /// <path>api/2.0/group</path>
-    [RaisesWebhook(WebhookTrigger.GroupCreated, When = "once for the new group. The `user.*` payloads of its manager and members are not re-sent")]
+    [RaisesWebhook(WebhookTrigger.GroupCreated, When = "once for the new group. It does not raise `user.*` webhooks for the manager or the members")]
     [Tags("Group")]
     [SwaggerResponse(200, "The new group, with its members", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `groupName`, the group name is `null`, blank or longer than 128 characters, or one of the listed members or the manager is a guest, is disabled or does not exist")]
@@ -225,23 +215,20 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Changes the name and the manager of a group and adds or removes members, in one call.
-    /// The caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a
-    /// group that has not been deleted, otherwise the operation answers 404.
-    /// Every field is optional and the ones that are left out are kept: omitting `groupName` keeps the current name,
-    /// and omitting `groupManager` keeps the current manager rather than clearing it.
-    /// Accounts in `membersToAdd` that cannot be group members - a guest, a disabled account or an ID that matches
-    /// nobody - are silently skipped instead of failing the call, so compare the members in the answer with what was
-    /// sent to see what was actually applied.
-    /// Members are added first and removed afterwards, an account listed in both lists therefore ends up removed,
-    /// and removing an account that is not a member changes nothing.
-    /// The answer holds the group as it is after the update.
+    /// Changes the name and the manager of a group, and adds or removes members, in one call. Requires a DocSpace
+    /// admin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes data.
+    /// You can repeat it with the same body. A field that you leave out keeps its current value. This call cannot
+    /// remove the manager. It skips a guest, a disabled account, or an unknown ID in `groupManager` and
+    /// `membersToAdd`. It also skips an ID in `membersToRemove` that is not a member. The call adds members first
+    /// and then removes them. So an account in both lists ends up removed. The response is the group after the
+    /// update. Compare it with the request to see what the call skipped. If no group has this ID, the call
+    /// returns 404. The call returns 400 if `groupName` is too long.
     /// </remarks>
     /// <summary>
     /// Update a group
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the name, the manager or the members actually change, not for a call that repeats the current values. The `user.*` payloads of the added and removed members and of the manager are not re-sent")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the name, the manager, or the members change. It does not raise `user.*` webhooks for those accounts")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group as it is after the update", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read, or `groupName` is longer than 128 characters")]
@@ -299,22 +286,17 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Deletes a group and withdraws the access it had been granted to rooms, folders and files.
-    /// The caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a
-    /// group that has not been deleted, otherwise the operation answers 404.
-    /// The removal is permanent and cannot be undone, and it affects sharing: everything that was shared with the
-    /// group loses that share, so members who had access only through this group lose it too.
-    /// The accounts themselves are kept - only their membership disappears.
-    /// The call answers 204 with no body; a second call with the same ID answers
-    /// 404 rather than succeeding again.
-    /// To empty a group without deleting it, move its members away with
-    /// `PUT api/2.0/group/{fromId}/members/{toId}` or remove them through `DELETE api/2.0/group/{id}/members`.
+    /// Deletes a group and removes its access to rooms, folders, and files. Members who had access only through the
+    /// group lose it. The call keeps the accounts of the members. Requires a DocSpace admin. Other callers get 403.
+    /// The deletion cannot be undone. A repeated call returns 404. The call returns 204 with no body. If no group
+    /// has this ID, the call returns 404. To empty a group without deleting it, use
+    /// `DELETE api/2.0/group/{id}/members`.
     /// </remarks>
     /// <summary>
     /// Delete a group
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
-    [RaisesWebhook(WebhookTrigger.GroupDeleted, When = "once for the deleted group. The `user.*` payloads of its former members are not re-sent")]
+    [RaisesWebhook(WebhookTrigger.GroupDeleted, When = "once for the deleted group. It does not raise `user.*` webhooks for its former members")]
     [Tags("Group")]
     [SwaggerResponse(204, "The group is deleted. No content is returned")]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -340,22 +322,19 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Moves every member of one group into another group, emptying the first one.
-    /// The caller needs the permissions to edit groups and to add and remove users, and both IDs have to belong to
-    /// groups that have not been deleted, otherwise the operation answers 404.
-    /// The source group is kept, only without members, so delete it separately through
-    /// `DELETE api/2.0/group/{id}` if it is no longer needed.
-    /// Members that cannot be group members any more are silently skipped rather than failing the call, and an
-    /// account that already belongs to the destination is simply left there.
-    /// The answer is the destination group with its members, not the source one.
-    /// To move a chosen few instead of everybody, use `PUT api/2.0/group/{id}/members` and
-    /// `DELETE api/2.0/group/{id}/members`.
+    /// Moves the members of one group to another group. The source group stays, without these members. Requires a
+    /// DocSpace admin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes
+    /// data, and you can repeat it. If both IDs are the same, the call changes nothing. The manager of the
+    /// destination group stays the same. The call skips disabled members, so they stay in the source group. A guest
+    /// member leaves the source group but does not join the destination. The response is the destination group
+    /// with its members. If no group has one of the IDs, the call returns 404. To delete the source group, use
+    /// `DELETE api/2.0/group/{id}`.
     /// </remarks>
     /// <summary>
     /// Move group members
     /// </summary>
     /// <path>api/2.0/group/{fromId}/members/{toId}</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "once for the source group when it had members, and once for the destination group when its members or manager actually change; not at all when both IDs name the same group. The moved members' `user.*` payloads are not re-sent")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "for the source group if it had members, and for the destination if its members change. It does not raise `user.*` webhooks for the moved members")]
     [Tags("Group")]
     [SwaggerResponse(200, "The destination group with its members", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -397,25 +376,20 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Replaces the whole member list of a group with the accounts given in the request, removing everybody who is
-    /// not in that list.
-    /// The caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a
-    /// group that has not been deleted, otherwise the operation answers 404.
-    /// At least one of the listed accounts has to be usable as a group member, otherwise the call is rejected with
-    /// 400 and the group is left untouched; the accounts that cannot be members - a guest, a disabled account or an
-    /// ID that matches nobody - are then silently skipped while the rest are applied.
-    /// The replacement is not atomic: the current members are removed first and the new ones added afterwards, so a
-    /// failure in between can leave the group empty.
-    /// The answer is the group with the members it ends up with, which is why it should be read instead of assuming
-    /// the request was applied verbatim.
-    /// To add or remove a few accounts without touching the others, use `PUT api/2.0/group/{id}/members` and
-    /// `DELETE api/2.0/group/{id}/members`.
+    /// Replaces the members of a group with the listed accounts. Requires a DocSpace admin. Other callers get 403. A
+    /// room admin can read groups but also gets 403 here. The call changes data. You can repeat it with the same
+    /// body. First, the call removes the current members, except disabled ones. Then it adds the listed accounts. It
+    /// skips a guest, a disabled account, or an unknown ID. These two steps are not atomic. So a failure between
+    /// them can leave the group empty. The response is the group with the members it ends up with. If no group has
+    /// this ID, the call returns 404. The call returns 400 if the list is missing, empty, or has no account that can
+    /// be a member. In that case, the group does not change. To add or remove a few accounts, use
+    /// `PUT api/2.0/group/{id}/members` or `DELETE api/2.0/group/{id}/members`.
     /// </remarks>
     /// <summary>
     /// Replace group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the members or the manager of the group actually change, not when the list names the current members again. The added and removed members' `user.*` payloads are not re-sent")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the members or the manager change. It does not raise `user.*` webhooks for the added or removed members")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members it ends up with", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `members` list, or none of the listed accounts can be a group member")]
@@ -459,22 +433,18 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Adds the listed accounts to a group, keeping the members it already has.
-    /// The caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a
-    /// group that has not been deleted, otherwise the operation answers 404.
-    /// Accounts that cannot be group members - a guest, a disabled account or an ID that matches nobody - are
-    /// silently skipped instead of failing the call, so compare the members in the answer with what was sent to see
-    /// what was actually applied.
-    /// The call is idempotent for an account that is already a member, and it does not change who manages the group;
-    /// use `PUT api/2.0/group/{id}/manager` for that.
-    /// The answer is the group with its members after the addition.
-    /// To replace the whole list instead of extending it, use `POST api/2.0/group/{id}/members`.
+    /// Adds the listed accounts to a group and keeps its current members. Requires a DocSpace admin. Other callers
+    /// get 403. A room admin can read groups but also gets 403 here. The call changes data. You can repeat it with
+    /// the same body. The call skips a guest, a disabled account, an unknown ID, and a current member. An empty list
+    /// changes nothing. The response is the group with its members after the call. If no group has this ID, the call
+    /// returns 404. This call does not change the manager. To set the manager, use
+    /// `PUT api/2.0/group/{id}/manager`. To replace all members, use `POST api/2.0/group/{id}/members`.
     /// </remarks>
     /// <summary>
     /// Add group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when at least one listed account is actually added, not for an empty list or for accounts that are already members or cannot be members. The added members' `user.*` payloads are not re-sent")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the call adds at least one account. It does not raise `user.*` webhooks for the added members")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its members after the addition", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -502,22 +472,18 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Makes an account the manager of a group, replacing whoever managed it before.
-    /// The caller needs the permissions to edit groups and to add and remove users.
-    /// Both the group and the account have to exist: the operation answers 404 when the ID in the route matches no
-    /// live group and also when `userId` matches no account, so the message of the error says which of the two was
-    /// not found.
-    /// The account is added to the group at the same time, so a manager does not have to be a member beforehand, and
-    /// the previous manager stays in the group as an ordinary member.
-    /// A group has one manager, which makes the call idempotent when it names the account that manages it already.
-    /// The answer is the group with its new manager.
-    /// To change the members rather than the manager, use `PUT api/2.0/group/{id}/members`.
+    /// Makes an account the manager of a group and replaces the previous manager. The account also becomes a member.
+    /// The previous manager stays a member. Requires a DocSpace admin. Other callers get 403. A room admin can read
+    /// groups but also gets 403 here. The call changes data. You can repeat it with the same body. If the account is
+    /// a guest or disabled, the call changes nothing. The response is the group with its manager. The call returns
+    /// 404 if no group has this ID or no account has `userId`. It also returns 400 if `userId` is missing. To
+    /// change the members, use `PUT api/2.0/group/{id}/members`.
     /// </remarks>
     /// <summary>
     /// Set a group manager
     /// </summary>
     /// <path>api/2.0/group/{id}/manager</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the manager or the members actually change, not when the account already manages the group or cannot be a group member. The `user.*` payloads of the new and the previous manager are not re-sent")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the manager or the members change. It does not raise `user.*` webhooks for the new or previous manager")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its new manager", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
@@ -545,22 +511,18 @@ public class GroupController(
     }
 
     /// <remarks>
-    /// Removes the listed accounts from a group, leaving the rest of its members in place.
-    /// The caller needs the permissions to edit groups and to add and remove users, and the ID has to belong to a
-    /// group that has not been deleted, otherwise the operation answers 404.
-    /// The accounts themselves are kept; only their membership in this group ends, together with the access they had
-    /// through it.
-    /// The call is idempotent and forgiving: an ID that is not a member, and one that matches no account at all, are
-    /// both skipped without an error, and an empty list simply changes nothing.
-    /// The answer is the group with the members that remain.
-    /// Emptying a group cannot be done through `POST api/2.0/group/{id}/members`, which needs at least one valid
-    /// account, so list every member here, or move them away with `PUT api/2.0/group/{fromId}/members/{toId}`.
+    /// Removes the listed accounts from a group and keeps the other members. The accounts stay, but they lose the
+    /// access they had through the group. Requires a DocSpace admin. Other callers get 403. A room admin can read
+    /// groups but also gets 403 here. The call changes data. You can repeat it with the same body. The call skips
+    /// an ID that is not a member or matches no account. An empty list changes nothing. The response is the group
+    /// with the remaining members. If no group has this ID, the call returns 404. To remove all members, list them
+    /// all here.
     /// </remarks>
     /// <summary>
     /// Remove group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when at least one listed account is actually a member and is removed, not for an empty list or a list of non-members. The removed members' `user.*` payloads are not re-sent")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the call removes at least one member. It does not raise `user.*` webhooks for the removed members")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members that remain", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -727,17 +689,13 @@ public class GroupControllerAdditional<T>(
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
     /// <remarks>
-    /// Returns the groups that can be given access to the room with the ID given in the route, and reports for each
-    /// of them whether it already has access to that room.
-    /// The caller has to be allowed to manage the access of that room, and the ID has to belong to an existing room,
-    /// so the operation answers 403 for a room the caller cannot share and 404 for an ID that matches nothing.
-    /// The call is read-only and, unlike the account search, works without a filter: leaving `filterValue` empty
-    /// returns every group instead of nothing, and a value narrows the result by group name.
-    /// The result is paged by `count` and `startIndex`, with the number of matching groups in the total count of the
-    /// response.
-    /// Pass `excludeShared` to keep only the groups that have no access to the room yet, which is the set to offer
-    /// when adding new ones; without it every matching group comes back and `shared` tells them apart.
-    /// To search users and groups together, use `GET api/2.0/accounts/room/{id}/search`.
+    /// Returns the portal groups for sharing the room. The `shared` field tells whether a group already has access.
+    /// The list also has the system group Everyone. Requires the right to change access to the room. Other callers
+    /// get 403. If no room has the ID, the call returns 404. The call is read-only. It sorts the groups by name and
+    /// pages them by `count` and `startIndex`, with a total count. An empty `filterValue` returns every group.
+    /// Otherwise, the call keeps the groups whose name contains the value, in any case. With `excludeShared`, the
+    /// call returns only the groups without access. The call returns 400 if `count` is outside 1 to 100. To search
+    /// users and groups together, use `GET api/2.0/accounts/room/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a room</summary>
     /// <path>api/2.0/group/room/{id}</path>
@@ -759,18 +717,14 @@ public class GroupControllerAdditional<T>(
     }
 
     /// <remarks>
-    /// Returns the groups that can be given access to the folder with the ID given in the route, and reports for
-    /// each of them whether it already has access to that folder.
-    /// The caller has to be allowed to manage the access of that folder, and the ID has to belong to an existing
-    /// folder, so the operation answers 403 for a folder the caller cannot share and 404 for an ID that matches
-    /// nothing.
-    /// The call is read-only and, unlike the account search, works without a filter: leaving `filterValue` empty
-    /// returns every group instead of nothing, and a value narrows the result by group name.
-    /// The result is paged by `count` and `startIndex`, with the number of matching groups in the total count of the
-    /// response.
-    /// Pass `excludeShared` to keep only the groups that have no access to the folder yet, which is the set to offer
-    /// when adding new ones; without it every matching group comes back and `shared` tells them apart.
-    /// To search users and groups together, use `GET api/2.0/accounts/folder/{id}/search`.
+    /// Returns the portal groups for sharing the folder. The `shared` field tells whether a group already has access.
+    /// A group with access to a parent folder also counts. The list also has the system group Everyone. Requires the
+    /// right to change access to the folder. Other callers get 403. If no folder has the ID, the call returns 404.
+    /// The call is read-only. It sorts the groups by name and pages them by `count` and `startIndex`, with a total
+    /// count. An empty `filterValue` returns every group. Otherwise, the call keeps the groups whose name contains
+    /// the value, in any case. With `excludeShared`, the call returns only the groups without access. The call
+    /// returns 400 if `count` is outside 1 to 100. To search users and groups together, use
+    /// `GET api/2.0/accounts/folder/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a folder</summary>
     /// <path>api/2.0/group/folder/{id}</path>
@@ -792,17 +746,14 @@ public class GroupControllerAdditional<T>(
     }
 
     /// <remarks>
-    /// Returns the groups that can be given access to the file with the ID given in the route, and reports for each
-    /// of them whether it already has access to that file.
-    /// The caller has to be allowed to manage the access of that file, and the ID has to belong to an existing file,
-    /// so the operation answers 403 for a file the caller cannot share and 404 for an ID that matches nothing.
-    /// The call is read-only and, unlike the account search, works without a filter: leaving `filterValue` empty
-    /// returns every group instead of nothing, and a value narrows the result by group name.
-    /// The result is paged by `count` and `startIndex`, with the number of matching groups in the total count of the
-    /// response.
-    /// Pass `excludeShared` to keep only the groups that have no access to the file yet, which is the set to offer
-    /// when adding new ones; without it every matching group comes back and `shared` tells them apart.
-    /// To search users and groups together, use `GET api/2.0/accounts/file/{id}/search`.
+    /// Returns the portal groups for sharing the file. The `shared` field tells whether a group already has access.
+    /// A group with access to a parent folder also counts. The list also has the system group Everyone. Requires the
+    /// right to change access to the file. Other callers get 403. If no file has the ID, the call returns 404. The
+    /// call is read-only. It sorts the groups by name and pages them by `count` and `startIndex`, with a total count.
+    /// An empty `filterValue` returns every group. Otherwise, the call keeps the groups whose name contains the
+    /// value, in any case. With `excludeShared`, the call returns only the groups without access. The call returns
+    /// 400 if `count` is outside 1 to 100. To search users and groups together, use
+    /// `GET api/2.0/accounts/file/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a file</summary>
     /// <path>api/2.0/group/file/{id}</path>
