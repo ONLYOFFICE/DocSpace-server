@@ -62,6 +62,6 @@ public class AuditTrailTenantFailureTests(AspireAppFixture fixture) : BaseTest(f
         (await RemainingEventsAsync([failingPortalEvent, laterPortalEvent])).Should().BeEquivalentTo([failingPortalEvent]);
 
         logger.Entries.Should().ContainSingle(e =>
-            e.Level == LogLevel.Warning && e.Exception is InvalidOperationException && Equals(e.Values["tenantId"], TenantId));
+            e.Level == LogLevel.Warning && e.Exception is InvalidOperationException && Equals(e.Values.GetValueOrDefault("tenantId"), TenantId));
     }
 }
