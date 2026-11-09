@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -35,6 +35,8 @@ global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Net;
+global using System.Net.NetworkInformation;
+global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Security.Cryptography;
 global using System.Text;
@@ -45,6 +47,8 @@ global using ASC.Api.Core.Middleware;
 global using ASC.Api.Core.Webhook.Payloads;
 global using ASC.Common.Caching;
 global using ASC.Common.Notify.Patterns;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.InMemoryLock;
 global using ASC.Common.Web;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;
@@ -73,7 +77,18 @@ global using Microsoft.Extensions.Logging.Abstractions;
 global using Polly;
 global using Polly.Retry;
 
+global using WireMock;
+global using WireMock.Matchers;
+global using WireMock.RequestBuilders;
+global using WireMock.ResponseBuilders;
+global using WireMock.Server;
+global using WireMock.Settings;
+global using WireMock.Types;
+global using WireMock.Util;
+
 global using ZiggyCreatures.Caching.Fusion;
+
+global using static ASC.Core.Common.Tests.PaymentStubs;
 
 global using DbQuota = ASC.Core.Common.EF.DbQuota;
 global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;

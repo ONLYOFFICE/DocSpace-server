@@ -104,6 +104,26 @@ public static class Constants
     public const int WebhookReceiverPort = 18089;
     public const string WebhookReceiverHost = "127.0.0.2";
 
+    // Where the integration-test-billing profile points the billing, accounting and docscloud services
+    // (ConnectionStringManager.UsePaymentServices): one WireMock the billing tests run in the test process, started
+    // before the stack, since the services ask billing as soon as a portal is registered. Each path is the base URL
+    // that service's client joins its routes to, so the three stay apart on the one server.
+    public const string PaymentStubHost = "127.0.0.1";
+    public const int PaymentStubPort = 18090;
+    public const string PaymentStubBillingPath = "/billing/api";
+    public const string PaymentStubAccountingPath = "/accounting/api";
+    public const string PaymentStubDocsCloudPath = "/docscloud/api/";
+
+    // What the services of that profile are told about the payment services in place of what buildtools/config says:
+    // the addresses, key, secret, region, default quota and the first accounting currency. A portal's payment key is
+    // the region followed by the tenant id, which is how the stub tells the portals apart; a portal billing knows
+    // nothing about falls back to the free startup quota rather than becoming unpaid. The other payment settings
+    // (core:payment:test and :delay, core:accounting:topupperiod, the limits) still come from buildtools/config.
+    public const string PaymentStubRegion = "stub-";
+    public const string PaymentStubKey = "stub-key";
+    public const string PaymentStubSecret = "stub-secret";
+    public const int PaymentStubDefaultQuota = -3;
+
     // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
     // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,
     // four attempts in all, instead of the production schedule of minutes to hours, and an attempt that gives up on a
