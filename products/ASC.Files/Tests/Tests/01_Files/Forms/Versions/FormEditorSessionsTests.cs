@@ -125,6 +125,22 @@ public class FormEditorSessionsTests
         FormFillingReportCreator.KeepEditorRenames(state, 1, 200, _user, "s0", [Rename("a", "b")]).Should().BeTrue();
     }
 
+    // The editor repeats its last report or one arrives late after the save; a forcesave saves the version mid-session.
+    [Fact]
+    public void KeepEditorRenames_ReportAfterSave_DropsOldAndContinuesNewer()
+    {
+        var state = new FormFillingProperties();
+        FormFillingReportCreator.KeepEditorRenames(state, 1, 100, _user, "s1", [Rename("a", "b")]).Should().BeTrue();
+        FormFillingReportCreator.MarkEditorRenamesSaved(state, 2).Should().BeTrue();
+
+        FormFillingReportCreator.KeepEditorRenames(state, 1, 100, _user, "s1", [Rename("a", "b")]).Should().BeFalse();
+        FormFillingReportCreator.KeepEditorRenames(state, 1, 90, _user, "s1", [Rename("a", "x")]).Should().BeFalse();
+        state.EditorFieldRenames.Should().ContainSingle();
+
+        FormFillingReportCreator.KeepEditorRenames(state, 1, 200, _user, "s1", [Rename("a", "b"), Rename("c", "d")]).Should().BeTrue();
+        state.EditorFieldRenames.Select(s => (s.SavedVersion, s.Renames.Count)).Should().Equal(((int?)2, 1), ((int?)null, 2));
+    }
+
     [Fact]
     public void MatchFields_TwoSessionsSavedAsOneVersion_KeepBothRenames()
     {

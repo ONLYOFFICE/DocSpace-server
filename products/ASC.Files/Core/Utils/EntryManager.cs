@@ -2256,7 +2256,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var resultsFolderId = await CreateFormFillingFolder(title, readyFormFolder.Id, FolderType.FormFillingFolderDone, form.CreateBy, folderDao);
             formFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, form.CreateBy, title, fileDao);
             formFilling.ResultsFolderId = resultsFolderId;
-            await fileDao.SaveProperties(form.Id, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(form.Id, properties);
 
             return true;
         }
@@ -2264,7 +2264,7 @@ public class EntryManager(IDaoFactory daoFactory,
         if (resultsFile == null || !resultsFile.ParentId.Equals(resultFolder.Id))
         {
             formFilling.ResultsFileID = await CreateFillResultsFile(resultFolder.Id, form.CreateBy, title, fileDao);
-            await fileDao.SaveProperties(form.Id, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(form.Id, properties);
 
             return true;
         }

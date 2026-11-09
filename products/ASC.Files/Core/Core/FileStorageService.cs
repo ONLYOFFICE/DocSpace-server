@@ -2337,7 +2337,7 @@ public class FileStorageService //: IFileStorageService
             properties.FormFilling.OriginalFormId = fileId;
             properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
 
-            await fileDao.SaveProperties(fileId, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(fileId, properties);
             await socketManager.UpdateFileAsync(file);
         }
 
@@ -5858,7 +5858,7 @@ public class FileStorageService //: IFileStorageService
         {
             properties.FormFilling.StartFilling = true;
             properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
-            await fileDao.SaveProperties(formId, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(formId, properties);
             var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, user?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
 
@@ -6173,7 +6173,7 @@ public class FileStorageService //: IFileStorageService
         if (formFilling.RoomId == 0)
         {
             formFilling.RoomId = room.Id;
-            await fileDao.SaveProperties(form.Id, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(form.Id, properties);
         }
         else if (formFilling.RoomId != room.Id)
         {
@@ -6447,7 +6447,7 @@ public class FileStorageService //: IFileStorageService
         if (formFilling.RoomId == 0)
         {
             formFilling.RoomId = room.Id;
-            await fileDao.SaveProperties(form.Id, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(form.Id, properties);
         }
         else if (formFilling.RoomId != room.Id)
         {

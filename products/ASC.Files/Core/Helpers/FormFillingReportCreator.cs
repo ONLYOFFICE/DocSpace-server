@@ -1290,6 +1290,14 @@ public class FormFillingReportCreator(
         var session = sessions.Find(r => r.OpenedVersion == openedVersion && r.UserId == userId && r.SavedVersion == null && r.SessionId == sessionId);
         if (session == null)
         {
+            // A report of the session repeated or late after a save of its version was taken already; a newer one
+            // continues the session past a forcesave.
+            if (sessions.Exists(r => r.OpenedVersion == openedVersion && r.UserId == userId && r.SavedVersion != null && r.SessionId == sessionId
+                && sequence <= r.Sequence))
+            {
+                return false;
+            }
+
             session = new FormEditorFieldRenames { OpenedVersion = openedVersion, UserId = userId, SessionId = sessionId };
             sessions.Add(session);
         }

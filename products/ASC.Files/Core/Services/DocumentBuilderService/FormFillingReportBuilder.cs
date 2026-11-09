@@ -192,7 +192,8 @@ public class FormFillingResultFileWriter(
     IHttpClientFactory clientFactory,
     TenantUtil tenantUtil,
     SocketManager socketManager,
-    FilesMessageService filesMessageService)
+    FilesMessageService filesMessageService,
+    FormFillingReportCreator formFillingReportCreator)
 {
     public async Task<File<int>> SaveAsync(int originalFormId, bool isNewFile, Uri fileUri, Dictionary<string, StringValues> headers)
     {
@@ -218,7 +219,7 @@ public class FormFillingResultFileWriter(
         if (resultFile.Id != origProperties.FormFilling.ResultsFileID)
         {
             origProperties.FormFilling.ResultsFileID = resultFile.Id;
-            await fileDao.SaveProperties(originalFormId, origProperties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(originalFormId, origProperties);
         }
 
         var xlsxProperties = new EntryProperties<int>
