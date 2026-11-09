@@ -64,6 +64,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>The requests the payment services got about this test's portal, in the order they arrived.</summary>
     protected IReadOnlyList<PaymentServiceCall> PaymentCalls => fixture.Payments.CallsFor(TenantId);
 
+    /// <summary>A promo code as billing hands them out; billing ignores its letter case, spaces and dashes.</summary>
+    protected const string PromoCode = "K7QX-M42P-9TRB";
+
     /// <summary>The roles below a DocSpace administrator, refused by the operations for administrators.</summary>
     protected static EmployeeType[] NonAdministrators => [EmployeeType.RoomAdmin, EmployeeType.User, EmployeeType.Guest];
 

@@ -289,6 +289,8 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
     /// Redeems a promo code for the portal; the billing service credits its bonus to the customer, at once or later,
     /// and returns what it credits. A code it refuses comes back as a <see cref="BillingPromoCodeException"/>.
     /// </summary>
+    /// <param name="portalId">The portal the code is redeemed for.</param>
+    /// <param name="promoCode">The promo code as the user entered it.</param>
     /// <param name="initiator">The e-mail of the user who redeems the code, kept in the billing audit.</param>
     public async Task<PromoCodeResult> ApplyPromoCodeAsync(string portalId, string promoCode, string initiator)
     {

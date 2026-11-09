@@ -141,6 +141,13 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
         "GET payment/activeservices"
     ];
 
+    /// <summary>The bonuses: the bonus balance with its bonus credits, and redeeming a promo code for a bonus.</summary>
+    protected static string[] BonusAdministratorOperations =>
+    [
+        "GET payment/customer/goodwill",
+        "POST payment/promoCode"
+    ];
+
     /// <summary>What accounting sells: its currencies and the prices of a service.</summary>
     protected static string[] AccountingAdministratorOperations =>
     [
@@ -172,7 +179,8 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
     [
         .. SubscriptionPayerOperations, .. WalletPayerOperations, .. CheckoutAdministratorOperations,
         .. CustomerAdministratorOperations, .. UsageOperations, .. UsageReportOperations, .. WalletAdministratorOperations,
-        .. AccountingAdministratorOperations, .. ServiceLimitReadOperations, .. ServiceLimitWriteOperations
+        .. BonusAdministratorOperations, .. AccountingAdministratorOperations, .. ServiceLimitReadOperations,
+        .. ServiceLimitWriteOperations
     ];
 
     /// <summary>The operations with a request here, as <c>METHOD payment/route</c> with the route template of the action.</summary>
@@ -223,6 +231,9 @@ public abstract class PaymentPermissionsTestBase(AspireAppFixture fixture) : Bas
             t._paymentApi.ChangeTenantWalletServiceStateAsync(new ChangeWalletServiceStateRequestDto(TenantWalletService.AITools, true), ct),
         ["GET payment/servicessettings"] = (t, ct) => t._paymentApi.GetTenantWalletServiceSettingsAsync(ct),
         ["GET payment/activeservices"] = (t, ct) => t._paymentApi.GetActiveServicesAsync(ct),
+
+        ["GET payment/customer/goodwill"] = (t, ct) => t._paymentApi.GetCustomerGoodwillAsync(ct),
+        ["POST payment/promoCode"] = (t, ct) => t._paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), ct),
 
         ["GET payment/accounting/currencies"] = (t, ct) => t.GetAccountingCurrenciesAsync(ct),
         ["GET payment/accounting/prices/{serviceName}"] = (t, ct) =>
