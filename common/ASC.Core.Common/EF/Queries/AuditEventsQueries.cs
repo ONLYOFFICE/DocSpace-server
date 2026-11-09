@@ -54,7 +54,9 @@ public partial class MessagesContext
     }
 }
 
-/// <summary>An audit event as the cleanup pages through them: its key, and whether it is part of the history of an entry.</summary>
+/// <summary>
+/// An audit event as the cleanup pages through them: its key, and whether it is part of the history of an entry.
+/// </summary>
 public record AuditEventKey(int Id, DateTime Date, bool InHistory);
 
 static file class AuditEventsQueries

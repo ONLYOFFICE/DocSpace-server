@@ -111,6 +111,15 @@ internal sealed class CleanerHost : IAsyncDisposable
         return _app.Services.GetRequiredService<AuditTrailCleaner>().ClearAsync(retention, cancellationToken);
     }
 
+    /// <summary>
+    /// A cleaner of the host's graph that logs to <paramref name="logger"/>, for a test that asserts what a pass
+    /// logged.
+    /// </summary>
+    public AuditTrailCleaner CreateCleaner(ILogger<AuditTrailCleaner> logger)
+    {
+        return new AuditTrailCleaner(logger, _app.Services.GetRequiredService<IServiceScopeFactory>());
+    }
+
     /// <summary>A context on the audit trail, for seeding events and reading back what a pass left.</summary>
     public Task<MessagesContext> CreateDbContextAsync(CancellationToken cancellationToken)
     {

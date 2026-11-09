@@ -60,6 +60,7 @@ global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
 
 // The suite's namespaces sit under ASC.ClearEvents, whose Configuration namespace would win over the
 // SDK's Configuration class; the billing types and the audit MessageAction share their names with SDK models.
