@@ -37,5 +37,5 @@ public interface ISenderChannel
 {
     string SenderName { get; }
     Task<SendResponse> DirectSend(INoticeMessage message, IServiceScope serviceScope);
-    Task SendAsync(INoticeMessage message, IServiceScope serviceScope);
+    Task<SendResponse> SendAsync(INoticeMessage message, IServiceScope serviceScope);
 }

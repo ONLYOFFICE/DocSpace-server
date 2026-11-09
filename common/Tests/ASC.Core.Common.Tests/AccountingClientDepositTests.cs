@@ -42,7 +42,7 @@ public class AccountingClientDepositTests
     [Fact]
     public async Task GetCustomerDeposits_BuildsDepositsPathAndQuery_AndReadsTheDeposit()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK,
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
             """{"collection":[{"id":15342,"date":"2026-10-23T11:13:53Z","sum":40.0,"currency":"USD","status":"Completed","bankName":"Stripe","paymentRef":"pi_3QabcDEF","metadata":{"details":"Top-up"}}],"offset":5,"limit":10,"totalQuantity":6,"totalPage":1,"currentPage":1}"""));
 
         var filter = new DepositFilter
@@ -59,7 +59,7 @@ public class AccountingClientDepositTests
         handler.LastMethod.Should().Be(HttpMethod.Get);
         handler.LastUri!.AbsolutePath.Should().Be("/api/customer/portal-1/deposits");
 
-        var query = AccountingClientTests.ParseQuery(handler.LastUri);
+        var query = ParseQuery(handler.LastUri);
         query["startDate"].Should().Be("2026-01-01T00:00:00.0000000Z");
         query["endDate"].Should().Be("2026-10-31T23:59:59.0000000Z");
         query["status"].Should().Be("Completed");
@@ -83,10 +83,10 @@ public class AccountingClientDepositTests
     public async Task GetCustomerDepositPages_AdvancesOffsetByItemsUntilTotalQuantity()
     {
         var requests = new List<Uri>();
-        var (client, _) = AccountingClientTests.CreateClient(request =>
+        var (client, _) = CreateAccountingClient(request =>
         {
-            requests.Add(request.RequestUri!);
-            var offset = int.Parse(AccountingClientTests.ParseQuery(request.RequestUri!)["offset"]);
+            requests.Add(request.Uri);
+            var offset = int.Parse(ParseQuery(request.Uri)["offset"]);
 
             return DepositsPage(Enumerable.Range(offset + 1, Math.Min(2, 5 - offset)), totalQuantity: 5);
         });
@@ -99,14 +99,14 @@ public class AccountingClientDepositTests
 
         ids.Should().Equal(1, 2, 3, 4, 5);
         requests.Should().AllSatisfy(uri => uri.AbsolutePath.Should().Be("/api/customer/portal-1/deposits"));
-        requests.Select(uri => AccountingClientTests.ParseQuery(uri)["offset"]).Should().Equal("0", "2", "4");
-        requests.Should().AllSatisfy(uri => AccountingClientTests.ParseQuery(uri)["limit"].Should().Be("2"));
+        requests.Select(uri => ParseQuery(uri)["offset"]).Should().Equal("0", "2", "4");
+        requests.Should().AllSatisfy(uri => ParseQuery(uri)["limit"].Should().Be("2"));
     }
 
     [Fact]
     public void GetCustomerDepositPages_FilterOffsetSet_ThrowsBeforeAnyRequest()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => DepositsPage([], totalQuantity: 0));
+        var (client, handler) = CreateAccountingClient(_ => DepositsPage([], totalQuantity: 0));
 
         var act = () => client.GetCustomerDepositPages("portal-1", new DepositFilter { Offset = 10 });
 
@@ -130,10 +130,10 @@ public class AccountingClientDepositTests
         deposit.HasInvoice.Should().Be(expected);
     }
 
-    internal static HttpResponseMessage DepositsPage(IEnumerable<int> ids, int totalQuantity)
+    internal static StubResponse DepositsPage(IEnumerable<int> ids, int totalQuantity)
     {
         var items = ids.Select(id => $$"""{"id":{{id}},"sum":40.0,"currency":"USD","status":"Completed","paymentRef":"pi_{{id}}"}""");
 
-        return AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", items)}}],"totalQuantity":{{totalQuantity}}}""");
+        return Reply(HttpStatusCode.OK, $$"""{"collection":[{{string.Join(",", items)}}],"totalQuantity":{{totalQuantity}}}""");
     }
 }

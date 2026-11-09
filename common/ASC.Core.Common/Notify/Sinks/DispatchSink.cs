@@ -42,8 +42,8 @@ internal class DispatchSink(string senderName, DispatchEngine dispatcher) : Sink
         return _dispatcher.Dispatch(message, senderName, serviceScope);
     }
 
-    public override async Task ProcessMessageAsync(INoticeMessage message, IServiceScope serviceScope)
+    public override Task<SendResponse> ProcessMessageAsync(INoticeMessage message, IServiceScope serviceScope)
     {
-        await _dispatcher.Dispatch(message, senderName, serviceScope);
+        return _dispatcher.Dispatch(message, senderName, serviceScope);
     }
 }

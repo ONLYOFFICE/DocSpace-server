@@ -69,7 +69,9 @@ public class DocsCloudController(
     /// the portal settings, on an installation where the billing service is configured. The operation changes the
     /// portal subscription and is not idempotent: repeating it after a successful activation fails with 400.
     /// It returns `true` when the trial has been granted, and `false` when the billing service declines it
-    /// (for example, when this portal has already used its trial), in which case nothing is changed. It never buys
+    /// (for example, when this portal has already used its trial), in which case nothing is changed - or when its
+    /// answer could not be read, in which case the trial may have been granted: read `GET api/2.0/portal/tariff`
+    /// before asking again. It never buys
     /// a paid plan: an existing paid Docs Connect subscription is moved to Docs Connect Dev Pack by
     /// `POST api/2.0/settings/docscloud/switchtodevpack` instead.
     /// </remarks>
@@ -78,7 +80,7 @@ public class DocsCloudController(
     /// </summary>
     /// <path>api/2.0/settings/docscloud/trial</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "Boolean value: true if the trial subscription is activated, false if the billing service declines it", typeof(bool))]
+    [SwaggerResponse(200, "Boolean value: true if the trial subscription is activated, false if the billing service declines it or its answer could not be read", typeof(bool))]
     [SwaggerResponse(400, "The portal already has a Docs Connect trial, Docs Connect or Docs Connect Dev Pack subscription")]
     [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the trial cannot be started")]
     [SwaggerResponse(403, "The caller has no portal-settings right, the billing service is not configured, or the trial was granted but the address of the assigned Docs Connect server would push the Content Security Policy header over its size limit")]

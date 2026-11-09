@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Hồ sơ AI được giao cho tác nhân AI để thực hiện hành động: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Đã xóa khóa BYOK cho mô hình AI: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Đã đặt khóa BYOK cho mô hình AI: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Hồ sơ AI được giao cho hành động: {0}</value>
   </data>

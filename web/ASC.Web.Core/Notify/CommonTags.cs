@@ -48,6 +48,9 @@ public static class CommonTags
     public const string MyStaffLink = "MyStaffLink";
     public const string SettingsLink = "SettingsLink";
     public const string InviteLink = "InviteLink";
+    public const string InviteType = "InviteType";
+    public const string LinkAddress = "LinkAddress";
+    public const string PortalAlias = "PortalAlias";
     public const string Date = "Date";
     public const string Device = "Device";
     public const string Location = "Location";
@@ -81,6 +84,8 @@ public static class CommonTags
     public const string ToUserLink = "ToUserLink";
     public const string Message = "Message";
     public const string RoomRole = "RoomRole";
+    public const string AccessLevel = "AccessLevel";
+    public const string NewUserType = "NewUserType";
     public const string Count = "Count";
 
     public const string Address = "Address";

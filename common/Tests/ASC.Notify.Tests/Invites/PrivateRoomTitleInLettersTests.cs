@@ -81,7 +81,7 @@ public class PrivateRoomTitleInLettersTests
                 break;
             case nameof(RoomUpdateAccessForUserNotifyAction):
                 var access = services.GetRequiredService<RoomUpdateAccessForUserNotifyAction>();
-                access.Init(room, "Viewer");
+                access.Init(room, ASC.Files.Core.Security.FileShare.Read, "Viewer");
                 action = access;
                 break;
             case nameof(DocumentsUploadedToRoomNotifyAction):
@@ -120,10 +120,10 @@ public class PrivateRoomTitleInLettersTests
         using var scope = await LetterScope.OpenAsync(stack, CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
 
         var room = scope.Services.GetRequiredService<SaasRoomInviteNotifyAction>();
-        room.Init(scope.Culture.Name, null, scope.PortalUrl);
+        room.Init(scope.Culture.Name, null, scope.PortalUrl, EmployeeType.User);
 
         var agent = scope.Services.GetRequiredService<SaasAgentInviteNotifyAction>();
-        agent.Init(scope.Culture.Name, null, scope.PortalUrl);
+        agent.Init(scope.Culture.Name, null, scope.PortalUrl, EmployeeType.User);
 
         var existingAgent = scope.Services.GetRequiredService<SaasAgentInviteExistingUserNotifyAction>();
         existingAgent.Init(scope.Recipient, null, scope.PortalUrl);
@@ -147,10 +147,10 @@ public class PrivateRoomTitleInLettersTests
         using var scope = await LetterScope.OpenAsync(stack, CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
 
         var room = scope.Services.GetRequiredService<UserRoleChangedNotifyAction>();
-        room.Init(scope.Recipient, null, scope.PortalUrl, "Editor");
+        room.Init(scope.Recipient, null, scope.PortalUrl, "Editing", "Editor");
 
         var agent = scope.Services.GetRequiredService<UserAgentRoleChangedNotifyAction>();
-        agent.Init(scope.Recipient, null, scope.PortalUrl, "Editor");
+        agent.Init(scope.Recipient, null, scope.PortalUrl, "Editing", "Editor");
 
         foreach (var tags in new[] { room.Tags, agent.Tags })
         {

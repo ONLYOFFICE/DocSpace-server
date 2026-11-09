@@ -92,6 +92,9 @@ public static class ResourceNames
     /// <summary>The mail server the letter tests deliver to. Endpoints: <c>smtp</c> and <c>http</c>.</summary>
     public const string MailPit = "mailpit";
 
+    /// <summary>The RabbitMQ the services publish their events on.</summary>
+    public const string Messaging = "messaging";
+
     /// <summary>
     /// The Nextcloud the third-party storage tests connect to. A suite that lists it gets
     /// <c>NEXTCLOUD_URL</c>, <c>NEXTCLOUD_LOGIN</c> and <c>NEXTCLOUD_PASSWORD</c> in its process

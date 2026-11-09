@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI պրոֆիլը նշանակված է AI գործակալին գործողության համար՝ {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>ԱԲ մոդելի BYOK բանալին ջնջված է՝ {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>ԱԲ մոդելի BYOK բանալին սահմանված է՝ {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>ԱԲ պրոֆիլը նշանակված է գործողության համար՝ {0}</value>
   </data>

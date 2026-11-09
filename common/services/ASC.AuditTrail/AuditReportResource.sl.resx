@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profil AI je bil dodeljen AI agentu za dejanje: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Ključ BYOK za model AI je bil izbrisan: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Ključ BYOK za model AI je bil nastavljen: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profil AI je bil dodeljen dejanju: {0}</value>
   </data>

@@ -33,76 +33,14 @@
 
 package com.asc.identity.minified;
 
-import com.asc.common.application.proto.ClientRegistrationServiceGrpc;
-import com.asc.common.application.proto.ClientResponse;
-import com.asc.common.application.proto.GetClientRequest;
+import com.asc.registration.application.service.AbstractGrpcClientRegistrationService;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
-import com.google.protobuf.Timestamp;
-import io.grpc.Status;
-import io.grpc.stub.StreamObserver;
-import lombok.RequiredArgsConstructor;
 import net.devh.boot.grpc.server.service.GrpcService;
 
-/**
- * gRPC service implementation for client registration in the minified deployment.
- *
- * <p>This service provides a gRPC endpoint to fetch client details by client ID. It extends {@link
- * ClientRegistrationServiceGrpc.ClientRegistrationServiceImplBase} to integrate with gRPC
- * infrastructure and handle requests.
- */
+/** Answers authorization's lookups of a client by its id in the minified deployment. */
 @GrpcService
-@RequiredArgsConstructor
-public class GrpcClientRegistrationService
-    extends ClientRegistrationServiceGrpc.ClientRegistrationServiceImplBase {
-  private final ClientApplicationService clientApplicationService;
-
-  /**
-   * Fetches client details for the given client ID.
-   *
-   * <p>Constructs a {@link ClientResponse} containing the client's details and sends it back to the
-   * caller. If the client is not found, an appropriate error is returned.
-   *
-   * @param request the {@link GetClientRequest} containing the client ID.
-   * @param responseObserver the {@link StreamObserver} to send the {@link ClientResponse}.
-   */
-  public void getClient(GetClientRequest request, StreamObserver<ClientResponse> responseObserver) {
-    try {
-      var client = clientApplicationService.getClient(request.getClientId());
-      responseObserver.onNext(
-          ClientResponse.newBuilder()
-              .setClientId(client.getClientId())
-              .setClientSecret(client.getClientSecret())
-              .setDescription(client.getDescription())
-              .setWebsiteUrl(client.getWebsiteUrl())
-              .setTermsUrl(client.getTermsUrl())
-              .setPolicyUrl(client.getPolicyUrl())
-              .addAllAuthenticationMethods(client.getAuthenticationMethods())
-              .setTenant(client.getTenant())
-              .addAllRedirectUris(client.getRedirectUris())
-              .addAllAllowedOrigins(client.getAllowedOrigins())
-              .addAllLogoutRedirectUris(client.getLogoutRedirectUri())
-              .addAllScopes(client.getScopes())
-              .setCreatedOn(
-                  Timestamp.newBuilder()
-                      .setSeconds(client.getCreatedOn().getSecond())
-                      .setNanos(client.getCreatedOn().getNano())
-                      .build())
-              .setCreatedBy(client.getCreatedBy())
-              .setModifiedOn(
-                  Timestamp.newBuilder()
-                      .setSeconds(client.getModifiedOn().getSecond())
-                      .setNanos(client.getModifiedOn().getNano())
-                      .build())
-              .setModifiedBy(client.getModifiedBy())
-              .setEnabled(client.isEnabled())
-              .setIsPublic(client.isPublic())
-              .build());
-      responseObserver.onCompleted();
-    } catch (Exception e) {
-      responseObserver.onError(
-          Status.NOT_FOUND
-              .withDescription("Could not find client with id " + request.getClientId())
-              .asRuntimeException());
-    }
+public class GrpcClientRegistrationService extends AbstractGrpcClientRegistrationService {
+  public GrpcClientRegistrationService(ClientApplicationService clientApplicationService) {
+    super(clientApplicationService);
   }
 }

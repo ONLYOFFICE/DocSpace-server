@@ -38,13 +38,18 @@ import com.asc.common.service.ports.output.message.publisher.AuthorizationMessag
 import com.asc.common.service.transfer.message.ClientRemovedEvent;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
 import com.asc.common.service.transfer.message.UserClientsRemovedEvent;
+import java.time.Duration;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Direct implementation of authorization cleanup publishers for minified deployment.
@@ -57,14 +62,76 @@ import org.springframework.transaction.annotation.Transactional;
 @Profile("minified")
 public class DirectAuthorizationCleanupPublisher {
   private static final int REMOVAL_TIMEOUT_SECONDS = 60;
+  private static final Duration SECOND_RUN_DELAY = Duration.ofSeconds(60);
+
+  /**
+   * Runs cleanups, each in a transaction of its own that the chunks of the cleanup join, so a
+   * failure rolls back every chunk instead of leaving a partial removal behind. The transaction is
+   * opened inside the error handling: were it opened around it, a failed chunk would mark it
+   * rollback-only and its commit would throw past the handling to the caller.
+   */
+  @Component
+  @Profile("minified")
+  public static class CleanupRunner implements AutoCloseable {
+    private final ScheduledExecutorService scheduler =
+        Executors.newSingleThreadScheduledExecutor(Thread.ofVirtual().factory());
+    private final TransactionTemplate transactionTemplate;
+
+    public CleanupRunner(PlatformTransactionManager transactionManager) {
+      this.transactionTemplate = new TransactionTemplate(transactionManager);
+      transactionTemplate.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
+      transactionTemplate.setTimeout(REMOVAL_TIMEOUT_SECONDS);
+    }
+
+    /**
+     * Runs a cleanup now, logging its failure instead of throwing it.
+     *
+     * @param subject what is being cleaned up, for the log
+     * @param cleanup the cleanup to run
+     */
+    public void runNow(String subject, Runnable cleanup) {
+      log.info("Directly cleaning up authorizations for {}", subject);
+      try {
+        transactionTemplate.executeWithoutResult(_ -> cleanup.run());
+        log.info("Authorizations and consents for {} have been removed", subject);
+      } catch (Exception e) {
+        log.error("Failed to clean up authorizations for {}", subject, e);
+      }
+    }
+
+    /**
+     * Runs a cleanup once more after {@link #SECOND_RUN_DELAY}. The second run is kept in memory,
+     * so it is lost if the process stops before it is due; requests that later present the
+     * leftovers still get them cleaned up.
+     *
+     * @param subject what is being cleaned up, for the log
+     * @param cleanup the cleanup to run again
+     */
+    public void runLater(String subject, Runnable cleanup) {
+      scheduler.schedule(
+          () -> {
+            try {
+              transactionTemplate.executeWithoutResult(_ -> cleanup.run());
+              log.info("Second cleanup run for {} completed", subject);
+            } catch (Exception e) {
+              log.error("Second cleanup run for {} failed", subject, e);
+            }
+          },
+          SECOND_RUN_DELAY.toMillis(),
+          TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void close() {
+      scheduler.shutdownNow();
+    }
+  }
 
   /**
    * Minified-specific publisher that performs immediate cleanup when a single client is removed.
    *
    * <p>Instead of sending an event over RabbitMQ, this implementation directly deletes all
-   * authorizations and consents for the given client. Unlike the broker path there is no retry
-   * here, so the whole removal runs in one transaction: the chunks join it, and a failure rolls
-   * back every one of them instead of leaving a partial removal behind.
+   * authorizations and consents for the given client, and once more a minute later.
    */
   @Primary
   @Component
@@ -73,6 +140,7 @@ public class DirectAuthorizationCleanupPublisher {
   public static class ClientRemovedPublisher
       implements AuthorizationMessagePublisher<ClientRemovedEvent> {
     private final AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
+    private final CleanupRunner cleanupRunner;
 
     /**
      * Deletes all authorizations and consents associated with the removed client.
@@ -80,20 +148,12 @@ public class DirectAuthorizationCleanupPublisher {
      * @param message event describing the removed client
      */
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED, timeout = REMOVAL_TIMEOUT_SECONDS)
     public void publish(ClientRemovedEvent message) {
-      log.info("Directly cleaning up authorizations for client: {}", message.getClientId());
-      try {
-        authorizationMessagingCleanupService.onClientRemoved(message.getClientId());
-        log.info(
-            "Authorizations and consents for client {} have been removed", message.getClientId());
-      } catch (Exception e) {
-        log.error(
-            "Failed to cleanup authorizations for client {}: {}",
-            message.getClientId(),
-            e.getMessage(),
-            e);
-      }
+      var subject = "client " + message.getClientId();
+      Runnable cleanup =
+          () -> authorizationMessagingCleanupService.onClientRemoved(message.getClientId());
+      cleanupRunner.runLater(subject, cleanup);
+      cleanupRunner.runNow(subject, cleanup);
     }
   }
 
@@ -110,6 +170,7 @@ public class DirectAuthorizationCleanupPublisher {
   public static class UserClientsRemovedPublisher
       implements AuthorizationMessagePublisher<UserClientsRemovedEvent> {
     private final AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
+    private final CleanupRunner cleanupRunner;
 
     /**
      * Deletes all authorizations and consents the given user made, and those made to the clients
@@ -118,20 +179,12 @@ public class DirectAuthorizationCleanupPublisher {
      * @param message event describing the user whose clients were removed
      */
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED, timeout = REMOVAL_TIMEOUT_SECONDS)
     public void publish(UserClientsRemovedEvent message) {
-      log.info("Directly cleaning up authorizations for user: {}", message.getUserId());
-      try {
-        authorizationMessagingCleanupService.onUserRemoved(
-            message.getTenantId(), message.getUserId());
-        log.info("Authorizations and consents for user {} have been removed", message.getUserId());
-      } catch (Exception e) {
-        log.error(
-            "Failed to cleanup authorizations for user {}: {}",
-            message.getUserId(),
-            e.getMessage(),
-            e);
-      }
+      cleanupRunner.runNow(
+          "user " + message.getUserId(),
+          () ->
+              authorizationMessagingCleanupService.onUserRemoved(
+                  message.getTenantId(), message.getUserId(), message.getRemovedAt()));
     }
   }
 
@@ -146,6 +199,7 @@ public class DirectAuthorizationCleanupPublisher {
   public static class TenantClientsRemovedPublisher
       implements AuthorizationMessagePublisher<TenantClientsRemovedEvent> {
     private final AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
+    private final CleanupRunner cleanupRunner;
 
     /**
      * Deletes all consents and authorizations the users of the specified tenant made, and those
@@ -154,20 +208,12 @@ public class DirectAuthorizationCleanupPublisher {
      * @param message event describing the tenant whose clients were removed
      */
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED, timeout = REMOVAL_TIMEOUT_SECONDS)
     public void publish(TenantClientsRemovedEvent message) {
-      log.info("Directly cleaning up authorizations for tenant: {}", message.getTenantId());
-      try {
-        authorizationMessagingCleanupService.onTenantRemoved(message.getTenantId());
-        log.info(
-            "Authorizations and consents for tenant {} have been removed", message.getTenantId());
-      } catch (Exception e) {
-        log.error(
-            "Failed to cleanup authorizations for tenant {}: {}",
-            message.getTenantId(),
-            e.getMessage(),
-            e);
-      }
+      cleanupRunner.runNow(
+          "tenant " + message.getTenantId(),
+          () ->
+              authorizationMessagingCleanupService.onTenantRemoved(
+                  message.getTenantId(), message.getRemovedAt()));
     }
   }
 }
