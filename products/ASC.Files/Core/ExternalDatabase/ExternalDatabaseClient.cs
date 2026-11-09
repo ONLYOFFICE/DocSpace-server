@@ -1823,12 +1823,6 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return JsonSerializer.Serialize(results);
     }
 
-    public Task InsertDataAsync(string tableName, Dictionary<string, object> data)
-        => ExecuteInsertAsync(tableName, data, keyColumn: null);
-
-    public Task UpsertDataAsync(string tableName, Dictionary<string, object> data, string keyColumn)
-        => ExecuteInsertAsync(tableName, data, keyColumn);
-
     public Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, Dictionary<string, object> data, string keyColumn)
     {
         if (data == null || data.Count == 0)
@@ -1974,41 +1968,6 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return ids;
     }
 
-    private async Task ExecuteInsertAsync(string tableName, Dictionary<string, object> data, string? keyColumn)
-    {
-        ValidateTableName(tableName);
-        try
-        {
-            if (data == null || data.Count == 0)
-            {
-                throw new ArgumentException("Data dictionary is empty.", nameof(data));
-            }
-            var dbType = DatabaseType;
-            data = ToStoredRow(data, dbType);
-            await using var connection = await CreateConnectionAsync(dbType);
-            await connection.OpenAsync();
-            await SetupSqliteAsync(connection, dbType);
-
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn, dbType);
-
-            foreach (var kvp in data)
-            {
-                var param = cmd.CreateParameter();
-                param.ParameterName = "@" + kvp.Key;
-                param.Value = kvp.Value ?? DBNull.Value;
-                cmd.Parameters.Add(param);
-            }
-
-            await cmd.ExecuteNonQueryAsync();
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorInsertFailed(ex, tableName);
-            throw;
-        }
-    }
-
     private static void AddParameters(DbCommand cmd, Dictionary<string, object?> parameters)
     {
         foreach (var (name, value) in parameters)
@@ -2088,9 +2047,6 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
 internal static partial class ExternalDatabaseClientLogger
 {
-    [LoggerMessage(LogLevel.Error, "Insert into table {TableName} failed")]
-    public static partial void ErrorInsertFailed(this ILogger<ExternalDatabaseClient> logger, Exception exception, string tableName);
-
     [LoggerMessage(LogLevel.Warning, "Forms DB: column {column} of table {tableName} is left out, the database keeps its name as {storedName}, which another field took")]
     public static partial void WarnColumnNameTaken(this ILogger<ExternalDatabaseClient> logger, string tableName, string column, string storedName);
 }
