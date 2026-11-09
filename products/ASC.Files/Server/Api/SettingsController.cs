@@ -50,16 +50,11 @@ public class SettingsController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Turns the portal-wide permission to connect third-party storages such as Google Drive, Dropbox or Nextcloud on
-    /// or off, and returns the value that is now stored. Only the portal owner and a DocSpace administrator may
-    /// change it: a room administrator, a member or a guest is refused, and so is an unauthenticated caller. This is
-    /// a single setting for the whole portal rather than a preference of the caller, so it changes what every account
-    /// sees. While it is off, connecting an account through `POST api/2.0/files/thirdparty` is refused and the
-    /// contents of an already connected provider folder cannot be listed; the stored connections themselves survive
-    /// and work again once it is turned back on. The providers this portal can offer are listed by
-    /// `GET api/2.0/files/thirdparty/capabilities`. The same value is published as `enableThirdParty` by
-    /// `GET api/2.0/files/settings`. Sending the same value again is safe. The response is the value read back from
-    /// the portal, not a success flag.
+    /// Turns the connection of third-party storages on or off for the whole portal. It returns the value that is now
+    /// stored. Requires a DocSpace admin. Other callers get 403. The call changes data, and you can repeat it with
+    /// the same body. While the setting is off, `POST api/2.0/files/thirdparty` returns 403. Reading a folder of a
+    /// connected storage also returns 403, but the connections stay. After the setting is turned on again, they work
+    /// again. To list the storages the portal offers, use `GET api/2.0/files/thirdparty/capabilities`.
     /// </remarks>
     /// <summary>Change the third-party settings access</summary>
     /// <path>api/2.0/files/thirdparty</path>
@@ -75,16 +70,10 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores whether the caller wants to be asked for confirmation before files and folders are deleted, and returns
-    /// the value that is now stored. The setting belongs to the calling account alone: every authenticated role down
-    /// to a guest may change its own copy, one member's choice never affects another, and an unauthenticated caller
-    /// is refused. It is a hint for the interface, not a server-side guard: the delete operations under
-    /// `api/2.0/files/fileops` remove whatever they are given regardless of this value, so a client that skips its
-    /// own prompt loses nothing but the prompt. Pass `set=true` to be asked again, `set=false` to delete without a
-    /// prompt. The same value is published as `confirmDelete` by `GET api/2.0/files/settings`, which is the only way
-    /// to read it back. Repeating the call with the same value writes it again and is safe. A new account starts with
-    /// the confirmation switched on, and the value says nothing about where deleted items land: they go to the trash
-    /// and are cleared from there according to `GET api/2.0/files/settings/autocleanup`.
+    /// Changes whether the calling account is asked to confirm a deletion of files and folders. It returns the value
+    /// that is now stored. Any signed-in user can call it. The call changes data, and you can repeat it with the same
+    /// body. The setting only guides the app. The delete operations under `api/2.0/files/fileops` ignore it. To read
+    /// the value, use the `confirmDelete` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Ask for delete confirmation</summary>
     /// <path>api/2.0/files/changedeleteconfrim</path>
@@ -98,16 +87,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Selects the archive format the portal packs the caller's multi-item downloads into: `set=true` switches to
-    /// `.tar.gz`, `set=false` back to `.zip`. The choice is stored for the calling account only, so every
-    /// authenticated role down to a guest may set its own, while an unauthenticated caller is refused. It takes
-    /// effect on the archives built by `PUT api/2.0/files/fileops/bulkdownload` and by the download links that
-    /// operation returns; archives already produced keep the format they were packed with. The returned archive
-    /// object carries no readable fields of its own, so it cannot be used to confirm the change: read `downloadTarGz`
-    /// from `GET api/2.0/files/settings` instead. Writing the same value again is safe and changes nothing else. A
-    /// new account starts on `.zip`. The format decides only how the archive is packed: which items go into it, and
-    /// the access needed to take them, are decided by the bulk-download operation itself, and a single file is
-    /// downloaded as it is whatever is stored here.
+    /// Changes the archive format of multi-item downloads for the calling account. If `set` is true, the portal packs
+    /// them as `.tar.gz`. If it is false, the portal uses `.zip`. Any signed-in user can call it. The call changes
+    /// data, and you can repeat it with the same body. The format applies to the archives that
+    /// `PUT api/2.0/files/fileops/bulkdownload` builds after this call. The response is an object without fields. To
+    /// read the format, use the `downloadTarGz` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Change the download archive format</summary>
     /// <path>api/2.0/files/settings/downloadtargz</path>
@@ -121,7 +105,9 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Displays the "Favorites" folder.
+    /// Shows or hides the Favorites section for the calling account. It returns `true` if the section is shown. Any
+    /// signed-in user can call it. The call changes data, and you can repeat it with the same body. To read the
+    /// value, use the `favoritesSection` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Display the "Favorites" folder</summary>
     /// <path>api/2.0/files/settings/favorites</path>
@@ -137,15 +123,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores whether the "Recent" section is offered to the calling account, and returns the value that is now
-    /// stored. The setting belongs to that account alone: every authenticated role down to a guest may change its own
-    /// copy, and an unauthenticated caller is refused. Hiding the section removes it from the list of section roots
-    /// returned by `GET api/2.0/files/@root`, and the document editor stops offering the recent-files entry; the
-    /// section itself keeps being maintained, and `GET api/2.0/files/recent` still returns its contents. Pass
-    /// `set=true` to show it again. The same value is published as `recentSection` by `GET api/2.0/files/settings`,
-    /// which is the only way to read it back. Repeating the call with the same value writes it again and is safe. A
-    /// new account starts with the section shown. Hiding it neither clears the recent history nor stops it being
-    /// recorded, so showing the section again brings the same entries back.
+    /// Shows or hides the Recent section for the calling account. It returns `true` if the section is shown. Any
+    /// signed-in user can call it. The call changes data, and you can repeat it with the same body. A hidden section
+    /// no longer appears in `GET api/2.0/files/@root` and in the document editor. The portal still records recent
+    /// files, and `GET api/2.0/files/recent` still returns them. To read the value, use the `recentSection` field of
+    /// `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Show the Recent section</summary>
     /// <path>api/2.0/files/displayrecent</path>
@@ -160,7 +142,9 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Displays the "Templates" folder.
+    /// Shows or hides the Templates section for the calling account. It returns `true` if the section is shown. Any
+    /// signed-in user can call it. The call changes data, and you can repeat it with the same body. To read the
+    /// value, use the `templatesSection` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Display the "Templates" folder</summary>
     /// <path>api/2.0/files/settings/templates</path>
@@ -176,17 +160,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Turns external (public) links on or off for the whole portal and returns the value that is now stored. Only
-    /// the portal owner and a DocSpace administrator may change it: a room administrator, a member or a guest is
-    /// refused, and so is an unauthenticated caller. Turning it off also turns sharing on social networks off, so a
-    /// following read of `externalShareSocialMedia` reports false without a separate call. This operation sets one
-    /// flag; to write the whole external-sharing policy in one request - the default link type, the sections the
-    /// restriction applies to and whether existing links are blocked at once - use
-    /// `PUT api/2.0/files/settings/externalsharingsettings`. The value is published as `externalShare` by
-    /// `GET api/2.0/files/settings`. Sending the same value again is safe. The response is the value read back from
-    /// the portal rather than a success flag. External links are allowed in a new portal. Turning them off does not
-    /// delete the links that already exist - whether those stop working at once is decided by the
-    /// `blockExistingLinksOnRestrict` field of the settings operation named above.
+    /// Turns external links on or off for the whole portal. It returns the value that is now stored. Requires a
+    /// DocSpace admin. Other callers get 403. The call changes data, and you can repeat it with the same body.
+    /// Turning external links off also turns off sharing on social networks. The call does not delete existing links.
+    /// The `blockExistingLinksOnRestrict` field decides if they keep working. To set it and the rest of the sharing
+    /// policy, use `PUT api/2.0/files/settings/externalsharingsettings`.
     /// </remarks>
     /// <summary>Change the external sharing ability</summary>
     /// <path>api/2.0/files/settings/external</path>
@@ -200,15 +178,12 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Writes the portal's whole external-sharing policy in one request and returns the set that is now in force.
-    /// Only the portal owner and a DocSpace administrator may call it; everyone else is refused, including an
-    /// unauthenticated caller. Every field of the request is applied, so send the complete set rather than the field
-    /// being changed - an omitted boolean is read as false. The portal keeps the set consistent: with `externalShare`
-    /// false the default link type is forced to "users of this portal only" and sharing on social networks is turned
-    /// off, and the three restriction fields only matter while external sharing is off.
-    /// `blockExistingLinksOnRestrict` decides what happens to links that already exist, so it is the field that
-    /// changes access to data already shared. The new set is pushed to the connected clients of the portal as well,
-    /// and is published field by field by `GET api/2.0/files/settings`. Sending the same set again is safe.
+    /// Changes the whole external sharing policy of the portal. It returns the policy that is now in force. Requires
+    /// a DocSpace admin. Other callers get 403. The call changes data, and you can repeat it with the same body. The
+    /// call writes every field, so an omitted field becomes false. Send the whole policy, not only the changed field.
+    /// If `externalShare` is false, the portal sets `defaultShareLinkInternal` to true. It also turns off sharing on
+    /// social networks. The `blockExistingLinksOnRestrict` field decides if existing links keep working while
+    /// external sharing is off.
     /// </remarks>
     /// <summary>Configure external sharing</summary>
     /// <path>api/2.0/files/settings/externalsharingsettings</path>
@@ -222,16 +197,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Turns the social-network sharing buttons on or off for the whole portal and returns the value that is now in
-    /// force. Only the portal owner and a DocSpace administrator may change it; a room administrator, a member or a
-    /// guest is refused, and so is an unauthenticated caller. The requested value is combined with the state of
-    /// external sharing itself: while that is off, enabling this setting has no effect and the response comes back
-    /// false, so turn external sharing on with `PUT api/2.0/files/settings/external` first and only then this one.
-    /// Turning external sharing off later switches this setting off again on its own. The value is published as
-    /// `externalShareSocialMedia` by `GET api/2.0/files/settings`. Sending the same value again is safe. Read the
-    /// response instead of assuming the requested value was stored. The setting governs the share-to-network buttons
-    /// offered next to an external link; it neither creates nor revokes links, and the links themselves keep working
-    /// either way.
+    /// Turns sharing on social networks on or off for the whole portal. It returns the value that is now in force. It
+    /// needs external links turned on with `PUT api/2.0/files/settings/external`. Requires a DocSpace admin. Other
+    /// callers get 403. The call changes data, and you can repeat it with the same body. While external links are
+    /// off, the call stores false and returns false. If external links are turned off later, this setting is turned
+    /// off too. The setting does not create or delete links.
     /// </remarks>
     /// <summary>Change the external sharing ability on social networks</summary>
     /// <path>api/2.0/files/settings/externalsocialmedia</path>
@@ -245,16 +215,10 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Reports that forcesaving is on for this portal. The operation is a stub kept for compatibility: it takes no
-    /// request body, stores nothing and always answers true, so calling it neither turns forcesaving on nor off and
-    /// repeating it changes nothing. Forcesaving itself - the editor writing the document back to storage while the
-    /// session is still open - is on for every portal and cannot be switched off through the API. Any authenticated
-    /// role down to a guest may call it; an unauthenticated caller is refused. The same constant is published as
-    /// `forcesave` by `GET api/2.0/files/settings`, which is the cheaper way to read it together with the rest of the
-    /// settings. A companion stub, `PUT api/2.0/files/storeforcesave`, answers for the storing of forcesaved versions
-    /// in the same way. Nothing in this call reaches a document: to have the current state of an editing session
-    /// written to storage, drive the document through the editor operations of the file itself rather than through
-    /// this setting.
+    /// Changes nothing and always returns `true`. Forcesaving is on in every portal, and the API cannot turn it off.
+    /// With forcesaving, the editor saves a document to storage while it is still open. The call is kept for
+    /// compatibility and takes no body. Any signed-in user can call it. You can repeat it. The `forcesave` field of
+    /// `GET api/2.0/files/settings` returns the same value.
     /// </remarks>
     /// <summary>Change the forcesaving ability</summary>
     /// <path>api/2.0/files/forcesave</path>
@@ -268,16 +232,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the whole Files configuration in one object: the caller's own preferences (trash auto-clearing,
-    /// default sharing rights, hidden confirmation dialogs, archive format, section visibility), the portal-wide
-    /// switches an administrator controls (third-party storages, external sharing), and the static tables a client
-    /// needs to work with documents - which extensions can be viewed, edited, converted or uploaded, the URL
-    /// templates for the viewer, editor and thumbnails, and the upload limits. This is the read side of the setting
-    /// operations in this section: each of those answers with the one value it wrote, and only the trash
-    /// auto-clearing and default-template settings have a GET of their own. Marked as allowing anonymous access
-    /// because the external-link pages read the extension tables before signing in, but a caller with neither a
-    /// session nor a valid link key is still rejected. The result is not filtered by role and is not paginated; fetch
-    /// it once per session rather than before each file action.
+    /// Returns the Files settings of the caller and the portal in one object. The object has the caller's
+    /// preferences, the portal switches, the format tables, the editor URLs, and the upload limits. Any signed-in
+    /// user can call it. A visitor with an external link can also call it without signing in. Other callers get 401.
+    /// The call is read-only. Most setting calls of this section return only the value they changed. Read the other
+    /// values here.
     /// </remarks>
     /// <summary>Get file settings</summary>
     /// <path>api/2.0/files/settings</path>
@@ -300,16 +259,9 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the descriptor of the Documents module of this portal: its identifier, display title and description,
-    /// the address of its start page, the icon and image addresses, the address of its help section, and whether it
-    /// is the portal's primary module. It is meant for building navigation to the module, not for working with
-    /// documents: nothing about files, rooms or permissions comes back, and nothing is changed by the call. The
-    /// values follow the portal's own configuration and branding, so the title and the description arrive already
-    /// translated for the caller. Any authenticated role down to a guest may read it; an unauthenticated caller is
-    /// refused. The content is the same for everyone in the portal and changes only when the portal is reconfigured,
-    /// so it can be fetched once and cached rather than requested per screen. Only the Documents module is described
-    /// here; this document carries no listing of the other modules of the portal. The file-related configuration a
-    /// client needs alongside it - the format tables, the editor addresses and the upload limits - comes from
+    /// Returns the descriptor of the Documents module of the portal. Any signed-in user can call it. The call is
+    /// read-only. The title and the description come in the language of the caller. The response is the same for
+    /// every user of the portal. For the format tables, the editor URLs, and the upload limits, use
     /// `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Get the Documents module information</summary>
@@ -324,17 +276,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores whether the caller is asked to confirm cancelling a running file operation, and returns the value that
-    /// is now stored. The setting belongs to the calling account alone: every authenticated role down to a guest may
-    /// change its own copy, and an unauthenticated caller is refused. Unlike the conversion prompt of
-    /// `PUT api/2.0/files/hideconfirmconvert`, this one works in both directions - `set=true` hides the confirmation,
-    /// `set=false` brings it back. It is a hint for the interface only: cancelling an operation through the API is
-    /// unaffected, and the operations themselves keep being reported by `GET api/2.0/files/fileops`. The value is
-    /// published as `hideConfirmCancelOperation` by `GET api/2.0/files/settings`, which is the only way to read it
-    /// back. Writing a value that is already stored is accepted and leaves the setting untouched. A new account
-    /// starts with the confirmation shown. The prompt it hides is the one raised when a running copy, move or
-    /// download is about to be abandoned, not the one raised before a deletion - that one is
-    /// `PUT api/2.0/files/changedeleteconfrim`.
+    /// Hides or shows the confirmation that the app asks before it cancels a running file operation. The setting is
+    /// for the calling account. If `set` is true, the app hides the confirmation. If it is false, the app shows it
+    /// again. Any signed-in user can call it. The call changes data, and you can repeat it with the same body. It
+    /// returns the value that is now stored. The setting does not change how the API cancels operations. To read it,
+    /// use the `hideConfirmCancelOperation` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Hide confirmation dialog when canceling operations</summary>
     /// <path>api/2.0/files/hideconfirmcanceloperation</path>
@@ -347,15 +293,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Hides one of the two prompts the interface shows around file conversion, for the calling account only. The
-    /// `save` field chooses which prompt, and is not the value being written: `save=true` hides the prompt that
-    /// offers to keep a copy in the original format when a file is converted, `save=false` hides the prompt that
-    /// offers to open the conversion result. Both flags are one-way - the operation can only hide a prompt, and there
-    /// is no API to show it again - so the answer is always true and repeating the call changes nothing. The two
-    /// flags are independent: hiding one leaves the other as it was. Every authenticated role down to a guest may set
-    /// its own, and an unauthenticated caller is refused. The stored flags are published as `hideConfirmConvertSave`
-    /// and `hideConfirmConvertOpen` by `GET api/2.0/files/settings`. Conversion itself is started by
-    /// `PUT api/2.0/files/file/{fileId}/checkconversion` and is not affected by either flag.
+    /// Hides one of two conversion prompts for the calling account. If `save` is true, the call hides the prompt to
+    /// keep a copy in the original format. If `save` is false, it hides the prompt to open the converted file. Any
+    /// signed-in user can call it. The call changes data, and you can repeat it with the same body. No call of the
+    /// API shows a hidden prompt again. The call always returns `true`. To read both flags, use
+    /// `hideConfirmConvertSave` and `hideConfirmConvertOpen` of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Hide the confirmation dialog when converting</summary>
     /// <path>api/2.0/files/hideconfirmconvert</path>
@@ -368,17 +310,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores whether the caller is warned before the lifetime settings of a room are changed, and returns the value
-    /// that is now stored. A room lifetime moves the files of the room to the trash once they reach the configured
-    /// age, which is why the interface confirms the change; this setting decides whether that confirmation is shown
-    /// to the calling account. It belongs to that account alone: every authenticated role down to a guest may change
-    /// its own copy, and an unauthenticated caller is refused. It works in both directions - `set=true` hides the
-    /// warning, `set=false` brings it back - and is a hint for the interface only, so changing a room lifetime
-    /// through `PUT api/2.0/files/rooms/{id}` is unaffected. The value is published as `hideConfirmRoomLifetime` by
-    /// `GET api/2.0/files/settings`, which is the only way to read it back. A new account starts with the warning
-    /// shown, and writing a value that is already stored is accepted and leaves the setting untouched. Hiding the
-    /// warning does not shorten or extend any lifetime: what a room does with ageing files is decided by the room
-    /// itself.
+    /// Hides or shows the warning that the app shows before it changes the lifetime of a room. The setting is for the
+    /// calling account. If `set` is true, the app hides the warning. If it is false, the app shows it again. Any
+    /// signed-in user can call it. The call changes data, and you can repeat it with the same body. It returns the
+    /// value that is now stored. The setting does not change room lifetimes or `PUT api/2.0/files/rooms/{id}`. To
+    /// read it, use the `hideConfirmRoomLifetime` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Hide confirmation dialog when changing room lifetime settings</summary>
     /// <path>api/2.0/files/hideconfirmroomlifetime</path>
@@ -391,16 +327,9 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Reports that forcesaved versions are not kept as separate file versions in this portal. The operation is a
-    /// stub kept for compatibility: it takes no request body, stores nothing and always answers false, so it neither
-    /// turns the behaviour on nor off and repeating it changes nothing. What it describes is what happens to the
-    /// intermediate saves the editor makes while a document is still open - they update the current version instead
-    /// of piling up as new ones in `GET api/2.0/files/file/{fileId}/history`. Any authenticated role down to a guest
-    /// may call it; an unauthenticated caller is refused. The same constant is published as `storeForcesave` by
-    /// `GET api/2.0/files/settings`, which is the cheaper way to read it. Its companion stub
-    /// `PUT api/2.0/files/forcesave` answers for forcesaving itself in the same way. Version history is not affected
-    /// by this call either: the versions a document really has are the ones the file history operation lists, and a
-    /// new one appears when the editing session is closed.
+    /// Changes nothing and always returns `false`. The value means that the portal does not keep forcesaved states as
+    /// separate file versions. The call is kept for compatibility and takes no body. Any signed-in user can call it.
+    /// You can repeat it. The `storeForcesave` field of `GET api/2.0/files/settings` returns the same value.
     /// </remarks>
     /// <summary>Change the ability to store the forcesaved files</summary>
     /// <path>api/2.0/files/storeforcesave</path>
@@ -414,15 +343,12 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores whether the caller's uploads keep the original file when the portal converts them into an editable
-    /// format, and returns the value that is now stored. With `set=true` the converted document is saved as a new
-    /// file next to the upload, so both the original and the converted copy stay in the folder; with `set=false` the
-    /// conversion replaces the uploaded file with a new version of it whenever the caller may edit that file. The
-    /// setting belongs to the calling account alone: every authenticated role down to a guest may change its own
-    /// copy, and an unauthenticated caller is refused. It applies to conversion on upload and to
-    /// `PUT api/2.0/files/file/{fileId}/checkconversion`, not to files already stored. The value is published as
-    /// `storeOriginalFiles` by `GET api/2.0/files/settings`, which is the only way to read it back. The change is
-    /// recorded in the portal audit trail.
+    /// Changes whether a conversion on upload keeps the original file for the calling account. It returns the value
+    /// that is now stored. If `set` is true, the portal saves the converted file next to the original. If it is
+    /// false, the converted file replaces the upload as its new version. This happens only when the caller can edit
+    /// the file. Any signed-in user can call it. The call changes data, and you can repeat it with the same body. The
+    /// setting also applies to `PUT api/2.0/files/file/{fileId}/checkconversion`. To read it, use the
+    /// `storeOriginalFiles` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Change the ability to upload original formats</summary>
     /// <path>api/2.0/files/storeoriginal</path>
@@ -436,16 +362,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores whether the caller wants new documents created with the default name instead of being asked for one,
-    /// and returns the value that is now stored. It is a preference of the calling account: every authenticated role
-    /// down to a guest may change its own copy, one member's choice never affects another, and an unauthenticated
-    /// caller is refused. The portal only keeps the value and reports it - the creation operations,
-    /// `POST api/2.0/files/{folderId}/file` among them, always use the title they are given, so this setting changes
-    /// what an interface asks for rather than what the server does. Writing a value that is already stored is
-    /// accepted and leaves the setting and the audit trail untouched. The value is published as `keepNewFileName` by
-    /// `GET api/2.0/files/settings`, which is the only way to read it back. A new account starts with the prompt in
-    /// place. The title a created document actually gets, and how a clash with an existing title is resolved, are
-    /// decided by the creation request rather than here.
+    /// Changes whether new documents get the default name without asking the user. The setting is for the calling
+    /// account and only guides the app. It returns the value that is now stored. Any signed-in user can call it. The
+    /// call changes data, and you can repeat it with the same body. Calls that create files, such as
+    /// `POST api/2.0/files/{folderId}/file`, always use the title they get. To read the value, use the
+    /// `keepNewFileName` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Keep the default file name</summary>
     /// <path>api/2.0/files/keepnewfilename</path>
@@ -458,15 +379,10 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores whether file titles are shown to the caller with their extension, and returns the value that is now
-    /// stored. It is a preference of the calling account: every authenticated role down to a guest may change its own
-    /// copy, and an unauthenticated caller is refused. Only the presentation changes - the titles kept by the portal
-    /// always include the extension, and the listing and file operations keep returning them in full, so a client
-    /// that trims the extension for display must add it back before it renames or searches for anything. Writing a
-    /// value that is already stored is accepted and leaves the setting untouched. The value is published as
-    /// `displayFileExtension` by `GET api/2.0/files/settings`, which is the only way to read it back. A new account
-    /// starts with extensions hidden. This governs display alone: which extensions may be uploaded, viewed or edited
-    /// at all is published by the same settings operation as separate format lists.
+    /// Changes whether the calling account sees file names with their extension. It returns the value that is now
+    /// stored. Any signed-in user can call it. The call changes data, and you can repeat it with the same body. The
+    /// setting only guides the app. File titles in the API always include the extension. So send the full title when
+    /// you rename or search. To read the value, use the `displayFileExtension` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Display a file extension</summary>
     /// <path>api/2.0/files/displayfileextension</path>
@@ -479,14 +395,10 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Turns the quick action buttons shown next to a file name on or off, and answers with the value that was
-    /// sent. This is a preference of the calling account rather than a portal setting, so it changes what the
-    /// caller sees and nothing for anybody else; any authenticated role down to a guest may set it, while an
-    /// unauthenticated caller is refused. The value is written only when it differs from the one already stored,
-    /// and only then is the change recorded in the audit trail, so repeating the same call is harmless and leaves
-    /// no trace. An account that has never set it is treated as having the buttons on. The answer echoes the
-    /// request instead of re-reading what was stored, so read the setting back through
-    /// `GET api/2.0/files/settings`, which publishes it as `showQuickActions`.
+    /// Turns the quick action buttons next to file names on or off for the calling account. Any signed-in user can
+    /// call it. The call changes data, and you can repeat it with the same body. An account that never set the value
+    /// has the buttons on. The response repeats the sent value and does not read the stored one. To read the stored
+    /// value, use the `showQuickActions` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Display quick actions</summary>
     /// <path>api/2.0/files/showquickactions</path>
@@ -499,16 +411,10 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Reports that uploading a file under a name that already exists does not update the existing file. The
-    /// operation is a stub kept for compatibility: the request body is read but ignored, nothing is stored, and the
-    /// answer is always false, so calling it changes no behaviour and repeating it changes nothing. What actually
-    /// decides the outcome of a name clash is the parameter of the upload itself - see the `createNewIfExist` and
-    /// conflict-resolution parameters of the operations under `api/2.0/files/{folderId}/upload` and of
-    /// `PUT api/2.0/files/fileops/copy`. Any authenticated role down to a guest may call it; an unauthenticated
-    /// caller is refused. Because the value is a constant, there is nothing to read back afterwards, and
-    /// `GET api/2.0/files/settings` does not publish it. To add a version to a document that is already stored,
-    /// address the file directly through the update operations under `api/2.0/files/file/{fileId}` instead of
-    /// uploading under the same name and relying on this setting.
+    /// Changes nothing and always returns `false`. The call is kept for compatibility and ignores the body. Any
+    /// signed-in user can call it. You can repeat it. The call does not make an upload update a file with the same
+    /// name. The parameters of the upload call decide what happens on a name clash. To add a version to a file, use
+    /// the update calls under `api/2.0/files/file/{fileId}`.
     /// </remarks>
     /// <summary>Update a file version if it exists</summary>
     /// <path>api/2.0/files/updateifexist</path>
@@ -521,15 +427,10 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the trash auto-clearing setting of the calling account: whether it is on, and after which interval an
-    /// item that sits in the trash is removed for good. The setting belongs to that account alone, so every
-    /// authenticated role down to a guest reads its own value and an unauthenticated caller is refused. The first
-    /// call for an account is not read-only: when nothing has been stored yet the portal writes the default -
-    /// clearing on, thirty days - and returns it, so the answer never comes back empty and a following call reports
-    /// the same pair. The interval is the age of an entry in the trash, not a schedule; each trashed entry also
-    /// reports the moment it is due to disappear in its own `autoDelete` field. Use
-    /// `PUT api/2.0/files/settings/autocleanup` to change the pair, or read it together with the rest of the
-    /// configuration from `GET api/2.0/files/settings`.
+    /// Returns the trash auto-clearing setting of the calling account. Any signed-in user can call it. If the account
+    /// has no setting yet, the call stores the default and returns it. The default turns clearing on with an interval
+    /// of thirty days. After this, the call is read-only. Each entry in the trash shows in its `autoDelete` field
+    /// when the portal deletes it. To change the setting, use `PUT api/2.0/files/settings/autocleanup`.
     /// </remarks>
     /// <summary>Get the trash bin auto-clearing setting</summary>
     /// <path>api/2.0/files/settings/autocleanup</path>
@@ -542,15 +443,11 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Writes the trash auto-clearing setting of the calling account and returns the pair that is now stored. Both
-    /// fields are written together from the request, so a call that omits `gap` stores an interval outside the
-    /// published list rather than keeping the previous one - always send the interval, including when `set` is false.
-    /// While clearing is on, an item is removed from the caller's trash for good once it has been there longer than
-    /// the interval, and each trashed entry reports the moment it is due to disappear in its own `autoDelete` field;
-    /// switching clearing off stops that and leaves whatever is in the trash. The setting belongs to the calling
-    /// account alone: every authenticated role down to a guest may change its own, one member's choice never affects
-    /// another, and an unauthenticated caller is refused. Items already removed are not recoverable. Read the pair
-    /// back with `GET api/2.0/files/settings/autocleanup`.
+    /// Changes the trash auto-clearing setting of the calling account. It returns the setting that is now stored. Any
+    /// signed-in user can call it. The call changes data, and you can repeat it with the same body. The call writes
+    /// `set` and `gap` together. If you omit `gap`, the call stores 0, which is not a valid interval. So send `gap`
+    /// even when `set` is false. While clearing is on, the portal deletes an item after it stays in the trash longer
+    /// than `gap`. This deletion cannot be undone. Turning clearing off keeps the items in the trash.
     /// </remarks>
     /// <summary>Update the trash bin auto-clearing setting</summary>
     /// <path>api/2.0/files/settings/autocleanup</path>
@@ -564,15 +461,13 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores the access rights the sharing dialog offers the calling account by default, and returns the set that
-    /// was actually stored. The body is a bare array of access-right values, not an object. The portal normalises the
-    /// array instead of keeping it as sent: it keeps the fill-forms, custom-filter and review entries, then adds
-    /// read-and-write or comment - whichever is present, in that order - and stops there, and it falls back to read
-    /// alone when nothing else applies, so the response can be shorter than the request and its order can differ. An
-    /// empty array clears the setting, after which read alone is reported. A value outside the published list is
-    /// rejected as an invalid request. The set belongs to the calling account alone: every authenticated role down to
-    /// a guest may store its own, and an unauthenticated caller is refused. Nothing already shared is changed. The
-    /// stored set is published as `defaultSharingAccessRights` by `GET api/2.0/files/settings`.
+    /// Changes the access rights that the sharing dialog offers the calling account by default. The body is an array
+    /// of access rights, not an object. Any signed-in user can call it. The call changes data, and you can repeat it
+    /// with the same body. The portal keeps `FillForms`, `CustomFilter`, and `Review` from the array. Then it adds
+    /// `ReadWrite` or `Comment`, the first one the array has. If the array has neither, it adds `Read`. So the
+    /// response can be shorter than the request and have another order. An empty array clears the setting, and the
+    /// call then returns `Read` alone. If a value is not an access right, the call returns 400. Existing shares do
+    /// not change.
     /// </remarks>
     /// <summary>Change the default access rights</summary>
     /// <path>api/2.0/files/settings/dafaultaccessrights</path>
@@ -588,15 +483,10 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Stores whether the caller wants documents opened in the current browser tab instead of a new one, and returns
-    /// the value that is now stored. It is a preference of the calling account: every authenticated role down to a
-    /// guest may change its own copy, and an unauthenticated caller is refused. The portal only keeps the value - the
-    /// editor addresses returned by the file operations are the same either way, so this setting changes how a client
-    /// opens them rather than what it receives. Writing a value that is already stored is accepted and leaves the
-    /// setting untouched. The value is published as `openEditorInSameTab` by `GET api/2.0/files/settings`, which is
-    /// the only way to read it back. A new account starts with documents opening in a new tab. Nothing about the
-    /// document changes with it: the editing session, the access rights that apply and the addresses handed out are
-    /// the same whichever tab a client uses.
+    /// Changes whether documents open in the current browser tab for the calling account. It returns the value that
+    /// is now stored. Any signed-in user can call it. The call changes data, and you can repeat it with the same
+    /// body. The setting only guides the app. The editor URLs that the API returns are the same either way. To read
+    /// the value, use the `openEditorInSameTab` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Open document in the same browser tab</summary>
     /// <path>api/2.0/files/settings/openeditorinsametab</path>
@@ -610,15 +500,13 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the blank document the portal creates for each format: one entry per extension the built-in template
-    /// set covers, with the file that has been chosen as the blank for it, if any. An entry whose `selectedFile` is
-    /// null means no custom template has been set and the built-in blank is used; the remaining fields - title, size,
-    /// modification moment and view address - are filled only for a custom one. The list is assembled from the
-    /// portal's built-in template set on every call, so an extension the set no longer covers disappears from it.
-    /// Entries come in the order the interface shows them: the text document, spreadsheet, presentation and PDF
-    /// formats first, the rest by extension. Reading the setting requires the portal settings permission, so only the
-    /// portal owner and a DocSpace administrator may call it. Use `PUT api/2.0/files/settings/defaulttemplate` to
-    /// choose an existing file and the matching POST to upload one.
+    /// Returns the blank documents that the portal uses for new files, one entry per extension. The list has every
+    /// extension of the built-in template set. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. The call is read-only. If `selectedFile` is null, the portal uses
+    /// its built-in blank. The other file fields are filled only for a custom blank. The list starts with `.docx`,
+    /// `.xlsx`, `.pptx`, and `.pdf`, and the rest follow by extension. To set a portal file as a blank, use
+    /// `PUT api/2.0/files/settings/defaulttemplate`. To upload one, use
+    /// `POST api/2.0/files/settings/defaulttemplate`.
     /// </remarks>
     /// <summary>Get the default template setting</summary>
     /// <path>api/2.0/files/settings/defaulttemplate</path>
@@ -634,15 +522,15 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Makes an existing document the blank the portal creates for one extension, and returns the full set of
-    /// templates as it now stands. The file is copied into the portal's template storage, so later edits of the
-    /// original do not change the blank, and the file that served as the previous custom blank for that extension is
-    /// deleted. `selectedFile` takes the identifier of a file the caller may copy - a number for a document stored in
-    /// the portal, a string for one in a connected third-party storage - and its extension must be the one named in
-    /// `fileExtension`; a mismatch or an identifier of another kind answers 400, a file the caller may not copy
-    /// answers 403, and a file that is not there is answered as missing. An extension the built-in template set does
-    /// not cover is not an error: the call succeeds and changes nothing, so compare the answer with what was asked
-    /// for. Requires the portal settings permission.
+    /// Makes a copy of an existing file the blank for new files of one extension. It returns all blanks after the
+    /// change. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
+    /// callers get 403. The call changes data. Later edits of the original file do not change the blank. The call
+    /// deletes the previous custom blank of that extension. So a repeated call makes a new copy and deletes the
+    /// previous one. If the extension is not in the built-in template set, the call changes nothing. If the caller
+    /// cannot copy the file, the call returns 403. The call returns 400 if `selectedFile` is neither a number nor a
+    /// string. It also returns 400 if the file extension is not exactly `fileExtension`, including case. If the file
+    /// does not exist, the call returns 404. If `selectedFile` is a number that is not a 32-bit integer, the call
+    /// returns 500.
     /// </remarks>
     /// <summary>Change the default template setting</summary>
     /// <path>api/2.0/files/settings/defaulttemplate</path>
@@ -661,16 +549,13 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Drops the custom blank document configured for one extension and returns the full set of templates as it now
-    /// stands. New documents of that extension are created from the portal's built-in blank again, and the file that
-    /// served as the custom one is deleted from the template storage - the original the template was copied from is
-    /// untouched. The extension is named in the request body, and the entry for it comes back with `selectedFile`
-    /// null. Resetting an extension that has no custom blank is accepted and changes nothing, which makes a repeated
-    /// call safe; an extension the built-in template set does not cover is ignored in the same way. Requires the
-    /// portal settings permission, so only the portal owner and a DocSpace administrator may call it. To set a blank
-    /// instead of dropping it, use `PUT api/2.0/files/settings/defaulttemplate`. Documents already created from the
-    /// custom blank are left as they are - the reset only decides what the next new document of that extension starts
-    /// from. The set as it stands can also be read with `GET api/2.0/files/settings/defaulttemplate`.
+    /// Deletes the custom blank of one extension. New files of that extension then start from the built-in blank. It
+    /// returns all blanks after the reset. The extension comes in the request body. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call changes data. It
+    /// deletes the stored copy of the blank, but not the file it was copied from. Files already created from the
+    /// blank do not change. You can repeat it. Without a custom blank, the call changes nothing. It also changes
+    /// nothing for an extension outside the built-in template set. If the body has no `fileExtension`, the call
+    /// returns 400.
     /// </remarks>
     /// <summary>Reset the default template setting</summary>
     /// <path>api/2.0/files/settings/defaulttemplate</path>
@@ -687,15 +572,14 @@ public class SettingsController(
     }
 
     /// <remarks>
-    /// Uploads a document and makes it the blank the portal creates for one extension, and returns the full set of
-    /// templates as it now stands. The request is multipart form data carrying the file, while the extension travels
-    /// in the `FileExtension` query parameter; the extension of the uploaded file name must be exactly that one, or
-    /// the call answers 403. A PDF is additionally checked to be a fillable form, and answers 403 as well when it is
-    /// not one. The upload is capped at 100 MB and a larger body answers 400 while it is still streaming in. The file
-    /// is stored in the portal's template storage and the file that served as the previous custom blank for that
-    /// extension is deleted; an extension the built-in template set does not cover leaves everything unchanged.
-    /// Requires the portal settings permission. Use `PUT api/2.0/files/settings/defaulttemplate` to reuse a document
-    /// that is already in the portal.
+    /// Uploads a file and makes it the blank for new files of one extension. It returns all blanks after the upload.
+    /// Send the file as multipart form data and the extension in the `fileExtension` query parameter. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call changes data and deletes the previous custom blank of that extension. So a repeated call stores a new
+    /// copy and deletes the previous one. If the extension is not in the built-in template set, the call changes
+    /// nothing. The call returns 400 if the file is missing, is larger than 100 MB, or has another extension. The
+    /// extension comparison is case-sensitive. If a PDF is not a fillable form, the call returns 403. To use a file
+    /// that is already in the portal, use `PUT api/2.0/files/settings/defaulttemplate`.
     /// </remarks>
     /// <summary>Upload a file as the default template setting</summary>
     /// <path>api/2.0/files/settings/defaulttemplate</path>
@@ -721,16 +605,11 @@ public class SettingsController(
     private const long MaxDefaultTemplateSize = 100 * 1024 * 1024;
 
     /// <remarks>
-    /// Stores whether the caller sees rooms arranged by the groups they belong to instead of one flat list, and
-    /// returns the value that is now stored. It is a preference of the calling account: every authenticated role down
-    /// to a guest may change its own copy, and an unauthenticated caller is refused. The groups themselves are the
-    /// room groups managed under `api/2.0/files/group`, and they exist whether or not this setting is on - the portal
-    /// only records the preference, while `GET api/2.0/files/rooms` keeps returning the same rooms either way, so the
-    /// arrangement is done by the client. Writing a value that is already stored is accepted and leaves the setting
-    /// untouched. The value is published as `organizeRoomsGrouping` by `GET api/2.0/files/settings`, which is the
-    /// only way to read it back. A new account starts with the grouping on. Turning it off changes no group: the
-    /// groups, the rooms in them and who may see them stay exactly as they were, and are still read through the room
-    /// group operations.
+    /// Changes whether the calling account sees rooms arranged by room groups. It returns the value that is now
+    /// stored. Any signed-in user can call it. The call changes data, and you can repeat it with the same body. The
+    /// setting only guides the app. The room groups under `api/2.0/files/group` and the list of
+    /// `GET api/2.0/files/rooms` stay the same either way. To read the value, use the `organizeRoomsGrouping` field
+    /// of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Organize rooms grouping</summary>
     /// <path>api/2.0/files/settings/organizegrouping</path>

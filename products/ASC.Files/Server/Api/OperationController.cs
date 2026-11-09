@@ -49,15 +49,15 @@ public class OperationController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Starts a background job that packs files and folders into one archive. The call returns the download operations
-    /// of the caller, including the new one. Requires read access to the listed items. If the caller can read none of
-    /// them, the call returns 403. The archive skips the items the caller cannot read. A caller who is not signed in
-    /// needs an external link to the items. Without one, the call returns 401. The call queues work. Repeat
-    /// `GET api/2.0/files/fileops` until `finished` is true. Then take the archive address from `url`. The call
-    /// converts the files of `fileConvertIds` before it packs them. An empty selection queues nothing and returns the
-    /// existing operations. Each caller can run only one download at a time. A second call during a running download
-    /// returns 403. If none of the listed items exists, the call returns 404. The call returns 400 if the body cannot
-    /// be read or an item of `fileConvertIds` has no `key` or `value`.
+    /// Starts a background job that packs files and folders into one archive. The call converts the files of
+    /// `fileConvertIds` before it packs them. Requires read access to the listed items. If the caller can read none
+    /// of them, the call returns 403. The archive skips the items the caller cannot read. A caller who is not signed
+    /// in needs an external link to the items. Without one, the call returns 401. The call queues work. Repeat
+    /// `GET api/2.0/files/fileops` until `finished` is true. Then take the archive address from `url`. A call during
+    /// a running download of the same caller returns 403. The call returns the download operations of the caller,
+    /// including the new one. An empty selection queues nothing and returns the existing operations. If none of the
+    /// listed items exists, the call returns 404. The call returns 400 if the body cannot be read or an item of
+    /// `fileConvertIds` has no `key` or `value`.
     /// </remarks>
     /// <summary>Bulk download</summary>
     /// <path>api/2.0/files/fileops/bulkdownload</path>
@@ -88,29 +88,30 @@ public class OperationController(
     }
 
     /// <remarks>
-    /// Starts a background job that copies files and folders into `destFolderId`. The originals stay where they are.
-    /// The call returns the move and copy operations of the caller, including the new one. Requires the right to
-    /// create content in the destination and read access to every listed item. Other callers get 403. In a room, the
-    /// Editing and Read roles cannot copy into it. The call queues work. Repeat `GET api/2.0/files/fileops` until
-    /// `finished` is true. Its `files` and `folders` then name the copies. A repeated call copies the items again, and
-    /// `conflictResolveType` settles the name clashes. With `content` true, the call copies the content of each listed
-    /// folder, not the folder. An empty selection queues nothing and returns the existing operations. To find name
-    /// clashes first, use `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use
-    /// `GET api/2.0/files/fileops/checkdestfolder`. To remove the originals, use `PUT api/2.0/files/fileops/move`.
-    /// The call also returns 403 if the destination is inside a listed folder or a quota would be exceeded. It also
-    /// returns 403 if a file to overwrite is locked or the caller cannot edit it. A file that is not a PDF form sent
-    /// to a form-filling room also returns 403. If the destination or a listed file or folder does not exist, the call
-    /// returns 404. A missing first listed folder returns 500 instead. The call returns 415 for a file format the
-    /// portal does not accept for upload. It also returns 415 for a format a knowledge folder cannot index.
+    /// Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call
+    /// copies the content of each listed folder, not the folder. Requires the right to create content in the
+    /// destination and read access to every listed item. Other callers get 403. In a room, room managers and content
+    /// creators have this right. The call queues work. Repeat `GET api/2.0/files/fileops` until `finished` is true.
+    /// Its `files` and `folders` then name the copies. A repeated call copies the items again, and
+    /// `conflictResolveType` settles the name clashes. The call returns the copy operations of the caller, including
+    /// the new one. An empty selection queues nothing and returns the existing operations. To find name clashes
+    /// first, use `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use
+    /// `GET api/2.0/files/fileops/checkdestfolder`. To move the items instead, use `PUT api/2.0/files/fileops/move`.
+    /// The call also returns 403 if the destination is inside a listed folder. A quota that would be exceeded also
+    /// returns 403. It also returns 403 if a file to overwrite is locked or the caller cannot edit it. A file that
+    /// is not a PDF form sent to a form-filling room also returns 403. If the destination or a listed file or folder
+    /// does not exist, the call returns 404. A missing first listed folder returns 500 instead. The call returns 415
+    /// for a file format the portal does not accept for upload. It also returns 415 for a format a knowledge folder
+    /// cannot index.
     /// </remarks>
     /// <summary>Copy files and folders</summary>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.FolderCopied, When = "for every copied folder, the folders inside it included")]
     [RaisesWebhook(WebhookTrigger.RoomCopied, When = "for every listed room copied into its own section, an AI agent included")]
-    [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every copied file, including the files inside copied folders, when the job copies it")]
+    [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every copied file, including the files inside copied folders")]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The move and copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(200, "The copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot read one of the listed items, the destination is a listed folder or lies inside one, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
     [SwaggerResponse(404, "The destination folder, a listed file or a listed folder other than the first one does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
@@ -130,15 +131,15 @@ public class OperationController(
     /// <remarks>
     /// Starts a background job that deletes files and folders. With `immediately` false, the call moves them to the
     /// Trash of the caller. With `immediately` true, it deletes them for good. It always deletes for good the items
-    /// that are already in the Trash or on a third-party storage. A folder is deleted with all its content. The call
-    /// returns the delete operations of the caller, including the new one. Requires the right to delete each listed
-    /// item. Other callers get 403. In a room, the Editing and Read roles cannot delete. The call queues work, and a
-    /// deletion for good cannot be undone. Repeat `GET api/2.0/files/fileops` until `finished` is true. A failure on
-    /// one item shows in `error`, not as a status code. A repeated call deletes again the items restored in the
-    /// meantime. An empty selection queues nothing and returns the existing operations. To empty the Trash, use
-    /// `PUT api/2.0/files/fileops/emptytrash`. The call also returns 403 if an item is locked by another user or open
-    /// for editing. It also returns 403 for a room when `immediately` is false. If a listed file or folder does not
-    /// exist, the call returns 404.
+    /// in the Trash or on a third-party storage. The call deletes a folder with all its content. Requires the right
+    /// to delete each listed item. Other callers get 403. In a room, a room manager can delete any item, and a
+    /// content creator only their own. The call queues work, and a deletion for good cannot be undone. Repeat
+    /// `GET api/2.0/files/fileops` until `finished` is true. A failure on one item shows in `error`, not as a status
+    /// code. A repeated call deletes again the items restored in the meantime. The call returns the delete operations
+    /// of the caller, including the new one. An empty selection queues nothing and returns the existing operations.
+    /// To empty the Trash, use `PUT api/2.0/files/fileops/emptytrash`. The call also returns 403 if an item is locked
+    /// by another user or open for editing. It also returns 403 for a room when `immediately` is false. If a listed
+    /// file or folder does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Delete files and folders</summary>
     /// <path>api/2.0/files/fileops/delete</path>
@@ -167,15 +168,15 @@ public class OperationController(
 
     /// <remarks>
     /// Starts a background job that deletes versions from the history of one file. The file stays with its other
-    /// versions. Send at least one version number. An empty or missing list deletes the whole file instead. The call
-    /// returns the delete operations of the caller, including the new one. Requires the right to delete the file.
+    /// versions. An empty `versions` list deletes the whole file instead. Requires the right to delete the file.
     /// Other callers get 403. A DocSpace admin also gets 403 for a file in the personal documents of another user.
     /// The call queues work, and deleted versions cannot be restored. Repeat `GET api/2.0/files/fileops` until
     /// `finished` is true. A failure during the job shows in `error`, not as a status code. The call skips version
-    /// numbers that do not exist, so you can repeat it. To delete the file itself, use
-    /// `PUT api/2.0/files/fileops/delete`. The call also returns 403 if `versions` includes the current version. It
-    /// also returns 403 if the file is locked, open for editing, in an archived room, or in the Trash. If the file
-    /// does not exist, the call returns 404. The call returns 400 if the body cannot be read or has no `fileId`.
+    /// numbers that do not exist, so you can repeat it. The call returns the delete operations of the caller,
+    /// including the new one. To delete the file itself, use `PUT api/2.0/files/fileops/delete`. The call also
+    /// returns 403 if `versions` includes the current version. It also returns 403 if the file is locked, open for
+    /// editing, in an archived room, or in the Trash. If the file does not exist, the call returns 404. The call
+    /// returns 400 if the body cannot be read or has no `fileId` or `versions`.
     /// </remarks>
     /// <summary>Delete file versions</summary>
     /// <path>api/2.0/files/fileops/deleteversion</path>
@@ -200,11 +201,11 @@ public class OperationController(
     /// <remarks>
     /// Starts a background job that deletes for good the content of the Trash of the caller. With `folderType`, the
     /// call deletes only the items that came from sections or rooms of those types. Without it, the call empties the
-    /// whole Trash. The call returns the delete operations of the caller, including the new one. Any signed-in user can
-    /// call it. The call empties only the Trash of the caller. The call queues work, and the deletion cannot be undone.
-    /// Repeat `GET api/2.0/files/fileops` until `finished` is true. You can repeat the call. On an empty Trash, it
-    /// queues nothing and returns the existing operations. To move items to the Trash, use
-    /// `PUT api/2.0/files/fileops/delete`. If `folderType` is not a folder type, the call returns 400.
+    /// whole Trash. Any signed-in user can call it. The call queues work, and the deletion cannot be undone. Repeat
+    /// `GET api/2.0/files/fileops` until `finished` is true. You can repeat the call. On an empty Trash, it queues
+    /// nothing and returns the existing operations. The call returns the delete operations of the caller, including
+    /// the new one. To move items to the Trash, use `PUT api/2.0/files/fileops/delete`. If `folderType` is not a
+    /// folder type, the call returns 400.
     /// </remarks>
     /// <summary>Empty the "Trash" folder</summary>
     /// <path>api/2.0/files/fileops/emptytrash</path>
@@ -229,13 +230,12 @@ public class OperationController(
 
     /// <remarks>
     /// Returns the background file operations of the caller that still run or have an unread result. The list starts
-    /// with duplications, then moves and copies, deletions, downloads, mark-as-read jobs, and builder runs. Anyone can
-    /// call it without signing in. Each caller sees only their own operations. An anonymous caller sees the operations
-    /// of their external link session. This is the call to poll. Repeat it until `finished` is true. A finished
-    /// operation appears in one answer and then leaves the list. The answers of the calls that start operations also
-    /// hand out finished records. So an empty list means nothing is left to report, not that the work failed. An
-    /// unknown `id` returns an empty list. To read one kind of operation, use
-    /// `GET api/2.0/files/fileops/{operationType}`.
+    /// with duplications, then moves and copies, deletions, downloads, mark-as-read jobs, and builder runs. Anyone
+    /// can call it without signing in. Each caller sees only their own operations. An anonymous caller sees the
+    /// operations of their external link session. This is the call to poll. Repeat it until `finished` is true. A
+    /// finished operation appears in one answer only, here or in the answer of the call that started it. So an empty
+    /// list means nothing is left to report, not that the work failed. An unknown `id` returns an empty list. To read
+    /// one kind of operation, use `GET api/2.0/files/fileops/{operationType}`.
     /// </remarks>
     /// <summary>Get active file operations</summary>
     /// <path>api/2.0/files/fileops</path>
@@ -263,8 +263,8 @@ public class OperationController(
     /// without signing in. Each caller sees only their own operations. As in `GET api/2.0/files/fileops`, a finished
     /// operation appears in one answer and then leaves the list. A kind without a queue of its own, such as an import
     /// or a conversion, returns an empty list. To read moves, use `GET api/2.0/files/fileops` and pick the move
-    /// records. The path `api/2.0/files/fileops/move` belongs to another operation. If
-    /// `operationType` is not a known kind, the call returns 400.
+    /// records. The path `api/2.0/files/fileops/move` belongs to another operation. If `operationType` is not a known
+    /// kind, the call returns 400.
     /// </remarks>
     /// <summary>Get file operations by type</summary>
     /// <path>api/2.0/files/fileops/{operationType}</path>
@@ -302,12 +302,12 @@ public class OperationController(
 
     /// <remarks>
     /// Starts a background job that clears the new-item badges of files and folders for the caller. Marking a folder
-    /// also clears the badges of its content. Other members keep their badges. The call returns the mark-as-read
-    /// operations of the caller, including the new one. Any signed-in user can call it. The call skips the items the
-    /// caller cannot read and the ids that do not exist, without an error. The call queues work. Repeat
-    /// `GET api/2.0/files/fileops` until `finished` is true. You can repeat it with the same body. An empty selection
-    /// queues nothing and returns the existing operations. To see new items, use `GET api/2.0/files/{folderId}/news`
-    /// for a folder or `GET api/2.0/files/rooms/news` for rooms.
+    /// also clears the badges of its content. Other members keep their badges. Any signed-in user can call it. The
+    /// call skips the items the caller cannot read and the ids that do not exist, without an error. The call queues
+    /// work. Repeat `GET api/2.0/files/fileops` until `finished` is true. You can repeat it with the same body. The
+    /// call returns the mark-as-read operations of the caller, including the new one. An empty selection queues
+    /// nothing and returns the existing operations. To see new items, use `GET api/2.0/files/{folderId}/news` for a
+    /// folder or `GET api/2.0/files/rooms/news` for rooms.
     /// </remarks>
     /// <summary>Mark files and folders as read</summary>
     /// <path>api/2.0/files/fileops/markasread</path>
@@ -327,22 +327,22 @@ public class OperationController(
     }
 
     /// <remarks>
-    /// Starts a background job that moves files and folders into `destFolderId`. The call returns the move and copy
-    /// operations of the caller, including the new one. Requires the right to create content in the destination and
-    /// to remove the items from their source. Other callers get 403. In a room, the Editing and Review roles cannot
-    /// move into it. A content creator can copy an item out of a room but cannot move it. The call queues work.
-    /// Repeat `GET api/2.0/files/fileops` until `finished` is true. You can repeat it with the same body. With
-    /// `content` true, the call moves the content of each listed folder, not the folder. An empty selection queues
-    /// nothing and returns the existing operations. A room can move only between the Rooms section and the archive.
-    /// To archive a room, use `PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use
+    /// Starts a background job that moves files and folders into `destFolderId`. With `content` true, the call moves
+    /// the content of each listed folder, not the folder. Requires the right to create content in the destination and
+    /// to remove the items from their source. Other callers get 403. In a room, room managers and content creators
+    /// have the right to create content. In a room, a content creator can move only the items they created. The call
+    /// queues work. Repeat `GET api/2.0/files/fileops` until `finished` is true. You can repeat it with the same body.
+    /// The call returns the move operations of the caller, including the new one. An empty selection queues nothing
+    /// and returns the existing operations. A room can move only between the Rooms section and the archive. To
+    /// archive a room, use `PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use
     /// `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use
     /// `GET api/2.0/files/fileops/checkdestfolder`. To keep the originals, use `PUT api/2.0/files/fileops/copy`. The
-    /// call also returns 403 if the destination is inside a listed folder or a quota would be exceeded. It also
-    /// returns 403 if a file to overwrite is locked or the caller cannot edit it. A file that is not a PDF form sent
-    /// to a form-filling room also returns 403. A folder or several files moved into a form-filling room from outside
-    /// also return 403. If the destination or a listed file or folder does not exist, the call returns 404. A missing
-    /// first listed folder returns 500 instead. The call returns 415 for a file format the portal does not accept for
-    /// upload. It also returns 415 for a format a knowledge folder cannot index.
+    /// call also returns 403 if the destination is inside a listed folder. A quota that would be exceeded also
+    /// returns 403. It also returns 403 if a file to overwrite is locked or the caller cannot edit it. A file that is
+    /// not a PDF form sent to a form-filling room also returns 403. A folder or several files moved into a
+    /// form-filling room from outside also return 403. If the destination or a listed file or folder does not exist,
+    /// the call returns 404. A missing first listed folder returns 500 instead. The call returns 415 for a file
+    /// format the portal does not accept for upload. It also returns 415 for a format a knowledge folder cannot index.
     /// </remarks>
     /// <summary>Move files and folders</summary>
     /// <path>api/2.0/files/fileops/move</path>
@@ -354,7 +354,7 @@ public class OperationController(
     [RaisesWebhook(WebhookTrigger.FileMoved, When = "for each listed file, and for files of folders that merge into existing folders")]
     [RaisesWebhook(WebhookTrigger.FileRestored, When = "instead for a file moved out of the trash")]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The move and copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(200, "The move operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
     [SwaggerResponse(404, "The destination folder, a listed file or a listed folder other than the first one does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
@@ -373,13 +373,13 @@ public class OperationController(
 
     /// <remarks>
     /// Starts a background job that copies each listed file and folder into the folder that holds it. A copy gets the
-    /// name of the original with a number added, and a folder is copied with its content. The call returns the
-    /// duplicate operations of the caller, including the new one. Requires the right to create content in the folder
-    /// that holds each item. Other callers get 403. In a room, the Editing and Read roles cannot duplicate. The call
-    /// queues work. Repeat `GET api/2.0/files/fileops` until `finished` is true. Do not repeat the call. Each call
-    /// adds one more copy of every item. An empty selection queues nothing and returns the existing operations. To
-    /// copy items to another folder, use `PUT api/2.0/files/fileops/copy`. The call also returns 403 for an item in
-    /// an archived room or in the Trash. If a listed file or folder does not exist, the call returns 404. The call
+    /// name of the original with a number added. The call copies a folder with its content. Requires the right to
+    /// create content in the folder that holds each item. Other callers get 403. In a room, a member with the Editing
+    /// or Read role also gets 403. The call queues work. Repeat `GET api/2.0/files/fileops` until `finished` is true.
+    /// Do not repeat the call. Each call adds one more copy of every item. The call returns the duplicate operations
+    /// of the caller, including the new one. An empty selection queues nothing and returns the existing operations.
+    /// To copy items to another folder, use `PUT api/2.0/files/fileops/copy`. The call also returns 403 for an item
+    /// in an archived room or in the Trash. If a listed file or folder does not exist, the call returns 404. The call
     /// returns 415 for a file format the portal does not accept for upload.
     /// </remarks>
     /// <summary>Duplicate files and folders</summary>
@@ -406,7 +406,7 @@ public class OperationController(
     }
 
     /// <remarks>
-    /// Returns whether the destination folder accepts the listed files, before a move or a copy. The call reads only
+    /// Returns whether the destination folder accepts the listed files before a move or a copy. The call reads only
     /// `fileIds` and `destFolderId` from the request. A form-filling room accepts only PDF forms. Every other folder
     /// accepts every file. A file listed twice counts once. Requires the right to create content in the destination.
     /// Other callers get 403. The call also returns 403 for an archived room and for the Rooms, Forms, and AI agents
@@ -470,16 +470,16 @@ public class OperationController(
 
     /// <remarks>
     /// Returns the listed files and folders that have a same-named item in `destFolderId`. Use it to settle name
-    /// clashes before a move or a copy. Requires the right to create content in the destination. Other callers get
-    /// 403. The call is read-only, though `PUT api/2.0/files/fileops/move` has the same path. An empty list means no
-    /// clashes. With `content` true, the call checks the content of each listed folder instead of the folder. The
-    /// call ignores `conflictResolveType`, encrypted files, and ids that do not exist. It checks only the listed
+    /// clashes before a move or a copy. With `content` true, the call checks the content of each listed folder
+    /// instead of the folder. Requires the right to create content in the destination. Other callers get 403. The
+    /// call is read-only, though `PUT api/2.0/files/fileops/move` has the same path. An empty list means no clashes.
+    /// The call ignores `conflictResolveType`, encrypted files, and ids that do not exist. It checks only the listed
     /// folders the caller can read. To check that the destination accepts the files, use
     /// `GET api/2.0/files/fileops/checkdestfolder`. The call also returns 403 if the destination is an archived room,
     /// a listed folder, or inside one. A file or a plain folder sent to the Rooms, Forms, or AI agents root also
     /// returns 403. A plain folder sent to a knowledge folder or the archive also returns 403. A room sent anywhere
-    /// except the Rooms root or the archive also returns 403. If the destination does not exist, the call returns 404.
-    /// Without `destFolderId`, the call returns 400.
+    /// except the Rooms root or the archive also returns 403. If the destination does not exist, the call
+    /// returns 404. Without `destFolderId`, the call returns 400.
     /// </remarks>
     /// <summary>Check move or copy conflicts</summary>
     /// <path>api/2.0/files/fileops/move</path>
@@ -522,10 +522,9 @@ public class OperationController(
     /// Cancels a background file operation of the caller and returns the operations that are left. Without `id`, the
     /// call cancels every running operation of the caller. Anyone can call it without signing in. A caller can cancel
     /// only their own operations. An anonymous caller reaches only the operations of their external link session. The
-    /// call stops the job but does not undo it. Items that were already copied, moved, or deleted stay so. Read the
-    /// result back before you continue. The answer is usually empty. After the job stops, `GET api/2.0/files/fileops`
-    /// lists it once, finished, with the status `Canceled`. You can repeat the call. An unknown `id` cancels nothing
-    /// and is not an error.
+    /// call stops the job but does not undo it. Items already copied, moved, or deleted stay that way. You can repeat
+    /// the call. An unknown `id` cancels nothing and is not an error. The answer is usually empty. After the job
+    /// stops, `GET api/2.0/files/fileops` lists it once, finished, with the status `Canceled`.
     /// </remarks>
     /// <summary>Cancel file operations</summary>
     /// <path>api/2.0/files/fileops/terminate/{id}</path>

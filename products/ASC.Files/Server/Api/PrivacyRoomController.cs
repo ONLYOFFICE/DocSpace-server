@@ -227,8 +227,8 @@ public class PrivacyRoomControllerCommon(
     /// returns 204 with no body. Before DocSpace 4.0, it returned 200 with the remaining keys. To read the remaining
     /// keys, use `GET api/2.0/privacyroom/keys`. After the caller deletes the last key,
     /// `GET api/2.0/privacyroom/{roomId}/access` returns 403 for all their private rooms. The rooms and their content
-    /// stay unchanged. Access returns after the caller creates a key with `POST api/2.0/privacyroom/keys`. If the
-    /// caller has no pair with this `id`, the call returns 404. A malformed `id` returns 400.
+    /// stay unchanged. To restore access, create a key with `POST api/2.0/privacyroom/keys`. If the caller has no
+    /// pair with this `id`, the call returns 404. A malformed `id` returns 400.
     /// </remarks>
     /// <summary>
     /// Delete an encryption key
