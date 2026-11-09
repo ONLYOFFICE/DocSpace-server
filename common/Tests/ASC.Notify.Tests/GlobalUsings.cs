@@ -31,9 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Collections.Concurrent;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
+global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Security.Cryptography;
@@ -52,6 +54,7 @@ global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.Tests;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
@@ -100,3 +103,12 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 
 global using MimeKit;
+
+global using WireMock;
+global using WireMock.Matchers;
+global using WireMock.RequestBuilders;
+global using WireMock.ResponseBuilders;
+global using WireMock.Server;
+global using WireMock.Settings;
+global using WireMock.Types;
+global using WireMock.Util;

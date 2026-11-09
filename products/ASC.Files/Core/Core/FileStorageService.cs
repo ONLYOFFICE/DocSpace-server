@@ -409,12 +409,13 @@ public class FileStorageService //: IFileStorageService
             FolderType.AiAgents => SearchArea.AiAgents,
             FolderType.AiHub => SearchArea.AiHub,
             FolderType.Forms => SearchArea.Forms,
+            FolderType.PrivateRooms => SearchArea.PrivateRooms,
             _ => searchArea
         };
 
-        if (parent.FolderType == FolderType.Forms)
+        if (parent.FolderType is FolderType.Forms or FolderType.PrivateRooms)
         {
-            // Forms is a virtual section anchored on an empty folder: its rooms are resolved from the
+            // Forms and private rooms are virtual sections anchored on an empty folder: their rooms are resolved from the
             // VirtualRooms tree. Browsing it with subfolders would expand the whole VirtualRooms subtree
             // (including the container itself and other rooms' content), so it is kept as a flat room list.
             withSubfolders = false;
@@ -1206,7 +1207,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
+        if (!isRoom && parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
@@ -1953,6 +1954,7 @@ public class FileStorageService //: IFileStorageService
                             folder.FolderType != FolderType.DefaultTemplates &&
                             folder.FolderType != FolderType.Archive &&
                             folder.FolderType != FolderType.Forms &&
+                            folder.FolderType != FolderType.PrivateRooms &&
                             folder.FolderType != FolderType.KnowledgeRoom;
 
             if (!canCreate)
@@ -2308,6 +2310,12 @@ public class FileStorageService //: IFileStorageService
         if (file == null)
         {
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        // Every file is answered back as a FileDto, so a caller who cannot read it must not get one.
+        if (!await fileSecurity.CanReadAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
 
         // Filling hands the form to people who hold no key, and its result would be stored in the clear.
@@ -3413,7 +3421,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         // a section root holds rooms only: the operation refuses any file there (PermissionCheckStarter.CheckFilesPermissionsAsync)
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms && filesId.Any())
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms && filesId.Any())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFile);
         }
@@ -3470,7 +3478,7 @@ public class FileStorageService //: IFileStorageService
         // the destinations the operation refuses (PermissionCheckStarter): a section root holds rooms only, so no file
         // goes there; a folder that is not a room goes neither there, nor into a knowledge folder or the archive; and a
         // room goes nowhere but the Rooms root and the archive
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms && filesId.Any())
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms && filesId.Any())
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_MoveFile);
         }
@@ -3478,7 +3486,7 @@ public class FileStorageService //: IFileStorageService
         // only the folders the caller can read are looked at, so the answer tells nothing about the others
         var readableFolders = await fileSecurity.FilterReadAsync(folderDao.GetFoldersAsync(foldersId)).OfType<Folder<TFrom>>().ToListAsync();
 
-        if ((toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.Knowledge
+        if ((toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Forms or FolderType.PrivateRooms or FolderType.Knowledge
              || toFolder.RootFolderType == FolderType.Archive)
             && readableFolders.Any(f => !f.IsRoom))
         {
@@ -4448,6 +4456,11 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    /// <summary>
+    /// Answers with the primary external link of an entry, creating it when the entry has none. An explicitly
+    /// revoked primary link is created again only when <c>recreateRevoked</c> is set: a read leaves it unset and
+    /// reports the revoked link as missing instead of resurrecting it, an explicit create request sets it.
+    /// </summary>
     public async Task<AceWrapper> GetPrimaryExternalLinkAsync<T>(
         T entryId,
         FileEntryType entryType,
@@ -4457,7 +4470,8 @@ public class FileStorageService //: IFileStorageService
         bool denyDownload = false,
         bool? requiredAuth = null,
         string password = null,
-        bool allowUnlimitedDate = false)
+        bool allowUnlimitedDate = false,
+        bool recreateRevoked = false)
     {
         await DemandAuthenticatedOrLinkAsync();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -4489,9 +4503,10 @@ public class FileStorageService //: IFileStorageService
         var link = await fileSharing.GetPureSharesAsync(entry, ShareFilterType.PrimaryExternalLink, null, null, 0, 1).FirstOrDefaultAsync();
         if (link == null)
         {
-            // An explicitly revoked primary link stays revoked: reading it reports 404 instead of
-            // silently resurrecting the link. Entries that never had one keep the lazy creation.
-            var revoked = await daoFactory.GetTagDao<T>()
+            // An explicitly revoked primary link stays revoked for a read: it reports 404 instead of
+            // silently resurrecting the link. Entries that never had one keep the lazy creation, and an
+            // explicit create request makes a new link, which also clears the revocation mark.
+            var revoked = !recreateRevoked && await daoFactory.GetTagDao<T>()
                 .GetTagsAsync([TagType.PrimaryLinkRevoked], [entry])
                 .AnyAsync();
 
@@ -6271,7 +6286,7 @@ public class FileStorageService //: IFileStorageService
             }
             // a room the caller can see, but of the other section: it is a bad request rather than a
             // permission problem, so it is counted apart from the denied ones
-            else if (!searchArea.MatchesRoomType(room.FolderType))
+            else if (!searchArea.MatchesRoom(room))
             {
                 wrongArea++;
             }

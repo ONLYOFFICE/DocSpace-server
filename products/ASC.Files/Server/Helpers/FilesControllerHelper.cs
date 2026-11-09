@@ -174,6 +174,8 @@ public class FilesControllerHelper(
                           title.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? title : title + extension,
                           memStream.Length, memStream, updateIfExist);
 
+        await SendFileWrittenFromContentAsync(file);
+
         return await _fileDtoHelper.GetAsync(file);
     }
 

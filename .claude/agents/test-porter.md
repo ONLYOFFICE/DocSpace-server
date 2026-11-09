@@ -21,6 +21,7 @@ everything below assumes it. `.claude/rules/csharp-style.md` applies as well.
 | `rooms/`, `files/`, `folders/` | `products/ASC.Files/Tests` |
 | `people/`, `group/` | `products/ASC.People/Tests` |
 | `ai/` | `products/ASC.AI/ASC.AI.Tests` |
+| `portal/payments/`, `settings/docsCloud/` - everything past "tariff service is not configured" | `web/ASC.Web.Api.Billing.Tests` (stubbed payment services, `tests.md` → "Payment services: two stacks") |
 | `portal/`, `settings/`, `security/`, `oauth2.0/`, `backup/`, `apiKeys/`, `authentication/`, `migration/`, `capabilities/` | no project exists yet — stop and say so |
 
 Inside the project, one folder per feature, holding every suite of that feature — functional,

@@ -128,8 +128,25 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     protected virtual string LaunchProfile => "integration-test";
 
+    /// <summary>
+    /// Whether the stack runs as a standalone installation (the default) or as SaaS. Standalone resolves the current
+    /// tenant from the <c>Origin</c> header first, which scopes each test to its portal, but gives every portal the
+    /// installation's one payment key. A SaaS stack gives each portal a key of its own; it resolves the tenant from
+    /// the request host, so the clients send the portal as <c>Host</c> too, and it names the portals itself.
+    /// </summary>
+    protected virtual bool Standalone => true;
+
     /// <summary>Builds the suite's own client bundle for a freshly registered portal.</summary>
     protected abstract TClients CreateClients(PortalContext context);
+
+    /// <summary>
+    /// The stack is about to start. For whatever the services reach from the moment they come up and so has to
+    /// answer before they do, such as a stub of an external service.
+    /// </summary>
+    protected virtual ValueTask OnStartingAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
 
     /// <summary>
     /// The app is up and portals can be registered, but no test has run yet. For whatever a suite has
@@ -149,6 +166,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Runs once the services of the app have stopped. For what they call until then - a stub of an external service
+    /// started in <see cref="OnStartingAsync"/> - so a service shutting down never meets a closed port, and its log
+    /// has no connection errors a test run did not cause.
+    /// </summary>
+    protected virtual ValueTask OnStoppedAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
     /// Suite-specific warmup, run once against a throwaway portal whose owner is already signed in
     /// on <see cref="PortalClientsBase.WebApiHttpClient"/>. Touch whatever every test hits first.
     /// </summary>
@@ -159,12 +186,14 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     public async ValueTask InitializeAsync()
     {
+        await OnStartingAsync();
+
         // Start the Aspire AppHost with the suite's launch profile.
         // APP_HOSTING_STANDALONE=true makes the platform resolve the current tenant from the
         // Origin header first (see TenantManager.SetCurrentTenantAsync), which is how every test
-        // is scoped to its own freshly registered portal.
+        // is scoped to its own freshly registered portal; see Standalone for the SaaS stack.
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", "APP_HOSTING_STANDALONE=true"]);
+            [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", $"APP_HOSTING_STANDALONE={(Standalone ? "true" : "false")}"]);
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
@@ -213,7 +242,11 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
         await InitializePasswordSaltAsync();
 
-        await SetBaseDomainAsync();
+        // A SaaS installation takes its base domain from the configuration; ApiSystem saves it for a server one only.
+        if (Standalone)
+        {
+            await SetBaseDomainAsync();
+        }
 
         await OnStartedAsync();
 
@@ -372,6 +405,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             TimeZoneName = "UTC",
             SkipWelcome = true
         }, cancellationToken));
+
+        // A SaaS ApiSystem ignores the requested name and picks one of its own.
+        if (!Standalone)
+        {
+            portalName = registration.Tenant.PortalName;
+        }
 
         // The owner Id is unique to this portal and comes straight from the registration response.
         var owner = new User(Initializer.OwnerEmail, Initializer.OwnerPassword)
@@ -684,6 +723,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         if (!string.IsNullOrEmpty(origin))
         {
             client.DefaultRequestHeaders.TryAddWithoutValidation("Origin", origin);
+
+            // A SaaS stack resolves the tenant from the request host; "localhost" is a portal of its own there.
+            if (!Standalone)
+            {
+                client.DefaultRequestHeaders.Host = new Uri(origin).Host;
+            }
         }
 
         return client;
@@ -708,8 +753,23 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // Teardown is a large, easily-overlooked share of a run's wall clock — it is Aspire/DCP
         // stopping every project process, and one service that ignores its shutdown token holds up
         // all of them. Measured separately so a regression there is visible instead of invisible.
-        await Timing.Measure("teardown.stop", async () => await _app.StopAsync());
-        await Timing.Measure("teardown.dispose", async () => await _app.DisposeAsync());
+        try
+        {
+            await Timing.Measure("teardown.stop", async () => await _app.StopAsync());
+            await Timing.Measure("teardown.dispose", async () => await _app.DisposeAsync());
+        }
+        finally
+        {
+            // Also when stopping the stack fails: a stub left running would hold its fixed port until the process ends.
+            try
+            {
+                await OnStoppedAsync();
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync($"OnStoppedAsync failed for {GetType().Name}: {ex}");
+            }
+        }
 
         _sharedHandler.Dispose();
 

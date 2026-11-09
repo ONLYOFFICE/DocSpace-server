@@ -33,11 +33,14 @@
 
 package com.asc.registration.application.service;
 
+import com.asc.common.application.proto.Consent;
 import com.asc.common.core.domain.value.ClientId;
+import com.asc.common.utilities.cleanup.RemovedClientReporter;
 import com.asc.registration.service.ports.input.service.ClientApplicationService;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ConsentResponse;
 import com.asc.registration.service.transfer.response.PageableModificationResponse;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,6 +64,21 @@ import org.springframework.stereotype.Service;
 public class ConsentService {
   private final GrpcAuthorizationService grpcAuthorizationService;
   private final ClientApplicationService clientApplicationService;
+  private final RemovedClientReporter removedClientReporter;
+
+  /**
+   * Returns when a consent was last written, or {@code null} if the authorization service did not
+   * say.
+   *
+   * @param consent the consent as returned by the authorization service
+   * @return the last modification time, or {@code null}
+   */
+  private static Instant modifiedAt(Consent consent) {
+    return Optional.of(consent.getModifiedAt())
+        .filter(s -> !s.isEmpty())
+        .map(s -> ZonedDateTime.parse(s).toInstant())
+        .orElse(null);
+  }
 
   /**
    * Retrieves a paginated list of consent records for a specific principal.
@@ -74,6 +92,8 @@ public class ConsentService {
    *       identifiers.
    *   <li>Maps each consent into a {@link ConsentResponse}, enriching it with the corresponding
    *       client details. The consent's modified timestamp is parsed and assigned if present.
+   *   <li>Drops the consents whose client no longer exists and reports those clients, so that the
+   *       consents their removal cleanup missed are removed as well.
    *   <li>Wraps the resulting list and metadata into a {@link PageableModificationResponse}.
    * </ol>
    *
@@ -99,6 +119,14 @@ public class ConsentService {
 
     var consents =
         response.getConsentsList().stream()
+            .filter(
+                consent -> {
+                  var exists =
+                      clients.stream().anyMatch(c -> c.getClientId().equals(consent.getClientId()));
+                  if (!exists)
+                    removedClientReporter.report(consent.getClientId(), modifiedAt(consent));
+                  return exists;
+                })
             .map(
                 consent -> {
                   var client =

@@ -939,8 +939,10 @@ public class PaymentController(
     /// has never been a customer gets an empty result. The call is read-only. This balance is what the wallet
     /// services are charged against, so it falls as they are used and rises with
     /// `POST api/2.0/portal/payment/deposit`; the movements behind a change are listed by
-    /// `GET api/2.0/portal/payment/customer/operations`. Pass `refresh=true` to re-read it from the accounting
-    /// service rather than the cache - right after a top-up the cached figure is still the old one.
+    /// `GET api/2.0/portal/payment/customer/operations`. Every read asks the accounting service, so the amount is
+    /// current, right after a top-up as well. Only a failed read is remembered: for ten minutes after the accounting
+    /// service could not be reached, or did not know the portal, the answer is an empty result without asking it
+    /// again - pass `refresh=true` to ask at once.
     /// </remarks>
     /// <summary>
     /// Get the customer balance

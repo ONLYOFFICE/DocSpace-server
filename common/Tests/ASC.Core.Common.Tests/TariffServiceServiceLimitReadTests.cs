@@ -43,7 +43,7 @@ public class TariffServiceServiceLimitReadTests : TariffServiceServiceLimitTestB
     public async Task GetTotalServiceLimit_ReadsThePortalLimitWithItsUsage()
     {
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(HttpStatusCode.OK,
+            _ => Reply(HttpStatusCode.OK,
                 """{"id":41,"serviceGroupName":"ai-services","scope":"Total","amountValue":500,"currency":"USD","period":"Month","enabled":true,"usage":{"periodStart":"2026-10-01T00:00:00Z","amountConsumed":312.4,"amountAvailable":187.6,"quantityConsumed":0}}"""));
 
         var serviceLimit = await tariffService.GetTotalServiceLimitAsync(TenantId, "ai-services");
@@ -51,14 +51,14 @@ public class TariffServiceServiceLimitReadTests : TariffServiceServiceLimitTestB
         serviceLimit.Scope.Should().Be(ServiceLimitScope.Total);
         serviceLimit.Usage.AmountAvailable.Should().Be(187.6m);
         handler.LastUri!.AbsolutePath.Should().Be($"/api/serviceLimit/by-customer/{PaymentRegion}{TenantId}/by-group/ai-services/total");
-        AccountingClientTests.ParseQuery(handler.LastUri)["includeUsage"].Should().Be("true");
+        ParseQuery(handler.LastUri)["includeUsage"].Should().Be("true");
     }
 
     [Fact]
     public async Task GetTotalServiceLimit_NoneSet_ReturnsNull()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
+            _ => Reply(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
 
         var serviceLimit = await tariffService.GetTotalServiceLimitAsync(TenantId, "ai-services");
 
@@ -69,7 +69,7 @@ public class TariffServiceServiceLimitReadTests : TariffServiceServiceLimitTestB
     public async Task GetGlobalServiceLimit_NoneSet_ReturnsNull()
     {
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
+            _ => Reply(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
 
         var serviceLimit = await tariffService.GetGlobalServiceLimitAsync(TenantId, "ai-services");
 
@@ -82,7 +82,7 @@ public class TariffServiceServiceLimitReadTests : TariffServiceServiceLimitTestB
     {
         // The accounting service answers an unknown customer with 400; for the portal that simply means no limit.
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
-            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}"""));
+            _ => Reply(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}"""));
 
         var total = await tariffService.GetTotalServiceLimitAsync(TenantId, "ai-services");
         var global = await tariffService.GetGlobalServiceLimitAsync(TenantId, "ai-services");
@@ -95,7 +95,7 @@ public class TariffServiceServiceLimitReadTests : TariffServiceServiceLimitTestB
     public async Task GetParticipantServiceLimits_PortalUnknownToTheAccountingService_ReturnsAnEmptyPage()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
-            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}"""));
+            _ => Reply(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}"""));
 
         var report = await tariffService.GetParticipantServiceLimitsAsync(TenantId, "ai-services", new ServiceLimitFilter { Offset = 50, Limit = 10 });
 

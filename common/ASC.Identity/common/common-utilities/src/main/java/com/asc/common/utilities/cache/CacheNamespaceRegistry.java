@@ -80,6 +80,7 @@ public class CacheNamespaceRegistry {
   private final String globalVersionKey;
   private final CacheNamespaceCounterStore store;
   private final Cache<Long, String> localNamespaces;
+  private final RedisOutageLatch outage;
 
   /**
    * @param store the counter store backing this registry's counters.
@@ -88,10 +89,20 @@ public class CacheNamespaceRegistry {
    *     cache its own prefix so their counters cannot collide with one another.
    */
   public CacheNamespaceRegistry(CacheNamespaceCounterStore store, String keyPrefix) {
+    this(store, keyPrefix, new RedisOutageLatch());
+  }
+
+  CacheNamespaceRegistry(
+      CacheNamespaceCounterStore store, String keyPrefix, RedisOutageLatch outage) {
     this.store = store;
+    this.outage = outage;
     this.globalVersionKey = keyPrefix;
     this.localNamespaces =
         Caffeine.newBuilder().maximumSize(LOCAL_MAX_TENANTS).expireAfterWrite(LOCAL_TTL).build();
+  }
+
+  RedisOutageLatch outage() {
+    return outage;
   }
 
   private String tenantVersionKey(long tenantId) {
@@ -129,8 +140,10 @@ public class CacheNamespaceRegistry {
   private boolean advance(String versionKey) {
     try {
       store.increment(versionKey, VERSION_TTL);
+      outage.reset();
       return true;
     } catch (Exception e) {
+      outage.trip();
       log.error("Failed to advance cache namespace at key: {}", versionKey, e);
       return false;
     }
@@ -143,12 +156,19 @@ public class CacheNamespaceRegistry {
    * than assumed, so losing one can only detach entries instead of exposing entries it was meant to
    * invalidate.
    *
+   * <p>While the {@link #outage()} latch is open the counter store is not called at all.
+   *
    * @param tenantId the tenant whose namespace to resolve.
    * @return the tenant's current namespace token, or {@code null} if it could not be resolved.
    */
   public String namespaceOf(long tenantId) {
     var memoized = localNamespaces.getIfPresent(tenantId);
     if (memoized != null) return memoized;
+
+    if (!outage.permits()) {
+      log.debug("Skipped resolving cache namespace for tenant {}: Redis is unreachable", tenantId);
+      return null;
+    }
 
     var tenantVersionKey = tenantVersionKey(tenantId);
     try {
@@ -159,11 +179,44 @@ public class CacheNamespaceRegistry {
               + resolveVersion(tenantVersionKey, storedVersion(versions, 1));
 
       localNamespaces.put(tenantId, namespace);
+      outage.reset();
       return namespace;
     } catch (Exception e) {
+      outage.trip();
       log.warn("Failed to resolve cache namespace for tenant: {}", tenantId, e);
       return null;
     }
+  }
+
+  /**
+   * Drops the memoized namespace of a tenant without advancing its counter, so the next resolution
+   * reads the counter store again. Used when another instance has already advanced the counter.
+   *
+   * @param tenantId the tenant whose memoized namespace should be dropped.
+   */
+  public void forgetTenant(long tenantId) {
+    localNamespaces.invalidate(tenantId);
+  }
+
+  /**
+   * Drops every memoized namespace without advancing any counter. Used when another instance has
+   * already advanced the global counter.
+   */
+  public void forgetAll() {
+    localNamespaces.invalidateAll();
+  }
+
+  /**
+   * Tells whether an entry stamped with {@code namespace} still belongs to the tenant's current
+   * namespace.
+   *
+   * @param tenantId the tenant owning the entry.
+   * @param namespace the namespace the entry was stamped with.
+   * @return {@code true} if the namespace is still current; {@code false} if it was advanced or
+   *     cannot be resolved.
+   */
+  public boolean isCurrent(long tenantId, String namespace) {
+    return namespace != null && namespace.equals(namespaceOf(tenantId));
   }
 
   /**
@@ -176,7 +229,7 @@ public class CacheNamespaceRegistry {
     if (advance(tenantVersionKey(tenantId)))
       log.info("Advanced cache namespace of tenant {} under prefix {}", tenantId, globalVersionKey);
 
-    localNamespaces.invalidate(tenantId);
+    forgetTenant(tenantId);
   }
 
   /** Moves every tenant to a new namespace, invalidating the cache as a whole. */
@@ -184,6 +237,6 @@ public class CacheNamespaceRegistry {
     if (advance(globalVersionKey))
       log.info("Advanced global cache namespace for prefix {}", globalVersionKey);
 
-    localNamespaces.invalidateAll();
+    forgetAll();
   }
 }

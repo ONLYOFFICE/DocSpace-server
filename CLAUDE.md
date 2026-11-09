@@ -65,7 +65,7 @@ dotnet run --project common/ASC.AppHost --launch-profile development  # Run via 
 cd common/Tools/ASC.Migration.Runner && dotnet run                    # Apply DB migrations
 ```
 
-The AppHost has 5 launch profiles: `development`, `test`, `preview`, `integration-test`, `frontend-dev` — always pass `--launch-profile` explicitly.
+The AppHost has 7 launch profiles: `development`, `test`, `preview`, `frontend-dev`, and the three test stacks `integration-test`, `integration-test-billing` (SaaS, billing/accounting/docscloud stubbed by the billing suite) and `notify-test` — always pass `--launch-profile` explicitly.
 
 **Aspire CLI:** works from the repo root — the committed `aspire.config.json` points to the AppHost (`appHostPath`, relative to the repo root), no `--apphost` flag needed. CLI 13.x dropped the older `.aspire/settings.json`; if the config is missing, recreate it with `aspire config set appHostPath "common/ASC.AppHost/ASC.AppHost.csproj"` (the CLI never writes the file on its own). The resource graph is defined in `common/ASC.AppHost/Program.cs` plus `common/ASC.AppHost/Configuration/` (`ProjectConfigurator.cs`, `ConnectionStringManager.cs`, `NginxConfiguration.cs`) — not in a single-file `apphost.cs`.
 
@@ -92,10 +92,10 @@ Conventions for writing integration tests (per-test portal, roles, `ApiException
 
 - **Framework**: xUnit v3 with `UseMicrosoftTestingPlatformRunner`
 - **Assertions**: FluentAssertions
-- **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. The harness is shared: `common/Tests/ASC.Tests.Common` holds `AspireHostFixture<TClients>`, `PortalClientsBase`, `Initializer` and `RawApiClient`; each suite only derives a thin `AspireAppFixture`/`PortalClients` pair in its own `ApiFactories/` folder
+- **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile; the billing suite uses `integration-test-billing`, the letter suite `notify-test`), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. The harness is shared: `common/Tests/ASC.Tests.Common` holds `AspireHostFixture<TClients>`, `PortalClientsBase`, `Initializer` and `RawApiClient`; each suite only derives a thin `AspireAppFixture`/`PortalClients` pair in its own `ApiFactories/` folder
 - **Fake data**: Bogus
 - **DB cleanup**: Respawn
-- **Test locations**: `products/*/Tests/`, `web/ASC.Web.Api.Tests/` (Web.Api REST suite) and `common/Tests/` (`ASC.Core.Common.Tests`, `ASC.Notify.Tests` letter suite, `ASC.Data.Backup.Core.Tests`). The remaining projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
+- **Test locations**: `products/*/Tests/`, `web/ASC.Web.Api.Tests/` (Web.Api REST suite), `web/ASC.Web.Api.Billing.Tests/` (payment endpoints on a SaaS stack whose billing, accounting and docscloud are a WireMock in the test process) and `common/Tests/` (`ASC.Core.Common.Tests`, `ASC.Notify.Tests` letter suite, `ASC.Data.Backup.Core.Tests`). The remaining projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
 
 ```bash
 dotnet test ASC.Tests.slnx

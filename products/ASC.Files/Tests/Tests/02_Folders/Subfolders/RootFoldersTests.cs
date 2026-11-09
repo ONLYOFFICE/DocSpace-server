@@ -51,11 +51,11 @@ public class RootFoldersTests(
 
         var result = await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
 
-        result.Response.Should().HaveCount(9);
+        result.Response.Should().HaveCount(11);
         var titles = result.Response.Select(s => s.Current.Title).ToList();
         titles.Should().Contain(
         [
-            "Files", "Rooms", "Trash", "Favorites", "Recent", "Archive", "Shared with me", "AI agents", "Forms"
+            "Files", "Rooms", "Trash", "Favorites", "Recent", "Archive", "Shared with me", "AI agents", "Forms", "Private"
         ]);
     }
 

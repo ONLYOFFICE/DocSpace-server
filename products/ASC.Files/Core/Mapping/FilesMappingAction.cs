@@ -88,6 +88,9 @@ public class FilesMappingAction(TenantUtil tenantUtil)
             case FolderType.Forms:
                 destination.Title = FilesUCResource.Forms;
                 break;
+            case FolderType.PrivateRooms:
+                destination.Title = FilesUCResource.PrivateRooms;
+                break;
             case FolderType.ChatOutputs:
                 destination.Title = FilesCommonResource.ChatOutputsFolder;
                 break;

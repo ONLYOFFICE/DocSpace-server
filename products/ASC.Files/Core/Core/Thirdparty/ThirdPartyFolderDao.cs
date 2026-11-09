@@ -638,6 +638,11 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDPrivateRoomsAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetBunchObjectIDAsync(string folderID)
     {
         return Task.FromResult<string>(null);
