@@ -1061,7 +1061,8 @@ public class FormFillingReportCreator(
 
     /// <summary>
     /// The fields of the version renamed since the last version with data; null when the version needs a table of its
-    /// own: a field kept its name under another type, a field took the name of another one, or no field is left. The
+    /// own: a field kept its name under another type, a field took the name of another one, co-editors passed a key to
+    /// each other in an order their reports do not tell, or no field is left. The
     /// renames the editor tracked by field id in the sessions saved since count, with those of the versions in between,
     /// decided the same way. Without the editor, a form whose fields kept their order, types and options while only keys
     /// changed is the same form under new keys; otherwise a field with a new name is a new field, so answers to different
@@ -1080,6 +1081,12 @@ public class FormFillingReportCreator(
             .Select(r => (Version: r.SavedVersion.Value, r.OpenedVersion, r.Renames))
             .ToList();
 
+        var before = NormalizeMetadata(previousVersion.Metadata).ToList();
+        if (IsJoinOrderUnclear(sessions, since, before.Select(f => f.Key).ToHashSet()))
+        {
+            return null;
+        }
+
         // A key of the previous version to its key after the known renames, applied in the order of the versions.
         var known = new Dictionary<string, string>();
         var renamedAt = new Dictionary<string, int>();
@@ -1090,7 +1097,6 @@ public class FormFillingReportCreator(
 
         var tracked = sessions.Count > 0;
 
-        var before = NormalizeMetadata(previousVersion.Metadata).ToList();
         var after = NormalizeMetadata(current).ToList();
 
         // Columns of the table no field of the previous version writes to: those of fields an earlier version removed.
@@ -1169,6 +1175,32 @@ public class FormFillingReportCreator(
             VersionLinks = formFilling?.VersionLinks?.Where(l => l.Version < version).ToList(),
             PendingVersionLinks = formFilling?.PendingVersionLinks?.Where(p => p.Version < version).ToList()
         });
+    }
+
+    // Sessions saved as one version are joined in the order they began to report, while a co-editor who opened the form
+    // after another's rename starts from it. A key of the previous version one session gave up and another took would
+    // join the two fields if the taker reported first; in either order its column holds the answers of another field.
+    // A new key passed on in the wrong order only loses its link. The keys of a session opened later are not known here.
+    internal static bool IsJoinOrderUnclear(IEnumerable<(int Version, int OpenedVersion, List<FormFieldRename> Renames)> sessions, int since,
+        HashSet<string> previousKeys)
+    {
+        foreach (var group in sessions.GroupBy(s => s.Version))
+        {
+            var joined = group.ToList();
+            for (var taker = 0; taker < joined.Count; taker++)
+            {
+                foreach (var key in (joined[taker].Renames ?? []).Select(r => r.NewKey))
+                {
+                    var passed = joined.Where((s, giver) => giver != taker && s.Renames?.Exists(r => r.OldKey == key) == true).ToList();
+                    if (passed.Count > 0 && (previousKeys.Contains(key) || joined[taker].OpenedVersion != since || passed.Exists(s => s.OpenedVersion != since)))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     // The renames of one version or one editor session happen at once, so swapped keys stay swapped. A session reports

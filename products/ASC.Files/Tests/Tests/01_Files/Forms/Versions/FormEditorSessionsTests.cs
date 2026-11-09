@@ -148,6 +148,41 @@ public class FormEditorSessionsTests
         renames.Select(r => (r.OldKey, r.NewKey)).Should().Equal(("fromWhom", "applicantName"));
     }
 
+    // The first renamed a to b without reporting yet; a co-editor who opened the form after it saw b, renamed x to a and
+    // reported first. Joined in the list order, x would continue into b and the answers of a and x would share columns.
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void MatchFields_KeyOfPreviousVersionPassedBetweenSessions_TakesTableOfItsOwn(bool takerReportedFirst)
+    {
+        FormEditorFieldRenames giver = Saved("first", Rename("a", "b")), taker = Saved("second", Rename("x", "a"));
+        var formFilling = new FormFillingProperties { EditorFieldRenames = takerReportedFirst ? [taker, giver] : [giver, taker] };
+
+        FormFillingReportCreator.MatchFields(2, 1, Previous("a", "x"), Fields("b", "a"), formFilling).Should().BeNull();
+    }
+
+    // The second renamed the first one's new key but reported before it: the field loses its link, not its column.
+    [Fact]
+    public void MatchFields_NewKeyRenamedBeforeItsTakerReported_KeepsTheColumnsApart()
+    {
+        var formFilling = new FormFillingProperties
+        {
+            EditorFieldRenames = [Saved("second", Rename("applicant", "applicantName")), Saved("first", Rename("fromWhom", "applicant"))]
+        };
+
+        FormFillingReportCreator.MatchFields(2, 1, Previous("fromWhom", "email"), Fields("applicantName", "email"), formFilling).Should().BeEmpty();
+    }
+
+    // v2 was saved without answers, so v3 is compared with v1 while its sessions report from v2's keys.
+    [Fact]
+    public void MatchFields_SessionsOpenedOnLaterVersionPassAKey_TakesTableOfItsOwn()
+    {
+        var formFilling = new FormFillingProperties { EditorFieldRenames = [Session(2, 3, Rename("a", "b")), Session(2, 3, Rename("b", "c"))] };
+        formFilling.EditorFieldRenames[1].SessionId = "other";
+
+        FormFillingReportCreator.MatchFields(3, 1, Previous("a"), Fields("c"), formFilling).Should().BeNull();
+    }
+
     // v2 swapped the keys and took a table of its own without answers; v3 is then compared with v1 and must see the swap.
     [Fact]
     public void ApplyVersionDecision_NoLinkThenRenamed_NextVersionSeesTheSwap()
