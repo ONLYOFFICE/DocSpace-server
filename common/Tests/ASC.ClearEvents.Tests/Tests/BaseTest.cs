@@ -51,6 +51,9 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
     private PortalClients _clients = null!;
 
+    /// <summary>The recent event every test portal starts with; see <see cref="InitializeAsync"/>.</summary>
+    private int _latestActivityId;
+
     protected int TenantId => _clients.TenantId;
 
     protected User Owner => _clients.Owner;
@@ -72,6 +75,10 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         _roomsApi = _clients.RoomsApi;
 
         await _clients.FilesHttpClient.Authenticate(Owner);
+
+        // A pass keeps the newest event of every portal, its last activity. Without a recent one, the newest of the
+        // expired events a test seeds would be kept for that reason alone and blur what the test asserts.
+        _latestActivityId = await SeedEventAsync(0);
     }
 
     public virtual ValueTask DisposeAsync()
@@ -213,15 +220,32 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
     /// <summary>
     /// Moves every audit event of this portal <paramref name="days"/> days into the past, so that the events
-    /// the services wrote a moment ago are as old as the cleanup needs them to be.
+    /// the services wrote a moment ago are as old as the cleanup needs them to be. The recent event the portal
+    /// started with stays where it is, and stays its newest.
     /// </summary>
-    protected async Task AgeAuditTrailAsync(int days)
+    protected Task AgeAuditTrailAsync(int days)
+    {
+        return AgeTenantAuditTrailAsync(TenantId, days, _latestActivityId);
+    }
+
+    /// <summary>
+    /// As <see cref="AgeAuditTrailAsync"/>, for every event of another portal but <paramref name="exceptEventId"/>.
+    /// </summary>
+    protected async Task AgeTenantAuditTrailAsync(int tenantId, int days, int exceptEventId = 0)
     {
         await using var ef = await fixture.Cleaner.CreateDbContextAsync(TestContext.Current.CancellationToken);
 
         await ef.AuditEvents
-            .Where(r => r.TenantId == TenantId)
+            .Where(r => r.TenantId == tenantId && r.Id != exceptEventId)
             .ExecuteUpdateAsync(s => s.SetProperty(r => r.Date, r => r.Date.AddDays(-days)), TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>The date of the newest audit event of a portal, as the portal retention policy reads its last activity.</summary>
+    protected async Task<DateTime?> LastEventDateAsync(int tenantId)
+    {
+        await using var ef = await fixture.Cleaner.CreateDbContextAsync(TestContext.Current.CancellationToken);
+
+        return await ef.LastAuditEventDateAsync(tenantId);
     }
 
     protected async Task<FolderDto> CreateCustomRoomAsync(string title)

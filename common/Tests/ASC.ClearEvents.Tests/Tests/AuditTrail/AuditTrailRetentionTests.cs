@@ -132,10 +132,36 @@ public class AuditTrailRetentionTests(AspireAppFixture fixture) : BaseTest(fixtu
         var paidPortalEvent = await SeedEventAsync(FreeLifeTimeDays + 30);
         var freePortalEvent = await SeedEventForTenantAsync(freePortal.TenantId, FreeLifeTimeDays + 30);
 
+        // Its last activity, which a pass keeps: the expired event is then not the newest of the portal.
+        await SeedEventForTenantAsync(freePortal.TenantId, 0);
+
         // Act
         await RunCleanupAsync();
 
         // Assert
         (await RemainingEventsAsync([paidPortalEvent, freePortalEvent])).Should().BeEquivalentTo([paidPortalEvent]);
+    }
+
+    [Fact]
+    public async Task ClearAsync_EveryEventExpired_KeepsTheLastActivity()
+    {
+        // Arrange: a portal without the recent event every test portal starts with, whose events, whatever its
+        // registration wrote included, are all past every life time.
+        using var idlePortal = await Fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
+
+        await AgeTenantAuditTrailAsync(idlePortal.TenantId, PaidLifeTimeDays * 2);
+
+        var older = await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 60);
+        await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 30);
+
+        var lastActivity = await LastEventDateAsync(idlePortal.TenantId);
+
+        // Act
+        await RunCleanupAsync();
+
+        // Assert: the portal retention policy counts from the newest event, and must not fall back to the creation
+        // date because the cleanup took every event away. An event the services write meanwhile is only later.
+        (await RemainingEventsAsync([older])).Should().BeEmpty();
+        (await LastEventDateAsync(idlePortal.TenantId)).Should().NotBeNull().And.BeOnOrAfter(lastActivity!.Value);
     }
 }

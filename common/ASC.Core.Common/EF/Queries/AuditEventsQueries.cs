@@ -48,6 +48,12 @@ public partial class MessagesContext
     }
 
     [PreCompileQuery]
+    public Task<int> NewestAuditEventIdAsync(int tenantId)
+    {
+        return AuditEventsQueries.NewestAuditEventIdAsync(this, tenantId);
+    }
+
+    [PreCompileQuery]
     public Task<int> DeleteAuditEventsToClearAsync(int tenantId, IEnumerable<int> ids)
     {
         return AuditEventsQueries.DeleteAuditEventsToClearAsync(this, tenantId, ids);
@@ -90,6 +96,19 @@ static file class AuditEventsQueries
                     .ThenBy(r => r.Id)
                     .Take(count)
                     .Select(r => new AuditEventKey(r.Id, r.Date, ctx.FilesAuditReferences.Any(a => a.AuditEventId == r.Id))));
+
+    // The newest event of a portal, by date as LastAuditEventDateAsync reads the last activity, the id breaking a
+    // tie; 0 when the portal has none. Served by the (tenant_id, date) index as a reverse range that stops at the
+    // first entry.
+    public static readonly Func<MessagesContext, int, Task<int>> NewestAuditEventIdAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (MessagesContext ctx, int tenantId) =>
+                ctx.AuditEvents
+                    .Where(r => r.TenantId == tenantId)
+                    .OrderByDescending(r => r.Date)
+                    .ThenByDescending(r => r.Id)
+                    .Select(r => r.Id)
+                    .FirstOrDefault());
 
     // The reference check is repeated, because files_audit_reference cascades from audit_events: deleting an event
     // that became part of a history after it was read would silently remove it from that history.

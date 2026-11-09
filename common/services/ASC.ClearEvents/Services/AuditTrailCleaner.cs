@@ -35,7 +35,8 @@ namespace ASC.ClearEvents.Services;
 
 /// <summary>
 /// One pass of the audit trail cleanup over every tenant: removes the audit events older than the retention of
-/// the tenant's tariff, except those that are part of the history of a file, folder or room. Kept apart from
+/// the tenant's tariff, except those that are part of the history of a file, folder or room, and the tenant's newest
+/// event, which the portal retention policy reads as its last activity. Kept apart from
 /// <see cref="ClearAuditEventsService"/>, which only decides when a pass runs, so that a pass can be run with
 /// retention settings of its own.
 /// </summary>
@@ -134,6 +135,11 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         DateTime? threshold = null;
         var paid = false;
 
+        // Never removed: the portal retention policy counts from the date of the newest event (and of the last login,
+        // which the login history cleanup purges), so a portal idle past the life time would otherwise lose every sign
+        // of activity and be counted from its creation date.
+        var newestId = 0;
+
         var removed = 0;
 
         var afterDate = DateTime.MinValue;
@@ -156,10 +162,11 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
                 {
                     paid = await IsPaidAsync(scope.ServiceProvider, tenantId);
                     threshold = paid ? paidThreshold : freeThreshold;
+                    newestId = await ef.NewestAuditEventIdAsync(tenantId);
                 }
 
                 var ids = events
-                    .Where(r => !r.InHistory && r.Date < threshold)
+                    .Where(r => !r.InHistory && r.Date < threshold && r.Id != newestId)
                     .Select(r => r.Id)
                     .ToList();
 
