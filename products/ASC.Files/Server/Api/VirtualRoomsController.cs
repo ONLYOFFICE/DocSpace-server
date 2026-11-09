@@ -81,21 +81,24 @@ public class VirtualRoomsInternalController(
     private readonly AuthContext _authContext = authContext;
 
     /// <remarks>
-    /// Creates a room in the portal Rooms section and returns it. `roomType` decides which sharing links, member
-    /// roles and form features the room offers, and it cannot be changed afterwards, so a room of the wrong kind has
-    /// to be recreated. The caller must be the portal owner, a portal administrator or a room administrator; a user
-    /// or a guest is refused, and so is a public room while the portal forbids external sharing. `title` is required
-    /// and must not be blank: characters a folder name cannot hold are replaced with underscores and the rest is
-    /// truncated, so the stored title can differ from the one sent and two rooms can share it. `quota` is accepted
-    /// only while the per-room quota feature is on and must stay within the portal quota, `cover` only for an id
-    /// returned by `GET api/2.0/files/rooms/covers`, and `color` as six hexadecimal digits with no leading number
-    /// sign. Tag names the portal does not know yet are added to the tag catalogue. `share` is not implemented and
-    /// any non-empty value is rejected, so invite members afterwards with `PUT api/2.0/files/rooms/{id}/share`.
-    /// Passing the portal room limit ends the call as a billing refusal and creates nothing.
+    /// Creates a room in the Rooms section and returns it. The call creates an Instructions room, a Knowledge room,
+    /// or an AI project in the AI rooms section instead. You cannot change `roomType` after this call. Requires a DocSpace admin
+    /// or a room admin. Other callers get 403. The call changes data. Do not repeat it. Each call creates another
+    /// room. The call adds the tag names that the portal does not have yet. A public room and a form filling room get
+    /// a primary external link. To invite members, use `PUT api/2.0/files/rooms/{id}/share` after this call. The call
+    /// returns 400 if `title` is blank, `cover` is unknown, or `share` is not empty. It also returns 400 if `private`
+    /// is set together with `indexing`, a lifetime, or a watermark. A room of the AI rooms section also returns 400
+    /// with settings that do not apply to its type. The call returns 402 if the portal reached the room limit of its
+    /// plan or its payment is overdue. Rooms of the AI rooms section do not count toward this limit. A logo that does
+    /// not fit into the storage quota also returns 402. The call returns 403 if `quota` is set while room quotas are
+    /// turned off, or is over the portal limit. It also returns 403 for a public room while the portal forbids
+    /// external sharing. A private room also returns 403 if the caller has no encryption keys. A Knowledge room
+    /// returns 403 while vectorization is turned off. If `logo.tmpFile` names no uploaded picture, or one already
+    /// used, the call returns 404.
     /// </remarks>
     /// <summary>Create a room</summary>
     /// <path>api/2.0/files/rooms</path>
-    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "unless `roomType` is `AiRoom`")]
+    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "when `roomType` is not `AiRoom`")]
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`, which creates an AI agent in the Rooms section")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
@@ -118,11 +121,11 @@ public class VirtualRoomsInternalController(
     }
 
     /// <remarks>
-    /// Returns one page of the root contents of an Instructions room, whose Markdown files are the skills of the AI
-    /// chat, in the same shape as `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that provide
-    /// skills are listed with `GET api/2.0/files/rooms?withAiFolder=true` (or `type=10`). Any member who can read the
-    /// room may call it; somebody who cannot is refused, and a room that does not exist or is not an Instructions room
-    /// is answered as not found.
+    /// Returns one page of the root folder of an Instructions room. Its Markdown files are the skills of the AI chat.
+    /// The response has the same shape as `GET api/2.0/files/{folderId}`. Requires read access to the room. Other
+    /// callers get 403. The call is read-only. To find Instructions rooms, use the `withAiFolder` filter of
+    /// `GET api/2.0/files/rooms`. The call returns 404 if the room does not exist or is not an Instructions room. It
+    /// returns 400 if `count` is out of range or `startIndex` is negative.
     /// </remarks>
     /// <summary>Get the skills folder of an Instructions room</summary>
     /// <path>api/2.0/files/rooms/{id}/ai</path>
@@ -140,16 +143,16 @@ public class VirtualRoomsInternalController(
     }
 
     /// <remarks>
-    /// Starts a background job that copies a room template into a new room of the Rooms section, and answers with the
-    /// same progress record that `GET api/2.0/files/rooms/fromtemplate/status` returns. The caller must be able to
-    /// read the template and to create rooms at all, so a user or a guest is refused, and the checks run before the
-    /// job is queued. The room does not exist when the response arrives: poll the status operation until
-    /// `isCompleted` is true, then take `roomId` from it, and treat a non-empty `error` as a failed job. Only one
-    /// such job is kept per account, and a finished one is discarded when the next is started, so a second creation
-    /// loses the record of the first. Anything not sent is inherited from the template, and `copyLogo` keeps the
-    /// template logo and makes `logo` pointless. `quota` is accepted only while the per-room quota feature is on, and
-    /// a template of a public room cannot be instantiated while the portal forbids external sharing. A template that
-    /// does not exist or cannot be read is answered as missing.
+    /// Starts a job that creates a room in the Rooms section from a room template. Requires read access to the
+    /// template and the right to create rooms. Other callers get 403. A user or a guest cannot create rooms. The call
+    /// queues work and returns the progress record of the job. The room does not exist yet when the response arrives.
+    /// Repeat `GET api/2.0/files/rooms/fromtemplate/status` until `isCompleted` is true. Then take `roomId` from it. A
+    /// non-empty `error` means that the job failed. The job fails if the template is a public room while the portal
+    /// forbids external sharing. The portal keeps one job record per account. Starting a new job deletes the record of
+    /// a finished one. Wait for the running job to end before you start the next one. Settings that the body leaves
+    /// out come from the template. With `copyLogo`, the call ignores `logo`. The call returns 400 if `title` is blank.
+    /// It returns 403 if `quota` is set while the quota for this kind of room is turned off. If no room template has
+    /// the `templateId`, the call returns 404.
     /// </remarks>
     /// <summary>Create a room from the template</summary>
     /// <path>api/2.0/files/rooms/fromtemplate</path>
@@ -241,16 +244,12 @@ public class VirtualRoomsInternalController(
     }
 
     /// <remarks>
-    /// Returns the progress of the room-from-template job started by the calling account with
-    /// `POST api/2.0/files/rooms/fromtemplate`. The record is private to the account that started the job: jobs of
-    /// other members are never reported, and only one record is kept per account. The body is empty when the account
-    /// has no such record, and it is also empty when the job queue cannot be read, so an empty answer is not proof
-    /// that nothing was started. `progress` is a percentage, `isCompleted` marks the end of the job whether it
-    /// succeeded or failed, `error` carries the failure message and is empty on success, and `roomId` is meaningful
-    /// only once the room exists. The record survives the end of the job and is dropped when the next creation
-    /// starts, so polling after completion keeps returning the same answer. Poll this operation until `isCompleted`
-    /// is true and then read the room itself with `GET api/2.0/files/rooms/{id}`. The call changes nothing and is
-    /// safe to repeat.
+    /// Returns the progress of the job that `POST api/2.0/files/rooms/fromtemplate` started for your account. Any
+    /// signed-in user can call it. The call shows only the job of your own account. The call is read-only. This is
+    /// the call to poll. Repeat it until `isCompleted` is true. Then pass `roomId` to `GET api/2.0/files/rooms/{id}`
+    /// to read the room. The record stays after the job ends, until you start the next job. The body is empty if
+    /// your account has no record. It is also empty if the portal cannot read the job queue. So an empty body does
+    /// not prove that no job was started.
     /// </remarks>
     /// <summary>Get the room creation progress</summary>
     /// <path>api/2.0/files/rooms/fromtemplate/status</path>
@@ -276,16 +275,14 @@ public class VirtualRoomsInternalController(
     }
 
     /// <remarks>
-    /// Queues a background job that re-exports the collected data of every original form of a form filling room into
-    /// the external database configured for the portal, and returns the job record. The room must be a form filling
-    /// room and the caller must be able to edit it, otherwise the call is refused with 403; an unknown room is
-    /// answered with 404. The export is not done when the response arrives: poll
-    /// `GET api/2.0/files/rooms/{id}/externaldbsync` until `isCompleted` is true, then read `forms` for the per-form
-    /// outcome, which stays empty while the job is running. Starting the job again while it is still running returns
-    /// the same record instead of a second job, so a retry is safe; a finished job is replaced by the new one. One
-    /// job is kept per room. A form whose data cannot be exported does not stop the others: it comes back in `forms`
-    /// with `success` false and its own `error`. When the portal has no external database configured the call is
-    /// refused with 400 and nothing is queued.
+    /// Starts a job that exports the data of all original forms of a form filling room to the external
+    /// database. Requires editing access to a form filling room. Other callers get 403. Any other room also
+    /// returns 403. The call queues work and returns the job record. Repeat
+    /// `GET api/2.0/files/rooms/{id}/externaldbsync` until `isCompleted` is true. Then read `forms` for the result of each form. A form that fails does not stop
+    /// the others. It gets `success` false and its own `error`. While a job runs, a new call returns that job and
+    /// starts no second one. So you can repeat the call. After a job ends, a new call starts a new job. The room keeps
+    /// one job record. If no external database is configured, the call returns 400 and queues nothing. If the room
+    /// does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Start external DB sync</summary>
     /// <path>api/2.0/files/rooms/{id}/externaldbsync</path>
@@ -302,15 +299,12 @@ public class VirtualRoomsInternalController(
     }
 
     /// <remarks>
-    /// Returns the record of the external database export job of a form filling room, or an empty body when the room
-    /// has no job at all. The room must be a form filling room and the caller must be able to edit it, otherwise the
-    /// call is refused; an unknown room is answered with 404. This is the polling target of
-    /// `POST api/2.0/files/rooms/{id}/externaldbsync`: repeat it until `isCompleted` is true, and then read `forms`,
-    /// which lists one entry per original form with its own `success` and `error` and is empty while the job is still
-    /// running. `percentage` advances as forms are processed, `status` distinguishes a job that is queued, running,
-    /// finished or failed, and `error` carries the message of a job that stopped as a whole. The record belongs to
-    /// the room rather than to the account that started the job, so any member who can edit the room sees the same
-    /// answer. The call changes nothing and is safe to repeat.
+    /// Returns the record of the job that exports form data of a form filling room to the external database. Requires
+    /// editing access to a form filling room. Other callers get 403. Any other room also returns 403. The call is
+    /// read-only. This is the call to poll after `POST api/2.0/files/rooms/{id}/externaldbsync`. Repeat it until
+    /// `isCompleted` is true. Then read the result of each form in `forms`. The body is empty if the room has no job.
+    /// The record belongs to the room, so every member with editing access sees the same job. If the room does not
+    /// exist, the call returns 404.
     /// </remarks>
     /// <summary>Get external DB sync status</summary>
     /// <path>api/2.0/files/rooms/{id}/externaldbsync</path>
@@ -367,23 +361,23 @@ public class VirtualRoomsThirdPartyController(
         fileSecurity)
 {
     /// <remarks>
-    /// Turns a folder of a connected third-party storage account into a room of the `Rooms` section, so that the
-    /// files of the room keep living in that storage instead of the portal. Connect the account first with
-    /// `POST api/2.0/files/thirdparty` and take the path parameter from a folder listing of that account: it is the
-    /// identifier of a folder in the storage, not of a room. One connected account can back one room only, so a
-    /// second call over the same account is refused, and so is an account that was not connected for room storage.
-    /// The caller needs the right to create rooms, which a portal user and a guest do not have; a public room is
-    /// refused while the administrator restricts external access, and reaching the room limit of the tariff is
-    /// refused too. With `createAsNewFolder` the room is a new subfolder named after `title`, otherwise the folder
-    /// from the path becomes the room itself and `tags` and `logo` are then dropped. A third-party room keeps neither
-    /// `indexing` nor `denyDownload` in either mode: both are accepted and ignored, and the room reads back with them
-    /// off. The
-    /// answer is the new room, whose identifiers are strings; a public or a form-filling room already has its primary
-    /// link, readable with `GET api/2.0/files/rooms/{id}/link`.
+    /// Creates a room in the Rooms section from a folder of a connected third-party storage account. The files of the
+    /// room stay in that storage. First, connect the storage account for rooms with `POST api/2.0/files/thirdparty`.
+    /// Requires a DocSpace admin or a room admin who connected this storage account. Other callers get 403. The call
+    /// changes data. One storage account backs only one room. So a repeated call returns 403. With
+    /// `createAsNewFolder`, the room is a new subfolder named after `title`. Otherwise the folder from the path
+    /// becomes the room, and the call ignores `tags` and `logo`. The call ignores `indexing` and `denyDownload` in
+    /// both modes. A public room and a form filling room get a primary external link. To read it, use
+    /// `GET api/2.0/files/rooms/{id}/link`. The call returns 400 if the storage account is not connected. It returns
+    /// 402 if the portal reached the room limit of its plan or its payment is overdue. It returns 403 if the storage
+    /// account was not connected for rooms. It also returns 403 for a public room while the portal forbids external
+    /// sharing. A room type of the AI rooms section also returns 403. With `createAsNewFolder`, a subfolder that
+    /// cannot be created also returns 403. If `id` is not a folder of a connected storage account, the call
+    /// returns 404.
     /// </remarks>
     /// <summary>Create a third-party room</summary>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
-    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "unless `roomType` is `AiRoom`")]
+    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "when `roomType` is not `AiRoom`")]
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
@@ -427,16 +421,13 @@ public abstract class VirtualRoomsController<T>(
     protected readonly FileStorageService _fileStorageService = fileStorageService;
 
     /// <remarks>
-    /// Returns one room with its type, title, tags, logo, cover, colour, quota and virtual data room settings,
-    /// together with the access level the caller has in it. Reading the room is not a side-effect-free call: it
-    /// clears the caller new-item badges for that room, and `newForMe` comes back as 0, so read
-    /// `GET api/2.0/files/rooms/{id}/news` first when the new items matter. The caller needs read access to the room;
-    /// portal administrators can read a room they were never invited to, while a member without access is refused.
-    /// The operation also answers an anonymous caller, but only in the context of a valid external share link of that
-    /// room, and a plain anonymous request is rejected as unauthenticated. A room that never existed, was deleted, or
-    /// lives in a section the caller cannot see is answered as missing. Archived rooms are returned as well and are
-    /// recognised by their root section rather than by a separate flag. Use `GET api/2.0/files/rooms` to search and
-    /// page through rooms instead of guessing ids.
+    /// Returns one room with its settings and the access level of the caller. Requires read access to the room.
+    /// Other callers get 403. A DocSpace admin can read any room, even without an invitation. An anonymous caller
+    /// needs a valid external link to the room. Without one, the call returns 401. The call is read-only, except for
+    /// the new-item marks. It clears the marks of the caller in this room, so `newForMe` becomes 0. To read the new
+    /// items first, use `GET api/2.0/files/rooms/{id}/news`. The call also returns archived rooms. Their root
+    /// section, not a flag, shows that they are archived. The call returns 404 for a deleted or unknown room, or a
+    /// room in a section the caller cannot see. To find room IDs, use `GET api/2.0/files/rooms`.
     /// </remarks>
     /// <summary>Get room information</summary>
     /// <path>api/2.0/files/rooms/{id}</path>
@@ -458,22 +449,27 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Applies a partial change to one room and returns the whole room as it is after it. Only the fields present in
-    /// the body are touched, an empty body changes nothing, and a property the body does not define is rejected as an
-    /// invalid request instead of being ignored. The caller must be a manager of this room: portal administrators do
-    /// not get in without an invitation, and an archived room is refused. `title` is trimmed, sanitised the way a
-    /// room title is sanitised at creation, and a blank value is treated as no change. `tags` replaces the whole tag
-    /// set and an empty array clears it, an empty `color` restores the default and an empty `cover` removes the
-    /// cover. A `quota` of -1 switches the room back to no custom limit, any other negative value restores the portal
-    /// default, and a positive one is accepted only while the per-room quota feature is on. Turning `indexing` on
-    /// renumbers the room contents. `chatSettings` belongs to an AI room and is rejected anywhere else. Use
-    /// `POST api/2.0/files/rooms/{id}/logo` for logo cropping.
+    /// Changes the settings of a room and returns the whole room. The call changes only the fields in the body. An
+    /// empty body changes nothing. Requires the room manager role in the room. Other callers get 403. A DocSpace
+    /// admin without an invitation also gets 403. The call changes data, and you can repeat it with the same body.
+    /// Only a repeated `logo` fails. The portal deletes the uploaded image after use, so the call returns 404. The
+    /// call trims a `title` and cleans it as at room creation. A blank `title` changes nothing. The `tags` array
+    /// replaces all tags of the room, and an empty array removes them. An empty `color` restores the default color.
+    /// An empty `cover` removes the cover. A `quota` of `-1` removes the custom limit. Any other negative `quota`
+    /// restores the portal default. A positive `quota` works only while the room quota feature is turned on. If you
+    /// turn on `indexing`, the call renumbers the room contents. The call returns 400 if the body has a property
+    /// that the room update does not define. It also returns 400 for `chatSettings` in a room that is not an AI
+    /// room. A private room with `indexing`, `lifetime`, or `watermark` also returns 400. If a new logo or
+    /// watermark image does not fit the portal storage quota, the call returns 402. It returns 403 for a room in
+    /// Trash or in the archive, or a `quota` over the portal limit. It also returns 403 if
+    /// `logo.tmpFile` is not an image the caller uploaded. If the room or the uploaded image does not exist, the
+    /// call returns 404. To crop and set only a logo, use `POST api/2.0/files/rooms/{id}/logo`.
     /// </remarks>
     /// <summary>Update a room</summary>
     /// <path>api/2.0/files/rooms/{id}</path>
     [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "on every successful call, even one that changes nothing")]
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when the room is an AI agent")]
-    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead when the ID is a folder inside a room rather than the room itself, which a manager of that room may pass and the operation does not refuse")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead when the ID is a folder inside the room, not the room itself")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the update", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, a private room is given `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]
@@ -490,22 +486,22 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Sets the same custom storage limit, in bytes, on every listed room and streams the updated rooms back in the
-    /// order they were given. The per-room quota feature has to be on for the portal, and the value must stay within
-    /// the portal own limit, otherwise the call is refused before anything is written. The caller must be a manager
-    /// of each listed room, and an archived room or a room in the trash is refused. The list is not transactional:
-    /// rooms processed before the offending one keep their new limit, so a failed call has to be checked room by
-    /// room. Only numeric room ids are processed, which means ids of rooms stored in a connected third-party account
-    /// are silently skipped. A room whose limit already equals the requested value is left untouched and still
-    /// returned. To go back to the portal default use `PUT api/2.0/files/rooms/resetquota`, and to drop the custom
-    /// limit entirely send a quota of -1 to `PUT api/2.0/files/rooms/{id}`.
+    /// Sets one custom storage limit, in bytes, on each listed room. It returns the updated rooms in the order of
+    /// `roomIds`. Requires the room manager role in each room. Other callers get 403. The call changes data, and you
+    /// can repeat it with the same body. A room that already has this limit stays the same and is still returned.
+    /// The call skips unknown rooms and rooms in third-party storage. The call is not atomic. If a room fails, the
+    /// rooms before it keep the new limit. So check each room after a failed call. The call returns 403 if the room
+    /// quota feature is turned off, or `quota` exceeds the portal storage limit. For AI agents, it checks the agent
+    /// quota feature instead. It also returns 403 for a room in Trash or in the archive. To restore the portal
+    /// default, use `PUT api/2.0/files/rooms/resetquota`. To remove the custom limit, send a `quota` of `-1` to
+    /// `PUT api/2.0/files/rooms/{id}`.
     /// </remarks>
     /// <summary>Change the room quota limit</summary>
     /// <path>api/2.0/files/rooms/roomquota</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every listed room, even when its quota does not change")]
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for a listed AI agent")]
-    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder, not a room")]
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the new limit was applied", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed room or it lies in Trash or in the archive")]
@@ -545,21 +541,22 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Returns every listed room to the default room quota of the portal and streams the updated rooms back in the
-    /// order they were given. This is not the same as removing the limit: the room stops carrying its own value and
-    /// starts following the portal default, which a portal administrator can change at any time. The per-room quota
-    /// feature has to be on, the caller must be a manager of each listed room, and an archived room or a room in the
-    /// trash is refused. The list is not transactional, so rooms processed before a failing one keep the default and
-    /// the rest keep what they had. Only numeric room ids are processed, which means ids of rooms stored in a
-    /// connected third-party account are silently skipped. Use `PUT api/2.0/files/rooms/roomquota` to set an explicit
-    /// value, and a quota of -1 in `PUT api/2.0/files/rooms/{id}` to leave the room with no custom limit at all.
+    /// Restores the default room quota of the portal on each listed room. It returns the updated rooms in the order
+    /// of `roomIds`. This does not remove the limit. The room then follows the portal default, which a DocSpace admin
+    /// can change at any time. Requires the room manager role in each room. Other callers get 403. The call changes
+    /// data, and you can repeat it with the same body. The call skips unknown rooms and rooms in third-party storage.
+    /// The call is not atomic. If a room fails, the rooms before it keep the default, and the rest keep their limit.
+    /// It returns 403 if the room quota feature is off, or a room is in Trash or the archive. For AI agents, it
+    /// checks the agent quota feature instead. To give the rooms their own value, use
+    /// `PUT api/2.0/files/rooms/roomquota`. To remove the custom limit, send a `quota` of `-1` to
+    /// `PUT api/2.0/files/rooms/{id}`.
     /// </remarks>
     /// <summary>Reset the room quota limit</summary>
     /// <path>api/2.0/files/rooms/resetquota</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every listed room")]
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for a listed AI agent")]
-    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder, not a room")]
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the default limit was restored", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, or the caller may not edit a listed room or it lies in Trash or in the archive")]
@@ -594,15 +591,13 @@ public abstract class VirtualRoomsController<T>(
 
 
     /// <remarks>
-    /// Queues a background job that deletes one room with everything inside it, and returns the operation record of
-    /// that job. Deleting a room is destructive and has no trash step: the room and its files are gone once the job
-    /// finishes, unlike a file or a folder, which is moved to the trash first. The right to delete is checked before
-    /// the job is queued, so a caller who may not delete the room is refused straight away and an unknown room is
-    /// answered as missing; the same checks run again when the job starts, which is why the `error` of the finished
-    /// operation still has to be read. Poll `GET api/2.0/files/fileops` until `finished` is true, or read the
-    /// returned record again by its `id`. The record is kept until it is read once, so one poll after completion
-    /// still sees it. `deleteAfter` in the body is required by the contract but has no effect on the job. An archived
-    /// room is deleted the same way, and a second delete of the same id reports that the room is missing.
+    /// Starts a background job that deletes a room with all its contents, and returns the job record. The job does
+    /// not move the room to Trash, so the deletion cannot be undone. An archived room is deleted the same way. Requires the right
+    /// to delete the room. Other callers get 403. The call checks the right before it queues the job. The job checks
+    /// it again, so read the `error` of the finished job. Repeat `GET api/2.0/files/fileops` until `finished` is
+    /// true. You can also read the record by its `id`. The portal keeps the record until you read it once after the
+    /// job ends. The body needs `deleteAfter`, but the job ignores it. If the room does not exist, the call
+    /// returns 404. A repeated call returns 404.
     /// </remarks>
     /// <summary>Remove a room</summary>
     /// <path>api/2.0/files/rooms/{id}</path>
@@ -626,16 +621,15 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Queues a background job that moves one room from the Rooms section to the Archive section, and returns the
-    /// operation record of that job. An archived room stays readable to its members and becomes read only: files
-    /// cannot be created, renamed or edited in it, and its settings, tags, logo and links can no longer be changed,
-    /// which is why many other room operations answer an archived room with a refusal. The caller must be a manager
-    /// of the room; administrators of the portal cannot archive a room they were not invited to, and a room template
-    /// cannot be archived at all and is answered as missing. Instructions and Knowledge rooms are never archived and
-    /// are refused with 403: delete them with `DELETE api/2.0/files/rooms/{id}` instead. The room is not archived when the response arrives: poll
-    /// `GET api/2.0/files/fileops` until `finished` is true. Archiving an already archived room is harmless.
-    /// `deleteAfter` decides only how long the finished record survives, not what happens to the room. Use
-    /// `PUT api/2.0/files/rooms/{id}/unarchive` to bring the room back.
+    /// Starts a background job that moves a room to the Archive section, and returns the job record. Members can
+    /// still read an archived room, but nobody can change it. No one can create, rename, or edit files in it, or
+    /// change its settings, tags, logo, or links. Requires the room manager role in the room. Other callers get 403.
+    /// A DocSpace admin without an invitation also gets 403. The call queues work. Repeat
+    /// `GET api/2.0/files/fileops` until `finished` is true. You can repeat the call on an archived room. The
+    /// `deleteAfter` field sets only how long the finished record stays. Instructions and Knowledge rooms cannot be
+    /// archived and return 403. To remove one, use `DELETE api/2.0/files/rooms/{id}`. A folder that is not a room
+    /// also returns 403. A room with a file that is locked or being edited also returns 403. If the room does not exist
+    /// or is a room template, the call returns 404. To restore the room, use `PUT api/2.0/files/rooms/{id}/unarchive`.
     /// </remarks>
     /// <summary>Archive a room</summary>
     /// <path>api/2.0/files/rooms/{id}/archive</path>
@@ -670,19 +664,18 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Queues a background job that moves one room from the Archive section back to the Rooms section, and returns
-    /// the operation record of that job. The room becomes writable again with the membership, tags, logo and links it
-    /// had before, while the pinned state of its members is not restored and has to be set again with
-    /// `PUT api/2.0/files/rooms/{id}/pin`. The caller must be a manager of the room; a member who was only invited to
-    /// it is refused, a room template is answered as missing, and a room that was never archived simply stays where
-    /// it is. The room is not moved when the response arrives: poll `GET api/2.0/files/fileops` until `finished` is
-    /// true, and expect a room that is still archived until then. `deleteAfter` decides only how long the finished
-    /// record survives. Calling the operation twice in a row does not corrupt the room, and a deleted or unknown room
-    /// id is reported as missing.
+    /// Starts a background job that moves a room from the Archive section back to Rooms, and returns the job record.
+    /// The room becomes writable again with its members, tags, logo, and links. The job does not restore the pins of
+    /// the members. To pin the room again, use `PUT api/2.0/files/rooms/{id}/pin`. Requires the room manager role in
+    /// the room. Other callers get 403. The call queues work. Repeat `GET api/2.0/files/fileops` until `finished` is
+    /// true. Until then, the room is still archived. You can repeat the call. A room that is not archived stays where
+    /// it is. The `deleteAfter` field sets only how long the finished record stays. A folder that is not a room
+    /// returns 403. A room with a file that is locked or being edited also returns 403. The call returns 404 if the
+    /// room does not exist, was deleted, or is a room template.
     /// </remarks>
     /// <summary>Unarchive a room</summary>
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
-    [RaisesWebhook(WebhookTrigger.RoomRestored, When = "once the queued operation moves the room out of the archive, for an AI agent as well")]
+    [RaisesWebhook(WebhookTrigger.RoomRestored, When = "once the queued operation moves the room out of the archive, for AI agents too")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued unarchive operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
@@ -708,16 +701,19 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Adds, changes and removes room members in one batch, and returns the resulting access list of the named
-    /// subjects. Each entry names either an account or a group of the portal, or the email address of somebody who
-    /// has no account yet, together with the access level to grant; an access of 0 removes the subject from the room.
-    /// An entry without an access level is ignored, the same subject listed twice keeps the last level, and an empty
-    /// list is accepted and changes nothing. The caller must be a manager of the room, so an invitation sent by a
-    /// user or a guest is refused, and an account that is a portal user or a guest cannot be made a room manager.
-    /// Inviting by email also needs the portal to allow guest invitations. A subject the caller is not allowed to see
-    /// is dropped without an error, which is why the answer has to be compared with the request. Removing a member
-    /// who still holds a form role is refused through `error` unless `force` is set. `notify` sends the invitation
-    /// email with the optional `message`.
+    /// Changes the members of a room in one call, and returns the access of the listed subjects. The call can add,
+    /// change, and remove members. Each entry names an account, a group, or the email of a person without an
+    /// account. An `access` of `None` removes the
+    /// subject from the room. Requires the room manager role in the room. Other callers get 403. The call changes
+    /// data, and you can repeat it with the same body. If `notify` is true, the portal emails the invitation with
+    /// `message`. Each repeated call then sends the emails again. The call ignores an entry without an access level.
+    /// If a subject is listed twice, the last level wins. An empty list changes nothing. The call skips subjects that
+    /// the caller cannot see, so compare the answer with the request. Without `force`, the call does not remove a
+    /// member who has a form role. It reports this in `error` instead. The answer can also carry a `warning`. The
+    /// call returns 400 for an invalid or too long `email`, too many email invitations, or an invalid `culture`. It
+    /// returns 403 if an entry has an email and the portal forbids guest invitations. It also returns 403 if a
+    /// subject cannot get the access, such as a user or guest as room manager. In a private room, a subject
+    /// without encryption keys also returns 403. If the room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Set the room access rights</summary>
     /// <path>api/2.0/files/rooms/{id}/share</path>
@@ -809,16 +805,15 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Returns one page of the access list of a room: the owner first, then the managers, the groups, the ordinary
-    /// members, the guests and finally the invitations nobody has accepted yet, with the total in the response
-    /// headers. `filterType` selects what is listed and defaults to accounts and groups, which leaves the sharing
-    /// links of the room out; those are read with `GET api/2.0/files/rooms/{id}/links`. `filterValue` matches the
-    /// displayed name of the subject, and an invitation that is still pending is listed under the email address it
-    /// was sent to. Paging is done with `count` and `startIndex`, and the order is stable between calls. Any member
-    /// who can read the room sees the accounts and the groups, so the list is not limited to the managers, and portal
-    /// administrators can read the list of a room they were never invited to; somebody who is not in the room at all
-    /// is refused. Asking for the link entries instead needs the right to see the links of the room, and a member
-    /// without it gets an empty page rather than an error.
+    /// Returns one page of the members of a room with their access. The list starts with the owner, then room
+    /// managers, groups, other members, guests, and pending invitations. Use `filterType` to select what the call
+    /// lists. By default, it lists accounts and groups, without links. To read the links, use
+    /// `GET api/2.0/files/rooms/{id}/links`. Use `filterValue` to match the display name. A pending invitation
+    /// matches by its email. Requires read access to the room. Other callers get 403. A DocSpace admin can read the
+    /// list of any room. The call is read-only. Use `startIndex` and `count` to page through the list. The order
+    /// stays the same between calls. The response headers carry the total. To list links here, the caller needs the
+    /// right to see the links. Without it, the call returns an empty page. A `count` out of range returns 400. If the
+    /// room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Get the room access rights</summary>
     /// <path>api/2.0/files/rooms/{id}/share</path>
@@ -846,16 +841,22 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Creates, updates or deletes one sharing link of a room and returns it. `linkType` chooses the kind: an
-    /// invitation link makes whoever opens it a member with the given access level, while an external link opens the
-    /// room without an account. Omitting `linkId` creates a link, passing the id of an existing one updates it, and
-    /// an unknown id is created with that id; the kind of an existing link cannot be changed afterwards. An access
-    /// level of 0 deletes the link, and deleting the primary external link of a public or form filling room
-    /// immediately replaces it with a fresh one, so such a room is never left without one. A room keeps at most one
-    /// invitation link, and a second one is refused; form filling rooms take no invitation links, and collaboration,
-    /// form filling and virtual data rooms take no external links. An expiration date in the past is dropped silently
-    /// for an external link and rejected for an invitation link. `password`, `denyDownload` and `internal` apply to
-    /// external links only.
+    /// Sets one link of a room and returns the link. The call can create, change, or delete the link. The `linkType`
+    /// field selects the type.
+    /// An invitation link makes each person who opens it a member with `access`. An external link opens the room
+    /// without an account. Without `linkId`, the call creates a link. With the ID of a link, it changes that link.
+    /// With an unknown ID, it creates a link with this ID. You cannot change the type of a link. An `access` of
+    /// `None` deletes the link. If you delete the primary external link of a public or form-filling room, the portal
+    /// creates a new one. Requires the right to manage the links of the room. Other callers get 403. The
+    /// call changes data. You can repeat a call with `linkId`. Do not repeat a call without it. Each call creates
+    /// another link. The `password`, `denyDownload`, and `internal` fields apply only to external links. For an
+    /// external link, the call ignores an expiration date in the past. For an invitation link, such a date
+    /// returns 400. A room has at most one invitation link, and a second one returns 403. Form-filling rooms take
+    /// no invitation links and no external links except the primary one. Collaboration and virtual data rooms take
+    /// no external links. The call also returns 403 for a private room, an access level the link cannot have, or too
+    /// many links. An admin restriction on external links also returns 403. The call returns 400 for a too long
+    /// title or password, a weak password, or an invalid `maxUseCount` or `expirationDate`. If the room does not
+    /// exist, the call returns 404. When the call creates nothing, the body is empty.
     /// </remarks>
     /// <summary>Set the room external or invitation link</summary>
     /// <path>api/2.0/files/rooms/{id}/links</path>
@@ -900,16 +901,14 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Returns the sharing links of a room, with the invitation and the external links mixed together unless `type`
-    /// narrows it to one kind. Each entry carries the link address, its title, access level, expiration, the flag
-    /// that marks the primary external link of the room and, for invitation links, how many times it may still be
-    /// used. Public and form filling rooms come with an external link created for them, so an empty answer there
-    /// means that the link was revoked rather than that the room is private; rooms of the other kinds start with no
-    /// links at all and only gain one when somebody creates it, which for a collaboration room and a virtual data
-    /// room can be an invitation link alone. The caller needs access to the room and the right to see its links: a
-    /// member invited without that right gets an empty list rather than an error, while somebody who is not in the
-    /// room at all is refused. Paging parameters are not honoured here: the first hundred links are returned and the
-    /// reported count is the number of entries actually sent.
+    /// Returns the links of a room. If `type` is set, the list has only links of this type. Otherwise, it has
+    /// invitation and external links together. Each entry has the address, title, access, expiration, and the flag of the primary external link.
+    /// Invitation links also show how many uses are left. Public and form-filling rooms get an external link when
+    /// they are created. So an empty list there means that the link was revoked. Other rooms start with no links.
+    /// Collaboration and virtual data rooms can have only an invitation link. Requires read access to the room.
+    /// Other callers get 403. A member without the right to see the links gets an empty list. The call is
+    /// read-only. It returns at most the first 100 links and ignores paging parameters. The count in the response is
+    /// the number of entries sent. If the room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Get the room links</summary>
     /// <path>api/2.0/files/rooms/{id}/links</path>
@@ -944,15 +943,16 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Returns the primary external link of a room, which is the one address meant to be handed out to people outside
-    /// the portal. A public room and a form filling room get such a link when they are created, and asking for it
-    /// again returns the same link rather than a new one, so the answer is stable. In a room that has no primary link
-    /// yet this call creates one instead of reporting nothing, which needs the right to manage the links of the room:
-    /// a member invited with a lower level is refused with 403, and so is anybody who is not in the room at all. A
-    /// link that was explicitly revoked stays revoked and is reported as missing rather than recreated, and an
-    /// unknown room is answered with 404 as well. An archived public room still reports its link. The answer is the
-    /// same entry that `GET api/2.0/files/rooms/{id}/links` returns with the primary flag set, including the request
-    /// token that has to travel with the address.
+    /// Returns the primary external link of a room, the address for people outside the portal. Public and
+    /// form-filling rooms get this link when they are created. If the room has no primary link yet, the call creates
+    /// one. Requires read access to the room. Other callers get 403. To create the link, the caller also needs the
+    /// right to manage the links of the room. Without it, the call returns 403. The call is read-only, except when it
+    /// creates the link. A repeated call returns the same link. An archived public room still returns its link. The
+    /// entry is the same as in `GET api/2.0/files/rooms/{id}/links`, with the primary flag set. It includes the
+    /// request token that must go with the address. The call also returns 403 if the room type takes no external
+    /// links. An admin rule that allows external links only in public rooms also returns 403. If the link was
+    /// revoked, the call returns 404
+    /// and creates no new link. If the room does not exist, the call also returns 404.
     /// </remarks>
     /// <summary>Get the room primary external link</summary>
     /// <path>api/2.0/files/rooms/{id}/link</path>
@@ -971,15 +971,13 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Attaches the named tags to a room and returns the room with its whole tag set. Tags are portal-wide labels
-    /// shared by every room, and a name that the catalogue does not hold yet is created there by this call, so
-    /// attaching is also the short way of adding a tag to the portal. Names already attached to the room are kept as
-    /// they are, and repeating the call changes nothing, which makes it safe to retry. An empty list is accepted and
-    /// does nothing, while a blank or overlong name is rejected as an invalid request. The caller must be a manager
-    /// of the room or an administrator of the portal, and a room in the Archive section is refused with 403. A tag
-    /// has no identifier of its own and is addressed by name, so `GET api/2.0/files/tags` is what shows which names
-    /// already exist. Use `DELETE api/2.0/files/rooms/{id}/tags` to detach them again, which leaves the tags
-    /// themselves in the catalogue.
+    /// Adds tags to a room and returns the room with all its tags. All rooms of the portal share one set of tags. The
+    /// call creates each name that the portal does not have yet. Requires the room manager role in the room, or a
+    /// DocSpace admin. Other callers get 403. An archived room also returns 403. The call changes data, and you can
+    /// repeat it with the same body. It keeps the tags that the room already has. An empty list changes nothing. A
+    /// tag has no ID, so the call finds it by name. To list the existing names, use `GET api/2.0/files/tags`. The
+    /// call returns 400 for a null, blank, or too long name. If the room does not exist, the call returns 404. To
+    /// remove tags from a room, use `DELETE api/2.0/files/rooms/{id}/tags`. The tags then stay in the portal.
     /// </remarks>
     /// <summary>Attach tags to a room</summary>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
@@ -997,14 +995,12 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Detaches the named tags from a room and returns the room with its remaining tag set. Only the link between the
-    /// room and the tag is removed: the tag stays in the portal catalogue and keeps working for every other room, and
-    /// `DELETE api/2.0/files/tags` is what removes it from the portal itself. Names that are not in the catalogue, or
-    /// not attached to this room, are skipped without an error, so a successful answer does not prove that anything
-    /// was detached; compare the returned tag set instead. An empty list is accepted and does nothing, while a null
-    /// entry in the list is rejected as an invalid request. The caller must be a manager of the room or an
-    /// administrator of the portal, and a room in the Archive section is refused with 403. A tag that loses its last
-    /// room stays in the catalogue, and only deleting that room takes the tag with it.
+    /// Removes tags from a room and returns the room with its other tags. The tags stay in the portal and on other
+    /// rooms, even a tag that has no rooms left. To delete a tag from the portal, use `DELETE api/2.0/files/tags`.
+    /// Requires the room manager role in the room, or a DocSpace admin. Other callers get 403. An archived room also
+    /// returns 403. The call changes data, and you can repeat it with the same body. It skips names that the portal
+    /// or the room does not have. So check the returned tags to see what changed. An empty list changes nothing. The
+    /// call returns 400 for a null, blank, or too long name. If the room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Detach tags from a room</summary>
     /// <path>api/2.0/files/rooms/{id}/tags</path>
@@ -1028,15 +1024,15 @@ public abstract class VirtualRoomsController<T>(
 
 
     /// <remarks>
-    /// Turns an image already uploaded to the portal into the logo of a room and returns the room with the addresses
-    /// of the four logo sizes. This is the second half of a two-step flow: upload the picture with
-    /// `POST api/2.0/files/logos` first and pass the path it returns as `tmpFile`, because the image itself is never
-    /// sent here. The temporary file belongs to the account that uploaded it and is consumed by this call, so it
-    /// cannot be reused for a second room and a path somebody else uploaded is refused. `x`, `y`, `width` and
-    /// `height` crop the picture; sending a position without a size is rejected as an invalid request, while a size
-    /// without a position is accepted. An empty `tmpFile` leaves the room as it is. A logo replaces the cover in the
-    /// interface without erasing it, and removing the logo brings the cover back. The caller must be a manager of the
-    /// room, an archived room is refused, and an unknown room is answered with 404.
+    /// Sets an uploaded image as the room logo, and returns the room with the URLs of four logo sizes. First,
+    /// upload the image with `POST api/2.0/files/logos`. Then pass the returned path in `tmpFile`. An empty `tmpFile`
+    /// changes nothing. Use `x`, `y`, `width`, and `height` to crop the image. A position without a size returns 400,
+    /// but a size without a position works. The logo hides the cover of the room. If you delete the logo, the room
+    /// shows the cover again. Requires the room manager role in the room. Other callers get 403. An archived room
+    /// also returns 403. The call changes data. The portal deletes the uploaded image after this call, so a repeated
+    /// call returns 404. A path that another account uploaded returns 403. The call returns 400 for a crop outside
+    /// the image or a value out of range. If the logo does not fit the portal storage quota, the call returns 402. If
+    /// the room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Set the room logo</summary>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
@@ -1060,15 +1056,13 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Sets the cover picture and the background colour a room is shown with, and returns the whole room afterwards.
-    /// `cover` accepts only an identifier listed by `GET api/2.0/files/rooms/covers`, and `color` only six
-    /// hexadecimal digits with no leading number sign, so anything else is rejected as an invalid request. Either
-    /// field may be sent on its own, an empty `cover` clears the picture, an empty `color` restores the default one,
-    /// and an empty body leaves the room untouched. The cover is what the room shows while it has no uploaded logo:
-    /// setting a logo with `POST api/2.0/files/rooms/{id}/logo` hides the cover without erasing it, and deleting that
-    /// logo brings it back. The caller must be a manager of the room, an archived room is refused with 403, and an
-    /// unknown or deleted room is answered with 404. Repeating the same request is harmless, and the cover survives
-    /// archiving and unarchiving.
+    /// Changes the cover image and the background color of a room, and returns the room. You can send either field
+    /// alone. An empty `cover` removes the cover, and an empty `color` restores the default. An empty body changes
+    /// nothing. The room shows its cover only while it has no logo. A logo from `POST api/2.0/files/rooms/{id}/logo`
+    /// hides the cover but keeps it. Requires the room manager role in the room. Other callers get 403. An archived
+    /// room also returns 403. The call changes data, and you can repeat it with the same body. The cover stays after
+    /// archiving and unarchiving. The call returns 400 for an unknown `cover` or an invalid `color`. If the room does
+    /// not exist or was deleted, the call returns 404.
     /// </remarks>
     /// <summary>Change the room cover</summary>
     /// <path>api/2.0/files/rooms/{id}/cover</path>
@@ -1091,15 +1085,11 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Returns the gallery of cover pictures a room can be given: every entry pairs the identifier to send to
-    /// `POST api/2.0/files/rooms/{id}/cover` with the drawing itself as inline vector markup ready to be rendered.
-    /// The gallery is built into the product rather than stored per portal, so it is the same for every account and
-    /// every room, does not depend on what rooms exist, and its identifiers do not change with the language of the
-    /// request. The identifiers are unique and stable, which makes them safe to keep in a client, while the drawings
-    /// behind them may change between product versions. Any account of the portal may read the gallery, but a guest
-    /// is refused. The list is the only source of valid cover identifiers: a value that is not in it is rejected
-    /// wherever a cover is set, including room creation and room update. The call changes nothing and is safe to
-    /// repeat.
+    /// Returns the built-in cover images for rooms. Each entry has the ID for `POST api/2.0/files/rooms/{id}/cover` and
+    /// the image as vector markup. The list is the same for all portals, rooms, accounts, and languages. The IDs do
+    /// not change, so you can store them. The images can change between product versions. Any signed-in user can
+    /// call it. A guest who has nothing shared on the portal gets 403. The call is read-only. Only the IDs of this
+    /// list are valid covers when you create or change a room.
     /// </remarks>
     /// <summary>Get room cover gallery</summary>
     /// <path>api/2.0/files/rooms/covers</path>
@@ -1140,14 +1130,12 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Removes the uploaded logo of a room and returns the room with empty logo addresses. What the room falls back
-    /// to is its cover and colour, which the logo only hid: if a cover was set before the logo, it is shown again,
-    /// and `POST api/2.0/files/rooms/{id}/cover` is what changes it. Nothing else about the room is touched, so
-    /// membership, tags, links and settings are preserved. A room that has no logo is accepted and answered with 200,
-    /// and repeating the call is therefore harmless. The caller must be a manager of the room; a member invited even
-    /// with editing rights is refused, and so is a room in the Archive section. A room that does not exist or was
-    /// deleted is answered as missing. After the logo is removed a new one can be set again through
-    /// `POST api/2.0/files/logos` followed by `POST api/2.0/files/rooms/{id}/logo`.
+    /// Deletes the logo of a room and returns the room with empty logo URLs. The room then shows its cover and color
+    /// again. To change the cover, use `POST api/2.0/files/rooms/{id}/cover`. The call changes nothing else in the
+    /// room. Requires the room manager role in the room. Other callers get 403. An editor of the room also gets 403.
+    /// An archived room also returns 403. The call changes data, and you can repeat it. A room without a logo
+    /// returns 200. If the room does not exist or was deleted, the call returns 404. To set a new logo, use
+    /// `POST api/2.0/files/logos`, then `POST api/2.0/files/rooms/{id}/logo`.
     /// </remarks>
     /// <summary>Remove a room logo</summary>
     /// <path>api/2.0/files/rooms/{id}/logo</path>
@@ -1170,16 +1158,13 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Pins a room to the top of the room list of the calling account and returns the room with the pinned flag set.
-    /// Pinning is personal: it changes the order only for the caller, is invisible to the other members of the room,
-    /// and does not survive a trip through the Archive section, so an unarchived room has to be pinned again. Pinned
-    /// rooms stay above the unpinned ones whatever sorting or filter the listing uses, and their own order between
-    /// each other is stable. An account may keep only a limited number of pinned rooms at a time, ten on a portal
-    /// with the default configuration, and AI agents and AI rooms are counted separately; a request
-    /// over the limit is refused until something is unpinned with `PUT api/2.0/files/rooms/{id}/unpin`. Pinning a
-    /// room that is already pinned changes nothing and is safe to repeat. Anybody who can read the room may pin it,
-    /// including guests and portal administrators who were never invited, while somebody who is not in the room is
-    /// refused, an archived room is rejected and an unknown room is answered as missing.
+    /// Pins a room to the top of the room list of the caller, and returns the room. Other members do not see the pin.
+    /// Pinned rooms stay above other rooms with any sort or filter. Their order among themselves stays the same.
+    /// Archiving removes the pin, so pin an unarchived room again. Requires read access to the room. Other callers
+    /// get 403. A guest and a DocSpace admin without an invitation can also pin it. The call changes data, and you can
+    /// repeat it. By default, an account can pin up to 10 rooms. AI agents and AI rooms have their own limits. Over
+    /// the limit, the call returns 403. To free a place, use `PUT api/2.0/files/rooms/{id}/unpin`. An archived room
+    /// or a folder that is not a room also returns 403. If the room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Pin a room</summary>
     /// <path>api/2.0/files/rooms/{id}/pin</path>
@@ -1198,14 +1183,13 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Removes a room from the pinned group of the calling account and returns the room with the pinned flag cleared.
-    /// Only the personal ordering of the caller changes: the room itself, its members, their roles and its contents
-    /// are left exactly as they were, and the room stays in the list, simply among the unpinned ones. Unpinning frees
-    /// one of the pin slots of the account, which AI rooms count separately, so it is the way out of a refused
-    /// `PUT api/2.0/files/rooms/{id}/pin`. Unpinning a room that was never pinned is accepted and changes nothing, so
-    /// the call can be repeated safely and its answer does not prove that anything was pinned before. Anybody who can
-    /// read the room may unpin it, while somebody who is not in the room at all is refused and an unknown or deleted
-    /// room is answered as missing. An archived room cannot be unpinned.
+    /// Unpins a room for the caller and returns the room. The call changes only the order of the room list of the
+    /// caller. The room, its members, and its contents stay the same. Unpinning frees a pin place of the account. AI
+    /// rooms have their own places. So use this call when `PUT api/2.0/files/rooms/{id}/pin` returns 403 for the
+    /// limit. Requires read access to the room. Other callers get 403. The call changes data, and you can repeat it.
+    /// A room that is not pinned returns 200 and changes nothing. So the answer does not show that the room was
+    /// pinned. An archived room or a folder that is not a room returns 403. If the room does not exist or was
+    /// deleted, the call returns 404.
     /// </remarks>
     /// <summary>Unpin a room</summary>
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
@@ -1224,15 +1208,14 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Sends the room invitation email again to members who were invited but have not joined yet. `resendAll` covers
-    /// every pending invitation of the room and makes `usersIds` irrelevant, while an explicit list without that flag
-    /// is limited to the named accounts. An account that has already accepted the invitation, is not a member of the
-    /// room, or is invisible to the caller is skipped without an error, and a request that names nobody and does not
-    /// set the flag does nothing, so a successful answer never proves that a message went out. Nothing about the room
-    /// or its membership changes, and the operation can be repeated. The caller must be a manager of the room, an
-    /// archived room is refused, a room template is answered as missing, and a malformed account id is rejected as an
-    /// invalid request. The call is rate limited, so a client that loops over members should send one batch instead.
-    /// The response carries no body.
+    /// Sends the room invitation email again to invited members. If `resendAll` is true, the call sends it to every
+    /// pending invitation of the room and ignores `usersIds`. Otherwise, it sends it only to the accounts in
+    /// `usersIds`. The call skips accounts that are not room members or that the caller cannot see. If `resendAll`
+    /// is false and `usersIds` is empty, the call does nothing. So a 200 does not prove that an email was sent.
+    /// Requires the room manager role in the room. Other callers get 403. An archived room also returns 403. The
+    /// call changes no data. Do not repeat it. Each call sends the emails again. The call has a rate limit, so send one
+    /// list instead of a call per member. The response has no body. A body that cannot be read returns 400. If the
+    /// room does not exist or is a room template, the call returns 404.
     /// </remarks>
     /// <summary>Resend the room invitations</summary>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
@@ -1250,15 +1233,12 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Renumbers the manual order of the items lying directly in a room so that they run from one upwards with no
-    /// gaps and no duplicates, and returns the room. The order of the items relative to each other is preserved: only
-    /// the numbers are compacted, and nothing is moved, renamed, duplicated or deleted. Files and folders share one
-    /// sequence. Nested folders keep their own numbering and are not touched, so each level is compacted on its own.
-    /// The operation is meant for a room with indexing turned on, where the manual order is what listings follow; a
-    /// room without indexing accepts it and simply has nothing that depends on the result. Running it twice changes
-    /// nothing the second time, and an already dense sequence is left as it is, which makes the call safe to retry.
-    /// The caller must be a manager of the room; a member invited with any other level is refused, an archived room
-    /// is rejected, and an unknown or deleted room is answered as missing.
+    /// Renumbers the items directly in a room from 1, without gaps or repeats, and returns the room. The items keep
+    /// their order. The call moves, renames, copies, or deletes nothing. Files and folders share one sequence. The
+    /// call does not change the numbers inside subfolders. The call is meant for rooms with `indexing` turned on,
+    /// where lists follow this order. A room without indexing also accepts it. Requires the room manager role in the
+    /// room. Other callers get 403. An archived room also returns 403. The call changes data, and you can repeat it.
+    /// A second call changes nothing. If the room does not exist or was deleted, the call returns 404.
     /// </remarks>
     /// <summary>Reorder room contents</summary>
     /// <path>api/2.0/files/rooms/{id}/reorder</path>
@@ -1278,15 +1258,14 @@ public abstract class VirtualRoomsController<T>(
     }
 
     /// <remarks>
-    /// Returns what is new for the calling account in one room, grouped by the day the entry was last changed, with
-    /// the newest day first and the entries inside a day ordered from the most recent. Only files are reported: a
-    /// folder somebody else created is not an entry of its own, while a file created inside it is, however deep it
-    /// lies. What the caller changed is never new for the caller, and a file that was deleted afterwards disappears
-    /// from the answer. Reading this list leaves the badges alone, which is what makes it the operation to call
-    /// before `GET api/2.0/files/rooms/{id}`, since opening the room clears them. An empty array therefore means that
-    /// there is nothing new, not that the badges were already read. The caller needs access to the room; somebody who
-    /// is not a member is refused, and an unknown or deleted room is answered as missing. Use
-    /// `GET api/2.0/files/rooms/news` for the same report across every room at once.
+    /// Returns the files of a room that are new for the caller, grouped by the day of the last change. The newest
+    /// day comes first, and in each day the newest file comes first. The list has only files, including files in
+    /// subfolders at any depth. A new folder is not an entry. Changes of the caller are never new for the caller. A
+    /// deleted file leaves the list. Requires read access to the room. Other callers get 403. The call is read-only
+    /// and keeps the new-item marks. Opening the room with `GET api/2.0/files/rooms/{id}` clears them, so call this
+    /// one first. An empty array means that nothing is new. A folder in Trash returns 403. If the room does not
+    /// exist or was deleted, the call returns 404. To read the new items of all rooms, use
+    /// `GET api/2.0/files/rooms/news`.
     /// </remarks>
     /// <summary>Get new items in a room</summary>
     /// <path>api/2.0/files/rooms/{id}/news</path>
@@ -1343,16 +1322,15 @@ public class VirtualRoomsCommonController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Lists the rooms of one section of the portal: the active rooms by default, or the archive, the form-filling
-    /// section or the room templates, chosen with `searchArea`. The rooms arrive in `folders` while `files` stays
-    /// empty, `current` describes the section itself, and `total` counts every room that matched the filters before
-    /// paging. A caller sees only the rooms they created or were invited to, while a portal administrator sees all of
-    /// them, so an empty answer means nothing is visible to this account rather than nothing exists. The remaining
-    /// parameters narrow the same set, by room type, title, tags, member, owner, storage, quota and privacy, and they
-    /// combine with each other. Sorting is not free of side effects: a `sortBy` value is also stored as this
-    /// account's default order for later listings, and omitting it reuses the stored order. Page the result with
-    /// `count` and `startIndex`. Read a single room with `GET api/2.0/files/rooms/{id}`, and create one with
-    /// `POST api/2.0/files/rooms`.
+    /// Returns one page of the rooms of a portal section. The `searchArea` parameter picks the section, by default the
+    /// active rooms. The other parameters filter the rooms by type, title, tags, member, owner, storage, quota, privacy,
+    /// and metadata. A room must match all filters. Any signed-in user can call it. If the caller cannot read the
+    /// section, the call returns 403. A caller sees only the rooms they created or were invited to. A DocSpace admin
+    /// sees all rooms. So an empty list means that the caller sees no matching room. The call is read-only, except
+    /// that it stores a `sortBy` value as the default sort order of the account. Without `sortBy`, the call uses the
+    /// stored order. The rooms come in `folders`, and `files` stays empty. The `current` field describes the section,
+    /// and `total` counts all matching rooms before paging. To read one room, use `GET api/2.0/files/rooms/{id}`. The
+    /// call returns 400 if `tags` is not a JSON array, `sortBy` is unknown, or the metadata filter is invalid.
     /// </remarks>
     /// <summary>Get rooms</summary>
     /// <path>api/2.0/files/rooms</path>
@@ -1392,19 +1370,20 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Lists one page of the rooms of a section narrowed by metadata: the active rooms by default, or the archive, the room
-    /// templates, the form templates or the Forms section, chosen with `searchArea`, while `type` narrows the room types.
-    /// The filter is a typed body: `metadataTemplateId` alone keeps the rooms the template is assigned to, every condition
-    /// in `metadataFilters` must hold at once, and `filterValue` adds a text search over room titles and metadata values;
-    /// the template and field IDs come from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the
-    /// section unfiltered. A caller sees only the rooms they created or were invited to, a DocSpace admin sees all of
-    /// them, so an empty page means nothing visible matched. The call changes nothing but the sort order: a `sortBy` value
-    /// is stored as the account's default order for later listings, and omitting it reuses the stored one. The rooms come
-    /// in `folders` while `files` stays empty, and `total` counts every match before `count` and `startIndex` page through
-    /// them. An unknown template or field, a field outside the named template, more than 20 conditions, an unrecognised
-    /// `sortBy` or a `count` out of range is refused with 400, a section the caller cannot read with 403. For the tag,
-    /// member, owner, storage, quota and privacy filters use `GET api/2.0/files/rooms`, which takes the same metadata
-    /// filter as a JSON string.
+    /// Returns one page of the rooms of a portal section that match a metadata filter. The `searchArea` field picks the
+    /// section, by default the active rooms, and `type` limits the room types. With only `metadataTemplateId`, the call
+    /// keeps the rooms that have this template. A room must match every condition of `metadataFilters`. The call
+    /// searches the `filterValue` text in room titles and metadata values. All given filters combine, and a body
+    /// without them lists the whole section. Take the template and field IDs from
+    /// `GET api/2.0/files/metadata/templates`. Any signed-in user can call it. If the caller cannot read the section,
+    /// the call returns 403. A caller sees only the rooms they created or were invited to. A DocSpace admin sees all
+    /// rooms. So an empty list means that the caller sees no matching room. The call is read-only, except that it
+    /// stores a `sortBy` value as the default sort order of the account. Without `sortBy`, the call uses the stored
+    /// order. You can repeat it with the same body. The rooms come in `folders`, and `files` stays empty. The `total`
+    /// field counts all matching rooms before
+    /// paging. To filter by tags, member, owner, storage, quota, or privacy, use `GET api/2.0/files/rooms`. The call
+    /// returns 400 for an unknown template or field, a field outside the template, or more than 20 conditions. It also
+    /// returns 400 for an unknown `sortBy`.
     /// </remarks>
     /// <summary>Search the rooms by metadata</summary>
     /// <path>api/2.0/files/rooms/search</path>
@@ -1510,15 +1489,13 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Adds a custom tag to the portal-wide catalog of room tags and answers with the stored name. Tags are shared by
-    /// the whole portal instead of belonging to the caller: once the tag exists, every room manager can attach it to
-    /// their own rooms with `PUT api/2.0/files/rooms/{id}/tags`, and that call also creates a tag it does not find.
-    /// Creating a name that is already in the catalog returns the existing tag unchanged rather than a duplicate or
-    /// an error, so repeating the call after a timeout is safe. A blank name, or one longer than the published limit,
-    /// is rejected as an invalid request. Only a room manager or a portal administrator may create a tag, and a user
-    /// or a guest is refused. The answer is the name as stored, and that name is the value to send in the `tags`
-    /// filter of `GET api/2.0/files/rooms` and in the room tag calls. The catalog itself is read with
-    /// `GET api/2.0/files/tags`.
+    /// Creates a custom room tag in the portal catalog and returns its name. The tag belongs to the portal, not to the
+    /// caller. Requires a DocSpace admin or a room admin. Other callers get 403. The call changes data. If a tag with
+    /// this name exists, the call returns that tag and creates nothing. So you can repeat it with the same body. Use
+    /// the returned name in the `tags` filter of `GET api/2.0/files/rooms` and in the room tag calls. To attach the
+    /// tag to a room, use `PUT api/2.0/files/rooms/{id}/tags`. That call also creates a missing tag. To read the
+    /// catalog, use `GET api/2.0/files/tags`. The call returns 400 if the name is missing, empty, has only spaces, or
+    /// is too long.
     /// </remarks>
     /// <summary>Create a room tag</summary>
     /// <path>api/2.0/files/tags</path>
@@ -1534,15 +1511,12 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Renames a custom room tag in the portal catalog. The rename follows the tag everywhere it is used: every room
-    /// that carries it keeps it and shows the new name, so nothing has to be re-attached afterwards. Only a portal
-    /// administrator may rename a tag, and a room manager who is allowed to create tags is still refused here. The
-    /// old name is matched exactly as it is stored rather than searched for, and a name that is not in the catalog is
-    /// answered as missing. A new name that another tag already occupies is rejected as an invalid request, because
-    /// tag names are unique across the portal; both names must be non-blank and within the published length limit.
-    /// The answer is the new name. Stored queries are not updated for the caller: a `tags` filter of
-    /// `GET api/2.0/files/rooms` that still names the old value stops matching anything. The catalog is read with
-    /// `GET api/2.0/files/tags`.
+    /// Renames a custom room tag of the portal. Every room with this tag then shows the new name. Use the old name
+    /// exactly as `GET api/2.0/files/tags` returns it. Requires a DocSpace admin. Other callers get 403. A room admin
+    /// can create tags but also gets 403 here. The call changes data, and a repeated call returns 404. It returns the
+    /// new name. After the rename, a `tags` filter of `GET api/2.0/files/rooms` with the old name finds no rooms. If
+    /// no tag has the old name, the call returns 404. The call returns 400 if a name is empty, has only spaces, or is
+    /// too long. It also returns 400 if any tag already has the new name, even this tag. So you cannot merge two tags.
     /// </remarks>
     /// <summary>Rename a room tag</summary>
     /// <path>api/2.0/files/tags</path>
@@ -1559,15 +1533,13 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Returns the custom room tags available to the caller as a flat array of names, not of objects. What the array
-    /// holds depends on the account: a portal administrator gets the whole catalog, including tags that no room uses
-    /// yet, while every other account gets only the tags attached to rooms it can see, with duplicates removed. An
-    /// empty answer therefore means that this caller sees no tagged room, not that the portal has no tags.
-    /// `filterValue` keeps the names that contain the given text, ignoring case, while `count` and `startIndex` page
-    /// the result; no total is returned, so a page shorter than `count` is the signal that the list is exhausted. The
-    /// names are exactly the values accepted by the `tags` filter of `GET api/2.0/files/rooms` and by the room tag
-    /// calls, which makes this the call to fill a tag picker with. Add a tag with `POST api/2.0/files/tags` and check
-    /// whether one is still in use with `GET api/2.0/files/tags/{tagName}/haslinks`.
+    /// Returns the names of the custom room tags that the caller can see, as an array of strings. Any signed-in user
+    /// can call it. A DocSpace admin gets the whole catalog, including tags that no room has. Any other caller gets
+    /// only the tags of the active rooms that it can see, without repeats. So an empty list
+    /// means that the caller sees no tagged room. The call is read-only. The list has no total, so a page shorter than
+    /// `count` is the last one. Use these names in the `tags` filter of `GET api/2.0/files/rooms` and in the room tag
+    /// calls. To create a tag, use `POST api/2.0/files/tags`. To check whether a tag is in use, use
+    /// `GET api/2.0/files/tags/{tagName}/haslinks`. The call returns 400 if `count` or `startIndex` is out of range.
     /// </remarks>
     /// <summary>Get available room tags</summary>
     /// <path>api/2.0/files/tags</path>
@@ -1582,14 +1554,13 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Reports whether any room still carries the named tag, which is the check to run before the tag is deleted from
-    /// the catalog. Only a portal administrator may call it, and every other account is refused. The name is matched
-    /// exactly against the catalog, and a name that is not in it is answered with 404. That also tells the two ways a
-    /// tag stops being used apart: taking the tag off the last room that carried it leaves the tag in the catalog and
-    /// turns the answer to false, while deleting that last room removes the tag itself, after which the call answers
-    /// 404. A true answer means at least one room, active or archived, still references the tag, so deleting it with
-    /// `DELETE api/2.0/files/tags` would strip it from those rooms. The handler reads the tag name from the query
-    /// string, so the value has to be sent twice: in the path segment and as the `tagName` query parameter.
+    /// Returns whether any room still has the named tag. Run it before you delete the tag from the catalog. Requires
+    /// a DocSpace admin. Other callers get 403. The call is read-only. It returns `true` if at least one active or
+    /// archived room has the tag. Then `DELETE api/2.0/files/tags` would remove the tag from those rooms. After you
+    /// remove the tag from its last room, the call returns `false`. If the last room with the tag is deleted, the
+    /// portal deletes the tag too. Then the call returns 404. Send the name in the path and also as the `tagName`
+    /// query parameter. The call reads only the query value and matches it exactly. If no tag has this name, or the
+    /// query has no `tagName`, the call returns 404.
     /// </remarks>
     /// <summary>Check room tag usage</summary>
     /// <path>api/2.0/files/tags/{tagName}/haslinks</path>
@@ -1609,15 +1580,14 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Deletes custom room tags from the portal catalog by name and detaches them from every room that carries them;
-    /// the rooms themselves and their content are untouched, and only the tag disappears from their tag lists. Only a
-    /// portal administrator may call it, and a room manager who is allowed to create tags is refused. The names are
-    /// matched exactly as they are stored: names that are not in the catalog are skipped in silence and an empty list
-    /// is accepted as a no-op, so a successful answer does not prove that anything was deleted; check a name with
-    /// `GET api/2.0/files/tags/{tagName}/haslinks` first when that matters. The call cannot be undone: creating the
-    /// name again with `POST api/2.0/files/tags` brings back the tag but not its links, which have to be attached to
-    /// each room once more. The answer carries no body. To take a tag off one room and leave it in the catalog for
-    /// the others, use `DELETE api/2.0/files/rooms/{id}/tags` instead.
+    /// Deletes custom room tags from the portal catalog and removes them from every room. The rooms and their content
+    /// stay. Requires a DocSpace admin. Other callers get 403. A room admin can create tags but also gets 403 here.
+    /// The call cannot be undone. Creating the name again with `POST api/2.0/files/tags` restores the tag but not its
+    /// rooms. The call matches names exactly and skips names that are not in the catalog. An empty list changes
+    /// nothing. So a success does not prove that a tag was deleted, and you can repeat the call. To check a tag first,
+    /// use `GET api/2.0/files/tags/{tagName}/haslinks`. The response has no body. To remove a tag from one room only,
+    /// use `DELETE api/2.0/files/rooms/{id}/tags`. The call returns 400 if `names` is missing, or a name is empty, has
+    /// only spaces, or is too long.
     /// </remarks>
     /// <summary>Delete the custom room tags</summary>
     /// <path>api/2.0/files/tags</path>
@@ -1632,15 +1602,13 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Stores an image in temporary storage and answers with the path to it, which is the first half of setting a
-    /// room logo. No room changes here: pass the returned path as `tmpFile` to `POST api/2.0/files/rooms/{id}/logo`,
-    /// together with the crop rectangle, to make the image the logo of a room. The image travels as multipart form
-    /// data, and the first file part of the request is the one that is used while any other part is ignored. It is
-    /// re-encoded to PNG and scaled down to fit 1280 by 1280 pixels, so a larger picture is accepted and shrunk,
-    /// while a part that is not a readable image, or one over the portal limit for uploaded images, is refused with
-    /// 400. Only a room manager or a portal administrator may upload, and everyone else gets 403. Every call produces
-    /// a new path, and an image that is never used stays in temporary storage until it is cleaned up, so uploading
-    /// twice is harmless.
+    /// Saves an image in temporary storage and returns its path. This is the first step of setting a room logo, and
+    /// no room changes. Then pass the path as `tmpFile` to `POST api/2.0/files/rooms/{id}/logo` with the crop area.
+    /// Requires a DocSpace admin or a room admin. Other callers get 403. The call changes data in temporary storage
+    /// only, and each call creates a new path. So you can repeat it. Send the image as multipart form data. The call
+    /// uses the first file and ignores other parts. It converts the image to PNG and scales it down to fit 1280 by 1280
+    /// pixels. The call returns 400 if the request is not a multipart form or has no file. It also returns 400 if the
+    /// image is empty, over the size limit, or not a readable PNG or JPEG.
     /// </remarks>
     /// <summary>Upload a room logo image</summary>
     /// <path>api/2.0/files/logos</path>
@@ -1686,16 +1654,16 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Queues a background job that builds the index of a virtual data room as a spreadsheet, and answers with the
-    /// job record to poll. The room has to be a virtual data room with indexing switched on, and the caller has to be
-    /// its manager or a portal administrator; any other kind of room, a room template, and a member invited with a
-    /// lower access level are refused, while an unknown room is answered as missing. There is one job per account:
-    /// starting an export while an earlier one is still running answers with that earlier record instead of queuing a
-    /// second job, and a finished record is replaced by the new one. Poll `GET api/2.0/files/rooms/indexexport` until
-    /// `isCompleted` is true, then read `status` to tell a completed job from a failed or cancelled one, and take
-    /// `resultFileId` and `resultFileUrl` from the same record. The report is saved as a spreadsheet in the My
-    /// documents section of the caller, not in the room. Cancel a running job with
-    /// `DELETE api/2.0/files/rooms/indexexport`.
+    /// Starts a background job that exports the index of a room to a spreadsheet, and returns the job. The room must
+    /// have indexing turned on. Requires a DocSpace admin or the room role room manager in this room. Other callers
+    /// get 403. It also returns 403 if the folder is not a room, the room is archived, or indexing is turned off. The
+    /// call queues work. Each account has one export job. If an earlier job still runs, the call returns that job and
+    /// starts nothing. So a repeated call during the export changes nothing. The new job replaces a finished one.
+    /// Repeat `GET api/2.0/files/rooms/indexexport` until `isCompleted` is true. Then read `status` to tell success
+    /// from failure or cancellation. The portal saves the spreadsheet in the My documents section of the caller, not
+    /// in the room. The `resultFileId` and `resultFileUrl` fields of the job point to it. To cancel the job, use
+    /// `DELETE api/2.0/files/rooms/indexexport`. If the room does not exist or is a room template, the call
+    /// returns 404.
     /// </remarks>
     /// <summary>Start the room index export</summary>
     /// <path>api/2.0/files/rooms/{id}/indexexport</path>
@@ -1758,16 +1726,14 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Returns the state of the index export of the calling account, the job started by
-    /// `POST api/2.0/files/rooms/{id}/indexexport`. The record is not addressed by room: there is at most one per
-    /// account, and the answer describes the latest export whichever room it was started for. When the account has
-    /// never started one, or its record was cancelled, the body is null rather than an error, so null is the normal
-    /// way of saying that there is nothing to report. While the job runs, `percentage` moves in coarse steps instead
-    /// of smoothly, which makes it a rough hint rather than a measure of the remaining time; `isCompleted` is the
-    /// field to wait on, and it is also set for a job that failed or was cancelled, so read `status` to tell the
-    /// outcomes apart and `error` for the message. After a successful build, `resultFileId`, `resultFileName` and
-    /// `resultFileUrl` point to the spreadsheet saved in the My documents section of the caller. The record survives
-    /// completion and is replaced only by the next export.
+    /// Returns the room index export job of the caller, started with `POST api/2.0/files/rooms/{id}/indexexport`.
+    /// Each account has at most one job, whatever room it exports. Any signed-in user can call it. The call is
+    /// read-only. This is the call to poll. Repeat it until `isCompleted` is true. The `isCompleted` field is also true
+    /// for a failed or cancelled job. So read `status` for the result and `error` for the message. The `percentage`
+    /// field changes in large steps and does not show the remaining time. After a successful export, `resultFileId`,
+    /// `resultFileName`, and `resultFileUrl` point to the spreadsheet in the My documents section of the caller. If the
+    /// account has no job or cancelled it, the response body is null. The job stays after completion until the next
+    /// export replaces it.
     /// </remarks>
     /// <summary>Get the room index export</summary>
     /// <path>api/2.0/files/rooms/indexexport</path>
@@ -1785,15 +1751,12 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Cancels the room index export of the calling account and drops its job record. No room is named because there
-    /// is at most one export per account, so the call always acts on the caller's own job and never on somebody
-    /// else's: an account with nothing running gets a successful answer that changes nothing, which makes the call
-    /// safe to repeat and makes it useless as a way of stopping an export somebody else started. Afterwards
-    /// `GET api/2.0/files/rooms/indexexport` answers with an empty body until a new export is started with
-    /// `POST api/2.0/files/rooms/{id}/indexexport`. The cancellation is asynchronous: the background job stops at its
-    /// next checkpoint, so one that is already saving the file may still finish, and a report that was written before
-    /// the cancellation stays in the My documents section of the caller and has to be deleted as an ordinary file.
-    /// The answer carries no body and says nothing about whether an export was running.
+    /// Cancels the room index export job of the caller and deletes the job. Any signed-in user can call it. The call
+    /// acts only on the caller's own job, so you cannot stop the job of another account. The call changes data. If the
+    /// caller has no job, the call changes nothing, so you can repeat it. The cancellation is asynchronous. A job that
+    /// is already saving the file may still finish. A spreadsheet saved before the cancellation stays in the My
+    /// documents section of the caller. After this call, `GET api/2.0/files/rooms/indexexport` returns an empty body
+    /// until a new export starts. The response has no body and does not say whether a job was running.
     /// </remarks>
     /// <summary>Terminate the room index export</summary>
     /// <path>api/2.0/files/rooms/indexexport</path>
@@ -1811,14 +1774,13 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Collects everything that is marked as new for the caller across the active rooms into one answer, grouped
-    /// first by the day an entry changed and then by the room it belongs to. An entry becomes new when somebody else
-    /// creates or changes it in a room the caller has already opened, so the caller's own work never shows up here,
-    /// and neither does anything from a room they have never visited. Only files are listed: a new subfolder is not
-    /// an item, although files created inside it are, at any depth. The days come newest first, and inside a day the
-    /// rooms and their files follow the same order by change time. The archive is out of scope, only rooms of the
-    /// active section are covered. Reading the list clears nothing: the marks stay until the room itself is opened
-    /// with `GET api/2.0/files/rooms/{id}`. An empty array means that this account has nothing new. For one room, use
+    /// Returns the items marked as new for the caller in all active rooms. The list is grouped by the day of the
+    /// change, then by room. Any signed-in user can call it. An item is new when another user creates or changes it in
+    /// a room that the caller has opened. So the list never has the caller's own changes or items of rooms the caller
+    /// never opened. The list has only files, including files in subfolders at any depth. A new subfolder is not an
+    /// item. Days come newest first. Inside a day, rooms and files follow the same order by change time. The call is
+    /// read-only and does not clear the marks. Opening the room with `GET api/2.0/files/rooms/{id}` clears them. An
+    /// empty array means that the caller has nothing new. To get the new items of one room, use
     /// `GET api/2.0/files/rooms/{id}/news`.
     /// </remarks>
     /// <summary>Get new items in all rooms</summary>

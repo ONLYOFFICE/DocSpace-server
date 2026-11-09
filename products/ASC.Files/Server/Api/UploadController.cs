@@ -86,18 +86,21 @@ public abstract class UploadController<T>(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Deprecated in favour of `POST api/2.0/files/{folderId}/session`, which opens the same session and returns it
-    /// without the success envelope used here; new callers should go there. Reserves a chunked upload of a file in
-    /// the folder named by the path: the title comes from `fileName`, the declared payload size from `fileSize`, and
-    /// the answer carries the session id every later call quotes, the address of the standalone chunk handler, the
-    /// moment an idle session is dropped and the reserved byte count. No content is stored yet. Send the payload as
-    /// multipart parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`, keeping each part within
-    /// `chunkUploadSize` from `GET api/2.0/files/settings`, then close the session with
-    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The caller needs the right to add content to the
-    /// target folder, which room managers and content creators have and readers, editors and guests do not: they get
-    /// 403, as does a section root such as Rooms or Archive, while an unknown folder is answered as missing. A
-    /// payload above the portal limit for chunked uploads is refused before the session exists, and a negative
-    /// `fileSize` is rejected as an invalid request.
+    /// Opens a chunked upload session for a file in the folder and returns it in a success envelope. This call is
+    /// deprecated. Use `POST api/2.0/files/{folderId}/session`, which returns the same session without the envelope.
+    /// No content is stored yet. Send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Each
+    /// part is at most `chunkUploadSize` from `GET api/2.0/files/settings`. Then store the file with
+    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the
+    /// folder. Other callers get 403. Room managers and content creators have this right, but readers, editors, and
+    /// guests do not. A section root, such as Rooms or Archive, also returns 403. The call changes data. A repeated
+    /// call opens another session. It creates the folders of `relativePath` that do not exist yet. If the folder has a
+    /// file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With false, the upload adds a
+    /// new version to that file if the caller can edit it. A session expires 12 hours after it opens or gets its last
+    /// part. If the folder does not exist, the call returns 404. The call returns 400 for a negative `fileSize`. In a
+    /// private room, it also returns 400 if the name is not a lowercase UUID with an optional extension. The call
+    /// returns 402 if `fileSize` is over the limit for chunked uploads or for a knowledge folder. It returns 403 if
+    /// a private room gets a file without `encrypted`, or a knowledge folder gets an unsupported format.
+    /// If the installation does not allow uploads with this extension, the call returns 415.
     /// </remarks>
     /// <summary>Chunked upload</summary>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
@@ -122,18 +125,22 @@ public abstract class UploadController<T>(
     }
 
     /// <remarks>
-    /// Opens a chunked upload session for a file in the folder named by the path and returns the session itself,
-    /// which is the difference from the deprecated `POST api/2.0/files/{folderId}/upload/create_session` and its
-    /// success envelope. The answer gives `id`, quoted by every later call, `location` for the standalone chunk
-    /// handler used by clients that bypass this API, `expired`, and `bytes_total` echoing the reserved size. Whether
-    /// parts are really needed follows from `fileSize`: below `chunkUploadSize` from `GET api/2.0/files/settings` the
-    /// whole payload goes in one `POST api/2.0/files/{folderId}/session/{sessionId}`, which stores the file and
-    /// answers 201, and above it the parts go one by one to
-    /// `POST api/2.0/files/{folderId}/session/{sessionId}/upload` and the file appears only after
-    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The caller must be allowed to add content to the
-    /// folder, so readers, editors and guests are refused, a section root is refused as well, and an unknown folder
-    /// is answered as missing, and a negative `fileSize` is rejected as an invalid request. Nothing is written until
-    /// the parts arrive, and an abandoned session disappears twelve hours later.
+    /// Opens a chunked upload session for a file in the folder and returns the session. No content is stored yet.
+    /// The size in `fileSize` decides the next step. If it is below `chunkUploadSize` from
+    /// `GET api/2.0/files/settings`, send the whole file in one `POST api/2.0/files/{folderId}/session/{sessionId}`.
+    /// That call stores the file and returns 201. For a larger file, send the parts to
+    /// `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Then store the file with
+    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the
+    /// folder. Other callers get 403. Room managers and content creators have this right, but readers, editors, and
+    /// guests do not. A section root, such as Rooms or Archive, also returns 403. The call changes data. A repeated
+    /// call opens another session. It creates the folders of `relativePath` that do not exist yet. If the folder has a
+    /// file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With false, the upload adds a
+    /// new version to that file if the caller can edit it. A session expires 12 hours after it opens or gets its last
+    /// part. If the folder does not exist, the call returns 404. The call returns 400 for a negative `fileSize`. In a
+    /// private room, it also returns 400 if the name is not a lowercase UUID with an optional extension. The call
+    /// returns 402 if `fileSize` is over the limit for chunked uploads or for a knowledge folder. It returns 403 if
+    /// a private room gets a file without `encrypted`, or a knowledge folder gets an unsupported format.
+    /// If the installation does not allow uploads with this extension, the call returns 415.
     /// </remarks>
     /// <summary>Create an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session</path>
@@ -151,14 +158,11 @@ public abstract class UploadController<T>(
     }
 
     /// <remarks>
-    /// Cancels a chunked upload opened with `POST api/2.0/files/{folderId}/session` and discards the parts already
-    /// received, so nothing of it reaches the folder. Only the account that opened the session may cancel it, and the
-    /// folder in the path has to be the one it was opened against. The call is destructive and is not safe to repeat, because the record is gone
-    /// afterwards: a second attempt, a session already closed by
-    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize` and a session that expired after twelve hours of
-    /// silence all fail rather than answer as missing. Finalizing removes the session too, so there is nothing left
-    /// to abort once the file exists. The answer carries no body. An upload that is simply abandoned needs no call at
-    /// all, since the session and its buffered parts are dropped when it expires.
+    /// Deletes a chunked upload session and the parts it has received. The file does not appear in the folder. Only
+    /// the account that opened the session can delete it. Other callers get 403. The call cannot be undone, and a
+    /// repeated call returns 404. The call returns 404 if the session does not exist, is finalized, has expired, or
+    /// was opened for another folder. The response has no body. A session expires 12 hours after it opens or gets its
+    /// last part. So an abandoned upload needs no call.
     /// </remarks>
     /// <summary>Abort an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
@@ -185,15 +189,17 @@ public abstract class UploadController<T>(
     //
 
     /// <remarks>
-    /// Sends the next part of a file into the session opened for it, as the multipart `File` field, and lets the
-    /// server keep count: parts are appended in the order they arrive, so two of these calls must never run in
-    /// parallel on one session. While bytes are still missing the answer describes the session and `uploaded` is
-    /// false; when the last part completes the declared size the file is written, its upload links are cleared, it is
-    /// marked as new for the room, and the answer comes back with 201, `uploaded` true and the whole file in `file`.
-    /// A session created for a payload smaller than `chunkUploadSize` from `GET api/2.0/files/settings` finishes on
-    /// the first such call and needs no separate finalize step. A part larger than that limit is refused. The first
-    /// part of a PDF is inspected, and a PDF that is not a fillable form is refused when the session targets a
-    /// form-filling room. The session is addressed by its id, and the folder in the path is not matched against it.
+    /// Uploads the next part of a file to a chunked upload session. Send the part as the multipart `File` field. The
+    /// call adds parts in the order they arrive. Do not send two parts to one session at the same time. Any signed-in
+    /// user with the session ID can call it. The call finds the session by its ID and ignores the folder in the path.
+    /// The call changes data. Do not repeat a part, because the session adds it again. While bytes are missing, the
+    /// response has `uploaded` false. When the parts reach the size of the session, the call stores the file. It then
+    /// returns 201, `uploaded` true, and the file in `file`. A session below `chunkUploadSize` from
+    /// `GET api/2.0/files/settings` stores the file on the first call. It needs no
+    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The call returns 400 if the request has no `File`
+    /// part. It returns 402 if the part is over `chunkUploadSize`, or the file is over a quota or size limit. If the
+    /// session does not exist, is finalized, or has expired, the call returns 404. If the file is not a PDF and the
+    /// room is a form-filling room, the call returns 500.
     /// </remarks>
     /// <summary>Upload the next chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
@@ -278,16 +284,18 @@ public abstract class UploadController<T>(
     }
 
     /// <remarks>
-    /// Stores one part of a file under the number given in `chunkNumber`, which is what the ordinary chunked flow
-    /// uses: parts are kept by their number rather than by arrival, so a part that failed can be resent under the
-    /// same number without restarting the session. Numbering starts at 1, so 0 and a negative number are rejected as
-    /// an invalid request, and leaving the number out makes the server count the parts itself. The answer is always the session, never the file, and this call never completes the
-    /// upload: the file appears only after `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Use
-    /// `POST api/2.0/files/{folderId}/session/{sessionId}` instead when the parts go strictly in order and the upload
-    /// should complete by itself. A part bigger than `chunkUploadSize` from `GET api/2.0/files/settings` is refused,
-    /// so that value is also the size to split the payload by. The first part of a PDF is inspected, and a PDF that
-    /// is not a fillable form is refused when the session targets a form-filling room. The session is found by its id
-    /// alone.
+    /// Uploads one part of a file to a chunked upload session under the number in `chunkNumber`. The session keeps
+    /// parts by number. So you can resend a failed part with the same number. Without `chunkNumber`, the call numbers
+    /// parts in the order they arrive. Split the file into parts of at most `chunkUploadSize` from
+    /// `GET api/2.0/files/settings`. Any signed-in user with the session ID can call it. The call ignores the folder
+    /// in the path. It changes data. A repeated part replaces the part with that number. The call returns the
+    /// session, not the file. After the last part, store the file with
+    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. A session below `chunkUploadSize` stores the file
+    /// on this call but still needs that call. To store the file with the last part, use
+    /// `POST api/2.0/files/{folderId}/session/{sessionId}`. The call returns 400 if the request has no `File` part,
+    /// or `chunkNumber` is below 1. It returns 402 if the part is over `chunkUploadSize`, or the file is over a quota
+    /// or size limit. If the session does not exist, is finalized, or has expired, the call returns 404. If the file
+    /// is not a PDF and the room is a form-filling room, the call returns 500.
     /// </remarks>
     /// <summary>Upload a numbered chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>
@@ -312,16 +320,13 @@ public abstract class UploadController<T>(
     }
 
     /// <remarks>
-    /// Assembles the parts received so far into the file the session was opened for and closes the session. What
-    /// comes out depends on how the session started: one opened against an existing file through
-    /// `POST api/2.0/files/file/{fileId}/edit_session` replaces that content in place and keeps the version number,
-    /// while one opened against a folder either creates the file or, when a file of the same name was taken over,
-    /// stores the content as its next version. A form loses its filling state on the way in. The answer arrives with
-    /// 201 and carries the identifiers of the file together with the file itself. The call ends the session: the
-    /// record and the buffered parts are removed, so it cannot be repeated and there is nothing left to abort
-    /// afterwards. Running it before all the declared bytes have arrived assembles whatever is there, so read the
-    /// progress from the chunk calls first. An unknown, already closed or expired session id fails instead of
-    /// answering as missing.
+    /// Stores the file of a chunked upload session from its parts and closes the session. A session from
+    /// `POST api/2.0/files/file/{fileId}/edit_session` replaces the content of that file and keeps its version. A
+    /// session for a folder creates a file, or adds a new version to the file with the same name. A PDF form loses
+    /// its form-filling state. Any signed-in user with the session ID can call it. The call returns 201 with the
+    /// file. It changes data and deletes the session with its parts. A repeated call returns 404. If the parts do not
+    /// add up to the size of the session, the call returns 400. Then send the missing parts and repeat the call. It
+    /// returns 402 if the file is over a quota or size limit. A missing, finalized, or expired session returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 500.
     /// </remarks>
     /// <summary>Finalize an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/finalize</path>
@@ -386,17 +391,17 @@ public abstract class UploadController<T>(
     }
 
     /// <remarks>
-    /// Opens a chunked session that replaces the content of an existing file, which is how WebDAV clients save over a
-    /// document. The answer carries the session id the later calls quote, the address of the standalone chunk
-    /// handler, the expiry and the reserved size, and nothing is written until the parts reach
-    /// `POST api/2.0/files/{folderId}/session/{sessionId}/upload` and the session is closed with
-    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`, where `folderId` is the folder the file lives in.
-    /// Unlike an upload into a folder, the finished content does not become a new version: it overwrites the current
-    /// one, and the file loses its encrypted flag and its stored conversion result in the process. The caller must be
-    /// allowed to edit the file, as the owner, a room manager and a member invited with editing rights are; a reader
-    /// and a guest get 403. A file that does not exist is answered as missing, a payload above the portal limit for
-    /// chunked uploads is refused before the session is created. A `fileSize` of -1 means the size is not known in
-    /// advance, as for a WebDAV body sent without Content-Length; a smaller value is rejected as an invalid request.
+    /// Opens a chunked upload session that replaces the content of an existing file. WebDAV apps save over a document
+    /// this way. No content is stored yet. Send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`,
+    /// with the folder of the file as `folderId`. Then store the content with
+    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The new content replaces the current version and
+    /// adds no version. The file also loses its encrypted state and its converted copy. Requires editing access to the
+    /// file. Other callers get 403. A guest also gets 403. The call changes data. A repeated call opens another
+    /// session. A
+    /// `fileSize` of -1 means the size is unknown, as for a WebDAV body without Content-Length. If the file does not
+    /// exist, the call returns 404. The call returns 400 if `fileSize` is below -1. It returns 402 if `fileSize` is
+    /// over the portal limit for chunked uploads. It also returns 403 if the file is locked, open in the editor, in
+    /// the trash, or encrypted.
     /// </remarks>
     /// <summary>Create the editing session</summary>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
@@ -418,15 +423,14 @@ public abstract class UploadController<T>(
     }
 
     /// <remarks>
-    /// Reports which of the submitted titles already belong to a file in the folder, so an upload can decide in
-    /// advance whether to overwrite or to ask for another name. Only the clashing titles come back, unordered and
-    /// without repetitions, and an empty array means every name is free. Matching is by title and ignores case, so a
-    /// name that differs only in capitalisation is still reported; an existing file that is encrypted is left out,
-    /// because an upload cannot take it over. The call changes nothing. It needs the same right as the upload itself,
-    /// the right to add content to the folder, which room managers and content creators have and readers, editors and
-    /// guests do not; an archived room, a section root and a folder the caller cannot write to are all refused, while
-    /// an unknown folder is answered as missing. A request without `filesTitle` is rejected as an invalid request, an
-    /// empty list is accepted and answers with an empty array.
+    /// Returns the names from `filesTitle` that a file in the folder already has. Use it before an upload to choose
+    /// between a new version and another name. The match ignores case. The call skips encrypted files, since an
+    /// upload cannot replace them. Requires the right to create content in the folder. Other callers get 403. Room
+    /// managers and content creators have this right, but readers, editors, and guests do not. An archived room and a
+    /// section root also return 403. The call is read-only. The list has no repeats and no order. An empty list means
+    /// that every name is free. If the folder does not exist, the call returns 404. The call returns 400 if
+    /// `filesTitle` is missing. An empty `filesTitle` returns an empty list. In a form-filling room template, a name
+    /// without the `.pdf` extension returns 403.
     /// </remarks>
     /// <summary>Check for upload conflicts</summary>
     /// <path>api/2.0/files/{folderId}/upload/check</path>
@@ -482,20 +486,23 @@ public abstract class UploadController<T>(
     }
 
     /// <remarks>
-    /// Stores a file in the folder named by the path in a single request, taking its name from `title` rather than
-    /// from the uploaded part, which is what separates it from `POST api/2.0/files/{folderId}/upload`. The content
-    /// may arrive either as a multipart part or as the raw request body. The name is stripped of characters a title
-    /// cannot hold and truncated, and `createNewIfExist` settles the clash: false adds a new version to the file that
-    /// already carries the name, true keeps both by giving the new one a numeric suffix. The caller needs the right
-    /// to add content to the folder, so a reader, an editor and a guest get 403, a section root and an archived room
-    /// are refused as well, and an unknown folder gives 404. Formats the portal converts are converted afterwards in
-    /// the background; pass `keepConvertStatus` to keep the outcome readable through
-    /// `GET api/2.0/files/file/{fileId}/checkconversion`. The answer is the stored file. A large payload belongs in a
-    /// chunked session instead.
+    /// Uploads a file to the folder in one request and names it by `title`. The content can be a multipart part or
+    /// the raw request body. To name the file by the uploaded part, use `POST api/2.0/files/{folderId}/upload`.
+    /// Requires the right to create content in the folder. Other callers get 403. Readers, editors, and guests do not
+    /// have this right. A section root and an archived room also return 403. The call changes data. It removes
+    /// characters that a title cannot have and shortens a long name. If the folder has a file with this name,
+    /// `createNewIfExist` true stores a copy with a numeric suffix. With false, the call adds a new version to that
+    /// file if the caller can edit it. So a repeated call adds another version or another copy. A `version` above 1
+    /// in the response means that the call added a version. The portal converts some formats in the background after
+    /// the upload. To read that result with `GET api/2.0/files/file/{fileId}/checkconversion`, pass
+    /// `keepConvertStatus`. If the folder does not exist, the call returns 404. The call returns 402 if the file is
+    /// over the upload limit or a storage quota. If the installation does not allow uploads with this extension, the
+    /// call returns 415. If the file is not a PDF and the room is a form-filling room, the call returns 500. To upload
+    /// a large file, use `POST api/2.0/files/{folderId}/session`.
     /// </remarks>
     /// <summary>Insert a file</summary>
     /// <path>api/2.0/files/{folderId}/insert</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one", typeof(FileDto<int>))]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
@@ -511,19 +518,21 @@ public abstract class UploadController<T>(
 
 
     /// <remarks>
-    /// Stores a file in the folder named by the path in a single multipart request, taking its name from the uploaded
-    /// part; use `POST api/2.0/files/{folderId}/insert` when the name has to be given separately or the content is
-    /// sent as a raw body. The answer is a list that always holds exactly one file. `createNewIfExist` settles the
-    /// clash: false adds a new version to the file that already carries the name, true keeps both by giving the new
-    /// one a numeric suffix. `storeOriginalFile` reaches further than this call, because it saves the setting on the
-    /// calling account, the same one `PUT api/2.0/files/storeoriginal` writes, and it stays in force for later
-    /// uploads. The caller needs the right to add content to the folder, so a reader, an editor and a guest get 403,
-    /// a section root and an archived room are refused as well, and an unknown folder gives 404. A request without a
-    /// file is rejected as invalid, and a payload above the portal upload limit is refused.
+    /// Uploads a file to the folder in one multipart request and names it by the uploaded part. To give the name
+    /// separately or send a raw body, use `POST api/2.0/files/{folderId}/insert`. Requires the right to create
+    /// content in the folder. Other callers get 403. Readers, editors, and guests do not have this right. A section
+    /// root and an archived room also return 403. The call changes data. If the folder has a file with this name,
+    /// `createNewIfExist` true stores a copy with a numeric suffix. With false, the call adds a new version to that
+    /// file if the caller can edit it. So a repeated call adds another version or another copy. The response is a
+    /// list with exactly one file. The call saves `storeOriginalFile` as a setting of the caller, like
+    /// `PUT api/2.0/files/storeoriginal`. Later uploads use it too. The call returns 400 if the request has no file
+    /// part. If the folder does not exist, the call returns 404. It returns 402 if the file is over the upload limit
+    /// or a storage quota. If the installation does not allow uploads with this extension, the call returns 415. If
+    /// the file is not a PDF and the room is a form-filling room, the call returns 500.
     /// </remarks>
     /// <summary>Upload a file</summary>
     /// <path>api/2.0/files/{folderId}/upload</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file, as a list with one element", typeof(List<FileDto<int>>))]
     [SwaggerResponse(400, "The request has no file part")]
@@ -546,11 +555,18 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Inserts a file specified in the request to the "Common" section by single file uploading.
+    /// Stores one file in the Common section of the portal and returns it. Send the content as a
+    /// `multipart/form-data` part or as the raw request body. The call names the file by `title`, not by the name
+    /// of the part. Requires the right to create files in the Common section. Other callers get 403. The call
+    /// changes data. By default, a file with the same title gets a new version. If that file is locked or open in
+    /// the editor, the call stores a second file with the same title. With `createNewIfExist` set to true, the call
+    /// adds a numeric suffix to the new title. Do not repeat the call. Each call adds a version or a file. The
+    /// portal queues the conversion of the formats in `extsMustConvert` of `GET api/2.0/files/settings`. If the
+    /// Common section is not found, the call returns 404.
     /// </remarks>
     /// <summary>Insert a file to the "Common" section</summary>
     /// <path>api/2.0/files/@common/insert</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "for a new file and for a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Inserted file", typeof(FileDto<int>))]
@@ -563,23 +579,21 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     }
 
     /// <remarks>
-    /// Stores one file in the caller's own My documents section, the personal storage every portal member has, and
-    /// returns the stored file. The destination takes no identifier: it is resolved from the calling account and
-    /// created on first use, while a guest account has none and is answered as missing (404). Send the content as a
-    /// `multipart/form-data` part or as the raw request body, and name it with `title`, which wins over the name of
-    /// the uploaded part and has invalid characters replaced before storing. The call is not idempotent: by default a
-    /// file of the same title is overwritten as a new version, while `createNewIfExist=true` stores a separate copy
-    /// under a title made unique with a numeric suffix; a title held by a file that is locked or open in the editor
-    /// cannot be overwritten either, and a second file appears under the same title. Formats listed in
-    /// `extsMustConvert` of `GET api/2.0/files/settings` are converted after the response is sent;
-    /// `keepConvertStatus=true` keeps that result readable through `GET api/2.0/files/file/{fileId}/checkconversion`,
-    /// which otherwise drops it. Files over the single-request size limit or the account's storage quota are refused:
-    /// send those through `POST api/2.0/files/{folderId}/upload/create_session`, and use
-    /// `POST api/2.0/files/{folderId}/insert` for any other destination.
+    /// Stores one file in My documents of the caller and returns it. Send the content as a `multipart/form-data` part
+    /// or as the raw request body. The call names the file by `title`, not by the name of the part. Any signed-in
+    /// user can call it, except a guest. A guest has no My documents, so the call returns 404. If the account cannot
+    /// create files there, the call returns 403. The call changes data. By default, a file with the same title gets a
+    /// new version. If that file is locked or open in the editor, the call stores a second file with the same title.
+    /// With `createNewIfExist` set to true, the call adds a numeric suffix to the new title. Do not repeat the call.
+    /// Each call adds a version or a file. The portal queues the conversion of the formats in `extsMustConvert` of
+    /// `GET api/2.0/files/settings`. The call returns 402 if the file is over the size limit of one request or the
+    /// storage quota. Send a large file through `POST api/2.0/files/{folderId}/upload/create_session`. If the
+    /// installation does not allow the file extension, the call returns 415. To store a file in another folder, use
+    /// `POST api/2.0/files/{folderId}/insert`.
     /// </remarks>
     /// <summary>Insert a file into My documents</summary>
     /// <path>api/2.0/files/@my/insert</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "for a new file and for a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file, with the identifier, version and title it was saved under", typeof(FileDto<int>))]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
@@ -593,19 +607,18 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     }
 
     /// <remarks>
-    /// Uploads a file specified in the request to the "Common" section by single file uploading or standart multipart/form-data method.
+    /// Uploads one file to the Common section of the portal and returns it in an array with one item. Send it as a
+    /// `multipart/form-data` part. The file takes the name of the part. Requires the right to create files in the
+    /// Common section. Other callers get 403. The call changes data. By default, a file with the same title gets a
+    /// new version. If that file is locked or open in the editor, the call stores a second file with the same title.
+    /// With `createNewIfExist` set to true, the call adds a numeric suffix to the new title. Do not repeat the call.
+    /// Each call adds a version or a file. The `storeOriginalFile` flag also changes an account setting for later
+    /// uploads, like `PUT api/2.0/files/storeoriginal`. The portal queues the conversion of the formats in
+    /// `extsMustConvert` of `GET api/2.0/files/settings`. If the Common section is not found, the call returns 404.
     /// </remarks>
     /// <summary>Upload a file to the "Common" section</summary>
-    /// <remarks>
-    /// <![CDATA[
-    ///  You can upload files in two different ways:
-    ///  <ol>
-    /// <li>Using single file upload. You should set the Content-Type and Content-Disposition headers to specify a file name and content type, and send the file to the request body.</li>
-    /// <li>Using standart multipart/form-data method.</li>
-    /// </ol>]]>
-    /// </remarks>
     /// <path>api/2.0/files/@common/upload</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "for a new file and for a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Uploaded file(s)", typeof(object))]
@@ -618,23 +631,23 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     }
 
     /// <remarks>
-    /// Uploads one file into the caller's own My documents section and returns it inside a single-element array; one
-    /// request stores exactly one file. The destination takes no identifier: it is resolved from the calling account
-    /// and created on first use, while a guest account has none and is answered as missing (404). The body has to be
-    /// `multipart/form-data` carrying the file part; a request without it is rejected as invalid, and the stored name
-    /// comes from that part, since unlike `POST api/2.0/files/@my/insert` there is no separate title. The call is not
-    /// idempotent: by default a file of the same title is overwritten as a new version, while `createNewIfExist=true`
-    /// stores a separate copy under a title made unique with a numeric suffix. `storeOriginalFile` is not a
-    /// per-request switch: it writes the same account setting as `PUT api/2.0/files/storeoriginal`, which decides
-    /// what happens to the formats listed in `extsMustConvert` of `GET api/2.0/files/settings` when they are
-    /// converted after the response - false replaces the uploaded file with the converted one, true keeps both;
-    /// `keepConvertStatus=true` keeps that conversion result readable through
-    /// `GET api/2.0/files/file/{fileId}/checkconversion`. Files over the single-request size limit or the account's
-    /// storage quota are refused; send those through `POST api/2.0/files/{folderId}/upload/create_session`.
+    /// Uploads one file to My documents of the caller and returns it in an array with one item. Send it as a
+    /// `multipart/form-data` part. The file takes the name of the part. To set another name, use
+    /// `POST api/2.0/files/@my/insert`. Any signed-in user can call it, except a guest. A guest has no My documents,
+    /// so the call returns 404. If the account cannot create files there, the call returns 403. The call changes
+    /// data. By default, a file with the same title gets a new version. If that file is locked or open in the editor,
+    /// the call stores a second file with the same title. With `createNewIfExist` set to true, the call adds a
+    /// numeric suffix to the new title. Do not repeat the call. Each call adds a version or a file. The
+    /// `storeOriginalFile` flag also changes an account setting for later uploads, like
+    /// `PUT api/2.0/files/storeoriginal`. The portal queues the conversion of the formats in `extsMustConvert` of
+    /// `GET api/2.0/files/settings`. If the request has no file part, the call returns 400. The call returns 402 if
+    /// the file is over the size limit of one request or the storage quota. Send a large file through
+    /// `POST api/2.0/files/{folderId}/upload/create_session`. If the installation does not allow the file extension,
+    /// the call returns 415.
     /// </remarks>
     /// <summary>Upload a file to My documents</summary>
     /// <path>api/2.0/files/@my/upload</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "whether the upload creates a new file or is saved as a new version of an existing file")]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "for a new file and for a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "An array holding the single uploaded file", typeof(List<FileDto<int>>))]
     [SwaggerResponse(400, "The request has no file part")]

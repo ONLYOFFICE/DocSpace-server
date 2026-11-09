@@ -53,17 +53,15 @@ public class ThirdpartyController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Lists the third-party storage services this portal is able to connect, in the compact form a connection dialog
-    /// needs. Every element is itself an array whose first item is the provider key accepted as `providerKey` by
-    /// `POST api/2.0/files/thirdparty`. For the services that authenticate through OAuth 2.0 (`Box`, `DropboxV2`,
-    /// `GoogleDrive`, `OneDrive`) the second and third items are the OAuth client ID and the redirect URL this portal
-    /// is registered with, so the caller can build the consent screen URL itself; the services that authenticate by
-    /// login and password (`SharePoint`, `WebDav`, `kDrive`, `Yandex`) contribute a single-item array. Only the
-    /// services enabled in the portal configuration are listed, and an OAuth service whose application is not
-    /// configured is left out. The call is read-only. An empty array is a normal answer rather than a failure: it is
-    /// what a guest gets, and what everyone gets while the portal-wide third-party switch is off
-    /// (`PUT api/2.0/files/thirdparty`). For display names, the WebDAV presets and the flags a connection form needs,
-    /// use `GET api/2.0/files/thirdparty/providers` instead.
+    /// Returns the third-party storage services that the portal can connect, in a short form. Each element is an array.
+    /// Its first item is the value to send as `providerKey` to `POST api/2.0/files/thirdparty`. The OAuth services are
+    /// `Box`, `DropboxV2`, `GoogleDrive`, and `OneDrive`. Their second and third items are the OAuth client ID and redirect
+    /// URL. With them, you can build the address of the consent screen. A service that uses a login and password
+    /// (`SharePoint`, `WebDav`, `kDrive`, or `Yandex`) has a one-item array. The list has only the services turned on in
+    /// the portal configuration. It also skips an OAuth service whose app is not set up. Any signed-in user can call it.
+    /// A guest gets an empty array instead of an error. The call is read-only. The array is also empty while third-party storage is
+    /// turned off for the portal. To turn it on, use `PUT api/2.0/files/thirdparty`. For display names, WebDAV presets,
+    /// and the flags of a connection form, use `GET api/2.0/files/thirdparty/providers`.
     /// </remarks>
     /// <summary>Get third-party provider capabilities</summary>
     /// <path>api/2.0/files/thirdparty/capabilities</path>
@@ -82,7 +80,10 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Creates a WordPress post with the parameters specified in the request.
+    /// Creates a post on the WordPress blog that the caller connected with `POST api/2.0/files/wordpress-save`. Any
+    /// signed-in user can call it. The call changes data. Do not repeat it. Each call creates another post. It returns
+    /// true if WordPress created the post. It returns false if the caller has no saved WordPress token, the token has no
+    /// blog, or WordPress fails.
     /// </remarks>
     /// <summary>Create a WordPress post</summary>
     /// <path>api/2.0/files/wordpress</path>
@@ -113,17 +114,14 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Disconnects a third-party storage account from the portal and returns the ID of the folder that stood for it,
-    /// in the `provider-accountId` form the Files operations use for third-party entries. Take `providerId` from
-    /// `GET api/2.0/files/thirdparty`: it is the numeric account ID, not that composed folder ID. The member who
-    /// connected the account can remove it; another member's request is refused unless they hold delete rights on the
-    /// folder it stands for. Nothing is deleted at the storage service: the files stay with the provider, and what
-    /// goes away is the portal's link to them together with the stored credentials, the sharing records and the tags
-    /// kept for its entries. An account a room was created on is refused with 403 while the room exists: delete the
-    /// room instead, which disconnects the account along with it. When the account being
-    /// removed is the one connected for backups by `POST api/2.0/files/thirdparty/backup`, its backup schedule is
-    /// deleted as well. The removal cannot be repeated: once the account is gone the same ID is refused rather than
-    /// confirmed, so treat the first successful answer as the record of it.
+    /// Disconnects a third-party storage account from the portal and returns the ID of its folder. The ID has the
+    /// `provider-accountId` form of third-party entries, not the numeric `providerId`. Requires the right to delete the
+    /// account folder, which the user who connected the account has. Other callers get 403. The call changes data and
+    /// cannot be undone. It deletes nothing at the storage service, and the files stay there. The portal deletes its
+    /// link to them, the stored credentials, and the sharing records and tags of its entries. If the account is the
+    /// backup storage of `POST api/2.0/files/thirdparty/backup`, the call also deletes the backup schedule. If a room
+    /// stands on the account, the call returns 403. To disconnect such an account, delete the room. If no account has
+    /// this `providerId`, the call returns 404. So a repeated call also returns 404.
     /// </remarks>
     /// <summary>Remove a third-party account</summary>
     /// <path>api/2.0/files/thirdparty/{providerId}</path>
@@ -146,7 +144,9 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Deletes the WordPress plugin information.
+    /// Deletes the WordPress token that the caller saved with `POST api/2.0/files/wordpress-save`. The operation uses
+    /// GET but changes data. Any signed-in user can call it. The `success` field is true if the call deleted a token. It
+    /// is false if the caller had no token, so a repeated call returns false.
     /// </remarks>
     /// <summary>Delete the WordPress information</summary>
     /// <path>api/2.0/files/wordpress-delete</path>
@@ -167,16 +167,13 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Lists the third-party storage accounts attached to the legacy Common section, as folder entries that can be
-    /// browsed with the usual folder operations. Each entry stands for a whole connected account: its title is the
-    /// account title, and `providerId` and `providerKey` identify the account behind it. Only accounts whose owner
-    /// the caller may read are included, so the answer differs from one member to another. The call is read-only and
-    /// returns a plain array with no paging. An empty array is the expected answer in most portals and does not mean
-    /// an error: accounts connected by `POST api/2.0/files/thirdparty` are attached to the Rooms section, not to
-    /// Common, so only accounts inherited from an older portal appear here. The list is also empty while the
-    /// portal-wide third-party switch is off (`PUT api/2.0/files/thirdparty`) and when no storage service is
-    /// configured. For the accounts the caller owns, regardless of where they are attached, use
-    /// `GET api/2.0/files/thirdparty`.
+    /// Returns the third-party storage accounts of the legacy Common section, as folder entries. Each entry stands for
+    /// one account, and the folder operations can browse it. Any signed-in user can call it. The call skips accounts
+    /// whose owner the caller cannot read, so the list differs between users. The call is read-only. It returns a plain
+    /// array without paging. In most portals the array is empty, and that is not an error. The reason is that
+    /// `POST api/2.0/files/thirdparty` attaches accounts to the Rooms section, not to Common. So only accounts from an
+    /// older portal appear here. The array is also empty if third-party storage is turned off or no storage service is
+    /// set up. For the caller's own accounts in any section, use `GET api/2.0/files/thirdparty`.
     /// </remarks>
     /// <summary>Get common third-party folders</summary>
     /// <path>api/2.0/files/thirdparty/common</path>
@@ -196,18 +193,12 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Lists the third-party storage accounts the caller has connected, one element per account, with the title it
-    /// was saved under, the storage service behind it and the portal section it is attached to. Accounts connected by
-    /// other members are not included, and neither is the portal backup account of
-    /// `GET api/2.0/files/thirdparty/backup`, even for an administrator. The `providerId` of an element is the value
-    /// to send to `DELETE api/2.0/files/thirdparty/{providerId}` and, as `providerId` in
-    /// `POST api/2.0/files/thirdparty`, the way to re-authenticate that same account instead of connecting a new one.
-    /// Credentials are never disclosed: `auth_data` comes back empty for every element. An element with
-    /// `roomsStorage` set is available as storage for a room, while `corporate` marks an account inherited from the
-    /// legacy Common section. The call is read-only, returns a plain array with no paging and no contractual
-    /// ordering, and answers with an empty array when the caller has connected nothing. To browse the content of an
-    /// account, take the folder ID from the answer of the operation that connected it or from
-    /// `GET api/2.0/files/@root`.
+    /// Returns the third-party storage accounts that the caller connected, one element per account. Any signed-in user
+    /// can call it. The list skips the accounts of other users. It also skips the backup account of
+    /// `GET api/2.0/files/thirdparty/backup`, even for a DocSpace admin. The call is read-only. It returns a plain array
+    /// without paging and in no fixed order. An empty array means that the caller connected nothing. The response has
+    /// no credentials. To browse an account, take its folder ID from `GET api/2.0/files/@root`. The answer of
+    /// `POST api/2.0/files/thirdparty` also has it.
     /// </remarks>
     /// <summary>Get the third-party accounts</summary>
     /// <path>api/2.0/files/thirdparty</path>
@@ -221,16 +212,12 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Returns the folder of the third-party storage account the portal keeps for backups, so a caller can check
-    /// where scheduled and manual backups are written. There is at most one such account per portal, connected by an
-    /// administrator through `POST api/2.0/files/thirdparty/backup`, and it is deliberately kept out of the personal
-    /// list of `GET api/2.0/files/thirdparty`. Any authenticated member may ask, and the call is read-only. The body
-    /// is `null`, with a successful status, in two situations the answer does not distinguish: no backup account has
-    /// been connected, and the caller has no read access to the folder of the one that is. When a folder does come
-    /// back, its `id` is the string ID of a third-party folder and can be used with the folder operations that accept
-    /// one, and its `title` is the title the account was saved under. Connecting a different account through the
-    /// backup operation replaces this one rather than adding a second, and
-    /// `DELETE api/2.0/files/thirdparty/{providerId}` removes it.
+    /// Returns the root folder of the third-party storage account where the portal saves scheduled and manual backups.
+    /// A portal has at most one such account. A DocSpace admin connects it with `POST api/2.0/files/thirdparty/backup`.
+    /// Any signed-in user can call it. The call is read-only. The body is `null` with status 200 if no backup account is
+    /// connected or the caller cannot read its folder. The answer does not tell these cases apart. The folder operations
+    /// accept the returned `id`. The `title` is the title of the account. The list of `GET api/2.0/files/thirdparty`
+    /// does not have this account. To remove it, use `DELETE api/2.0/files/thirdparty/{providerId}`.
     /// </remarks>
     /// <summary>Get the third-party backup folder</summary>
     /// <path>api/2.0/files/thirdparty/backup</path>
@@ -250,7 +237,10 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Returns the WordPress plugin information.
+    /// Returns the WordPress blog that the caller connected with `POST api/2.0/files/wordpress-save`. Any signed-in user
+    /// can call it. The call is read-only. The `data` field is a JSON string with the blog data from WordPress. It also
+    /// has the `username` of the caller at WordPress. If the caller has no saved token, `success` is false and `data` is
+    /// null.
     /// </remarks>
     /// <summary>Get the WordPress information</summary>
     /// <path>api/2.0/files/wordpress-info</path>
@@ -278,14 +268,19 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Connects an account at a third-party storage service as room storage, or, with `providerId`, re-authenticates an
-    /// account the caller connected earlier, and returns the folder that stands for the account's root. Take
-    /// `providerKey` from `GET api/2.0/files/thirdparty/providers` and send `url` wherever it reports
-    /// `requiredConnectionUrl`; OAuth services take `token`, the authorization code from their consent screen, the
-    /// others `login` and `password`. The caller needs the right to create rooms, and the portal-wide third-party switch
-    /// has to be on. Credentials are checked before anything is stored; a call without `providerId` always adds a new
-    /// account, and a re-authenticated room account keeps its server address. The new account is used by
-    /// `POST api/2.0/files/rooms/thirdparty/{id}`; backup storage is connected by `POST api/2.0/files/thirdparty/backup`.
+    /// Connects a third-party storage account as room storage, or re-authenticates the caller's account with
+    /// `providerId`. It returns the root folder of the account. Third-party storage must be turned on with
+    /// `PUT api/2.0/files/thirdparty`. Requires the right to create rooms. Other callers get 403. The call changes data.
+    /// It checks the credentials at the service before it saves anything. Without `providerId`, each call adds a new
+    /// account, so do not repeat it. You can repeat a re-authentication with the same body. A re-authenticated room
+    /// account keeps its server address. The call returns 400 if `customerTitle` or `providerKey` is missing, or
+    /// `providerKey` names no known service. For a new account, it also returns 400 if a needed `token`, `password`, or
+    /// `url` is missing. The call returns 403 if third-party storage is turned off or the service rejects the
+    /// credentials. It also returns 403 if `providerId` names the account of another user. For a new account, a title
+    /// that is empty after the call removes invalid characters also returns 403. If no account has the `providerId`,
+    /// the call returns 404. If the service cannot be reached, the call returns 500. To create a room on the account,
+    /// use `POST api/2.0/files/rooms/thirdparty/{id}`. To connect backup storage, use
+    /// `POST api/2.0/files/thirdparty/backup`.
     /// </remarks>
     /// <summary>Connect a third-party account</summary>
     /// <path>api/2.0/files/thirdparty</path>
@@ -314,16 +309,17 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Connects the third-party storage account the portal writes its backups to, and returns the folder that stands
-    /// for its root. Only a portal administrator may call it, and the portal-wide third-party switch has to be on;
-    /// other callers are refused. The account is portal-wide and single: a second call does not add another one but
-    /// re-authenticates and retitles the existing one, which makes the operation safe to repeat with the same body.
-    /// The credentials follow the same rules as in `POST api/2.0/files/thirdparty` - an authorization code in `token`
-    /// for the OAuth services, `login` with `password` and, where the server address is not fixed, `url` for the
-    /// WebDAV family, kDrive and SharePoint - and are verified against the service before anything is stored, so a
-    /// wrong password leaves the previous account untouched. The account is deliberately absent from
-    /// `GET api/2.0/files/thirdparty`; read it back with `GET api/2.0/files/thirdparty/backup` and remove it with
-    /// `DELETE api/2.0/files/thirdparty/{providerId}`.
+    /// Connects the third-party storage account where the portal saves backups, and returns its root folder. Third-party
+    /// storage must be turned on with `PUT api/2.0/files/thirdparty`. Requires a DocSpace admin. Other callers get 403.
+    /// The call changes data. A portal has one backup account. A second call re-authenticates and renames that account
+    /// instead of adding one. So you can repeat the call with the same body. The credentials follow the rules of
+    /// `POST api/2.0/files/thirdparty`. The call checks them at the service before it saves anything. So wrong
+    /// credentials leave the current account unchanged. The call returns 400 if `providerKey` names no known service or
+    /// a needed `url` is missing. While no backup account exists, a missing `token` or `password` also returns 400. The
+    /// call returns 403 if third-party storage is turned off or the service rejects the credentials. While no backup
+    /// account exists, a title that is empty after the call removes invalid characters also returns 403. If the service
+    /// cannot be reached, the call returns 500. The list of `GET api/2.0/files/thirdparty` does not have this account. To
+    /// read it, use `GET api/2.0/files/thirdparty/backup`. To remove it, use `DELETE api/2.0/files/thirdparty/{providerId}`.
     /// </remarks>
     /// <summary>Connect the third-party backup storage</summary>
     /// <path>api/2.0/files/thirdparty/backup</path>
@@ -354,7 +350,10 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Saves the user WordPress information when logging in.
+    /// Exchanges a WordPress authorization code for a token and saves the token for the caller. It returns the connected
+    /// blog in the form of `GET api/2.0/files/wordpress-info`. Any signed-in user can call it. The call changes data. A
+    /// new token replaces the saved one. Do not repeat the call with the same code. WordPress accepts a code only once.
+    /// If `code` is empty or any step fails, `success` is false.
     /// </remarks>
     /// <summary>Save the user WordPress information</summary>
     /// <path>api/2.0/files/wordpress-save</path>
@@ -394,16 +393,11 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Lists the third-party storage services this portal can connect, with everything a connection form needs: the
-    /// display name, the key to send as `providerKey`, whether the service authenticates through OAuth 2.0, the OAuth
-    /// client ID and redirect URL where it does, and whether the caller has to supply the server address. Several
-    /// WebDAV presets share the key `WebDav` and are told apart by their names, so keep the name the caller chose
-    /// next to the key when building the request. Pass `excludewebdav=true` to drop the whole WebDAV family,
-    /// including the kDrive and Yandex presets, and keep only the OAuth services. The call is read-only. An empty
-    /// array is a normal answer: it is what a guest gets, and what everyone gets while the portal-wide third-party
-    /// switch is off (`PUT api/2.0/files/thirdparty`). The `connected` flag of an element says the service is
-    /// available on this portal, not that an account of it exists - the caller's own accounts are listed by
-    /// `GET api/2.0/files/thirdparty`.
+    /// Returns the third-party storage services that the portal configuration lists, with the data of a connection form.
+    /// With `excludewebdav=true`, the list has only the OAuth services. Any signed-in user can call it. A guest gets an
+    /// empty array instead of an error. The call is read-only. The array is also empty while third-party storage is turned off for
+    /// the portal. To turn it on, use `PUT api/2.0/files/thirdparty`. The list also has OAuth services whose app is not
+    /// set up, with `connected` false. To list the accounts of the caller, use `GET api/2.0/files/thirdparty`.
     /// </remarks>
     /// <summary>Get all third-party providers</summary>
     /// <path>api/2.0/files/thirdparty/providers</path>
