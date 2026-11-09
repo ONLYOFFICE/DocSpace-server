@@ -119,7 +119,7 @@ public class ServiceUsageReportBuilder(
 
             var properties = new List<PropertyValue>
             {
-                new(title, "@"),
+                new(WalletServiceDescriptionManager.MarkByok(title, record.Service), "@"),
                 CountValue(record.TotalQuantity),
                 new(serviceUnit, "@"),
                 MoneyValue(record.TotalAmount),

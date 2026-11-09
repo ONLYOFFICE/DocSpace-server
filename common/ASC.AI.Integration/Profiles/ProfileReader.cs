@@ -34,7 +34,12 @@
 namespace ASC.AI.Integration.Profiles;
 
 [Scope]
-public class ProfileReader(ProfileStorage storage, AiGateway aiGateway, BaseCommonLinkUtility linkUtility)
+public class ProfileReader(
+    ProfileStorage storage,
+    ByokKeyStorage byokKeyStorage,
+    PortalModelsService portalModelsService,
+    AiGateway aiGateway,
+    BaseCommonLinkUtility linkUtility)
 {
     private const string ImageModality = "image";
     private const string ToolsCapability = "tools";
@@ -47,9 +52,9 @@ public class ProfileReader(ProfileStorage storage, AiGateway aiGateway, BaseComm
             return await storage.ReadByIdAsync(tenantId, id);
         }
 
-        var profiles = await GetGatewayProfilesAsync();
+        var profiles = await ReadAllAsync(tenantId);
 
-        return profiles.FirstOrDefault(p => p.Id == id);
+        return profiles.Find(p => p.Id == id);
     }
 
     public async Task<List<Profile>> ReadAllAsync(int tenantId, IEnumerable<Model>? models = null)
@@ -59,35 +64,49 @@ public class ProfileReader(ProfileStorage storage, AiGateway aiGateway, BaseComm
             return await storage.ReadAllAsync(tenantId);
         }
 
-        var profiles = models is null ? await GetGatewayProfilesAsync() : MapGatewayProfiles(models);
-
-        return [.. profiles];
+        return await MapGatewayProfilesAsync(tenantId, models ?? await portalModelsService.ReadAsync(tenantId));
     }
 
-    private async Task<IEnumerable<Profile>> GetGatewayProfilesAsync()
+    public static bool IsNotEmbedding(Model model)
     {
-        var response = await aiGateway.GetModelsAsync();
-
-        return MapGatewayProfiles(response.Data);
+        return !string.Equals(model.Type, "embedding", StringComparison.OrdinalIgnoreCase);
     }
 
-    private IEnumerable<Profile> MapGatewayProfiles(IEnumerable<Model> models)
+    private async Task<List<Profile>> MapGatewayProfilesAsync(int tenantId, IEnumerable<Model> models)
     {
-        return models
-            .Where(m => !string.Equals(m.Type, "embedding", StringComparison.OrdinalIgnoreCase))
-            .Select(m => new Profile
-            {
-                Id = m.RevisionId,
-                Name = m.Alias,
-                ProviderType = "onlyoffice",
-                BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
-                ModelId = m.Id,
-                Reasoning = MapReasoning(m),
-                CanUseTool = HasCapability(m, ToolsCapability),
-                Capabilities = MapCapabilities(m),
-                UseResponsesApi = false,
-                Key = "onlyoffice"
-            });
+        var byokProviders = (await byokKeyStorage.ReadAllAsync(tenantId)).ToDictionary(k => k.Id, k => k.Provider);
+
+        return
+        [
+            .. models
+                .Where(IsNotEmbedding)
+                .Select(m => MapGatewayProfile(m, ActiveByokProvider(m, byokProviders)))
+        ];
+    }
+
+    private static string? ActiveByokProvider(Model model, Dictionary<Guid, string> byokProviders)
+    {
+        return byokProviders.TryGetValue(model.RevisionId, out var provider) && model.AcceptsByokProvider(provider)
+            ? provider
+            : null;
+    }
+
+    private Profile MapGatewayProfile(Model model, string? byokProvider)
+    {
+        return new Profile
+        {
+            Id = model.RevisionId,
+            Name = model.Alias,
+            ProviderType = "onlyoffice",
+            BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
+            ModelId = model.Id,
+            Reasoning = MapReasoning(model),
+            CanUseTool = HasCapability(model, ToolsCapability),
+            Capabilities = MapCapabilities(model),
+            UseResponsesApi = false,
+            Key = "onlyoffice",
+            ByokProvider = byokProvider
+        };
     }
 
     private static ReasoningConfig MapReasoning(Model model)

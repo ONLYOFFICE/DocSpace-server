@@ -39,6 +39,7 @@ public class ProfileStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     ProfileStorage storage,
+    ByokKeyStorage byokKeyStorage,
     IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
@@ -46,6 +47,8 @@ public class ProfileStorageService(
     ProfileReader profileReader,
     MessageService messageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, aiGateway)
 {
+    private readonly AiGateway _aiGateway = aiGateway;
+
     private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
@@ -74,6 +77,104 @@ public class ProfileStorageService(
         }
 
         return created;
+    }
+
+    public async Task<ByokKeyDto> SetByokKeyAsync(Guid id, string provider, string key)
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var model = await FindByokModelAsync(id) ?? throw new ItemNotFoundException();
+        var type = GetByokType(model) ?? throw new ItemNotFoundException();
+
+        if (!model.AcceptsByokProvider(provider))
+        {
+            throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
+        }
+
+        if (!await _aiGateway.VerifyByokKeyAsync(provider, key))
+        {
+            throw new ArgumentException(ErrorMessages.InvalidKey);
+        }
+
+        await byokKeyStorage.SetAsync(tenantManager.GetCurrentTenantId(), id, type, provider, key);
+
+        messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), model.Alias);
+
+        return new ByokKeyDto { Id = id, Name = model.Alias, Provider = provider, Image = AiModelImages.Get(model.OwnedBy) };
+    }
+
+    public async Task DeleteByokKeyAsync(Guid id)
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var name = await TryFindByokModelNameAsync(id) ?? id.ToString();
+
+        if (!await byokKeyStorage.DeleteAsync(tenantManager.GetCurrentTenantId(), id))
+        {
+            throw new ItemNotFoundException();
+        }
+
+        messageService.Send(MessageAction.AiByokKeyDeleted, MessageTarget.Create(id), name);
+    }
+
+    public async Task<List<ByokKeyDto>> ReadByokKeysAsync()
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var keys = await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId());
+        if (keys.Count == 0)
+        {
+            return [];
+        }
+
+        var models = (await _aiGateway.GetAllModelsAsync()).Data
+            .DistinctBy(m => m.RevisionId)
+            .ToDictionary(m => m.RevisionId);
+
+        return
+        [
+            .. keys
+                .Select(k =>
+                {
+                    var model = models.GetValueOrDefault(k.Id);
+
+                    return new ByokKeyDto
+                    {
+                        Id = k.Id,
+                        Name = model?.Alias,
+                        Provider = k.Provider,
+                        Image = AiModelImages.Get(model?.OwnedBy)
+                    };
+                })
+        ];
+    }
+
+    public async Task<List<ByokProviderDto>> ReadByokProvidersAsync()
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
+        var overridden = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId())).Select(k => k.Id).ToHashSet();
+
+        return
+        [
+            .. models
+                .Where(m => GetByokType(m).HasValue && !overridden.Contains(m.RevisionId))
+                .SelectMany(m => (m.ByokProviders ?? []).Select(p => (Provider: p, Model: m)))
+                .GroupBy(x => x.Provider.Id)
+                .Select(g => new ByokProviderDto
+                {
+                    Id = g.Key,
+                    Name = g.First().Provider.Name,
+                    Image = AiModelImages.Get(GetSingleOwner(g.Select(x => x.Model))),
+                    Models = [.. g.Select(x => new ByokModelDto { Id = x.Model.RevisionId, Name = x.Model.Alias })]
+                })
+                .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+        ];
     }
 
     public async Task<Profile> ReadByIdAsync(Guid id)
@@ -124,8 +225,54 @@ public class ProfileStorageService(
         }
     }
 
-    internal async Task<List<Profile>> ReadAllVerifiedAsync(IEnumerable<Model>? models = null)
+    internal async Task<List<Profile>> ReadAllVerifiedAsync(List<Model>? models = null)
     {
         return await profileReader.ReadAllAsync(tenantManager.GetCurrentTenantId(), models);
+    }
+
+    internal async Task<ByokCredentials> ReadByokCredentialsAsync(Guid id)
+    {
+        await AssertUserHasAccessAsync(_readTypes);
+        AssertGatewayConfigured();
+
+        return await byokKeyStorage.ReadCredentialsAsync(tenantManager.GetCurrentTenantId(), id) ?? throw new ItemNotFoundException();
+    }
+
+    private void AssertGatewayConfigured()
+    {
+        if (!_aiGateway.Configured)
+        {
+            throw new ItemNotFoundException();
+        }
+    }
+
+    private async Task<Model?> FindByokModelAsync(Guid id)
+    {
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
+
+        return models.FirstOrDefault(m => m.RevisionId == id);
+    }
+
+    private async Task<string?> TryFindByokModelNameAsync(Guid id)
+    {
+        try
+        {
+            return (await FindByokModelAsync(id))?.Alias;
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or TimeoutException or JsonException)
+        {
+            return null;
+        }
+    }
+
+    private static string? GetSingleOwner(IEnumerable<Model> models)
+    {
+        var owners = models.Select(m => m.OwnedBy).Distinct(StringComparer.OrdinalIgnoreCase).Take(2).ToList();
+        return owners.Count == 1 ? owners[0] : null;
+    }
+
+    private static ByokKeyType? GetByokType(Model model)
+    {
+        return ByokKeyTypeExtensions.TryParse(model.Type, ignoreCase: true, out var type) ? type : null;
     }
 }

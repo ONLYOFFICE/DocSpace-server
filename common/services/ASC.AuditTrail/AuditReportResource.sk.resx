@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profil AI bol priradený agentovi AI pre akciu: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Kľúč BYOK pre model AI bol odstránený: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Kľúč BYOK pre model AI bol nastavený: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profil AI bol priradený k akcii: {0}</value>
   </data>
