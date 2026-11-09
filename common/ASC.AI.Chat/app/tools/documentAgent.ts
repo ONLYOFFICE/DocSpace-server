@@ -58,9 +58,8 @@ import { DOCUMENT_AGENT_TYPE, getDocumentAgent } from "../../config/index.js";
 import type { DocumentAgentConfig } from "../../config/index.js";
 import { storage } from "../storage/index.js";
 import {
-  DOCUMENT_AGENT_DEFAULTS,
   type DocumentAgentSettings as TenantSettings,
-  readDocumentAgentSettings,
+  readDocumentAgentSettingsForTask,
   type ReasoningLevel,
 } from "../storage/documentAgentSettingsStorage.js";
 import { reasoningFor } from "./documentAgentReasoning.js";
@@ -354,17 +353,10 @@ function outputsUrl(config: DocumentAgentConfig, folderId: string): string {
   return url.href;
 }
 
-// The portal's settings for the agent; a read that fails leaves the
-// defaults in force rather than the tool unavailable.
-async function tenantSettings(): Promise<TenantSettings> {
-  try {
-    return await readDocumentAgentSettings();
-  } catch (err) {
-    logger.warn(
-      `${DOCUMENT_AGENT_TOOL_NAME}: settings not read, defaults in force: ${err instanceof Error ? err.message : String(err)}`,
-    );
-    return DOCUMENT_AGENT_DEFAULTS;
-  }
+// The portal's settings for the agent; while they cannot be read the
+// agent is off, so a broken file never turns it back on.
+function tenantSettings(): Promise<TenantSettings> {
+  return readDocumentAgentSettingsForTask();
 }
 
 // Where the task's log goes: the folder the portal chose when the user may

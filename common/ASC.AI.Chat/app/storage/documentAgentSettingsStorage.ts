@@ -44,7 +44,7 @@ import path from "path";
 import { z } from "zod";
 
 import { getDocumentAgent } from "../../config/index.js";
-import { logDir } from "../log.js";
+import logger, { logDir } from "../log.js";
 import { getForwardedHeaders } from "../requestContext.js";
 
 export const REASONING_LEVELS = ["off", "low", "medium", "high", "max"] as const;
@@ -115,17 +115,32 @@ export class DocumentAgentSettingsStorage {
   }
 
   async write(key: string, settings: DocumentAgentSettings): Promise<DocumentAgentSettings> {
-    const entries = await this.#load();
-    entries[key] = settings;
     // Writes queue behind each other: two admins saving at once must not
-    // interleave on the file.
-    this.#writing = this.#writing.then(() => this.#save(entries));
-    await this.#writing;
+    // interleave on the file, and each one starts from what the previous one
+    // left. The cache takes the new entry only once the file holds it, so a
+    // failed write is not served as saved; and a failed write does not stop
+    // the queue, so the next save tries the file again.
+    const step = this.#writing.then(async () => {
+      const updated = { ...(await this.#load()), [key]: settings };
+      await this.#save(updated);
+      this.#entries = Promise.resolve(updated);
+    });
+    this.#writing = step.catch(() => undefined);
+    await step;
     return settings;
   }
 
+  // A read that fails is not kept: the next call reads the file again.
   async #load(): Promise<Record<string, DocumentAgentSettings>> {
-    this.#entries ??= this.#readFile();
+    if (!this.#entries) {
+      const loading = this.#readFile();
+      this.#entries = loading;
+      loading.catch(() => {
+        if (this.#entries === loading) {
+          this.#entries = undefined;
+        }
+      });
+    }
     return this.#entries;
   }
 
@@ -172,6 +187,26 @@ export function documentAgentSettingsStorage(): DocumentAgentSettingsStorage {
 }
 
 /** The settings of the portal the current request came for. */
-export function readDocumentAgentSettings(): Promise<DocumentAgentSettings> {
-  return documentAgentSettingsStorage().read(tenantKey());
+/**
+ * What a task runs with when the portal's settings cannot be read (the file
+ * is unreadable or damaged): the defaults, with the agent off. A portal whose
+ * admin turned the agent off must not get it back because of a broken file.
+ */
+export const DOCUMENT_AGENT_UNREADABLE: DocumentAgentSettings = {
+  ...DOCUMENT_AGENT_DEFAULTS,
+  enabled: false,
+};
+
+/** The portal's settings for a task; the agent is off while they cannot be read. */
+export async function readDocumentAgentSettingsForTask(
+  storage: DocumentAgentSettingsStorage = documentAgentSettingsStorage(),
+): Promise<DocumentAgentSettings> {
+  try {
+    return await storage.read(tenantKey());
+  } catch (err) {
+    logger.warn(
+      `documentAgentSettings: not read, the agent is off: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return DOCUMENT_AGENT_UNREADABLE;
+  }
 }
