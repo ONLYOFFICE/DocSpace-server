@@ -33,13 +33,23 @@
 
 package com.asc.authorization.application.security.oauth.service;
 
+import com.asc.authorization.application.exception.client.NonRetryableGrpcException;
 import com.asc.authorization.application.exception.client.RegisteredClientPermissionException;
 import com.asc.authorization.application.mapper.ClientMapper;
+import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
 import com.asc.authorization.data.client.cache.CachedRegisteredClient;
 import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
+import com.asc.authorization.data.consent.repository.JpaConsentRepository;
+import com.asc.common.utilities.cleanup.RemovedClientReporter;
 import com.asc.common.utilities.concurrent.SingleFlight;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.Optional;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -68,24 +78,61 @@ public class RegisteredClientService
   private final RegisteredClientCacheService registeredClientCacheService;
   private final GrpcRegisteredClientService grpcRegisteredClientService;
   private final ClientMapper clientMapper;
+  private final JpaAuthorizationRepository jpaAuthorizationRepository;
+  private final JpaConsentRepository jpaConsentRepository;
+  private final RemovedClientReporter removedClientReporter;
 
   /**
-   * Fetches a client from the gRPC service and caches it for subsequent lookups.
+   * Fetches a client from the gRPC service and caches it for subsequent lookups, unless an eviction
+   * reached the cache while the fetch was in flight.
    *
    * @param clientId the client ID to fetch.
    * @return the fetched snapshot of the client.
    */
   private CachedRegisteredClient fetchAndCache(String clientId) {
+    var ticket = registeredClientCacheService.ticket(clientId);
     var client = grpcRegisteredClientService.getClient(clientId);
     var cachedClient = clientMapper.toCachedRegisteredClient(client);
-    registeredClientCacheService.put(cachedClient);
+    registeredClientCacheService.putUnlessInvalidated(cachedClient, ticket);
 
     return cachedClient;
   }
 
   /**
+   * Tells whether a failed lookup proved that the client does not exist: registration answers
+   * NOT_FOUND for a missing client only, never for a lookup it could not complete.
+   *
+   * @param e the failure of the lookup
+   * @return {@code true} if the failure is registration's NOT_FOUND
+   */
+  private static boolean isNotFound(RuntimeException e) {
+    return e instanceof NonRetryableGrpcException
+        && e.getCause() instanceof StatusRuntimeException status
+        && status.getStatus().getCode() == Status.Code.NOT_FOUND;
+  }
+
+  /**
+   * Returns when the authorizations and consents a client left behind were last written.
+   *
+   * @param clientId the client ID to look up.
+   * @return the latest write, or empty if the client left nothing behind.
+   */
+  private Optional<Instant> latestLeftoverWrite(String clientId) {
+    return Stream.of(
+            jpaAuthorizationRepository.findLatestModificationByClientId(clientId),
+            jpaConsentRepository.findLatestModificationByClientId(clientId))
+        .flatMap(Optional::stream)
+        .map(ZonedDateTime::toInstant)
+        .max(Comparator.naturalOrder());
+  }
+
+  /**
    * Resolves a client from the cache, falling back to the gRPC service and populating the cache on
    * a miss.
+   *
+   * <p>Every lookup of a client goes through here, so this is where a removed client is noticed:
+   * when registration answers that the client does not exist, any authorizations and consents it
+   * left behind are orphans its removal cleanup missed, and the cleanup is requested again.
    *
    * @param clientId the client ID to resolve.
    * @return the cached snapshot of the client.
@@ -94,7 +141,13 @@ public class RegisteredClientService
     var cachedClient = registeredClientCacheService.get(clientId).orElse(null);
     if (cachedClient != null) return cachedClient;
 
-    return calls.execute(clientId, () -> fetchAndCache(clientId));
+    try {
+      return calls.execute(clientId, () -> fetchAndCache(clientId));
+    } catch (RuntimeException e) {
+      if (isNotFound(e))
+        removedClientReporter.reportIfLeftovers(clientId, () -> latestLeftoverWrite(clientId));
+      throw e;
+    }
   }
 
   /**

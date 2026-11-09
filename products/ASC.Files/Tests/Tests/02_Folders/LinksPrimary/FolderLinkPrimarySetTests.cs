@@ -214,6 +214,38 @@ public class FolderLinkPrimarySetTests(
         exception.ErrorCode.Should().Be(404);
     }
 
+    /// <remarks>
+    /// BUG 84872 (folder side): POST /files/folder/{id}/link shared the read path of the primary link, so after the
+    /// folder's primary link was revoked the explicit create was refused with 404 as well. Fixed by letting the
+    /// create request make a new primary link despite the revocation mark; the read still answers 404 (bug 81807).
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "84872")]
+    public async Task CreatePrimaryLink_AfterPrimaryLinkOfFolderIsDeleted_CreatesItAgain()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Folder Link Recreate");
+        var folder = await CreateFolder("Autotest Subfolder Link Recreate", room.Id);
+
+        var created = (await _foldersApi.CreateFolderPrimaryExternalLinkAsync(
+            folder.Id, new FolderLinkRequest(access: FileShare.Read), cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        await _foldersApi.SetFolderPrimaryExternalLinkAsync(
+            folder.Id, new FolderLinkRequest(linkId: created.SharedLink.Id, access: FileShare.None), TestContext.Current.CancellationToken);
+
+        // Act
+        var recreated = (await _foldersApi.CreateFolderPrimaryExternalLinkAsync(
+            folder.Id, new FolderLinkRequest(access: FileShare.Read), cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        recreated.SharedLink.Primary.Should().BeTrue();
+        recreated.SharedLink.Id.Should().NotBe(created.SharedLink.Id);
+
+        var read = (await _foldersApi.GetFolderPrimaryExternalLinkAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        read.SharedLink.Id.Should().Be(recreated.SharedLink.Id);
+    }
+
     [Fact]
     public async Task SetPrimaryLink_NonExistentFolderId_Returns404()
     {

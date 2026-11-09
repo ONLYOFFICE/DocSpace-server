@@ -38,6 +38,8 @@ import com.asc.common.utilities.HttpUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -54,6 +56,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Component
 @RequiredArgsConstructor
 public class SecurityUtils {
+  private static final Pattern CLIENT_ID =
+      Pattern.compile(
+          "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+
   private final SecurityConfigurationProperties securityConfigProperties;
   private final HttpUtils httpUtils;
 
@@ -97,12 +103,27 @@ public class SecurityUtils {
                     "%s://%s", request.getScheme(), httpUtils.getFirstForwardedHost(request)))
             .path("/login")
             .queryParam("type", "oauth2")
-            .queryParam("client_id", clientId)
+            .queryParamIfPresent("client_id", redirectableClientId(clientId))
             .queryParam("error", error)
             .build()
             .toUriString();
     log.debug("Redirecting {} to {} due to an error", clientId, errorRedirectUri);
     response.setHeader(securityConfigProperties.getRedirectHeader(), errorRedirectUri);
     response.sendRedirect(errorRedirectUri);
+  }
+
+  /**
+   * Returns the client id when it may be echoed into a redirect: only a well-formed client id (a
+   * UUID) is. A request can carry any text as {@code client_id}; copied into the {@code Location}
+   * header, a very long value overflows the response headers and a CR/LF breaks them, and the
+   * redirect fails with a 500 instead of reaching the login page.
+   *
+   * @param clientId the client id taken from the request, possibly {@code null}.
+   * @return the client id, or empty when it is not a well-formed client id.
+   */
+  public static Optional<String> redirectableClientId(String clientId) {
+    return clientId != null && CLIENT_ID.matcher(clientId).matches()
+        ? Optional.of(clientId)
+        : Optional.empty();
   }
 }

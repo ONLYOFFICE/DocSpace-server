@@ -55,6 +55,7 @@ global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.Common;
+global using ASC.Core.Common.Data;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;

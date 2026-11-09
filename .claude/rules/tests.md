@@ -3,11 +3,12 @@ paths:
   - "products/*/Tests/**/*.cs"
   - "common/Tests/**/*.cs"
   - "web/ASC.Web.Api.Tests/**/*.cs"
+  - "web/ASC.Web.Api.Billing.Tests/**/*.cs"
 ---
 
 # Integration Tests
 
-Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/` and `common/Tests/`. Style rules
+Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/`, `web/ASC.Web.Api.Billing.Tests/` and `common/Tests/`. Style rules
 (`csharp-style.md`) apply here too — including the mandatory `dotnet format style` check
 after editing any `.cs` file.
 
@@ -114,10 +115,11 @@ var exception = await Assert.ThrowsAsync<ApiException>(
     async () => await _roomsApi.DeleteRoomAsync(room.Id, new DeleteRoomRequest(false), TestContext.Current.CancellationToken));
 
 exception.ErrorCode.Should().Be(403);
-exception.ErrorContent?.ToString().Should().Contain("Access denied");
+exception.ErrorContent!.ToString().Should().Contain("Access denied");
 ```
 
-`ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`.
+`ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`. Read `ErrorContent` with
+`!`, never `?.`: with `?.` an empty body skips the whole assertion, and a check of the message can never fail.
 
 ## Endpoints the SDK does not expose
 
@@ -293,3 +295,18 @@ value on the wire. Use it for those only.
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both
 belongs in code (e.g. `[assembly: CollectionBehavior(...)]`), not on the command line.
+
+## Payment services: two stacks
+
+The `integration-test` stack runs **no** billing, accounting or docscloud service, so a payment test there only
+sees 403 "Tariff service is not configured" or a check before it. Everything past that check goes to
+`web/ASC.Web.Api.Billing.Tests` (SaaS stack, the three services stubbed by `PaymentServiceStub`):
+
+- Script **only the test's own portal** through `Payments` (`Paid`, `Customer`, `Balance`, `On`). Requests that
+  name no portal (the checkout template, the price catalogue) are answered once for the whole run - never script them.
+- **Assert on what the stack did, not on the stub**: `PaymentCalls` lists only requests that name the portal (a
+  route by id is checked in the store, `HasServiceLimit`); a billing body is compared by field (`BillingValue`),
+  not by substring; a status reachable on several paths also checks `ErrorContent`.
+- Re-read cached data (tariff, customer, balance) with `refresh=true` after scripting a payment.
+- The stub profile overrides the payment addresses, key, secret, region, default quota and the first accounting
+  currency; never depend on the rest of `buildtools/config` (an unsupported currency is `XXX`).

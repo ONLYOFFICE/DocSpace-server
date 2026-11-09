@@ -145,7 +145,7 @@
     <value>Υπηρεσία</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Λειτουργίες AI</value>
+    <value>AI πράκτορες και εργαλεία</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Αντίγραφο ασφαλείας</value>
@@ -1177,7 +1177,7 @@
     <value>Αναζήτηση AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Λειτουργίες AI</value>
+    <value>AI πράκτορες και εργαλεία</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Παρακολούθηση συνδέσεων και ενεργειών</value>

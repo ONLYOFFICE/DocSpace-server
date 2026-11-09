@@ -202,8 +202,8 @@ public abstract class UploadController<T>(
     [SwaggerResponse(200, "The progress of the session, or the stored file once the last part has arrived", typeof(UploadSessionResponseDto<int>))]
     [SwaggerResponse(400, "The request has no `File` part")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit")]
+    [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
-    [SwaggerResponse(500, "A file that is not a PDF is stored in a form-filling room")]
     [HttpPost("{folderId}/session/{sessionId}")]
     public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto<T> inDto)
     {
@@ -222,6 +222,11 @@ public abstract class UploadController<T>(
             if (resumedSession.UseChunks)
             {
                 resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(inDto.SessionId);
+            }
+            else
+            {
+                // A small session stored the file with this part, so it ends here as a large one does when finalized.
+                await chunkedUploadSessionHolder.RemoveSessionAsync(resumedSession);
             }
 
             await fileUploader.DeleteLinkAndMarkAsync(resumedSession.File);
@@ -295,8 +300,8 @@ public abstract class UploadController<T>(
     [SwaggerResponse(200, "The session with its progress after the part was stored", typeof(ChunkedUploadSessionDto<int>))]
     [SwaggerResponse(400, "The request has no `File` part, or `chunkNumber` is 0 or negative")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file")]
+    [SwaggerResponse(403, "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
-    [SwaggerResponse(500, "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room")]
     [HttpPost("{folderId}/session/{sessionId}/upload")]
     public async Task<ChunkedUploadSessionDto<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
     {
@@ -330,8 +335,8 @@ public abstract class UploadController<T>(
     [SwaggerResponse(200, "The assembled file and the identifiers of the closed session", typeof(UploadSessionResponseDto<int>))]
     [SwaggerResponse(400, "The parts received so far do not add up to the size the session was opened for")]
     [SwaggerResponse(402, "Storing the file would exceed a storage quota or size limit")]
+    [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
-    [SwaggerResponse(500, "A file that is not a PDF is stored in a form-filling room")]
     [HttpPut("{folderId}/session/{sessionId}/finalize")]
     public async Task<UploadSessionResponseDto<T>> FinalizeSession(FinalizeSessionDto<T> inDto)
     {
@@ -339,6 +344,11 @@ public abstract class UploadController<T>(
         if (session.UseChunks)
         {
             session = await fileUploader.FinalizeUploadSessionAsync<T>(inDto.SessionId);
+        }
+        else
+        {
+            // Left open, a small session could be aborted, finalized again or written to after this call.
+            await chunkedUploadSessionHolder.RemoveSessionAsync(session);
         }
 
         await fileUploader.DeleteLinkAndMarkAsync(session.File);
@@ -499,10 +509,9 @@ public abstract class UploadController<T>(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one", typeof(FileDto<int>))]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
-    [SwaggerResponse(403, "The caller cannot add content to this folder")]
+    [SwaggerResponse(403, "The caller cannot add content to this folder, or a file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No folder with the specified ID")]
     [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
-    [SwaggerResponse(500, "A file that is not a PDF is stored in a form-filling room")]
     [HttpPost("{folderId}/insert", Order = 1)]
     public async Task<FileDto<T>> InsertFile(InsertWithFileRequestDto<T> inDto)
     {
@@ -528,10 +537,9 @@ public abstract class UploadController<T>(
     [SwaggerResponse(200, "The stored file, as a list with one element", typeof(List<FileDto<int>>))]
     [SwaggerResponse(400, "The request has no file part")]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
-    [SwaggerResponse(403, "The caller cannot add content to this folder")]
+    [SwaggerResponse(403, "The caller cannot add content to this folder, or a file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No folder with the specified ID")]
     [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
-    [SwaggerResponse(500, "A file that is not a PDF is stored in a form-filling room")]
     [HttpPost("{folderId}/upload", Order = 1)]
     public async Task<List<FileDto<T>>> UploadFile(UploadWithFolderRequestDto<T> inDto)
     {

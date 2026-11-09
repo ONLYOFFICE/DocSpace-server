@@ -194,9 +194,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The versions of the file after the change", typeof(IAsyncEnumerable<FileDto<int>>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `version`")]
     [SwaggerResponse(402, "Completing the current version needs more space than the room or user storage quota leaves")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, or the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
-    [SwaggerResponse(500, "The file is locked by somebody else, or, when the current version is completed, the file is encrypted, another update of it is in progress, or storing the new version fails")]
+    [SwaggerResponse(500, "When the current version is completed, the file is encrypted, another update of it is in progress, or storing the new version fails")]
     [HttpPut("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> ChangeVersionHistory(ChangeHistoryRequestDto<T> inDto)
     {
@@ -346,7 +346,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the form gallery has no file of the title's format")]
+    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, the form gallery has no file of the title's format, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage")]
     [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the folder id is 0 and the caller is a guest without My documents")]
     [HttpPost("{folderId}/file")]
@@ -376,7 +376,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/html")]
     public async Task<FileDto<T>> CreateHtmlFile(CreateTextOrHtmlFileRequestDto<T> inDto)
@@ -405,7 +405,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/text")]
     public async Task<FileDto<T>> CreateTextFile(CreateTextOrHtmlFileRequestDto<T> inDto)
@@ -747,9 +747,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The editing revisions of the file after the restore", typeof(IAsyncEnumerable<EditHistoryDto>))]
     [SwaggerResponse(400, "The version is missing or is already the current one")]
     [SwaggerResponse(402, "The restored content does not fit into the storage quota")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file, or, with `url`, may not edit the file or the file is locked by somebody else or being edited")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, the file is locked by somebody else, or, with `url`, may not edit the file or the file is being edited")]
     [SwaggerResponse(404, "Without `url`, the file id or the requested version resolves to nothing")]
-    [SwaggerResponse(500, "The file is locked by somebody else or being edited, another restore of it is in progress, or storing the new version fails; with `url`, also when the file or the version does not exist or the address cannot be fetched")]
+    [SwaggerResponse(500, "The file is being edited, another restore of it is in progress, or storing the new version fails; with `url`, also when the file or the version does not exist or the address cannot be fetched")]
     [AllowAnonymous]
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
@@ -837,9 +837,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "The title is longer than 165 characters, or `lastVersion` is the current version")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(402, "Restoring `lastVersion` needs more space than the room or user storage quota leaves")]
-    [SwaggerResponse(403, "The caller may not read or rename the file or change its version")]
+    [SwaggerResponse(403, "The caller may not read or rename the file or change its version, or the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id, or `lastVersion` of it, resolves to nothing, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
-    [SwaggerResponse(500, "The file is locked by somebody else, a third-party file is renamed while it is being edited, or restoring `lastVersion` fails because the file is being edited, another update of it is in progress or the new version cannot be stored")]
+    [SwaggerResponse(500, "A third-party file is renamed while it is being edited, or restoring `lastVersion` fails because the file is being edited, another update of it is in progress or the new version cannot be stored")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFile(UpdateFileRequestDto<T> inDto)
@@ -876,8 +876,9 @@ public abstract class FilesController<T>(
     /// `internal` whether only signed-in members may follow it, `denyDownload` whether the content may only be
     /// viewed, and `password` a secret to be asked for. A PDF form gets the rights it needs for filling out whatever
     /// was asked for, and a form in a form-filling room is answered with the link of the room instead. The caller
-    /// needs the right to share the file and is otherwise refused with 403; a link that was deliberately revoked is
-    /// not recreated but answered with 404. Read the address from `sharedTo.shareLink`.
+    /// needs the right to share the file and is otherwise refused with 403. A primary link that was revoked is
+    /// created anew by this call, with a new identifier, while `GET api/2.0/files/file/{id}/link` keeps answering
+    /// such a link with 404. Read the address from `sharedTo.shareLink`.
     /// </remarks>
     /// <summary>
     /// Create the file primary external link
@@ -887,7 +888,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
     [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
     [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms")]
-    [SwaggerResponse(404, "The file does not exist, or its primary link was revoked")]
+    [SwaggerResponse(404, "The file does not exist")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
     {
@@ -899,7 +900,8 @@ public abstract class FilesController<T>(
             requiredAuth: inDto.File.Internal,
             allowUnlimitedDate: true,
             denyDownload: inDto.File.DenyDownload,
-            password: inDto.File.Password);
+            password: inDto.File.Password,
+            recreateRevoked: true);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -1304,8 +1306,8 @@ public abstract class FilesController<T>(
     /// key that `GET api/2.0/files/file/{fileId}/publickeys` reports for them. The keys of the accounts named in the
     /// request are replaced, and the keys of everybody else are left as they are, which makes the call idempotent for
     /// a given set of recipients while remaining a mutating one; sending no entry for a person does not revoke that
-    /// person's key. The file has to lie in a private room, and every account named in the request has to have read
-    /// access to it. The caller needs read access to the file and the right to create content in that room, which its
+    /// person's key. The file has to lie in a private room. An account named in the request that cannot read the file is skipped,
+    /// nothing is stored for it, and it comes back in `skippedUserIds`, while the keys of the others are stored. The caller needs read access to the file and the right to create content in that room, which its
     /// members with editing rights and its admins have; a caller without those rights, a file outside a private room
     /// and a file that does not exist are all refused with 403. Read the result back with
     /// `GET api/2.0/files/{fileId}/access`.

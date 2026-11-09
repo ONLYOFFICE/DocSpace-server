@@ -75,6 +75,10 @@ public static class IdentityConsentExtension
 
                 entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_consents_owner");
 
+                entity.HasIndex(e => e.ModifiedAt, "idx_identity_consents_modified_at");
+
+                entity.HasIndex(e => e.RegisteredClientId, "idx_identity_consents_registered_client_id");
+
                 entity.Property(e => e.PrincipalId)
                     .HasMaxLength(255)
                     .HasColumnName("principal_id");
@@ -120,6 +124,10 @@ public static class IdentityConsentExtension
                     .HasColumnName("owner_user_id");
 
                 entity.HasIndex(e => new { e.OwnerTenantId, e.OwnerUserId }, "idx_identity_consents_owner");
+
+                entity.HasIndex(e => e.ModifiedAt, "idx_identity_consents_modified_at");
+
+                entity.HasIndex(e => e.RegisteredClientId, "idx_identity_consents_registered_client_id");
 
                 entity.Property(e => e.IsInvalidated)
                     .HasDefaultValueSql("false") // PostgreSQL uses "false" for boolean false

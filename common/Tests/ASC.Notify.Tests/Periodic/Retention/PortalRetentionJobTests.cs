@@ -72,19 +72,17 @@ public class PortalRetentionJobTests
     }
 
     /// <summary>
-    /// The stack's tariff service in front of an accounting service whose answers the case writes. The stack runs
-    /// none, so - as <c>AccountingClientTests</c> do - the real <see cref="AccountingClient"/> is configured with
-    /// an address and its network handler is replaced: the request goes through the client's own retries and
-    /// error mapping, and the cancellation reaches the handler. The stack is standalone, where every portal has
-    /// the installation's accounting key, so a portal that exists only in memory is asked about as well.
+    /// The stack's tariff service in front of <paramref name="accounting"/>. The stack runs no accounting service, so
+    /// the real <see cref="AccountingClient"/> is configured with the stub's address: the request goes through the
+    /// client's own retries and error mapping, and the job's cancellation cuts it off. The stack is standalone, where
+    /// every portal has the installation's accounting key, so a portal that exists only in memory is asked about as well.
     /// </summary>
-    private static (ITariffService TariffService, ServiceProvider Accounting) WithAccounting(LetterScope scope,
-        Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> respond)
+    private static (ITariffService TariffService, ServiceProvider Accounting) WithAccounting(LetterScope scope, AccountingStub accounting)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["core:accounting:url"] = "https://accounting.example.com/api",
+                ["core:accounting:url"] = accounting.Url,
                 ["core:accounting:key"] = "test-key",
                 ["core:accounting:secret"] = "test-secret"
             })
@@ -98,31 +96,68 @@ public class PortalRetentionJobTests
         services.AddFusionCache();
         services.AddAccountingHttpClient(configuration);
 
-        // AddRefitGeneratedClient sets the primary handler of its own named client, so the override targets it.
-        services.AddHttpClient(Refit.UniqueName.ForType<IAccountingApi>())
-                .ConfigurePrimaryHttpMessageHandler(() => new RespondingHandler(respond));
+        var provider = services.BuildServiceProvider();
+        var tariffService = ActivatorUtilities.CreateInstance<TariffService>(scope.Services, provider.GetRequiredService<AccountingClient>());
 
-        var accounting = services.BuildServiceProvider();
-        var tariffService = ActivatorUtilities.CreateInstance<TariffService>(scope.Services, accounting.GetRequiredService<AccountingClient>());
-
-        return (tariffService, accounting);
+        return (tariffService, provider);
     }
 
-    private sealed class RespondingHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> respond) : HttpMessageHandler
+    /// <summary>
+    /// An accounting service that answers the balance requests as the case scripts them, on the same
+    /// <see cref="HttpStub"/> the payment client tests use. <see cref="Asked"/> counts a request the moment it arrives,
+    /// before it is answered; a request the case does not answer fails in transport, as when the service is down.
+    /// </summary>
+    private sealed class AccountingStub : IDisposable
     {
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        private const string EmptyBalance = """{"accountNumber":1,"accountCurrency":"USD","subAccounts":[]}""";
+
+        private readonly CancellationTokenSource _released = new();
+        private readonly HttpStub _stub;
+        private int _answering;
+
+        private AccountingStub(Func<int, CancellationToken, Task<bool>> answer)
         {
-            return respond(request, cancellationToken);
+            _stub = new HttpStub(async _ =>
+                await answer(Interlocked.Increment(ref _answering) - 1, _released.Token)
+                    ? StubResponse.Json(HttpStatusCode.OK, EmptyBalance)
+                    : StubResponse.TransportFault());
         }
-    }
 
-    /// <summary>A balance with nothing left on it.</summary>
-    private static HttpResponseMessage EmptyBalance()
-    {
-        return new HttpResponseMessage(HttpStatusCode.OK)
+        public string Url => _stub.Url + "/api";
+
+        public int Asked => _stub.CallCount;
+
+        /// <summary>The n-th request gets an empty balance when <paramref name="answers"/>[n] is true, a dropped connection otherwise.</summary>
+        public static AccountingStub Answering(params bool[] answers)
         {
-            Content = new StringContent("""{"accountNumber":1,"accountCurrency":"USD","subAccounts":[]}""", Encoding.UTF8, "application/json")
-        };
+            return new AccountingStub((n, _) => Task.FromResult(n < answers.Length && answers[n]));
+        }
+
+        /// <summary>A service that never answers: each request hangs until the case is over or <paramref name="cancellationToken"/> fires.</summary>
+        public static AccountingStub Silent(CancellationToken cancellationToken)
+        {
+            return new AccountingStub(async (_, released) =>
+            {
+                using var waiting = CancellationTokenSource.CreateLinkedTokenSource(released, cancellationToken);
+
+                try
+                {
+                    await Task.Delay(Timeout.Infinite, waiting.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                }
+
+                return false;
+            });
+        }
+
+        public void Dispose()
+        {
+            _released.Cancel();
+            _stub.Dispose();
+            _released.Dispose();
+        }
     }
 
     /// <summary>
@@ -228,11 +263,9 @@ public class PortalRetentionJobTests
         var tenant = InMemoryTenant(scope);
 
         // Unreachable on the first night, answers on the second.
-        bool[] answers = [false, true];
-        var asked = 0;
+        using var stub = AccountingStub.Answering(false, true);
 
-        var (tariffService, accounting) = WithAccounting(scope, (_, _) =>
-            answers[asked++] ? Task.FromResult(EmptyBalance()) : throw new HttpRequestException("Connection refused"));
+        var (tariffService, accounting) = WithAccounting(scope, stub);
 
         await using var accountingServices = accounting;
 
@@ -698,25 +731,24 @@ public class PortalRetentionJobTests
 
         // An accounting service that never answers: the request ends only when the job gives up on it - or when
         // the test runs out of time, should the job never give up.
-        var testCancellation = TestContext.Current.CancellationToken;
+        using var stub = AccountingStub.Silent(TestContext.Current.CancellationToken);
 
-        var (tariffService, accounting) = WithAccounting(scope, async (_, cancellationToken) =>
-        {
-            using var waiting = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, testCancellation);
-
-            await Task.Delay(Timeout.Infinite, waiting.Token);
-
-            return EmptyBalance();
-        });
+        var (tariffService, accounting) = WithAccounting(scope, stub);
 
         await using var accountingServices = accounting;
 
-        var job = CreateJob(scope, logger, new Dictionary<string, string?> { ["balanceTimeoutSeconds"] = "1" }, tariffService);
+        // Three seconds, not one: on a busy machine the request may take a while to reach the stub, and the test checks
+        // that it did.
+        var job = CreateJob(scope, logger, new Dictionary<string, string?> { ["balanceTimeoutSeconds"] = "3" }, tariffService);
         var waited = Stopwatch.StartNew();
 
         var leaveAlone = await job.ApplyAsync(PeriodicLetterContexts.Free(InMemoryTenant(scope), _today, _today.AddDays(-30)), _policyStart, client, _senderName);
 
-        waited.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(15), "the request is cut off after the configured second, not the client's minute");
+        waited.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(15), "the request is cut off after the configured seconds, not the client's minute");
+        // The wait is the request that hung, not a failure before it was sent: accounting was asked once, and the job
+        // gave up on it no sooner than the configured seconds.
+        stub.Asked.Should().Be(1);
+        waited.Elapsed.Should().BeGreaterThanOrEqualTo(TimeSpan.FromSeconds(2.9));
         leaveAlone.Should().BeFalse();
         logger.Messages.Should().ContainSingle(m => m.Contains("the wallet balance could not be read"));
         client.Sent.Should().BeEmpty("not knowing which schedule applies, the portal waits for the next run");
@@ -728,13 +760,12 @@ public class PortalRetentionJobTests
         using var scope = await OpenScopeAsync();
         var logger = new RecordingLogger<PortalRetentionJob>();
 
-        // Unreachable twice, answers once - which starts the count again - then unreachable for good. A refused
+        // Unreachable twice, answers once - which starts the count again - then unreachable for good. A dropped
         // connection is not retried by the client, so every failure is one request.
         bool[] answers = [false, false, true, false, false, false, false];
-        var asked = 0;
+        using var stub = AccountingStub.Answering(answers);
 
-        var (tariffService, accounting) = WithAccounting(scope, (_, _) =>
-            answers[asked++] ? Task.FromResult(EmptyBalance()) : throw new HttpRequestException("Connection refused"));
+        var (tariffService, accounting) = WithAccounting(scope, stub);
 
         await using var accountingServices = accounting;
 
@@ -745,7 +776,7 @@ public class PortalRetentionJobTests
             await job.ApplyAsync(PeriodicLetterContexts.Free(InMemoryTenant(scope), _today, _today.AddDays(-30)), _policyStart, new RecordingNotifyClient(), _senderName);
         }
 
-        asked.Should().Be(6, "after the third failure in a row the seventh portal is not asked about");
+        stub.Asked.Should().Be(6, "after the third failure in a row the seventh portal is not asked about");
         logger.Messages.Should().ContainSingle(m => m.Contains("requests in a row failed"));
         logger.Messages.Count(m => m.Contains("the wallet balance could not be read")).Should().Be(5, "only a request that was made and failed is reported");
         logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"), "the portal it got an answer for is warned");

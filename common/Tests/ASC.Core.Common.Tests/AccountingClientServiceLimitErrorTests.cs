@@ -43,7 +43,7 @@ public class AccountingClientServiceLimitErrorTests
     [Fact]
     public async Task CreateServiceLimit_SecondLimitOfTheScope_ThrowsConflictWithTheReason()
     {
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.Conflict,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.Conflict,
             """{"title":"Conflict","status":409,"detail":"Service group 'ai-services' already has a limit for this scope","instance":"/api/ServiceLimit"}"""));
 
         var act = async () => await client.CreateServiceLimitAsync("portal-1", "ai-services", ServiceLimitScope.Total, null, 500m, null, ServiceLimitPeriod.Month);
@@ -55,7 +55,7 @@ public class AccountingClientServiceLimitErrorTests
     [Fact]
     public async Task CreateServiceLimit_RejectedThreshold_ThrowsBadRequestWithTheReason()
     {
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.BadRequest,
             """{"title":"Bad request","status":400,"detail":"Services of group 'ai-services' have different units, a quantity threshold cannot be set"}"""));
 
         var act = async () => await client.CreateServiceLimitAsync("portal-1", "ai-services", ServiceLimitScope.Global, null, null, 1000, ServiceLimitPeriod.Day);
@@ -68,7 +68,7 @@ public class AccountingClientServiceLimitErrorTests
     public async Task UpdateServiceLimit_ValidationErrors_ThrowsBadRequestWithTheMessages()
     {
         // Field validation comes in the ASP.NET format, with an "errors" object instead of "detail".
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.BadRequest,
             """{"title":"One or more validation errors occurred.","status":400,"errors":{"AmountValue":["The field AmountValue must be between 0 and 79228162514264337593543950335."]}}"""));
 
         var act = async () => await client.UpdateServiceLimitAsync(42, -1m, null, null);
@@ -81,7 +81,7 @@ public class AccountingClientServiceLimitErrorTests
     public async Task Charge_ServiceLimitExceeded_ThrowsServiceLimitExceededWithTheReason()
     {
         // A limit refuses a charge with 403 and this title; the wallet may still have the money.
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.Forbidden,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.Forbidden,
             """{"title":"Service limit exceeded","status":403,"detail":"Service limit exceeded for customer No.10234. Service group 'ai-services', amount limit 100, available 12.50"}"""));
 
         var act = async () => await client.OpenCustomerSessionAsync("portal-1", "ai-tools", "ref", 1, 10);
@@ -94,7 +94,7 @@ public class AccountingClientServiceLimitErrorTests
     public async Task Forbidden_WithoutTheServiceLimitTitle_StaysAPlainFailure()
     {
         // A 403 without the title means our API client lacks the access level: a failure of ours, not of the user.
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.Forbidden,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.Forbidden,
             """{"title":"Forbidden","status":403}"""));
 
         var act = async () => await client.OpenCustomerSessionAsync("portal-1", "ai-tools", "ref", 1, 10);
@@ -107,7 +107,7 @@ public class AccountingClientServiceLimitErrorTests
     {
         // Outside the service limits a 400 means a request the portal built wrongly, so it is not passed on as the
         // caller's mistake.
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.BadRequest,
             """{"title":"Bad request","status":400,"detail":"Quantity must be positive"}"""));
 
         var act = async () => await client.OpenCustomerSessionAsync("portal-1", "ai-tools", "ref", 1, 10);
@@ -119,7 +119,7 @@ public class AccountingClientServiceLimitErrorTests
     public async Task Conflict_OutsideTheServiceLimits_StaysAPlainFailure()
     {
         // Only a service limit operation passes a 409 on to the caller; elsewhere it stays a failure of ours, as it was.
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.Conflict,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.Conflict,
             """{"title":"Conflict","status":409,"detail":"Session with this reference is already open"}"""));
 
         var act = async () => await client.OpenCustomerSessionAsync("portal-1", "ai-tools", "ref", 1, 10);
@@ -132,7 +132,7 @@ public class AccountingClientServiceLimitErrorTests
     {
         // The accounting service answers a missing service group with 400 "... not found" as well; the portal does have
         // a customer, so the reason must reach the caller instead of turning into "Customer not found".
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.BadRequest,
             """{"title":"Bad request","status":400,"detail":"Service group 'ai-services' not found","instance":"/api/serviceLimit"}"""));
 
         var act = async () => await client.CreateServiceLimitAsync("portal-1", "ai-services", ServiceLimitScope.Total, null, 50m, null, ServiceLimitPeriod.Day);
@@ -145,7 +145,7 @@ public class AccountingClientServiceLimitErrorTests
     public async Task UpdateServiceLimit_UnknownId_ThrowsNotFound()
     {
         // A read of a missing limit answers 404, an update or a deletion 400 with this detail; both mean the same.
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.BadRequest,
             """{"title":"Bad request","status":400,"detail":"Service limit '42' not found","instance":"/api/serviceLimit"}"""));
 
         var act = async () => await client.UpdateServiceLimitAsync(42, 1m, null, null);
@@ -156,7 +156,7 @@ public class AccountingClientServiceLimitErrorTests
     [Fact]
     public async Task GetTotalServiceLimit_UnknownCustomer_ThrowsCustomerNotFoundWithoutRetry()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.BadRequest,
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.BadRequest,
             """{"title":"Bad request","status":400,"detail":"Customer account 'portal-1' not found"}"""));
 
         var act = async () => await client.GetTotalServiceLimitAsync("portal-1", "ai-services", includeUsage: true);
@@ -169,7 +169,7 @@ public class AccountingClientServiceLimitErrorTests
     public async Task GetTotalServiceLimit_NoLimitSet_ThrowsNotFoundWithoutRetry()
     {
         // A missing limit is a definitive result, so the GET must not be retried.
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.NotFound,
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.NotFound,
             """{"title":"Resource not found","status":404,"detail":"Customer 'portal-1' has no total limit on group 'ai-services'"}"""));
 
         var act = async () => await client.GetTotalServiceLimitAsync("portal-1", "ai-services", includeUsage: true);
@@ -181,7 +181,7 @@ public class AccountingClientServiceLimitErrorTests
     [Fact]
     public async Task GetServiceLimit_UnknownId_ThrowsNotFoundWithoutRetry()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.NotFound,
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.NotFound,
             """{"title":"Resource not found","status":404}"""));
 
         var act = async () => await client.GetServiceLimitAsync(999999);
@@ -195,12 +195,12 @@ public class AccountingClientServiceLimitErrorTests
     {
         // Outside the service limits a 404 may be transient: a customer created a moment ago may not be visible yet.
         var calls = 0;
-        var (client, handler) = AccountingClientTests.CreateClient(_ =>
+        var (client, handler) = CreateAccountingClient(_ =>
         {
             calls++;
             return calls == 1
-                ? AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}""")
-                : AccountingClientTests.Json(HttpStatusCode.OK, """{"accountNumber":7}""");
+                ? Reply(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}""")
+                : Reply(HttpStatusCode.OK, """{"accountNumber":7}""");
         });
 
         var balance = await client.GetCustomerBalanceAsync("portal-1", TestContext.Current.CancellationToken);

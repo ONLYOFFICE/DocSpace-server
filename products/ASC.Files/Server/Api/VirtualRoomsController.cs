@@ -1393,7 +1393,7 @@ public class VirtualRoomsCommonController(
 
     /// <remarks>
     /// Lists one page of the rooms of a section narrowed by metadata: the active rooms by default, or the archive, the room
-    /// templates, the form templates or the Forms section, chosen with `searchArea`, while `type` narrows the room types.
+    /// templates, the form templates, the Forms section or the private rooms section, chosen with `searchArea`, while `type` narrows the room types. Private rooms are left out of the active rooms unless `privacyFilter` asks for them.
     /// The filter is a typed body: `metadataTemplateId` alone keeps the rooms the template is assigned to, every condition
     /// in `metadataFilters` must hold at once, and `filterValue` adds a text search over room titles and metadata values;
     /// the template and field IDs come from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the
@@ -1430,6 +1430,7 @@ public class VirtualRoomsCommonController(
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.FormTemplates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
+            SearchArea.PrivateRooms => await globalFolderHelper.GetFolderPrivateRoomsAsync(),
             SearchArea.AiHub => await globalFolderHelper.GetFolderAiHubAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };
