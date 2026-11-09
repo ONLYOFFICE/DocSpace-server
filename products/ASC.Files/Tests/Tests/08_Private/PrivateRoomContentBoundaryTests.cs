@@ -111,9 +111,11 @@ public class PrivateRoomContentBoundaryTests(AspireAppFixture fixture) : Privacy
             new DuplicateRequestDto(folderIds: [new(room.Id)]),
             TestContext.Current.CancellationToken));
 
+        var privateRooms = (await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.PrivateRooms, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var rooms = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        rooms.Folders.OfType<FolderDto>().Should().ContainSingle(f => f.Title.StartsWith(room.Title));
+        privateRooms.Folders.OfType<FolderDto>().Should().ContainSingle(f => f.Title.StartsWith(room.Title));
+        rooms.Folders.OfType<FolderDto>().Should().NotContain(f => f.Title.StartsWith(room.Title), "a copy would land in Rooms as an ordinary room");
     }
 
     [Fact]

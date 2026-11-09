@@ -41,7 +41,9 @@ public class FileLogHtmlCreationTests(
 {
     /// <summary>
     /// A docx created through createFile has its FileCreated entry at once, but an HTML file created
-    /// through createHtmlFile had an empty log (still empty 26 s later).
+    /// through createHtmlFile had an empty log (still empty 26 s later): the content was stored through the uploader,
+    /// which writes no audit entry, and nothing after it did. Fixed by recording the file as created (and sending the
+    /// socket event) after the content is stored.
     /// </summary>
     [Fact]
     [Trait("Bug", "84773")]
@@ -52,6 +54,27 @@ public class FileLogHtmlCreationTests(
         var room = await CreateCustomRoom("Autotest Log Html " + Guid.NewGuid().ToString()[..8]);
         var file = (await _filesApi.CreateHtmlFileAsync(
             room.Id, new CreateTextOrHtmlFileRequest("Autotest Log Html", "<p/>"), TestContext.Current.CancellationToken)).Response;
+
+        // Act
+        var history = await PollFileHistoryAsync(file.Id, TimeSpan.FromSeconds(20));
+
+        // Assert
+        history.Should().NotBeEmpty();
+    }
+
+    /// <summary>
+    /// BUG 84773, text-file side: createTextFile stores its content through the same path as createHtmlFile and
+    /// left the log just as empty. Fixed together with the HTML case.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "84773")]
+    public async Task GetFileHistory_TextFileCreatedThroughCreateTextFile_HasCreationEntry()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Log Text " + Guid.NewGuid().ToString()[..8]);
+        var file = (await _filesApi.CreateTextFileAsync(
+            room.Id, new CreateTextOrHtmlFileRequest("Autotest Log Text", "plain text"), TestContext.Current.CancellationToken)).Response;
 
         // Act
         var history = await PollFileHistoryAsync(file.Id, TimeSpan.FromSeconds(20));

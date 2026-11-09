@@ -34,14 +34,13 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// Covers how a DocsCloud failure reaches the API caller: the Refit-backed <see cref="DocsCloudClient"/> is
-/// driven with a fake primary handler (no network access), and the exception it raises is passed through the
+/// Covers how a DocsCloud failure reaches the API caller: the Refit-backed <see cref="DocsCloudClient"/> talks to an
+/// <see cref="HttpStub"/> over loopback, and the exception it raises is passed through the
 /// real <see cref="CustomExceptionHandler"/> — the same object the API pipeline uses — so the assertions are
 /// made on the status code and the error body the portal actually answers with.
 /// </summary>
 public class DocsCloudClientTests
 {
-    private const string BaseUrl = "https://docscloud.example.com/api/";
     private const string PortalId = "portal-1";
     private const string NotFoundMessage = "DocsCloud resource not found";
 
@@ -56,7 +55,7 @@ public class DocsCloudClientTests
     [Trait("Bug", "83320")]
     public async Task GetTenantConfig_TenantNotActivated_IsReportedAsBadRequest()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.NotFound, "\"not found\""));
+        var (client, handler) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.NotFound, "\"not found\""));
 
         var response = await CallAndHandleAsync(() => client.GetTenantConfigAsync(PortalId));
 
@@ -77,7 +76,7 @@ public class DocsCloudClientTests
     [Trait("Bug", "83321")]
     public async Task GetTenantInfo_TenantNotActivated_IsReportedAsBadRequest()
     {
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.NotFound, "\"not found\""));
+        var (client, _) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.NotFound, "\"not found\""));
 
         var response = await CallAndHandleAsync(() => client.GetTenantInfoAsync(PortalId));
 
@@ -92,7 +91,7 @@ public class DocsCloudClientTests
     [Trait("Bug", "83322")]
     public async Task GetTenantUsage_TenantNotActivated_IsReportedAsBadRequest()
     {
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.NotFound, "\"not found\""));
+        var (client, _) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.NotFound, "\"not found\""));
 
         var response = await CallAndHandleAsync(() => client.GetTenantUsageAsync(PortalId));
 
@@ -108,7 +107,7 @@ public class DocsCloudClientTests
     [Trait("Bug", "83323")]
     public async Task UpdateTenantConfig_TenantNotActivated_IsReportedAsBadRequest()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.NotFound, "\"not found\""));
+        var (client, handler) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.NotFound, "\"not found\""));
 
         var response = await CallAndHandleAsync(() => client.UpdateTenantConfigAsync(PortalId, new DocsCloudConfig { Wopi = new DocsCloudWopiConfig { Enable = true } }));
 
@@ -124,7 +123,7 @@ public class DocsCloudClientTests
     [Trait("Bug", "83325")]
     public async Task GetTenantQuota_TenantNotActivated_IsReportedAsBadRequest()
     {
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.NotFound, "\"not found\""));
+        var (client, _) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.NotFound, "\"not found\""));
 
         var response = await CallAndHandleAsync(() => client.GetTenantQuotaAsync(PortalId));
 
@@ -139,7 +138,7 @@ public class DocsCloudClientTests
     [Fact]
     public async Task GetTenantConfig_ServiceFailure_StaysInternalServerError()
     {
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.InternalServerError, "\"boom\""));
+        var (client, _) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.InternalServerError, "\"boom\""));
 
         var response = await CallAndHandleAsync(() => client.GetTenantConfigAsync(PortalId));
 
@@ -181,66 +180,36 @@ public class DocsCloudClientTests
         // A transport failure never reaches ExceptionFactory, which only sees HTTP responses; the
         // TransportExceptionFactory keeps it inside the DocsCloudException hierarchy instead of leaking
         // Refit.ApiRequestException to the callers.
-        var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
+        var (client, _) = CreateDocsCloudClient(HttpStub.Unreachable());
 
         var act = async () => await client.GetTenantConfigAsync(PortalId);
 
         (await act.Should().ThrowExactlyAsync<DocsCloudException>())
             .WithInnerException<HttpRequestException>();
     }
-    private static (DocsCloudClient client, CapturingHandler handler) CreateClient(Func<HttpRequestMessage, HttpResponseMessage> responder)
+
+    /// <summary>
+    /// DocsCloud signs its requests like billing and accounting, but with the standard Base64 alphabet: the hash of
+    /// <c>"{timestamp}\n{key}"</c> keyed by the secret, padding and all.
+    /// </summary>
+    [Fact]
+    public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["core:docscloud:url"] = BaseUrl,
-                ["core:docscloud:key"] = "test-key",
-                ["core:docscloud:secret"] = "test-secret"
-            })
-            .Build();
+        var (client, handler) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.OK, "{}"));
 
-        var handler = new CapturingHandler(responder);
+        await client.GetTenantConfigAsync(PortalId);
 
-        var services = new ServiceCollection();
-        services.AddSingleton<IConfiguration>(configuration);
-        services.AddScoped<DocsCloudClient>();
-        services.AddFusionCache();
+        var token = handler.LastAuthorization;
+        token.Should().NotBeNull().And.StartWith($"ASC {Key}:");
 
-        services.AddDocsCloudHttpClient(configuration);
+        var parts = token!["ASC ".Length..].Split(':');
+        parts.Should().HaveCount(3);
 
-        // Replace the real network handler with our capturing one. AddRefitGeneratedClient sets a primary
-        // handler on its own named client, which overrides ConfigureHttpClientDefaults - so the
-        // override has to target that exact client by name.
-        services.AddHttpClient(Refit.UniqueName.ForType<IDocsCloudApi>())
-                .ConfigurePrimaryHttpMessageHandler(() => handler);
+        var timestamp = parts[1];
+        timestamp.Should().MatchRegex(@"^\d{14}$");
 
-        var provider = services.BuildServiceProvider();
-
-        return (provider.GetRequiredService<DocsCloudClient>(), handler);
-    }
-
-    private static HttpResponseMessage Json(HttpStatusCode status, string json)
-    {
-        return new HttpResponseMessage(status)
-        {
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-    }
-
-    private sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
-    {
-        public int CallCount { get; private set; }
-
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            CallCount++;
-
-            var response = responder(request);
-
-            // Mimic the real primary handler so the resilience pipeline can inspect the request.
-            response.RequestMessage = request;
-
-            return Task.FromResult(response);
-        }
+        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(Secret));
+        var hash = Convert.ToBase64String(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", timestamp, Key))));
+        token.Should().Be($"ASC {Key}:{timestamp}:{hash}");
     }
 }

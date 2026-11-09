@@ -34,9 +34,10 @@
 package com.asc.authorization.application.configuration;
 
 import com.asc.authorization.application.configuration.serialization.CacheObjectSerializer;
-import com.asc.authorization.application.security.oauth.service.RedisCacheNamespaceCounterStore;
 import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
 import com.asc.common.utilities.cache.CacheNamespaceRegistry;
+import com.asc.common.utilities.cache.RedisCacheNamespaceCounterStore;
+import com.asc.common.utilities.cache.bus.RedisCacheInvalidationBus;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -212,5 +213,20 @@ public class CacheManagerConfiguration {
   public CacheNamespaceRegistry registeredClientCacheNamespaceRegistry(
       CacheNamespaceCounterStore counterStore) {
     return new CacheNamespaceRegistry(counterStore, "identity:authorization:client:ver");
+  }
+
+  /**
+   * Creates the bus that broadcasts evictions to the in-process registered client cache of every
+   * instance.
+   *
+   * @param connectionFactory the Redis connection factory
+   * @return a {@link RedisCacheInvalidationBus} on the registered client cache's own channel
+   */
+  @Bean
+  @Profile("saas")
+  public RedisCacheInvalidationBus registeredClientCacheInvalidationBus(
+      RedisConnectionFactory connectionFactory) {
+    return new RedisCacheInvalidationBus(
+        connectionFactory, "identity:authorization:client:invalidate");
   }
 }

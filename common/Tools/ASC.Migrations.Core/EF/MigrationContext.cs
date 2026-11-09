@@ -133,6 +133,8 @@ public class MigrationContext : DbContext
     public DbSet<IdentityClientScope> IdentityClientScopes { get; set; }
     public DbSet<IdentityConsent> IdentityConsents { get; set; }
     public DbSet<IdentityConsentScope> IdentityConsentScopes { get; set; }
+    public DbSet<IdentityPendingMessage> IdentityPendingMessages { get; set; }
+    public DbSet<IdentityPurgeCursor> IdentityPurgeCursors { get; set; }
     public DbSet<IdentityScope> IdentityScopes { get; set; }
     public DbSet<IdentityShedlock> IdentityShedlocks { get; set; }
     public DbSet<DbUserRelation> UserRelations { get; set; }
@@ -244,6 +246,8 @@ public class MigrationContext : DbContext
                 .AddIdentityClientScope()
                 .AddIdentityConsent()
                 .AddIdentityConsentScope()
+                .AddIdentityPendingMessage()
+                .AddIdentityPurgeCursor()
                 .AddIdentityScope()
                 .AddIdentityShedlock()
                 .AddUserRelation()

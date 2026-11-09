@@ -36,75 +36,15 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 /// <summary>
 /// GET /api/2.0/portal/payment/walletservices — the full wallet service catalogue. Requires
 /// EditPortalSettings and reads local <c>TenantQuota</c> definitions only, so it is unaffected by
-/// the unconfigured billing service.
+/// the unconfigured billing service. The catalogue is SaaS data this standalone host does not have, so only the
+/// access rules are checked here; the catalogue itself is in <c>WalletServicesTests</c> of
+/// ASC.Web.Api.Billing.Tests.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PaymentWalletServicesTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // Commented out for now: the wallet-service catalog (6 services with fixed prices) is SaaS
-    // seed data this standalone-style integration host does not have — the endpoint answers 200
-    // with an empty list here. Re-enable on a SaaS-seeded environment.
-    /*
-    [Fact]
-    public async Task GetWalletServices_Owner_ReturnsAllServices()
-    {
-        // Arrange
-        await _webApiClient.Authenticate(Owner);
-
-        // Act
-        var services = await _paymentApi.GetWalletServicesAsync(TestContext.Current.CancellationToken);
-
-        // Assert
-        services.StatusCode.Should().Be(200);
-        services.Response.Should().HaveCount(6);
-
-        var serviceNames = services.Response!.Select(s => s.ServiceName).ToList();
-        serviceNames.Should().Contain([
-            "disk-storage-1-hour",
-            "backup",
-            "ai-tools",
-            "docscloud-1-hour",
-            "docscloud-devpack-1-hour",
-            "ai-search"
-        ]);
-
-        var expectedPrices = new Dictionary<string, double>
-        {
-            ["disk-storage-1-hour"] = 0.14,
-            ["backup"] = 10,
-            ["ai-tools"] = 0,
-            ["docscloud-1-hour"] = 8,
-            ["docscloud-devpack-1-hour"] = 12,
-            ["ai-search"] = 0
-        };
-
-        foreach (var service in services.Response!)
-        {
-            service.Id.Should().NotBe(0);
-            service.Price!.Value.Should().Be(expectedPrices[service.ServiceName!]);
-            service.Price.IsoCurrencySymbol.Should().Be("USD");
-            service.Features.Should().NotBeNullOrEmpty();
-        }
-    }
-
-    [Fact]
-    public async Task GetWalletServices_DocSpaceAdmin_ReturnsAllServices()
-    {
-        // Arrange
-        var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
-        await _webApiClient.Authenticate(admin);
-
-        // Act
-        var services = await _paymentApi.GetWalletServicesAsync(TestContext.Current.CancellationToken);
-
-        // Assert
-        services.StatusCode.Should().Be(200);
-        services.Response.Should().HaveCount(6);
-    }
-    */
-
     [Fact]
     public async Task GetWalletServices_Anonymous_ThrowsUnauthorized()
     {

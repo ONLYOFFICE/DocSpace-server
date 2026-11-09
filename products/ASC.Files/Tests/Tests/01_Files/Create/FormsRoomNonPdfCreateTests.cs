@@ -60,7 +60,10 @@ public class FormsRoomNonPdfCreateTests(
         }
     }
 
-    /// <summary>The portal reported the rejection as an unhandled exception, a 500, for every non-PDF creation.</summary>
+    /// <summary>
+    /// The portal used to report the rejection as an unhandled exception, a 500, for every non-PDF creation. The
+    /// refusal is now an InvalidOperationException, answered with 403 as the copy and move checks do.
+    /// </summary>
     [Fact]
     [Trait("Bug", "84840")]
     public async Task CreateHtmlFile_FormFillingRoom_RefusedWithClientError()

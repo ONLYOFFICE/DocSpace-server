@@ -56,7 +56,7 @@ import org.springframework.context.annotation.Configuration;
     info =
         @Info(
             title = "ASC.Identity.Registration",
-            version = "1.3.0",
+            version = "1.4.0",
             description = "API for managing OAuth2 clients",
             termsOfService = "",
             contact =

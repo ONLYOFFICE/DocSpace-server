@@ -48,7 +48,7 @@ public class SaasRoomInviteLetterTests : LetterTestBase<SaasRoomInviteNotifyActi
 
     protected override Task InitAsync(SaasRoomInviteNotifyAction action, LetterScope scope)
     {
-        action.Init(scope.Culture.Name, RoomTitle, ConfirmUrl(scope));
+        action.Init(scope.Culture.Name, RoomTitle, ConfirmUrl(scope), EmployeeType.User);
 
         return Task.CompletedTask;
     }

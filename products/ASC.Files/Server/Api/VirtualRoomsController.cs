@@ -712,12 +712,13 @@ public abstract class VirtualRoomsController<T>(
     /// subjects. Each entry names either an account or a group of the portal, or the email address of somebody who
     /// has no account yet, together with the access level to grant; an access of 0 removes the subject from the room.
     /// An entry without an access level is ignored, the same subject listed twice keeps the last level, and an empty
-    /// list is accepted and changes nothing. The caller must be a manager of the room, so an invitation sent by a
-    /// user or a guest is refused, and an account that is a portal user or a guest cannot be made a room manager.
+    /// list changes nothing. The caller must be a manager of the room, and an account that is a
+    /// portal user or a guest cannot be made a room manager.
     /// Inviting by email also needs the portal to allow guest invitations. A subject the caller is not allowed to see
-    /// is dropped without an error, which is why the answer has to be compared with the request. Removing a member
-    /// who still holds a form role is refused through `error` unless `force` is set. `notify` sends the invitation
-    /// email with the optional `message`.
+    /// is dropped without an error, so compare the answer with the request. Removing a member who still holds a form
+    /// role is refused through `error` unless `force` is set. `notify` sends the invitation email with the optional
+    /// `message`; a person who got the same invitation to this room, or was told about the same access in it, a short
+    /// while ago is not mailed again, even with a new message.
     /// </remarks>
     /// <summary>Set the room access rights</summary>
     /// <path>api/2.0/files/rooms/{id}/share</path>
@@ -1231,19 +1232,18 @@ public abstract class VirtualRoomsController<T>(
     /// set the flag does nothing, so a successful answer never proves that a message went out. Nothing about the room
     /// or its membership changes, and the operation can be repeated. The caller must be a manager of the room, an
     /// archived room is refused, a room template is answered as missing, and a malformed account id is rejected as an
-    /// invalid request. The call is rate limited, so a client that loops over members should send one batch instead.
-    /// The response carries no body.
+    /// invalid request. A member who got the invitation to this room a short while ago is not mailed again, and the
+    /// link in that letter stays valid. The response carries no body.
     /// </remarks>
     /// <summary>Resend the room invitations</summary>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "The invitations that were still pending have been sent again")]
+    [SwaggerResponse(200, "The request is accepted; the pending members it covers are mailed again, except those who already got this invitation within the repeat period")]
     [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller is not a manager of the room, or the room is archived")]
     [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("{id}/resend")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitations(UserInvitationRequestDto<T> inDto)
     {
         await _fileStorageService.ResendEmailInvitationsAsync(inDto.Id, inDto.UserInvitation.UsersIds, inDto.UserInvitation.ResendAll);
@@ -1393,7 +1393,7 @@ public class VirtualRoomsCommonController(
 
     /// <remarks>
     /// Lists one page of the rooms of a section narrowed by metadata: the active rooms by default, or the archive, the room
-    /// templates, the form templates or the Forms section, chosen with `searchArea`, while `type` narrows the room types.
+    /// templates, the form templates, the Forms section or the private rooms section, chosen with `searchArea`, while `type` narrows the room types. Private rooms are left out of the active rooms unless `privacyFilter` asks for them.
     /// The filter is a typed body: `metadataTemplateId` alone keeps the rooms the template is assigned to, every condition
     /// in `metadataFilters` must hold at once, and `filterValue` adds a text search over room titles and metadata values;
     /// the template and field IDs come from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the
@@ -1430,6 +1430,7 @@ public class VirtualRoomsCommonController(
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.FormTemplates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
+            SearchArea.PrivateRooms => await globalFolderHelper.GetFolderPrivateRoomsAsync(),
             SearchArea.AiHub => await globalFolderHelper.GetFolderAiHubAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };

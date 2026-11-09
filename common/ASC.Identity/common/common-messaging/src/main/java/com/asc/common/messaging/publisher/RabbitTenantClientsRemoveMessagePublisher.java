@@ -33,51 +33,21 @@
 
 package com.asc.common.messaging.publisher;
 
-import com.asc.common.messaging.configuration.AuthorizationMessagingConfiguration;
-import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
 import com.asc.common.service.transfer.message.TenantClientsRemovedEvent;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link AuthorizationMessagePublisher} that publishes {@link
- * TenantClientsRemovedEvent} messages to a RabbitMQ exchange.
+ * Publishes {@link TenantClientsRemovedEvent} cleanups; see {@link AuthorizationCleanupPublisher}.
  *
- * <p>This publisher broadcasts tenant client removal events to the authorization messaging system
- * using the exchange defined in {@link AuthorizationMessagingConfiguration#ENTRY_EXCHANGE}.
- *
- * <p>This publisher is only loaded when RabbitMQ classes are available on the classpath.
- *
- * @see AuthorizationMessagePublisher
- * @see TenantClientsRemovedEvent
- * @see AuthorizationMessagingConfiguration
+ * <p>Only loaded when RabbitMQ classes are available on the classpath.
  */
-@Slf4j
 @Component
-@RequiredArgsConstructor
 @ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class RabbitTenantClientsRemoveMessagePublisher
-    implements AuthorizationMessagePublisher<TenantClientsRemovedEvent> {
-
-  /** The AMQP client used to send messages to RabbitMQ. */
-  private final AmqpTemplate amqpClient;
-
-  /**
-   * Publishes a tenant clients removed event to the authorization message exchange.
-   *
-   * <p>The message is sent to the entry exchange defined in {@link
-   * AuthorizationMessagingConfiguration#ENTRY_EXCHANGE} with an empty routing key.
-   *
-   * @param message the {@link TenantClientsRemovedEvent} to publish
-   */
-  @Override
-  public void publish(TenantClientsRemovedEvent message) {
-    log.debug("Broadcasting a tenant clients removed event: {}", message);
-    amqpClient.convertAndSend(
-        AuthorizationMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
+    extends AuthorizationCleanupPublisher<TenantClientsRemovedEvent> {
+  public RabbitTenantClientsRemoveMessagePublisher(
+      RabbitPersistableMessagePublisher publisher, RabbitBackgroundPublisher background) {
+    super(publisher, background, false);
   }
 }

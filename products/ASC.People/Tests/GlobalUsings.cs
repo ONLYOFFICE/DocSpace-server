@@ -63,6 +63,7 @@ global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
 // Both the People and the Group areas publish a SearchApi, so neither can be used unqualified.
 global using GroupSearchApi = DocSpace.API.SDK.Api.Group.SearchApi;
+global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
 // QuotaApi and GuestsApi each exist in more than one of the namespaces above, so the People ones
 // are reached through an alias rather than unqualified.
 global using PeopleGuestsApi = DocSpace.API.SDK.Api.People.GuestsApi;

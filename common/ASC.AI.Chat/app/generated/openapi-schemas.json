@@ -699,7 +699,8 @@
             "message-end",
             "message-incomplete",
             "tool-call-pending",
-            "thread-title"
+            "thread-title",
+            "context-compacted"
           ],
           "type": "string",
           "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids.",
@@ -1103,6 +1104,10 @@
         "reasoningSupport": {
           "$ref": "#/components/schemas/AiReasoningSupport",
           "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
+        },
+        "contextWindow": {
+          "type": "number",
+          "description": "Size of the selected model's context window in tokens, as the provider's catalogue reported it at save time (see `Model.contextWindow`). The engine's history compaction measures the thread against it; when absent the id-based table answers, and when that has no row either, `CompactionOptions.defaultContextWindow`. Hosts persist it with the rest of the profile."
         },
         "capabilities": {
           "type": "number",
@@ -1669,6 +1674,10 @@
           "$ref": "#/components/schemas/AiReasoningSupport",
           "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
         },
+        "contextWindow": {
+          "type": "number",
+          "description": "Size of the selected model's context window in tokens, as the provider's catalogue reported it at save time (see `Model.contextWindow`). The engine's history compaction measures the thread against it; when absent the id-based table answers, and when that has no row either, `CompactionOptions.defaultContextWindow`. Hosts persist it with the rest of the profile."
+        },
         "capabilities": {
           "type": "number",
           "description": "Bitmask of capabilities supported by the selected model.",
@@ -1779,6 +1788,10 @@
           "examples": [
             7
           ]
+        },
+        "contextWindow": {
+          "type": "number",
+          "description": "Size of the model's context window in tokens, when the provider's catalogue reports one (OpenRouter and the ONLYOFFICE route carry `context_length`). Copied onto the profile at save time; absent, the widget falls back to the id-based table in `core/providers/context-window`."
         },
         "created": {
           "type": "number",
@@ -3665,6 +3678,10 @@
           "reasoningSupport": {
             "$ref": "#/components/schemas/AiReasoningSupport",
             "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
+          },
+          "contextWindow": {
+            "type": "number",
+            "description": "Size of the selected model's context window in tokens, as the provider's catalogue reported it at save time (see `Model.contextWindow`). The engine's history compaction measures the thread against it; when absent the id-based table answers, and when that has no row either, `CompactionOptions.defaultContextWindow`. Hosts persist it with the rest of the profile."
           },
           "capabilities": {
             "type": "number",

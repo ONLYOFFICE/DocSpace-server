@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -38,6 +38,14 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 {
     public override string ID => "portal_deactivate";
 
+    // a caller can repeat POST portal/suspend at will
+    public override bool SuppressRepeats => true;
+
+    // the links are valid only while the owner still has the address they were made for, so a request after an
+    // email change is a new letter; the address goes in as stored, since the check compares it the way the database
+    // does, which tells case apart on PostgreSQL
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -55,6 +63,7 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email),
             new TagValue(CommonTags.ActivateUrl, activateUrl),
             TagValues.OrangeButton(orangeButtonText, deactivateUrl),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
@@ -67,6 +76,14 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelper, DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "portal_delete";
+
+    // a caller can repeat POST portal/delete at will
+    public override bool SuppressRepeats => true;
+
+    // the link is valid only while the owner still has the address it was made for, so a request after an email
+    // change is a new letter; the address goes in as stored, since the check compares it the way the database does,
+    // which tells case apart on PostgreSQL
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
 
     public override List<Pattern> Patterns
     {
@@ -85,6 +102,7 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email),
             TagValues.OrangeButton(orangeButtonText, url),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
             new TagValue(CommonTags.AutoRenew, showAutoRenewText.ToString()),
@@ -136,7 +154,7 @@ public sealed class PortalDeletedToSupportNotifyAction(DisplayUserSettingsHelper
         ];
     }
 
-    public void Init(UserInfo user, string tenantDomain,  CustomerInfo customerInfo)
+    public void Init(UserInfo user, string tenantDomain, CustomerInfo customerInfo)
     {
         Tags =
         [
@@ -155,6 +173,13 @@ public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtilit
 {
     public override string ID => "profile_delete";
 
+    // a caller can repeat PUT people/self/delete at will
+    public override bool SuppressRepeats => true;
+
+    // the link is valid only while the account still has the address it was made for, so a request after an email
+    // change is a new letter; the address goes in as stored, since the check compares it exactly
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -172,6 +197,7 @@ public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtilit
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email),
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, user.GetCulture().Name)
@@ -400,6 +426,9 @@ public sealed class ConfirmOwnerChangeNotifyAction(DisplayUserSettingsHelper dis
 public sealed class ActivateEmailNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "activate_email";
+
+    // a caller can repeat PUT people/invite at will
+    public override bool SuppressRepeats => true;
 
     public override List<Pattern> Patterns
     {
@@ -681,7 +710,7 @@ public sealed class PhoneChangeNotifyAction(CommonLinkUtility commonLinkUtility,
 }
 
 [Scope]
-public sealed class TfaChangeNotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class TfaChangeNotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "change_tfa";
 
@@ -722,7 +751,7 @@ public sealed class UserHasJoinNotifyAction(TenantManager tenantManager) : Notif
 }
 
 [Scope]
-public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "join";
 
@@ -1295,6 +1324,13 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
 {
     public override string ID => "saas_room_invite";
 
+    // a caller can repeat PUT files/rooms/{id}/share and POST files/rooms/{id}/resend at will
+    public override bool SuppressRepeats => true;
+
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1303,7 +1339,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         ];
     }
 
-    public void Init(string culture, string roomTitle, string confirmationUrl)
+    public void Init(string culture, string roomTitle, string confirmationUrl, EmployeeType inviteType)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1313,6 +1349,8 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         Tags = [
             new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1325,6 +1363,13 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
 {
     public override string ID => "saas_agent_invite";
 
+    // a caller can repeat PUT files/rooms/{id}/share and POST files/rooms/{id}/resend at will
+    public override bool SuppressRepeats => true;
+
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1333,7 +1378,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         ];
     }
 
-    public void Init(string culture, string roomTitle, string confirmationUrl)
+    public void Init(string culture, string roomTitle, string confirmationUrl, EmployeeType inviteType)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1343,6 +1388,8 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         Tags = [
             new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1354,6 +1401,13 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
 public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "saas_room_invite_existing_user";
+
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    // the room's address tells two rooms apart even in a letter that carries no room id: one sent by a node of the
+    // previous version during an update, or queued before it; it is built from the room id, so a rename keeps it
+    public override string[] DeduplicationTags => [CommonTags.InviteLink];
 
     public override List<Pattern> Patterns
     {
@@ -1384,6 +1438,13 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
 {
     public override string ID => "saas_agent_invite_existing_user";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    // the room's address tells two rooms apart even in a letter that carries no room id: one sent by a node of the
+    // previous version during an update, or queued before it; it is built from the room id, so a rename keeps it
+    public override string[] DeduplicationTags => [CommonTags.InviteLink];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1413,6 +1474,13 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
 {
     public override string ID => "saas_docspace_invite";
 
+    // a caller can repeat PUT people/invite at will
+    public override bool SuppressRepeats => true;
+
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1421,7 +1489,7 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
         ];
     }
 
-    public void Init(string confirmationUrl, string culture = "")
+    public void Init(string confirmationUrl, EmployeeType inviteType, string culture = "")
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1431,6 +1499,8 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
         Tags = [
 
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
@@ -3547,6 +3617,11 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
 {
     public override string ID => "user_type_changed";
 
+    // a caller can repeat PUT people/type/{type} at will
+    public override bool SuppressRepeats => true;
+
+    public override string[] DeduplicationTags => [CommonTags.NewUserType];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -3555,13 +3630,14 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
         ];
     }
 
-    public void Init(UserInfo u, string userType)
+    public void Init(UserInfo u, EmployeeType type, string userType)
     {
         var culture = GetCulture(u);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         Tags =
         [
+            new TagValue(CommonTags.NewUserType, type.ToStringFast()),
             new TagValue("UserType", userType),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),
@@ -3575,6 +3651,11 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
 {
     public override string ID => "user_role_changed";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    public override string[] DeduplicationTags => [CommonTags.AccessLevel];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -3583,7 +3664,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
         ];
     }
 
-    public void Init(UserInfo user, string roomTitle, string roomUrl, string userRole)
+    public void Init(UserInfo user, string roomTitle, string roomUrl, string accessLevel, string userRole)
     {
         var culture = GetCulture(user);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -3592,6 +3673,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
         [
             new TagValue("RoomTitle", (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", culture)).HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
+            new TagValue(CommonTags.AccessLevel, accessLevel),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),
@@ -3605,6 +3687,11 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
 {
     public override string ID => "user_agent_role_changed";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    public override string[] DeduplicationTags => [CommonTags.AccessLevel];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -3613,7 +3700,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
         ];
     }
 
-    public void Init(UserInfo user, string roomTitle, string roomUrl, string userRole)
+    public void Init(UserInfo user, string roomTitle, string roomUrl, string accessLevel, string userRole)
     {
         var culture = GetCulture(user);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
@@ -3622,6 +3709,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
         [
             new TagValue("RoomTitle", (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", culture)).HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
+            new TagValue(CommonTags.AccessLevel, accessLevel),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),

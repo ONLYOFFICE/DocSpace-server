@@ -177,7 +177,7 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
                 .Where(folder => folder.RootFolderType != FolderType.Archive)
                 // a room of the other section is invisible in this group's listing, so it must not be
                 // counted either - otherwise the group shows a room count it never lists
-                .Where(folder => roomArea.MatchesRoomType(folder.FolderType));
+                .Where(folder => roomArea.MatchesRoom(folder));
 
             // a room the owner of the group can no longer read leaves the group the same way: the reference
             // is kept, so that access granted again restores the membership, but nothing of the room is shown

@@ -145,7 +145,7 @@ public class FileMarker(
         else
         {
             var additionalSubjects = Array.Empty<Guid>();
-            if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms)
+            if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms)
             {
                 var room = parentFolders.Find(f => f.IsRoom);
                 if (room.CreateBy != obj.CurrentAccountId)
@@ -933,7 +933,8 @@ public class FileMarker(
             Equals(folder.Id, await globalFolder.GetFolderShareAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)) ||
             Equals(folder.Id, await globalFolder.GetFolderAiAgentsAsync(daoFactory)) ||
-            Equals(folder.Id, await globalFolder.GetFolderFormsAsync(daoFactory)))
+            Equals(folder.Id, await globalFolder.GetFolderFormsAsync(daoFactory)) ||
+            Equals(folder.Id, await globalFolder.GetFolderPrivateRoomsAsync(daoFactory)))
         {
             var folderTags = tags.Where(tag => tag.EntryType == FileEntryType.Folder && tag.EntryId is string);
 
@@ -1103,9 +1104,9 @@ public class FileMarker(
         var tagDao = daoFactory.GetTagDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
 
-        // Forms is a virtual section: its rooms physically live under VirtualRooms,
-        // so its new-item tags must be read from the VirtualRooms root.
-        var tagsSourceFolder = parent.FolderType == FolderType.Forms
+        // Forms and private rooms are virtual sections: their rooms physically live under VirtualRooms,
+        // so their new-item tags must be read from the VirtualRooms root.
+        var tagsSourceFolder = parent.FolderType is FolderType.Forms or FolderType.PrivateRooms
             ? await folderDao.GetFolderAsync(IdConverter.Convert<T>(await globalFolder.GetFolderVirtualRoomsAsync(daoFactory)))
             : parent;
 
@@ -1138,7 +1139,7 @@ public class FileMarker(
             }
         }
 
-        if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms)
+        if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms)
         {
             var disabledRooms = await roomsNotificationSettingsHelper.GetDisabledRoomsForCurrentUserAsync();
             totalTags = totalTags.Where(e => !disabledRooms.Contains(e.EntryId.ToString())).ToList();
@@ -1146,7 +1147,8 @@ public class FileMarker(
 
         // FillingFormsRoom rooms physically live under VirtualRooms but are shown in the separate Forms
         // section, so their new-item counts must be attributed to Forms and excluded from the Rooms badge.
-        if (parent.FolderType is FolderType.VirtualRooms or FolderType.Forms)
+        // Private rooms are split off the same way.
+        if (parent.FolderType is FolderType.VirtualRooms or FolderType.Forms or FolderType.PrivateRooms)
         {
             var folderTagIds = totalTags
                 .Where(t => t.EntryType == FileEntryType.Folder && int.TryParse(t.EntryId?.ToString(), out _))
@@ -1155,6 +1157,7 @@ public class FileMarker(
                 .ToList();
 
             var formRoomIds = new HashSet<string>();
+            var privateRoomIds = new HashSet<string>();
             if (folderTagIds.Count > 0)
             {
                 await foreach (var formRoom in daoFactory.GetFolderDao<int>().GetFoldersAsync(folderTagIds))
@@ -1163,12 +1166,19 @@ public class FileMarker(
                     {
                         formRoomIds.Add(formRoom.Id.ToString());
                     }
+                    else if (formRoom.SettingsPrivate)
+                    {
+                        privateRoomIds.Add(formRoom.Id.ToString());
+                    }
                 }
             }
 
-            totalTags = parent.FolderType == FolderType.Forms
-                ? totalTags.Where(t => t.EntryType == FileEntryType.Folder && formRoomIds.Contains(t.EntryId.ToString())).ToList()
-                : totalTags.Where(t => !(t.EntryType == FileEntryType.Folder && formRoomIds.Contains(t.EntryId.ToString()))).ToList();
+            totalTags = parent.FolderType switch
+            {
+                FolderType.Forms => totalTags.Where(t => t.EntryType == FileEntryType.Folder && formRoomIds.Contains(t.EntryId.ToString())).ToList(),
+                FolderType.PrivateRooms => totalTags.Where(t => t.EntryType == FileEntryType.Folder && privateRoomIds.Contains(t.EntryId.ToString())).ToList(),
+                _ => totalTags.Where(t => !(t.EntryType == FileEntryType.Folder && (formRoomIds.Contains(t.EntryId.ToString()) || privateRoomIds.Contains(t.EntryId.ToString())))).ToList()
+            };
         }
 
         var countSubNew = 0;
@@ -1187,9 +1197,9 @@ public class FileMarker(
             ((IFolder)parent).NewForMe = parentFolderTag.Count;
         }
 
-        // The Forms anchor folder holds no physical children, so its own new-tag is never returned by the
-        // VirtualRooms-scoped query above. Surface the computed count directly so the section badge is shown.
-        if (parent.FolderType == FolderType.Forms)
+        // The anchor folders of Forms and private rooms hold no physical children, so their own new-tag is never returned by
+        // the VirtualRooms-scoped query above. Surface the computed count directly so the section badge is shown.
+        if (parent.FolderType is FolderType.Forms or FolderType.PrivateRooms)
         {
             ((IFolder)parent).NewForMe = countSubNew;
         }
@@ -1203,10 +1213,12 @@ public class FileMarker(
             countSubNew = parentFolderTag.Count;
         }
 
-        if (parent.FolderType != FolderType.Forms && parentFolderTag.Count != countSubNew)
+        if (parent.FolderType is not (FolderType.Forms or FolderType.PrivateRooms) && parentFolderTag.Count != countSubNew)
         {
             if (parent.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub)
             {
+                // The stored count may still hold the rooms of Forms and private rooms, which this section does not show.
+                ((IFolder)parent).NewForMe = countSubNew;
                 parentFolderTag.Count = countSubNew;
                 if (parentFolderTag.Id == -1)
                 {
