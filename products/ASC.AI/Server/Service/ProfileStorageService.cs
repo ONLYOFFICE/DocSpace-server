@@ -101,7 +101,7 @@ public class ProfileStorageService(
 
         messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), model.Alias);
 
-        return new ByokKeyDto { Id = id, Name = model.Alias, Provider = provider };
+        return new ByokKeyDto { Id = id, Name = model.Alias, Provider = provider, Image = AiModelImages.Get(model.OwnedBy) };
     }
 
     public async Task DeleteByokKeyAsync(Guid id)
@@ -130,18 +130,24 @@ public class ProfileStorageService(
             return [];
         }
 
-        var names = (await _aiGateway.GetAllModelsAsync()).Data
+        var models = (await _aiGateway.GetAllModelsAsync()).Data
             .DistinctBy(m => m.RevisionId)
-            .ToDictionary(m => m.RevisionId, m => m.Alias);
+            .ToDictionary(m => m.RevisionId);
 
         return
         [
             .. keys
-                .Select(k => new ByokKeyDto
+                .Select(k =>
                 {
-                    Id = k.Id,
-                    Name = names.GetValueOrDefault(k.Id),
-                    Provider = k.Provider
+                    var model = models.GetValueOrDefault(k.Id);
+
+                    return new ByokKeyDto
+                    {
+                        Id = k.Id,
+                        Name = model?.Alias,
+                        Provider = k.Provider,
+                        Image = AiModelImages.Get(model?.OwnedBy)
+                    };
                 })
         ];
     }

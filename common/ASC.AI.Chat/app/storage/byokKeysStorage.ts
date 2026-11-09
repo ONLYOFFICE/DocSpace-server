@@ -51,6 +51,8 @@ export interface ByokKey {
   name?: string;
   /** BYOK provider id the key belongs to, e.g. `anthropic`. */
   provider: string;
+  /** SVG markup of the logo of the model's owner. */
+  image?: string;
 }
 
 export interface ByokModel {
@@ -117,7 +119,13 @@ function dtoToByokKey(raw: JsonObject): ByokKey | undefined {
     return undefined;
   }
   const name = getString(raw, "name");
-  return name === undefined ? { id, provider } : { id, name, provider };
+  const image = getString(raw, "image");
+  return {
+    id,
+    provider,
+    ...(name === undefined ? {} : { name }),
+    ...(image === undefined ? {} : { image }),
+  };
 }
 
 function dtoToByokModel(raw: JsonObject): ByokModel | undefined {

@@ -52,4 +52,5 @@ public class ByokKeyDto
     public Guid Id { get; init; }
     public string? Name { get; init; }
     public required string Provider { get; init; }
+    public string? Image { get; init; }
 }

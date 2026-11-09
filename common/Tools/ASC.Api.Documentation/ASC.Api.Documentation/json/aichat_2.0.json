@@ -13039,6 +13039,10 @@
           "provider": {
             "type": "string",
             "description": "BYOK provider id the key belongs to, e.g. `anthropic`."
+          },
+          "image": {
+            "type": "string",
+            "description": "SVG markup of the logo of the model's owner."
           }
         },
         "required": [
