@@ -58,13 +58,17 @@ public record AuditEventKey(int Id, DateTime Date);
 
 static file class AuditEventsQueries
 {
+    // The portals with an event older than the threshold, walked from the tenants table: per portal one seek into the
+    // (tenant_id, date) index of audit_events that stops at its oldest event. Grouping audit_events by portal instead
+    // reads every group in full on PostgreSQL, and the start-up warmup runs this query on every replica of every
+    // service, with a threshold no event is older than.
     public static readonly Func<MessagesContext, DateTime, IAsyncEnumerable<int>> AuditEventTenantsOlderThanAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (MessagesContext ctx, DateTime threshold) =>
-                ctx.AuditEvents
-                    .GroupBy(r => r.TenantId)
-                    .Where(r => r.Min(a => a.Date) < threshold)
-                    .Select(r => r.Key));
+                ctx.Tenants
+                    .Where(t => ctx.AuditEvents.Any(r => r.TenantId == t.Id && r.Date < threshold))
+                    .OrderBy(t => t.Id)
+                    .Select(t => t.Id));
 
     // The events older than the threshold that are not part of the history of a file, folder or room: an event is
     // kept while files_audit_reference points at it, and the history is cleared together with its entry. The
