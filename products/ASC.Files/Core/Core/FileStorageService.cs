@@ -2716,7 +2716,7 @@ public class FileStorageService //: IFileStorageService
         {
             if (tagCustomFilter != null)
             {
-                await tagDao.RemoveTagsAsync(file, [ tagCustomFilter.Id ]);
+                await tagDao.RemoveTagsAsync(file, [tagCustomFilter.Id]);
             }
 
             await filesMessageService.SendAsync(MessageAction.FileCustomFilterDisabled, file, file.Title);
@@ -3954,7 +3954,7 @@ public class FileStorageService //: IFileStorageService
             }
 
             var tags = await tagDao.GetTagsAsync(user, [TagType.Recent, TagType.Favorite], sharedEntries)
-                .Select(r=> r.Id)
+                .Select(r => r.Id)
                 .ToListAsync();
 
             foreach (var entry in sharedEntries)
@@ -4299,7 +4299,7 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var entry in entries)
         {
-            await tagDao.RemoveTagsAsync(entry, tags.Where(r=> r.EntryType == entry.FileEntryType && Equals(r.EntryId, entry.Id)).Select(r=> r.Id));
+            await tagDao.RemoveTagsAsync(entry, tags.Where(r => r.EntryType == entry.FileEntryType && Equals(r.EntryId, entry.Id)).Select(r => r.Id));
             await socketManager.RemoveFromFavoritesAsync(entry, [authContext.CurrentAccount.ID]);
             await filesMessageService.SendAsync(MessageAction.FileRemovedFromFavorite, entry, entry.Title);
         }
@@ -4369,7 +4369,7 @@ public class FileStorageService //: IFileStorageService
 
         foreach (var e in entries)
         {
-            tasks.Add(tagDao.RemoveTagsAsync(e, tags.Where(r=> r.EntryType == e.FileEntryType && Equals(r.EntryId, e.Id)).Select(r=> r.Id)));
+            tasks.Add(tagDao.RemoveTagsAsync(e, tags.Where(r => r.EntryType == e.FileEntryType && Equals(r.EntryId, e.Id)).Select(r => r.Id)));
 
             switch (e)
             {
@@ -4515,7 +4515,7 @@ public class FileStorageService //: IFileStorageService
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             }
 
-            var requiredAuthResolved = await ResolveRequiredAuthAsync(entry, requiredAuth ?? false,  applyDefault: !requiredAuth.HasValue);
+            var requiredAuthResolved = await ResolveRequiredAuthAsync(entry, requiredAuth ?? false, applyDefault: !requiredAuth.HasValue);
 
             await DetermineParentRoomType(entry);
 
@@ -4624,7 +4624,7 @@ public class FileStorageService //: IFileStorageService
 
                                                 var role = FileShareExtensions.GetAccessString(ace.Access, true, folder.FolderType == FolderType.AiRoom);
                                                 var url = commonLinkUtility.GetFullAbsolutePath($"rooms/shared/{folder.Id}");
-                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.SettingsPrivate ? null : folder.Title, url, role, folder.FolderType == FolderType.AiRoom);
+                                                await studioNotifyService.SendMsgUserRoleChangedAsync(user, folder.UniqID, folder.SettingsPrivate ? null : folder.Title, url, ace.Access.ToStringFast(), role, folder.FolderType == FolderType.AiRoom);
                                             }
                                             break;
                                     }
@@ -5174,7 +5174,7 @@ public class FileStorageService //: IFileStorageService
         else
         {
             var tags = await tagDao.GetTagsAsync(userId, [TagType.Pin], [room]).ToListAsync();
-            await tagDao.RemoveTagsAsync(room, tags.Select(r=> r.Id));
+            await tagDao.RemoveTagsAsync(room, tags.Select(r => r.Id));
         }
 
         room.Pinned = pin;
@@ -5467,12 +5467,12 @@ public class FileStorageService //: IFileStorageService
         }
 
         var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
-        if (parentRoom is { SettingsPrivate: false})
+        if (parentRoom is { SettingsPrivate: false })
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
-        if(!await fileSecurity.CanCreateAsync(parentRoom))
+        if (!await fileSecurity.CanCreateAsync(parentRoom))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -5737,8 +5737,16 @@ public class FileStorageService //: IFileStorageService
                     continue;
                 }
 
+                var inviteType = FileSecurity.GetTypeByShare(ace.Access);
+                await using var acceptance = await studioNotifyService.TryAcceptEmailRoomInviteAsync(user.Email, room.UniqID, inviteType, room.FolderType == FolderType.AiRoom);
+                if (!acceptance.Accepted)
+                {
+                    continue;
+                }
+
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, room.Id.ToString());
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.SettingsPrivate ? null : room.Title, await urlShortener.GetShortenLinkAsync(link), room.FolderType == FolderType.AiRoom);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.UniqID, room.SettingsPrivate ? null : room.Title, await urlShortener.GetShortenLinkAsync(link), inviteType, room.FolderType == FolderType.AiRoom);
+                acceptance.Complete();
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
@@ -5770,10 +5778,18 @@ public class FileStorageService //: IFileStorageService
                     continue;
                 }
 
+                var inviteType = FileSecurity.GetTypeByShare(ace.Access);
+                await using var acceptance = await studioNotifyService.TryAcceptEmailRoomInviteAsync(user.Email, room.UniqID, inviteType, room.FolderType == FolderType.AiRoom);
+                if (!acceptance.Accepted)
+                {
+                    continue;
+                }
+
                 var link = invitationService.GetInvitationLink(user.Email, ace.Access, authContext.CurrentAccount.ID, id.ToString());
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.SettingsPrivate ? null : room.Title, shortenLink, room.FolderType == FolderType.AiRoom);
+                await studioNotifyService.SendEmailRoomInviteAsync(user.Email, room.UniqID, room.SettingsPrivate ? null : room.Title, shortenLink, inviteType, room.FolderType == FolderType.AiRoom);
+                acceptance.Complete();
                 await filesMessageService.SendAsync(MessageAction.RoomInviteResend, room, user.Email, user.Id.ToString());
             }
 
