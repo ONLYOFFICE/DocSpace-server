@@ -40,11 +40,9 @@ module.exports = function (app, config) {
   const urlResolver = require("./utils/resolver")();
   const coder = require("./utils/coder");
   const urn = require("samlify/build/src/urn");
-  const fetch = require("node-fetch");
   const fileManager = require('./fileManager');
   const forge = require('node-forge');
   const path = require('path');
-  const uuid = require('uuid');
   const formidable = require('formidable');
   const UserModel = require("./model/user");
   const LogoutModel = require("./model/logout");
@@ -147,7 +145,7 @@ module.exports = function (app, config) {
 
   function onLoadMetadata(req, res) {
     try {
-      const filePath = path.join(uploadDir, uuid.v1() + ".xml");
+      const filePath = path.join(uploadDir, crypto.randomUUID() + ".xml");
 
       fileManager.downloadFile(req.body.url, filePath)
         .then((result) => {
@@ -673,6 +671,9 @@ module.exports = function (app, config) {
 
       let headers = { Origin: urls.originUrl }
       const response = await fetch(urls.url, { headers });
+
+      // The body is not used, but an unread body keeps the pooled connection busy.
+      await response.arrayBuffer();
 
       logger.info(
         `PORTAL LOGOUT ${

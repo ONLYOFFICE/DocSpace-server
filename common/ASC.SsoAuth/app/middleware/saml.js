@@ -39,7 +39,6 @@ module.exports = (app, config) => {
   const coder = require("../utils/coder");
   const converter = require("../utils/converter")();
   const _ = require("lodash");
-  const fetch = require("node-fetch");
   const routes = _.values(config.routes);
   const machineKey = config["core"].machinekey
     ? config["core"].machinekey

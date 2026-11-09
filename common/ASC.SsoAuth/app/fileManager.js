@@ -35,8 +35,13 @@
 
 const fs = require('fs'),
     path = require('path'),
-    co = require("co"),
-    request = require("request");
+    http = require("http"),
+    https = require("https"),
+    { pipeline } = require("stream/promises"),
+    co = require("co");
+
+const downloadMaxRedirects = 5;
+const downloadTimeout = 30 * 1000;
 
 const config = require('../config');
 const appDataDirPath = path.join(__dirname, config.get("web:data"));
@@ -157,21 +162,54 @@ function deleteFile(pathToFile) {
         });
 }
 
-function downloadFile(uri, filePath) {
+function getResponse(uri, redirectsLeft) {
     return new Promise((resolve, reject) => {
-        const data = request
-            .get(uri, { rejectUnauthorized: false })
-            .on('error', (err) => {
-                reject(err);
-            })
-            .pipe(fs.createWriteStream(filePath))
-            .on('error', (err) => {
-                reject(err);
-            })
-            .on('finish', () => {
-                resolve(filePath);
-            });
+        let url;
+        try {
+            url = new URL(uri);
+        } catch (err) {
+            reject(err);
+            return;
+        }
+
+        const client = url.protocol === "https:" ? https : url.protocol === "http:" ? http : null;
+        if (!client) {
+            reject(new Error(`Unsupported protocol ${url.protocol}`));
+            return;
+        }
+
+        // IdP metadata is often published on hosts with self-signed certificates.
+        const req = client.get(url, { rejectUnauthorized: false, timeout: downloadTimeout }, (res) => {
+            const { statusCode, headers } = res;
+
+            if (statusCode >= 300 && statusCode < 400 && headers.location) {
+                res.resume();
+                if (redirectsLeft <= 0) {
+                    reject(new Error("Too many redirects"));
+                    return;
+                }
+                resolve(getResponse(new URL(headers.location, url).toString(), redirectsLeft - 1));
+                return;
+            }
+
+            if (statusCode !== 200) {
+                res.resume();
+                reject(new Error(`Download failed with status ${statusCode}`));
+                return;
+            }
+
+            resolve(res);
+        });
+
+        req.on("timeout", () => req.destroy(new Error("Download timed out")));
+        req.on("error", reject);
     });
+}
+
+async function downloadFile(uri, filePath) {
+    const res = await getResponse(uri, downloadMaxRedirects);
+    await pipeline(res, fs.createWriteStream(filePath));
+    return filePath;
 }
 
 module.exports = { checkFileExist, createDir, copyFile, moveFile, deleteFile, getDataDirPath, downloadFile };
