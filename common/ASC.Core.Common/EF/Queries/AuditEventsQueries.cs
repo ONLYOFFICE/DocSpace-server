@@ -42,9 +42,9 @@ public partial class MessagesContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<AuditEventKey> AuditEventsToClearAsync(int tenantId, DateTime threshold, DateTime? afterDate, int afterId, int count)
+    public IAsyncEnumerable<AuditEventKey> AuditEventsOlderThanAsync(int tenantId, DateTime threshold, DateTime afterDate, int afterId, int count)
     {
-        return AuditEventsQueries.AuditEventsToClearAsync(this, tenantId, threshold, afterDate, afterId, count);
+        return AuditEventsQueries.AuditEventsOlderThanAsync(this, tenantId, threshold, afterDate, afterId, count);
     }
 
     [PreCompileQuery]
@@ -54,7 +54,8 @@ public partial class MessagesContext
     }
 }
 
-public record AuditEventKey(int Id, DateTime Date);
+/// <summary>An audit event as the cleanup pages through them: its key, and whether it is part of the history of an entry.</summary>
+public record AuditEventKey(int Id, DateTime Date, bool InHistory);
 
 static file class AuditEventsQueries
 {
@@ -70,21 +71,23 @@ static file class AuditEventsQueries
                     .OrderBy(t => t.Id)
                     .Select(t => t.Id));
 
-    // The events older than the threshold that are not part of the history of a file, folder or room: an event is
-    // kept while files_audit_reference points at it, and the history is cleared together with its entry. The
-    // events are read in (date, id) order resuming after the last one of the previous batch, so the history events
-    // that stay behind are passed over once per run instead of once per batch.
-    public static readonly Func<MessagesContext, int, DateTime, DateTime?, int, int, IAsyncEnumerable<AuditEventKey>> AuditEventsToClearAsync =
+    // A page of the events older than the threshold, in (date, id) order after the last one of the previous page; the
+    // first page starts after DateTime.MinValue and id 0. Each event says whether it is part of the history of a
+    // file, folder or room - files_audit_reference points at it - which the cleanup keeps: the history is cleared
+    // together with its entry. The history events are flagged rather than filtered out, so that one page reads at most
+    // `count` events from the (tenant_id, date) index however many of them are history; filtered out, a single page
+    // would walk every history event in its way before it found `count` others. The cursor is a plain range on the
+    // date, which keeps that index usable for every page, on a generic PostgreSQL plan too.
+    public static readonly Func<MessagesContext, int, DateTime, DateTime, int, int, IAsyncEnumerable<AuditEventKey>> AuditEventsOlderThanAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId, DateTime threshold, DateTime? afterDate, int afterId, int count) =>
+            (MessagesContext ctx, int tenantId, DateTime threshold, DateTime afterDate, int afterId, int count) =>
                 ctx.AuditEvents
                     .Where(r => r.TenantId == tenantId && r.Date < threshold)
-                    .Where(r => afterDate == null || r.Date > afterDate || (r.Date == afterDate && r.Id > afterId))
-                    .Where(r => !ctx.FilesAuditReferences.Any(a => a.AuditEventId == r.Id))
+                    .Where(r => r.Date >= afterDate && (r.Date > afterDate || r.Id > afterId))
                     .OrderBy(r => r.Date)
                     .ThenBy(r => r.Id)
                     .Take(count)
-                    .Select(r => new AuditEventKey(r.Id, r.Date)));
+                    .Select(r => new AuditEventKey(r.Id, r.Date, ctx.FilesAuditReferences.Any(a => a.AuditEventId == r.Id))));
 
     // The reference check is repeated, because files_audit_reference cascades from audit_events: deleting an event
     // that became part of a history after it was read would silently remove it from that history.

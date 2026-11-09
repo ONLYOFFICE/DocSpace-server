@@ -42,6 +42,8 @@ namespace ASC.ClearEvents.Services;
 [Singleton]
 public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServiceScopeFactory serviceScopeFactory)
 {
+    private static readonly TimeSpan _pageDelay = TimeSpan.FromMilliseconds(200);
+
     public async Task ClearAsync(AuditTrailRetentionConfiguration retention, CancellationToken stoppingToken)
     {
         if (!retention.Enabled)
@@ -127,24 +129,20 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         await using var ef = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
 
         // The tenants are picked by their oldest event, history included, so a tenant whose old events are all part of
-        // a history is picked on every pass. Nothing past the free life time outside a history means nothing to clear
-        // on either tariff, the paid life time being the longer one, and the tariff is not looked up for it.
-        if (!await ef.AuditEventsToClearAsync(tenantId, freeThreshold, null, 0, 1).AnyAsync(stoppingToken))
-        {
-            return 0;
-        }
-
-        var paid = await IsPaidAsync(scope.ServiceProvider, tenantId);
-        var threshold = paid ? paidThreshold : freeThreshold;
+        // a history is picked on every pass. The walk starts under the free life time, the later of the two thresholds,
+        // and the tariff is looked up only once an event outside a history turns up: a tenant with nothing but history
+        // past the free life time has nothing to clear on either tariff, and no lookup is paid for it.
+        DateTime? threshold = null;
+        var paid = false;
 
         var removed = 0;
 
-        DateTime? afterDate = null;
+        var afterDate = DateTime.MinValue;
         var afterId = 0;
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var events = await ef.AuditEventsToClearAsync(tenantId, threshold, afterDate, afterId, batchSize).ToListAsync(stoppingToken);
+            var events = await ef.AuditEventsOlderThanAsync(tenantId, threshold ?? freeThreshold, afterDate, afterId, batchSize).ToListAsync(stoppingToken);
 
             if (events.Count == 0)
             {
@@ -153,19 +151,35 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
             (afterId, afterDate) = (events[^1].Id, events[^1].Date);
 
-            removed += await ef.DeleteAuditEventsToClearAsync(tenantId, events.Select(r => r.Id).ToList());
+            if (threshold is null && events.Exists(r => !r.InHistory))
+            {
+                paid = await IsPaidAsync(scope.ServiceProvider, tenantId);
+                threshold = paid ? paidThreshold : freeThreshold;
+            }
+
+            var ids = events
+                .Where(r => !r.InHistory && r.Date < threshold)
+                .Select(r => r.Id)
+                .ToList();
+
+            if (ids.Count > 0)
+            {
+                removed += await ef.DeleteAuditEventsToClearAsync(tenantId, ids);
+            }
 
             if (events.Count < batchSize)
             {
                 break;
             }
 
-            await Task.Delay(TimeSpan.FromMilliseconds(200), stoppingToken);
+            // After every page, the ones of history only too: a page reads at most a batch, and the delay keeps a tenant
+            // with years of retained history from being walked as fast as the database answers.
+            await Task.Delay(_pageDelay, stoppingToken);
         }
 
         if (removed > 0)
         {
-            logger.InformationRemovedTenantAuditEvents(removed, threshold, tenantId, paid);
+            logger.InformationRemovedTenantAuditEvents(removed, threshold.Value, tenantId, paid);
         }
 
         return removed;

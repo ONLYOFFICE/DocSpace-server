@@ -62,9 +62,9 @@ public class RoomHistoryRetentionTests(AspireAppFixture fixture) : BaseTest(fixt
     [Fact]
     public async Task ClearAsync_HistoryInterleavedAcrossBatches_RemovesEveryEventOutsideHistory()
     {
-        // Arrange: oldest first, every other event in a history. The read query leaves history events out before it
-        // takes a batch, so every batch is full of events to remove; this guards against that filter moving after the
-        // paging, where a batch of history events would end the pass early or be deleted with the rest.
+        // Arrange: oldest first, every other event in a history, so that every page holds both kinds. A page is read
+        // with its history events flagged rather than left out; this guards against a flagged event being deleted
+        // with the rest of its page.
         const int batchSize = 2;
 
         var inHistory = new List<int>();
@@ -82,6 +82,33 @@ public class RoomHistoryRetentionTests(AspireAppFixture fixture) : BaseTest(fixt
             {
                 outsideHistory.Add(await SeedEventAsync(daysAgo));
             }
+        }
+
+        // Act
+        await RunCleanupAsync(Retention(batchSize: batchSize));
+
+        // Assert
+        (await RemainingEventsAsync(inHistory.Concat(outsideHistory))).Should().BeEquivalentTo(inHistory);
+    }
+
+    [Fact]
+    public async Task ClearAsync_FullPagesOfHistoryFirst_DoNotEndThePass()
+    {
+        // Arrange: the oldest pages are history only, so they remove nothing; the pass has to page on past them, and
+        // a page that removes nothing must not be taken for the end of the expired events.
+        const int batchSize = 2;
+
+        var inHistory = new List<int>();
+        var outsideHistory = new List<int>();
+
+        for (var i = 0; i < 2 * batchSize; i++)
+        {
+            inHistory.Add(await SeedEventAsync(PaidLifeTimeDays * 2 - i, RoomId));
+        }
+
+        for (var i = 0; i < batchSize + 1; i++)
+        {
+            outsideHistory.Add(await SeedEventAsync(PaidLifeTimeDays + 30 - i));
         }
 
         // Act
