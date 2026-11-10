@@ -207,8 +207,9 @@ public abstract class Migrator(
 
     /// <summary>
     /// Unpacks a tar stream into <paramref name="root"/>, counting its entries and the bytes written against the limits.
-    /// A path met twice in the archive keeps the later entry, as tar does. Symbolic and hard links are skipped: their
-    /// target may lie outside the extraction folder. With <paramref name="replaceExisting"/> a file that was there before
+    /// A path met twice in the archive keeps the later entry, as tar does. A hard link to a file unpacked earlier is
+    /// unpacked as a copy of it; symbolic links, other hard links, sparse files and devices are skipped with a line in
+    /// the log, as their target may lie outside the extraction folder. With <paramref name="replaceExisting"/> a file that was there before
     /// the extraction is replaced rather than refused. <paramref name="onEntry"/> is called before each entry.
     /// A truncated tar fails with <see cref="EndOfStreamException"/>: GZipStream does not notice a cut-off stream, but
     /// TarReader requires the end-of-archive block, so even a cut on an entry boundary is reported.
@@ -224,16 +225,45 @@ public abstract class Migrator(
             CountExtractedEntries(1);
             await onEntry();
 
-            if (entry.EntryType == TarEntryType.Directory)
+            switch (entry.EntryType)
             {
-                Directory.CreateDirectory(GetSafeExtractPath(root, entry.Name));
-            }
-            else if (entry.EntryType is TarEntryType.RegularFile or TarEntryType.V7RegularFile or TarEntryType.ContiguousFile)
-            {
-                var destPath = GetSafeExtractPath(root, entry.Name);
-                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-                var repeated = !written.Add(destPath);
-                await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, replaceExisting || repeated, cancellationToken);
+                case TarEntryType.Directory:
+                    Directory.CreateDirectory(GetSafeExtractPath(root, entry.Name));
+                    break;
+                case TarEntryType.RegularFile or TarEntryType.V7RegularFile or TarEntryType.ContiguousFile:
+                    {
+                        var destPath = GetSafeExtractPath(root, entry.Name);
+                        Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                        var repeated = !written.Add(destPath);
+                        await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, replaceExisting || repeated, cancellationToken);
+                        break;
+                    }
+                // tar stores a file with several names once, and every other name as a hard link to the first one: the
+                // link is unpacked as a copy of that file, but only of one this extraction wrote, so it never reaches
+                // outside the folder or a file that was there before
+                case TarEntryType.HardLink
+                    when TryGetSafeExtractPath(root, entry.LinkName, out var targetPath) && written.Contains(targetPath):
+                    {
+                        var destPath = GetSafeExtractPath(root, entry.Name);
+                        if (destPath == targetPath)
+                        {
+                            break;
+                        }
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                        var repeated = !written.Add(destPath);
+                        await using var target = File.OpenRead(targetPath);
+                        await ExtractEntryAsync(target, destPath, replaceExisting || repeated, cancellationToken);
+                        break;
+                    }
+                // the archive's own metadata, not a file
+                case TarEntryType.GlobalExtendedAttributes:
+                    break;
+                // symbolic links (their target may lie outside the folder), other hard links, sparse files, devices:
+                // logged, so that a file missing from the import can be traced
+                default:
+                    Log(string.Format(MigrationResource.ArchiveEntrySkipped, entry.Name, entry.EntryType));
+                    break;
             }
 
             if (cancellationToken.IsCancellationRequested)

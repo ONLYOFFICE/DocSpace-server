@@ -61,6 +61,15 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Skipped {0}: entries of type {1} are not unpacked.
+        /// </summary>
+        public static string ArchiveEntrySkipped {
+            get {
+                return ResourceManager.GetString("ArchiveEntrySkipped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Couldn&apos;t add user {0} to group {1}.
         /// </summary>
         public static string CanNotAddUserInGroup {

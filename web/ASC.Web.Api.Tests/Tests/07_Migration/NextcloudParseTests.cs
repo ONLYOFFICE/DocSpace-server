@@ -35,24 +35,14 @@ namespace ASC.Web.Api.Tests.Tests._07_Migration;
 
 /// <summary>
 /// POST /api/2.0/migration/init/Nextcloud on an uploaded backup, read back from
-/// GET /api/2.0/migration/status. The backup is a minimal Nextcloud layout: one top-level folder
-/// holding a MySQL dump and <c>data/{uid}/files</c>, packed as each supported archive type.
+/// GET /api/2.0/migration/status, and the import that follows it. What the parse does with the
+/// entries of a broken or hostile archive is in <see cref="NextcloudUnpackTests"/>.
 /// </summary>
 [Trait("Category", "Migration")]
 public class NextcloudParseTests(
     AspireAppFixture fixture)
-    : MigrationParseTestBase(fixture)
+    : NextcloudParseTestBase(fixture)
 {
-    private const string Uid = "alice";
-    private const string Email = "alice.smith@example.com";
-    private const string FileContent = "hello from nextcloud";
-
-    private const string Dump =
-        $"INSERT INTO `oc_accounts` VALUES ('{Uid}','{{}}');\n" +
-        $"INSERT INTO `oc_accounts_data` VALUES (1,'{Uid}','displayname','Alice Smith'),(2,'{Uid}','email','{Email}');\n" +
-        $"INSERT INTO `oc_storages` VALUES (7,'home::{Uid}',1,NULL);\n" +
-        "INSERT INTO `oc_filecache` VALUES (10,7,'files'),(11,7,'files/hello.txt'),(12,7,'files/link.txt');\n";
-
     [Theory]
     [InlineData("backup.zip")]
     [InlineData("backup.ZIP")]
@@ -77,29 +67,6 @@ public class NextcloudParseTests(
         user.Email.Should().Be(Email);
         user.FirstName.Should().Be("Alice");
         user.LastName.Should().Be("Smith");
-        user.MigratingFiles.FilesCount.Should().Be(1);
-        user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
-    }
-
-    /// <summary>
-    /// A tar entry can be a symbolic link whose target lies outside the extraction folder. Such
-    /// entries are not extracted, so the link listed in the dump is not counted as a file of the
-    /// user - only the regular file next to it is.
-    /// </summary>
-    [Fact]
-    public async Task Parse_TarGzWithSymbolicLink_SkipsLink()
-    {
-        // Arrange
-        await UploadBackupAsync("backup.tar.gz", BuildTarGz(withLink: true));
-
-        // Act
-        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
-        var status = await WaitForParseAsync();
-
-        // Assert
-        status.IsCompleted.Should().BeTrue();
-        status.Error.Should().BeNullOrEmpty();
-        var user = status.ParseResult.Users.Should().ContainSingle().Which;
         user.MigratingFiles.FilesCount.Should().Be(1);
         user.MigratingFiles.BytesTotal.Should().Be(Encoding.UTF8.GetByteCount(FileContent));
     }
@@ -222,32 +189,6 @@ public class NextcloudParseTests(
     }
 
     /// <summary>
-    /// An archive that was cut short fails the parse. Before, an unpacking error was only logged and
-    /// the parse went on with the part already unpacked: the dump comes first in a backup, so a
-    /// .tar.gz cut in the middle parsed "successfully" with the files after the cut silently missing.
-    /// GZipStream does not notice a cut-off stream, so the tar that ends without its end-of-archive
-    /// block - a cut on an entry boundary - is covered on its own.
-    /// </summary>
-    [Theory]
-    [InlineData("backup.tar.gz", "cut")]
-    [InlineData("backup.tar.gz", "no end block")]
-    [InlineData("backup.zip", "cut")]
-    public async Task Parse_TruncatedArchive_FailsParse(string fileName, string truncation)
-    {
-        // Arrange
-        await UploadBackupAsync(fileName, BuildTruncatedArchive(fileName, truncation));
-
-        // Act
-        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
-        var status = await WaitForParseAsync();
-
-        // Assert
-        status.IsCompleted.Should().BeTrue();
-        status.Error.Should().Contain("Couldn't parse");
-        status.ParseResult.FailedArchives.Should().Equal(fileName);
-    }
-
-    /// <summary>
     /// The import after a parse reads the tree the parse unpacked next to the archive. It used to
     /// unpack the archive again over that tree, which failed on the first file already there and
     /// wrote "Couldn't unzip" into the log of every import; now that an unpacking error fails the
@@ -331,121 +272,5 @@ public class NextcloudParseTests(
 
             await Task.Delay(500, TestContext.Current.CancellationToken);
         }
-    }
-
-    /// <summary>
-    /// A backup whose dump and first file come before the cut and a file of random bytes - which
-    /// compresses to its own size, so a cut at three quarters lands in it - after.
-    /// </summary>
-    private static byte[] BuildTruncatedArchive(string fileName, string truncation)
-    {
-        var later = new byte[64 * 1024];
-        new Random(42).NextBytes(later);
-
-        if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-        {
-            using var zipBuffer = new MemoryStream();
-            using (var zip = new ZipArchive(zipBuffer, ZipArchiveMode.Create, leaveOpen: true))
-            {
-                WriteZipEntry(zip, "nextcloud/nextcloud.sql", Dump);
-                WriteZipEntry(zip, $"nextcloud/data/{Uid}/files/hello.txt", FileContent);
-                using var entry = zip.CreateEntry($"nextcloud/data/{Uid}/files/later.bin").Open();
-                entry.Write(later);
-            }
-
-            var zipBytes = zipBuffer.ToArray();
-            return zipBytes[..(zipBytes.Length * 3 / 4)];
-        }
-
-        using var tarBuffer = new MemoryStream();
-        byte[] withoutEndBlock;
-        using (var tar = new TarWriter(tarBuffer, leaveOpen: true))
-        {
-            WriteTarEntry(tar, "nextcloud/nextcloud.sql", Dump);
-            WriteTarEntry(tar, $"nextcloud/data/{Uid}/files/hello.txt", FileContent);
-            WriteTarEntry(tar, $"nextcloud/data/{Uid}/files/later.bin", new MemoryStream(later));
-
-            // the writer adds the end-of-archive block only when it is disposed
-            withoutEndBlock = tarBuffer.ToArray();
-        }
-
-        if (truncation == "no end block")
-        {
-            return Gzip(withoutEndBlock);
-        }
-
-        var tarGz = Gzip(tarBuffer.ToArray());
-        return tarGz[..(tarGz.Length * 3 / 4)];
-    }
-
-    /// <summary>
-    /// The migrator reads only the first INSERT of each table, so extra rows go into that statement.
-    /// </summary>
-    private static string AddRows(string dump, string table, string rows)
-    {
-        var start = dump.IndexOf($"INSERT INTO `{table}` VALUES ", StringComparison.Ordinal);
-        var end = dump.IndexOf(";\n", start, StringComparison.Ordinal);
-        return dump.Insert(end, "," + rows);
-    }
-
-    private static byte[] BuildArchive(string fileName, params (string Name, string Content)[] entries)
-    {
-        using var buffer = new MemoryStream();
-        if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
-        {
-            using var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true);
-            foreach (var (name, content) in entries)
-            {
-                WriteZipEntry(zip, name, content);
-            }
-        }
-        else
-        {
-            using var gzip = new GZipStream(buffer, CompressionLevel.Fastest, leaveOpen: true);
-            using var tar = new TarWriter(gzip);
-            foreach (var (name, content) in entries)
-            {
-                WriteTarEntry(tar, name, content);
-            }
-        }
-
-        return buffer.ToArray();
-    }
-
-    private static byte[] BuildZip(string dump = Dump, string? extraFile = null)
-    {
-        using var buffer = new MemoryStream();
-        using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
-        {
-            WriteZipEntry(zip, "nextcloud/nextcloud.sql", dump);
-            WriteZipEntry(zip, $"nextcloud/data/{Uid}/files/hello.txt", FileContent);
-            if (extraFile != null)
-            {
-                WriteZipEntry(zip, extraFile, FileContent);
-            }
-        }
-
-        return buffer.ToArray();
-    }
-
-    private static byte[] BuildTarGz(bool withLink)
-    {
-        using var buffer = new MemoryStream();
-        using (var gzip = new GZipStream(buffer, CompressionLevel.Fastest, leaveOpen: true))
-        using (var tar = new TarWriter(gzip))
-        {
-            tar.WriteEntry(new PaxTarEntry(TarEntryType.Directory, "nextcloud/"));
-            WriteTarEntry(tar, "nextcloud/nextcloud.sql", Dump);
-
-            // the link goes before the regular file: an extractor that fails on it then loses the file too
-            if (withLink)
-            {
-                tar.WriteEntry(new PaxTarEntry(TarEntryType.SymbolicLink, $"nextcloud/data/{Uid}/files/link.txt") { LinkName = "/etc/passwd" });
-            }
-
-            WriteTarEntry(tar, $"nextcloud/data/{Uid}/files/hello.txt", FileContent);
-        }
-
-        return buffer.ToArray();
     }
 }
