@@ -15,6 +15,8 @@ controller (list rules §1).
 """
 
 import argparse
+import shutil
+import tempfile
 import collections
 import datetime
 import difflib
@@ -23,48 +25,23 @@ import os
 import re
 import sys
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.dont_write_bytecode = True  # no __pycache__ inside the skill
+import tools  # noqa: E402  (Vale, vacuum and their stand-in)
+
 # --- what is in scope -------------------------------------------------------------------------
-# `scope` is the default membership. `ai` and `apisystem` sit outside the public bundle (rule 5.5);
-# they stay switchable with --scope so that taking them in costs a flag, not an edit.
-PROJECTS = {
-    "api":       dict(project="web/ASC.Web.Api",                 doc="api_2.0.json",          asm="ASC.Web.Api",     scope=True),
-    "files":     dict(project="products/ASC.Files/Server",       doc="files_2.0.json",        asm="ASC.Files",       scope=True),
-    "people":    dict(project="products/ASC.People/Server",      doc="people_2.0.json",       asm="ASC.People",      scope=True),
-    "backup":    dict(project="common/services/ASC.Data.Backup", doc="backup_2.0.json",       asm="ASC.Data.Backup", scope=True),
-    "ai":        dict(project="products/ASC.AI/Server",          doc="ai_2.0.json",           asm="ASC.AI",          scope=False),
-    "apisystem": dict(project="common/services/ASC.ApiSystem",   doc="apisystem_common.json", asm="ASC.ApiSystem",   scope=False),
-}
-
-# The size of the published surface, per document: controllers, actions in the sources, operations in
-# the document. These move only when somebody adds or removes an action, so a mismatch here is the
-# index breaking, not the API changing — and a controller the index quietly lost takes its findings
-# with it, which reads exactly like a pass that fixed them. That is why the numbers live here and are
-# checked on every run instead of sitting in a document somebody has to remember to compare against.
-# Update a row in the same commit that adds or removes the actions, and say so in the message.
-EXPECTED_SURFACE = {
-    "api":       dict(controllers=26, actions=254, operations=254),
-    "files":     dict(controllers=29, actions=318, operations=215),
-    "people":    dict(controllers=13, actions=91,  operations=82),
-    "backup":    dict(controllers=1,  actions=14,  operations=14),
-    "ai":        dict(controllers=3,  actions=14,  operations=14),
-    "apisystem": dict(controllers=2,  actions=14,  operations=14),
-}
-
-JSON_DIR = "common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/json"
+# No document is listed here by hand: `projects()` reads the documents, the projects behind them and
+# the public bundle from the files that produce them (list rules §5.5), so a new service document
+# reaches the queue without an edit to this skill.
+DOC_TOOL_DIR = "common/Tools/ASC.Api.Documentation/ASC.Api.Documentation"
+JSON_DIR = DOC_TOOL_DIR + "/json"
+BUNDLE_SETTINGS = DOC_TOOL_DIR + "/appsettings.json"
 LIST_PATH = ".claude/skills/openapi-desc-opt/unoptimized-controllers.md"
 
 VERBS = ("get", "post", "put", "delete", "patch", "head", "options", "trace")
 
 STOP_WORDS = set("""a an the of to for in on by with and or is are was were this that it its be as from at all
 if when which what current specified given new used use uses set get gets returns return""".split())
-
-# Response texts the generator prints for every operation. No [SwaggerResponse] on an action writes
-# them, so no controller edit can improve them (rule 5.1). Matched on the normalised text, because
-# the spelling drifts between generator versions ("Too many requests." vs "Too Many Requests.").
-GENERATOR_RESPONSE_TEXTS = {
-    "bad request", "unauthorized", "too many requests", "internal server error",
-    "bad gateway", "service unavailable",
-}
 
 # Tier A is "there is no text", B is "there is text and it says nothing", C is "the text is there and
 # says something, the form could be better". `tautological-param` is tier C (list-rules.md §4):
@@ -74,24 +51,22 @@ GENERATOR_RESPONSE_TEXTS = {
 # reaches a tier at all — it is folded into the operation's own row (§4.2).
 TIERS = {
     "no-description": "A", "no-summary": "A", "no-param-description": "A",
-    "thin-description": "B", "empty-response-text": "B",
-    "tautological-param": "C", "duplicate-summary": "C", "long-summary": "C",
+    "thin-description": "B", "empty-response-text": "B", "off-form-description": "B",
+    "tautological-param": "C", "duplicate-summary": "C", "long-summary": "C", "heavy-description": "C",
 }
 
 # --- what a pass can hold ---------------------------------------------------------------------
 # A row of the queue is a controller, because that is the unit of the surface report — but it is
 # neither the unit of work nor the unit of verification, and the two numbers disagree in both
-# directions. Over the four documents of the public bundle, 35 findings in 12 rows came to 17 places
-# where something is actually typed. Fourteen `tautological-param` findings in `files` were TWO of
-# them (the properties `fileId` and `folderId`), so four passes counted by rows would have edited one
-# DTO four times; fourteen `long-summary` findings in the same document were twelve separate titles,
-# where the pass really is per action. So the batch is budgeted in edit
-# sites, and the weights below say what a site costs in attention rather than in build time — the
-# limiting resource of this loop is careful prose, not MSBuild.
+# directions: many `tautological-param` findings can be one DTO property, so passes counted by rows
+# would edit one DTO several times, while `long-summary` findings are one title each. So the batch is
+# budgeted in edit sites, and the weights below say what a site costs in attention rather than in
+# build time — the limiting resource of this loop is careful prose, not MSBuild.
 SITE_WEIGHTS = {
-    # The whole description written from scratch: read the handler end to end, then 150-200 words.
+    # The whole description written from scratch: read the handler end to end, check every fact of
+    # references/description-rules.md §2, then bring the text to its minimum.
     # Four points means two of them fill a pass and a third does not fit, which is the point.
-    "no-description": 4, "thin-description": 4,
+    "no-description": 4, "thin-description": 4, "off-form-description": 4, "heavy-description": 4,
     # One DTO property. Cheap to type and expensive to get right, because the sentence has to be true
     # of every operation that binds it — hence the per-consumer surcharge in edit_sites().
     "no-param-description": 2, "tautological-param": 2,
@@ -101,7 +76,9 @@ SITE_WEIGHTS = {
 # The band a pass is budgeted in. The ceiling is what one pass may carry; the floor is what
 # keeps a split from leaving a two-point remainder that wastes a whole pass on one title.
 BUDGET_LOW, BUDGET_HIGH = 8, 10
-DOC_ORDER = {key: i for i, key in enumerate(PROJECTS)}
+# Inside a tier, a text that is missing or says nothing goes before one that says too much in too long
+# sentences: the first leaves an agent without a tool definition, the second only makes it hard to read.
+CHECK_ORDER = {"off-form-description": 1, "heavy-description": 1}
 MANIFEST_PATH = ".claude/skills/openapi-desc-opt/batch-manifest.json"
 
 
@@ -432,6 +409,86 @@ def load_operations(doc_path):
     return operations
 
 
+def bundle_documents(root):
+    """File names of the documents the joiner merges into the published contract (`join` in
+    BUNDLE_SETTINGS): the public bundle, and so the default scope."""
+    try:
+        with open(os.path.join(root, BUNDLE_SETTINGS), encoding="utf-8-sig") as f:
+            join = json.load(f).get("join") or {}
+    except (OSError, ValueError, AttributeError):
+        return set()
+    return {parts[-1] for parts in join.values() if isinstance(parts, list) and parts}
+
+
+def csproj_files(root):
+    """Project files of the repository, untracked ones included; the walk is only a fallback."""
+    listed = git(root, "ls-files", "--cached", "--others", "--exclude-standard", "--", "*.csproj")
+    if listed:
+        return listed.splitlines()
+    found = []
+    for folder, dirs, files in os.walk(root):
+        dirs[:] = [d for d in dirs if not d.startswith(".") and d not in ("node_modules", "bin", "obj")]
+        found.extend(os.path.relpath(os.path.join(folder, f), root) for f in files if f.endswith(".csproj"))
+    return found
+
+
+_PROJECTS = {}
+
+
+def projects(root):
+    """{key: dict(project, doc, asm, scope)} for every C# project that emits a document into JSON_DIR.
+
+    Read from the project files: `<OpenApiDocumentsDirectory>` resolves to JSON_DIR, the key is the
+    `--file-name` of `<OpenApiGenerateDocumentsOptions>` (the assembly name without it) and the document
+    is the `<key>_<document name>.json` the build writes there. `scope` is membership in the public
+    bundle. Order: the bundle first, then the larger surface first — the order batches are planned in.
+    """
+    root = os.path.abspath(root)
+    if root in _PROJECTS:
+        return _PROJECTS[root]
+    json_dir = os.path.join(root, JSON_DIR)
+    target_dir = os.path.normcase(os.path.normpath(json_dir))
+    present = sorted(os.listdir(json_dir)) if os.path.isdir(json_dir) else []
+    bundle = bundle_documents(root)
+    found = {}
+    for rel in csproj_files(root):
+        text = read_text(os.path.join(root, rel))
+        target = re.search(r"<OpenApiDocumentsDirectory>([^<]+)</OpenApiDocumentsDirectory>", text)
+        if not target:
+            continue
+        project_dir = os.path.dirname(rel).replace("\\", "/")
+        resolved = target.group(1).strip().replace("$(MSBuildProjectDirectory)", os.path.join(root, project_dir))
+        if os.path.normcase(os.path.normpath(resolved.replace("\\", "/"))) != target_dir:
+            continue
+        asm = re.search(r"<AssemblyName>([^<$]+)</AssemblyName>", text)
+        asm = asm.group(1).strip() if asm else os.path.splitext(os.path.basename(rel))[0]
+        options = re.search(r"<OpenApiGenerateDocumentsOptions>([^<]*)</OpenApiGenerateDocumentsOptions>", text)
+        name = re.search(r"--file-name\s+(\S+)", options.group(1)) if options else None
+        key = name.group(1) if name else asm
+        docs = [f for f in present if f.startswith(key + "_") and f.endswith(".json")]
+        if len(docs) > 1:
+            sys.exit("{0} emits several documents ({1}); the scan expects one per project".format(rel, ", ".join(docs)))
+        # A document not generated yet keeps its pattern, and the scan reports it as missing.
+        found[key] = dict(project=project_dir, doc=docs[0] if docs else key + "_*.json", asm=asm,
+                          scope=bool(docs) and docs[0] in bundle)
+
+    def size(meta):
+        path = os.path.join(json_dir, meta["doc"])
+        return len(load_operations(path)) if os.path.isfile(path) else 0
+
+    ordered = sorted(found.items(), key=lambda kv: (not kv[1]["scope"], -size(kv[1]), kv[0]))
+    _PROJECTS[root] = collections.OrderedDict(ordered)
+    return _PROJECTS[root]
+
+
+def unscanned_documents(root):
+    """Documents of JSON_DIR that no C# project emits, so no controller can be tied to them."""
+    json_dir = os.path.join(root, JSON_DIR)
+    emitted = {meta["doc"] for meta in projects(root).values()}
+    return [f for f in sorted(os.listdir(json_dir)) if f.endswith(".json") and f not in emitted] \
+        if os.path.isdir(json_dir) else []
+
+
 def route_key(verb, path):
     """`verb path`, route constraints dropped and case folded (rule 3).
 
@@ -484,12 +541,8 @@ def match(operations, controllers):
 
 # --- checks -----------------------------------------------------------------------------------
 
-def default_response_texts(operations):
-    """Texts the generator prints everywhere, found twice over (rule 5.1).
-
-    The fixed list catches the ones whose wording is known; the frequency guard catches the rest,
-    including the ones a filter in this repository adds, without having to enumerate them.
-    """
+def frequent_response_texts(operations):
+    """"Code + text" pairs repeated across a large share of one document's operations (rule 5.1)."""
     counts = collections.Counter()
     for op in operations:
         for code, text in op["responses"].items():
@@ -498,7 +551,47 @@ def default_response_texts(operations):
     return {key for key, n in counts.items() if n > limit}
 
 
-def check_operation(op, defaults, summary_counts):
+def generator_response_texts(root):
+    """Pairs the generator prints in every document (rule 5.1), read from the documents themselves.
+
+    A pair that is in every document and frequent in at least one is the generator's, not an
+    action's — this also catches it in a document where few operations happen to carry it, which the
+    frequency guard alone misses. No wording is listed by hand, so a new generator text needs no edit.
+    """
+    seen, frequent = [], set()
+    for meta in projects(root).values():
+        path = os.path.join(root, JSON_DIR, meta["doc"])
+        if not os.path.exists(path):
+            continue
+        operations = load_operations(path)
+        seen.append({(code, norm(text)) for op in operations for code, text in op["responses"].items()})
+        frequent |= frequent_response_texts(operations)
+    if len(seen) < 2:
+        return set()
+    return set.intersection(*seen) & frequent
+
+
+def default_response_texts(operations, generator=frozenset()):
+    """Texts no controller edit can improve: the generator's, and any pair frequent in this document."""
+    return frequent_response_texts(operations) | set(generator)
+
+
+def form_detail(form):
+    """The departures of a description from the form, as one line, the hard ones first."""
+    hard, soft = [], []
+    if form["long"]:
+        hard.append("{0} {1} over {2} words (longest {3})".format(
+            form["long"], "sentence" if form["long"] == 1 else "sentences", tools.MAX_SENTENCE_WORDS, form["longest"]))
+    if form["paragraphs"]:
+        hard.append("more than one paragraph or a list")
+    if form["average"]:
+        soft.append("average {0} words per sentence".format(form["average"]))
+    if form["grade"]:
+        soft.append("Flesch-Kincaid grade {0}".format(form["grade"]))
+    return hard, soft
+
+
+def check_operation(op, defaults, summary_counts, form=None):
     """Every finding of one operation, before the merges of rules 4.1 and 4.2."""
     found = []
     description, summary = op["description"], op["summary"]
@@ -518,6 +611,16 @@ def check_operation(op, defaults, summary_counts):
         found.append(dict(check="thin-description", detail="sentences {0}, novel words {1}".format(count, novel)))
 
     thin = any(f["check"] in ("no-description", "thin-description") for f in found)
+    if form and not thin:
+        # Above the norm, by the verdict of the tools (tools.form_verdicts). One finding per
+        # description, so one rewrite closes it: the soft departures ride along in the detail of a
+        # hard one instead of standing as a second finding that a second pass would open again. A
+        # thin description gets none of this — its rewrite is from scratch anyway.
+        hard, soft = form_detail(form)
+        if hard:
+            found.append(dict(check="off-form-description", detail="; ".join(hard + soft)))
+        elif soft:
+            found.append(dict(check="heavy-description", detail="; ".join(soft)))
     for param in op["parameters"]:
         name, text = param.get("name", ""), param.get("description") or ""
         if not text.strip():
@@ -527,7 +630,7 @@ def check_operation(op, defaults, summary_counts):
             found.append(dict(check="tautological-param", detail=name, param=name, rolled_up=thin))
 
     for code, text in op["responses"].items():
-        if (code, norm(text)) in defaults or norm(text) in GENERATOR_RESPONSE_TEXTS:
+        if (code, norm(text)) in defaults:
             continue
         if len(norm(text).split()) <= 3:
             found.append(dict(check="empty-response-text", detail='{0} "{1}"'.format(code, text)))
@@ -551,7 +654,11 @@ def staleness(op, action):
     one failure mode that wastes a whole pass, so anything below the threshold is reported apart from
     the queue instead of inside it.
     """
-    published, source = norm(op["description"]), norm(action["remarks"])
+    # The generator appends the sentences of `[RaisesWebhook]` after a blank line
+    # (`WebhookOperationFilter`); they never stood in `<remarks>`, and a long `When` alone would push
+    # a current document under the threshold.
+    published = (op["description"] or "").split("\n\nRaises the ")[0]
+    published, source = norm(published), norm(action["remarks"])
     if not published and not source:
         return 1.0
     return difflib.SequenceMatcher(None, published, source).ratio()
@@ -578,8 +685,8 @@ def freshness(root, scope):
     """
     verdicts = []
     for key in scope:
-        meta = PROJECTS[key]
-        doc_rel = "{0}/{1}".format(JSON_DIR, meta["doc"])
+        meta = projects(root)[key]
+        doc_rel ="{0}/{1}".format(JSON_DIR, meta["doc"])
         doc_commit = git(root, "log", "-1", "--format=%ct", "--", doc_rel)
         src_commit = git(root, "log", "-1", "--format=%ct", "--", meta["project"])
         dirty = [line for line in git(root, "status", "--porcelain", "--", meta["project"]).splitlines()
@@ -598,19 +705,37 @@ def freshness(root, scope):
     return verdicts
 
 
-def run(root, scope, threshold):
-    result = dict(sections=[], diag=collections.OrderedDict(), stale=[], unmatched={})
+def run(root, scope, threshold, found_tools=None):
+    result = dict(sections=[], diag=collections.OrderedDict(), stale=[], unmatched={}, form_notes=[],
+                  doc_order={key: i for i, key in enumerate(projects(root))})
+    generator =generator_response_texts(root)
+    found_tools = found_tools if found_tools is not None else tools.discover()
+    work = tempfile.mkdtemp(prefix="desc-opt-scan-")
+    try:
+        result = _run(root, scope, threshold, result, generator, found_tools, work)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+    return result
+
+
+def _run(root, scope, threshold, result, generator, found_tools, work):
     for key in scope:
-        meta = PROJECTS[key]
-        doc_path = os.path.join(root, JSON_DIR, meta["doc"])
+        meta = projects(root)[key]
+        doc_path =os.path.join(root, JSON_DIR, meta["doc"])
         if not os.path.exists(doc_path):
             result["diag"][key] = dict(error="no document " + meta["doc"])
             continue
         controllers = index_sources(root, meta["project"])
         operations = load_operations(doc_path)
         matched, unmatched = match(operations, controllers)
-        defaults = default_response_texts(operations)
+        defaults = default_response_texts(operations, generator)
         summary_counts = collections.Counter(norm(op["summary"]) for op in operations if op["summary"].strip())
+        entries = [((op["verb"], op["path"]), op["path"], op["verb"], tools.published(op["description"]))
+                   for op in operations if op["description"].strip()]
+        doc_work = os.path.join(work, key)
+        os.makedirs(doc_work, exist_ok=True)
+        forms, result["form_source"], notes = tools.form_verdicts(entries, found_tools, doc_work)
+        result["form_notes"] = sorted(set(result["form_notes"]) | set(notes))
 
         per_controller = collections.defaultdict(list)
         stale_ops = []
@@ -622,7 +747,7 @@ def run(root, scope, threshold):
             if staleness(op, action) < 0.9:
                 stale_ops.append("{0} {1} ({2}.{3})".format(op["verb"].upper(), op["path"], action["cls"], action["method"]))
                 continue
-            findings = check_operation(op, defaults, summary_counts)
+            findings = check_operation(op, defaults, summary_counts, forms.get((op["verb"], op["path"])))
             if not findings:
                 continue
             for ctrl in {c[2]["name"]: c[2] for c in candidates}.values():
@@ -678,26 +803,15 @@ def run(root, scope, threshold):
     return result
 
 
-def surface_drift(result):
-    """Where the indexed surface disagrees with EXPECTED_SURFACE, one line per document.
+def unmatched_lines(result):
+    """Documents with operations nobody could tie to an action, one line per document.
 
-    `unmatched` is checked here too: it is not a size but it has the same job — an operation nobody
-    could tie to an action carries findings nobody can attribute, so a non-zero value invalidates the
-    run just as a lost controller does.
+    This is what catches an index that lost a controller, with no expected sizes to keep by hand: the
+    operations of the lost controller stop matching. An operation nobody could tie to an action carries
+    findings nobody can attribute, so a non-zero value invalidates the run.
     """
-    out = []
-    for key, diag in result["diag"].items():
-        if diag.get("error"):
-            continue
-        expected = EXPECTED_SURFACE.get(key)
-        if expected:
-            for field, want in expected.items():
-                got = diag.get(field)
-                if got != want:
-                    out.append("{0}.{1}: {2}, expected {3}".format(key, field, got, want))
-        if diag.get("unmatched"):
-            out.append("{0}.unmatched: {1}, expected 0".format(key, diag["unmatched"]))
-    return out
+    return ["{0}.unmatched: {1}".format(key, diag["unmatched"])
+            for key, diag in result["diag"].items() if not diag.get("error") and diag.get("unmatched")]
 
 
 def advisory_summary(result):
@@ -726,6 +840,8 @@ def advisory_summary(result):
         "duplicate-summary":    ("{n} {u} that repeat one another", ("title", "titles"), "controller"),
         "empty-response-text":  ("{n} {u} labelled with a word or two", ("response code", "response codes"), "controller"),
         "thin-description":     ("{n} {u} shorter than three sentences", ("description", "descriptions"), "controller"),
+        "off-form-description": ("{n} {u} with sentences over twenty words", ("description", "descriptions"), "controller"),
+        "heavy-description":    ("{n} {u} with long sentences on average or a hard reading grade", ("description", "descriptions"), "controller"),
         "no-description":       ("{n} {u} with no description at all", ("operation", "operations"), "controller"),
         "no-summary":           ("{n} {u} with no title at all", ("operation", "operations"), "controller"),
         "no-param-description": ("{n} {u} with no description at all", ("parameter", "parameters"), "param"),
@@ -791,7 +907,7 @@ def edit_sites(result):
         # checking rather than in the typing: one point per consuming operation beyond the first.
         site["weight"] = base + (len(site["ops"]) - 1 if site["param"] else 0)
     return sorted(sites.values(),
-                  key=lambda s: (s["tier"], DOC_ORDER.get(s["doc"], 99), s["check"], s["file"], s["target"]))
+                  key=lambda s: (s["tier"], result["doc_order"].get(s["doc"], 99), s["check"], s["file"], s["target"]))
 
 
 def finding_id(doc, controller, finding):
@@ -818,23 +934,48 @@ def weight_of(sites):
     return sum(s["weight"] for s in sites)
 
 
+def split_file(group):
+    """A file heavier than one pass, cut into consecutive parts that each fit one.
+
+    Kept whole, a controller with thirty descriptions to rewrite would be a single pass of a hundred
+    points. Cut, each part is a pass with its own manifest, so step 7 still knows which edit closed
+    what; the parts are taken one after another, never side by side.
+    """
+    if weight_of(group) <= BUDGET_HIGH:
+        return [group]
+    parts, current = [], []
+    for site in group:
+        if current and weight_of(current) + site["weight"] > BUDGET_HIGH:
+            parts.append(current)
+            current = []
+        current.append(site)
+    return parts + ([current] if current else [])
+
+
 def pack(file_groups):
     """Split one (document × check) group into passes of 8-10 points.
 
-    Sites of the same file travel together: a file opened by two passes is one diff reviewed twice,
-    and the second pass cannot say which of the two edits closed what. When the group does not fit in
-    one pass it is spread over the fewest passes that do, balanced rather than filled to the brim —
-    filling greedily leaves a two-point remainder, and a whole pass spent on one title is exactly the
-    waste this batching exists to remove.
+    Sites of the same file travel together while the file fits in one pass: a file opened by two
+    passes is one diff reviewed twice. A file heavier than a pass is cut first (`split_file`). When the
+    group does not fit in one pass it is spread over the fewest passes that do, balanced rather than
+    filled to the brim — filling greedily leaves a two-point remainder, and a whole pass spent on one
+    title is exactly the waste this batching exists to remove.
     """
+    file_groups = [part for group in file_groups for part in split_file(group)]
     total = sum(weight_of(g) for g in file_groups)
     if total <= BUDGET_HIGH:
         return [[s for g in file_groups for s in g]]
     count = max(2, -(-total // BUDGET_HIGH))
-    bins = [[] for _ in range(count)]
-    for group in sorted(file_groups, key=lambda g: -weight_of(g)):
-        bins.sort(key=weight_of)
-        bins[0].extend(group)
+    while True:
+        bins = [[] for _ in range(count)]
+        for group in sorted(file_groups, key=lambda g: -weight_of(g)):
+            bins.sort(key=weight_of)
+            bins[0].extend(group)
+        # Balancing chunky groups (a file part of eight points) can still tip a bin over the
+        # ceiling; one more bin then, until none is over or every group has a bin of its own.
+        if all(weight_of(b) <= BUDGET_HIGH for b in bins) or count >= len(file_groups):
+            break
+        count += 1
     return [b for b in sorted(bins, key=lambda b: -weight_of(b)) if b]
 
 
@@ -864,7 +1005,7 @@ def plan_batches(result):
     # Full loads first. A group that holds less than a pass — one stray title in a whole document —
     # is real work and keeps its own pass, but taking it first would spend a pass on one point while
     # loaded batches wait. Inside that, the deterministic order the rest of the script uses.
-    batches.sort(key=lambda b: (b["tier"], b["undersized"], DOC_ORDER.get(b["doc"], 99), b["check"],
+    batches.sort(key=lambda b: (b["tier"], CHECK_ORDER.get(b["check"], 0), b["undersized"], result["doc_order"].get(b["doc"], 99), b["check"],
                                 -b["weight"]))
     return batches
 
@@ -873,7 +1014,7 @@ def make_batch(doc, check, sites, group_total, note):
     weight = weight_of(sites)
     warnings = []
     if weight > BUDGET_HIGH:
-        warnings.append("heavier than the ceiling of {0} points: a file is not split between passes"
+        warnings.append("heavier than the ceiling of {0} points: one site alone outweighs a pass"
                         .format(BUDGET_HIGH))
     elif weight < BUDGET_LOW and group_total > BUDGET_HIGH:
         # Not every split can put both halves above the floor — twelve points in two passes cannot.
@@ -909,9 +1050,8 @@ def cross_document_params(result):
 def write_manifest(root, result, batch, threshold, scope):
     """Declare, before the first edit, exactly which findings this pass intends to close.
 
-    This is what makes a batch verifiable at all. Step 7 used to read "the diff touches only the
-    expected rows" and check it by reasoning — workable while a pass was one row, hopeless once it is
-    six places. With the declared set on disk the check becomes set equality: what closed and was
+    This is what makes a batch verifiable at all: reasoning about a diff does not scale past a
+    couple of sites. With the declared set on disk the check becomes set equality: what closed and was
     declared, what was declared and survived, and what closed without being declared. The last of the
     three is the one a batch would otherwise hide, and it is usually good news — a shared DTO property
     reaching further than expected — which still has to be stated rather than discovered later.
@@ -930,6 +1070,9 @@ def write_manifest(root, result, batch, threshold, scope):
         # Everything open at declaration time, so that a finding which closed without being asked for
         # can be told from one that was never open.
         baseline=sorted(finding_ids(result)),
+        # Who judged the form. Another set of tools at verification can open or close form findings
+        # on its own, so step 7 has to know.
+        form_by=result.get("form_source", "own checks"),
         diag={key: dict(diag) for key, diag in result["diag"].items()},
     )
     path = os.path.join(root, MANIFEST_PATH)
@@ -978,6 +1121,10 @@ def verify_batch(root, result):
                 moved.append("{0}.{1}: {2} → {3}".format(key, field, diag.get(field), now.get(field)))
         if now.get("stale", 0) > diag.get("stale", 0):
             moved.append("{0}.stale: {1} → {2}".format(key, diag.get("stale"), now.get("stale")))
+    form_now = result.get("form_source", "own checks")
+    if manifest.get("form_by", form_now) != form_now:
+        moved.append("form judged by {0} at declaration, by {1} now — pass the same tools, or "
+                     "--own-checks if they are gone".format(manifest["form_by"], form_now))
 
     for item in left:
         print("  STILL OPEN: {0}".format(item))
@@ -1211,7 +1358,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=".")
-    parser.add_argument("--scope", default=",".join(k for k, v in PROJECTS.items() if v["scope"]))
+    parser.add_argument("--scope", help="documents to scan, comma-separated (default: the public bundle)")
     parser.add_argument("--threshold", default="AB", choices=["A", "AB", "ABC"])
     parser.add_argument("--out", default=LIST_PATH)
     parser.add_argument("--diag", action="store_true", help="counts only; write nothing")
@@ -1220,12 +1367,30 @@ def main():
                         help="commit to the next batch: write the list and the manifest step 7 verifies against")
     parser.add_argument("--verify-batch", dest="verify", action="store_true",
                         help="compare what is open now against the manifest the batch declared")
+    parser.add_argument("--vale", help="path to vale (else VALE_BIN, else PATH)")
+    parser.add_argument("--vacuum", help="path to vacuum (else VACUUM_BIN, else PATH)")
+    parser.add_argument("--own-checks", dest="own", action="store_true",
+                        help="judge the form with the skill's own checks even where the tools are installed")
     args = parser.parse_args()
 
-    scope = [k.strip() for k in args.scope.split(",") if k.strip()]
-    unknown = [k for k in scope if k not in PROJECTS]
-    if unknown:
-        sys.exit("unknown documents in --scope: " + ", ".join(unknown))
+    known = projects(args.root)
+    if not known:
+        sys.exit("no C# project emits a document into {0}: run from the repository root or pass --root"
+                 .format(JSON_DIR))
+    if args.scope is None:
+        scope = [k for k, v in known.items() if v["scope"]]
+        if not scope:
+            sys.exit("no document of the public bundle found: {0} lists none of {1} in `join`; pass --scope"
+                     .format(BUNDLE_SETTINGS, ", ".join(v["doc"] for v in known.values())))
+    else:
+        wanted = {k.strip() for k in args.scope.split(",") if k.strip()}
+        unknown = sorted(wanted - set(known))
+        if unknown:
+            sys.exit("unknown documents in --scope: {0} (known: {1})".format(", ".join(unknown), ", ".join(known)))
+        scope = [k for k in known if k in wanted]
+    for name in unscanned_documents(args.root):
+        print("NOT SCANNED: {0} — no C# project emits it, so no controller ties its texts to a source "
+              "(list rules §1); it needs a pass of its own".format(name))
 
     if args.freshness:
         stale = False
@@ -1238,20 +1403,24 @@ def main():
                              else "safe to analyse as it stands"))
         return
 
-    result = run(args.root, scope, args.threshold)
+    found = tools.discover(args.vale, args.vacuum, use_tools=not args.own)
+    result = run(args.root, scope, args.threshold, found)
 
     if args.verify:
         sys.exit(verify_batch(args.root, result))
 
     for key, diag in result["diag"].items():
         print("{0:10} ".format(key) + "  ".join("{0}={1}".format(k, v) for k, v in diag.items()))
-    drifted = surface_drift(result)
-    for line in drifted:
-        print("SURFACE: " + line)
-    if drifted:
-        print("SURFACE: the index disagrees with EXPECTED_SURFACE in scan.py. Find the commit that "
-              "moved it before trusting any finding below — a controller the index lost takes its "
-              "findings with it and looks like a closed batch.")
+    print("FORM: judged by {0}{1}".format(result.get("form_source", "own checks"),
+                                          "".join(" · " + n for n in result["form_notes"])))
+    unmatched = unmatched_lines(result)
+    for line in unmatched:
+        print("UNMATCHED: " + line)
+    if unmatched:
+        print("UNMATCHED: operations of the document that no action matched. Either the index broke or "
+              "the surface changed; the operations at the end of the list and the diff of their "
+              "controllers say which. Work it out before trusting any finding below — a controller the "
+              "index lost takes its findings with it and looks like a closed batch.")
     must = sum(len(s["rows"]) for s in result["sections"])
     advisory = sum(len(s["advisory"]) for s in result["sections"])
     print("TOTAL: mandatory {0}, recommended {1}".format(must, advisory))

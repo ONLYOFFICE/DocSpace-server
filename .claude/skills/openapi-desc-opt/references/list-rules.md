@@ -7,6 +7,11 @@ only the controllers whose texts nobody has rewritten yet.
 
 ---
 
+Contents: §1 the unit of the list · §2 tying an operation to a controller · §3 what the document does
+to routes · §4 the checks and their thresholds (§4.1 tautological descriptions, §4.2 tautological
+parameters) · §5 filters for false positives · §6 the list and its threshold (§6.1 edit sites, §6.2
+weights and budget, §6.3 the axis of a batch, §6.4 the manifest) · related files.
+
 ## 1. The unit of the list is a controller class, not a file and not an operation
 
 The population of the list is the published C# surface, taken from the sources and not from a
@@ -21,9 +26,9 @@ list out of one file `EditorController.cs`. The list is obliged to keep that bre
 a shared action has to be visible at every class that publishes it, even though one edit closes them
 all (§3).
 
-`aichat_2.0.json` (the public AI API, 103 operations) does not reach this list at all: it is written
-by the Node/TS service `common/ASC.NewAi`, which has no C# controllers. If its texts are in scope
-too, it needs a pass of its own — over the document, with no controllers to tie it to.
+A document that no C# project emits — one written by a Node service, for example — does not reach
+this list at all: it has no controllers to tie its texts to. `scan.py` names each such document on a
+`NOT SCANNED:` line. If its texts are in scope too, it needs a pass of its own, over the document.
 
 ---
 
@@ -48,18 +53,17 @@ file. It is never a finding: nobody can be asked to fix text that cannot be trac
 
 * **Route constraints do not reach the document.** What is published is
   `/api/2.0/files/file/{fileId}`, not `{fileId:int}`. So an `*Internal` / `*Thirdparty` pair collapses
-  **into one operation**, which is why ASC.Files indexes far more actions than the document has
-  operations. Their text is shared — it is declared once in the generic base.
+  **into one operation**, which is why a project with such pairs indexes more actions than its
+  document has operations. Their text is shared — it is declared once in the generic base.
   **Consequence:** one finding lands in two rows of the list but closes with one edit. The list is
   obliged to show both rows (every class that publishes the action has to be findable), and the report
   of the work is obliged to say that the edit is one.
-* **A route collision: there can be fewer operations than actions.** Two methods on the same
-  `[HttpDelete("favorites")]` in `TagsController` (`DeleteFavoritesFromBody` and
-  `DeleteFavoritesFromQuery`) give one operation.
-* **Two attributes on one method are one operation too.** `GetRecentFolder` has `@recent` and
-  `recent`; the document holds only `/api/2.0/files/recent`. The source walk sees both routes.
-* **The casing of the path is not kept:** `api/2.0/settings/security/loginSettings` in the source
-  against `loginsettings` in the document. Compare routes in lower case only.
+* **A route collision: there can be fewer operations than actions.** Two methods on the same verb
+  and route (one binding the body, one the query, say) give one operation.
+* **Two attributes on one method are one operation too.** The document holds one of the routes; the
+  source walk sees both.
+* **The casing of the path is not kept:** a camel-case segment in the source is lower case in the
+  document. Compare routes in lower case only.
 
 ---
 
@@ -78,17 +82,33 @@ is the source of truth if the two ever disagree.
 | `no-description` | `description` empty | A | the action has no `<remarks>` — the agent has nothing to read |
 | `no-summary` | `summary` empty | A | there is no `<summary>` |
 | `no-param-description` | the parameter has no `description` | A | there is nothing to fill the field with |
-| `thin-description` | fewer than 3 sentences | B | below the lower bound of §2 of the rule (three sentences minimum, 6–9 and 150–200 words as the norm) |
+| `thin-description` | fewer than 3 sentences | B | below the lower bound of `references/description-rules.md` §4 (at least three sentences; the facts set the length) |
 | `tautological-description` | at most 3 novel content words | — | **not a finding of its own, a field inside `thin-description`** — see §4.1 |
 | `tautological-param` | `content_words(text) − content_words(name)` ≤ 1 | C | "The user ID." at `userid`; standing on its own it improves a text that already works, so it must not outrank an empty description — the queue splits in two, see §4.2 |
 | `empty-response-text` | the text of a response code is 3 words or fewer | B | "OK", "Status", "Ok" instead of what actually came back |
 | `duplicate-summary` | the title occurs twice in the document | C | breaks the uniqueness requirement of §1 of the rule |
 | `long-summary` | more than 6 words | C | a title has to be 2–6 words |
+| `off-form-description` | a sentence over 20 words, or more than one paragraph or a list | B | above the norm of `references/description-rules.md` §4 — what the tools flag at warning level |
+| `heavy-description` | over 12 words per sentence on average, or a Flesch-Kincaid grade over 10, with no sentence over 20 | C | heavy to read — what the tools flag at info / suggestion level |
 
 Two things the counting has to get right, and does: a `` `GET api/2.0/files/fileops` `` inside the
 prose is not three sentences, and a description is "novel" only in the words it adds beyond the title,
 the method name and the path — otherwise every operation would look documented by virtue of repeating
 its own route.
+
+### The form checks follow the tools
+
+`off-form-description` and `heavy-description` are the verdict of Vale and vacuum, run with the
+settings in `readability/` on every published description of the document (the webhook sentence
+included), so the queue says what the tools say. Where a tool is not installed, `tools.py` computes the
+same thresholds with the counting of the vacuum rule; where neither is, that stand-in decides alone.
+The `FORM:` line of the scan names who judged, and the manifest keeps it: step 7 has to judge with the
+same tools, or a finding can open or close for that reason alone.
+
+One description gets one form finding. A soft departure next to a hard one is part of the hard one's
+detail, and a thin description gets none: its rewrite is from scratch, so a second finding would only
+send a second pass into the same text. Inside a tier a missing or empty text goes first, a text
+above the norm after it — the first leaves an agent with nothing, the second only makes it work.
 
 **What these checks do not see:** whether the text is true, whether the permissions and the
 preconditions are named, whether asynchrony is mentioned, whether a deprecated operation names its
@@ -98,8 +118,8 @@ replacement. A clean report ≠ a finished document; the checks show where to lo
 
 A description that retells its own title is always also a short one, and that is arithmetic rather
 than luck: "adds almost nothing beyond the title, the method name and the path" is unreachable in a
-text of 150–200 words, because a text that long inevitably names the permissions, the response codes
-and the neighbouring operations. So a tautological description is a subset of `thin-description` by
+text of three sentences or more that states what `references/description-rules.md` §2 asks for —
+the access, the effect, the response codes and the neighbouring operations. So a tautological description is a subset of `thin-description` by
 construction, and a queue that lists both gives one operation two rows.
 
 **The rule:** do not put it in the queue as a row of its own. Print it as a field of the
@@ -132,12 +152,13 @@ three different passes into one file.
 
 ## 5. Filters for false positives
 
-1. **Do not count the generator's default response texts.** The `400`, `401`, `429`, `500`, `502` and
-   `503` texts are printed by a filter rather than by `[SwaggerResponse]`, so no controller edit
-   closes them. Two mechanisms drop them: a list of the known wordings, and a frequency guard for the
-   ones nobody enumerated — a "code + text" pair repeated across a large share of a document's
-   operations is a default by definition. If such a text ever reaches the queue, the hole is in the
-   filter, not in the controller.
+1. **Do not count the generator's default response texts.** The standard client- and server-error
+   texts are printed by a filter rather than by `[SwaggerResponse]`, so no controller edit closes
+   them. Both mechanisms that drop them read the documents, with no wording kept by hand: a "code +
+   text" pair repeated across a large share of a document's operations is a default by definition,
+   and so is a pair present in every document and frequent in at least one — which catches it in a
+   small document where few operations carry it. If such a text ever reaches the queue, the hole is
+   in the filter, not in the controller.
 2. **`*Wrapper` schemas are out of scope** — they have no source file.
 3. **The check against the source.** For every operation, compare the published `description` with
    the `<remarks>` behind it and treat a divergence as a stale document rather than as a finding.
@@ -147,10 +168,13 @@ three different passes into one file.
 4. **A controller with no visible operations does not reach the list**:
    class-level `IgnoreApi`, every method hidden one by one, an abstract base with no actions. A
    class-level `<summary>` does not reach the document at all.
-5. **Documents outside the public bundle** (`ai_2.0.json`, `apisystem_common.json`) are scanned but
-   marked apart: their descriptions only ever reach the service's Scalar UI. They are out of the
-   default scope and stay one `--scope` flag away; taking them in is a decision for whoever owns the
-   campaign, not for the pass.
+5. **Documents outside the public bundle** are scanned but marked apart: their descriptions only
+   ever reach the service's Scalar UI. Nothing lists them by hand. A document belongs to a C#
+   project whose `<OpenApiDocumentsDirectory>` points at the `json/` folder, and its key is the
+   `--file-name` of `<OpenApiGenerateDocumentsOptions>`. The bundle is what `join` in the
+   documentation tool's `appsettings.json` merges. Documents outside it are out of the default scope
+   and stay one `--scope` flag away; taking them in is a decision for whoever owns the campaign, not
+   for the pass.
 
 ---
 
@@ -212,8 +236,9 @@ sites, not in rows and not in findings.
 What each kind of site costs, and why (`SITE_WEIGHTS` and the budget band in `scan.py` hold the
 numbers):
 
-- **a description written from scratch** is the expensive one — the handler is read end to end and
-  150–200 words come out of it. Two of those are a full pass, and a third no longer fits, which is
+- **a description written from scratch** is the expensive one — the handler is read end to end, every
+  item of `references/description-rules.md` §2 is checked against it, and the text is brought to its
+  minimum and checked (SKILL.md step 4). Two of those are a full pass, and a third no longer fits, which is
   the point of weighting them at all;
 - **a DTO property** is cheap to type and expensive to get right, because the sentence has to be true
   for every operation that binds it — hence a surcharge per consuming operation beyond the first;
@@ -238,9 +263,10 @@ A batch is **(document × check)**, then cut along files.
 - **The check** — because one check is one shape of edit, one section of the description rule and one
   thing to review. A diff that mixes rewritten titles with rewritten DTO properties is the same problem
   the skill already forbids when it keeps tier C out of a tier B pass.
-- **A file is not split between passes**: the sites of one file travel together. A file opened by two
-  passes is one diff reviewed twice, and the second pass can no longer say which of the two edits
-  closed what.
+- **A file is not split between passes while it fits in one**: the sites of one file travel
+  together, because a file opened by two passes is one diff reviewed twice. A file heavier than one
+  pass — a controller whose every description is above the norm — is cut into consecutive parts, each
+  a pass with its own manifest, taken one after another.
 
 Taken as a pass of its own, outside the batch:
 
@@ -282,10 +308,11 @@ would have written it down as closed.
 
 ## Related files
 
-- `.claude/rules/openapi-endpoint-docs.md`, `.claude/rules/openapi-dto-docs.md` — how the text itself
-  has to read.
+- `references/description-rules.md` — how an operation description has to read;
+  `.claude/rules/openapi-endpoint-docs.md`, `.claude/rules/openapi-dto-docs.md` — the title, the
+  response texts, the properties.
 - `SKILL.md` — the loop that consumes this list.
 - `references/writing-traps.md` — what this codebase does to the text you edit.
 - `scan.py` — the implementation, and the source of truth for anything mechanical: the thresholds of
-  §4, the filters of §5, the weights of §6.2 and the expected surface all live there as constants.
-  This file explains what they are for; it does not restate them.
+  §4, the filters of §5 and the weights of §6.2 live there as constants. This file explains what they
+  are for; it does not restate them.

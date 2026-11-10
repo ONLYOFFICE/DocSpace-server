@@ -1,0 +1,7 @@
+# references/description-rules.md, section 4: a sentence has at most 20 words.
+extends: occurrence
+message: "Sentence of more than 20 words."
+scope: sentence
+level: warning
+max: 20
+token: \b(\w+)\b
