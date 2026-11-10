@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>ԱԲ մոդելի BYOK բանալին սահմանված է՝ {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Փաստաթղթերի գործակալի կարգավորումները թարմացվել են</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>ԱԲ պրոֆիլը նշանակված է գործողության համար՝ {0}</value>
   </data>
