@@ -39,6 +39,9 @@ namespace ASC.Core.Common.Tests;
 /// brought in a hotfix whose service-limit actions took 6112-6116) turns every row already written into another event.
 /// The snapshot lists every member of every stored enum, sorted by value, so two branches that take the same number
 /// collide in it when they are merged, and a moved, reused or removed number fails here.
+/// New members need no hand edit: when they are the only difference, the test writes them into the snapshot and fails
+/// once, so that the file is committed with the change that added them. A moved or removed number is never written:
+/// that one is a decision.
 /// </summary>
 /// <remarks>
 /// The stored enums are found, not listed: every enum-typed property of an entity that some <see cref="DbContext"/>
@@ -57,8 +60,8 @@ public class PersistedEnumValuesTests
 
     private const string SnapshotHeader =
         "# Every member of every enum the database stores, as Enum.Member=Value, sorted by enum and value.\n" +
-        "# Checked by PersistedEnumValuesTests. A new member gets its line here; a changed or removed one is a decision:\n" +
-        "# rows already stored with that number change their meaning.\n";
+        "# Checked by PersistedEnumValuesTests, which writes the lines of new members itself: commit them with the change.\n" +
+        "# A changed or removed line is a decision: rows already stored with that number change their meaning.\n";
 
     /// <summary>
     /// Enums the database holds as a plain number column, so no enum-typed entity property leads to them.
@@ -98,23 +101,65 @@ public class PersistedEnumValuesTests
             return;
         }
 
-        var received = Path.Combine(AppContext.BaseDirectory, "PersistedEnums.received.txt");
-        File.WriteAllText(received, SnapshotHeader + string.Join('\n', actual) + "\n");
-
+        var content = SnapshotHeader + string.Join('\n', actual) + "\n";
         var now = ToValues(actual);
         var before = ToValues(snapshot);
+
+        var changed = before.Where(e => now.TryGetValue(e.Key, out var value) && value != e.Value)
+            .Select(e => $"{e.Key}: {e.Value} -> {now[e.Key]}").ToList();
+        var removed = before.Keys.Where(k => !now.ContainsKey(k)).Select(k => $"{k}={before[k]}").ToList();
+        var added = now.Keys.Where(k => !before.ContainsKey(k)).Select(k => $"{k}={now[k]}").ToList();
+
+        if (changed.Count == 0 && removed.Count == 0)
+        {
+            // Only new members, or the lines out of their sorted order after a merge: nothing stored before changes its
+            // meaning, so the snapshot is brought up to date here instead of by hand.
+            Assert.Fail(ExtendSnapshot(content, added));
+        }
+
+        var received = Path.Combine(AppContext.BaseDirectory, "PersistedEnums.received.txt");
+        File.WriteAllText(received, content);
+
         var message = new StringBuilder($"The stored enum values differ from {SnapshotPath}.\n");
 
-        Append(message, "Changed: rows stored with the old number now read as another member. Put the old value back, or decide it and update the snapshot",
-            before.Where(e => now.TryGetValue(e.Key, out var value) && value != e.Value).Select(e => $"{e.Key}: {e.Value} -> {now[e.Key]}"));
-        Append(message, "Removed: rows stored with this number lose their name",
-            before.Keys.Where(k => !now.ContainsKey(k)).Select(k => $"{k}={before[k]}"));
-        Append(message, "Added: add these lines to the snapshot, in their sorted place",
-            now.Keys.Where(k => !before.ContainsKey(k)).Select(k => $"{k}={now[k]}"));
+        Append(message, "Changed: rows stored with the old number now read as another member. Put the old value back, or decide it and update the snapshot", changed);
+        Append(message, "Removed: rows stored with this number lose their name", removed);
+        Append(message, "Added: written to the snapshot once the changes above are settled", added);
 
         message.Append($"The whole expected snapshot is in {received}.");
 
         Assert.Fail(message.ToString());
+    }
+
+    /// <summary>
+    /// Writes the snapshot when the only difference is new members, and says what to commit. The test still fails, so
+    /// that a run never passes while the committed file lacks the lines: CI stays red until they are committed.
+    /// </summary>
+    private static string ExtendSnapshot(string content, List<string> added)
+    {
+        var path = Path.Combine(FindRepositoryRoot(), SnapshotPath);
+
+        try
+        {
+            File.WriteAllText(path, content);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            var received = Path.Combine(AppContext.BaseDirectory, "PersistedEnums.received.txt");
+            File.WriteAllText(received, content);
+
+            return $"{SnapshotPath} could not be written ({exception.Message}). The expected snapshot is in {received}: copy it over and commit it.";
+        }
+
+        var message = new StringBuilder($"{SnapshotPath} was out of date and has been rewritten: commit it. ");
+
+        message.Append(added.Count > 0
+            ? "Only new members were found, so nothing stored before changes its meaning; the next run passes.\n"
+            : "Its lines were out of their sorted order, the values are unchanged; the next run passes.\n");
+
+        Append(message, "Added", added);
+
+        return message.ToString();
     }
 
     [Fact]
@@ -161,10 +206,8 @@ public class PersistedEnumValuesTests
             .ToDictionary(g => g.Key, g => g.First()[1], StringComparer.Ordinal);
     }
 
-    private static void Append(StringBuilder message, string title, IEnumerable<string> items)
+    private static void Append(StringBuilder message, string title, List<string> list)
     {
-        var list = items.ToList();
-
         if (list.Count == 0)
         {
             return;

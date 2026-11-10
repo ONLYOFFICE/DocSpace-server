@@ -1,6 +1,6 @@
 # Every member of every enum the database stores, as Enum.Member=Value, sorted by enum and value.
-# Checked by PersistedEnumValuesTests. A new member gets its line here; a changed or removed one is a decision:
-# rows already stored with that number change their meaning.
+# Checked by PersistedEnumValuesTests, which writes the lines of new members itself: commit them with the change.
+# A changed or removed line is a decision: rows already stored with that number change their meaning.
 ASC.AI.Core.Database.Legacy.ConnectionType.Direct=0
 ASC.AI.Core.Database.Legacy.ConnectionType.OAuth=1
 ASC.AI.Integration.Assignments.ActionType.Default=0
