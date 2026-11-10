@@ -50,6 +50,9 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Warning, "Subscription renewal that timed out at {timedOutAt} is not confirmed yet: tenant {tenantId}, {description}: {reason}")]
     public static partial void WarningRenewSubscriptionServiceNotConfirmed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, DateTime timedOutAt, string reason, Exception exception);
 
+    [LoggerMessage(LogLevel.Error, "RenewSubscriptionService: error processing tenant {tenantId}")]
+    public static partial void ErrorRenewSubscriptionServiceTenant(this ILogger<RenewSubscriptionService> logger, int tenantId, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "Subscription renewal for tenant {tenantId} scheduled a switch to unknown wallet quota {nextQuotaId}")]
     public static partial void ErrorRenewSubscriptionServiceUnknownNextQuota(this ILogger<RenewSubscriptionService> logger, int tenantId, int nextQuotaId);
 }
