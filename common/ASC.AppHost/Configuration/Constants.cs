@@ -126,11 +126,16 @@ public static class Constants
     // the addresses, key, secret, region, default quota and the first accounting currency. A portal's payment key is
     // the region followed by the tenant id, which is how the stub tells the portals apart; a portal billing knows
     // nothing about falls back to the free startup quota rather than becoming unpaid. The other payment settings
-    // (core:payment:test and :delay, core:accounting:topupperiod, the limits) still come from buildtools/config.
+    // (core:payment:test and :delay, the limits) still come from buildtools/config.
     public const string PaymentStubRegion = "stub-";
     public const string PaymentStubKey = "stub-key";
     public const string PaymentStubSecret = "stub-secret";
     public const int PaymentStubDefaultQuota = -3;
+
+    // core:accounting:topupperiod of that profile: how often TopUpWalletService walks the portals with wallet settings.
+    // The billing tests of what it does (LowBalanceWarningTests) wait for its next run, so it is seconds, not the
+    // minute buildtools/config sets.
+    public static TimeSpan PaymentStubTopUpPeriod { get; } = TimeSpan.FromSeconds(5);
 
     // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
     // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,

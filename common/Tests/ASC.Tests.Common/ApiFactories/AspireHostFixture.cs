@@ -462,6 +462,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Starts listening on the stack's event bus for events of one type, named as the services name it (the type's
+    /// name, e.g. <c>NotifyItemIntegrationEvent</c>). Start it before the call under test: it sees only what is
+    /// published after it started.
+    /// </summary>
+    public async Task<EventBusProbe> ListenToEventBusAsync(string eventName, CancellationToken cancellationToken = default)
+    {
+        return await EventBusProbe.StartAsync(await GetConnectionStringAsync(ResourceNames.Messaging, cancellationToken), eventName, cancellationToken);
+    }
+
+    /// <summary>
     /// The connection string Aspire published for a resource — for a suite that talks to a container
     /// directly instead of through a service.
     /// </summary>
@@ -473,7 +483,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     /// <summary>
     /// An open connection to the stack's database, for a test that has to plant a row no API call
-    /// writes any more — data left behind by an older release that the current code must still read.
+    /// writes any more — data left behind by an older release that the current code must still read —
+    /// or to set or read a value the API does not expose; such a test says why next to the query.
     /// </summary>
     public async Task<MySqlConnection> OpenDatabaseAsync(CancellationToken cancellationToken = default)
     {

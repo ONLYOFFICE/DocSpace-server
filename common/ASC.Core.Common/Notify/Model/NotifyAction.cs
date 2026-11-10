@@ -39,9 +39,13 @@ public abstract class NotifyAction(TenantManager tenantManager) : INotifyAction
 {
     public abstract string ID { get; }
     public abstract List<Pattern> Patterns { get; }
-    
+
     public List<ITagValue> Tags { get; set; }
-    
+
+    public virtual bool SuppressRepeats => false;
+
+    public virtual string[] DeduplicationTags => [];
+
     public static implicit operator NotifyActionItem(NotifyAction cache)
     {
         return new NotifyActionItem
@@ -49,7 +53,7 @@ public abstract class NotifyAction(TenantManager tenantManager) : INotifyAction
             NotifyActionType = cache.GetType().FullName
         };
     }
-    
+
     protected CultureInfo GetCulture(UserInfo user)
     {
         CultureInfo culture = null;
@@ -61,7 +65,13 @@ public abstract class NotifyAction(TenantManager tenantManager) : INotifyAction
 
         return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
     }
-    
+
+    // the alias of the portal the letter is sent from, which signs the invitation links it carries
+    protected string GetTenantAlias()
+    {
+        return tenantManager.GetCurrentTenant(false)?.Alias;
+    }
+
     public override string ToString()
     {
         return $"action: {ID}";

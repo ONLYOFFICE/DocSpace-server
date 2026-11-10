@@ -197,6 +197,15 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
 
         await InitAsync(action, scope);
 
+        // A tag the repeat check keys on but Init leaves out turns the check off for the letter: without the value it
+        // cannot be told from another letter of its kind, so it goes out every time.
+        foreach (var keyTag in action.DeduplicationTags)
+        {
+            action.Tags.Should().Contain(
+                t => t.Tag == keyTag && !string.IsNullOrEmpty(t.Value as string),
+                $"{typeof(TAction).Name}.Init has to fill '{keyTag}', which the repeat check keys on");
+        }
+
         var pattern = action.Patterns.Find(p => p.SenderName == ASC.Core.Configuration.Constants.NotifyEMailSenderSysName)
             ?? throw new InvalidOperationException(
                 $"Action '{action.ID}' carries no email pattern, so there is no letter to render.");

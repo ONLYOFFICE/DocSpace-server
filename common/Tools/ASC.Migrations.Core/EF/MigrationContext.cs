@@ -167,6 +167,7 @@ public class MigrationContext : DbContext
     public DbSet<DbPromptFolder> PromptFolders { get; set; }
     public DbSet<DbPrompt> Prompts { get; set; }
     public DbSet<DbAttachment> Attachments { get; set; }
+    public DbSet<DbByokKey> ByokKeys { get; set; }
 
     public MigrationContext(DbContextOptions<MigrationContext> options) : base(options) { }
 
@@ -276,6 +277,7 @@ public class MigrationContext : DbContext
             .AddDbPreferences()
             .AddDbPromptFolders()
             .AddDbPrompts()
-            .AddDbAttachments();
+            .AddDbAttachments()
+            .AddDbByokKeys();
     }
 }

@@ -43,6 +43,7 @@ public class ChatContextDto
     public ThreadDto? Thread { get; init; }
     public List<MessageDto>? Messages { get; init; }
     public WebSearchConfigDto? WebSearch { get; init; }
+    public required bool DocumentAgentEnabled { get; init; }
 }
 
 public class ChatContextScopeDto

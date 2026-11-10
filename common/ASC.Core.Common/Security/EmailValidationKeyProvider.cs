@@ -76,23 +76,29 @@ public class EmailValidationKeyProvider
     {
         _machinePseudoKeys = machinePseudoKeys;
         _tenantManager = tenantManager;
-        if (!TimeSpan.TryParse(configuration["email:validinterval"], out var validInterval))
-        {
-            validInterval = TimeSpan.FromDays(7);
-        }
         if (!TimeSpan.TryParse(configuration["auth:validinterval"], out var authValidInterval))
         {
             authValidInterval = TimeSpan.FromHours(1);
         }
-        if (!TimeSpan.TryParse(configuration["visit:validinterval"], out var validVisitLinkInterval))
-        {
-            validVisitLinkInterval = TimeSpan.FromMinutes(15);
-        }
 
-        ValidEmailKeyInterval = validInterval;
+        ValidEmailKeyInterval = GetValidEmailKeyInterval(configuration);
         ValidAuthKeyInterval = authValidInterval;
-        ValidVisitLinkInterval = validVisitLinkInterval;
+        ValidVisitLinkInterval = GetValidVisitLinkInterval(configuration);
         _logger = logger;
+    }
+
+    public static TimeSpan GetValidEmailKeyInterval(IConfiguration configuration)
+    {
+        return TimeSpan.TryParse(configuration["email:validinterval"], out var validInterval)
+            ? validInterval
+            : TimeSpan.FromDays(7);
+    }
+
+    public static TimeSpan GetValidVisitLinkInterval(IConfiguration configuration)
+    {
+        return TimeSpan.TryParse(configuration["visit:validinterval"], out var validVisitLinkInterval)
+            ? validVisitLinkInterval
+            : TimeSpan.FromMinutes(15);
     }
 
 
