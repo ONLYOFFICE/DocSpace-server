@@ -41,9 +41,13 @@ namespace ASC.Common.Utils;
 /// </summary>
 /// <remarks>
 /// Read once, when the service is created, and keep the result: every call that meets a bad value writes its warning
-/// again. Values are read in the invariant culture. A time span is <c>[-][d.]hh:mm[:ss[.fffffff]]</c>, and a bare
-/// number is a count of days: <c>"60"</c> is 60 days, not 60 minutes. The bounds are code, not configuration, so a
-/// default outside them, or a minimum above the maximum, throws <see cref="ArgumentException"/>.
+/// again. Values are read in the invariant culture. A time span is <c>[-][d.]hh:mm[:ss[.fffffff]]</c>. Two spellings
+/// read as days, which may not be what was meant: a bare number (<c>"60"</c> is 60 days, not 60 minutes), and three
+/// parts whose first is 24 or more, read as days:hours:minutes (<c>"24:00:00"</c> is 24 days, not 24 hours;
+/// <c>"36:15:00"</c> is 36 days and 15 hours; <c>"24:30:00"</c> and <c>"24:00"</c> do not parse). They are kept as
+/// read, since days may be what was meant, and get a warning that shows the reading in the unambiguous form
+/// (<c>"24.00:00:00"</c>; one day is <c>"1.00:00:00"</c>). The bounds are code, not configuration, so a default outside
+/// them, or a minimum above the maximum, throws <see cref="ArgumentException"/>.
 /// </remarks>
 public static class ConfigurationValueExtensions
 {
@@ -54,7 +58,7 @@ public static class ConfigurationValueExtensions
     /// </summary>
     public static TimeSpan ReadInterval(this IConfiguration configuration, string key, TimeSpan @default, TimeSpan min, TimeSpan max, ILogger logger)
     {
-        return Read(configuration, key, @default, min, max, logger, TryParseInterval);
+        return Read(configuration, key, @default, min, max, logger, TryParseInterval, IsAmbiguousInterval);
     }
 
     /// <summary>
@@ -71,6 +75,15 @@ public static class ConfigurationValueExtensions
     public static long ReadLong(this IConfiguration configuration, string key, long @default, long min, long max, ILogger logger)
     {
         return Read(configuration, key, @default, min, max, logger, TryParseLong);
+    }
+
+    /// <summary>
+    /// The floating-point number at <paramref name="key"/>, within <paramref name="min"/>..<paramref name="max"/>, with
+    /// a dot as the decimal separator. <c>NaN</c> and the infinities are unreadable: they would bound nothing.
+    /// </summary>
+    public static double ReadDouble(this IConfiguration configuration, string key, double @default, double min, double max, ILogger logger)
+    {
+        return Read(configuration, key, @default, min, max, logger, TryParseDouble);
     }
 
     /// <summary>
@@ -97,7 +110,7 @@ public static class ConfigurationValueExtensions
         return @default;
     }
 
-    private static T Read<T>(IConfiguration configuration, string key, T @default, T min, T max, ILogger logger, TryParser<T> tryParse)
+    private static T Read<T>(IConfiguration configuration, string key, T @default, T min, T max, ILogger logger, TryParser<T> tryParse, Func<string, bool> isAmbiguous = null)
         where T : struct, IComparable<T>
     {
         if (min.CompareTo(max) > 0)
@@ -117,7 +130,9 @@ public static class ConfigurationValueExtensions
             return @default;
         }
 
-        if (!tryParse(value.Trim(), out var parsed))
+        var text = value.Trim();
+
+        if (!tryParse(text, out var parsed))
         {
             logger.WarningConfigurationValueUnreadable(key, value, Format(@default));
 
@@ -130,6 +145,11 @@ public static class ConfigurationValueExtensions
         {
             logger.WarningConfigurationValueOutOfRange(key, value, Format(min), Format(max), Format(effective));
         }
+        else if (isAmbiguous is not null && isAmbiguous(text))
+        {
+            // One warning per value: a value moved to a bound already says what is used.
+            logger.WarningConfigurationValueAmbiguous(key, value, Format(effective));
+        }
 
         return effective;
     }
@@ -137,6 +157,24 @@ public static class ConfigurationValueExtensions
     private static bool TryParseInterval(string value, out TimeSpan result)
     {
         return TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out result);
+    }
+
+    /// <summary>
+    /// A spelling that <see cref="TimeSpan"/> reads as days although it may have been meant otherwise: a bare number
+    /// (<c>"60"</c>), or three parts whose first is 24 or more (<c>"24:00:00"</c>, read as days:hours:minutes).
+    /// </summary>
+    private static bool IsAmbiguousInterval(string text)
+    {
+        if (long.TryParse(text, NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out _))
+        {
+            return true;
+        }
+
+        var parts = text.TrimStart('-').Split(':');
+
+        return parts.Length == 3
+            && int.TryParse(parts[0], NumberStyles.None, CultureInfo.InvariantCulture, out var first)
+            && first >= 24;
     }
 
     private static bool TryParseInt(string value, out int result)
@@ -147,6 +185,11 @@ public static class ConfigurationValueExtensions
     private static bool TryParseLong(string value, out long result)
     {
         return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out result);
+    }
+
+    private static bool TryParseDouble(string value, out double result)
+    {
+        return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out result) && double.IsFinite(result);
     }
 
     private static bool TryParseBool(string value, out bool result)

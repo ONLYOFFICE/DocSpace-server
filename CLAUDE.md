@@ -107,6 +107,7 @@ dotnet test ASC.Tests.slnx
 - **Integration branch**: `develop`
 - **Branch naming**: `feature/*`, `bugfix/*`
 - **Submodules**: 9 total — 8 SDK submodules in `sdk/` plus `common/resources/DocStore` (document templates); use `git submodule update --init` after clone
+- **Self-review before review**: when a branch you wrote is finished, run the `review-branch` skill on it yourself in self-review mode and do what its §8 "Self-review" says before handing the branch over. The reviewer runs the same skill, so whatever it finds there would otherwise cost a review round. After a review round, the re-check of your fixes comes first (`.claude/rules/fixing-findings.md` §6). This applies to every branch, also one that changes only scripts, skills or rules
 
 ## Architecture Notes
 

@@ -133,7 +133,9 @@ red, then puts the change back and expects green. Paste its last line into the c
 .claude/scripts/prove-red.sh --commit c1bf173086 --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*NotifyRepeatOptInTests"
 ```
 
-The first form takes away the uncommitted changes, the second the product part of a commit. When the
+The first form takes away the uncommitted product changes and leaves the test files and a local edit
+of the environment (`global.json`, `--exclude PATH`) in place; the second takes away the product part
+of a commit. When the
 test calls what the change adds, the whole change cannot be taken away (exit 3): pass `--patch` with
 only the behavioural hunk. When the run is impossible here (environment, cost), the commit says "not
 proven red" and why.
@@ -299,12 +301,24 @@ resolves its parent without a `using`, which matters here because usings are onl
 ## Class size drives parallelism
 
 xUnit parallelises **test collections**, and by default a collection is a class. Cases
-inside one class always run sequentially — there is no setting that changes this. A
-`[Theory]` with 16 cases is 16 sequential tests.
+inside one class run sequentially: a `[Theory]` with 16 cases is 16 sequential tests. xUnit 4
+can run them concurrently (`"parallelMode": "all"` in `xunit.runner.json`), but the repo does not
+set it.
 
-So: **one class per endpoint, and keep it under ~24 cases** (cases, not methods — count
-`InlineData` rows and `MemberData` sizes). Split by endpoint or by scenario group, put
-shared helpers in an intermediate base class, and shared `TheoryData` in a static data
+With no runner configuration (the repo has none), xUnit runs up to one class per logical core at a
+time — 24 on the development machine — and the cases of each class one after another. So a run
+lasts at least as long as its longest class. That matters in the integration suites, whose cases
+run against the Aspire stack: Files had ~3 850 cases with a median of 0.75 s (2026-09), about two
+and a half minutes of work per core, so one class of 200 such cases would alone take as long as the
+whole run while the other cores sit idle. ~24 cases keeps a class at tens of seconds, a small piece
+the scheduler can spread over the cores. It is an upper bound, not a target: once classes are much
+shorter than the run, splitting further gains nothing. A unit-test class — nothing started,
+milliseconds per case (`ConfigurationValueExtensionsTests`, `PersistedEnumValuesTests`) — has no
+limit.
+
+So, in an integration suite: **one class per endpoint, and keep it under ~24 cases** (cases,
+not methods — count `InlineData` rows and `MemberData` sizes). Split by endpoint or by scenario
+group, put shared helpers in an intermediate base class, and shared `TheoryData` in a static data
 class referenced explicitly:
 
 ```csharp

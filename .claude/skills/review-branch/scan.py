@@ -146,7 +146,7 @@ LINE_CHECKS = [
      re.compile(r"\.Log\w*\(\s*\$\""), is_cs),
     ("logging.md", "[LoggerMessage] outside a dedicated *Logger class file",
      re.compile(r"\[LoggerMessage\b"), lambda p: is_cs(p) and not p.endswith("Logger.cs")),
-    ("configuration.md", "* configuration value read - through ConfigurationValueExtensions, both bounds, 0 / negative / huge?",
+    ("configuration.md", "* configuration value read - through ConfigurationValueExtensions (a list or a bound section: configuration.md §1), both bounds, 0 / negative / huge?",
      re.compile(r"\.GetValue<\s*(int|long|double|bool|TimeSpan|int\[\])|configuration\[\s*\"|\.GetSection\(\s*\"[^\"]*\"\s*\)\s*\.Get<"),
      lambda p: is_cs(p) and not is_test(p)),
     ("configuration.md", "`Parse` of a configuration value (throws on a typo; use ConfigurationValueExtensions)",

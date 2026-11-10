@@ -40,4 +40,7 @@ internal static partial class ConfigurationValueLogger
 
     [LoggerMessage(LogLevel.Warning, "Configuration value {key} = \"{value}\" is outside {min}..{max}, {effective} is used instead")]
     public static partial void WarningConfigurationValueOutOfRange(this ILogger logger, string key, string value, string min, string max, string effective);
+
+    [LoggerMessage(LogLevel.Warning, "Configuration value {key} = \"{value}\" is read as {effective} (days.hours:minutes:seconds); write it in that form if this is what is meant")]
+    public static partial void WarningConfigurationValueAmbiguous(this ILogger logger, string key, string value, string effective);
 }

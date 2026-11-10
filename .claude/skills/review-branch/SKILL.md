@@ -1,6 +1,6 @@
 ---
 name: review-branch
-description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new. USE FOR: review the branch, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
+description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new, and the author's self-review of a finished branch before it goes to review. USE FOR: review the branch, check my branch before review, self-review, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request, except after a self-review), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
 ---
 
 # Review a branch against the repo rules
@@ -10,7 +10,8 @@ The review answers two questions: **does the branch follow the rules written in 
 alternative designs, "I would have written it differently" — stays out unless a rule backs it.
 
 The review is read-only. Never edit product code, never commit, never switch branches, never
-touch submodule checkouts or the user's running DocSpace. Fixing is a separate request.
+touch submodule checkouts or the user's running DocSpace. Fixing is a separate request; the one
+exception is the author's self-review of their own branch (§0, §8 "Self-review").
 
 Report in the user's language. Section headings below are given in English; translate them along
 with the rest of the report.
@@ -24,6 +25,11 @@ with the rest of the report.
 - **Saturation** — "find all the findings", "why does every run find something new", "review until
   nothing is left". Go to §9: two independent full passes on one frozen sha and an estimate of what
   is still unfound.
+- **Self-review** — the author checks a branch they wrote before handing it to review: "check my
+  branch before review", "self-review", or the step `CLAUDE.md` (Git Workflow) asks for when a
+  branch is finished. Run it as a first review, against the base the reviewer will use, with
+  `--worktree` while the work is uncommitted. Only the end differs: §8 "Self-review". A branch that
+  has already had a review round is checked with §7 instead.
 
 One review covers **one sha**. While fix rounds keep landing, a fresh first review of the whole
 branch finds new things every time for two reasons that look the same in the report: bugs in the
@@ -197,7 +203,7 @@ edit here. Distribute every applicable rule to a reviewer:
   operation/property; `<summary>` = title, `<remarks>` = description (inverted!), every code named
   in prose has a `[SwaggerResponse]`, realistic `<example>`, behavioural facts on the operation, not
   the property; for a shared DTO find every operation that binds it.
-- **A3** — `tests.md`, only if test files changed. One feature = one folder, class under ~24 cases,
+- **A3** — `tests.md`, only if test files changed. One feature = one folder, an integration-suite class under ~24 cases (a unit-test class has no limit),
   SDK not raw HTTP outside the carve-outs, `ApiException` assertions, `TestContext.Current.CancellationToken`,
   deadline polling (no fixed `Task.Delay` before an assert, no timeout token inside the loop),
   access matrices that match `FileSecurity.AvailableRoomAccesses`, `[Trait("Bug")]` instead of Skip.
@@ -511,6 +517,27 @@ End the file with a `Coverage` section the next run reads (§3 Coverage): the re
 the matrices built with their row counts, and the files no reviewer read in full. Every run of a
 branch saves one, also when the user did not ask for the findings: offer it in the closing line,
 since without it the next run cannot tell what is new from what was missed.
+
+### Self-review
+
+The findings go back to the author, who fixes them before anyone else reads the branch. This is
+the one mode that is followed by fixing without a separate request: the author asked for the check
+in order to fix what it finds. Reviewing someone else's branch stays read-only.
+
+1. Fix every finding in one batch (`fixing-findings.md`), then run §7 on that batch, once. Fix what
+   the re-check finds as well; a third pass only when the re-check found a blocker.
+   Uncommitted work has no fix commits for §7 to take: before fixing, save `git diff HEAD` to the
+   scratchpad. The re-check then reads the files the batch touched against that copy, gives the
+   fresh reviewer of §7 point 3 the difference, and proves a behavioural fix with `prove-red.sh
+   --patch` holding the fix's own hunk instead of `--commit`.
+2. A finding whose fix would change behaviour or scope the user did not ask for goes to the user as
+   a question, not into a silent fix.
+3. Write what the self-review could not verify (a suite it could not run, a platform, a profile)
+   under "Not verified" in the commit message or the PR description, or, when the author does not
+   commit, in the commit message proposed to the one who does: the reviewer starts there.
+4. Do not hand the findings list to the reviewer. A reviewer given a list checks that list (§7,
+   point 3); the reviewer runs a first review of their own. Save the file, when asked, as
+   `<branch-name-with-dashes>-self-review.md`, so that no later run takes it for a review round.
 
 ## 9. Saturation mode
 

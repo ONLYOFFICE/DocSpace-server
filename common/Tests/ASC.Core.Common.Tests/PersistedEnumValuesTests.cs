@@ -42,8 +42,14 @@ namespace ASC.Core.Common.Tests;
 /// </summary>
 /// <remarks>
 /// The stored enums are found, not listed: every enum-typed property of an entity that some <see cref="DbContext"/>
-/// maps through a <see cref="DbSet{TEntity}"/>, in the ASC assemblies this project loads, plus the enums the database
-/// holds as a plain number (<see cref="_storedAsNumbers"/>). A new enum column therefore enters the check on its own.
+/// maps through a <see cref="DbSet{TEntity}"/>, of every entity in the model of
+/// <see cref="ASC.Migrations.Core.MigrationContext"/>, plus the enums the database holds as a plain number
+/// (<see cref="_storedAsNumbers"/>). The contexts are searched in the ASC assemblies reachable from this one and from
+/// <c>MigrationContext</c>. The migrations are generated from that context's model, so it holds every table of the
+/// schema: those whose runtime context lives in a project this one does not reference (<c>BackupsContext</c> in
+/// <c>ASC.Data.Backup.Core</c>, <c>LegacyAiDbContext</c> in the AI service), and those mapped only through its
+/// <c>OnModelCreating</c> chain, with no <see cref="DbSet{TEntity}"/>. A new enum column needs a migration, so it
+/// enters the check on its own. A database of its own with no migrations here (the resources database) stays outside.
 /// </remarks>
 public class PersistedEnumValuesTests
 {
@@ -73,7 +79,11 @@ public class PersistedEnumValuesTests
             typeof(ASC.Files.Core.FolderType),
             typeof(ASC.Files.Core.Security.FileShare),
             typeof(ASC.Core.Tenants.TenantStatus),
-            typeof(ASC.Core.Users.EmployeeStatus)
+            typeof(ASC.Core.Users.EmployeeStatus),
+            // Both are mapped at runtime only by contexts in projects this one does not reference. ProviderType is what
+            // proves that MigrationContext is searched: naming BackupStorageType here brings its assembly in by itself.
+            typeof(ASC.Data.Backup.Contracts.BackupStorageType),
+            typeof(ASC.Core.Common.EF.Model.Ai.Legacy.ProviderType)
         ]);
     }
 
@@ -187,22 +197,22 @@ public class PersistedEnumValuesTests
             .SelectMany(TypesOf)
             .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(DbContext).IsAssignableFrom(t));
 
-        foreach (var context in contexts)
-        {
-            var entities = context.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+        var entities = contexts
+            .SelectMany(context => context.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
-                .Select(p => p.PropertyType.GetGenericArguments()[0]);
+                .Select(p => p.PropertyType.GetGenericArguments()[0]))
+            .Concat(MigrationModelEntities())
+            .Distinct();
 
-            foreach (var entity in entities)
+        foreach (var entity in entities)
+        {
+            foreach (var property in entity.GetProperties(BindingFlags.Public | BindingFlags.Instance))
             {
-                foreach (var property in entity.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-                {
-                    var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+                var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
 
-                    if (type.IsEnum && type.FullName?.StartsWith("ASC.", StringComparison.Ordinal) == true)
-                    {
-                        enums.Add(type);
-                    }
+                if (type.IsEnum && type.FullName?.StartsWith("ASC.", StringComparison.Ordinal) == true)
+                {
+                    enums.Add(type);
                 }
             }
         }
@@ -211,12 +221,39 @@ public class PersistedEnumValuesTests
     }
 
     /// <summary>
-    /// The ASC assemblies reachable from this test assembly through its references.
+    /// The entity types of the model the migrations are generated from, built the way <c>BackupCoverageTests</c> builds
+    /// it: the provider is needed, a connection is never opened. Unlike the <see cref="DbSet{TEntity}"/> properties, the
+    /// model also holds an entity mapped only through the <c>OnModelCreating</c> chain. Shared-type entities (property
+    /// bags) have no class of their own to read properties from.
+    /// </summary>
+    private static List<Type> MigrationModelEntities()
+    {
+        var options = new DbContextOptionsBuilder<ASC.Migrations.Core.MigrationContext>()
+            .UseMySql(
+                "Server=localhost;Database=docspace",
+                ServerVersion.Parse("9.2.0"),
+                providerOptions => providerOptions.UseMicrosoftJson())
+            .Options;
+
+        using var context = new ASC.Migrations.Core.MigrationContext(options);
+
+        return [.. context.Model.GetEntityTypes().Where(e => !e.HasSharedClrType).Select(e => e.ClrType)];
+    }
+
+    /// <summary>
+    /// The ASC assemblies reachable through their references from this test assembly and from the one that holds
+    /// <see cref="ASC.Migrations.Core.MigrationContext"/>. The compiler keeps a reference only to an assembly whose
+    /// types the code uses, so a project reference alone would not bring that assembly in: it is named here.
     /// </summary>
     private static List<Assembly> AscAssemblies()
     {
-        var found = new Dictionary<string, Assembly>(StringComparer.Ordinal);
-        var queue = new Queue<Assembly>([typeof(PersistedEnumValuesTests).Assembly]);
+        var roots = new[]
+        {
+            typeof(PersistedEnumValuesTests).Assembly,
+            typeof(ASC.Migrations.Core.MigrationContext).Assembly
+        };
+        var found = roots.ToDictionary(a => a.GetName().Name!, StringComparer.Ordinal);
+        var queue = new Queue<Assembly>(roots);
 
         while (queue.TryDequeue(out var assembly))
         {

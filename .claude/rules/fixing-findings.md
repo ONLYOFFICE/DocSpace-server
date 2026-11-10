@@ -15,8 +15,8 @@ paths around it. Before a fix is handed back:
    commit message which ones were left and why.
 2. **Walk the other paths of the changed code.** Create vs update (a field left out on update),
    the lookup the old behaviour served, rows and backup archives written before the change, the
-   other database, the success path and the opposite failure. If the fix adds a retry, requeue or
-   fallback, show where it ends.
+   other database in the code (the PostgreSQL branch of a model builder or of raw SQL), the success
+   path and the opposite failure. If the fix adds a retry, requeue or fallback, show where it ends.
 3. **Prove it with a test** that fails without the fix — for every behavioural finding — and prove
    that it fails: run `.claude/scripts/prove-red.sh` (`tests.md`, "A test has to be able to fail") and
    put its result line in the commit message. A finding that cannot be tested or proven here
@@ -29,8 +29,10 @@ paths around it. Before a fix is handed back:
 5. **Fix a review in one batch.** Take all findings of one review (one sha) in one round and only
    then ask for the next review. Fixing between review runs moves the sha under the review, and
    each run then finds the bugs of the previous round's fixes mixed with what it missed before.
-6. **Re-check your own fix commits** with the `review-branch` skill, §7 (re-check mode), before
-   asking for another review round.
+6. **Check your own work before handing it back.** Before a branch first goes to review, run the
+   `review-branch` skill on it in self-review mode (its §0); after a round of fixes, run its §7
+   re-check on your fix commits. Fix what it finds, then ask for the review. The reviewer uses the
+   same skill, so what it finds here would otherwise cost a round (`CLAUDE.md`, Git Workflow).
 
 A fix that adds state — a mark, an "accepted" flag, a lock, a retry, a fallback — is new code and
 goes through `failure-paths.md` like any other: in past rounds most new findings were in exactly

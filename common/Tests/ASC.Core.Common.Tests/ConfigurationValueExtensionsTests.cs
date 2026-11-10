@@ -49,8 +49,11 @@ public class ConfigurationValueExtensionsTests
     private static readonly TimeSpan _maxInterval = TimeSpan.FromDays(365);
 
     /// <summary>
-    /// The configured text, the interval read from it and whether a warning was written. A bare number is a count of
-    /// days, so <c>"60"</c> is read as 60 days without a warning: only the bounds catch a number meant in other units.
+    /// The configured text, the interval read from it and whether a warning was written. Two spellings read as days
+    /// that may have been meant otherwise, so they are kept as read and get a warning: a bare number (<c>"60"</c> is
+    /// 60 days) and three parts whose first is 24 or more, read as days:hours:minutes (<c>"24:00:00"</c> is 24 days,
+    /// <c>"36:15:00"</c> is 36 days and 15 hours). <c>"24:30:00"</c> and <c>"24:00"</c> do not parse at all. A value
+    /// that is also out of bounds gets the one warning about the bound.
     /// </summary>
     public static TheoryData<string?, TimeSpan, bool> Intervals => new()
     {
@@ -59,7 +62,14 @@ public class ConfigurationValueExtensionsTests
         { "   ", TimeSpan.FromDays(30), false },
         { "7.00:00:00", TimeSpan.FromDays(7), false },
         { " 2.12:00:00 ", new TimeSpan(2, 12, 0, 0), false },
-        { "60", TimeSpan.FromDays(60), false },
+        { "24.00:00:00", TimeSpan.FromDays(24), false },
+        { "60", TimeSpan.FromDays(60), true },
+        { "24:00:00", TimeSpan.FromDays(24), true },
+        { "48:00:00", TimeSpan.FromDays(48), true },
+        { "36:15:00", new TimeSpan(36, 15, 0, 0), true },
+        { "1000", TimeSpan.FromDays(365), true },
+        { "24:30:00", TimeSpan.FromDays(30), true },
+        { "24:00", TimeSpan.FromDays(30), true },
         { "30d", TimeSpan.FromDays(30), true },
         { "1 day", TimeSpan.FromDays(30), true },
         { "00:30:00", TimeSpan.FromDays(1), true },
@@ -147,6 +157,33 @@ public class ConfigurationValueExtensionsTests
         logger.Warnings.Should().HaveCount(warned ? 1 : 0);
     }
 
+    /// <summary>
+    /// A ratio or a factor. <c>NaN</c> and the infinities parse as numbers but bound nothing, so they are unreadable,
+    /// and a comma is not a decimal separator on any host.
+    /// </summary>
+    [Theory]
+    [InlineData(null, 0.5, false)]
+    [InlineData("0.25", 0.25, false)]
+    [InlineData(" 1 ", 1.0, false)]
+    [InlineData("1e-1", 0.1, false)]
+    [InlineData("0,25", 0.5, true)]
+    [InlineData("NaN", 0.5, true)]
+    [InlineData("Infinity", 0.5, true)]
+    [InlineData("-Infinity", 0.5, true)]
+    [InlineData("half", 0.5, true)]
+    [InlineData("0", 0.01, true)]
+    [InlineData("-0.5", 0.01, true)]
+    [InlineData("1.5", 1.0, true)]
+    public void ReadDouble_ReturnsTheValueWithinItsBounds(string? configured, double expected, bool warned)
+    {
+        var logger = new RecordingLogger();
+
+        var result = Configuration(configured).ReadDouble(Key, 0.5, 0.01, 1.0, logger);
+
+        result.Should().Be(expected);
+        logger.Warnings.Should().HaveCount(warned ? 1 : 0);
+    }
+
     [Theory]
     [InlineData("true", true)]
     [InlineData("True", true)]
@@ -193,6 +230,43 @@ public class ConfigurationValueExtensionsTests
 
         logger.Warnings.Should().ContainSingle()
             .Which.Should().Contain(Key).And.Contain("30d").And.Contain("30.00:00:00");
+    }
+
+    /// <summary>
+    /// <c>"24:00:00"</c> may mean 24 days or one day. The value is kept as <see cref="TimeSpan"/> reads it, and the
+    /// warning shows that reading in the unambiguous form, so whoever meant hours sees it in the log.
+    /// </summary>
+    [Fact]
+    public void Warning_ForAnAmbiguousInterval_ShowsHowItWasRead()
+    {
+        var logger = new RecordingLogger();
+
+        var result = Configuration("24:00:00").ReadInterval(Key, _defaultInterval, _minInterval, _maxInterval, logger);
+
+        result.Should().Be(TimeSpan.FromDays(24));
+        logger.Warnings.Should().ContainSingle()
+            .Which.Should().Contain(Key).And.Contain("\"24:00:00\"").And.Contain("24.00:00:00");
+    }
+
+    /// <summary>
+    /// The list recipe of <c>configuration.md</c> §1: every element goes through the reader under its full path, so
+    /// the unreadable one gets a warning that names it. The binder would drop it without a word
+    /// (<c>Get&lt;int[]&gt;()</c> gives <c>[5]</c>).
+    /// </summary>
+    [Fact]
+    public void ReadInt_OverTheElementsOfAList_NamesTheUnreadableOne()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["section:list:0"] = "5", ["section:list:1"] = "x" })
+            .Build();
+        var logger = new RecordingLogger();
+
+        var values = configuration.GetSection("section:list").GetChildren()
+            .Select(element => configuration.ReadInt(element.Path, 1, 1, 10, logger))
+            .ToList();
+
+        values.Should().Equal(5, 1);
+        logger.Warnings.Should().ContainSingle().Which.Should().Contain("section:list:1").And.Contain("\"x\"");
     }
 
     /// <summary>
