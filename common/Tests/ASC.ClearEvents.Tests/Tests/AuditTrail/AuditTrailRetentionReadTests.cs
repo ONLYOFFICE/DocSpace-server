@@ -85,11 +85,21 @@ public class AuditTrailRetentionReadTests
     }
 
     [Fact]
+    public void Read_NoGracePeriod_DefaultsToAWeek()
+    {
+        // Act
+        var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(("enabled", "true")));
+
+        // Assert
+        retention.PaidGracePeriodDays.Should().Be(7);
+    }
+
+    [Fact]
     public void Read_ValidSection_ReturnsItsValues()
     {
         // Act
         var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(
-            ("enabled", "true"), ("paidLifeTimeDays", "2000"), ("freeLifeTimeDays", "400"), ("period", "12:00:00"), ("batchSize", "500")));
+            ("enabled", "true"), ("paidLifeTimeDays", "2000"), ("freeLifeTimeDays", "400"), ("paidGracePeriodDays", "14"), ("period", "12:00:00"), ("batchSize", "500")));
 
         // Assert
         retention.Should().BeEquivalentTo(new
@@ -97,6 +107,7 @@ public class AuditTrailRetentionReadTests
             Enabled = true,
             PaidLifeTimeDays = 2000,
             FreeLifeTimeDays = 400,
+            PaidGracePeriodDays = 14,
             Period = TimeSpan.FromHours(12),
             BatchSize = 500,
             BindingError = (string?)null,

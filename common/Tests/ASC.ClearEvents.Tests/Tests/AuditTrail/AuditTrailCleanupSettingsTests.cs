@@ -145,6 +145,21 @@ public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest
         (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
     }
 
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(MaxLifeTimeDays + 1)]
+    public async Task ClearAsync_UnusableGracePeriod_RemovesNothing(int paidGracePeriodDays)
+    {
+        // Arrange
+        var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
+
+        // Act
+        await RunCleanupAsync(Retention(paidGracePeriodDays: paidGracePeriodDays));
+
+        // Assert
+        (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
+    }
+
     [Fact]
     public async Task ClearAsync_UnreadableSection_RemovesNothing()
     {

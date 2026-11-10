@@ -34,8 +34,8 @@
 namespace ASC.ClearEvents.Log;
 internal static partial class AuditTrailCleanerLogger
 {
-    [LoggerMessage(LogLevel.Warning, "The audit trail cleanup will not run: life time {paidLifeTimeDays}/{freeLifeTimeDays} day(s), batch size {batchSize} and period {period} are not a usable configuration. Both life times must be between {minLifeTimeDays} and {maxLifeTimeDays} day(s) with the free one not above the paid one, the batch size between 1 and {maxBatchSize} and the period between {minPeriod} and {maxPeriod}.")]
-    public static partial void WarningInvalidConfiguration(this ILogger<AuditTrailCleaner> logger, int paidLifeTimeDays, int freeLifeTimeDays, int batchSize, TimeSpan period, int minLifeTimeDays, int maxLifeTimeDays, int maxBatchSize, TimeSpan minPeriod, TimeSpan maxPeriod);
+    [LoggerMessage(LogLevel.Warning, "The audit trail cleanup will not run: life time {paidLifeTimeDays}/{freeLifeTimeDays} day(s), paid grace period {paidGracePeriodDays} day(s), batch size {batchSize} and period {period} are not a usable configuration. Both life times must be between {minLifeTimeDays} and {maxLifeTimeDays} day(s) with the free one not above the paid one, the grace period between 0 and {maxLifeTimeDays} day(s), the batch size between 1 and {maxBatchSize} and the period between {minPeriod} and {maxPeriod}.")]
+    public static partial void WarningInvalidConfiguration(this ILogger<AuditTrailCleaner> logger, int paidLifeTimeDays, int freeLifeTimeDays, int paidGracePeriodDays, int batchSize, TimeSpan period, int minLifeTimeDays, int maxLifeTimeDays, int maxBatchSize, TimeSpan minPeriod, TimeSpan maxPeriod);
 
     [LoggerMessage(LogLevel.Warning, "The audit trail cleanup will not run: the {sectionName} section could not be read. {error}")]
     public static partial void WarningUnreadableConfiguration(this ILogger<AuditTrailCleaner> logger, string sectionName, string error);

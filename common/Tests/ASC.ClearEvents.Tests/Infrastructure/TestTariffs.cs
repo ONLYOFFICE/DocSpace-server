@@ -46,7 +46,7 @@ namespace ASC.ClearEvents.Tests.Infrastructure;
 /// </remarks>
 public static class TestTariffs
 {
-    private static readonly ConcurrentDictionary<int, (TariffState State, bool FreeQuota)> _tariffs = new();
+    private static readonly ConcurrentDictionary<int, TestTariff> _tariffs = new();
     private static readonly ConcurrentDictionary<int, int> _lookups = new();
     private static readonly ConcurrentDictionary<int, bool> _failing = new();
 
@@ -65,9 +65,16 @@ public static class TestTariffs
     /// Sets the tariff of <paramref name="tenantId"/>: its <paramref name="state"/>, and whether its quota is a
     /// free one (free, trial, non-profit or custom) whatever the state says.
     /// </summary>
-    public static void Set(int tenantId, TariffState state, bool freeQuota = false)
+    /// <remarks>
+    /// The dates are those <see cref="ITariffService"/> computes: an unpaid tariff has its <paramref name="dueDate"/>
+    /// in the past, a year ago unless given, and the end of its payment delay in <paramref name="delayDueDate"/> when it
+    /// went through one. Any other tariff is due at <see cref="DateTime.MaxValue"/> unless given.
+    /// </remarks>
+    public static void Set(int tenantId, TariffState state, bool freeQuota = false, DateTime? dueDate = null, DateTime? delayDueDate = null)
     {
-        _tariffs[tenantId] = (state, freeQuota);
+        var due = dueDate ?? (state == TariffState.NotPaid ? DateTime.UtcNow.Date.AddYears(-1) : DateTime.MaxValue);
+
+        _tariffs[tenantId] = new TestTariff(state, freeQuota, due, delayDueDate ?? DateTime.MinValue);
     }
 
     /// <summary>
@@ -79,10 +86,12 @@ public static class TestTariffs
         _failing[tenantId] = true;
     }
 
-    private static (TariffState State, bool FreeQuota) Get(int tenantId)
+    private static TestTariff Get(int tenantId)
     {
-        return _tariffs.TryGetValue(tenantId, out var tariff) ? tariff : (TariffState.Trial, true);
+        return _tariffs.TryGetValue(tenantId, out var tariff) ? tariff : new TestTariff(TariffState.Trial, true, DateTime.MaxValue, DateTime.MinValue);
     }
+
+    private sealed record TestTariff(TariffState State, bool FreeQuota, DateTime DueDate, DateTime DelayDueDate);
 
     /// <summary>Public and unsealed: <see cref="DispatchProxy"/> derives the proxy type from it.</summary>
     public class TariffServiceProxy : DispatchProxy
@@ -101,7 +110,9 @@ public static class TestTariffs
                         return Task.FromException<Tariff>(new InvalidOperationException($"The tariff of tenant {tenantId} is unavailable."));
                     }
 
-                    return Task.FromResult(new Tariff { Id = tenantId, State = Get(tenantId).State, DueDate = DateTime.MaxValue, Quotas = [] });
+                    var set = Get(tenantId);
+
+                    return Task.FromResult(new Tariff { Id = tenantId, State = set.State, DueDate = set.DueDate, DelayDueDate = set.DelayDueDate, Quotas = [] });
 
                 case nameof(ITariffService.IsFreeTariffAsync):
                     var tariff = (Tariff)args![0]!;

@@ -64,6 +64,13 @@ public class AuditTrailRetentionConfiguration
 
     public int FreeLifeTimeDays { get; init; } = 365;
 
+    /// <summary>
+    /// How long a portal keeps the paid life time after its subscription ended - after the payment delay, which
+    /// counts as paid on its own. A customer who renews within it loses none of the events past the free life time.
+    /// 0 turns it off; at most <see cref="MaxLifeTimeDays"/>.
+    /// </summary>
+    public int PaidGracePeriodDays { get; init; } = 7;
+
     public TimeSpan Period { get; init; } = TimeSpan.FromDays(1);
 
     public int BatchSize { get; init; } = 1000;
@@ -86,6 +93,7 @@ public class AuditTrailRetentionConfiguration
         FreeLifeTimeDays >= MinLifeTimeDays &&
         PaidLifeTimeDays >= FreeLifeTimeDays &&
         PaidLifeTimeDays <= MaxLifeTimeDays &&
+        PaidGracePeriodDays is >= 0 and <= MaxLifeTimeDays &&
         BatchSize is > 0 and <= MaxBatchSize &&
         IsPeriodUsable;
 

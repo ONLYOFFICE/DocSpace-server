@@ -63,6 +63,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
             logger.WarningInvalidConfiguration(
                 retention.PaidLifeTimeDays,
                 retention.FreeLifeTimeDays,
+                retention.PaidGracePeriodDays,
                 retention.BatchSize,
                 retention.Period,
                 AuditTrailRetentionConfiguration.MinLifeTimeDays,
@@ -77,6 +78,9 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
         var freeThreshold = now.AddDays(-retention.FreeLifeTimeDays);
         var paidThreshold = now.AddDays(-retention.PaidLifeTimeDays);
+
+        // A subscription that ended after this date still counts as paid: see PaidGracePeriodDays.
+        var paidGraceStart = now.AddDays(-retention.PaidGracePeriodDays);
 
         // Every page is committed as it is deleted, so what a pass removed is counted as it goes and logged however
         // the pass ends: a tenant that fails halfway, or a stop that cancels the pause between pages, has still
@@ -94,7 +98,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
                 try
                 {
-                    await RemoveOldAuditEventsAsync(tenantId, freeThreshold, paidThreshold, retention.BatchSize, totals, stoppingToken);
+                    await RemoveOldAuditEventsAsync(tenantId, freeThreshold, paidThreshold, paidGraceStart, retention.BatchSize, totals, stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
@@ -123,7 +127,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         return await ef.AuditEventTenantsOlderThanAsync(freeThreshold).ToListAsync(stoppingToken);
     }
 
-    private async Task RemoveOldAuditEventsAsync(int tenantId, DateTime freeThreshold, DateTime paidThreshold, int batchSize, PassTotals totals, CancellationToken stoppingToken)
+    private async Task RemoveOldAuditEventsAsync(int tenantId, DateTime freeThreshold, DateTime paidThreshold, DateTime paidGraceStart, int batchSize, PassTotals totals, CancellationToken stoppingToken)
     {
         await using var scope = serviceScopeFactory.CreateAsyncScope();
         await using var ef = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
@@ -165,7 +169,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
                     if (events.Exists(r => !r.InHistory && r.Id != newestId))
                     {
-                        paid = await IsPaidAsync(scope.ServiceProvider, tenantId);
+                        paid = await IsPaidAsync(scope.ServiceProvider, tenantId, paidGraceStart);
                         threshold = paid ? paidThreshold : freeThreshold;
                     }
                 }
@@ -205,13 +209,34 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         }
     }
 
-    private static async Task<bool> IsPaidAsync(IServiceProvider serviceProvider, int tenantId)
+    /// <summary>
+    /// Whether the tenant keeps the paid life time: its tariff is paid, in the payment delay, or ended after
+    /// <paramref name="paidGraceStart"/>, and is not on a free quota.
+    /// </summary>
+    private static async Task<bool> IsPaidAsync(IServiceProvider serviceProvider, int tenantId, DateTime paidGraceStart)
     {
         var tariffService = serviceProvider.GetRequiredService<ITariffService>();
 
         var tariff = await tariffService.GetTariffAsync(tenantId, withRequestToPaymentSystem: false);
 
-        return tariff.State is TariffState.Paid or TariffState.Delay && !await tariffService.IsFreeTariffAsync(tariff);
+        var paid = tariff.State switch
+        {
+            TariffState.Paid or TariffState.Delay => true,
+            TariffState.NotPaid => PaidUntil(tariff) >= paidGraceStart,
+            _ => false
+        };
+
+        return paid && !await tariffService.IsFreeTariffAsync(tariff);
+    }
+
+    /// <summary>
+    /// When an unpaid tariff stopped counting as paid: the end of its payment delay when it went through one, its
+    /// due date otherwise. A tariff that was never paid has no due date (<see cref="DateTime.MinValue"/>), so no
+    /// grace period reaches it.
+    /// </summary>
+    private static DateTime PaidUntil(Tariff tariff)
+    {
+        return tariff.DelayDueDate > tariff.DueDate && tariff.DelayDueDate != DateTime.MaxValue ? tariff.DelayDueDate : tariff.DueDate;
     }
 
     /// <summary>What a pass has removed so far, across the tenants it has been through.</summary>
