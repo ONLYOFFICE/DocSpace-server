@@ -31,6 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Diagnostics;
 global using System.Linq.Expressions;
 
 global using ASC.Api.Core;

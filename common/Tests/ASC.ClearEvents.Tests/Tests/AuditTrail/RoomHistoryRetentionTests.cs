@@ -85,7 +85,7 @@ public class RoomHistoryRetentionTests(AspireAppFixture fixture) : BaseTest(fixt
         }
 
         // Act
-        await RunCleanupAsync(Retention(batchSize: batchSize));
+        await RunCleanupAsync(Retention(batchSize: batchSize, readPageSize: batchSize));
 
         // Assert
         (await RemainingEventsAsync(inHistory.Concat(outsideHistory))).Should().BeEquivalentTo(inHistory);
@@ -112,10 +112,48 @@ public class RoomHistoryRetentionTests(AspireAppFixture fixture) : BaseTest(fixt
         }
 
         // Act
-        await RunCleanupAsync(Retention(batchSize: batchSize));
+        await RunCleanupAsync(Retention(batchSize: batchSize, readPageSize: batchSize));
 
         // Assert
         (await RemainingEventsAsync(inHistory.Concat(outsideHistory))).Should().BeEquivalentTo(inHistory);
+    }
+
+    [Fact]
+    public async Task ClearAsync_ReadPageLargerThanBatch_ReadsOnePageAndDeletesInBatches()
+    {
+        // Arrange: history and expired events interleaved, more of the expired ones than one batch deletes, all on
+        // one page: a page reads far more than a batch, the history it walks past being most of what it reads.
+        const int batchSize = 2;
+
+        var inHistory = new List<int>();
+        var outsideHistory = new List<int>();
+
+        for (var i = 0; i < 10; i++)
+        {
+            var daysAgo = PaidLifeTimeDays * 2 - i;
+
+            if (i % 2 == 0)
+            {
+                inHistory.Add(await SeedEventAsync(daysAgo, RoomId));
+            }
+            else
+            {
+                outsideHistory.Add(await SeedEventAsync(daysAgo));
+            }
+        }
+
+        var logger = new RecordingLogger<AuditTrailCleaner>();
+
+        // Act
+        await Fixture.Cleaner.CreateCleaner(logger).ClearAsync(Retention(batchSize: batchSize, readPageSize: 20), TestContext.Current.CancellationToken);
+
+        // Assert
+        (await RemainingEventsAsync(inHistory.Concat(outsideHistory))).Should().BeEquivalentTo(inHistory);
+
+        var tenant = logger.Entries.Should().ContainSingle(e => e.Has("pageCount") && Equals(e.Values.GetValueOrDefault("tenantId"), TenantId)).Subject;
+
+        tenant.Values["count"].Should().Be(outsideHistory.Count);
+        tenant.Values["pageCount"].Should().Be(1, "the page reads up to 20 events, the batch deletes up to 2");
     }
 
     [Fact]
@@ -132,7 +170,7 @@ public class RoomHistoryRetentionTests(AspireAppFixture fixture) : BaseTest(fixt
         }
 
         // Act
-        await RunCleanupAsync(Retention(batchSize: batchSize));
+        await RunCleanupAsync(Retention(batchSize: batchSize, readPageSize: batchSize));
 
         // Assert
         (await RemainingEventsAsync(expired)).Should().BeEmpty();

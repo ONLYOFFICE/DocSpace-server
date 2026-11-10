@@ -65,10 +65,12 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
                 retention.FreeLifeTimeDays,
                 retention.PaidGracePeriodDays,
                 retention.BatchSize,
+                retention.ReadPageSize,
                 retention.Period,
                 AuditTrailRetentionConfiguration.MinLifeTimeDays,
                 AuditTrailRetentionConfiguration.MaxLifeTimeDays,
                 AuditTrailRetentionConfiguration.MaxBatchSize,
+                AuditTrailRetentionConfiguration.MaxReadPageSize,
                 AuditTrailRetentionConfiguration.MinPeriod,
                 AuditTrailRetentionConfiguration.MaxPeriod);
             return;
@@ -82,9 +84,10 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         // A subscription that ended after this date still counts as paid: see PaidGracePeriodDays.
         var paidGraceStart = now.AddDays(-retention.PaidGracePeriodDays);
 
-        // Every page is committed as it is deleted, so what a pass removed is counted as it goes and logged however
-        // the pass ends: a tenant that fails halfway, or a stop that cancels the pause between pages, has still
-        // removed what it removed.
+        // Every batch is committed as it is deleted, so what a pass removed is counted as it goes and logged however
+        // the pass ends: a tenant that fails halfway, or a stop that cancels a pause, has still removed what it
+        // removed. What it read is logged with it, whether anything was removed or not: the cost of a pass is in the
+        // history it walks again every day, which removes nothing.
         var totals = new PassTotals();
 
         try
@@ -98,7 +101,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
                 try
                 {
-                    await RemoveOldAuditEventsAsync(tenantId, freeThreshold, paidThreshold, paidGraceStart, retention.BatchSize, totals, stoppingToken);
+                    await RemoveOldAuditEventsAsync(tenantId, freeThreshold, paidThreshold, paidGraceStart, retention, totals, stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
@@ -112,10 +115,18 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         }
         finally
         {
-            if (totals.Removed > 0)
-            {
-                logger.InformationRemovedAuditEvents(totals.Removed, totals.Tenants);
-            }
+            logger.InformationPassFinished(
+                stoppingToken.IsCancellationRequested,
+                Stopwatch.GetElapsedTime(totals.Started),
+                totals.WalkedTenants,
+                totals.Pages,
+                totals.Read,
+                totals.TariffLookups,
+                totals.Removed,
+                totals.Tenants,
+                totals.SlowestTenantId,
+                totals.SlowestTenantElapsed,
+                totals.SlowestTenantPages);
         }
     }
 
@@ -127,8 +138,17 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         return await ef.AuditEventTenantsOlderThanAsync(freeThreshold).ToListAsync(stoppingToken);
     }
 
-    private async Task RemoveOldAuditEventsAsync(int tenantId, DateTime freeThreshold, DateTime paidThreshold, DateTime paidGraceStart, int batchSize, PassTotals totals, CancellationToken stoppingToken)
+    private async Task RemoveOldAuditEventsAsync(
+        int tenantId,
+        DateTime freeThreshold,
+        DateTime paidThreshold,
+        DateTime paidGraceStart,
+        AuditTrailRetentionConfiguration retention,
+        PassTotals totals,
+        CancellationToken stoppingToken)
     {
+        var started = Stopwatch.GetTimestamp();
+
         await using var scope = serviceScopeFactory.CreateAsyncScope();
         await using var ef = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
 
@@ -146,6 +166,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         int? newestId = null;
 
         var removed = 0;
+        var pages = 0;
 
         var afterDate = DateTime.MinValue;
         var afterId = 0;
@@ -154,12 +175,17 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                var events = await ef.AuditEventsOlderThanAsync(tenantId, threshold ?? freeThreshold, afterDate, afterId, batchSize).ToListAsync(stoppingToken);
+                // A page reads more than a batch deletes: its rows are keys, dates and history flags from the
+                // (tenant_id, date) index, cheap next to a delete, and most of them are history a pass walks past.
+                var events = await ef.AuditEventsOlderThanAsync(tenantId, threshold ?? freeThreshold, afterDate, afterId, retention.ReadPageSize).ToListAsync(stoppingToken);
 
                 if (events.Count == 0)
                 {
                     break;
                 }
+
+                pages++;
+                totals.Read += events.Count;
 
                 (afterId, afterDate) = (events[^1].Id, events[^1].Date);
 
@@ -169,6 +195,8 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
                     if (events.Exists(r => !r.InHistory && r.Id != newestId))
                     {
+                        totals.TariffLookups++;
+
                         paid = await IsPaidAsync(scope.ServiceProvider, tenantId, paidGraceStart);
                         threshold = paid ? paidThreshold : freeThreshold;
                     }
@@ -182,26 +210,38 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
                         .Select(r => r.Id)
                         .ToList();
 
-                if (ids.Count > 0)
+                // A pause after every batch deleted, so that the deletes go at the rate of one batch per pause however
+                // large a page is.
+                foreach (var batch in ids.Chunk(retention.BatchSize))
                 {
-                    removed += await ef.DeleteAuditEventsToClearAsync(tenantId, ids);
+                    removed += await ef.DeleteAuditEventsToClearAsync(tenantId, batch);
+
+                    await Task.Delay(_pageDelay, stoppingToken);
                 }
 
-                if (events.Count < batchSize)
+                if (events.Count < retention.ReadPageSize)
                 {
                     break;
                 }
 
-                // After every page, the ones of history only too: a page reads at most a batch, and the delay keeps a
-                // tenant with years of retained history from being walked as fast as the database answers.
-                await Task.Delay(_pageDelay, stoppingToken);
+                // And after every page that deleted nothing, the ones of history only: a page reads at most a page
+                // size, and the delay keeps a tenant with years of retained history from being walked as fast as the
+                // database answers.
+                if (ids.Count == 0)
+                {
+                    await Task.Delay(_pageDelay, stoppingToken);
+                }
             }
         }
         finally
         {
+            var elapsed = Stopwatch.GetElapsedTime(started);
+
+            totals.Walked(tenantId, pages, elapsed);
+
             if (removed > 0)
             {
-                logger.InformationRemovedTenantAuditEvents(removed, threshold.Value, tenantId, paid);
+                logger.InformationRemovedTenantAuditEvents(removed, threshold.Value, tenantId, paid, pages, elapsed);
 
                 totals.Removed += removed;
                 totals.Tenants++;
@@ -239,11 +279,41 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         return tariff.DelayDueDate > tariff.DueDate && tariff.DelayDueDate != DateTime.MaxValue ? tariff.DelayDueDate : tariff.DueDate;
     }
 
-    /// <summary>What a pass has removed so far, across the tenants it has been through.</summary>
+    /// <summary>What a pass has read and removed so far, across the tenants it has been through.</summary>
     private sealed class PassTotals
     {
+        public long Started { get; } = Stopwatch.GetTimestamp();
+
+        /// <summary>The tenants walked, whether anything was removed from them or not.</summary>
+        public int WalkedTenants { get; private set; }
+
+        public int Pages { get; private set; }
+
+        public long Read { get; set; }
+
+        public int TariffLookups { get; set; }
+
         public int Removed { get; set; }
 
+        /// <summary>The tenants something was removed from.</summary>
         public int Tenants { get; set; }
+
+        /// <summary>The tenant that took the longest, 0 before the first one; most of its time is the pauses.</summary>
+        public int SlowestTenantId { get; private set; }
+
+        public TimeSpan SlowestTenantElapsed { get; private set; }
+
+        public int SlowestTenantPages { get; private set; }
+
+        public void Walked(int tenantId, int pages, TimeSpan elapsed)
+        {
+            WalkedTenants++;
+            Pages += pages;
+
+            if (elapsed > SlowestTenantElapsed)
+            {
+                (SlowestTenantId, SlowestTenantElapsed, SlowestTenantPages) = (tenantId, elapsed, pages);
+            }
+        }
     }
 }

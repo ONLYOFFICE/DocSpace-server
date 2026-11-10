@@ -34,17 +34,17 @@
 namespace ASC.ClearEvents.Log;
 internal static partial class AuditTrailCleanerLogger
 {
-    [LoggerMessage(LogLevel.Warning, "The audit trail cleanup will not run: life time {paidLifeTimeDays}/{freeLifeTimeDays} day(s), paid grace period {paidGracePeriodDays} day(s), batch size {batchSize} and period {period} are not a usable configuration. Both life times must be between {minLifeTimeDays} and {maxLifeTimeDays} day(s) with the free one not above the paid one, the grace period between 0 and {maxLifeTimeDays} day(s), the batch size between 1 and {maxBatchSize} and the period between {minPeriod} and {maxPeriod}.")]
-    public static partial void WarningInvalidConfiguration(this ILogger<AuditTrailCleaner> logger, int paidLifeTimeDays, int freeLifeTimeDays, int paidGracePeriodDays, int batchSize, TimeSpan period, int minLifeTimeDays, int maxLifeTimeDays, int maxBatchSize, TimeSpan minPeriod, TimeSpan maxPeriod);
+    [LoggerMessage(LogLevel.Warning, "The audit trail cleanup will not run: life time {paidLifeTimeDays}/{freeLifeTimeDays} day(s), paid grace period {paidGracePeriodDays} day(s), batch size {batchSize}, read page size {readPageSize} and period {period} are not a usable configuration. Both life times must be between {minLifeTimeDays} and {maxLifeTimeDays} day(s) with the free one not above the paid one, the grace period between 0 and {maxLifeTimeDays} day(s), the batch size between 1 and {maxBatchSize}, the read page size between 1 and {maxReadPageSize} and the period between {minPeriod} and {maxPeriod}.")]
+    public static partial void WarningInvalidConfiguration(this ILogger<AuditTrailCleaner> logger, int paidLifeTimeDays, int freeLifeTimeDays, int paidGracePeriodDays, int batchSize, int readPageSize, TimeSpan period, int minLifeTimeDays, int maxLifeTimeDays, int maxBatchSize, int maxReadPageSize, TimeSpan minPeriod, TimeSpan maxPeriod);
 
     [LoggerMessage(LogLevel.Warning, "The audit trail cleanup will not run: the {sectionName} section could not be read. {error}")]
     public static partial void WarningUnreadableConfiguration(this ILogger<AuditTrailCleaner> logger, string sectionName, string error);
 
-    [LoggerMessage(LogLevel.Information, "Removed {count} audit event(s) older than {threshold} for tenant {tenantId} (paid tariff: {paid}).")]
-    public static partial void InformationRemovedTenantAuditEvents(this ILogger<AuditTrailCleaner> logger, int count, DateTime threshold, int tenantId, bool paid);
+    [LoggerMessage(LogLevel.Information, "Removed {count} audit event(s) older than {threshold} for tenant {tenantId} (paid tariff: {paid}), {pageCount} page(s) read in {elapsed}.")]
+    public static partial void InformationRemovedTenantAuditEvents(this ILogger<AuditTrailCleaner> logger, int count, DateTime threshold, int tenantId, bool paid, int pageCount, TimeSpan elapsed);
 
-    [LoggerMessage(LogLevel.Information, "Removed {count} audit event(s) in {tenantCount} tenant(s).")]
-    public static partial void InformationRemovedAuditEvents(this ILogger<AuditTrailCleaner> logger, int count, int tenantCount);
+    [LoggerMessage(LogLevel.Information, "Audit trail cleanup pass finished (stopped: {stopped}) in {elapsed}: {walkedTenantCount} tenant(s) walked, {pageCount} page(s) and {readCount} audit event(s) read, {tariffLookupCount} tariff lookup(s); removed {count} audit event(s) in {tenantCount} tenant(s). Slowest tenant {slowestTenantId}: {slowestTenantElapsed} over {slowestTenantPageCount} page(s).")]
+    public static partial void InformationPassFinished(this ILogger<AuditTrailCleaner> logger, bool stopped, TimeSpan elapsed, int walkedTenantCount, int pageCount, long readCount, int tariffLookupCount, int count, int tenantCount, int slowestTenantId, TimeSpan slowestTenantElapsed, int slowestTenantPageCount);
 
     [LoggerMessage(LogLevel.Warning, "Could not clear the audit trail of tenant {tenantId}.")]
     public static partial void WarningClearTenantFailed(this ILogger<AuditTrailCleaner> logger, int tenantId, Exception exception);

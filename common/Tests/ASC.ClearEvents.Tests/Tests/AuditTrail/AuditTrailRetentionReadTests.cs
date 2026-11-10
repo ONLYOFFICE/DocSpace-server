@@ -95,11 +95,21 @@ public class AuditTrailRetentionReadTests
     }
 
     [Fact]
+    public void Read_NoReadPageSize_ReadsTenBatchesAPage()
+    {
+        // Act
+        var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(("enabled", "true")));
+
+        // Assert
+        retention.ReadPageSize.Should().Be(10 * retention.BatchSize);
+    }
+
+    [Fact]
     public void Read_ValidSection_ReturnsItsValues()
     {
         // Act
         var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(
-            ("enabled", "true"), ("paidLifeTimeDays", "2000"), ("freeLifeTimeDays", "400"), ("paidGracePeriodDays", "14"), ("period", "12:00:00"), ("batchSize", "500")));
+            ("enabled", "true"), ("paidLifeTimeDays", "2000"), ("freeLifeTimeDays", "400"), ("paidGracePeriodDays", "14"), ("period", "12:00:00"), ("batchSize", "500"), ("readPageSize", "5000")));
 
         // Assert
         retention.Should().BeEquivalentTo(new
@@ -110,6 +120,7 @@ public class AuditTrailRetentionReadTests
             PaidGracePeriodDays = 14,
             Period = TimeSpan.FromHours(12),
             BatchSize = 500,
+            ReadPageSize = 5000,
             BindingError = (string?)null,
             IsUsable = true
         });

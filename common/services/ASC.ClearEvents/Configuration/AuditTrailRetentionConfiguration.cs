@@ -52,6 +52,9 @@ public class AuditTrailRetentionConfiguration
     /// <summary>The largest batch a pass accepts: its ids travel to the database as one IN list.</summary>
     public const int MaxBatchSize = 10_000;
 
+    /// <summary>The largest page a pass accepts: the rows of one page are held in memory together.</summary>
+    public const int MaxReadPageSize = 100_000;
+
     /// <summary>The shortest period between passes: a pass walks every portal with old events.</summary>
     public static readonly TimeSpan MinPeriod = TimeSpan.FromHours(1);
 
@@ -73,7 +76,16 @@ public class AuditTrailRetentionConfiguration
 
     public TimeSpan Period { get; init; } = TimeSpan.FromDays(1);
 
+    /// <summary>How many events a pass deletes at once; a pause follows every batch.</summary>
     public int BatchSize { get; init; } = 1000;
+
+    /// <summary>
+    /// How many events a pass reads at once: their keys, dates and history flags, from the (tenant_id, date) index.
+    /// Larger than <see cref="BatchSize"/>, because most of what a pass reads is history it keeps and walks past
+    /// again on every pass: a page with nothing to delete is followed by one pause, so a tenant with years of
+    /// retained history is walked in this many fewer pauses. The deletes still go a batch at a time.
+    /// </summary>
+    public int ReadPageSize { get; init; } = 10_000;
 
     /// <summary>
     /// Why the section could not be read, such as a period written as <c>1d</c>; null when it was. The other values
@@ -95,6 +107,7 @@ public class AuditTrailRetentionConfiguration
         PaidLifeTimeDays <= MaxLifeTimeDays &&
         PaidGracePeriodDays is >= 0 and <= MaxLifeTimeDays &&
         BatchSize is > 0 and <= MaxBatchSize &&
+        ReadPageSize is > 0 and <= MaxReadPageSize &&
         IsPeriodUsable;
 
     /// <summary>

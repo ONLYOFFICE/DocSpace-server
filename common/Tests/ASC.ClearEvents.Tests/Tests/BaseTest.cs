@@ -52,6 +52,9 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>How long a portal keeps the paid retention after its subscription ended, as in production.</summary>
     protected const int PaidGracePeriodDays = 7;
 
+    /// <summary>How many events a page reads, as in production; a test that needs several pages sets its own.</summary>
+    protected const int ReadPageSize = 10_000;
+
     private PortalClients _clients = null!;
 
     /// <summary>The recent event every test portal starts with; see <see cref="InitializeAsync"/>.</summary>
@@ -98,7 +101,8 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         int paidLifeTimeDays = PaidLifeTimeDays,
         int batchSize = 1000,
         TimeSpan? period = null,
-        int paidGracePeriodDays = PaidGracePeriodDays)
+        int paidGracePeriodDays = PaidGracePeriodDays,
+        int readPageSize = ReadPageSize)
     {
         return new AuditTrailRetentionConfiguration
         {
@@ -106,6 +110,7 @@ public abstract class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             FreeLifeTimeDays = freeLifeTimeDays,
             PaidLifeTimeDays = paidLifeTimeDays,
             PaidGracePeriodDays = paidGracePeriodDays,
+            ReadPageSize = readPageSize,
             BatchSize = batchSize,
             Period = period ?? TimeSpan.FromDays(1)
         };

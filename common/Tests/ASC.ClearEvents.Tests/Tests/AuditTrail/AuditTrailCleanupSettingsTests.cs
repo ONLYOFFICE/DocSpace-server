@@ -160,6 +160,21 @@ public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest
         (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(AuditTrailRetentionConfiguration.MaxReadPageSize + 1)]
+    public async Task ClearAsync_UnusableReadPageSize_RemovesNothing(int readPageSize)
+    {
+        // Arrange
+        var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
+
+        // Act
+        await RunCleanupAsync(Retention(readPageSize: readPageSize));
+
+        // Assert
+        (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
+    }
+
     [Fact]
     public async Task ClearAsync_UnreadableSection_RemovesNothing()
     {

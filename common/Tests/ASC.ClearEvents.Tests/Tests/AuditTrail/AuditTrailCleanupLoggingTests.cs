@@ -58,14 +58,14 @@ public class AuditTrailCleanupLoggingTests(AspireAppFixture fixture) : BaseTest(
     }
 
     [Fact]
-    public async Task ClearAsync_CancelledBetweenPages_StillLogsWhatWasRemoved()
+    public async Task ClearAsync_CancelledBetweenBatches_StillLogsWhatWasRemoved()
     {
-        // Arrange: one event per page, so the pass pauses after each one it removes.
-        const int pages = 4;
+        // Arrange: one event per batch, so the pass pauses after each one it removes.
+        const int batches = 4;
 
         var expired = new List<int>();
 
-        for (var i = 0; i < pages; i++)
+        for (var i = 0; i < batches; i++)
         {
             expired.Add(await SeedEventAsync(PaidLifeTimeDays * 2 - i));
         }
@@ -74,13 +74,13 @@ public class AuditTrailCleanupLoggingTests(AspireAppFixture fixture) : BaseTest(
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
-        // Act: stop the pass in the pause that follows the first page of this portal. The pass walks every portal of
-        // the database before this one, a page and a pause for each event of history the other tests left behind, so
-        // how long it takes to get here grows with the suite: no deadline of its own but the run's, which cancels
-        // the delay below and fails the test with it.
+        // Act: stop the pass in the pause that follows the first batch of this portal. The pass walks every portal of
+        // the database before this one, through the history the other tests left behind, so how long it takes to get
+        // here grows with the suite: no deadline of its own but the run's, which cancels the delay below and fails
+        // the test with it.
         var pass = Fixture.Cleaner.CreateCleaner(logger).ClearAsync(Retention(batchSize: 1), cts.Token);
 
-        while ((await RemainingEventsAsync(expired)).Count == pages && !pass.IsCompleted)
+        while ((await RemainingEventsAsync(expired)).Count == batches && !pass.IsCompleted)
         {
             await Task.Delay(10, TestContext.Current.CancellationToken);
         }
@@ -92,12 +92,40 @@ public class AuditTrailCleanupLoggingTests(AspireAppFixture fixture) : BaseTest(
         // Assert
         await run.Should().ThrowAsync<OperationCanceledException>();
 
-        var removed = pages - (await RemainingEventsAsync(expired)).Count;
+        var removed = batches - (await RemainingEventsAsync(expired)).Count;
 
-        removed.Should().BeInRange(1, pages - 1, "the pass has to be stopped after it removed some of the events and before it removed them all");
+        removed.Should().BeInRange(1, batches - 1, "the pass has to be stopped after it removed some of the events and before it removed them all");
 
         TenantCount(logger).Should().Be(removed);
         PassCount(logger).Should().BeGreaterThanOrEqualTo(removed);
+    }
+
+    [Fact]
+    public async Task ClearAsync_NothingRemovedHere_LogsWhatThePassRead()
+    {
+        // Arrange: only history past the free life time, which a pass walks on every run and never removes - the
+        // cost a pass has to report, since it shows in no removal.
+        const int roomId = int.MaxValue - 1;
+
+        await SeedEventAsync(PaidLifeTimeDays * 2, roomId);
+        await SeedEventAsync(PaidLifeTimeDays * 2 - 1, roomId);
+
+        var logger = new RecordingLogger<AuditTrailCleaner>();
+
+        // Act
+        await Fixture.Cleaner.CreateCleaner(logger).ClearAsync(Retention(), TestContext.Current.CancellationToken);
+
+        // Assert: the pass walks the portals of the other tests too, so only lower bounds hold.
+        TenantCount(logger).Should().BeNull();
+
+        var pass = logger.Entries.Should().ContainSingle(e => e.Has("walkedTenantCount")).Subject;
+
+        pass.Level.Should().Be(LogLevel.Information);
+        pass.Values["stopped"].Should().Be(false);
+        ((int)pass.Values["walkedTenantCount"]!).Should().BeGreaterThanOrEqualTo(1);
+        ((int)pass.Values["pageCount"]!).Should().BeGreaterThanOrEqualTo(1);
+        ((long)pass.Values["readCount"]!).Should().BeGreaterThanOrEqualTo(2);
+        ((int)pass.Values["slowestTenantId"]!).Should().BePositive();
     }
 
     /// <summary>The count of the line logged for this portal, or null when there is none.</summary>
