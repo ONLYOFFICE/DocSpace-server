@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>BYOK-sleutel ingesteld voor AI-model: {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Instellingen van de documentagent bijgewerkt</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI-profiel toegewezen aan actie: {0}</value>
   </data>
