@@ -159,25 +159,34 @@ public class RenewSubscriptionService(
 
     private async ValueTask RenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted)
     {
-        var keepInJournal = false;
+        // The claim comes before anything else, the checks that can end the renewal with a failure letter included:
+        // an entry that is gone or changed since this run read it belongs to another instance, which alone settles
+        // it and tells the customer how it ended.
+        var claimed = await TryClaimInJournalAsync(data);
+        if (claimed == null)
+        {
+            logger.WarningRenewSubscriptionServiceNotClaimed(data.TenantId, Describe(_walletQuotas[data.Quota], data.NextQuantity ?? data.Quantity));
+
+            return;
+        }
+
+        var waitsForBilling = false;
 
         try
         {
-            keepInJournal = await TryRenewSubscriptionAsync(data, interrupted);
+            waitsForBilling = await TryRenewSubscriptionAsync(data, interrupted);
         }
         finally
         {
             // However the renewal ended in this process, it is over: only a process that stops half-way leaves its
-            // entry behind. An interrupted one billing could not tell anything about stays for the next run.
-            if (!keepInJournal)
-            {
-                await RemoveFromJournalAsync(data);
-            }
+            // claim behind. An interrupted one billing could not tell anything about goes back as it was read, with
+            // the time and the attempts its limits are counted from.
+            await ReleaseInJournalAsync(claimed, waitsForBilling ? data : null);
         }
     }
 
-    // Returns true when the entry has to stay in the journal as it is: the renewal was interrupted earlier and billing
-    // gave no answer about it yet, or it is not this process's to make any more.
+    // Returns true when the renewal has to wait in the journal for the next run: it was interrupted earlier and billing
+    // gave no answer about it yet.
     private async Task<bool> TryRenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted)
     {
         UserInfo payer = null;
@@ -373,14 +382,8 @@ public class RenewSubscriptionService(
             var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoRenewal } };
 
             // From here on money moves (a top-up of the wallet, then the payment change), so a process that stops
-            // past this point leaves a renewal whose outcome only billing can tell. The mark is also the claim: an
-            // entry that is gone or changed since this run read it has been taken up by another instance.
-            if (!await TryStartInJournalAsync(data))
-            {
-                logger.WarningRenewSubscriptionServiceNotClaimed(data.TenantId, description);
-
-                return true;
-            }
+            // past this point leaves a renewal whose outcome only billing can tell - which is what the entry, marked
+            // as started when it was claimed, has the next runs ask.
 
             if (!targetQuota.Additional)
             {
@@ -622,10 +625,11 @@ public class RenewSubscriptionService(
         await hybridCache.SetAsync(JournalCacheKey, journal, TimeSpan.FromDays(1));
     }
 
-    // Marks the entry as started, with one more attempt. False when the journal no longer holds the entry as this run
-    // read it - another instance has settled it or taken it up - or when the journal could not be changed: the entry
-    // is then left as it is, for the run that owns it or for the next one.
-    private async Task<bool> TryStartInJournalAsync(RenewalJournalEntry entry)
+    // Claims the entry for this process: marks it as started, with one more attempt, and returns it as the journal
+    // now holds it. Null when the journal no longer holds the entry as this run read it - another instance has settled
+    // it or taken it up - or when the journal could not be changed: the entry is then left as it is, for the run that
+    // owns it or for the next one.
+    private async Task<RenewalJournalEntry> TryClaimInJournalAsync(RenewalJournalEntry entry)
     {
         try
         {
@@ -636,25 +640,29 @@ public class RenewSubscriptionService(
                 var at = journal.FindIndex(entry.IsSameRenewal);
                 if (at < 0 || journal[at] != entry)
                 {
-                    return false;
+                    return null;
                 }
 
-                journal[at] = entry with { Stage = RenewalStage.Started, StageSince = DateTime.UtcNow, Attempt = entry.Attempt + 1 };
+                var claimed = entry with { Stage = RenewalStage.Started, StageSince = DateTime.UtcNow, Attempt = entry.Attempt + 1 };
+
+                journal[at] = claimed;
 
                 await SaveJournalAsync(journal);
 
-                return true;
+                return claimed;
             }
         }
         catch (Exception ex)
         {
             logger.ErrorRenewSubscriptionServiceTenant(entry.TenantId, ex);
 
-            return false;
+            return null;
         }
     }
 
-    private async Task RemoveFromJournalAsync(RenewalJournalEntry entry)
+    // Gives up the claim: the entry is removed, or put back as the given one. Only the very entry this process claimed
+    // is touched - one that is gone or changed meanwhile is another instance's by now.
+    private async Task ReleaseInJournalAsync(RenewalJournalEntry claimed, RenewalJournalEntry putBack)
     {
         try
         {
@@ -662,16 +670,28 @@ public class RenewSubscriptionService(
             {
                 var journal = await LoadJournalAsync();
 
-                if (journal.RemoveAll(entry.IsSameRenewal) > 0)
+                var at = journal.FindIndex(claimed.IsSameRenewal);
+                if (at < 0 || journal[at] != claimed)
                 {
-                    await SaveJournalAsync(journal);
+                    return;
                 }
+
+                if (putBack != null)
+                {
+                    journal[at] = putBack;
+                }
+                else
+                {
+                    journal.RemoveAt(at);
+                }
+
+                await SaveJournalAsync(journal);
             }
         }
         catch (Exception ex)
         {
             // the renewal itself is settled; a leftover entry only gets it checked against billing once more
-            logger.ErrorRenewSubscriptionServiceTenant(entry.TenantId, ex);
+            logger.ErrorRenewSubscriptionServiceTenant(claimed.TenantId, ex);
         }
     }
 
@@ -762,10 +782,11 @@ public class RenewSubscriptionService(
 
     private enum RenewalStage
     {
-        // in the journal, not started: nothing has been paid
+        // in the journal, not taken up by any process: nothing has been paid
         Queued,
 
-        // money may have moved: the wallet top-up and the payment change come after this mark
+        // claimed by a process, so money may have moved: its checks, the wallet top-up and the payment change all come
+        // after this mark
         Started
     }
 
