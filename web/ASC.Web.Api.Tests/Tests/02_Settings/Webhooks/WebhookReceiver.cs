@@ -54,14 +54,46 @@ public sealed class WebhookReceiver
     private readonly string _path = $"/hooks/{Guid.NewGuid():N}";
     private int _deliveryCount;
     private int _redirectedCount;
+    private int _probeCount;
 
-    /// <summary>The HEAD the portal sends when a subscription is created or changed always gets 200.</summary>
-    private WebhookReceiver()
+    /// <summary>
+    /// The HEAD the portal sends when a subscription is created or changed gets 200, or the 302 of
+    /// <see cref="CreateRedirectingProbe"/>; each one is counted on arrival.
+    /// </summary>
+    private WebhookReceiver(bool redirectProbe = false)
     {
         _server.Value
             .Given(Request.Create().WithPath(_path).UsingHead())
-            .RespondWith(Response.Create().WithStatusCode(200));
+            .RespondWith(Response.Create().WithCallback(_ =>
+            {
+                Interlocked.Increment(ref _probeCount);
+
+                return redirectProbe ? Answer(302, string.Empty, RedirectPath) : Answer(200, string.Empty);
+            }));
     }
+
+    /// <summary>
+    /// A new endpoint whose HEAD probe is answered with a 302 to <see cref="RedirectPath"/>, a path of the same
+    /// receiver that answers 200 to any method: a probe that followed the redirect would be accepted, and would leave
+    /// a request there.
+    /// </summary>
+    public static WebhookReceiver CreateRedirectingProbe()
+    {
+        var receiver = new WebhookReceiver(redirectProbe: true);
+
+        _server.Value
+            .Given(Request.Create().WithPath(receiver.RedirectPath).UsingAnyMethod())
+            .RespondWith(Response.Create().WithCallback(_ =>
+            {
+                Interlocked.Increment(ref receiver._redirectedCount);
+                return Answer(200, "redirected");
+            }));
+
+        return receiver;
+    }
+
+    /// <summary>The HEAD probes that reached the endpoint so far.</summary>
+    public int CountProbes() => Volatile.Read(ref _probeCount);
 
     /// <summary>The address a subscription points at.</summary>
     public string TargetUri => _baseUri + _path;

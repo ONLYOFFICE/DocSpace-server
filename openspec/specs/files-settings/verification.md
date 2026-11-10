@@ -1,5 +1,7 @@
 # files-settings — verification
 
+Revision 2026-11-09 (bb406b409b..6fb013e745)
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement of `spec.md` with where it was verified. No test was run for this document: TEST-CONFIRMED means a
@@ -120,6 +122,7 @@ None of those specs was edited.
 | Refusals, 404s | same file 189-200,277-290,339-355,382-398; 361,404,423 by name; `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:260-297`; `FolderLinkPrimaryGetTests.cs:104-114`, 118,132 by name | TEST-CONFIRMED [run: PASS] |
 | **Revoked primary link stays revoked on read** | | |
 | Folder: 404 after revoke | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:195-214` | TEST-CONFIRMED [run: PASS] |
+| Create after revocation: new primary link with a new id, read answers it (file and folder, 62419af921) | `T/01_Files/Links/FileLinkPrimaryTests.cs:238-242`; `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` | TEST-CONFIRMED |
 | File: same path; `primary` true clears the state; replaced in Public and Form filling rooms | `FSS:4491-4503,6622-6660` | CODE-ONLY |
 | **Setting an external link of a file** | | |
 | Structure and fields | `T/01_Files/Links/FileLinkSetTests.cs:46-197` by name | TEST-CONFIRMED [run: PASS] |
@@ -177,7 +180,7 @@ None of those specs was edited.
 | `deleteCustomTags` | empty list is a no-op | Code agrees (`Tags`, `names.Count == 0`), the test accepts 200 or 400 (`RoomCustomTagValidationPermissionsTests.cs:64-83`) |
 | `createRoomTag` | no 500 listed | Name outside the BMP answers 500 (`RoomTagCreateTests.cs:95-109`) |
 | `getEncryptionInfo` | text: a missing file is 403; responses also list 404 for it | Not checked in code |
-| `createFilePrimaryExternalLink` | documents 404 after revocation | Code agrees; the test for bug 84872 expects recreation (FX3) |
+| `createFilePrimaryExternalLink`, `createFolderPrimaryExternalLink` | documented 404 after revocation | Since `62419af921` the create makes a new link; the 404 entry now reads "does not exist" only, the document and the server agree (FX3 fixed) |
 
 ## Left out
 
@@ -191,8 +194,8 @@ owned by this capability. `setDefaultTemplate` on third-party string ids was not
 |---|---|---|---|---|
 | FX1 | `startEditFile` | Any refused call drops the file's whole tracker: the catch calls the tracker removal with no tab or user, which removes the entry. A second person's refused claim, or a reader's refused start, therefore ends the first person's editing mark, and the next claim succeeds | `FSS:2383-2388`, `Trk:86-115` | red by code reading (no test covers the state after the refusal) |
 | FX2 | `startEditFile` | A second person refused a claim is told "This document is being edited by you in another tab" | `T/01_Files/Editing/EditingStartTests.cs:116-136` asserts that text for another account | pinned by a test; wording judged by reading |
-| FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4496-4503` | red test by reading |
-| FX4 | `get*PrimaryExternalLink`, `create*PrimaryExternalLink` | The revocation check runs before the sharing right check, so a caller with no access to a revoked entry gets 404 rather than 403, while an unrevoked entry gives 403 | `FSS:4496-4503` before `FSS:4523` | red by code reading |
+| FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4496-4503` | FIXED (62419af921): the create request skips the revocation mark, asserted at `FileLinkPrimaryTests.cs:238-242` and `FolderLinkPrimarySetTests.cs:242-246` |
+| FX4 | `get*PrimaryExternalLink`, `create*PrimaryExternalLink` | The revocation check runs before the sharing right check, so a caller with no access to a revoked entry gets 404 rather than 403, while an unrevoked entry gives 403 | `FSS:4496-4503` before `FSS:4523` | STILL OPEN for `get*`; for `create*` REFUTED since 62419af921 (the create skips the revocation check, so the sharing right check answers 403) |
 | FX5 | `getDocServiceUrl` | The anonymous answer includes the internal Document Server address, the portal address as the service sees it, the signature header name and the SSL flag | `E:721-746`; `T/07_Settings/Editor/GetDocServiceUrlTests.cs:97-107` pins anonymous reading only | red by code reading |
 | FX6 | `setFilesOrder` | Items are applied one at a time with no transaction, so a later item's 403 or 404 leaves earlier items reordered while the caller sees an error | `FSS:2824-2870` | red by code reading |
 | FX7 | `createRoomTag` | A name with a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design | `T/03_Rooms/Tags/RoomTagCreateTests.cs:85-109` | per test comment |

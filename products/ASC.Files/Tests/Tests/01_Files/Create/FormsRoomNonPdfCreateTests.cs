@@ -66,31 +66,31 @@ public class FormsRoomNonPdfCreateTests(
     /// </summary>
     [Fact]
     [Trait("Bug", "84840")]
-    public async Task CreateHtmlFile_FormFillingRoom_RefusedWithClientError()
+    public async Task CreateHtmlFile_FormFillingRoom_Returns403()
     {
         var status = await StatusOfCreate(async roomId => await _filesApi.CreateHtmlFileAsync(
             roomId, new CreateTextOrHtmlFileRequest("X", "<p/>"), TestContext.Current.CancellationToken));
 
-        status.Should().BeInRange(400, 499);
+        status.Should().Be(403);
     }
 
     [Fact]
     [Trait("Bug", "84840")]
-    public async Task CreateTextFile_FormFillingRoom_RefusedWithClientError()
+    public async Task CreateTextFile_FormFillingRoom_Returns403()
     {
         var status = await StatusOfCreate(async roomId => await _filesApi.CreateTextFileAsync(
             roomId, new CreateTextOrHtmlFileRequest("X", "x"), TestContext.Current.CancellationToken));
 
-        status.Should().BeInRange(400, 499);
+        status.Should().Be(403);
     }
 
     [Fact]
     [Trait("Bug", "84840")]
-    public async Task CreateFile_Docx_FormFillingRoom_RefusedWithClientError()
+    public async Task CreateFile_Docx_FormFillingRoom_Returns403()
     {
         var status = await StatusOfCreate(async roomId => await _filesApi.CreateFileAsync(
             roomId, new CreateFileRequest("X.docx"), TestContext.Current.CancellationToken));
 
-        status.Should().BeInRange(400, 499);
+        status.Should().Be(403);
     }
 }

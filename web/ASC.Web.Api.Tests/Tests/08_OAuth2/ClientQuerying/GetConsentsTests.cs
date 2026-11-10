@@ -91,6 +91,10 @@ public class GetConsentsTests(
 
     // TS ported this as test.fail("BUG 81729"): a guest is refused everywhere else in this suite
     // with 403, so a guest reading their own (empty) consent list should be refused the same way.
+    // The published contract says the opposite (no role check, guests allowed) and the server answers
+    // 200 with an empty page; the typed call reported that as 500 because the SDK cannot read the null
+    // cursor (see ClientQueryingTestBase), so the status is read raw.
+    [Trait("Category", "Bug")]
     [Trait("Bug", "81729")]
     [Fact]
     public async Task GetConsents_Guest_ThrowsForbidden()
@@ -100,10 +104,9 @@ public class GetConsentsTests(
         await ApplySignatureAsync(guest);
 
         // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _clientQueryingApi.GetConsentsAsync(50, cancellationToken: TestContext.Current.CancellationToken));
+        using var response = await _identityClient.GetAsync("api/2.0/clients/consents?limit=50", TestContext.Current.CancellationToken);
 
         // Assert
-        exception.ErrorCode.Should().Be(403);
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 }

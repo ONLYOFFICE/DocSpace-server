@@ -99,8 +99,13 @@ public class FileVersionInfoTests(
         versions[0].Id.Should().Be(file.Id);
     }
 
+    /// <summary>
+    /// H2: the version list of a file that does not exist answers 403 (<c>CanReadHistoryAsync(null)</c>),
+    /// while the revisions of the same id answer 404.
+    /// </summary>
     [Fact]
-    public async Task GetFileVersionInfo_NonExistentFile_Returns403()
+    [Trait("Category", "Bug")]
+    public async Task GetFileVersionInfo_NonExistentFile_Returns404()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -109,7 +114,7 @@ public class FileVersionInfoTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.GetFileVersionInfoAsync(999999999, TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]

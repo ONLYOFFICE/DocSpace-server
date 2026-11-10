@@ -42,6 +42,54 @@ public abstract class ApiKeysTestBase(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
+    private readonly AspireAppFixture _fixture = fixture;
+
+    /// <summary>
+    /// Moves the expiry of a key into the past directly in the stack's database: no API call makes a key expire on
+    /// demand, and the shortest <c>expiresInDays</c> is one day. MySQL only, like the webhook suites' helper.
+    /// </summary>
+    protected async Task ExpireAsync(Guid keyId)
+    {
+        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE core_user_api_key SET expires_at = UTC_TIMESTAMP() - INTERVAL 1 HOUR WHERE id = @id";
+        command.Parameters.AddWithValue("@id", keyId.ToString());
+
+        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1, "the key should be in the database");
+    }
+
+    /// <summary>The number of keys of the portal's database whose stored hash column equals <paramref name="value"/>. MySQL only.</summary>
+    protected async Task<long> CountKeysWithStoredHashAsync(string value)
+    {
+        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT COUNT(*) FROM core_user_api_key WHERE hashed_key = @value";
+        command.Parameters.AddWithValue("@value", value);
+
+        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// Runs <paramref name="action"/> with <c>_webApiClient</c> authenticated as the given API key, then restores the
+    /// identity it had before: the Web.Api endpoints (settings, portal) are on that client, not on <c>_peopleClient</c>.
+    /// </summary>
+    protected async Task<T> AsApiKeyOnWebApiAsync<T>(string apiKey, Func<Task<T>> action)
+    {
+        var original = _webApiClient.DefaultRequestHeaders.Authorization;
+        _webApiClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", apiKey);
+
+        try
+        {
+            return await action();
+        }
+        finally
+        {
+            _webApiClient.DefaultRequestHeaders.Authorization = original;
+        }
+    }
+
     /// <summary>
     /// Authenticates <c>_peopleClient</c> as the given actor, inviting a fresh member first when
     /// the actor is not the portal owner.

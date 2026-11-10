@@ -56,9 +56,12 @@ public class BaseTest(
     protected RoomsApi _roomsApi = null!;
     protected FoldersApi _foldersApi = null!;
     protected ThirdPartyIntegrationApi _thirdPartyIntegrationApi = null!;
+    protected FilesApi _filesApi = null!;
+    protected OperationsApi _operationsApi = null!;
 
     protected PaymentApi _paymentApi = null!;
     protected SettingsAuthorizationApi _settingsAuthorizationApi = null!;
+    protected SettingsStorageApi _settingsStorageApi = null!;
 
     public async ValueTask InitializeAsync()
     {
@@ -76,8 +79,11 @@ public class BaseTest(
         _roomsApi = _clients.RoomsApi;
         _foldersApi = _clients.FoldersApi;
         _thirdPartyIntegrationApi = _clients.ThirdPartyIntegrationApi;
+        _filesApi = _clients.FilesApi;
+        _operationsApi = _clients.OperationsApi;
         _paymentApi = _clients.PaymentApi;
         _settingsAuthorizationApi = _clients.SettingsAuthorizationApi;
+        _settingsStorageApi = _clients.SettingsStorageApi;
 
         await _backupClient.Authenticate(Owner);
     }

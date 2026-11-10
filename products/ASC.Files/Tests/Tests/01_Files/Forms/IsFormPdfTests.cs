@@ -76,6 +76,29 @@ public class IsFormPdfTests(
         isForm.Should().BeFalse();
     }
 
+    /// <summary>
+    /// Every <c>.pdf</c> is offered as a fillable form (<c>isForm</c>), whatever its content says;
+    /// <c>isformpdf</c> is what tells a form from a document. Any other format carries no flag.
+    /// </summary>
+    [Fact]
+    public async Task FileInfo_IsForm_TrueForEveryPdfAndAbsentForOtherFormats()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest IsForm Flag Room");
+        var pdfId = await UploadRegularPdfAsync(room.Id, "Autotest IsForm Flag.pdf");
+        var docx = await CreateFile("Autotest IsForm Flag.docx", room.Id);
+
+        // Act
+        var pdf = (await _filesApi.GetFileInfoAsync(pdfId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var doc = (await _filesApi.GetFileInfoAsync(docx.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        pdf.IsForm.Should().BeTrue("a PDF without the form signature is still offered for filling");
+        (await _filesApi.IsFormPDFAsync(pdfId, TestContext.Current.CancellationToken)).Response.Should().BeFalse();
+        doc.IsForm.Should().BeNull();
+    }
+
     [Fact]
     public async Task IsFormPDF_DocxfFormTemplate_ReturnsFalse()
     {

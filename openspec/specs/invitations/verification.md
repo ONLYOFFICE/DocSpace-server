@@ -2,6 +2,8 @@
 
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
+> Revision 2026-11-09 (bb406b409b..6fb013e745): the repeat check of letters (no letter for a repeat within the period, same answer); the rate limit of the resend and instruction endpoints is gone.
+
 One row per requirement scenario of `spec.md`. Status: TEST-CONFIRMED — an integration test asserts it;
 CODE-ONLY — read from the server code and/or the OpenAPI document, no test covers it; NOTES-ONLY — only
 the release notes say it (none of the scenarios is in this state; everything that stayed notes-only was
@@ -34,6 +36,7 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Anonymous 401 | PT/01_Profiles/InviteUsersTests.cs:141-150 | TEST-CONFIRMED [run: PASS] |
 | Existing address: related to inviter, type raised, not mailed | UC:525-545; yaml `inviteUsers` description ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:59-69 | TEST-CONFIRMED [run: PASS] (type raised) / CODE-ONLY (relation, not mailed) |
 | Disabled account → 400 | UC:527-530; yaml `inviteUsers` 400 ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:46-57 | TEST-CONFIRMED [run: PASS] |
+| Inviting an address again after its pending profile was deleted, within the repeat period: no second letter | PT/01_Profiles/ResendActivationTests.cs:161-181; yaml `inviteUsers` description | TEST-CONFIRMED |
 | Not enough paid seats → 402 before anything is sent | UC:500-511; yaml `inviteUsers` 402 | CODE-ONLY |
 | Answer lists every pending profile the caller may see | UC:558-570; yaml description ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:71-82 (owner sees earlier pending profiles) | TEST-CONFIRMED [run: PASS] |
 
@@ -66,11 +69,12 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Claim | Source | Status |
 |---|---|---|
 | Allowed inviter resends; member returned Pending / Pending | PT/01_Profiles/ResendActivationTests.cs:52-72 | TEST-CONFIRMED [run: PASS] |
-| Guest resends for another account → 403 | PT/01_Profiles/ResendActivationTests.cs:75-91 | TEST-CONFIRMED [run: PASS] |
-| User resends for another account → 403, bug 79545 | PT/01_Profiles/ResendActivationTests.cs:96-112 | TEST-CONFIRMED [run: PASS] |
-| Anonymous 401 | PT/01_Profiles/ResendActivationTests.cs:115-125 | TEST-CONFIRMED [run: PASS] |
-| Skipped accounts and resendAll: active / disabled skipped; activation instructions for non-confirmed; new link each time; resendAll admin-only; own id only for User/Guest | UC:1680-1770 (the `IsActive || Terminated` skip at `:1701`); yaml `resendUserInvites` ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:97-157 | TEST-CONFIRMED [run: PASS] (resendAll refused for User and Guest, allowed for Room admin; own id accepted for User; active and disabled accounts keep their status) / CODE-ONLY (letters, new link) |
-| Throttling 5 per 15 minutes → 429 | UC `[EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]`; yaml `resendUserInvites` 429 header text | CODE-ONLY |
+| Guest resends for another account → 403 | PT/01_Profiles/ResendActivationTests.cs:102-118 | TEST-CONFIRMED [run: PASS] |
+| User resends for another account → 403, bug 79545 | PT/01_Profiles/ResendActivationTests.cs:123-139 | TEST-CONFIRMED [run: PASS] |
+| Anonymous 401 | PT/01_Profiles/ResendActivationTests.cs:183-193 | TEST-CONFIRMED [run: PASS] |
+| Skipped accounts and resendAll: active / disabled skipped; activation instructions for non-confirmed; new link unless the letter is a repeat; resendAll admin-only; own id only for User/Guest | UC:1680-1770 (the `IsActive || Terminated` skip at `:1701`); yaml `resendUserInvites` ; products/ASC.People/Tests/Tests/01_Profiles/InviteUsersRulesTests.cs:97-157 | TEST-CONFIRMED [run: PASS] (resendAll refused for User and Guest, allowed for Room admin; own id accepted for User; active and disabled accounts keep their status) / CODE-ONLY (letters, new link) |
+| Repeated resend: six calls in a row each answer 200 with the account (no 429 - the endpoint's own rate limit was removed in `eeaf3b6988`), one invitation letter | PT/01_Profiles/ResendActivationTests.cs:75-99; yaml `resendUserInvites` description | TEST-CONFIRMED |
+| Resend leaves the account unwritten (modification date unchanged), `55ba296b05` | PT/01_Profiles/ResendActivationTests.cs:142-159 | TEST-CONFIRMED |
 
 ## Portal invitation links per user type
 
@@ -131,6 +135,7 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Claim | Source | Status |
 |---|---|---|
 | Unknown address → pending Guest profile created by caller, share recorded, room invitation email with `roomId` | FS:291-318, 412-426; IS:61-66; `UserManagerWrapper.cs:101-130` ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:59-73 | TEST-CONFIRMED [run: PASS] (pending Guest profile, share recorded) / CODE-ONLY (letter, created by caller) |
+| Access of an email-invited address switched back and forth (same account type): one letter, bug 79410 | `products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationResendTests.cs:217-237` | TEST-CONFIRMED |
 | Existing pending account → related, access set, invitation resent | FS:293-311 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:75-88 | TEST-CONFIRMED [run: PASS] (access set) / CODE-ONLY (relation, resend) |
 | Address of an existing active account → related, access set, no invitation email, existing-user notice when `notify` | FS:305-311, 432-451 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:90-104 | TEST-CONFIRMED [run: PASS] (access set, account stays Active) / CODE-ONLY (relation, letters) |
 | Guest invitations disabled → 403 for the whole request | VRC `SetRoomSecurity` (`newGuestsInvited` / `AllowInvitingGuests`); yaml `setRoomSecurity` 403 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationByEmailTests.cs:106-130 | TEST-CONFIRMED [run: PASS] |
@@ -158,7 +163,7 @@ The AI-project test above is the only integration test that sends an `email` ent
 | Malformed account id → 400 | RoomInvitationTests.cs:120-138 | TEST-CONFIRMED [run: PASS] |
 | Room id 0 / -1 / unknown / deleted → 404, bugs 81879, 81880 | RoomInvitationTests.cs:150-204 | TEST-CONFIRMED [run: PASS] |
 | Archived room → 403 | RoomInvitationTests.cs:206-223 | TEST-CONFIRMED [run: PASS] |
-| Throttling 5 per 15 minutes → 429 | VRC `[EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]` on `{id}/resend`; yaml `resendEmailInvitations` 429 header text | CODE-ONLY |
+| Repeated resend (one member, or `resendAll`) six times: 200 each, one letter in all; the endpoint's own rate limit is gone (`eeaf3b6988`) | `products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationResendTests.cs:171-192, 195-214`; yaml `resendEmailInvitations` 200 text | TEST-CONFIRMED |
 
 ## Invitation link of a room
 

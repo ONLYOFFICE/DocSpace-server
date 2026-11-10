@@ -110,6 +110,7 @@ lifecycle and settings, room links, room members, forms (see `form-filling-workf
 
 - **WHEN** an action of the tracked set is performed on an entry
 - **THEN** a history entry is written for the file actions `FileCreated`, `FileUploaded`, `FileUploadedWithOverwriting`, `UserFileUpdated`, `FileRenamed`, `FileMoved`, `FileMovedWithOverwriting`, `FileMovedToTrash`, `FileCopied`, `FileCopiedWithOverwriting`, `FileVersionRemoved`, `FileDeleted`, `FileConverted`, `FileRestoreVersion`, `FileIndexChanged`, `FileLocked`, `FileUnlocked`, `FileCustomFilterEnabled`, `FileCustomFilterDisabled`, `FileSavedButUserQuotaExceeded`, `FileNotSavedDueToUserQuota`, `FileSavedButRoomQuotaExceeded`, `FileNotSavedDueToRoomQuota` and `FileKeysSet`
+- **AND** an entry of `FileRestoreVersion` or `FileUploadedWithOverwriting` is shown with `action.id` `UserFileUpdated`, the action it is presented as
 - **AND** for the folder actions `FolderCreated`, `FolderRenamed`, `FolderMoved`, `FolderMovedWithOverwriting`, `FolderCopied`, `FolderCopiedWithOverwriting`, `FolderMovedToTrash`, `FolderDeleted`, `FolderIndexChanged` and `FolderIndexReordered`
 - **AND** for the room actions `RoomCreated`, `RoomCopied`, `RoomRenamed`, `RoomArchived`, `RoomUnarchived`, `AddedRoomTags`, `DeletedRoomTags`, `RoomLogoCreated`, `RoomLogoDeleted`, `RoomColorChanged`, `RoomCoverChanged`, `RoomIndexingEnabled`, `RoomIndexingDisabled`, `RoomLifeTimeSet`, `RoomLifeTimeDisabled`, `RoomDenyDownloadEnabled`, `RoomDenyDownloadDisabled`, `RoomWatermarkSet`, `RoomWatermarkDisabled` and `RoomIndexExportSaved`
 - **AND** for the link actions `RoomExternalLinkCreated`, `RoomExternalLinkRenamed`, `RoomExternalLinkDeleted` and `RoomExternalLinkRevoked`
@@ -464,7 +465,7 @@ and the date in the portal time zone. Logging out and closing connections are re
 
 - **WHEN** the owner reads `audit/login/last`
 - **THEN** each event has a positive id, a user id and name, an action text and `actionId`, a non-null `ip` and a date
-- **AND** an event carries the account, the login, the action text, the IP with its port removed, the country and city resolved from the IP (empty when unknown), browser, platform and page
+- **AND** an event carries the account, the login as it was typed (filled for a failed attempt; a successful password sign-in leaves it empty), the action text, the IP with its port removed, the country and city resolved from the IP (empty when unknown), browser, platform and page
 
 ### Requirement: Reading the login history
 

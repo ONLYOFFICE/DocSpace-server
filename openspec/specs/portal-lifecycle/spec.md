@@ -351,8 +351,9 @@ stay. `continuePortal` with the PortalContinue link SHALL set the status back to
 
 #### Scenario: Repeating the suspend link
 
-- **WHEN** the suspend link is used a second time within its validity
+- **WHEN** the suspend link is used again within its validity, after the portal was continued
 - **THEN** the portal is Suspended again with a new `statusChangeDate`
+- **AND** while the portal is still suspended the same call answers 404, since `suspendPortal` is not allowed on a suspended portal
 
 ### Requirement: Asking for the portal to be deleted
 
@@ -395,7 +396,8 @@ SHALL answer 200 with the address of the "registration cancelled" feedback page.
 #### Scenario: Owner confirms the deletion
 
 - **WHEN** the owner opens the PortalRemove link
-- **THEN** the answer is 200 with the feedback address, the old address answers 404 at once, and shortly afterwards the portal's files, database rows and search entries are gone
+- **THEN** the answer is 200 with the feedback address, the portal stops being served under its old address at once and its name is free to register again, and shortly afterwards the portal's files, database rows and search entries are gone
+- **AND** on a server installation, which resolves an address it does not know to its default portal, a request to the old address is answered by the default portal rather than with 404
 
 #### Scenario: Letter failure does not stop the removal
 

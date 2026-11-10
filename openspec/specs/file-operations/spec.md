@@ -132,7 +132,7 @@ room, nor in an Instructions, Knowledge or AI project room (403); a parent that 
 `updateFile` SHALL rename a file without changing its format: the original extension is always preserved and
 appended to the requested title. An empty or whitespace-only title SHALL leave the name unchanged (200).
 Characters a file name cannot hold are replaced with `_`. A title longer than 170 characters is rejected
-(400); a file id that does not exist answers 404. A file locked by another account SHALL NOT be renamed.
+(400); a file id that does not exist answers 404. A file locked by another account SHALL NOT be renamed (403).
 
 #### Scenario: Extension handling
 
@@ -159,7 +159,7 @@ Characters a file name cannot hold are replaced with `_`. A title longer than 17
 #### Scenario: Locked by another member
 
 - **WHEN** a Content creator renames a file of the room that the Owner locked
-- **THEN** the rename is refused, the title and the lock are unchanged, and the refusal is a 500, not a client error (bug 84842)
+- **THEN** the rename is refused with 403 and the title and the lock are unchanged
 
 ### Requirement: Renaming a folder
 
@@ -899,9 +899,8 @@ that version's content again as a new version; `getFileInfo` with `version` SHAL
 
 `changeVersionHistory` (`PUT .../history`, `version`, `continueVersion`) SHALL split the given version into a
 revision group of its own with `continueVersion:false` and fold it back with `true`. `restoreFileVersion`
-(`POST .../restoreversion`, `version` or `url`) SHALL store the chosen version's content on top of the history
-as a new version and answer the editing revisions, grown by one. A file locked or edited by somebody else
-SHALL keep its versions.
+(`POST .../restoreversion`, `version` or `url`) SHALL store the chosen version's content as a new version and
+answer the editing revisions, grown by one. A file held by somebody else SHALL keep its versions.
 
 #### Scenario: Split and merge
 
@@ -913,13 +912,15 @@ SHALL keep its versions.
 
 - **WHEN** version 1 of a two-version file is restored
 - **THEN** the answer lists the revisions, one more than before, each with id, key, version, group, user and `created`
+- **AND** the file is now at version 3 with the bytes of version 1 and the comment "Restored from the revision of ..."
 - **AND** a restore without `version` and `url` answers 400, of file 999999999 answers 404, in an archived room 403, and a GET to the route is not 200 and restores nothing (bug 78027)
 - **AND** the restore route accepts POST only
 
 #### Scenario: File held by somebody else
 
 - **WHEN** a Content creator changes the version history of a file the Owner locked, or of a file open in the Owner's editing session
-- **THEN** the number of versions is unchanged in both cases; the locked file answers 500 (bug 84771) and the edited one answers 200 (bug 84772), neither a client error
+- **THEN** the number of versions is unchanged in both cases; the locked file answers 403 and the edited one answers 200, not a client error (bug 84772)
+- **AND** a Room manager's `restoreFileVersion` on a file the Owner locked answers 403 and changes nothing
 
 ### Requirement: Version comments
 
@@ -1015,7 +1016,7 @@ by someone with manager rights. Unknown file 404, no access 403, anonymous 401. 
 #### Scenario: Lock blocks others
 
 - **WHEN** another account tries to delete or copy a file that is locked, to save new content into it through the editor's save route, to claim it for editing, or to rename it
-- **THEN** the deletion, the copy and the save are refused (403) and the file keeps its title, version, bytes and lock; the claim and the rename are refused through a 500, not a client error (bugs 84768 and 84842)
+- **THEN** the deletion, the copy, the save, the claim and the rename are refused (403) and the file keeps its title, version, bytes and lock
 
 #### Scenario: Editing session blocks others
 

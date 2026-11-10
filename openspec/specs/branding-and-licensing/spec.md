@@ -515,9 +515,9 @@ the license is neither trial nor time-limited, and SHALL set the tariff's `dueDa
 
 `refreshLicense` SHALL answer 200 false on an installation that is not Enterprise or Developer and otherwise re-read
 the license file and rewrite the quota and tariff from it, answering true; a missing or unreadable file or an
-editing-service refusal SHALL answer 402, a start date in the future 400. The Files worker SHALL perform the same
-re-read periodically (daily unless configured otherwise) whenever a license path is configured, so a replaced file
-takes effect without a call.
+editing-service refusal SHALL answer 402, a start date in the future 400. After acceptance a background re-read of the
+license in force SHALL run daily by default, so a replaced file takes effect without a call; it SHALL NOT apply an
+uploaded license.
 
 #### Scenario: Open-source installation
 
@@ -528,6 +528,11 @@ takes effect without a call.
 
 - **WHEN** the license file is replaced by one with a later end date and the periodic re-read runs
 - **THEN** `getPortalTariff` reports the new `dueDate`
+
+#### Scenario: Uploaded license not accepted
+
+- **WHEN** a license was uploaded with `uploadLicense` and not accepted, and the periodic re-read runs
+- **THEN** the uploaded license stays staged and the tariff is unchanged; only `acceptLicense` or `refreshLicense` puts it in force
 
 ### Requirement: Whether a license is still required
 

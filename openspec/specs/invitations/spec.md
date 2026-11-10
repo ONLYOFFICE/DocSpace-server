@@ -57,6 +57,11 @@ invitation link. The Guest type SHALL be refused through this operation for ever
 - **WHEN** an unauthenticated caller invites by email
 - **THEN** the system answers 401
 
+#### Scenario: Inviting an address again shortly after
+
+- **WHEN** an address is invited, its pending profile is deleted and the address is invited again within the repeat period
+- **THEN** a new pending profile is created and the call answers as usual, but no second invitation letter goes out
+
 #### Scenario: Address that already has an account
 
 - **WHEN** an invited address already belongs to a profile of the portal
@@ -153,7 +158,8 @@ change it through `PUT /api/2.0/people/status/{status}`.
 The system SHALL let the inviter of a pending account send its invitation email again through
 `PUT /api/2.0/people/invite` (`resendUserInvites`), issuing a fresh invitation link, and SHALL send
 activation instructions instead to an account that exists but has not confirmed its address. A User or a
-Guest MAY list nothing but their own id.
+Guest MAY list nothing but their own id. A repeat within the period of `notifications` SHALL
+send no second letter.
 
 #### Scenario: Allowed inviter resends to a pending member
 
@@ -176,10 +182,15 @@ Guest MAY list nothing but their own id.
 - **WHEN** an unauthenticated caller resends
 - **THEN** the system answers 401
 
-#### Scenario: Throttling
+#### Scenario: Repeated resend
 
-- **WHEN** a caller resends more than 5 times within 15 minutes
-- **THEN** the system answers 429
+- **WHEN** the Owner resends to the same pending account six times in a row
+- **THEN** every call answers 200 with that account, and only one invitation letter goes out
+
+#### Scenario: Resend leaves the account unwritten
+
+- **WHEN** a pending account is resent to
+- **THEN** its modification date does not move
 
 ### Requirement: Portal invitation links per user type
 
@@ -342,6 +353,11 @@ relate that account to the caller and apply the access.
 - **WHEN** an entry carries an email that belongs to no account and an access other than 0
 - **THEN** a Guest profile with status Pending is created for it, the share is recorded and the invitation email with the room link is sent
 
+#### Scenario: Access switched back and forth
+
+- **WHEN** the access of an address invited by email is switched between two levels that give the same account type, several times in a row
+- **THEN** every call succeeds and only one invitation letter goes out (bug 79410)
+
 #### Scenario: Address of an existing pending account
 
 - **WHEN** an entry carries the email of a pending account
@@ -415,10 +431,10 @@ The operation SHALL change nothing about the room or its membership.
 - **WHEN** the room is archived
 - **THEN** the system denies the request (403, "You don't have enough permission to perform the operation")
 
-#### Scenario: Throttling
+#### Scenario: Repeated resend
 
-- **WHEN** a caller resends more than 5 times within 15 minutes
-- **THEN** the system answers 429
+- **WHEN** a manager resends to one pending member, or with `resendAll`, six times in a row
+- **THEN** every call answers 200 and the member gets one invitation letter in all
 
 ### Requirement: Invitation link of a room
 

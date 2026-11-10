@@ -1,5 +1,7 @@
 # private-rooms — verification
 
+Revision 2026-11-09 (bb406b409b..6fb013e745)
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement of `spec.md`, with where it was verified. Paths are relative to the repo root (`server/`). `yaml` is
@@ -83,6 +85,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | History keeps titles for members | same file:203-222 | TEST-CONFIRMED [run: NO-LINK] |
 | Letters use the neutral title (tags of the action, not rendered pushes) | common/Tests/ASC.Notify.Tests/Invites/PrivateRoomTitleInLettersTests.cs:115-177 | TEST-CONFIRMED [run: PASS] |
 | Webhooks: outsider gets nothing | web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/WebhookPrivateRoomAccessTests.cs:71-109 | TEST-CONFIRMED [run: PASS] |
+| Webhook contract: the room-type values of the payloads include the Private rooms section type (d8b46d2b9a); documentation only, no spec change | `sdk/docspace-api-spec/webhooks/docspace-webhooks.yaml` `components.schemas` room-type descriptions | CODE-ONLY |
 
 ## Differences between the yaml and the server
 

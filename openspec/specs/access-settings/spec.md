@@ -472,13 +472,13 @@ With a method on, `authenticateMe` SHALL ask for the second factor instead of is
 
 ### Requirement: Required single sign-on fields
 
-`saveSsoSettingsV2` SHALL refuse without storing a configuration with no IdP entity ID, with an SSO URL that is missing or not absolute HTTP or HTTPS, with an SLO URL that is present and not absolute HTTP or HTTPS, or with no first name, last name or email in the field mapping.
+`saveSsoSettingsV2` SHALL refuse with 400, without storing, settings that are not valid JSON, a configuration with no IdP settings or no IdP entity ID, with an SSO URL that is missing or not absolute HTTP or HTTPS, with an SLO URL that is present and not absolute HTTP or HTTPS, or with no field mapping or no first name, last name or email in it.
 
 #### Scenario: Missing entity ID
 
 - **WHEN** the configuration has no IdP entity ID
-- **THEN** the call fails with a 500, not a client error, and the stored settings do not change (bug 84685)
-- **AND** a missing SSO URL, a malformed SLO URL and an incomplete field mapping answer 500 too
+- **THEN** the answer is 400 and the stored settings do not change
+- **AND** a missing SSO URL, a malformed SLO URL, an incomplete or missing field mapping, missing IdP settings and settings that are not valid JSON answer 400 too
 
 ### Requirement: Switching single sign-on off
 
@@ -566,12 +566,17 @@ With a method on, `authenticateMe` SHALL ask for the second factor instead of is
 
 ### Requirement: Resending the SMS code
 
-`sendSmsCode` SHALL be open to anonymous callers and SHALL check credentials the same way as `authenticateMe`: wrong or empty credentials, an unknown account and an empty body SHALL answer 401 "User authentication failed". With SMS on for the account it SHALL answer 200 with `sms` true, the masked phone number and the expiry, and no token.
+`sendSmsCode` SHALL be open to anonymous callers and SHALL check credentials the same way as `authenticateMe`: wrong or empty credentials, an unknown account and an empty body SHALL answer 401 "User authentication failed". With SMS on for the account it SHALL answer 200 with `sms` true, the masked phone number and the expiry, and no token. Valid credentials when SMS is not available on the portal or not required for the account SHALL answer 405.
 
 #### Scenario: Rejected credentials
 
 - **WHEN** the password is wrong, the account is unknown, the credentials are empty or the body is empty
 - **THEN** the answer is 401 "User authentication failed"
+
+#### Scenario: SMS not in use
+
+- **WHEN** the credentials are valid and the account signs in without SMS codes
+- **THEN** the answer is 405 and no code is sent
 
 ### Requirement: Password reminder for a signed-in caller
 

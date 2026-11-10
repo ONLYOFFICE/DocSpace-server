@@ -285,6 +285,49 @@ AI Tools on (403) and a `models` list without null entries (400).
 - **WHEN** a project's model is restricted and a member sends into an existing thread of that project
 - **THEN** the send is refused while a rename of the project still answers 200
 
+### Requirement: BYOK keys of a hosted portal
+
+`aiByokProviders` SHALL list, to a DocSpace admin, the providers through which a chat or image model of the
+gateway catalogue can be called with the portal's own key, each with its models and a logo, leaving out
+models that already have a key. `aiByokKeysList` SHALL list the stored keys by model revision id with the
+model name while the catalogue still has it, the provider and a logo, and never the key itself. Other roles
+403; no gateway 404.
+
+#### Scenario: Stored key never read back
+
+- **WHEN** a DocSpace admin sets a key through `aiByokKeysSet` and then calls `aiByokKeysList`
+- **THEN** both answers carry the model revision id and the provider, and neither carries the key
+
+### Requirement: Setting and deleting a BYOK key
+
+`aiByokKeysSet` on a model revision id SHALL take `provider` and `key`: 404 for a model the catalogue lacks
+or that is no chat or image model, 400 when that provider does not serve the model or rejects the key; a
+later call replaces the earlier key. `aiByokKeysDelete` SHALL remove the key, 404 when there is none, and
+SHALL succeed while the gateway catalogue is unreachable. Both are DocSpace admin only and audited.
+
+#### Scenario: Key the provider rejects
+
+- **WHEN** a DocSpace admin calls `aiByokKeysSet` with a key the provider's verification refuses
+- **THEN** the system answers 400 with a message and stores nothing
+
+#### Scenario: Delete without the catalogue
+
+- **WHEN** the gateway catalogue does not answer and a DocSpace admin calls `aiByokKeysDelete` for a stored key
+- **THEN** the key is removed and the audit entry names the model by its revision id
+
+### Requirement: Models running on a BYOK key
+
+A model with a BYOK key SHALL be called, by the chat and by the document agent alike, through the BYOK
+route of its profile, `/api/2.0/ai/gateway/byok/{profileId}/...`, with a gateway token bound to that model
+revision; a model the portal's offer lacks joins the catalogue through its key. A key whose provider no
+longer serves the model SHALL be ignored; a key that cannot be decrypted makes the route answer 404.
+Wallet charges: the billing spec.
+
+#### Scenario: Provider dropped the model
+
+- **WHEN** the gateway catalogue no longer lists the key's provider among the model's providers
+- **THEN** the model is served on the built-in key, or leaves the catalogue if the portal's offer lacks it
+
 ### Requirement: Tasks and the scope of the assignments
 
 Each task — Default, Chat, Code, Summarization, Translation, TextAnalyze, ImageGeneration, OCR, Vision,

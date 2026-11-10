@@ -48,6 +48,7 @@ namespace ASC.Notify.Tests.Deduplication;
 /// then be refused by nothing but the engine's mark. The engine's channels themselves do not run: the letter host is
 /// built but never started, so no sender is registered.
 /// </summary>
+[Collection(nameof(NotifyQueueCollection))]
 public class RepeatAcceptKeyTests
 {
     [Theory]

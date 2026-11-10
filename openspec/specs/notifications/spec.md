@@ -287,6 +287,11 @@ Telegram.
 - **WHEN** a member uploaded a file into a room an hour ago
 - **THEN** the other members of the room subscribed to room activity get the hourly letter naming the file
 
+#### Scenario: Not-paid portal skips the hourly digest
+
+- **WHEN** the portal's tariff is not paid
+- **THEN** no hourly digest is sent either, while the letters a room sends at once still go out
+
 ### Requirement: SMTP settings of the portal
 
 `getSmtpSettings`, `saveSmtpSettings` and `resetSmtpSettings` SHALL require the portal-settings
@@ -709,6 +714,53 @@ also goes to Telegram.
 
 - **WHEN** the sign-in check of `history-and-audit` fires
 - **THEN** the member receives "Suspicious login to your <brand> account" by e-mail and, if linked, Telegram
+
+### Requirement: Repeated letters within a period
+
+These letters SHALL go out once per recipient and channel within a configurable repeat period, never longer than their links stay valid: portal deactivation and deletion instructions, profile deletion instructions, portal and room invitations, activation instructions, type and room role change letters, and file, folder and room share letters. A repeat SHALL be dropped before any link is built, and its request SHALL get the same status and body as the first one.
+
+#### Scenario: Instructions asked for six times
+
+- **WHEN** the owner calls `sendSuspendInstructions` or `sendDeleteInstructions` six times in a row
+- **THEN** every call answers 200 with no body, and one letter goes out
+
+#### Scenario: Resend asked for six times
+
+- **WHEN** `resendUserInvites`, `resendEmailInvitations` or `sendInstructionsToDelete` is called six times in a row for the same account
+- **THEN** every call answers 200 with its usual body, and the account gets one letter
+
+#### Scenario: After the period
+
+- **WHEN** the same letter is asked for after the repeat period
+- **THEN** it goes out again
+
+#### Scenario: Letter that was not delivered
+
+- **WHEN** the first letter could not be delivered
+- **THEN** a repeat sends it
+
+### Requirement: What makes a repeated letter a new one
+
+A letter SHALL not count as a repeat when its subject differs: an invitation whose link carries another account type or was signed with another portal address name, a room invitation of an existing user to another room, a letter for another access level, or deactivation, deletion and profile deletion instructions after the recipient's address changed, even only in case.
+
+#### Scenario: Invitation with another account type
+
+- **WHEN** an address is invited again within the period with another account type
+- **THEN** the new invitation letter goes out
+
+#### Scenario: Address changed
+
+- **WHEN** the portal owner changes their address and asks for the deactivation instructions again within the period
+- **THEN** a letter with links for the new address goes out
+
+### Requirement: Letters that always go out
+
+Security alerts (password changed, two-factor setting changed, suspicious login), password and email change instructions, the administrator activation letter, the "user joined" letter, the portal rename letter and editor mentions SHALL go out on every request. `sendEditorNotify` SHALL keep its rate limit and answer 429 above it.
+
+#### Scenario: Password change instructions asked twice
+
+- **WHEN** a member asks for the password change instructions twice in a row
+- **THEN** both letters go out, and only the link of the latest one works
 
 ### Requirement: Rendering and branding of a letter
 

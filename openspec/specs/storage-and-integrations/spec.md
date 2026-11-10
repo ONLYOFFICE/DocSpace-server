@@ -499,7 +499,8 @@ right to edit portal settings. A room admin, user or guest gets 403 "Access deni
 
 `startDocsCloudTrial` SHALL need a configured billing service (403), a trial quota on the installation (404), a tariff
 not delayed or unpaid (402) and no Docs Connect subscription on the portal (400). It answers true when the trial is
-granted, adding the tenant's address to the Content Security Policy domains, and false when billing declines.
+granted, adding the tenant's address to the Content Security Policy domains, and false when billing declines or its
+answer cannot be read; after an unreadable answer the cached tariff is dropped, so the next check reads billing again.
 
 #### Scenario: Subscription already there
 
@@ -510,6 +511,11 @@ granted, adding the tenant's address to the Content Security Policy domains, and
 
 - **WHEN** the billing service grants the trial
 - **THEN** the answer is true and the address of the assigned tenant is among the allowed domains
+
+#### Scenario: Unreadable billing answer
+
+- **WHEN** the billing service answers with something that is not a readable trial result
+- **THEN** the answer is false and the cached tariff is cleared
 
 ### Requirement: Moving to Docs Connect Dev Pack
 
@@ -530,7 +536,22 @@ Dev Pack for `quantity` users. Both need a configured billing service and an adm
 #### Scenario: Quantity below the minimum
 
 - **WHEN** `quantity` is below the current number of Docs Connect users or the Dev Pack minimum, by default 10
-- **THEN** the answer is 400
+- **THEN** the answer is 400 and contains "Invalid quantity", and nothing is asked of the billing service
+
+#### Scenario: No Docs Connect subscription
+
+- **WHEN** the portal holds no active Docs Connect subscription
+- **THEN** the answer is 400 and contains "DocsCloud subscription is not active"
+
+#### Scenario: DocSpace admin who is not the owner
+
+- **WHEN** a DocSpace admin who is not the owner calls `calculateDevPack` or `switchToDevPack` on a subscribed portal
+- **THEN** the switch is priced or performed, and `switchToDevPack` names the caller as the paying participant
+
+#### Scenario: Not an administrator
+
+- **WHEN** a signed-in caller who is not an administrator calls either operation on an installation with a billing service
+- **THEN** the answer is 403 and contains "Access denied", and nothing is charged
 
 #### Scenario: Simultaneous switches
 
@@ -552,6 +573,11 @@ the configuration, the user lists and the active-user count, and answer 400 with
 
 - **WHEN** the license says trial and the tariff holds a Docs Connect or Dev Pack quota
 - **THEN** `getTenantInfo` reports `license.trial` false
+
+#### Scenario: Never activated
+
+- **WHEN** the portal has no activated Docs Connect tenant
+- **THEN** `getTenant` answers 200 with an empty body and `getTenantInfo` answers 400 containing "DocsCloud resource not found"
 
 ### Requirement: Updating the Docs Connect configuration
 

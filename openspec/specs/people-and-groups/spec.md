@@ -221,7 +221,7 @@ A deleted profile SHALL no longer appear in `getAllProfiles`, including when its
 
 ### Requirement: Immediate change versus instructions
 
-`sendEmailChangeInstructions` SHALL change the address at once when the caller is the Owner or a DocSpace admin, and SHALL only send a letter when the caller is anyone else. The response text is the same in both cases.
+`sendEmailChangeInstructions` SHALL change the address at once when the caller is the Owner or a DocSpace admin, and SHALL only send a letter when the caller is anyone else. The response text is the same in both cases. The activation instructions an address got within the repeat period SHALL not be sent to it again.
 
 #### Scenario: Owner changes their own address
 
@@ -232,6 +232,11 @@ A deleted profile SHALL no longer appear in `getAllProfiles`, including when its
 
 - **WHEN** a User sends a new `email` for themselves
 - **THEN** the answer is 200, the letter goes out and the stored address stays until the link is followed
+
+#### Scenario: Address switched back and forth
+
+- **WHEN** an administrator moves an account between two addresses six times in a row
+- **THEN** every call succeeds, and each address gets its activation instructions once
 
 ### Requirement: Validation of an email change
 
@@ -537,7 +542,7 @@ The accounts-and-groups searches SHALL return an empty list with a zero total wh
 
 ### Requirement: Asking to delete one's own profile
 
-`sendInstructionsToDelete` (`PUT people/self/delete`) SHALL send the caller a confirmation letter and name the caller's address in the answer. The Owner and an LDAP account SHALL get 403.
+`sendInstructionsToDelete` (`PUT people/self/delete`) SHALL send the caller a confirmation letter and name the caller's address in the answer. The Owner and an LDAP account SHALL get 403. A repeat within the repeat period (see `notifications`) SHALL get the same answer and send no second letter; the first link stays valid.
 
 #### Scenario: Member asks
 
@@ -548,6 +553,11 @@ The accounts-and-groups searches SHALL return an empty list with a zero total wh
 
 - **WHEN** the Owner calls the operation
 - **THEN** the answer is 403 "Access denied"
+
+#### Scenario: Repeated request
+
+- **WHEN** a member calls the operation six times in a row
+- **THEN** every answer holds the caller's email, and one letter goes out
 
 ### Requirement: Deleting a guest's personal folder
 

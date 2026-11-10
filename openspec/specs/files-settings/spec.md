@@ -459,13 +459,19 @@ SHALL be rejected with 400, and `startIndex` has no effect.
 ### Requirement: Revoked primary link stays revoked on read
 
 After a primary link of a folder or file was revoked, except in the rooms that replace it, `getFolderPrimaryExternalLink`
-and `getFilePrimaryExternalLink` SHALL answer 404 instead of creating a new link. `setFileExternalLink` or
-`setFolderPrimaryExternalLink` with `primary` true SHALL create one again and clear this state.
+and `getFilePrimaryExternalLink` SHALL answer 404 instead of creating a new link. The create operations, and
+`setFileExternalLink` or `setFolderPrimaryExternalLink` with `primary` true, SHALL create one with a new id and
+clear this state.
 
 #### Scenario: Read after revocation
 
 - **WHEN** a folder's primary link is revoked with `access` None and then read
 - **THEN** the answer is 404
+
+#### Scenario: Create after revocation
+
+- **WHEN** the primary link of a file or a folder was revoked and `createFilePrimaryExternalLink` or `createFolderPrimaryExternalLink` is called
+- **THEN** the answer is a primary link with a new id, and a following read answers that link
 
 ### Requirement: Setting an external link of a file
 

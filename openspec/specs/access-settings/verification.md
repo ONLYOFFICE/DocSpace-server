@@ -1,5 +1,7 @@
 # access-settings — verification
 
+Revision 2026-11-09 (bb406b409b..6fb013e745)
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement of `spec.md` with where it was checked. Paths are relative to the repo root (`server/`). `yaml` is
@@ -102,9 +104,10 @@ and from the method body where a row needed the request; test line numbers point
 | 402 for an administrator; anonymous `false` without the plan | `Sso:77-96,325-337` | CODE-ONLY |
 | **Single sign-on template and constants** | `S/Sso/SsoReadTests.cs:43,55`; `S/Sso/SsoPermissionsTests.cs:45,59,72,86,99` | TEST-CONFIRMED [run: PASS] |
 | **Saving single sign-on settings** | | |
-| Stored and read back; label cut; type normalised (unrecognised to 4, 1 and 3 kept); empty 400; roles | `S/Sso/SsoSaveTests.cs:47,64,75,88,99`; `S/Sso/SsoPermissionsTests.cs:131,145` | TEST-CONFIRMED [run: PASS] (the four red `SaveSsoSettings_*_ThrowsBadRequest` tests beside them are AC-1) |
-| Invalid configuration answers 500 (scenario "Missing entity ID") | failure text of `SsoSaveTests.SaveSsoSettings_MissingEntityId_ThrowsBadRequest`, `MissingSsoUrl`, `MalformedSloUrl`, `IncompleteFieldMapping` in run 365d87fe60 | CODE-ONLY (the stored settings not changing was not reached) |
-| **Required single sign-on fields** | `Sso:206-226` (thrown before the save at 242). The status is AC-1 to AC-4 | CODE-ONLY |
+| Stored and read back; label cut; type normalised (unrecognised to 4, 1 and 3 kept); empty 400; roles | `S/Sso/SsoSaveTests.cs:47,64,75,88,99`; `S/Sso/SsoPermissionsTests.cs:131,145` | TEST-CONFIRMED [run: PASS] |
+| **Required single sign-on fields** | | |
+| 400 for missing entity ID, SSO URL, field mapping, IdP settings, malformed SLO URL, invalid JSON (f3a52c35dd) | `S/Sso/SsoSaveTests.cs:125,143,161,182,196,210,220` | TEST-CONFIRMED |
+| Stored settings do not change | Checks thrown before the save in `Sso`; no test reads back after a refusal | CODE-ONLY |
 | **Switching single sign-on off** | | |
 | Reset restores defaults; roles | `S/Sso/SsoResetTests.cs:41`; `S/Sso/SsoPermissionsTests.cs:161,175` | TEST-CONFIRMED [run: PASS] |
 | Accounts converted to ordinary | `Sso:247-251,293,300-318` | CODE-ONLY |
@@ -122,6 +125,7 @@ and from the method body where a row needed the request; test line numbers point
 | **Resending the SMS code** | | |
 | 401 in the four cases | `A/SendSmsCodeTests.cs:50,68,85,103` | TEST-CONFIRMED [run: PASS] |
 | 200 body with SMS on | `Auth:590-597`. Not reachable on a test portal | CODE-ONLY |
+| 405 for valid credentials with SMS off (f5f2735e30) | `A/SendSmsCodeTests.cs:146` | TEST-CONFIRMED |
 | **Password reminder for a signed-in caller** | | |
 | Own account and admin for member | `P/PasswordReminderTests.cs:60` with the pairs at :45-55 | TEST-CONFIRMED [run: PASS] |
 | Refused pairs (bug 80157) | `P/PasswordReminderPermissionsTests.cs:57,89` | TEST-CONFIRMED [run: PASS] |
@@ -139,8 +143,6 @@ and from the method body where a row needed the request; test line numbers point
 | `saveMobilePhone` | 200, 401, no 403 | An ordinary token gets 403 (`SaveMobilePhonePermissionsTests.cs:67`) |
 | `getTfaAppCodes`, `updateTfaAppCodes` | no 403 | `Tfa:439-442,481-484` can answer 403 for an outsider account |
 | `authenticateMeFromBodyWithCode`, `sendSmsCode` | 404 for no matching user | With a password, an unknown account gets 401 (`SendSmsCodeTests.cs:68`, `BruteForceLoginManager.cs:162-165`); 404 was not traced to a reachable path |
-| `sendSmsCode` | no entry for SMS being off | Answers 500, see AC-5 |
-| `saveSsoSettingsV2` | Documents 500 for invalid fields | The tests expect 400, see AC-1 to AC-4 |
 | Routes | `settings/security/loginsettings` | Code declares `loginSettings`; tests reach it through the SDK with the yaml spelling |
 
 A comment at `S/Tfa/TfaAuditTrailTests.cs:125` says that disabling two-factor invalidates the session. `Tfa:318-321` resets
@@ -163,11 +165,11 @@ No test was run. "Red by code reading" means the code as read would fail that te
 
 | # | Where | What the server does | Evidence | Evidence kind |
 |---|---|---|---|---|
-| AC-1 | `saveSsoSettingsV2` | No IdP entity ID, no SSO URL, a malformed SLO URL or an incomplete field mapping answers 500; the tests expect 400 (bug 84685) | `SsoSaveTests.cs:111`; `Sso:206-209`; `Wrap` default branch | red test, run 365d87fe60 |
-| AC-2 | `saveSsoSettingsV2` | Missing or invalid SSO URL answers 500; the test expects 400 (bug 84686) | `SsoSaveTests.cs:129`; `Sso:211-214` | red by code reading |
-| AC-3 | `saveSsoSettingsV2` | Incomplete field mapping answers 500; the test expects 400 (bug 84687) | `SsoSaveTests.cs:147`; `Sso:221-226` | red by code reading |
-| AC-4 | `saveSsoSettingsV2` | Malformed SLO URL answers 500; the test expects 400 (bug 84688) | `SsoSaveTests.cs:165`; `Sso:216-219` | red by code reading |
-| AC-5 | `sendSmsCode` | Valid credentials with SMS off for the account answer 500: the thrown exception type has no mapping; the test requires anything but 500 (bug 84503) | `SendSmsCodeTests.cs:125`; `web/ASC.Web.Core/Sms/SmsManager.cs:100-103`; `Wrap` default branch | red by code reading |
+| AC-1 | `saveSsoSettingsV2` | No IdP entity ID, no SSO URL, a malformed SLO URL or an incomplete field mapping answers 500; the tests expect 400 (bug 84685) | `SsoSaveTests.cs:111`; `Sso:206-209`; `Wrap` default branch | FIXED (f3a52c35dd): refused as a bad request; also missing `idpSettings` and invalid JSON |
+| AC-2 | `saveSsoSettingsV2` | Missing or invalid SSO URL answers 500; the test expects 400 (bug 84686) | `SsoSaveTests.cs:129`; `Sso:211-214` | FIXED (f3a52c35dd): refused as a bad request |
+| AC-3 | `saveSsoSettingsV2` | Incomplete field mapping answers 500; the test expects 400 (bug 84687) | `SsoSaveTests.cs:147`; `Sso:221-226` | FIXED (f3a52c35dd): refused as a bad request, missing `fieldMapping` too |
+| AC-4 | `saveSsoSettingsV2` | Malformed SLO URL answers 500; the test expects 400 (bug 84688) | `SsoSaveTests.cs:165`; `Sso:216-219` | FIXED (f3a52c35dd): refused as a bad request |
+| AC-5 | `sendSmsCode` | Valid credentials with SMS off for the account answer 500: the thrown exception type has no mapping; the test requires anything but 500 (bug 84503) | `SendSmsCodeTests.cs:125`; `web/ASC.Web.Core/Sms/SmsManager.cs:100-103`; `Wrap` default branch | FIXED (f5f2735e30): 405 "SMS not available", asserted at `SendSmsCodeTests.cs:146` |
 | AC-6 | `updateTfaSettings` | A numeric `type` outside the known values takes the `None` branch: two-factor is switched off and the answer is 200 false. The test name says the value is ignored; it asserts only false | `TfaSettingsUpdateTests.cs:86`; `Tfa:252,302-315` | by code reading |
 | AC-7 | `getTfaSettings` | No role check: any signed-in role receives `trustedIps`, `mandatoryUsers` and `mandatoryGroups` | `Tfa:80-119`; tests cover only owner and anonymous | by code reading |
 | AC-8 | `updateTfaSettings` | The 403 for naming the owner depends on the `id` field, not on the caller's role. An owner listing themselves in `mandatoryUsers` with no `id` gets 403 | `Tfa:241-246` | by code reading |

@@ -25,8 +25,9 @@ Sources: the integration tests of `web/ASC.Web.Api.Tests` (`04_Portal/Payments`,
 payment controller, the tariff service, the accounting client and the wallet job where the tests stop, the
 runtime configuration, and the release notes (v1.1, v3.1, v3.2, v3.5, v3.6, v3.7, v4.0; v4.1 has none, so its
 changes come from the code and the tests alone). The integration
-host has no billing service, so every operation that needs one answers 403 there and only its
-authentication guard and request validation are test-confirmed; the evidence per scenario, the differences
+host has no billing service, so every operation that needs one answers 403 there; a second suite runs them
+on a hosted stack whose billing, accounting and DocsCloud services are stubs, and confirms their role
+checks and much of their behaviour; the evidence per scenario, the differences
 and the suspected defects are in `verification.md` next to this file.
 
 ## Requirements
@@ -119,7 +120,7 @@ as the quota it switches to. The call keeps answering while the payment has laps
 
 ### Requirement: Payment gate while the portal is not paid
 
-While a portal's tariff is NotPaid the server SHALL answer 402 with no body to every API call except the
+While a portal's tariff is NotPaid the server SHALL answer 402 without a reason to every call except the
 ones allowed without payment: the portal record, `getPortalTariff`, `getUpcomingPayments`, `getPortalQuota`,
 the extra licence information, every `portal/payment/*` operation, `getPaymentSettings`, authentication,
 suspend and delete. It applies only where tariff settings are enabled: a hosted portal, or a self-hosted
@@ -128,7 +129,7 @@ installation with a licence path. During the grace period no gate applies.
 #### Scenario: Lapsed portal lists files
 
 - **WHEN** a member of a NotPaid hosted portal lists a folder
-- **THEN** the system answers 402 and the body is empty
+- **THEN** the system answers 402 and the body carries the status and a trace id but no error message
 
 #### Scenario: Lapsed portal reads its tariff
 
@@ -315,6 +316,17 @@ and catalogue, switching services and buying from the wallet SHALL be open to an
 - **WHEN** a DocSpace admin who is not the payer calls `changeTenantWalletServiceState`
 - **THEN** the system answers 200 and the service is switched
 
+#### Scenario: Payer below DocSpace admin
+
+- **WHEN** the payer is a Room admin or a User
+- **THEN** `updatePayment`, `getSubscriptionBalanceInfo`, `moveSubscriptionToWallet`, `getPaymentAccount`, `topUpDeposit` and `setTenantWalletSettings` let the payer through
+- **AND** `getCheckoutSetupUrl` answers 403 "Access denied", since it also asks for a DocSpace admin
+
+#### Scenario: Owner who does not pay
+
+- **WHEN** the billing customer's e-mail belongs to nobody of the portal and the owner calls a payer operation
+- **THEN** the system answers 403 "Access denied", except `getPaymentAccount`, which the owner may always call
+
 ### Requirement: Contacting the sales team
 
 `sendPaymentRequest` SHALL require a DocSpace admin (403 "Access denied" for a Room admin, a User and a
@@ -337,9 +349,9 @@ the vendor's sales address, write an audit event and answer 200.
 
 `getCustomerBalance` SHALL answer a DocSpace admin (403 otherwise and without a billing service, 401
 anonymous) with the wallet as the accounting service holds it: `accountNumber`, `subAccountNumber`,
-`accountCurrency`, one entry of `subAccounts` per currency with its `amount`, and `lastCredit`; a portal
-that was never a customer gets an empty result. `refresh=true` re-reads accounting. Every wallet service
-is charged against it; an AI charge SHALL reduce it by the debit of its movement.
+`accountCurrency`, one `subAccounts` entry per currency with its `amount`, and `lastCredit`; a portal that
+was never a customer gets an empty result. Every read asks accounting; only a failed read is remembered.
+An AI charge SHALL reduce the balance by the debit of its movement.
 
 #### Scenario: Funded wallet
 
@@ -351,6 +363,16 @@ is charged against it; an AI charge SHALL reduce it by the debit of its movement
 
 - **WHEN** an AI chat reply is produced on a portal with AI tools on
 - **THEN** the balance after the charge is the balance before minus the debit of the `Chat` movement
+
+#### Scenario: Portal that is no customer
+
+- **WHEN** a DocSpace admin calls `getCustomerBalance` on a portal that never became a billing customer
+- **THEN** the system answers with an empty result without asking the accounting service
+
+#### Scenario: Failed read
+
+- **WHEN** the accounting service cannot be reached or does not know the portal
+- **THEN** the answer is an empty result, and for ten minutes later reads answer the same without asking again unless they pass `refresh=true`
 
 ### Requirement: Wallet top-up
 
@@ -374,6 +396,17 @@ payment method it also pushes the balance to the clients and re-arms the low-bal
 
 - **WHEN** the payer sends the same top-up twice
 - **THEN** the wallet is charged twice; above ten requests a minute the caller gets 429
+
+#### Scenario: Charge declined
+
+- **WHEN** billing declines the charge of the payment method
+- **THEN** the system answers `false`, does not try again and does not wait for the wallet to change
+
+#### Scenario: Outcome of the charge unknown
+
+- **WHEN** the billing service fails or its answer to the charge cannot be read
+- **THEN** `topUpDeposit` answers `false` as for a decline, although the charge may have been applied
+- **AND** a top-up the server starts itself to cover a purchase stops there instead of charging again
 
 ### Requirement: Automatic top-up settings
 
@@ -559,6 +592,17 @@ name not sold), `startDate`/`endDate` in the portal time zone, `participantName`
 - **WHEN** `participantName` names nobody
 - **THEN** the system answers 200 with an empty `collection`
 
+#### Scenario: AI paid with the portal's own keys
+
+- **WHEN** `serviceName` is `ai-tools-byok` or `ai-search-byok`
+- **THEN** the name is accepted when its AI service is sold, and each movement reads like its AI service with `byok` true and the AI `provider` that ran it
+- **AND** the operations and usage report files mark those rows "(BYOK)"
+
+#### Scenario: BYOK totals merged
+
+- **WHEN** `getCustomerServiceUsage` is called with `mergeByok=true`
+- **THEN** each BYOK total is added into the total of its AI service, `byok` is false on every row, and the merged list is paged by `offset` and `limit`
+
 #### Scenario: Period without a start
 
 - **WHEN** `getCustomerOperations`, `getCustomerServiceUsage`, `getCustomerMonthlyUsage` or `getCustomerDeposits` is called without `startDate`
@@ -698,6 +742,28 @@ DocSpace admin, a customer and AI tools on (403), and `models` with no null entr
 
 - **WHEN** the owner or a DocSpace admin stores one model id and reads `getRestrictedAiModels`
 - **THEN** `models` equals that one id, and the stored set is replaced as a whole on every write
+
+#### Scenario: Model running on a key of the portal
+
+- **WHEN** the portal has a BYOK key for a model and calls `getAiPrices`
+- **THEN** that model is marked `byok` and priced by the key's provider, or by the built-in provider when the key's provider has no price
+
+### Requirement: Unreadable answers of the payment services
+
+An answer of the billing, accounting or DocsCloud service that cannot be read SHALL NOT be taken for a
+refusal: the operation fails with 500, not 402, and no refusal path (an unpaid portal, a dropped schedule)
+acts on it. A charge, a trial or a renewal whose answer cannot be read SHALL be an unknown outcome instead,
+never retried as if refused. Error messages SHALL name the call, never the service address or portal key.
+
+#### Scenario: Proxy page instead of the answer
+
+- **WHEN** a payment service answers with something that is not its contract, such as an HTML page
+- **THEN** the operation answers 500 and the message names the method and route template of the call only
+
+#### Scenario: Renewal answer unreadable
+
+- **WHEN** the answer to a subscription renewal cannot be read
+- **THEN** the renewal is checked again later and no failure letter is sent
 
 ### Requirement: Paid seats and tariff limits
 

@@ -36,7 +36,8 @@ exists (`updateRoom` has no `roomType` property).
 
 - **WHEN** a room of each type is created
 - **THEN** a Form filling room and a Public room get a primary external link on creation, while a Collaboration, Custom, Virtual Data and AI room do not
-- **AND** a Form filling room lives in the Forms section (`searchArea=Forms`, the Forms root), an AI room in the AI Agents section (`searchArea=AiAgents`), an Instructions, Knowledge or AI project room in the AI rooms section (`searchArea=AiHub`, the AI rooms root, see "Rooms of the AI rooms section") and the other types in the Rooms section (`searchArea=Active`, the Virtual Rooms root)
+- **AND** a Form filling room lives in the Forms section (`searchArea=Forms`, the Forms root), an Instructions, Knowledge or AI project room in the AI rooms section (`searchArea=AiHub`, the AI rooms root, see "Rooms of the AI rooms section") and the other types in the Rooms section (`searchArea=Active`, the Virtual Rooms root) — an AI room created by `createRoom` too: it lands under the Virtual Rooms root, and an agent of the AI Agents section is created by `POST api/2.0/ai/agents` instead (see `ai-agents`)
+- **AND** an AI room and a room of the AI rooms section have no external link, and a request to create one answers 403
 
 #### Scenario: Every type is created with its own value
 
@@ -45,8 +46,9 @@ exists (`updateRoom` has no `roomType` property).
 
 #### Scenario: Unknown or missing room type is rejected
 
-- **WHEN** `createRoom` is called with `roomType` 99999, with `roomType` null or without `roomType`
-- **THEN** the system rejects the request (400)
+- **WHEN** `createRoom` is called with `roomType` 99999, a value between the listed ones (0, 3, 4, 7, 13), with `roomType` null or without `roomType`
+- **THEN** the system rejects the request (400) and creates nothing
+- **AND** an `updateRoom` body that carries `roomType` is rejected (400) and the type stays
 
 #### Scenario: AI room carries chat settings, other types refuse them
 

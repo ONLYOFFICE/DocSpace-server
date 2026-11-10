@@ -2,6 +2,8 @@
 
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
+> Revision 2026-11-09 (bb406b409b..6fb013e745): the repeat check of letters (no letter for a repeat within the period, same answer); the rate limit of the resend and instruction endpoints is gone.
+
 Paths are relative to the repo root. `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml` (working tree of the
 submodule, HEAD `baf28cf`, 2026-11-06). Tests are under `products/ASC.People/Tests/Tests/`, by folder: `P/`
 `01_Profiles`, `T/` `02_UserType`, `S/` `03_UserStatus`, `E/` `04_Email`, `F/` `06_Photos`, `Q/` `08_Search`, `H/`
@@ -67,8 +69,9 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Denied pairs 403 "Access denied" | `E/EmailChangeInstructionsPermissionsTests.cs:42-73` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | `E/EmailChangeInstructionsPermissionsTests.cs:134` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Immediate change versus instructions** | | |
-| Owner on self: 200, sign-in with the new address | `E/EmailChangeInstructionsTests.cs:70-90` | TEST-CONFIRMED [run: PASS] |
+| Owner on self: 200, sign-in with the new address | `E/EmailChangeInstructionsTests.cs:94-120` | TEST-CONFIRMED [run: PASS] |
 | Non-admin only gets a letter; admin path writes the address | `User:1924-1985` | CODE-ONLY |
+| Address switched back and forth by an admin six times: two letters, one per address | `E/EmailChangeInstructionsTests.cs:65-86` | TEST-CONFIRMED |
 | **Validation of an email change** | | |
 | Malformed 400 naming the Email field; unknown 404 message | `E/EmailChangeInstructionsPermissionsTests.cs:86-115` | TEST-CONFIRMED [run: PASS] |
 | Longer than 255 → 400 | `E/EmailChangeInstructionsPermissionsTests.cs:117` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -143,8 +146,9 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Progress `error` empty; terminate succeeds (Owner) | `D/RemoveProgressTests.cs:43-52`; `D/RemoveTerminateTests.cs:44-52` | TEST-CONFIRMED [run: PASS] |
 | admin; non-admin 403; anonymous 401 | `D/RemoveProgressTests.cs:57,73,88`; `D/RemoveTerminateTests.cs:56,70,89` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Asking to delete one's own profile** | | |
-| Member gets own email in the answer; Owner 403 | `D/SendInstructionsToDeleteTests.cs:52-72` | TEST-CONFIRMED [run: PASS] |
+| Member gets own email in the answer; Owner 403 | `D/SendInstructionsToDeleteTests.cs:52-61, 87-97` | TEST-CONFIRMED [run: PASS] |
 | LDAP 403 | `Remove:102-105` | CODE-ONLY |
+| Six calls in a row: each answer holds the email, one letter; no 429 (rate limit removed, `eeaf3b6988`) | `D/SendInstructionsToDeleteTests.cs:63-84` | TEST-CONFIRMED |
 | **Deleting a guest's personal folder** | | |
 | All five types 403 (a fresh Guest has no folder) | `D/DeletePersonalFolderTests.cs:43-62`; `Remove:219-224`; `Queue:147-154` | TEST-CONFIRMED [run: PASS] |
 | A Guest with a folder gets the job | `Remove:224-226`; `common/ASC.Data.Reassigns/DeletePersonalFolderProgressItem.cs:59-117` | CODE-ONLY |

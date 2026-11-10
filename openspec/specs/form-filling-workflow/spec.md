@@ -144,7 +144,7 @@ client's way into and out of filling mode.
 
 `PUT /api/2.0/files/file/{fileId}/startfilling` (`startFillingFile`) SHALL mark a PDF lying directly in a Form
 filling room as started and answer with the file. For any other file it SHALL change nothing and answer the
-file unchanged (200). A caller with no access to the room SHALL be refused (403) unless they can manage the
+file unchanged (200). A caller who cannot read the file SHALL be refused (403), wherever it lies. A caller with no access to the room SHALL be refused (403) unless they can manage the
 room; a member holding only the form-filling right SHALL be refused (403).
 
 #### Scenario: Form in a Form filling room
@@ -154,8 +154,13 @@ room; a member holding only the form-filling right SHALL be refused (403).
 
 #### Scenario: Not a form-room PDF
 
-- **WHEN** `startfilling` is called on a `.docx` in My documents or on a PDF in My documents
+- **WHEN** `startfilling` is called on a `.docx` in My documents or on a PDF in My documents, or by a member with read access on a `.docx` in a Custom room
 - **THEN** the answer is 200 with the file unchanged and no filling properties are written
+
+#### Scenario: File the caller cannot read
+
+- **WHEN** a User calls `startfilling` on a `.docx` or a PDF in another account's My documents
+- **THEN** the answer is 403 and the file is not returned
 
 #### Scenario: Missing file and callers without access
 
@@ -465,20 +470,25 @@ missing parameter is refused (400); an unknown session answers 404.
 ### Requirement: Role-based filling in a Virtual Data Room
 
 In a Virtual Data Room a PDF form SHALL be filled in steps by assigned participants (release notes v3.1).
-`POST /api/2.0/files/file/{fileId}/formrolemapping` (`saveFormRoleMapping`, body `formId` + `roles` of
-`roleName`, `roleColor`, `userId`, `sequence`, `roomId`) SHALL replace the form's role set and start its
-filling; an empty role list resets it. Roles with the same `sequence` are filled in parallel; a
-higher `sequence` waits for every lower one. The file SHALL be a PDF in a room (403).
+`POST /api/2.0/files/file/{fileId}/formrolemapping` (`saveFormRoleMapping`, body `formId` + `roles`) SHALL
+replace the form's role set and start its filling; an empty role list resets it. Each role waits for every role
+sent before it. The file SHALL be a PDF in a room (403).
 
 #### Scenario: Roles assigned
 
 - **WHEN** `formrolemapping` is sent with a non-empty role set
 - **THEN** `startFilling` becomes true, the caller is recorded as the account that started the filling, the "form started to fill" history entry is written, every assigned account is notified and the form is revealed to the members holding only the form-filling right
+- **AND** the roles are numbered in the order sent (`sequence` 1, 2, 3; a `sequence` in the request is ignored, `submitted` is stored as sent)
 
 #### Scenario: Reset with an empty role list
 
-- **WHEN** `formrolemapping` is sent with an empty `roles` array for a configured form
-- **THEN** the roles are removed, the filling properties are dropped and the form returns to the not-configured state
+- **WHEN** `formrolemapping` is sent with an empty `roles` array for a configured form whose filling was stopped
+- **THEN** the roles are removed, the filling properties are dropped and the form returns to the not-configured state, so a new role set can be sent
+
+#### Scenario: New roles while the filling runs
+
+- **WHEN** `formrolemapping` is sent for a started form that was not stopped, with a new role set or with an empty one
+- **THEN** the request is refused (403) and the roles stay as they were
 
 ### Requirement: Form roles listing
 
@@ -537,7 +547,7 @@ forced.
 
 For a PDF opened from My documents, a Public room or any room other than a Form filling room or a Virtual Data
 Room, the editor configuration SHALL offer `startFillingMode` `ShareToFillOut` when the caller may copy the
-document and is signed in, and `startFilling` SHALL be true only for the form's own creator in My documents.
+document and is signed in; in My documents `startFilling` SHALL be true only for the form's own creator.
 The quick-share link with the form-filling right exists in My documents, Form filling rooms and Virtual Data
 Rooms only (`user-type-permissions`).
 
@@ -549,7 +559,7 @@ Rooms only (`user-type-permissions`).
 #### Scenario: Form in a Custom room
 
 - **WHEN** a member opens a PDF form of a Custom room through `openedit`
-- **THEN** the configuration carries `startFillingMode` `ShareToFillOut` and `startFilling` false
+- **THEN** the configuration carries `startFillingMode` `ShareToFillOut` and `startFilling` true (the button is offered; whether a fill link can then be created is the quick-share rule of `user-type-permissions`)
 
 #### Scenario: Fill link refused in other room types
 

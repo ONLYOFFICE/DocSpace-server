@@ -1,5 +1,7 @@
 # shared-links — verification
 
+Revision 2026-11-09 (bb406b409b..6fb013e745)
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
@@ -107,7 +109,7 @@ and R10; the yaml line numbers were refreshed to submodule `5ea4dc6`. D2, D11, D
 | Viewer, Guest Viewer, non-members → 403; anonymous 401; terminated 401 | `RoomLinkPermissionsTests.cs:250-270, 301-359`; `FolderLinkPrimaryPermissionsTests.cs:119-159` | TEST-CONFIRMED [run: PASS] |
 | Editor, Form Filler, Reviewer, Commentator → 403 | same check as the Viewer (`FileSharing.cs:101`) | CODE-ONLY |
 | Primary link of a Custom room: Room manager and Content creator read it; a Viewer (User with Read) → 403; the folder endpoint likewise | `RoomLinkPermissionsTests.cs:98-147`; `03_Rooms/RoomAccessData.cs:88-92`; `FolderLinkPrimaryPermissionsTests.cs:259-276`; `getRoomLinks` for a member without link access → 200 and empty `RoomLinkReadTests.cs:504-520` | TEST-CONFIRMED [run: PASS] |
-| Reading the primary link of a file requires the right to manage links | `FileLinkPrimaryTests.GetPrimaryLink_UserWithoutAccess_AnotherUsersPrivateFile_Returns403` (bug 81572; passes, a no-access caller gets 403) | TEST-CONFIRMED [run: PASS] (the red `CreatePrimaryLink_AfterThePrimaryLinkWasRevoked_CreatesItAgain` beside it is R10) |
+| Reading the primary link of a file requires the right to manage links | `FileLinkPrimaryTests.GetPrimaryLink_UserWithoutAccess_AnotherUsersPrivateFile_Returns403` (bug 81572; passes, a no-access caller gets 403) | TEST-CONFIRMED [run: PASS] (`CreatePrimaryLink_AfterThePrimaryLinkWasRevoked_CreatesItAgain` beside it, R10, is fixed by 62419af921) |
 | Non-member DocSpace admin reads the Public room's primary link (200) and cannot create a link there (403) | `RoomLinkPermissionsTests.cs:62-77, 250-270` | TEST-CONFIRMED [run: PASS] |
 
 Counts: 47 rows — TEST-CONFIRMED 26, CODE-ONLY 16, LIVE-CONFIRMED 5, MATRIX-ONLY 0. Spec: 7 requirements,
@@ -135,7 +137,8 @@ field itself.
   GET answers 404** (`RoomLinkPrimaryTests.cs:209-230`; `RoomShareTests.cs:474-557, 643-673, 727-758`;
   `FolderLinkPrimarySetTests.cs:187-215`, bug 81807): link lifecycle, `room-types` ("Public room" primary
   link) and `file-sharing`. Two tests added in 4.1.0 assert the opposite for the revocation the client sends
-  (R9, R10 below); until they are green the "stays revoked" behaviour is what the server does.
+  (R9, R10 below). Since `62419af921` an explicit `createFilePrimaryExternalLink` / `createFolderPrimaryExternalLink`
+  makes a new primary link after a revocation (R10 fixed, `files-settings`); the read still answers 404.
 - **Past or malformed expiration silently ignored** (`RoomLinkUpdateTests.cs:155-191`;
   `RoomLinkValidationTests.cs:295-319`; `FolderLinkPrimarySetTests.cs:333-351`); **unknown link id is an
   upsert**; **link type cannot be changed**; **missing type defaults to invitation**; **missing access creates
@@ -171,4 +174,4 @@ D-numbers are the ones of `openspec/deviations.md`; R-numbers are new.
 | R7 | Roles that manage links | `getFilePrimaryExternalLink` answers 200 to a caller without access to the file instead of 403; `POST folder/{id}/link` answers 200 with an empty list to a Content creator, a Viewer, a non-member admin, a Guest, and on an archived room instead of 403. | `FileLinkPrimaryTests.cs:189-210` (bug 81572, red); `FolderLinkCreateTests.cs:271-421` (bug 81575, red) | NOT REPRODUCED in run 365d87fe60: the test of bug 81572 and all of `FolderLinkCreateTests` (bug 81575) pass; no fixing commit identified, the "currently answers 200" remarks are stale |
 | R8 | Link count limits | The link-limit refusal is produced as the operation's *warning* with the entry skipped, not as an exception; the observed 403 depends on the caller turning the warning into an error. Invalid link type or access answers 403 instead of 400. | `FileSharing.cs:379-381`; `RoomLinkValidationTests.cs:235, 258` (bugs 82370, 82371) | STILL OPEN (2026-11-04: the warning path and the tests are unchanged) |
 | R9 | Custom room primary link | Revoking a Custom room's primary link with the body the client sends (`setRoomLink` with `access` 0 and no `primary` field) leaves `getRoomsPrimaryExternalLink` at 404 for good; the TypeScript suite found that a revocation carrying `primary:true` lets the link be minted again, so the outcome hinges on a field the request does not need. The new test asserts that the primary link is readable again after that revocation. | `03_Rooms/Links/RoomLinkPrimaryTests.cs:233-261` (bug 84873, Category Bug, red: no fix commit in the range or after it) | OPEN — red test, run 365d87fe60 (404 "The required file was not found") |
-| R10 | File primary link | Once a file's primary link has been revoked, `createFilePrimaryExternalLink` (the "create external link" button) answers 404 for that file from then on, while a new primary link can still be made through `setFileExternalLink`; the new test asserts that the POST mints a new primary link with a new id. | `01_Files/Links/FileLinkPrimaryTests.cs:212-241` (bug 84872, Category Bug, red: no fix commit in the range or after it) | OPEN — red test, run 365d87fe60 (404 "The required file was not found") |
+| R10 | File primary link | Once a file's primary link has been revoked, `createFilePrimaryExternalLink` (the "create external link" button) answers 404 for that file from then on, while a new primary link can still be made through `setFileExternalLink`; the new test asserts that the POST mints a new primary link with a new id. | `01_Files/Links/FileLinkPrimaryTests.cs:212-242` (bug 84872) | FIXED (62419af921): the create request ignores the revocation mark; new id asserted at `FileLinkPrimaryTests.cs:239`, the read at `:242`; the folder twin at `02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` |

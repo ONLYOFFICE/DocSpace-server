@@ -103,8 +103,13 @@ public class FileVersionInfoPermissionsTests(
         versions.Should().NotBeEmpty();
     }
 
+    /// <summary>
+    /// H2: an anonymous caller is answered with 403 instead of 401, because the security failure is
+    /// raised as <c>InvalidOperationException</c> inside <c>FileStorageService.GetFileHistoryAsync</c>.
+    /// </summary>
     [Fact]
-    public async Task GetFileVersionInfo_Unauthenticated_Returns403()
+    [Trait("Category", "Bug")]
+    public async Task GetFileVersionInfo_Unauthenticated_Returns401()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -116,7 +121,7 @@ public class FileVersionInfoPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.GetFileVersionInfoAsync(file.Id, TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]

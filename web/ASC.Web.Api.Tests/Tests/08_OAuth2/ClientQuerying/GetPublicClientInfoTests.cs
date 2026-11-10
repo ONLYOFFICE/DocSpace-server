@@ -112,8 +112,8 @@ public class GetPublicClientInfoTests(
         info.ClientId.Should().Be(clientId);
     }
 
-    // TS ported this as test.fail("BUG 81728"): a non-existent client should be refused with 404,
-    // the same as every other lookup in this suite, not silently succeed.
+    // TS ported this as test.fail("BUG 81728"): a non-existent client was not refused with 404;
+    // it now is, the same as every other lookup in this suite (green 2026-11-10).
     [Trait("Bug", "81728")]
     [Fact]
     public async Task GetPublicClientInfo_NonExistentClientId_ThrowsNotFound()

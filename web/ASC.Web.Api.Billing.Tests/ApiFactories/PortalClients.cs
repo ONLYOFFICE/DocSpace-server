@@ -43,22 +43,26 @@ public sealed class PortalClients : PortalClientsBase
 
     // People service - members for the role tests
     public ProfilesApi ProfilesApi { get; }
+    public DocSpace.API.SDK.Api.People.QuotaApi PeopleQuotaApi { get; }
 
     // WebApi service
     public PaymentApi PaymentApi { get; }
     public PortalQuotaApi PortalQuotaApi { get; }
     public DocsCloudApi DocsCloudApi { get; }
     public CommonSettingsApi CommonSettingsApi { get; }
+    public DocSpace.API.SDK.Api.Settings.QuotaApi SettingsQuotaApi { get; }
 
     public PortalClients(PortalContext context) : base(context)
     {
         PeopleHttpClient = CreateClient(ResourceNames.People);
         ProfilesApi = new ProfilesApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
+        PeopleQuotaApi = new DocSpace.API.SDK.Api.People.QuotaApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         PaymentApi = new PaymentApi(WebApiHttpClient, webApiConfig);
         PortalQuotaApi = new PortalQuotaApi(WebApiHttpClient, webApiConfig);
         DocsCloudApi = new DocsCloudApi(WebApiHttpClient, webApiConfig);
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
+        SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(WebApiHttpClient, webApiConfig);
     }
 }

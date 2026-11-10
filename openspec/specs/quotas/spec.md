@@ -227,14 +227,18 @@ SHALL be refused (403, see `room-types`).
 
 `setTenantQuotaSettings` SHALL set the storage quota of one tenant of a self-hosted installation
 (`tenantId`, `quota` in bytes; negative removes the limit). It SHALL require the portal-settings right and
-the `statistic` feature (402) and SHALL be refused on a hosted portal or for a caller below DocSpace admin
-(415). The change is announced to the DocSpace admins and audited. While on, the quota SHALL cap every write
+the `statistic` feature (402); a hosted portal SHALL be refused (415). The change is announced to the DocSpace admins and audited. While on, the quota SHALL cap every write
 (soft overrun below twice) and every quota set afterwards.
 
 #### Scenario: Owner caps the portal of a test host
 
 - **WHEN** the owner calls `setTenantQuotaSettings` with the portal's own `tenantId` and 1 MB
 - **THEN** the system answers 200, the DocSpace admins receive `change-user-quota-used-value`, and a per-user quota of 100 MB is refused afterwards with 400 — the portal quota caps every default and custom quota (user, room, AI agent) set after it
+
+#### Scenario: Caller without the right, and a hosted portal
+
+- **WHEN** a Room admin or a User calls `setTenantQuotaSettings`, or the owner of a hosted portal whose plan has `statistic` calls it
+- **THEN** the caller is refused with 403, and the hosted portal with 415 "Not available."
 
 #### Scenario: Write above twice the portal quota
 
@@ -299,6 +303,17 @@ signed-in caller but grade its answer by role.
 - **WHEN** the owner calls `getPortalQuota` and `getRightQuota`
 - **THEN** the allowance carries `maxTotalSize`, `maxFileSize`, `countRoom`, `countUser`, `countPaidUser`, `countRoomAdmin` and the feature flags
 - **AND** the recommendation is the cheapest monthly quota whose user allowance exceeds the active account count and whose storage allowance exceeds the used space — always empty on a host without a tariff catalogue
+
+#### Scenario: Startup plan of a hosted portal
+
+- **WHEN** the owner or a DocSpace admin calls `getPortalQuota` on a new hosted portal that has paid nothing
+- **THEN** the allowance is the free Startup plan: 2 GiB of storage, 3 administrators, 12 rooms, `free` true and the paid features (audit, SSO, branding, content search, backup, AI tools) off
+- **AND** after a payment for ten administrator units it is that paid plan, not free, with `countRoomAdmin` 10 and audit, SSO and content search on
+
+#### Scenario: Recommendation on a hosted portal
+
+- **WHEN** the owner or a DocSpace admin calls `getRightQuota` on a hosted portal
+- **THEN** a portal on the free plan gets a visible monthly paid plan, and a portal on a paid plan gets one no dearer, with no more storage and no more administrators than the plan it pays for
 
 #### Scenario: Statistics are refused to other roles
 
@@ -393,6 +408,11 @@ spending limit (`billing`, "Spending limits on the AI services").
 
 - **WHEN** the number of rooms equals `countRoom` and a room is created, copied or restored from the archive
 - **THEN** the operation is refused with 402 "The number of rooms should not exceed <limit>"
+
+#### Scenario: Member added directly above the paid limit
+
+- **WHEN** the paid-user limit is reached and an administrator adds a member with `POST api/2.0/people` and the Room admin or DocSpace admin type
+- **THEN** the member is not refused: the account is created with the User type instead
 
 #### Scenario: Bulk invitation and a lapsed tariff
 

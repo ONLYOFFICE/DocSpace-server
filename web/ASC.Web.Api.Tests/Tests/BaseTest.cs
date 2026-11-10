@@ -43,6 +43,9 @@ public class BaseTest(
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    /// <summary>The client bundle of this test's portal, for the harness calls that take one (<c>CreateApiSystemClient</c>).</summary>
+    protected PortalClients Clients => _clients;
+
     /// <summary>The id of this test's own portal.</summary>
     protected int TenantId => _clients.TenantId;
 
