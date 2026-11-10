@@ -132,6 +132,9 @@ public static class Constants
     // (migration:maxExtractedSize, set in ProjectConfigurator). The test portals run on an unlimited quota, which sets
     // no limit of its own, so without it MigrationSizeLimitTests would have to unpack gigabytes to reach one.
     public const long MigrationTestMaxExtractedSize = 64L * 1024 * 1024;
+    // migration:maxExtractedEntries of the same profile: the most entries such a backup may hold, low enough that
+    // MigrationSizeLimitTests reach it with an archive of a few kilobytes.
+    public const long MigrationTestMaxExtractedEntries = 1000;
 
     // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
     // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,

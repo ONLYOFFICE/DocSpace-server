@@ -221,75 +221,36 @@ public class NextcloudWorkspaceMigrator : Migrator
         return file.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
     }
 
+    // the archive lies in TmpFolder itself, next to what it unpacks to: a file that was there before the extraction
+    // (the uploaded archive) is never replaced
     private async Task<bool> ExtractZipAsync(bool reportProgress)
     {
-        double progress = 5;
-        // a path met twice in one archive keeps the later entry, as unzip and tar do; a file that was there before
-        // the extraction (the uploaded archive, a tree unpacked by the parse) is never replaced
-        var written = new HashSet<string>();
         await using var archive = await ZipFile.OpenReadAsync(_takeout, _cancellationToken);
-        foreach (var entry in archive.Entries)
+        var extracted = await ExtractZipAsync(archive, TmpFolder, async (number, count) =>
         {
             if (reportProgress)
             {
-                progress += 45d / archive.Entries.Count;
-                await ReportUnzippingAsync(progress);
+                await ReportUnzippingAsync(5 + 45d * number / count);
             }
-            var destPath = GetSafeExtractPath(TmpFolder, entry.FullName);
-            if (string.IsNullOrEmpty(entry.Name))
-            {
-                Directory.CreateDirectory(destPath);
-            }
-            else
-            {
-                var dir = Path.GetDirectoryName(destPath);
-                if (!Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
-                await using var entryStream = await entry.OpenAsync(_cancellationToken);
-                await ExtractEntryAsync(entryStream, destPath, !written.Add(destPath), _cancellationToken);
-            }
-            if (_cancellationToken.IsCancellationRequested && reportProgress)
-            {
-                return false;
-            }
-        }
-        return true;
+        }, _cancellationToken);
+
+        return extracted || !reportProgress;
     }
 
     private async Task<bool> ExtractTarGzAsync(bool reportProgress)
     {
         await using var fileStream = File.OpenRead(_takeout);
         await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
-        await using var reader = new TarReader(gzipStream);
-        // as in ExtractZipAsync: a repeated path keeps the later entry, a file that was there before is never replaced
-        var written = new HashSet<string>();
-        while (await reader.GetNextEntryAsync(cancellationToken: _cancellationToken) is { } entry)
+        var extracted = await ExtractTarAsync(gzipStream, TmpFolder, false, async () =>
         {
             if (reportProgress)
             {
                 // a gzip stream has no entry count up front, so progress follows the compressed bytes read
                 await ReportUnzippingAsync(5 + 45d * fileStream.Position / fileStream.Length);
             }
+        }, _cancellationToken);
 
-            // symbolic and hard links are skipped: their target may lie outside the extraction folder
-            if (entry.EntryType == TarEntryType.Directory)
-            {
-                Directory.CreateDirectory(GetSafeExtractPath(TmpFolder, entry.Name));
-            }
-            else if (entry.EntryType is TarEntryType.RegularFile or TarEntryType.V7RegularFile or TarEntryType.ContiguousFile)
-            {
-                var destPath = GetSafeExtractPath(TmpFolder, entry.Name);
-                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-                await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, !written.Add(destPath), _cancellationToken);
-            }
-            if (_cancellationToken.IsCancellationRequested && reportProgress)
-            {
-                return false;
-            }
-        }
-        return true;
+        return extracted || !reportProgress;
     }
 
     private void DbExtractGroup(string dbFile)

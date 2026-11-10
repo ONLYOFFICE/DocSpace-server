@@ -143,8 +143,9 @@ public class ProjectConfigurator(
                 // and an honest shutdown takes ~0.5 s, so this only trims the hang.
                 .WithEnvironment("shutdownTimeoutSeconds", "3")
 
-                // A small ceiling for unpacking migration backups, see Constants.MigrationTestMaxExtractedSize.
+                // Small ceilings for unpacking migration backups, see Constants.MigrationTestMaxExtractedSize and MigrationTestMaxExtractedEntries.
                 .WithEnvironment("migration:maxExtractedSize", Constants.MigrationTestMaxExtractedSize.ToString(CultureInfo.InvariantCulture))
+                .WithEnvironment("migration:maxExtractedEntries", Constants.MigrationTestMaxExtractedEntries.ToString(CultureInfo.InvariantCulture))
 
                 // Without an absolute authority IdentityClient calls {ServerRootPath}/api/2.0/oauth2/, the
                 // portal's own host on the calling service's port: <alias>.docspace.localhost, which Windows

@@ -141,7 +141,9 @@ public class MigrationOperation : DistributedTaskProgress
             }
 
             // The check above sees only the compressed upload, so the migrator also bounds what it unpacks.
-            migrator.MaxExtractedSize = GetMaxExtractedSize(scope.ServiceProvider.GetRequiredService<IConfiguration>(), maxTotalSize);
+            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            migrator.MaxExtractedSize = GetMaxExtractedSize(configuration, maxTotalSize);
+            migrator.MaxExtractedEntries = GetMaxExtractedEntries(configuration);
 
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
@@ -214,6 +216,21 @@ public class MigrationOperation : DistributedTaskProgress
         return Math.Min(
             maxExtractedSize > 0 ? maxExtractedSize : long.MaxValue,
             maxTotalSize > 0 ? maxTotalSize : long.MaxValue);
+    }
+
+    /// <summary>
+    /// The most entries an uploaded backup may hold when <c>migration:maxExtractedEntries</c> is not configured.
+    /// </summary>
+    public const long DefaultMaxExtractedEntries = 1_000_000;
+
+    /// <summary>
+    /// The most entries - files, folders, links - the uploaded backup may hold: <c>migration:maxExtractedEntries</c>, or
+    /// <see cref="DefaultMaxExtractedEntries"/> when unset. Zero or a negative value sets no limit.
+    /// </summary>
+    public static long GetMaxExtractedEntries(IConfiguration configuration)
+    {
+        var maxExtractedEntries = configuration.GetValue("migration:maxExtractedEntries", DefaultMaxExtractedEntries);
+        return maxExtractedEntries > 0 ? maxExtractedEntries : long.MaxValue;
     }
 
     public static string GetMigrationFolderCacheKey(int tenantId)

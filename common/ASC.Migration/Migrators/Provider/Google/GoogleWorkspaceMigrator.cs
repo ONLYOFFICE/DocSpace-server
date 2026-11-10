@@ -123,33 +123,16 @@ public class GoogleWorkspaceMigrator : Migrator
             {
                 await using (var archive = await ZipFile.OpenReadAsync(takeout, _cancellationToken))
                 {
-                    var unpacked = 0;
-                    foreach (var entry in archive.Entries)
+                    var extracted = await ExtractZipAsync(archive, tmpFolder, async (number, count) =>
                     {
                         if (reportProgress)
                         {
-                            await ReportUnzippingAsync(takeoutProgress + progressStep * ++unpacked / archive.Entries.Count, takeoutStatus);
+                            await ReportUnzippingAsync(takeoutProgress + progressStep * number / count, takeoutStatus);
                         }
-
-                        var destPath = GetSafeExtractPath(tmpFolder, entry.FullName);
-                        if (string.IsNullOrEmpty(entry.Name))
-                        {
-                            Directory.CreateDirectory(destPath);
-                        }
-                        else
-                        {
-                            var dir = Path.GetDirectoryName(destPath);
-                            if (!Directory.Exists(dir))
-                            {
-                                Directory.CreateDirectory(dir);
-                            }
-                            await using var entryStream = await entry.OpenAsync(_cancellationToken);
-                            await ExtractEntryAsync(entryStream, destPath, false, _cancellationToken);
-                        }
-                        if (_cancellationToken.IsCancellationRequested && reportProgress)
-                        {
-                            return null;
-                        }
+                    }, _cancellationToken);
+                    if (!extracted && reportProgress)
+                    {
+                        return null;
                     }
                 }
                 var rootFolder = Path.Combine(tmpFolder, "Takeout");

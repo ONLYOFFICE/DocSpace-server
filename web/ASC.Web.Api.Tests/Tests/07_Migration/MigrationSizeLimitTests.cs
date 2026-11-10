@@ -39,7 +39,9 @@ namespace ASC.Web.Api.Tests.Tests._07_Migration;
 /// limit is enforced while the backup is unpacked and the parse fails with the "backup is larger"
 /// error. The test portals have an unlimited quota, so the limit here is the
 /// <c>migration:maxExtractedSize</c> ceiling of the integration-test profile; the entry is a run of
-/// zeros one megabyte over it, which compresses to well under a megabyte.
+/// zeros one megabyte over it, which compresses to well under a megabyte. The byte limit does not see
+/// directories and empty files, so the number of entries is limited too, by
+/// <c>migration:maxExtractedEntries</c>; an archive of one entry more than that fails the same way.
 /// </summary>
 [Trait("Category", "Migration")]
 public class MigrationSizeLimitTests(
@@ -47,6 +49,7 @@ public class MigrationSizeLimitTests(
     : MigrationParseTestBase(fixture)
 {
     private const long MaxExtractedSize = ASC.AppHost.Configuration.Constants.MigrationTestMaxExtractedSize;
+    private const long MaxExtractedEntries = ASC.AppHost.Configuration.Constants.MigrationTestMaxExtractedEntries;
     private const string LargeBackupError = "larger than the total size of the portal";
 
     /// <summary>
@@ -107,6 +110,105 @@ public class MigrationSizeLimitTests(
         status.IsCompleted.Should().BeTrue();
         status.Error.Should().Contain(LargeBackupError);
         status.ParseResult.FailedArchives.Should().Equal("takeout.zip");
+    }
+
+    /// <summary>
+    /// A small .tar.gz of empty directories passes the byte limit however many it holds; the entry
+    /// limit stops it, so it cannot exhaust inodes or keep the parse busy.
+    /// </summary>
+    [Fact]
+    public async Task Parse_NextcloudTarGzWithTooManyEntries_FailsWithLargeBackup()
+    {
+        // Arrange
+        await UploadBackupAsync("backup.tar.gz", BuildEmptyEntriesTarGz("nextcloud/data/alice/files/"));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().Contain(LargeBackupError);
+        status.ParseResult.FailedArchives.Should().Equal("backup.tar.gz");
+    }
+
+    [Fact]
+    public async Task Parse_NextcloudZipWithTooManyEntries_FailsWithLargeBackup()
+    {
+        // Arrange
+        await UploadBackupAsync("backup.zip", BuildEmptyEntriesZip("nextcloud/data/alice/files/"));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().Contain(LargeBackupError);
+        status.ParseResult.FailedArchives.Should().Equal("backup.zip");
+    }
+
+    [Fact]
+    public async Task Parse_WorkspaceBackupWithTooManyEntries_FailsWithLargeBackup()
+    {
+        // Arrange
+        await UploadBackupAsync("backup.tar.gz", BuildEmptyEntriesTarGz("extra/"));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Workspace", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().Contain(LargeBackupError);
+        status.ParseResult.FailedArchives.Should().Equal("backup.tar.gz");
+    }
+
+    [Fact]
+    public async Task Parse_GoogleTakeoutWithTooManyEntries_FailsWithLargeBackup()
+    {
+        // Arrange
+        await UploadBackupAsync("takeout.zip", BuildEmptyEntriesZip("Takeout/Drive/"));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("GoogleWorkspace", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().Contain(LargeBackupError);
+        status.ParseResult.FailedArchives.Should().Equal("takeout.zip");
+    }
+
+    /// <summary>One empty file more than the entry limit allows.</summary>
+    private static byte[] BuildEmptyEntriesZip(string prefix)
+    {
+        using var buffer = new MemoryStream();
+        using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            for (var i = 0; i <= MaxExtractedEntries; i++)
+            {
+                zip.CreateEntry($"{prefix}{i}.txt");
+            }
+        }
+
+        return buffer.ToArray();
+    }
+
+    /// <summary>One empty directory more than the entry limit allows.</summary>
+    private static byte[] BuildEmptyEntriesTarGz(string prefix)
+    {
+        using var buffer = new MemoryStream();
+        using (var gzip = new GZipStream(buffer, CompressionLevel.Optimal, leaveOpen: true))
+        using (var tar = new TarWriter(gzip))
+        {
+            for (var i = 0; i <= MaxExtractedEntries; i++)
+            {
+                tar.WriteEntry(new PaxTarEntry(TarEntryType.Directory, $"{prefix}{i}/"));
+            }
+        }
+
+        return buffer.ToArray();
     }
 
     private static byte[] BuildZeroZip(string entryName)

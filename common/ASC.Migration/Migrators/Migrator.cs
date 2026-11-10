@@ -138,9 +138,17 @@ public abstract class Migrator(
     /// </summary>
     public long MaxExtractedSize { get; set; } = long.MaxValue;
 
-    private long _extractedSize;
+    /// <summary>
+    /// The most entries the uploaded archives may hold, set by the operation from <c>migration:maxExtractedEntries</c>.
+    /// The byte limit does not see directories, empty files or the entry headers, which compress to a few bytes
+    /// each, so an archive of millions of empty entries would pass it and exhaust inodes, CPU and memory.
+    /// </summary>
+    public long MaxExtractedEntries { get; set; } = long.MaxValue;
 
-    protected void CountExtractedSize(long length)
+    private long _extractedSize;
+    private long _extractedEntries;
+
+    private void CountExtractedSize(long length)
     {
         _extractedSize += length;
         if (_extractedSize > MaxExtractedSize)
@@ -149,11 +157,97 @@ public abstract class Migrator(
         }
     }
 
+    private void CountExtractedEntries(long count)
+    {
+        _extractedEntries += count;
+        if (_extractedEntries > MaxExtractedEntries)
+        {
+            throw new LargeBackupException(MigrationResource.LargeBackup);
+        }
+    }
+
+    /// <summary>
+    /// Unpacks a zip archive into <paramref name="root"/>, counting its entries and the bytes written against the limits.
+    /// A path met twice in the archive keeps the later entry, as unzip does; a file that was there before the extraction
+    /// is never replaced. <paramref name="onEntry"/> is called before each entry with its 1-based number and the entry count.
+    /// </summary>
+    /// <returns><see langword="false"/> when <paramref name="cancellationToken"/> stopped the extraction.</returns>
+    protected async Task<bool> ExtractZipAsync(ZipArchive archive, string root, Func<int, int, Task> onEntry, CancellationToken cancellationToken)
+    {
+        // the central directory lists every entry up front, so an archive of too many is refused before anything is written
+        var count = archive.Entries.Count;
+        CountExtractedEntries(count);
+
+        var written = new HashSet<string>();
+        var number = 0;
+        foreach (var entry in archive.Entries)
+        {
+            await onEntry(++number, count);
+
+            var destPath = GetSafeExtractPath(root, entry.FullName);
+            if (string.IsNullOrEmpty(entry.Name))
+            {
+                Directory.CreateDirectory(destPath);
+            }
+            else
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                await using var entryStream = await entry.OpenAsync(cancellationToken);
+                await ExtractEntryAsync(entryStream, destPath, !written.Add(destPath), cancellationToken);
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Unpacks a tar stream into <paramref name="root"/>, counting its entries and the bytes written against the limits.
+    /// A path met twice in the archive keeps the later entry, as tar does. Symbolic and hard links are skipped: their
+    /// target may lie outside the extraction folder. With <paramref name="replaceExisting"/> a file that was there before
+    /// the extraction is replaced rather than refused. <paramref name="onEntry"/> is called before each entry.
+    /// </summary>
+    /// <returns><see langword="false"/> when <paramref name="cancellationToken"/> stopped the extraction.</returns>
+    protected async Task<bool> ExtractTarAsync(Stream tarStream, string root, bool replaceExisting, Func<Task> onEntry, CancellationToken cancellationToken)
+    {
+        await using var reader = new TarReader(tarStream, leaveOpen: true);
+        var written = new HashSet<string>();
+        while (await reader.GetNextEntryAsync(cancellationToken: cancellationToken) is { } entry)
+        {
+            // a tar has no entry count up front, so the entries are counted as they come
+            CountExtractedEntries(1);
+            await onEntry();
+
+            if (entry.EntryType == TarEntryType.Directory)
+            {
+                Directory.CreateDirectory(GetSafeExtractPath(root, entry.Name));
+            }
+            else if (entry.EntryType is TarEntryType.RegularFile or TarEntryType.V7RegularFile or TarEntryType.ContiguousFile)
+            {
+                var destPath = GetSafeExtractPath(root, entry.Name);
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                var repeated = !written.Add(destPath);
+                await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, replaceExisting || repeated, cancellationToken);
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// Writes an archive entry to a new file, counting the bytes actually written rather than the size the archive declares.
     /// With <paramref name="overwrite"/> the file may already exist and is replaced; its bytes are counted again.
     /// </summary>
-    protected async Task ExtractEntryAsync(Stream source, string destPath, bool overwrite, CancellationToken cancellationToken)
+    private async Task ExtractEntryAsync(Stream source, string destPath, bool overwrite, CancellationToken cancellationToken)
     {
         await using var target = new FileStream(destPath, overwrite ? FileMode.Create : FileMode.CreateNew, FileAccess.Write);
         var buffer = new byte[81920];

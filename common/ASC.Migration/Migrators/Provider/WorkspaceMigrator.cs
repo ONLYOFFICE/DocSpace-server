@@ -143,29 +143,17 @@ public class WorkspaceMigrator : Migrator
         await using var file = File.OpenRead(_backup);
         // the same test DataOperatorFactory.GetReadOperator uses to pick a gzipped or a plain tar
         await using var gzip = _backup.EndsWith("tar.gz") ? new GZipStream(file, CompressionMode.Decompress, leaveOpen: true) : null;
-        await using var reader = new TarReader(gzip ?? (Stream)file, leaveOpen: true);
-        while (await reader.GetNextEntryAsync(cancellationToken: cancellationToken) is { } entry)
+
+        // files are replaced, not refused, as the shared read operator does: the parse that precedes a migration leaves
+        // its unpacked folder behind, and the migration parses the backup again into the same place
+        await ExtractTarAsync(gzip ?? (Stream)file, folder, true, async () =>
         {
             if (reportProgress)
             {
                 // unpacking has the 5-30% share; a tar has no entry count up front, so progress follows the file bytes read
                 await ReportUnzippingAsync(5 + 25d * file.Position / file.Length);
             }
-
-            // symbolic and hard links are skipped: their target may lie outside the extraction folder
-            if (entry.EntryType == TarEntryType.Directory)
-            {
-                Directory.CreateDirectory(GetSafeExtractPath(folder, entry.Name));
-            }
-            else if (entry.EntryType is TarEntryType.RegularFile or TarEntryType.V7RegularFile or TarEntryType.ContiguousFile)
-            {
-                var destPath = GetSafeExtractPath(folder, entry.Name);
-                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
-                // replaced, not refused, as the shared read operator does: the parse that precedes a migration leaves
-                // its unpacked folder behind, and the migration parses the backup again into the same place
-                await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, true, cancellationToken);
-            }
-        }
+        }, cancellationToken);
 
         return new FolderReadOperator(folder, cancellationToken);
     }

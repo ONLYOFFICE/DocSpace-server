@@ -35,8 +35,8 @@ namespace ASC.Web.Api.Tests.Tests._07_Migration;
 
 /// <summary>
 /// The limits the migration operation puts on what an uploaded backup may unpack to. The integration-test profile
-/// configures <c>migration:maxExtractedSize</c> for the whole stack, so what a deployment gets without that setting
-/// is checked here, on the method the operation reads it through.
+/// configures <c>migration:maxExtractedSize</c> and <c>migration:maxExtractedEntries</c> for the whole stack, so what a deployment gets without that setting
+/// is checked here, on the methods the operation reads them through.
 /// </summary>
 [Trait("Category", "Migration")]
 public class MigrationExtractionLimitsTests
@@ -88,5 +88,23 @@ public class MigrationExtractionLimitsTests
 
         // Assert
         maxExtractedSize.Should().Be(2048);
+    }
+
+    /// <summary>
+    /// The byte limit does not see directories or empty files, so the number of entries has a finite ceiling of
+    /// its own when the deployment configures none.
+    /// </summary>
+    [Fact]
+    public void GetMaxExtractedEntries_NotConfigured_IsFinite()
+    {
+        // Arrange
+        var configuration = new ConfigurationBuilder().Build();
+
+        // Act
+        var maxExtractedEntries = ASC.Migration.Core.MigrationOperation.GetMaxExtractedEntries(configuration);
+
+        // Assert
+        maxExtractedEntries.Should().Be(ASC.Migration.Core.MigrationOperation.DefaultMaxExtractedEntries);
+        maxExtractedEntries.Should().BeLessThan(long.MaxValue);
     }
 }
