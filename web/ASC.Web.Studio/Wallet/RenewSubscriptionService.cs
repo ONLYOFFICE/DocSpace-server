@@ -217,7 +217,9 @@ public class RenewSubscriptionService(
         {
             // However the renewal ended in this process, it is over: only a process that stops half-way leaves its
             // claim behind. An interrupted one billing could not tell anything about goes back as it was read, with
-            // the time and the attempts its limits are counted from.
+            // the time and the attempts its limits are counted from - not as it was claimed: a wait has not got to the
+            // money, so it is no attempt, and the claim's fresh time would start the wait for billing anew on every
+            // run, which would then never end.
             await ReleaseInJournalAsync(claimed, waitsForBilling ? data : null);
         }
     }
@@ -244,6 +246,12 @@ public class RenewSubscriptionService(
 
         // whether the tariff row is no longer the one the renewal was queued for
         var outdated = false;
+
+        // Whether the subscription is not to be renewed any more: the renewal was switched off, the tariff is overdue,
+        // the scheduled quota is unknown. A renewal that paid nothing ends right there. One a stopped process may have
+        // paid goes on to billing first: if the payment was applied, it is put on record all the same - only the
+        // renewal itself, and the failure letter, are left out.
+        var notToRenew = false;
 
         if (resumed)
         {
@@ -293,7 +301,12 @@ public class RenewSubscriptionService(
 
             if (data.NextQuantity is <= 0)
             {
-                return false;
+                if (!resumed)
+                {
+                    return false;
+                }
+
+                notToRenew = true;
             }
 
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
@@ -302,7 +315,12 @@ public class RenewSubscriptionService(
 
             if (currentTariff.State > TariffState.Paid && walletQuota.Additional)
             {
-                return false;
+                if (!resumed)
+                {
+                    return false;
+                }
+
+                notToRenew = true;
             }
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
@@ -313,7 +331,15 @@ public class RenewSubscriptionService(
             if (data.NextQuota is { } nextQuotaId && !_walletQuotas.TryGetValue(nextQuotaId, out targetQuota))
             {
                 logger.ErrorRenewSubscriptionServiceUnknownNextQuota(data.TenantId, nextQuotaId);
-                return false;
+
+                if (!resumed)
+                {
+                    return false;
+                }
+
+                // billing is asked about the quota the row holds, the only one the stopped process could have paid for
+                notToRenew = true;
+                targetQuota = walletQuota;
             }
 
             // null both for a customer billing does not know and for a request that failed
@@ -366,6 +392,11 @@ public class RenewSubscriptionService(
                 {
                     logger.WarningRenewSubscriptionServiceOutdated(data.TenantId, Describe(targetQuota, renewedQuantity));
 
+                    return false;
+                }
+
+                if (notToRenew)
+                {
                     return false;
                 }
 
@@ -523,6 +554,13 @@ public class RenewSubscriptionService(
         catch (Exception ex)
         {
             logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
+        }
+
+        if (notToRenew)
+        {
+            // billing never said whether the stopped process had paid, but no renewal is wanted any more: a letter
+            // asking to renew manually would be wrong
+            return false;
         }
 
         await SendRenewSubscriptionErrorAsync(data.TenantId, Describe(renewedQuota, renewedQuantity), renewedQuota.ServiceName, renewedQuantity, payer, owner);
