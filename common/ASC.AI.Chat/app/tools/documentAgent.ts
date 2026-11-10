@@ -59,6 +59,7 @@ import type { DocumentAgentConfig } from "../../config/index.js";
 import { storage } from "../storage/index.js";
 import {
   type DocumentAgentSettings as TenantSettings,
+  isDocumentAgentEnabled,
   readDocumentAgentSettingsForTask,
   type ReasoningLevel,
 } from "../storage/documentAgentSettingsStorage.js";
@@ -163,7 +164,7 @@ export const documentAgentTools: ToolsAdapter = {
     if (!getDocumentAgent()) {
       return {};
     }
-    return (await tenantSettings()).enabled ? { [DOCUMENT_AGENT_TYPE]: [TOOL] } : {};
+    return (await isDocumentAgentEnabled()) ? { [DOCUMENT_AGENT_TYPE]: [TOOL] } : {};
   },
 
   async callTool(
@@ -355,8 +356,8 @@ function outputsUrl(config: DocumentAgentConfig, folderId: string): string {
   return url.href;
 }
 
-// The portal's settings for the agent; while they cannot be read the
-// agent is off, so a broken file never turns it back on.
+// The portal's settings for the agent, from the AI service; while they
+// cannot be read the agent is off, so a failed read never turns it back on.
 function tenantSettings(): Promise<TenantSettings> {
   return readDocumentAgentSettingsForTask();
 }

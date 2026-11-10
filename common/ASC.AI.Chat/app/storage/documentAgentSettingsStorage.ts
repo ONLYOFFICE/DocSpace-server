@@ -33,19 +33,17 @@
 
 // The tenant settings of the document agent (Portal settings → AI settings
 // → Document Agent): which model and effort its tasks run on, their
-// limits, whether and where their logs are kept. Owned by this service and
-// kept in one JSON file on its host, one entry per portal, keyed by the
-// host the portal is reached at (the same key the portal resolves the
-// tenant by). A portal that never saved anything gets the defaults.
-
-import { promises as fs } from "fs";
-import path from "path";
+// limits, whether and where their logs are kept. The AI service owns them
+// (`internal/ai/document-agent/settings`, stored with the portal's other
+// settings, so they travel with a backup); this service reads them for a
+// task and proxies the tab's read and write. A portal that never saved
+// anything gets the defaults from there.
 
 import { z } from "zod";
 
-import { getDocumentAgent } from "../../config/index.js";
-import logger, { logDir } from "../log.js";
-import { getForwardedHeaders } from "../requestContext.js";
+import logger from "../log.js";
+import { getChatContextSnapshot } from "../requestContext.js";
+import { aiService } from "./httpClient.js";
 
 export const REASONING_LEVELS = ["off", "low", "medium", "high", "max"] as const;
 export type ReasoningLevel = (typeof REASONING_LEVELS)[number];
@@ -54,6 +52,9 @@ export type ReasoningLevel = (typeof REASONING_LEVELS)[number];
 export const MAX_TOOL_CALLS = 150;
 export const MAX_FILE_BYTES = 32 * 1024 * 1024;
 
+export const DOCUMENT_AGENT_SETTINGS_PATH = "/document-agent/settings";
+
+/** What the tab may send: the AI service checks the rest (the profile, the folder, who writes). */
 export const documentAgentSettingsSchema = z.object({
   /** Whether the `document_agent` tool is offered to the chat at all. */
   enabled: z.boolean(),
@@ -81,116 +82,43 @@ export const DOCUMENT_AGENT_DEFAULTS: DocumentAgentSettings = {
   taskLogFolderId: null,
 };
 
-const DEFAULT_FILE_NAME = "document-agent-settings.json";
+// The settings as the AI service answers them. It leaves a null out or
+// sends it, and keeps no ceiling of its own on the limits, so an absent
+// reference is null and a limit above the agent's ceiling is the ceiling.
+const storedSettingsSchema = z.object({
+  enabled: z.boolean(),
+  profileId: z.string().min(1).nullish(),
+  reasoning: z.enum(["default", ...REASONING_LEVELS]),
+  maxToolCalls: z.number().int().min(1),
+  maxFileBytes: z.number().int().min(1),
+  taskLog: z.boolean(),
+  taskLogFolderId: z.union([z.string().min(1), z.number().int()]).nullish(),
+});
+
+/** The AI service's answer as this service uses it; throws on one it cannot read. */
+export function parseDocumentAgentSettings(raw: unknown): DocumentAgentSettings {
+  const stored = storedSettingsSchema.parse(raw);
+  return {
+    enabled: stored.enabled,
+    profileId: stored.profileId ?? null,
+    reasoning: stored.reasoning,
+    maxToolCalls: Math.min(stored.maxToolCalls, MAX_TOOL_CALLS),
+    maxFileBytes: Math.min(stored.maxFileBytes, MAX_FILE_BYTES),
+    taskLog: stored.taskLog,
+    taskLogFolderId: stored.taskLogFolderId == null ? null : String(stored.taskLogFolderId),
+  };
+}
+
+/** The settings of the portal the current request came for, read as its user. */
+export async function readDocumentAgentSettings(): Promise<DocumentAgentSettings> {
+  return parseDocumentAgentSettings(await aiService.get(DOCUMENT_AGENT_SETTINGS_PATH));
+}
 
 /**
- * The portal the request came for, as the portal itself tells tenants apart:
- * the host the browser used, forwarded by the router (see tenantHeaders in
- * documentAgent.ts), else the plain host. Case does not matter in a host.
- */
-export function tenantKey(): string {
-  const forwarded = getForwardedHeaders();
-  const host = forwarded["x-forwarded-host"] || forwarded["host"] || "";
-  return host.split(",")[0]?.trim().toLowerCase() || "default";
-}
-
-/** One JSON file holding every portal's settings; read once, written through. */
-export class DocumentAgentSettingsStorage {
-  readonly #path: string;
-  #entries: Promise<Record<string, DocumentAgentSettings>> | undefined;
-  #writing: Promise<void> = Promise.resolve();
-
-  constructor(filePath: string) {
-    this.#path = filePath;
-  }
-
-  get path(): string {
-    return this.#path;
-  }
-
-  /** The portal's settings, the defaults when it saved none; a damaged entry counts as none. */
-  async read(key: string): Promise<DocumentAgentSettings> {
-    const entries = await this.#load();
-    return entries[key] ?? DOCUMENT_AGENT_DEFAULTS;
-  }
-
-  async write(key: string, settings: DocumentAgentSettings): Promise<DocumentAgentSettings> {
-    // Writes queue behind each other: two admins saving at once must not
-    // interleave on the file, and each one starts from what the previous one
-    // left. The cache takes the new entry only once the file holds it, so a
-    // failed write is not served as saved; and a failed write does not stop
-    // the queue, so the next save tries the file again.
-    const step = this.#writing.then(async () => {
-      const updated = { ...(await this.#load()), [key]: settings };
-      await this.#save(updated);
-      this.#entries = Promise.resolve(updated);
-    });
-    this.#writing = step.catch(() => undefined);
-    await step;
-    return settings;
-  }
-
-  // A read that fails is not kept: the next call reads the file again.
-  async #load(): Promise<Record<string, DocumentAgentSettings>> {
-    if (!this.#entries) {
-      const loading = this.#readFile();
-      this.#entries = loading;
-      loading.catch(() => {
-        if (this.#entries === loading) {
-          this.#entries = undefined;
-        }
-      });
-    }
-    return this.#entries;
-  }
-
-  async #readFile(): Promise<Record<string, DocumentAgentSettings>> {
-    let raw: string;
-    try {
-      raw = await fs.readFile(this.#path, "utf8");
-    } catch (err) {
-      if ((err as { code?: string }).code === "ENOENT") {
-        return {};
-      }
-      throw err;
-    }
-    const parsed: unknown = JSON.parse(raw);
-    const entries: Record<string, DocumentAgentSettings> = {};
-    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-      for (const [key, value] of Object.entries(parsed as Record<string, unknown>)) {
-        const result = documentAgentSettingsSchema.safeParse(value);
-        if (result.success) {
-          entries[key] = result.data;
-        }
-      }
-    }
-    return entries;
-  }
-
-  async #save(entries: Record<string, DocumentAgentSettings>): Promise<void> {
-    await fs.mkdir(path.dirname(this.#path), { recursive: true });
-    // Written beside and renamed over: a crash mid-write leaves the old file whole.
-    const tmp = `${this.#path}.${process.pid}.tmp`;
-    await fs.writeFile(tmp, `${JSON.stringify(entries, null, 2)}\n`, "utf8");
-    await fs.rename(tmp, this.#path);
-  }
-}
-
-let shared: DocumentAgentSettingsStorage | undefined;
-
-/** The service's one storage, at `ai.documentAgent.settingsPath` or next to the logs. */
-export function documentAgentSettingsStorage(): DocumentAgentSettingsStorage {
-  shared ??= new DocumentAgentSettingsStorage(
-    getDocumentAgent()?.settingsPath ?? path.join(logDir, DEFAULT_FILE_NAME),
-  );
-  return shared;
-}
-
-/** The settings of the portal the current request came for. */
-/**
- * What a task runs with when the portal's settings cannot be read (the file
- * is unreadable or damaged): the defaults, with the agent off. A portal whose
- * admin turned the agent off must not get it back because of a broken file.
+ * What a task runs with when the portal's settings cannot be read (the AI
+ * service is down, refuses the user or answers something else): the
+ * defaults, with the agent off. A portal whose admin turned the agent off
+ * must not get it back because of a failed read.
  */
 export const DOCUMENT_AGENT_UNREADABLE: DocumentAgentSettings = {
   ...DOCUMENT_AGENT_DEFAULTS,
@@ -199,14 +127,28 @@ export const DOCUMENT_AGENT_UNREADABLE: DocumentAgentSettings = {
 
 /** The portal's settings for a task; the agent is off while they cannot be read. */
 export async function readDocumentAgentSettingsForTask(
-  storage: DocumentAgentSettingsStorage = documentAgentSettingsStorage(),
+  read: () => Promise<DocumentAgentSettings> = readDocumentAgentSettings,
 ): Promise<DocumentAgentSettings> {
   try {
-    return await storage.read(tenantKey());
+    return await read();
   } catch (err) {
     logger.warn(
       `documentAgentSettings: not read, the agent is off: ${err instanceof Error ? err.message : String(err)}`,
     );
     return DOCUMENT_AGENT_UNREADABLE;
   }
+}
+
+/**
+ * Whether the portal offers the agent to the chat. A chat round already
+ * holds the answer (the aggregate's `documentAgentEnabled`), so listing the
+ * round's tools costs no request; outside a round, or with an aggregate
+ * that does not carry it, the settings are read.
+ */
+export async function isDocumentAgentEnabled(): Promise<boolean> {
+  const primed = getChatContextSnapshot()?.documentAgentEnabled;
+  if (primed !== undefined) {
+    return primed;
+  }
+  return (await readDocumentAgentSettingsForTask()).enabled;
 }

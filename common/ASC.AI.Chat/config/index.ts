@@ -176,12 +176,6 @@ export interface DocumentAgentConfig {
      * host reaches; an agent elsewhere needs this service's address on their shared network.
      */
     filesUrl: string;
-    /**
-     * The JSON file this service keeps the portals' document-agent settings
-     * (the Document Agent tab of the portal settings) in. Undefined means
-     * `document-agent-settings.json` next to the logs.
-     */
-    settingsPath: string | undefined;
 }
 
 const DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS = 1800;
@@ -191,7 +185,7 @@ const DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS = 1800;
 // MCP endpoints (`AI__DOCUMENT_AGENT__URL`, `AI__DOCUMENT_AGENT__TOKEN`,
 // `AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS`, `AI__DOCUMENT_AGENT__MAX_TOOL_CALLS`,
 // `AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS`, `AI__DOCUMENT_AGENT__PORTAL_URL`,
-// `AI__DOCUMENT_AGENT__FILES_URL`, `AI__DOCUMENT_AGENT__SETTINGS_PATH`).
+// `AI__DOCUMENT_AGENT__FILES_URL`).
 // Undefined without a URL and a token: the tool is then simply not offered.
 // An environment variable that is set wins even when empty, so the Docker
 // install's empty DOCUMENT_AGENT_URL / DOCUMENT_AGENT_TOKEN switch the agent
@@ -217,10 +211,6 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
         share !== undefined && share !== "" ? share === "true" || share === "1" : setting?.shareSystemServers === true;
     const portalUrl = firstText(process.env["AI__DOCUMENT_AGENT__PORTAL_URL"], setting?.portalUrl);
     const filesUrl = firstText(process.env["AI__DOCUMENT_AGENT__FILES_URL"], setting?.filesUrl);
-    const settingsPath = firstText(
-        process.env["AI__DOCUMENT_AGENT__SETTINGS_PATH"],
-        setting?.settingsPath,
-    );
     return {
         url: url.replace(/\/+$/, ""),
         token,
@@ -229,7 +219,6 @@ export function getDocumentAgent(): DocumentAgentConfig | undefined {
         shareSystemServers,
         portalUrl: portalUrl === "" ? undefined : portalUrl.replace(/\/+$/, ""),
         filesUrl: (filesUrl === "" ? `http://localhost:${getAppConfig().port}` : filesUrl).replace(/\/+$/, ""),
-        settingsPath: settingsPath === "" ? undefined : settingsPath,
     };
 }
 

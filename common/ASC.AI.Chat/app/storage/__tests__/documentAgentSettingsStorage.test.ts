@@ -1,36 +1,41 @@
-import { promises as fs } from "fs";
-import os from "os";
-import path from "path";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+const state = vi.hoisted(() => ({
+  gets: [] as string[],
+  answer: undefined as unknown,
+  failure: undefined as unknown,
+  snapshot: undefined as { documentAgentEnabled: boolean | undefined } | undefined,
+}));
 
-vi.mock("../../../config/index.js", () => ({ getDocumentAgent: () => undefined }));
-const warn = vi.fn();
-vi.mock("../../log.js", () => ({ default: { info: vi.fn(), warn }, logDir: "/nowhere" }));
-vi.mock("../../requestContext.js", () => ({ getForwardedHeaders: () => headers }));
+const warn = vi.hoisted(() => vi.fn());
 
-let headers: Record<string, string> = {};
+vi.mock("../../log.js", () => ({
+  default: { info: vi.fn(), warn, error: vi.fn(), debug: vi.fn() },
+  logDir: "/nowhere",
+}));
+vi.mock("../../requestContext.js", () => ({
+  getChatContextSnapshot: () => state.snapshot,
+}));
+vi.mock("../httpClient.js", () => ({
+  aiService: {
+    get: async (path: string) => {
+      state.gets.push(path);
+      if (state.failure) {
+        throw state.failure;
+      }
+      return state.answer;
+    },
+  },
+}));
 
 const {
   DOCUMENT_AGENT_DEFAULTS,
   DOCUMENT_AGENT_UNREADABLE,
-  DocumentAgentSettingsStorage,
+  isDocumentAgentEnabled,
+  parseDocumentAgentSettings,
+  readDocumentAgentSettings,
   readDocumentAgentSettingsForTask,
-  tenantKey,
 } = await import("../documentAgentSettingsStorage.js");
-
-let dir: string;
-
-beforeEach(async () => {
-  dir = await fs.mkdtemp(path.join(os.tmpdir(), "docagent-settings-"));
-  headers = {};
-  warn.mockClear();
-});
-
-afterEach(async () => {
-  vi.restoreAllMocks();
-  await fs.rm(dir, { recursive: true, force: true });
-});
 
 const SAVED = {
   ...DOCUMENT_AGENT_DEFAULTS,
@@ -39,142 +44,116 @@ const SAVED = {
   reasoning: "high" as const,
   maxToolCalls: 40,
   taskLog: true,
-  taskLogFolderId: "f-9",
+  taskLogFolderId: "9",
 };
 
-describe("DocumentAgentSettingsStorage", () => {
-  it("answers the defaults for a portal that saved nothing, file or no file", async () => {
-    const storage = new DocumentAgentSettingsStorage(path.join(dir, "s.json"));
+beforeEach(() => {
+  state.gets = [];
+  state.answer = undefined;
+  state.failure = undefined;
+  state.snapshot = undefined;
+  warn.mockClear();
+});
 
-    expect(await storage.read("a.example.com")).toEqual(DOCUMENT_AGENT_DEFAULTS);
-    await storage.write("b.example.com", SAVED);
-    expect(await storage.read("a.example.com")).toEqual(DOCUMENT_AGENT_DEFAULTS);
+describe("parseDocumentAgentSettings", () => {
+  it("takes the settings as the AI service answers them", () => {
+    expect(parseDocumentAgentSettings(SAVED)).toEqual(SAVED);
   });
 
-  it("keeps what a portal saved, across instances, apart from other portals", async () => {
-    const file = path.join(dir, "deep", "s.json");
-    await new DocumentAgentSettingsStorage(file).write("a.example.com", SAVED);
+  it("reads a reference the answer leaves out as none, and a numeric folder id as its text", () => {
+    const { profileId: _profileId, taskLogFolderId: _folderId, ...bare } = SAVED;
 
-    const again = new DocumentAgentSettingsStorage(file);
-    expect(await again.read("a.example.com")).toEqual(SAVED);
-    expect(await again.read("b.example.com")).toEqual(DOCUMENT_AGENT_DEFAULTS);
-    expect(JSON.parse(await fs.readFile(file, "utf8"))).toEqual({ "a.example.com": SAVED });
+    expect(parseDocumentAgentSettings(bare)).toEqual({
+      ...SAVED,
+      profileId: null,
+      taskLogFolderId: null,
+    });
+    expect(parseDocumentAgentSettings({ ...SAVED, taskLogFolderId: 9 }).taskLogFolderId).toBe("9");
   });
 
-  it("drops a damaged entry and keeps the rest", async () => {
-    const file = path.join(dir, "s.json");
-    await fs.writeFile(
-      file,
-      JSON.stringify({
-        "a.example.com": SAVED,
-        "b.example.com": { ...SAVED, maxToolCalls: 10_000 },
-        "c.example.com": "nonsense",
-      }),
-    );
-    const storage = new DocumentAgentSettingsStorage(file);
+  it("lowers a limit above the agent's ceiling to the ceiling", () => {
+    const parsed = parseDocumentAgentSettings({
+      ...SAVED,
+      maxToolCalls: 2_147_483_647,
+      maxFileBytes: 2_147_483_647,
+    });
 
-    expect(await storage.read("a.example.com")).toEqual(SAVED);
-    expect(await storage.read("b.example.com")).toEqual(DOCUMENT_AGENT_DEFAULTS);
-    expect(await storage.read("c.example.com")).toEqual(DOCUMENT_AGENT_DEFAULTS);
+    expect(parsed.maxToolCalls).toBe(DOCUMENT_AGENT_DEFAULTS.maxToolCalls);
+    expect(parsed.maxFileBytes).toBe(DOCUMENT_AGENT_DEFAULTS.maxFileBytes);
   });
 
-  it("serialises concurrent writes", async () => {
-    const file = path.join(dir, "s.json");
-    const storage = new DocumentAgentSettingsStorage(file);
-
-    await Promise.all([
-      storage.write("a.example.com", SAVED),
-      storage.write("b.example.com", { ...SAVED, maxToolCalls: 1 }),
-      storage.write("a.example.com", { ...SAVED, maxToolCalls: 2 }),
-    ]);
-
-    const again = new DocumentAgentSettingsStorage(file);
-    expect((await again.read("a.example.com")).maxToolCalls).toBe(2);
-    expect((await again.read("b.example.com")).maxToolCalls).toBe(1);
+  it("throws on an answer it cannot read", () => {
+    for (const raw of [
+      null,
+      "nonsense",
+      { ...SAVED, reasoning: "xhigh" },
+      { ...SAVED, enabled: 1 },
+    ]) {
+      expect(() => parseDocumentAgentSettings(raw), JSON.stringify(raw)).toThrow();
+    }
   });
 });
 
-describe("DocumentAgentSettingsStorage when the file fails", () => {
-  it("a failed write is not served as saved, and the next save writes the file", async () => {
-    const file = path.join(dir, "s.json");
-    const storage = new DocumentAgentSettingsStorage(file);
-    await storage.write("a.example.com", SAVED);
+describe("readDocumentAgentSettings", () => {
+  it("asks the AI service", async () => {
+    state.answer = SAVED;
 
-    const rename = vi.spyOn(fs, "rename").mockRejectedValueOnce(
-      Object.assign(new Error("no space left"), { code: "ENOSPC" }),
-    );
-    await expect(
-      storage.write("a.example.com", { ...SAVED, maxToolCalls: 7 }),
-    ).rejects.toThrow("no space left");
-    expect((await storage.read("a.example.com")).maxToolCalls).toBe(SAVED.maxToolCalls);
-
-    rename.mockRestore();
-    await storage.write("a.example.com", { ...SAVED, maxToolCalls: 8 });
-    expect((await storage.read("a.example.com")).maxToolCalls).toBe(8);
-    const again = new DocumentAgentSettingsStorage(file);
-    expect((await again.read("a.example.com")).maxToolCalls).toBe(8);
-  });
-
-  it("a write queued behind a failed one still lands, with the earlier entries", async () => {
-    const file = path.join(dir, "s.json");
-    const storage = new DocumentAgentSettingsStorage(file);
-    await storage.write("a.example.com", SAVED);
-
-    vi.spyOn(fs, "rename").mockRejectedValueOnce(new Error("disk gone"));
-    const failed = storage.write("b.example.com", { ...SAVED, maxToolCalls: 1 });
-    const next = storage.write("c.example.com", { ...SAVED, maxToolCalls: 3 });
-
-    await expect(failed).rejects.toThrow("disk gone");
-    await next;
-    const saved = JSON.parse(await fs.readFile(file, "utf8"));
-    expect(Object.keys(saved).sort()).toEqual(["a.example.com", "c.example.com"]);
-  });
-
-  it("a damaged file fails the read each time, and a repaired one is read again", async () => {
-    const file = path.join(dir, "s.json");
-    await fs.writeFile(file, "{ not json");
-    const storage = new DocumentAgentSettingsStorage(file);
-
-    await expect(storage.read("a.example.com")).rejects.toThrow();
-    await expect(storage.write("a.example.com", SAVED)).rejects.toThrow();
-    // The damaged file is left as it is: other portals' entries are in it.
-    expect(await fs.readFile(file, "utf8")).toBe("{ not json");
-
-    await fs.writeFile(file, JSON.stringify({ "a.example.com": SAVED }));
-    expect(await storage.read("a.example.com")).toEqual(SAVED);
+    expect(await readDocumentAgentSettings()).toEqual(SAVED);
+    expect(state.gets).toEqual(["/document-agent/settings"]);
   });
 });
 
 describe("readDocumentAgentSettingsForTask", () => {
   it("is the portal's saved settings", async () => {
-    headers = { "x-forwarded-host": "a.example.com" };
-    const storage = new DocumentAgentSettingsStorage(path.join(dir, "s.json"));
-    await storage.write("a.example.com", SAVED);
+    state.answer = SAVED;
 
-    expect(await readDocumentAgentSettingsForTask(storage)).toEqual(SAVED);
+    expect(await readDocumentAgentSettingsForTask()).toEqual(SAVED);
     expect(warn).not.toHaveBeenCalled();
   });
 
   it("turns the agent off while the settings cannot be read", async () => {
-    headers = { "x-forwarded-host": "a.example.com" };
-    const file = path.join(dir, "s.json");
-    await fs.writeFile(file, "{ not json");
+    for (const broken of [
+      () => (state.failure = new Error("connect ECONNREFUSED")),
+      () => (state.answer = { nonsense: true }),
+    ]) {
+      state.answer = undefined;
+      state.failure = undefined;
+      warn.mockClear();
+      broken();
 
-    const settings = await readDocumentAgentSettingsForTask(new DocumentAgentSettingsStorage(file));
+      const settings = await readDocumentAgentSettingsForTask();
 
-    expect(settings).toEqual(DOCUMENT_AGENT_UNREADABLE);
-    expect(settings.enabled).toBe(false);
-    expect(warn).toHaveBeenCalledTimes(1);
+      expect(settings).toEqual(DOCUMENT_AGENT_UNREADABLE);
+      expect(settings.enabled).toBe(false);
+      expect(warn).toHaveBeenCalledTimes(1);
+    }
   });
 });
 
-describe("tenantKey", () => {
-  it("is the forwarded host, lowercased, else the plain host, else a default", () => {
-    headers = { "x-forwarded-host": "Portal.Example.com, proxy", host: "ignored" };
-    expect(tenantKey()).toBe("portal.example.com");
-    headers = { host: "Localhost:8092" };
-    expect(tenantKey()).toBe("localhost:8092");
-    headers = {};
-    expect(tenantKey()).toBe("default");
+describe("isDocumentAgentEnabled", () => {
+  it("is what the round's aggregate says, with no request", async () => {
+    state.answer = { ...SAVED, enabled: true };
+
+    state.snapshot = { documentAgentEnabled: false };
+    expect(await isDocumentAgentEnabled()).toBe(false);
+    state.snapshot = { documentAgentEnabled: true };
+    expect(await isDocumentAgentEnabled()).toBe(true);
+    expect(state.gets).toEqual([]);
+  });
+
+  it("reads the settings outside a round, and under an aggregate that does not say", async () => {
+    state.answer = { ...SAVED, enabled: true };
+    expect(await isDocumentAgentEnabled()).toBe(true);
+
+    state.snapshot = { documentAgentEnabled: undefined };
+    state.answer = SAVED;
+    expect(await isDocumentAgentEnabled()).toBe(false);
+    expect(state.gets).toHaveLength(2);
+  });
+
+  it("is off while the settings cannot be read", async () => {
+    state.failure = new Error("boom");
+
+    expect(await isDocumentAgentEnabled()).toBe(false);
   });
 });

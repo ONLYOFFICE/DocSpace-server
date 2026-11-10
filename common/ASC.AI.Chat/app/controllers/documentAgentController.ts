@@ -32,38 +32,29 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // GET/PUT document-agent/settings: the tenant settings of the document
-// agent, read by anyone signed in (the tab needs them to render), written
-// by a portal administrator only. The answer wears the portal API's
-// envelope (`{ response }`), which the client unwraps as it does for every
-// other route.
+// agent, a thin proxy for the AI service's own
+// (`internal/ai/document-agent/settings`), which stores them and decides
+// who may read (any member of the portal) and write (a portal
+// administrator). `raw: true` keeps the portal API's envelope
+// (`{ response }`), which the client unwraps as it does for every other
+// route. The one thing checked here is what the AI service does not know:
+// the agent's own ceilings on the limits.
 
 import { asyncHandler } from "./_helpers.js";
-import { isPortalAdmin } from "../storage/docspacePeopleApi.js";
+import { aiService } from "../storage/httpClient.js";
 import {
-  type DocumentAgentSettings,
+  DOCUMENT_AGENT_SETTINGS_PATH,
   documentAgentSettingsSchema,
-  documentAgentSettingsStorage,
-  tenantKey,
 } from "../storage/documentAgentSettingsStorage.js";
-import logger from "../log.js";
-
-const envelope = (settings: DocumentAgentSettings) => ({
-  response: settings,
-  count: 1,
-  status: 0,
-  statusCode: 200,
-});
 
 export const documentAgentController = {
+  // GET document-agent/settings → `GET internal/ai/document-agent/settings`.
   getSettings: asyncHandler(async (_req, res) => {
-    res.json(envelope(await documentAgentSettingsStorage().read(tenantKey())));
+    res.json(await aiService.get(DOCUMENT_AGENT_SETTINGS_PATH, { raw: true }));
   }),
 
+  // PUT document-agent/settings → `PUT internal/ai/document-agent/settings`.
   setSettings: asyncHandler(async (req, res) => {
-    if (!(await isPortalAdmin())) {
-      res.status(403).json({ error: "Only a portal administrator may change these settings" });
-      return;
-    }
     const parsed = documentAgentSettingsSchema.safeParse(req.body);
     if (!parsed.success) {
       const issues = parsed.error.issues
@@ -72,13 +63,6 @@ export const documentAgentController = {
       res.status(400).json({ error: `Invalid settings: ${issues}` });
       return;
     }
-    const key = tenantKey();
-    const saved = await documentAgentSettingsStorage().write(key, parsed.data);
-    logger.info(
-      `documentAgentSettings: saved for ${key}: enabled=${saved.enabled} profile=${saved.profileId ?? "chat"} ` +
-        `reasoning=${saved.reasoning} maxToolCalls=${saved.maxToolCalls} maxFileBytes=${saved.maxFileBytes} ` +
-        `taskLog=${saved.taskLog} folder=${saved.taskLogFolderId ?? "results"}`,
-    );
-    res.json(envelope(saved));
+    res.json(await aiService.put(DOCUMENT_AGENT_SETTINGS_PATH, parsed.data, { raw: true }));
   }),
 };

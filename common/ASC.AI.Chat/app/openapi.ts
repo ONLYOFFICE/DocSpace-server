@@ -463,9 +463,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiSettingsSetToolMode:
     "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum with 400; the answer is the stored mode inside the service's `response` envelope. The mode applies to every chat of the user in the portal.",
   aiSettingsGetDocumentAgent:
-    "Returns the portal's document agent settings, as the Document Agent tab of the portal settings shows them: `enabled` (whether the `document_agent` tool is offered to the chat), `profileId` (the model profile its tasks run on, null for the chat's own model), `reasoning` (`default` for the model's own default, else `off`, `low`, `medium`, `high`, `max`), `maxToolCalls` and `maxFileBytes` (the limits of one task, at most the agent's own ceilings of 150 and 32 MiB), `taskLog` (whether every task leaves its full log as a file) and `taskLogFolderId` (where the logs go, null for next to the task's results). A portal that never saved any gets the defaults. Any signed-in user may read them.",
+    "Returns the portal's document agent settings, as the Document Agent tab of the portal settings shows them: `enabled` (whether the `document_agent` tool is offered to the chat), `profileId` (the model profile its tasks run on, null for the chat's own model), `reasoning` (`default` for the model's own default, else `off`, `low`, `medium`, `high`, `max`), `maxToolCalls` and `maxFileBytes` (the limits of one task, at most the agent's own ceilings of 150 and 32 MiB), `taskLog` (whether every task leaves its full log as a file) and `taskLogFolderId` (where the logs go, null for next to the task's results). The settings are kept by the DocSpace AI service and proxied from it; a portal that never saved any gets the defaults, and a profile or a log folder that no longer exists comes back as null. Any member of the portal may read them, a guest may not.",
   aiSettingsSetDocumentAgent:
-    "Replaces the portal's document agent settings and returns the stored result. The whole object is required, every field as `GET api/2.0/ai/document-agent/settings` returns it; a limit above the agent's ceiling, an unknown reasoning level or a missing field is rejected rather than coerced. Only a portal administrator may write.",
+    "Replaces the portal's document agent settings and returns the stored result. The whole object is required, every field as `GET api/2.0/ai/document-agent/settings` returns it; a limit above the agent's ceiling, an unknown reasoning level or a missing field is rejected rather than coerced. The DocSpace AI service stores them and checks the rest: the profile has to exist, and the log folder has to be a portal folder (not a third-party one, not in the trash) the caller may create files in. Only a portal administrator may write.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -822,7 +822,8 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiSettingsSetToolMode: { "400": "`mode` is not one of the `ToolPermissionMode` members." },
   aiSettingsSetDocumentAgent: {
     "400": "A field is missing, has the wrong type, or a limit is above the agent's ceiling.",
-    "403": "The caller is not a portal administrator.",
+    "403": "The caller is not a portal administrator, or may not create files in the log folder.",
+    "404": "The log folder does not exist or is in the trash.",
   },
   aiPreferencesSetReasoningLevel: {
     "400": "`value` is not one of the depths, or `entityId` is not a room ID.",

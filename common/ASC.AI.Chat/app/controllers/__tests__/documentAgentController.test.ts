@@ -1,15 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const state = vi.hoisted(() => ({
-  admin: true,
-  stored: new Map<string, unknown>(),
+  calls: [] as { method: string; path: string; body?: unknown; raw?: boolean }[],
+  answer: undefined as unknown,
+  failure: undefined as unknown,
 }));
 
-vi.mock("../../storage/docspacePeopleApi.js", () => ({
-  isPortalAdmin: async () => state.admin,
-}));
 vi.mock("../../log.js", () => ({
-  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
+  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
   logDir: "/nowhere",
 }));
 vi.mock("../../../config/index.js", () => ({
@@ -19,22 +17,29 @@ vi.mock("../../../config/index.js", () => ({
 }));
 vi.mock("../../requestContext.js", () => ({
   getForwardedHeaders: () => ({ host: "portal.example.com" }),
+  getChatContextSnapshot: () => undefined,
 }));
-vi.mock("../../storage/documentAgentSettingsStorage.js", async (importOriginal) => {
-  const original =
-    await importOriginal<typeof import("../../storage/documentAgentSettingsStorage.js")>();
+vi.mock("../../storage/httpClient.js", async (importOriginal) => {
+  const original = await importOriginal<typeof import("../../storage/httpClient.js")>();
+  const answer = (call: (typeof state.calls)[number]) => {
+    state.calls.push(call);
+    if (state.failure) {
+      throw state.failure;
+    }
+    return state.answer;
+  };
   return {
     ...original,
-    documentAgentSettingsStorage: () => ({
-      read: async (key: string) => state.stored.get(key) ?? original.DOCUMENT_AGENT_DEFAULTS,
-      write: async (key: string, settings: unknown) => {
-        state.stored.set(key, settings);
-        return settings;
-      },
-    }),
+    aiService: {
+      get: async (path: string, opts?: { raw?: boolean }) =>
+        answer({ method: "GET", path, raw: opts?.raw }),
+      put: async (path: string, body: unknown, opts?: { raw?: boolean }) =>
+        answer({ method: "PUT", path, body, raw: opts?.raw }),
+    },
   };
 });
 
+const { AiServiceHttpError } = await import("../../storage/httpClient.js");
 const { DOCUMENT_AGENT_DEFAULTS } = await import("../../storage/documentAgentSettingsStorage.js");
 const { documentAgentController } = await import("../documentAgentController.js");
 
@@ -70,44 +75,46 @@ const SETTINGS = {
   maxToolCalls: 10,
   maxFileBytes: 1024,
   taskLog: true,
-  taskLogFolderId: "f-1",
+  taskLogFolderId: "17",
 };
 
+const envelope = (response: unknown) => ({ response, count: 1, status: 0, statusCode: 200 });
+
 beforeEach(() => {
-  state.admin = true;
-  state.stored.clear();
+  state.calls = [];
+  state.answer = undefined;
+  state.failure = undefined;
 });
 
 describe("documentAgentController", () => {
-  it("reads the defaults in the portal envelope", async () => {
+  it("reads the AI service's settings, envelope and all", async () => {
+    state.answer = envelope(DOCUMENT_AGENT_DEFAULTS);
+
     const res = await run(documentAgentController.getSettings);
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toEqual({
-      response: DOCUMENT_AGENT_DEFAULTS,
-      count: 1,
-      status: 0,
-      statusCode: 200,
-    });
+    expect(res.body).toEqual(envelope(DOCUMENT_AGENT_DEFAULTS));
+    expect(state.calls).toEqual([{ method: "GET", path: "/document-agent/settings", raw: true }]);
   });
 
-  it("stores what an administrator sends, per portal, and reads it back", async () => {
-    const put = await run(documentAgentController.setSettings, SETTINGS);
-    expect(put.statusCode).toBe(200);
-    expect(put.body).toMatchObject({ response: SETTINGS });
-    expect([...state.stored.keys()]).toEqual(["portal.example.com"]);
+  it("hands what the tab sends to the AI service and answers what it stored", async () => {
+    state.answer = envelope(SETTINGS);
 
-    const get = await run(documentAgentController.getSettings);
-    expect(get.body).toMatchObject({ response: SETTINGS });
+    const res = await run(documentAgentController.setSettings, SETTINGS);
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toEqual(envelope(SETTINGS));
+    expect(state.calls).toEqual([
+      { method: "PUT", path: "/document-agent/settings", body: SETTINGS, raw: true },
+    ]);
   });
 
-  it("refuses a user who is not an administrator", async () => {
-    state.admin = false;
+  it("answers the AI service's refusal with its status", async () => {
+    state.failure = new AiServiceHttpError(403, "Forbidden", "", "http://ai/x");
 
     const res = await run(documentAgentController.setSettings, SETTINGS);
 
     expect(res.statusCode).toBe(403);
-    expect(state.stored.size).toBe(0);
   });
 
   it("refuses a limit over the agent's ceiling, an unknown level, a missing field", async () => {
@@ -123,6 +130,6 @@ describe("documentAgentController", () => {
       expect(res.statusCode, JSON.stringify(body)).toBe(400);
       expect(String((res.body as { error: string }).error)).toMatch(/^Invalid settings: /);
     }
-    expect(state.stored.size).toBe(0);
+    expect(state.calls).toEqual([]);
   });
 });

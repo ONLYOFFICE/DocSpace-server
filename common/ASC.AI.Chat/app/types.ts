@@ -136,8 +136,6 @@ export interface DocumentAgentSetting {
   portalUrl?: string;
   /** This service as the agent reaches it, for the file-link server it hands the agent; `http://localhost:<port>` by default. */
   filesUrl?: string;
-  /** The JSON file this service keeps the portals' document-agent settings in; next to the logs by default. */
-  settingsPath?: string;
 }
 
 // Automatic history compaction (`ai.compaction` in the shared
