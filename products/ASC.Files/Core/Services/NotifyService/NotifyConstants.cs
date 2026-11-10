@@ -99,6 +99,12 @@ public class ShareDocumentNotifyAction(TenantManager tenantManager, BaseCommonLi
 {
     public override string ID => "ShareDocument";
 
+    // a caller can repeat PUT files/file/{id}/share and PUT files/folder/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    // the letter names the access level, so a share changed to another level is a new letter
+    public override string[] DeduplicationTags => [CommonTags.AccessLevel];
+
     public override List<Pattern> Patterns =>
     [
         new EmailPattern(() => FilesPatternResource.subject_ShareDocument, () => FilesPatternResource.pattern_ShareDocument),
@@ -106,13 +112,14 @@ public class ShareDocumentNotifyAction(TenantManager tenantManager, BaseCommonLi
         new PushPattern(() => FilesPatternResource.subject_ShareDocument_push)
     ];
 
-    public void Init<T>(FileEntry<T> fileEntry, Folder<T> folder, string url, string fileExtension, string aceString, string message, string culture)
+    public void Init<T>(FileEntry<T> fileEntry, Folder<T> folder, string url, string fileExtension, FileShare access, string aceString, string message, string culture)
     {
         List<ITagValue> tags =
         [
             new TagValue(NotifyConstants.TagDocumentTitle, fileEntry.Title),
             new TagValue(NotifyConstants.TagDocumentUrl, baseCommonLinkUtility.GetFullAbsolutePath(url)),
             new TagValue(NotifyConstants.TagDocumentExtension, fileExtension),
+            new TagValue(CommonTags.AccessLevel, access.ToStringFast()),
             new TagValue(NotifyConstants.TagAccessRights, aceString),
             new TagValue(NotifyConstants.TagMessage, message == null ? string.Empty : message.HtmlEncode()),
             new TagValue(NotifyConstants.TagFolderID, folder.Id),
@@ -310,6 +317,9 @@ public class InvitedToRoomNotifyAction(TenantManager tenantManager) : NotifyActi
 {
     public override string ID => "InvitedToRoom";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
     public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_InvitedToRoom_push)
@@ -343,15 +353,21 @@ public class RoomUpdateAccessForUserNotifyAction(TenantManager tenantManager) : 
 {
     public override string ID => "RoomUpdateAccessForUser";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    public override string[] DeduplicationTags => [CommonTags.AccessLevel];
+
     public override List<Pattern> Patterns =>
     [
         new PushPattern(() => FilesPatternResource.pattern_RoomUpdateAccessForUser_push)
     ];
 
-    public void Init<T>(FileEntry<T> room, string accessString)
+    public void Init<T>(FileEntry<T> room, FileShare access, string accessString)
     {
         Tags =
         [
+            new TagValue(CommonTags.AccessLevel, access.ToStringFast()),
             new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
             new TagValue(NotifyConstants.TagFolderID, room.Id),
             new TagValue(NotifyConstants.TagFolderParentId, room.ParentId),
@@ -458,7 +474,7 @@ public sealed class FolderCreatedInRoomNotifyAction(TenantManager tenantManager)
         Tags =
         [
             new TagValue(NotifyConstants.RoomTitle, NotifyConstants.GetRoomTitle(room)),
-            new TagValue(NotifyConstants.FolderTitle, folder.Title),
+            new TagValue(NotifyConstants.FolderTitle, room.SettingsPrivate ? FilesPatternResource.PrivateFolderTitle : folder.Title),
             new TagValue(NotifyConstants.TagFolderID, folder.Id),
             new TagValue(NotifyConstants.TagFolderParentId, folder.ParentId),
             new TagValue(NotifyConstants.TagFolderRootFolderType, folder.RootFolderType)

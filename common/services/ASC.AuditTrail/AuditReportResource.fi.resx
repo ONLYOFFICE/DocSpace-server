@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI-profiili on määritetty AI-agentille toimintoa varten: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>AI-mallin BYOK-avain on poistettu: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>AI-mallin BYOK-avain on asetettu: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI-profiili on määritetty toimintoa varten: {0}</value>
   </data>

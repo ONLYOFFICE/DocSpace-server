@@ -205,6 +205,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} (BYOK).
+        /// </summary>
+        public static string AccountingCustomerOperationServiceByok {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceByok", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Business plan.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_admin {
@@ -232,7 +241,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI features.
+        ///   Looks up a localized string similar to AI agents &amp; tools.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_tools {
             get {
@@ -3985,7 +3994,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to AI features.
+        ///   Looks up a localized string similar to AI agents &amp; tools.
         /// </summary>
         public static string TariffsFeature_aitools_wallet {
             get {

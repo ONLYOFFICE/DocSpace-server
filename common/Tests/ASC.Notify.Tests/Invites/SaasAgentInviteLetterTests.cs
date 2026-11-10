@@ -48,7 +48,7 @@ public class SaasAgentInviteLetterTests : LetterTestBase<SaasAgentInviteNotifyAc
 
     protected override Task InitAsync(SaasAgentInviteNotifyAction action, LetterScope scope)
     {
-        action.Init(scope.Culture.Name, AgentTitle, ConfirmUrl(scope));
+        action.Init(scope.Culture.Name, AgentTitle, ConfirmUrl(scope), EmployeeType.User);
 
         return Task.CompletedTask;
     }

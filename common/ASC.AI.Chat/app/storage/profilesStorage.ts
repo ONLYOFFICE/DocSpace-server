@@ -57,15 +57,33 @@ import {
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
+export type DocspaceProfile = Profile & {
+  /** BYOK provider id when the profile runs on the portal's own provider key. */
+  byokProvider?: string;
+};
+
+// The portal API path an `onlyoffice` profile is called through, whatever host
+// is put in front: the gateway proxy, or its BYOK route when the profile runs
+// on the portal's own provider key, so the key is sent along with the request.
+export function onlyofficeGatewayPath(profile: DocspaceProfile): string {
+  return profile.byokProvider
+    ? `${ONLYOFFICE_GATEWAY_PATH}/byok/${encodeURIComponent(profile.id)}`
+    : ONLYOFFICE_GATEWAY_PATH;
+}
+
+function gatewayBaseUrl(profile: DocspaceProfile): string {
+  return `${aiServiceBaseUrl}${onlyofficeGatewayPath(profile)}`;
+}
+
 export function withOnlyofficeProviderOverrides(
-  profile: Profile | undefined,
-): Profile | undefined {
+  profile: DocspaceProfile | undefined,
+): DocspaceProfile | undefined {
   if (!profile || profile.providerType !== "onlyoffice") {
     return profile;
   }
-  const resolved: Profile = {
+  const resolved: DocspaceProfile = {
     ...profile,
-    baseUrl: `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`,
+    baseUrl: gatewayBaseUrl(profile),
   };
   if (shouldForwardHeadersToProvider()) {
     resolved.headers = { ...getForwardedHeaders(), ...(profile.headers ?? {}) };
@@ -73,7 +91,7 @@ export function withOnlyofficeProviderOverrides(
   return resolved;
 }
 
-export function dtoToProfile(raw: unknown): Profile | undefined {
+export function dtoToProfile(raw: unknown): DocspaceProfile | undefined {
   if (!isObject(raw)) {
     return undefined;
   }
@@ -93,7 +111,7 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
   ) {
     return undefined;
   }
-  const profile: Profile = {
+  const profile: DocspaceProfile = {
     id,
     name,
     providerType,
@@ -101,6 +119,10 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
     modelId,
     createdAt,
   };
+  const byokProvider = getString(raw, "byokProvider");
+  if (byokProvider !== undefined) {
+    profile.byokProvider = byokProvider;
+  }
   const key = getString(raw, "key");
   if (key !== undefined) {
     profile.key = key;
@@ -307,7 +329,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // forwarded auth headers must never reach a client (Bug 82821). Read with
   // `forClient=true` like `readAllForClient`; get-by-id drops `key` and
   // `headers` on top for every caller.
-  async readByIdRaw(id: string): Promise<Profile | undefined> {
+  async readByIdRaw(id: string): Promise<DocspaceProfile | undefined> {
     const snapshot = readChatContext("profiles");
     if (snapshot) {
       return snapshot.profiles.find((p) => p.id === id);

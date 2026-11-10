@@ -31,50 +31,42 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-package com.asc.authorization.application.security.oauth.service;
+package com.asc.authorization.application.service;
 
-import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
+import com.asc.common.messaging.publisher.RabbitPersistableMessagePublisher;
 import java.time.Duration;
-import java.util.List;
-import org.springframework.data.redis.core.RedisTemplate;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 /**
- * Redis-backed {@link CacheNamespaceCounterStore} backing this service's {@link
- * com.asc.common.utilities.cache.CacheNamespaceRegistry}.
+ * Sends the messages the broker could not take once it is back.
  *
- * <p>A thin adapter: it holds no policy of its own, only translating the store's contract onto
- * {@link RedisTemplate} calls.
+ * <p>Runs on one instance at a time per database, under a ShedLock lock, and sends a bounded batch
+ * per round within a time budget shorter than the lock, so a long outage drains steadily instead of
+ * flooding the broker when it returns.
  */
-public class RedisCacheNamespaceCounterStore implements CacheNamespaceCounterStore {
-  private final RedisTemplate<String, String> redisTemplate;
+@Slf4j
+@Component
+@RequiredArgsConstructor
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
+public class PendingMessageRelayService {
+  private static final int BATCH_SIZE = 100;
+  private static final Duration ROUND_BUDGET = Duration.ofSeconds(40);
 
-  public RedisCacheNamespaceCounterStore(RedisTemplate<String, String> redisTemplate) {
-    this.redisTemplate = redisTemplate;
-  }
+  private final RabbitPersistableMessagePublisher rabbitPersistableMessagePublisher;
 
-  @Override
-  public List<String> multiGet(List<String> keys) {
-    return redisTemplate.opsForValue().multiGet(keys);
-  }
-
-  @Override
-  public String get(String key) {
-    return redisTemplate.opsForValue().get(key);
-  }
-
-  @Override
-  public boolean setIfAbsent(String key, String value, Duration ttl) {
-    return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, ttl));
-  }
-
-  @Override
-  public void increment(String key, Duration ttl) {
-    redisTemplate.opsForValue().increment(key);
-    redisTemplate.expire(key, ttl);
-  }
-
-  @Override
-  public void refreshTtl(String key, Duration ttl) {
-    redisTemplate.expire(key, ttl);
+  /** Sends one batch of due messages. */
+  @Scheduled(fixedDelayString = "${IDENTITY_PENDING_MESSAGES_RELAY_INTERVAL:PT30S}")
+  @SchedulerLock(name = "pending_messages_relay", lockAtMostFor = "PT1M")
+  public void relay() {
+    try {
+      rabbitPersistableMessagePublisher.relayDue(BATCH_SIZE, ROUND_BUDGET);
+    } catch (Exception e) {
+      log.error("Failed to relay pending messages", e);
+    }
   }
 }

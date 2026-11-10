@@ -86,7 +86,7 @@ public class FileSharingAceHelper(
         var selfLeave = aceWrappers.Count > 0 && aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None);
 
         if (!selfLeave &&
-            !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r,_) =>
+            !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r, _) =>
             {
                 var roomType = room?.FolderType;
 
@@ -448,16 +448,27 @@ public class FileSharingAceHelper(
 
             if (emailInvite && share != FileShare.None)
             {
-                var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
-                var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+                var inviteType = FileSecurity.GetTypeByShare(share);
+                var isAgent = entry is IFolder { FolderType: FolderType.AiRoom };
 
-                await studioNotifyService.SendEmailRoomInviteAsync(
-                    w.Email,
-                    entry is Folder<T> { SettingsPrivate: true } ? null : entry.Title,
-                    shortenLink,
-                    entry is IFolder { FolderType: FolderType.AiRoom },
-                    culture,
-                    true);
+                // a repeat of the same invitation within the period builds no link and spends no invitation
+                await using var acceptance = await studioNotifyService.TryAcceptEmailRoomInviteAsync(w.Email, entry.UniqID, inviteType, isAgent);
+                if (acceptance.Accepted)
+                {
+                    var link = invitationService.GetInvitationLink(w.Email, share, authContext.CurrentAccount.ID, entry.Id.ToString(), culture);
+                    var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+
+                    await studioNotifyService.SendEmailRoomInviteAsync(
+                        w.Email,
+                        entry.UniqID,
+                        entry is Folder<T> { SettingsPrivate: true } ? null : entry.Title,
+                        shortenLink,
+                        inviteType,
+                        isAgent,
+                        culture,
+                        true,
+                        acceptance);
+                }
             }
             else
             {
@@ -465,7 +476,7 @@ public class FileSharingAceHelper(
                 {
                     var user = await userManager.GetUsersAsync(w.Id);
 
-                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.SettingsPrivate ? null : room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
+                    await studioNotifyService.SendEmailRoomInviteExistingUserAsync(user, room.UniqID, room.SettingsPrivate ? null : room.Title, roomUrl, room.FolderType is FolderType.AiRoom);
                 }
             }
 
@@ -603,7 +614,7 @@ public class FileSharingAceHelper(
         var tagDao = daoFactory.GetTagDao<T>();
 
         var tagRecent = await tagDao.GetTagsAsync(entry.Id, entry.FileEntryType, TagType.RecentByLink).ToListAsync();
-        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry), ..tagRecent];
+        List<Tag> tags = [Tag.Favorite(currentId, entry), Tag.Recent(currentId, entry), .. tagRecent];
 
         var currentShare = await fileSecurity.GetSharesAsync(entry, [currentId]);
         var currentShareIsNullOrEmpty = currentShare == null || !currentShare.Any();

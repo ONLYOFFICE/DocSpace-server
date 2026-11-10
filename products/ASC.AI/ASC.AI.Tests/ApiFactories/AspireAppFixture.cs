@@ -57,7 +57,8 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
         return new PortalClients(context);
     }
 
-    protected override ValueTask OnDisposingAsync()
+    // A chat can still be answered until the services stop, so the model provider outlives them.
+    protected override ValueTask OnStoppedAsync()
     {
         ModelProvider.Dispose();
 

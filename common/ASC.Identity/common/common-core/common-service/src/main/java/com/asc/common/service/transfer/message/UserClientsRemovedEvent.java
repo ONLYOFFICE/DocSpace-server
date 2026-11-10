@@ -36,6 +36,7 @@ package com.asc.common.service.transfer.message;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
+import java.time.Instant;
 import lombok.*;
 
 /**
@@ -59,4 +60,11 @@ public class UserClientsRemovedEvent implements Serializable {
   /** The unique identifier of the tenant owning the removed clients. */
   @JsonProperty(value = "tenant_id", required = true)
   private long tenantId;
+
+  /**
+   * When the clients were removed. The cleanup removes only the grants made up to this moment, so
+   * that a cleanup delivered late does not remove grants made after the removal.
+   */
+  @JsonProperty("removed_at")
+  private Instant removedAt;
 }

@@ -256,6 +256,37 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     hasBody: true,
   },
   {
+    method: "GET",
+    path: "/byok",
+    tag: "BYOK",
+    operationId: "aiByokKeysList",
+    summary: "List BYOK keys",
+  },
+  {
+    method: "GET",
+    path: "/byok/providers",
+    tag: "BYOK",
+    operationId: "aiByokProviders",
+    summary: "List BYOK providers",
+  },
+  {
+    method: "PUT",
+    path: "/byok/{id}",
+    tag: "BYOK",
+    operationId: "aiByokKeysSet",
+    summary: "Set a BYOK key",
+    pathParams: ["id"],
+    hasBody: true,
+  },
+  {
+    method: "DELETE",
+    path: "/byok/{id}",
+    tag: "BYOK",
+    operationId: "aiByokKeysDelete",
+    summary: "Delete a BYOK key",
+    pathParams: ["id"],
+  },
+  {
     method: "POST",
     path: "/openai/{profileId}/v1/chat/completions",
     tag: "OpenAI passthrough",
@@ -312,6 +343,7 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
 // operation uses but the document does not declare is an OpenAPI lint error
 // (`operation-tag-defined`), so a new custom tag belongs here as well.
 export const CUSTOM_TAG_DOCS: Readonly<Record<string, string>> = {
+  BYOK: "The portal's own provider keys that override built-in models.",
   Export: "Markdown → docx export.",
   Metadata:
     "AI-proposed custom metadata fields for files, and AI-filled values of an entry's fields.",

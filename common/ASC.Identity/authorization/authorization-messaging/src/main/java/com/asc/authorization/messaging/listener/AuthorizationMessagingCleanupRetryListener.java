@@ -71,10 +71,12 @@ public class AuthorizationMessagingCleanupRetryListener {
    *
    * @param message the incoming RabbitMQ message from the dead-letter queue.
    */
-  @RabbitListener(queues = AuthorizationMessagingConfiguration.DEAD_LETTER_QUEUE)
+  @RabbitListener(
+      queues = AuthorizationMessagingConfiguration.DEAD_LETTER_QUEUE,
+      containerFactory = "rabbitRawListenerContainerFactory")
   public void receiveMessage(Message message) {
     var death = message.getMessageProperties().getXDeathHeader();
-    if (!death.isEmpty()) {
+    if (death != null && !death.isEmpty()) {
       var entry = death.getFirst();
       try {
         var counter = Integer.parseInt(entry.get("count").toString());

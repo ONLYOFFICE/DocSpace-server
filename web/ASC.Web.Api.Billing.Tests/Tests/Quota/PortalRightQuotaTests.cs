@@ -31,50 +31,61 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Tests.Tests._04_Portal.Quota;
+
+namespace ASC.Web.Api.Billing.Tests.Tests.Quota;
 
 /// <summary>
-/// GET /api/2.0/portal/quota/right — the cheapest quota that would still cover the portal's
-/// current usage. On a freshly registered portal the current quota is already the free
-/// "startup" plan, so the recommended quota is that same plan and the comparison against the
-/// current quota degenerates to equality rather than a strict downgrade. The TypeScript source
-/// upgrades the tariff first (through the real payments.teamlab.info billing service, which is
-/// not configured in this environment) precisely so that a cheaper plan is recommendable; the
-/// assertions that only make sense on that paid path (<c>visible === true</c>,
-/// <c>productId</c> being truthy) are dropped here, keeping only the invariants that hold
-/// regardless of tariff.
+/// The cheapest plan on sale that still covers the portal's use (<c>GET portal/quota/right</c>). Only plans on sale
+/// count, so a portal on the free startup plan, which is not sold, is recommended the cheapest monthly plan; a paid
+/// portal is recommended a plan no dearer than the one it pays for.
 /// </summary>
-[Trait("Category", "Portal")]
-public class PortalRightQuotaTests(
-    AspireAppFixture fixture)
-    : BaseTest(fixture)
+public class PortalRightQuotaTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    // Commented out for now: GET /portal/quota/right returns null on this integration host —
-    // recommending a plan needs the SaaS tariff catalog, which a standalone-style portal (no
-    // billing, single "default" quota) does not have. Re-enable on a SaaS-seeded environment.
-    /*
     [Fact]
-    public async Task GetRightQuota_Owner_ReturnsQuotaNoMoreExpensiveThanCurrent()
+    public async Task GetRightQuota_FreePortal_RecommendsAMonthlyPlanOnSale()
     {
-        // Arrange
-        await _webApiClient.Authenticate(Owner);
+        // Act
+        var right = (await _portalQuotaApi.GetRightQuotaAsync(TestContext.Current.CancellationToken)).Response;
 
-        // Act & Assert
-        await AssertRightQuotaCoversCurrentAsync();
+        // Assert
+        right.Should().NotBeNull();
+        right.Visible.Should().BeTrue();
+        right.ProductId.Should().NotBeNullOrEmpty();
+        right.Year.Should().BeFalse();
+        right.Free.Should().BeFalse();
     }
 
     [Fact]
-    public async Task GetRightQuota_DocSpaceAdmin_ReturnsQuotaNoMoreExpensiveThanCurrent()
+    public async Task GetRightQuota_PaidPortal_Owner_RecommendsAPlanNoDearerThanThePaidOne()
     {
         // Arrange
-        var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
+        await PayForTenAdministratorsAsync();
+
+        // Act & Assert
+        var (current, right) = await AssertRightQuotaCoversCurrentAsync();
+
+        right.Price.Should().BeLessThan(current.Price, "the portal uses far less than ten administrators' worth");
+    }
+
+    [Fact]
+    public async Task GetRightQuota_PaidPortal_DocSpaceAdmin_RecommendsAPlanNoDearerThanThePaidOne()
+    {
+        // Arrange
+        await PayForTenAdministratorsAsync();
+        var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
         await _webApiClient.Authenticate(admin);
 
         // Act & Assert
         await AssertRightQuotaCoversCurrentAsync();
     }
 
-    private async Task AssertRightQuotaCoversCurrentAsync()
+    private async Task PayForTenAdministratorsAsync()
+    {
+        Payments.Paid(Plans.AdminProductId, quantity: 10, DateTime.UtcNow.Date.AddYears(1));
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+    }
+
+    private async Task<(TenantQuotaDto Current, TenantQuotaDto Right)> AssertRightQuotaCoversCurrentAsync()
     {
         var current = await _portalQuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken);
         var right = await _portalQuotaApi.GetRightQuotaAsync(TestContext.Current.CancellationToken);
@@ -86,6 +97,8 @@ public class PortalRightQuotaTests(
 
         rightQuota.Should().NotBeNull();
         rightQuota.Name.Should().NotBeNullOrEmpty();
+        rightQuota.Visible.Should().BeTrue();
+        rightQuota.ProductId.Should().NotBeNullOrEmpty();
         rightQuota.Features.Should().NotBeNullOrEmpty();
         rightQuota.MaxFileSize.Should().BeGreaterThan(0);
         rightQuota.MaxTotalSize.Should().BeGreaterThan(0);
@@ -93,6 +106,7 @@ public class PortalRightQuotaTests(
         rightQuota.Price.Should().BeLessThanOrEqualTo(currentQuota.Price);
         rightQuota.MaxTotalSize.Should().BeLessThanOrEqualTo(currentQuota.MaxTotalSize);
         rightQuota.CountRoomAdmin.Should().BeLessThanOrEqualTo(currentQuota.CountRoomAdmin);
+
+        return (currentQuota, rightQuota);
     }
-    */
 }

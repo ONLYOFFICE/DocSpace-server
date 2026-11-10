@@ -210,10 +210,10 @@ public class FileLinkPrimaryTests(
     }
 
     /// <remarks>
-    /// BUG 84872: once a file's primary link has been revoked, POST /files/file/{id}/link — the call behind the
-    /// "create external link" button — answers 404 for that file from then on, so the user cannot share it again
-    /// from the product. A new primary link can still be made through PUT /files/file/{id}/links, which the
-    /// button does not use.
+    /// BUG 84872: once a file's primary link had been revoked, POST /files/file/{id}/link — the call behind the
+    /// "create external link" button — answered 404 for that file from then on, because it shared the read path that
+    /// keeps a revoked link from being resurrected (bug 81807). Fixed by letting the explicit create request make a
+    /// new primary link despite the revocation mark; the creation clears the mark, so the read sees the new link.
     /// </remarks>
     [Fact]
     [Trait("Bug", "84872")]
@@ -237,5 +237,8 @@ public class FileLinkPrimaryTests(
         // Assert
         recreated.SharedLink.Primary.Should().BeTrue();
         recreated.SharedLink.Id.Should().NotBe(created.SharedLink.Id);
+
+        var read = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        read.SharedLink.Id.Should().Be(recreated.SharedLink.Id);
     }
 }

@@ -77,6 +77,30 @@ public class UploadSessionChunkTests(
         (await FilesIn(folderId, fileName)).Should().HaveCount(1);
     }
 
+    /// <summary>The flow the web client uses for a small file: one numbered part, then finalize.</summary>
+    [Fact]
+    public async Task FinalizeSession_SmallPayloadSentAsNumberedPart_Returns201AndStoresFileAtVersionOne()
+    {
+        // Arrange
+        var folderId = await GetUserFolderIdAsync(Owner);
+        var payload = MakeBytes(1000, 33);
+        const string fileName = "Autotest Upload Numbered Small.bin";
+        var sessionId = await OpenSession(folderId, fileName, payload.Length);
+        await SendChunk(folderId, sessionId, 1, payload);
+
+        // Act
+        var result = await Finalize(folderId, sessionId);
+
+        // Assert
+        result.Uploaded.Should().BeTrue();
+        result.Version.Should().Be(1);
+        result.Title.Should().Be(fileName);
+        result.File.PureContentLength.Should().Be(payload.Length);
+        await ExpectContent(result.File.Id, payload);
+        (await FilesIn(folderId, fileName)).Should().HaveCount(1);
+        (await VersionsOf(result.File.Id)).Should().Equal(1);
+    }
+
     [Fact]
     public async Task UploadSession_LargePayload_Returns200ForFirstChunkAnd201ForLastWithoutFinalize()
     {

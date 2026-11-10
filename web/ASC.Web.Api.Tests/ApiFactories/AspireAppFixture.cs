@@ -56,7 +56,8 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
         return new PortalClients(context);
     }
 
-    protected override ValueTask OnDisposingAsync()
+    // Webhooks may still be delivered until the services stop, so the receiver outlives them.
+    protected override ValueTask OnStoppedAsync()
     {
         Tests._02_Settings.Webhooks.WebhookReceiver.StopServer();
 

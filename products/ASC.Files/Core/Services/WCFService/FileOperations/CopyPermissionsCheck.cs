@@ -454,7 +454,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom || toFolder.RootFolderType == FolderType.Archive))
+        if (!isRoom && (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms or FolderType.Knowledge or FolderType.KnowledgeRoom or FolderType.InstructionsRoom || toFolder.RootFolderType == FolderType.Archive))
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFolder;
             return check ? throw new SecurityException(errorMsg) : errorMsg;
@@ -621,7 +621,7 @@ public class PermissionCheckStarter<T, TTo>(
             return errorMsg;
         }
 
-        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms || toFolder.RootFolderType == FolderType.Archive)
+        if (toFolder.FolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiProjectRoom or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms || toFolder.RootFolderType == FolderType.Archive)
         {
             errorMsg = FilesCommonResource.ErrorMessage_SecurityException_MoveFile;
             if (check)

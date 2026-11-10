@@ -89,6 +89,7 @@ public class PathProvider(WebImageSupplier webImageSupplier,
             FolderType.AiHub when folder.FolderType == FolderType.AiProjectRoom => string.Format($"ai-projects/{urlPathEncode}/filter?folder={urlPathEncode}"),
             FolderType.AiHub => string.Format($"ai-rooms/{urlPathEncode}/filter?folder={urlPathEncode}"),
             FolderType.Forms => string.Format($"forms/{urlPathEncode}/filter?folder={urlPathEncode}"),
+            FolderType.PrivateRooms => string.Format($"private/{urlPathEncode}/filter?folder={urlPathEncode}"),
             _ => result
         };
 

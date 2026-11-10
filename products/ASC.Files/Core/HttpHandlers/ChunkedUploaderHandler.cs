@@ -135,6 +135,11 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             {
                                 resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
                             }
+                            else
+                            {
+                                // A small session stored the file with this part, so it ends here as a large one does when finalized.
+                                await chunkedUploadSessionHolder.RemoveSessionAsync(resumedSession);
+                            }
 
                             await fileUploader.DeleteLinkAndMarkAsync(resumedSession.File);
 
@@ -201,6 +206,11 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     if (session.UseChunks)
                     {
                         session = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
+                    }
+                    else
+                    {
+                        // Left open, a small session could be aborted, finalized again or written to after this call.
+                        await chunkedUploadSessionHolder.RemoveSessionAsync(session);
                     }
 
                     await fileUploader.DeleteLinkAndMarkAsync(session.File);

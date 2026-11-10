@@ -144,8 +144,11 @@
   <data name="AccountingCustomerOperationService" xml:space="preserve">
     <value>Service</value>
   </data>
+  <data name="AccountingCustomerOperationServiceByok" xml:space="preserve">
+    <value>{0} (BYOK)</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI features</value>
+    <value>AI agents &amp; tools</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
@@ -1222,7 +1225,7 @@
     <value>The number of AI agents should not exceed {0}</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI features</value>
+    <value>AI agents &amp; tools</value>
   </data>
   <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
     <value>Get access to a wide range of AI models through OpenRouter integration. Pay only for what you use, billed from your Wallet.</value>

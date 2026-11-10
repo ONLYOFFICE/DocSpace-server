@@ -78,6 +78,21 @@ public class NotifyRequest(ILoggerFactory loggerFactory, INotifySource notifySou
         return result;
     }
 
+    internal async Task SendFailedAsync(IServiceScope serviceScope)
+    {
+        foreach (var interceptor in _interceptors)
+        {
+            try
+            {
+                await interceptor.SendFailedAsync(this, serviceScope);
+            }
+            catch (Exception err)
+            {
+                _log.ErrorIntercept(interceptor.Name, NotifyAction.ToString(), Recipient.ToString(), err);
+            }
+        }
+    }
+
     internal IPattern GetSenderPattern(string senderName)
     {
         if (_senderNames == null || _patterns == null ||

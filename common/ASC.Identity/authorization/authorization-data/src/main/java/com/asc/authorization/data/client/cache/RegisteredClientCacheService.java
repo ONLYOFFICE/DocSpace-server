@@ -33,6 +33,7 @@
 
 package com.asc.authorization.data.client.cache;
 
+import com.asc.common.utilities.cache.CacheTicket;
 import java.util.Optional;
 
 /** Service interface for caching registered clients resolved from the registration service. */
@@ -44,6 +45,24 @@ public interface RegisteredClientCacheService {
    * @param client the client to cache.
    */
   void put(CachedRegisteredClient client);
+
+  /**
+   * Returns a ticket identifying the current state of invalidations of a client. Take it before
+   * fetching the client from the registration service and hand it to {@link #putUnlessInvalidated}.
+   *
+   * @param clientId the client about to be fetched.
+   * @return the ticket.
+   */
+  CacheTicket ticket(String clientId);
+
+  /**
+   * Stores a client fetched after a cache miss, unless the cache was invalidated since {@code
+   * ticket} was taken, so that a fetch racing with an eviction cannot bring the old client back.
+   *
+   * @param client the fetched client.
+   * @param ticket the ticket taken with {@link #ticket(String)} before the fetch.
+   */
+  void putUnlessInvalidated(CachedRegisteredClient client, CacheTicket ticket);
 
   /**
    * Retrieves a client from the cache by its client ID, regardless of tenant.

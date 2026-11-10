@@ -575,6 +575,20 @@ public class GlobalFolder(
         return result;
     }
 
+    public async ValueTask<int> GetFolderPrivateRoomsAsync(IDaoFactory daoFactory)
+    {
+        var key = $"privaterooms/{tenantManager.GetCurrentTenantId()}";
+
+        if (!DocSpaceFolderCache.TryGetValue(key, out var result))
+        {
+            result = await daoFactory.GetFolderDao<int>().GetFolderIDPrivateRoomsAsync(true);
+
+            DocSpaceFolderCache[key] = result;
+        }
+
+        return result;
+    }
+
     internal static readonly ConcurrentDictionary<string, Lazy<int>> UserRootFolderCache = new(); /*Use SYNCHRONIZED for cross thread blocks*/
 
     public async ValueTask<int> GetFolderMyAsync(IDaoFactory daoFactory)
@@ -969,6 +983,7 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public ValueTask<int> FolderAiAgentsAsync => globalFolder.GetFolderAiAgentsAsync(daoFactory);
     public ValueTask<int> FolderAiHubAsync => globalFolder.GetFolderAiHubAsync(daoFactory);
     public ValueTask<int> FolderFormsAsync => globalFolder.GetFolderFormsAsync(daoFactory);
+    public ValueTask<int> FolderPrivateRoomsAsync => globalFolder.GetFolderPrivateRoomsAsync(daoFactory);
 
     public async Task<T> GetFolderMyAsync<T>()
     {
@@ -1008,6 +1023,11 @@ public class GlobalFolderHelper(IDaoFactory daoFactory, GlobalFolder globalFolde
     public async ValueTask<int> GetFolderFormsAsync()
     {
         return await FolderFormsAsync;
+    }
+
+    public async ValueTask<int> GetFolderPrivateRoomsAsync()
+    {
+        return await FolderPrivateRoomsAsync;
     }
 
     public async ValueTask<int> GetFolderRoomTemplatesAsync()

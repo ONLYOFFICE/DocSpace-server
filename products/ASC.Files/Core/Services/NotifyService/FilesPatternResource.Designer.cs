@@ -343,6 +343,15 @@ namespace ASC.Files.Core.Services.NotifyService {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Private folder.
+        /// </summary>
+        public static string PrivateFolderTitle {
+            get {
+                return ResourceManager.GetString("PrivateFolderTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Private room.
         /// </summary>
         public static string PrivateRoomTitle {
