@@ -215,8 +215,9 @@ public abstract class Migrator(
     /// Unpacks a tar stream into <paramref name="root"/>, counting its entries and the bytes written against the limits.
     /// A path met twice in the archive keeps the later entry, as tar does. A hard link to a file unpacked earlier is
     /// unpacked as a copy of it; symbolic links, other hard links, sparse files and devices are skipped with a line in
-    /// the log, as their target may lie outside the extraction folder. With <paramref name="replaceExisting"/> a file that was there before
-    /// the extraction is replaced rather than refused. <paramref name="onEntry"/> is called before each entry.
+    /// the log, as their target may lie outside the extraction folder. With <paramref name="replaceExisting"/> a file
+    /// that was there before the extraction is replaced rather than refused. <paramref name="onEntry"/> is called
+    /// before each entry.
     /// A truncated tar fails with <see cref="EndOfStreamException"/>: GZipStream does not notice a cut-off stream, but
     /// TarReader requires the end-of-archive block, so even a cut on an entry boundary is reported.
     /// </summary>

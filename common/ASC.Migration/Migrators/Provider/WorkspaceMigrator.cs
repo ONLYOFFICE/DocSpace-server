@@ -143,10 +143,10 @@ public class WorkspaceMigrator : Migrator
         // the same test DataOperatorFactory.GetReadOperator uses to pick a gzipped or a plain tar
         await using var gzip = _backup.EndsWith("tar.gz") ? new GZipStream(file, CompressionMode.Decompress, leaveOpen: true) : null;
 
-        // files are replaced, not refused, as the shared read operator does: the parse that precedes a migration leaves
-        // its unpacked folder behind, and the migration parses the backup again into the same place
-        // the import unpacks with the operation's token as well: nothing is imported before the backup is unpacked, so
-        // stopping it there is safe, and a large backup could not be stopped otherwise
+        // Files are replaced, not refused, as the shared read operator does: the parse that precedes a migration leaves
+        // its unpacked folder behind, and the migration parses the backup again into the same place. The migration
+        // unpacks with the operation's token as well: nothing is imported before the backup is unpacked, so stopping
+        // it there is safe, and a large backup could not be stopped otherwise.
         var extracted = await ExtractTarAsync(gzip ?? (Stream)file, folder, true, async () =>
         {
             if (reportProgress)
