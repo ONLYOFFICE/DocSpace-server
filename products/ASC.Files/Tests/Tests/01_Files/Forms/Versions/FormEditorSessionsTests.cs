@@ -288,13 +288,33 @@ public class FormEditorSessionsTests
 
     // A co-editor reported a->b and closed; another renamed the field back before the save, so v2 still has a.
     [Fact]
-    public void MatchFields_SessionReportOlderThanTheSave_DoesNotVacateTheKey()
+    public void MatchFields_SessionRenamesKeyAnEarlierSessionVacated_TakesTableOfItsOwn()
     {
+        // The second session renames a: the old field, if the first one's last report was stale, or a new field that took
+        // its key. The reports cannot tell which, so its answers must not continue the old a's.
         var formFilling = new FormFillingProperties { EditorFieldRenames = [Session(1, 2, Rename("a", "b")), Session(2, 3, Rename("a", "x"))] };
 
-        var renames = FormFillingReportCreator.MatchFields(3, 1, Previous("a"), Fields("x"), formFilling);
+        FormFillingReportCreator.MatchFields(3, 1, Previous("a"), Fields("x"), formFilling).Should().BeNull();
+    }
 
-        renames.Select(r => (r.OldKey, r.NewKey)).Should().Equal(("a", "x"));
+    // The scenario of the review: a renamed to b and a new field a added in v2, the new a renamed to c in v3; v3 is
+    // compared with v1, and the answers to the old a must not show under c.
+    [Fact]
+    public void MatchFields_RenamedThenKeyTakenAndRenamedAgain_TakesTableOfItsOwn()
+    {
+        var formFilling = new FormFillingProperties { EditorFieldRenames = [Session(1, 2, Rename("a", "b")), Session(2, 3, Rename("a", "c"))] };
+
+        FormFillingReportCreator.MatchFields(3, 1, Previous("a"), Fields("b", "c"), formFilling).Should().BeNull();
+    }
+
+    // A field renamed on by a later session is the same field: its chain continues.
+    [Fact]
+    public void MatchFields_LaterSessionRenamesTheRenamedField_ContinuesTheChain()
+    {
+        var formFilling = new FormFillingProperties { EditorFieldRenames = [Session(1, 2, Rename("a", "b")), Session(2, 3, Rename("b", "c"))] };
+
+        FormFillingReportCreator.MatchFields(3, 1, Previous("a"), Fields("c"), formFilling)
+            .Select(r => (r.OldKey, r.NewKey)).Should().Equal(("a", "c"));
     }
 
     // v2 added a field and is decided but never filled: its field is not a column yet, so v3 may rename into it.
@@ -327,11 +347,23 @@ public class FormEditorSessionsTests
     public void MatchFields_SameLayoutKeyOfRemovedField_TakesTableOfItsOwn()
     {
         var formFilling = new FormFillingProperties { VersionLinks = [new FormVersionLink { Version = 2, TableVersion = 1 }] };
-        var tableColumns = FormFillingReportCreator.GetTableColumns(formFilling, 1, [Previous(1, "name", "old"), Previous(2, "name")], 3);
+        var tableColumns = FormFillingReportCreator.GetTableColumns(formFilling, 1, [Previous(1, "name", "old", "email"), Previous(2, "name", "email")], 3);
 
-        tableColumns.Should().HaveCount(2);
-        FormFillingReportCreator.MatchFields(3, 1, Previous(2, "name"), Fields("old"), formFilling, tableColumns).Should().BeNull();
-        FormFillingReportCreator.MatchFields(3, 1, Previous(2, "name"), Fields("fullName"), formFilling, tableColumns)
+        tableColumns.Should().HaveCount(3);
+        FormFillingReportCreator.MatchFields(3, 1, Previous(2, "name", "email"), Fields("old", "email"), formFilling, tableColumns).Should().BeNull();
+        FormFillingReportCreator.MatchFields(3, 1, Previous(2, "name", "email"), Fields("fullName", "email"), formFilling, tableColumns)
+            .Select(r => (r.OldKey, r.NewKey)).Should().Equal(("name", "fullName"));
+    }
+
+    // Without the editor's reports and without one field that kept its key, two forms of as many text fields would be
+    // taken for one form renamed, and the answers of another form would join the same columns.
+    [Fact]
+    public void MatchFields_SameLayoutWithoutAnUnchangedKey_TakesTableOfItsOwn()
+    {
+        var formFilling = new FormFillingProperties();
+
+        FormFillingReportCreator.MatchFields(2, 1, Previous("name", "email"), Fields("product", "price"), formFilling).Should().BeNull();
+        FormFillingReportCreator.MatchFields(2, 1, Previous("name", "email"), Fields("fullName", "email"), formFilling)
             .Select(r => (r.OldKey, r.NewKey)).Should().Equal(("name", "fullName"));
     }
 

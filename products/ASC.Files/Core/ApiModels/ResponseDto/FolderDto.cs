@@ -522,7 +522,7 @@ public class FolderDtoHelper(
                     {
                         // Responses can be analysed only when the form has them in the forms database.
                         var originalFormProperties = await fileDao.GetProperties(originalFormId);
-                        canAnalyze = await FormHasAnalysableResponsesAsync(originalFormProperties?.FormFilling);
+                        canAnalyze = await FormHasAnalysableResponsesAsync(originalFormProperties?.FormFilling, originalForm.Version);
                     }
                 }
             }

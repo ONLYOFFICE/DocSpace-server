@@ -1707,9 +1707,17 @@ public class EntryManager(IDaoFactory daoFactory,
         await fileMarker.MarkAsNewAsync(file);
         await fileMarker.RemoveMarkAsNewAsync(file);
 
+        // The file is saved already: a failure here must not fail the save the document server reported.
         if (file.IsPdf)
         {
-            await OnFormVersionChangedAsync(file);
+            try
+            {
+                await OnFormVersionChangedAsync(file);
+            }
+            catch (Exception e)
+            {
+                logger.WarnFormVersionStateNotUpdated(e, file.Id.ToString(), file.Version);
+            }
         }
 
         return file;
@@ -2333,6 +2341,11 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             origProperties.FormFilling.ResultFormNumber++;
+            if (originalForm != null)
+            {
+                origProperties.FormFilling.LastSubmittedVersion = Math.Max(origProperties.FormFilling.LastSubmittedVersion, originalForm.Version);
+            }
+
             await fileDao.SaveProperties(originalFormId, origProperties);
 
             var resultFolder = await folderDao.GetFolderAsync(origProperties.FormFilling.ResultsFolderId);

@@ -34,9 +34,9 @@
 namespace ASC.Files.Tests.Tests._01_Files.Forms;
 
 /// <summary>
-/// <see cref="FormFieldMatcher.Match"/> — compares two form versions and decides which fields were
-/// renamed, so earlier answers can stay in one table and report sheet instead of starting a new one.
-/// Pure logic, no portal: builds the metadata lists in memory and checks the pairing directly.
+/// <see cref="FormFieldMatcher.MatchSameLayout"/> and <see cref="FormFieldMatcher.CountShared"/> — how two form versions
+/// are compared without the editor's reports: by place when only keys changed, and by the column names they share.
+/// Pure logic, no portal: builds the metadata lists in memory.
 /// </summary>
 [Trait("Category", "Unit")]
 [Trait("Feature", "Forms")]
@@ -49,144 +49,83 @@ public class FormFieldMatcherTests
         renames.Select(r => (r.OldKey, r.NewKey)).ToArray();
 
     [Fact]
-    public void Match_SameFields_ReturnsNoRenames()
+    public void MatchSameLayout_SameFields_ReturnsNoRenames()
     {
-        var previous = new[] { Field("name"), Field("email") };
-        var current = new[] { Field("name"), Field("email") };
-
-        var result = FormFieldMatcher.Match(previous, current);
-
-        result.Should().BeEmpty();
+        FormFieldMatcher.MatchSameLayout([Field("name"), Field("email")], [Field("name"), Field("email")]).Should().BeEmpty();
     }
 
     [Fact]
-    public void Match_OneKeyRenamedSameType_ReturnsThatRename()
+    public void MatchSameLayout_KeysChangedInPlace_PairsByPosition()
     {
-        var previous = new[] { Field("name"), Field("email") };
-        var current = new[] { Field("fullName"), Field("email") };
+        var result = FormFieldMatcher.MatchSameLayout([Field("first"), Field("email"), Field("last")], [Field("firstName"), Field("email"), Field("lastName")]);
 
-        var result = FormFieldMatcher.Match(previous, current);
-
-        Pairs(result).Should().Equal(("name", "fullName"));
+        Pairs(result!).Should().Equal(("first", "firstName"), ("last", "lastName"));
     }
 
     [Fact]
-    public void Match_TwoKeysRenamedInOrder_ReturnsBothRenames()
+    public void MatchSameLayout_ListRenamedWithSameOptions_IsARename()
     {
-        // An unchanged field in the middle anchors the comparison; the gaps around it pair up.
-        var previous = new[] { Field("first"), Field("email"), Field("last") };
-        var current = new[] { Field("firstName"), Field("email"), Field("lastName") };
+        var result = FormFieldMatcher.MatchSameLayout([Field("choice", "comboBox", ["yes", "no"])], [Field("decision", "comboBox", ["yes", "no"])]);
 
-        var result = FormFieldMatcher.Match(previous, current);
-
-        Pairs(result).Should().Equal(("first", "firstName"), ("last", "lastName"));
+        Pairs(result!).Should().Equal(("choice", "decision"));
     }
 
     [Fact]
-    public void Match_AllKeysRenamedSameTypesAndCount_PairsByPosition()
+    public void MatchSameLayout_FieldAddedOrRemoved_IsNotTheSameLayout()
     {
-        var previous = new[] { Field("a"), Field("b") };
-        var current = new[] { Field("x"), Field("y") };
-
-        var result = FormFieldMatcher.Match(previous, current);
-
-        Pairs(result).Should().Equal(("a", "x"), ("b", "y"));
+        FormFieldMatcher.MatchSameLayout([Field("name")], [Field("name"), Field("email")]).Should().BeNull();
+        FormFieldMatcher.MatchSameLayout([Field("name"), Field("email")], [Field("name")]).Should().BeNull();
     }
 
     [Fact]
-    public void Match_FieldAdded_IsNotARename()
+    public void MatchSameLayout_TypeChangedInPlace_IsNotTheSameLayout()
     {
-        var previous = new[] { Field("name") };
-        var current = new[] { Field("name"), Field("email") };
-
-        var result = FormFieldMatcher.Match(previous, current);
-
-        result.Should().BeEmpty();
+        FormFieldMatcher.MatchSameLayout([Field("status")], [Field("state", "comboBox", ["open", "closed"])]).Should().BeNull();
     }
 
     [Fact]
-    public void Match_FieldRemoved_IsNotARename()
+    public void MatchSameLayout_ListOptionsChanged_IsNotTheSameLayout()
     {
-        var previous = new[] { Field("name"), Field("email") };
-        var current = new[] { Field("name") };
+        FormFieldMatcher.MatchSameLayout([Field("color", "comboBox", ["red"])], [Field("colour", "comboBox", ["red", "blue"])]).Should().BeNull();
+    }
 
-        var result = FormFieldMatcher.Match(previous, current);
-
-        result.Should().BeEmpty();
+    // A key that moved to another place means the fields may have been reordered, so no pairing by place is safe.
+    [Fact]
+    public void MatchSameLayout_KeyMovedToAnotherPlace_IsNotTheSameLayout()
+    {
+        FormFieldMatcher.MatchSameLayout([Field("a"), Field("b")], [Field("b"), Field("c")]).Should().BeNull();
     }
 
     [Fact]
-    public void Match_EnumRenamedSameOptions_ReturnsRename()
+    public void MatchSameLayout_DuplicateKeys_CountAsOneField()
     {
-        var previous = new[] { Field("choice", "comboBox", ["yes", "no"]) };
-        var current = new[] { Field("decision", "comboBox", ["yes", "no"]) };
-
-        var result = FormFieldMatcher.Match(previous, current);
-
-        Pairs(result).Should().Equal(("choice", "decision"));
+        FormFieldMatcher.MatchSameLayout([Field("fullName"), Field("fullName")], [Field("fullName")]).Should().BeEmpty();
     }
 
     [Fact]
-    public void Match_SameKeyDifferentType_NeedsOwnTable()
+    public void MatchSameLayout_EmptyVersion_IsNotTheSameLayout()
     {
-        // A field kept its key but changed type: the old answers no longer fit, so a new table is needed.
-        var previous = new[] { Field("status") };
-        var current = new[] { Field("status", "comboBox", ["open", "closed"]) };
-
-        var result = FormFieldMatcher.Match(previous, current);
-
-        result.Should().BeNull();
+        FormFieldMatcher.MatchSameLayout([], [Field("name")]).Should().BeNull();
+        FormFieldMatcher.MatchSameLayout([Field("name")], []).Should().BeNull();
     }
 
     [Fact]
-    public void Match_SameKeyEnumOptionsChanged_NeedsOwnTable()
+    public void CountShared_CountsFieldsByColumnName()
     {
-        var previous = new[] { Field("color", "comboBox", ["red"]) };
-        var current = new[] { Field("color", "comboBox", ["red", "blue"]) };
-
-        var result = FormFieldMatcher.Match(previous, current);
-
-        result.Should().BeNull();
+        FormFieldMatcher.CountShared([Field("name"), Field("email")], [Field("email"), Field("phone")]).Should().Be(1);
+        FormFieldMatcher.CountShared([Field("name")], [Field("phone")]).Should().Be(0);
     }
 
     [Fact]
-    public void Match_AmbiguousPairing_NeedsOwnTable()
+    public void CountShared_SameKeyOtherType_CannotShareATable()
     {
-        // Two removed fields, one added, all the same type and no anchor: which one became the new
-        // field is a guess, so the match refuses and a new table is used.
-        var previous = new[] { Field("a"), Field("b") };
-        var current = new[] { Field("c") };
-
-        var result = FormFieldMatcher.Match(previous, current);
-
-        result.Should().BeNull();
+        FormFieldMatcher.CountShared([Field("status")], [Field("status", "comboBox", ["open", "closed"])]).Should().BeNull();
     }
 
+    // The options of a list may differ: its column takes them all.
     [Fact]
-    public void Match_DuplicateKeys_CountAsOneField()
+    public void CountShared_ListOptionsChanged_StillShares()
     {
-        // Two fields given the same key share one column; the duplicate must not look like a rename.
-        var previous = new[] { Field("fullName"), Field("fullName") };
-        var current = new[] { Field("fullName") };
-
-        var result = FormFieldMatcher.Match(previous, current);
-
-        result.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void Match_EmptyPreviousVersion_NeedsOwnTable()
-    {
-        var result = FormFieldMatcher.Match([], [Field("name")]);
-
-        result.Should().BeNull();
-    }
-
-    [Fact]
-    public void Match_EmptyCurrentVersion_NeedsOwnTable()
-    {
-        var result = FormFieldMatcher.Match([Field("name")], []);
-
-        result.Should().BeNull();
+        FormFieldMatcher.CountShared([Field("color", "comboBox", ["red"])], [Field("color", "comboBox", ["red", "blue"])]).Should().Be(1);
     }
 }

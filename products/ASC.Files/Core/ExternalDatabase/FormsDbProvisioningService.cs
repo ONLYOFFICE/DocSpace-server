@@ -60,7 +60,11 @@ public class FormsDbProvisioningService(
     private const int ConnectionIdleLifetime = 60;
 
     private const int RoConnectionLimit = 5;
-    private const string RoStatementTimeout = "30s";
+
+    // Above what the pools of every service of one portal may open (two pools of five per process), so it only stops a
+    // single portal from taking the server's connections.
+    private const int RwConnectionLimit = 50;
+    internal const string RoStatementTimeout = "30s";
 
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
@@ -103,8 +107,8 @@ public class FormsDbProvisioningService(
         await connection.OpenAsync();
 
         await ExecuteAsync(connection, $"DROP SCHEMA IF EXISTS \"{schemaName}\" CASCADE");
-        await ExecuteAsync(connection, $"DROP ROLE IF EXISTS \"{GetRoUser(tenantId)}\"");
-        await ExecuteAsync(connection, $"DROP ROLE IF EXISTS \"{GetRwUser(tenantId)}\"");
+        await DropRoleAsync(connection, tenantId, GetRoUser(tenantId));
+        await DropRoleAsync(connection, tenantId, GetRwUser(tenantId));
 
         await settingsManager.SaveAsync(new BuiltinFormsDbSettings(), tenantId);
         await _cache.RemoveAndNotifyAsync(GetCacheKey(tenantId));
@@ -165,6 +169,67 @@ public class FormsDbProvisioningService(
         }
     }
 
+    // Before PostgreSQL 15 every role may create objects in "public" and temporary tables; the portal accounts must not.
+    // Database-wide, so revoked once under a lock of its own: portals provisioned at once would otherwise update the same
+    // catalog rows together and fail with "tuple concurrently updated".
+    private async Task RevokePublicDefaultsAsync(NpgsqlConnection connection)
+    {
+        if (!await PublicKeepsDefaultsAsync(connection))
+        {
+            return;
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync("forms_db_public_defaults"))
+        {
+            if (await PublicKeepsDefaultsAsync(connection))
+            {
+                await ExecuteAsync(connection, "REVOKE CREATE ON SCHEMA public FROM PUBLIC");
+                await ExecuteAsync(connection, $"REVOKE TEMPORARY ON DATABASE \"{connection.Database}\" FROM PUBLIC");
+            }
+        }
+    }
+
+    // Whether PUBLIC (grantee 0) still may create in "public" or make temporary tables; a NULL ACL is the default one.
+    private static async Task<bool> PublicKeepsDefaultsAsync(NpgsqlConnection connection)
+    {
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText =
+            "SELECT EXISTS (SELECT 1 FROM pg_namespace n, aclexplode(COALESCE(n.nspacl, acldefault('n', n.nspowner))) a " +
+            "WHERE n.nspname = 'public' AND a.grantee = 0 AND a.privilege_type = 'CREATE') " +
+            "OR EXISTS (SELECT 1 FROM pg_database d, aclexplode(COALESCE(d.datacl, acldefault('d', d.datdba))) a " +
+            "WHERE d.datname = current_database() AND a.grantee = 0 AND a.privilege_type = 'TEMPORARY')";
+
+        return await cmd.ExecuteScalarAsync() is true;
+    }
+
+    // A role that cannot be dropped (it still owns something elsewhere) must at least no longer sign in.
+    private async Task DropRoleAsync(NpgsqlConnection connection, int tenantId, string role)
+    {
+        try
+        {
+            if (await RoleExistsAsync(connection, role))
+            {
+                await ExecuteAsync(connection, $"DROP OWNED BY \"{role}\"");
+            }
+
+            await ExecuteAsync(connection, $"DROP ROLE IF EXISTS \"{role}\"");
+        }
+        catch (PostgresException e)
+        {
+            logger.WarnFormsDbRoleNotDropped(e, tenantId, role);
+            await ExecuteAsync(connection, $"ALTER ROLE \"{role}\" NOLOGIN");
+        }
+    }
+
+    private static async Task<bool> RoleExistsAsync(NpgsqlConnection connection, string role)
+    {
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = "SELECT 1 FROM pg_roles WHERE rolname = @role";
+        cmd.Parameters.Add(new NpgsqlParameter("@role", role));
+
+        return await cmd.ExecuteScalarAsync() != null;
+    }
+
     private async Task<FormsDbCredentials> ProvisionAsync(int tenantId)
     {
         var schemaName = GetSchemaName(tenantId);
@@ -176,14 +241,13 @@ public class FormsDbProvisioningService(
         await using var connection = new NpgsqlConnection(AdminConnectionString);
         await connection.OpenAsync();
 
-        // Before PostgreSQL 15 every role may create objects in "public" and temporary tables; the portal accounts must not.
-        await ExecuteAsync(connection, "REVOKE CREATE ON SCHEMA public FROM PUBLIC");
-        await ExecuteAsync(connection, $"REVOKE TEMPORARY ON DATABASE \"{connection.Database}\" FROM PUBLIC");
+        await RevokePublicDefaultsAsync(connection);
 
         await ExecuteAsync(connection, $"CREATE SCHEMA IF NOT EXISTS \"{schemaName}\"");
 
         await CreateOrResetRoleAsync(connection, rwUser, rwPassword);
         await CreateOrResetRoleAsync(connection, roUser, roPassword);
+        await ExecuteAsync(connection, $"ALTER ROLE \"{rwUser}\" CONNECTION LIMIT {RwConnectionLimit}");
         await ExecuteAsync(connection, $"ALTER ROLE \"{roUser}\" CONNECTION LIMIT {RoConnectionLimit}");
         await ExecuteAsync(connection, $"ALTER ROLE \"{roUser}\" SET statement_timeout = '{RoStatementTimeout}'");
 
@@ -291,4 +355,7 @@ internal static partial class FormsDbProvisioningServiceLogger
 
     [LoggerMessage(LogLevel.Warning, "Forms DB schema '{SchemaName}' for tenant {TenantId} is missing or its account cannot sign in; re-provisioning")]
     public static partial void WarnFormsDbUnusable(this ILogger<FormsDbProvisioningService> logger, int tenantId, string schemaName);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: role {role} of tenant {tenantId} could not be dropped and can no longer sign in")]
+    public static partial void WarnFormsDbRoleNotDropped(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId, string role);
 }

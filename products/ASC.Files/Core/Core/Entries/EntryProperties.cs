@@ -138,6 +138,11 @@ public class FormFillingProperties<T>
     public int ResultFormNumber { get; set; }
 
     /// <summary>
+    /// The latest version of the original form a response was submitted to; 0 for responses taken before it was kept.
+    /// </summary>
+    public int LastSubmittedVersion { get; set; }
+
+    /// <summary>
     /// The date when the form filling was stopped.
     /// </summary>
     public DateTime FillingStopedDate { get; set; }

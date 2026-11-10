@@ -6111,6 +6111,12 @@ public class FileStorageService //: IFileStorageService
 
     public async Task SetEditorFieldRenamesAsync(int formId, int openedVersion, long sequence, string sessionId, List<FormFieldKeyChangeRequest> renames)
     {
+        // Validation checks the entries, not their presence: a null entry is a malformed request.
+        if (renames.Exists(r => r == null))
+        {
+            throw new ArgumentException("An entry of renames is null", nameof(renames));
+        }
+
         var form = await daoFactory.GetFileDao<int>().GetFileAsync(formId) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         if (!await CanReportFormFieldChangesAsync(form))
         {

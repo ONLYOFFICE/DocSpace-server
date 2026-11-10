@@ -93,6 +93,19 @@ public class FormFieldChangesPermissionsTests(AspireAppFixture fixture) : FormFi
         (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)).Should().Contain(EditRefusal);
     }
 
+    // A null entry is a malformed body, refused before anything is read; a typed request cannot carry it.
+    [Fact]
+    public async Task FieldChanges_NullRenameEntry_IsBadRequest()
+    {
+        var (_, formId) = await CreateStartedFormAsync();
+
+        await _filesClient.Authenticate(Owner);
+        using var response = await new RawApiClient(_filesClient).PutRawAsync($"api/2.0/files/file/{formId}/fieldchanges",
+            """{"version":1,"sequence":1,"sessionId":"tab","renames":[null]}""", TestContext.Current.CancellationToken);
+
+        ((int)response.StatusCode).Should().Be(400);
+    }
+
     private async Task<(int RoomId, int FormId)> CreateStartedFormAsync()
     {
         await _filesClient.Authenticate(Owner);

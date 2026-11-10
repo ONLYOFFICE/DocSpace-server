@@ -631,7 +631,7 @@ public class FileDtoHelper(
             // form has responses in the forms database.
             result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] =
                 result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx]
-                && await FormHasAnalysableResponsesAsync(formFilling);
+                && await FormHasAnalysableResponsesAsync(formFilling, file.Version);
 
             if (isOriginalForm && formFilling.ResultsFolderId is int resultsFolderId)
             {

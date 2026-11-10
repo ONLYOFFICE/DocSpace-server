@@ -403,10 +403,11 @@ public class FormFillingReportCreator(
             }
 
             var versions = GetTableVersions(formFilling, tableVersion);
-            var (success, count) = await factoryIndexerForm.TryCountAsync(r =>
+            var (success, indexedIds) = await factoryIndexerForm.TrySelectIdsAsync(r =>
                 r.Where(s => s.RoomId, formFilling.RoomId)
                  .Where(s => s.OriginalFormId, originalFormId)
-                 .In(s => s.OriginalFormVersion, versions));
+                 .In(s => s.OriginalFormVersion, versions)
+                 .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
 
             if (!success)
             {
@@ -414,16 +415,16 @@ public class FormFillingReportCreator(
                 return false;
             }
 
-            if (count >= BaseIndexer<DbFormsItemDataSearch>.QueryLimit)
+            if (indexedIds.Count >= BaseIndexer<DbFormsItemDataSearch>.QueryLimit)
             {
-                logger.InfoIdleTableKeptTooLarge(tableName, count);
+                logger.InfoIdleTableKeptTooLarge(tableName, indexedIds.Count);
                 return false;
             }
 
-            var result = await builtinFormsDatabaseClient.DropIdleTableAsync(tableName, cutoff, count);
-            if (result == IdleTableDrop.MoreRowsThanIndex)
+            var result = await builtinFormsDatabaseClient.DropIdleTableAsync(tableName, cutoff, indexedIds.ToHashSet());
+            if (result == IdleTableDrop.RowsMissingFromIndex)
             {
-                logger.WarnIdleTableKeptIndexBehind(tableName, count);
+                logger.WarnIdleTableKeptIndexBehind(tableName, indexedIds.Count);
             }
 
             return result == IdleTableDrop.Dropped;
@@ -752,6 +753,8 @@ public class FormFillingReportCreator(
         to.VersionLinks = from.VersionLinks;
         to.PendingVersionLinks = from.PendingVersionLinks;
         to.EditorFieldRenames = from.EditorFieldRenames;
+        to.ResultFormNumber = Math.Max(to.ResultFormNumber, from.ResultFormNumber);
+        to.LastSubmittedVersion = Math.Max(to.LastSubmittedVersion, from.LastSubmittedVersion);
     }
 
     private async Task<FormFillingProperties<int>> GetFormFillingAsync(int originalFormId)
@@ -763,6 +766,27 @@ public class FormFillingReportCreator(
     internal static int GetTableVersion(FormFillingProperties<int> formFilling, int version)
     {
         return formFilling?.VersionLinks?.FirstOrDefault(l => l.Version == version)?.TableVersion ?? version;
+    }
+
+    /// <summary>
+    /// Whether the table the given version writes to may hold responses, which is what analysis reads. The response
+    /// counter covers every version, so a version that took a table of its own has none until its first response; the
+    /// table holds responses when one of its versions is not later than the last submitted one. Responses taken before
+    /// the submitted version was kept leave that unknown, and the counter decides.
+    /// </summary>
+    public static bool HasResponsesInVersionTable<T>(FormFillingProperties<T> formFilling, int version)
+    {
+        if (formFilling is not { ResultFormNumber: > 0 })
+        {
+            return false;
+        }
+
+        if (formFilling.LastSubmittedVersion == 0 || formFilling is not FormFillingProperties<int> state)
+        {
+            return true;
+        }
+
+        return GetVersionsInTable(state, version).Exists(v => v <= state.LastSubmittedVersion);
     }
 
     /// <summary>The versions of the form whose responses are in the table the given version writes to.</summary>
@@ -1133,9 +1157,13 @@ public class FormFillingReportCreator(
         // A key of the previous version to its key after the known renames, applied in the order of the versions.
         var known = new Dictionary<string, string>();
         var renamedAt = new Dictionary<string, int>();
+        var vacatedBySession = new Dictionary<string, int>();
         foreach (var (savedVersion, openedVersion, renames) in decided.Concat(sessions).OrderBy(r => r.Version))
         {
-            ComposeRenames(known, renamedAt, renames, savedVersion, openedVersion);
+            if (!ComposeRenames(known, renamedAt, vacatedBySession, renames, savedVersion, openedVersion))
+            {
+                return null;
+            }
         }
 
         var tracked = sessions.Count > 0;
@@ -1174,7 +1202,10 @@ public class FormFillingReportCreator(
                 : f)
             .ToList();
 
-        if (!tracked && FormFieldMatcher.MatchSameLayout(renamed, after) is { } positional)
+        // Without the editor's reports the layout alone would make any two forms of as many text fields one form: a field
+        // that kept its key is the anchor that tells a renamed form from another one.
+        var anchored = renamed.Exists(f => after.Exists(a => NormalizeColumnName(a.Key) == NormalizeColumnName(f.Key)));
+        if (!tracked && anchored && FormFieldMatcher.MatchSameLayout(renamed, after) is { } positional)
         {
             if (positional.Exists(r => foreign.Contains(NormalizeColumnName(r.NewKey))))
             {
@@ -1256,9 +1287,11 @@ public class FormFillingReportCreator(
     // The renames of one version or one editor session happen at once, so swapped keys stay swapped. A session reports
     // from the version it opened: a key a decided link renamed away in that version or before now names a field the
     // earlier versions did not have. Only a decided link vouches that the key was vacated: it was matched against the
-    // saved fields, while a session's last report may be older than the version it was saved as.
-    private static void ComposeRenames(Dictionary<string, string> known, Dictionary<string, int> renamedAt, IEnumerable<FormFieldRename> renames,
-        int version, int openedVersion)
+    // saved fields, while a session's last report may be older than the version it was saved as. So when a later
+    // session renames a key an earlier session renamed away, it is either the old field or a new one that took its key,
+    // and the reports cannot tell which: false, the version takes a table of its own.
+    private static bool ComposeRenames(Dictionary<string, string> known, Dictionary<string, int> renamedAt, Dictionary<string, int> vacatedBySession,
+        IEnumerable<FormFieldRename> renames, int version, int openedVersion)
     {
         var composed = new List<(string Origin, string NewKey)>();
         foreach (var rename in renames ?? [])
@@ -1267,6 +1300,11 @@ public class FormFillingReportCreator(
             if (origin == null && renamedAt.TryGetValue(rename.OldKey, out var renamedVersion) && renamedVersion <= openedVersion)
             {
                 continue;
+            }
+
+            if (origin == null && openedVersion > 0 && vacatedBySession.TryGetValue(rename.OldKey, out var vacatedVersion) && vacatedVersion <= openedVersion)
+            {
+                return false;
             }
 
             composed.Add((origin ?? rename.OldKey, rename.NewKey));
@@ -1278,13 +1316,20 @@ public class FormFillingReportCreator(
             if (origin == newKey)
             {
                 renamedAt.Remove(origin);
+                vacatedBySession.Remove(origin);
             }
             // The version the key was vacated at, not the latest one that renamed the field further.
             else if (openedVersion == 0)
             {
                 renamedAt.TryAdd(origin, version);
             }
+            else
+            {
+                vacatedBySession.TryAdd(origin, version);
+            }
         }
+
+        return true;
     }
 
     // An editor opens the form this many times at most before the version is saved; more is not a person at work.

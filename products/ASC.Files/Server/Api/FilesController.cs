@@ -1218,7 +1218,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/fieldchanges</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The report was taken; a late, repeated or surplus one is dropped without an error")]
-    [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, `renames` has more than 500 entries, a key is empty or longer than 255 characters, or `sessionId` is longer than 64 characters or has other characters than letters, digits, hyphens and underscores")]
+    [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, `renames` has more than 500 entries or a null one, a key is empty or longer than 255 characters, or `sessionId` is longer than 64 characters or has other characters than letters, digits, hyphens and underscores")]
     [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, it is a copy of a form, the caller may not edit it, or the document editors are Community Edition, which do not track renamed fields")]
     [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpPut("file/{fileId}/fieldchanges")]

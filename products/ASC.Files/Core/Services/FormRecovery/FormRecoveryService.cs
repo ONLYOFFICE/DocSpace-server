@@ -457,6 +457,7 @@ public class FormRecoveryService(
                 }
 
                 resultFormNumber = ++formProperties.FormFilling.ResultFormNumber;
+                formProperties.FormFilling.LastSubmittedVersion = Math.Max(formProperties.FormFilling.LastSubmittedVersion, version.File.Version);
                 await fileDao.SaveProperties(form.Id, formProperties);
 
                 properties.FormFilling.OriginalFormId = form.Id;

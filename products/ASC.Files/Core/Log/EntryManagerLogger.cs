@@ -34,6 +34,9 @@
 namespace ASC.Files.Core.Log;
 internal static partial class EntryManagerLogger
 {
+    [LoggerMessage(LogLevel.Warning, "The form version state of {fileId} was not updated after version {version} was saved")]
+    public static partial void WarnFormVersionStateNotUpdated(this ILogger<EntryManager> logger, Exception exception, string fileId, int version);
+
     [LoggerMessage(LogLevel.Error, "Error on update {fileId} to version {version}")]
     public static partial void ErrorUpdateFile(this ILogger<EntryManager> logger, string fileId, int version, Exception exception);
 

@@ -509,7 +509,7 @@ public class FileEntryDtoHelper(
         }
     }
 
-    protected async Task<bool> FormHasAnalysableResponsesAsync<T>(FormFillingProperties<T> formFilling)
+    protected async Task<bool> FormHasAnalysableResponsesAsync<T>(FormFillingProperties<T> formFilling, int currentVersion)
     {
         if (externalDatabaseClient.IsEnabled())
         {
@@ -517,8 +517,9 @@ public class FileEntryDtoHelper(
         }
 
         // No table check: an idle built-in table may be dropped, and it is restored from the search index when analysis starts.
-        return builtinFormsDatabaseClient.IsEnabled() && formFilling is { ResultFormNumber: > 0 };
+        return builtinFormsDatabaseClient.IsEnabled() && FormFillingReportCreator.HasResponsesInVersionTable(formFilling, currentVersion);
     }
+
 
     private async Task<bool> FormHasExternalDbTableAsync(string tableName)
     {

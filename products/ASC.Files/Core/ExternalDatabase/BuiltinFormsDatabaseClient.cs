@@ -68,6 +68,18 @@ public class BuiltinFormsDatabaseClient(
         return new NpgsqlConnection(credentials.RwConnectionString);
     }
 
+    // Every transaction read-only and every statement bounded as on the read-only account, on the portal's own account.
+    internal async Task<DbConnection> CreateAnalysisConnectionAsync()
+    {
+        var credentials = _provisioned ?? await provisioner.GetOrProvisionAsync(tenantManager.GetCurrentTenantId());
+        var builder = new NpgsqlConnectionStringBuilder(credentials.RwConnectionString)
+        {
+            Options = $"-c default_transaction_read_only=on -c statement_timeout={FormsDbProvisioningService.RoStatementTimeout}"
+        };
+
+        return new NpgsqlConnection(builder.ConnectionString);
+    }
+
     /// <summary>
     /// Binds this client to the portal's existing schema for background work, which must never provision one; false
     /// when the portal has none that signs in.
@@ -141,10 +153,11 @@ public class BuiltinFormsDatabaseClient(
     }
 
     /// <summary>
-    /// Drops the table if it is still unused since <paramref name="cutoff"/> (UTC) and holds no more than
-    /// <paramref name="maxRows"/> rows, when given; the checks and the drop are one transaction.
+    /// Drops the table if it is still unused since <paramref name="cutoff"/> (UTC) and, when
+    /// <paramref name="indexedFormIds"/> is given, holds no row whose form id is not among them; the checks and the drop
+    /// are one transaction.
     /// </summary>
-    public async Task<IdleTableDrop> DropIdleTableAsync(string tableName, DateTime cutoff, long? maxRows = null)
+    public async Task<IdleTableDrop> DropIdleTableAsync(string tableName, DateTime cutoff, IReadOnlySet<int>? indexedFormIds = null)
     {
         if (!_formTableRegex.IsMatch(tableName))
         {
@@ -166,10 +179,11 @@ public class BuiltinFormsDatabaseClient(
             return IdleTableDrop.Kept;
         }
 
-        // More rows than the index can give back: the index lost some, and a rebuilt table would miss them.
-        if (maxRows != null && await CountRowsAsync(connection, tx, tableName) > maxRows)
+        // A row the index cannot give back would be missing from the rebuilt table. Compared by form id, not by count:
+        // the index may hold other rows than the table, as many or more.
+        if (indexedFormIds != null && (await ReadFormIdsAsync(connection, tx, tableName)).Any(id => !indexedFormIds.Contains(id)))
         {
-            return IdleTableDrop.MoreRowsThanIndex;
+            return IdleTableDrop.RowsMissingFromIndex;
         }
 
         await using var dropCmd = connection.CreateCommand();
@@ -183,7 +197,7 @@ public class BuiltinFormsDatabaseClient(
         return IdleTableDrop.Dropped;
     }
 
-    private static async Task<long> CountRowsAsync(DbConnection connection, DbTransaction tx, string tableName)
+    private static async Task<List<int>> ReadFormIdsAsync(DbConnection connection, DbTransaction tx, string tableName)
     {
         await using var existsCmd = connection.CreateCommand();
         existsCmd.Transaction = tx;
@@ -191,13 +205,24 @@ public class BuiltinFormsDatabaseClient(
         existsCmd.Parameters.Add(new NpgsqlParameter("@tableName", tableName));
         if (await existsCmd.ExecuteScalarAsync() is not true)
         {
-            return 0;
+            return [];
         }
 
-        await using var countCmd = connection.CreateCommand();
-        countCmd.Transaction = tx;
-        countCmd.CommandText = $"SELECT count(*) FROM \"{tableName}\"";
-        return Convert.ToInt64(await countCmd.ExecuteScalarAsync());
+        await using var idsCmd = connection.CreateCommand();
+        idsCmd.Transaction = tx;
+        idsCmd.CommandText = $"SELECT \"form_id\" FROM \"{tableName}\"";
+
+        var ids = new List<int>();
+        await using var reader = await idsCmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            if (!reader.IsDBNull(0))
+            {
+                ids.Add(reader.GetInt32(0));
+            }
+        }
+
+        return ids;
     }
 
     /// <summary>
@@ -273,6 +298,6 @@ public enum IdleTableDrop
     /// <summary>Used again since the cutoff, or not a form table.</summary>
     Kept,
 
-    /// <summary>Holds more rows than the search index, so a table rebuilt from it would miss some.</summary>
-    MoreRowsThanIndex
+    /// <summary>Holds rows the search index does not, so a table rebuilt from it would miss them.</summary>
+    RowsMissingFromIndex
 }

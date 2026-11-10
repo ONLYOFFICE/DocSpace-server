@@ -57,6 +57,7 @@ public class FormSchemaProvider(
     IDaoFactory daoFactory,
     ExternalDatabaseClient externalDatabaseClient,
     BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
+    BuiltinFormsAnalysisClient builtinFormsAnalysisClient,
     FormFillingReportCreator formFillingReportCreator,
     TenantManager tenantManager,
     IFusionCache fusionCache,
@@ -84,7 +85,7 @@ public class FormSchemaProvider(
             return await TryGetTableNameAsync(file) is not null;
         }
 
-        return builtinFormsDatabaseClient.IsEnabled() && await GetStartedFormFillingAsync(file) is { ResultFormNumber: > 0 };
+        return builtinFormsDatabaseClient.IsEnabled() && FormFillingReportCreator.HasResponsesInVersionTable(await GetStartedFormFillingAsync(file), file.Version);
     }
 
     /// <summary>
@@ -135,7 +136,7 @@ public class FormSchemaProvider(
     // Not cached: an idle built-in table may be dropped at any time, and it is restored here.
     private async Task<string?> TryGetBuiltinTableNameAsync(File<int> file, FormFillingProperties<int>? formFilling)
     {
-        if (!builtinFormsDatabaseClient.IsEnabled() || formFilling is not { ResultFormNumber: > 0 })
+        if (!builtinFormsDatabaseClient.IsEnabled() || formFilling is null || !FormFillingReportCreator.HasResponsesInVersionTable(formFilling, file.Version))
         {
             return null;
         }
@@ -209,7 +210,8 @@ public class FormSchemaProvider(
                 return null;
             }
 
-            var client = externalDatabaseClient.IsEnabled() ? externalDatabaseClient : builtinFormsDatabaseClient;
+            // The built-in database is read through a read-only, time-bounded client: the queries are built by an assistant.
+            var client = externalDatabaseClient.IsEnabled() ? externalDatabaseClient : builtinFormsAnalysisClient;
             var rowCount = await client.CountAsync(tableName);
             // The columns as the table holds them: a field whose name the database cuts to another field's is not there.
             var columns = client.GetStoredColumns(await formFillingReportCreator.GetColumnDefinitionsAsync(file.Id, file.Version));
