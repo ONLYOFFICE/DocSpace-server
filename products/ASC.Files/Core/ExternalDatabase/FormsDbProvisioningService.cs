@@ -118,7 +118,7 @@ public class FormsDbProvisioningService(
 
     /// <summary>
     /// The stored credentials of the portal when they still sign in, or null; never provisions, so background work
-    /// cannot recreate a dropped schema or reset the passwords an administrator handed out.
+    /// cannot recreate a dropped schema or reset its passwords.
     /// </summary>
     public Task<FormsDbCredentials?> GetProvisionedAsync(int tenantId) => TryGetProvisionedAsync(tenantId);
 
