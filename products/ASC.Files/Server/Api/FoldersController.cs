@@ -956,7 +956,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section with one page of the files the caller opened lately", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, `searchArea` is `PrivateRooms`, or the metadata filter names an unknown template or field")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Recent\" section")]
     [SwaggerResponse(404, "The \"Recent\" section could not be resolved for this account")]
     [HttpGet("@recent")]

@@ -102,7 +102,8 @@ its own route.
 settings in `readability/` on every published description of the document (the webhook sentence
 included), so the queue says what the tools say. Where a tool is not installed, `tools.py` computes the
 same thresholds with the counting of the vacuum rule; where neither is, that stand-in decides alone.
-The `FORM:` line of the scan names who judged, and the manifest keeps it: step 7 has to judge with the
+The `FORM:` line of the scan names who judged, per document when the documents differ (a tool can fail
+on one document only), and the manifest keeps the judge of each document: step 7 has to judge with the
 same tools, or a finding can open or close for that reason alone.
 
 One description gets one form finding. A soft departure next to a hard one is part of the hard one's

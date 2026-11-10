@@ -706,7 +706,10 @@ def freshness(root, scope):
 
 
 def run(root, scope, threshold, found_tools=None):
-    result = dict(sections=[], diag=collections.OrderedDict(), stale=[], unmatched={}, form_notes=[],
+    # form_source and form_notes are per document: a tool can fail on one document of the scope and
+    # run on the next, and then the two are judged by different tools.
+    result = dict(sections=[], diag=collections.OrderedDict(), stale=[], unmatched={},
+                  form_source=collections.OrderedDict(), form_notes=collections.OrderedDict(),
                   doc_order={key: i for i, key in enumerate(projects(root))})
     generator =generator_response_texts(root)
     found_tools = found_tools if found_tools is not None else tools.discover()
@@ -734,8 +737,8 @@ def _run(root, scope, threshold, result, generator, found_tools, work):
                    for op in operations if op["description"].strip()]
         doc_work = os.path.join(work, key)
         os.makedirs(doc_work, exist_ok=True)
-        forms, result["form_source"], notes = tools.form_verdicts(entries, found_tools, doc_work)
-        result["form_notes"] = sorted(set(result["form_notes"]) | set(notes))
+        forms, result["form_source"][key], result["form_notes"][key] = tools.form_verdicts(
+            entries, found_tools, doc_work)
 
         per_controller = collections.defaultdict(list)
         stale_ops = []
@@ -801,6 +804,30 @@ def _run(root, scope, threshold, result, generator, found_tools, work):
     result["batches"] = plan_batches(result)
     result["cross_doc_params"] = cross_document_params(result)
     return result
+
+
+def form_line(result):
+    """Who judged the form, for the FORM: line: one judge when every document had the same one, else
+    the judge of each document — a tool that failed on one document only must show which one."""
+    judged = [(key, source, result["form_notes"].get(key, [])) for key, source in result["form_source"].items()]
+    if not judged:
+        return "own checks"
+    if len({(source, tuple(notes)) for _, source, notes in judged}) == 1:
+        _, source, notes = judged[0]
+        return source + "".join(" · " + n for n in notes)
+    return "; ".join("{0}: {1}{2}".format(key, source, "".join(" · " + n for n in notes))
+                     for key, source, notes in judged)
+
+
+def form_moved(manifest_form_by, form_now):
+    """Documents judged by other tools now than at declaration, as "key: before → now".
+
+    A manifest written before the judge was kept per document holds one string for all of them.
+    """
+    before = (manifest_form_by if isinstance(manifest_form_by, dict)
+              else {key: manifest_form_by for key in form_now})
+    return ["{0}: {1} → {2}".format(key, before[key], now)
+            for key, now in form_now.items() if key in before and before[key] != now]
 
 
 def unmatched_lines(result):
@@ -1072,7 +1099,7 @@ def write_manifest(root, result, batch, threshold, scope):
         baseline=sorted(finding_ids(result)),
         # Who judged the form. Another set of tools at verification can open or close form findings
         # on its own, so step 7 has to know.
-        form_by=result.get("form_source", "own checks"),
+        form_by=dict(result["form_source"]),
         diag={key: dict(diag) for key, diag in result["diag"].items()},
     )
     path = os.path.join(root, MANIFEST_PATH)
@@ -1121,10 +1148,8 @@ def verify_batch(root, result):
                 moved.append("{0}.{1}: {2} → {3}".format(key, field, diag.get(field), now.get(field)))
         if now.get("stale", 0) > diag.get("stale", 0):
             moved.append("{0}.stale: {1} → {2}".format(key, diag.get("stale"), now.get("stale")))
-    form_now = result.get("form_source", "own checks")
-    if manifest.get("form_by", form_now) != form_now:
-        moved.append("form judged by {0} at declaration, by {1} now — pass the same tools, or "
-                     "--own-checks if they are gone".format(manifest["form_by"], form_now))
+    for change in form_moved(manifest.get("form_by", {}), result["form_source"]):
+        moved.append("form of {0} — pass the same tools, or --own-checks if they are gone".format(change))
 
     for item in left:
         print("  STILL OPEN: {0}".format(item))
@@ -1411,8 +1436,7 @@ def main():
 
     for key, diag in result["diag"].items():
         print("{0:10} ".format(key) + "  ".join("{0}={1}".format(k, v) for k, v in diag.items()))
-    print("FORM: judged by {0}{1}".format(result.get("form_source", "own checks"),
-                                          "".join(" · " + n for n in result["form_notes"])))
+    print("FORM: judged by " + form_line(result))
     unmatched = unmatched_lines(result)
     for line in unmatched:
         print("UNMATCHED: " + line)

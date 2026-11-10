@@ -422,10 +422,10 @@ def main():
             for check, severity, match, message in alerts:
                 print("  Vale    {0} ({1}) \"{2}\": {3}".format(check, severity, match, message))
         if vac is not None:
-            found = vac.get(item["key"], [])
-            if not found:
+            vac_alerts = vac.get(item["key"], [])
+            if not vac_alerts:
                 print("  vacuum  clean")
-            for code, message in found:
+            for code, message in vac_alerts:
                 print("  vacuum  {0}: {1}".format(code, message))
 
     print()
