@@ -520,7 +520,8 @@ public class AuthenticationController(
     /// `POST api/2.0/authentication/{code}` accepts a code sent to it. If a code sent to this number is still valid,
     /// the call sends no new SMS. You can repeat it to change a number that is not activated yet. The answer has no
     /// token. To send another code, use `POST api/2.0/authentication/sendsms`. If the user already has an activated
-    /// number, the call returns 500. An empty number also returns 500.
+    /// number, the call returns 500. An empty number also returns 500. If SMS codes are on for the user but the
+    /// portal cannot send them, the call returns 405. It still saves the number but sends no SMS.
     /// </remarks>
     /// <summary>
     /// Set a mobile phone
@@ -528,6 +529,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/setphone</path>
     [Tags("Authentication")]
     [SwaggerResponse(200, "The masked phone number the code was sent to and the moment that code expires - no authentication token yet", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(405, "SMS two-factor is switched on for the user but the portal cannot send SMS codes, for example because its plan does not include them; the number is stored and no code is sent")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
@@ -553,10 +555,10 @@ public class AuthenticationController(
     /// counts toward the SMS usage of the portal. Earlier codes stay valid until they expire, by default after 10
     /// minutes. The first accepted code cancels every code of the number. By default, a number gets at most 6 codes
     /// in 10 minutes. You can repeat the call up to this limit. More calls return 500 until the codes expire. The
-    /// answer has no token. To finish the sign-in, send the code to
-    /// `POST api/2.0/authentication/{code}`. The call returns 401 for a wrong password or an unknown user. It returns
-    /// 403 for a disabled user or after too many failed attempts. A rejected key in `confirmData` returns 404. If the
-    /// user has no stored phone number, the call returns 400. If SMS codes are off for the user, it returns 500.
+    /// answer has no token. To finish the sign-in, send the code to `POST api/2.0/authentication/{code}`. The call
+    /// returns 401 for a wrong password or an unknown user. It returns 403 for a disabled user or after too many
+    /// failed attempts. A rejected key in `confirmData` returns 404. If the user has no stored phone number, the call
+    /// returns 400. If SMS codes are off on the portal or for the user, it returns 405.
     /// </remarks>
     /// <summary>
     /// Send SMS code
@@ -569,6 +571,7 @@ public class AuthenticationController(
     [SwaggerResponse(401, "The password, the confirmation key or the third-party profile was rejected")]
     [SwaggerResponse(403, "The user is disabled, or too many failed attempts have blocked further sign-ins for these credentials")]
     [SwaggerResponse(404, "No user of this portal matches the credentials in the request body")]
+    [SwaggerResponse(405, "SMS two-factor is not available on the portal or not required for this user, so there is no code to send")]
     [SwaggerResponse(429, "The portal rate limiter rejected the call - retry after the interval in the `Retry-After` header")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("sendsms")]

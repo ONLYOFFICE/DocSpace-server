@@ -31,50 +31,21 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Core;
+namespace ASC.Notify.Engine;
 
-[Singleton]
-public class WalletStaticProvider
+internal class DuplicateMessageInterceptor(NotifyDeduplicationService notifyDeduplicationService) : ISendInterceptor
 {
-    private readonly ConcurrentDictionary<string, string> _cache = new();
+    public string Name => "__syspreventrepeatedmessageinterceptor";
+    public InterceptorPlace PreventPlace => InterceptorPlace.MessageSend;
+    public InterceptorLifetime Lifetime => InterceptorLifetime.Global;
 
-    private static readonly Assembly _assembly = typeof(WalletStaticProvider).Assembly;
-    private static readonly string _assemblyName = _assembly.GetName().Name;
-
-    private const string DefaultKey = "default";
-
-    public async ValueTask<string> GetImageAsync(string key)
+    public Task<bool> PreventSend(NotifyRequest request, InterceptorPlace place, IServiceScope serviceScope)
     {
-        if (_cache.TryGetValue(key, out var img))
-        {
-            return img;
-        }
-
-        img = await ReadSvgResourceAsync(key);
-        if (img == null && key != DefaultKey)
-        {
-            img = await GetImageAsync(DefaultKey);
-        }
-
-        if (img != null)
-        {
-            _cache.TryAdd(key, img);
-        }
-
-        return img;
+        return notifyDeduplicationService.IsDuplicateAsync(request);
     }
 
-    private static async Task<string> ReadSvgResourceAsync(string key)
+    public Task SendFailedAsync(NotifyRequest request, IServiceScope serviceScope)
     {
-        await using var stream = _assembly.GetManifestResourceStream($"{_assemblyName}.img.{key}.svg");
-
-        if (stream == null)
-        {
-            return null;
-        }
-
-        using var reader = new StreamReader(stream);
-
-        return await reader.ReadToEndAsync();
+        return notifyDeduplicationService.ReleaseAsync(request);
     }
 }

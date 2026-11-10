@@ -679,13 +679,14 @@ public abstract class FoldersController<T>(
     /// Returns the primary external link of a folder or a room, and creates it if it does not exist. The call uses
     /// the body only when it creates the link. If the link exists, the call returns it unchanged. Requires the right
     /// to manage the links of the folder. Other callers get 403. The room manager has this right, but a content
-    /// creator does not. The first call changes data. You can repeat it, and later calls return the same link. To
-    /// change a link, use `PUT api/2.0/files/folder/{id}/links`. If `access` grants nothing, the call creates no link
-    /// and returns an empty response. Read the address from `sharedTo.shareLink`. The call returns 400 if the title
-    /// or password is too long, or the password breaks the portal policy. It also returns 400 if `expirationDate` is
-    /// more than 10 years ahead. It also returns 403 if folder links cannot have this access level. The link limit
-    /// and a ban on external links outside public rooms also return 403. If the folder does not exist, the call
-    /// returns 404. If the primary link was revoked, the call returns 404 and creates no new one.
+    /// creator does not. The call changes data only when it creates the link. You can repeat it, and later calls
+    /// return the same link. To change a link, use `PUT api/2.0/files/folder/{id}/links`. If `access` grants nothing,
+    /// the call creates no link and returns an empty response. Read the address from `sharedTo.shareLink`. The call
+    /// returns 400 if the title or password is too long, or the password breaks the portal policy. It also returns
+    /// 400 if `expirationDate` is more than 10 years ahead. It also returns 403 if folder links cannot have this
+    /// access level. The link limit and a ban on external links outside public rooms also return 403. If the folder
+    /// does not exist, the call returns 404. If the primary link was revoked, the call creates a new one with a new
+    /// ID. Until then, `GET api/2.0/files/folder/{id}/link` returns 404.
     /// </remarks>
     /// <summary>
     /// Create the folder primary external link
@@ -695,7 +696,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
     [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms")]
-    [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{id}/link")]
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
@@ -708,7 +709,8 @@ public abstract class FoldersController<T>(
             requiredAuth: inDto.FolderLink.Internal,
             allowUnlimitedDate: true,
             denyDownload: inDto.FolderLink.DenyDownload,
-            password: inDto.FolderLink.Password);
+            password: inDto.FolderLink.Password,
+            recreateRevoked: true);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -835,9 +837,13 @@ public class FoldersControllerCommon(
     SecurityContext securityContext,
     FilesSettingsHelper filesSettingsHelper,
     SettingsManager settingsManager,
-    MetadataFilterHelper metadataFilterHelper)
+    MetadataFilterHelper metadataFilterHelper,
+    AppSettingsService appSettingsService,
+    TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+    private const string PrivateRoomsAppId = "e2e-rooms";
+
     /// <remarks>
     /// Returns one page of the files and folders in the "Common" section. Any signed-in user can call it. The call
     /// is read-only, but a valid `sortBy` becomes the account's default order. The `total` field counts
@@ -1085,6 +1091,46 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFormsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
+    /// <remarks>
+    /// Returns the private rooms section: the flat list of end-to-end encrypted rooms the caller is a member of. Such
+    /// rooms are stored under the "Rooms" tree but are surfaced only here, so `GET api/2.0/files/rooms` leaves them out of
+    /// the active area and lists them when `searchArea` names the private rooms area instead. An administrator who is not
+    /// a member does not see a private room here either. The section is not expanded into room content, so `folders`
+    /// carries the rooms while `files` comes back empty; to read what is inside one of them, call
+    /// `GET api/2.0/files/{folderId}` with the room identifier. Nothing is modified, though passing `sortBy` saves the
+    /// requested order as the default order for this account. `filterType`, `filterValue`, `userIdOrGroupId` and the
+    /// sorting parameters narrow and order the room list, `metadataTemplateId` and `metadataFilters` keep only the rooms
+    /// carrying the template and matching the conditions, `count` and `startIndex` page through it, `total` reports how
+    /// many rooms match the request in full, and `current` describes the section folder itself. Archived private rooms
+    /// stay in the archive area; narrow it with `privacyFilter` of `GET api/2.0/files/rooms`.
+    /// </remarks>
+    /// <summary>Get the private rooms section</summary>
+    /// <path>api/2.0/files/@private</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "The private rooms section with one page of the private rooms the caller is a member of", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
+    [SwaggerResponse(403, "The caller is not allowed to read the private rooms section")]
+    [SwaggerResponse(404, "The end-to-end encrypted rooms app is turned off on this portal")]
+    [HttpGet("@private")]
+    public async Task<FolderContentDto<int>> GetPrivateRoomsFolder(GetCommonFolderRequestDto inDto)
+    {
+        if (!await IsPrivateRoomsAppEnabledAsync())
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivateRoomsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
+    }
+
+    private async Task<bool> IsPrivateRoomsAppEnabledAsync()
+    {
+        var app = await appSettingsService.GetAppAsync(tenantManager.GetCurrentTenantId(), PrivateRoomsAppId);
+
+        return app is { Enabled: true };
+    }
+
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var aiAccessSettingsTask = settingsManager.LoadAsync<TenantAiAccessSettings>();
@@ -1116,6 +1162,12 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderFormsAsync;
+
+        if (await IsPrivateRoomsAppEnabledAsync())
+        {
+            yield return await globalFolderHelper.FolderPrivateRoomsAsync;
+        }
+
         yield return await globalFolderHelper.FolderArchiveAsync;
 
         var aiAccessSettings = await aiAccessSettingsTask;

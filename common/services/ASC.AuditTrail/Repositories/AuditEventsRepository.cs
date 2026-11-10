@@ -187,6 +187,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         var q2 = q1.Select(x => new AuditEventQuery
         {
             Event = x,
+            HidePrivateTitles = true,
             UserData = auditTrailContext.Users.Where(u => u.TenantId == tenant && u.Id == x.UserId).Select(u => new UserData
             {
                 FirstName = u.FirstName,
@@ -241,6 +242,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
                         select new AuditEventQuery
                         {
                             Event = e,
+                            HidePrivateTitles = true,
                             UserData = new UserData
                             {
                                 FirstName = u.FirstName,

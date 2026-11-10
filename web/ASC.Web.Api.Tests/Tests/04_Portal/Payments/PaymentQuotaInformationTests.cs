@@ -36,54 +36,17 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 /// <summary>
 /// GET /api/2.0/portal/payment/quota — the current portal quota. The action only denies Guests
 /// explicitly (<c>IsGuestAsync</c>) and trims the answer for everyone below a DocSpace admin; it
-/// never calls <c>PaymentHelper.DemandConfigured</c>, so it answers the same free "Startup" plan
-/// here as it would in production before any tariff is set.
+/// never calls <c>PaymentHelper.DemandConfigured</c>, so it answers on this host too, which has no
+/// payment services. The tests here pin only what holds for any plan - who is refused and what each
+/// caller type is shown - because the plan itself comes from the quota catalogue of the edition: this
+/// standalone host has its own, and the free "Startup" plan of a SaaS portal is checked by
+/// <c>PaymentQuotaTests</c> in ASC.Web.Api.Billing.Tests.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PaymentQuotaInformationTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // Commented out for now: these assert the SaaS "Startup" plan (id -3) seed data, which this
-    // standalone-style integration host does not have. Re-enable on a SaaS-seeded environment.
-    /*
-    [Fact]
-    public async Task GetQuotaPaymentInformation_Owner_ReturnsStartupQuota()
-    {
-        // Arrange
-        await _webApiClient.Authenticate(Owner);
-
-        // Act
-        var quota = await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
-
-        // Assert
-        quota.StatusCode.Should().Be(200);
-        quota.Response!.Id.Should().Be(-3);
-        quota.Response.Title.Should().Be("Startup");
-        quota.Response.Price!.Value.Should().Be(0);
-        quota.Response.Free.Should().BeTrue();
-        quota.Response.Trial.Should().BeFalse();
-        quota.Response.NonProfit.Should().BeFalse();
-        quota.Response.Features.Should().NotBeNullOrEmpty();
-    }
-
-    [Fact]
-    public async Task GetQuotaPaymentInformation_DocSpaceAdmin_ReturnsStartupQuota()
-    {
-        // Arrange
-        var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
-        await _webApiClient.Authenticate(admin);
-
-        // Act
-        var quota = await _paymentApi.GetQuotaPaymentInformationAsync(cancellationToken: TestContext.Current.CancellationToken);
-
-        // Assert
-        quota.StatusCode.Should().Be(200);
-        quota.Response!.Id.Should().Be(-3);
-        quota.Response.Title.Should().Be("Startup");
-    }
-    */
-
     [Fact]
     public async Task GetQuotaPaymentInformation_Guest_ThrowsAccessDenied()
     {

@@ -699,7 +699,8 @@
             "message-end",
             "message-incomplete",
             "tool-call-pending",
-            "thread-title"
+            "thread-title",
+            "context-compacted"
           ],
           "type": "string",
           "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids.",
@@ -1103,6 +1104,10 @@
         "reasoningSupport": {
           "$ref": "#/components/schemas/AiReasoningSupport",
           "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
+        },
+        "contextWindow": {
+          "type": "number",
+          "description": "Size of the selected model's context window in tokens, as the provider's catalogue reported it at save time (see `Model.contextWindow`). The engine's history compaction measures the thread against it; when absent the id-based table answers, and when that has no row either, `CompactionOptions.defaultContextWindow`. Hosts persist it with the rest of the profile."
         },
         "capabilities": {
           "type": "number",
@@ -1669,6 +1674,10 @@
           "$ref": "#/components/schemas/AiReasoningSupport",
           "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
         },
+        "contextWindow": {
+          "type": "number",
+          "description": "Size of the selected model's context window in tokens, as the provider's catalogue reported it at save time (see `Model.contextWindow`). The engine's history compaction measures the thread against it; when absent the id-based table answers, and when that has no row either, `CompactionOptions.defaultContextWindow`. Hosts persist it with the rest of the profile."
+        },
         "capabilities": {
           "type": "number",
           "description": "Bitmask of capabilities supported by the selected model.",
@@ -1780,6 +1789,10 @@
             7
           ]
         },
+        "contextWindow": {
+          "type": "number",
+          "description": "Size of the model's context window in tokens, when the provider's catalogue reports one (OpenRouter and the ONLYOFFICE route carry `context_length`). Copied onto the profile at save time; absent, the widget falls back to the id-based table in `core/providers/context-window`."
+        },
         "created": {
           "type": "number",
           "description": "Release date as a Unix timestamp in **seconds**, when the provider's catalogue reports one (OpenAI-shaped `/models` responses and OpenRouter carry `created`; Anthropic carries an ISO `created_at`). The model picker sorts on it so the newest releases come first; entries without it fall back to alphabetical order."
@@ -1792,6 +1805,98 @@
       ],
       "additionalProperties": false,
       "description": "AI model metadata. Describes a single model available from a provider."
+    },
+    "AiByokKey": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Model revision id the key is set for, used in the path when replacing or deleting it."
+        },
+        "name": {
+          "type": "string",
+          "description": "Model display name; absent when the model is no longer in the gateway catalogue."
+        },
+        "provider": {
+          "type": "string",
+          "description": "BYOK provider id the key belongs to, e.g. `anthropic`."
+        },
+        "image": {
+          "type": "string",
+          "description": "SVG markup of the logo of the model's owner."
+        }
+      },
+      "required": [
+        "id",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
+    "AiByokProvider": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "BYOK provider id, passed as `provider` when setting a BYOK key."
+        },
+        "name": {
+          "type": "string",
+          "description": "Provider display name."
+        },
+        "image": {
+          "type": "string",
+          "description": "SVG markup of the logo of the provider's models' owner."
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiByokModel"
+          },
+          "description": "Models that can be called through this provider with the portal's own key."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "models"
+      ],
+      "additionalProperties": false
+    },
+    "AiByokModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Model id, used in the path when setting its BYOK key."
+        },
+        "name": {
+          "type": "string",
+          "description": "Model display name."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "AiByokKeyInput": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "BYOK provider id from the model's `byok_providers`, e.g. `anthropic`."
+        },
+        "key": {
+          "type": "string",
+          "description": "Provider API key."
+        }
+      },
+      "required": [
+        "provider",
+        "key"
+      ],
+      "additionalProperties": false
     },
     "AiCreatePromptInput": {
       "type": "object",
@@ -3666,6 +3771,10 @@
             "$ref": "#/components/schemas/AiReasoningSupport",
             "description": "What the model can do with extended thinking, as the provider's catalogue reported it when the profile was saved; the effort choices in the chat follow it. When absent, the abilities are taken from the model ID."
           },
+          "contextWindow": {
+            "type": "number",
+            "description": "Size of the selected model's context window in tokens, as the provider's catalogue reported it at save time (see `Model.contextWindow`). The engine's history compaction measures the thread against it; when absent the id-based table answers, and when that has no row either, `CompactionOptions.defaultContextWindow`. Hosts persist it with the rest of the profile."
+          },
           "capabilities": {
             "type": "number",
             "description": "Bitmask of capabilities supported by the selected model."
@@ -3707,6 +3816,30 @@
         "items": {
           "$ref": "#/components/schemas/AiProfile"
         }
+      }
+    },
+    "aiByokKeysList": {
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AiByokKey"
+        }
+      }
+    },
+    "aiByokProviders": {
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AiByokProvider"
+        }
+      }
+    },
+    "aiByokKeysSet": {
+      "request": {
+        "$ref": "#/components/schemas/AiByokKeyInput"
+      },
+      "response": {
+        "$ref": "#/components/schemas/AiByokKey"
       }
     },
     "aiPromptsCreate": {

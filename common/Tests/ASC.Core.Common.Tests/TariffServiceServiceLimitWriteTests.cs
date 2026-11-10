@@ -53,7 +53,7 @@ public class TariffServiceServiceLimitWriteTests : TariffServiceServiceLimitTest
     public async Task CreateServiceLimit_PortalUnknownToTheAccountingService_ThrowsCustomerNotFound()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
-            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, CustomerNotFoundBody));
+            _ => Reply(HttpStatusCode.BadRequest, CustomerNotFoundBody));
 
         var act = async () => await tariffService.CreateServiceLimitAsync(TenantId, "ai-services", ServiceLimitScope.Total, null, 1m, null, ServiceLimitPeriod.Month);
 
@@ -65,7 +65,7 @@ public class TariffServiceServiceLimitWriteTests : TariffServiceServiceLimitTest
     public async Task SetParticipantServiceLimits_PortalUnknownToTheAccountingService_ThrowsCustomerNotFound()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
-            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, CustomerNotFoundBody));
+            _ => Reply(HttpStatusCode.BadRequest, CustomerNotFoundBody));
 
         var act = async () => await tariffService.SetParticipantServiceLimitsAsync(TenantId, "ai-services", [UserA], 1m, null, ServiceLimitPeriod.Month);
 
@@ -77,7 +77,7 @@ public class TariffServiceServiceLimitWriteTests : TariffServiceServiceLimitTest
     public async Task DisableParticipantServiceLimits_PortalUnknownToTheAccountingService_ThrowsCustomerNotFound()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
-            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, CustomerNotFoundBody));
+            _ => Reply(HttpStatusCode.BadRequest, CustomerNotFoundBody));
 
         var act = async () => await tariffService.DisableParticipantServiceLimitsAsync(TenantId, "ai-services");
 
@@ -89,7 +89,7 @@ public class TariffServiceServiceLimitWriteTests : TariffServiceServiceLimitTest
     {
         // A 400 "not found" that names something other than the customer stays the caller's mistake, answered with 400.
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Service group 'ai-services' not found"}"""));
+            _ => Reply(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Service group 'ai-services' not found"}"""));
 
         var act = async () => await tariffService.CreateServiceLimitAsync(TenantId, "ai-services", ServiceLimitScope.Total, null, 1m, null, ServiceLimitPeriod.Month);
 

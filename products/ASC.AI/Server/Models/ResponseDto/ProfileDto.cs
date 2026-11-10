@@ -45,6 +45,7 @@ public class ProfileDto
     public Capabilities? Capabilities { get; init; }
     public bool? UseResponsesApi { get; init; }
     public bool? CanUseTool { get; init; }
+    public string? ByokProvider { get; init; }
     public long CreatedAt { get; init; }
 }
 

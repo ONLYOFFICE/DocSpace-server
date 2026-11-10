@@ -104,7 +104,7 @@ public class VirtualRoomsInternalController(
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
-    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
     [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
     [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("")]
@@ -381,7 +381,7 @@ public class VirtualRoomsThirdPartyController(
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue")]
     [SwaggerResponse(403, "The caller is not the account that connected the storage or may not create rooms, the storage account was not connected for room storage or already backs a room, the room would be public while the portal forbids external sharing, or, with `createAsNewFolder`, the subfolder cannot be created, as when `title` is blank, `cover` is not a known cover, a tag name is empty or the logo cannot be applied")]
     [SwaggerResponse(404, "`id` is not a folder of a connected third-party storage: a plain number, an identifier with a storage type the portal does not know, or a folder the storage does not have")]
@@ -521,7 +521,7 @@ public abstract class VirtualRoomsController<T>(
                 continue;
             }
 
-            folderTitles.Add(room.Title);
+            folderTitles.Add(NotifyConstants.GetRoomTitle(room));
             yield return await _folderDtoHelper.GetAsync(room);
         }
 
@@ -576,7 +576,7 @@ public abstract class VirtualRoomsController<T>(
                 continue;
             }
 
-            folderTitles.Add(room.Title);
+            folderTitles.Add(NotifyConstants.GetRoomTitle(room));
 
             yield return await _folderDtoHelper.GetAsync(room);
         }
@@ -702,17 +702,17 @@ public abstract class VirtualRoomsController<T>(
 
     /// <remarks>
     /// Changes the members of a room in one call, and returns the access of the listed subjects. The call can add,
-    /// change, and remove members. Each entry names an account, a group, or the email of a person without an
-    /// account. An `access` of `None` removes the
-    /// subject from the room. Requires the room manager role in the room. Other callers get 403. The call changes
-    /// data, and you can repeat it with the same body. If `notify` is true, the portal emails the invitation with
-    /// `message`. Each repeated call then sends the emails again. The call ignores an entry without an access level.
-    /// If a subject is listed twice, the last level wins. An empty list changes nothing. The call skips subjects that
-    /// the caller cannot see, so compare the answer with the request. Without `force`, the call does not remove a
-    /// member who has a form role. It reports this in `error` instead. The answer can also carry a `warning`. The
-    /// call returns 400 for an invalid or too long `email`, too many email invitations, or an invalid `culture`. It
-    /// returns 403 if an entry has an email and the portal forbids guest invitations. It also returns 403 if a
-    /// subject cannot get the access, such as a user or guest as room manager. In a private room, a subject
+    /// change, and remove members. Each entry names an account, a group, or the email of a person without an account.
+    /// An `access` of `None` removes the subject from the room. Requires the room manager role in the room. Other
+    /// callers get 403. The call changes data, and you can repeat it with the same body. If `notify` is true, the
+    /// portal emails the invitation with `message`. A person who got the same invitation or access email for this
+    /// room recently gets no new one. A new `message` does not change this. The call ignores an entry without an
+    /// access level. If a subject is listed twice, the last level wins. An empty list changes nothing. The call skips
+    /// subjects that the caller cannot see, so compare the answer with the request. Without `force`, the call does
+    /// not remove a member who has a form role. It reports this in `error` instead. The answer can also carry a
+    /// `warning`. The call returns 400 for an invalid or too long `email`, too many email invitations, or an invalid
+    /// `culture`. It returns 403 if an entry has an email and the portal forbids guest invitations. It also returns
+    /// 403 if a subject cannot get the access, such as a user or guest as room manager. In a private room, a subject
     /// without encryption keys also returns 403. If the room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Set the room access rights</summary>
@@ -1210,23 +1210,22 @@ public abstract class VirtualRoomsController<T>(
     /// <remarks>
     /// Sends the room invitation email again to invited members. If `resendAll` is true, the call sends it to every
     /// pending invitation of the room and ignores `usersIds`. Otherwise, it sends it only to the accounts in
-    /// `usersIds`. The call skips accounts that are not room members or that the caller cannot see. If `resendAll`
-    /// is false and `usersIds` is empty, the call does nothing. So a 200 does not prove that an email was sent.
-    /// Requires the room manager role in the room. Other callers get 403. An archived room also returns 403. The
-    /// call changes no data. Do not repeat it. Each call sends the emails again. The call has a rate limit, so send one
-    /// list instead of a call per member. The response has no body. A body that cannot be read returns 400. If the
-    /// room does not exist or is a room template, the call returns 404.
+    /// `usersIds`. The call skips accounts that are not room members or that the caller cannot see. If `resendAll` is
+    /// false and `usersIds` is empty, the call does nothing. So a 200 does not prove that an email was sent. Requires
+    /// the room manager role in the room. Other callers get 403. An archived room also returns 403. The call changes
+    /// no data, and you can repeat it. A member who got the invitation to this room recently gets no new email. The
+    /// link in the earlier email stays valid. The response has no body. A body that cannot be read returns 400. If
+    /// the room does not exist or is a room template, the call returns 404.
     /// </remarks>
     /// <summary>Resend the room invitations</summary>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "The invitations that were still pending have been sent again")]
+    [SwaggerResponse(200, "The request is accepted; the pending members it covers are mailed again, except those who already got this invitation within the repeat period")]
     [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller is not a manager of the room, or the room is archived")]
     [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("{id}/resend")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitations(UserInvitationRequestDto<T> inDto)
     {
         await _fileStorageService.ResendEmailInvitationsAsync(inDto.Id, inDto.UserInvitation.UsersIds, inDto.UserInvitation.ResendAll);
@@ -1370,20 +1369,20 @@ public class VirtualRoomsCommonController(
     }
 
     /// <remarks>
-    /// Returns one page of the rooms of a portal section that match a metadata filter. The `searchArea` field picks the
-    /// section, by default the active rooms, and `type` limits the room types. With only `metadataTemplateId`, the call
-    /// keeps the rooms that have this template. A room must match every condition of `metadataFilters`. The call
-    /// searches the `filterValue` text in room titles and metadata values. All given filters combine, and a body
+    /// Returns one page of the rooms of a portal section that match a metadata filter. The `searchArea` field picks
+    /// the section, by default the active rooms, and `type` limits the room types. The `searchArea` field can also
+    /// pick the private rooms section. The active rooms do not include private rooms. With only `metadataTemplateId`,
+    /// the call keeps the rooms that have this template. A room must match every condition of `metadataFilters`. The
+    /// call searches the `filterValue` text in room titles and metadata values. All given filters combine, and a body
     /// without them lists the whole section. Take the template and field IDs from
     /// `GET api/2.0/files/metadata/templates`. Any signed-in user can call it. If the caller cannot read the section,
     /// the call returns 403. A caller sees only the rooms they created or were invited to. A DocSpace admin sees all
     /// rooms. So an empty list means that the caller sees no matching room. The call is read-only, except that it
     /// stores a `sortBy` value as the default sort order of the account. Without `sortBy`, the call uses the stored
     /// order. You can repeat it with the same body. The rooms come in `folders`, and `files` stays empty. The `total`
-    /// field counts all matching rooms before
-    /// paging. To filter by tags, member, owner, storage, quota, or privacy, use `GET api/2.0/files/rooms`. The call
-    /// returns 400 for an unknown template or field, a field outside the template, or more than 20 conditions. It also
-    /// returns 400 for an unknown `sortBy`.
+    /// field counts all matching rooms before paging. To filter by tags, member, owner, storage, quota, or privacy,
+    /// use `GET api/2.0/files/rooms`. The call returns 400 for an unknown template or field, a field outside the
+    /// template, or more than 20 conditions. It also returns 400 for an unknown `sortBy`.
     /// </remarks>
     /// <summary>Search the rooms by metadata</summary>
     /// <path>api/2.0/files/rooms/search</path>
@@ -1409,6 +1408,7 @@ public class VirtualRoomsCommonController(
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.FormTemplates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
+            SearchArea.PrivateRooms => await globalFolderHelper.GetFolderPrivateRoomsAsync(),
             SearchArea.AiHub => await globalFolderHelper.GetFolderAiHubAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };

@@ -161,9 +161,11 @@ public class UploadSessionDefectTests(
         status.Should().BeInRange(400, 499);
     }
 
-    /// <summary>The contract says finalize ends the session and cannot be repeated; a small session answers 201 again.</summary>
+    /// <summary>
+    /// The contract says finalize ends the session and cannot be repeated; a small session used to answer 201 again.
+    /// Finalizing now closes it.
+    /// </summary>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task FinalizeSession_SmallSessionFinalizedTwice_RefusesTheSecondCall()
     {
         // Arrange
@@ -182,9 +184,8 @@ public class UploadSessionDefectTests(
         (await FilesIn(folderId, fileName)).Should().HaveCount(1);
     }
 
-    /// <summary>A chunk sent after finalize is accepted by a small session.</summary>
+    /// <summary>A chunk sent after finalize used to be accepted by a small session. Finalizing now closes it.</summary>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task UploadAsyncSession_SmallSessionChunkAfterFinalize_IsRefusedAndFileIsNotRewritten()
     {
         // Arrange
@@ -202,9 +203,11 @@ public class UploadSessionDefectTests(
         await ExpectContent(fileId, payload);
     }
 
-    /// <summary>The contract says there is nothing left to abort once the file exists; a small session answers 200.</summary>
+    /// <summary>
+    /// The contract says there is nothing left to abort once the file exists, but finalizing a small session used to
+    /// leave its record behind and the abort answered 200. Finalizing now closes it, as it does a large one.
+    /// </summary>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task AbortUploadSession_SmallSessionAfterFinalize_IsRefused()
     {
         // Arrange
@@ -212,13 +215,35 @@ public class UploadSessionDefectTests(
         var payload = MakeBytes(1000, 58);
         var sessionId = await OpenSession(folderId, "Autotest Upload Small Late Abort.bin", payload.Length);
         await SendChunk(folderId, sessionId, 1, payload);
-        await Finalize(folderId, sessionId);
+        var file = await Finalize(folderId, sessionId);
 
         // Act
         var abort = await AbortStatus(folderId, sessionId);
 
         // Assert
-        abort.Should().BeGreaterThanOrEqualTo(400);
+        abort.Should().Be(404);
+        await ExpectContent(file.File.Id, payload);
+    }
+
+    /// <summary>
+    /// A small session completed by the sequential call needs no finalize, yet it used to stay open as well: the
+    /// abort answered 200 and a repeated part was stored as another version.
+    /// </summary>
+    [Fact]
+    public async Task UploadSession_SmallSessionCompleted_ClosesTheSession()
+    {
+        // Arrange
+        var folderId = await GetUserFolderIdAsync(Owner);
+        var payload = MakeBytes(1000, 60);
+        var sessionId = await OpenSession(folderId, "Autotest Upload Small Sequential Close.bin", payload.Length);
+        var file = (await _filesOperationsApi.UploadSessionWithHttpInfoAsync(
+            folderId, sessionId, Part(payload), TestContext.Current.CancellationToken)).Data.Response.File;
+
+        // Act & Assert
+        (await AbortStatus(folderId, sessionId)).Should().Be(404);
+        (await FinalizeStatus(folderId, sessionId)).Should().Be(404);
+        (await SequentialChunkStatus(folderId, sessionId, payload)).Should().Be(404);
+        (await VersionsOf(file.Id)).Should().Equal(1);
     }
 
     /// <summary>A brand-new file is version 1; probing showed one extra version per repeated chunk call.</summary>

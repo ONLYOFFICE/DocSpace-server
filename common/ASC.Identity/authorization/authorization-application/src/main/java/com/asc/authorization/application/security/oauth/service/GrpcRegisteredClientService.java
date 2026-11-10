@@ -69,10 +69,17 @@ public class GrpcRegisteredClientService {
     this.deadlineMs = deadlineMs;
   }
 
+  /**
+   * Tells whether a failed lookup concerns the requested client only, so that it is neither retried
+   * nor counted against the circuit breaker. Registration answers {@code INTERNAL} for a client it
+   * found but could not answer with: counting that would let lookups of one broken client stop the
+   * lookups of every client.
+   */
   private static boolean isNonRetryable(Status.Code code) {
     return switch (code) {
       case NOT_FOUND,
           INVALID_ARGUMENT,
+          INTERNAL,
           PERMISSION_DENIED,
           UNAUTHENTICATED,
           FAILED_PRECONDITION,

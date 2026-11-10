@@ -157,7 +157,7 @@ public abstract class EditorController<T>(
     [SwaggerResponse(403, "The caller cannot edit the file, the file is locked or in Trash, somebody is already editing it and the session was claimed alone, or the document service did not accept the tracking request")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
-    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it, or, with `editingAlone=true`, the file is locked by somebody else or lies in Trash")]
+    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it, or, with `editingAlone=true`, the file lies in Trash")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<string> StartEditFile(StartEditRequestDto<T> inDto)
@@ -168,10 +168,11 @@ public abstract class EditorController<T>(
     /// <remarks>
     /// Starts filling of a PDF form in a form-filling room and returns the form. The portal saves the room, the
     /// title, the starting account, and the original form id on the file. The portal then collects later submissions
-    /// for this form. For any other file, the call changes nothing and returns the file. Requires a role in the room
-    /// other than `FillForms`, or the right to edit the room. Other callers get 403. The call changes data, and you can repeat it. It also returns 403 for an encrypted
-    /// file. If the file does not exist, the call returns 404. To build a spreadsheet of the submitted answers, use
-    /// `POST api/2.0/files/file/{fileId}/xlsx`.
+    /// for this form. For any other file, the call changes nothing and returns the file. A caller who cannot read the
+    /// file gets 403, whatever the file is. Requires a role in the room other than `FillForms`, or the right to edit
+    /// the room. Other callers get 403. The call changes data, and you can repeat it. It also returns 403 for an
+    /// encrypted file. If the file does not exist, the call returns 404. To build a spreadsheet of the submitted
+    /// answers, use `POST api/2.0/files/file/{fileId}/xlsx`.
     /// </remarks>
     /// <summary>
     /// Start filling a form
@@ -179,7 +180,7 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The form file, with the filling properties now stored on it", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "The caller holds only form-filling access on the room, or no access to it at all")]
+    [SwaggerResponse(403, "The caller cannot read the file, or holds only form-filling access on the room, or no access to it at all")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
@@ -199,8 +200,8 @@ public abstract class EditorController<T>(
     /// anonymous caller needs an external link. Without a link, it gets 401. A refresh through a link that does not
     /// allow editing also returns 401. The call changes data of the session, not the document. You can repeat it. On
     /// success, `key` is true and `value` is empty. A failure returns an error code, not a false `key`. If the file
-    /// does not exist, the call returns 404. If the file is locked by another user or is in Trash, a refresh
-    /// returns 500.
+    /// does not exist, the call returns 404. A refresh of a file that another user locked returns 403. A refresh of
+    /// a file in Trash returns 500.
     /// </remarks>
     /// <summary>
     /// Track an editing session
@@ -210,9 +211,9 @@ public abstract class EditorController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The session was refreshed or closed", typeof(ItemKeyValuePair<bool, string>))]
     [SwaggerResponse(401, "An anonymous caller has no external link, or refreshes the session through a link that does not grant editing")]
-    [SwaggerResponse(403, "The document key does not match the revision being edited, or the caller has none of the editing rights on the file")]
+    [SwaggerResponse(403, "The document key does not match the revision being edited, the caller has none of the editing rights on the file, or the session is refreshed while the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
-    [SwaggerResponse(500, "The session is refreshed while the file is locked by somebody else or lies in Trash")]
+    [SwaggerResponse(500, "The session is refreshed while the file lies in Trash")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<ItemKeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
@@ -244,7 +245,7 @@ public abstract class EditorController<T>(
     [SwaggerResponse(200, "The editor configuration for the requested file and mode", typeof(ConfigurationDto<int>))]
     [SwaggerResponse(403, "The caller cannot read the file, asked for a past version without access to the file history, or the file is in Trash")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
-    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
+    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing, or it is an encrypted file of a private room and the connected document server cannot work with encrypted files")]
     [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [AllowNotPayment]

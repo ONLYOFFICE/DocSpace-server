@@ -378,4 +378,10 @@ public class EventDescription<T>
     public int? FromParentType { get; set; }
     public int? FromFolderId { get; set; }
     public bool? IsAgent { get; set; }
+
+    /// <summary>
+    /// Set only on an event of a private room: the titles in this event the audit trail must not show. The history of
+    /// the room, which its members read, shows them.
+    /// </summary>
+    public List<string> PrivateTitles { get; set; }
 }

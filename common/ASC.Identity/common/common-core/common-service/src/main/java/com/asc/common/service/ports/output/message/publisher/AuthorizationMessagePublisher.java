@@ -48,4 +48,15 @@ public interface AuthorizationMessagePublisher<E> {
    * @param message the message to be published.
    */
   void publish(E message);
+
+  /**
+   * Publishes the given message on the caller's thread and returns once it has been handed to the
+   * messaging system, for a caller that has to know the message is out before it goes on.
+   * Publishers that send in the background override this; for the others it is {@link #publish}.
+   *
+   * @param message the message to be published.
+   */
+  default void publishNow(E message) {
+    publish(message);
+  }
 }

@@ -71,14 +71,13 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     }
 
     /// <remarks>
-    /// Emails the caller a link that confirms the deletion of their own profile.
-    /// Any signed-in user can call it. The portal owner and LDAP accounts get 403.
-    /// The call changes no data and sends an email. A repeated call sends a new link.
-    /// To delete the profile, the app calls `DELETE api/2.0/people/@self` with the confirmation token from the link.
-    /// To delete another account, use `DELETE api/2.0/people/{userId}`.
-    /// The call returns a text that you can show to the user, with the email address of the link.
-    /// The address is wrapped in HTML bold tags. Remove them before you show the text outside a web page.
-    /// By default, the limit is 5 calls in 15 minutes per user. More calls return 429.
+    /// Emails the caller a link that confirms the deletion of their own profile. Any signed-in user can call it. The
+    /// portal owner and LDAP accounts get 403. The call changes no data and sends an email. A repeated call shortly
+    /// after the email went out sends no new email, and the link already sent stays valid. To delete the profile, the
+    /// app calls `DELETE api/2.0/people/@self` with the confirmation token from the link. To delete another account,
+    /// use `DELETE api/2.0/people/{userId}`. The call returns a text that you can show to the user, with the email
+    /// address of the link. The address is wrapped in HTML bold tags. Remove them before you show the text outside a
+    /// web page.
     /// </remarks>
     /// <summary>
     /// Send the deletion instructions
@@ -88,7 +87,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [SwaggerResponse(200, "The message stating which address the confirmation link was sent to", typeof(string))]
     [SwaggerResponse(403, "The caller is the portal owner or an LDAP account and cannot delete their own profile")]
     [HttpPut("self/delete")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<string> SendInstructionsToDelete()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -99,8 +97,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
             throw new SecurityException();
         }
 
-        await studioNotifyService.SendMsgProfileDeletionAsync(user);
-        messageService.Send(MessageAction.UserSentDeleteInstructions);
+        if (await studioNotifyService.SendMsgProfileDeletionAsync(user))
+        {
+            messageService.Send(MessageAction.UserSentDeleteInstructions);
+        }
 
         return string.Format(Resource.SuccessfullySentNotificationDeleteUserInfoMessage, "<b>" + user.Email + "</b>");
     }

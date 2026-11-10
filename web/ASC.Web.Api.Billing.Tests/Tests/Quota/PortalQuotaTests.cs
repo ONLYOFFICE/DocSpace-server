@@ -31,31 +31,18 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Tests.Tests._04_Portal.Quota;
+
+namespace ASC.Web.Api.Billing.Tests.Tests.Quota;
 
 /// <summary>
-/// GET /api/2.0/portal/quota — the current portal quota. A freshly registered portal always
-/// starts on the free "startup" plan, so the values here are the fixed defaults of that plan
-/// rather than something the test computes. Billing is not configured in this environment
-/// (payment.url is empty), so the "paid portal" variant of this suite in the TypeScript source
-/// — which upgrades the tariff through the real payments.teamlab.info billing service before
-/// asserting on the paid plan's numbers — cannot be reproduced here and is dropped.
+/// The quota the portal runs under (<c>GET portal/quota</c>): the fixed defaults of the free startup plan a new portal
+/// starts on, and the paid plan's numbers once billing lists a payment for it.
 /// </summary>
-[Trait("Category", "Portal")]
-public class PortalQuotaTests(
-    AspireAppFixture fixture)
-    : BaseTest(fixture)
+public class PortalQuotaTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    // Commented out for now: these assert the SaaS "startup" tariff seed data, which this
-    // integration host (standalone by base-domain, no billing) does not have — the portal runs
-    // on the single "default" quota. Re-enable on a SaaS-seeded environment.
-    /*
     [Fact]
     public async Task GetPortalQuota_Owner_ReturnsFreeStartupQuota()
     {
-        // Arrange
-        await _webApiClient.Authenticate(Owner);
-
         // Act
         var quota = await _portalQuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken);
 
@@ -67,7 +54,7 @@ public class PortalQuotaTests(
     public async Task GetPortalQuota_DocSpaceAdmin_ReturnsFreeStartupQuota()
     {
         // Arrange
-        var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
+        var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
         await _webApiClient.Authenticate(admin);
 
         // Act
@@ -75,6 +62,24 @@ public class PortalQuotaTests(
 
         // Assert
         AssertFreeStartupQuota(quota);
+    }
+
+    [Fact]
+    public async Task GetPortalQuota_AfterAPayment_ReturnsThePaidPlan()
+    {
+        // Arrange
+        Payments.Paid(Plans.AdminProductId, quantity: 10, DateTime.UtcNow.Date.AddYears(1));
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var quota = (await _portalQuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        quota.Free.Should().BeFalse();
+        quota.CountRoomAdmin.Should().Be(10, "ten units of the plan cover ten administrators");
+        quota.Audit.Should().BeTrue();
+        quota.Sso.Should().BeTrue();
+        quota.ContentSearch.Should().BeTrue();
     }
 
     private static void AssertFreeStartupQuota(TenantQuotaWrapper quota)
@@ -114,5 +119,4 @@ public class PortalQuotaTests(
         response.Backup.Should().BeFalse();
         response.AiTools.Should().BeFalse();
     }
-    */
 }

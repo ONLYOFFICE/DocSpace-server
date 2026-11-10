@@ -64,22 +64,24 @@ public class DocsCloudController(
     /// Starts the free Docs Connect trial for the current portal. If the trial is granted, the call adds the assigned
     /// Docs Connect server to the Content Security Policy settings. To check the subscriptions and the tariff state
     /// first, use `GET api/2.0/portal/tariff`. Requires the EditPortalSettings permission, which the portal owner and
-    /// DocSpace admins have. Other callers get 403. The call changes data, and a repeated call returns 400.
-    /// It returns `true` if the trial is granted. It returns `false` if the billing service declines it, for example
-    /// after an earlier trial. Then nothing changes. The call never buys a paid plan. To move a paid Docs Connect
-    /// subscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`. The call returns
-    /// 400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It returns 402 if
-    /// the tariff is delayed or not paid. It returns 403 if the billing service is not configured. If the installation
-    /// has no Docs Connect trial quota, the call returns 404. After a granted trial, the call can still return 403 or
-    /// 500, and the trial stays granted. It returns 403 if the server address makes the Content Security Policy header
-    /// too long. It returns 500 if reading the Docs Connect tenant fails.
+    /// DocSpace admins have. Other callers get 403. The call changes data, and a repeated call returns 400. It
+    /// returns `true` if the trial is granted. It returns `false` if the billing service declines it, for example
+    /// after an earlier trial. Then nothing changes. It also returns `false` if the portal cannot read the answer of
+    /// the billing service. Then the trial may be granted, so check `GET api/2.0/portal/tariff` before you call
+    /// again. The call never buys a paid plan. To move a paid Docs Connect subscription to Docs Connect Dev Pack, use
+    /// `POST api/2.0/settings/docscloud/switchtodevpack`. The call returns 400 if the portal already has a Docs
+    /// Connect trial, Docs Connect, or Docs Connect Dev Pack. It returns 402 if the tariff is delayed or not paid. It
+    /// returns 403 if the billing service is not configured. If the installation has no Docs Connect trial quota, the
+    /// call returns 404. After a granted trial, the call can still return 403 or 500, and the trial stays granted. It
+    /// returns 403 if the server address makes the Content Security Policy header too long. It returns 500 if reading
+    /// the Docs Connect tenant fails.
     /// </remarks>
     /// <summary>
     /// Start the Docs Connect trial
     /// </summary>
     /// <path>api/2.0/settings/docscloud/trial</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "Boolean value: true if the trial subscription is activated, false if the billing service declines it", typeof(bool))]
+    [SwaggerResponse(200, "Boolean value: true if the trial subscription is activated, false if the billing service declines it or its answer could not be read", typeof(bool))]
     [SwaggerResponse(400, "The portal already has a Docs Connect trial, Docs Connect or Docs Connect Dev Pack subscription")]
     [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the trial cannot be started")]
     [SwaggerResponse(403, "The caller has no portal-settings right, the billing service is not configured, or the trial was granted but the address of the assigned Docs Connect server would push the Content Security Policy header over its size limit")]

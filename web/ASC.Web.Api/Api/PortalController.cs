@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -951,23 +951,22 @@ public class PortalController(
     /// <remarks>
     /// Sends the portal owner an email with the links that deactivate the portal and make it active again. This call
     /// does not change the portal. Only the portal owner can call it. Other callers get 403, including a DocSpace
-    /// admin. The call also works while the portal is unpaid. A repeated call sends the email again. By default, the
-    /// limit is 5 calls in 15 minutes per user. More calls return 429. The first link signs
-    /// `PUT api/2.0/portal/suspend`, and the second signs `PUT api/2.0/portal/continue`. To delete the portal
-    /// instead, use `POST api/2.0/portal/delete`. On a server installation, the call returns 500 if every other space
-    /// has limited access. So you cannot deactivate the last space.
+    /// admin. The call also works while the portal is unpaid. A repeated call shortly after the email went out does
+    /// nothing, and the links of the first email stay valid. The first link signs `PUT api/2.0/portal/suspend`, and
+    /// the second signs `PUT api/2.0/portal/continue`. To delete the portal instead, use
+    /// `POST api/2.0/portal/delete`. On a server installation, the call returns 500 if every other space has limited
+    /// access. So you cannot deactivate the last space.
     /// </remarks>
     /// <summary>
     /// Send suspension instructions
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The deactivation letter has been handed to the mail service and the request is recorded in the audit trail; the portal itself is still active and the response carries no content")]
+    [SwaggerResponse(200, "The request is accepted: the deactivation letter is queued and the request recorded in the audit trail, unless the same letter already went out within the repeat period; the portal itself is still active and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [AllowNotPayment]
     [HttpPost("suspend")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendSuspendInstructions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -976,11 +975,18 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeactivationAsync(tenant);
+        if (!acceptance.Accepted)
+        {
+            return;
+        }
+
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
         var suspendUrl = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalSuspend);
         var continueUrl = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalContinue);
 
         await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, await urlShortener.GetShortenLinkAsync(suspendUrl), await urlShortener.GetShortenLinkAsync(continueUrl));
+        acceptance.Complete();
 
         messageService.Send(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
@@ -988,10 +994,10 @@ public class PortalController(
     /// <remarks>
     /// Sends the portal owner an email with the link that deletes the portal. This call does not change the portal.
     /// Only the portal owner can call it. Other callers get 403, including a DocSpace admin. The call also works
-    /// while the portal is unpaid. A repeated call sends the email again. By default, the limit is 5 calls in 15
-    /// minutes per user. More calls return 429. If the portal has payments and is not on trial, the email also warns
-    /// that the subscription stops renewing. The link signs `DELETE api/2.0/portal/delete`, which deletes the portal
-    /// and cannot be undone. To deactivate the portal instead, use `POST api/2.0/portal/suspend`. On a server
+    /// while the portal is unpaid. A repeated call shortly after the email went out does nothing, and the link of the
+    /// first email stays valid. If the portal has payments and is not on trial, the email also warns that the
+    /// subscription stops renewing. The link signs `DELETE api/2.0/portal/delete`, which deletes the portal and
+    /// cannot be undone. To deactivate the portal instead, use `POST api/2.0/portal/suspend`. On a server
     /// installation, the call returns 500 if every other space has limited access. So you cannot delete the last
     /// space.
     /// </remarks>
@@ -1000,12 +1006,11 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The removal letter has been handed to the mail service; nothing about the portal has changed yet and the response carries no content")]
+    [SwaggerResponse(200, "The request is accepted, and the removal letter is queued unless one already went out within the repeat period; nothing about the portal has changed yet and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpPost("delete")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendDeleteInstructions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -1013,6 +1018,12 @@ public class PortalController(
         var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
+
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeletionAsync(tenant);
+        if (!acceptance.Accepted)
+        {
+            return;
+        }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
@@ -1023,6 +1034,7 @@ public class PortalController(
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
+        acceptance.Complete();
     }
 
     /// <remarks>
@@ -1237,7 +1249,11 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Sends the instructions to remove a portal of a user with the ID specified in the request.
+    /// Mails the portal owner the confirmation link that removes this portal; nothing about the portal changes until
+    /// that link is used. The call needs no authentication token: it works only on a server installation, for the
+    /// portal owner's ID, with a key issued for that ID and the removal, valid for an hour - anything else answers
+    /// 403. The letter goes to the owner's address as it is, without waiting for the address to be activated. A repeat
+    /// shortly after the letter went out sends nothing, and the link of that letter stays valid.
     /// </remarks>
     /// <summary>Send removal instructions to the user</summary>
     /// <path>api/2.0/portal/sendremoveinstructions</path>
@@ -1263,10 +1279,17 @@ public class PortalController(
             throw new SecurityException("Access Denied.");
         }
 
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeletionAsync(tenant, false);
+        if (!acceptance.Accepted)
+        {
+            return;
+        }
+
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), false, false);
+        acceptance.Complete();
     }
 
     private async Task DemandPermissionToDeleteTenantAsync(Tenant tenant)

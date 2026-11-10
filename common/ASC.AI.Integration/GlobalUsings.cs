@@ -53,7 +53,10 @@ global using ASC.Security.Cryptography;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
 
 global using NetEscapades.EnumGenerators;
+
+global using Riok.Mapperly.Abstractions;
 
 global using ZiggyCreatures.Caching.Fusion;

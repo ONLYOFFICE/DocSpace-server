@@ -36,119 +36,15 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 /// <summary>
 /// GET /api/2.0/portal/payment/walletservice — a single wallet service's info. Requires
 /// EditPortalSettings and reads local <c>TenantQuota</c> definitions only, so it is unaffected by
-/// the unconfigured billing service.
+/// the unconfigured billing service. The catalogue is SaaS data this standalone host does not have, so only the
+/// access rules are checked here; the services themselves are in <c>WalletServiceTests</c> of
+/// ASC.Web.Api.Billing.Tests.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PaymentWalletServiceTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // Commented out for now: the wallet-service catalog is SaaS seed data this standalone-style
-    // integration host does not have — every id answers 404 "Service could not be found" here.
-    // Re-enable on a SaaS-seeded environment.
-    /*
-    [Fact]
-    public async Task GetWalletService_Owner_AITools_ReturnsFreeService()
-    {
-        // Arrange
-        await _webApiClient.Authenticate(Owner);
-
-        // Act
-        var service = await _paymentApi.GetWalletServiceAsync(TenantWalletService.AITools, TestContext.Current.CancellationToken);
-
-        // Assert
-        service.StatusCode.Should().Be(200);
-        service.Response!.Id.Should().Be((int)TenantWalletService.AITools);
-        service.Response.ServiceName.Should().Be("ai-tools");
-        service.Response.Price!.Value.Should().Be(0);
-        service.Response.Features.Should().NotBeNullOrEmpty();
-    }
-
-    [Fact]
-    public async Task GetWalletService_Owner_Backup_ReturnsPricedService()
-    {
-        // Arrange
-        await _webApiClient.Authenticate(Owner);
-
-        // Act
-        var service = await _paymentApi.GetWalletServiceAsync(TenantWalletService.Backup, TestContext.Current.CancellationToken);
-
-        // Assert
-        service.StatusCode.Should().Be(200);
-        service.Response!.Id.Should().Be((int)TenantWalletService.Backup);
-        service.Response.ServiceName.Should().Be("backup");
-        service.Response.Price!.Value.Should().BeGreaterThan(0);
-        service.Response.Features.Should().NotBeNullOrEmpty();
-    }
-
-    [Fact]
-    public async Task GetWalletService_Owner_Storage_ReturnsPricedService()
-    {
-        // Arrange
-        await _webApiClient.Authenticate(Owner);
-
-        // Act
-        var service = await _paymentApi.GetWalletServiceAsync(TenantWalletService.Storage, TestContext.Current.CancellationToken);
-
-        // Assert
-        service.StatusCode.Should().Be(200);
-        service.Response!.Id.Should().Be((int)TenantWalletService.Storage);
-        service.Response.ServiceName.Should().Be("disk-storage-1-hour");
-        service.Response.Price!.Value.Should().BeGreaterThan(0);
-        service.Response.Features.Should().NotBeNullOrEmpty();
-    }
-
-    [Fact]
-    public async Task GetWalletService_Owner_AISearch_ReturnsFreeService()
-    {
-        // Arrange
-        await _webApiClient.Authenticate(Owner);
-
-        // Act
-        var service = await _paymentApi.GetWalletServiceAsync(TenantWalletService.AISearch, TestContext.Current.CancellationToken);
-
-        // Assert
-        service.StatusCode.Should().Be(200);
-        service.Response!.Id.Should().Be((int)TenantWalletService.AISearch);
-        service.Response.ServiceName.Should().Be("ai-search");
-        service.Response.Price!.Value.Should().Be(0);
-        service.Response.Price.IsoCurrencySymbol.Should().Be("USD");
-        service.Response.Features.Should().NotBeNullOrEmpty();
-    }
-
-    [Fact]
-    public async Task GetWalletService_DocSpaceAdmin_AISearch_ReturnsFreeService()
-    {
-        // Arrange
-        var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
-        await _webApiClient.Authenticate(admin);
-
-        // Act
-        var service = await _paymentApi.GetWalletServiceAsync(TenantWalletService.AISearch, TestContext.Current.CancellationToken);
-
-        // Assert
-        service.StatusCode.Should().Be(200);
-        service.Response!.Id.Should().Be((int)TenantWalletService.AISearch);
-        service.Response.ServiceName.Should().Be("ai-search");
-    }
-
-    [Fact]
-    public async Task GetWalletService_DocSpaceAdmin_AITools_ReturnsFreeService()
-    {
-        // Arrange
-        var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
-        await _webApiClient.Authenticate(admin);
-
-        // Act
-        var service = await _paymentApi.GetWalletServiceAsync(TenantWalletService.AITools, TestContext.Current.CancellationToken);
-
-        // Assert
-        service.StatusCode.Should().Be(200);
-        service.Response!.Id.Should().Be((int)TenantWalletService.AITools);
-        service.Response.ServiceName.Should().Be("ai-tools");
-    }
-    */
-
     [Fact]
     public async Task GetWalletService_Anonymous_ThrowsUnauthorized()
     {

@@ -229,7 +229,7 @@ public class GroupsController(
     /// <collection>list</collection>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room groups of the calling account", typeof(IAsyncEnumerable<RoomGroupDto>))]
-    [SwaggerResponse(400, "The `searchArea` names a section other than `Active` and `Forms`")]
+    [SwaggerResponse(400, "The `searchArea` names a section other than `Active`, `Forms` and `PrivateRooms`")]
     [HttpGet("")]
     public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupsRequestDto inDto)
     {
@@ -301,6 +301,7 @@ public class GroupsController(
         {
             null or SearchArea.Active => SearchArea.Active,
             SearchArea.Forms => SearchArea.Forms,
+            SearchArea.PrivateRooms => SearchArea.PrivateRooms,
             _ => throw new ArgumentException($"'{searchArea}' is not a valid room group area.", nameof(searchArea))
         };
     }

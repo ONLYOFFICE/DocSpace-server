@@ -20,6 +20,9 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="xunit.v3" />
+    <!-- The billing, accounting and docscloud client tests answer through a WireMock server on loopback, so the
+         requests cross the real handler chain (auth, resilience, sockets) rather than a fake primary handler. -->
+    <PackageReference Include="WireMock.Net" />
   </ItemGroup>
 
   <ItemGroup>

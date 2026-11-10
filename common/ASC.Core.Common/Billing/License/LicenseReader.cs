@@ -105,14 +105,32 @@ public class LicenseReader(
         await tariffService.DeleteDefaultBillingInfoAsync();
     }
 
-    public async Task RefreshLicenseAsync(Func<License, Task<LicenseValidationResult>> validateFunc)
+    /// <summary>
+    /// Applies the license: a staged file (uploaded but not yet in force) replaces the active one first, otherwise
+    /// the active file is re-read. For the calls made on behalf of the user who accepts the license.
+    /// </summary>
+    public Task RefreshLicenseAsync(Func<License, Task<LicenseValidationResult>> validateFunc)
+    {
+        return RefreshLicenseAsync(validateFunc, applyStaged: true);
+    }
+
+    /// <summary>
+    /// Re-reads only the active license file and leaves a staged one where it is. For the background refresh: a
+    /// staged file is put in force only by the user accepting it.
+    /// </summary>
+    public Task RefreshActiveLicenseAsync(Func<License, Task<LicenseValidationResult>> validateFunc)
+    {
+        return RefreshLicenseAsync(validateFunc, applyStaged: false);
+    }
+
+    private async Task RefreshLicenseAsync(Func<License, Task<LicenseValidationResult>> validateFunc, bool applyStaged)
     {
         if (string.IsNullOrEmpty(LicensePath))
         {
             throw new BillingNotFoundException("Empty license path");
         }
 
-        var temp = File.Exists(_licensePathTemp);
+        var temp = applyStaged && File.Exists(_licensePathTemp);
         var bcp = temp && File.Exists(LicensePath);
 
         try

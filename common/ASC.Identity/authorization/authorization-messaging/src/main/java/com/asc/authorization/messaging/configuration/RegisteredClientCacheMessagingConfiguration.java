@@ -67,8 +67,7 @@ public class RegisteredClientCacheMessagingConfiguration {
    */
   @Bean
   public Queue authorizationClientCacheRegionQueue() {
-    return QueueBuilder.durable(
-            "asc_identity_authorization_client_cache_" + region.toLowerCase() + "_queue")
+    return QueueBuilder.durable(ClientCacheMessagingConfiguration.authorizationRegionQueue(region))
         .withArgument("x-max-length", MAX_QUEUE_SIZE)
         .withArgument("x-overflow", "reject-publish-dlx")
         .withArgument("x-message-ttl", MESSAGE_TTL_MS)

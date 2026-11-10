@@ -133,6 +133,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Private.
+        /// </summary>
+        public static string PrivateRooms {
+            get {
+                return ResourceManager.GetString("PrivateRooms", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Forms.
         /// </summary>
         public static string Forms {

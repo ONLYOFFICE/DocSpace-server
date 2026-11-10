@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profilul AI a fost atribuit agentului AI pentru acțiunea: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Cheia BYOK pentru modelul AI a fost ștearsă: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Cheia BYOK pentru modelul AI a fost setată: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profilul AI a fost atribuit acțiunii: {0}</value>
   </data>

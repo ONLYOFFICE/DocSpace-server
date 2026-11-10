@@ -62,6 +62,9 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     private readonly Dictionary<string, Uri> _baseAddresses = [];
 
+    // Local and in whole seconds, like the dates in the log it is compared with.
+    private readonly DateTime _startedAt = new(DateTime.Now.Ticks / TimeSpan.TicksPerSecond * TimeSpan.TicksPerSecond);
+
     // A single connection pool shared by every per-test HttpClient. The clients stay per-test (so
     // their Origin/Authorization default headers never collide across parallel tests), but they all
     // reuse this one handler, which avoids creating a short-lived connection pool per test and the
@@ -111,6 +114,9 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     protected virtual IEnumerable<string> LazyResources => [];
 
+    private readonly Lock _routerLock = new();
+    private Task? _routerUp;
+
     private readonly Lock _lazyResourcesLock = new();
     private Task? _lazyResourcesHealthy;
 
@@ -122,8 +128,25 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     /// </summary>
     protected virtual string LaunchProfile => "integration-test";
 
+    /// <summary>
+    /// Whether the stack runs as a standalone installation (the default) or as SaaS. Standalone resolves the current
+    /// tenant from the <c>Origin</c> header first, which scopes each test to its portal, but gives every portal the
+    /// installation's one payment key. A SaaS stack gives each portal a key of its own; it resolves the tenant from
+    /// the request host, so the clients send the portal as <c>Host</c> too, and it names the portals itself.
+    /// </summary>
+    protected virtual bool Standalone => true;
+
     /// <summary>Builds the suite's own client bundle for a freshly registered portal.</summary>
     protected abstract TClients CreateClients(PortalContext context);
+
+    /// <summary>
+    /// The stack is about to start. For whatever the services reach from the moment they come up and so has to
+    /// answer before they do, such as a stub of an external service.
+    /// </summary>
+    protected virtual ValueTask OnStartingAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
 
     /// <summary>
     /// The app is up and portals can be registered, but no test has run yet. For whatever a suite has
@@ -143,6 +166,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Runs once the services of the app have stopped. For what they call until then - a stub of an external service
+    /// started in <see cref="OnStartingAsync"/> - so a service shutting down never meets a closed port, and its log
+    /// has no connection errors a test run did not cause.
+    /// </summary>
+    protected virtual ValueTask OnStoppedAsync()
+    {
+        return ValueTask.CompletedTask;
+    }
+
+    /// <summary>
     /// Suite-specific warmup, run once against a throwaway portal whose owner is already signed in
     /// on <see cref="PortalClientsBase.WebApiHttpClient"/>. Touch whatever every test hits first.
     /// </summary>
@@ -153,12 +186,14 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     public async ValueTask InitializeAsync()
     {
+        await OnStartingAsync();
+
         // Start the Aspire AppHost with the suite's launch profile.
         // APP_HOSTING_STANDALONE=true makes the platform resolve the current tenant from the
         // Origin header first (see TenantManager.SetCurrentTenantAsync), which is how every test
-        // is scoped to its own freshly registered portal.
+        // is scoped to its own freshly registered portal; see Standalone for the SaaS stack.
         var appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>(
-            [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", "APP_HOSTING_STANDALONE=true"]);
+            [$"DOTNET_LAUNCH_PROFILE={LaunchProfile}", "SKIP_CLIENT=true", $"APP_HOSTING_STANDALONE={(Standalone ? "true" : "false")}"]);
 
         appHost.Configuration["DOTNET_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
         appHost.Configuration["ASPIRE_DASHBOARD_OTLP_ENDPOINT_URL"] = "";
@@ -207,7 +242,11 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
         await InitializePasswordSaltAsync();
 
-        await SetBaseDomainAsync();
+        // A SaaS installation takes its base domain from the configuration; ApiSystem saves it for a server one only.
+        if (Standalone)
+        {
+            await SetBaseDomainAsync();
+        }
 
         await OnStartedAsync();
 
@@ -367,6 +406,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             SkipWelcome = true
         }, cancellationToken));
 
+        // A SaaS ApiSystem ignores the requested name and picks one of its own.
+        if (!Standalone)
+        {
+            portalName = registration.Tenant.PortalName;
+        }
+
         // The owner Id is unique to this portal and comes straight from the registration response.
         var owner = new User(Initializer.OwnerEmail, Initializer.OwnerPassword)
         {
@@ -417,6 +462,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// Starts listening on the stack's event bus for events of one type, named as the services name it (the type's
+    /// name, e.g. <c>NotifyItemIntegrationEvent</c>). Start it before the call under test: it sees only what is
+    /// published after it started.
+    /// </summary>
+    public async Task<EventBusProbe> ListenToEventBusAsync(string eventName, CancellationToken cancellationToken = default)
+    {
+        return await EventBusProbe.StartAsync(await GetConnectionStringAsync(ResourceNames.Messaging, cancellationToken), eventName, cancellationToken);
+    }
+
+    /// <summary>
     /// The connection string Aspire published for a resource — for a suite that talks to a container
     /// directly instead of through a service.
     /// </summary>
@@ -428,7 +483,8 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
 
     /// <summary>
     /// An open connection to the stack's database, for a test that has to plant a row no API call
-    /// writes any more — data left behind by an older release that the current code must still read.
+    /// writes any more — data left behind by an older release that the current code must still read —
+    /// or to set or read a value the API does not expose; such a test says why next to the query.
     /// </summary>
     public async Task<MySqlConnection> OpenDatabaseAsync(CancellationToken cancellationToken = default)
     {
@@ -562,6 +618,55 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
     }
 
+    /// <summary>
+    /// Waits, once per run, until the router passes requests on to the services. The run itself does not need the
+    /// router and starts without it, but the socket service checks a cookie through it (<c>API_HOST</c>), and until it
+    /// is up every connection is refused. Answered by People, because a socket connection asks it first.
+    /// </summary>
+    public Task WaitForRouterAsync()
+    {
+        lock (_routerLock)
+        {
+            return _routerUp ??= PollRouterAsync();
+        }
+    }
+
+    private async Task PollRouterAsync()
+    {
+        using var startUp = new CancellationTokenSource(_startUpBudget);
+        using var client = new HttpClient(_sharedHandler, disposeHandler: false) { Timeout = TimeSpan.FromSeconds(10) };
+        var probe = new Uri($"http://localhost:{AppHostConstants.AppHostPort}/api/2.0/people/@self");
+
+        try
+        {
+            while (true)
+            {
+                try
+                {
+                    using var response = await client.GetAsync(probe, startUp.Token);
+
+                    // Anonymous, so 401 is the answer of a service that was reached.
+                    if ((int)response.StatusCode < 500)
+                    {
+                        return;
+                    }
+                }
+                catch (Exception exception) when (!startUp.IsCancellationRequested && exception is HttpRequestException or TaskCanceledException)
+                {
+                    // Not up yet: the connection is refused or dropped until the container listens.
+                }
+
+                await Task.Delay(TimeSpan.FromMilliseconds(500), startUp.Token);
+            }
+        }
+        catch (OperationCanceledException) when (startUp.IsCancellationRequested)
+        {
+            throw new TimeoutException(
+                $"The router did not answer {probe} within {_startUpBudget.TotalMinutes} minutes. The log of the "
+                + "openresty container is the one to read.");
+        }
+    }
+
     private async Task PollDocumentServerAsync()
     {
         using var startUp = new CancellationTokenSource(_startUpBudget);
@@ -629,6 +734,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         if (!string.IsNullOrEmpty(origin))
         {
             client.DefaultRequestHeaders.TryAddWithoutValidation("Origin", origin);
+
+            // A SaaS stack resolves the tenant from the request host; "localhost" is a portal of its own there.
+            if (!Standalone)
+            {
+                client.DefaultRequestHeaders.Host = new Uri(origin).Host;
+            }
         }
 
         return client;
@@ -653,8 +764,23 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // Teardown is a large, easily-overlooked share of a run's wall clock — it is Aspire/DCP
         // stopping every project process, and one service that ignores its shutdown token holds up
         // all of them. Measured separately so a regression there is visible instead of invisible.
-        await Timing.Measure("teardown.stop", async () => await _app.StopAsync());
-        await Timing.Measure("teardown.dispose", async () => await _app.DisposeAsync());
+        try
+        {
+            await Timing.Measure("teardown.stop", async () => await _app.StopAsync());
+            await Timing.Measure("teardown.dispose", async () => await _app.DisposeAsync());
+        }
+        finally
+        {
+            // Also when stopping the stack fails: a stub left running would hold its fixed port until the process ends.
+            try
+            {
+                await OnStoppedAsync();
+            }
+            catch (Exception ex)
+            {
+                await Console.Error.WriteLineAsync($"OnStoppedAsync failed for {GetType().Name}: {ex}");
+            }
+        }
 
         _sharedHandler.Dispose();
 
@@ -669,5 +795,18 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         }
 
         GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    /// The notifications the socket service refused so far in this run, as "route status" with how many times. Nothing
+    /// else would ever say so: the operation succeeds and the client stays stale. A suite asks at the very end of its
+    /// run, from a test in a collection with <c>DisableParallelization</c>, which xUnit runs after the parallel ones.
+    /// It is a test and not a failure of this fixture's disposal, because that is reported once for every test run.
+    /// </summary>
+    public Task<Dictionary<string, int>> FindSocketHubRefusalsAsync()
+    {
+        var logs = AppPaths.GetTestLogsDirectory(AppPaths.GetBasePath(Projects.ASC_AppHost.ProjectPath));
+
+        return SocketHubRefusals.FindAsync(logs, _startedAt);
     }
 }

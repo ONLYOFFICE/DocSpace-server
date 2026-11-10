@@ -939,8 +939,10 @@ public class PaymentController(
     /// call also returns 403 if the installation has no billing service. If the portal has no billing customer, the
     /// call returns an empty result. The call is read-only. The wallet services spend this balance, and
     /// `POST api/2.0/portal/payment/deposit` adds to it. To list the movements, use
-    /// `GET api/2.0/portal/payment/customer/operations`. By default, the call reads the cache, so right after a
-    /// top-up the balance is still the old one. Use `refresh=true` to read it from the accounting service.
+    /// `GET api/2.0/portal/payment/customer/operations`. Each call reads the balance from the accounting service, so
+    /// it is current right after a top-up too. Only a failed read is cached. A read fails if the service cannot be
+    /// reached or does not know the portal. Then the call returns an empty result for 10 minutes. Use `refresh=true`
+    /// to read it again immediately.
     /// </remarks>
     /// <summary>
     /// Get the customer balance
@@ -972,7 +974,9 @@ public class PaymentController(
     /// refunds, and corrections. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
     /// installation has no billing service. If the portal has no billing customer, the call returns an empty result.
     /// The call is read-only. All filters are optional. If `serviceName` has a name that the installation does not
-    /// sell, the call returns 404. If neither `credit` nor `debit` is set, the list has both directions. By default,
+    /// sell, the call returns 404. If neither `credit` nor `debit` is set, the list has both directions. AI usage
+    /// paid with the portal's own provider keys has the service names `ai-tools-byok` and `ai-search-byok`. The
+    /// `serviceName` filter accepts them. Such a movement looks like its AI service, with `byok` set. By default,
     /// `offset` is 0 and `limit` is 25. The answer repeats them next to `totalQuantity`, `totalPage`, and
     /// `currentPage`. To get the same data as a file, use `POST api/2.0/portal/payment/customer/operationsreport`. To
     /// get the totals per service, use `GET api/2.0/portal/payment/customer/usage`.
@@ -1213,9 +1217,12 @@ public class PaymentController(
     /// DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service.
     /// If the portal has no billing customer, the call returns an empty result. The call is read-only. All filters
     /// are optional. If `serviceName` has a name that the installation does not sell, the call returns 404. The
-    /// amounts use the unit of each service. For AI tools, the unit is tokens, not AI credits. To list the charges
-    /// behind the totals, use `GET api/2.0/portal/payment/customer/operations`. To get the same figures as a file,
-    /// use `POST api/2.0/portal/payment/customer/usage/report`.
+    /// amounts use the unit of each service. For AI tools, the unit is tokens, not AI credits. AI usage paid with the
+    /// portal's own provider keys has totals of its own, `ai-tools-byok` and `ai-search-byok`. They have the title of
+    /// their AI service and `byok` set, and `serviceName` accepts these names. With `mergeByok=true`, the call adds
+    /// them to the totals of their AI services. To list the charges behind the totals, use
+    /// `GET api/2.0/portal/payment/customer/operations`. To get the same figures as a file, use
+    /// `POST api/2.0/portal/payment/customer/usage/report`.
     /// </remarks>
     /// <summary>
     /// Get the customer service usage
@@ -1259,7 +1266,9 @@ public class PaymentController(
             OrderType = inDto.OrderType
         };
 
-        var report = await tariffService.GetCustomerServiceUsageAsync(tenant.Id, filter);
+        var report = inDto.MergeByok == true
+            ? await paymentHelper.GetServiceUsageWithByokMergedAsync(tenant.Id, filter)
+            : await tariffService.GetCustomerServiceUsageAsync(tenant.Id, filter);
         if (report == null)
         {
             return null;
@@ -1319,7 +1328,8 @@ public class PaymentController(
     /// the installation has no billing service. The call queues the job and returns it. The file is not ready when
     /// the response arrives. The body takes the filters of `GET api/2.0/portal/payment/customer/operations`. An empty
     /// body covers the time from the creation of the portal until now. If `serviceName` has a name that the
-    /// installation does not sell, the call returns 404. Repeat
+    /// installation does not sell, the call returns 404. The file marks the AI services paid with the portal's own
+    /// provider keys, `ai-tools-byok` and `ai-search-byok`, as BYOK. Repeat
     /// `GET api/2.0/portal/payment/customer/operationsreport` until `isCompleted` is true. Then take the file from
     /// `resultFileUrl` or `resultFileId`. The portal saves the file in the My documents section of the caller. The
     /// file counts against the portal storage. Each user has one report of this kind at a time. While it runs, a
@@ -1441,15 +1451,16 @@ public class PaymentController(
     /// Starts a job that builds the usage of the wallet services as an `xlsx` file. If the portal has no billing
     /// customer, the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if
     /// the installation has no billing service. The call queues the job and returns it. The file is not ready when
-    /// the response arrives. The body takes the filters of `GET api/2.0/portal/payment/customer/usage`. An empty body
-    /// covers the time from the creation of the portal until now. If `serviceName` has a name that the installation
-    /// does not sell, the call returns 404. Repeat `GET api/2.0/portal/payment/customer/usage/report` until
-    /// `isCompleted` is true. Then take the file from `resultFileUrl` or `resultFileId`. The portal saves the file in
-    /// the My documents section of the caller. The file counts against the portal storage. Each user has one report
-    /// of this kind at a time. While it runs, a repeated call returns the running job. To stop it, use
-    /// `DELETE api/2.0/portal/payment/customer/usage/report`. If the build fails, the job ends with `error` filled
-    /// in. This report does not affect the operations report. To get the history of the movements, use
-    /// `POST api/2.0/portal/payment/customer/operationsreport`.
+    /// the response arrives. The body takes the filters of `GET api/2.0/portal/payment/customer/usage`, except
+    /// `mergeByok`. An empty body covers the time from the creation of the portal until now. If `serviceName` has a
+    /// name that the installation does not sell, the call returns 404. In the file, `ai-tools-byok` and
+    /// `ai-search-byok`, paid with the portal's own provider keys, stay separate totals marked BYOK. Repeat
+    /// `GET api/2.0/portal/payment/customer/usage/report` until `isCompleted` is true. Then take the file from
+    /// `resultFileUrl` or `resultFileId`. The portal saves the file in the My documents section of the caller. The
+    /// file counts against the portal storage. Each user has one report of this kind at a time. While it runs, a
+    /// repeated call returns the running job. To stop it, use `DELETE api/2.0/portal/payment/customer/usage/report`.
+    /// If the build fails, the job ends with `error` filled in. This report does not affect the operations report. To
+    /// get the history of the movements, use `POST api/2.0/portal/payment/customer/operationsreport`.
     /// </remarks>
     /// <summary>
     /// Start the service usage report

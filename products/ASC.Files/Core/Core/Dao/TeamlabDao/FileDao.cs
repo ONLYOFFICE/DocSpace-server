@@ -825,7 +825,7 @@ internal class FileDao(
                             {
                                 await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
 
-                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
                         }
                     }

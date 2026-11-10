@@ -83,8 +83,12 @@ public class AbortUploadSessionTests(
         folderContent.Files.Should().NotContain(f => f.Title == fileName);
     }
 
+    /// <summary>
+    /// This test used to pin the 200 that a leftover small session answered, against the contract: finalizing closes
+    /// the session, so there is nothing left to abort.
+    /// </summary>
     [Fact]
-    public async Task AbortUploadSession_AlreadyFinalized_Succeeds()
+    public async Task AbortUploadSession_AlreadyFinalized_ReturnsNotFound()
     {
         // Arrange
         var folderId = await GetUserFolderIdAsync(Owner);
@@ -105,8 +109,12 @@ public class AbortUploadSessionTests(
             TestContext.Current.CancellationToken);
         await _filesOperationsApi.FinalizeSessionAsync(folderId, session.Id, TestContext.Current.CancellationToken);
 
-        // Act & Assert
-        await _filesOperationsApi.AbortUploadSessionAsync(session.Id, folderId, TestContext.Current.CancellationToken);
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.AbortUploadSessionAsync(session.Id, folderId, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]

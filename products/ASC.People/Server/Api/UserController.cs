@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -272,7 +272,7 @@ public class UserController(
         }
         else
         {
-            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type),Constants.Action_AddRemoveUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type), Constants.Action_AddRemoveUser);
             var tenant = tenantManager.GetCurrentTenant();
             var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
@@ -431,16 +431,18 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Invites people to the portal by email. For each new address, the call creates a pending account and emails it an
-    /// invitation link. Requires a room admin or a DocSpace admin. Other callers get 403. Only a DocSpace admin can
-    /// invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal that
-    /// does not allow inviting members also return 403. For an address that already has an account, the call sends no
-    /// email. It links that account to the caller and raises its type if needed. The call changes data. A repeated call
-    /// sends no new emails, since the accounts then exist. If the invitations need more paid seats than the tariff has
-    /// left, the call returns 402 and sends nothing. The call returns 400 for a malformed or punycode address, or for
-    /// the address of a disabled account. The call handles the addresses in order. So a 400 or 403 in the middle leaves
-    /// the earlier invitations sent. The call returns every pending account that the caller can see, not only the new
-    /// ones. The portal limits the rate of these calls. To send an invitation again, use `PUT api/2.0/people/invite`.
+    /// Invites people to the portal by email. For each new address, the call creates a pending account and emails it
+    /// an invitation link. Requires a room admin or a DocSpace admin. Other callers get 403. Only a DocSpace admin
+    /// can invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal
+    /// that does not allow inviting members also return 403. For an address that already has an account, the call
+    /// sends no email. It links that account to the caller and raises its type if needed. The call changes data. A
+    /// repeated call sends no new emails, since the accounts then exist. If the pending account was deleted, a new
+    /// invitation to its address soon after the first sends no email. The first link still works. If the invitations
+    /// need more paid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400
+    /// for a malformed or punycode address, or for the address of a disabled account. The call handles the addresses
+    /// in order. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending
+    /// account that the caller can see, not only the new ones. The portal limits the rate of these calls. To send an
+    /// invitation again, use `PUT api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Invite users
@@ -529,11 +531,18 @@ public class UserController(
             }
 
             user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture, false);
-            var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
-            var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
-            messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            // the same invitation already went out within the period: no new link, no record, no spent invitation
+            await using var acceptance = await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, invite.Type);
+            if (acceptance.Accepted)
+            {
+                var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
+                var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, invite.Type, inDto.Culture, true, acceptance);
+                messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            }
+
             await socketManager.AddUserAsync(user);
 
             await webhookManager.PublishAsync(WebhookTrigger.UserInvited, user);
@@ -1546,16 +1555,16 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sends the invitation or activation email again to accounts that have not finished joining. With `resendAll` set
-    /// to true, the call reaches every pending account and ignores `userIds`. Requires a room admin or a DocSpace admin
-    /// for this mode. Other callers get 403. Without it, the call reaches only the listed accounts. A user or a guest
-    /// can list only their own ID, and other IDs return 403. A pending invitation gets a new invitation link. An
-    /// account that has not confirmed its email gets activation instructions. The call skips active and disabled
-    /// accounts, and accounts the caller cannot invite, without an error. The call changes data and sends emails. Do
-    /// not repeat it. Each call sends the emails again with new links. The portal limits the rate of these calls. The
-    /// response lists only the targeted accounts that the caller can see. So it is not a delivery report. If `userIds`
-    /// is missing and `resendAll` is false, the call returns 400. To invite a new address, use
-    /// `POST api/2.0/people/invite`.
+    /// Sends the invitation or activation email again to accounts that have not finished joining. With `resendAll`
+    /// set to true, the call reaches every pending account and ignores `userIds`. Requires a room admin or a DocSpace
+    /// admin for this mode. Other callers get 403. Without it, the call reaches only the listed accounts. A user or a
+    /// guest can list only their own ID, and other IDs return 403. A pending invitation gets a new invitation link.
+    /// An account that has not confirmed its email gets activation instructions. The call skips active and disabled
+    /// accounts, and accounts the caller cannot invite, without an error. The call changes data and sends emails. An
+    /// account that got this email a short while ago gets no new one, and its link stays valid. So you can repeat the
+    /// call, but a repeat sends nothing new. The response lists only the targeted accounts that the caller can see.
+    /// So it is not a delivery report. If `userIds` is missing and `resendAll` is false, the call returns 400. To
+    /// invite a new address, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Resend activation emails
@@ -1568,7 +1577,6 @@ public class UserController(
     [SwaggerResponse(403, "A member or a guest asked for resendAll, or listed an account other than their own")]
     [AllowNotPayment]
     [HttpPut("invite")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvites(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
@@ -1609,6 +1617,7 @@ public class UserController(
         }
 
         Dictionary<Guid, UserRelation> userRelations = null;
+        List<UserInfo> sent = [];
 
         foreach (var user in users)
         {
@@ -1619,6 +1628,8 @@ public class UserController(
 
             if (currentUserType == EmployeeType.DocSpaceAdmin || currentUser.Id == user.Id)
             {
+                var activationStatus = user.ActivationStatus;
+
                 if (user.ActivationStatus == EmployeeActivationStatus.Activated)
                 {
                     user.ActivationStatus = EmployeeActivationStatus.NotActivated;
@@ -1628,7 +1639,12 @@ public class UserController(
                     user.ActivationStatus = EmployeeActivationStatus.AutoGenerated;
                 }
 
-                await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                // an account left as it was is not saved: the save would only move its modification date, once per
+                // account on every call
+                if (user.ActivationStatus != activationStatus)
+                {
+                    await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                }
             }
 
             if (user.ActivationStatus == EmployeeActivationStatus.Pending)
@@ -1639,11 +1655,19 @@ public class UserController(
                     continue;
                 }
 
+                await using var acceptance = await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, type);
+                if (!acceptance.Accepted)
+                {
+                    continue;
+                }
+
                 var culture = user.GetCulture()?.Name;
                 var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
-                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, culture);
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, type, culture);
+                acceptance.Complete();
+                sent.Add(user);
             }
             else
             {
@@ -1656,12 +1680,19 @@ public class UserController(
                     }
                 }
 
-                await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email);
+                if (await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email))
+                {
+                    sent.Add(user);
+                }
             }
         }
 
-        messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)),
-            users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        // only the accounts that got a letter: a repeat within the period is not mailed and not recorded
+        if (sent.Count > 0)
+        {
+            messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(sent.Select(x => x.Id)),
+                sent.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        }
 
         foreach (var user in users)
         {
@@ -1801,15 +1832,17 @@ public class UserController(
 
     /// <remarks>
     /// Changes the email address of an account, or sends a link that confirms the change. If the caller is not a
-    /// DocSpace admin, the call emails a link to the new address. The address changes only when they follow the link to
-    /// `PUT api/2.0/people/{userId}/email`. A DocSpace admin changes the address of any account immediately. The call
-    /// then marks the account not activated, ends its sessions, and emails it activation instructions. Any signed-in
-    /// user can call it for their own account. Another account requires a DocSpace admin, and other callers get 403.
-    /// Only the portal owner can change the address of the portal owner. The same applies to another DocSpace admin. If
-    /// the account does not exist, is disabled, or is a pending invitation, the call returns 404. The call returns 400
-    /// if the address is empty or malformed. It also returns 400 if any account has the address, even this one. The
-    /// call changes data. A repeated call sends the link again, or returns 400 for a DocSpace admin. The portal limits
-    /// the rate of these calls. It returns a message for the user with the address.
+    /// DocSpace admin, the call emails a link to the new address. The address changes only when they follow the link
+    /// to `PUT api/2.0/people/{userId}/email`. A DocSpace admin changes the address of any account immediately. The
+    /// call then marks the account not activated, ends its sessions, and emails it activation instructions. If a
+    /// DocSpace admin changes the address back to one that recently got activation instructions, the call sends
+    /// nothing. The link of that email still works. Any signed-in user can call it for their own account. Another
+    /// account requires a DocSpace admin, and other callers get 403. Only the portal owner can change the address of
+    /// the portal owner. The same applies to another DocSpace admin. If the account does not exist, is disabled, or
+    /// is a pending invitation, the call returns 404. The call returns 400 if the address is empty or malformed. It
+    /// also returns 400 if any account has the address, even this one. The call changes data. A repeated call sends
+    /// the link again, or returns 400 for a DocSpace admin. The portal limits the rate of these calls. It returns a
+    /// message for the user with the address.
     /// </remarks>
     /// <summary>
     /// Send instructions to change email
@@ -1892,6 +1925,8 @@ public class UserController(
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             await cookiesManager.ResetUserCookieAsync(user.Id);
             await studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
+
+            // recorded even when the letter is a repeat: the record is the only trace of the address change itself
             messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 
@@ -2429,16 +2464,17 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes the type of the listed accounts to the type in the route. Only these changes work: a guest to `User`, a
-    /// user or guest to `RoomAdmin`, and any account to `DocSpaceAdmin`. The portal owner can also make a DocSpace
+    /// Changes the type of the listed accounts to the type in the route. Only these changes work: a guest to `User`,
+    /// a user or guest to `RoomAdmin`, and any account to `DocSpaceAdmin`. The portal owner can also make a DocSpace
     /// admin a `RoomAdmin`. Any other change returns 403, including any change to `Guest`. A room admin can make a
     /// guest a `User`. Only a DocSpace admin can set `RoomAdmin`, and only the portal owner can set `DocSpaceAdmin`.
     /// Other callers get 403. Nobody can change their own type or the type of the portal owner. The caller must see
     /// each account, and no account can be disabled. Otherwise the call returns 403. The call changes data, and a
-    /// repeated call returns 403. It emails each changed account. The call changes the accounts one by one, so an error
-    /// in the middle leaves the earlier ones changed. A paid type takes a paid seat. If the tariff has no free paid
-    /// seat, the call returns 402. If `userIds` is missing, the call returns 400. The call does not move rooms or
-    /// shared files. To move them in the same step, use `POST api/2.0/people/type`.
+    /// repeated call returns 403. It emails each changed account. An account that got an email about the same type
+    /// recently gets no new one. The call changes the accounts one by one, so an error in the middle leaves the
+    /// earlier ones changed. A paid type takes a paid seat. If the tariff has no free paid seat, the call returns
+    /// 402. If `userIds` is missing, the call returns 400. The call does not move rooms or shared files. To move them
+    /// in the same step, use `POST api/2.0/people/type`.
     /// </remarks>
     /// <summary>
     /// Change a user type
@@ -2501,7 +2537,7 @@ public class UserController(
             }
 
             await socketManager.ChangeUserTypeAsync(user, true);
-            await studioNotifyService.SendMsgUserTypeChangedAsync(user, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, inDto.Type, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
             messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create([user.Id]), [user.DisplayUserName(false, displayUserSettingsHelper)], [user.Id], inDto.Type);
             await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
         }
@@ -3193,7 +3229,7 @@ public class UserControllerAdditional<T>(
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         var securityDao = daoFactory.GetSecurityDao<T>();
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
 
         var offset = inDto.StartIndex;
         var count = inDto.Count;

@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>ملف تعريف الذكاء الاصطناعي المعين لوكيل الذكاء الاصطناعي للإجراء: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>تم حذف مفتاح BYOK لنموذج الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>تم تعيين مفتاح BYOK لنموذج الذكاء الاصطناعي: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>ملف تعريف الذكاء الاصطناعي المعين للإجراء: {0}</value>
   </data>

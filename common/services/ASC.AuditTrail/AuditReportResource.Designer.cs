@@ -203,7 +203,25 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("AiAgentProfileAssigned", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to BYOK key deleted for AI model: {0}.
+        /// </summary>
+        public static string AiByokKeyDeleted {
+            get {
+                return ResourceManager.GetString("AiByokKeyDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to BYOK key set for AI model: {0}.
+        /// </summary>
+        public static string AiByokKeySet {
+            get {
+                return ResourceManager.GetString("AiByokKeySet", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Default provider deleted.
         /// </summary>
@@ -1086,6 +1104,15 @@ namespace ASC.AuditTrail {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Private room.
+        /// </summary>
+        public static string PrivateRoomTitle {
+            get {
+                return ResourceManager.GetString("PrivateRoomTitle", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to File keys issued for &quot;{0}&quot; to: {1}.
         /// </summary>

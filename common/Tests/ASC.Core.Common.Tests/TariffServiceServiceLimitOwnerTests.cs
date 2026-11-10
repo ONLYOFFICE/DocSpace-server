@@ -68,7 +68,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
     {
         // The customer may hold limits on other service groups; the operations of one group must not touch them.
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(HttpStatusCode.OK,
+            _ => Reply(HttpStatusCode.OK,
                 $$"""{"id":42,"serviceGroupName":"storage","scope":"Total","customerAccountNumber":{{OwnAccountNumber}},"amountValue":50,"currency":"USD","period":"Month","enabled":true}"""));
 
         var serviceLimit = await tariffService.UpdateServiceLimitAsync(TenantId, "ai-services", 42, 100m, null, null);
@@ -85,7 +85,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
         // check reads it again and gets the same answer.
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
             request => IsBalanceRequest(request)
-                ? AccountingClientTests.Json(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}""")
+                ? Reply(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer 'portal-1' not found"}""")
                 : ServiceLimitResponse(OwnAccountNumber));
 
         var serviceLimit = await tariffService.GetServiceLimitAsync(TenantId, "ai-services", 42);
@@ -100,7 +100,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
         // like one of another portal meanwhile.
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
             request => IsBalanceRequest(request)
-                ? AccountingClientTests.Json(HttpStatusCode.OK, $$"""{"accountNumber":{{OwnAccountNumber}},"subAccounts":[]}""")
+                ? Reply(HttpStatusCode.OK, $$"""{"accountNumber":{{OwnAccountNumber}},"subAccounts":[]}""")
                 : ServiceLimitResponse(OwnAccountNumber));
 
         var serviceLimit = await tariffService.GetServiceLimitAsync(TenantId, "ai-services", 42);
@@ -114,7 +114,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance(),
             request => IsBalanceRequest(request)
-                ? AccountingClientTests.Json(HttpStatusCode.ServiceUnavailable, "unavailable")
+                ? Reply(HttpStatusCode.ServiceUnavailable, "unavailable")
                 : ServiceLimitResponse(OwnAccountNumber));
 
         var act = async () => await tariffService.GetServiceLimitAsync(TenantId, "ai-services", 42);
@@ -126,7 +126,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
     public async Task GetServiceLimit_UnknownId_ReturnsNull()
     {
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            _ => AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
+            _ => Reply(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
 
         var serviceLimit = await tariffService.GetServiceLimitAsync(TenantId, "ai-services", 999999);
 
@@ -163,7 +163,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
     public async Task DeleteServiceLimit_LimitOfThisPortal_DeletesAndReturnsIt()
     {
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            request => request.Method == HttpMethod.Delete ? new HttpResponseMessage(HttpStatusCode.NoContent) : ServiceLimitResponse(OwnAccountNumber));
+            request => request.Method == HttpMethod.Delete ? Reply(HttpStatusCode.NoContent, "") : ServiceLimitResponse(OwnAccountNumber));
 
         var deleted = await tariffService.DeleteServiceLimitAsync(TenantId, "ai-services", 42);
 
@@ -178,7 +178,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
     {
         // A limit is deleted by its global ID, so the owner is checked first and a foreign limit is never deleted.
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
-            request => request.Method == HttpMethod.Delete ? new HttpResponseMessage(HttpStatusCode.NoContent) : ServiceLimitResponse(OtherAccountNumber));
+            request => request.Method == HttpMethod.Delete ? Reply(HttpStatusCode.NoContent, "") : ServiceLimitResponse(OtherAccountNumber));
 
         var deleted = await tariffService.DeleteServiceLimitAsync(TenantId, "ai-services", 42);
 
@@ -193,7 +193,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
         // The accounting service answers a deletion of a limit it does not have with 400, not 404.
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request => request.Method == HttpMethod.Delete
-                ? AccountingClientTests.Json(HttpStatusCode.BadRequest, ServiceLimitNotFoundBody)
+                ? Reply(HttpStatusCode.BadRequest, ServiceLimitNotFoundBody)
                 : ServiceLimitResponse(OwnAccountNumber));
 
         var deleted = await tariffService.DeleteServiceLimitAsync(TenantId, "ai-services", 42);
@@ -208,7 +208,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
         // The accounting service answers an update of a limit it does not have with 400, not 404.
         var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request => request.Method == HttpMethod.Put
-                ? AccountingClientTests.Json(HttpStatusCode.BadRequest, ServiceLimitNotFoundBody)
+                ? Reply(HttpStatusCode.BadRequest, ServiceLimitNotFoundBody)
                 : ServiceLimitResponse(OwnAccountNumber));
 
         var updated = await tariffService.UpdateServiceLimitAsync(TenantId, "ai-services", 42, 100m, null, null);
@@ -223,7 +223,7 @@ public class TariffServiceServiceLimitOwnerTests : TariffServiceServiceLimitTest
         // A 400 that explains a mistake of the caller must reach the caller, not turn into "limit not found".
         var (tariffService, _) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
             request => request.Method == HttpMethod.Put
-                ? AccountingClientTests.Json(HttpStatusCode.BadRequest,
+                ? Reply(HttpStatusCode.BadRequest,
                     """{"title":"Bad request","status":400,"detail":"Services of group 'ai-services' have different units, a quantity threshold can not be set"}""")
                 : ServiceLimitResponse(OwnAccountNumber));
 

@@ -363,6 +363,12 @@
   <data name="ErrorMessage_SecurityException_CopyToFolder" xml:space="preserve">
     <value>You don't have permission to copy to this folder</value>
   </data>
+  <data name="ErrorMessage_DocServiceEncryptionNotSupported" xml:space="preserve">
+    <value>The document server connected to this portal cannot work with encrypted files</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnThirdPartyNotSupported" xml:space="preserve">
+    <value>A private room cannot be created on a third-party storage</value>
+  </data>
   <data name="ErrorMessage_SecurityException_Create" xml:space="preserve">
     <value>You don't have enough permission to create</value>
   </data>

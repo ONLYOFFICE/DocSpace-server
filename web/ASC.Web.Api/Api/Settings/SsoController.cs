@@ -148,18 +148,19 @@ public class SsoController(
 
     /// <remarks>
     /// Replaces the SAML SSO configuration of the portal with the JSON object in `serializeSettings`. It returns the
-    /// saved configuration. The object is a full configuration, not a patch. Left-out fields become empty. Start
-    /// from `GET api/2.0/settings/ssov2` or `GET api/2.0/settings/ssov2/default`. Requires the EditPortalSettings
+    /// saved configuration. The object is a full configuration, not a patch. Left-out fields become empty. Start from
+    /// `GET api/2.0/settings/ssov2` or `GET api/2.0/settings/ssov2/default`. Requires the EditPortalSettings
     /// permission, which the portal owner and DocSpace admins have. Other callers get 403. If a cloud plan lacks SSO
     /// or SSO settings are hidden, the call returns 402. The call changes data, and you can repeat it with the same
     /// body. It changes a `usersType` other than room admin (1), DocSpace admin (3), or user (4) to 4. It saves an
     /// empty login label as `Single Sign-on` and cuts a longer one to 100 characters. If `enableSso` is false or
-    /// missing, the call unlinks every SSO account from the identity provider. These accounts become ordinary
-    /// portal accounts. Turning SSO back on does not link them again. If `serializeSettings` is empty or the JSON
-    /// `null`, the call returns 400. The call returns 500 if the JSON is invalid or lacks `idpSettings` or
-    /// `fieldMapping`. It also returns 500 for an empty entity ID, sign-in URL, first name, last name, or email
-    /// mapping. It also returns 500 if a sign-in or sign-out URL is not an absolute http or https address. Then the
-    /// call saves nothing. For the values of the SAML fields, use `GET api/2.0/settings/ssov2/constants`.
+    /// missing, the call unlinks every SSO account from the identity provider. These accounts become ordinary portal
+    /// accounts. Turning SSO back on does not link them again. The call returns 400 if `serializeSettings` is empty,
+    /// the JSON `null`, or not valid JSON. A value of the wrong type also returns 400. It also returns 400 if the
+    /// JSON lacks `idpSettings` or `fieldMapping`. An empty entity ID, sign-in URL, first name, last name, or email
+    /// mapping also returns 400. A sign-in or sign-out URL that is not an absolute http or https address also returns
+    /// 400. Then the call saves nothing. For the values of the SAML fields, use
+    /// `GET api/2.0/settings/ssov2/constants`.
     /// </remarks>
     /// <summary>
     /// Save the SSO settings
@@ -167,10 +168,10 @@ public class SsoController(
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "The SSO settings as they were stored, with the login label and the user type normalised", typeof(SsoSettingsDto))]
-    [SwaggerResponse(400, "The serialized settings are empty or do not contain an SSO configuration object")]
+    [SwaggerResponse(400, "The serialized settings are empty, not valid JSON, have a value of the wrong type or do not contain an SSO configuration object, the `idpSettings` object is missing or its entity ID is empty, the SSO URL is missing or the SSO or SLO URL is not an absolute HTTP or HTTPS address, or the `fieldMapping` object is missing or its first name, last name or email attribute is empty")]
     [SwaggerResponse(402, "The portal is a cloud one, and its pricing plan has no single sign-on option or the SSO section is not enabled for it")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The serialized settings are not valid JSON, have a value of the wrong type or lack the `idpSettings` or `fieldMapping` object, the IdP entity ID is empty, the SSO URL is missing or the SSO or SLO URL is not an absolute HTTP or HTTPS address, or the first name, last name or email attribute mapping is empty")]
+    [SwaggerResponse(500, "The settings cannot be stored")]
     [HttpPost("")]
     public async Task<SsoSettingsDto> SaveSsoSettingsV2(SsoSettingsRequestsDto inDto)
     {
@@ -189,33 +190,43 @@ public class SsoController(
             PropertyNameCaseInsensitive = true
         };
 
-        var settings = JsonSerializer.Deserialize<SsoSettingsV2>(serializeSettings, options);
+        SsoSettingsV2 settings;
+        try
+        {
+            settings = JsonSerializer.Deserialize<SsoSettingsV2>(serializeSettings, options);
+        }
+        catch (JsonException e)
+        {
+            throw new ArgumentException(Resource.SsoSettingsCouldNotBeNull, e);
+        }
 
         if (settings == null)
         {
             throw new ArgumentException(Resource.SsoSettingsCouldNotBeNull);
         }
 
-        if (string.IsNullOrWhiteSpace(settings.IdpSettings.EntityId))
+        // Every check below is about what the caller sent, so it is refused as a bad request (400), never as a
+        // server failure.
+        if (string.IsNullOrWhiteSpace(settings.IdpSettings?.EntityId))
         {
-            throw new Exception(Resource.SsoSettingsInvalidEntityId);
+            throw new ArgumentException(Resource.SsoSettingsInvalidEntityId);
         }
 
         if (string.IsNullOrWhiteSpace(settings.IdpSettings.SsoUrl) || !CheckUri(settings.IdpSettings.SsoUrl))
         {
-            throw new Exception(string.Format(Resource.SsoSettingsInvalidBinding, "SSO " + settings.IdpSettings.SsoBinding));
+            throw new ArgumentException(string.Format(Resource.SsoSettingsInvalidBinding, "SSO " + settings.IdpSettings.SsoBinding));
         }
 
         if (!string.IsNullOrWhiteSpace(settings.IdpSettings.SloUrl) && !CheckUri(settings.IdpSettings.SloUrl))
         {
-            throw new Exception(string.Format(Resource.SsoSettingsInvalidBinding, "SLO " + settings.IdpSettings.SloBinding));
+            throw new ArgumentException(string.Format(Resource.SsoSettingsInvalidBinding, "SLO " + settings.IdpSettings.SloBinding));
         }
 
-        if (string.IsNullOrWhiteSpace(settings.FieldMapping.FirstName) ||
+        if (string.IsNullOrWhiteSpace(settings.FieldMapping?.FirstName) ||
             string.IsNullOrWhiteSpace(settings.FieldMapping.LastName) ||
             string.IsNullOrWhiteSpace(settings.FieldMapping.Email))
         {
-            throw new Exception(Resource.SsoSettingsInvalidMapping);
+            throw new ArgumentException(Resource.SsoSettingsInvalidMapping);
         }
 
         if ((EmployeeType)settings.UsersType is not (EmployeeType.User or EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin))

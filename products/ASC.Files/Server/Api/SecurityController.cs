@@ -161,10 +161,11 @@ public abstract class SecurityController<T>(
     /// <remarks>
     /// Changes the access of accounts and groups to a file. The access `None` deletes the rights. Requires the right
     /// to manage access to the file. Other callers get 403. The call changes data. It skips subjects the caller may
-    /// not share with, such as another user's guest. It also skips deactivated accounts, deleted groups, and files
-    /// outside My documents and rooms. If `notify` is true, the portal emails the accounts about the change. It
-    /// returns the new rights of the listed subjects. The call changes nothing and returns an empty list for an
-    /// empty `share`, a repeated call, or an unknown file. To change several entries in one call, use
+    /// not share with. It also skips deactivated accounts, deleted groups, and files outside My documents and rooms.
+    /// If `notify` is true, the portal emails the accounts about the change. An account that got an email about the
+    /// same access to this file recently gets no new one. A new `sharingMessage` does not change this. The call
+    /// returns the new rights of the listed subjects. It changes nothing and returns an empty list for an empty
+    /// `share`, a repeated call, or an unknown file. To change several entries in one call, use
     /// `PUT api/2.0/files/share`. The call returns 400 for an invalid or too long `email`, too many email
     /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access.
     /// </remarks>
@@ -193,11 +194,12 @@ public abstract class SecurityController<T>(
     /// <remarks>
     /// Changes the access of accounts and groups to a folder. The access `None` deletes the rights. Requires the
     /// right to manage access to the folder. Other callers get 403. The call changes data. It skips subjects the
-    /// caller may not share with, such as another user's guest. It also skips deactivated accounts and deleted
-    /// groups. If `notify` is true, the portal emails the accounts about the change. It returns the new rights of
-    /// the listed subjects. The call changes nothing and returns an empty list for an empty `share`, a repeated
-    /// call, or an unknown folder. For a room, use `PUT api/2.0/files/rooms/{id}/share`, which also invites people
-    /// by email. The call returns 400 for an invalid or too long `email`, too many email invitations, or a too long
+    /// caller may not share with. It also skips deactivated accounts and deleted groups. If `notify` is true, the
+    /// portal emails the accounts about the change. An account that got an email about the same access to this folder
+    /// recently gets no new one. A new `sharingMessage` does not change this. The call returns the new rights of the
+    /// listed subjects. It changes nothing and returns an empty list for an empty `share`, a repeated call, or an
+    /// unknown folder. For a room, use `PUT api/2.0/files/rooms/{id}/share`, which also invites people by email. The
+    /// call returns 400 for an invalid or too long `email`, too many email invitations, or a too long
     /// `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks encryption keys for a
     /// private room.
     /// </remarks>
