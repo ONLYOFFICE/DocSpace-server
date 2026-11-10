@@ -206,6 +206,9 @@ export default function registerRoutes(app: Application): void {
   // description for an Instructions room; the client saves it after review
   // (see skillsController).
   router.post("/skills/generate", skillsController.generate);
+  // Skill creation: saves a new Markdown skill, written from a template
+  // and named by its title, into an Instructions room.
+  router.post("/skills/create", skillsController.create);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);

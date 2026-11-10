@@ -375,6 +375,8 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   // Skills.
   aiSkillsGenerate:
     "Writes the text of one skill from a title and the caller's description of the skill they need, for an Instructions room, without saving it: the caller shows the text for review and saves the version the user accepts as `<name>.md` through `POST api/2.0/files/{folderId}/insert`, where the Files service validates the frontmatter. `destId` is the integer id of the Instructions room, checked before the model runs: the caller has to be able to create files in it, and any other folder answers 400. `title` becomes the skill's `name`: it is lower-cased and every run of characters other than letters and digits is folded into one hyphen, so `Sales report` becomes `sales-report`. `description` is a specification of the skill, passed to the model as data, never as an instruction. The model bound to the `Chat` action - the `Default` slot when that action has no profile of its own - runs once, without tools, and writes the description and the body; the frontmatter is then rebuilt here, with the description flattened to one line, stripped of tags and cut to 1 024 characters, so the text as returned always passes the Files service's skill validation. The answer carries the skill's name and the whole file, frontmatter included.",
+  aiSkillsCreate:
+    "Creates a new skill in an Instructions room from the skill template and saves it as `<title>.md`; no model is involved. `destId` is the integer id of the Instructions room, checked before anything is written: the caller has to be able to create files in it, and any other folder answers 400. `title` is the file's title, at most 165 characters, without the extension (a trailing `.md` is dropped), and has to hold a letter or a digit: the skill's `name` is derived from it as in `POST api/2.0/ai/skills/generate`, and its `description` starts as the title itself. The body is a skeleton of the sections a skill is made of, for the user to fill in. The file is saved through `POST api/2.0/files/{folderId}/insert`, so the Files service validates the frontmatter and the room's limits, and a title already taken in the room gets a numbered one. The answer carries the ID and the title of the new file.",
 
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
@@ -758,6 +760,12 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "The model request failed; `code` says how and `providerMessage` carries the provider's own words when it gave any.",
     "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
     "504": "Reading the files or the model round did not finish within the time budget.",
+  },
+  aiSkillsCreate: {
+    "400":
+      "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room.",
+    "403": "The caller cannot create files in the room.",
+    "404": "The room does not exist.",
   },
   aiSkillsGenerate: {
     "400":
@@ -1427,6 +1435,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
 
   aiSkillsGenerate:
     "The skill's name and the whole Markdown file, frontmatter included; nothing is saved.",
+  aiSkillsCreate: "The ID and the title of the new skill file.",
 
   aiOpenaiChatCompletions:
     "The provider's own response, relayed with its status and content type (a 5xx excepted).",

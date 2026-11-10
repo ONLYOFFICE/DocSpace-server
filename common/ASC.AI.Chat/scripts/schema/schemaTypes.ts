@@ -777,6 +777,19 @@ export type Res_aiSkillsGenerate = {
   content: string;
 };
 
+export type Req_aiSkillsCreate = {
+  /** The integer id of the Instructions room the skill is created in. */
+  destId: string | number;
+  /** The file's title without the extension, at most 165 characters, with a letter or a digit. */
+  title: string;
+};
+export type Res_aiSkillsCreate = {
+  /** The ID of the new skill file. */
+  id: string;
+  /** The title the file was saved under, extension included. */
+  title: string;
+};
+
 export type Req_aiMetaFill = {
   /** The entry's table. Only `file` for now: a folder or a room answers 400. */
   kind: "file";
