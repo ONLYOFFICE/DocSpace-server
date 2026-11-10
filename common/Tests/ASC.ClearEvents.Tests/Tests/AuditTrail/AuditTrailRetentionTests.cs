@@ -72,6 +72,26 @@ public class AuditTrailRetentionTests(AspireAppFixture fixture) : BaseTest(fixtu
     }
 
     [Fact]
+    public async Task ClearAsync_OnlyTheNewestEventOutsideHistoryExpired_DoesNotLookUpTheTariff()
+    {
+        // Arrange: an abandoned portal. Its newest event, which a pass always keeps, is past every life time, and the
+        // only other event is part of a history; the portal is picked on every pass with nothing to remove.
+        const int roomId = int.MaxValue - 1;
+
+        var inHistory = await SeedEventAsync(PaidLifeTimeDays * 3, roomId);
+        var newest = await SeedEventAsync(PaidLifeTimeDays * 2);
+
+        await RemoveEventsExceptAsync(inHistory, newest);
+
+        // Act
+        await RunCleanupAsync();
+
+        // Assert
+        TestTariffs.LookupsOf(TenantId).Should().Be(0, "an event the pass keeps anyway is no reason to look the tariff up");
+        (await RemainingEventsAsync([inHistory, newest])).Should().BeEquivalentTo([inHistory, newest]);
+    }
+
+    [Fact]
     public async Task ClearAsync_PaidPortal_KeepsEventsUntilPaidLifeTime()
     {
         // Arrange
@@ -152,16 +172,24 @@ public class AuditTrailRetentionTests(AspireAppFixture fixture) : BaseTest(fixtu
         await AgeTenantAuditTrailAsync(idlePortal.TenantId, PaidLifeTimeDays * 2);
 
         var older = await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 60);
-        await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 30);
-
-        var lastActivity = await LastEventDateAsync(idlePortal.TenantId);
+        var newest = await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 30);
 
         // Act
         await RunCleanupAsync();
 
         // Assert: the portal retention policy counts from the newest event, and must not fall back to the creation
-        // date because the cleanup took every event away. An event the services write meanwhile is only later.
-        (await RemainingEventsAsync([older])).Should().BeEmpty();
-        (await LastEventDateAsync(idlePortal.TenantId)).Should().NotBeNull().And.BeOnOrAfter(lastActivity!.Value);
+        // date because the cleanup took every event away. The event itself is checked, not the date of the last
+        // activity: an event the services wrote for the portal after it was aged would hold that date on its own.
+        (await RemainingEventsAsync([older, newest])).Should().BeEquivalentTo([newest], "the newest event of a portal is its last activity");
+    }
+
+    /// <summary>Removes every audit event of this portal but <paramref name="eventIds"/>.</summary>
+    private async Task RemoveEventsExceptAsync(params int[] eventIds)
+    {
+        await using var ef = await Fixture.Cleaner.CreateDbContextAsync(TestContext.Current.CancellationToken);
+
+        await ef.AuditEvents
+            .Where(r => r.TenantId == TenantId && !eventIds.Contains(r.Id))
+            .ExecuteDeleteAsync(TestContext.Current.CancellationToken);
     }
 }

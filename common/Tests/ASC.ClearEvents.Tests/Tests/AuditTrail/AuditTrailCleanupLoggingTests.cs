@@ -74,12 +74,13 @@ public class AuditTrailCleanupLoggingTests(AspireAppFixture fixture) : BaseTest(
 
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
 
-        // Act: stop the pass in the pause that follows the first page of this portal.
+        // Act: stop the pass in the pause that follows the first page of this portal. The pass walks every portal of
+        // the database before this one, a page and a pause for each event of history the other tests left behind, so
+        // how long it takes to get here grows with the suite: no deadline of its own but the run's, which cancels
+        // the delay below and fails the test with it.
         var pass = Fixture.Cleaner.CreateCleaner(logger).ClearAsync(Retention(batchSize: 1), cts.Token);
 
-        var deadline = DateTime.UtcNow.AddSeconds(60);
-
-        while ((await RemainingEventsAsync(expired)).Count == pages && !pass.IsCompleted && DateTime.UtcNow < deadline)
+        while ((await RemainingEventsAsync(expired)).Count == pages && !pass.IsCompleted)
         {
             await Task.Delay(10, TestContext.Current.CancellationToken);
         }

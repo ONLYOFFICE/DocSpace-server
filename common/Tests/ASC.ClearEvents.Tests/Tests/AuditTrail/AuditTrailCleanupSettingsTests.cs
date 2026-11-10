@@ -159,4 +159,21 @@ public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest
         // Assert
         (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
     }
+
+    [Fact]
+    public async Task ClearAsync_EnabledThatDoesNotConvert_WarnsAndRemovesNothing()
+    {
+        // Arrange: a switch the binder does not read as a bool, which used to leave the cleanup off without a word.
+        var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
+
+        var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(("enabled", "1")));
+        var logger = new RecordingLogger<AuditTrailCleaner>();
+
+        // Act
+        await Fixture.Cleaner.CreateCleaner(logger).ClearAsync(retention, TestContext.Current.CancellationToken);
+
+        // Assert
+        logger.Entries.Should().ContainSingle(e => e.Level == LogLevel.Warning && e.Has("sectionName"));
+        (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
+    }
 }

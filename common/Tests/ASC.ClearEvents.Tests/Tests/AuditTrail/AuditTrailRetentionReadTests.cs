@@ -54,6 +54,36 @@ public class AuditTrailRetentionReadTests
         retention.IsUsable.Should().BeFalse();
     }
 
+    [Theory]
+    [InlineData("1")]
+    [InlineData("yes")]
+    [InlineData("on")]
+    [InlineData("0")]
+    public void Read_EnabledThatDoesNotConvert_ReturnsUnusableSettingsThatAreEnabled(string enabled)
+    {
+        // Act
+        var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(("enabled", enabled)));
+
+        // Assert: read as disabled, the cleanup would not be registered and would say nothing about why.
+        retention.Enabled.Should().BeTrue("a cleanup that was meant to be switched on has to stay registered to report the error on every pass");
+        retention.BindingError.Should().ContainEquivalentOf("enabled");
+        retention.IsUsable.Should().BeFalse();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("false")]
+    [InlineData(" False ")]
+    public void Read_NotEnabledWithAnotherValueThatDoesNotConvert_StaysDisabled(string? enabled)
+    {
+        // Act
+        var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(("enabled", enabled), ("period", "1d")));
+
+        // Assert
+        retention.Enabled.Should().BeFalse();
+        retention.BindingError.Should().NotBeNullOrEmpty();
+    }
+
     [Fact]
     public void Read_ValidSection_ReturnsItsValues()
     {

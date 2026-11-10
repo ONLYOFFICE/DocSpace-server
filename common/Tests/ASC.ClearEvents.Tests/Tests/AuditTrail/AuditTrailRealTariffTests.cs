@@ -52,8 +52,12 @@ public class AuditTrailRealTariffTests(AspireAppFixture fixture) : BaseTest(fixt
         // Act
         await host.CreateCleaner(logger).ClearAsync(Retention(), TestContext.Current.CancellationToken);
 
-        // Assert
-        logger.Entries.Should().NotContain(e => e.Level >= LogLevel.Warning);
+        // Assert: the pass walks every portal of the database, and a warning about another one says nothing about the
+        // tariff service. What is checked is this portal's and the settings', the warnings that name no portal.
+        var warnings = logger.Entries.Where(e => e.Level >= LogLevel.Warning).ToList();
+
+        warnings.Should().NotContain(e => !e.Has("tenantId"), "the settings of the pass are valid");
+        warnings.Should().NotContain(e => Equals(e.Values.GetValueOrDefault("tenantId"), TenantId), "the real tariff service has to answer for this portal");
         (await RemainingEventsAsync([expired])).Should().BeEmpty();
     }
 }

@@ -93,7 +93,10 @@ public class AuditTrailRetentionConfiguration
     /// Reads the <see cref="SectionName"/> section. A value that does not convert does not throw: it would stop the
     /// service, and the whole monolith with it, even with the cleanup disabled. The settings come back unusable
     /// instead, with <see cref="BindingError"/> set and <see cref="Enabled"/> read on its own, so that an enabled
-    /// cleanup reports the error on every pass rather than going quiet.
+    /// cleanup reports the error on every pass rather than going quiet. An <c>enabled</c> that is set to anything but
+    /// <c>false</c> counts as enabled, the unreadable ones too (<c>1</c>, <c>yes</c>, <c>on</c>): read as disabled,
+    /// such a value would leave the cleanup unregistered without a word in the log, and the trail growing unbounded.
+    /// No pass removes anything while the error is there.
     /// </summary>
     public static AuditTrailRetentionConfiguration Read(IConfiguration configuration)
     {
@@ -107,7 +110,7 @@ public class AuditTrailRetentionConfiguration
         {
             return new AuditTrailRetentionConfiguration
             {
-                Enabled = bool.TryParse(section[nameof(Enabled)], out var enabled) && enabled,
+                Enabled = !string.IsNullOrWhiteSpace(section[nameof(Enabled)]) && !(bool.TryParse(section[nameof(Enabled)], out var enabled) && !enabled),
                 BindingError = ex.InnerException?.Message is { } inner ? $"{ex.Message} {inner}" : ex.Message
             };
         }

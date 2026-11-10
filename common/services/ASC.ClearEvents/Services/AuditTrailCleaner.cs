@@ -129,16 +129,17 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         await using var ef = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<MessagesContext>>().CreateDbContextAsync(stoppingToken);
 
         // The tenants are picked by their oldest event, history included, so a tenant whose old events are all part of
-        // a history is picked on every pass. The walk starts under the free life time, the later of the two thresholds,
-        // and the tariff is looked up only once an event outside a history turns up: a tenant with nothing but history
-        // past the free life time has nothing to clear on either tariff, and no lookup is paid for it.
+        // a history, or are its newest event, is picked on every pass. The walk starts under the free life time, the
+        // later of the two thresholds, and the tariff is looked up only once an event turns up that the pass could
+        // remove, outside a history and not the newest: a tenant with nothing else past the free life time - an
+        // abandoned portal among them - has nothing to clear on either tariff, and no lookup is paid for it.
         DateTime? threshold = null;
         var paid = false;
 
         // Never removed: the portal retention policy counts from the date of the newest event (and of the last login,
         // which the login history cleanup purges), so a portal idle past the life time would otherwise lose every sign
-        // of activity and be counted from its creation date.
-        var newestId = 0;
+        // of activity and be counted from its creation date. Read once, with the first event outside a history.
+        int? newestId = null;
 
         var removed = 0;
 
@@ -160,15 +161,22 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
                 if (threshold is null && events.Exists(r => !r.InHistory))
                 {
-                    paid = await IsPaidAsync(scope.ServiceProvider, tenantId);
-                    threshold = paid ? paidThreshold : freeThreshold;
-                    newestId = await ef.NewestAuditEventIdAsync(tenantId);
+                    newestId ??= await ef.NewestAuditEventIdAsync(tenantId);
+
+                    if (events.Exists(r => !r.InHistory && r.Id != newestId))
+                    {
+                        paid = await IsPaidAsync(scope.ServiceProvider, tenantId);
+                        threshold = paid ? paidThreshold : freeThreshold;
+                    }
                 }
 
-                var ids = events
-                    .Where(r => !r.InHistory && r.Date < threshold && r.Id != newestId)
-                    .Select(r => r.Id)
-                    .ToList();
+                // Nothing on the pages before the tariff is known: they hold only events the pass keeps anyway.
+                var ids = threshold is null
+                    ? []
+                    : events
+                        .Where(r => !r.InHistory && r.Date < threshold && r.Id != newestId)
+                        .Select(r => r.Id)
+                        .ToList();
 
                 if (ids.Count > 0)
                 {
