@@ -100,6 +100,44 @@ public class WorkspaceParseTests(
     }
 
     /// <summary>
+    /// The photo manager decodes a profile photo whole, and a photo of a few kilobytes can declare
+    /// any number of pixels. The import reads the size from the header first and leaves a photo over
+    /// 4096 x 4096 out with a line in the log; the user is imported all the same. A photo of an
+    /// ordinary size is imported as before.
+    /// </summary>
+    [Theory]
+    [InlineData(64, false)]
+    [InlineData(5000, true)]
+    public async Task Migrate_UserPhoto_SkipsPhotoOverPixelLimit(int side, bool skipped)
+    {
+        // Arrange
+        await UploadBackupAsync("backup.tar.gz", BuildBackup(gzip: true, photo: BuildBlankPng(side, side)));
+        await _migrationApi.UploadAndInitializeMigrationAsync("Workspace", TestContext.Current.CancellationToken);
+        var parsed = await WaitForParseAsync();
+        parsed.Error.Should().BeNullOrEmpty();
+        var user = parsed.ParseResult.Users.Should().ContainSingle().Which;
+
+        // Act
+        await StartMigrationAsync("Workspace", user, importPersonalFiles: false);
+        var status = await WaitForMigrationAsync();
+        var log = await GetMigrationLogAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        status.ParseResult.SuccessedUsers.Should().Be(1);
+        status.ParseResult.Errors.Should().BeEmpty();
+        if (skipped)
+        {
+            log.Should().Contain($"Skipped the photo of Carol White: {side}x{side} pixels");
+        }
+        else
+        {
+            log.Should().NotContain("Skipped the photo");
+        }
+    }
+
+    /// <summary>
     /// A backup cut short on an entry boundary - everything is there except the end-of-archive block
     /// and whatever followed - fails the parse rather than being imported in part. GZipStream does not
     /// notice a cut-off stream, so the tar has to.
@@ -122,7 +160,7 @@ public class WorkspaceParseTests(
         status.ParseResult.FailedArchives.Should().Equal(fileName);
     }
 
-    private static byte[] BuildBackup(bool gzip, int extraFiles = 0, bool withEndBlock = true)
+    private static byte[] BuildBackup(bool gzip, int extraFiles = 0, bool withEndBlock = true, byte[]? photo = null)
     {
         using var buffer = new MemoryStream();
         byte[] withoutEndBlock;
@@ -130,7 +168,17 @@ public class WorkspaceParseTests(
         {
             WriteTable(tar, "core/core_user", ["id", "email", "firstname", "lastname", "removed"],
                 [UserId, Email, "Carol", "White", "0"]);
-            WriteTable(tar, "core/core_userphoto", ["userId", "photo"]);
+            using (var photos = new DataTable("core_userphoto"))
+            {
+                photos.Columns.Add("userId", typeof(string));
+                photos.Columns.Add("photo", typeof(byte[]));
+                if (photo != null)
+                {
+                    photos.Rows.Add(UserId, photo);
+                }
+
+                WriteTable(tar, "core/core_userphoto", photos);
+            }
             WriteTable(tar, "core/core_group", ["id", "name", "removed"]);
             WriteTable(tar, "core/core_usergroup", ["userid", "groupid", "removed", "ref_type"]);
 
@@ -179,9 +227,72 @@ public class WorkspaceParseTests(
             table.Rows.Add(row);
         }
 
+        WriteTable(tar, name, table);
+    }
+
+    private static void WriteTable(TarWriter tar, string name, DataTable table)
+    {
         var xml = new MemoryStream();
         table.WriteXml(xml, XmlWriteMode.WriteSchema);
         xml.Position = 0;
         WriteTarEntry(tar, $"databases/{name}", xml);
+    }
+
+    /// <summary>
+    /// A black grayscale PNG of <paramref name="width"/> x <paramref name="height"/>: its rows of zeros
+    /// compress to a few kilobytes whatever the size.
+    /// </summary>
+    private static byte[] BuildBlankPng(int width, int height)
+    {
+        using var png = new MemoryStream();
+        png.Write([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+
+        // bit depth 8, color type 0 (grayscale); compression, filter and interlace methods 0
+        WritePngChunk(png, "IHDR", [.. BigEndian(width), .. BigEndian(height), 8, 0, 0, 0, 0]);
+
+        using var pixels = new MemoryStream();
+        using (var zlib = new ZLibStream(pixels, CompressionLevel.Optimal, leaveOpen: true))
+        {
+            // each row is its filter type (0, none) followed by one byte per pixel
+            var row = new byte[width + 1];
+            for (var y = 0; y < height; y++)
+            {
+                zlib.Write(row);
+            }
+        }
+
+        WritePngChunk(png, "IDAT", pixels.ToArray());
+        WritePngChunk(png, "IEND", []);
+        return png.ToArray();
+    }
+
+    private static void WritePngChunk(Stream png, string type, byte[] data)
+    {
+        var typeBytes = Encoding.ASCII.GetBytes(type);
+        png.Write(BigEndian(data.Length));
+        png.Write(typeBytes);
+        png.Write(data);
+        png.Write(BigEndian((int)Crc32([.. typeBytes, .. data])));
+    }
+
+    private static byte[] BigEndian(int value)
+    {
+        return [(byte)(value >> 24), (byte)(value >> 16), (byte)(value >> 8), (byte)value];
+    }
+
+    /// <summary>The CRC-32 a PNG chunk ends with (ISO 3309, as in zlib).</summary>
+    private static uint Crc32(byte[] data)
+    {
+        var crc = 0xFFFFFFFFu;
+        foreach (var b in data)
+        {
+            crc ^= b;
+            for (var bit = 0; bit < 8; bit++)
+            {
+                crc = (crc & 1) != 0 ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
+            }
+        }
+
+        return ~crc;
     }
 }

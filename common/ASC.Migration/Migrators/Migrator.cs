@@ -145,6 +145,12 @@ public abstract class Migrator(
     /// </summary>
     public long MaxExtractedEntries { get; set; } = long.MaxValue;
 
+    /// <summary>
+    /// The most pixels a profile photo from a backup may have: 4096 x 4096, far beyond what a profile photo needs and
+    /// still well within what decoding it costs. A larger one is left out of the import with a line in the log.
+    /// </summary>
+    private const ulong MaxPhotoPixels = 4096UL * 4096;
+
     private long _extractedSize;
     private long _extractedEntries;
 
@@ -411,13 +417,20 @@ public abstract class Migrator(
 
                     if (user.HasPhoto)
                     {
-                        using var ms = new MemoryStream();
                         // every migrator builds this path from the backup's contents, so it is checked once more where it is opened
-                        await using (var fs = File.OpenRead(GetSafeExtractPath(TmpFolder, user.PathToPhoto)))
+                        var photoPath = GetSafeExtractPath(TmpFolder, user.PathToPhoto);
+
+                        // the photo manager decodes the whole image, and a photo of a few kilobytes can declare gigapixels:
+                        // its size is read from the header first, which decodes no pixels
+                        var photoInfo = new MagickImageInfo(photoPath);
+                        if ((ulong)photoInfo.Width * photoInfo.Height > MaxPhotoPixels)
                         {
-                            await fs.CopyToAsync(ms);
+                            Log(string.Format(MigrationResource.PhotoTooLarge, user.Info.DisplayUserName(DisplayUserSettingsHelper), photoInfo.Width, photoInfo.Height));
                         }
-                        await UserPhotoManager.SaveOrUpdatePhoto(user.Info.Id, ms.ToArray());
+                        else
+                        {
+                            await UserPhotoManager.SaveOrUpdatePhoto(user.Info.Id, await File.ReadAllBytesAsync(photoPath));
+                        }
                     }
                 }
                 if (saved.Equals(Constants.LostUser))

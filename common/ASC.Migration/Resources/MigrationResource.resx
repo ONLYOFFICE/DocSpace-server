@@ -201,6 +201,9 @@
   <data name="MigrationProjectFiles" xml:space="preserve">
     <value>Migration project files</value>
   </data>
+  <data name="PhotoTooLarge" xml:space="preserve">
+    <value>Skipped the photo of {0}: {1}x{2} pixels is more than a profile photo may have</value>
+  </data>
   <data name="PreparingForMigration" xml:space="preserve">
     <value>Preparing for migration</value>
   </data>

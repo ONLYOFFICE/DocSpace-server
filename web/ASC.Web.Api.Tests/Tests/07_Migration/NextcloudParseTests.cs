@@ -208,7 +208,7 @@ public class NextcloudParseTests(
         var user = parsed.ParseResult.Users.Should().ContainSingle().Which;
 
         // Act
-        await StartMigrationAsync(user);
+        await StartMigrationAsync("Nextcloud", user, importPersonalFiles: true);
         var status = await WaitForMigrationAsync();
         var log = await GetMigrationLogAsync();
 
@@ -234,43 +234,5 @@ public class NextcloudParseTests(
         // Assert
         status.IsCompleted.Should().BeTrue();
         status.Error.Should().Contain(".zip, .tar.gz or .tgz");
-    }
-
-    /// <summary>
-    /// The SDK's <c>MigratingApiUser</c> has no <c>shouldImport</c> - the server's model takes it from
-    /// a base class the generated client does not carry - so the import is started over raw HTTP with
-    /// the body the web client sends.
-    /// </summary>
-    private async Task StartMigrationAsync(MigratingApiUser user)
-    {
-        var body = new
-        {
-            migratorName = "Nextcloud",
-            users = new[] { new { key = user.Key, email = user.Email, firstName = user.FirstName, lastName = user.LastName, userType = "User", shouldImport = true } },
-            importPersonalFiles = true
-        };
-        using var response = await _webApiClient.PostAsJsonAsync("api/2.0/migration/migrate", body, TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-    }
-
-    /// <summary>
-    /// Right after the import is queued the status may still describe the finished parse, so the wait
-    /// is for a completed job of the import itself.
-    /// </summary>
-    private async Task<MigrationStatusDto> WaitForMigrationAsync()
-    {
-        var deadline = DateTime.UtcNow.AddSeconds(60);
-
-        while (true)
-        {
-            var status = (await _migrationApi.GetMigrationStatusAsync(TestContext.Current.CancellationToken)).Response;
-
-            if (status is { IsCompleted: true, ParseResult.Operation: "migration" } || DateTime.UtcNow >= deadline)
-            {
-                return status;
-            }
-
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
     }
 }

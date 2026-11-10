@@ -87,6 +87,44 @@ public abstract class MigrationParseTestBase(
     }
 
     /// <summary>
+    /// The SDK's <c>MigratingApiUser</c> has no <c>shouldImport</c> - the server's model takes it from
+    /// a base class the generated client does not carry - so the import is started over raw HTTP with
+    /// the body the web client sends.
+    /// </summary>
+    protected async Task StartMigrationAsync(string migratorName, MigratingApiUser user, bool importPersonalFiles)
+    {
+        var body = new
+        {
+            migratorName,
+            users = new[] { new { key = user.Key, email = user.Email, firstName = user.FirstName, lastName = user.LastName, userType = "User", shouldImport = true } },
+            importPersonalFiles
+        };
+        using var response = await _webApiClient.PostAsJsonAsync("api/2.0/migration/migrate", body, TestContext.Current.CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>
+    /// Right after the import is queued the status may still describe the finished parse, so the wait
+    /// is for a completed job of the import itself.
+    /// </summary>
+    protected async Task<MigrationStatusDto> WaitForMigrationAsync()
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+
+        while (true)
+        {
+            var status = (await _migrationApi.GetMigrationStatusAsync(TestContext.Current.CancellationToken)).Response;
+
+            if (status is { IsCompleted: true, ParseResult.Operation: "migration" } || DateTime.UtcNow >= deadline)
+            {
+                return status;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
     /// The SDK's <c>GetMigrationLogsWithHttpInfoAsync</c> is typed <c>Object</c> and parses the body as
     /// JSON, while the endpoint answers <c>text/plain</c>, so the log is read over raw HTTP.
     /// </summary>

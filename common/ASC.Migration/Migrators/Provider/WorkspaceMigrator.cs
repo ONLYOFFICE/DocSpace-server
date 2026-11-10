@@ -303,8 +303,9 @@ public class WorkspaceMigrator : Migrator
                     if (rowPhoto["userId"].ToString() == key)
                     {
                         var bytes = rowPhoto["photo"] as byte[];
-                        using var img = new MagickImage(bytes);
-                        var format = img.Format;
+                        // only the format is needed here, and the header holds it: decoding the whole image would let a
+                        // photo that declares gigapixels exhaust memory during the parse
+                        var format = new MagickImageInfo(bytes).Format;
 
                         // the user id comes from the dump: the photo written under it must stay inside the backup folder
                         u.PathToPhoto = GetSafeExtractPath(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");

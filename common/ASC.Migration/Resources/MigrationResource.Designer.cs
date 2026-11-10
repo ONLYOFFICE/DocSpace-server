@@ -313,6 +313,15 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Skipped the photo of {0}: {1}x{2} pixels is more than a profile photo may have.
+        /// </summary>
+        public static string PhotoTooLarge {
+            get {
+                return ResourceManager.GetString("PhotoTooLarge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Preparing for migration.
         /// </summary>
         public static string PreparingForMigration {
