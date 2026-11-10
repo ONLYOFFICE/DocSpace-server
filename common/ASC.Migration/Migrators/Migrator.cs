@@ -218,16 +218,35 @@ public abstract class Migrator(
     /// the log, as their target may lie outside the extraction folder. With <paramref name="replaceExisting"/> a file
     /// that was there before the extraction is replaced rather than refused. <paramref name="onEntry"/> is called
     /// before each entry.
-    /// A truncated tar fails with <see cref="EndOfStreamException"/>: GZipStream does not notice a cut-off stream, but
-    /// TarReader requires the end-of-archive block, so even a cut on an entry boundary is reported.
+    /// A truncated tar - one that ends without its end-of-archive block, even when the cut falls on an entry boundary -
+    /// fails with <see cref="InvalidDataException"/> or <see cref="EndOfStreamException"/>.
     /// </summary>
     /// <returns><see langword="false"/> when <paramref name="cancellationToken"/> stopped the extraction.</returns>
     protected async Task<bool> ExtractTarAsync(Stream tarStream, string root, bool replaceExisting, Func<Task> onEntry, CancellationToken cancellationToken)
     {
-        await using var reader = new TarReader(tarStream, leaveOpen: true);
+        // TarReader treats a stream that simply ends before the next header as the end of the archive when it can seek
+        // (a plain .tar file), and GZipStream does not check the gzip trailer, so a backup cut on an entry boundary
+        // would read as complete with the rest of it silently missing. The archive is read through a forward-only view
+        // that counts the bytes, and its end is accepted only where the reader found the block of zeros.
+        await using var counter = new ReadCountingStream(tarStream);
+        await using var reader = new TarReader(counter, leaveOpen: true);
         var written = new HashSet<string>();
-        while (await reader.GetNextEntryAsync(cancellationToken: cancellationToken) is { } entry)
+        while (true)
         {
+            var readBeforeHeader = counter.BytesRead;
+            var entry = await reader.GetNextEntryAsync(cancellationToken: cancellationToken);
+            if (entry is null)
+            {
+                // every entry's data has been read to its end below, so before the next header the reader reads at most
+                // the padding of the last entry, and a whole block more only when it found the end-of-archive block
+                if (counter.BytesRead - readBeforeHeader < TarBlockSize)
+                {
+                    throw new InvalidDataException("The archive is truncated: it ends without the end-of-archive block.");
+                }
+
+                return true;
+            }
+
             // a tar has no entry count up front, so the entries are counted as they come
             CountExtractedEntries(1);
             await onEntry();
@@ -273,14 +292,20 @@ public abstract class Migrator(
                     break;
             }
 
+            if (entry.DataStream is not null)
+            {
+                // the data of an entry that was not unpacked (a sparse file) is read through too, see the end check above
+                await entry.DataStream.CopyToAsync(Stream.Null, cancellationToken);
+            }
+
             if (cancellationToken.IsCancellationRequested)
             {
                 return false;
             }
         }
-
-        return true;
     }
+
+    private const int TarBlockSize = 512;
 
     /// <summary>
     /// Writes an archive entry to a new file, counting the bytes actually written rather than the size the archive declares.
