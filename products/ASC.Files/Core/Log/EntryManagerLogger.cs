@@ -34,6 +34,9 @@
 namespace ASC.Files.Core.Log;
 internal static partial class EntryManagerLogger
 {
+    [LoggerMessage(LogLevel.Error, "The submission of form {formId} was not sent on to the forms database and the report")]
+    public static partial void ErrorSubmissionNotPublished(this ILogger<EntryManager> logger, Exception exception, string formId);
+
     [LoggerMessage(LogLevel.Warning, "The form version state of {fileId} was not updated after version {version} was saved")]
     public static partial void WarnFormVersionStateNotUpdated(this ILogger<EntryManager> logger, Exception exception, string fileId, int version);
 

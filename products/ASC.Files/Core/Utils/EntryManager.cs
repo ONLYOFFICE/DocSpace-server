@@ -2330,6 +2330,10 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FillFormDraftObsolete);
         }
 
+        // Runs once the submission lock is released (see FormFillingReportCreator.PublishSubmissionAsync).
+        Func<Task> publishSubmission = null;
+        File<T> result;
+
         await using (await distributedLockProvider.TryAcquireFairLockAsync(formFillingReportCreator.GetSubmissionLockKey(originalFormId)))
         {
             var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId) ?? properties;
@@ -2384,7 +2388,6 @@ public class EntryManager(IDaoFactory daoFactory,
             pdfFile.Category = (int)FilterType.PdfForm;
             pdfFile.IsCompletedForm = true;
 
-            File<T> result;
             if (tmpStream.CanSeek)
             {
                 pdfFile.ContentLength = tmpStream.Length;
@@ -2447,15 +2450,15 @@ public class EntryManager(IDaoFactory daoFactory,
                         await fileDao.SaveProperties(originalFormId, origProperties);
                     }
 
-                    await formFillingReportCreator.UpdateFormFillingReport(
-                       origFormId,
-                       origProperties.FormFilling.OriginalFormVersion,
-                       rId,
-                       resProp.FormFilling.ResultFormNumber,
-                       formsDataUrl,
-                       result,
-                       room.SettingsSendFormToExternalDB,
-                       room.SettingsSaveFormAsXLSX);
+                    var submittedVersion = origProperties.FormFilling.OriginalFormVersion;
+                    var resultFormNumber = resProp.FormFilling.ResultFormNumber;
+                    await formFillingReportCreator.IndexSubmissionAsync(origFormId, submittedVersion, rId, resultFormNumber, formsDataUrl, result);
+
+                    var sendFormToExternalDb = room.SettingsSendFormToExternalDB;
+                    var saveFormAsXlsx = room.SettingsSaveFormAsXLSX;
+                    var submittedFile = result;
+                    publishSubmission = () => formFillingReportCreator.PublishSubmissionAsync(
+                        origFormId, submittedVersion, rId, resultFormNumber, formsDataUrl, submittedFile, sendFormToExternalDb, saveFormAsXlsx);
                 }
 
                 if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
@@ -2481,9 +2484,21 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 logger.LogError(ex, "Form submission error");
             }
-
-            return result;
         }
+
+        if (publishSubmission != null)
+        {
+            try
+            {
+                await publishSubmission();
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorSubmissionNotPublished(ex, originalFormId.ToString());
+            }
+        }
+
+        return result;
     }
 
     private async Task<File<T>> SubmitUserFormAsync<T>(File<T> pdfFile, IFileDao<T> fileDao, Stream stream)

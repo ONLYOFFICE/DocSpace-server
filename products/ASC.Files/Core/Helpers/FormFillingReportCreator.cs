@@ -65,12 +65,24 @@ public class FormFillingReportCreator(
     private static readonly HashSet<string> _checkboxOffStates =
         new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
 
-    public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
+    /// <summary>
+    /// Indexes the submitted form, the half of a submission that has to happen under the form's submission lock: the
+    /// recovery of lost forms relies on a submission having its PDF indexed once the lock is released.
+    /// </summary>
+    public async Task IndexSubmissionAsync<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile)
     {
         await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
 
         await MigrateFormVersionAsync(roomId, originalFormId, originalFormVersion);
+    }
 
+    /// <summary>
+    /// Sends the indexed submission on to the forms database and the spreadsheet report. Called after the submission lock
+    /// is released: the database handler saves the form's version state under that lock, and an in-process event bus runs
+    /// the handler inside the publish, so publishing while holding the lock would wait for itself.
+    /// </summary>
+    public async Task PublishSubmissionAsync<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
+    {
         var fileId = formsDataFile.Id is int id ? id : 0;
 
         // Best effort: a broker failure must not skip the report below; a lost submission is completed from the index
