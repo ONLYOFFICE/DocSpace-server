@@ -76,7 +76,9 @@ merges of the base into the branch do not show up as branch changes. Read its he
   changed.
 
 Then read the commit messages: they are the branch's **declared intent**, the yardstick for scope
-creep in §3.
+creep in §3, and claims to verify like code (§3 B "claims the branch writes"). Read the PR
+description too when the user gives it or it can be reached: the next reviewer starts from it, so
+one that no longer describes the branch is a finding.
 
 ## 2. The scan output is hints, not findings
 
@@ -95,10 +97,14 @@ is read in context. What each section is for:
 | Changed endpoints | not a finding by itself: the rows of the cross-cutting matrix (§3 A0) |
 | Stateful / background processing | the files reviewer G walks (§3 G) |
 | Size | how many chunks reviewers B, D, E and G are split into (§3 Coverage) |
+| New projects | an `!!` line: a project in neither `ASC.Web.slnx` nor `ASC.Tests.slnx` (a tool with a solution of its own is the exception), or a test project outside `products/` that `CLAUDE.md` does not name |
 | Possibly committed by accident | a review `.md`, a `.binlog`, `.env` committed by accident |
 
 Things `scan.py` cannot see and you must look for yourself: broken indentation left by a merge,
-`<summary>`/`<remarks>` swapped, a new project not added to `ASC.Web.slnx` / `ASC.Tests.slnx`.
+`<summary>`/`<remarks>` swapped, a list in `CLAUDE.md` the branch leaves incomplete (services, launch
+profiles; new projects are the scan's "New projects" section). Guarantee
+words in comments ("never", "only", "cannot") are not scanned for: on a real branch they give about a
+hundred hits, so §3 B checks the claims while reading instead.
 
 ## 3. Fan out reviewers
 
@@ -155,13 +161,15 @@ count with the search it used, so a short matrix is visible as short.
 |---|---|---|
 | M1 payload fill | property of every new or changed response, event or webhook DTO | which code fills it on the path that builds **this** DTO (not on another path of the same entity — a listing fills fields a plain DAO read does not); `never` is a finding |
 | M2 after-action effects | call of a notification, webhook, socket, event bus or index update after the action took effect | is a failure caught and logged so the request neither fails nor rolls back; is it built from the entry in the state it describes |
-| M3 config bounds | read of a configuration value (`IConfiguration`, a `*Settings` bound from config) | lower bound, upper bound, what 0 / negative / huge does |
+| M3 config bounds | read of a configuration value (`IConfiguration`, a `*Settings` bound from config) | lower bound, upper bound, what 0 / negative / huge does, read through `ConfigurationValueExtensions`; cite `[configuration.md §N]` |
 | M4 loop termination | retry, requeue, hand-back, re-schedule or polling loop | where it ends (count, age window, terminal state), and what happens when the step throws after its side effect |
 | M5 catch blocks | `catch` added or changed in the diff | is the exception logged, rethrown or deliberately dropped with a comment; can a second fault replace the first |
-| M6 stored columns | column added or written by the branch | backup declaration (`UserIDColumns`, `DateColumns`, `RelationInfo`), length vs column, both databases |
+| M6 stored columns | column added or written by the branch | backup declaration (`UserIDColumns`, `DateColumns`, `RelationInfo`), length vs column (MySQL only, §3 C) |
 | M7 out-of-band sources | call site of a cross-cutting publish outside controllers (jobs, handlers, editor callbacks) | is it declared where the contract lists such sources (`_otherSources` for webhooks, `socket-events.md` recipients) |
 
-A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
+M2, M4 and M5 are the reviewer side of `.claude/rules/failure-paths.md` (§3, §8, §7); a finding in
+them, or one of B or G that matches a section of that rule, cites it as `[failure-paths.md §N]`, so
+the author finds the rule behind it. A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
 out to be a class that has no matrix yet and can be enumerated, say so in the report as a candidate
 row for this table (the review itself edits nothing).
 
@@ -203,10 +211,25 @@ edit here. Distribute every applicable rule to a reviewer:
 - **blast radius**: for every changed member whose meaning changed (`IsForm` began to mean "any
   PDF"), run `findReferences` and walk the call sites — security filters, share rights, DTO
   mapping, sockets. This is where the expensive findings are;
+- **texts made untrue by the change**: the code changed and the text that describes it did not. These
+  texts sit far from the change, so the diff does not show them:
+  - the `<remarks>` and the DTO `<summary>` of every action that reaches a member whose behaviour
+    changed (LSP `incomingCalls` up to the controllers), even when the controller is not in the diff.
+    A sentence that was true on the base and is false on the branch is an `openapi-endpoint-docs.md`
+    §5 "Untrue" finding of this branch ("each converted user gets a notification email" after the
+    branch began to suppress repeats);
+  - comments elsewhere that state the old invariant. Search the table name, the setting key or the
+    entity in comments (`audit_events` led to a comment in `PortalRetentionJob` saying only login
+    history is ever deleted);
+- **claims the branch writes**: check every guarantee in a new or changed comment, `<remarks>`, commit
+  message or PR description ("never", "always", "only", "cannot", "at most", "exactly once", "no
+  longer") against the code, the same way as a finding: true, true except for a window (name it), or
+  false. A commit that promises what its diff does not contain (bounds "rejected", a retry "bounded")
+  is a finding, and so are two sentences of one text that disagree;
 - **the other path of each change**: a default added on create — what does update do when the field
   is left out; a filter narrowed for one caller — what about the caller that relied on the old
-  result; a new column — rows written before it existed, archives taken before it existed, the
-  other database (`migrations/postgre`); a new failure mode — the success path and the opposite
+  result; a new column — rows written before it existed, archives taken before it existed; a new
+  failure mode — the success path and the opposite
   failure (a refused URL vs a DNS timeout);
 - **side effects after the primary action**: a notification, webhook, socket event or index update
   that runs after the action took effect must not fail the request or roll the action back — it is
@@ -223,10 +246,13 @@ edit here. Distribute every applicable rule to a reviewer:
 **C. Data, contract, infrastructure** — if the branch touches migrations, contract files,
 `*.csproj`/`*.props`, AppHost, submodules or `ASC.Data.Backup*`:
 
-- migrations: which of the four variants `migrations/{mysql,postgre}/{SaaS,Standalone}` changed
-  and whether that is justified (`db-migrations` skill; a standalone-only change can be
-  deliberate); `*.Designer.cs` and the model snapshot updated; ordering after the newest migration
-  in the base; no edit of an already-applied migration; a new table is wired into backup/restore;
+- migrations: which variants changed and whether that is justified (`db-migrations` skill; a
+  standalone-only change in `mysql/Standalone` can be deliberate). Only MySQL is migrated until full
+  PostgreSQL support is added: a migration without a `migrations/postgre` counterpart is not a
+  finding, and PostgreSQL does not go under "Not verified" for the DocSpace schema. Code that talks to
+  a PostgreSQL server of its own (the forms database) is reviewed as usual. `*.Designer.cs` and the
+  model snapshot updated; ordering after the newest migration in the base; no edit of an
+  already-applied migration; a new table is wired into backup/restore;
 - contract: a renamed/removed property, a `bool` → `bool?`, a changed route is a breaking change for
   the SDKs — were the spec and `sdk/*` submodule pointers updated, or is regeneration knowingly
   postponed? Is the submodule pointer in the branch the one tests were built against?
@@ -424,7 +450,10 @@ conversation). Re-scan (§1) and then:
    - does the fix add a loop, a requeue or a fallback — then §3 G "termination";
    - does it change what old data means (rows, archives, settings saved before it);
    - did it fix the **class** or only the cited line — run the finding's `siblings` again;
-   - does it come with a test that fails without it; a behavioural fix without one is a remark;
+   - does it come with a test that fails without it; a behavioural fix without one is a remark. Do
+     not judge that by reading the test: run `.claude/scripts/prove-red.sh --commit <fix sha>` with
+     the test's filter (`--patch` with the behavioural hunk when the test calls what the fix adds).
+     STILL GREEN is a finding. A run the stand does not allow goes under "Not verified";
    - run the class matrices (§3 M) over the fix diff: a fix commit adds rows like any other code.
 3. Give the fix commits to one more reviewer **without** the previous findings — the code only,
    with §3 B and G. A reviewer handed the earlier list checks that list; the fresh one finds what
@@ -432,6 +461,9 @@ conversation). Re-scan (§1) and then:
 4. Re-evaluate findings that were dropped or accepted earlier ("acceptable", "not from this
    branch") when a fix changed the code around them.
 5. If an earlier finding turns out to be wrong, say so plainly and withdraw it.
+6. Re-read the texts the fixes may have made stale (§3 B "texts made untrue", "claims"): the claims in
+   the earlier rounds' commits and comments, the remarks of the actions the fixed behaviour reaches,
+   and the PR description — does it still describe the branch after the rounds of fixes.
 
 ## 8. Report
 

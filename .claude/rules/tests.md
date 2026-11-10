@@ -121,6 +121,63 @@ exception.ErrorContent!.ToString().Should().Contain("Access denied");
 `ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`. Read `ErrorContent` with
 `!`, never `?.`: with `?.` an empty body skips the whole assertion, and a check of the message can never fail.
 
+## A test has to be able to fail
+
+A guard test that stays green without the change it guards protects nothing, and reading the test
+does not tell: reviews kept finding tests that passed with the fix reverted. Prove it instead.
+`.claude/scripts/prove-red.sh` takes the product part of the change away, runs the test and expects
+red, then puts the change back and expects green. Paste its last line into the commit message.
+
+```bash
+.claude/scripts/prove-red.sh --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*NotifyRepeatOptInTests"
+.claude/scripts/prove-red.sh --commit c1bf173086 --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*NotifyRepeatOptInTests"
+```
+
+The first form takes away the uncommitted changes, the second the product part of a commit. When the
+test calls what the change adds, the whole change cannot be taken away (exit 3): pass `--patch` with
+only the behavioural hunk. When the run is impossible here (environment, cost), the commit says "not
+proven red" and why.
+
+What leaves a test unable to fail:
+
+- **Asserting that nothing threw.** Assert the effect instead: letters (Mailpit, `RecordingEventBus`),
+  audit and `short_links` rows, the stored state. Six calls that do not throw stay green whether the
+  repeat is suppressed or not.
+- **An environment the test only imagines.** The rate limiter is off in the stacks
+  (`rateLimiterOptions.enable: "false"` in `buildtools/config/appsettings.json`, and `BaseStartup`
+  adds it only when true), so no test relies on a 429. `integration-test` runs no payment services
+  (see "Payment services"). A test comment that says what the environment does is checked like code.
+- **An empty "nothing changed".** A refusal checked by comparing snapshots needs an Arrange that
+  creates what the refused call could change, and an assertion that the snapshot is not empty.
+- **Going around the path under test.** Enter where the product enters: the engine with a stub
+  channel, not the request's failure callback; the service with its real `Init`, not values typed
+  into the check; the handler that writes a state, not an SQL insert of it. Use SQL in Arrange only for
+  a state the API cannot produce, and then the code that produces it gets a test of its own.
+- **Substituting our own code.** Stub only what lies outside the process, at the HTTP boundary
+  (WireMock.Net), so that our client, its auth handler, the parsing and the error mapping run. A mock
+  of our own interface (`ITariffService`, `IBillingClient`) belongs only in a unit test of the class
+  that calls it. A suite that replaces a service of ours keeps one test on the real one, with its
+  real DI registration.
+- **A stub that answers what is convenient.** The stub's behaviour comes from the real service's
+  contract: its documentation, the comments of our client, the remarks of our endpoints, the
+  TypeScript suite that runs against the real service. A stub that disagrees with them is a finding.
+  It honours the parameters our code sends (paging, filters), or the test does not rely on them. It
+  can answer a 4xx, a 5xx, a timeout (`WithDelay`), a dropped connection (`WithFault`) and an
+  unreadable 200.
+- **A check looser than the right.** Check a right with the lowest role that can hold it: a "member
+  who is the payer" is a User, not an admin. Compare routes, counts and messages exactly, never with
+  `StartWith`.
+
+The test also has to fail only for a reason:
+
+- Filter assertions over shared state (the log entries of a pass, global tables) by the test's own
+  tenant.
+- A pass over every portal of the database gets no fixed time budget. Wait for the effect in the
+  test's own portal on a deadline (see "Anything written asynchronously has to be polled"), or
+  restrict the pass to that portal through a test entry point.
+- Never give something a short fixed budget to arrive ("the request reached the stub within one
+  second"): poll on a deadline.
+
 ## Endpoints the SDK does not expose
 
 Controller actions marked `[ApiExplorerSettings(IgnoreApi = true)]` are absent from the

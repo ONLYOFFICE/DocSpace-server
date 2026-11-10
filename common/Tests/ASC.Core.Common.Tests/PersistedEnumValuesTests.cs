@@ -1,0 +1,262 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Core.Common.Tests;
+
+/// <summary>
+/// The numbers of the enums the database stores. A stored number keeps its meaning only while the member keeps it: a
+/// value moved during a merge (<c>MessageAction.WebhookRetried</c> went from 6112 to 6117 in the merge commit that
+/// brought in a hotfix whose service-limit actions took 6112-6116) turns every row already written into another event.
+/// The snapshot lists every member of every stored enum, sorted by value, so two branches that take the same number
+/// collide in it when they are merged, and a moved, reused or removed number fails here.
+/// </summary>
+/// <remarks>
+/// The stored enums are found, not listed: every enum-typed property of an entity that some <see cref="DbContext"/>
+/// maps through a <see cref="DbSet{TEntity}"/>, in the ASC assemblies this project loads, plus the enums the database
+/// holds as a plain number (<see cref="_storedAsNumbers"/>). A new enum column therefore enters the check on its own.
+/// </remarks>
+public class PersistedEnumValuesTests
+{
+    private const string SnapshotPath = "common/Tests/ASC.Core.Common.Tests/Snapshots/PersistedEnums.txt";
+
+    private const string SnapshotHeader =
+        "# Every member of every enum the database stores, as Enum.Member=Value, sorted by enum and value.\n" +
+        "# Checked by PersistedEnumValuesTests. A new member gets its line here; a changed or removed one is a decision:\n" +
+        "# rows already stored with that number change their meaning.\n";
+
+    /// <summary>
+    /// Enums the database holds as a plain number column, so no enum-typed entity property leads to them.
+    /// </summary>
+    private static readonly Type[] _storedAsNumbers = [typeof(ASC.MessagingSystem.Core.MessageAction)];
+
+    /// <summary>
+    /// Members that share a value with another member of their enum on purpose. Any other shared value is a collision.
+    /// </summary>
+    private static readonly HashSet<string> _intendedAliases = [];
+
+    [Fact]
+    public void Discovery_FindsTheEnumsKnownToBeStored()
+    {
+        StoredEnums().Should().Contain(
+        [
+            typeof(ASC.MessagingSystem.Core.MessageAction),
+            typeof(ASC.Files.Core.FolderType),
+            typeof(ASC.Files.Core.Security.FileShare),
+            typeof(ASC.Core.Tenants.TenantStatus),
+            typeof(ASC.Core.Users.EmployeeStatus)
+        ]);
+    }
+
+    [Fact]
+    public void StoredEnums_MatchTheSnapshot()
+    {
+        var actual = SnapshotLines();
+        var snapshot = ReadSnapshot();
+
+        if (actual.SequenceEqual(snapshot))
+        {
+            return;
+        }
+
+        var received = Path.Combine(AppContext.BaseDirectory, "PersistedEnums.received.txt");
+        File.WriteAllText(received, SnapshotHeader + string.Join('\n', actual) + "\n");
+
+        var now = ToValues(actual);
+        var before = ToValues(snapshot);
+        var message = new StringBuilder($"The stored enum values differ from {SnapshotPath}.\n");
+
+        Append(message, "Changed: rows stored with the old number now read as another member. Put the old value back, or decide it and update the snapshot",
+            before.Where(e => now.TryGetValue(e.Key, out var value) && value != e.Value).Select(e => $"{e.Key}: {e.Value} -> {now[e.Key]}"));
+        Append(message, "Removed: rows stored with this number lose their name",
+            before.Keys.Where(k => !now.ContainsKey(k)).Select(k => $"{k}={before[k]}"));
+        Append(message, "Added: add these lines to the snapshot, in their sorted place",
+            now.Keys.Where(k => !before.ContainsKey(k)).Select(k => $"{k}={now[k]}"));
+
+        message.Append($"The whole expected snapshot is in {received}.");
+
+        Assert.Fail(message.ToString());
+    }
+
+    [Fact]
+    public void StoredEnums_GiveEveryValueOneName()
+    {
+        var collisions = StoredEnums()
+            .SelectMany(type => Members(type).Select(m => (Type: type, m.Name, m.Value)))
+            .GroupBy(m => (m.Type, m.Value))
+            .Where(g => g.Count(m => !_intendedAliases.Contains($"{g.Key.Type.FullName}.{m.Name}")) > 1)
+            .Select(g => $"{g.Key.Type.FullName}={g.Key.Value}: {string.Join(", ", g.Select(m => m.Name))}")
+            .ToList();
+
+        collisions.Should().BeEmpty(
+            "two members with one number cannot be told apart once stored; give the new one a free number, " +
+            "or list a deliberate alias in _intendedAliases");
+    }
+
+    private static List<string> SnapshotLines()
+    {
+        return
+        [
+            .. StoredEnums().SelectMany(type => Members(type)
+                .OrderBy(m => m.Value)
+                .ThenBy(m => m.Name, StringComparer.Ordinal)
+                .Select(m => $"{type.FullName}.{m.Name}={m.Value.ToString(CultureInfo.InvariantCulture)}"))
+        ];
+    }
+
+    private static List<string> ReadSnapshot()
+    {
+        var path = Path.Combine(FindRepositoryRoot(), SnapshotPath);
+
+        return File.Exists(path)
+            ? [.. File.ReadAllLines(path).Select(l => l.Trim()).Where(l => l.Length > 0 && !l.StartsWith('#'))]
+            : [];
+    }
+
+    private static Dictionary<string, string> ToValues(IEnumerable<string> lines)
+    {
+        return lines
+            .Select(l => l.Split('=', 2))
+            .Where(p => p.Length == 2)
+            .GroupBy(p => p[0], StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First()[1], StringComparer.Ordinal);
+    }
+
+    private static void Append(StringBuilder message, string title, IEnumerable<string> items)
+    {
+        var list = items.ToList();
+
+        if (list.Count == 0)
+        {
+            return;
+        }
+
+        message.Append($"{title} ({list.Count}):\n");
+
+        foreach (var item in list.Take(30))
+        {
+            message.Append($"  {item}\n");
+        }
+
+        if (list.Count > 30)
+        {
+            message.Append($"  ... and {list.Count - 30} more\n");
+        }
+    }
+
+    private static IEnumerable<(string Name, decimal Value)> Members(Type type)
+    {
+        return type.GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Select(f => (f.Name, Convert.ToDecimal(f.GetRawConstantValue(), CultureInfo.InvariantCulture)));
+    }
+
+    private static List<Type> StoredEnums()
+    {
+        var enums = new HashSet<Type>(_storedAsNumbers);
+
+        var contexts = AscAssemblies()
+            .SelectMany(TypesOf)
+            .Where(t => t is { IsClass: true, IsAbstract: false } && typeof(DbContext).IsAssignableFrom(t));
+
+        foreach (var context in contexts)
+        {
+            var entities = context.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
+                .Select(p => p.PropertyType.GetGenericArguments()[0]);
+
+            foreach (var entity in entities)
+            {
+                foreach (var property in entity.GetProperties(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    var type = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+
+                    if (type.IsEnum && type.FullName?.StartsWith("ASC.", StringComparison.Ordinal) == true)
+                    {
+                        enums.Add(type);
+                    }
+                }
+            }
+        }
+
+        return [.. enums.OrderBy(t => t.FullName, StringComparer.Ordinal)];
+    }
+
+    /// <summary>
+    /// The ASC assemblies reachable from this test assembly through its references.
+    /// </summary>
+    private static List<Assembly> AscAssemblies()
+    {
+        var found = new Dictionary<string, Assembly>(StringComparer.Ordinal);
+        var queue = new Queue<Assembly>([typeof(PersistedEnumValuesTests).Assembly]);
+
+        while (queue.TryDequeue(out var assembly))
+        {
+            foreach (var reference in assembly.GetReferencedAssemblies())
+            {
+                if (reference.Name is { } name && name.StartsWith("ASC.", StringComparison.Ordinal) && !found.ContainsKey(name))
+                {
+                    var loaded = Assembly.Load(reference);
+                    found[name] = loaded;
+                    queue.Enqueue(loaded);
+                }
+            }
+        }
+
+        return [.. found.Values];
+    }
+
+    private static IEnumerable<Type> TypesOf(Assembly assembly)
+    {
+        try
+        {
+            return assembly.GetTypes();
+        }
+        catch (ReflectionTypeLoadException exception)
+        {
+            // A type whose dependency is not deployed with the tests cannot be a stored enum's context here.
+            return exception.Types.OfType<Type>();
+        }
+    }
+
+    private static string FindRepositoryRoot()
+    {
+        for (var directory = new DirectoryInfo(AppContext.BaseDirectory); directory is not null; directory = directory.Parent)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "ASC.Tests.slnx")))
+            {
+                return directory.FullName;
+            }
+        }
+
+        throw new InvalidOperationException($"ASC.Tests.slnx not found above {AppContext.BaseDirectory}.");
+    }
+}
