@@ -259,7 +259,7 @@ public class RenewSubscriptionService(
                 // twice - so check again on the next runs.
                 // The exception, not only its message: the message names the call, the cause - a timeout, DNS, TLS, an
                 // unreadable body - is in the inner exception.
-                logger.WarningRenewSubscriptionServiceOutcomeUnknown(data.TenantId, description, ex);
+                logger.ErrorRenewSubscriptionServiceOutcomeUnknown(data.TenantId, description, ex);
 
                 await AddPendingRenewalAsync(new PendingRenewal(
                     data.TenantId,
