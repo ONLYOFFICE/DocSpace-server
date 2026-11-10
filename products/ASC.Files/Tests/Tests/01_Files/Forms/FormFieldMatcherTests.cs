@@ -42,7 +42,7 @@ namespace ASC.Files.Tests.Tests._01_Files.Forms;
 [Trait("Feature", "Forms")]
 public class FormFieldMatcherTests
 {
-    private static FormMetadata Field(string key, string type = "", List<string> values = null) =>
+    private static FormMetadata Field(string key, string type = "", List<string>? values = null) =>
         new() { Key = key, Type = type, PossibleValues = values };
 
     private static (string OldKey, string NewKey)[] Pairs(List<FormFieldRename> renames) =>

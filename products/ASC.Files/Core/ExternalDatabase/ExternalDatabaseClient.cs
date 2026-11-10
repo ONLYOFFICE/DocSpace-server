@@ -569,7 +569,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         param.Value = tableName;
         cmd.Parameters.Add(param);
 
-        var columns = new Dictionary<string, string>();
+        var columns = new Dictionary<string, string>(GetColumnNameComparer(dbType));
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
@@ -1851,7 +1851,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
         // MySQL DDL (CREATE TABLE) causes an implicit commit,
         // making it impossible to wrap CREATE TABLE + INSERT in one atomic transaction.
-        DbTransaction? tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
+        var tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
         var optionComparer = await GetOptionComparerAsync(connection, dbType, null);
 
         try

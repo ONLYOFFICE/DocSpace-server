@@ -126,8 +126,10 @@ public class ConfigurationDto<T>
 
     /// <summary>
     /// True when the editor should report the form fields renamed while the original form of a form-filling room is
-    /// edited. It is false with Document Server Community Edition, whose editors cannot tell the fields of the open
-    /// form.
+    /// edited, which is exactly when `PUT api/2.0/files/file/{fileId}/fieldchanges` accepts the reports. It is false
+    /// when the form is opened for viewing or filling, when the caller may not edit it, for a copy of a form, outside
+    /// a form-filling room, and with Document Server Community Edition, whose editors cannot tell the fields of the
+    /// open form.
     /// </summary>
     /// <example>true</example>
     public bool TrackFormFieldChanges { get; set; }

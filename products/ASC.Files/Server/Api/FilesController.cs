@@ -1203,13 +1203,14 @@ public abstract class FilesController<T>(
     /// Reports which fields of the original PDF form of a form-filling room the user renamed in the editor since it opened
     /// `version`, told apart by the field ids the editor keeps. The editor sends it while the form is edited and when it
     /// is left, only when its configuration from `GET api/2.0/files/file/{fileId}/openedit` has `trackFormFieldChanges`
-    /// true. The caller needs the right to start the filling of the form, started before or not yet. Only the stored
-    /// renames change: a report replaces the previous one of the same `sessionId`, and one whose `sequence` is not above
-    /// the last of that session is dropped, so a repeated or late call is harmless; give every editor tab its own
-    /// `sessionId`. When the editor saves the version, a renamed field keeps its earlier answers under its new name in
-    /// the forms database and the spreadsheet report. A `version` the form does not have yet is ignored, and past 20
-    /// sessions of one user on one version a new one is ignored too; both still answer 200. With Document Server
-    /// Community Edition the call is refused with 403.
+    /// true. The caller needs the right to edit the form; once its filling is started, a content creator keeps it only
+    /// for a form they created or started. Only the stored renames change: a report replaces the previous one of the
+    /// same `sessionId`, and one whose `sequence` is not above the last of that session is dropped, so a repeated or
+    /// late call is harmless; give every editor tab its own `sessionId`. A field left out of `renames` kept its key.
+    /// When the editor saves the version, a renamed field keeps its earlier answers under its new name in the forms
+    /// database and the spreadsheet report. A `version` the form does not have yet or already compared is ignored, as
+    /// is a new session past 20 of one user on one version and a report past the renames the form can keep; all still
+    /// answer 200. With Document Server Community Edition the call is refused with 403.
     /// </remarks>
     /// <summary>
     /// Report renamed form fields
@@ -1217,11 +1218,11 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/fieldchanges</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The report was taken; a late, repeated or surplus one is dropped without an error")]
-    [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, a key is empty or longer than 255 characters, or `sessionId` is longer than 64 characters or has other characters than letters, digits, hyphens and underscores")]
-    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, it is a copy of a form, the caller may not start its filling, or the document editors are Community Edition, which do not track renamed fields")]
+    [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, `renames` has more than 500 entries, a key is empty or longer than 255 characters, or `sessionId` is longer than 64 characters or has other characters than letters, digits, hyphens and underscores")]
+    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, it is a copy of a form, the caller may not edit it, or the document editors are Community Edition, which do not track renamed fields")]
     [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpPut("file/{fileId}/fieldchanges")]
-    public Task SetFormFieldChanges(FormFieldChangesRequestDto inDto)
+    public Task SetFormFieldChanges(SetFormFieldChangesRequestDto inDto)
     {
         return fileStorageService.SetEditorFieldRenamesAsync(inDto.FileId, inDto.Changes.Version, inDto.Changes.Sequence, inDto.Changes.SessionId, inDto.Changes.Renames);
     }

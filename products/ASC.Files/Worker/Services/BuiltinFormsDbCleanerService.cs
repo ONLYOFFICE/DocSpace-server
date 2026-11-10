@@ -46,9 +46,27 @@ public class BuiltinFormsDbCleanerService(
 {
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    private TimeSpan IdleInterval { get; } = TimeSpan.Parse(configuration.GetValue<string>("files:builtinFormsDbCleaner:idle") ?? "30.0:0:0");
+    // A table in use is touched at most once an hour, so a shorter idle period would drop tables still in use.
+    private TimeSpan IdleInterval { get; } = ReadInterval(configuration, logger, "files:builtinFormsDbCleaner:idle", TimeSpan.FromDays(30), TimeSpan.FromDays(1));
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration.GetValue<string>("files:builtinFormsDbCleaner:period") ?? "1.0:0:0");
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = ReadInterval(configuration, logger, "files:builtinFormsDbCleaner:period", TimeSpan.FromDays(1), TimeSpan.FromMinutes(10));
+
+    private static TimeSpan ReadInterval(IConfiguration configuration, ILogger<BuiltinFormsDbCleanerService> logger, string key, TimeSpan fallback, TimeSpan minimum)
+    {
+        var value = configuration.GetValue<string>(key);
+        if (string.IsNullOrEmpty(value))
+        {
+            return fallback;
+        }
+
+        if (!TimeSpan.TryParse(value, CultureInfo.InvariantCulture, out var interval) || interval < minimum)
+        {
+            logger.WarnIntervalOutOfRange(key, value, fallback);
+            return fallback;
+        }
+
+        return interval;
+    }
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -99,24 +117,37 @@ public class BuiltinFormsDbCleanerService(
                 return;
             }
 
+            // The report creator shares this client within the scope, so the whole sweep stays on the existing schema.
             var client = scope.ServiceProvider.GetRequiredService<BuiltinFormsDatabaseClient>();
+            if (!await client.UseProvisionedOnlyAsync())
+            {
+                return;
+            }
+
             var reportCreator = scope.ServiceProvider.GetRequiredService<FormFillingReportCreator>();
             var dropped = 0;
 
-            foreach (var tableName in await client.GetIdleTablesAsync(cutoff))
+            try
             {
-                // One table that cannot be checked now leaves the others to be dropped; it is checked again next time.
-                try
+                foreach (var tableName in await client.GetIdleTablesAsync(cutoff))
                 {
-                    if (await reportCreator.DropIdleBuiltinTableAsync(tableName, cutoff))
+                    // One table that cannot be checked now leaves the others to be dropped; it is checked again next time.
+                    try
                     {
-                        dropped++;
+                        if (await reportCreator.DropIdleBuiltinTableAsync(tableName, cutoff))
+                        {
+                            dropped++;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        logger.WarnIdleTableNotChecked(e, tenantId, tableName);
                     }
                 }
-                catch (Exception e)
-                {
-                    logger.WarnIdleTableNotChecked(e, tenantId, tableName);
-                }
+            }
+            finally
+            {
+                client.ReleaseConnections();
             }
 
             if (dropped > 0)
@@ -133,6 +164,9 @@ public class BuiltinFormsDbCleanerService(
 
 internal static partial class BuiltinFormsDbCleanerServiceLogger
 {
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: {key} = {value} is not a valid interval or is too short, {fallback} is used")]
+    public static partial void WarnIntervalOutOfRange(this ILogger<BuiltinFormsDbCleanerService> logger, string key, string value, TimeSpan fallback);
+
     [LoggerMessage(LogLevel.Information, "Built-in forms DB: dropped {count} idle tables of tenant {tenantId}")]
     public static partial void InfoIdleTablesDropped(this ILogger<BuiltinFormsDbCleanerService> logger, int tenantId, int count);
 

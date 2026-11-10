@@ -58,7 +58,15 @@ public class FormFieldKeyChangeRequest
 /// <summary>
 /// The field keys the user changed in the editor.
 /// </summary>
-public class FormFieldChangesRequest
+/// <example>
+/// {
+///   "version": 3,
+///   "sequence": 1762250000000,
+///   "sessionId": "8f14e45f-ceea-4e7a-9a3b-1c2d3e4f5a6b",
+///   "renames": [{"oldKey": "fromWhom", "newKey": "applicantName"}]
+/// }
+/// </example>
+public class SetFormFieldChangesRequest
 {
     /// <summary>
     /// The version of the form the editor opened; the old keys are the keys of that version.
@@ -69,7 +77,7 @@ public class FormFieldChangesRequest
 
     /// <summary>
     /// The number of this report within the editor session, growing with each one, such as the time it was taken in
-    /// milliseconds; a report with a number not above the one taken already for the session is dropped.
+    /// milliseconds.
     /// </summary>
     /// <example>1762250000000</example>
     [Range(0, long.MaxValue)]
@@ -86,18 +94,18 @@ public class FormFieldChangesRequest
 
     /// <summary>
     /// Every field whose key the user changed since the editor opened the form, told apart by the field id the editor
-    /// keeps; empty when no key changed. The other fields that differ from the opened form were added or removed.
+    /// keeps, with the key it had in the opened version and the key it has now; empty when no key changed.
     /// </summary>
     /// <example>[{"oldKey": "fromWhom", "newKey": "applicantName"}]</example>
     [Required]
-    [MaxLength(1000)]
+    [MaxLength(500)]
     public List<FormFieldKeyChangeRequest> Renames { get; set; }
 }
 
 /// <summary>
 /// The request parameters for reporting the field keys changed in the editor.
 /// </summary>
-public class FormFieldChangesRequestDto
+public class SetFormFieldChangesRequestDto
 {
     /// <summary>
     /// The PDF form open in the editor: the original form of a form-filling room.
@@ -110,7 +118,7 @@ public class FormFieldChangesRequestDto
     /// The changed keys.
     /// </summary>
     [FromBody]
-    public required FormFieldChangesRequest Changes { get; set; }
+    public required SetFormFieldChangesRequest Changes { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]

@@ -59,11 +59,36 @@ public class BuiltinFormsDatabaseClient(
 
     protected override ExternalDatabaseType DatabaseType => ExternalDatabaseType.PostgreSql;
 
+    private FormsDbCredentials? _provisioned;
+
     // The read-only account is left to portal administrators, so its connection limit never blocks the server.
     protected override async Task<DbConnection> CreateConnectionAsync(ExternalDatabaseType dbType)
     {
-        var credentials = await provisioner.GetOrProvisionAsync(tenantManager.GetCurrentTenantId());
+        var credentials = _provisioned ?? await provisioner.GetOrProvisionAsync(tenantManager.GetCurrentTenantId());
         return new NpgsqlConnection(credentials.RwConnectionString);
+    }
+
+    /// <summary>
+    /// Binds this client to the portal's existing schema for background work, which must never provision one; false
+    /// when the portal has none that signs in.
+    /// </summary>
+    public async Task<bool> UseProvisionedOnlyAsync()
+    {
+        _provisioned = await provisioner.GetProvisionedAsync(tenantManager.GetCurrentTenantId());
+        return _provisioned != null;
+    }
+
+    /// <summary>
+    /// Closes the idle pooled connections of the bound portal. Every portal has its own pool, so a sweep over all of
+    /// them would otherwise keep one open per portal until the pool prunes it.
+    /// </summary>
+    public void ReleaseConnections()
+    {
+        if (_provisioned != null)
+        {
+            using var connection = new NpgsqlConnection(_provisioned.RwConnectionString);
+            NpgsqlConnection.ClearPool(connection);
+        }
     }
 
     public static string GetActivityCacheKey(int tenantId, string tableName) => tenantId + "formsdbactivity" + tableName;

@@ -72,13 +72,23 @@ public class FormFillingReportCreator(
         await MigrateFormVersionAsync(roomId, originalFormId, originalFormVersion);
 
         var fileId = formsDataFile.Id is int id ? id : 0;
-        if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
+
+        // Best effort: a broker failure must not skip the report below; a lost submission is completed from the index
+        // by the next gap sync.
+        try
         {
-            await PublishExternalDbSubmissionAsync(sendFormToExternalDB, originalFormId, originalFormVersion, roomId, fileId, resultFormNumber, formsDataUrl);
+            if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
+            {
+                await PublishExternalDbSubmissionAsync(sendFormToExternalDB, originalFormId, originalFormVersion, roomId, fileId, resultFormNumber, formsDataUrl);
+            }
+            else
+            {
+                await PublishBuiltinDbSubmissionAsync(originalFormId, originalFormVersion, roomId, fileId, resultFormNumber, formsDataUrl);
+            }
         }
-        else
+        catch (Exception e)
         {
-            await PublishBuiltinDbSubmissionAsync(originalFormId, originalFormVersion, roomId, fileId, resultFormNumber, formsDataUrl);
+            logger.WarnSubmissionNotPublished(e, originalFormId, originalFormVersion);
         }
 
         if (settingsSaveFormAsXLSX)
@@ -124,15 +134,22 @@ public class FormFillingReportCreator(
         // The first submission makes the form's responses analysable.
         if (resultFormNumber == 1 && GetBuiltinDb() != null)
         {
-            var originalForm = await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId);
-            if (originalForm != null)
+            try
             {
-                await socketManager.UpdateFileAsync(originalForm);
+                var originalForm = await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId);
+                if (originalForm != null)
+                {
+                    await socketManager.UpdateFileAsync(originalForm);
+                }
+            }
+            catch (Exception e)
+            {
+                logger.WarnFirstResponseNotNotified(e, originalFormId);
             }
         }
     }
 
-    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
+    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, string formsDataUrl)
     {
         var formFilling = await DecideVersionTableAsync(externalDatabaseClient, originalFormId, originalFormVersion);
         var tableName = await WriteSubmissionAsync(externalDatabaseClient, formFilling, fileId, originalFormId, originalFormVersion, roomId, formsDataUrl);
@@ -619,7 +636,7 @@ public class FormFillingReportCreator(
             // The report showed a pending version with the shared ones; the database refused it, so it gets its sheet back.
             if (pending.Exists(v => state.VersionLinks?.Exists(l => l.Version == v) != true && !GetPendingVersions(state).Contains(v)))
             {
-                await RequestReportRebuildAsync(state.RoomId, form);
+                await RequestReportRebuildAsync(await ResolveRoomIdAsync(form.Id, state.RoomId), form);
             }
 
             return state;
@@ -664,7 +681,7 @@ public class FormFillingReportCreator(
     // Under the version lock, so the state replaces the saved one; the lock of the submissions keeps the other properties.
     private async Task SaveVersionStateAsync(int originalFormId, FormFillingProperties<int> state)
     {
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(await GetFormLockKeyAsync(originalFormId, state.RoomId)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(originalFormId)))
         {
             var fileDao = daoFactory.GetFileDao<int>();
             var current = await fileDao.GetProperties(originalFormId);
@@ -690,7 +707,7 @@ public class FormFillingReportCreator(
             return;
         }
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(await GetFormLockKeyAsync(formId, properties.FormFilling.RoomId)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(formId)))
         {
             var current = (await fileDao.GetProperties(formId))?.FormFilling;
             if (current != null)
@@ -702,10 +719,18 @@ public class FormFillingReportCreator(
         }
     }
 
-    // The lock the submissions of the form take: keyed by its room. A form started by assigning roles keeps no room in
-    // its properties until its report is generated, so the room is looked up; with a key of its own a writer would not
-    // wait for the others and could save over them.
-    private async Task<string> GetFormLockKeyAsync<T>(T formId, T roomId)
+    /// <summary>
+    /// The lock every writer of a form's submissions and properties takes. It is keyed by the form alone: the room in
+    /// the properties stays unset for a form started by assigning roles and goes stale when the form is moved, and a
+    /// writer keyed by another room would not wait for the others and could save over them.
+    /// </summary>
+    public string GetSubmissionLockKey<T>(T formId)
+    {
+        return $"fillform_{tenantManager.GetCurrentTenantId()}_{formId}";
+    }
+
+    // The room stored in the properties, or the form's parent room while none is stored.
+    private async Task<T> ResolveRoomIdAsync<T>(T formId, T roomId)
     {
         if (EqualityComparer<T>.Default.Equals(roomId, default))
         {
@@ -717,7 +742,7 @@ public class FormFillingReportCreator(
             }
         }
 
-        return $"fillform_{roomId}_{formId}";
+        return roomId;
     }
 
     private static void CopyVersionState<T>(FormFillingProperties<T> from, FormFillingProperties<T> to)
@@ -1159,6 +1184,13 @@ public class FormFillingReportCreator(
             return applied.Concat(positional).OrderBy(r => after.FindIndex(f => f.Key == r.NewKey)).ToList();
         }
 
+        // A new field given the key of a field an earlier version removed would write next to that field's answers.
+        var keptColumns = renamed.Select(f => NormalizeColumnName(f.Key)).ToHashSet();
+        if (after.Exists(f => !keptColumns.Contains(NormalizeColumnName(f.Key)) && foreign.Contains(NormalizeColumnName(f.Key))))
+        {
+            return null;
+        }
+
         if (FormFieldMatcher.CountShared(renamed, after) is null or 0)
         {
             return null;
@@ -1298,7 +1330,8 @@ public class FormFillingReportCreator(
     // stands for all the sessions of the user on the version, as the editors before the session id did.
     internal static bool KeepEditorRenames(FormFillingProperties<int> state, int openedVersion, long sequence, Guid userId, string sessionId, List<FormFieldRename> renames)
     {
-        if (IsEditorSessionLimitReached(state, openedVersion, userId, sessionId))
+        // A version compared already took the sessions opened before it; a report on one of them would be kept forever.
+        if (openedVersion < state.FieldsCheckedVersion || IsEditorSessionLimitReached(state, openedVersion, userId, sessionId))
         {
             return false;
         }
@@ -1324,11 +1357,46 @@ public class FormFillingReportCreator(
             return false;
         }
 
-        session.Sequence = sequence;
-        session.Renames = renames
+        var kept = renames
             .Where(r => !string.IsNullOrEmpty(r.OldKey) && !string.IsNullOrEmpty(r.NewKey) && r.OldKey != r.NewKey)
             .Select(r => new FormFieldRename { OldKey = r.OldKey, NewKey = r.NewKey })
             .ToList();
+
+        if (!FitEditorRenames(sessions, session, kept.Count))
+        {
+            if (session.Renames == null)
+            {
+                sessions.Remove(session);
+            }
+
+            return false;
+        }
+
+        session.Sequence = sequence;
+        session.Renames = kept;
+
+        return true;
+    }
+
+    // The renames of all sessions are stored in the form's properties, read with every listing and submission: past
+    // the budget the oldest saved sessions go first, which only costs their versions a table of their own, and a
+    // report that still does not fit is dropped.
+    internal const int MaxEditorRenamesPerForm = 2000;
+
+    private static bool FitEditorRenames(List<FormEditorFieldRenames> sessions, FormEditorFieldRenames session, int count)
+    {
+        int Total() => sessions.Where(r => r != session).Sum(r => r.Renames?.Count ?? 0) + count;
+
+        while (Total() > MaxEditorRenamesPerForm)
+        {
+            var oldest = sessions.Where(r => r.SavedVersion != null && r != session).MinBy(r => r.SavedVersion);
+            if (oldest == null)
+            {
+                return false;
+            }
+
+            sessions.Remove(oldest);
+        }
 
         return true;
     }

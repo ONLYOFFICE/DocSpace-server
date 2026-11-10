@@ -60,7 +60,7 @@ public class FormMySqlSchemaTests
     [InlineData("utf8mb4_0900_as_ci", "ENUM('Yes', 'Ne', 'Né')")]
     [InlineData("utf8mb4_0900_ai_ci", null)]
     [InlineData("utf8mb4_cs_0900_ai_ci", null)]
-    public void BuildWidenOptions_ByCollation_KeepsWhatTheColumnTellsApart(string collation, string expected)
+    public void BuildWidenOptions_ByCollation_KeepsWhatTheColumnTellsApart(string collation, string? expected)
     {
         var comparer = ExternalDatabaseClient.GetOptionComparer(CoreExternalDatabaseType.MySql, collation);
 
@@ -94,8 +94,8 @@ public class FormMySqlSchemaTests
         var check = ExternalDatabaseClient.BuildMySqlCopyCheck("form_1_v2", "col_kind", "text", "enum('Paid','Unpaid')");
 
         check.Should().NotBeNull();
-        check.Value.Sql.Should().Be("SELECT EXISTS (SELECT 1 FROM `form_1_v2` WHERE `col_kind` IS NOT NULL AND TRIM(TRAILING ' ' FROM `col_kind`) NOT IN (@option0, @option1))");
-        check.Value.Parameters.Values.Should().Equal("Paid", "Unpaid");
+        check!.Value.Sql.Should().Be("SELECT EXISTS (SELECT 1 FROM `form_1_v2` WHERE `col_kind` IS NOT NULL AND TRIM(TRAILING ' ' FROM `col_kind`) NOT IN (@option0, @option1))");
+        check!.Value.Parameters.Values.Should().Equal("Paid", "Unpaid");
     }
 
     // The source list widens the target one; whether 'paid' is 'Paid' is up to the collation, so it is checked as well.
@@ -105,11 +105,11 @@ public class FormMySqlSchemaTests
         var check = ExternalDatabaseClient.BuildMySqlCopyCheck("form_1_v2", "col_kind", "enum('paid','Sick')", "enum('Paid','Unpaid')");
 
         check.Should().NotBeNull();
-        check.Value.Parameters.Values.Should().Equal("Paid", "Unpaid", "Sick");
+        check!.Value.Parameters.Values.Should().Equal("Paid", "Unpaid", "Sick");
 
         var binary = ExternalDatabaseClient.BuildMySqlCopyCheck("form_1_v2", "col_kind", "enum('paid','Sick')", "enum('Paid','Unpaid')",
             ExternalDatabaseClient.GetOptionComparer(CoreExternalDatabaseType.MySql, "utf8mb4_bin"));
-        binary.Value.Parameters.Values.Should().Equal("Paid", "Unpaid", "paid", "Sick");
+        binary!.Value.Parameters.Values.Should().Equal("Paid", "Unpaid", "paid", "Sick");
     }
 
     [Fact]
@@ -118,8 +118,8 @@ public class FormMySqlSchemaTests
         var check = ExternalDatabaseClient.BuildMySqlCopyCheck("form_1_v2", "col_name", "text", "varchar(255)");
 
         check.Should().NotBeNull();
-        check.Value.Sql.Should().EndWith("AND CHAR_LENGTH(TRIM(TRAILING ' ' FROM `col_name`)) > 255)");
-        check.Value.Parameters.Should().BeEmpty();
+        check!.Value.Sql.Should().EndWith("AND CHAR_LENGTH(TRIM(TRAILING ' ' FROM `col_name`)) > 255)");
+        check!.Value.Parameters.Should().BeEmpty();
     }
 
     [Theory]

@@ -369,8 +369,13 @@ public abstract class EditorController<T>(
                     result.StartFillingMode = rootFolder.FolderType == FolderType.FillingFormsRoom ? StartFillingMode.StartFillingFormRoom : StartFillingMode.ShareToFillOut;
                     result.StartFilling = formOpenSetup.CanStartFilling;
                     result.EditorConfig.Customization.StartFillingForm = new StartFillingForm { Text = rootFolder.FolderType == FolderType.FillingFormsRoom ? FilesCommonResource.StartFillingModeEnum_StartFilling : FilesCommonResource.StartFillingModeEnum_ShareToFillOut };
-                    result.TrackFormFieldChanges = result.StartFillingMode == StartFillingMode.StartFillingFormRoom && !await documentServiceLicense.IsFreeEditionAsync();
                 }
+            }
+
+            // The same right PUT fieldchanges demands, so the editor does not send reports that are refused.
+            if (rootFolder.FolderType == FolderType.FillingFormsRoom && canEdit && !inDto.View)
+            {
+                result.TrackFormFieldChanges = await fileStorageService.CanReportFormFieldChangesAsync(file) && !await documentServiceLicense.IsFreeEditionAsync();
             }
 
         }

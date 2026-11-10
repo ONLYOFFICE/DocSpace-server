@@ -66,7 +66,6 @@ public class ExternalDbFormSubmissionIntegrationEventHandler(
                         @event.OriginalFormId,
                         @event.OriginalFormVersion,
                         @event.RoomId,
-                        @event.ResultFormNumber,
                         @event.FormsDataUrl);
                 }
 

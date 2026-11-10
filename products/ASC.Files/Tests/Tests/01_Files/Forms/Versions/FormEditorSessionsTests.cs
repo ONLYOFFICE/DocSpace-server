@@ -347,6 +347,67 @@ public class FormEditorSessionsTests
             .Select(r => (r.OldKey, r.NewKey)).Should().Equal(("name", "extra"));
     }
 
+    // v2 removed a, v3 adds a new field under the same key: its answers would land next to the old a's.
+    [Fact]
+    public void MatchFields_NewFieldTakesKeyOfRemovedField_TakesTableOfItsOwn()
+    {
+        var formFilling = new FormFillingProperties { VersionLinks = [new FormVersionLink { Version = 2, TableVersion = 1 }] };
+        var tableColumns = FormFillingReportCreator.GetTableColumns(formFilling, 1, [Previous(1, "a", "c"), Previous(2, "c")], 3);
+
+        FormFillingReportCreator.MatchFields(3, 1, Previous(2, "c"), Fields("c", "a"), formFilling, tableColumns).Should().BeNull();
+        FormFillingReportCreator.MatchFields(3, 1, Previous(2, "c"), Fields("c", "b"), formFilling, tableColumns).Should().BeEmpty();
+    }
+
+    [Fact]
+    public void KeepEditorRenames_VersionAlreadyCompared_IsDropped()
+    {
+        var state = new FormFillingProperties { FieldsCheckedVersion = 3 };
+
+        FormFillingReportCreator.KeepEditorRenames(state, 2, 100, _user, "tab", [Rename("fromWhom", "applicant")]).Should().BeFalse();
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 100, _user, "tab", [Rename("fromWhom", "applicant")]).Should().BeTrue();
+
+        state.EditorFieldRenames.Should().ContainSingle().Which.OpenedVersion.Should().Be(3);
+    }
+
+    // Reports of the largest allowed size from many sessions over many saved versions: the stored state keeps a fixed
+    // budget, so the form's properties never outgrow the column they are kept in.
+    [Fact]
+    public void KeepEditorRenames_AdversarialReportsAcrossVersions_StayWithinBudget()
+    {
+        var state = new FormFillingProperties();
+        var renames = Enumerable.Range(0, 500).Select(i => Rename($"{i}".PadLeft(255, 'o'), $"{i}".PadLeft(255, 'n'))).ToList();
+
+        for (var version = 1; version <= 10; version++)
+        {
+            for (var session = 0; session < FormFillingReportCreator.MaxEditorSessionsPerUser; session++)
+            {
+                FormFillingReportCreator.KeepEditorRenames(state, version, 100, Guid.NewGuid(), $"s{session}", renames);
+            }
+
+            FormFillingReportCreator.MarkEditorRenamesSaved(state, version + 1);
+        }
+
+        state.EditorFieldRenames.Sum(s => s.Renames?.Count ?? 0).Should().BeLessThanOrEqualTo(FormFillingReportCreator.MaxEditorRenamesPerForm);
+        state.EditorFieldRenames.Should().OnlyContain(s => s.Renames != null);
+        JsonSerializer.Serialize(state).Length.Should().BeLessThan(FormFillingReportCreator.MaxEditorRenamesPerForm * 600);
+    }
+
+    // A report that cannot fit even after the saved sessions go leaves no empty session behind.
+    [Fact]
+    public void KeepEditorRenames_ReportPastTheBudget_IsDroppedWithoutASession()
+    {
+        var state = new FormFillingProperties();
+        var renames = Enumerable.Range(0, 500).Select(i => Rename($"o{i}", $"n{i}")).ToList();
+        for (var session = 0; session < FormFillingReportCreator.MaxEditorRenamesPerForm / renames.Count; session++)
+        {
+            FormFillingReportCreator.KeepEditorRenames(state, 1, 100, Guid.NewGuid(), "tab", renames).Should().BeTrue();
+        }
+
+        FormFillingReportCreator.KeepEditorRenames(state, 1, 100, _user, "late", renames).Should().BeFalse();
+
+        state.EditorFieldRenames.Should().NotContain(s => s.SessionId == "late");
+    }
+
     private static FormFieldRename Rename(string oldKey, string newKey) => new() { OldKey = oldKey, NewKey = newKey };
 
     private static FormEditorFieldRenames Session(int opened, int saved, params FormFieldRename[] renames) =>

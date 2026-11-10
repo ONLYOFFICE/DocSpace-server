@@ -112,6 +112,12 @@ public class FormsDbProvisioningService(
         logger.InfoFormsDbDeprovisioned(tenantId, schemaName);
     }
 
+    /// <summary>
+    /// The stored credentials of the portal when they still sign in, or null; never provisions, so background work
+    /// cannot recreate a dropped schema or reset the passwords an administrator handed out.
+    /// </summary>
+    public Task<FormsDbCredentials?> GetProvisionedAsync(int tenantId) => TryGetProvisionedAsync(tenantId);
+
     // Settings restored from another portal's backup name that portal's schema, so they are accepted only for this tenant.
     private async Task<FormsDbCredentials?> TryGetProvisionedAsync(int tenantId)
     {

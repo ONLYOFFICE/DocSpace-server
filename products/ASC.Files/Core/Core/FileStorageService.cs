@@ -6095,7 +6095,11 @@ public class FileStorageService //: IFileStorageService
 
     public async Task SetEditorFieldRenamesAsync(int formId, int openedVersion, long sequence, string sessionId, List<FormFieldKeyChangeRequest> renames)
     {
-        var form = await GetStartedFormAsync(formId);
+        var form = await daoFactory.GetFileDao<int>().GetFileAsync(formId) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        if (!await CanReportFormFieldChangesAsync(form))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
 
         // Community Edition editors cannot tell the fields of the open form.
         if (await documentServiceLicense.IsFreeEditionAsync())
@@ -6106,35 +6110,24 @@ public class FileStorageService //: IFileStorageService
         await formFillingReportCreator.SetEditorFieldRenamesAsync(form.Id, openedVersion, sequence, authContext.CurrentAccount.ID, sessionId, renames.Select(r => r.Map()).ToList());
     }
 
-    // The original PDF form of a form-filling room whose filling the caller may start, started before or not yet.
-    private async Task<File<int>> GetStartedFormAsync(int formId)
+    // The original PDF form of a form-filling room that the caller may edit: only its editor renames fields, and the
+    // right to start the filling alone would let a user who cannot edit the form tie renames to someone else's save.
+    public async Task<bool> CanReportFormFieldChangesAsync<T>(File<T> form)
     {
-        var fileDao = daoFactory.GetFileDao<int>();
-        var form = await fileDao.GetFileAsync(formId) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
-
-        if (!form.IsPdf)
+        if (!form.IsPdf || !await fileSecurity.CanEditAsync(form))
         {
-            throw new InvalidOperationException();
+            return false;
         }
 
-        if (!await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-        }
-
-        var room = await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<int>());
+        var room = await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<T>());
         if (room is not { FolderType: FolderType.FillingFormsRoom })
         {
-            throw new InvalidOperationException();
+            return false;
         }
 
-        var formFilling = (await fileDao.GetProperties(form.Id))?.FormFilling;
-        if (formFilling == null || formFilling.OriginalFormId != form.Id)
-        {
-            throw new InvalidOperationException();
-        }
+        var formFilling = (await daoFactory.GetFileDao<T>().GetProperties(form.Id))?.FormFilling;
 
-        return form;
+        return formFilling != null && EqualityComparer<T>.Default.Equals(formFilling.OriginalFormId, form.Id);
     }
 
     private async Task<List<Guid>> GetFormFillersAsync<T>(Folder<T> room)
