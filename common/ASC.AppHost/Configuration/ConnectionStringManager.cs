@@ -750,8 +750,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         if (FormsAdminConnectionString != null)
         {
-            // The key the services read the built-in forms database from, over whatever buildtools/config says.
-            resourceBuilder.WithEnvironment("ConnectionStrings__formsAdmin:connectionString", FormsAdminConnectionString);
+            // The whole entry, over whatever buildtools/config says: the services look a connection string up by its
+            // name, and buildtools ships this entry with an empty one.
+            resourceBuilder
+                .WithEnvironment("ConnectionStrings__formsAdmin:name", "formsAdmin")
+                .WithEnvironment("ConnectionStrings__formsAdmin:connectionString", FormsAdminConnectionString)
+                .WithEnvironment("ConnectionStrings__formsAdmin:providerName", "Npgsql");
         }
 
         if (MailResource != null)
