@@ -1,6 +1,6 @@
 ---
 name: openapi-desc-opt
-description: "Closing the next batch of the endpoint-description queue end to end: refresh the queue of controllers whose published summary, description, parameter and response texts fail `.claude/rules/openapi-endpoint-docs.md` or `.claude/rules/openapi-dto-docs.md` (missing, thin, or sentences too long and heavy to read, judged by Vale and vacuum where installed), take the batch it plans, rewrite the C# sources by `references/description-rules.md`, check the new texts, regenerate that service's OpenAPI document and prove the findings left the queue. USE FOR: which controllers still have unoptimized descriptions, refresh the list, optimize the next controller or batch, continue the description campaign, endpoints left with thin descriptions — even when the user names neither the list nor the campaign. DO NOT USE FOR: Spectral findings (openapi-lint-fix), a DTO-property campaign of its own, hand-editing `json/*_2.0.json` or `docspace-backend.yaml`, regenerating the SDKs (generate-sdk)."
+description: "Closing the next batch of the endpoint-description queue end to end: refresh the queue of controllers whose published summary, description, parameter and response texts fail `.claude/rules/openapi-endpoint-docs.md` or `.claude/rules/openapi-dto-docs.md` (missing, thin, or sentences too long and heavy to read, judged by Vale and vacuum where installed), take the batch it plans, rewrite the C# sources by `references/description-rules.md`, check the new texts, regenerate that service's OpenAPI document and prove the findings left the queue. USE FOR: which controllers still have unoptimized descriptions, refresh the list, optimize the next controller or batch, continue the description campaign, endpoints left with thin descriptions, installing Vale or vacuum — even when the user names neither the list nor the campaign. DO NOT USE FOR: Spectral findings (openapi-lint-fix), a DTO-property campaign of its own, hand-editing `json/*_2.0.json` or `docspace-backend.yaml`, regenerating the SDKs (generate-sdk)."
 ---
 
 # Closing the next batch of the description queue
@@ -25,6 +25,10 @@ already right. Step 7, because the row has to be absent from a list rebuilt from
 *genuinely* regenerated after the edit — and the counts around it have to be unchanged, or the
 absence is a parsing accident.
 
+A request only to install or check the readability tools (Vale, vacuum, textstat) is not a pass:
+follow `references/tools-setup.md` through its step 4, report what it printed, and stop. Never
+install them in the middle of a pass — a new tool changes the judge between step 3 and step 7.
+
 ## What the loop owns
 
 | File | What it is |
@@ -33,6 +37,7 @@ absence is a parsing accident.
 | `.claude/skills/openapi-desc-opt/tools.py` | finds Vale and vacuum, runs them with the settings in `readability/`, and computes their thresholds itself where they are missing; shared by both scripts |
 | `.claude/skills/openapi-desc-opt/check_texts.py` | checks the rewritten descriptions of the batch (step 4 and step 6): its own form, order, plain-word and status-code checks, then textstat, Vale and vacuum when found |
 | `.claude/skills/openapi-desc-opt/readability/` | the Vale styles and the vacuum ruleset that `check_texts.py` runs |
+| `.claude/skills/openapi-desc-opt/references/tools-setup.md` | installing textstat, Vale and vacuum on request, and the check that proves they apply the settings of `readability/` |
 | `.claude/skills/openapi-desc-opt/unoptimized-controllers.md` | the list: the next batch, "Must fix" (tiers A and B) and "Recommended" (tier C), rewritten by every scan, deleted when both are empty |
 | `.claude/skills/openapi-desc-opt/batch-manifest.json` | what this pass declared it would close, written by `--batch` in step 3 and verified by `--verify-batch` in step 7; absent until a batch is committed, and removed by `--batch` when there is nothing left to declare |
 | `.claude/skills/openapi-desc-opt/references/list-rules.md` | how the queue is defined: units, checks, tiers, filters, the axis of a batch |
@@ -52,6 +57,9 @@ Scope is the public bundle: the documents that `join` in
 §5.5), and `--diag` prints their keys. A document outside the bundle is scanned only when `--scope`
 names it, for the day that decision changes. Do not widen the scope on your own initiative: the
 extra rows are texts nobody has agreed to own.
+
+The commands below call the interpreter `python`, its name on Windows. On macOS and Linux it is
+usually `python3`; use the name `command -v python3 python` finds.
 
 ## 1. Are the documents younger than their sources?
 
@@ -272,7 +280,10 @@ prints a block per operation. Section numbers here and in its output are those o
 The tools are optional. The script looks for them before it runs them: `--vale` or `VALE_BIN`,
 `--vacuum` or `VACUUM_BIN`, else `PATH`; textstat is imported by the running Python, else by
 `--textstat-python` or `TEXTSTAT_PYTHON`. A tool that is not found is skipped without an error, and the
-last line, `MISSING TOOLS:`, names it — keep that line for the report. Do not install anything.
+last line, `MISSING TOOLS:`, names it — keep that line for the report. Do not install anything on
+your own. When the user asks for the tools, `references/tools-setup.md` has the commands per machine
+and the check that proves them (`check_texts.py --check-tools`); a tool that check marks `FAILED` is
+not used for the queue (`--own-checks`) until it is fixed.
 
 Read the output as a list of places to look at, not as a score. A note about content — a missing
 refusal code, a missing repeat statement, a code not in the text — is a question to put to the code,
@@ -391,9 +402,9 @@ wrong for one of the operations that share it. These are the findings that never
 because no check can see them.
 
 The last line of the report names the tools `check_texts.py` did not find, from its `MISSING TOOLS:`
-line: "textstat, Vale and vacuum are not installed on this machine; their checks were skipped." Say
-it once, without installation advice, and leave it out when every tool ran or when the batch had no
-description to check.
+line: "textstat, Vale and vacuum are not installed on this machine; their checks were skipped; they
+install by `references/tools-setup.md`." Say it once, and leave it out when every tool ran or when
+the batch had no description to check.
 
 ## When the pass stops short
 

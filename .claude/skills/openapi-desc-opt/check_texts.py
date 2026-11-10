@@ -16,6 +16,10 @@ Which operations: the description sites of the batch in batch-manifest.json, or 
 
 Finding the tools: --vale / VALE_BIN, --vacuum / VACUUM_BIN, else PATH; textstat is imported by this
 interpreter, else by --textstat-python / TEXTSTAT_PYTHON.
+
+--check-tools runs every tool it finds on two texts with a known verdict and says whether each one
+works with the settings of readability/ (references/tools-setup.md, step 4); exit code 1 when one
+does not.
 """
 import argparse
 import html
@@ -329,6 +333,111 @@ def run_textstat(texts, python):
     return json.loads(proc.stdout), python
 
 
+# --- the installation check --------------------------------------------------------------------
+
+# Two texts with a known verdict (references/tools-setup.md, step 4). The first is one sentence of 26
+# words: it breaks the sentence length, the sentence count and the average of description-rules.md §4.
+# The second keeps all of them.
+SAMPLE_LONG = ("Returns the list of all the files and folders that the current user can open in the room "
+               "with the given ID and the given filter.")
+SAMPLE_SHORT = "Returns the files of a room. The room is set by its ID. A missing room returns 404."
+VACUUM_RULES = {"desc-sentence-length", "desc-average-sentence", "desc-min-sentences", "desc-one-paragraph",
+                "desc-grade"}
+VACUUM_EXPECTED = {"desc-sentence-length", "desc-min-sentences"}
+
+
+def tool_version(binary, *variants):
+    """The first non-empty output line of the first variant of the version flags that succeeds."""
+    env = dict(os.environ, VACUUM_NO_UPDATE_CHECK="true")
+    for flags in variants:
+        try:
+            proc = subprocess.run([binary] + list(flags), capture_output=True, text=True, encoding="utf-8",
+                                  env=env, timeout=60)
+        except (OSError, subprocess.SubprocessError):
+            continue
+        line = next((x.strip() for x in (proc.stdout or "").splitlines() if x.strip()), "")
+        if proc.returncode == 0 and line:
+            return line
+    return "version unknown"
+
+
+def check_tools(args):
+    """Runs the tools that are found on the two samples and compares their verdicts with the known one.
+    A tool that runs but misses the long sentence would close form findings it never saw."""
+    work = args.work or tempfile.mkdtemp(prefix="desc-opt-tools-")
+    os.makedirs(work, exist_ok=True)
+    samples = {"long": SAMPLE_LONG, "short": SAMPLE_SHORT}
+    failed, missing = [], []
+    print("TOOL CHECK: a 26-word sentence has to be flagged, three short sentences have to pass")
+
+    own = {k: max(readability.form_metrics(t)["lengths"]) for k, t in samples.items()}
+    if own["long"] > readability.MAX_SENTENCE_WORDS >= own["short"]:
+        print("  own checks  ok: longest sentence {0} and {1} words".format(own["long"], own["short"]))
+    else:
+        failed.append("own checks")
+        print("  own checks  FAILED: longest sentence {0} and {1} words".format(own["long"], own["short"]))
+
+    stats, python = run_textstat(samples, args.textstat_python)
+    if stats is None:
+        missing.append("textstat")
+        print("  textstat    not found")
+    else:
+        grades = [stats[k]["flesch_kincaid_grade"] for k in ("long", "short")]
+        if grades[0] > grades[1]:
+            print("  textstat    ok ({0}): grade {1} and {2}".format(python, *grades))
+        else:
+            failed.append("textstat")
+            print("  textstat    FAILED ({0}): grade {1} and {2}, the long sample has to grade higher".format(
+                python, *grades))
+
+    found = readability.discover(args.vale, args.vacuum)
+    if not found["vale"]:
+        missing.append("Vale")
+        print("  Vale        not found")
+    else:
+        where = "{0}, {1}".format(found["vale"], tool_version(found["vale"], ["--version"]))
+        out, note = readability.run_vale(found["vale"], samples, work)
+        if out is None:
+            failed.append("Vale")
+            print("  Vale        FAILED ({0}): {1}".format(where, note))
+        else:
+            hits = {k: sum(1 for a in out.get(k, []) if a[0] == "Docs.SentenceLength") for k in samples}
+            if hits["long"] and not hits["short"]:
+                print("  Vale        ok ({0}): {1}".format(where, note))
+            else:
+                failed.append("Vale")
+                print("  Vale        FAILED ({0}): Docs.SentenceLength alerts: {1} on the long sample, {2} on the "
+                      "short one; expected at least 1 and 0".format(where, hits["long"], hits["short"]))
+
+    if not found["vacuum"]:
+        missing.append("vacuum")
+        print("  vacuum      not found")
+    else:
+        where = "{0}, {1}".format(found["vacuum"], tool_version(found["vacuum"], ["version"], ["--version"]))
+        # The dot of `api/2.0` is part of the check: vacuum splits the reported path on it.
+        entries = [(k, "/api/2.0/tool-check/" + k, "get", t) for k, t in samples.items()]
+        out, note = readability.run_vacuum(found["vacuum"], entries, work)
+        if out is None:
+            failed.append("vacuum")
+            print("  vacuum      FAILED ({0}): {1}".format(where, note))
+        else:
+            codes = {k: {c for c, _ in out.get(k, []) if c in VACUUM_RULES} for k in samples}
+            if VACUUM_EXPECTED <= codes["long"] and not codes["short"]:
+                print("  vacuum      ok ({0}): {1}".format(where, ", ".join(sorted(codes["long"]))))
+            else:
+                failed.append("vacuum")
+                print("  vacuum      FAILED ({0}): rules on the long sample: {1}; on the short one: {2}; expected "
+                      "at least {3} on the long one and none on the short one".format(
+                          where, ", ".join(sorted(codes["long"])) or "none",
+                          ", ".join(sorted(codes["short"])) or "none", ", ".join(sorted(VACUUM_EXPECTED))))
+
+    print()
+    print(("TOOLS FAILED: " + ", ".join(failed)) if failed else "TOOLS OK")
+    print("MISSING TOOLS: " + (", ".join(missing) if missing else "none"))
+    print("tool inputs: " + work)
+    return 1 if failed else 0
+
+
 # --- report ------------------------------------------------------------------------------------
 
 def main():
@@ -350,7 +459,11 @@ def main():
     parser.add_argument("--vacuum")
     parser.add_argument("--textstat-python")
     parser.add_argument("--work", help="folder for the tool inputs (default: a new temp folder)")
+    parser.add_argument("--check-tools", action="store_true",
+                        help="run the tools that are found on two samples with a known verdict and stop")
     args = parser.parse_args()
+    if args.check_tools:
+        sys.exit(check_tools(args))
 
     source = args.source == "source"
     doc_key, wanted = targets(args)
