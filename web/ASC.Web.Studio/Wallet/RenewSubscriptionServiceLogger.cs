@@ -52,6 +52,9 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Warning, "Subscription renewal that timed out at {timedOutAt} is not confirmed yet: tenant {tenantId}, {description}: {reason}")]
     public static partial void WarningRenewSubscriptionServiceNotConfirmed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, DateTime timedOutAt, string reason, Exception exception);
 
+    [LoggerMessage(LogLevel.Error, "Subscription renewal was interrupted at {stage} on attempt {attempt}, a process stopped half-way, resuming: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceInterrupted(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, string stage, int attempt);
+
     [LoggerMessage(LogLevel.Error, "RenewSubscriptionService: error processing tenant {tenantId}")]
     public static partial void ErrorRenewSubscriptionServiceTenant(this ILogger<RenewSubscriptionService> logger, int tenantId, Exception exception);
 

@@ -745,6 +745,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 // the wallet poller of Web.Studio runs every few seconds rather than every minute, so a test of what
                 // it does to a portal waits seconds for its next run
                 .WithEnvironment("core:accounting:topupperiod", Constants.PaymentStubTopUpPeriod.ToString())
+                // the renewal service likewise, and with it how long before the due date a subscription is renewed
+                // (core:accounting:renewadvance falls back to the period)
+                .WithEnvironment("core:accounting:renewperiod", Constants.PaymentStubRenewPeriod.ToString())
                 .WithEnvironment("core:docscloud:url", PaymentServicesUrl + Constants.PaymentStubDocsCloudPath)
                 .WithEnvironment("core:docscloud:key", key)
                 .WithEnvironment("core:docscloud:secret", secret);

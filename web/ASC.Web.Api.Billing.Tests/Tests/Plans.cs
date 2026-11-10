@@ -48,6 +48,11 @@ internal static class Plans
     public const int AdminProductId = 1006;
     public const string AdminPlanName = "admin";
 
+    // The same plan paid from the wallet, "adminwallet": renewed by the stack itself when its due date comes, at 20 USD
+    // per administrator.
+    public const int AdminWalletProductId = 1013;
+    public const decimal AdminWalletPrice = 20m;
+
     // The DocsCloud wallet services: DocsCloud (quota -15) and its developer pack (quota -16).
     public const int DocsCloudProductId = 1014;
     public const int DocsCloudDevPackProductId = 1015;

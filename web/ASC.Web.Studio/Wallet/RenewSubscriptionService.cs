@@ -65,6 +65,14 @@ public class RenewSubscriptionService(
     // customer is told it failed.
     private static readonly TimeSpan _renewVerifyPeriod = TimeSpan.FromMinutes(30);
 
+    // The renewals taken on and not finished yet. Every renewal clears its own entry however it ends, so an entry
+    // that outlives the run that wrote it was left by a process that stopped half-way, and the next runs take it up.
+    private const string JournalCacheKey = "renewsubscriptionservice_journal";
+
+    // How many times a renewal is started before the customer is told it failed: a renewal that stops a process on
+    // every attempt must not be retried for ever.
+    private const int MaxRenewalAttempts = 3;
+
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         try
@@ -81,22 +89,52 @@ public class RenewSubscriptionService(
 
             await VerifyPendingRenewalsAsync(stoppingToken);
 
+            var now = DateTime.UtcNow;
+
             // Look ahead by _renewAdvance so quotas are renewed before their DueDate passes (no downtime).
-            var to = DateTime.UtcNow + _renewAdvance;
+            var to = now + _renewAdvance;
 
             var from = await hybridCache.GetOrDefaultAsync(CacheKey, to, token: stoppingToken);
 
             var walletQuotasToRenew = await Queries.GetWalletQuotasByDueDateAsync(coreDbContext, _walletQuotas.Keys.ToArray(), from, to).ToListAsync(stoppingToken);
 
+            var journal = await LoadJournalAsync();
+            var interrupted = await GetInterruptedRenewalsAsync(journal, now);
+
+            var queued = walletQuotasToRenew
+                .Select(row => new RenewalJournalEntry(row.TenantId, row.Quota, row.Quantity, row.NextQuota, row.NextQuantity, row.DueDate.Value, RenewalStage.Queued, now, 0))
+                .Where(entry => !journal.Exists(entry.IsSameRenewal))
+                .ToList();
+
+            if (queued.Count > 0)
+            {
+                journal.AddRange(queued);
+                await SaveJournalAsync(journal);
+            }
+
+            // Only once the rows are in the journal: a window moved first would lose them for good to a process
+            // that stops in between, as no later window covers their due dates again.
             await hybridCache.SetAsync(CacheKey, to, token: stoppingToken);
 
-            if (walletQuotasToRenew.Count > 0)
-            {
-                logger.InfoRenewSubscriptionServiceFound(walletQuotasToRenew.Count);
+            var renewals = interrupted.Select(entry => (Entry: entry, Interrupted: true))
+                .Concat(queued.Select(entry => (Entry: entry, Interrupted: false)))
+                .OrderBy(x => _walletQuotas[x.Entry.Quota].Additional)
+                .ToList();
 
-                foreach (var walletQuotaToRenew in walletQuotasToRenew.OrderBy(x => _walletQuotas[x.Quota].Additional))
+            if (renewals.Count > 0)
+            {
+                logger.InfoRenewSubscriptionServiceFound(renewals.Count);
+
+                foreach (var (entry, wasInterrupted) in renewals)
                 {
-                    await RenewSubscriptionAsync(walletQuotaToRenew);
+                    // A stopping process starts no new renewal: what is left stays queued in the journal for the
+                    // next process, rather than being cut off half-way when the host stops waiting.
+                    if (stoppingToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+
+                    await RenewSubscriptionAsync(entry, wasInterrupted);
                 }
             }
         }
@@ -106,7 +144,28 @@ public class RenewSubscriptionService(
         }
     }
 
-    private async ValueTask RenewSubscriptionAsync(DbTariffRow data)
+    private async ValueTask RenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted)
+    {
+        var keepInJournal = false;
+
+        try
+        {
+            keepInJournal = await TryRenewSubscriptionAsync(data, interrupted);
+        }
+        finally
+        {
+            // However the renewal ended in this process, it is over: only a process that stops half-way leaves its
+            // entry behind. An interrupted one billing could not tell anything about stays for the next run.
+            if (!keepInJournal)
+            {
+                await RemoveFromJournalAsync(data);
+            }
+        }
+    }
+
+    // Returns true when the renewal has to stay in the journal: it was interrupted earlier, and billing gave no answer
+    // to whether the subscription got extended meanwhile.
+    private async Task<bool> TryRenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted)
     {
         UserInfo payer = null;
         UserInfo owner = null;
@@ -119,7 +178,7 @@ public class RenewSubscriptionService(
         {
             if (data.NextQuantity is <= 0)
             {
-                return;
+                return false;
             }
 
             await using var scope = _scopeFactory.CreateAsyncScope();
@@ -128,7 +187,7 @@ public class RenewSubscriptionService(
 
             if (tenant.Status != TenantStatus.Active)
             {
-                return;
+                return false;
             }
 
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
@@ -137,7 +196,7 @@ public class RenewSubscriptionService(
 
             if (currentTariff.State > TariffState.Paid && walletQuota.Additional)
             {
-                return;
+                return false;
             }
 
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
@@ -162,7 +221,40 @@ public class RenewSubscriptionService(
             if (data.NextQuota is { } nextQuotaId && !_walletQuotas.TryGetValue(nextQuotaId, out targetQuota))
             {
                 logger.ErrorRenewSubscriptionServiceUnknownNextQuota(data.TenantId, nextQuotaId);
-                return;
+                return false;
+            }
+
+            if (interrupted)
+            {
+                logger.ErrorRenewSubscriptionServiceInterrupted(data.TenantId, Describe(targetQuota, renewedQuantity), data.Stage.ToString(), data.Attempt);
+
+                // The stopped process may have got as far as the payment change, with billing applying it after the
+                // process was gone - renewing again would make the customer pay twice, so billing is asked first.
+                bool extended;
+
+                try
+                {
+                    extended = await tariffService.IsSubscriptionExtendedAsync(data.TenantId, targetQuota.ProductId, data.DueDate);
+                }
+                catch (Exception ex)
+                {
+                    // no answer is no "not extended" either: ask again on the next run
+                    logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
+
+                    return true;
+                }
+
+                if (extended)
+                {
+                    await ReportRenewedAsync(scope.ServiceProvider, data.TenantId, Describe(targetQuota, renewedQuantity));
+
+                    return false;
+                }
+
+                if (data.Attempt >= MaxRenewalAttempts)
+                {
+                    throw new BillingException($"The renewal was interrupted on each of its {data.Attempt} attempts");
+                }
             }
 
             // the feature/capacity being checked concerns whatever is actually being purchased (targetQuota),
@@ -226,6 +318,10 @@ public class RenewSubscriptionService(
 
             var metadata = new Dictionary<string, string> { { BillingClient.MetadataDetails, Resource.AutoRenewal } };
 
+            // From here on money moves (a top-up of the wallet, then the payment change), so a process that stops
+            // past this point leaves a renewal whose outcome only billing can tell.
+            await ReplaceInJournalAsync(data, data with { Stage = RenewalStage.Started, StageSince = DateTime.UtcNow, Attempt = data.Attempt + 1 });
+
             if (!targetQuota.Additional)
             {
                 // The user subscription is paid from the wallet, so make sure the wallet balance
@@ -267,19 +363,19 @@ public class RenewSubscriptionService(
                     description,
                     renewedQuota.ServiceName,
                     renewedQuantity,
-                    data.DueDate.Value,
+                    data.DueDate,
                     owner.Id,
                     payer?.Id,
                     DateTime.UtcNow));
 
-                return;
+                return false;
             }
 
             if (result)
             {
                 await ReportRenewedAsync(scope.ServiceProvider, data.TenantId, description);
 
-                return;
+                return false;
             }
         }
         catch (Exception ex)
@@ -288,6 +384,8 @@ public class RenewSubscriptionService(
         }
 
         await SendRenewSubscriptionErrorAsync(data.TenantId, Describe(renewedQuota, renewedQuantity), renewedQuota.ServiceName, renewedQuantity, payer, owner);
+
+        return false;
     }
 
     // the quota name and quantity the logs and the audit trail show for a renewal, e.g. "adminwallet 2"
@@ -409,11 +507,76 @@ public class RenewSubscriptionService(
 
     private async Task AddPendingRenewalAsync(PendingRenewal renewal)
     {
-        var pending = await hybridCache.GetOrDefaultAsync<List<PendingRenewal>>(PendingCacheKey) ?? [];
-
-        pending.Add(renewal);
+        // a copy: the memory level of the cache hands out the stored list itself, which must not change under a reader
+        List<PendingRenewal> pending = [.. await hybridCache.GetOrDefaultAsync<List<PendingRenewal>>(PendingCacheKey) ?? [], renewal];
 
         await SavePendingRenewalsAsync(pending);
+    }
+
+    // The entries an earlier run left in the journal that are now taken up again. One run ends before the next one
+    // starts, so whatever is there was left by a process that stopped half-way - or by another instance that is still
+    // finishing it after the active one changed, which is why an entry is left alone for a while first. A renewal the
+    // pending list already re-checks is not taken up a second time.
+    private async Task<List<RenewalJournalEntry>> GetInterruptedRenewalsAsync(List<RenewalJournalEntry> journal, DateTime now)
+    {
+        if (journal.Count == 0)
+        {
+            return [];
+        }
+
+        var pending = await hybridCache.GetOrDefaultAsync<List<PendingRenewal>>(PendingCacheKey) ?? [];
+
+        return journal
+            .Where(entry => now - entry.StageSince >= _renewNotExtendedGrace)
+            .Where(entry => _walletQuotas.ContainsKey(entry.Quota))
+            .Where(entry => !pending.Exists(renewal => renewal.TenantId == entry.TenantId && renewal.PreviousDueDate == entry.DueDate))
+            .ToList();
+    }
+
+    private async Task<List<RenewalJournalEntry>> LoadJournalAsync()
+    {
+        // a copy, for the same reason as the pending list
+        return [.. await hybridCache.GetOrDefaultAsync<List<RenewalJournalEntry>>(JournalCacheKey) ?? []];
+    }
+
+    private async Task SaveJournalAsync(List<RenewalJournalEntry> journal)
+    {
+        if (journal.Count == 0)
+        {
+            await hybridCache.RemoveAsync(JournalCacheKey);
+
+            return;
+        }
+
+        // far longer than the few runs it takes to resume an entry, so the entries outlive a restart of the service
+        await hybridCache.SetAsync(JournalCacheKey, journal, TimeSpan.FromDays(1));
+    }
+
+    private async Task ReplaceInJournalAsync(RenewalJournalEntry entry, RenewalJournalEntry replacement)
+    {
+        var journal = await LoadJournalAsync();
+
+        journal.RemoveAll(entry.IsSameRenewal);
+
+        if (replacement != null)
+        {
+            journal.Add(replacement);
+        }
+
+        await SaveJournalAsync(journal);
+    }
+
+    private async Task RemoveFromJournalAsync(RenewalJournalEntry entry)
+    {
+        try
+        {
+            await ReplaceInJournalAsync(entry, null);
+        }
+        catch (Exception ex)
+        {
+            // the renewal itself is settled; a leftover entry only gets it checked against billing once more
+            logger.ErrorRenewSubscriptionServiceTenant(entry.TenantId, ex);
+        }
     }
 
     private async Task SavePendingRenewalsAsync(List<PendingRenewal> pending)
@@ -500,6 +663,38 @@ public class RenewSubscriptionService(
         Guid OwnerId,
         Guid? PayerId,
         DateTime TimedOutAt);
+
+    private enum RenewalStage
+    {
+        // in the journal, not started: nothing has been paid
+        Queued,
+
+        // money may have moved: the wallet top-up and the payment change come after this mark
+        Started
+    }
+
+    /// <summary>
+    /// A renewal of one tariff row this service has taken on: the row as it was when its due date came into the window
+    /// (<see cref="DueDate"/> is the date being renewed from), the <see cref="Stage"/> it got to and since when, and how
+    /// many times it has been <see cref="RenewalStage.Started"/>. A renewal is told apart from the others by its tenant,
+    /// quota and due date.
+    /// </summary>
+    private sealed record RenewalJournalEntry(
+        int TenantId,
+        int Quota,
+        int Quantity,
+        int? NextQuota,
+        int? NextQuantity,
+        DateTime DueDate,
+        RenewalStage Stage,
+        DateTime StageSince,
+        int Attempt)
+    {
+        public bool IsSameRenewal(RenewalJournalEntry other)
+        {
+            return other.TenantId == TenantId && other.Quota == Quota && other.DueDate == DueDate;
+        }
+    }
 }
 
 static file class Queries
