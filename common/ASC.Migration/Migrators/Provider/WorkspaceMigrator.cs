@@ -135,7 +135,6 @@ public class WorkspaceMigrator : Migrator
     /// </summary>
     private async Task<IDataReadOperator> ExtractBackupAsync(bool reportProgress)
     {
-        var cancellationToken = reportProgress ? _cancellationToken : CancellationToken.None;
         // the backup's own name, so it needs no sanitizing: it already names a file on this file system
         var folder = Path.Combine(Path.GetDirectoryName(_backup), Path.GetFileNameWithoutExtension(_backup));
 
@@ -146,16 +145,25 @@ public class WorkspaceMigrator : Migrator
 
         // files are replaced, not refused, as the shared read operator does: the parse that precedes a migration leaves
         // its unpacked folder behind, and the migration parses the backup again into the same place
-        await ExtractTarAsync(gzip ?? (Stream)file, folder, true, async () =>
+        // the import unpacks with the operation's token as well: nothing is imported before the backup is unpacked, so
+        // stopping it there is safe, and a large backup could not be stopped otherwise
+        var extracted = await ExtractTarAsync(gzip ?? (Stream)file, folder, true, async () =>
         {
             if (reportProgress)
             {
                 // unpacking has the 5-30% share; a tar has no entry count up front, so progress follows the file bytes read
                 await ReportUnzippingAsync(5 + 25d * file.Position / file.Length);
             }
-        }, cancellationToken);
+        }, _cancellationToken);
 
-        return new FolderReadOperator(folder, cancellationToken);
+        if (!extracted && !reportProgress)
+        {
+            // the parse returns quietly when stopped; the import must not go on with a backup unpacked in part
+            throw new OperationCanceledException(_cancellationToken);
+        }
+
+        // reading the unpacked backup during the import keeps ignoring cancellation, as it did before
+        return new FolderReadOperator(folder, reportProgress ? _cancellationToken : CancellationToken.None);
     }
 
     private async Task InnerParseAsync(bool reportProgress, int count = 1)

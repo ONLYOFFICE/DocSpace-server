@@ -130,9 +130,15 @@ public class GoogleWorkspaceMigrator : Migrator
                             await ReportUnzippingAsync(takeoutProgress + progressStep * number / count, takeoutStatus);
                         }
                     }, _cancellationToken);
-                    if (!extracted && reportProgress)
+                    if (!extracted)
                     {
-                        return null;
+                        if (reportProgress)
+                        {
+                            return null;
+                        }
+
+                        // the import must not go on with a takeout unpacked in part
+                        throw new OperationCanceledException(_cancellationToken);
                     }
                 }
                 var rootFolder = Path.Combine(tmpFolder, "Takeout");
@@ -200,6 +206,11 @@ public class GoogleWorkspaceMigrator : Migrator
                 // the limit counts every takeout unpacked so far, so the remaining ones cannot fit either: the parse stops here
                 MigrationInfo.FailedArchives.Add(key);
                 await ReportProgressAsync(100, ex.Message);
+                throw;
+            }
+            catch (OperationCanceledException) when (!reportProgress && _cancellationToken.IsCancellationRequested)
+            {
+                // a stopped import ends here instead of going on with the takeouts unpacked so far
                 throw;
             }
             catch (Exception ex)
