@@ -274,7 +274,7 @@ public class RenewSubscriptionService(
                 // a renewal of that new date is another one, which a later window brings.
                 await using var coreDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<CoreDbContext>>().CreateDbContextAsync();
 
-                var row = await Queries.GetWalletQuotaAsync(coreDbContext, data.TenantId, data.Quota);
+                var row = await coreDbContext.TariffRowAsync(data.TenantId, data.Quota);
 
                 outdated = row == null || row.DueDate != data.DueDate;
 
@@ -930,15 +930,5 @@ static file class Queries
                         (x, tariffRow) => tariffRow
                     )
                     .Where(r => quotas.Contains(r.Quota) && r.DueDate.HasValue && r.DueDate > from && r.DueDate < to)
-            );
-
-    // the row of the quota in the latest tariff of the tenant, null when that tariff does not hold the quota any more
-    public static readonly Func<CoreDbContext, int, int, Task<DbTariffRow>>
-        GetWalletQuotaAsync = EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int tenantId, int quota) =>
-                ctx.TariffRows
-                    .Where(r => r.TenantId == tenantId && r.Quota == quota)
-                    .Where(r => r.TariffId == ctx.TariffRows.Where(x => x.TenantId == tenantId).Max(x => x.TariffId))
-                    .FirstOrDefault()
             );
 }
