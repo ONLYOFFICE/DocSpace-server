@@ -46,17 +46,18 @@ public partial class MigrationContext_Upgrade5 : Migration
         // the tables have no key, so duplicates are dropped by copying into a keyed table;
         // the copy is created with LIKE so client_id keeps the charset and collation the existing
         // foreign key to identity_clients was declared with (they differ between installations),
-        // and the old table is dropped together with its foreign keys, whatever they are named
+        // and the old table is dropped together with its foreign keys, whatever they are named.
+        // MySQL commits each DDL statement, so a copy left by a failed run is dropped first; and LIKE also copies the
+        // invisible my_row_id key that SaaS MigrationContext_Upgrade106 (applied before this context) adds, so
+        // ReplacePrimaryKey swaps it for the composite key in one statement
+        migrationBuilder.Sql("DROP TABLE IF EXISTS identity_client_authentication_methods_new;");
         migrationBuilder.Sql("CREATE TABLE identity_client_authentication_methods_new LIKE identity_client_authentication_methods;");
 
         migrationBuilder.DropIndex(
             name: "idx_client_authentication_methods_client_id",
             table: "identity_client_authentication_methods_new");
 
-        migrationBuilder.AddPrimaryKey(
-            name: "PRIMARY",
-            table: "identity_client_authentication_methods_new",
-            columns: ["client_id", "authentication_method"]);
+        ReplacePrimaryKey(migrationBuilder, "identity_client_authentication_methods_new", "client_id, authentication_method");
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_authentication_methods_new (client_id, authentication_method)
@@ -77,6 +78,7 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
+        migrationBuilder.Sql("DROP TABLE IF EXISTS identity_client_redirect_uris_new;");
         migrationBuilder.Sql("CREATE TABLE identity_client_redirect_uris_new LIKE identity_client_redirect_uris;");
 
         migrationBuilder.DropIndex(
@@ -95,10 +97,7 @@ public partial class MigrationContext_Upgrade5 : Migration
             .Annotation("MySql:CharSet", "utf8mb4")
             .OldAnnotation("MySql:CharSet", "utf8mb4");
 
-        migrationBuilder.AddPrimaryKey(
-            name: "PRIMARY",
-            table: "identity_client_redirect_uris_new",
-            columns: ["client_id", "redirect_uri"]);
+        ReplacePrimaryKey(migrationBuilder, "identity_client_redirect_uris_new", "client_id, redirect_uri");
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_redirect_uris_new (client_id, redirect_uri)
@@ -119,6 +118,7 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
+        migrationBuilder.Sql("DROP TABLE IF EXISTS identity_client_allowed_origins_new;");
         migrationBuilder.Sql("CREATE TABLE identity_client_allowed_origins_new LIKE identity_client_allowed_origins;");
 
         migrationBuilder.DropIndex(
@@ -137,10 +137,7 @@ public partial class MigrationContext_Upgrade5 : Migration
             .Annotation("MySql:CharSet", "utf8mb4")
             .OldAnnotation("MySql:CharSet", "utf8mb4");
 
-        migrationBuilder.AddPrimaryKey(
-            name: "PRIMARY",
-            table: "identity_client_allowed_origins_new",
-            columns: ["client_id", "allowed_origin"]);
+        ReplacePrimaryKey(migrationBuilder, "identity_client_allowed_origins_new", "client_id, allowed_origin");
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_allowed_origins_new (client_id, allowed_origin)
@@ -161,16 +158,14 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
+        migrationBuilder.Sql("DROP TABLE IF EXISTS identity_client_scopes_new;");
         migrationBuilder.Sql("CREATE TABLE identity_client_scopes_new LIKE identity_client_scopes;");
 
         migrationBuilder.DropIndex(
             name: "idx_identity_client_scopes_client_id",
             table: "identity_client_scopes_new");
 
-        migrationBuilder.AddPrimaryKey(
-            name: "PRIMARY",
-            table: "identity_client_scopes_new",
-            columns: ["client_id", "scope_name"]);
+        ReplacePrimaryKey(migrationBuilder, "identity_client_scopes_new", "client_id, scope_name");
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_scopes_new (client_id, scope_name)
@@ -355,5 +350,18 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalTable: "identity_scopes",
             principalColumn: "name",
             onDelete: ReferentialAction.Cascade);
+    }
+
+    // Adds the composite primary key; when the copy carries the invisible my_row_id key, drops it in the same
+    // statement, so the table is never without a key (Group Replication and sql_require_primary_key refuse that).
+    private static void ReplacePrimaryKey(MigrationBuilder migrationBuilder, string table, string columns)
+    {
+        migrationBuilder.Sql($@"SET @upgrade5_ddl = IF(
+            (SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '{table}' AND column_name = 'my_row_id') > 0,
+            'ALTER TABLE {table} DROP COLUMN my_row_id, ADD PRIMARY KEY ({columns})',
+            'ALTER TABLE {table} ADD PRIMARY KEY ({columns})');");
+        migrationBuilder.Sql("PREPARE upgrade5_ddl FROM @upgrade5_ddl;");
+        migrationBuilder.Sql("EXECUTE upgrade5_ddl;");
+        migrationBuilder.Sql("DEALLOCATE PREPARE upgrade5_ddl;");
     }
 }

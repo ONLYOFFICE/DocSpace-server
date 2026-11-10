@@ -24,11 +24,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             // Fail fast rather than queue every request on these tables behind a waiting metadata lock.
             migrationBuilder.Sql("SET SESSION lock_wait_timeout = 10;");
 
-            // Guarded per table: MySQL commits DDL statement by statement, and the column is already there where Flyway
-            // ran V1_9_1 or the server generated invisible primary keys at CREATE (sql_generate_invisible_primary_keys).
+            // Guarded per table on any primary key, not on the column: MySQL commits DDL statement by statement; my_row_id
+            // is already there where Flyway ran V1_9_1 or the server generated invisible primary keys at CREATE
+            // (sql_generate_invisible_primary_keys); and on Standalone, Standalone_MigrationContext_Upgrade5 (V1_15)
+            // gives these tables a composite key, a second one would fail with "Multiple primary key defined".
             foreach (var table in _tables)
             {
-                RunIf(migrationBuilder, ColumnExists(table, "my_row_id") + " = 0",
+                RunIf(migrationBuilder, PrimaryKeyExists(table) + " = 0",
                     $"ALTER TABLE {table} ADD COLUMN my_row_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT INVISIBLE PRIMARY KEY FIRST");
             }
 
@@ -48,6 +50,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
         private static string ColumnExists(string table, string column)
         {
             return $"(SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = '{table}' AND column_name = '{column}')";
+        }
+
+        private static string PrimaryKeyExists(string table)
+        {
+            return $"(SELECT COUNT(*) FROM information_schema.table_constraints WHERE table_schema = DATABASE() AND table_name = '{table}' AND constraint_type = 'PRIMARY KEY')";
         }
 
         private static void RunIf(MigrationBuilder migrationBuilder, string condition, string statement)
