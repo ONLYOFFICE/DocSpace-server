@@ -664,7 +664,7 @@ public class FormFillingReportCreator(
     // Under the version lock, so the state replaces the saved one; the lock of the submissions keeps the other properties.
     private async Task SaveVersionStateAsync(int originalFormId, FormFillingProperties<int> state)
     {
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{state.RoomId}_{originalFormId}"))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(await GetFormLockKeyAsync(originalFormId, state.RoomId)))
         {
             var fileDao = daoFactory.GetFileDao<int>();
             var current = await fileDao.GetProperties(originalFormId);
@@ -690,7 +690,7 @@ public class FormFillingReportCreator(
             return;
         }
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{properties.FormFilling.RoomId}_{formId}"))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(await GetFormLockKeyAsync(formId, properties.FormFilling.RoomId)))
         {
             var current = (await fileDao.GetProperties(formId))?.FormFilling;
             if (current != null)
@@ -700,6 +700,24 @@ public class FormFillingReportCreator(
 
             await fileDao.SaveProperties(formId, properties);
         }
+    }
+
+    // The lock the submissions of the form take: keyed by its room. A form started by assigning roles keeps no room in
+    // its properties until its report is generated, so the room is looked up; with a key of its own a writer would not
+    // wait for the others and could save over them.
+    private async Task<string> GetFormLockKeyAsync<T>(T formId, T roomId)
+    {
+        if (EqualityComparer<T>.Default.Equals(roomId, default))
+        {
+            var form = await daoFactory.GetFileDao<T>().GetFileAsync(formId);
+            var room = form != null ? await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<T>()) : null;
+            if (room != null)
+            {
+                roomId = room.Id;
+            }
+        }
+
+        return $"fillform_{roomId}_{formId}";
     }
 
     private static void CopyVersionState<T>(FormFillingProperties<T> from, FormFillingProperties<T> to)
