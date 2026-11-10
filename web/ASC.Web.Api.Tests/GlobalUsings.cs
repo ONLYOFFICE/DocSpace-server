@@ -64,6 +64,8 @@ global using DocSpace.Webhooks.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.Extensions.Configuration;
+
 global using WireMock;
 global using WireMock.RequestBuilders;
 global using WireMock.ResponseBuilders;

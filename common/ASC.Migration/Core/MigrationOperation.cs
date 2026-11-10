@@ -140,13 +140,8 @@ public class MigrationOperation : DistributedTaskProgress
                 }
             }
 
-            // The check above sees only the compressed upload, so the migrator also bounds what it unpacks: by the
-            // quota, and by the configured ceiling for portals whose quota sets no limit (unlimited plans, standalone).
-            // Zero or a negative value means no limit, as for the quota.
-            var maxExtractedSize = scope.ServiceProvider.GetRequiredService<IConfiguration>().GetValue("migration:maxExtractedSize", long.MaxValue);
-            migrator.MaxExtractedSize = Math.Min(
-                maxExtractedSize > 0 ? maxExtractedSize : long.MaxValue,
-                maxTotalSize > 0 ? maxTotalSize : long.MaxValue);
+            // The check above sees only the compressed upload, so the migrator also bounds what it unpacks.
+            migrator.MaxExtractedSize = GetMaxExtractedSize(scope.ServiceProvider.GetRequiredService<IConfiguration>(), maxTotalSize);
 
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
@@ -199,6 +194,26 @@ public class MigrationOperation : DistributedTaskProgress
             }
             await PublishChanges();
         }
+    }
+
+    /// <summary>
+    /// The ceiling on what an uploaded backup may unpack to when <c>migration:maxExtractedSize</c> is not configured.
+    /// A portal whose quota sets no limit (an unlimited plan, standalone) would otherwise have none, and a backup of a
+    /// few megabytes that unpacks to hundreds of gigabytes would fill the disk the service shares with every portal.
+    /// </summary>
+    public const long DefaultMaxExtractedSize = 100L * 1024 * 1024 * 1024;
+
+    /// <summary>
+    /// The most bytes the uploaded backup may unpack to: the tenant quota, capped by <c>migration:maxExtractedSize</c>
+    /// (<see cref="DefaultMaxExtractedSize"/> when unset). Zero or a negative value, in the quota or in the setting,
+    /// sets no limit of its own.
+    /// </summary>
+    public static long GetMaxExtractedSize(IConfiguration configuration, long maxTotalSize)
+    {
+        var maxExtractedSize = configuration.GetValue("migration:maxExtractedSize", DefaultMaxExtractedSize);
+        return Math.Min(
+            maxExtractedSize > 0 ? maxExtractedSize : long.MaxValue,
+            maxTotalSize > 0 ? maxTotalSize : long.MaxValue);
     }
 
     public static string GetMigrationFolderCacheKey(int tenantId)
