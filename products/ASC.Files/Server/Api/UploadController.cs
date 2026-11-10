@@ -199,13 +199,14 @@ public abstract class UploadController<T>(
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The call returns 400 if the request has no `File`
     /// part. It returns 402 if the part is over `chunkUploadSize`, or the file is over a quota or size limit. If the
     /// session does not exist, is finalized, or has expired, the call returns 404. If the file is not a PDF and the
-    /// room is a form-filling room, the call returns 500.
+    /// room is a form-filling room, the call returns 403.
     /// </remarks>
     /// <summary>Upload the next chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
     [RaisesWebhook(WebhookTrigger.FileUploaded, When = "on the request that completes the upload, without `file.created`")]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The progress of the session, or the stored file once the last part has arrived", typeof(UploadSessionResponseDto<int>))]
+    [SwaggerResponse(200, "The part is stored and bytes are still missing; `uploaded` is false", typeof(UploadSessionResponseDto<int>))]
+    [SwaggerResponse(201, "The last part has arrived and the file is stored; `uploaded` is true and `file` holds the file", typeof(UploadSessionResponseDto<int>))]
     [SwaggerResponse(400, "The request has no `File` part")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
@@ -300,7 +301,7 @@ public abstract class UploadController<T>(
     /// `POST api/2.0/files/{folderId}/session/{sessionId}`. The call returns 400 if the request has no `File` part,
     /// or `chunkNumber` is below 1. It returns 402 if the part is over `chunkUploadSize`, or the file is over a quota
     /// or size limit. If the session does not exist, is finalized, or has expired, the call returns 404. If the file
-    /// is not a PDF and the room is a form-filling room, the call returns 500.
+    /// is not a PDF and the room is a form-filling room, the call returns 403.
     /// </remarks>
     /// <summary>Upload a numbered chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>
@@ -331,13 +332,13 @@ public abstract class UploadController<T>(
     /// its form-filling state. Any signed-in user with the session ID can call it. The call returns 201 with the
     /// file. It changes data and deletes the session with its parts. A repeated call returns 404. If the parts do not
     /// add up to the size of the session, the call returns 400. Then send the missing parts and repeat the call. It
-    /// returns 402 if the file is over a quota or size limit. A missing, finalized, or expired session returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 500.
+    /// returns 402 if the file is over a quota or size limit. A missing, finalized, or expired session returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 403.
     /// </remarks>
     /// <summary>Finalize an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/finalize</path>
     [RaisesWebhook(WebhookTrigger.FileUploaded, When = "without `file.created`")]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The assembled file and the identifiers of the closed session", typeof(UploadSessionResponseDto<int>))]
+    [SwaggerResponse(201, "The assembled file and the identifiers of the closed session", typeof(UploadSessionResponseDto<int>))]
     [SwaggerResponse(400, "The parts received so far do not add up to the size the session was opened for")]
     [SwaggerResponse(402, "Storing the file would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
@@ -507,7 +508,7 @@ public abstract class UploadController<T>(
     /// the upload. To read that result with `GET api/2.0/files/file/{fileId}/checkconversion`, pass
     /// `keepConvertStatus`. If the folder does not exist, the call returns 404. The call returns 402 if the file is
     /// over the upload limit or a storage quota. If the installation does not allow uploads with this extension, the
-    /// call returns 415. If the file is not a PDF and the room is a form-filling room, the call returns 500. To upload
+    /// call returns 415. If the file is not a PDF and the room is a form-filling room, the call returns 403. To upload
     /// a large file, use `POST api/2.0/files/{folderId}/session`.
     /// </remarks>
     /// <summary>Insert a file</summary>
@@ -537,7 +538,7 @@ public abstract class UploadController<T>(
     /// `PUT api/2.0/files/storeoriginal`. Later uploads use it too. The call returns 400 if the request has no file
     /// part. If the folder does not exist, the call returns 404. It returns 402 if the file is over the upload limit
     /// or a storage quota. If the installation does not allow uploads with this extension, the call returns 415. If
-    /// the file is not a PDF and the room is a form-filling room, the call returns 500.
+    /// the file is not a PDF and the room is a form-filling room, the call returns 403.
     /// </remarks>
     /// <summary>Upload a file</summary>
     /// <path>api/2.0/files/{folderId}/upload</path>

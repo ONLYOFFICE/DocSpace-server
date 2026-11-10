@@ -941,10 +941,11 @@ public class FoldersControllerCommon(
     /// Returns one page of the files that the caller opened recently. Each account has its own history, and the
     /// section holds files only, so `folders` is empty. Any signed-in user can call it. The call is read-only, but
     /// a valid `sortBy` becomes the account's default order. The call always sorts the list by the last
-    /// opening time, newest first. So `sortBy` and `sortOrder` do not change the order here. By default, the call
-    /// lists files from personal sections and rooms, except form-filling rooms. With `searchArea` set to `Forms`, it
-    /// lists only files from form-filling rooms. Any other `searchArea` value lists all recent files. The call
-    /// ignores `applyFilterOption`. The `total` field counts all matching files. The call
+    /// opening time, newest first. So `sortBy` and `sortOrder` do not change the order here. Without `searchArea`, or
+    /// with `Active`, the call lists files from personal sections and rooms, except form-filling rooms. With
+    /// `searchArea` set to `Forms`, it lists only files from form-filling rooms. If `searchArea` is `PrivateRooms`,
+    /// the call returns 400. Any other `searchArea` value lists all recent files. The call ignores
+    /// `applyFilterOption`. The `total` field counts all matching files. The call also
     /// returns 400 if `metadataTemplateId` or `metadataFilters` names an unknown template or field, or has a
     /// malformed condition. The portal adds a file to the section when the caller opens it. To add a file without
     /// opening it, use `POST api/2.0/files/file/{fileId}/recent`. To clear the history, use

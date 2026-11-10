@@ -531,16 +531,18 @@ public class GetRecentFolderRequestDto
     public bool? ExcludeSubject { get; set; }
 
     /// <summary>
-    /// Chooses which half of a listing `filterType` and `filterValue` are applied to: files, folders, or both.
+    /// Accepted for compatibility with the other folder listings and ignored: the "Recent" section holds files only.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "applyFilterOption")]
     public ApplyFilterOption? ApplyFilterOption { get; set; }
 
     /// <summary>
-    /// The area of the portal that the recent files must come from. Omitted, it means `Active`.
+    /// The section of the portal that the recent files must come from. `Active`, which is what an omitted parameter
+    /// means, stands for the personal sections and the rooms other than form-filling rooms; `Forms` stands for the
+    /// form-filling rooms.
     /// </summary>
-    /// <example>1</example>
+    /// <example>8</example>
     [FromQuery(Name = "searchArea")]
     public SearchArea? SearchArea { get; set; }
 
