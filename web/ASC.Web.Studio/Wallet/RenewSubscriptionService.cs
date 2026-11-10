@@ -97,6 +97,14 @@ public class RenewSubscriptionService(
     // every attempt must not be retried for ever.
     private const int MaxRenewalAttempts = 3;
 
+    // The claims of renewals this process has settled but could not release, the journal being out of reach at that
+    // moment, each with the entry to put back in its place, if any. They are released by the next run before it looks
+    // for interrupted renewals: left in the journal, such an entry would be taken for one a stopped process left
+    // half-way, and a renewal that ended with the failure letter would be made - and fail - again. Only this
+    // process's memory knows the renewal is settled, so a process that stops here does leave it to be resumed.
+    // Runs do not overlap, so the list needs no lock.
+    private readonly List<(RenewalJournalEntry Claimed, RenewalJournalEntry PutBack)> _unreleased = [];
+
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         try
@@ -129,6 +137,14 @@ public class RenewSubscriptionService(
             {
                 var journal = await LoadJournalAsync();
 
+                // first, so that a renewal already settled is not taken for an interrupted one below
+                var released = false;
+
+                foreach (var (claimed, putBack) in _unreleased)
+                {
+                    released |= Release(journal, claimed, putBack);
+                }
+
                 interrupted = await GetInterruptedRenewalsAsync(journal, now);
 
                 queued = walletQuotasToRenew
@@ -136,11 +152,14 @@ public class RenewSubscriptionService(
                     .Where(entry => !journal.Exists(entry.IsSameRenewal))
                     .ToList();
 
-                if (queued.Count > 0)
+                if (queued.Count > 0 || released)
                 {
                     journal.AddRange(queued);
                     await SaveJournalAsync(journal);
                 }
+
+                // only once the journal is saved without them: a run that fails before that tries again
+                _unreleased.Clear();
             }
 
             // Only once the rows are in the journal: a window moved first would lose them for good to a process
@@ -729,29 +748,42 @@ public class RenewSubscriptionService(
             {
                 var journal = await LoadJournalAsync();
 
-                var at = journal.FindIndex(claimed.IsSameRenewal);
-                if (at < 0 || journal[at] != claimed)
+                if (Release(journal, claimed, putBack))
                 {
-                    return;
+                    await SaveJournalAsync(journal);
                 }
-
-                if (putBack != null)
-                {
-                    journal[at] = putBack;
-                }
-                else
-                {
-                    journal.RemoveAt(at);
-                }
-
-                await SaveJournalAsync(journal);
             }
         }
         catch (Exception ex)
         {
-            // the renewal itself is settled; a leftover entry only gets it checked against billing once more
+            // The renewal itself is settled, but the journal still says it is under way: the next run of this
+            // process releases the claim before it looks for interrupted renewals.
             logger.ErrorRenewSubscriptionServiceTenant(claimed.TenantId, ex);
+
+            _unreleased.Add((claimed, putBack));
         }
+    }
+
+    // Takes the claimed entry out of the journal, or puts the given one back in its place. False when the journal no
+    // longer holds the entry as it was claimed, and is left as it is.
+    private static bool Release(List<RenewalJournalEntry> journal, RenewalJournalEntry claimed, RenewalJournalEntry putBack)
+    {
+        var at = journal.FindIndex(claimed.IsSameRenewal);
+        if (at < 0 || journal[at] != claimed)
+        {
+            return false;
+        }
+
+        if (putBack != null)
+        {
+            journal[at] = putBack;
+        }
+        else
+        {
+            journal.RemoveAt(at);
+        }
+
+        return true;
     }
 
     private async Task SavePendingRenewalsAsync(List<PendingRenewal> pending)
