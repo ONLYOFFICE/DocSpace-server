@@ -75,6 +75,24 @@ public class RenewSubscriptionService(
     // each other's change or start the same renewal.
     private const string JournalLockKey = "renewsubscriptionservice_journal_lock";
 
+    // What the lock protects is the journal the instances share, so under it the journal is read from the distributed
+    // level, not from this process's memory: that copy is only replaced when the notification of another instance's
+    // change arrives, which can be after the lock has been handed over. For the same reason a read or a write that
+    // does not reach the distributed level fails rather than quietly making do with the memory level: the run then
+    // stops before the window moves, or the renewal is not claimed, and the next run takes it up.
+    private static readonly FusionCacheEntryOptions _sharedReadOptions = new()
+    {
+        SkipMemoryCacheRead = true,
+        ReThrowDistributedCacheExceptions = true
+    };
+
+    // a day: far longer than the few runs it takes to resume an entry, so the entries outlive a restart of the service
+    private static readonly FusionCacheEntryOptions _journalWriteOptions = new()
+    {
+        Duration = TimeSpan.FromDays(1),
+        ReThrowDistributedCacheExceptions = true
+    };
+
     // How many times a renewal is started before the customer is told it failed: a renewal that stops a process on
     // every attempt must not be retried for ever.
     private const int MaxRenewalAttempts = 3;
@@ -186,7 +204,7 @@ public class RenewSubscriptionService(
     }
 
     // Returns true when the renewal has to wait in the journal for the next run: it was interrupted earlier and billing
-    // gave no answer about it yet.
+    // has not said yet what became of the subscription meanwhile.
     private async Task<bool> TryRenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted)
     {
         UserInfo payer = null;
@@ -196,9 +214,17 @@ public class RenewSubscriptionService(
         var renewedQuota = _walletQuotas[data.Quota];
         var renewedQuantity = data.NextQuantity ?? data.Quantity;
 
-        // Only a renewal that got as far as the money steps has an outcome to ask billing about; one left queued has
-        // paid nothing and is simply made now.
+        // Only a renewal that got as far as the money steps may have been paid by the process that left it; one left
+        // queued has paid nothing itself.
         var resumed = interrupted && data.Stage == RenewalStage.Started;
+
+        // An interrupted renewal has waited, and what happened to the subscription meanwhile only billing can tell.
+        // Until it has, nothing that goes wrong may end the renewal with the failure letter, which asks the customer
+        // to renew manually - on top of a payment that may have been applied.
+        var billingAnswered = !interrupted;
+
+        // whether the tariff row is no longer the one the renewal was queued for
+        var outdated = false;
 
         if (resumed)
         {
@@ -212,16 +238,41 @@ public class RenewSubscriptionService(
 
         try
         {
-            if (data.NextQuantity is <= 0)
-            {
-                return false;
-            }
-
             await using var scope = _scopeFactory.CreateAsyncScope();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var tenant = await tenantManager.SetCurrentTenantAsync(data.TenantId);
 
             if (tenant.Status != TenantStatus.Active)
+            {
+                return false;
+            }
+
+            if (interrupted)
+            {
+                // The entry is the tariff row as it was when the renewal was queued. Since then the customer may have
+                // changed the quantity, scheduled another quota or switched the renewal off, so the row is read again:
+                // the renewal is made as the row says now, and not at all when the row is gone or its due date moved -
+                // a renewal of that new date is another one, which a later window brings.
+                await using var coreDbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<CoreDbContext>>().CreateDbContextAsync();
+
+                var row = await Queries.GetWalletQuotaAsync(coreDbContext, data.TenantId, data.Quota);
+
+                outdated = row == null || row.DueDate != data.DueDate;
+
+                if (!outdated)
+                {
+                    data = data with { Quantity = row.Quantity, NextQuota = row.NextQuota, NextQuantity = row.NextQuantity };
+                    renewedQuantity = data.NextQuantity ?? data.Quantity;
+                }
+                else if (!resumed)
+                {
+                    logger.WarningRenewSubscriptionServiceOutdated(data.TenantId, Describe(renewedQuota, renewedQuantity));
+
+                    return false;
+                }
+            }
+
+            if (data.NextQuantity is <= 0)
             {
                 return false;
             }
@@ -249,40 +300,36 @@ public class RenewSubscriptionService(
             // null both for a customer billing does not know and for a request that failed
             var customerInfo = await tariffService.GetCustomerInfoAsync(data.TenantId);
 
+            // known before anything below can end the renewal with the failure letter, which goes to the payer too
+            if (customerInfo != null)
+            {
+                payer = await userManager.GetActivePayerAsync(customerInfo);
+            }
+
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
 
-            if (resumed)
+            if (interrupted)
             {
                 // The stopped process may have got as far as the payment change, with billing applying it after the
-                // process was gone - renewing again, or telling the customer to renew manually, would make them pay
-                // twice. So billing is asked first, before anything else can end the renewal.
-                bool extended;
+                // process was gone, and the customer may have paid manually while the entry waited - renewing again
+                // would make them pay twice. No answer is no "not extended" either: the exception leaves the entry
+                // for the next run, see the catch below.
+                var extended = await tariffService.IsSubscriptionExtendedAsync(data.TenantId, targetQuota.ProductId, data.DueDate);
 
-                try
-                {
-                    extended = await tariffService.IsSubscriptionExtendedAsync(data.TenantId, targetQuota.ProductId, data.DueDate);
-                }
-                catch (Exception ex) when (CanWaitForBilling(data))
-                {
-                    // no answer is no "not extended" either: ask again on the next run
-                    logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
+                billingAnswered = true;
 
-                    return true;
-                }
-                catch (Exception ex)
+                if (extended && !resumed)
                 {
-                    throw new BillingException("Billing gave no answer about the interrupted renewal", ex);
+                    // not the doing of this service, which had not got to the money: whoever paid has put it on record
+                    logger.WarningRenewSubscriptionServiceOutdated(data.TenantId, Describe(targetQuota, renewedQuantity));
+
+                    return false;
                 }
 
                 if (extended)
                 {
                     try
                     {
-                        if (customerInfo != null)
-                        {
-                            payer = await userManager.GetActivePayerAsync(customerInfo);
-                        }
-
                         await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, (payer ?? owner).Id);
 
                         await ReportRenewedAsync(scope.ServiceProvider, data.TenantId, Describe(targetQuota, renewedQuantity));
@@ -292,6 +339,13 @@ public class RenewSubscriptionService(
                         // the renewal is applied, only its audit entry is missing - nothing to warn the customer about
                         logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
                     }
+
+                    return false;
+                }
+
+                if (outdated)
+                {
+                    logger.WarningRenewSubscriptionServiceOutdated(data.TenantId, Describe(targetQuota, renewedQuantity));
 
                     return false;
                 }
@@ -315,8 +369,6 @@ public class RenewSubscriptionService(
                 // notified instead of the subscription lapsing unnoticed.
                 throw new BillingException("Customer could not be found");
             }
-
-            payer = await userManager.GetActivePayerAsync(customerInfo);
 
             await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, (payer ?? owner).Id);
 
@@ -440,6 +492,14 @@ public class RenewSubscriptionService(
 
                 return false;
             }
+        }
+        catch (Exception ex) when (!billingAnswered && CanWaitForBilling(data))
+        {
+            // Whatever failed - the database, the cache, billing itself - did so before billing said what became of
+            // the interrupted renewal: it is asked again on the next run, for as long as CanWaitForBilling allows.
+            logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
+
+            return true;
         }
         catch (Exception ex)
         {
@@ -577,8 +637,8 @@ public class RenewSubscriptionService(
     }
 
     // Whether an interrupted renewal billing gives no answer about may wait for the next run: for as long as a renewal
-    // whose payment change timed out is re-checked, counted from its last start. After that the customer is told it
-    // failed, so an entry is not asked about for ever, nor dropped unnoticed when the journal expires.
+    // whose payment change timed out is re-checked, counted from when it was queued or last started. After that the
+    // customer is told it failed, so an entry is not asked about for ever, nor dropped unnoticed when the journal expires.
     private static bool CanWaitForBilling(RenewalJournalEntry entry)
     {
         return DateTime.UtcNow < entry.StageSince + _renewVerifyPeriod;
@@ -597,7 +657,7 @@ public class RenewSubscriptionService(
             return [];
         }
 
-        var pending = await hybridCache.GetOrDefaultAsync<List<PendingRenewal>>(PendingCacheKey) ?? [];
+        var pending = await hybridCache.GetOrDefaultAsync<List<PendingRenewal>>(PendingCacheKey, null, _sharedReadOptions) ?? [];
 
         return journal
             .Where(entry => now - entry.StageSince >= (entry.Stage == RenewalStage.Started ? _renewNotExtendedGrace : ExecuteTaskPeriod))
@@ -609,20 +669,19 @@ public class RenewSubscriptionService(
     private async Task<List<RenewalJournalEntry>> LoadJournalAsync()
     {
         // a copy, for the same reason as the pending list
-        return [.. await hybridCache.GetOrDefaultAsync<List<RenewalJournalEntry>>(JournalCacheKey) ?? []];
+        return [.. await hybridCache.GetOrDefaultAsync<List<RenewalJournalEntry>>(JournalCacheKey, null, _sharedReadOptions) ?? []];
     }
 
     private async Task SaveJournalAsync(List<RenewalJournalEntry> journal)
     {
         if (journal.Count == 0)
         {
-            await hybridCache.RemoveAsync(JournalCacheKey);
+            await hybridCache.RemoveAsync(JournalCacheKey, _journalWriteOptions);
 
             return;
         }
 
-        // far longer than the few runs it takes to resume an entry, so the entries outlive a restart of the service
-        await hybridCache.SetAsync(JournalCacheKey, journal, TimeSpan.FromDays(1));
+        await hybridCache.SetAsync(JournalCacheKey, journal, _journalWriteOptions);
     }
 
     // Claims the entry for this process: marks it as started, with one more attempt, and returns it as the journal
@@ -839,5 +898,15 @@ static file class Queries
                         (x, tariffRow) => tariffRow
                     )
                     .Where(r => quotas.Contains(r.Quota) && r.DueDate.HasValue && r.DueDate > from && r.DueDate < to)
+            );
+
+    // the row of the quota in the latest tariff of the tenant, null when that tariff does not hold the quota any more
+    public static readonly Func<CoreDbContext, int, int, Task<DbTariffRow>>
+        GetWalletQuotaAsync = EF.CompileAsyncQuery(
+            (CoreDbContext ctx, int tenantId, int quota) =>
+                ctx.TariffRows
+                    .Where(r => r.TenantId == tenantId && r.Quota == quota)
+                    .Where(r => r.TariffId == ctx.TariffRows.Where(x => x.TenantId == tenantId).Max(x => x.TariffId))
+                    .FirstOrDefault()
             );
 }
