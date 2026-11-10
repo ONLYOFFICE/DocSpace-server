@@ -302,41 +302,29 @@ async function run(
   // address, so only the file id in it is ours. The title is read back: a
   // same-named file was saved under a numbered one.
   const saved: { id: string; title: string; url: string }[] = [];
-  let log: { id: string; title: string; url: string } | undefined;
   for (const artifact of result.artifacts) {
+    // The task's log is not a result and is none of the chat model's
+    // business: it is a file for whoever looks into a task afterwards, so
+    // nothing of it goes back with the tool's answer.
+    if (artifact.kind === "log") {
+      continue;
+    }
     const id = savedFileId(artifact.url);
     if (id === undefined) {
       logger.warn(`${DOCUMENT_AGENT_TOOL_NAME}: artifact ${artifact.name} names no file of ours`);
       continue;
     }
     const info = await getFileInfo(id).catch(() => undefined);
-    const file = { id, title: info?.title ?? artifact.name, url: fileEditorUrl(id) };
-    // The task's log is not a result: it goes back on its own, for the chat
-    // to offer next to the files.
-    if (artifact.kind === "log") {
-      log = file;
-    } else {
-      saved.push(file);
-    }
+    saved.push({ id, title: info?.title ?? artifact.name, url: fileEditorUrl(id) });
   }
-  const extras = {
-    ...(saved.length > 0 ? { files: saved } : {}),
-    ...(log === undefined ? {} : { log }),
-  };
 
   if (result.state !== "completed") {
     return {
       error: `The document agent did not finish the task (${result.state}): ${result.text || "no details"}`,
-      ...(Object.keys(extras).length > 0 ? { data: extras } : {}),
+      ...(saved.length > 0 ? { data: { files: saved } } : {}),
     };
   }
-  return {
-    data: {
-      summary: result.text,
-      files: saved,
-      ...(log === undefined ? {} : { log }),
-    },
-  };
+  return { data: { summary: result.text, files: saved } };
 }
 
 /** The file id of an editor link as `fileEditorUrl` builds it, whatever host the agent put in front. */
