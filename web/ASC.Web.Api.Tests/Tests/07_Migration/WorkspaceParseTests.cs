@@ -99,11 +99,34 @@ public class WorkspaceParseTests(
         CountProgressReports(log, "progress: Unzipping...").Should().BeInRange(2, 26, log);
     }
 
-    private static byte[] BuildBackup(bool gzip, int extraFiles = 0)
+    /// <summary>
+    /// A backup cut short on an entry boundary - everything is there except the end-of-archive block
+    /// and whatever followed - fails the parse rather than being imported in part. GZipStream does not
+    /// notice a cut-off stream, so the tar has to.
+    /// </summary>
+    [Theory]
+    [InlineData("backup.tar.gz")]
+    [InlineData("backup.tar")]
+    public async Task Parse_BackupWithoutEndBlock_FailsParse(string fileName)
+    {
+        // Arrange
+        await UploadBackupAsync(fileName, BuildBackup(gzip: fileName.EndsWith(".gz"), withEndBlock: false));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Workspace", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().Contain("Couldn't parse");
+        status.ParseResult.FailedArchives.Should().Equal(fileName);
+    }
+
+    private static byte[] BuildBackup(bool gzip, int extraFiles = 0, bool withEndBlock = true)
     {
         using var buffer = new MemoryStream();
-        using (var compressed = gzip ? new GZipStream(buffer, CompressionLevel.Optimal, leaveOpen: true) : null)
-        using (var tar = new TarWriter(compressed ?? (Stream)buffer, leaveOpen: true))
+        byte[] withoutEndBlock;
+        using (var tar = new TarWriter(buffer, leaveOpen: true))
         {
             WriteTable(tar, "core/core_user", ["id", "email", "firstname", "lastname", "removed"],
                 [UserId, Email, "Carol", "White", "0"]);
@@ -134,9 +157,13 @@ public class WorkspaceParseTests(
                 random.NextBytes(content);
                 WriteTarEntry(tar, $"extra/{i}.bin", new MemoryStream(content));
             }
+
+            // the writer adds the end-of-archive block only when it is disposed
+            withoutEndBlock = buffer.ToArray();
         }
 
-        return buffer.ToArray();
+        var backup = withEndBlock ? buffer.ToArray() : withoutEndBlock;
+        return gzip ? Gzip(backup) : backup;
     }
 
     private static void WriteTable(TarWriter tar, string name, string[] columns, params string[][] rows)

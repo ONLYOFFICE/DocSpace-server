@@ -90,19 +90,26 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         try
         {
-            try
+            // the parse that precedes a migration unpacks the archive next to it and leaves the tree behind, and the
+            // migration reads that tree: unpacking again would only collide with the files already there
+            if (MigrationInfo.Operation != OperationType.Migration)
             {
-                var extracted = IsZip(_takeout)
-                    ? await ExtractZipAsync(reportProgress)
-                    : await ExtractTarGzAsync(reportProgress);
-                if (!extracted)
+                try
                 {
-                    return null;
+                    var extracted = IsZip(_takeout)
+                        ? await ExtractZipAsync()
+                        : await ExtractTarGzAsync();
+                    if (!extracted)
+                    {
+                        return null;
+                    }
                 }
-            }
-            catch (Exception ex) when (ex is not LargeBackupException)
-            {
-                Log(string.Format(MigrationResource.CanNotToUnzip, _takeout), ex);
+                catch (Exception ex) when (ex is not LargeBackupException)
+                {
+                    // a truncated or broken archive fails the parse rather than leaving part of the backup out of it
+                    Log(string.Format(MigrationResource.CanNotToUnzip, _takeout), ex);
+                    throw;
+                }
             }
 
             if (reportProgress)
@@ -223,34 +230,18 @@ public class NextcloudWorkspaceMigrator : Migrator
 
     // the archive lies in TmpFolder itself, next to what it unpacks to: a file that was there before the extraction
     // (the uploaded archive) is never replaced
-    private async Task<bool> ExtractZipAsync(bool reportProgress)
+    private async Task<bool> ExtractZipAsync()
     {
         await using var archive = await ZipFile.OpenReadAsync(_takeout, _cancellationToken);
-        var extracted = await ExtractZipAsync(archive, TmpFolder, async (number, count) =>
-        {
-            if (reportProgress)
-            {
-                await ReportUnzippingAsync(5 + 45d * number / count);
-            }
-        }, _cancellationToken);
-
-        return extracted || !reportProgress;
+        return await ExtractZipAsync(archive, TmpFolder, (number, count) => ReportUnzippingAsync(5 + 45d * number / count), _cancellationToken);
     }
 
-    private async Task<bool> ExtractTarGzAsync(bool reportProgress)
+    private async Task<bool> ExtractTarGzAsync()
     {
         await using var fileStream = File.OpenRead(_takeout);
         await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
-        var extracted = await ExtractTarAsync(gzipStream, TmpFolder, false, async () =>
-        {
-            if (reportProgress)
-            {
-                // a gzip stream has no entry count up front, so progress follows the compressed bytes read
-                await ReportUnzippingAsync(5 + 45d * fileStream.Position / fileStream.Length);
-            }
-        }, _cancellationToken);
-
-        return extracted || !reportProgress;
+        // a gzip stream has no entry count up front, so progress follows the compressed bytes read
+        return await ExtractTarAsync(gzipStream, TmpFolder, false, () => ReportUnzippingAsync(5 + 45d * fileStream.Position / fileStream.Length), _cancellationToken);
     }
 
     private void DbExtractGroup(string dbFile)

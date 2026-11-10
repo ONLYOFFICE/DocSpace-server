@@ -125,6 +125,17 @@ public abstract class MigrationParseTestBase(
         });
     }
 
+    protected static byte[] Gzip(byte[] content)
+    {
+        using var buffer = new MemoryStream();
+        using (var gzip = new GZipStream(buffer, CompressionLevel.Optimal, leaveOpen: true))
+        {
+            gzip.Write(content);
+        }
+
+        return buffer.ToArray();
+    }
+
     /// <summary>
     /// A seekable stream of <paramref name="length"/> zero bytes that holds nothing in memory, so a
     /// test can pack an entry larger than the portal quota into an archive of a few megabytes.

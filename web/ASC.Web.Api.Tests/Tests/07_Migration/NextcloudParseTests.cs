@@ -221,6 +221,65 @@ public class NextcloudParseTests(
         unzippingReports.Should().BeInRange(1, 46, log);
     }
 
+    /// <summary>
+    /// An archive that was cut short fails the parse. Before, an unpacking error was only logged and
+    /// the parse went on with the part already unpacked: the dump comes first in a backup, so a
+    /// .tar.gz cut in the middle parsed "successfully" with the files after the cut silently missing.
+    /// GZipStream does not notice a cut-off stream, so the tar that ends without its end-of-archive
+    /// block - a cut on an entry boundary - is covered on its own.
+    /// </summary>
+    [Theory]
+    [InlineData("backup.tar.gz", "cut")]
+    [InlineData("backup.tar.gz", "no end block")]
+    [InlineData("backup.zip", "cut")]
+    public async Task Parse_TruncatedArchive_FailsParse(string fileName, string truncation)
+    {
+        // Arrange
+        await UploadBackupAsync(fileName, BuildTruncatedArchive(fileName, truncation));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().Contain("Couldn't parse");
+        status.ParseResult.FailedArchives.Should().Equal(fileName);
+    }
+
+    /// <summary>
+    /// The import after a parse reads the tree the parse unpacked next to the archive. It used to
+    /// unpack the archive again over that tree, which failed on the first file already there and
+    /// wrote "Couldn't unzip" into the log of every import; now that an unpacking error fails the
+    /// parse, unpacking again would fail the import itself.
+    /// </summary>
+    [Theory]
+    [InlineData("backup.zip")]
+    [InlineData("backup.tar.gz")]
+    public async Task Migrate_ParsedArchive_ImportsUserFromUnpackedTree(string fileName)
+    {
+        // Arrange
+        var archive = fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ? BuildZip() : BuildTarGz(withLink: false);
+        await UploadBackupAsync(fileName, archive);
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var parsed = await WaitForParseAsync();
+        parsed.Error.Should().BeNullOrEmpty();
+        var user = parsed.ParseResult.Users.Should().ContainSingle().Which;
+
+        // Act
+        await StartMigrationAsync(user);
+        var status = await WaitForMigrationAsync();
+        var log = await GetMigrationLogAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        status.ParseResult.SuccessedUsers.Should().Be(1);
+        status.ParseResult.FailedUsers.Should().Be(0);
+        status.ParseResult.Errors.Should().BeEmpty();
+        log.Should().NotContain("Couldn't unzip");
+    }
+
     [Fact]
     public async Task Parse_UnsupportedArchive_ReportsAcceptedFormats()
     {
@@ -234,6 +293,89 @@ public class NextcloudParseTests(
         // Assert
         status.IsCompleted.Should().BeTrue();
         status.Error.Should().Contain(".zip, .tar.gz or .tgz");
+    }
+
+    /// <summary>
+    /// The SDK's <c>MigratingApiUser</c> has no <c>shouldImport</c> - the server's model takes it from
+    /// a base class the generated client does not carry - so the import is started over raw HTTP with
+    /// the body the web client sends.
+    /// </summary>
+    private async Task StartMigrationAsync(MigratingApiUser user)
+    {
+        var body = new
+        {
+            migratorName = "Nextcloud",
+            users = new[] { new { key = user.Key, email = user.Email, firstName = user.FirstName, lastName = user.LastName, userType = "User", shouldImport = true } },
+            importPersonalFiles = true
+        };
+        using var response = await _webApiClient.PostAsJsonAsync("api/2.0/migration/migrate", body, TestContext.Current.CancellationToken);
+        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+    }
+
+    /// <summary>
+    /// Right after the import is queued the status may still describe the finished parse, so the wait
+    /// is for a completed job of the import itself.
+    /// </summary>
+    private async Task<MigrationStatusDto> WaitForMigrationAsync()
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+
+        while (true)
+        {
+            var status = (await _migrationApi.GetMigrationStatusAsync(TestContext.Current.CancellationToken)).Response;
+
+            if (status is { IsCompleted: true, ParseResult.Operation: "migration" } || DateTime.UtcNow >= deadline)
+            {
+                return status;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// A backup whose dump and first file come before the cut and a file of random bytes - which
+    /// compresses to its own size, so a cut at three quarters lands in it - after.
+    /// </summary>
+    private static byte[] BuildTruncatedArchive(string fileName, string truncation)
+    {
+        var later = new byte[64 * 1024];
+        new Random(42).NextBytes(later);
+
+        if (fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            using var zipBuffer = new MemoryStream();
+            using (var zip = new ZipArchive(zipBuffer, ZipArchiveMode.Create, leaveOpen: true))
+            {
+                WriteZipEntry(zip, "nextcloud/nextcloud.sql", Dump);
+                WriteZipEntry(zip, $"nextcloud/data/{Uid}/files/hello.txt", FileContent);
+                using var entry = zip.CreateEntry($"nextcloud/data/{Uid}/files/later.bin").Open();
+                entry.Write(later);
+            }
+
+            var zipBytes = zipBuffer.ToArray();
+            return zipBytes[..(zipBytes.Length * 3 / 4)];
+        }
+
+        using var tarBuffer = new MemoryStream();
+        byte[] withoutEndBlock;
+        using (var tar = new TarWriter(tarBuffer, leaveOpen: true))
+        {
+            WriteTarEntry(tar, "nextcloud/nextcloud.sql", Dump);
+            WriteTarEntry(tar, $"nextcloud/data/{Uid}/files/hello.txt", FileContent);
+            WriteTarEntry(tar, $"nextcloud/data/{Uid}/files/later.bin", new MemoryStream(later));
+
+            // the writer adds the end-of-archive block only when it is disposed
+            withoutEndBlock = tarBuffer.ToArray();
+        }
+
+        if (truncation == "no end block")
+        {
+            return Gzip(withoutEndBlock);
+        }
+
+        var tarGz = Gzip(tarBuffer.ToArray());
+        return tarGz[..(tarGz.Length * 3 / 4)];
     }
 
     /// <summary>

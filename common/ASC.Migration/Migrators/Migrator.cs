@@ -210,6 +210,8 @@ public abstract class Migrator(
     /// A path met twice in the archive keeps the later entry, as tar does. Symbolic and hard links are skipped: their
     /// target may lie outside the extraction folder. With <paramref name="replaceExisting"/> a file that was there before
     /// the extraction is replaced rather than refused. <paramref name="onEntry"/> is called before each entry.
+    /// A truncated tar fails with <see cref="EndOfStreamException"/>: GZipStream does not notice a cut-off stream, but
+    /// TarReader requires the end-of-archive block, so even a cut on an entry boundary is reported.
     /// </summary>
     /// <returns><see langword="false"/> when <paramref name="cancellationToken"/> stopped the extraction.</returns>
     protected async Task<bool> ExtractTarAsync(Stream tarStream, string root, bool replaceExisting, Func<Task> onEntry, CancellationToken cancellationToken)
