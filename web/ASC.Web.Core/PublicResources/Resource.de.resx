@@ -145,7 +145,7 @@
     <value>Dienst</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>KI-Funktionen</value>
+    <value>KI-Agenten und Tools</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
@@ -1177,7 +1177,7 @@
     <value>KI-Suche</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>KI-Funktionen</value>
+    <value>KI-Agenten und Tools</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Verfolgen von Anmeldungen und Aktionen</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Anbieterkosten</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Der Webhook ist deaktiviert. Aktivieren Sie ihn, bevor Sie seine Zustellungen wiederholen</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Das Ereignis wird gerade gesendet. Wiederholen Sie den Vorgang, sobald der Versuch abgeschlossen ist</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Die Zustellung wurde in einem früheren Webhook-Format aufgezeichnet und kann nicht erneut gesendet werden</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Das Webhook-Ziel ist kein vorhandener Benutzer oder keine vorhandene Gruppe</value>
   </data>
 </root>

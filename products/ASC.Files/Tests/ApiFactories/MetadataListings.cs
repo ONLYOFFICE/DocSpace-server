@@ -63,11 +63,10 @@ public static class MetadataModelExtensions
 }
 
 /// <summary>
-/// The listings and searches with the metadata filter. The request goes through the typed SDK call, so the query and
-/// body the generated client builds are what is exercised; only the response is re-read from
-/// <see cref="ApiResponse{T}.RawContent"/>: <c>FolderContentDto.Folders</c> and <c>Files</c> are typed
-/// <c>List&lt;FileEntryBaseDto&gt;</c>, which drops the <c>id</c>, <c>assignedMetadataTemplates</c> and
-/// <c>metadataMatches</c> of every entry. That is an SDK defect, not a preference.
+/// The listings and searches with the metadata filter, through the typed SDK calls. <c>FolderContentDto.Folders</c>
+/// and <c>Files</c> are declared as the base <c>FileEntryBaseDto</c>, but the <c>entryKind</c> discriminator makes
+/// the SDK build each entry as its concrete model, so the <c>id</c>, <c>assignedMetadataTemplates</c> and
+/// <c>metadataMatches</c> are read from <c>FileEntryDto</c>.
 /// </summary>
 public static class MetadataListings
 {
@@ -101,7 +100,7 @@ public static class MetadataListings
         string? rawMetadataFilters = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await api.GetRoomsFolderWithHttpInfoAsync(
+        var response = await api.GetRoomsFolderAsync(
             type: type,
             searchArea: searchArea,
             filterValue: filterValue,
@@ -110,7 +109,7 @@ public static class MetadataListings
             includeHiddenMetadata: includeHiddenMetadata,
             cancellationToken: cancellationToken);
 
-        return Read<RoomsContentResponse>(response.RawContent);
+        return RoomsContentResponse.From(response.Response);
     }
 
     /// <summary>
@@ -129,7 +128,7 @@ public static class MetadataListings
         string? rawMetadataFilters = null,
         CancellationToken cancellationToken = default)
     {
-        var response = await api.GetFolderByFolderIdWithHttpInfoAsync(
+        var response = await api.GetFolderByFolderIdAsync(
             folderId,
             withSubFolders: withSubFolders,
             extension: extension,
@@ -139,7 +138,7 @@ public static class MetadataListings
             includeHiddenMetadata: includeHiddenMetadata,
             cancellationToken: cancellationToken);
 
-        return Read<FolderContentResponse>(response.RawContent);
+        return FolderContentResponse.From(response.Response);
     }
 
     /// <summary>
@@ -157,29 +156,29 @@ public static class MetadataListings
 
         var response = section switch
         {
-            "@my" => await api.GetMyFolderWithHttpInfoAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
-            "@trash" => await api.GetTrashFolderWithHttpInfoAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
-            "@recent" => await api.GetRecentFolderWithHttpInfoAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
-            "@favorites" => await api.GetFavoritesFolderWithHttpInfoAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
-            "@forms" => await api.GetFormsFolderWithHttpInfoAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
+            "@my" => await api.GetMyFolderAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
+            "@trash" => await api.GetTrashFolderAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
+            "@recent" => await api.GetRecentFolderAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
+            "@favorites" => await api.GetFavoritesFolderAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
+            "@forms" => await api.GetFormsFolderAsync(metadataTemplateId: metadataTemplateId, metadataFilters: filters, cancellationToken: cancellationToken),
             _ => throw new ArgumentOutOfRangeException(nameof(section), section, "The SDK has no method for this section alias.")
         };
 
-        return Read<FolderContentResponse>(response.RawContent);
+        return FolderContentResponse.From(response.Response);
     }
 
     public static async Task<FolderContentResponse> SearchFolderWithMetadataAsync(this FoldersApi api, int folderId, FolderMetadataSearch body, CancellationToken cancellationToken = default)
     {
-        var response = await api.SearchFolderWithHttpInfoAsync(folderId, body, cancellationToken);
+        var response = await api.SearchFolderAsync(folderId, body, cancellationToken);
 
-        return Read<FolderContentResponse>(response.RawContent);
+        return FolderContentResponse.From(response.Response);
     }
 
     public static async Task<RoomsContentResponse> SearchRoomsWithMetadataAsync(this RoomsApi api, RoomsMetadataSearchRequestDto body, CancellationToken cancellationToken = default)
     {
-        var response = await api.SearchRoomsWithHttpInfoAsync(body, cancellationToken);
+        var response = await api.SearchRoomsAsync(body, cancellationToken);
 
-        return Read<RoomsContentResponse>(response.RawContent);
+        return RoomsContentResponse.From(response.Response);
     }
 
     /// <summary>
@@ -211,6 +210,16 @@ public class RoomsContentResponse
     public int Total { get; init; }
     public int Count { get; init; }
 
+    public static RoomsContentResponse From(FolderContentDto content)
+    {
+        return new RoomsContentResponse
+        {
+            Folders = RoomEntryResponse.From(content.Folders),
+            Total = content.Total,
+            Count = content.Count
+        };
+    }
+
     public List<int> RoomIds()
     {
         return Folders.Select(f => f.Id).ToList();
@@ -224,6 +233,17 @@ public class FolderContentResponse
     public int Total { get; init; }
     public int Count { get; init; }
 
+    public static FolderContentResponse From(FolderContentDto content)
+    {
+        return new FolderContentResponse
+        {
+            Folders = RoomEntryResponse.From(content.Folders),
+            Files = RoomEntryResponse.From(content.Files),
+            Total = content.Total,
+            Count = content.Count
+        };
+    }
+
     public List<int> FolderIds()
     {
         return Folders.Select(f => f.Id).ToList();
@@ -236,7 +256,8 @@ public class FolderContentResponse
 }
 
 /// <summary>
-/// An entry of a listing: the part of the FileEntryDto the SDK model of the listing drops.
+/// An entry of a listing: the metadata part of its <c>FileEntryDto</c>. Also the shape of a listing requested over
+/// raw HTTP through <see cref="MetadataListings.ReadAsync{T}"/>.
 /// </summary>
 public class RoomEntryResponse
 {
@@ -244,6 +265,25 @@ public class RoomEntryResponse
     public string Title { get; init; } = "";
     public List<int>? AssignedMetadataTemplates { get; init; }
     public List<MetadataMatchResponse>? MetadataMatches { get; init; }
+
+    public static List<RoomEntryResponse> From(List<FileEntryBaseDto>? entries)
+    {
+        return (entries ?? []).OfType<FileEntryDto>()
+            .Select(e => new RoomEntryResponse
+            {
+                Id = e.Id,
+                Title = e.Title,
+                AssignedMetadataTemplates = e.AssignedMetadataTemplates,
+                MetadataMatches = e.MetadataMatches?.Select(m => new MetadataMatchResponse
+                {
+                    TemplateId = m.TemplateId,
+                    FieldId = m.FieldId,
+                    FieldName = m.FieldName ?? "",
+                    Value = m.Value ?? ""
+                }).ToList()
+            })
+            .ToList();
+    }
 }
 
 /// <summary>

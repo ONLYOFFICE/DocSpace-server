@@ -145,7 +145,7 @@
     <value>Ծառայություն</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>ԱԲ գործառույթներ</value>
+    <value>ԱԲ գործակալներ և գործիքներ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Պահուստավորում</value>
@@ -1177,7 +1177,7 @@
     <value>ԱԲ որոնում</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>ԱԲ գործառույթներ</value>
+    <value>ԱԲ գործակալներ և գործիքներ</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Մուտքերի և գործողությունների հետևում</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Մատակարարի արժեք</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook-ն անջատված է։ Ակտիվացրեք այն՝ նախքան դրա առաքումները կրկին փորձելը</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Իրադարձությունը ուղարկվում է հենց հիմա։ Կրկին փորձեք՝ երբ փորձն ավարտվի</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Առաքումը գրանցվել է ավելի վաղ Webhook-ի ձևաչափով և չի կարող կրկին ուղարկվել</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook-ի թիրախը գոյություն ունեցող օգտատեր կամ խումբ չէ</value>
   </data>
 </root>

@@ -233,4 +233,110 @@ public class RebrandingPermissionsTests(AspireAppFixture fixture) : RebrandingTe
         // Assert
         exception.ErrorCode.Should().Be(403);
     }
+
+    [Fact]
+    public async Task RestoreWhiteLabelLogos_User_ThrowsAccessDenied()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteContact(EmployeeType.User));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await Rebranding.RestoreWhiteLabelLogosAsync(cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task SaveWhiteLabelSettings_User_ThrowsAccessDeniedBeforePlanCheck()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteContact(EmployeeType.User));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await Rebranding.SaveWhiteLabelSettingsAsync(
+                whiteLabelRequestDto: new WhiteLabelRequestDto(logo: []),
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task SaveWhiteLabelSettingsFromFiles_User_ThrowsAccessDeniedBeforePlanCheck()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteContact(EmployeeType.User));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await Rebranding.SaveWhiteLabelSettingsFromFilesAsync(
+                cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task SaveCompanyWhiteLabelSettings_User_ThrowsAccessDenied()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteContact(EmployeeType.User));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await Rebranding.SaveCompanyWhiteLabelSettingsAsync(
+                CompanyRequest, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task SaveAdditionalWhiteLabelSettings_User_ThrowsAccessDenied()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteContact(EmployeeType.User));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await Rebranding.SaveAdditionalWhiteLabelSettingsAsync(
+                AdditionalRequest, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    // The two deletes reset default-tenant settings shared by every portal on the host, so the owner
+    // call is not ported. A plain User is refused by the first line of the action (EditPortalSettings),
+    // before anything is touched, which makes this one safe.
+    [Fact]
+    public async Task DeleteCompanyWhiteLabelSettings_User_ThrowsAccessDenied()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteContact(EmployeeType.User));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await Rebranding.DeleteCompanyWhiteLabelSettingsAsync(TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task DeleteAdditionalWhiteLabelSettings_User_ThrowsAccessDenied()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteContact(EmployeeType.User));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await Rebranding.DeleteAdditionalWhiteLabelSettingsAsync(TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
 }

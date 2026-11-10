@@ -76,6 +76,7 @@ public class BaseTest(
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
+    protected UserDataApi _userDataApi = null!;
     protected PhotosApi _photosApi = null!;
     protected ProfilesApi _profilesApi = null!;
 
@@ -137,6 +138,7 @@ public class BaseTest(
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;
+        _userDataApi = _clients.UserDataApi;
         _photosApi = _clients.PhotosApi;
         _profilesApi = _clients.ProfilesApi;
 
@@ -166,6 +168,22 @@ public class BaseTest(
         return Invitations.InviteContactAsync(_clients.ProfilesApi, _peopleClient, employeeType, user ?? Owner, TestContext.Current.CancellationToken);
     }
 
+    /// <summary>Connects a Socket.IO client to this test's portal as the given user. The test disposes it.</summary>
+    protected async Task<PortalSocket> ConnectSocket(User user)
+    {
+        await fixture.WaitForRouterAsync().WaitAsync(TestContext.Current.CancellationToken);
+
+        return await _clients.ConnectSocketAsync(user, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Connects with the given auth cookie, or with none: for what the service does with a bad one.</summary>
+    protected async Task<PortalSocket> ConnectSocket(string? token)
+    {
+        await fixture.WaitForRouterAsync().WaitAsync(TestContext.Current.CancellationToken);
+
+        return await PortalSocket.ConnectAsync(_clients.PortalName, token, TestContext.Current.CancellationToken);
+    }
+
     protected Task<User> InviteGuest(User? user = null)
     {
         return Invitations.InviteGuestAsync(_peopleClient, user ?? Owner, TestContext.Current.CancellationToken);
@@ -182,16 +200,6 @@ public class BaseTest(
     protected async Task<ThirdPartyFileDto> GetFile(string fileId)
     {
         return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
-    }
-
-    /// <summary>
-    /// Reads the <c>total</c> of a share list (<c>api/2.0/files/file/{id}/share</c>,
-    /// <c>api/2.0/files/rooms/{id}/share?...</c>) from the raw envelope: <c>FileShareArrayWrapper</c>
-    /// in the SDK has no <c>Total</c> property, so the typed call cannot see it.
-    /// </summary>
-    protected Task<long?> ReadShareTotal(string path)
-    {
-        return new RawApiClient(_filesClient).GetTotalAsync(path, TestContext.Current.CancellationToken);
     }
 
     protected async Task<int> GetShareFolderIdAsync(User user)
@@ -293,19 +301,13 @@ public class BaseTest(
     }
 
     /// <summary>
-    /// Reads the raw JSON because <c>FileEntryBaseDto</c> in the generated listing model carries
-    /// neither <c>id</c> nor <c>type</c>.
+    /// The id of the AI room's knowledge folder, found among its subfolders by <c>FolderType.Knowledge</c>.
     /// </summary>
     protected async Task<int> GetKnowledgeFolderIdAsync(int aiRoomId)
     {
-        var response = await _foldersApi.GetFoldersWithHttpInfoAsync(aiRoomId, TestContext.Current.CancellationToken);
+        var folders = (await _foldersApi.GetFoldersAsync(aiRoomId, TestContext.Current.CancellationToken)).Response;
 
-        using var payload = JsonDocument.Parse(response.RawContent);
-
-        return payload.RootElement.GetProperty("response").EnumerateArray()
-            .Where(f => f.GetProperty("type").GetInt32() == (int)FolderType.Knowledge)
-            .Select(f => f.GetProperty("id").GetInt32())
-            .First();
+        return folders.OfType<FolderDto>().First(f => f.Type == FolderType.Knowledge).Id;
     }
 
     /// <summary>

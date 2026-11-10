@@ -80,7 +80,7 @@ public class RetryWebhooksTests(
         });
 
         var newIds = result.Response.Select(r => r.Id).ToList();
-        var records = await GetDeliveryRecordsAsync(configId);
+        var records = await GetLogAsync(configId);
         records.Where(r => newIds.Contains(r.Id)).Select(r => r.EventId).Should().BeEquivalentTo(ids);
     }
 
@@ -88,7 +88,7 @@ public class RetryWebhooksTests(
     public async Task RetryWebhooks_TwoRecordsOfTheSameEvent_QueuesOneRetry()
     {
         // Arrange: an event's first record and a manual retry of it, attempted, so nothing of the event is in flight
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
@@ -103,7 +103,7 @@ public class RetryWebhooksTests(
         var retry = result.Response.Should().ContainSingle().Subject;
         retry.Id.Should().NotBe(original.Id).And.NotBe(firstRetry.Id);
 
-        var records = await GetDeliveryRecordsAsync(subscription.Id);
+        var records = await GetLogAsync(subscription.Id);
         records.Should().HaveCount(3, "the event's first record, the earlier retry and the one queued now");
         records.Single(r => r.Id == retry.Id).EventId.Should().Be(original.Id);
     }
@@ -126,7 +126,7 @@ public class RetryWebhooksTests(
     public async Task RetryWebhooks_DeliveryBeingSent_IsSkippedInSilence()
     {
         // Arrange: the record as a sender holds it while it is sending: leased, with the lease still running
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -145,7 +145,7 @@ public class RetryWebhooksTests(
     public async Task RetryWebhooks_DisabledSubscription_IsSkippedInSilence()
     {
         // Arrange: a delivered event, then the subscription is switched off
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);

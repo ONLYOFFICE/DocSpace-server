@@ -145,7 +145,7 @@
     <value>Pakalpojums</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>MI funkcijas</value>
+    <value>MI aģenti un rīki</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Dublējums</value>
@@ -1177,7 +1177,7 @@
     <value>MI meklēšana</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>MI funkcijas</value>
+    <value>MI aģenti un rīki</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Izsekošana pieteikšanās un darbības</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Pakalpojumu sniedzēja izmaksas</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook ir atspējots. Iespējojiet to, pirms atkārtojat tā piegādes</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Notikums šobrīd tiek sūtīts. Mēģiniet vēlreiz pēc mēģinājuma pabeigšanas</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Piegāde tika reģistrēta agrākā webhook formātā, un to nevar nosūtīt vēlreiz</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Webhook mērķis nav esošs lietotājs vai grupa</value>
   </data>
 </root>

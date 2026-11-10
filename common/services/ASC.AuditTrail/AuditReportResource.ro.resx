@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profilul AI a fost atribuit agentului AI pentru acțiunea: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Cheia BYOK pentru modelul AI a fost ștearsă: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Cheia BYOK pentru modelul AI a fost setată: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profilul AI a fost atribuit acțiunii: {0}</value>
   </data>
@@ -1322,5 +1328,17 @@
   </data>
   <data name="AppDisabled" xml:space="preserve">
     <value>Aplicația a fost dezactivată: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Camere asociate proiectului AI {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Camere disociate de proiectul AI {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Modelul AI al proiectului AI {0} a fost schimbat în {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Livrarea webhook-ului a fost reîncercată: {0}</value>
   </data>
 </root>

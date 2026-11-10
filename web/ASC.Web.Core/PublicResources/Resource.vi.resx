@@ -145,7 +145,7 @@
     <value>Dịch vụ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Tính năng AI</value>
+    <value>Tác nhân và công cụ AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Sao lưu</value>
@@ -1177,7 +1177,7 @@
     <value>Tìm kiếm AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Tính năng AI</value>
+    <value>Tác nhân và công cụ AI</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Theo dõi đăng nhập và hành động</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Chi phí nhà cung cấp</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook đang bị vô hiệu hóa. Hãy bật nó trước khi thử gửi lại các lượt gửi</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Sự kiện đang được gửi. Hãy thử lại sau khi lần thử hiện tại hoàn tất</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Lượt gửi này được ghi lại theo định dạng webhook cũ hơn và không thể gửi lại</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Đích của webhook không phải là người dùng hoặc nhóm hiện có</value>
   </data>
 </root>

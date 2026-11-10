@@ -43,6 +43,12 @@ public class BaseTest(
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    /// <summary>The id of this test's own portal.</summary>
+    protected int TenantId => _clients.TenantId;
+
+    /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
+    protected AspireAppFixture Fixture => fixture;
+
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;
 
@@ -55,9 +61,10 @@ public class BaseTest(
     protected UserStatusApi _userStatusApi = null!;
     protected GroupApi _groupApi = null!;
     protected UserTypeApi _userTypeApi = null!;
-    protected HttpClient _webhookReceiverClient = null!;
     protected HttpClient _filesClient = null!;
     protected RoomsApi _roomsApi = null!;
+    protected PrivacyRoomApi _privacyRoomApi = null!;
+    protected SharingApi _sharingApi = null!;
     protected FilesApi _filesApi = null!;
     protected FoldersApi _foldersApi = null!;
     protected OperationsApi _operationsApi = null!;
@@ -131,9 +138,10 @@ public class BaseTest(
         _userStatusApi = _clients.UserStatusApi;
         _groupApi = _clients.GroupApi;
         _userTypeApi = _clients.UserTypeApi;
-        _webhookReceiverClient = _clients.WebhookReceiverHttpClient;
         _filesClient = _clients.FilesHttpClient;
         _roomsApi = _clients.RoomsApi;
+        _privacyRoomApi = _clients.PrivacyRoomApi;
+        _sharingApi = _clients.SharingApi;
         _filesApi = _clients.FilesApi;
         _foldersApi = _clients.FoldersApi;
         _operationsApi = _clients.OperationsApi;

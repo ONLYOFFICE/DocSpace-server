@@ -7,13 +7,13 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.1.2</version>
         <relativePath/>
     </parent>
 
     <groupId>com.asc</groupId>
     <artifactId>identity</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <packaging>pom</packaging>
 
     <profiles>
@@ -54,44 +54,45 @@
 
     <properties>
         <annotations.version>6.0.53</annotations.version>
-        <aws.version>4.0.0</aws.version>
-        <aws.cloudwatch.version>2.42.27</aws.cloudwatch.version>
-        <blackbird.version>3.1.1</blackbird.version>
+        <aws.version>4.2.1</aws.version>
+        <aws.cloudwatch.version>2.57.11</aws.cloudwatch.version>
+        <blackbird.version>3.1.7</blackbird.version>
         <bucket4j.version>8.10.1</bucket4j.version>
-        <caffeine.caching.version>3.2.3</caffeine.caching.version>
-        <dependency.maven.check.plugin.version>12.2.0</dependency.maven.check.plugin.version>
-        <depgraph.maven.plugin.version>4.0.3</depgraph.maven.plugin.version>
-        <flyway.version>12.3.0</flyway.version>
-        <graal.version>25.0.2</graal.version>
-        <grpc.version>1.80.0</grpc.version>
+        <caffeine.caching.version>3.3.1</caffeine.caching.version>
+        <dependency.maven.check.plugin.version>13.0.0</dependency.maven.check.plugin.version>
+        <depgraph.maven.plugin.version>4.0.6</depgraph.maven.plugin.version>
+        <flyway.version>13.12.1</flyway.version>
+        <graal.version>25.0.5</graal.version>
+        <grpc.version>1.85.1</grpc.version>
         <grpc.starter.version>3.1.0.RELEASE</grpc.starter.version>
         <jsystemd.version>4.0.0</jsystemd.version>
-        <junit.jupiter.version>6.0.3</junit.jupiter.version>
+        <junit.jupiter.version>6.1.3</junit.jupiter.version>
+        <junit-jupiter.version>${junit.jupiter.version}</junit-jupiter.version>
         <logback.gelf.version>6.1.2</logback.gelf.version>
         <logback.logstash.version>9.0</logback.logstash.version>
-        <mockito.version>5.23.0</mockito.version>
-        <mysql.connector.version>9.6.0</mysql.connector.version>
+        <mockito.version>5.24.0</mockito.version>
+        <mysql.connector.version>26.10.0</mysql.connector.version>
         <resilience4j.version>2.4.0</resilience4j.version>
-        <shedlock.version>7.7.0</shedlock.version>
-        <spring.oauth2.server.version>7.0.4</spring.oauth2.server.version>
-        <springdoc.version>3.0.2</springdoc.version>
-        <spring.jcl.version>6.2.17</spring.jcl.version>
-        <testcontainers.version>2.0.4</testcontainers.version>
+        <shedlock.version>7.11.0</shedlock.version>
+        <spring.oauth2.server.version>7.1.2</spring.oauth2.server.version>
+        <springdoc.version>3.2.0</springdoc.version>
+        <spring.jcl.version>6.2.19</spring.jcl.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
         <os.maven.plugin.version>1.7.1</os.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
         <winsw.maven.plugin.version>0.1.10</winsw.maven.plugin.version>
 
         <!-- Protoc Versions -->
-        <protoc.version>3.25.8</protoc.version>
-        <protoc.gen.version>1.80.0</protoc.gen.version>
+        <protoc.version>3.25.9</protoc.version>
+        <protoc.gen.version>1.85.1</protoc.gen.version>
 
         <!-- Maven and Java Versions -->
         <java.version>25</java.version>
-        <maven.compiler.plugin.vesrion>3.15.0</maven.compiler.plugin.vesrion>
-        <maven.documentation.plugin.version>1.4</maven.documentation.plugin.version>
+        <maven.compiler.plugin.vesrion>3.16.0</maven.compiler.plugin.vesrion>
+        <maven.documentation.plugin.version>1.6</maven.documentation.plugin.version>
         <maven.formatter.plugin.version>2.29</maven.formatter.plugin.version>
-        <maven.google.format.version>1.35.0</maven.google.format.version>
-        <maven.surefire.plugin.version>3.5.5</maven.surefire.plugin.version>
+        <maven.google.format.version>1.37.0</maven.google.format.version>
+        <maven.surefire.plugin.version>3.6.1</maven.surefire.plugin.version>
     </properties>
 
     <dependencyManagement>

@@ -55,7 +55,7 @@ if (otelFileLogging)
     connectionManager.AddOpenTelemetryCollector();
 }
 
-var isIntegrationTest = launchProfile is "integration-test" or "notify-test";
+var isIntegrationTest = launchProfile is "integration-test" or "notify-test" or "integration-test-billing";
 var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker, isIntegrationTest);
 
 switch (launchProfile)
@@ -69,7 +69,10 @@ switch (launchProfile)
             // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
             .AddNextcloud()
-            .AddWebhookReceiver()
+            .UseWebhookTestSettings()
+            // No payment services, whatever buildtools/config says: the payment tests of this profile expect the
+            // tariff service to be reported as not configured. integration-test-billing gives them a stub.
+            .UsePaymentServices()
             .AllowPortalRegistration();
 
         configurator
@@ -79,6 +82,9 @@ switch (launchProfile)
             .AddProject<ASC_Web_Api>(Constants.WebApiPort)
             .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
             .AddProject<ASC_AI>(Constants.AiPort)
+            // The AI worker subscribes to the text-to-docx export event (TextToDocxIntegrationHandler) and writes the
+            // exported file; without it an export is accepted (202) and never lands.
+            .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
             // Audit events reach the bus from every service, but the only subscriber to
             // EventDataIntegrationEvent is registered in Web.Studio (WebStudioServiceExtensions).
             // Without it nothing persists them and every history endpoint - GET /files/file/{id}/log
@@ -89,7 +95,39 @@ switch (launchProfile)
             .AddProject<ASC_Data_Backup>(Constants.BackupPort)
             .AddProject<ASC_Data_Backup_Worker>(Constants.BackupWorkerPort)
             .AddSocketIO()
-            .AddIdentity();
+            .AddIdentity()
+            // The chat surface (/api/2.0/ai) for the AI chat tests, which stand in for the model with a WireMock.
+            .AddAiChat();
+
+        break;
+    case "integration-test-billing":
+        // The payment suite's graph (ASC.Web.Api.Billing.Tests): a SaaS stack, where every portal has a payment key
+        // of its own - the standalone stack gives all of them the installation's one, so the billing answers of
+        // parallel tests could not be told apart. Billing, accounting and docscloud are a WireMock the suite runs in
+        // the test process (Constants.PaymentStubPort), started before the stack.
+        // A test fixture passes APP_HOSTING_STANDALONE itself (AspireHostFixture.Standalone), which wins over this
+        // profile's value: a suite that forgets to ask for SaaS gets this error, not portals that share one key.
+        if (string.Equals(builder.Configuration["APP_HOSTING_STANDALONE"], "true", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "The integration-test-billing profile is a SaaS stack: start it with APP_HOSTING_STANDALONE=false " +
+                "(AspireHostFixture.Standalone => false).");
+        }
+
+        connectionManager
+            .AddMySql(withDataVolume: false, withTmpfs: true)
+            .AddRabbitMq(withManagementPlugin: false)
+            .AddRedis()
+            .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
+            .UsePaymentServices($"http://{Constants.PaymentStubHost}:{Constants.PaymentStubPort}")
+            .AllowPortalRegistration();
+
+        configurator
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_People>(Constants.PeoplePort)
+            // The wallet top-up and low-balance services run in Web.Studio.
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort);
 
         break;
     case "notify-test":
@@ -105,6 +143,7 @@ switch (launchProfile)
             // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
             .AddMailPit()
+            .UsePaymentServices()
             .AllowPortalRegistration();
 
         configurator
@@ -146,6 +185,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddDocumentAgent()
             .AddAiChat();
 
         break;
@@ -182,6 +222,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddDocumentAgent()
             .AddAiChat()
             .AddWebDav()
             .AddIdentity();
@@ -213,9 +254,10 @@ if (storybook)
         .WithEnvironment("BROWSER", "none");
 }
 
-// The letter suite never goes through the proxy, and OpenResty binds fixed host ports (8092, 443)
-// and mounts the client packages — which a server-only checkout does not have.
-if (launchProfile != "notify-test")
+// The letter and billing suites never go through the proxy - their clients call the services directly - and
+// OpenResty binds fixed host ports (8092, 443) and mounts the client packages, which a server-only checkout does
+// not have.
+if (launchProfile is not ("notify-test" or "integration-test-billing"))
 {
     var isPreview = launchProfile == "preview";
     var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);

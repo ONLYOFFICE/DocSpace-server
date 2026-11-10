@@ -61,6 +61,30 @@ public class EmailChangeInstructionsTests(AspireAppFixture fixture) : BaseTest(f
         { EmployeeType.Guest, null },
     };
 
+    [Fact]
+    public async Task SendEmailChangeInstructions_AddressesSwitchedBackAndForth_SendOneLetterEach()
+    {
+        // An administrator moving an account between two addresses mails activation instructions on every change;
+        // the instructions an address got a moment ago are not sent to it again, and their link still works.
+        await _peopleClient.Authenticate(Owner);
+        var member = await InviteMember(EmployeeType.User);
+        string[] addresses = [Initializer.FakerMember.Generate().Email, Initializer.FakerMember.Generate().Email];
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
+
+        for (var call = 0; call < 6; call++)
+        {
+            await _emailApi.SendEmailChangeInstructionsAsync(
+                new UpdateMemberRequestDto(userId: member.Id.ToString(), email: addresses[call % 2]),
+                TestContext.Current.CancellationToken);
+        }
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.ActivateEmailNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().HaveCount(2, "each address got its instructions once");
+    }
+
     /// <summary>
     /// The one case where the caller is also the target and is an admin (the Owner): the change is
     /// applied immediately, so the test proves it end to end by signing in with the new address and

@@ -134,7 +134,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
                 await securityContext.AuthenticateMeWithoutCookieAsync(_currentUserId);
                 await fileSecurity.UpdateShareByFolderTypesAsync(
                     User,
-                    [FolderType.AiRoom],
+                    [FolderType.AiRoom, FolderType.AiProjectRoom],
                     Files.Core.Security.FileShare.Read);
 
                 await SetPercentageAndCheckCancellationAsync(60, true);
@@ -273,7 +273,7 @@ public class UpdateUserTypeProgressItem : DistributedTaskProgress
         var toUser = await userManager.GetUsersAsync(ToUser);
 
         await studioNotifyService.SendMsgReassignsCompletedAsync(_currentUserId, _userInfo, toUser);
-        await studioNotifyService.SendMsgUserTypeChangedAsync(_userInfo, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + _employeeType.ToStringFast()));
+        await studioNotifyService.SendMsgUserTypeChangedAsync(_userInfo, _employeeType, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + _employeeType.ToStringFast()));
 
         var fromUserName = _userInfo.DisplayUserName(false, displayUserSettingsHelper);
 

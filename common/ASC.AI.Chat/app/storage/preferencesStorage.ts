@@ -31,12 +31,10 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
-import { resolveAgentEntityId } from "./docspaceFilesApi.js";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject } from "../narrow.js";
 import type { PreferencesStorage, ToolPermissionMode } from "@onlyoffice/ai-chat/core";
 import {
-  chatContextScope,
   invalidateChatContext,
   readChatContext,
   reportChatContextMiss,
@@ -52,22 +50,12 @@ import { csharpToToolPermissionMode, toolPermissionModeToCsharp } from "./toolPe
 const PATH = "/preferences";
 const TOOL_MODE_PATH = "/config/tool-mode";
 
-function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
-  return entityId ? { entityId } : undefined;
-}
-
-// Writes and reads must agree on the scope key. Reads fold a non-agent
-// entityId to the global scope (`resolveAgentEntityId` → undefined), so a
-// write keyed by a raw room/folder id would store a row no read ever sees —
-// the deep-mode toggle flipped from an ordinary room appeared saved but
-// read back as the portal value, and a folder id 403'd in the C# PUT
-// (Bug 82900). Scope resolution here mirrors threads and tool prefs: the
-// scope ladder is global-or-agent by design (Bug 82719).
-async function scopedEntityId(
-  entityId: string | undefined,
-): Promise<string | null> {
-  return (await resolveAgentEntityId(entityId)) ?? null;
-}
+// Preferences are one row per user: the `entityId` the library passes along
+// (the folder the chat is opened from) is accepted for the interface's sake
+// and ignored, so a write from any room lands where every read looks
+// (Bug 82900 — a row keyed by a raw folder id was invisible to the reads,
+// and a folder id 403'd in the C# PUT). The C# storage keeps the global
+// scope under `entityId: null`.
 
 // The C# storage keeps ONE value per scope: `depth`, its `ReasoningDepth`
 // enum (`none | low | medium | high | xhigh | max`, see `reasoningDepth.ts`).
@@ -135,16 +123,14 @@ export class HttpPreferencesStorage implements PreferencesStorage {
     await this.writeDepth(value, entityId);
   }
 
-  async readReasoningLevel(entityId?: string): Promise<ReasoningLevel | null> {
+  async readReasoningLevel(_entityId?: string): Promise<ReasoningLevel | null> {
     const snapshot = readChatContext("preferences");
-    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
-    if (scope) {
-      return scope.reasoningLevel;
+    if (snapshot) {
+      return snapshot.global.reasoningLevel;
     }
-    reportChatContextMiss(`preferences.readReasoningLevel(${entityId ?? "-"})`);
+    reportChatContextMiss("preferences.readReasoningLevel");
     try {
-      const query = entityIdQuery(await resolveAgentEntityId(entityId));
-      const raw = await aiService.get(PATH, query ? { query } : undefined);
+      const raw = await aiService.get(PATH);
       if (!isObject(raw)) {
         return null;
       }
@@ -206,10 +192,10 @@ export class HttpPreferencesStorage implements PreferencesStorage {
     await this.writeDepth(DEFAULT_REASONING_LEVEL, entityId);
   }
 
-  private async writeDepth(level: ReasoningLevel, entityId?: string): Promise<void> {
+  private async writeDepth(level: ReasoningLevel, _entityId?: string): Promise<void> {
     await aiService.put(PATH, {
       depth: levelToDepth(level),
-      entityId: await scopedEntityId(entityId),
+      entityId: null,
     });
     invalidateChatContext("preferences");
   }
@@ -221,11 +207,10 @@ export class HttpPreferencesStorage implements PreferencesStorage {
     invalidateChatContext("preferences");
   }
 
-  private async deleteScope(entityId?: string): Promise<void> {
+  private async deleteScope(_entityId?: string): Promise<void> {
     invalidateChatContext("preferences");
     try {
-      const query = entityIdQuery(await resolveAgentEntityId(entityId));
-      await aiService.delete(PATH, query ? { query } : undefined);
+      await aiService.delete(PATH);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return;

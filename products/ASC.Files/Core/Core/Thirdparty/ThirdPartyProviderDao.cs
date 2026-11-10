@@ -232,7 +232,17 @@ internal abstract class ThirdPartyProviderDao
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDAiHubAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetFolderIDFormsAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
+    public Task<string> GetFolderIDPrivateRoomsAsync(bool createIfNotExists)
     {
         return Task.FromResult<string>(null);
     }

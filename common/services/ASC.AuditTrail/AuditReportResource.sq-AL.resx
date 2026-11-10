@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profili i AI caktuar te agjenti i AI për veprim: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Çelësi BYOK për modelin AI u fshi: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Çelësi BYOK për modelin AI u caktua: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profili i AI caktuar për veprim: {0}</value>
   </data>
@@ -1322,5 +1328,17 @@
   </data>
   <data name="AppDisabled" xml:space="preserve">
     <value>Aplikacioni u çaktivizua: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Dhoma të lidhura me projektin e IA-së {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Dhoma të shkëputura nga projekti i IA-së {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Modeli AI i projektit të IA-së {0} u ndryshua në {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Dërgimi i webhook-ut u riprovua: {0}</value>
   </data>
 </root>

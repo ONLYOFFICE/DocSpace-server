@@ -1242,6 +1242,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Профіль AI призначено AI-агенту для дії: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Ключ BYOK для AI-моделі видалено: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Ключ BYOK для AI-моделі задано: {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Профіль AI призначено для дії: {0}</value>
   </data>
@@ -1322,5 +1328,17 @@
   </data>
   <data name="AppDisabled" xml:space="preserve">
     <value>Застосунок вимкнено: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Кімнати прив'язано до ШІ-проєкту {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Кімнати відв'язано від ШІ-проєкту {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI-модель ШІ-проєкту {0} змінено на {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Доставку вебхука повторено: {0}</value>
   </data>
 </root>

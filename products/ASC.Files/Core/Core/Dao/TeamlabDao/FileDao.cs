@@ -312,7 +312,7 @@ internal class FileDao(
             q = q.Take(count);
         }
 
-        var attachVectorizationStatus = parentType is FolderType.Knowledge;
+        var attachVectorizationStatus = parentType.IsKnowledgeStorage();
 
         var result = withShared
             ? FromQueryWithShared(filesDbContext, q, attachVectorizationStatus)
@@ -479,6 +479,18 @@ internal class FileDao(
         return await SaveFileAsync(file, fileStream, true, true, null, allowQuotaGrace);
     }
 
+    /// <summary>
+    /// A private room holds nothing but ciphertext, whichever way a file gets there. This sits on the write path
+    /// itself so that a new way of creating a file cannot walk around it.
+    /// </summary>
+    private async Task DemandEncryptedInPrivateRoomAsync(File<int> file, int roomId)
+    {
+        if (!file.Encrypted && roomId != -1 && await daoFactory.GetCacheFolderDao<int>().GetFolderAsync(roomId) is { SettingsPrivate: true })
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
     public async Task<File<int>> SaveFormFileAsync(File<int> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream, true, checkFolder);
@@ -512,7 +524,21 @@ internal class FileDao(
             throw FileSizeComment.GetFileSizeException(vectorizationGlobalSettings.MaxContentLength);
         }
 
-        var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+        var (roomId, _, roomType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
+        await DemandEncryptedInPrivateRoomAsync(file, roomId);
+
+        var inKnowledgeRoom = roomType == FolderType.KnowledgeRoom;
+        if (inKnowledgeRoom)
+        {
+            ValidateKnowledgeRoomFile(file);
+        }
+
+        SkillFrontmatter skill = null;
+        if (roomType == FolderType.InstructionsRoom)
+        {
+            (skill, fileStream) = await ReadSkillAsync(file, fileStream, uploadSession);
+        }
+
         UserInfo user = null;
         string quotaLockKey;
         TenantEntityQuotaSettings roomQuotaSettings = null;
@@ -591,6 +617,7 @@ internal class FileDao(
             var cloneStreamForSave = new MemoryStream();
             var streamChange = false;
             var needVectorization = false;
+            DbFilesSkill previousSkill = null;
 
             await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
             {
@@ -635,7 +662,7 @@ internal class FileDao(
                             await filesDbContext.DisableCurrentVersionAsync(tenantId, file.Id);
                         }
 
-                        if (isNew && currentFolder is { FolderType: FolderType.Knowledge })
+                        if ((isNew && currentFolder is { FolderType: FolderType.Knowledge }) || (inKnowledgeRoom && currentFolder.RootFolderType == FolderType.AiHub))
                         {
                             needVectorization = true;
                             file.VectorizationStatus = VectorizationStatus.InProgress;
@@ -708,6 +735,16 @@ internal class FileDao(
                                         Status = file.VectorizationStatus.Value,
                                         UpdatedOn = DateTime.UtcNow
                                     });
+                        }
+
+                        if (skill != null)
+                        {
+                            if (isNew)
+                            {
+                                await EnsureSkillsLimitAsync(filesDbContext, tenantId, file.ParentId);
+                            }
+
+                            previousSkill = await SaveSkillAsync(filesDbContext, tenantId, file.Id, skill);
                         }
 
                         await filesDbContext.SaveChangesAsync();
@@ -788,7 +825,7 @@ internal class FileDao(
                             {
                                 await DeleteFileAsync(file.Id, file.GetFileQuotaOwner());
 
-                                throw new Exception(FilesCommonResource.ErrorMessage_UploadToFormRoom);
+                                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UploadToFormRoom);
                             }
                         }
                     }
@@ -812,6 +849,11 @@ internal class FileDao(
                         else if (!await IsExistOnStorageAsync(file))
                         {
                             await DeleteFileVersionAsync(file);
+
+                            if (skill != null)
+                            {
+                                await RestoreSkillAsync(tenantId, file.Id, previousSkill);
+                            }
                         }
                     }
                     catch (Exception deleteException)
@@ -928,6 +970,18 @@ internal class FileDao(
 
         var tenantId = _tenantManager.GetCurrentTenantId();
 
+        SkillFrontmatter skill = null;
+        DbFilesSkill previousSkill = null;
+        if (fileStream != null)
+        {
+            var (roomId, _, roomType) = await daoFactory.GetFolderDao<int>().GetParentRoomInfoFromFileEntryAsync(file);
+            await DemandEncryptedInPrivateRoomAsync(file, roomId);
+            if (roomType == FolderType.InstructionsRoom)
+            {
+                (skill, fileStream) = await ReadSkillAsync(file, fileStream, null);
+            }
+        }
+
         var (tenantQuotaLock, graceForThisSave) = await EnforceTenantQuotaAsync(file, allowQuotaGrace, tenantId);
         await using var quotaLockScope = tenantQuotaLock;
 
@@ -976,6 +1030,12 @@ internal class FileDao(
                 toUpdate.ThumbnailStatus = file.ThumbnailStatus;
 
                 context.Update(toUpdate);
+
+                if (skill != null)
+                {
+                    previousSkill = await SaveSkillAsync(context, tenantId, file.Id, skill);
+                }
+
                 await context.SaveChangesAsync();
 
                 await tx.CommitAsync();
@@ -1005,6 +1065,11 @@ internal class FileDao(
                 if (!await IsExistOnStorageAsync(file))
                 {
                     await DeleteFileVersionAsync(file);
+
+                    if (skill != null)
+                    {
+                        await RestoreSkillAsync(tenantId, file.Id, previousSkill);
+                    }
                 }
 
                 throw;
@@ -1122,6 +1187,12 @@ internal class FileDao(
             }
 
             await context.DeleteDbFilesByIdsAsync(tenantId, fileIds);
+
+            if (toDeleteFiles.Any(f => SkillFrontmatter.IsSkillFile(f.Title)))
+            {
+                await context.DeleteSkillsAsync(tenantId, fileIds);
+            }
+
             await context.DeleteTagsAsync(tenantId);
             await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
             await context.DeleteOrderByFileIdsAsync(tenantId, fileIds);
@@ -1292,8 +1363,8 @@ internal class FileDao(
         var fileContentLength = file.ContentLength;
         var tenantId = _tenantManager.GetCurrentTenantId();
 
-        var (fromRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
-        var (toRoomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
+        var (fromRoomId, _, fromRoomType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(fromFolder);
+        var (toRoomId, _, toRoomType) = await folderDao.GetParentRoomInfoFromFileEntryAsync(toFolder);
 
         var fromRoomTags = tagDao.GetTagsAsync(fileId, FileEntryType.File, TagType.FromRoom);
         var fromRoomTag = await fromRoomTags.FirstOrDefaultAsync();
@@ -1303,8 +1374,21 @@ internal class FileDao(
         var toUser = await _userManager.GetUsersAsync(toFolder.RootCreateBy);
         var fromUser = await _userManager.GetUsersAsync(fromFolder.RootCreateBy);
 
-        var needDeleteVectors = fromFolder.FolderType is FolderType.Knowledge;
-        var needVectorization = toFolder.FolderType is FolderType.Knowledge;
+        var fromKnowledgeBase = fromFolder.FolderType is FolderType.Knowledge || fromRoomType == FolderType.KnowledgeRoom;
+        var toKnowledgeBase = toFolder.FolderType is FolderType.Knowledge || (toRoomType == FolderType.KnowledgeRoom && toFolder.RootFolderType == FolderType.AiHub);
+        var sameKnowledgeBase = fromKnowledgeBase && toKnowledgeBase && fromRoomId == toRoomId;
+
+        var needVectorization = toKnowledgeBase && !sameKnowledgeBase;
+        var needDeleteVectors = fromKnowledgeBase && !toKnowledgeBase;
+
+        var toInstructions = toRoomType == FolderType.InstructionsRoom && toFolder.RootFolderType == FolderType.AiHub;
+        var needDeleteSkill = fromRoomType == FolderType.InstructionsRoom && !toInstructions;
+
+        SkillFrontmatter skill = null;
+        if (toInstructions)
+        {
+            skill = await ReadSkillAsync(file, title ?? file.Title);
+        }
 
         if (toRoomId != -1 && fromRoomId != toRoomId)
         {
@@ -1371,6 +1455,10 @@ internal class FileDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
+        await using var skillsLock = skill != null && fromRoomId != toRoomId
+            ? await _distributedLockProvider.TryAcquireFairLockAsync(LockKey)
+            : null;
+
         await strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
@@ -1384,6 +1472,11 @@ internal class FileDao(
             await using (var tx = await context.Database.BeginTransactionAsync())
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
+
+                if (skill != null && fromRoomId != toRoomId)
+                {
+                    await EnsureSkillsLimitAsync(context, tenantId, toFolderId);
+                }
 
                 if (trashId.Equals(toFolderId))
                 {
@@ -1414,6 +1507,16 @@ internal class FileDao(
 
                     await context.FileVectorization.AddOrUpdateAsync(vectorization);
                     await context.SaveChangesAsync();
+                }
+
+                if (skill != null)
+                {
+                    await SaveSkillAsync(context, tenantId, fileId, skill);
+                    await context.SaveChangesAsync();
+                }
+                else if (needDeleteSkill)
+                {
+                    await context.DeleteSkillAsync(tenantId, fileId);
                 }
 
                 // reuse the values already resolved before the transaction: toFolder has not
@@ -2445,6 +2548,33 @@ internal class FileDao(
             .ToListAsync();
     }
 
+    public async Task DeleteFileKeysAsync(IEnumerable<int> fileIds, IEnumerable<Guid> userIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.DeleteFileKeysOfUsersAsync(tenantId, fileIds, userIds);
+    }
+
+    public async Task DeleteFileKeysAsync(Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.DeleteAllFileKeysOfUserAsync(tenantId, userId);
+    }
+
+    public async IAsyncEnumerable<int> GetFileIdsWithKeyAsync(IEnumerable<int> fileIds, Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var fileId in filesDbContext.FileIdsWithKeyAsync(tenantId, fileIds, userId))
+        {
+            yield return fileId;
+        }
+    }
+
     public string GetUniqThumbnailPath(File<int> file, uint width, uint height)
     {
         var thumbnailName = GetThumbnailName(width, height);
@@ -3328,7 +3458,7 @@ internal class FileDao(
                 Location.Room =>
                     query.Where(x => x.Tag == documentsTagType &&
                          filesDbContext.Folders
-                         .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom))
+                         .Where(f => f.TenantId == tenantId && (f.FolderType == FolderType.CustomRoom || f.FolderType == FolderType.EditingRoom || f.FolderType == FolderType.FillingFormsRoom || f.FolderType == FolderType.PublicRoom || f.FolderType == FolderType.VirtualDataRoom || f.FolderType == FolderType.InstructionsRoom || f.FolderType == FolderType.KnowledgeRoom))
                          .Join(filesDbContext.Tree, f => new { f.Id, x.Entry.ParentId }, t => new { Id = t.ParentId, ParentId = t.FolderId }, (folder, tree) => new { folder, tree })
                          .Any()),
                 Location.Link => query.Where(x =>
@@ -3368,6 +3498,102 @@ internal class FileDao(
         return q;
     }
 
+    private static async Task<DbFilesSkill> SaveSkillAsync(FilesDbContext filesDbContext, int tenantId, int fileId, SkillFrontmatter skill)
+    {
+        var previousSkill = await filesDbContext.SkillAsync(tenantId, fileId);
+
+        await filesDbContext.AddOrUpdateAsync(
+            x => x.Skills,
+            new DbFilesSkill
+            {
+                TenantId = tenantId,
+                FileId = fileId,
+                Name = skill.Name,
+                Description = skill.Description
+            });
+
+        return previousSkill;
+    }
+
+    private async Task RestoreSkillAsync(int tenantId, int fileId, DbFilesSkill previousSkill)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        if (previousSkill == null)
+        {
+            await filesDbContext.DeleteSkillAsync(tenantId, fileId);
+
+            return;
+        }
+
+        await filesDbContext.AddOrUpdateAsync(x => x.Skills, previousSkill);
+        await filesDbContext.SaveChangesAsync();
+    }
+
+    private async Task<(SkillFrontmatter Skill, Stream Stream)> ReadSkillAsync(File<int> file, Stream fileStream, ChunkedUploadSession<int> uploadSession)
+    {
+        ReadOnlyMemory<byte> head = default;
+        if (fileStream != null)
+        {
+            (head, fileStream) = await PrefixedStream.ReadHeadAsync(fileStream, SkillFrontmatter.MaxHeadLength);
+        }
+        else if (uploadSession is { TempPath: not null })
+        {
+            var store = await globalStore.GetStoreAsync();
+
+            await using var tStream = await store.GetReadStreamAsync(FileConstant.StorageDomainTmp, uploadSession.TempPath, 0, SkillFrontmatter.MaxHeadLength);
+            (head, _) = await PrefixedStream.ReadHeadAsync(tStream, SkillFrontmatter.MaxHeadLength);
+        }
+
+        return (ParseSkill(file.Title, head.Span), fileStream);
+    }
+
+    private async Task<SkillFrontmatter> ReadSkillAsync(File<int> file, string title)
+    {
+        await using var stream = await GetFileStreamAsync(file, 0, SkillFrontmatter.MaxHeadLength);
+        var (head, _) = await PrefixedStream.ReadHeadAsync(stream, SkillFrontmatter.MaxHeadLength);
+
+        return ParseSkill(title, head.Span);
+    }
+
+    private static SkillFrontmatter ParseSkill(string title, ReadOnlySpan<byte> head)
+    {
+        if (!SkillFrontmatter.IsSkillFile(title))
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_InstructionsRoomMarkdownOnly);
+        }
+
+        var error = SkillFrontmatter.TryParse(head, out var skill);
+
+        return error switch
+        {
+            SkillFrontmatterError.None => skill,
+            SkillFrontmatterError.InvalidName => throw new ArgumentException(FilesCommonResource.ErrorMessage_SkillNameInvalid),
+            SkillFrontmatterError.InvalidDescription => throw new ArgumentException(FilesCommonResource.ErrorMessage_SkillDescriptionInvalid),
+            _ => throw new ArgumentException(FilesCommonResource.ErrorMessage_SkillFrontmatterMissing)
+        };
+    }
+
+    private static async Task EnsureSkillsLimitAsync(FilesDbContext filesDbContext, int tenantId, int roomId)
+    {
+        if (await filesDbContext.SkillsCountAsync(tenantId, roomId) >= Skill.MaxPerRoom)
+        {
+            throw new ArgumentException(string.Format(FilesCommonResource.ErrorMessage_InstructionsRoomSkillsLimit, Skill.MaxPerRoom));
+        }
+    }
+
+    private void ValidateKnowledgeRoomFile(File<int> file)
+    {
+        if (!vectorizationGlobalSettings.IsSupportedContentExtraction(file.Title))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+        }
+
+        if (file.ContentLength > vectorizationGlobalSettings.MaxContentLength)
+        {
+            throw FileSizeComment.GetFileSizeException(vectorizationGlobalSettings.MaxContentLength);
+        }
+    }
 }
 
 public class DbFileQuery

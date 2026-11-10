@@ -60,12 +60,11 @@ public sealed class PortalClients : PortalClientsBase
     // Files service — the file, folder, room and agent events the webhook payload tests publish
     public HttpClient FilesHttpClient { get; }
     public RoomsApi RoomsApi { get; }
+    public PrivacyRoomApi PrivacyRoomApi { get; }
+    public SharingApi SharingApi { get; }
     public FilesApi FilesApi { get; }
     public FoldersApi FoldersApi { get; }
     public OperationsApi OperationsApi { get; }
-
-    // WireMock admin API (/__admin) of the receiver the webhook delivery tests subscribe to
-    public HttpClient WebhookReceiverHttpClient { get; }
 
     // WebApi service
     public AuthenticationApi AuthenticationApi { get; }
@@ -123,11 +122,11 @@ public sealed class PortalClients : PortalClientsBase
 
         var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
         RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
+        PrivacyRoomApi = new PrivacyRoomApi(FilesHttpClient, filesConfig);
+        SharingApi = new SharingApi(FilesHttpClient, filesConfig);
         FilesApi = new FilesApi(FilesHttpClient, filesConfig);
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
         OperationsApi = new OperationsApi(FilesHttpClient, filesConfig);
-
-        WebhookReceiverHttpClient = CreateClient(ResourceNames.WebhookReceiver);
 
         IdentityHttpClient = CreateClient(ResourceNames.IdentityRegistration);
 

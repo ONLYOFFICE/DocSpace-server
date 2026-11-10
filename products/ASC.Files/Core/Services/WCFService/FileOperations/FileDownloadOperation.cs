@@ -80,7 +80,8 @@ public class FileDownloadOperation : ComposeFileOperation<FileDownloadOperationD
 
         await base.RunJob(cancellationToken);
 
-        if (!string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
+        // a cancelled download hands out no archive, even when the cancel came before any entry reported it
+        if (cancellationToken.IsCancellationRequested || !string.IsNullOrEmpty(DaoOperation.Err) || !string.IsNullOrEmpty(ThirdPartyOperation.Err))
         {
             await PublishChanges();
             return;

@@ -35,27 +35,24 @@ namespace ASC.AI.Tests.Tests.ToolPreferenceStorageTests;
 
 [Trait("Category", "Concurrency")]
 [Trait("Feature", "AI/ToolPreferences")]
-public class ToolPreferenceConcurrencyTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ToolPreferenceConcurrencyTests(AspireAppFixture fixture) : McpServerStorageTests.PublicToolsTestBase(fixture)
 {
     // Reproduces the duplicate-row bug: the upsert is a read-then-write, so without a lock
     // concurrent calls for the same server type both see "no existing row" and both insert,
     // leaving two rows. The fair lock in ToolPrefsStorage must serialize them into one.
+    // Every public set-disabled ends in that same storage upsert.
     [Fact]
     public async Task ConcurrentUpsertDisabled_SameServerType_DoesNotCreateDuplicate()
     {
         var upserts = Enumerable.Range(0, 10)
-            .Select(_ => UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
-            {
-                [SystemToolsServerType] = ["search"]
-            }));
+            .Select(_ => SetDisabledAsync(WebSearchServerType, "search"));
 
         await Task.WhenAll(upserts);
 
-        var stored = await ReadToolPrefsAsync();
+        var disabled = await GetDisabledAsync();
 
-        stored.Should().HaveCount(1);
-        stored.Should().ContainKey(SystemToolsServerType);
-        stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["search"]);
+        disabled.Should().HaveCount(1);
+        disabled.Should().ContainKey(WebSearchServerType).WhoseValue.Should().BeEquivalentTo(["search"]);
     }
 
     // The two write paths (disabled and allow-always) hit the same row through different
@@ -64,26 +61,19 @@ public class ToolPreferenceConcurrencyTests(AspireAppFixture fixture) : BaseTest
     [Fact]
     public async Task ConcurrentUpsertDisabledAndAllowAlways_SameServerType_MergeIntoSingleRow()
     {
-        var disabled = UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["search"]
-        });
-
-        var allowAlways = UpsertAllowAlwaysToolPrefsAsync(new Dictionary<string, HashSet<string>>
-        {
-            [SystemToolsServerType] = ["preview"]
-        });
+        var disabled = SetDisabledAsync(WebSearchServerType, "search");
+        var allowAlways = SetAllowAlwaysAsync(WebSearchServerType, "preview");
 
         await Task.WhenAll(disabled, allowAlways);
 
-        var stored = await ReadToolPrefsAsync();
+        var storedDisabled = await GetDisabledAsync();
+        storedDisabled.Should().HaveCount(1);
+        storedDisabled.Should().ContainKey(WebSearchServerType).WhoseValue.Should().BeEquivalentTo(["search"]);
 
-        stored.Should().HaveCount(1);
-        stored.Should().ContainKey(SystemToolsServerType);
-        stored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["search"]);
-        stored[SystemToolsServerType].AllowAlways.Should().BeEquivalentTo(["preview"]);
+        (await GetAllowAlwaysAsync()).Should().BeEquivalentTo([Token(WebSearchServerType, "preview")]);
     }
 
+    // Internal contract: per-entity tool-pref scope has no public route (the chat service always stores under entityId null).
     // Scoped upserts are keyed by entry, so a global and a per-entry write for the same server
     // type run under different locks and must remain two independent rows.
     [Fact]
@@ -91,12 +81,12 @@ public class ToolPreferenceConcurrencyTests(AspireAppFixture fixture) : BaseTest
     {
         var roomId = await CreateRoomAsync();
 
-        var global = UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        var global = UpsertDisabledToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = ["global-tool"]
         });
 
-        var scoped = UpsertDisabledToolPrefsAsync(
+        var scoped = UpsertDisabledToolPrefsInternalAsync(
             new Dictionary<string, HashSet<string>>
             {
                 [SystemToolsServerType] = ["scoped-tool"]
@@ -105,8 +95,8 @@ public class ToolPreferenceConcurrencyTests(AspireAppFixture fixture) : BaseTest
 
         await Task.WhenAll(global, scoped);
 
-        var globalStored = await ReadToolPrefsAsync();
-        var scopedStored = await ReadToolPrefsAsync(roomId.ToString());
+        var globalStored = await ReadToolPrefsInternalAsync();
+        var scopedStored = await ReadToolPrefsInternalAsync(roomId.ToString());
 
         globalStored.Should().HaveCount(1);
         globalStored[SystemToolsServerType].Disabled.Should().BeEquivalentTo(["global-tool"]);

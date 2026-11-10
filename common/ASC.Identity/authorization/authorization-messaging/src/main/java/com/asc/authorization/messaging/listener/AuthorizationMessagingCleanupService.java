@@ -2,6 +2,9 @@ package com.asc.authorization.messaging.listener;
 
 import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
 import com.asc.authorization.data.consent.repository.JpaConsentRepository;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.function.IntUnaryOperator;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +41,10 @@ public class AuthorizationMessagingCleanupService {
     if (total > 0) log.info("Chunked removal of {} items", total);
   }
 
+  private static ZonedDateTime cutoffOf(Instant removedAt) {
+    return (removedAt != null ? removedAt : Instant.now()).atZone(ZoneOffset.UTC);
+  }
+
   public void onClientRemoved(String clientId) {
     handleChunkedDelete(
         limit -> jpaAuthorizationRepository.deleteAuthorizationsByClientId(clientId, limit),
@@ -47,12 +54,14 @@ public class AuthorizationMessagingCleanupService {
         CONSENT_CHUNK_SIZE);
   }
 
-  public void onUserRemoved(long tenantId, String userId) {
+  public void onUserRemoved(long tenantId, String userId, Instant removedAt) {
+    var cutoff = cutoffOf(removedAt);
     handleChunkedDelete(
-        limit -> jpaAuthorizationRepository.deleteAuthorizationsByPrincipalId(userId, limit),
+        limit ->
+            jpaAuthorizationRepository.deleteAuthorizationsByPrincipalId(userId, cutoff, limit),
         AUTHORIZATION_CHUNK_SIZE);
     handleChunkedDelete(
-        limit -> jpaConsentRepository.deleteConsentsByPrincipalId(userId, limit),
+        limit -> jpaConsentRepository.deleteConsentsByPrincipalId(userId, cutoff, limit),
         CONSENT_CHUNK_SIZE);
 
     if (tenantId <= 0) {
@@ -63,26 +72,29 @@ public class AuthorizationMessagingCleanupService {
     }
 
     handleChunkedDelete(
-        limit -> jpaAuthorizationRepository.deleteAuthorizationsByOwner(tenantId, userId, limit),
+        limit ->
+            jpaAuthorizationRepository.deleteAuthorizationsByOwner(tenantId, userId, cutoff, limit),
         AUTHORIZATION_CHUNK_SIZE);
     handleChunkedDelete(
-        limit -> jpaConsentRepository.deleteConsentsByOwner(tenantId, userId, limit),
+        limit -> jpaConsentRepository.deleteConsentsByOwner(tenantId, userId, cutoff, limit),
         CONSENT_CHUNK_SIZE);
   }
 
-  public void onTenantRemoved(long tenantId) {
+  public void onTenantRemoved(long tenantId, Instant removedAt) {
+    var cutoff = cutoffOf(removedAt);
     handleChunkedDelete(
-        limit -> jpaConsentRepository.deleteConsentsByTenantId(tenantId, limit),
+        limit -> jpaConsentRepository.deleteConsentsByTenantId(tenantId, cutoff, limit),
         CONSENT_CHUNK_SIZE);
     handleChunkedDelete(
-        limit -> jpaAuthorizationRepository.deleteAuthorizationsByTenantId(tenantId, limit),
+        limit -> jpaAuthorizationRepository.deleteAuthorizationsByTenantId(tenantId, cutoff, limit),
         AUTHORIZATION_CHUNK_SIZE);
 
     handleChunkedDelete(
-        limit -> jpaConsentRepository.deleteConsentsByOwnerTenantId(tenantId, limit),
+        limit -> jpaConsentRepository.deleteConsentsByOwnerTenantId(tenantId, cutoff, limit),
         CONSENT_CHUNK_SIZE);
     handleChunkedDelete(
-        limit -> jpaAuthorizationRepository.deleteAuthorizationsByOwnerTenantId(tenantId, limit),
+        limit ->
+            jpaAuthorizationRepository.deleteAuthorizationsByOwnerTenantId(tenantId, cutoff, limit),
         AUTHORIZATION_CHUNK_SIZE);
   }
 }

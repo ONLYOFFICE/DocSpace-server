@@ -99,9 +99,9 @@ public class VirtualRoomsInternalController(
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`, which creates an AI agent in the Rooms section")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set together with `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
-    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
     [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
     [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("")]
@@ -118,36 +118,25 @@ public class VirtualRoomsInternalController(
     }
 
     /// <remarks>
-    /// Returns one page of the contents of the .ai folder that lies in the root of a room, in the same shape as
-    /// `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that hold such a folder are listed with
-    /// `GET api/2.0/files/rooms?withAiFolder=true`. Any member who can read the room may call it; somebody who cannot
-    /// is refused, and a room that does not exist is answered as not found. A room that holds no .ai folder is
-    /// answered with an empty page: no files and folders, a zero `total`, no `current` folder and empty `pathParts`.
+    /// Returns one page of the root contents of an Instructions room, whose Markdown files are the skills of the AI
+    /// chat, in the same shape as `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that provide
+    /// skills are listed with `GET api/2.0/files/rooms?withAiFolder=true` (or `type=10`). Any member who can read the
+    /// room may call it; somebody who cannot is refused, and a room that does not exist or is not an Instructions room
+    /// is answered as not found.
     /// </remarks>
-    /// <summary>Get the .ai folder of a room</summary>
+    /// <summary>Get the skills folder of an Instructions room</summary>
     /// <path>api/2.0/files/rooms/{id}/ai</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents, or an empty page without `current` when the room holds no .ai folder", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "One page of the Instructions room root, with the room itself and the chain of its parents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller may not read this room")]
-    [SwaggerResponse(404, "The room does not exist")]
+    [SwaggerResponse(404, "The room does not exist or is not an Instructions room")]
     [HttpGet("{id}/ai")]
     public async Task<FolderContentDto<int>> GetRoomAiFolder(GetRoomAiFolderRequestDto inDto)
     {
-        var aiFolder = await _fileStorageService.GetRoomAiFolderAsync(inDto.Id);
-        if (aiFolder is null)
-        {
-            return new FolderContentDto<int>
-            {
-                Files = [],
-                Folders = [],
-                PathParts = new List<object>(),
-                StartIndex = inDto.StartIndex,
-                Total = 0
-            };
-        }
+        var skillsFolder = await _fileStorageService.GetRoomSkillsFolderAsync(inDto.Id);
 
-        return await folderContentDtoHelper.GetAsync(aiFolder.Id, null, null, inDto.FilterType, default, true, true, null, null, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        return await folderContentDtoHelper.GetAsync(skillsFolder.Id, null, null, inDto.FilterType, default, true, true, null, null, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <remarks>
@@ -398,7 +387,7 @@ public class VirtualRoomsThirdPartyController(
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue")]
     [SwaggerResponse(403, "The caller is not the account that connected the storage or may not create rooms, the storage account was not connected for room storage or already backs a room, the room would be public while the portal forbids external sharing, or, with `createAsNewFolder`, the subfolder cannot be created, as when `title` is blank, `cover` is not a known cover, a tag name is empty or the logo cannot be applied")]
     [SwaggerResponse(404, "`id` is not a folder of a connected third-party storage: a plain number, an identifier with a storage type the portal does not know, or a folder the storage does not have")]
@@ -487,7 +476,7 @@ public abstract class VirtualRoomsController<T>(
     [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead when the ID is a folder inside a room rather than the room itself, which a manager of that room may pass and the operation does not refuse")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the update", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, a private room is given `indexing`, an enabled `lifetime` or an enabled `watermark`, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(402, "The new logo or watermark image does not fit into the portal storage quota")]
     [SwaggerResponse(403, "The caller may not edit this room, the room lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
     [SwaggerResponse(404, "No room has this id, the uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
@@ -536,7 +525,7 @@ public abstract class VirtualRoomsController<T>(
                 continue;
             }
 
-            folderTitles.Add(room.Title);
+            folderTitles.Add(NotifyConstants.GetRoomTitle(room));
             yield return await _folderDtoHelper.GetAsync(room);
         }
 
@@ -590,7 +579,7 @@ public abstract class VirtualRoomsController<T>(
                 continue;
             }
 
-            folderTitles.Add(room.Title);
+            folderTitles.Add(NotifyConstants.GetRoomTitle(room));
 
             yield return await _folderDtoHelper.GetAsync(room);
         }
@@ -642,7 +631,8 @@ public abstract class VirtualRoomsController<T>(
     /// cannot be created, renamed or edited in it, and its settings, tags, logo and links can no longer be changed,
     /// which is why many other room operations answer an archived room with a refusal. The caller must be a manager
     /// of the room; administrators of the portal cannot archive a room they were not invited to, and a room template
-    /// cannot be archived at all and is answered as missing. The room is not archived when the response arrives: poll
+    /// cannot be archived at all and is answered as missing. Instructions and Knowledge rooms are never archived and
+    /// are refused with 403: delete them with `DELETE api/2.0/files/rooms/{id}` instead. The room is not archived when the response arrives: poll
     /// `GET api/2.0/files/fileops` until `finished` is true. Archiving an already archived room is harmless.
     /// `deleteAfter` decides only how long the finished record survives, not what happens to the room. Use
     /// `PUT api/2.0/files/rooms/{id}/unarchive` to bring the room back.
@@ -653,7 +643,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued archive operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "The caller may not read or archive this room, the id names a folder that is not a room, or a file in the room is locked or being edited")]
+    [SwaggerResponse(403, "The caller may not read or archive this room, the id names a folder that is not a room, the room is an Instructions or Knowledge room, which is never archived, or a file in the room is locked or being edited")]
     [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/archive")]
@@ -663,6 +653,11 @@ public abstract class VirtualRoomsController<T>(
         if (room.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
         {
             throw new ItemNotFoundException();
+        }
+
+        if (room.RootFolderType == FolderType.AiHub)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ArchiveRoom);
         }
 
         var destFolder = JsonSerializer.SerializeToElement(await globalFolderHelper.FolderArchiveAsync);
@@ -717,12 +712,13 @@ public abstract class VirtualRoomsController<T>(
     /// subjects. Each entry names either an account or a group of the portal, or the email address of somebody who
     /// has no account yet, together with the access level to grant; an access of 0 removes the subject from the room.
     /// An entry without an access level is ignored, the same subject listed twice keeps the last level, and an empty
-    /// list is accepted and changes nothing. The caller must be a manager of the room, so an invitation sent by a
-    /// user or a guest is refused, and an account that is a portal user or a guest cannot be made a room manager.
+    /// list changes nothing. The caller must be a manager of the room, and an account that is a
+    /// portal user or a guest cannot be made a room manager.
     /// Inviting by email also needs the portal to allow guest invitations. A subject the caller is not allowed to see
-    /// is dropped without an error, which is why the answer has to be compared with the request. Removing a member
-    /// who still holds a form role is refused through `error` unless `force` is set. `notify` sends the invitation
-    /// email with the optional `message`.
+    /// is dropped without an error, so compare the answer with the request. Removing a member who still holds a form
+    /// role is refused through `error` unless `force` is set. `notify` sends the invitation email with the optional
+    /// `message`; a person who got the same invitation to this room, or was told about the same access in it, a short
+    /// while ago is not mailed again, even with a new message.
     /// </remarks>
     /// <summary>Set the room access rights</summary>
     /// <path>api/2.0/files/rooms/{id}/share</path>
@@ -867,7 +863,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Rooms")]
     [SwaggerResponse(200, "The link as it is after the change, or an empty body when nothing was created", typeof(FileShareDto))]
     [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "The caller may not manage the links of this room, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change")]
+    [SwaggerResponse(403, "The caller may not manage the links of this room, the room is private, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change")]
     [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "`linkType` is `Invitation` and `linkId` is the id of the room owner's account, or a third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/links")]
@@ -1180,7 +1176,7 @@ public abstract class VirtualRoomsController<T>(
     /// and does not survive a trip through the Archive section, so an unarchived room has to be pinned again. Pinned
     /// rooms stay above the unpinned ones whatever sorting or filter the listing uses, and their own order between
     /// each other is stable. An account may keep only a limited number of pinned rooms at a time, ten on a portal
-    /// with the default configuration, and AI rooms are counted separately against their own allowance; a request
+    /// with the default configuration, and AI agents and AI rooms are counted separately; a request
     /// over the limit is refused until something is unpinned with `PUT api/2.0/files/rooms/{id}/unpin`. Pinning a
     /// room that is already pinned changes nothing and is safe to repeat. Anybody who can read the room may pin it,
     /// including guests and portal administrators who were never invited, while somebody who is not in the room is
@@ -1191,7 +1187,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its pinned flag set for the caller", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "The caller cannot read this room, the room is archived or is not a room, or the caller already has the maximum number of pinned rooms (AI agents are counted separately)")]
+    [SwaggerResponse(403, "The caller cannot read this room, the room is archived or is not a room, or the caller already has the maximum number of pinned rooms (AI agents and AI rooms are counted separately)")]
     [SwaggerResponse(404, "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/pin")]
@@ -1236,19 +1232,18 @@ public abstract class VirtualRoomsController<T>(
     /// set the flag does nothing, so a successful answer never proves that a message went out. Nothing about the room
     /// or its membership changes, and the operation can be repeated. The caller must be a manager of the room, an
     /// archived room is refused, a room template is answered as missing, and a malformed account id is rejected as an
-    /// invalid request. The call is rate limited, so a client that loops over members should send one batch instead.
-    /// The response carries no body.
+    /// invalid request. A member who got the invitation to this room a short while ago is not mailed again, and the
+    /// link in that letter stays valid. The response carries no body.
     /// </remarks>
     /// <summary>Resend the room invitations</summary>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "The invitations that were still pending have been sent again")]
+    [SwaggerResponse(200, "The request is accepted; the pending members it covers are mailed again, except those who already got this invitation within the repeat period")]
     [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller is not a manager of the room, or the room is archived")]
     [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("{id}/resend")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitations(UserInvitationRequestDto<T> inDto)
     {
         await _fileStorageService.ResendEmailInvitationsAsync(inDto.Id, inDto.UserInvitation.UsersIds, inDto.UserInvitation.ResendAll);
@@ -1398,7 +1393,7 @@ public class VirtualRoomsCommonController(
 
     /// <remarks>
     /// Lists one page of the rooms of a section narrowed by metadata: the active rooms by default, or the archive, the room
-    /// templates, the form templates or the Forms section, chosen with `searchArea`, while `type` narrows the room types.
+    /// templates, the form templates, the Forms section or the private rooms section, chosen with `searchArea`, while `type` narrows the room types. Private rooms are left out of the active rooms unless `privacyFilter` asks for them.
     /// The filter is a typed body: `metadataTemplateId` alone keeps the rooms the template is assigned to, every condition
     /// in `metadataFilters` must hold at once, and `filterValue` adds a text search over room titles and metadata values;
     /// the template and field IDs come from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the
@@ -1435,6 +1430,8 @@ public class VirtualRoomsCommonController(
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.FormTemplates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
             SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
+            SearchArea.PrivateRooms => await globalFolderHelper.GetFolderPrivateRoomsAsync(),
+            SearchArea.AiHub => await globalFolderHelper.GetFolderAiHubAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };
     }

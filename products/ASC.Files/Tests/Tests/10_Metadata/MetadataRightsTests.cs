@@ -247,12 +247,12 @@ public class MetadataRightsTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task FolderMetadata_OnTheSectionRoots_IsRefused()
     {
         await _filesClient.Authenticate(Owner);
-        var template = await CreateTemplateAsync("Root " + Suffix(), []);
+        var template = await CreateTemplateAsync("Root " + Suffix(), [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
         var value = new CustomFieldRequest("Project code", "A-42");
 
         // the roots answer the right to create with true for their owner and for every room admin, while nobody may
         // edit them: a cascade queued from the rooms root would walk every room of the portal
-        var myDocuments = await GetSectionRootIdAsync("api/2.0/files/@my");
+        var myDocuments = (await _foldersApi.GetMyFolderAsync(count: 1, cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
 
         var myAssign = await Assert.ThrowsAsync<ApiException>(
             async () => await _metadataApi.AssignFolderTemplatesAsync(myDocuments, new AssignMetadataTemplates([template.Id], cascade: true), TestContext.Current.CancellationToken));
@@ -265,7 +265,7 @@ public class MetadataRightsTests(AspireAppFixture fixture) : BaseTest(fixture)
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         await _filesClient.Authenticate(roomAdmin);
 
-        var rooms = await GetSectionRootIdAsync("api/2.0/files/rooms");
+        var rooms = (await _roomsApi.GetRoomsFolderAsync(count: 1, cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
 
         var roomsAssign = await Assert.ThrowsAsync<ApiException>(
             async () => await _metadataApi.AssignFolderTemplatesAsync(rooms, new AssignMetadataTemplates([template.Id], cascade: true), TestContext.Current.CancellationToken));

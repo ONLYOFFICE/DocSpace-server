@@ -145,7 +145,7 @@
     <value>Serviço</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Funcionalidades de IA</value>
+    <value>Agentes e ferramentas de IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
@@ -1177,7 +1177,7 @@
     <value>Pesquisa com IA</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Funcionalidades de IA</value>
+    <value>Agentes e ferramentas de IA</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Rastreamento de logins e ações</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Custo do provedor</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>O webhook está desativado. Ative-o antes de tentar novamente suas entregas</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>O evento está sendo enviado agora. Tente novamente quando a tentativa for concluída</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>A entrega foi registrada em um formato de webhook anterior e não pode ser enviada novamente</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>O destino do webhook não é um usuário ou grupo existente</value>
   </data>
 </root>

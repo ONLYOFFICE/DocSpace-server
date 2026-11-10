@@ -1254,6 +1254,12 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profil IA attribué à l'agent IA pour l'action : {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Clé BYOK supprimée pour le modèle IA : {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Clé BYOK définie pour le modèle IA : {0}</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profil IA attribué à l'action : {0}</value>
   </data>
@@ -1322,5 +1328,17 @@
   </data>
   <data name="AppDisabled" xml:space="preserve">
     <value>Application désactivée : {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Salles liées au projet IA {0} : [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Salles dissociées du projet IA {0} : [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Modèle IA du projet IA {0} remplacé par {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Nouvelle tentative de livraison du webhook : {0}</value>
   </data>
 </root>

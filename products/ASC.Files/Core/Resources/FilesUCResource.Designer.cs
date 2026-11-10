@@ -70,6 +70,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI rooms.
+        /// </summary>
+        public static string AiHub {
+            get {
+                return ResourceManager.GetString("AiHub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Archive.
         /// </summary>
         public static string Archive {
@@ -123,6 +132,15 @@ namespace ASC.Files.Core.Resources {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Private.
+        /// </summary>
+        public static string PrivateRooms {
+            get {
+                return ResourceManager.GetString("PrivateRooms", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Forms.
         /// </summary>

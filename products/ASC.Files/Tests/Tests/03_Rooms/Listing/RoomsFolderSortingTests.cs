@@ -62,14 +62,14 @@ public class RoomsFolderSortingTests(
         // Arrange
         await _filesClient.Authenticate(Owner);
         await CreateAllRoomTypesAsync();
-        var all = await GetRoomsFolderRawAsync();
+        var all = await ListRoomsAsync();
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(startIndex: 2);
+        var rooms = await ListRoomsAsync(startIndex: 2);
 
         // Assert
-        raw.Folders.Should().HaveCount(ActiveAreaRoomCount - 2);
-        raw.Folders.Select(f => f.Id).Should().Equal(all.Folders.Skip(2).Select(f => f.Id));
+        rooms.Folders.Should().HaveCount(ActiveAreaRoomCount - 2);
+        rooms.Folders.Select(f => f.Id).Should().Equal(all.Folders.Skip(2).Select(f => f.Id));
     }
 
     [Fact]
@@ -78,13 +78,13 @@ public class RoomsFolderSortingTests(
         // Arrange
         await _filesClient.Authenticate(Owner);
         await CreateAllRoomTypesAsync();
-        var all = await GetRoomsFolderRawAsync();
+        var all = await ListRoomsAsync();
 
         // Act
-        var raw = await GetRoomsFolderRawAsync(startIndex: 1, count: 2);
+        var rooms = await ListRoomsAsync(startIndex: 1, count: 2);
 
         // Assert
-        raw.Folders.Select(f => f.Id).Should().Equal(all.Folders.Skip(1).Take(2).Select(f => f.Id));
+        rooms.Folders.Select(f => f.Id).Should().Equal(all.Folders.Skip(1).Take(2).Select(f => f.Id));
     }
 
     [Fact]
@@ -197,12 +197,12 @@ public class RoomsFolderSortingTests(
 
         // Act - filterValue is served from the search index, which is written asynchronously, so
         // poll until all three rooms are indexed instead of racing the write with a bare read.
-        var raw = await PollAsync(
-            () => GetRoomsFolderRawAsync(filterValue: marker, sortBy: "DateAndTimeCreation", sortOrder: SortOrder.Ascending),
+        var rooms = await PollAsync(
+            () => ListRoomsAsync(filterValue: marker, sortBy: "DateAndTimeCreation", sortOrder: SortOrder.Ascending),
             page => page.Folders.Count == createdIds.Count);
 
         // Assert
-        raw.Folders.Select(f => f.Id).Should().Equal(createdIds);
+        rooms.Folders.Select(f => f.Id).Should().Equal(createdIds);
     }
 
     [Fact]
@@ -222,11 +222,11 @@ public class RoomsFolderSortingTests(
 
         // Act - filterValue is served from the search index, which is written asynchronously, so
         // poll until all three rooms are indexed instead of racing the write with a bare read.
-        var raw = await PollAsync(
-            () => GetRoomsFolderRawAsync(filterValue: marker, sortBy: "DateAndTimeCreation", sortOrder: SortOrder.Descending),
+        var rooms = await PollAsync(
+            () => ListRoomsAsync(filterValue: marker, sortBy: "DateAndTimeCreation", sortOrder: SortOrder.Descending),
             page => page.Folders.Count == createdIds.Count);
 
         // Assert
-        raw.Folders.Select(f => f.Id).Should().Equal(Enumerable.Reverse(createdIds));
+        rooms.Folders.Select(f => f.Id).Should().Equal(Enumerable.Reverse(createdIds));
     }
 }

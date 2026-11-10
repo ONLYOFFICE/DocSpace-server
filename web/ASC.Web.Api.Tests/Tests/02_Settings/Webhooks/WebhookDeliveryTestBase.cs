@@ -43,7 +43,7 @@ public abstract class WebhookDeliveryTestBase(
 {
     private readonly AspireAppFixture _fixture = fixture;
 
-    // the receiver takes the deliveries, Web.Studio sends them, and Files publishes the file events
+    // Web.Studio sends the deliveries, and Files publishes the file events
     protected override bool NeedsLazyResources => true;
 
     /// <summary>
@@ -80,9 +80,9 @@ public abstract class WebhookDeliveryTestBase(
     /// A receiver endpoint of this test's own that answers every delivery with <paramref name="status"/> and
     /// <paramref name="body"/> (<c>ok</c> by default).
     /// </summary>
-    protected Task<WebhookReceiver> CreateReceiverAsync(int status = 200, int delayMilliseconds = 0, string? body = null)
+    protected static WebhookReceiver CreateReceiver(int status = 200, int delayMilliseconds = 0, string? body = null)
     {
-        return WebhookReceiver.CreateAsync(_webhookReceiverClient, status, delayMilliseconds, body);
+        return WebhookReceiver.Create(status, delayMilliseconds, body);
     }
 
     /// <summary>
@@ -109,7 +109,7 @@ public abstract class WebhookDeliveryTestBase(
     /// </summary>
     protected async Task<int> CreateSubscriptionAsync()
     {
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
 
         return (await CreateSubscriptionAsync(receiver)).Id;
     }
@@ -123,8 +123,8 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// The delivery log of one subscription as the generated SDK reads it, as the owner, newest first. Enough for
-    /// everything but the retry fields the pinned SDK model does not carry (<see cref="GetDeliveryRecordsAsync"/>).
+    /// The delivery log of one subscription as the generated SDK reads it, as the owner, newest first, retry fields
+    /// (<c>attempts</c>, <c>nextAttemptOn</c>, <c>eventId</c>, <c>retriedBy</c>) included.
     /// </summary>
     protected async Task<List<WebhooksLogDto>> GetLogAsync(int configId)
     {
@@ -199,34 +199,18 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
-    /// The delivery records of one subscription with the retry fields the pinned SDK model (<see cref="WebhooksLogDto"/>
-    /// of DocSpace.API.SDK 4.0.0) does not carry yet (<c>attempts</c>, <c>nextAttemptOn</c>, <c>eventId</c>,
-    /// <c>retriedBy</c>), read as raw JSON as the owner, newest first. Anything else goes through
-    /// <see cref="GetLogAsync"/>; move these reads there too once the SDK is regenerated with the fields.
-    /// </summary>
-    protected async Task<List<DeliveryRecord>> GetDeliveryRecordsAsync(int configId)
-    {
-        await _webApiClient.Authenticate(Owner);
-
-        using var response = await _webApi.GetAsync(
-            $"api/2.0/settings/webhooks/log?configId={configId}", TestContext.Current.CancellationToken);
-
-        return await _webApi.ReadAsync<List<DeliveryRecord>>(response, TestContext.Current.CancellationToken);
-    }
-
-    /// <summary>
     /// Polls the delivery records of one subscription until there is exactly one and it satisfies
     /// <paramref name="until"/>, and returns that record, or the only record there is at the deadline whether it
     /// satisfies <paramref name="until"/> or not, so the caller asserts what it waited for. Fails with the records it
     /// saw when the subscription has none or more than one by the deadline.
     /// </summary>
-    protected async Task<DeliveryRecord> WaitForRecordAsync(int configId, Func<DeliveryRecord, bool> until, int timeoutSeconds = 90)
+    protected async Task<WebhooksLogDto> WaitForRecordAsync(int configId, Func<WebhooksLogDto, bool> until, int timeoutSeconds = 90)
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 
         while (true)
         {
-            var records = await GetDeliveryRecordsAsync(configId);
+            var records = await GetLogAsync(configId);
 
             if (records is [var record] && until(record))
             {
@@ -247,29 +231,10 @@ public abstract class WebhookDeliveryTestBase(
     /// <paramref name="match"/>, and returns that payload, or null when none did by the deadline. The record
     /// holds the body as published until it is sent and as sent afterwards; the payload is the same in both.
     /// </summary>
-    protected async Task<JsonElement?> WaitForPayloadAsync(int configId, Func<JsonElement, bool> match, int timeoutSeconds = 30)
+    protected Task<DeliveredPayload<T>?> WaitForPayloadAsync<T>(int configId, Func<T, bool> match, int timeoutSeconds = 30)
+        where T : class
     {
-        var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
-
-        while (true)
-        {
-            var payloads = (await GetLogAsync(configId)).Select(r => PayloadOf(r.RequestPayload));
-
-            foreach (var payload in payloads)
-            {
-                if (match(payload))
-                {
-                    return payload;
-                }
-            }
-
-            if (DateTime.UtcNow >= deadline)
-            {
-                return null;
-            }
-
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
+        return WaitForDeliveredPayloadAsync(configId, null, match, timeoutSeconds);
     }
 
     /// <summary>
@@ -278,7 +243,14 @@ public abstract class WebhookDeliveryTestBase(
     /// payload, or null when none did by the deadline. Matching the name rather than the subscription's trigger
     /// bits lets a catch-all subscription stand in for the triggers the pinned SDK enum does not list yet (agent.*).
     /// </summary>
-    protected async Task<JsonElement?> WaitForEventPayloadAsync(int configId, string trigger, Func<JsonElement, bool> match, int timeoutSeconds = 30)
+    protected Task<DeliveredPayload<T>?> WaitForEventPayloadAsync<T>(int configId, string trigger, Func<T, bool> match, int timeoutSeconds = 30)
+        where T : class
+    {
+        return WaitForDeliveredPayloadAsync(configId, trigger, match, timeoutSeconds);
+    }
+
+    private async Task<DeliveredPayload<T>?> WaitForDeliveredPayloadAsync<T>(int configId, string? trigger, Func<T, bool> match, int timeoutSeconds)
+        where T : class
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 
@@ -286,14 +258,11 @@ public abstract class WebhookDeliveryTestBase(
         {
             foreach (var record in await GetLogAsync(configId))
             {
-                using var document = JsonDocument.Parse(record.RequestPayload);
-                var root = document.RootElement;
+                var webhook = WebhookParser.Parse(record.RequestPayload);
 
-                if (root.GetProperty("event").GetProperty("trigger").GetString() == trigger
-                    && root.GetProperty("payload") is var payload
-                    && match(payload))
+                if ((trigger is null || webhook.Trigger == trigger) && webhook.PayloadAs<T>() is { } payload && match(payload))
                 {
-                    return payload.Clone();
+                    return new DeliveredPayload<T>(payload, PayloadOf(record.RequestPayload));
                 }
             }
 
@@ -326,8 +295,17 @@ public abstract class WebhookDeliveryTestBase(
         return list.Response.SingleOrDefault(w => w.Configs.Id == configId)?.Configs;
     }
 
-    /// <summary>The <c>payload</c> of a delivery body: the user, group or entry the event is about.</summary>
-    protected static JsonElement PayloadOf(string body)
+    /// <summary>
+    /// The number of the attempt a delivery body belongs to, from 0: <c>webhook.retryCount</c>, which is left out of
+    /// the first attempt.
+    /// </summary>
+    protected static int RetryCountOf(string body)
+    {
+        return WebhookParser.Parse(body).Webhook!.RetryCount ?? 0;
+    }
+
+    /// <summary>The <c>payload</c> of a delivery body as it went out.</summary>
+    private static JsonElement PayloadOf(string body)
     {
         using var document = JsonDocument.Parse(body);
 
@@ -530,31 +508,13 @@ public abstract class WebhookDeliveryTestBase(
         return firstName;
     }
 
-    /// <summary>The HMAC-SHA256 the portal signs a body with, as the hex string of the signature header.</summary>
-    protected static string Sign(string secretKey, string body)
-    {
-        return Convert.ToHexString(HMACSHA256.HashData(Encoding.UTF8.GetBytes(secretKey), Encoding.UTF8.GetBytes(body)));
-    }
 }
 
 public sealed record WebhookSubscription(int Id, string Name, string Uri, string SecretKey);
 
-/// <summary>A delivery record as <c>GET settings/webhooks/log</c> returns it, retry fields included.</summary>
-public sealed class DeliveryRecord
-{
-    public int Id { get; init; }
-    public int EventId { get; init; }
-    public DeliveryRecordAuthor? RetriedBy { get; init; }
-    public int Status { get; init; }
-    public DateTime? Delivery { get; init; }
-    public int Attempts { get; init; }
-    public DateTime? NextAttemptOn { get; init; }
-    public string RequestPayload { get; init; } = "";
-    public string? ResponsePayload { get; init; }
-}
-
-/// <summary>The member a delivery record names, of whom only the id is compared.</summary>
-public sealed class DeliveryRecordAuthor
-{
-    public Guid Id { get; init; }
-}
+/// <summary>
+/// A payload read from a delivery record through the webhook SDK. <paramref name="Json"/> is the same payload as it
+/// went out, for what a model cannot say: that a field no model declares is not there, and how a value looks on the
+/// wire.
+/// </summary>
+public sealed record DeliveredPayload<T>(T Model, JsonElement Json);

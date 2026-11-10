@@ -372,6 +372,13 @@ public class CustomerServiceUsageRequestDto
     /// </summary>
     /// <example>Descending</example>
     public OperationOrderType? OrderType { get; init; }
+
+    /// <summary>
+    /// Whether the AI consumption paid with the portal's own provider keys - `ai-tools-byok`, `ai-search-byok` - is
+    /// added into the total of its AI service instead of being a total of its own.
+    /// </summary>
+    /// <example>true</example>
+    public bool? MergeByok { get; set; }
 }
 
 /// <summary>
@@ -556,8 +563,9 @@ public class CreateServiceLimitRequestDto
     /// Whom the limit applies to.
     /// </summary>
     /// <example>Custom</example>
+    [Required]
     [EnumDataType(typeof(ServiceLimitScope))]
-    public ServiceLimitScope Scope { get; init; } = ServiceLimitScope.Total;
+    public ServiceLimitScope? Scope { get; init; }
 
     /// <summary>
     /// The ID of the portal user a personal limit is set for, as returned in `id` by the people operations.

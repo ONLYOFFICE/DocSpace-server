@@ -2044,6 +2044,9 @@ Your current tariff plan is STARTUP. It is absolutely free and includes:
 
 $TrulyYours</value>
   </data>
+  <data name="PrivateRoomTitle" xml:space="preserve">
+    <value>Private room</value>
+  </data>
   <data name="subject_admin_activation_v1" xml:space="preserve">
     <value>Welcome to ${LetterLogoText}!</value>
   </data>

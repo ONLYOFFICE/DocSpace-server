@@ -35,6 +35,7 @@ import type { ContextFolder, RoomSkill, StorageAdapter } from "@onlyoffice/ai-ch
 
 import { HttpAttachmentsStorage } from "./attachmentsStorage.js";
 import { HttpAssignmentsStorage } from "./assignmentsStorage.js";
+import { HttpByokKeysStorage } from "./byokKeysStorage.js";
 import { HttpFormAnalysisStorage } from "./formAnalysisStorage.js";
 import { HttpMcpServersStorage } from "./mcpServersStorage.js";
 import { HttpMessagesStorage } from "./messagesStorage.js";
@@ -45,7 +46,12 @@ import { HttpPromptsStorage } from "./promptsStorage.js";
 import { HttpThreadsStorage } from "./threadsStorage.js";
 import { HttpToolPrefsStorage } from "./toolPrefsStorage.js";
 import { HttpWebSearchStorage } from "./webSearchStorage.js";
-import { getContextFolders, getRoomSkill, getRoomSkills } from "./roomSkills.js";
+import {
+  getContextFolders,
+  getKnowledgeFolders,
+  getRoomSkill,
+  getRoomSkills,
+} from "./roomSkills.js";
 
 export class HttpStorageAdapter implements StorageAdapter {
   public threads = new HttpThreadsStorage();
@@ -60,12 +66,18 @@ export class HttpStorageAdapter implements StorageAdapter {
   public webSearch = new HttpWebSearchStorage();
   public attachments = new HttpAttachmentsStorage();
   public formAnalysis = new HttpFormAnalysisStorage();
+  public byokKeys = new HttpByokKeysStorage();
 
-  // Rooms and skills for the chat's context: the rooms with a `.ai` folder
-  // the caller can read (one cloud entry — DocSpace is a single cloud, so
-  // `cloud` is not consulted) and the Markdown files of a room's folder.
+  // Rooms and skills for the chat's context: the Instructions rooms the
+  // caller can read (one cloud entry — DocSpace is a single cloud, so
+  // `cloud` is not consulted), the Markdown files of such a room, and the
+  // Knowledge rooms the chat may search.
   async getContextFolders(): Promise<ContextFolder[]> {
     return getContextFolders();
+  }
+
+  async getKnowledgeFolders(): Promise<ContextFolder[]> {
+    return getKnowledgeFolders();
   }
 
   async getRoomSkills(_cloud: string, roomId: string): Promise<RoomSkill[]> {

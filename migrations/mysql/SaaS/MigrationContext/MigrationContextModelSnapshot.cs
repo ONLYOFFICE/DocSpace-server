@@ -266,6 +266,49 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbByokKey", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("Id")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("key")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("ModifiedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("modified_on");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("provider")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type");
+
+                    b.HasKey("TenantId", "Id")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("ai_integration_byok_keys", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbMcpServer", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4495,6 +4538,31 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasAnnotation("Relational:Collation", "utf8_general_ci");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesAiProjectRoom", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("ProjectId")
+                        .HasColumnType("int")
+                        .HasColumnName("project_id");
+
+                    b.Property<int>("RoomId")
+                        .HasColumnType("int")
+                        .HasColumnName("room_id");
+
+                    b.HasKey("TenantId", "ProjectId", "RoomId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "RoomId")
+                        .HasDatabaseName("IX_tenant_id_room_id");
+
+                    b.ToTable("files_ai_project_room", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesBunchObjects", b =>
                 {
                     b.Property<int>("TenantId")
@@ -5106,6 +5174,40 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasDatabaseName("tenant_id");
 
                     b.ToTable("files_security", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesSkill", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<int>("FileId")
+                        .HasColumnType("int")
+                        .HasColumnName("file_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(1024)
+                        .HasColumnType("varchar(1024)")
+                        .HasColumnName("description")
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("name")
+                        .UseCollation("utf8mb4_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8mb4");
+
+                    b.HasKey("TenantId", "FileId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("files_skill", (string)null);
 
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
@@ -6048,6 +6150,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("owner_user_id");
 
+                    b.Property<DateTime?>("PurgeAt")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("purge_at")
+                        .HasComputedColumnSql("GREATEST(COALESCE(modified_at, TIMESTAMP'1000-01-01 00:00:00'), COALESCE(authorization_code_expires_at, TIMESTAMP'1000-01-01 00:00:00'), COALESCE(access_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'), COALESCE(refresh_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'), COALESCE(id_token_expires_at, TIMESTAMP'1000-01-01 00:00:00'))", false)
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.ComputedColumn);
+
                     b.Property<DateTime?>("RefreshTokenExpiresAt")
                         .HasMaxLength(6)
                         .HasColumnType("datetime(6)")
@@ -6094,6 +6203,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "Id" }, "idx_identity_authorizations_id");
 
                     b.HasIndex(new[] { "OwnerTenantId", "OwnerUserId" }, "idx_identity_authorizations_owner");
+
+                    b.HasIndex(new[] { "PurgeAt" }, "idx_identity_authorizations_purge_at");
 
                     b.HasIndex(new[] { "RefreshTokenHash" }, "idx_identity_authorizations_refresh_token_hash")
                         .HasAnnotation("MySql:IndexPrefixLength", new[] { 64 });
@@ -6348,9 +6459,13 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("PrincipalId", "RegisteredClientId")
                         .HasName("PRIMARY");
 
+                    b.HasIndex(new[] { "ModifiedAt" }, "idx_identity_consents_modified_at");
+
                     b.HasIndex(new[] { "OwnerTenantId", "OwnerUserId" }, "idx_identity_consents_owner");
 
                     b.HasIndex(new[] { "PrincipalId" }, "idx_identity_consents_principal_id");
+
+                    b.HasIndex(new[] { "RegisteredClientId" }, "idx_identity_consents_registered_client_id");
 
                     b.ToTable("identity_consents", (string)null);
                 });
@@ -6377,6 +6492,79 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasIndex(new[] { "Scopes" }, "idx_identity_consent_scopes_scopes");
 
                     b.ToTable("identity_consent_scopes", (string)null);
+                });
+
+            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityPendingMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("id")
+                        .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("Attempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("attempts");
+
+                    b.Property<byte[]>("Body")
+                        .IsRequired()
+                        .HasColumnType("mediumblob")
+                        .HasColumnName("body");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("created_at");
+
+                    b.Property<DateTime>("DeliverAt")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("deliver_at");
+
+                    b.Property<string>("ExchangeName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("exchange_name");
+
+                    b.Property<string>("Headers")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("headers");
+
+                    b.Property<string>("RoutingKey")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)")
+                        .HasColumnName("routing_key");
+
+                    b.HasKey("Id")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex(new[] { "DeliverAt" }, "idx_identity_pending_messages_deliver_at");
+
+                    b.ToTable("identity_pending_messages", (string)null);
+                });
+
+            modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityPurgeCursor", b =>
+                {
+                    b.Property<string>("Name")
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)")
+                        .HasColumnName("name")
+                        .HasAnnotation("MySql:CharSet", "ascii");
+
+                    b.Property<DateTime>("Position")
+                        .HasMaxLength(6)
+                        .HasColumnType("datetime(6)")
+                        .HasColumnName("position");
+
+                    b.HasKey("Name")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("identity_purge_cursors", (string)null);
                 });
 
             modelBuilder.Entity("ASC.Migrations.Core.Identity.IdentityScope", b =>
@@ -6793,6 +6981,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Message");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.AI.Integration.Database.Models.DbByokKey", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Tenant");
                 });
@@ -7308,6 +7507,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesAiProjectRoom", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesBunchObjects", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
@@ -7434,6 +7644,17 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesSecurity", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesSkill", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

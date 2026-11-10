@@ -78,7 +78,7 @@ public class RetryWebhookTests(
     {
         // Arrange: a first attempt that failed, with an automatic retry scheduled. It is planted on a delivered
         // record and held a day ahead: a real retry comes half a second later and could be in flight (409)
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var original = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -91,7 +91,7 @@ public class RetryWebhookTests(
         var result = await _webhooksApi.RetryWebhookAsync(original.Id, TestContext.Current.CancellationToken);
 
         // Assert: the failed record keeps its answer, and its automatic retries give way to the manual one
-        var records = await GetDeliveryRecordsAsync(subscription.Id);
+        var records = await GetLogAsync(subscription.Id);
 
         var earlier = records.Should().ContainSingle(r => r.Id == original.Id).Subject;
         earlier.Status.Should().Be(500);
@@ -109,7 +109,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_RetryOfARetry_SendsTheOriginalEventId()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var original = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
@@ -125,7 +125,7 @@ public class RetryWebhookTests(
         deliveries.Should().HaveCount(3);
         deliveries.Should().AllSatisfy(d => d.Header("x-docspace-event-id").Should().Be(original.Id.ToString()));
 
-        var records = await GetDeliveryRecordsAsync(subscription.Id);
+        var records = await GetLogAsync(subscription.Id);
         records.Single(r => r.Id == secondRetry.Response.Id).EventId.Should().Be(original.Id);
     }
 
@@ -163,7 +163,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_DeliveredRecord_ResendsTheSameBodyAndSignature()
     {
         // Arrange
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Status != 0);
@@ -177,7 +177,7 @@ public class RetryWebhookTests(
 
         deliveries.Should().HaveCount(2);
         deliveries[1].Body.Should().Be(deliveries[0].Body);
-        deliveries[1].Header("x-docspace-signature-256").Should().Be(deliveries[0].Header("x-docspace-signature-256"));
+        deliveries[1].Signature.Should().Be(deliveries[0].Signature);
         deliveries[1].Header("x-docspace-event-id").Should().Be(record.Id.ToString());
     }
 
@@ -185,7 +185,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_DeliveryBeingSent_ThrowsConflict()
     {
         // Arrange: the record as a sender holds it while it is sending: leased, with the lease still running
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -205,7 +205,7 @@ public class RetryWebhookTests(
     public async Task RetryWebhook_DisabledSubscription_ThrowsConflict()
     {
         // Arrange: a delivered event, then the subscription is switched off
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -226,14 +226,14 @@ public class RetryWebhookTests(
         // Assert: a disabled subscription receives nothing, so nothing is queued for it
         exception.ErrorCode.Should().Be(409);
         exception.ErrorContent?.ToString().Should().Contain("The webhook is disabled");
-        (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
+        (await GetLogAsync(subscription.Id)).Should().ContainSingle();
     }
 
     [Fact]
     public async Task RetryWebhook_RecordOfThePreviousDeliveryFormat_ThrowsConflict()
     {
         // Arrange: a record as the sender before the attempt counter left it, sent but with no attempt counted
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -247,7 +247,7 @@ public class RetryWebhookTests(
         // Assert: its body is in the old format, which carried whole REST objects, so it is not sent again
         exception.ErrorCode.Should().Be(409);
         exception.ErrorContent?.ToString().Should().Contain("The delivery was recorded in an earlier webhook format");
-        (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
+        (await GetLogAsync(subscription.Id)).Should().ContainSingle();
     }
 
     [Fact]
@@ -255,7 +255,7 @@ public class RetryWebhookTests(
     {
         // Arrange: a record as Web.Studio leaves one that a publisher of the previous version wrote during a rolling
         // update: never attempted, off the schedule, with the note in place of a response
-        var receiver = await CreateReceiverAsync();
+        var receiver = CreateReceiver();
         var subscription = await CreateSubscriptionAsync(receiver);
         await FireEventAsync();
         var record = await WaitForRecordAsync(subscription.Id, r => r.Delivery is not null);
@@ -277,7 +277,7 @@ public class RetryWebhookTests(
         // Assert: the body of such a record is in the old format too, sent or not
         exception.ErrorCode.Should().Be(409);
         exception.ErrorContent?.ToString().Should().Contain("The delivery was recorded in an earlier webhook format");
-        (await GetDeliveryRecordsAsync(subscription.Id)).Should().ContainSingle();
+        (await GetLogAsync(subscription.Id)).Should().ContainSingle();
     }
 
     [Fact]

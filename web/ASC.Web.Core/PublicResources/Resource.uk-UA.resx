@@ -145,7 +145,7 @@
     <value>Сервіс</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Функції AІ</value>
+    <value>Агенти та інструменти AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервна копія</value>
@@ -1177,7 +1177,7 @@
     <value>AI-пошук</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Функції AІ</value>
+    <value>Агенти та інструменти AI</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Відстеження входів та дій</value>
@@ -1559,5 +1559,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Ціна провайдера</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Вебхук вимкнено. Увімкніть його перед повторною відправкою його доставок</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Подія надсилається просто зараз. Повторіть спробу після завершення поточної</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Доставку було записано в ранньому форматі вебхука, і її не можна надіслати повторно</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Цільовий об'єкт вебхука не є наявним користувачем або групою</value>
   </data>
 </root>

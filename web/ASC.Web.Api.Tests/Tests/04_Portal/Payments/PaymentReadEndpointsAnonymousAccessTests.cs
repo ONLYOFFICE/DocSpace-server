@@ -43,7 +43,11 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 /// which the unhandled-exception middleware maps to 403 "Tariff service is not configured" for
 /// every caller, Owner included — so the TS suite's per-role 403 assertions ("Access denied")
 /// cannot be reproduced here; only the authentication guard, which runs before the controller is
-/// ever reached, still proves what it always proves: anonymous is refused with 401.
+/// ever reached, still proves what it always proves: anonymous is refused with 401. The per-role
+/// checks run in ASC.Web.Api.Billing.Tests, whose stack has payment services
+/// (<c>PaymentPermissionsTestBase</c> and the classes built on it) - except for the AI prices and the
+/// restricted AI models (<c>GetAiPrices</c>, <c>GetRestrictedAiModels</c>), which also need the AI gateway
+/// that stack does not configure: their role checks are tested nowhere yet.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PaymentReadEndpointsAnonymousAccessTests(

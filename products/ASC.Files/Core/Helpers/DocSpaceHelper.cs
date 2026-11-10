@@ -42,7 +42,10 @@ public static class DocSpaceHelper
         FolderType.FillingFormsRoom,
         FolderType.PublicRoom,
         FolderType.VirtualDataRoom,
-        FolderType.AiRoom
+        FolderType.AiRoom,
+        FolderType.InstructionsRoom,
+        FolderType.KnowledgeRoom,
+        FolderType.AiProjectRoom
     ];
 
     extension(FolderType folderType)
@@ -58,13 +61,31 @@ public static class DocSpaceHelper
         }
 
         /// <summary>
+        /// A room kept under the AI rooms root (<see cref="FolderType.AiHub"/>): an Instructions room, a Knowledge
+        /// room or an AI project. Such a room is created there only, is never archived and has no templates.
+        /// </summary>
+        public bool IsAiHubRoom()
+        {
+            return folderType is FolderType.InstructionsRoom or FolderType.KnowledgeRoom or FolderType.AiProjectRoom;
+        }
+
+        /// <summary>
+        /// A folder whose files are vectorized for knowledge search: the agent's knowledge folder
+        /// or a knowledge room (the whole room is the knowledge base, subfolders included).
+        /// </summary>
+        public bool IsKnowledgeStorage()
+        {
+            return folderType is FolderType.Knowledge or FolderType.KnowledgeRoom;
+        }
+
+        /// <summary>
         /// A section root the whole portal shares (created without a user, see <c>FolderDao.GetFolderID*</c>):
         /// whoever happened to touch the section first is recorded as its author, so that author is not reported.
         /// The roots every account owns itself - My documents, Trash, Privacy - are not among them.
         /// </summary>
         public bool IsPublicSystemFolder()
         {
-            return folderType is FolderType.AiAgents or FolderType.Forms
+            return folderType is FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms
                 or FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates
                 or FolderType.SHARE or FolderType.Recent or FolderType.Favorites
                 or FolderType.COMMON or FolderType.Templates or FolderType.DefaultTemplates;
@@ -83,7 +104,7 @@ public static class DocSpaceHelper
 
     // the roots of the sections that hold rooms: a file is never placed in them directly
     public static bool IsRoomsSectionRoot(FolderType folderType) =>
-        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms;
+        folderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Archive or FolderType.RoomTemplates or FolderType.Forms or FolderType.PrivateRooms;
 
     public static bool IsFormsFillingSystemFolder(FolderType folderType)
     {
@@ -105,6 +126,9 @@ public static class DocSpaceHelper
             FolderType.PublicRoom => RoomType.PublicRoom,
             FolderType.VirtualDataRoom => RoomType.VirtualDataRoom,
             FolderType.AiRoom => RoomType.AiRoom,
+            FolderType.InstructionsRoom => RoomType.InstructionsRoom,
+            FolderType.KnowledgeRoom => RoomType.KnowledgeRoom,
+            FolderType.AiProjectRoom => RoomType.AiProjectRoom,
             _ => null
         };
     }
@@ -119,6 +143,9 @@ public static class DocSpaceHelper
             RoomType.PublicRoom => FolderType.PublicRoom,
             RoomType.VirtualDataRoom => FolderType.VirtualDataRoom,
             RoomType.AiRoom => FolderType.AiRoom,
+            RoomType.InstructionsRoom => FolderType.InstructionsRoom,
+            RoomType.KnowledgeRoom => FolderType.KnowledgeRoom,
+            RoomType.AiProjectRoom => FolderType.AiProjectRoom,
             _ => throw new ArgumentOutOfRangeException(nameof(roomType), roomType, null)
         };
     }
@@ -154,6 +181,9 @@ public static class DocSpaceHelper
             FilterType.PublicRooms => FolderType.PublicRoom,
             FilterType.VirtualDataRooms => FolderType.VirtualDataRoom,
             FilterType.AiRooms => FolderType.AiRoom,
+            FilterType.InstructionsRooms => FolderType.InstructionsRoom,
+            FilterType.KnowledgeRooms => FolderType.KnowledgeRoom,
+            FilterType.AiProjectRooms => FolderType.AiProjectRoom,
             _ => null
         };
     }
@@ -163,6 +193,27 @@ public static class DocSpaceHelper
         var room = await GetParentRoom(file, folderDao);
 
         return LocatedInPrivateRoom(room);
+    }
+
+    /// <summary>
+    /// The encrypted files under <paramref name="folderId"/> that hold no key for <paramref name="userId"/>,
+    /// which that user could not open. A file stored in the clear needs no key and is not reported.
+    /// </summary>
+    public static async Task<List<T>> GetEncryptedFilesWithoutKeyAsync<T>(IFileDao<T> fileDao, T folderId, Guid userId)
+    {
+        var encrypted = await fileDao.GetFilesAsync(folderId, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false, withSubfolders: true)
+            .Where(f => f.Encrypted)
+            .Select(f => f.Id)
+            .ToListAsync();
+
+        if (encrypted.Count == 0)
+        {
+            return encrypted;
+        }
+
+        var withKey = await fileDao.GetFileIdsWithKeyAsync(encrypted, userId).ToHashSetAsync();
+
+        return encrypted.Where(id => !withKey.Contains(id)).ToList();
     }
 
     public static bool LocatedInPrivateRoom<T>(Folder<T> room)

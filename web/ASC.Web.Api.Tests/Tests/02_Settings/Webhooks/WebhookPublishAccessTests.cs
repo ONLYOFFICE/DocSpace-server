@@ -43,7 +43,7 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// Every test has the owner subscribe to the same event as a control: one publication serves both, so once the
 /// owner's record is there the other one would be too. The subscription under test is created first, which puts
 /// it before the control in the order the publication walks them. form.submit is not covered: it is published from
-/// the Document Server save callback, and the integration-test profile runs no Document Server.
+/// the Document Server save callback for a filled form, and nothing here drives an editor session to send one.
 /// </remarks>
 [Trait("Category", "Settings")]
 public class WebhookPublishAccessTests(
@@ -55,15 +55,15 @@ public class WebhookPublishAccessTests(
     {
         // Arrange
         var member = await InviteContact(EmployeeType.User);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
         var roomId = await CreateRoomAsync();
 
         // Act
         var (_, title) = await CreateFileAsync(roomId);
 
         // Assert
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<FilePayload>(subject, control, p => p.Title == title);
     }
 
     [Fact]
@@ -71,8 +71,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange
         var member = await InviteContact(EmployeeType.User);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderCreated, member);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated, member);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated);
         var roomId = await CreateRoomAsync();
         var title = $"folder-{Guid.NewGuid():N}";
 
@@ -81,7 +81,7 @@ public class WebhookPublishAccessTests(
         await _foldersApi.CreateFolderAsync(roomId, new CreateFolderRequest(title), TestContext.Current.CancellationToken);
 
         // Assert
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<FolderPayload>(subject, control, p => p.Title == title);
     }
 
     [Fact]
@@ -89,8 +89,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: a RoomAdmin may subscribe to room.created, but sees only the rooms they are in
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomCreated, roomAdmin);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomCreated, roomAdmin);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomCreated);
         var title = $"room-{Guid.NewGuid():N}";
 
         // Act
@@ -99,7 +99,26 @@ public class WebhookPublishAccessTests(
             new CreateRoomRequestDto(title: title, roomType: RoomType.CustomRoom), TestContext.Current.CancellationToken);
 
         // Assert
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<RoomPayload>(subject, control, p => p.Title == title);
+    }
+
+    [Fact]
+    public async Task FolderCreated_RoomAdminWalkedAfterAMember_GetsNothing()
+    {
+        // Arrange: the member goes first, so a share record kept from their check would answer for the other creator
+        var member = await InviteContact(EmployeeType.RoomAdmin);
+        var outsider = await InviteContact(EmployeeType.RoomAdmin);
+        var roomId = await CreateRoomAsync(member);
+        var inside = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated, member);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderCreated, outsider);
+        var title = $"folder-{Guid.NewGuid():N}";
+
+        // Act
+        await _filesClient.Authenticate(Owner);
+        await _foldersApi.CreateFolderAsync(roomId, new CreateFolderRequest(title), TestContext.Current.CancellationToken);
+
+        // Assert
+        await ShouldReachOnlyTheControlAsync<FolderPayload>(subject, inside, p => p.Title == title);
     }
 
     [Fact]
@@ -107,13 +126,13 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: the counterpart of the demotion below - a RoomAdmin is entitled to group.* and may read groups
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupCreated, roomAdmin);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupCreated, roomAdmin);
 
         // Act
         var group = await CreateGroupAsync();
 
         // Assert
-        (await WaitForPayloadAsync(subscription.Id, p => IdIs(p, group))).Should().NotBeNull();
+        (await WaitForPayloadAsync<GroupPayload>(subscription.Id, p => p.Id == group)).Should().NotBeNull();
     }
 
     [Fact]
@@ -121,15 +140,15 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: group.* is not available to a User, who may not read groups either
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupCreated, roomAdmin);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.GroupCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupCreated, roomAdmin);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.GroupCreated);
         await ChangeTypeAsync(roomAdmin, EmployeeType.User);
 
         // Act
         var group = await CreateGroupAsync();
 
         // Assert: the subscription was saved by a RoomAdmin, but the event goes by who its creator is now
-        await ShouldReachOnlyTheControlAsync(subject, control, p => IdIs(p, group));
+        await ShouldReachOnlyTheControlAsync<GroupPayload>(subject, control, p => p.Id == group);
     }
 
     [Fact]
@@ -137,8 +156,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: a member who could read the room and subscribed while active
         var member = await InviteContact(EmployeeType.User);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
         var roomId = await CreateRoomAsync(member);
         await TerminateAsync(member);
 
@@ -146,7 +165,7 @@ public class WebhookPublishAccessTests(
         var (_, title) = await CreateFileAsync(roomId);
 
         // Assert
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<FilePayload>(subject, control, p => p.Title == title);
     }
 
     [Fact]
@@ -154,8 +173,8 @@ public class WebhookPublishAccessTests(
     {
         // Arrange: a member who can read the room, then the owner limits the developer tools to admins
         var member = await InviteContact(EmployeeType.User);
-        var subject = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var control = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var subject = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var control = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
         var roomId = await CreateRoomAsync(member);
 
         await _webApiClient.Authenticate(Owner);
@@ -166,10 +185,11 @@ public class WebhookPublishAccessTests(
         var (_, title) = await CreateFileAsync(roomId);
 
         // Assert: the member may no longer use the developer tools, so their subscription receives nothing either
-        await ShouldReachOnlyTheControlAsync(subject, control, p => TitleIs(p, title));
+        await ShouldReachOnlyTheControlAsync<FilePayload>(subject, control, p => p.Title == title);
     }
 
-    private async Task ShouldReachOnlyTheControlAsync(WebhookSubscription subject, WebhookSubscription control, Func<JsonElement, bool> match)
+    private async Task ShouldReachOnlyTheControlAsync<T>(WebhookSubscription subject, WebhookSubscription control, Func<T, bool> match)
+        where T : class
     {
         (await WaitForPayloadAsync(control.Id, match)).Should().NotBeNull("the owner's control subscription gets the event");
 
@@ -186,13 +206,5 @@ public class WebhookPublishAccessTests(
         return group.Response.Id;
     }
 
-    private static bool TitleIs(JsonElement payload, string title)
-    {
-        return payload.TryGetProperty("title", out var value) && value.GetString() == title;
-    }
 
-    private static bool IdIs(JsonElement payload, Guid id)
-    {
-        return payload.TryGetProperty("id", out var value) && value.ValueKind == JsonValueKind.String && value.GetGuid() == id;
-    }
 }

@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -545,9 +545,11 @@ public class TariffService(
             return false;
         }
 
+        string portalId = null;
+
         try
         {
-            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            portalId = await coreSettings.GetKeyAsync(tenantId);
 
             var result = await billingClient.GetDocsCloudTrialAsync(portalId, customer);
 
@@ -556,6 +558,18 @@ public class TariffService(
             await docsCloudClient.ClearCacheAsync(portalId);
 
             return result;
+        }
+        catch (PaymentServiceContractException error)
+        {
+            // The answer could not be read, so the trial may have been granted all the same: the cached tariff and
+            // DocsCloud tenant are dropped as after any answer, or they would hide the new quota until they expire.
+            LogError(error, tenantId.ToString());
+
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+
+            return false;
         }
         catch (Exception error)
         {
@@ -1312,6 +1326,14 @@ public class TariffService(
         return defaultQuota;
     }
 
+    private static IEnumerable<string> MessagesOf(Exception error)
+    {
+        for (var current = error; current != null; current = current.InnerException)
+        {
+            yield return current.Message;
+        }
+    }
+
     private void LogError(Exception error, string tenantId = null)
     {
         if (error is BillingNotFoundException)
@@ -1330,7 +1352,9 @@ public class TariffService(
             }
             else
             {
-                logger.ErrorBilling(tenantId, error.Message);
+                // No stack at this level, but the cause: the message of a payment client names only the call, and the
+                // timeout, DNS or TLS failure behind it is in the inner exception.
+                logger.ErrorBilling(tenantId, string.Join(" <- ", MessagesOf(error)));
             }
         }
     }
@@ -2128,14 +2152,34 @@ public class TariffService(
         await hybridCache.SetAsync(GetServiceLimitsCacheVersionKey(tenantId, groupName), Guid.NewGuid().ToString("N"), _serviceLimitsCacheVersionDuration);
     }
 
+    /// <summary>
+    /// Creates the service limit. A portal the accounting service does not know yet - a billing customer whose wallet
+    /// was never topped up - is refused as a missing customer, as a portal without billing is.
+    /// </summary>
     public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var serviceLimit = await accountingClient.CreateServiceLimitAsync(portalId, groupName, scope, customerParticipantName, amountValue, quantityValue, period);
+        var serviceLimit = await ChangeServiceLimitsAsync(tenantId,
+            () => accountingClient.CreateServiceLimitAsync(portalId, groupName, scope, customerParticipantName, amountValue, quantityValue, period));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
         return serviceLimit;
+    }
+
+    // The reads answer a portal the accounting service does not know as one without limits; a change has nothing to act
+    // on there, so it is refused as a missing customer instead of failing as an error of the accounting service.
+    private async Task<T> ChangeServiceLimitsAsync<T>(int tenantId, Func<Task<T>> change)
+    {
+        try
+        {
+            return await change();
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            throw new ItemNotFoundException("Customer could not be found", exception);
+        }
     }
 
     /// <summary>
@@ -2170,7 +2214,8 @@ public class TariffService(
     public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string groupName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var count = await accountingClient.SetParticipantServiceLimitsAsync(portalId, groupName, customerParticipantNames, amountValue, quantityValue, period);
+        var count = await ChangeServiceLimitsAsync(tenantId,
+            () => accountingClient.SetParticipantServiceLimitsAsync(portalId, groupName, customerParticipantNames, amountValue, quantityValue, period));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
@@ -2180,7 +2225,7 @@ public class TariffService(
     public async Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string groupName)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var count = await accountingClient.DisableParticipantServiceLimitsAsync(portalId, groupName);
+        var count = await ChangeServiceLimitsAsync(tenantId, () => accountingClient.DisableParticipantServiceLimitsAsync(portalId, groupName));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 

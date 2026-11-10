@@ -35,29 +35,44 @@ namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
-public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class McpServerCreateTests(AspireAppFixture fixture) : PublicToolsTestBase(fixture)
 {
     [Fact]
     public async Task Create_Owner_PersistsAndIsReadable()
     {
-        var config = BuildMcpConfig();
+        var result = await _aiTools.AiToolsAddCustomServerAsync(
+            new AiToolsAddCustomServerRequest(name: "server-1", config: McpConfig()),
+            TestContext.Current.CancellationToken);
 
-        await CreateMcpServerAsync("server-1", config);
+        result.Success.Should().BeTrue();
+        result.Error.Should().BeNull();
 
-        var stored = await ReadMcpServerAsync("server-1");
-        stored.Name.Should().Be("server-1");
-        JsonEquals(stored.Config, config).Should().BeTrue();
+        ConfigEquals(await GetCustomServerAsync("server-1")).Should().BeTrue();
     }
 
+    // The public registry is one map per portal: an accessible entityId is accepted and ignored (Bug 82863), so a
+    // server added from a room is the portal-wide one every listing reads back.
+    [Fact]
+    public async Task Create_WithAccessibleEntityId_LandsInPortalRegistry()
+    {
+        var roomId = await CreateRoomAsync();
+
+        await AddCustomServerAsync("server-1", entityId: roomId.ToString());
+
+        ConfigEquals(await GetCustomServerAsync("server-1")).Should().BeTrue();
+        (await ListCustomServersAsync()).Should().ContainKey("server-1");
+    }
+
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task Create_WithEntityId_PersistsForFolder()
     {
         var roomId = await CreateRoomAsync();
         var config = BuildMcpConfig();
 
-        await CreateMcpServerAsync("server-1", config, roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", config, roomId.ToString());
 
-        var scoped = await ReadMcpServerAsync("server-1", roomId.ToString());
+        var scoped = await ReadMcpServerInternalAsync("server-1", roomId.ToString());
         scoped.Name.Should().Be("server-1");
         JsonEquals(scoped.Config, config).Should().BeTrue();
 
@@ -67,6 +82,7 @@ public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
         globalResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task Create_SameNameInGlobalAndEntity_AreIsolated()
     {
@@ -74,34 +90,39 @@ public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
         var globalConfig = BuildMcpConfig("https://example.com/global");
         var scopedConfig = BuildMcpConfig("https://example.com/scoped");
 
-        await CreateMcpServerAsync("server-1", globalConfig);
-        await CreateMcpServerAsync("server-1", scopedConfig, roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", globalConfig);
+        await CreateMcpServerInternalAsync("server-1", scopedConfig, roomId.ToString());
 
-        var global = await ReadMcpServerAsync("server-1");
-        var scoped = await ReadMcpServerAsync("server-1", roomId.ToString());
+        var global = await ReadMcpServerInternalAsync("server-1");
+        var scoped = await ReadMcpServerInternalAsync("server-1", roomId.ToString());
 
         JsonEquals(global.Config, globalConfig).Should().BeTrue();
         JsonEquals(scoped.Config, scopedConfig).Should().BeTrue();
     }
 
+    // A duplicate is a soft failure: status 200 with success=false and the name field named, the first entry kept.
     [Fact]
     public async Task Create_DuplicateName_Fails()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1", "https://example.com/first");
 
-        using var response = await _ai.PostAsync(
-            McpServersPath,
-            new { name = "server-1", config = BuildMcpConfig() },
+        var result = await _aiTools.AiToolsAddCustomServerAsync(
+            new AiToolsAddCustomServerRequest(name: "server-1", config: McpConfig("https://example.com/second")),
             TestContext.Current.CancellationToken);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
+        result.Success.Should().BeFalse();
+        result.Error.Should().NotBeNull();
+        result.Error.Field.Should().Be(AiErrorData.FieldEnum.Name);
+
+        ConfigEquals(await GetCustomServerAsync("server-1"), "https://example.com/first").Should().BeTrue();
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task Create_DuplicateNameWithSameEntityId_Fails()
     {
         var roomId = await CreateRoomAsync();
-        await CreateMcpServerAsync("server-1", entityId: roomId.ToString());
+        await CreateMcpServerInternalAsync("server-1", entityId: roomId.ToString());
 
         using var response = await _ai.PostAsync(
             McpServersPath,
@@ -114,20 +135,26 @@ public class McpServerCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Create_NonExistentEntityId_Returns404()
     {
-        using var response = await _ai.PostAsync(
-            McpServersPath,
-            new { name = "server-1", config = BuildMcpConfig(), entityId = "999999999" },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiTools.AiToolsAddCustomServerAsync(
+                new AiToolsAddCustomServerRequest(name: "server-1", config: McpConfig(), entityId: MissingEntityId),
+                TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
+
+        (await ListCustomServersAsync()).Should().BeEmpty();
     }
 
+    // Raw HTTP: a body without a config is rejected client-side by the SDK's required constructor parameter.
     [Fact]
     public async Task Create_InvalidJson_Returns400()
     {
         const string invalidJson = """{ "name": "server-1" }""";
 
-        using var response = await _ai.PostRawAsync(McpServersPath, invalidJson, TestContext.Current.CancellationToken);
+        using var response = await new RawApiClient(_aiChatClient).PostRawAsync(
+            $"{ToolsPath}/add-custom-server",
+            invalidJson,
+            TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

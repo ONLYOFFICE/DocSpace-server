@@ -939,8 +939,10 @@ public class PaymentController(
     /// has never been a customer gets an empty result. The call is read-only. This balance is what the wallet
     /// services are charged against, so it falls as they are used and rises with
     /// `POST api/2.0/portal/payment/deposit`; the movements behind a change are listed by
-    /// `GET api/2.0/portal/payment/customer/operations`. Pass `refresh=true` to re-read it from the accounting
-    /// service rather than the cache - right after a top-up the cached figure is still the old one.
+    /// `GET api/2.0/portal/payment/customer/operations`. Every read asks the accounting service, so the amount is
+    /// current, right after a top-up as well. Only a failed read is remembered: for ten minutes after the accounting
+    /// service could not be reached, or did not know the portal, the answer is an empty result without asking it
+    /// again - pass `refresh=true` to ask at once.
     /// </remarks>
     /// <summary>
     /// Get the customer balance
@@ -969,16 +971,18 @@ public class PaymentController(
 
     /// <remarks>
     /// Lists the money movements on the portal's wallet - top-ups, the charges of the wallet services, refunds and
-    /// corrections - one page at a time, which is what a billing history is built from. Only a DocSpace administrator
+    /// corrections - one page at a time, as a billing history. Only a DocSpace administrator
     /// may read it, a portal with no billing customer answers with an empty result, and the call is read-only. Every
     /// filter is optional: `startDate` and `endDate` are read in the portal time zone and default to the portal
     /// creation date and the present moment, `serviceName` narrows to particular wallet services and fails with 404
     /// on a name this installation does not sell, `participantName`, `type` and `status` narrow to who caused a
-    /// movement and how it ended, and `credit` and `debit` include or exclude the two directions. `offset` and
-    /// `limit` page through the result and default to 0 and 25, `orderBy` and `orderType` sort it, and the answer
-    /// repeats them next to `totalQuantity`, `totalPage` and `currentPage` so a client can page without counting. The
-    /// same data as a downloadable file is `POST api/2.0/portal/payment/customer/operationsreport`, and the figures
-    /// added up per service are `GET api/2.0/portal/payment/customer/usage`.
+    /// movement and how it ended, and `credit` and `debit` include or exclude the two directions. AI consumption paid
+    /// with the portal's own provider keys is filed under `ai-tools-byok` and `ai-search-byok`, which `serviceName`
+    /// accepts; such a movement reads like its AI service with `byok` set. `offset` and `limit` page through the
+    /// result and default to 0 and 25, `orderBy` and `orderType` sort it, and the answer repeats them next to
+    /// `totalQuantity`, `totalPage` and `currentPage`. The same data as a downloadable file is
+    /// `POST api/2.0/portal/payment/customer/operationsreport`, and the figures added up per service are
+    /// `GET api/2.0/portal/payment/customer/usage`.
     /// </remarks>
     /// <summary>
     /// Get the wallet operations
@@ -1038,10 +1042,10 @@ public class PaymentController(
     /// <remarks>
     /// Lists the top-ups of the portal's wallet - the payments into it - one page at a time, which is what a list of
     /// payments with their invoices is built from. A portal that is not a billing customer yet has no top-ups and
-    /// gets an empty result rather than an error. Only the payer or the portal owner may read it, as with the
-    /// invoices, and the call is read-only. Every filter is optional: `startDate` and `endDate` default to the
-    /// portal creation date and the present moment, a value without `Z` or an offset is read in the portal time
-    /// zone, and `status` narrows to how a top-up ended. `offset` and `limit` default to 0 and 25 and are echoed next
+    /// gets an empty result rather than an error. Any DocSpace administrator may read it, not only the payer, and
+    /// the call is read-only. Every filter is optional: `startDate` and `endDate` default to the portal creation
+    /// date and the present moment, a value without `Z` or an offset is read in the portal time zone, and `status`
+    /// narrows to how a top-up ended. `offset` and `limit` default to 0 and 25 and are echoed next
     /// to `totalQuantity`, `totalPage` and `currentPage`; a negative `offset` or a `limit` outside 1 to 100 fails
     /// with 400. An empty result means the portal is not a billing customer, has no wallet at the accounting service
     /// yet, or that service could not be read; a period without top-ups gives an empty `collection`. A top-up with
@@ -1056,11 +1060,13 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "A page of wallet top-ups with its paging information, or an empty result when the portal is not a billing customer, has no wallet at the accounting service yet, or that service could not be read", typeof(DepositReportDto))]
     [SwaggerResponse(400, "`offset` is negative, `limit` is outside 1 to 100, or a parameter cannot be read, such as a `status` that is not one of its values or a date that is not ISO 8601")]
-    [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpGet("customer/deposits")]
     public async Task<DepositReportDto> GetCustomerDeposits(GetCustomerDepositsRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -1069,8 +1075,6 @@ public class PaymentController(
         {
             return null;
         }
-
-        await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
 
         var offset = inDto.Offset ?? 0;
         var limit = inDto.Limit ?? 25;
@@ -1097,8 +1101,7 @@ public class PaymentController(
     /// Hands back the address of the page on which the billing provider shows the invoice for one top-up of the
     /// portal's wallet, so a client can open or download it. The top-up is named by the `id` that
     /// `GET api/2.0/portal/payment/customer/deposits` returns, and only one listed there with `hasInvoice` true has an
-    /// invoice to show. Only the payer or the portal owner may read it, as with the billing account page, and the
-    /// call changes nothing. The address is absolute and points to the billing provider rather than to the portal;
+    /// invoice to show. Any DocSpace administrator may read it, not only the payer, and the call changes nothing. The address is absolute and points to the billing provider rather than to the portal;
     /// it is asked for anew on every call, so request it when the user is about to open the invoice instead of
     /// storing it. A top-up this portal does not have, one without an invoice, or a portal that is not a billing
     /// customer answers 404, and an `id` that is not a number fails with 400. An installation without a billing
@@ -1113,12 +1116,14 @@ public class PaymentController(
     [SwaggerResponse(200, "The absolute address of the hosted invoice page for the top-up", typeof(string))]
     [SwaggerResponse(400, "`id` is not a number")]
     [SwaggerResponse(402, "The billing or the accounting service rejected the request for the top-up or its invoice link, or did not answer")]
-    [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, no top-up with this ID, or the top-up has no invoice")]
     [HttpGet("customer/deposits/{id}/invoice")]
     public async Task<string> GetDepositInvoice(GetDepositInvoiceRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
 
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -1127,8 +1132,6 @@ public class PaymentController(
         {
             throw new ItemNotFoundException("Customer could not be found");
         }
-
-        await paymentHelper.DemandPayerOrOwnerAsync(tenant, customerInfo);
 
         // The default window of the top-up list, so every top-up the list can show is found here as well.
         var utcStartDate = GetUtcStartDate(null, tenant);
@@ -1227,9 +1230,12 @@ public class PaymentController(
     /// to who consumed and how the operation ended, `startDate` and `endDate` bound the period in the portal time
     /// zone, `metadata` matches the key and value pairs a service records with its usage, and `offset`, `limit`,
     /// `orderBy` and `orderType` page and sort the result. Amounts come with the unit the service is sold in, except
-    /// AI tools, whose consumption is reported in tokens rather than in AI credits. The individual charges behind
-    /// these totals are `GET api/2.0/portal/payment/customer/operations`, and the same figures as a downloadable file
-    /// are `POST api/2.0/portal/payment/customer/usage/report`.
+    /// AI tools, whose consumption is reported in tokens rather than in AI credits. AI consumption paid with the
+    /// portal's own provider keys is a total of its own, `ai-tools-byok` or `ai-search-byok`, titled like its AI
+    /// service and flagged by `byok`; `serviceName` accepts these names, and `mergeByok=true` folds them into their AI
+    /// services. The individual charges behind these totals are
+    /// `GET api/2.0/portal/payment/customer/operations`, and the same figures as a downloadable file are
+    /// `POST api/2.0/portal/payment/customer/usage/report`.
     /// </remarks>
     /// <summary>
     /// Get the customer service usage
@@ -1273,7 +1279,9 @@ public class PaymentController(
             OrderType = inDto.OrderType
         };
 
-        var report = await tariffService.GetCustomerServiceUsageAsync(tenant.Id, filter);
+        var report = inDto.MergeByok == true
+            ? await paymentHelper.GetServiceUsageWithByokMergedAsync(tenant.Id, filter)
+            : await tariffService.GetCustomerServiceUsageAsync(tenant.Id, filter);
         if (report == null)
         {
             return null;
@@ -1333,7 +1341,8 @@ public class PaymentController(
     /// DocSpace administrator. The body takes the same filters as `GET api/2.0/portal/payment/customer/operations` -
     /// the service names, the date range, the participant, the operation type and status, the credit and debit
     /// directions and the ordering - and an empty body reports everything from the portal creation date to now; a
-    /// service name this installation does not sell fails with 404. Poll
+    /// service name this installation does not sell fails with 404, and the own-key AI services `ai-tools-byok` and
+    /// `ai-search-byok` are marked BYOK in the file. Poll
     /// `GET api/2.0/portal/payment/customer/operationsreport` until `isCompleted` is true, then take the file from
     /// `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's own My documents section,
     /// where it counts against the portal storage like any other file. One operations report per user is tracked at a
@@ -1452,15 +1461,15 @@ public class PaymentController(
     /// <remarks>
     /// Queues the usage of the wallet services as an `xlsx` file and returns the task that will build it; the file is
     /// not ready when the response arrives. The portal needs a billing customer and the caller has to be a DocSpace
-    /// administrator. The body takes the same filters as `GET api/2.0/portal/payment/customer/usage` - the service
-    /// names, the date range, the participant, the operation status, the usage metadata and the ordering - and an
-    /// empty body reports every service from the portal creation date to now; a service name this installation does
-    /// not sell fails with 404. Poll `GET api/2.0/portal/payment/customer/usage/report` until `isCompleted` is true,
-    /// then take the file from `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's
-    /// own My documents section, where it counts against the portal storage like any other file. One service usage
-    /// report per user is tracked at a time - a call made while the previous one is still running answers with that
-    /// task - and `DELETE api/2.0/portal/payment/customer/usage/report` stops it. It is a different report from the
-    /// operations one and does not interfere with it: per-movement history is
+    /// administrator. The body takes the filters of `GET api/2.0/portal/payment/customer/usage` except `mergeByok` -
+    /// the service names, the date range, the participant, the operation status, the usage metadata and the ordering
+    /// - and an empty body reports every service from the portal creation date to now; a service name this
+    /// installation does not sell fails with 404, and `ai-tools-byok` and `ai-search-byok` stay totals of their own,
+    /// marked BYOK. Poll `GET api/2.0/portal/payment/customer/usage/report` until `isCompleted` is true, then take the
+    /// file from `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's own My documents
+    /// section, where it counts against the portal storage like any other file. One service usage report per user is
+    /// tracked at a time - a call made while the previous one is still running answers with that task - and
+    /// `DELETE api/2.0/portal/payment/customer/usage/report` stops it. Per-movement history is the separate
     /// `POST api/2.0/portal/payment/customer/operationsreport`.
     /// </remarks>
     /// <summary>
@@ -1879,7 +1888,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicelimit</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The service limit as it was created", typeof(ServiceLimitDto))]
-    [SwaggerResponse(400, "Neither `amountValue` nor `quantityValue` is given, `userId` is missing for the scope `Custom` or given for another scope, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
+    [SwaggerResponse(400, "`scope` is missing, neither `amountValue` nor `quantityValue` is given, `userId` is missing for the scope `Custom` or given for another scope, a value is outside its range, or the accounting service rejects a threshold, such as a quantity for services with different units")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, or the user does not exist")]
     [SwaggerResponse(409, "A limit of this scope, or for this user, exists already")]
@@ -1897,8 +1906,10 @@ public class PaymentController(
             throw new ArgumentException("Either the amount or the quantity threshold must be set");
         }
 
+        var scope = inDto.Scope.Value;
+
         string participantName = null;
-        if (inDto.Scope == ServiceLimitScope.Custom)
+        if (scope == ServiceLimitScope.Custom)
         {
             if (!inDto.UserId.HasValue)
             {
@@ -1914,12 +1925,12 @@ public class PaymentController(
             throw new ArgumentException("Only a personal limit is set for a user");
         }
 
-        var serviceLimit = await tariffService.CreateServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, inDto.Scope, participantName,
+        var serviceLimit = await tariffService.CreateServiceLimitAsync(tenantId, ServiceLimitGroups.AiServices, scope, participantName,
             inDto.AmountValue, inDto.QuantityValue, inDto.Period);
 
-        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceLimit.ServiceGroupName, inDto.Scope, participantName);
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceLimit.ServiceGroupName, scope, participantName);
 
-        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, inDto.Scope, participantName);
+        await NotifyServiceLimitChangeAsync(serviceLimit.ServiceGroupName, serviceLimit.Id, scope, participantName);
 
         return serviceLimit.Map();
     }

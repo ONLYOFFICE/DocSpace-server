@@ -59,7 +59,11 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
-    private IResourceBuilder<ContainerResource>? WebhookReceiverResource { get; set; }
+    private bool WebhookTestSettings { get; set; }
+
+    // Set by UsePaymentServices: the stub the billing, accounting and docscloud services are pointed at, "" for none;
+    // null leaves the services with whatever buildtools/config says.
+    private string? PaymentServicesUrl { get; set; }
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
     private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
@@ -411,20 +415,26 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     }
 
     /// <summary>
-    /// The receiver the webhook delivery tests subscribe to (WireMock). A test stubs the answer for a
-    /// path of its own through the admin API and reads back from the request journal what the portal
-    /// sent. Adding it also switches the services to the test webhook settings in
-    /// <see cref="AddBaseConfig{T}"/>: a blacklist the receiver passes and short retry intervals.
+    /// Switches the services to the test webhook settings in <see cref="AddBaseConfig{T}"/>: a blacklist the
+    /// receiver of the webhook tests passes (a WireMock in the test process, on
+    /// <see cref="Constants.WebhookReceiverHost"/>) and short retry intervals.
     /// </summary>
-    public ConnectionStringManager AddWebhookReceiver()
+    public ConnectionStringManager UseWebhookTestSettings()
     {
-        WebhookReceiverResource = builder.AddContainer(Constants.WebhookReceiverContainer, "wiremock/wiremock", Constants.WireMockVersion)
-            .WithHttpEndpoint(port: Constants.WebhookReceiverPort, targetPort: 8080, name: "http", isProxied: false)
-            // published on that loopback alias rather than the default localhost (127.0.0.1), which the
-            // test blacklist keeps refusing
-            .WithEndpoint("http", e => e.TargetHost = Constants.WebhookReceiverHost)
-            .WithArgs("--disable-banner", "--max-request-journal-entries", "10000")
-            .WithHttpHealthCheck("/__admin/mappings");
+        WebhookTestSettings = true;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Gives every service the billing, accounting and docscloud addresses in <see cref="AddBaseConfig{T}"/>, in place
+    /// of the ones in <c>buildtools/config/appsettings.json</c>, so a test run never depends on that file - a
+    /// developer's copy may point at a real payment service. Without <paramref name="stubUrl"/> the services get no
+    /// address and report the tariff service as not configured.
+    /// </summary>
+    public ConnectionStringManager UsePaymentServices(string? stubUrl = null)
+    {
+        PaymentServicesUrl = stubUrl ?? string.Empty;
 
         return this;
     }
@@ -673,8 +683,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("core:notify:postman", "mailpit");
         }
 
-        if (WebhookReceiverResource != null)
+        if (WebhookTestSettings)
         {
+            // Only for the tests: the official image of the document server does not carry the crypto library, and without
+            // it no private room can be created. They drive the save callback themselves and need no real editor.
+            // An encrypted file could not really be edited on this stack.
+            resourceBuilder.WithEnvironment("files:docservice:encryption-assume-supported", "true");
+
             // a blacklist the receiver passes (Constants.WebhookTestBlacklist), only for the services that reach the
             // receiver: it replaces the default list for every UrlValidator caller of a service, not only for webhooks
             if (Constants.WebhookTestBlacklistServices.Contains(resourceBuilder.Resource.Name))
@@ -701,6 +716,38 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             // receiver gives (WebhookDeliveryStateTests), which has to arrive within the limit
             resourceBuilder.WithEnvironment(
                 "webhooks:requestTimeout", Constants.WebhookTestRequestTimeout.ToString());
+        }
+
+        if (PaymentServicesUrl == string.Empty)
+        {
+            resourceBuilder
+                .WithEnvironment("core:payment:url", string.Empty)
+                .WithEnvironment("core:accounting:url", string.Empty)
+                .WithEnvironment("core:docscloud:url", string.Empty);
+        }
+        else if (PaymentServicesUrl != null)
+        {
+            var key = Constants.PaymentStubKey;
+            var secret = Constants.PaymentStubSecret;
+
+            resourceBuilder
+                .WithEnvironment("core:payment:url", PaymentServicesUrl + Constants.PaymentStubBillingPath)
+                .WithEnvironment("core:payment:key", key)
+                .WithEnvironment("core:payment:secret", secret)
+                .WithEnvironment("core:payment:region", Constants.PaymentStubRegion)
+                .WithEnvironment("core:payment:defaultquota", Constants.PaymentStubDefaultQuota.ToString(CultureInfo.InvariantCulture))
+                .WithEnvironment("core:accounting:url", PaymentServicesUrl + Constants.PaymentStubAccountingPath)
+                .WithEnvironment("core:accounting:key", key)
+                .WithEnvironment("core:accounting:secret", secret)
+                // An array is overridden index by index: a buildtools/config that lists more currencies keeps the
+                // ones after the first, so a test never relies on a currency being unsupported - it sends "XXX".
+                .WithEnvironment("core:accounting:currencies:0", "USD")
+                // the wallet poller of Web.Studio runs every few seconds rather than every minute, so a test of what
+                // it does to a portal waits seconds for its next run
+                .WithEnvironment("core:accounting:topupperiod", Constants.PaymentStubTopUpPeriod.ToString())
+                .WithEnvironment("core:docscloud:url", PaymentServicesUrl + Constants.PaymentStubDocsCloudPath)
+                .WithEnvironment("core:docscloud:key", key)
+                .WithEnvironment("core:docscloud:secret", secret);
         }
 
         if (isDocker)
@@ -742,7 +789,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             resourceBuilder
                 .WithEnvironment("elastic:Scheme", () => "http")
-                .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
+                // 127.0.0.1, not localhost: Windows tries ::1 first, the port Docker publishes listens on IPv4
+                // only, and every new connection to the index waited ~2 s for that refusal.
+                .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : IPAddress.Loopback.ToString()))
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
                 .WithEnvironment("elastic:Threads", () => "1")
                 // Goes with the 512 MiB OpenSearch heap - see ContainerMemoryExtensions.

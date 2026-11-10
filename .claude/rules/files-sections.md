@@ -29,10 +29,13 @@ helpers.
 | | Templates | `Templates` (12), `DefaultTemplates` (35) |
 | Rooms | active / archive / templates | `VirtualRooms` (14) + `SearchArea.Active`; `Archive` (20) / `SearchArea.Archive`; `RoomTemplates` (30) / `SearchArea.Templates` |
 | Forms | form rooms / form templates | `Forms` (36) / `SearchArea.Forms`, `SearchArea.FormTemplates` — `FillingFormsRoom` (15) rooms that live under the `VirtualRooms` root |
+| Private rooms | private rooms | `PrivateRooms` (42) / `SearchArea.PrivateRooms` — rooms with `SettingsPrivate` that live under the `VirtualRooms` root, whatever their type; the root is shown only while the `e2e-rooms` app is on; archived ones stay in `SearchArea.Archive` |
 | AI Agents | agents, inside them Knowledge / ChatOutputs | `AiAgents` (34) / `SearchArea.AiAgents`, rooms of type `AiRoom` (31) |
+| AI rooms | Instructions / Knowledge rooms, AI projects | `AiHub` (41) / `SearchArea.AiHub`, rooms of type `InstructionsRoom` (38), `KnowledgeRoom` (39) and `AiProjectRoom` (40) — `DocSpaceHelper.IsAiHubRoom`; created and changed through the shared `files/rooms` routes (settings that do not apply to the type are refused with 400), never archived, no templates, deleted outright, outside the room count limit; projects hold no files, their linked rooms are `files/rooms/{id}/sources`, skills `files/rooms/{id}/skills`, the chat model `files/rooms/{id}/model` (the project-scoped `Chat` AI assignment, readable by any member, set by a manager, never cleared); a project member reads the linked rooms through a virtual `SubjectType.AiProject` record that `SecurityDao.GetSharesAsync` builds for AiHub entries only (never stored), so those rooms are not listed in the section |
 
-The Rooms/Forms split is one function, `SearchArea.MatchesRoomType`: a `FillingFormsRoom` belongs to
-Forms and nowhere else; every other room type belongs to Rooms. Use it — do not re-derive the split.
+The split of Rooms, Forms and Private rooms is one function, `SearchArea.MatchesRoom`: a `FillingFormsRoom`
+belongs to Forms and a private room to Private rooms and nowhere else; every other room belongs to Rooms. Use it —
+do not re-derive the split. `privacyFilter=Private` on the Rooms area means the Private rooms section.
 
 ## Checklist for any change that touches entries
 

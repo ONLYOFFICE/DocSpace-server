@@ -37,7 +37,7 @@ public interface ISecurityDao<T>
 {
     Task SetShareAsync(FileShareRecord<T> r);
     IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects, Guid? ownerId = null);
-    Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync(FileEntry<T> entry, HashSet<Guid> subjects = null);
+    Task<IEnumerable<FileShareRecord<T>>> GetSharesAsync(FileEntry<T> entry, HashSet<Guid> subjects = null, bool includeAiProjectAccess = false);
     Task RemoveBySubjectAsync(Guid subject, bool withoutOwner);
     Task RemoveSecuritiesAsync(Guid subject, Guid ownerId, SubjectType subjectType);
     IAsyncEnumerable<FileShareRecord<T>> GetPureShareRecordsAsync(IEnumerable<FileEntry<T>> entries);

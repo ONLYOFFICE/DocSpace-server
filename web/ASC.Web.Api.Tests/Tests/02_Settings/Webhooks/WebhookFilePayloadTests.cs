@@ -58,8 +58,8 @@ public class WebhookFilePayloadTests(
         // Arrange
         var member = await InviteContact(EmployeeType.User);
         var roomId = await CreateRoomAsync(member);
-        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated, member);
-        var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileCreated);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated, member);
+        var ownerSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileCreated);
 
         // Act
         var (_, title) = await CreateFileAsync(roomId);
@@ -68,16 +68,16 @@ public class WebhookFilePayloadTests(
         var ownerPayload = await WaitForFilePayloadAsync(ownerSubscription.Id, title);
 
         ownerPayload.Should().NotBeNull("the owner may read every room");
-        ownerPayload!.Value.GetProperty("createdBy").TryGetProperty("profileUrl", out _).Should().BeTrue();
+        ownerPayload!.Model.CreatedBy.ProfileUrl.Should().NotBeNull();
 
         var memberPayload = await WaitForFilePayloadAsync(memberSubscription.Id, title);
 
         memberPayload.Should().NotBeNull("the member may read the room the file is in");
 
-        var createdBy = memberPayload!.Value.GetProperty("createdBy");
-        createdBy.GetProperty("id").GetGuid().Should().Be(Owner.Id);
-        createdBy.TryGetProperty("profileUrl", out _).Should().BeFalse("the profile link carries the email of the author");
-        memberPayload.Value.GetProperty("updatedBy").TryGetProperty("profileUrl", out _).Should().BeFalse();
+        var createdBy = memberPayload!.Model.CreatedBy;
+        createdBy.Id.Should().Be(Owner.Id);
+        createdBy.ProfileUrl.Should().BeNull("the profile link carries the email of the author");
+        memberPayload.Model.UpdatedBy.ProfileUrl.Should().BeNull();
     }
 
     [Fact]
@@ -94,8 +94,8 @@ public class WebhookFilePayloadTests(
 
         var member = await InviteContact(EmployeeType.User);
         var roomId = await CreateRoomAsync(member);
-        var memberSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated, member);
-        var ownerSubscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.RoomUpdated);
+        var memberSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated, member);
+        var ownerSubscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.RoomUpdated);
 
         // Act: a quota of the room's own, set together with a new title, which publishes room.updated
         var title = $"room-{Guid.NewGuid():N}";
@@ -104,15 +104,15 @@ public class WebhookFilePayloadTests(
         await _roomsApi.UpdateRoomAsync(roomId, new UpdateRoomRequest(title: title, quota: quota), cancellationToken);
 
         // Assert: the REST API shows the quota only to those who may edit the room, and so does the payload
-        var ownerPayload = await WaitForFilePayloadAsync(ownerSubscription.Id, title);
+        var ownerPayload = await WaitForRoomPayloadAsync(ownerSubscription.Id, title);
 
         ownerPayload.Should().NotBeNull("the owner may read every room");
-        ownerPayload!.Value.GetProperty("quotaLimit").GetInt64().Should().Be(quota);
+        ownerPayload!.Model.QuotaLimit.Should().Be(quota);
 
-        var memberPayload = await WaitForFilePayloadAsync(memberSubscription.Id, title);
+        var memberPayload = await WaitForRoomPayloadAsync(memberSubscription.Id, title);
 
         memberPayload.Should().NotBeNull("the member may read the room");
-        memberPayload!.Value.TryGetProperty("quotaLimit", out _).Should().BeFalse("the member may not edit the room");
+        memberPayload!.Model.QuotaLimit.Should().BeNull("the member may not edit the room");
     }
 
     /// <summary>
@@ -126,19 +126,19 @@ public class WebhookFilePayloadTests(
         // Arrange
         var roomId = await CreateRoomAsync();
         var (fileId, _) = await CreateFileAsync(roomId);
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FileUpdated);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FileUpdated);
 
         // Act
         await _filesClient.Authenticate(Owner);
         await _filesApi.LockFileAsync(fileId, new LockFileRequest(lockFile: true), TestContext.Current.CancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "file.updated",
-            p => p.GetProperty("id").GetInt32() == fileId && p.TryGetProperty("locked", out _));
+        var payload = await WaitForEventPayloadAsync<FilePayload>(subscription.Id, "file.updated",
+            p => p.Id?.ActualInstance is int id && id == fileId && p.Locked == true);
 
         payload.Should().NotBeNull("locking the file raises file.updated with the lock in it");
-        payload!.Value.GetProperty("locked").GetBoolean().Should().BeTrue();
-        payload.Value.GetProperty("lockedBy").GetProperty("id").GetGuid().Should().Be(Owner.Id);
+        payload!.Model.Locked.Should().BeTrue();
+        payload.Model.LockedBy.Id.Should().Be(Owner.Id);
     }
 
     /// <summary>
@@ -161,23 +161,26 @@ public class WebhookFilePayloadTests(
         await CreateFileAsync(folder.Id);
         await CreateFileAsync(folder.Id);
 
-        var subscription = await CreateSubscriptionAsync(await CreateReceiverAsync(), WebhookTrigger.FolderDeleted);
+        var subscription = await CreateSubscriptionAsync(CreateReceiver(), WebhookTrigger.FolderDeleted);
 
         // Act: deleted at once, not moved to the trash
         await _filesClient.Authenticate(Owner);
         await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest(deleteAfter: false, immediately: true), cancellationToken);
 
         // Assert
-        var payload = await WaitForEventPayloadAsync(subscription.Id, "folder.deleted", p => p.GetProperty("title").GetString() == title, 60);
+        var payload = await WaitForEventPayloadAsync<FolderPayload>(subscription.Id, "folder.deleted", p => p.Title == title, 60);
 
         payload.Should().NotBeNull("deleting the folder raises folder.deleted once the queued operation deletes it");
-        // a count of 0 is left out of the body
-        var filesCount = payload!.Value.TryGetProperty("filesCount", out var count) ? count.GetInt32() : 0;
-        filesCount.Should().Be(2, "the payload describes the folder as it was deleted, not after its files went");
+        payload!.Model.FilesCount.Should().Be(2, "the payload describes the folder as it was deleted, not after its files went");
     }
 
-    private Task<JsonElement?> WaitForFilePayloadAsync(int configId, string title)
+    private Task<DeliveredPayload<FilePayload>?> WaitForFilePayloadAsync(int configId, string title)
     {
-        return WaitForPayloadAsync(configId, p => p.TryGetProperty("title", out var t) && t.GetString() == title);
+        return WaitForPayloadAsync<FilePayload>(configId, p => p.Title == title);
+    }
+
+    private Task<DeliveredPayload<RoomPayload>?> WaitForRoomPayloadAsync(int configId, string title)
+    {
+        return WaitForPayloadAsync<RoomPayload>(configId, p => p.Title == title);
     }
 }

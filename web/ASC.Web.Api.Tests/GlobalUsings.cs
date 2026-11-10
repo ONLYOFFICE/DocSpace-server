@@ -34,12 +34,15 @@
 extern alias ASCPeople;
 extern alias ASCWebApi;
 
+global using System.Collections.Concurrent;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
+global using System.Net.Http.Json;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
+global using System.Text.Json.Nodes;
 
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
@@ -54,8 +57,18 @@ global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Api.Settings;
 global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
+global using DocSpace.Webhooks.SDK;
+global using DocSpace.Webhooks.SDK.Model;
 
 global using FluentAssertions;
+
+global using WireMock;
+global using WireMock.RequestBuilders;
+global using WireMock.ResponseBuilders;
+global using WireMock.Server;
+global using WireMock.Settings;
+global using WireMock.Types;
+global using WireMock.Util;
 
 global using Xunit;
 
@@ -71,6 +84,7 @@ global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
 global using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
 global using LoginHistoryApi = DocSpace.API.SDK.Api.Security.LoginHistoryApi;
 global using MigrationApi = DocSpace.API.SDK.Api.Migration.MigrationApi;
+global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
 global using OAuth2Api = DocSpace.API.SDK.Api.Security.OAuth2Api;
 global using OperationsApi = DocSpace.API.SDK.Api.Files.OperationsApi;
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
@@ -78,10 +92,13 @@ global using PortalGuestsApi = DocSpace.API.SDK.Api.Portal.GuestsApi;
 global using PortalQuotaApi = DocSpace.API.SDK.Api.Portal.QuotaApi;
 global using PortalSettingsApi = DocSpace.API.SDK.Api.Portal.SettingsApi;
 global using PortalUsersApi = DocSpace.API.SDK.Api.Portal.UsersApi;
+global using PrivacyRoomApi = DocSpace.API.SDK.Api.Rooms.PrivacyRoomApi;
 global using RoomsApi = DocSpace.API.SDK.Api.Rooms.RoomsApi;
 global using SecurityAccessToDevToolsApi = DocSpace.API.SDK.Api.Security.AccessToDevToolsApi;
 global using SecurityBannersVisibilityApi = DocSpace.API.SDK.Api.Security.BannersVisibilityApi;
 global using SettingsQuotaApi = DocSpace.API.SDK.Api.Settings.QuotaApi;
+global using SharingApi = DocSpace.API.SDK.Api.Files.SharingApi;
 global using SMTPSettingsApi = DocSpace.API.SDK.Api.Security.SMTPSettingsApi;
 global using Task = System.Threading.Tasks.Task;
+global using ThirdPartyApi = DocSpace.API.SDK.Api.ThirdParty.ThirdPartyApi;
 global using User = ASC.Tests.Common.Data.User;
