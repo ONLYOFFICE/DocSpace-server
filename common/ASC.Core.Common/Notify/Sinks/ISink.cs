@@ -37,5 +37,5 @@ public interface ISink
 {
     ISink NextSink { get; set; }
     Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope serviceScope);
-    Task ProcessMessageAsync(INoticeMessage message, IServiceScope serviceScope);
+    Task<SendResponse> ProcessMessageAsync(INoticeMessage message, IServiceScope serviceScope);
 }

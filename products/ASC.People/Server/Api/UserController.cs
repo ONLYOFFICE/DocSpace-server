@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -282,7 +282,7 @@ public class UserController(
         }
         else
         {
-            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type),Constants.Action_AddRemoveUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type), Constants.Action_AddRemoveUser);
             var tenant = tenantManager.GetCurrentTenant();
             var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
@@ -441,22 +441,17 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Invites people to the portal by email, creating a pending profile for each address and mailing it an
-    /// invitation link.
-    /// The caller has to be a room admin or a DocSpace admin - a member or a guest is rejected - the portal has to
-    /// allow inviting members, and inviting a room admin additionally requires DocSpace admin rights while inviting
-    /// another DocSpace admin requires the portal owner; a `Guest` type is not accepted here at all.
-    /// An address that already belongs to a profile is not mailed again: the existing account is only related to the
-    /// caller, and its type is raised when the invitation asks for a higher one, while a disabled account rejects
-    /// the whole call with 400.
-    /// The whole call is rejected before anything is sent when the invitations would need more paid seats than the
-    /// tariff has left, and a malformed or punycode address is rejected with 400, so the list is validated as a
-    /// batch but applied one address at a time - a failure partway through leaves the earlier invitations sent.
-    /// The answer is not the result of this call: it lists every profile of the portal that is still pending and
-    /// that the caller may see, so previously invited people appear in it as well.
-    /// Repeated calls are throttled.
-    /// Use `PUT api/2.0/people/invite` to send the invitation email again, and `POST api/2.0/people` to create a
-    /// profile without mailing anybody.
+    /// Invites people to the portal by email, creating a pending profile for each address and mailing it an invitation
+    /// link. The caller has to be a room admin or a DocSpace admin and the portal has to allow inviting members; only a
+    /// DocSpace admin invites a room admin, only the owner a DocSpace admin, and `Guest` is not accepted. An address
+    /// that already has a profile is not mailed: the account is only related to the caller and raised to a higher type
+    /// when asked, while a disabled account rejects the call with 400. Nothing is sent when the invitations need more
+    /// paid seats than the tariff has left, or for a malformed or punycode address (400); otherwise the addresses are
+    /// applied one by one, so a failure partway leaves earlier invitations sent. The answer lists every pending profile
+    /// the caller may see, not only this call's. Inviting an address again shortly after its invitation went out -
+    /// after its pending profile was deleted - sends no second letter, and the link already sent still opens. Repeated
+    /// calls are throttled. Use `PUT api/2.0/people/invite` to resend the invitation, and `POST api/2.0/people` to
+    /// create a profile without mailing anybody.
     /// </remarks>
     /// <summary>
     /// Invite users
@@ -545,11 +540,18 @@ public class UserController(
             }
 
             user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture, false);
-            var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
-            var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
-            messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            // the same invitation already went out within the period: no new link, no record, no spent invitation
+            await using var acceptance = await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, invite.Type);
+            if (acceptance.Accepted)
+            {
+                var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
+                var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, invite.Type, inDto.Culture, true, acceptance);
+                messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            }
+
             await socketManager.AddUserAsync(user);
 
             await webhookManager.PublishAsync(WebhookTrigger.UserInvited, user);
@@ -1634,13 +1636,14 @@ public class UserController(
     /// Set `resendAll` to true to reach every pending account of the portal, in which case `userIds` is ignored and
     /// the caller has to be a room admin or a DocSpace admin; with the default false only the listed accounts are
     /// reached, and a member or a guest may then list nothing but their own ID.
-    /// Which email goes out depends on the state of each account: a pending invitation gets a fresh invitation link,
-    /// while an account that exists but has not confirmed its address gets activation instructions instead.
-    /// Accounts that are already active or that are disabled are skipped, and so are the pending accounts the caller
-    /// has no right to invite, without an error.
+    /// A pending invitation gets a fresh invitation link, while an account that has not confirmed its address gets
+    /// activation instructions instead.
+    /// Active and disabled accounts are skipped without an error, and so are the pending accounts the caller has no
+    /// right to invite.
     /// The answer lists only the targeted accounts the caller is allowed to see, so it can be shorter than the
     /// request and is not a delivery report.
-    /// Repeated calls are throttled, and each call issues new links that make the previously sent ones useless.
+    /// An account that got this letter a short while ago is not mailed again, and the link it already has stays
+    /// valid, so repeating the call is safe but delivers nothing new.
     /// To invite an address that has no profile yet, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
@@ -1654,7 +1657,6 @@ public class UserController(
     [SwaggerResponse(403, "A member or a guest asked for resendAll, or listed an account other than their own")]
     [AllowNotPayment]
     [HttpPut("invite")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvites(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
@@ -1695,6 +1697,7 @@ public class UserController(
         }
 
         Dictionary<Guid, UserRelation> userRelations = null;
+        List<UserInfo> sent = [];
 
         foreach (var user in users)
         {
@@ -1705,6 +1708,8 @@ public class UserController(
 
             if (currentUserType == EmployeeType.DocSpaceAdmin || currentUser.Id == user.Id)
             {
+                var activationStatus = user.ActivationStatus;
+
                 if (user.ActivationStatus == EmployeeActivationStatus.Activated)
                 {
                     user.ActivationStatus = EmployeeActivationStatus.NotActivated;
@@ -1714,7 +1719,12 @@ public class UserController(
                     user.ActivationStatus = EmployeeActivationStatus.AutoGenerated;
                 }
 
-                await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                // an account left as it was is not saved: the save would only move its modification date, once per
+                // account on every call
+                if (user.ActivationStatus != activationStatus)
+                {
+                    await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                }
             }
 
             if (user.ActivationStatus == EmployeeActivationStatus.Pending)
@@ -1725,11 +1735,19 @@ public class UserController(
                     continue;
                 }
 
+                await using var acceptance = await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, type);
+                if (!acceptance.Accepted)
+                {
+                    continue;
+                }
+
                 var culture = user.GetCulture()?.Name;
                 var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
-                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, culture);
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, type, culture);
+                acceptance.Complete();
+                sent.Add(user);
             }
             else
             {
@@ -1742,12 +1760,19 @@ public class UserController(
                     }
                 }
 
-                await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email);
+                if (await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email))
+                {
+                    sent.Add(user);
+                }
             }
         }
 
-        messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)),
-            users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        // only the accounts that got a letter: a repeat within the period is not mailed and not recorded
+        if (sent.Count > 0)
+        {
+            messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(sent.Select(x => x.Id)),
+                sent.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        }
 
         foreach (var user in users)
         {
@@ -1904,7 +1929,8 @@ public class UserController(
     /// stays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userId}/email`.
     /// A DocSpace administrator acting on somebody else changes the address immediately instead: the account is
     /// marked as not activated, every session of it is ended, and activation instructions are sent to the new
-    /// address - and passing the address the account already has is then rejected with 400.
+    /// address - and passing the address the account already has is then rejected with 400. Changing it back to an
+    /// address that got activation instructions a moment ago sends no new letter, and the link of that letter works.
     /// A caller who is not an administrator may only address their own account, nobody but the owner may change the
     /// owner's address, and only the owner may change the address of another DocSpace administrator.
     /// The target has to be an account that is neither disabled nor a pending invitation, otherwise the operation
@@ -1992,6 +2018,8 @@ public class UserController(
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             await cookiesManager.ResetUserCookieAsync(user.Id);
             await studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
+
+            // recorded even when the letter is a repeat: the record is the only trace of the address change itself
             messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 
@@ -2550,19 +2578,19 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes the type of the existing portal users listed in `userIds` to the type given in the route, in one call.
+    /// Changes the type of the existing portal users listed in `userIds` to the type given in the route.
     /// The caller needs the permission to add and remove users of the requested type, cannot change their own type or
-    /// the type of the portal owner, and cannot use this operation at all while being a guest; changing somebody to
-    /// `Guest` additionally requires the portal to allow inviting guests.
+    /// the type of the portal owner, and must not be a guest; changing somebody to `Guest` also needs the portal to
+    /// allow inviting guests.
     /// Every listed account has to be visible to the caller and must not be disabled.
-    /// The change is applied immediately: each converted user gets a notification email, and the accounts are
-    /// processed one by one, so a rejection in the middle leaves the users before it
-    /// already converted - re-read them before retrying.
-    /// The answer streams the converted users with their detailed information, in the order they were processed.
+    /// The change is applied immediately: each converted user gets a notification email, unless one about the same
+    /// type reached them a short while ago, and the accounts are processed one by one, so a rejection in the middle
+    /// leaves the users before it already converted - re-read them before retrying.
+    /// The answer streams the converted users in detail, in the order they were processed.
     /// Converting somebody to a paid type takes a paid seat, so the operation answers 402 when the tariff or the
     /// paid-user quota does not allow one more.
-    /// This operation only moves the type and leaves the rooms and the shared files of the account where they are -
-    /// to hand them over to another admin in the same step, use `POST api/2.0/people/type` instead.
+    /// This operation only moves the type and leaves the rooms and shared files of the account in place; to hand them
+    /// over to another admin as well, use `POST api/2.0/people/type`.
     /// </remarks>
     /// <summary>
     /// Change a user type
@@ -2625,7 +2653,7 @@ public class UserController(
             }
 
             await socketManager.ChangeUserTypeAsync(user, true);
-            await studioNotifyService.SendMsgUserTypeChangedAsync(user, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, inDto.Type, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
             messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create([user.Id]), [user.DisplayUserName(false, displayUserSettingsHelper)], [user.Id], inDto.Type);
             await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
         }
@@ -3342,7 +3370,7 @@ public class UserControllerAdditional<T>(
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         var securityDao = daoFactory.GetSecurityDao<T>();
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
 
         var offset = inDto.StartIndex;
         var count = inDto.Count;

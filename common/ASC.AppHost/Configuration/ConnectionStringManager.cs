@@ -820,6 +820,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 // An array is overridden index by index: a buildtools/config that lists more currencies keeps the
                 // ones after the first, so a test never relies on a currency being unsupported - it sends "XXX".
                 .WithEnvironment("core:accounting:currencies:0", "USD")
+                // the wallet poller of Web.Studio runs every few seconds rather than every minute, so a test of what
+                // it does to a portal waits seconds for its next run
+                .WithEnvironment("core:accounting:topupperiod", Constants.PaymentStubTopUpPeriod.ToString())
                 .WithEnvironment("core:docscloud:url", PaymentServicesUrl + Constants.PaymentStubDocsCloudPath)
                 .WithEnvironment("core:docscloud:key", key)
                 .WithEnvironment("core:docscloud:secret", secret);

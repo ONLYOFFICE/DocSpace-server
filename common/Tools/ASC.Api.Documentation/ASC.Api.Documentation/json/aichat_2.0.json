@@ -51,6 +51,11 @@
       "x-displayName": "Attachments"
     },
     {
+      "name": "AI / BYOK",
+      "description": "The portal's own provider keys that override built-in models.",
+      "x-displayName": "BYOK"
+    },
+    {
       "name": "AI / Context",
       "description": "Instructions rooms connected to the chat as context with their skills, and the Knowledge rooms the chat may search.",
       "x-displayName": "Context"
@@ -128,6 +133,7 @@
         "AI / AI",
         "AI / Assignments",
         "AI / Attachments",
+        "AI / BYOK",
         "AI / Context",
         "AI / Editor tools",
         "AI / Export",
@@ -9739,6 +9745,255 @@
         }
       }
     },
+    "/api/2.0/ai/byok": {
+      "get": {
+        "tags": [
+          "AI / BYOK"
+        ],
+        "operationId": "aiByokKeysList",
+        "summary": "List BYOK keys",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiByokKey"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/byok/providers": {
+      "get": {
+        "tags": [
+          "AI / BYOK"
+        ],
+        "operationId": "aiByokProviders",
+        "summary": "List BYOK providers",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiByokProvider"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/byok/{id}": {
+      "put": {
+        "tags": [
+          "AI / BYOK"
+        ],
+        "operationId": "aiByokKeysSet",
+        "summary": "Set a BYOK key",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiByokKey"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiByokKeyInput"
+              }
+            }
+          },
+          "x-codegen-request-body-name": "AiByokKeyInput"
+        }
+      },
+      "delete": {
+        "tags": [
+          "AI / BYOK"
+        ],
+        "operationId": "aiByokKeysDelete",
+        "summary": "Delete a BYOK key",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
     "/api/2.0/ai/openai/{profileId}/v1/chat/completions": {
       "post": {
         "tags": [
@@ -12769,6 +13024,98 @@
         ],
         "additionalProperties": false,
         "description": "AI model metadata. Describes a single model available from a provider."
+      },
+      "AiByokKey": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Model revision id the key is set for, used in the path when replacing or deleting it."
+          },
+          "name": {
+            "type": "string",
+            "description": "Model display name; absent when the model is no longer in the gateway catalogue."
+          },
+          "provider": {
+            "type": "string",
+            "description": "BYOK provider id the key belongs to, e.g. `anthropic`."
+          },
+          "image": {
+            "type": "string",
+            "description": "SVG markup of the logo of the model's owner."
+          }
+        },
+        "required": [
+          "id",
+          "provider"
+        ],
+        "additionalProperties": false
+      },
+      "AiByokProvider": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "BYOK provider id, passed as `provider` when setting a BYOK key."
+          },
+          "name": {
+            "type": "string",
+            "description": "Provider display name."
+          },
+          "image": {
+            "type": "string",
+            "description": "SVG markup of the logo of the provider's models' owner."
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiByokModel"
+            },
+            "description": "Models that can be called through this provider with the portal's own key."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "models"
+        ],
+        "additionalProperties": false
+      },
+      "AiByokModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Model id, used in the path when setting its BYOK key."
+          },
+          "name": {
+            "type": "string",
+            "description": "Model display name."
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "AiByokKeyInput": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "BYOK provider id from the model's `byok_providers`, e.g. `anthropic`."
+          },
+          "key": {
+            "type": "string",
+            "description": "Provider API key."
+          }
+        },
+        "required": [
+          "provider",
+          "key"
+        ],
+        "additionalProperties": false
       },
       "AiCreatePromptInput": {
         "type": "object",

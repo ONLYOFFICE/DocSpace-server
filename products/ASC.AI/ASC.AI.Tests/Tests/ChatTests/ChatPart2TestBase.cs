@@ -144,24 +144,4 @@ public abstract class ChatPart2TestBase(AspireAppFixture fixture) : AssignmentsS
 
         return (first, second);
     }
-
-    /// <summary>Polls a Files operation until it is finished (or gone from the queue); returns the last statuses seen.</summary>
-    protected async Task<List<FileOperationDto>> WaitForOperationAsync(string operationId)
-    {
-        var deadline = DateTime.UtcNow.AddSeconds(60);
-
-        while (true)
-        {
-            var statuses = (await OperationsApi.GetOperationStatusesAsync(
-                id: operationId,
-                cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-            if (statuses.Count == 0 || statuses.TrueForAll(s => s.Finished) || DateTime.UtcNow >= deadline)
-            {
-                return statuses;
-            }
-
-            await Task.Delay(200, TestContext.Current.CancellationToken);
-        }
-    }
 }

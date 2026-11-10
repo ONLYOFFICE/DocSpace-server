@@ -44,8 +44,8 @@ public abstract class Sink : ISink
 
     public abstract Task<SendResponse> ProcessMessage(INoticeMessage message, IServiceScope serviceScope);
 
-    public virtual async Task ProcessMessageAsync(INoticeMessage message, IServiceScope serviceScope)
+    public virtual Task<SendResponse> ProcessMessageAsync(INoticeMessage message, IServiceScope serviceScope)
     {
-        await NextSink.ProcessMessageAsync(message, serviceScope);
+        return NextSink.ProcessMessageAsync(message, serviceScope);
     }
 }

@@ -115,6 +115,7 @@ global using MetadataFilterHelper = ASC.Files.Core.MetadataFilterHelper;
 global using MetadataSearchQuery = ASC.Web.Files.Core.Search.MetadataSearchQuery;
 global using MetadataService = ASC.Files.Core.MetadataService;
 global using MetadataValue = ASC.Files.Core.MetadataValue;
+global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
 global using PrefixedStream = ASC.Web.Files.Core.PrefixedStream;
 global using RoomType = DocSpace.API.SDK.Model.RoomType;
 global using SkillFrontmatter = ASC.Files.Core.Core.AI.SkillFrontmatter;

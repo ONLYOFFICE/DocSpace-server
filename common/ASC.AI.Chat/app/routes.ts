@@ -56,6 +56,7 @@ import { contextController } from "./controllers/contextController.js";
 import { editorToolsController } from "./controllers/editorToolsController.js";
 import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
+import { byokKeysController } from "./controllers/byokKeysController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
@@ -214,6 +215,11 @@ export default function registerRoutes(app: Application): void {
   router.put("/config/tool-mode", settingsController.setToolMode);
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
+
+  router.get("/byok", byokKeysController.list);
+  router.get("/byok/providers", byokKeysController.providers);
+  router.put("/byok/:id", byokKeysController.set);
+  router.delete("/byok/:id", byokKeysController.delete);
 
   // OpenAI-compatible passthrough for the document editor's AI plugin
   // (external-provider transport). Explicit sub-paths only — the allowlist

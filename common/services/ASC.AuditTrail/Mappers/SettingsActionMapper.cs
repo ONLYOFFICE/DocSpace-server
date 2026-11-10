@@ -123,7 +123,9 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.DocsCloudConfigUpdated,
                     MessageAction.AiProfileUpdated,
                     MessageAction.AiProfileAssigned,
-                    MessageAction.AppEnabled, MessageAction.AppDisabled
+                    MessageAction.AppEnabled, MessageAction.AppDisabled,
+                    MessageAction.AiByokKeySet,
+                    MessageAction.AiDocumentAgentSettingsUpdated
                 ]
             },
             {
@@ -158,6 +160,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ResetVectorizationSettings,
                     MessageAction.AiProfileDeleted,
                     MessageAction.AiProfileUnassigned,
+                    MessageAction.AiByokKeyDeleted,
                     MessageAction.WebpluginDeleted,
                     MessageAction.ScheduledBackupDeleted,
                     MessageAction.CustomerServiceLimitDeleted

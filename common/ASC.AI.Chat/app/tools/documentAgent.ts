@@ -87,6 +87,8 @@ import { runDocumentTask, DocumentAgentError } from "./documentAgentClient.js";
 import type { DocumentAgentSettings } from "./documentAgentClient.js";
 import { getArray, getString, isObject } from "../narrow.js";
 import { aiServiceBaseUrl } from "../storage/httpClient.js";
+import { onlyofficeGatewayPath } from "../storage/profilesStorage.js";
+import type { DocspaceProfile } from "../storage/profilesStorage.js";
 import logger from "../log.js";
 
 export const DOCUMENT_AGENT_TOOL_NAME = "document_agent";
@@ -317,7 +319,7 @@ function savedFileId(url: string): string | undefined {
 // as the C# storage serves it: the in-process override would point an
 // `onlyoffice` profile at this service's own address, which the agent, on
 // another host, cannot reach (see modelSettings).
-async function resolveProfile(): Promise<Profile | undefined> {
+async function resolveProfile(): Promise<DocspaceProfile | undefined> {
   const roundProfileId = getRoundProfileId();
   if (roundProfileId) {
     const profile = await storage.profiles.readByIdRaw(roundProfileId);
@@ -330,14 +332,14 @@ async function resolveProfile(): Promise<Profile | undefined> {
 }
 
 // The portal's own provider is reached through the portal API, where the
-// gateway proxy lives at `/api/2.0/ai/gateway`, authenticated as the user.
+// gateway proxy lives at `/api/2.0/ai/gateway` (its BYOK route for a profile
+// on the portal's own provider key), authenticated as the user.
 // The C# side stores the portal's public root as the profile's `baseUrl`,
 // which from inside the deployment may be a dev host with a self-signed
 // certificate or a name that does not resolve; so, unless the host names
 // the portal address for the agent, it gets the AI service's own address,
 // the one this service uses for the same calls.
 const ONLYOFFICE_PROVIDER = "onlyoffice";
-const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
 // The profile as the agent's settings want it. A third-party provider goes
 // as stored, key included. For the portal's own provider the key is a
@@ -354,7 +356,7 @@ const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 // too, so the agent's requests are billed to the same entry as the chat's
 // own.
 function modelSettings(
-  profile: Profile,
+  profile: DocspaceProfile,
   config: DocumentAgentConfig,
 ): DocumentAgentSettings["model"] {
   const model: DocumentAgentSettings["model"] = {
@@ -373,7 +375,7 @@ function modelSettings(
     model.responsesApi = profile.useResponsesApi;
   }
   if (profile.providerType === ONLYOFFICE_PROVIDER) {
-    model.baseUrl = `${config.portalUrl ?? aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`;
+    model.baseUrl = `${config.portalUrl ?? aiServiceBaseUrl}${onlyofficeGatewayPath(profile)}`;
     const source = getSourceMeta();
     if (source) {
       model.source = source;
