@@ -112,6 +112,30 @@ public class MetadataValue
 }
 
 /// <summary>
+/// Where a free text search met the metadata of an entry: one string value holding the text, with the field it
+/// belongs to. A custom field is reported by its name alone, the hidden system template and its field ids stay inside.
+/// </summary>
+public class MetadataTextMatch
+{
+    public int EntryId { get; set; }
+    public FileEntryType EntryType { get; set; }
+    public int? TemplateId { get; set; }
+    public int? FieldId { get; set; }
+    public string FieldName { get; set; }
+    public string Value { get; set; }
+}
+
+/// <summary>
+/// A file or a folder named by the metadata tables: the shape the page queries answer with when the question is which
+/// entries of a listing page satisfy a condition, not what their metadata are.
+/// </summary>
+public class MetadataEntryRef
+{
+    public int EntryId { get; set; }
+    public FileEntryType EntryType { get; set; }
+}
+
+/// <summary>
 /// The metadata template to entry binding.
 /// </summary>
 public class MetadataTemplateLink
@@ -133,6 +157,16 @@ public class TemplateMetadata
 {
     public MetadataTemplate Template { get; set; }
     public List<MetadataValue> Values { get; set; } = [];
+
+    /// <summary>
+    /// Whether the template cascades from the entry to its content. Always false on a file.
+    /// </summary>
+    public bool Cascade { get; set; }
+
+    /// <summary>
+    /// How the cascade of the entry treats the values the sub-entries already hold. Meaningful while <see cref="Cascade"/> is set.
+    /// </summary>
+    public MetadataConflictResolveType CascadeConflict { get; set; }
 }
 
 /// <summary>
@@ -158,4 +192,11 @@ public class EntryMetadata
 {
     public List<TemplateMetadata> Templates { get; set; } = [];
     public List<CustomFieldValue> CustomFields { get; set; } = [];
+
+    /// <summary>
+    /// Whether the entry has a field a user can see and fill: a field of a visible assigned template, or a custom field.
+    /// The fields of a hidden template do not count, the way the UI, the search and the AI filling leave them out. The
+    /// same rule answers <c>hasMetadataFields</c> on the entry in a listing, so a client decides from either.
+    /// </summary>
+    public bool HasMetadataFields { get; set; }
 }

@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>确认账户终止</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>联系支持团队</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>停用门户</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>加入房间</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>保留我的空间</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>保留我的空间和资金</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>留下反馈</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>设置密码</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>分享我的反馈</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>开始免费试用</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>解除空间锁定</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>升级</value>
@@ -764,6 +779,186 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>门户 ${PortalUrl} 已被数据保留策略锁定：该门户未被使用，或其订阅未续订，具体情况见下方类别。
+
+*门户:* ${PortalUrl}
+*所有者:* ${UserName} ${UserEmail}
+*类别:* ${Category}
+*删除日期:* ${DeleteDate}
+
+除非解除锁定，否则该门户及其所有数据将在该日期被删除。
+
+如果所有者要求保留，请在该日期前重新激活门户。</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.您的空间已被锁定，但目前没有任何数据丢失
+
+#if($Unpaid == "True")
+由于您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 的订阅已结束，我们已暂时锁定该空间。这意味着您的团队成员目前都无法登录，但您的所有文档和设置仍然安全。
+#else
+由于您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 已有一段时间未被使用，我们已暂时锁定该空间。这意味着您的团队成员目前都无法登录，但您的所有文档和设置仍然安全。
+#end
+
+您的数据将保留至 *$DeleteDate* 。此后，该空间及其中的所有内容将被永久删除。
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+好消息是：现在还不晚。只需在 ${DeleteDateShort} 前解除空间锁定，然后续订即可恢复工作。一切都将保持原样。
+#else
+好消息是：现在还不晚。只需在 ${DeleteDateShort} 前解除空间锁定，一切都将保持原样。
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+如果您决定不再继续使用，也完全没问题。如果有想要保留的数据，请在 ${DeleteDateShort} 前解除空间锁定并进行备份。
+#else
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前解除空间锁定并下载这些文件。
+#end
+#else
+好消息是：现在还不晚。只需在 ${DeleteDateShort} 前联系我们的支持团队，我们将帮助您按原样恢复空间。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前告知我们，我们将帮助您访问这些文件。
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.您的空间已被删除
+
+#if($Unpaid == "True")
+由于您的 ${LetterLogoText} 空间 *$PortalName* 的订阅已结束且未续订，我们已根据 "隐私政策":"$URL1" 将该空间及其所有数据删除。
+#else
+由于您的 ${LetterLogoText} 空间 *$PortalName* 已长时间未被使用，我们已根据 "隐私政策":"$URL1" 将该空间及其所有数据删除。
+#end
+
+#if($Unpaid == "True")
+感谢您一直以来的使用。我们非常想知道您停止使用的原因：是某些功能不适合您，找到了更合适的方案，还是只是不再需要了？只需一分钟，您的每一条反馈都能帮助我们改进。
+#else
+感谢您试用 ${LetterLogoText}。我们非常想知道您停止使用的原因：是某些功能不适合您，找到了更合适的方案，还是只是不再需要了？只需一分钟，您的每一条反馈都能帮助我们改进。
+#end
+
+$OrangeButton
+
+如果您将来想回来，我们随时欢迎。您可以随时 "创建新空间":"$URL2" 。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.您的空间即将被删除
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+由于订阅已结束，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是最后一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#else
+由于订阅已结束，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#end
+#else
+#if($FinalNotice == "True")
+由于已有一段时间未被使用，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是最后一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#else
+由于已有一段时间未被使用，您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 仍处于锁定状态。这是一次友情提醒： *$DeleteDate* ，该空间及其所有数据将被永久删除。
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前解除空间锁定，然后续订即可恢复工作。一切都将保持原样。
+#else
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前解除空间锁定，一切都将保持原样。
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+如果您决定不再继续使用，也完全没问题。如果有想要保留的数据，请在 ${DeleteDateShort} 前解除空间锁定并进行备份。此后我们将无法恢复。
+#else
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前解除空间锁定并下载这些文件。此后我们将无法恢复。
+#end
+#else
+如果您想保留它，现在还来得及。只需在 ${DeleteDateShort} 前联系我们的支持团队，我们将帮助您按原样恢复空间。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。如果有想要保留的文件，请在 ${DeleteDateShort} 前告知我们，我们将帮助您访问这些文件。此后我们将无法恢复。
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.好久不见
+
+已经有一段时间没有人登录您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 了。我们希望在您的文档和设置受到影响之前提醒您。
+
+为了让所有人都能顺畅使用，我们会锁定一段时间未使用的免费空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将被永久删除。
+
+好消息是：保留空间很简单。只需在 ${BlockDateShort} 前登录一次，一切都会保持原样。
+
+$OrangeButton
+
+如果您不再需要该空间，则无需执行任何操作。只需确保在 ${BlockDateShort} 前下载您想保留的文件。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.您的订阅已结束，但您的空间仍在
+
+您为 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 购买的 ${LetterLogoText} 订阅已于 *$DueDate* 结束。感谢您一直以来的使用。希望 ${LetterLogoText} 让您的工作更轻松了一些。
+
+为了保证服务顺畅运行，我们会锁定订阅已结束的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将被永久删除。
+
+好消息是：保留空间很简单。只需在 ${BlockDateShort} 前续订，您的文档、设置和团队都将保持原样。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前备份您想保留的数据。
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.您的订阅已结束，但您的空间和资金仍在
+
+您为 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 购买的 ${LetterLogoText} 订阅已于 *$DueDate* 结束。感谢您一直以来的使用。您的钱包中仍有资金（ "查看余额":"$URL1" ），我们不希望您在不知情的情况下失去它们。
+
+为了保证服务顺畅运行，我们会锁定订阅已结束的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将与钱包中的资金一起被永久删除。
+
+好消息是：两者都可以轻松保留。只需在 ${BlockDateShort} 前续订，您的文档、设置和资金都将保持原样。您的钱包余额甚至可以抵扣部分费用。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前备份您想保留的数据。
+#else
+h1.您的空间中仍有资金等待着您
+
+已经有一段时间没有人登录您的 ${LetterLogoText} 空间 *"${__VirtualRootPath}":"${__VirtualRootPath}"* 了，但其 "钱包":"$URL1" 中仍有资金。我们不希望您在不知情的情况下失去它们。
+
+为了保证服务顺畅运行，我们会锁定不活跃的空间。对您的空间而言，这意味着：
+
+*$BlockDate*: 您的空间将被锁定，您将无法登录。
+*$DeleteDate*: 空间及其所有数据将与钱包中的资金一起被永久删除。
+
+好消息是：两者都可以轻松保留。只需在 ${BlockDateShort} 前登录一次，您的文档、设置和资金都将保持原样。
+
+$OrangeButton
+
+如果您决定不再继续使用，也完全没问题。请记得在 ${BlockDateShort} 前下载您想保留的文件。
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" 门户停用
 
@@ -1173,30 +1368,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;您的 ${LetterLogoText} 将&lt;span style="color: #FF6F3D;"&gt;被删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt; 您已经超过半年没有登录您的 ${LetterLogoText}&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;由于您决定不再使用，依据&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;，您的${LetterLogoText} 及其所有数据将被删除。&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;我们非常希望您能提供反馈：请问出于哪些原因决定停用${LetterLogoText}？&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如需继续使用您的 ${LetterLogoText}，请输入您的信息并进行任意操作即可保留。&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;您的 ${LetterLogoText} 将&lt;span style="color: #FF6F3D;"&gt;被删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您已经 3 个月没有登录您的 ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; 了。&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;请注意：您的 ${LetterLogoText} 及其所有数据将在停用 6 个月后被删除。只需现在登录，即可让您的 ${LetterLogoText} 保持活跃并继续使用。&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;获取&lt;span style="color: #FF6F3D;"&gt;免费&lt;/span&gt; ${LetterLogoText} 应用&lt;/td&gt;&lt;/tr&gt;
 
@@ -1211,32 +1382,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 600; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;如要在移动设备上编辑文档，请获取适用于${LetterLogoText} 文档应用&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; Margin: 0; padding-bottom: 32px; padding-left: 126px; padding-right: 126px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 34px;"&gt;&lt;img height="32" width="32" src="$IMG2" alt="iOS"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 8px; padding-right: 30px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;iOS&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 24px;"&gt;&lt;/td&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 20px;"&gt;&lt;img height="31" width="28" src="$IMG4" alt="Android"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 10px; padding-right: 16px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Android&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt; 您的 ${LetterLogoText} &lt;span style="color: #FF6F3D;"&gt;将被删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt; 您已经超过半年没有登录您的 ${LetterLogoText}&lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;考虑到您决定不再使用它，您的 ${LetterLogoText} 和所有数据将被删除，依据是我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;。&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;我们感谢您提供反馈。您为何决定停止使用 ${LetterLogoText}？&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您认为这其中有误，希望继续使用 ${LetterLogoText}，请联系我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt; 您的 ${LetterLogoText} &lt;span style="color: #FF6F3D;"&gt;将被删除&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;您已经 3 个月没有登录您的 ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; 了。&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;由于您未使用，根据我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;隐私政策&lt;/a&gt;，您的 ${LetterLogoText} 及其所有数据将在停用 6 个月后被删除。&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;如果您认为这其中有误，希望继续使用 ${LetterLogoText}，请联系我们的&lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;支持团队&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1656,6 +1801,30 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>您的密码已成功更改</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>门户 ${PortalUrl} 已被数据保留策略锁定</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间已被锁定，但您的数据在 ${DeleteDateShort} 前都是安全的</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间已被删除</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间即将被删除（删除日期：${DeleteDateShort}）</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>保留您的 ${LetterLogoText} 空间的最后机会（删除日期：${DeleteDateShort}）</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间想念您（请在 ${BlockDateShort} 前采取行动）</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间想念您（请在 ${BlockDateShort} 前采取行动）</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>您的 ${LetterLogoText} 空间中仍有资金（请在 $BlockDate 前采取行动）</value>
+  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>禁用${__VirtualRootHost}门户</value>
   </data>
@@ -1725,20 +1894,8 @@ $TrulyYours</value>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>探索 ${LetterLogoText} 中的 4 款实用应用</value>
   </data>
-  <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>您的 ${LetterLogoText} 将被删除</value>
-  </data>
-  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>您的 ${LetterLogoText} 将被删除</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>获取免费 ${LetterLogoText} 应用</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>您的 ${LetterLogoText} 将被删除</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>您的 ${LetterLogoText} 将被删除</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>了解 ${LetterLogoText} 的专业订阅计划</value>

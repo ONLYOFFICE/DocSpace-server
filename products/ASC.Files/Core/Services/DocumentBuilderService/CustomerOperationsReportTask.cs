@@ -58,7 +58,7 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
             _ => throw new ArgumentOutOfRangeException(nameof(_data.ReportType), _data.ReportType, "Unknown report type")
         };
 
-        return builder.BuildAsync(_userId, _data);
+        return builder.BuildAsync(_userId, _data, CancellationToken);
     }
 
     protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)

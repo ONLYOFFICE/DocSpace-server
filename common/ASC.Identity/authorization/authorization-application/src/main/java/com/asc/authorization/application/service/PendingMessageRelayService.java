@@ -1,0 +1,72 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY; without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+package com.asc.authorization.application.service;
+
+import com.asc.common.messaging.publisher.RabbitPersistableMessagePublisher;
+import java.time.Duration;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+/**
+ * Sends the messages the broker could not take once it is back.
+ *
+ * <p>Runs on one instance at a time per database, under a ShedLock lock, and sends a bounded batch
+ * per round within a time budget shorter than the lock, so a long outage drains steadily instead of
+ * flooding the broker when it returns.
+ */
+@Slf4j
+@Component
+@RequiredArgsConstructor
+@ConditionalOnClass(name = "com.rabbitmq.client.Connection")
+public class PendingMessageRelayService {
+  private static final int BATCH_SIZE = 100;
+  private static final Duration ROUND_BUDGET = Duration.ofSeconds(40);
+
+  private final RabbitPersistableMessagePublisher rabbitPersistableMessagePublisher;
+
+  /** Sends one batch of due messages. */
+  @Scheduled(fixedDelayString = "${IDENTITY_PENDING_MESSAGES_RELAY_INTERVAL:PT30S}")
+  @SchedulerLock(name = "pending_messages_relay", lockAtMostFor = "PT1M")
+  public void relay() {
+    try {
+      rabbitPersistableMessagePublisher.relayDue(BATCH_SIZE, ROUND_BUDGET);
+    } catch (Exception e) {
+      log.error("Failed to relay pending messages", e);
+    }
+  }
+}

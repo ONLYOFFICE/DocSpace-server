@@ -90,6 +90,11 @@ internal class SelectorFactory(IServiceProvider serviceProvider)
 
     private string Match(string id)
     {
+        if (id is null)
+        {
+            return "";
+        }
+
         var match = Selectors.Pattern.Match(id);
 
         return match.Success ? match.Groups["selector"].Value : "";

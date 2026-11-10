@@ -303,7 +303,8 @@ public class DiscDataStore(
         var target = GetTarget(domain, path + "chunks");
         if (Directory.Exists(target))
         {
-            Directory.Delete(target);
+            // the parts received so far are still in it: a non-recursive delete failed with "the directory is not empty"
+            Directory.Delete(target, true);
         }
         return Task.CompletedTask;
     }
@@ -800,8 +801,21 @@ public class DiscDataStore(
         //Build Dir
         var target = CrossPlatform.PathCombine(pathMap.PhysicalPath, PathUtils.Normalize(path));
         ValidatePath(target);
+        ValidateInsideRoot(pathMap.PhysicalPath, target);
 
         return target;
+    }
+
+    private static void ValidateInsideRoot(string root, string target)
+    {
+        var fullRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        var fullTarget = Path.TrimEndingDirectorySeparator(Path.GetFullPath(target));
+
+        if (!fullTarget.Equals(fullRoot, StringComparison.Ordinal) &&
+            !fullTarget.StartsWith(fullRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+        {
+            throw new ArgumentException("bad path");
+        }
     }
 
     private static void ValidatePath(string target)

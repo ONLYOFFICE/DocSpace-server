@@ -42,13 +42,13 @@ public class ToolPreferenceStorageController(ToolPrefsStorageService toolPrefsSt
     [HttpGet("tool-prefs")]
     public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAsync(ReadToolPrefsRequestDto inDto)
     {
-        return await toolPrefsStorageService.ReadAsync(inDto.EntityId);
+        return await toolPrefsStorageService.ReadAsync(inDto.EntityId, inDto.Scope);
     }
 
     [HttpPut("tool-prefs/disabled")]
     public async Task<IActionResult> UpsertDisabledAsync(UpsertToolPrefsRequestDto inDto)
     {
-        await toolPrefsStorageService.UpsertDisabledAsync(inDto.Disabled, inDto.EntityId);
+        await toolPrefsStorageService.UpsertDisabledAsync(inDto.Disabled, inDto.EntityId, inDto.Scope);
         return NoContent();
     }
 

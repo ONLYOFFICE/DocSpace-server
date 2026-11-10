@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Confirme terminación de la cuenta</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Contactar con soporte</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Desactivar portal</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Unirse a la sala</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Conservar mi espacio</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Conservar mi espacio y mis fondos</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Deje comentarios</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Establecer contraseña</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Compartir mi opinión</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Empezar prueba gratis</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Desbloquear mi espacio</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Actualizar</value>
@@ -742,6 +757,186 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>El portal ${PortalUrl} ha sido bloqueado por la política de retención de datos: no se utilizaba o su suscripción no se renovó; la categoría de abajo indica cuál de los dos casos.
+
+*Portal:* ${PortalUrl}
+*Propietario:* ${UserName} ${UserEmail}
+*Categoría:* ${Category}
+*Fecha de eliminación:* ${DeleteDate}
+
+Si no se desbloquea, el portal y todos sus datos se eliminarán en esa fecha.
+
+Si el propietario pide conservarlo, vuelva a activar el portal antes de esa fecha.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Su espacio está bloqueado, pero todavía no se ha perdido nada
+
+#if($Unpaid == "True")
+Como la suscripción de su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, ha finalizado, lo hemos bloqueado por ahora. Esto significa que nadie de su equipo puede iniciar sesión en este momento, pero todos sus documentos y ajustes siguen a salvo.
+#else
+Como su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, lleva tiempo sin usarse, lo hemos bloqueado por ahora. Esto significa que nadie de su equipo puede iniciar sesión en este momento, pero todos sus documentos y ajustes siguen a salvo.
+#end
+
+Conservaremos sus datos hasta el *$DeleteDate*. Después, el espacio y todo su contenido se eliminarán de forma permanente.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+La buena noticia: todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort y, después, renovar su suscripción para volver al trabajo. Todo estará tal y como lo dejó.
+#else
+La buena noticia: todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort, y todo estará tal y como lo dejó.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Si ha decidido seguir otro camino, no pasa nada. Si hay datos que quiera conservar, desbloquee su espacio y haga una copia de seguridad antes del $DeleteDateShort.
+#else
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, desbloquee su espacio y descárguelos antes del $DeleteDateShort.
+#end
+#else
+La buena noticia: todavía está a tiempo. Solo tiene que ponerse en contacto con nuestro equipo de soporte antes del $DeleteDateShort, y le ayudaremos a recuperar su espacio tal y como lo dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, avísenos antes del $DeleteDateShort y le ayudaremos a acceder a ellos.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Su espacio se ha eliminado
+
+#if($Unpaid == "True")
+Como la suscripción de su espacio de ${LetterLogoText}, *$PortalName*, finalizó y no se renovó, lo hemos eliminado junto con todos sus datos, tal y como se describe en nuestra "Política de privacidad":"$URL1".
+#else
+Como su espacio de ${LetterLogoText}, *$PortalName*, llevaba mucho tiempo sin usarse, lo hemos eliminado junto con todos sus datos, tal y como se describe en nuestra "Política de privacidad":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Gracias por trabajar con nosotros. Nos encantaría saber por qué dejó de usarlo: si algo no le funcionó, si encontró una opción mejor o si simplemente ya no lo necesitaba. Solo le llevará un minuto, y cada respuesta nos ayuda a mejorar.
+#else
+Gracias por probar ${LetterLogoText}. Nos encantaría saber por qué dejó de usarlo: si algo no le funcionó, si encontró una opción mejor o si simplemente ya no lo necesitaba. Solo le llevará un minuto, y cada respuesta nos ayuda a mejorar.
+#end
+
+$OrangeButton
+
+Si algún día quiere volver, nuestras puertas siempre estarán abiertas. Puede "crear un nuevo espacio":"$URL2" en cualquier momento.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Su espacio se eliminará pronto
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque su suscripción ha finalizado. Este es un último recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#else
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque su suscripción ha finalizado. Este es un recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#end
+#else
+#if($FinalNotice == "True")
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque lleva tiempo sin usarse. Este es un último recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#else
+Su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, sigue bloqueado porque lleva tiempo sin usarse. Este es un recordatorio amistoso: el *$DeleteDate*, el espacio y todos sus datos se eliminarán de forma permanente.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort y, después, renovar su suscripción para volver al trabajo. Todo estará tal y como lo dejó.
+#else
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que desbloquear su espacio antes del $DeleteDateShort, y todo estará tal y como lo dejó.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Si ha decidido seguir otro camino, no pasa nada. Si hay datos que quiera conservar, desbloquee su espacio y haga una copia de seguridad antes del $DeleteDateShort, ya que después no podremos recuperarlos.
+#else
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, desbloquee su espacio y descárguelos antes del $DeleteDateShort, ya que después no podremos recuperarlos.
+#end
+#else
+Si quiere conservarlo, todavía está a tiempo. Solo tiene que ponerse en contacto con nuestro equipo de soporte antes del $DeleteDateShort, y le ayudaremos a recuperar su espacio tal y como lo dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Si hay archivos que quiera conservar, avísenos antes del $DeleteDateShort y le ayudaremos a acceder a ellos, ya que después no podremos recuperarlos.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Hace tiempo que no le vemos
+
+Hace tiempo que nadie inicia sesión en su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Queríamos ponernos en contacto con usted antes de que les pase algo a sus documentos y ajustes.
+
+Para que todo funcione bien para todos, bloqueamos los espacios gratuitos que llevan tiempo sin usarse. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente.
+
+La buena noticia: conservarlo es fácil. Solo tiene que iniciar sesión una vez antes del $BlockDateShort, y todo quedará tal y como lo dejó.
+
+$OrangeButton
+
+Si ya no necesita el espacio, no tiene que hacer nada. Solo asegúrese de descargar los archivos que quiera conservar antes del $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Su suscripción ha finalizado, pero su espacio sigue aquí
+
+Su suscripción a ${LetterLogoText} para *"${__VirtualRootPath}":"${__VirtualRootPath}"* finalizó el *$DueDate*. Gracias por trabajar con nosotros. Esperamos que ${LetterLogoText} le haya facilitado un poco el trabajo.
+
+Para que todo funcione bien, bloqueamos los espacios cuya suscripción ha finalizado. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente.
+
+La buena noticia: conservarlo es fácil. Solo tiene que renovar su suscripción antes del $BlockDateShort, y sus documentos, ajustes y equipo seguirán tal y como los dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde hacer una copia de seguridad de los datos que quiera conservar antes del $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Su suscripción ha finalizado, pero su espacio y sus fondos siguen aquí
+
+Su suscripción a ${LetterLogoText} para *"${__VirtualRootPath}":"${__VirtualRootPath}"* finalizó el *$DueDate*. Gracias por trabajar con nosotros. Todavía quedan fondos en su Monedero ("consulte su saldo":"$URL1"), y no queríamos que los perdiera sin saberlo.
+
+Para que todo funcione bien, bloqueamos los espacios cuya suscripción ha finalizado. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente, junto con los fondos de su Monedero.
+
+La buena noticia: conservar ambos es fácil. Solo tiene que renovar su suscripción antes del $BlockDateShort, y sus documentos, ajustes y fondos seguirán tal y como los dejó. El saldo de su Monedero incluso puede cubrir parte del importe.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde hacer una copia de seguridad de los datos que quiera conservar antes del $BlockDateShort.
+#else
+h1.Su espacio todavía tiene fondos esperándole
+
+Hace tiempo que nadie inicia sesión en su espacio de ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, pero todavía quedan fondos en su "Monedero":"$URL1". No queríamos que los perdiera sin saberlo.
+
+Para que todo funcione bien, bloqueamos los espacios inactivos. Esto es lo que significa para el suyo:
+
+*$BlockDate*: su espacio se bloqueará y no podrá iniciar sesión.
+*$DeleteDate*: el espacio y todos sus datos se eliminarán de forma permanente, junto con los fondos de su Monedero.
+
+La buena noticia: conservar ambos es fácil. Solo tiene que iniciar sesión una vez antes del $BlockDateShort, y sus documentos, ajustes y fondos seguirán tal y como los dejó.
+
+$OrangeButton
+
+Si ha decidido seguir otro camino, no pasa nada. Solo recuerde descargar los archivos que quiera conservar antes del $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Deactivación del Portal "${__VirtualRootPath}":"${__VirtualRootPath}" 
 
@@ -1151,30 +1346,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Su ${LetterLogoText} se &lt;span style="color: #FF6F3D;"&gt;eliminará&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Usted no ha entrado en su ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; durante más de medio año. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Como ha decidido no utilizarlo más, su ${LetterLogoText} y todos los datos se eliminarán de acuerdo con nuestra &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Política de privacidad&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Le agradeceríamos que nos enviara sus comentarios. ¿Por qué ha decidido dejar de utilizar ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Si desea seguir utilizando su ${LetterLogoText}, simplemente entre en él y realice cualquier acción.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Su ${LetterLogoText} se &lt;span style="color: #FF6F3D;"&gt;eliminará&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Usted no ha entrado en su ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; durante 3 meses.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tenga en cuenta: su ${LetterLogoText} y todos los datos se eliminarán tras 6 meses de inactividad. Basta con que inicie sesión ahora para mantener su ${LetterLogoText} activo y seguir utilizándolo.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Obtenga &lt;span style="color: #FF6F3D;"&gt;gratis&lt;/span&gt; las aplicaciones ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
 
@@ -1189,32 +1360,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 600; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Para editar documentos en dispositivos móviles, obtenga la aplicación ${LetterLogoText} Documents&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; Margin: 0; padding-bottom: 32px; padding-left: 126px; padding-right: 126px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 34px;"&gt;&lt;img height="32" width="32" src="$IMG2" alt="iOS"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 8px; padding-right: 30px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Para iOS&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 24px;"&gt;&lt;/td&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 20px;"&gt;&lt;img height="31" width="28" src="$IMG4" alt="Android"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 10px; padding-right: 16px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Para Android&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Su ${LetterLogoText} se &lt;span style="color: #FF6F3D;"&gt;eliminará&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Usted no ha entrado en su ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; durante más de medio año. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dado que ha decidido no utilizarlo más, su ${LetterLogoText} y todos los datos serán eliminados de acuerdo con nuestra &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Política de Privacidad&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Le agradeceríamos que nos diera su opinión. ¿Por qué ha decidido dejar de utilizar ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Si cree que esto es un error y quiere seguir utilizando ${LetterLogoText}, por favor, póngase en contacto con nuestro &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;equipo de soporte&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Su ${LetterLogoText} se &lt;span style="color: #FF6F3D;"&gt;eliminará&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Usted no ha entrado en su ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; durante 3 meses.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dado que no lo está utilizando, su ${LetterLogoText} y todos los datos se eliminarán tras 6 meses de inactividad de acuerdo con nuestra &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Política de privacidad&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Si cree que esto es un error y quiere seguir utilizando ${LetterLogoText}, por favor, póngase en contacto con nuestro &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;equipo de soporte&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1633,6 +1778,30 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Su contraseña se ha cambiado correctamente</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>El portal ${PortalUrl} ha sido bloqueado por la política de retención de datos</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} está bloqueado, pero sus datos están a salvo hasta el $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} se ha eliminado</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} se eliminará pronto (eliminación: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Última oportunidad para conservar su espacio de ${LetterLogoText} (eliminación: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} le echa de menos (acción necesaria antes del $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Su espacio de ${LetterLogoText} le echa de menos (acción necesaria antes del $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Todavía tiene fondos en su espacio de ${LetterLogoText} (acción necesaria antes del $BlockDate)</value>
+  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Desactivación del portal ${__VirtualRootHost}</value>
   </data>
@@ -1702,20 +1871,8 @@ $TrulyYours</value>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>Descubra 4 aplicaciones útiles dentro de su ${LetterLogoText}</value>
   </data>
-  <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>Su ${LetterLogoText} se eliminará</value>
-  </data>
-  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>Su ${LetterLogoText} se eliminará</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Obtenga gratis las aplicaciones de ${LetterLogoText}</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>Su ${LetterLogoText} se eliminará</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>Su ${LetterLogoText} se eliminará</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Descubra la suscripción empresarial de ${LetterLogoText}</value>

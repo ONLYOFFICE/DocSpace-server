@@ -76,7 +76,9 @@ public static class OpenTelemetryExtension
                 Assembly.GetEntryAssembly()?.GetName().Name
             }.FirstOrDefault(static s => !string.IsNullOrWhiteSpace(s));
 
-            var otlbuilder = builder.Services.AddOpenTelemetry()
+            // The host-builder overload also adds deployment.environment.name (from EnvironmentName) to the resource
+            // as a low-priority default; it does not generate service.instance.id, see the AddService call below.
+            var otlbuilder = builder.AddOpenTelemetry()
                 .WithMetrics(metrics =>
                 {
                     metrics.AddAspNetCoreInstrumentation()

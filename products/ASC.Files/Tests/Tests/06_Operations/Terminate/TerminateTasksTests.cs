@@ -100,7 +100,7 @@ public class TerminateTasksTests(
         var file = await CreateFileInMy("Autotest TerminateTasks Completed.docx", Owner);
 
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto(fileIds: [new DeleteBatchRequestDtoAllOfFileIds(file.Id)], immediately: true),
+            new DeleteBatchRequestDto(fileIds: [new DeleteBatchRequestDtoAllOfFileIds(file.Id)], immediately: true) { ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
         var operationId = results[0].Id;
 
@@ -177,7 +177,7 @@ public class TerminateTasksTests(
                 immediately: false),
             TestContext.Current.CancellationToken);
 
-        var results = (await _filesOperationsApi.EmptyTrashAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesOperationsApi.EmptyTrashAsync(true, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var operationId = results[0].Id;
 
         await WaitUntilInProgress(operationId);

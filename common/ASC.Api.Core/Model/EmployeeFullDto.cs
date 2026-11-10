@@ -228,6 +228,14 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
+    /// The spending limit on the AI services in force for this user - the personal one, or else the limit for every
+    /// user - with what the user spent against it. Null when no such limit applies to the user, when the portal has no
+    /// billing service, or when the caller is neither a DocSpace administrator nor the user; the limit of the portal as
+    /// a whole is not reflected here. The value, and the spending in particular, can lag by a few minutes.
+    /// </summary>
+    public UserServiceLimitDto AiServicesLimit { get; set; }
+
+    /// <summary>
     /// The current login event ID.
     /// </summary>
     /// <example>123</example>
@@ -269,18 +277,18 @@ public class EmployeeFullDtoHelper(
         AuthContext authContext,
         UserPhotoManager userPhotoManager,
         WebItemSecurity webItemSecurity,
-        CommonLinkUtility commonLinkUtility,
+        UserFieldsHelper userFieldsHelper,
         DisplayUserSettingsHelper displayUserSettingsHelper,
         ApiDateTimeHelper apiDateTimeHelper,
         WebItemManager webItemManager,
         SettingsManager settingsManager,
-        IQuotaService quotaService,
         TenantManager tenantManager,
         CoreBaseSettings coreBaseSettings,
         GroupSummaryDtoHelper groupSummaryDtoHelper,
         TfaAppAuthSettingsHelper tfaAppAuthSettingsHelper,
+        ITariffService tariffService,
         ILogger<EmployeeDtoHelper> logger)
-    : EmployeeDtoHelper(displayUserSettingsHelper, userPhotoManager, commonLinkUtility, userManager, authContext, logger)
+    : EmployeeDtoHelper(displayUserSettingsHelper, userPhotoManager, userFieldsHelper, userManager, authContext, logger)
 {
     // public static Expression<Func<User, UserInfo>> GetExpression(ApiContext apiContext)
     // {
@@ -352,8 +360,8 @@ public class EmployeeFullDtoHelper(
 
     public async Task<EmployeeFullDto> GetFullAsync(UserInfo userInfo, bool? shared = null)
     {
-        var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
         var tenant = tenantManager.GetCurrentTenant();
+        var roles = await _userFieldsHelper.GetRoleFlagsAsync(userInfo, tenant);
 
         var result = new EmployeeFullDto
         {
@@ -366,11 +374,11 @@ public class EmployeeFullDtoHelper(
             Terminated = apiDateTimeHelper.Get(userInfo.TerminatedDate),
             //WorkFrom = apiDateTimeHelper.Get(userInfo.WorkFromDate),
             Email = userInfo.Email,
-            IsVisitor = await _userManager.IsGuestAsync(userInfo),
-            IsAdmin = currentType is EmployeeType.DocSpaceAdmin && !userInfo.IsOwner(tenant),
-            IsRoomAdmin = currentType is EmployeeType.RoomAdmin,
-            IsOwner = userInfo.IsOwner(tenant),
-            IsCollaborator = currentType is EmployeeType.User,
+            IsVisitor = roles.IsVisitor,
+            IsAdmin = roles.IsAdmin,
+            IsRoomAdmin = roles.IsRoomAdmin,
+            IsOwner = roles.IsOwner,
+            IsCollaborator = roles.IsCollaborator,
             IsLDAP = userInfo.IsLDAP(),
             IsSSO = userInfo.IsSSO(),
             Shared = shared
@@ -380,20 +388,21 @@ public class EmployeeFullDtoHelper(
 
         var isDocSpaceAdmin = await _userManager.IsDocSpaceAdminAsync(_authContext.CurrentAccount.ID);
 
-        if ((coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Statistic) && (isDocSpaceAdmin || userInfo.Id == _authContext.CurrentAccount.ID))
+        if (isDocSpaceAdmin || userInfo.Id == _authContext.CurrentAccount.ID)
         {
-            var quotaSettings = await settingsManager.LoadAsync<TenantUserQuotaSettings>();
-            result.UsedSpace = Math.Max(0, (await quotaService.FindUserQuotaRowsAsync(tenant.Id, userInfo.Id)).Where(r => !string.IsNullOrEmpty(r.Tag) && !string.Equals(r.Tag, Guid.Empty.ToString())).Sum(r => r.Counter));
-            if (quotaSettings.EnableQuota)
+            var quota = await _userFieldsHelper.GetQuotaAsync(userInfo, tenant);
+
+            if (quota != null)
             {
-                var userQuotaSettings = await settingsManager.LoadAsync<UserQuotaSettings>(userInfo);
-
-                result.IsCustomQuota = userQuotaSettings != null && userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota;
-
-                result.QuotaLimit = userQuotaSettings != null ?
-                                    userQuotaSettings.UserQuota != userQuotaSettings.GetDefault().UserQuota ? userQuotaSettings.UserQuota : quotaSettings.DefaultQuota
-                                    : quotaSettings.DefaultQuota;
+                result.UsedSpace = quota.UsedSpace;
+                result.QuotaLimit = quota.QuotaLimit;
+                result.IsCustomQuota = quota.IsCustomQuota;
             }
+        }
+
+        if (isDocSpaceAdmin || userInfo.Id == _authContext.CurrentAccount.ID)
+        {
+            result.AiServicesLimit = (await tariffService.GetCachedUserServiceLimitAsync(tenant.Id, ServiceLimitGroups.AiServices, userInfo.Id))?.ToUserServiceLimitDto();
         }
 
         // if (userInfo.Sex.HasValue)
@@ -426,12 +435,6 @@ public class EmployeeFullDtoHelper(
         FillConacts(result, userInfo);
         await FillGroupsAsync(result, userInfo);
 
-        var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
-
-        result.AvatarOriginal = await _userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarMax = await _userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         var listAdminModules = await userInfo.GetListAdminModulesAsync(webItemSecurity, webItemManager);
         if (listAdminModules.Count > 0)
         {
@@ -460,10 +463,8 @@ public class EmployeeFullDtoHelper(
 
     private async Task FillGroupsAsync(EmployeeFullDto result, UserInfo userInfo)
     {
-        var currentId = _authContext.CurrentAccount.ID;
-
         // A User or a Guest may only see their own group membership; anyone else's is not theirs to know.
-        if (currentId != userInfo.Id && (await _userManager.IsUserAsync(currentId) || await _userManager.IsGuestAsync(currentId)))
+        if (await IsWithoutContactsAccessAsync(userInfo.Id))
         {
             return;
         }

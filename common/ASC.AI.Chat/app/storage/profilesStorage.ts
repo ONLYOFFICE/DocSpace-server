@@ -57,15 +57,33 @@ import {
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
+export type DocspaceProfile = Profile & {
+  /** BYOK provider id when the profile runs on the portal's own provider key. */
+  byokProvider?: string;
+};
+
+// The portal API path an `onlyoffice` profile is called through, whatever host
+// is put in front: the gateway proxy, or its BYOK route when the profile runs
+// on the portal's own provider key, so the key is sent along with the request.
+export function onlyofficeGatewayPath(profile: DocspaceProfile): string {
+  return profile.byokProvider
+    ? `${ONLYOFFICE_GATEWAY_PATH}/byok/${encodeURIComponent(profile.id)}`
+    : ONLYOFFICE_GATEWAY_PATH;
+}
+
+function gatewayBaseUrl(profile: DocspaceProfile): string {
+  return `${aiServiceBaseUrl}${onlyofficeGatewayPath(profile)}`;
+}
+
 export function withOnlyofficeProviderOverrides(
-  profile: Profile | undefined,
-): Profile | undefined {
+  profile: DocspaceProfile | undefined,
+): DocspaceProfile | undefined {
   if (!profile || profile.providerType !== "onlyoffice") {
     return profile;
   }
-  const resolved: Profile = {
+  const resolved: DocspaceProfile = {
     ...profile,
-    baseUrl: `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`,
+    baseUrl: gatewayBaseUrl(profile),
   };
   if (shouldForwardHeadersToProvider()) {
     resolved.headers = { ...getForwardedHeaders(), ...(profile.headers ?? {}) };
@@ -73,7 +91,7 @@ export function withOnlyofficeProviderOverrides(
   return resolved;
 }
 
-export function dtoToProfile(raw: unknown): Profile | undefined {
+export function dtoToProfile(raw: unknown): DocspaceProfile | undefined {
   if (!isObject(raw)) {
     return undefined;
   }
@@ -93,7 +111,7 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
   ) {
     return undefined;
   }
-  const profile: Profile = {
+  const profile: DocspaceProfile = {
     id,
     name,
     providerType,
@@ -101,6 +119,10 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
     modelId,
     createdAt,
   };
+  const byokProvider = getString(raw, "byokProvider");
+  if (byokProvider !== undefined) {
+    profile.byokProvider = byokProvider;
+  }
   const key = getString(raw, "key");
   if (key !== undefined) {
     profile.key = key;
@@ -133,6 +155,13 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
   const isCloudProvider = getBoolean(raw, "isCloudProvider");
   if (isCloudProvider !== undefined) {
     profile.isCloudProvider = isCloudProvider;
+  }
+  // Not a C# column today: the gateway's model is looked up by id in the
+  // library's own table when the field is absent. Read anyway, so a DTO
+  // that grows the field feeds the engine's compaction without a change here.
+  const contextWindow = getNumber(raw, "contextWindow");
+  if (contextWindow !== undefined && contextWindow > 0) {
+    profile.contextWindow = contextWindow;
   }
   return profile;
 }
@@ -216,6 +245,28 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
   );
 }
 
+// Reads whose answer an HTTP response echoes to the browser. The secrets of
+// a profile (`key`, `headers`) are what in-process provider calls need -
+// the chat engine and the passthroughs run under the caller's credentials
+// too - so only the AI service, which knows the caller's employee type, can
+// decide to drop them, and only Node knows which reads leave the process.
+// Every other read goes without the flag and keeps the secrets.
+const CLIENT_READ = { query: { forClient: true } };
+
+function parseProfileList(raw: unknown): Profile[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const result: Profile[] = [];
+  for (const item of raw) {
+    const profile = dtoToProfile(item);
+    if (profile) {
+      result.push(profile);
+    }
+  }
+  return result;
+}
+
 export class HttpProfilesStorage implements ProfilesStorage {
   async create(profile: Omit<Profile, "id" | "createdAt">): Promise<Profile> {
     const raw = await aiService.post(PATH, toCreateBody(profile));
@@ -275,14 +326,16 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // the profile exactly as the C# storage serves it (public gateway baseUrl
   // on SaaS — the same object `readAll` returns). This is the only variant
   // an HTTP response may echo: the override's internal service address and
-  // forwarded auth headers must never reach a client (Bug 82821).
-  async readByIdRaw(id: string): Promise<Profile | undefined> {
+  // forwarded auth headers must never reach a client (Bug 82821). Read with
+  // `forClient=true` like `readAllForClient`; get-by-id drops `key` and
+  // `headers` on top for every caller.
+  async readByIdRaw(id: string): Promise<DocspaceProfile | undefined> {
     const snapshot = readChatContext("profiles");
     if (snapshot) {
       return snapshot.profiles.find((p) => p.id === id);
     }
     try {
-      const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`, CLIENT_READ);
       return dtoToProfile(raw);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -293,24 +346,23 @@ export class HttpProfilesStorage implements ProfilesStorage {
     }
   }
 
+  // The profile list as an HTTP response may echo it: read with
+  // `forClient=true`, which tells the AI service the answer leaves this
+  // process, so it strips `key` and `headers` unless the caller administers
+  // the portal (an administrator needs them to edit a profile). Never served
+  // from the round snapshot, which carries the secrets for in-process use.
+  // An AI service that predates the flag ignores it and answers in full.
+  async readAllForClient(): Promise<Profile[]> {
+    return parseProfileList(await aiService.get(PATH, CLIENT_READ));
+  }
+
   async readAll(): Promise<Profile[]> {
     const snapshot = readChatContext("profiles");
     if (snapshot) {
       return snapshot.profiles;
     }
     reportChatContextMiss("profiles.readAll");
-    const raw = await aiService.get(PATH);
-    if (!Array.isArray(raw)) {
-      return [];
-    }
-    const result: Profile[] = [];
-    for (const item of raw) {
-      const profile = dtoToProfile(item);
-      if (profile) {
-        result.push(profile);
-      }
-    }
-    return result;
+    return parseProfileList(await aiService.get(PATH));
   }
 
   async update(profile: Profile): Promise<void> {
@@ -388,6 +440,13 @@ function mapGatewayModel(raw: unknown): Model | undefined {
   if (reasoningSupport !== undefined) {
     model.reasoningSupport = reasoningSupport;
     model.reasoning = reasoningSupport.thinks;
+  }
+  // OpenRouter's field, which the gateway proxies; the profile editor copies
+  // it onto the profile so the engine measures a thread against the real
+  // window instead of the library's id-based table.
+  const contextWindow = getNumber(raw, "context_length");
+  if (contextWindow !== undefined && contextWindow > 0) {
+    model.contextWindow = contextWindow;
   }
   return model;
 }

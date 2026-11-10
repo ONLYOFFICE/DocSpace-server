@@ -69,6 +69,13 @@ public class MetadataService(
     public const int MaxStringValueLength = 8000;
 
     /// <summary>
+    /// The largest magnitude of a number value: Number.MAX_SAFE_INTEGER, the largest integer a JSON client that reads
+    /// numbers as IEEE 754 doubles (a browser, Node) represents exactly. The column is a 64-bit integer and could hold
+    /// more, but a larger value would come back rounded on such a client and be written back rounded by its next save.
+    /// </summary>
+    public const long MaxNumberValue = (1L << 53) - 1;
+
+    /// <summary>
     /// The assignment of a template is a check-then-insert on the link table; two concurrent assignments of the same
     /// template to the same entry (a double click) would otherwise collide on the primary key instead of being idempotent.
     /// </summary>
@@ -88,6 +95,8 @@ public class MetadataService(
         await CheckTemplateNameIsFreeAsync(metadataDao, name, 0);
 
         var fieldsList = fields?.ToList() ?? [];
+
+        DemandAtLeastOneField(fieldsList.Count);
 
         // the whole batch is validated before anything is persisted, and the template is saved together with its fields
         // in one transaction, otherwise an invalid field or a failed write would leave an orphan template behind
@@ -138,6 +147,8 @@ public class MetadataService(
             }
         }
 
+        var visibilityChanged = visible.HasValue && visible.Value != template.Visible;
+
         template.Name = string.IsNullOrEmpty(name) ? template.Name : name;
         template.Visible = visible ?? template.Visible;
 
@@ -155,6 +166,16 @@ public class MetadataService(
         saved.Fields = template.Fields;
 
         filesMessageService.Send(MessageAction.MetadataTemplateUpdated, saved.Name);
+
+        if (visibilityChanged)
+        {
+            // hiding or showing a template flips hasMetadataFields on every entry it is assigned to, and the clients
+            // showing those entries learn it the way they learn any metadata change: by re-reading the entry. The
+            // search index needs nothing, it checks the visibility at query time.
+            var affectedLinks = await metadataDao.GetLinksByTemplateAsync(templateId);
+
+            await metadataEntryNotifier.NotifyUpdatedAsync(affectedLinks.Select(l => ((int)l.EntryId, l.EntryType)));
+        }
 
         return saved;
     }
@@ -285,8 +306,13 @@ public class MetadataService(
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
-        _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
-        var field = await GetTemplateFieldAsync(metadataDao, templateId, fieldId);
+        // the template comes with its fields: the field is found among them instead of being read once more, and a
+        // field of another template is unknown here the way GetTemplateFieldAsync answers it
+        var template = await GetUserTemplateAsync(metadataDao, templateId, withFields: true);
+        var field = template.Fields.FirstOrDefault(f => f.Id == fieldId) ?? throw new ItemNotFoundException();
+
+        // the field being deleted is one of the loaded ones, so the count after the deletion is the count less one
+        DemandAtLeastOneField(template.Fields.Count - 1);
 
         await DeleteFieldInternalAsync(metadataDao, field);
     }
@@ -432,9 +458,9 @@ public class MetadataService(
     /// </summary>
     private static async Task<EntryMetadata> LoadEntryMetadataAsync(IMetadataDao<int> metadataDao, int entryId, FileEntryType entryType)
     {
-        var templateIds = await metadataDao.GetLinksAsync(entryId, entryType)
-            .Select(l => l.TemplateId)
-            .ToListAsync();
+        // the links are kept whole: besides the template they say whether the entry cascades it and how
+        var links = await metadataDao.GetLinksAsync(entryId, entryType).ToDictionaryAsync(l => l.TemplateId);
+        var templateIds = links.Keys.ToList();
 
         var values = await metadataDao.GetValuesAsync(entryId, entryType).ToListAsync();
 
@@ -460,12 +486,20 @@ public class MetadataService(
                 continue;
             }
 
+            var link = links[templateId];
+
             result.Templates.Add(new TemplateMetadata
             {
                 Template = template,
-                Values = FilterValues(values, template)
+                Values = FilterValues(values, template),
+                Cascade = link.Cascade,
+                CascadeConflict = link.CascadeConflict
             });
         }
+
+        // the one rule of "something to fill", shared with the listing flag (IMetadataDao.GetEntriesWithFieldsAsync) and
+        // relied on by the AI filling instead of a copy of its own
+        result.HasMetadataFields = result.Templates.Any(t => t.Template.Visible && t.Template.Fields.Count > 0) || result.CustomFields.Count > 0;
 
         return result;
     }
@@ -568,6 +602,75 @@ public class MetadataService(
             // links become direct assignments and the inherited values stay
             await metadataDao.ConvertCascadeLinksToDirectAsync(folderId, templateId);
         }
+    }
+
+    /// <summary>
+    /// Turns the cascade of a template the folder already carries on or off without touching the assignment itself.
+    /// On: the link is marked cascading with the given conflict rule and a pass over the subtree is queued, the way
+    /// <see cref="AssignTemplatesToFolderAsync"/> does it; the id of that pass is returned. Off: the link stays, the
+    /// folder keeps its values, the links the subtree inherited from this folder become direct assignments with their
+    /// values (the same the unassignment of a cascading folder does), and a pass still running stops at its next batch,
+    /// which re-reads the folder's links. Null is returned when nothing was queued.
+    /// </summary>
+    public async Task<string> SetFolderTemplateCascadeAsync(int folderId, int templateId, bool cascade, MetadataConflictResolveType conflict)
+    {
+        var entry = await DemandEntryAccessAsync(folderId, FileEntryType.Folder, edit: true);
+
+        var metadataDao = daoFactory.GetMetadataDao<int>();
+
+        _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
+
+        // the call changes an assignment, it does not create one: a template the folder does not carry is unknown here
+        var link = await metadataDao.GetLinksAsync(folderId, FileEntryType.Folder).FirstOrDefaultAsync(l => l.TemplateId == templateId)
+                   ?? throw new ItemNotFoundException();
+
+        if (!cascade)
+        {
+            if (link.Cascade)
+            {
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLinksLockKey(folderId, FileEntryType.Folder)))
+                {
+                    await metadataDao.StopCascadeAsync(folderId, templateId);
+                }
+
+                await NotifyUpdateAsync(entry);
+            }
+
+            return null;
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLinksLockKey(folderId, FileEntryType.Folder)))
+        {
+            // the save upgrades the existing link: the flag goes on, the mode is replaced, an inherited link becomes the folder's own
+            await metadataDao.SaveLinksAsync(
+            [
+                new MetadataTemplateLink
+                {
+                    TemplateId = templateId,
+                    EntryId = folderId,
+                    EntryType = FileEntryType.Folder,
+                    Cascade = true,
+                    CascadeConflict = conflict
+                }
+            ]);
+        }
+
+        await NotifyUpdateAsync(entry);
+
+        var taskId = await cascadeWorker.StartAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, folderId, [templateId], conflict, MetadataCascadeMode.Assign);
+
+        await filesMessageService.SendAsync(MessageAction.MetadataCascadeStarted, entry, entry.Title);
+
+        return taskId;
+    }
+
+    /// <summary>
+    /// The operation a request of the caller has just queued, by its id: the status of the folder would report a pass
+    /// still running for other templates instead of the one the request started. The access was checked by that request.
+    /// </summary>
+    public async Task<MetadataCascadeOperation> GetCascadeOperationAsync(string taskId)
+    {
+        return await cascadeWorker.GetAsync(tenantManager.GetCurrentTenantId(), taskId);
     }
 
     public async Task<MetadataCascadeOperation> GetCascadeStatusAsync(int folderId)
@@ -719,6 +822,11 @@ public class MetadataService(
                     throw new ArgumentException($@"The field '{field.Name}' accepts a number value only", nameof(value));
                 }
 
+                if (value.NumberValue is > MaxNumberValue or < -MaxNumberValue)
+                {
+                    throw new ArgumentException($@"The value of the field '{field.Name}' must be between -{MaxNumberValue} and {MaxNumberValue}", nameof(value));
+                }
+
                 break;
             case MetadataFieldType.SingleChoice:
             case MetadataFieldType.MultiChoice:
@@ -764,7 +872,7 @@ public class MetadataService(
             throw new ItemNotFoundException();
         }
 
-        var allowed = edit ? await fileSecurity.CanEditAsync(entry) : await fileSecurity.CanReadAsync(entry);
+        var allowed = edit ? await fileSecurity.CanEditMetadataAsync(entry) : await fileSecurity.CanReadAsync(entry);
 
         if (!allowed)
         {
@@ -951,6 +1059,19 @@ public class MetadataService(
         if (userType != EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+    }
+
+    /// <summary>
+    /// A template is a set of fields an entry is described by, so one without fields is nothing to assign or to fill in:
+    /// it is neither created empty nor emptied by deleting its last field. The last field goes with the template, through
+    /// <see cref="DeleteTemplateAsync"/>.
+    /// </summary>
+    private static void DemandAtLeastOneField(int fieldCount)
+    {
+        if (fieldCount < 1)
+        {
+            throw new ArgumentException(@"A template must have at least one field", "fields");
         }
     }
 

@@ -45,9 +45,9 @@ public class DeleteWebPluginTests(
     // prefixes: privacyroom, people, group, accounts, keys, backup, plugins, migration, clients,
     // scopes, oauth2, ai) collides with another controller's route template, so the request never
     // reaches the web plugins controller and the server answers 404 instead of removing the
-    // plugin. Filed under the same routing defect as the PUT case below (bug 83425): both stem
-    // from the same reserved-prefix collision, just on a different HTTP verb.
-    [Trait("Bug", "83425")]
+    // plugin. Tracked as bug 84321; the PUT case (bug 83425) stems from the same routing defect,
+    // just on a different HTTP verb.
+    [Trait("Bug", "84321")]
     [Fact]
     public async Task DeleteWebPlugin_NameWithFilesPrefix_RemovesPlugin()
     {

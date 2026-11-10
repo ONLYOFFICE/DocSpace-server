@@ -43,6 +43,12 @@ public class BaseTest(
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    /// <summary>The id of this test's own portal.</summary>
+    protected int TenantId => _clients.TenantId;
+
+    /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
+    protected AspireAppFixture Fixture => fixture;
+
     protected HttpClient _filesClient = null!;
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;
@@ -71,6 +77,7 @@ public class BaseTest(
     protected UsersApi _portalUsersApi = null!;
     protected CommonSettingsApi _commonSettingsApi = null!;
     protected DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = null!;
+    protected SettingsApi _portalSettingsApi = null!;
     protected WebhooksApi _webhooksApi = null!;
 
     public async ValueTask InitializeAsync()
@@ -108,6 +115,7 @@ public class BaseTest(
         _portalUsersApi = _clients.PortalUsersApi;
         _commonSettingsApi = _clients.CommonSettingsApi;
         _settingsQuotaApi = _clients.SettingsQuotaApi;
+        _portalSettingsApi = _clients.PortalSettingsApi;
         _webhooksApi = _clients.WebhooksApi;
 
         await _peopleClient.Authenticate(Owner);

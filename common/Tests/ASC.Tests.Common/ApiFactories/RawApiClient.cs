@@ -115,4 +115,17 @@ public class RawApiClient(HttpClient client)
 
         return wrapper.Response;
     }
+
+    /// <summary>
+    /// Reads the whole envelope, for the fields next to <c>response</c> (<c>total</c>) that a
+    /// generated SDK wrapper does not carry.
+    /// </summary>
+    public async Task<RawApiResponse<T>> ReadEnvelopeAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        response.EnsureSuccessStatusCode();
+
+        var wrapper = await response.Content.ReadFromJsonAsync<RawApiResponse<T>>(_jsonOptions, cancellationToken);
+
+        return wrapper ?? throw new InvalidOperationException($"Empty response body for {response.RequestMessage?.Method} {response.RequestMessage?.RequestUri}.");
+    }
 }

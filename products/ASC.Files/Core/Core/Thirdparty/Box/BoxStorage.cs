@@ -98,18 +98,20 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
         }
     }
 
-    public Task<BoxFile> GetFileAsync(string fileId)
+    public async Task<BoxFile> GetFileAsync(string fileId)
     {
         try
         {
-            return _boxClient.FilesManager.GetInformationAsync(fileId, _boxFields);
+            return await _boxClient.FilesManager.GetInformationAsync(fileId, _boxFields);
         }
-        catch (Exception ex)
+        catch (BoxAPIException ex)
         {
-            if (ex.InnerException is BoxAPIException boxException && boxException.Error.Status == ((int)HttpStatusCode.NotFound).ToString())
+            // A trashed file answers 404 as well.
+            if (ex.Error?.Status == ((int)HttpStatusCode.NotFound).ToString())
             {
-                return Task.FromResult<BoxFile>(null);
+                return null;
             }
+
             throw;
         }
     }

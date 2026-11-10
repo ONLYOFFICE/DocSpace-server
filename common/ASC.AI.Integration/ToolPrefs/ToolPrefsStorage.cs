@@ -38,6 +38,8 @@ public class ToolPrefsStorage(
     IDbContextFactory<AiIntegrationContext> dbContextFactory,
     IDistributedLockProvider distributedLockProvider)
 {
+    public static readonly Guid TenantScopeCreatedBy = Guid.Empty;
+
     public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAllAsync(int tenantId, Guid createdBy, int? entryId = null)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
@@ -46,7 +48,13 @@ public class ToolPrefsStorage(
             ? context.GetAllToolPrefsByEntryAsync(tenantId, createdBy, entryId.Value)
             : context.GetAllToolPrefsAsync(tenantId, createdBy);
 
-        return await rows.ToDictionaryAsync(x => x.ServerType, ToDomain);
+        var result = new Dictionary<string, ToolPreference>();
+        await foreach (var entity in rows)
+        {
+            Accumulate(result, entity);
+        }
+
+        return result;
     }
 
     public async Task<ScopedValues<Dictionary<string, ToolPreference>>> ReadByScopesAsync(int tenantId, Guid createdBy, int? firstEntryId, int? secondEntryId)
@@ -58,8 +66,7 @@ public class ToolPrefsStorage(
 
         await foreach (var entity in context.GetAllToolPrefsByScopesAsync(tenantId, createdBy, firstEntryId, secondEntryId))
         {
-            var target = entity.EntryId.HasValue ? byEntry[entity.EntryId.Value] : global;
-            target[entity.ServerType] = ToDomain(entity);
+            Accumulate(entity.EntryId.HasValue ? byEntry[entity.EntryId.Value] : global, entity);
         }
 
         return new ScopedValues<Dictionary<string, ToolPreference>>(global, byEntry);
@@ -136,11 +143,26 @@ public class ToolPrefsStorage(
         }
     }
 
-    private static ToolPreference ToDomain(DbToolPreference entity) => new()
+    private static void Accumulate(Dictionary<string, ToolPreference> target, DbToolPreference entity)
     {
-        Disabled = entity.Disabled,
-        AllowAlways = entity.AllowAlways
-    };
+        target.TryGetValue(entity.ServerType, out var current);
+
+        target[entity.ServerType] = new ToolPreference
+        {
+            Disabled = Union(current?.Disabled, entity.Disabled),
+            AllowAlways = entity.CreatedBy == TenantScopeCreatedBy ? current?.AllowAlways : entity.AllowAlways
+        };
+    }
+
+    private static HashSet<string>? Union(HashSet<string>? first, HashSet<string>? second)
+    {
+        if (first is null)
+        {
+            return second;
+        }
+
+        return second is null ? first : [.. first, .. second];
+    }
 
     private static string GetLockKey(int tenantId, Guid createdBy, int? entryId)
     {

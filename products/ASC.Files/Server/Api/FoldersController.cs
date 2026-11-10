@@ -339,6 +339,7 @@ public abstract class FoldersController<T>(
     /// Create a folder
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
+    [RaisesWebhook(WebhookTrigger.FolderCreated)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder that was created", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
@@ -369,6 +370,10 @@ public abstract class FoldersController<T>(
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderTrashed, When = "once the queued operation moves the folder to the trash; the folders inside it raise none")]
+    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "instead when the folder is deleted at once: `immediately` is true, or it is already in the trash, inside a room or the root of a third-party storage")]
+    [RaisesWebhook(WebhookTrigger.RoomDeleted, When = "instead when the folder is a room")]
+    [RaisesWebhook(WebhookTrigger.AgentDeleted, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller may not delete the folder, or the folder is a room and `immediately` is not set")]
@@ -399,6 +404,7 @@ public abstract class FoldersController<T>(
     /// Set folder order
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/order</path>
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "when the order changes")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with the position it now holds", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read, or `order` is below 1 or is neither a number nor a dotted path ending in one")]
@@ -449,13 +455,13 @@ public abstract class FoldersController<T>(
 
         MetadataFilter metadataFilter = null;
 
-        if (inDto.MetadataTemplateId.HasValue || !string.IsNullOrEmpty(inDto.MetadataFilters))
+        if (inDto.MetadataTemplateId.HasValue || !string.IsNullOrEmpty(inDto.MetadataFilters) || inDto.IncludeHiddenMetadata == true)
         {
             // the endpoint is anonymous and the filter names the templates and the fields of the tenant: the access to the
             // folder is checked before the filter is parsed, so a caller without it cannot probe them through the validation errors
             await fileStorageService.GetFolderAsync(inDto.FolderId);
 
-            metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+            metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
         }
 
         var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location, inDto.FolderType, metadataFilter);
@@ -463,15 +469,26 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Searches the folder by metadata. The same filter the folder listing takes in the "metadataTemplateId" and "metadataFilters"
-    /// query parameters, here as a typed request body for the clients that build the conditions as objects rather than as a JSON string.
+    /// Lists one page of the contents of a folder narrowed by metadata, in the shape `GET api/2.0/files/{folderId}` returns:
+    /// subfolders in `folders`, files in `files`, the folder itself in `current`. The filter is a typed body:
+    /// `metadataTemplateId` alone keeps the entries the template is assigned to, every condition in `metadataFilters` must
+    /// hold at once, and `filterValue` adds a text search over titles and metadata values; the template and field IDs come
+    /// from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the folder unfiltered. The caller
+    /// needs read access to the folder. No entry is changed, but a recognised `sortBy` is saved as the account's default
+    /// order while an unrecognised one is ignored, and opening a room or an ordinary folder clears its new-item marks for
+    /// the caller. `withSubFolders` searches the whole subtree unless switched off; `total` counts every match, and `count`
+    /// with `startIndex` page through them. A folder in a connected third-party storage carries no metadata, so a filter
+    /// there returns an empty page. An unknown template or field, a field outside the named template, more than 20
+    /// conditions, or a filter in the Templates or Private section is refused with 400; a folder the caller may not read
+    /// with 403, a missing one with 404. To combine metadata with the user, extension or form filters, use
+    /// `GET api/2.0/files/{folderId}`, which takes the same filter as a JSON string.
     /// </remarks>
     /// <summary>
     /// Search a folder by metadata
     /// </summary>
     /// <path>api/2.0/files/{folderId}/search</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "Folder contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "One page of the folder contents that match the filter, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "Invalid metadata filter, or a metadata filter on a section that cannot apply it")]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
@@ -480,7 +497,7 @@ public abstract class FoldersController<T>(
     {
         var search = inDto.Search;
 
-        var metadataFilter = await metadataFilterHelper.ParseAsync(search.MetadataTemplateId, search.MetadataFilters);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(search.MetadataTemplateId, search.MetadataFilters, search.IncludeHiddenMetadata ?? false);
 
         var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, null, null, search.FilterType, default, true, search.WithSubFolders ?? true, null, null, null, search.SortBy, search.SortOrder, search.StartIndex, search.Count, search.FilterValue, metadataFilter: metadataFilter);
         return folder.NotFoundIfNull();
@@ -638,6 +655,9 @@ public abstract class FoldersController<T>(
     /// Rename a folder
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "when the title changes")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "instead when the folder is a room")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with its new title", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
@@ -686,8 +706,10 @@ public abstract class FoldersController<T>(
     /// be viewed, and `password` a secret to be asked for. Sending `access` with the value that grants nothing
     /// creates no link and answers with nothing. The caller needs the right to manage the links of the room the
     /// folder belongs to, which its manager and a portal administrator acting as room manager have, and a member with
-    /// content-creator or read access is refused with 403; an unknown folder is answered with 404. Read the address
-    /// from `sharedTo.shareLink`.
+    /// content-creator or read access is refused with 403; an unknown folder is answered with 404. A primary link
+    /// that was revoked is created anew by this call, with a new identifier, while
+    /// `GET api/2.0/files/folder/{id}/link` keeps answering such a link with 404. Read the address from
+    /// `sharedTo.shareLink`.
     /// </remarks>
     /// <summary>
     /// Create the folder primary external link
@@ -697,7 +719,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
     [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms")]
-    [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{id}/link")]
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
@@ -710,7 +732,8 @@ public abstract class FoldersController<T>(
             requiredAuth: inDto.FolderLink.Internal,
             allowUnlimitedDate: true,
             denyDownload: inDto.FolderLink.DenyDownload,
-            password: inDto.FolderLink.Password);
+            password: inDto.FolderLink.Password,
+            recreateRevoked: true);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -843,23 +866,33 @@ public class FoldersControllerCommon(
     SecurityContext securityContext,
     FilesSettingsHelper filesSettingsHelper,
     SettingsManager settingsManager,
-    MetadataFilterHelper metadataFilterHelper)
+    MetadataFilterHelper metadataFilterHelper,
+    AppSettingsService appSettingsService,
+    TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+    private const string PrivateRoomsAppId = "e2e-rooms";
+
     /// <remarks>
-    /// Returns the detailed list of files and folders located in the "Common" section.
+    /// Returns the detailed list of files and folders located in the "Common" section. `metadataTemplateId` and
+    /// `metadataFilters` narrow the listing to the entries carrying the template and matching the conditions, the
+    /// same way `GET api/2.0/files/{folderId}` does; an unknown template or field, or a malformed condition, is
+    /// refused with 400.
     /// </remarks>
     /// <summary>Get the "Common" section</summary>
     /// <path>api/2.0/files/@common</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Common\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@common")]
     public async Task<FolderContentDto<int>> GetCommonFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderCommonAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
     /// <remarks>
@@ -884,7 +917,7 @@ public class FoldersControllerCommon(
     [HttpGet("@favorites")]
     public async Task<FolderContentDto<int>> GetFavoritesFolder(GetFavoritesFolderRequestDto inDto)
     {
-        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
 
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
@@ -895,24 +928,28 @@ public class FoldersControllerCommon(
     /// member that has a personal section can read it; guest accounts are not given one, and the call then answers
     /// 404. Nothing in the section is modified, though passing `sortBy` saves the requested order as the default
     /// order for this account. Without a filter only the top level of the section is listed; as soon as `filterType`,
-    /// `userIdOrGroupId` or `filterValue` narrows the request, the search descends through the whole subtree.
-    /// `filterValue` is matched against titles and against indexed document content, and the index is written
-    /// asynchronously, so a file uploaded a moment ago can be missing from a search for a short while. `folders` and
-    /// `files` hold one page of the result, `total` counts everything that matches before `count` and `startIndex`
-    /// are applied, and `current` describes the section folder. To open a folder inside the section, call
-    /// `GET api/2.0/files/{folderId}` with its identifier.
+    /// `userIdOrGroupId`, `filterValue` or a metadata filter narrows the request, the search descends through the whole
+    /// subtree. `filterValue` is matched against titles and against indexed document content, and the index is written
+    /// asynchronously, so a file uploaded a moment ago can be missing from a search for a short while.
+    /// `metadataTemplateId` and `metadataFilters` keep only the entries carrying the template and matching the
+    /// conditions, the same way `GET api/2.0/files/{folderId}` does; an unknown template or field, or a malformed
+    /// condition, is refused with 400. `folders` and `files` hold one page of the result, `total` counts everything
+    /// that matches before `count` and `startIndex` are applied, and `current` describes the section folder. To open
+    /// a folder inside the section, call `GET api/2.0/files/{folderId}` with its identifier.
     /// </remarks>
     /// <summary>Get the "My documents" section</summary>
     /// <path>api/2.0/files/@my</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"My documents\" section with one page of its contents", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"My documents\" section")]
     [SwaggerResponse(404, "This account has no personal section")]
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolder(GetMyTrashFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderMyAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
     /// <remarks>
@@ -953,7 +990,7 @@ public class FoldersControllerCommon(
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolder(GetRecentFolderRequestDto inDto)
     {
-        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
 
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension, metadataFilter: metadataFilter);
     }
@@ -991,35 +1028,46 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the detailed list of files and folders located in the "Shared with me" section.
+    /// Returns the detailed list of files and folders located in the "Shared with me" section: the entries other
+    /// members shared with the caller directly. `metadataTemplateId` and `metadataFilters` keep only the shared
+    /// entries carrying the template and matching the conditions, the same way `GET api/2.0/files/{folderId}` does
+    /// with the section identifier; an unknown template or field, or a malformed condition, is refused with 400.
     /// </remarks>
     /// <summary>Get the "Shared with me" section</summary>
     /// <path>api/2.0/files/@share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Shared with me\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@share")]
     public async Task<FolderContentDto<int>> GetShareFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderShareAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
     /// <remarks>
-    /// Returns the detailed list of files located in the "Templates" section.
+    /// Returns the detailed list of files located in the "Templates" section. The section gathers its files from
+    /// tags and cannot apply a metadata filter, so a request carrying `metadataTemplateId` or `metadataFilters` is
+    /// refused with 400 rather than answered unfiltered.
     /// </remarks>
     /// <summary>Get the "Templates" section</summary>
     /// <path>api/2.0/files/@templates</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Templates\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or a metadata filter is set on a section that cannot apply it")]
     [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
     [SwaggerResponse(404, "The required folder was not found")]
     [HttpGet("@templates")]
     public async Task<FolderContentDto<int>> GetTemplatesFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderTemplatesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
     /// <remarks>
@@ -1030,21 +1078,25 @@ public class FoldersControllerCommon(
     /// `GET api/2.0/files/fileops`. This call itself modifies nothing, though passing `sortBy` saves the requested
     /// order as the default order for this account. Only the top level of the section is listed, so the contents of a
     /// deleted folder are not expanded into it, and `filterValue` is matched against titles alone here rather than
-    /// against document content. `folders` and `files` hold one page of the result, `total` counts everything that
-    /// matches before `count` and `startIndex` are applied, and `current` describes the section folder. An account
-    /// that is given no Trash of its own, an outsider for instance, receives 404.
+    /// against document content. `metadataTemplateId` and `metadataFilters` keep only the deleted entries carrying the
+    /// template and matching the conditions, the same way `GET api/2.0/files/{folderId}` does; an unknown template or
+    /// field, or a malformed condition, is refused with 400. `folders` and `files` hold one page of the result,
+    /// `total` counts everything that matches before `count` and `startIndex` are applied, and `current` describes
+    /// the section folder. An account that is given no Trash of its own, an outsider for instance, receives 404.
     /// </remarks>
     /// <summary>Get the "Trash" section</summary>
     /// <path>api/2.0/files/@trash</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Trash\" section with one page of the entries the caller deleted", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Trash\" section")]
     [SwaggerResponse(404, "This account has no \"Trash\" section")]
     [HttpGet("@trash")]
     public async Task<FolderContentDto<int>> GetTrashFolder(GetMyTrashFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(Convert.ToInt32(await globalFolderHelper.FolderTrashAsync), inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, inDto.ApplyFilterOption, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
     /// <remarks>
@@ -1054,21 +1106,64 @@ public class FoldersControllerCommon(
     /// content, so `folders` carries the rooms while `files` comes back empty; to read what is inside one of them,
     /// call `GET api/2.0/files/{folderId}` with the room identifier. Nothing is modified, though passing `sortBy`
     /// saves the requested order as the default order for this account. `filterType`, `filterValue`,
-    /// `userIdOrGroupId` and the sorting parameters narrow and order the room list, `count` and `startIndex` page
-    /// through it, `total` reports how many rooms match the request in full, and `current` describes the section
-    /// folder itself.
+    /// `userIdOrGroupId` and the sorting parameters narrow and order the room list, `metadataTemplateId` and
+    /// `metadataFilters` keep only the rooms carrying the template and matching the conditions (an unknown template
+    /// or field, or a malformed condition, is refused with 400), `count` and `startIndex` page through it, `total`
+    /// reports how many rooms match the request in full, and `current` describes the section folder itself.
     /// </remarks>
     /// <summary>Get the "Forms" section</summary>
     /// <path>api/2.0/files/@forms</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Forms\" section with one page of the form-filling rooms available to the caller", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Forms\" section")]
     [SwaggerResponse(404, "The \"Forms\" section could not be resolved for this account")]
     [HttpGet("@forms")]
     public async Task<FolderContentDto<int>> GetFormsFolder(GetCommonFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFormsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFormsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
+    }
+
+    /// <remarks>
+    /// Returns the private rooms section: the flat list of end-to-end encrypted rooms the caller is a member of. Such
+    /// rooms are stored under the "Rooms" tree but are surfaced only here, so `GET api/2.0/files/rooms` leaves them out of
+    /// the active area and lists them when `searchArea` names the private rooms area instead. An administrator who is not
+    /// a member does not see a private room here either. The section is not expanded into room content, so `folders`
+    /// carries the rooms while `files` comes back empty; to read what is inside one of them, call
+    /// `GET api/2.0/files/{folderId}` with the room identifier. Nothing is modified, though passing `sortBy` saves the
+    /// requested order as the default order for this account. `filterType`, `filterValue`, `userIdOrGroupId` and the
+    /// sorting parameters narrow and order the room list, `metadataTemplateId` and `metadataFilters` keep only the rooms
+    /// carrying the template and matching the conditions, `count` and `startIndex` page through it, `total` reports how
+    /// many rooms match the request in full, and `current` describes the section folder itself. Archived private rooms
+    /// stay in the archive area; narrow it with `privacyFilter` of `GET api/2.0/files/rooms`.
+    /// </remarks>
+    /// <summary>Get the private rooms section</summary>
+    /// <path>api/2.0/files/@private</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "The private rooms section with one page of the private rooms the caller is a member of", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
+    [SwaggerResponse(403, "The caller is not allowed to read the private rooms section")]
+    [SwaggerResponse(404, "The end-to-end encrypted rooms app is turned off on this portal")]
+    [HttpGet("@private")]
+    public async Task<FolderContentDto<int>> GetPrivateRoomsFolder(GetCommonFolderRequestDto inDto)
+    {
+        if (!await IsPrivateRoomsAppEnabledAsync())
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivateRoomsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
+    }
+
+    private async Task<bool> IsPrivateRoomsAppEnabledAsync()
+    {
+        var app = await appSettingsService.GetAppAsync(tenantManager.GetCurrentTenantId(), PrivateRoomsAppId);
+
+        return app is { Enabled: true };
     }
 
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
@@ -1102,12 +1197,19 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderFormsAsync;
+
+        if (await IsPrivateRoomsAppEnabledAsync())
+        {
+            yield return await globalFolderHelper.FolderPrivateRoomsAsync;
+        }
+
         yield return await globalFolderHelper.FolderArchiveAsync;
 
         var aiAccessSettings = await aiAccessSettingsTask;
         if (aiAccessSettings.Enabled)
         {
             yield return await globalFolderHelper.FolderAiAgentsAsync;
+            yield return await globalFolderHelper.FolderAiHubAsync;
         }
     }
 }

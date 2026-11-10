@@ -33,58 +33,33 @@
 
 package com.asc.common.messaging.publisher;
 
-import com.asc.common.messaging.configuration.ClientCacheMessagingConfiguration;
-import com.asc.common.service.ports.output.message.publisher.AuthorizationMessagePublisher;
 import com.asc.common.service.transfer.message.ClientCacheRemoveEvent;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 /**
- * Implementation of {@link AuthorizationMessagePublisher} that publishes {@link
- * ClientCacheRemoveEvent} messages to a RabbitMQ exchange.
+ * Publishes single client client cache evictions ({@link ClientCacheRemoveEvent}) to every region,
+ * and at once to the authorization service of the local region; see {@link
+ * ClientCacheEvictionPublisher}.
  *
- * <p>This publisher broadcasts client cache removal events to the client cache messaging system
- * using the exchange defined in {@link ClientCacheMessagingConfiguration#ENTRY_EXCHANGE}. Messages
- * are distributed across all regions via the fanout exchange pattern.
+ * <p>Only active in the SaaS profile, where multi-region cache invalidation is required, and only
+ * loaded when RabbitMQ classes are available on the classpath.
  *
- * <p>This implementation is only active in the SaaS profile where multi-region cache invalidation
- * is required.
- *
- * <p>This publisher is only loaded when RabbitMQ classes are available on the classpath.
- *
- * @see AuthorizationMessagePublisher
+ * @see ClientCacheEvictionPublisher
  * @see ClientCacheRemoveEvent
- * @see ClientCacheMessagingConfiguration
  */
-@Slf4j
 @Component
 @Profile("saas")
-@RequiredArgsConstructor
 @ConditionalOnClass(name = "com.rabbitmq.client.Connection")
 public class RabbitClientCacheRemoveMessagePublisher
-    implements AuthorizationMessagePublisher<ClientCacheRemoveEvent> {
-  /** The AMQP client used to send messages to RabbitMQ. */
-  private final AmqpTemplate amqpClient;
-
-  /**
-   * Publishes a client cache removal event to the client cache message exchange.
-   *
-   * <p>The message is sent to the entry exchange defined in {@link
-   * ClientCacheMessagingConfiguration#ENTRY_EXCHANGE} with an empty routing key. The message will
-   * be distributed to all regional queues via the fanout exchange for multi-region cache
-   * invalidation.
-   *
-   * @param message the {@link ClientCacheRemoveEvent} to publish
-   */
-  @Override
-  public void publish(ClientCacheRemoveEvent message) {
-    log.debug("Broadcasting a client cache removal event: {}", message);
-    amqpClient.convertAndSend(
-        ClientCacheMessagingConfiguration.ENTRY_EXCHANGE, Strings.EMPTY, message);
+    extends ClientCacheEvictionPublisher<ClientCacheRemoveEvent> {
+  public RabbitClientCacheRemoveMessagePublisher(
+      AmqpTemplate amqpClient,
+      @Value("${spring.application.region}") String region,
+      RabbitBackgroundPublisher background) {
+    super(amqpClient, region, background);
   }
 }

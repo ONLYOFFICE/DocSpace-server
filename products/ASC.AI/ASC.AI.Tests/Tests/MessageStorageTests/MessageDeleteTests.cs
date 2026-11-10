@@ -35,107 +35,100 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Messages")]
-public class MessageDeleteTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class MessageDeleteTests(AspireAppFixture fixture) : MessageTestBase(fixture)
 {
     [Fact]
     public async Task Delete_Existing_Removes()
     {
-        var thread = await CreateThreadAsync();
-        var created = await CreateMessageAsync(thread.Id);
+        var threadId = await CreateMessageThreadAsync();
+        var messageId = await AppendAsync(threadId);
 
-        using var response = await _ai.DeleteAsync(
-            $"{MessagesPath}/{created.Id}",
-            TestContext.Current.CancellationToken);
+        var result = await _aiThreads.AiThreadsDeleteMessageAsync(messageId, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
 
-        using var readResponse = await _ai.GetAsync(
-            $"{MessagesPath}/{created.Id}",
-            TestContext.Current.CancellationToken);
-        readResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await GetMessageAsync(messageId));
+        exception.ErrorCode.Should().Be(404);
     }
 
+    // The internal route answers 404; the public one is idempotent by design and reports success for an unknown id
+    // (the storage swallows the 404 so the engine's cascades never fail on a message already gone).
     [Fact]
-    public async Task Delete_NonExisting_Returns404()
+    public async Task Delete_NonExisting_ReportsSuccess()
     {
-        using var response = await _ai.DeleteAsync(
-            $"{MessagesPath}/{Guid.NewGuid()}",
-            TestContext.Current.CancellationToken);
+        var result = await _aiThreads.AiThreadsDeleteMessageAsync(Guid.NewGuid().ToString(), TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        result.Success.Should().BeTrue();
     }
 
     [Fact]
     public async Task Delete_OneMessage_DoesNotAffectOthers()
     {
-        var thread = await CreateThreadAsync();
-        var first = await CreateMessageAsync(thread.Id, BuildMessageContents("first"));
-        var second = await CreateMessageAsync(thread.Id, BuildMessageContents("second"));
+        var threadId = await CreateMessageThreadAsync();
+        var first = await AppendAsync(threadId, "first");
+        var second = await AppendAsync(threadId, "second");
 
-        using var response = await _ai.DeleteAsync(
-            $"{MessagesPath}/{first.Id}",
-            TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var result = await _aiThreads.AiThreadsDeleteMessageAsync(first, TestContext.Current.CancellationToken);
+        result.Success.Should().BeTrue();
 
-        var remaining = await ReadMessagesByThreadAsync(thread.Id);
-        remaining.Should().ContainSingle(m => m.Id == second.Id);
+        var remaining = await ReadMessagesAsync(threadId);
+        remaining.Should().ContainSingle(m => m.Id == second);
     }
 
     [Fact]
     public async Task DeleteByThread_Existing_RemovesAllMessages()
     {
-        var thread = await CreateThreadAsync();
-        await CreateMessageAsync(thread.Id, BuildMessageContents("first"));
-        await CreateMessageAsync(thread.Id, BuildMessageContents("second"));
-        await CreateMessageAsync(thread.Id, BuildMessageContents("third"));
+        var threadId = await CreateMessageThreadAsync();
+        await AppendAsync(threadId, "first");
+        await AppendAsync(threadId, "second");
+        await AppendAsync(threadId, "third");
 
-        using var response = await _ai.DeleteAsync(
-            $"{ThreadsPath}/{thread.Id}/messages",
-            TestContext.Current.CancellationToken);
+        var result = await _aiThreads.AiThreadsClearMessagesAsync(threadId, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
 
-        var remaining = await ReadMessagesByThreadAsync(thread.Id);
+        var remaining = await ReadMessagesAsync(threadId);
         remaining.Should().BeEmpty();
+
+        // The thread itself outlives its messages.
+        var thread = await _aiThreads.AiThreadsGetByIdAsync(threadId, TestContext.Current.CancellationToken);
+        thread.ThreadId.Should().Be(threadId);
     }
 
     [Fact]
     public async Task DeleteByThread_DoesNotAffectOtherThreads()
     {
-        var first = await CreateThreadAsync("first");
-        var second = await CreateThreadAsync("second");
+        var first = await CreateMessageThreadAsync("first");
+        var second = await CreateMessageThreadAsync("second");
 
-        await CreateMessageAsync(first.Id, BuildMessageContents("first-msg"));
-        var secondMessage = await CreateMessageAsync(second.Id, BuildMessageContents("second-msg"));
+        await AppendAsync(first, "first-msg");
+        var secondMessage = await AppendAsync(second, "second-msg");
 
-        using var response = await _ai.DeleteAsync(
-            $"{ThreadsPath}/{first.Id}/messages",
-            TestContext.Current.CancellationToken);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        var result = await _aiThreads.AiThreadsClearMessagesAsync(first, TestContext.Current.CancellationToken);
+        result.Success.Should().BeTrue();
 
-        var secondMessages = await ReadMessagesByThreadAsync(second.Id);
-        secondMessages.Should().ContainSingle(m => m.Id == secondMessage.Id);
+        var secondMessages = await ReadMessagesAsync(second);
+        secondMessages.Should().ContainSingle(m => m.Id == secondMessage);
     }
 
+    // The clear itself swallows a missing thread, but the touch that follows it does not, so an unknown thread is
+    // a 404 — as rename answers for the same id.
     [Fact]
     public async Task DeleteByThread_NonExistentThread_Returns404()
     {
-        using var response = await _ai.DeleteAsync(
-            $"{ThreadsPath}/{Guid.NewGuid()}/messages",
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiThreads.AiThreadsClearMessagesAsync(Guid.NewGuid().ToString(), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
-    public async Task DeleteByThread_EmptyThread_Returns204()
+    public async Task DeleteByThread_EmptyThread_ReportsSuccess()
     {
-        var thread = await CreateThreadAsync();
+        var threadId = await CreateMessageThreadAsync();
 
-        using var response = await _ai.DeleteAsync(
-            $"{ThreadsPath}/{thread.Id}/messages",
-            TestContext.Current.CancellationToken);
+        var result = await _aiThreads.AiThreadsClearMessagesAsync(threadId, TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        result.Success.Should().BeTrue();
     }
 }

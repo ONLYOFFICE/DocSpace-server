@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Hesabın sonlandırılmasını onayla</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Destek ekibiyle iletişime geç</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Portalı Devre Dışı Bırak</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Odaya katıl</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Alanımı koru</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Alanımı ve bakiyemi koru</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Geribildirim Bırak</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Şifre ayarla</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Geri bildirimimi paylaş</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Ücretsiz denemeyi başlat</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Alanımın engelini kaldır</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Yükseltme</value>
@@ -748,6 +763,186 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} portalı veri saklama politikası nedeniyle engellendi: kullanılmıyordu ya da aboneliği yenilenmedi. Hangisi olduğunu aşağıdaki kategori gösteriyor.
+
+*Portal:* ${PortalUrl}
+*Sahip:* ${UserName} ${UserEmail}
+*Kategori:* ${Category}
+*Silinme tarihi:* ${DeleteDate}
+
+Engeli kaldırılmazsa portal ve tüm verileri bu tarihte silinecek.
+
+Sahip portalın korunmasını isterse portalı bu tarihten önce yeniden etkinleştirin.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Alanınız engellendi, ancak henüz hiçbir şey kaybolmadı
+
+#if($Unpaid == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınızın aboneliği sona erdiği için alanı şimdilik engelledik. Bu, ekibinizden hiç kimsenin şu anda oturum açamayacağı anlamına geliyor, ancak tüm belgeleriniz ve ayarlarınız hâlâ güvende.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız bir süredir kullanılmadığı için alanı şimdilik engelledik. Bu, ekibinizden hiç kimsenin şu anda oturum açamayacağı anlamına geliyor, ancak tüm belgeleriniz ve ayarlarınız hâlâ güvende.
+#end
+
+Verileriniz *$DeleteDate* tarihine kadar bizde kalacak. Bu tarihten sonra alan ve içindeki her şey kalıcı olarak silinecek.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+İyi haber: henüz geç değil. $DeleteDateShort tarihinden önce alanınızın engelini kaldırın, ardından işinize dönmek için aboneliğinizi yenileyin. Her şey bıraktığınız yerde olacak.
+#else
+İyi haber: henüz geç değil. $DeleteDateShort tarihinden önce alanınızın engelini kaldırmanız yeterli; her şey bıraktığınız yerde olacak.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz veriler varsa alanınızın engelini kaldırın ve $DeleteDateShort tarihinden önce yedekleyin.
+#else
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa alanınızın engelini kaldırın ve $DeleteDateShort tarihinden önce indirin.
+#end
+#else
+İyi haber: henüz geç değil. $DeleteDateShort tarihinden önce destek ekibimizle iletişime geçmeniz yeterli; alanınızı bıraktığınız gibi geri almanıza yardımcı olacağız.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa $DeleteDateShort tarihinden önce bize bildirin, bunlara erişmenize yardımcı olalım.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Alanınız silindi
+
+#if($Unpaid == "True")
+Aboneliği sona eren ve yenilenmeyen *$PortalName* adlı ${LetterLogoText} alanınızı tüm verileriyle birlikte "Gizlilik Politikamızda":"$URL1" açıklandığı şekilde sildik.
+#else
+Uzun süredir kullanılmayan *$PortalName* adlı ${LetterLogoText} alanınızı tüm verileriyle birlikte "Gizlilik Politikamızda":"$URL1" açıklandığı şekilde sildik.
+#end
+
+#if($Unpaid == "True")
+Bizimle çalıştığınız için teşekkür ederiz. Kullanmayı neden bıraktığınızı gerçekten merak ediyoruz: bir şey işinize yaramadı mı, daha uygun bir çözüm mü buldunuz, yoksa artık ihtiyacınız mı kalmadı? Yalnızca bir dakikanızı alır ve her yanıt kendimizi geliştirmemize yardımcı olur.
+#else
+${LetterLogoText} ürününü denediğiniz için teşekkür ederiz. Kullanmayı neden bıraktığınızı gerçekten merak ediyoruz: bir şey işinize yaramadı mı, daha uygun bir çözüm mü buldunuz, yoksa artık ihtiyacınız mı kalmadı? Yalnızca bir dakikanızı alır ve her yanıt kendimizi geliştirmemize yardımcı olur.
+#end
+
+$OrangeButton
+
+Bir gün geri dönmek isterseniz sizi her zaman bekleriz. İstediğiniz zaman "yeni bir alan oluşturabilirsiniz":"$URL2".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Alanınız yakında silinecek
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız, aboneliği sona erdiği için hâlâ engelli. Bu dostça bir son hatırlatmadır: *$DeleteDate* tarihinde alan ve tüm verileri kalıcı olarak silinecek.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız, aboneliği sona erdiği için hâlâ engelli. Bu dostça bir hatırlatmadır: *$DeleteDate* tarihinde alan ve tüm verileri kalıcı olarak silinecek.
+#end
+#else
+#if($FinalNotice == "True")
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız, bir süredir kullanılmadığı için hâlâ engelli. Bu dostça bir son hatırlatmadır: *$DeleteDate* tarihinde alan ve tüm verileri kalıcı olarak silinecek.
+#else
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınız, bir süredir kullanılmadığı için hâlâ engelli. Bu dostça bir hatırlatmadır: *$DeleteDate* tarihinde alan ve tüm verileri kalıcı olarak silinecek.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Alanı korumak istiyorsanız hâlâ zamanınız var. $DeleteDateShort tarihinden önce alanınızın engelini kaldırın, ardından işinize dönmek için aboneliğinizi yenileyin. Her şey bıraktığınız yerde olacak.
+#else
+Alanı korumak istiyorsanız hâlâ zamanınız var. $DeleteDateShort tarihinden önce alanınızın engelini kaldırmanız yeterli; her şey bıraktığınız yerde olacak.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz veriler varsa alanınızın engelini kaldırın ve $DeleteDateShort tarihinden önce yedekleyin. Bu tarihten sonra bunları kurtaramayacağız.
+#else
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa alanınızın engelini kaldırın ve $DeleteDateShort tarihinden önce indirin. Bu tarihten sonra bunları kurtaramayacağız.
+#end
+#else
+Alanı korumak istiyorsanız hâlâ zamanınız var. $DeleteDateShort tarihinden önce destek ekibimizle iletişime geçmeniz yeterli; alanınızı bıraktığınız gibi geri almanıza yardımcı olacağız.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Saklamak istediğiniz dosyalar varsa $DeleteDateShort tarihinden önce bize bildirin, bunlara erişmenize yardımcı olalım. Bu tarihten sonra bunları kurtaramayacağız.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Bir süredir sizi göremiyoruz
+
+Bir süredir kimse *"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınızda oturum açmadı. Belgelerinize ve ayarlarınıza bir şey olmadan önce size ulaşmak istedik.
+
+Her şeyin herkes için sorunsuz çalışması için bir süredir kullanılmayan ücretsiz alanları engelliyoruz. Bunun sizin alanınız için anlamı şu:
+
+*$BlockDate*: alanınız engellenecek ve oturum açamayacaksınız.
+*$DeleteDate*: alan ve tüm verileri kalıcı olarak silinecek.
+
+İyi haber: alanınızı korumak çok kolay. $BlockDateShort tarihinden önce bir kez oturum açmanız yeterli; her şey bıraktığınız gibi kalacak.
+
+$OrangeButton
+
+Alana artık ihtiyacınız yoksa hiçbir şey yapmanıza gerek yok. Yalnızca saklamak istediğiniz dosyaları $BlockDateShort tarihinden önce indirmeyi unutmayın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Aboneliğiniz sona erdi ama alanınız hâlâ burada
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* için ${LetterLogoText} aboneliğiniz *$DueDate* tarihinde sona erdi. Bizimle çalıştığınız için teşekkür ederiz. ${LetterLogoText} ile işinizin biraz kolaylaştığını umuyoruz.
+
+Her şeyin sorunsuz çalışması için aboneliği sona eren alanları engelliyoruz. Bunun sizin alanınız için anlamı şu:
+
+*$BlockDate*: alanınız engellenecek ve oturum açamayacaksınız.
+*$DeleteDate*: alan ve tüm verileri kalıcı olarak silinecek.
+
+İyi haber: alanınızı korumak çok kolay. $BlockDateShort tarihinden önce aboneliğinizi yenilemeniz yeterli; belgeleriniz, ayarlarınız ve ekibiniz bıraktığınız yerde kalacak.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Yalnızca saklamak istediğiniz verileri $BlockDateShort tarihinden önce yedeklemeyi unutmayın.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Aboneliğiniz sona erdi ama alanınız ve bakiyeniz hâlâ burada
+
+*"${__VirtualRootPath}":"${__VirtualRootPath}"* için ${LetterLogoText} aboneliğiniz *$DueDate* tarihinde sona erdi. Bizimle çalıştığınız için teşekkür ederiz. Cüzdanınızda hâlâ bakiye var ("bakiyenizi kontrol edin":"$URL1") ve bundan habersiz kaybetmenizi istemedik.
+
+Her şeyin sorunsuz çalışması için aboneliği sona eren alanları engelliyoruz. Bunun sizin alanınız için anlamı şu:
+
+*$BlockDate*: alanınız engellenecek ve oturum açamayacaksınız.
+*$DeleteDate*: alan ve tüm verileri, cüzdanınızdaki bakiyeyle birlikte kalıcı olarak silinecek.
+
+İyi haber: ikisini de korumak çok kolay. $BlockDateShort tarihinden önce aboneliğinizi yenilemeniz yeterli; belgeleriniz, ayarlarınız ve bakiyeniz bıraktığınız yerde kalacak. Cüzdan bakiyeniz bunun bir kısmını bile karşılayabilir.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Yalnızca saklamak istediğiniz verileri $BlockDateShort tarihinden önce yedeklemeyi unutmayın.
+#else
+h1.Alanınızda sizi bekleyen bakiye var
+
+Bir süredir kimse *"${__VirtualRootPath}":"${__VirtualRootPath}"* adresindeki ${LetterLogoText} alanınızda oturum açmadı, ancak alanın "cüzdanında":"$URL1" hâlâ bakiye var. Bundan habersiz kaybetmenizi istemedik.
+
+Her şeyin sorunsuz çalışması için etkin olmayan alanları engelliyoruz. Bunun sizin alanınız için anlamı şu:
+
+*$BlockDate*: alanınız engellenecek ve oturum açamayacaksınız.
+*$DeleteDate*: alan ve tüm verileri, cüzdanınızdaki bakiyeyle birlikte kalıcı olarak silinecek.
+
+İyi haber: ikisini de korumak çok kolay. $BlockDateShort tarihinden önce bir kez oturum açmanız yeterli; belgeleriniz, ayarlarınız ve bakiyeniz bıraktığınız yerde kalacak.
+
+$OrangeButton
+
+Başka bir yola devam etmeye karar verdiyseniz bu tamamen normal. Yalnızca saklamak istediğiniz dosyaları $BlockDateShort tarihinden önce indirmeyi unutmayın.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1."${__VirtualRootPath}":"${__VirtualRootPath}" portalı devre dışı bırakma
 
@@ -1157,30 +1352,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText}’iniz &lt;span style="color: #FF6F3D;"&gt;silinecek&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; konumuna yarım yıldan fazla bir süredir giriş yapmadınız. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Artık kullanmamaya karar verdiğiniz için, ${LetterLogoText}’iniz ve tüm veriler &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Gizlilik Politikamız doğrultusunda&lt;/a&gt; silinecektir.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Geri bildiriminizi almaktan memnuniyetle duyarız. ${LetterLogoText}’i kullanmayı bırakma sebebiniz nedir?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;${LetterLogoText}’inizi kullanmaya devam etmek istiyorsanız, sadece giriş yapıp herhangi bir işlem yapmanız yeterlidir.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText}’iniz &lt;span style="color: #FF6F3D;"&gt;silinecek&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; konumuna 3 aydır giriş yapmadınız.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Lütfen dikkat: ${LetterLogoText}'iniz ve tüm veriler 6 ay hareketsizlik sonrasında silinecektir. ${LetterLogoText}'inizin aktif kalması ve kullanmaya devam edebilmeniz için şimdi giriş yapmanız yeterlidir.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;&lt;span style="color: #FF6F3D;"&gt;Ücretsiz&lt;/span&gt; ${LetterLogoText} uygulamalarını edinin&lt;/td&gt;&lt;/tr&gt;
 
@@ -1195,32 +1366,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 600; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Belgeleri mobil cihazlarda düzenlemek için ${LetterLogoText} Documents uygulamasını edinin&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; Margin: 0; padding-bottom: 32px; padding-left: 126px; padding-right: 126px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 34px;"&gt;&lt;img height="32" width="32" src="$IMG2" alt="iOS"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 8px; padding-right: 30px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;iOS&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 24px;"&gt;&lt;/td&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 20px;"&gt;&lt;img height="31" width="28" src="$IMG4" alt="Android"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 10px; padding-right: 16px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Android&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText}’iniz &lt;span style="color: #FF6F3D;"&gt;silinecektir&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; konumuna yarım yıldan fazla bir süredir giriş yapmadınız. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Artık kullanmamaya karar verdiğiniz için ${LetterLogoText}'iniz ve tüm veriler &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Gizlilik Politikamız&lt;/a&gt; uyarınca silinecektir.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Geri bildirim almaktan memnun oluruz. Niçin ${LetterLogoText}'i kullanmayı bırakmaya karar verdiniz?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Bunun bir hata olduğunu düşünüyorsanız ve ${LetterLogoText}'i kullanmaya devam etmek istiyorsanız, lütfen &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;destek ekibimiz&lt;/a&gt; ile iletişime geçin.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;${LetterLogoText}’iniz &lt;span style="color: #FF6F3D;"&gt;silinecektir&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; konumuna 3 aydır giriş yapmadınız.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Kullanmadığınız için ${LetterLogoText}'iniz ve tüm veriler 6 ay hareketsizlik sonrasında &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Gizlilik Politikamız&lt;/a&gt; uyarınca silinecektir.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Bunun bir hata olduğunu düşünüyorsanız ve ${LetterLogoText}'i kullanmaya devam etmek istiyorsanız, lütfen &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;destek ekibimiz&lt;/a&gt; ile iletişime geçin.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1665,6 +1810,30 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Şifreniz başarıyla değiştirildi</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>${PortalUrl} portalı veri saklama politikası nedeniyle engellendi</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>${LetterLogoText} alanınız engellendi, ancak verileriniz $DeleteDateShort tarihine kadar güvende</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>${LetterLogoText} alanınız silindi</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>${LetterLogoText} alanınız yakında silinecek (silinme tarihi: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>${LetterLogoText} alanınızı korumak için son şans (silinme tarihi: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>${LetterLogoText} alanınız sizi özledi ($BlockDateShort tarihine kadar işlem yapmanız gerekiyor)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>${LetterLogoText} alanınız sizi özledi ($BlockDateShort tarihine kadar işlem yapmanız gerekiyor)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>${LetterLogoText} alanınızda hâlâ bakiye var ($BlockDate tarihine kadar işlem yapmanız gerekiyor)</value>
+  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>${__VirtualRootHost} portal deaktivasyonu</value>
   </data>
@@ -1737,20 +1906,8 @@ $TrulyYours</value>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>${LetterLogoText} içindeki 4 kullanışlı uygulamayı keşfedin</value>
   </data>
-  <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>${LetterLogoText}’iniz silinecektir</value>
-  </data>
-  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>${LetterLogoText}’iniz silinecektir</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Ücretsiz ${LetterLogoText} uygulamalarını edinin</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>${LetterLogoText}’iniz silinecektir</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>${LetterLogoText}’iniz silinecektir</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>${LetterLogoText}’in işletme aboneliğini keşfedin</value>

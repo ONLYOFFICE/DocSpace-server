@@ -41,19 +41,40 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// the same services the sending code uses. What is left here is the *expected* side of the assertions,
 /// and keeping it independent is the point: a help-center link that the letter and this file disagree
 /// about is a finding, not a duplication. The two places a value is still an input rather than an
-/// expectation are <see cref="PortalUrl"/>, which seeds the request the sending code would have had, and
+/// expectation are <see cref="PublishedUrl"/>, which seeds the request the sending code would have had, and
 /// <see cref="ConfigDirectory"/>, which the in-process host is configured from.
 /// </summary>
 internal static class LetterEnvironment
 {
     /// <summary>
-    /// Where the Aspire stack publishes the portal (OpenResty, <c>Constants.RestyPort</c> in the
-    /// AppHost). Override with <c>PORTAL_URL</c> to preview against another host.
+    /// Where the Aspire stack publishes its services (OpenResty, <c>Constants.RestyPort</c> in the
+    /// AppHost). Override with <c>PORTAL_URL</c> to preview against another host. It seeds the request
+    /// the sending code would have had; a portal itself answers on <see cref="PortalUrlFor"/>.
     /// </summary>
-    public static string PortalUrl { get; } =
+    public static string PublishedUrl { get; } =
         Environment.GetEnvironmentVariable("PORTAL_URL")?.TrimEnd('/') is { Length: > 0 } url
             ? url
             : "http://localhost:8092";
+
+    /// <summary>
+    /// The base domain of the stack, saved by <see cref="LetterStackFixture"/> into the installation-wide
+    /// <c>BaseDomain</c> setting before any portal is registered - which is where a server installation
+    /// keeps it; <c>core:base-domain</c> stays <c>localhost</c>, which is what makes it standalone. Not
+    /// <c>localhost</c> itself: on that <c>Tenant.GetTenantDomain</c> collapses every portal onto the
+    /// default one and rewrites its alias, so a portal saved afterwards would collide with that one.
+    /// </summary>
+    public const string BaseDomain = "dev.localhost";
+
+    /// <summary>
+    /// Where a registered portal answers: its alias under <see cref="BaseDomain"/>, on the port the stack
+    /// publishes, which is what <c>CommonLinkUtility</c> builds its links from.
+    /// </summary>
+    public static string PortalUrlFor(string alias)
+    {
+        var published = new Uri(PublishedUrl);
+
+        return new UriBuilder(published.Scheme, $"{alias}.{BaseDomain}", published.Port).Uri.ToString().TrimEnd('/');
+    }
 
     /// <summary>
     /// The default branding text. Letters must never spell the product name out: they carry
@@ -99,21 +120,18 @@ internal static class LetterEnvironment
     public static string SalesEmail { get; } = Fallback(ExternalResources.Common.GetDefaultRegionalFullEntry("paymentemail"), "sales@onlyoffice.com");
 
     /// <summary>
-    /// What <c>StudioNotifyHelper.GetNotificationImageUrl</c> returns for an empty file name, i.e. the
-    /// value of the <c>ImagePath</c> tag: <c>web:notification:image:path</c> when configured, the
-    /// portal's own image folder otherwise — which is the case in the local stack.
+    /// A single notification image on a given portal, e.g. <c>configure_docspace.gif</c>: what
+    /// <c>StudioNotifyHelper.GetNotificationImageUrl</c> returns once the in-process host has pinned
+    /// <c>web:notification:image:path</c> to that portal (<see cref="NotificationImagePathFor"/>).
     /// </summary>
-    private static string NotificationImagePath { get; } = BuildNotificationImagePath();
-
-    /// <summary>A single notification image, e.g. <c>configure_docspace.gif</c>.</summary>
-    public static string NotificationImageUrl(string fileName)
+    public static string NotificationImageUrl(string portalUrl, string fileName)
     {
-        return $"{NotificationImagePath}/{fileName}";
+        return $"{NotificationImagePathFor(portalUrl)}/{fileName}";
     }
 
     /// <summary>
     /// The notification image folder on a given portal. The registered portal answers on its own alias
-    /// rather than on <see cref="PortalUrl"/>, so the images a letter carries have to be pinned to the
+    /// rather than on <see cref="PublishedUrl"/>, so the images a letter carries have to be pinned to the
     /// same host as its links — otherwise the letter points at two portals at once.
     /// </summary>
     public static string NotificationImagePathFor(string portalUrl)
@@ -140,20 +158,6 @@ internal static class LetterEnvironment
     private static string Fallback(string? value, string fallback)
     {
         return string.IsNullOrEmpty(value) ? fallback : value;
-    }
-
-    private static string BuildNotificationImagePath()
-    {
-        var configured = Configuration["web:notification:image:path"];
-
-        if (!string.IsNullOrEmpty(configured))
-        {
-            return configured.TrimEnd('/');
-        }
-
-        var images = Configuration["web:images"] ?? "static/images";
-
-        return $"{PortalUrl}/{images.Trim('~', '/')}/notifications";
     }
 
     private static IConfiguration BuildConfiguration()

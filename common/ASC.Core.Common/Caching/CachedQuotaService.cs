@@ -41,40 +41,49 @@ internal class CachedQuotaService() : IQuotaService
     private readonly GeolocationHelper _geolocationHelper;
     private readonly bool _quotaCacheEnabled;
     private readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan _quotasLockTimeout = TimeSpan.FromSeconds(30);
 
     private const string KeyQuota = "quota";
     private const string KeyQuotaRows = "quotarows";
 
-    public CachedQuotaService(DbQuotaService service, IFusionCacheProvider cacheProvider, GeolocationHelper geolocationHelper, IConfiguration Configuration) : this()
+    public CachedQuotaService(DbQuotaService service, IFusionCacheProvider cacheProvider, GeolocationHelper geolocationHelper, IConfiguration configuration) : this()
     {
         _service = service ?? throw new ArgumentNullException(nameof(service));
         _geolocationHelper = geolocationHelper;
         _cache = cacheProvider.GetMemoryCache();
 
-        if (Configuration["core:enable-quota-cache"] == null)
+        if (configuration["core:enable-quota-cache"] == null)
         {
             _quotaCacheEnabled = true;
         }
         else
         {
-            _quotaCacheEnabled = !bool.TryParse(Configuration["core:enable-quota-cache"], out var enabled) || enabled;
+            _quotaCacheEnabled = !bool.TryParse(configuration["core:enable-quota-cache"], out var enabled) || enabled;
         }
     }
 
     public async Task<IEnumerable<TenantQuota>> GetTenantQuotasAsync()
     {
-        var cacheKey = KeyQuota + (await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
-        var quotas = await _cache.GetOrDefaultAsync<IEnumerable<TenantQuota>>(cacheKey);
-        if (quotas == null)
+        if (!_quotaCacheEnabled)
         {
-            quotas = await _service.GetTenantQuotasAsync();
-            if (_quotaCacheEnabled)
-            {
-                await _cache.SetAsync(cacheKey, quotas, _cacheExpiration, [CacheExtention.GetTenantQuotaTag((await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key)]);
-            }
+            return await _service.GetTenantQuotasAsync();
         }
 
-        return quotas;
+        var geoKey = (await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key;
+
+        // Mapping the list prices it through the payment services, so concurrent misses wait for one build instead
+        // of each pricing the list again. The factory must never read the quota list itself: the wait for the key
+        // would then never end, and the lock timeout is what turns such a cycle into a second build instead of a hang.
+        return await _cache.GetOrSetAsync<IEnumerable<TenantQuota>>(KeyQuota + geoKey, async (ctx, _) =>
+        {
+            var result = await _service.GetTenantQuotasAsync();
+            ctx.Tags = [CacheExtention.GetTenantQuotaTag(geoKey)];
+            return ctx.Modified(result);
+        }, opt =>
+        {
+            opt.Duration = _cacheExpiration;
+            opt.LockTimeout = _quotasLockTimeout;
+        });
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int id)

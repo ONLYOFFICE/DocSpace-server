@@ -33,18 +33,32 @@
 
 package com.asc.registration.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.asc.common.application.proto.AuthorizationServiceGrpc;
 import com.asc.registration.application.service.ConsentService;
+import com.asc.registration.application.transfer.CreateClientRequest;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.Random;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -114,5 +128,88 @@ public class RegistrationServiceSaasIT extends AbstractRegistrationServiceIT {
   protected AuthorizationServiceGrpc.AuthorizationServiceBlockingStub
       getAuthorizationServiceClient() {
     return authorizationServiceClient;
+  }
+
+  private static CreateClientRequest maximumSizeClientRequest(String name, Random random) {
+    var logo = new byte[25600];
+    random.nextBytes(logo);
+    return CreateClientRequest.builder()
+        .name(name + "n".repeat(256 - name.length()))
+        .description("d".repeat(255))
+        .logo("data:image/png;base64," + Base64.getEncoder().encodeToString(logo))
+        .allowPkce(false)
+        .isPublic(false)
+        .websiteUrl("https://example.com")
+        .termsUrl("https://example.com/terms")
+        .policyUrl("https://example.com/policy")
+        .redirectUris(
+            IntStream.range(0, 12)
+                .mapToObj(i -> "https://example.com/redirect/%02d/%s".formatted(i, "p".repeat(200)))
+                .collect(Collectors.toSet()))
+        .allowedOrigins(
+            IntStream.range(0, 12)
+                .mapToObj(i -> "https://o%02d%s.example.com".formatted(i, "q".repeat(50)))
+                .collect(Collectors.toSet()))
+        .logoutRedirectUri("https://example.com/logout")
+        .scopes(Set.of("files:read"))
+        .build();
+  }
+
+  private JsonNode listClients(int limit, JsonNode cursor, String cookie) throws Exception {
+    var body =
+        restClient()
+            .get()
+            .uri(
+                builder -> {
+                  builder.path(WEB_API + "/clients").queryParam("limit", limit);
+                  if (cursor != null)
+                    builder
+                        .queryParam("last_client_id", cursor.get("last_client_id").asText())
+                        .queryParam("last_created_on", cursor.get("last_created_on").asText());
+                  return builder.build();
+                })
+            .header(HttpHeaders.COOKIE, cookie)
+            .retrieve()
+            .body(String.class);
+    return new ObjectMapper().readTree(body);
+  }
+
+  @Test
+  void givenTenantAtClientCapWithMaximumSizeClients_whenListing_thenEveryClientIsReturned()
+      throws Exception {
+    var tenantId = 2L;
+    var random = new Random(42);
+    var created = new ArrayList<String>();
+    for (var user = 0; user < 3; user++) {
+      var cookie = signatureCookie(randomUserId(), tenantId, false, false, true);
+      for (var i = 0; i < 10; i++) {
+        var response =
+            createClient(maximumSizeClientRequest("list-" + user + "-" + i, random), cookie);
+
+        assertCreated(response);
+
+        created.add(extractJsonField(response.getBody(), "client_id"));
+      }
+    }
+
+    var adminCookie = signatureCookie(randomUserId(), tenantId, true, false, false);
+    var page = listClients(50, null, adminCookie);
+
+    assertThat(page.get("data")).hasSize(30);
+    assertThat(page.path("last_client_id").isMissingNode() || page.get("last_client_id").isNull())
+        .isTrue();
+
+    var seen = new HashSet<String>();
+    JsonNode cursor = null;
+
+    for (var pages = 0; pages < 5; pages++) {
+      var next = listClients(10, cursor, adminCookie);
+      next.get("data").forEach(client -> seen.add(client.get("client_id").asText()));
+      if (next.path("last_client_id").isMissingNode() || next.get("last_client_id").isNull()) break;
+      cursor = next;
+    }
+
+    assertThat(seen).containsExactlyInAnyOrderElementsOf(created);
+    assertOk(deleteTenantClients(adminCookie));
   }
 }

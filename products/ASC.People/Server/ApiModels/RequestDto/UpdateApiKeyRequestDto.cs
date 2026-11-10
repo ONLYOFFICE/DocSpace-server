@@ -40,10 +40,13 @@ namespace ASC.People.ApiModels.RequestDto;
 public class UpdateApiKeyRequest
 {
     /// <summary>
-    /// The new label of the key, up to 30 characters. Omit it to keep the current name.
+    /// The new label of the key, up to 30 characters, neither empty nor made of whitespace only. Omit it to keep the
+    /// current name.
     /// </summary>
     /// <example>Updated API Key</example>
     [StringLength(30, ErrorMessage = "Incorrect name. Length must be less than 30")]
+    [MinLength(1, ErrorMessage = "Incorrect name. It must not be empty or consist of whitespace only")]
+    [RegularExpression(@"[\s\S]*\S[\s\S]*", ErrorMessage = "Incorrect name. It must not be empty or consist of whitespace only")]
     public string Name { get; set; }
 
     /// <summary>

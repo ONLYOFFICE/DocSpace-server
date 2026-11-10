@@ -203,8 +203,8 @@ public class ApiKeysController(
     /// Returns the API key that authenticated this very request, letting the holder of a key find out what it is
     /// allowed to do without knowing its ID.
     /// The key is identified by the `Authorization` header of the call itself, so the request has to be sent as
-    /// `Bearer sk-...`; a session authenticated in any other way has no key to report and this operation is not
-    /// usable for it.
+    /// `Bearer sk-...`; a session authenticated in any other way, by a cookie or by a user token, has no key to
+    /// report and is rejected with 400.
     /// The call is read-only and returns one entry, with the same fields as `GET api/2.0/keys` and without the
     /// secret - read `permissions` for the granted scopes, `expiresAt` for the expiry and `isActive` for the state.
     /// To look at a key other than the one in use, call `GET api/2.0/keys` instead.
@@ -215,14 +215,20 @@ public class ApiKeysController(
     /// <path>api/2.0/keys/@self</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "The API key that authenticated this request", typeof(ApiKeyResponseDto))]
-    [SwaggerResponse(400, "The request has no Authorization header, as with a session authenticated by a cookie")]
-    [SwaggerResponse(500, "The Authorization header carries a token that is not an API key of this portal")]
+    [SwaggerResponse(400, "The request is not authenticated by an API key, as with a session authenticated by a cookie or by a user token")]
     [HttpGet("@self")]
     public async Task<ApiKeyResponseDto> GetApiKey()
     {
-        var token = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString()["Bearer ".Length..];
+        var header = httpContextAccessor?.HttpContext?.Request.Headers.Authorization.ToString();
 
-        var apiKey = await apiKeyManager.GetApiKeyAsync(token);
+        if (string.IsNullOrEmpty(header) || !header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("The request is not authenticated by an API key");
+        }
+
+        var apiKey = await apiKeyManager.GetApiKeyAsync(header["Bearer ".Length..])
+            ?? throw new ArgumentException("The request is not authenticated by an API key");
+
         return await mapper.MapManual(apiKey);
     }
 
@@ -233,11 +239,13 @@ public class ApiKeysController(
     /// The caller may update a key they created themselves, and a DocSpace administrator may update any key of the
     /// portal.
     /// Take the values for `permissions` from `GET api/2.0/keys/permissions`; an unknown scope or an empty array is
-    /// rejected with 400, and the fields that are left out keep their current values.
+    /// rejected with 400, as is a name that is empty or made of whitespace only, and the fields that are left out
+    /// keep their current values.
     /// The answer is a plain boolean: true when the key was changed, and false when it was not - which is also what
     /// an already expired key returns, because such a key is left untouched instead of being reported as an error.
     /// Deactivating a key through `isActive` stops it from authenticating while keeping it in the list, so use it
     /// when the key may be needed again and `DELETE api/2.0/keys/{keyId}` when it may not.
+    /// An ID that matches no key of the portal, including a key that has already been deleted, is rejected with 404.
     /// </remarks>
     /// <summary>
     /// Update an API key
@@ -245,15 +253,15 @@ public class ApiKeysController(
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "True if the key was changed, false if it was left untouched because it has already expired", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read, the name is longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know")]
+    [SwaggerResponse(400, "The request body cannot be read, the name is empty, made of whitespace only or longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know")]
     [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
-    [SwaggerResponse(500, "The portal has no key with this ID")]
+    [SwaggerResponse(404, "The portal has no key with this ID")]
     [HttpPut("{keyId:guid}")]
     public async Task<bool> UpdateApiKey(UpdateApiKeyRequestDto requestDto)
     {
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
-        var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId);
+        var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId) ?? throw new ItemNotFoundException("API key not found");
 
         if (apiKey.ExpiresAt.HasValue && apiKey.ExpiresAt.Value < DateTime.UtcNow)
         {
@@ -292,6 +300,7 @@ public class ApiKeysController(
     /// deleted key cannot be restored and a new one has to be issued through `POST api/2.0/keys`.
     /// To stop a key temporarily instead, set `isActive` to false through `PUT api/2.0/keys/{keyId}`.
     /// The answer is a plain boolean reporting whether the key was removed.
+    /// An ID that matches no key of the portal, including a key that has already been deleted, is rejected with 404.
     /// </remarks>
     /// <summary>
     /// Delete an API key
@@ -300,14 +309,14 @@ public class ApiKeysController(
     [Tags("Api keys")]
     [SwaggerResponse(200, "True if the key was removed", typeof(bool))]
     [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
-    [SwaggerResponse(500, "The portal has no key with this ID")]
+    [SwaggerResponse(404, "The portal has no key with this ID")]
     [HttpDelete("{keyId:guid}")]
     public async Task<bool> DeleteApiKey(DeleteApiKeyRequestDto requestDto)
     {
         var keyId = requestDto.KeyId;
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
-        var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);
+        var apiKey = await apiKeyManager.GetApiKeyAsync(keyId) ?? throw new ItemNotFoundException("API key not found");
 
         if (!isAdmin && apiKey.CreateBy != authContext.CurrentAccount.ID)
         {

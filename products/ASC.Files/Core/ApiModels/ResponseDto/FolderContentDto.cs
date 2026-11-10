@@ -127,7 +127,12 @@ public class FolderContentDtoHelper(
         return folderContentWrapper.NotFoundIfNull();
     }
 
-    public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex)
+    /// <summary>
+    /// Builds the page from the entries already read. The search text the listing was filtered by, when there was one,
+    /// lets the page say where its entries matched it in their metadata, the hidden templates included when the search
+    /// looked at them.
+    /// </summary>
+    public async Task<FolderContentDto<T>> GetAsync<T>(T parentId, DataWrapper<T> folderItems, int startIndex, string searchText = null, bool includeHiddenMetadata = false)
     {
         var result = new FolderContentDto<T>
         {
@@ -223,8 +228,10 @@ public class FolderContentDtoHelper(
             result.Current.RootRoomType = DocSpaceHelper.MapToRoomType(folderItems.ParentRoom.FolderType);
         }
 
-        // one round trip for the whole page, files and folders together
-        await fileWrapperHelper.SetAssignedMetadataTemplatesAsync([.. (result.Files ?? []).OfType<FileEntryDto<int>>(), .. (result.Folders ?? []).OfType<FileEntryDto<int>>()]);
+        // the metadata of the whole page, files and folders together, in one pass
+        List<FileEntryDto<int>> pageEntries = [.. (result.Files ?? []).OfType<FileEntryDto<int>>(), .. (result.Folders ?? []).OfType<FileEntryDto<int>>()];
+
+        await fileWrapperHelper.SetMetadataAsync(pageEntries, searchText, includeHiddenMetadata);
 
         return result;
 
@@ -355,7 +362,7 @@ public class FolderContentDtoHelper(
             folderType: folderType,
             metadataFilter: metadataFilter);
 
-        return await GetAsync(folderId, items, startIndex);
+        return await GetAsync(folderId, items, startIndex, text, metadataFilter?.IncludeHiddenTemplates ?? false);
     }
 
 }

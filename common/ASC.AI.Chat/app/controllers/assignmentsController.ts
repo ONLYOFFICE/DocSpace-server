@@ -31,21 +31,32 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
+import { AssignmentsEngine, ActionType, CapabilitiesUI } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString, isObject } from "../narrow.js";
+import { asActionType, asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 const engine = new AssignmentsEngine({ storage });
 
-const ACTION_TYPES = new Set<string>(Object.values(ActionType));
-
-function asActionType(value: unknown): ActionType | undefined {
-  if (typeof value !== "string" || !ACTION_TYPES.has(value)) {
-    return undefined;
+// The engine's lenient lookup still throws a plain Error when the slot
+// names a profile that can no longer be loaded - deleted without the
+// assignment cascade, or one the caller cannot see. For the caller that is
+// the same as an empty slot, not a server failure, so both resolve
+// operations answer it as one (404 and an empty result respectively)
+// instead of a 500.
+async function resolveOrNull(
+  actionType: ActionType,
+  entityId: string | undefined,
+): Promise<Awaited<ReturnType<AssignmentsEngine["tryResolveForAction"]>>> {
+  try {
+    return await engine.tryResolveForAction(actionType, entityId);
+  } catch (err) {
+    if (err instanceof Error && err.message.startsWith("Assigned profile not found")) {
+      return null;
+    }
+    throw err;
   }
-  return value as ActionType;
 }
 
 interface AssignBody {
@@ -73,7 +84,21 @@ export const assignmentsController = {
       return;
     }
     const entityId = asString(req.query["entityId"]);
-    const result = await engine.resolveForAction(actionType, entityId);
+    // A nonexistent room used to answer the portal-wide profile with 200;
+    // get-all-assignments already 404s it (Bug 82832), and so do both
+    // resolve operations now (Bug 84279). An accessible room is accepted;
+    // the bindings themselves are portal-wide.
+    await assertEntityAccessible(entityId);
+    // The engine's throwing variant reports "nothing configured" with a
+    // plain Error, which read as a 500 (Bugs 84278, 84450); the lenient
+    // variant answers null for the same states (and `resolveOrNull` for an
+    // assigned profile that is gone), and that is a 404 here — the status
+    // threads/create gives the same condition.
+    const result = await resolveOrNull(actionType, entityId);
+    if (result === null) {
+      res.status(404).json({ error: `no AI profile is available for ActionType.${actionType}` });
+      return;
+    }
     res.json(result);
   }),
 
@@ -84,7 +109,8 @@ export const assignmentsController = {
       return;
     }
     const entityId = asString(req.query["entityId"]);
-    const result = await engine.tryResolveForAction(actionType, entityId);
+    await assertEntityAccessible(entityId);
+    const result = await resolveOrNull(actionType, entityId);
     res.json(result);
   }),
 
@@ -157,13 +183,38 @@ export const assignmentsController = {
   getAllAssignments: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     // Read-side gating (Bug 82832): a supplied entityId must reference a folder
-    // the caller can access — a nonexistent/no-access id 404s. But a valid
-    // *non-agent* folder is fine: it falls through and assignmentsStorage
-    // degrades the read to the global scope (review #2), so the model
-    // assignment still loads in ordinary rooms and My Documents. An
-    // absent/empty entityId stays the global scope.
+    // the caller can access — a nonexistent/no-access id 404s. A valid folder
+    // is fine: the bindings are portal-wide (review #2), so the model
+    // assignment loads the same in ordinary rooms and My Documents. An
+    // absent/empty entityId is the ordinary case.
     await assertEntityAccessible(entityId);
     const result = await engine.getAllAssignments(entityId);
+    // `expand=profile` answers the assigned profiles themselves instead of
+    // their ids, with the catalogue's counts, so a chat can start on one
+    // read: the client learns its current model (name, provider,
+    // capabilities) and whether the portal has any profile at all without
+    // `profiles/list`, which it reads only when the model picker opens. An
+    // assignment whose profile is gone is left out, as the id-only answer
+    // would point at nothing.
+    if (asString(req.query["expand"]) === "profile") {
+      const profiles = await storage.profiles.readAllForClient();
+      const byId = new Map(profiles.map((profile) => [profile.id, profile]));
+      const assignments: Record<string, (typeof profiles)[number]> = {};
+      for (const [actionType, profileId] of Object.entries(result)) {
+        const profile = profileId ? byId.get(profileId) : undefined;
+        if (profile) assignments[actionType] = profile;
+      }
+      // A profile without known capabilities may chat, as the widget's
+      // model picker assumes (`CapabilitiesUI.Chat`).
+      const canChat = (p: { capabilities?: number | null }) =>
+        !p.capabilities || (p.capabilities & CapabilitiesUI.Chat) !== 0;
+      res.json({
+        assignments,
+        profilesTotal: profiles.length,
+        chatProfilesTotal: profiles.filter(canChat).length,
+      });
+      return;
+    }
     res.json(result);
   }),
 

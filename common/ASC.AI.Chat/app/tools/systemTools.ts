@@ -45,7 +45,6 @@ import {
 } from "../../config/index.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { withTimeout } from "../storage/httpClient.js";
-import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
 import logger from "../log.js";
 
@@ -128,7 +127,7 @@ function readCookie(cookieHeader: string | undefined, name: string): string | un
 // server rejects the request ("Authorization header is required").
 const AUTH_COOKIE = "asc_auth_key";
 
-function authorizationValue(headers: Record<string, string>): string | undefined {
+export function authorizationValue(headers: Record<string, string>): string | undefined {
   const cookie = headers["cookie"];
   return (
     readCookie(cookie, AUTH_COOKIE) ??
@@ -152,6 +151,37 @@ function stripNegotiation(
     }
   }
   return out;
+}
+
+// The headers a system MCP server wants on a request made on the caller's
+// behalf, for a client outside this process (the document agent): the
+// `Authorization` derived from the session cookie and the portal `Referer`,
+// the same two the C# transport sends.
+export function systemServerHeaders(): Record<string, string> {
+  const forwarded = getForwardedHeaders();
+  const referer = portalReferer(forwarded);
+  const authorization = authorizationValue(forwarded);
+  return {
+    ...(referer ? { referer } : {}),
+    ...(authorization ? { authorization } : {}),
+  };
+}
+
+// The caller's session as the one cookie the portal API reads, for a client
+// outside this process that must act as the user against the portal itself
+// (the document agent's model requests through the gateway proxy). Only the
+// auth cookie goes (or the `authorization` cookie a caller may carry in its
+// place, as `authorizationValue` accepts it): the rest of the browser's
+// cookies are not the agent's.
+export function sessionCookie(): string | undefined {
+  const cookie = getForwardedHeaders()["cookie"];
+  for (const name of [AUTH_COOKIE, "authorization"]) {
+    const value = readCookie(cookie, name);
+    if (value !== undefined) {
+      return `${name}=${value}`;
+    }
+  }
+  return undefined;
 }
 
 // Forward the caller's DocSpace auth/context headers to the MCP server so
@@ -241,10 +271,9 @@ const serverNames = Object.keys(servers);
 
 /**
  * Canonical config of a configured system MCP server, by name. The tools
- * controller uses it to pin entity-scoped whitelist markers for system
- * servers to the real endpoint instead of trusting a client-provided
- * config — so a marker entry never shadows the system group with a broken
- * connection.
+ * controller uses it to pin a registry entry named after a system server to
+ * the real endpoint instead of trusting a client-provided config — so such
+ * an entry never shadows the system group with a broken connection.
  */
 export function getSystemServerConfig(
   name: string,
@@ -265,74 +294,6 @@ const source = new SystemToolsSource({
   servers,
   fetch: forwardingFetch,
 });
-
-// Agent rooms carry an MCP whitelist: only the servers enabled for the
-// agent are served to its chat. The whitelist is the agent's per-entity
-// custom-servers map in `/mcp-servers` (managed by the agent
-// create/edit dialog through the AI.Chat `tools/*` routes): an entry whose
-// name matches a system server acts as the "enabled" marker for it.
-// Returns `undefined` when `entityId` is absent, not an agent room, or the
-// agent has no stored server map at all (never configured — no restriction,
-// Bug 82991) — no filtering, the full configured set stays available. Fails
-// closed only on a resolution ERROR: then an agent gets just the portal MCP
-// server rather than everything.
-async function agentServerWhitelist(
-  entityId: string | undefined,
-): Promise<Set<string> | undefined> {
-  if (!entityId) {
-    return undefined;
-  }
-  const agentId = await resolveAgentEntityId(entityId);
-  if (!agentId) {
-    return undefined;
-  }
-  // The portal's own MCP server is always enabled, agents included — it
-  // never depends on the per-agent marker map (and the failure path below
-  // keeps it too).
-  try {
-    const servers = await storage.mcpServers.readAll(agentId);
-    // An agent with NO stored server map has simply never configured one:
-    // that means "no restriction", not "deny all" — a fresh agent used to
-    // get an empty catalog from list-system-tools because everything was
-    // filtered out (Bug 82991). The whitelist kicks in only once the agent
-    // has explicit marker entries.
-    if (Object.keys(servers).length === 0) {
-      return undefined;
-    }
-    return new Set([...Object.keys(servers), PORTAL_MCP_SERVER_NAME]);
-  } catch (err) {
-    logger.error(
-      `systemTools: failed to resolve MCP whitelist for agent ${agentId}: ${
-        err instanceof Error ? err.message : String(err)
-      } — serving only the portal MCP server`,
-    );
-    return new Set([PORTAL_MCP_SERVER_NAME]);
-  }
-}
-
-function filterByWhitelist<T>(
-  grouped: Record<string, T>,
-  whitelist: Set<string> | undefined,
-): Record<string, T> {
-  if (!whitelist) {
-    return grouped;
-  }
-  const filtered: Record<string, T> = {};
-  const dropped: string[] = [];
-  for (const [serverType, items] of Object.entries(grouped)) {
-    if (whitelist.has(serverType)) {
-      filtered[serverType] = items;
-    } else {
-      dropped.push(serverType);
-    }
-  }
-  if (dropped.length > 0) {
-    logger.info(
-      `systemTools: servers [${dropped.join(", ")}] are not enabled for this agent — filtered out`,
-    );
-  }
-  return filtered;
-}
 
 // Read-only (GET) MCP operations are flagged `requireApproval: false`.
 //
@@ -428,10 +389,7 @@ export const systemToolsSource: ToolsAdapter & {
     const started = Date.now();
     let grouped: Awaited<ReturnType<typeof source.getTools>>;
     try {
-      const whitelist = await agentServerWhitelist(entityId);
-      grouped = withReadOnlyAutoAllow(
-        filterByWhitelist(await source.getTools(), whitelist),
-      );
+      grouped = withReadOnlyAutoAllow(await source.getTools());
     } catch (err) {
       logger.error(
         `systemTools.getTools failed after ${Date.now() - started}ms: ${err instanceof Error ? err.message : String(err)}`,
@@ -450,30 +408,17 @@ export const systemToolsSource: ToolsAdapter & {
     return grouped;
   },
 
-  async callTool(toolName, args, entityId) {
+  async callTool(toolName, args, entityId, options) {
     logger.info(
       `systemTools.callTool name=${toolName} args=[${Object.keys(args).join(
         ",",
       )}] entityId=${entityId ?? "-"}`,
     );
     try {
-      // Enforce the agent whitelist on execution too — the tool list is
-      // rebuilt per stream, but a call by name must not slip through for a
-      // server the agent has disabled.
-      const whitelist = await agentServerWhitelist(entityId);
-      if (whitelist) {
-        const grouped = await source.getTools();
-        const owner = Object.entries(grouped).find(
-          ([, items]) => items.some((t) => t.name === toolName),
-        )?.[0];
-        if (owner !== undefined && !whitelist.has(owner)) {
-          logger.warn(
-            `systemTools.callTool name=${toolName} denied: server "${owner}" is not enabled for this agent`,
-          );
-          return `Tool "${toolName}" is not available: its MCP server is not enabled for this agent.`;
-        }
-      }
-      const result = await source.callTool(toolName, args);
+      // Unscoped like the listing above; the options carry the progress callback.
+      const result = options
+        ? await source.callTool(toolName, args, undefined, options)
+        : await source.callTool(toolName, args);
       const failure = describeToolErrorResult(result);
       if (failure) {
         logger.warn(

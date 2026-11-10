@@ -335,7 +335,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return newId;
     }
 
-    public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, CancellationToken? cancellationToken)
+    public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, string newTitle, CancellationToken? cancellationToken)
     {
         if (toFolderId is int tId)
         {
@@ -628,7 +628,17 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
         return Task.FromResult<string>(null);
     }
 
+    public Task<string> GetFolderIDAiHubAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
     public Task<string> GetFolderIDFormsAsync(bool createIfNotExists)
+    {
+        return Task.FromResult<string>(null);
+    }
+
+    public Task<string> GetFolderIDPrivateRoomsAsync(bool createIfNotExists)
     {
         return Task.FromResult<string>(null);
     }

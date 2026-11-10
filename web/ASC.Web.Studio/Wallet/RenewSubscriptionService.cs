@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -30,21 +30,6 @@
 // Public License v3.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
-
-using System.Globalization;
-
-using ASC.Core.Billing;
-using ASC.Core.Common.Hosting;
-using ASC.Core.Common.Quota.Features;
-using ASC.Core.Tenants;
-using ASC.Core.Users;
-using ASC.MessagingSystem.Core;
-using ASC.Web.Core.PublicResources;
-using ASC.Web.Core.Quota;
-
-using Microsoft.EntityFrameworkCore;
-
-using ZiggyCreatures.Caching.Fusion;
 
 namespace ASC.Web.Studio.Wallet;
 
@@ -167,21 +152,10 @@ public class RenewSubscriptionService(
                 throw new BillingException("Customer could not be found");
             }
 
-            if (!string.IsNullOrEmpty(customerInfo.Email))
-            {
-                payer = await userManager.GetUserByEmailAsync(customerInfo.Email);
-            }
+            payer = await userManager.GetActivePayerAsync(customerInfo);
 
             var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
-
-            if (payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id)
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, payer.Id);
-            }
-            else
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, owner.Id);
-            }
+            await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, (payer ?? owner).Id);
 
             // when a switch to a different quota is scheduled, buy that quota outright instead of renewing the current one
             var targetQuota = walletQuota;
@@ -278,12 +252,14 @@ public class RenewSubscriptionService(
                 // throwIfFailure lets the transport failure through, which is swallowed into "false" otherwise
                 result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, productQuantityType, defaultCurrency, false, null, metadata, true);
             }
-            catch (BillingTransportException ex)
+            catch (Exception ex) when (ex is BillingTransportException or PaymentServiceContractException)
             {
-                // No answer is not a refusal: the change may have been applied with only the response lost. The
-                // failure letter asks the customer to renew manually, which could make them pay twice - so check
-                // again on the next runs.
-                logger.WarningRenewSubscriptionServiceOutcomeUnknown(data.TenantId, description, ex.Message);
+                // No answer, or one that cannot be read, is not a refusal: the change may have been applied with only
+                // the response lost. The failure letter asks the customer to renew manually, which could make them pay
+                // twice - so check again on the next runs.
+                // The exception, not only its message: the message names the call, the cause - a timeout, DNS, TLS, an
+                // unreadable body - is in the inner exception.
+                logger.ErrorRenewSubscriptionServiceOutcomeUnknown(data.TenantId, description, ex);
 
                 await AddPendingRenewalAsync(new PendingRenewal(
                     data.TenantId,
@@ -293,7 +269,7 @@ public class RenewSubscriptionService(
                     renewedQuantity,
                     data.DueDate.Value,
                     owner.Id,
-                    payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id ? payer.Id : null,
+                    payer?.Id,
                     DateTime.UtcNow));
 
                 return;
@@ -308,7 +284,7 @@ public class RenewSubscriptionService(
         }
         catch (Exception ex)
         {
-            logger.ErrorWithException(ex);
+            logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
         }
 
         await SendRenewSubscriptionErrorAsync(data.TenantId, Describe(renewedQuota, renewedQuantity), renewedQuota.ServiceName, renewedQuantity, payer, owner);
@@ -395,14 +371,14 @@ public class RenewSubscriptionService(
 
             if (DateTime.UtcNow < renewal.TimedOutAt + waitFor)
             {
-                logger.WarningRenewSubscriptionServiceNotConfirmed(renewal.TenantId, description, renewal.TimedOutAt, error?.Message ?? "not extended yet");
+                logger.WarningRenewSubscriptionServiceNotConfirmed(renewal.TenantId, description, renewal.TimedOutAt, error?.Message ?? "not extended yet", error);
 
                 return renewal;
             }
 
             if (error != null)
             {
-                logger.ErrorWithException(error);
+                logger.ErrorRenewSubscriptionServiceTenant(renewal.TenantId, error);
             }
 
             await SendRenewSubscriptionErrorAsync(renewal);
@@ -425,7 +401,7 @@ public class RenewSubscriptionService(
         catch (Exception ex)
         {
             // the renewal is applied, only its audit entry is missing - nothing to retry or to warn the customer about
-            logger.ErrorWithException(ex);
+            logger.ErrorRenewSubscriptionServiceTenant(renewal.TenantId, ex);
         }
 
         return null;
@@ -475,7 +451,7 @@ public class RenewSubscriptionService(
         }
         catch (Exception ex)
         {
-            logger.ErrorWithException(ex);
+            logger.ErrorRenewSubscriptionServiceTenant(renewal.TenantId, ex);
         }
 
         await SendRenewSubscriptionErrorAsync(renewal.TenantId, renewal.Description, renewal.ServiceName, renewal.Quantity, payer, owner);
@@ -501,7 +477,7 @@ public class RenewSubscriptionService(
         }
         catch (Exception ex)
         {
-            logger.ErrorWithException(ex);
+            logger.ErrorRenewSubscriptionServiceTenant(tenantId, ex);
         }
     }
 

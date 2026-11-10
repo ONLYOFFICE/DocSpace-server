@@ -219,6 +219,7 @@ public class ThirdPartyFileTests(
         // Act
         var results = (await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             FileIds = [new(source.Id)],
             DestFolderId = new(work.Id),
             ConflictResolveType = FileConflictResolveType.Overwrite,
@@ -251,6 +252,7 @@ public class ThirdPartyFileTests(
         // Act
         var results = (await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             FileIds = [new(source.Id)],
             DestFolderId = new(myDocumentsId),
             ConflictResolveType = FileConflictResolveType.Overwrite,
@@ -284,6 +286,7 @@ public class ThirdPartyFileTests(
         // Act
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             FileIds = [new(file.Id)],
             DestFolderId = new(destination.Id),
             ConflictResolveType = FileConflictResolveType.Overwrite,

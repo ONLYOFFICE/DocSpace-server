@@ -51,7 +51,7 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task ChangeUserTypeAsync(UserInfo userInfo, bool hasPersonalFolder)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        var dto = await GetUserDtoAsync(userInfo);
         var currentUser = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
         var name = currentUser.DisplayUserName(displayUserSettingsHelper);
 
@@ -61,14 +61,14 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task AddUserAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        var dto = await GetUserDtoAsync(userInfo);
         await MakeRequest("add-user", new { tenantId, user = dto });
     }
 
     public async Task UpdateUserAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        var dto = await GetUserDtoAsync(userInfo);
         if (dto.Groups != null)
         {
             foreach (var group in dto.Groups)
@@ -108,7 +108,7 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task AddGuestAsync(UserInfo userInfo, bool notifyAdmins = true)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        var dto = await GetUserDtoAsync(userInfo);
         var currentUser = securityContext.CurrentAccount.ID;
         await MakeRequest("add-guest", new { tenantId, room = currentUser, guest = dto });
         if (notifyAdmins)
@@ -124,7 +124,7 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task UpdateGuestAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        var dto = await GetUserDtoAsync(userInfo);
         var relations = await userManager.GetUserRelationsByTargetAsync(userInfo.Id);
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         foreach (var relation in relations)
@@ -174,5 +174,16 @@ public class UserSocketManager(ITariffService tariffService,
     {
         _ = await _tenantManager.SetCurrentTenantAsync(tenantId);
         await MakeRequest("update-telegram", new { tenantId, userId, username });
+    }
+
+    // Joining a socket room is not access-checked, and these events reach every user subscribed to the users of the
+    // portal, so the DTO leaves out the AI services limit, which only an administrator or the user may read. Clients
+    // re-read it on "change-service-limits".
+    private async Task<EmployeeFullDto> GetUserDtoAsync(UserInfo userInfo)
+    {
+        var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
+        dto.AiServicesLimit = null;
+
+        return dto;
     }
 }

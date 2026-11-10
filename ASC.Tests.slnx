@@ -23,6 +23,7 @@
   <Project Path="common/ASC.Webhooks.Core/ASC.Webhooks.Core.csproj" />
   <Project Path="common/services/ASC.ApiSystem/ASC.ApiSystem.csproj" />
   <Project Path="common/services/ASC.AuditTrail/ASC.AuditTrail.csproj" />
+  <Project Path="common/services/ASC.Data.Backup.Worker/ASC.Data.Backup.Worker.csproj" />
   <Project Path="common/services/ASC.Data.Backup/ASC.Data.Backup.csproj" />
   <Project Path="common/services/ASC.ElasticSearch/ASC.ElasticSearch.csproj" />
   <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
@@ -30,9 +31,11 @@
   <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />
   <Project Path="common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj" />
   <Project Path="common/Tests/ASC.Data.Backup.Core.Tests/ASC.Data.Backup.Core.Tests.csproj" />
+  <Project Path="common/Tests/ASC.Data.Backup.Tests/ASC.Data.Backup.Tests.csproj" />
   <Project Path="common/Tests/ASC.Notify.Tests/ASC.Notify.Tests.csproj" />
   <Project Path="common/Tests/ASC.Tests.Common/ASC.Tests.Common.csproj" />
   <Project Path="common/Tools/ASC.Data.Stress/ASC.Data.Stress.csproj" />
+  <Project Path="common/Tools/ASC.Webhooks.Contract/ASC.Webhooks.Contract.csproj" />
   <Project Path="products/ASC.AI/ASC.AI.Tests/ASC.AI.Tests.csproj" />
   <Project Path="products/ASC.AI/Core/ASC.AI.Core.csproj" />
   <Project Path="products/ASC.AI/Server/ASC.AI.csproj" />
@@ -43,6 +46,7 @@
   <Project Path="products/ASC.Files/Worker/ASC.Files.Worker.csproj" />
   <Project Path="products/ASC.People/Server/ASC.People.csproj" />
   <Project Path="products/ASC.People/Tests/ASC.People.Tests.csproj" />
+  <Project Path="web/ASC.Web.Api.Billing.Tests/ASC.Web.Api.Billing.Tests.csproj" />
   <Project Path="web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj" />
   <Project Path="web/ASC.Web.Api/ASC.Web.Api.csproj" />
   <Project Path="web/ASC.Web.Core/ASC.Web.Core.csproj" />

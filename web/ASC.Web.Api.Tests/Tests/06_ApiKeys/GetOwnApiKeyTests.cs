@@ -68,4 +68,23 @@ public class GetOwnApiKeyTests(
         result.Data.Count.Should().Be(1);
         result.Data.Links.Should().ContainSingle(link => link.Action == "GET");
     }
+
+    /// <summary>
+    /// Bug 84486: a request authenticated by a regular user token instead of an API key used to fail with a
+    /// 500; the endpoint now answers 400 when the request carries no API key.
+    /// </summary>
+    [Trait("Bug", "84486")]
+    [Fact]
+    public async Task GetApiKey_UserToken_ReturnsBadRequest()
+    {
+        // Arrange
+        await _peopleClient.Authenticate(Owner);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _apiKeysApi.GetApiKeyAsync(TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
 }

@@ -158,7 +158,7 @@ public class NotifyClient(
             var aceString = GetAccessString(recipientPair.Value, userCulture);
             var recipient = await recipientsProvider.GetRecipientAsync(u.Id.ToString());
             
-            action.Init(fileEntry, folder, url, fileExtension, aceString, message, culture);
+            action.Init(fileEntry, folder, url, fileExtension, recipientPair.Value, aceString, message, culture);
 
             await client.SendNoticeAsync(
                 action,
@@ -195,6 +195,12 @@ public class NotifyClient(
                     return;
                 }
                 folderUrl = pathProvider.GetRoomsUrl(roomIdInt, false);
+
+                if (await DocSpaceHelper.LocatedInPrivateRoomAsync(file, daoFactory.GetCacheFolderDao<T>()))
+                {
+                    folderTitle = FilesPatternResource.PrivateRoomTitle;
+                }
+
                 break;
             case FolderType.USER:
                 var shareFolderId = await globalFolder.GetFolderShareAsync<T>(daoFactory);
@@ -222,7 +228,7 @@ public class NotifyClient(
                 continue;
             }
 
-            if (file.RootFolderType is FolderType.VirtualRooms && await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(roomId, recipientId))
+            if (file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub && await roomsNotificationSettingsHelper.CheckMuteForRoomAsync(roomId, recipientId))
             {
                 continue;
             }
@@ -349,7 +355,7 @@ public class NotifyClient(
             }
             
             var action = folder.FolderType == FolderType.AiRoom ? serviceProvider.GetService<AgentRemovedNotifyAction>()  : serviceProvider.GetService<RoomRemovedNotifyAction>();
-            action.Init(folder.Title, roomUrl);
+            action.Init(NotifyConstants.GetRoomTitle(folder), roomUrl);
             
             await client.SendNoticeToAsync(
                 action,
@@ -408,7 +414,7 @@ public class NotifyClient(
         var accessString = FileShareExtensions.GetAccessString(currentRole, isAgent: isAgent);
 
         var action = isAgent ? serviceProvider.GetService<AgentUpdateAccessForUserNotifyAction>() : serviceProvider.GetService<RoomUpdateAccessForUserNotifyAction>();
-        action.Init(room, accessString);
+        action.Init(room, currentRole, accessString);
         
         await client.SendNoticeAsync(
             action,

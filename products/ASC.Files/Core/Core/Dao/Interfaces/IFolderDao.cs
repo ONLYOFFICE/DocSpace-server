@@ -162,7 +162,11 @@ public interface IFolderDao<T>
     /// <param name="toFolderId">destination folder id</param>
     /// <param name="cancellationToken"></param>
     Task<T> MoveFolderAsync(T folderId, T toFolderId, CancellationToken? cancellationToken);
-    Task<TTo> MoveFolderAsync<TTo>(T folderId, TTo toFolderId, CancellationToken? cancellationToken);
+    /// <summary>
+    /// Moves the folder. A non-null <paramref name="newTitle"/> is the title it arrives under, set by the move
+    /// itself; third-party storages ignore it.
+    /// </summary>
+    Task<TTo> MoveFolderAsync<TTo>(T folderId, TTo toFolderId, string newTitle, CancellationToken? cancellationToken);
     Task<string> MoveFolderAsync(T folderId, string toFolderId, CancellationToken? cancellationToken);
     Task<int> MoveFolderAsync(T folderId, int toFolderId, CancellationToken? cancellationToken);
 
@@ -444,12 +448,25 @@ public interface IFolderDao<T>
     Task<T> GetFolderIDAiAgentsAsync(bool createIfNotExists);
 
     /// <summary>
+    /// Returns id folder "AiHub"
+    /// Only in TMFolderDao
+    /// </summary>
+    /// <param name="createIfNotExists"></param>
+    /// <returns></returns>
+    Task<T> GetFolderIDAiHubAsync(bool createIfNotExists);
+
+    /// <summary>
     /// Returns id folder "Forms"
     /// Only in TMFolderDao
     /// </summary>
     /// <param name="createIfNotExists"></param>
     /// <returns></returns>
     Task<T> GetFolderIDFormsAsync(bool createIfNotExists);
+
+    /// <summary>
+    /// The ID of the root of the private rooms section.
+    /// </summary>
+    Task<T> GetFolderIDPrivateRoomsAsync(bool createIfNotExists);
 
     /// <summary>
     /// Return id of related object

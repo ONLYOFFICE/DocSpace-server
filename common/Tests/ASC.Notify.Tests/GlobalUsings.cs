@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,25 +31,44 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Collections.Concurrent;
+global using System.Diagnostics;
 global using System.Globalization;
+global using System.Net;
+global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
+global using System.Security.Cryptography;
+global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
+global using System.Threading.Channels;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
+global using ASC.AuditTrail.Repositories;
+global using ASC.Common.Caching;
 global using ASC.Common.DependencyInjection;
 global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
+global using ASC.Core.Common.Settings;
+global using ASC.Core.Common.Tests;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Backup;
+global using ASC.EventBus.Abstractions;
+global using ASC.EventBus.Events;
+global using ASC.EventBus.Serializers;
+global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Services.NotifyService;
+global using ASC.MessagingSystem.Core;
+global using ASC.MessagingSystem.EF.Context;
+global using ASC.MessagingSystem.EF.Model;
 global using ASC.Notify.Engine;
 global using ASC.Notify.Extension;
 global using ASC.Notify.Messages;
@@ -62,11 +81,15 @@ global using ASC.Security.Cryptography;
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 global using ASC.Web.Core.PublicResources;
+global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Core.Users;
 global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;
+
+global using DocSpace.API.SDK.Api.Settings;
+global using DocSpace.API.SDK.Client;
 
 global using FluentAssertions;
 
@@ -82,3 +105,17 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 
 global using MimeKit;
+
+global using WireMock;
+global using WireMock.Matchers;
+global using WireMock.RequestBuilders;
+global using WireMock.ResponseBuilders;
+global using WireMock.Server;
+global using WireMock.Settings;
+global using WireMock.Types;
+global using WireMock.Util;
+
+global using ZiggyCreatures.Caching.Fusion;
+
+global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
+global using StudioNotifyServiceHelper = ASC.Web.Core.Notify.StudioNotifyServiceHelper;

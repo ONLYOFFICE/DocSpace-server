@@ -208,4 +208,37 @@ public class FileLinkPrimaryTests(
         // Assert
         exception.ErrorCode.Should().Be(403);
     }
+
+    /// <remarks>
+    /// BUG 84872: once a file's primary link had been revoked, POST /files/file/{id}/link — the call behind the
+    /// "create external link" button — answered 404 for that file from then on, because it shared the read path that
+    /// keeps a revoked link from being resurrected (bug 81807). Fixed by letting the explicit create request make a
+    /// new primary link despite the revocation mark; the creation clears the mark, so the read sees the new link.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "84872")]
+    public async Task CreatePrimaryLink_AfterThePrimaryLinkWasRevoked_CreatesItAgain()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Primary Link Recreate");
+        var file = await CreateFile("Autotest Primary Link Recreate.docx", room.Id);
+
+        var created = (await _filesApi.CreateFilePrimaryExternalLinkAsync(
+            file.Id, new FileLinkRequest(access: FileShare.Read), TestContext.Current.CancellationToken)).Response;
+
+        await _filesApi.SetFileExternalLinkAsync(
+            file.Id, new FileLinkRequest(linkId: created.SharedLink.Id, access: FileShare.None), TestContext.Current.CancellationToken);
+
+        // Act
+        var recreated = (await _filesApi.CreateFilePrimaryExternalLinkAsync(
+            file.Id, new FileLinkRequest(access: FileShare.Read), TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        recreated.SharedLink.Primary.Should().BeTrue();
+        recreated.SharedLink.Id.Should().NotBe(created.SharedLink.Id);
+
+        var read = (await _filesApi.GetFilePrimaryExternalLinkAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        read.SharedLink.Id.Should().Be(recreated.SharedLink.Id);
+    }
 }

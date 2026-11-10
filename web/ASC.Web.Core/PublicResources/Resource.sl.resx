@@ -145,7 +145,7 @@
     <value>Storitev</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Funkcije AI</value>
+    <value>AI agenti in orodja</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Varnostno kopiraj</value>
@@ -1177,7 +1177,7 @@
     <value>Iskanje z AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Funkcije AI</value>
+    <value>AI agenti in orodja</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Sledenje prijavam in dejanjem</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Strošek ponudnika</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook je onemogočen. Omogočite ga, preden ponovno poskusite njegove dostave</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Dogodek se trenutno pošilja. Poskusite znova, ko se poskus konča</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Dostava je bila zabeležena v starejši obliki webhooka in je ni mogoče znova poslati</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Cilj webhooka ni obstoječ uporabnik ali skupina</value>
   </data>
 </root>

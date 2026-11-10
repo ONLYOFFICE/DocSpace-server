@@ -79,9 +79,30 @@ public interface IMetadataDao<T>
 
     Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null);
 
+    /// <summary>
+    /// Turns the cascade of the template off on the folder's own link and, in the same transaction, makes the links the
+    /// subtree inherited from this folder direct assignments. The folder keeps the template and every value stays; a
+    /// folder above that still cascades the template keeps providing it to the entries created later.
+    /// </summary>
+    Task StopCascadeAsync(T folderId, int templateId);
+
     Task SetValuesAsync(T entryId, FileEntryType entryType, IEnumerable<MetadataValue> values);
     IAsyncEnumerable<MetadataValue> GetValuesAsync(T entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null);
     IAsyncEnumerable<MetadataValue> GetValuesAsync(IEnumerable<T> entryIds, FileEntryType entryType);
+
+    /// <summary>
+    /// The string values of the files and the folders that contain the text, with their fields, in the order of the
+    /// fields within the entry. The text is matched as a substring without regard to case, the way the text search
+    /// confirms its candidates, so every entry the search returned by its metadata has at least one match here. The
+    /// values of the hidden templates are reported only when asked for, as the search finds by them only when asked.
+    /// </summary>
+    Task<List<MetadataTextMatch>> GetTextMatchesAsync(IEnumerable<T> fileIds, IEnumerable<T> folderIds, string text, bool includeHiddenTemplates);
+
+    /// <summary>
+    /// The files and the folders among the given ones that have a metadata field a user can see and fill: a visible
+    /// assigned template with at least one field, or a custom field. The fields of a hidden template do not count.
+    /// </summary>
+    Task<List<MetadataEntryRef>> GetEntriesWithFieldsAsync(IEnumerable<T> fileIds, IEnumerable<T> folderIds);
     Task DeleteValuesAsync(T entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null);
 
     /// <summary>

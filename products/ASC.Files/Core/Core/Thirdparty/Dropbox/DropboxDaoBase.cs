@@ -268,16 +268,16 @@ internal class DropboxDaoBase(
         }
     }
 
-    public Task<FileMetadata> GetFileAsync(string fileId)
+    public async Task<FileMetadata> GetFileAsync(string fileId)
     {
         var dropboxFileId = MakeThirdId(fileId);
         try
         {
-            return _providerInfo.GetFileAsync(dropboxFileId);
+            return await _providerInfo.GetFileAsync(dropboxFileId);
         }
         catch (Exception ex)
         {
-            return Task.FromResult<FileMetadata>(new ErrorFile(ex, dropboxFileId));
+            return new ErrorFile(ex, dropboxFileId);
         }
     }
 

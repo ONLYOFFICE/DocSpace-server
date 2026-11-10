@@ -117,6 +117,7 @@ public abstract class EditorController<T>(
     /// Save edited file content
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file is saved and the stored version is returned", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The file id cannot be resolved to a storage that could accept the content")]
@@ -154,7 +155,7 @@ public abstract class EditorController<T>(
     [SwaggerResponse(403, "The caller cannot edit the file, the file is locked or in Trash, somebody is already editing it and the session was claimed alone, or the document service did not accept the tracking request")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
-    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it, or, with `editingAlone=true`, the file is locked by somebody else or lies in Trash")]
+    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it, or, with `editingAlone=true`, the file lies in Trash")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<string> StartEditFile(StartEditRequestDto<T> inDto)
@@ -167,7 +168,8 @@ public abstract class EditorController<T>(
     /// stores the filling properties on it - the room it belongs to, its title, the account that started it and the
     /// id it keeps as the original form - so that later submissions are collected against this form. The file has to
     /// be a PDF whose parent folder is a form-filling room; anything else is answered unchanged and nothing is
-    /// stored. Access follows room membership rather than portal role: a member holding only form-filling access on
+    /// stored. Whatever the file, a caller who cannot read it is refused with 403. Inside a form-filling room access
+    /// follows room membership rather than portal role: a member holding only form-filling access on
     /// the room may not start filling, and a caller with no access to the room at all is refused with 403 unless they
     /// can manage it, which the room owner, a room administrator and a DocSpace administrator can. The call is
     /// mutating and safe to repeat, since a repeat rewrites the same properties. Once a form is started, the answers
@@ -179,7 +181,7 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/startfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The form file, with the filling properties now stored on it", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "The caller holds only form-filling access on the room, or no access to it at all")]
+    [SwaggerResponse(403, "The caller cannot read the file, or holds only form-filling access on the room, or no access to it at all")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
@@ -210,9 +212,9 @@ public abstract class EditorController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The session was refreshed or closed", typeof(ItemKeyValuePair<bool, string>))]
     [SwaggerResponse(401, "An anonymous caller has no external link, or refreshes the session through a link that does not grant editing")]
-    [SwaggerResponse(403, "The document key does not match the revision being edited, or the caller has none of the editing rights on the file")]
+    [SwaggerResponse(403, "The document key does not match the revision being edited, the caller has none of the editing rights on the file, or the session is refreshed while the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
-    [SwaggerResponse(500, "The session is refreshed while the file is locked by somebody else or lies in Trash")]
+    [SwaggerResponse(500, "The session is refreshed while the file lies in Trash")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<ItemKeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
@@ -231,7 +233,8 @@ public abstract class EditorController<T>(
     /// picks the desktop, mobile or embedded layout. For a PDF form the room decides the outcome and may overrule the
     /// request: a form-filling room, a virtual data room, a public room and a user folder each produce their own
     /// mode, and a form opened from the templates folder is read-only and, outside the mobile layout, framed as
-    /// embedded. When the portal is over its storage quota the configuration comes back read-only with the exceeded
+    /// embedded. In a form-filling room `edit=true` takes the form off filling only for a
+    /// caller who may edit it. When the portal is over its storage quota the configuration comes back read-only with the exceeded
     /// scope named. In a private room the caller's encryption keys are added to the editor configuration. Payment is
     /// not required and an anonymous caller opens through an external link.
     /// </remarks>
@@ -240,11 +243,12 @@ public abstract class EditorController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/openedit</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.FormStopped, When = "when a PDF form whose filling had started in a form-filling room is opened with `edit` true")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editor configuration for the requested file and mode", typeof(ConfigurationDto<int>))]
     [SwaggerResponse(403, "The caller cannot read the file, asked for a past version without access to the file history, or the file is in Trash")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
-    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
+    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing, or it is an encrypted file of a private room and the connected document server cannot work with encrypted files")]
     [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [AllowNotPayment]
@@ -283,7 +287,9 @@ public abstract class EditorController<T>(
 
             formOpenSetup.RootFolder = rootFolder;
 
-            if (inDto.Edit && rootFolder.FolderType == FolderType.FillingFormsRoom)
+            // the editor re-requests the configuration in its own mode ("edit" even while filling), so only a
+            // caller who may edit the form takes it off filling
+            if (inDto.Edit && formOpenSetup.CanEdit && rootFolder.FolderType == FolderType.FillingFormsRoom)
             {
                 await fileStorageService.ManageFormFilling(file.Id, FormFillingManageAction.Edit);
             }

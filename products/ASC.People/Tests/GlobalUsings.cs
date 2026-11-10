@@ -53,6 +53,8 @@ global using DocSpace.API.SDK.Model;
 global using FluentAssertions;
 
 global using Xunit;
+
+global using CoreConstants = ASC.Core.Users.Constants;
 // Files-service clients the People tests need for room-scoped scenarios. Imported one by one
 // instead of the whole namespace: DocSpace.API.SDK.Api.Files also carries QuotaApi and SettingsApi,
 // which would clash with the People and Settings ones already in scope here.
@@ -61,6 +63,7 @@ global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
 // Both the People and the Group areas publish a SearchApi, so neither can be used unqualified.
 global using GroupSearchApi = DocSpace.API.SDK.Api.Group.SearchApi;
+global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
 // QuotaApi and GuestsApi each exist in more than one of the namespaces above, so the People ones
 // are reached through an alias rather than unqualified.
 global using PeopleGuestsApi = DocSpace.API.SDK.Api.People.GuestsApi;

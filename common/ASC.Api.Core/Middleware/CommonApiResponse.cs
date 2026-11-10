@@ -116,6 +116,13 @@ public class SuccessApiResponse : CommonApiResponse
 
     public List<Link> Links { get; set; }
 
+    /// <summary>
+    /// Set for a request the model validation refused, so that a validation 400 carries <c>error.message</c>
+    /// like every other error of the API, next to the per-field <c>errors</c> in <see cref="Response"/>.
+    /// Left null - and so not written - for every other response.
+    /// </summary>
+    public CommonApiError Error { get; set; }
+
     public SuccessApiResponse()
     {
 
@@ -134,12 +141,26 @@ public class SuccessApiResponse : CommonApiResponse
         {
             Status = 1;
             StatusCode = (HttpStatusCode)validationProblemDetails.Status;
+            Error = new CommonApiError { Message = GetValidationMessage(validationProblemDetails) };
         }
 
         Links =
         [
             new Link { Href = httpContext.Request.GetDisplayUrl(), Action = httpContext.Request.Method }
         ];
+    }
+
+    /// <summary>
+    /// Every validation message, each followed by the field it is about in the form an ArgumentException
+    /// uses - "The value is required. (Parameter 'Name')" - so both kinds of 400 read alike.
+    /// </summary>
+    private static string GetValidationMessage(ValidationProblemDetails problem)
+    {
+        var messages = problem.Errors
+            .SelectMany(field => field.Value.Select(message => string.IsNullOrEmpty(field.Key) ? message : $"{message} (Parameter '{field.Key}')"))
+            .ToList();
+
+        return messages.Count > 0 ? string.Join(" ", messages) : problem.Title;
     }
 }
 

@@ -199,6 +199,39 @@ public class WebPluginsController(
     }
 
     /// <remarks>
+    /// Picks up a web plugin whose files were replaced in storage without an upload, for example a new version of an
+    /// installation-wide plugin put in place during a deployment. The `name` is the manifest name published by
+    /// `GET api/2.0/settings/webplugins`, matched without regard to case. Editing the portal settings is required, so
+    /// a portal owner or administrator, and the installation has to have web plugins enabled in its configuration.
+    /// The server compares the version of the plugin it serves with the `version` of the manifest in storage and,
+    /// only when they differ or the plugin appeared in or vanished from storage, re-reads the plugin list on every
+    /// server: for all portals when the plugin is installation-wide, for this portal alone otherwise, and notifies
+    /// the connected clients of this portal. The call is idempotent: with matching versions nothing changes, so a
+    /// repeat is safe. The response is the plugin as served after the check. The stored state, the settings and the
+    /// Content Security Policy of the portal are left as they are. To install a new version use
+    /// `POST api/2.0/settings/webplugins` instead.
+    /// </remarks>
+    /// <summary>Refresh a web plugin</summary>
+    /// <path>api/2.0/settings/webplugins/{name}/refresh</path>
+    [Tags("Settings / Webplugins")]
+    [SwaggerResponse(200, "The web plugin as served after the version check", typeof(WebPluginDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or web plugins are switched off for the installation")]
+    [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal after the check")]
+    [HttpPut("{name}/refresh")]
+    public async Task<WebPluginDto> RefreshWebPlugin(WebPluginNameRequestDto inDto)
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var webPlugin = await webPluginManager.RefreshWebPluginAsync(tenant.Id, inDto.Name);
+
+        var outDto = await mapper.ToDtoManual(webPlugin);
+
+        return outDto;
+    }
+
+    /// <remarks>
     /// Removes a web plugin from the current portal and deletes the files of its package from storage. The `name` is
     /// the manifest name published by `GET api/2.0/settings/webplugins`, matched without regard to case. Editing the
     /// portal settings is required, so a portal owner or administrator, and the installation has to have web plugins

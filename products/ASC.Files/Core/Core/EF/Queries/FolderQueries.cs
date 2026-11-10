@@ -108,12 +108,6 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<bool> AiFolderExistsAsync(int tenantId, int parentId, int exceptFolderId)
-    {
-        return FolderQueries.AiFolderExistsAsync(this, tenantId, parentId, exceptFolderId);
-    }
-
-    [PreCompileQuery]
     public Task<DbFolderQuery> DbFolderQueryWithSharedAsync(int tenantId, int folderId)
     {
         return FolderQueries.DbFolderQueryWithSharedAsync(this, tenantId, folderId);
@@ -300,9 +294,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateFoldersAsync(int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy)
+    public Task<int> UpdateFoldersAsync(int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy, string title)
     {
-        return FolderQueries.UpdateFoldersAsync(this, tenantId, folderId, parentId, folderType, modifiedBy);
+        return FolderQueries.UpdateFoldersAsync(this, tenantId, folderId, parentId, folderType, modifiedBy, title);
     }
 
     [PreCompileQuery]
@@ -611,15 +605,6 @@ static file class FolderQueries
                     .Select(r => r.FolderType)
                     .FirstOrDefault());
 
-    public static readonly Func<FilesDbContext, int, int, int, Task<bool>> AiFolderExistsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentId, int exceptFolderId) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.ParentId == parentId)
-                    .Where(r => r.Title == FileConstant.AiFolderTitle)
-                    .Any(r => r.FolderType == FolderType.Ai && r.Id != exceptFolderId));
-
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFolder>> DbFoldersForDeleteAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> subfolders) =>
@@ -707,13 +692,15 @@ static file class FolderQueries
                     .Where(r => r.EntryType == (byte)FileEntryType.Folder)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, int, FolderType, Guid, Task<int>> UpdateFoldersAsync =
-        (FilesDbContext ctx, int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy) =>
+    // a null title keeps the one the folder has
+    public static readonly Func<FilesDbContext, int, int, int, FolderType, Guid, string, Task<int>> UpdateFoldersAsync =
+        (FilesDbContext ctx, int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy, string title) =>
             ctx.Folders
                 .Where(r => r.TenantId == tenantId)
                 .Where(r => r.Id == folderId)
                 .ExecuteUpdateAsync(toUpdate => toUpdate
                     .SetProperty(p => p.ParentId, parentId)
+                    .SetProperty(p => p.Title, p => title ?? p.Title)
                     .SetProperty(p => p.FolderType, folderType)
                     .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)
                     .SetProperty(p => p.ModifiedBy, modifiedBy)

@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Bola stiahnutá správa o operáciách zákazníka</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Limit výdavkov na službu bol vytvorený: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Limit výdavkov na službu bol aktualizovaný: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Limit výdavkov na službu bol odstránený: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Osobné limity výdavkov na službu boli nastavené: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Osobné limity výdavkov na službu boli vypnuté: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Predplatné zákazníka bolo aktualizované: {0}</value>
   </data>
@@ -731,6 +746,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portál deaktivovaný</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portál bol zablokovaný zásadami uchovávania údajov</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portál bol odblokovaný</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portál bol odstránený</value>
@@ -1221,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profil AI bol priradený agentovi AI pre akciu: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Kľúč BYOK pre model AI bol odstránený: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Kľúč BYOK pre model AI bol nastavený: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Nastavenia agenta dokumentov boli aktualizované</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profil AI bol priradený k akcii: {0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Hodnoty metadát boli aktualizované: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Súbor bol otvorený skriptom Document Builder: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Aplikácia bola zapnutá: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Aplikácia bola vypnutá: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Miestnosti prepojené s projektom AI {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Miestnosti odpojené od projektu AI {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Model AI projektu AI {0} bol zmenený na {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Doručenie webhooku bolo zopakované: {0}</value>
   </data>
 </root>

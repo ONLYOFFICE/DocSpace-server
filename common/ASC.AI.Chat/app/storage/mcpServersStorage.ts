@@ -31,22 +31,21 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
-import { resolveAgentEntityId } from "./docspaceFilesApi.js";
+import { aiService, AiServiceHttpError } from "./httpClient.js";
 import { isObject, getString } from "../narrow.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
 import {
-  chatContextScope,
   invalidateChatContext,
   readChatContext,
   reportChatContextMiss,
 } from "./chatContextSnapshot.js";
 
+// The custom MCP server registry is one map per portal. The `entityId` the
+// library passes with every call (the folder the chat is opened from) is
+// accepted for the interface's sake and ignored: a server registered from
+// any room lands in the map every listing reads back (Bug 82863). The C#
+// storage keeps that map under `entityId: null`.
 const PATH = "/mcp-servers";
-
-function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
-  return entityId ? { entityId } : undefined;
-}
 
 export function parseMcpServerConfig(raw: unknown): McpServerConfig | null {
   if (raw === null || raw === undefined) {
@@ -64,32 +63,23 @@ export function parseMcpServerConfig(raw: unknown): McpServerConfig | null {
 }
 
 export class HttpMcpServersStorage implements McpServersStorage {
-  async create(name: string, config: McpServerConfig, entityId?: string): Promise<void> {
-    // Resolve the scope the same way readAll does: a server written under a
-    // non-agent folder must land in the (global) scope the listing reads back
-    // from — otherwise it is saved yet invisible in every list (Bug 82863).
-    const scopedEntityId = await resolveAgentEntityId(entityId);
+  async create(name: string, config: McpServerConfig, _entityId?: string): Promise<void> {
     await aiService.post(PATH, {
       name,
       config: JSON.stringify(config),
-      entityId: scopedEntityId ?? null,
+      entityId: null,
     });
     invalidateChatContext("mcpServers");
   }
 
-  async readByName(name: string, entityId?: string): Promise<McpServerConfig | null> {
+  async readByName(name: string, _entityId?: string): Promise<McpServerConfig | null> {
     const snapshot = readChatContext("mcpServers");
-    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
-    if (scope) {
-      return scope.mcpServers[name] ?? null;
+    if (snapshot) {
+      return snapshot.global.mcpServers[name] ?? null;
     }
-    reportChatContextMiss(`mcpServers.readByName(${name}, ${entityId ?? "-"})`);
+    reportChatContextMiss(`mcpServers.readByName(${name})`);
     try {
-      const query = entityIdQuery(await resolveAgentEntityId(entityId));
-      const raw = await aiService.get(
-        `${PATH}/${encodeURIComponent(name)}`,
-        query ? { query } : undefined,
-      );
+      const raw = await aiService.get(`${PATH}/${encodeURIComponent(name)}`);
       if (!isObject(raw)) {
         return null;
       }
@@ -106,15 +96,13 @@ export class HttpMcpServersStorage implements McpServersStorage {
   // The C# `McpServerStorageController` returns `IReadOnlyList<McpServerDto>`
   // (each `{ name, config }`), so we have to assemble the name → config map
   // client-side rather than reading an object back.
-  async readAll(entityId?: string): Promise<Record<string, McpServerConfig>> {
+  async readAll(_entityId?: string): Promise<Record<string, McpServerConfig>> {
     const snapshot = readChatContext("mcpServers");
-    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
-    if (scope) {
-      return { ...scope.mcpServers };
+    if (snapshot) {
+      return { ...snapshot.global.mcpServers };
     }
-    reportChatContextMiss(`mcpServers.readAll(${entityId ?? "-"})`);
-    const query = entityIdQuery(await resolveAgentEntityId(entityId));
-    const raw = await aiService.get(PATH, query ? { query } : undefined);
+    reportChatContextMiss("mcpServers.readAll");
+    const raw = await aiService.get(PATH);
     if (!Array.isArray(raw)) {
       return {};
     }
@@ -135,36 +123,30 @@ export class HttpMcpServersStorage implements McpServersStorage {
     return result;
   }
 
-  async update(name: string, config: McpServerConfig, entityId?: string): Promise<void> {
-    const scopedEntityId = await resolveAgentEntityId(entityId);
+  async update(name: string, config: McpServerConfig, _entityId?: string): Promise<void> {
     await aiService.put(`${PATH}/${encodeURIComponent(name)}`, {
       config: JSON.stringify(config),
-      entityId: scopedEntityId ?? null,
+      entityId: null,
     });
     invalidateChatContext("mcpServers");
   }
 
   async replaceAll(
     servers: Record<string, McpServerConfig>,
-    entityId?: string,
+    _entityId?: string,
   ): Promise<void> {
-    const scopedEntityId = await resolveAgentEntityId(entityId);
     const payload: Record<string, string> = {};
     for (const [n, c] of Object.entries(servers)) {
       payload[n] = JSON.stringify(c);
     }
-    await aiService.put(PATH, { servers: payload, entityId: scopedEntityId ?? null });
+    await aiService.put(PATH, { servers: payload, entityId: null });
     invalidateChatContext("mcpServers");
   }
 
-  async delete(name: string, entityId?: string): Promise<void> {
+  async delete(name: string, _entityId?: string): Promise<void> {
     invalidateChatContext("mcpServers");
     try {
-      const query = entityIdQuery(await resolveAgentEntityId(entityId));
-      await aiService.delete(
-        `${PATH}/${encodeURIComponent(name)}`,
-        query ? { query } : undefined,
-      );
+      await aiService.delete(`${PATH}/${encodeURIComponent(name)}`);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return;

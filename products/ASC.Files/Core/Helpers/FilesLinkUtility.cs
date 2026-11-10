@@ -208,6 +208,19 @@ public class FilesLinkUtility
         }
     }
 
+    public string DocServiceConverterFromFileUrl
+    {
+        get
+        {
+            var url = DocServiceConverterUrl;
+            if (!string.IsNullOrEmpty(url))
+            {
+                url = url.TrimEnd('/') + "/from-file";
+            }
+            return url;
+        }
+    }
+
     public string DocServiceCommandUrl
     {
         get
@@ -237,6 +250,19 @@ public class FilesLinkUtility
                 {
                     url += "docbuilder";
                 }
+            }
+            return url;
+        }
+    }
+
+    public string DocServiceDocbuilderFromFileUrl
+    {
+        get
+        {
+            var url = DocServiceDocbuilderUrl;
+            if (!string.IsNullOrEmpty(url))
+            {
+                url = url.TrimEnd('/') + "/from-file";
             }
             return url;
         }

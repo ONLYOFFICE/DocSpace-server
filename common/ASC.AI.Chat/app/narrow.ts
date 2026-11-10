@@ -31,6 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { ActionType } from "@onlyoffice/ai-chat/core";
+
 export type JsonObject = Record<string, unknown>;
 
 export function isObject(v: unknown): v is JsonObject {
@@ -95,4 +97,14 @@ export function parseInt10(value: unknown, fallback?: number): number | undefine
   }
   const n = Number.parseInt(value, 10);
   return Number.isFinite(n) ? n : fallback;
+}
+
+const ACTION_TYPES = new Set<string>(Object.values(ActionType));
+
+/** The {@link ActionType} named by a query or body value, or `undefined` for anything else. */
+export function asActionType(v: unknown): ActionType | undefined {
+  if (typeof v !== "string" || !ACTION_TYPES.has(v)) {
+    return undefined;
+  }
+  return v as ActionType;
 }

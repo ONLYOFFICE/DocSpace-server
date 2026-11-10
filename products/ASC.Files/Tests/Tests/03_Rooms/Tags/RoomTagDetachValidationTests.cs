@@ -163,6 +163,26 @@ public class RoomTagDetachValidationTests(
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
 
+    /// <remarks>
+    /// Bug 84320: unlike the other invalid id shapes above, a whitespace-only id crashed the
+    /// third-party selector's regex lookup (ArgumentNullException) and surfaced as an unhandled
+    /// 400 instead of resolving to a clean "not found". The segment is percent-encoded because a
+    /// raw space cannot travel in a URL path; a typed int route parameter cannot produce it.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "84320")]
+    public async Task DeleteRoomTags_WhitespaceOnlyRoomId_NotFound()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        using var response = await SendRawRoomTagsDelete(Uri.EscapeDataString("   "), """{"names":["X"]}""");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
     // Note: a missing room id is enforced by the SDK's route — the endpoint cannot be invoked
     // without an id, so there is no separate test for it.
 

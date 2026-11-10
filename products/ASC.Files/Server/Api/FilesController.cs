@@ -194,9 +194,9 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The versions of the file after the change", typeof(IAsyncEnumerable<FileDto<int>>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `version`")]
     [SwaggerResponse(402, "Completing the current version needs more space than the room or user storage quota leaves")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, or the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
-    [SwaggerResponse(500, "The file is locked by somebody else, or, when the current version is completed, the file is encrypted, another update of it is in progress, or storing the new version fails")]
+    [SwaggerResponse(500, "When the current version is completed, the file is encrypted, another update of it is in progress, or storing the new version fails")]
     [HttpPut("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> ChangeVersionHistory(ChangeHistoryRequestDto<T> inDto)
     {
@@ -303,11 +303,13 @@ public abstract class FilesController<T>(
     /// Copy a file
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
+    [RaisesWebhook(WebhookTrigger.FileUploaded, When = "as well when the copy is converted to another format")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension")]
     [SwaggerResponse(402, "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size")]
-    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, or the caller may not create files in it")]
+    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
     [SwaggerResponse(415, "The installation filters uploads and does not accept the format of the new title")]
     [SwaggerResponse(500, "The document service fails to convert the content, `destFolderId` is a fraction or outside the 32-bit range, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
@@ -339,11 +341,12 @@ public abstract class FilesController<T>(
     /// Create a file
     /// </summary>
     /// <path>api/2.0/files/{folderId}/file</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the form gallery has no file of the title's format")]
+    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, the form gallery has no file of the title's format, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage")]
     [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the folder id is 0 and the caller is a guest without My documents")]
     [HttpPost("{folderId}/file")]
@@ -368,11 +371,12 @@ public abstract class FilesController<T>(
     /// Create an HTML file
     /// </summary>
     /// <path>api/2.0/files/{folderId}/html</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/html")]
     public async Task<FileDto<T>> CreateHtmlFile(CreateTextOrHtmlFileRequestDto<T> inDto)
@@ -396,11 +400,12 @@ public abstract class FilesController<T>(
     /// Create a text file
     /// </summary>
     /// <path>api/2.0/files/{folderId}/text</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, the folder is a section where files cannot be created, or the folder lies in a form-filling room, which takes PDF files only")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/text")]
     public async Task<FileDto<T>> CreateTextFile(CreateTextOrHtmlFileRequestDto<T> inDto)
@@ -426,6 +431,8 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FileTrashed, When = "once the queued operation moves the file to the trash")]
+    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "instead when the file is deleted at once: `immediately` is true, or the file is already in the trash or in a third-party storage")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller may not delete the file, or the file is locked by somebody else or open in an editing session")]
@@ -677,6 +684,7 @@ public abstract class FilesController<T>(
     /// Lock a file
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/lock</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "on every successful call, even one that changes nothing; with `lockFile=false` on a file of the portal storage it is raised twice, once for the unlocking note appended to the version comment and once for the unlock itself")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file with its lock state as it now stands", typeof(FileDto<int>))]
     [SwaggerResponse(403, "The caller may not lock or unlock the file")]
@@ -734,13 +742,14 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/restoreversion</path>
     /// <collection>list</collection>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editing revisions of the file after the restore", typeof(IAsyncEnumerable<EditHistoryDto>))]
     [SwaggerResponse(400, "The version is missing or is already the current one")]
     [SwaggerResponse(402, "The restored content does not fit into the storage quota")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file, or, with `url`, may not edit the file or the file is locked by somebody else or being edited")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, the file is locked by somebody else, or, with `url`, may not edit the file or the file is being edited")]
     [SwaggerResponse(404, "Without `url`, the file id or the requested version resolves to nothing")]
-    [SwaggerResponse(500, "The file is locked by somebody else or being edited, another restore of it is in progress, or storing the new version fails; with `url`, also when the file or the version does not exist or the address cannot be fetched")]
+    [SwaggerResponse(500, "The file is being edited, another restore of it is in progress, or storing the new version fails; with `url`, also when the file or the version does not exist or the address cannot be fetched")]
     [AllowAnonymous]
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
@@ -768,6 +777,7 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The conversion entry to poll, or the finished result when the conversion is synchronous", typeof(IAsyncEnumerable<ConversationResultDto>))]
+    [SwaggerResponse(400, "`outputType` names a format the portal cannot convert this file to")]
     [HttpPut("file/{fileId}/checkconversion")]
     public IAsyncEnumerable<ConversationResultDto> StartFileConversion(StartConversionRequestDto<T> inDto)
     {
@@ -792,6 +802,7 @@ public abstract class FilesController<T>(
     /// Update a comment
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/comment</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The comment as it was stored", typeof(string))]
     [SwaggerResponse(400, "The request body cannot be read or has no `version`, the version is below 1 or does not exist, or the comment is longer than 255 characters")]
@@ -820,14 +831,15 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for a rename that takes effect, and again for a switch to `lastVersion`")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file after the rename, the restore, or both", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The title is longer than 165 characters, or `lastVersion` is the current version")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(402, "Restoring `lastVersion` needs more space than the room or user storage quota leaves")]
-    [SwaggerResponse(403, "The caller may not read or rename the file or change its version")]
+    [SwaggerResponse(403, "The caller may not read or rename the file or change its version, or the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id, or `lastVersion` of it, resolves to nothing, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
-    [SwaggerResponse(500, "The file is locked by somebody else, a third-party file is renamed while it is being edited, or restoring `lastVersion` fails because the file is being edited, another update of it is in progress or the new version cannot be stored")]
+    [SwaggerResponse(500, "A third-party file is renamed while it is being edited, or restoring `lastVersion` fails because the file is being edited, another update of it is in progress or the new version cannot be stored")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFile(UpdateFileRequestDto<T> inDto)
@@ -840,6 +852,7 @@ public abstract class FilesController<T>(
     /// </remarks>
     /// <summary>Update file contents</summary>
     /// <path>api/2.0/files/{fileId}/update</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Updated file information", typeof(FileDto<int>))]
@@ -863,8 +876,9 @@ public abstract class FilesController<T>(
     /// `internal` whether only signed-in members may follow it, `denyDownload` whether the content may only be
     /// viewed, and `password` a secret to be asked for. A PDF form gets the rights it needs for filling out whatever
     /// was asked for, and a form in a form-filling room is answered with the link of the room instead. The caller
-    /// needs the right to share the file and is otherwise refused with 403; a link that was deliberately revoked is
-    /// not recreated but answered with 404. Read the address from `sharedTo.shareLink`.
+    /// needs the right to share the file and is otherwise refused with 403. A primary link that was revoked is
+    /// created anew by this call, with a new identifier, while `GET api/2.0/files/file/{id}/link` keeps answering
+    /// such a link with 404. Read the address from `sharedTo.shareLink`.
     /// </remarks>
     /// <summary>
     /// Create the file primary external link
@@ -874,7 +888,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
     [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
     [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms")]
-    [SwaggerResponse(404, "The file does not exist, or its primary link was revoked")]
+    [SwaggerResponse(404, "The file does not exist")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
     {
@@ -886,7 +900,8 @@ public abstract class FilesController<T>(
             requiredAuth: inDto.File.Internal,
             allowUnlimitedDate: true,
             denyDownload: inDto.File.DenyDownload,
-            password: inDto.File.Password);
+            password: inDto.File.Password,
+            recreateRevoked: true);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -1016,6 +1031,7 @@ public abstract class FilesController<T>(
     /// Set file order
     /// </summary>
     /// <path>api/2.0/files/{fileId}/order</path>
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "when the order changes")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file with the position it now holds", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read, or `order` is below 1 or is neither a number nor a dotted path ending in one")]
@@ -1046,6 +1062,8 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/order</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "for every folder in the list whose order changes")]
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file in the list whose order changes")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The files and folders that were moved, with the positions they now hold", typeof(IAsyncEnumerable<FileEntryDto<int>>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `items`, an item has no `entryId` or `entryType`, or an `order` is below 1 or is neither a number nor a dotted path ending in one")]
@@ -1077,6 +1095,7 @@ public abstract class FilesController<T>(
     /// Save a file as PDF
     /// </summary>
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The PDF file that was created", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `folderId` or `title`")]
@@ -1157,17 +1176,19 @@ public abstract class FilesController<T>(
     /// editing, closing it for filling and remembering the version it was edited from. The file has to be a PDF form
     /// lying in a room. Starting needs the right to start the filling, which the room admin and a member with
     /// content-creator rights have, while stopping a filling that somebody else started belongs to room managers
-    /// alone, so a content creator is refused with 403 there. The call is mutating; the state that resulted is read
+    /// alone, so a content creator is refused with 403 there. In a form-filling room action 3 needs the right to
+    /// edit the form. The call is mutating; the state that resulted is read
     /// with `GET api/2.0/files/file/{fileId}/formroles`.
     /// </remarks>
     /// <summary>
     /// Perform form filling action
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
+    [RaisesWebhook(WebhookTrigger.FormStopped, When = "when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
-    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling, or `action` is not one of the known values")]
+    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values")]
     [SwaggerResponse(500, "The form has no filling properties yet, as when a filling that was never started is resumed, or the form lies in a third-party storage")]
     // Same shape as formrolemapping above: the id travels in the body, the route placeholder is
     // unbound, and the client fills both with the same value.
@@ -1257,8 +1278,8 @@ public abstract class FilesController<T>(
     /// key that `GET api/2.0/files/file/{fileId}/publickeys` reports for them. The keys of the accounts named in the
     /// request are replaced, and the keys of everybody else are left as they are, which makes the call idempotent for
     /// a given set of recipients while remaining a mutating one; sending no entry for a person does not revoke that
-    /// person's key. The file has to lie in a private room, and every account named in the request has to have read
-    /// access to it. The caller needs read access to the file and the right to create content in that room, which its
+    /// person's key. The file has to lie in a private room. An account named in the request that cannot read the file is skipped,
+    /// nothing is stored for it, and it comes back in `skippedUserIds`, while the keys of the others are stored. The caller needs read access to the file and the right to create content in that room, which its
     /// members with editing rights and its admins have; a caller without those rights, a file outside a private room
     /// and a file that does not exist are all refused with 403. Read the result back with
     /// `GET api/2.0/files/{fileId}/access`.
@@ -1268,13 +1289,13 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/{fileId}/access</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The file keys were stored")]
-    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, the file is not in a private room, or a recipient has no read access to it")]
+    [SwaggerResponse(200, "The file keys of the recipients who can read the file were stored; the others are listed in `skippedUserIds`", typeof(FileKeysWrittenDto))]
+    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, or the file is not in a private room")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPut("{fileId}/access")]
-    public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
+    public async Task<FileKeysWrittenDto> SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {
-        await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project());
+        return new FileKeysWrittenDto { SkippedUserIds = await fileStorageService.SetEncryptionInfoAsync(inDto.FileId, inDto.Keys.Project()) };
     }
 }
 
@@ -1304,6 +1325,7 @@ public class FilesControllerCommon(
     /// Create a file in My documents
     /// </summary>
     /// <path>api/2.0/files/@my/file</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
@@ -1322,6 +1344,7 @@ public class FilesControllerCommon(
     /// </remarks>
     /// <summary>Create an HTML file in the "Common" section</summary>
     /// <path>api/2.0/files/@common/html</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -1349,6 +1372,7 @@ public class FilesControllerCommon(
     /// Create an HTML file in My documents
     /// </summary>
     /// <path>api/2.0/files/@my/html</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
@@ -1366,6 +1390,7 @@ public class FilesControllerCommon(
     /// </remarks>
     /// <summary>Create a text file in the "Common" section</summary>
     /// <path>api/2.0/files/@common/text</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "New file information", typeof(FileDto<int>))]
@@ -1391,6 +1416,7 @@ public class FilesControllerCommon(
     /// Create a text file in My documents
     /// </summary>
     /// <path>api/2.0/files/@my/text</path>
+    [RaisesWebhook(WebhookTrigger.FileCreated, When = "whether the content creates a new file or is saved as a new version of an existing file")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]

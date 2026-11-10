@@ -47,7 +47,7 @@ public abstract class OperationsStatusesTestBase(
     protected async Task<string> StartDelete(int fileId, bool immediately = true)
     {
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto(fileIds: [new DeleteBatchRequestDtoAllOfFileIds(fileId)], immediately: immediately),
+            new DeleteBatchRequestDto(fileIds: [new DeleteBatchRequestDtoAllOfFileIds(fileId)], immediately: immediately) { ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         return results[0].Id;
@@ -57,7 +57,7 @@ public abstract class OperationsStatusesTestBase(
     protected async Task<string> StartDuplicate(int fileId)
     {
         var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(
-            new DuplicateRequestDto(fileIds: [new DuplicateRequestDtoAllOfFileIds(fileId)]),
+            new DuplicateRequestDto(fileIds: [new DuplicateRequestDtoAllOfFileIds(fileId)]) { ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         return results[0].Id;
@@ -70,7 +70,7 @@ public abstract class OperationsStatusesTestBase(
             new BatchRequestDto(
                 fileIds: [new BatchRequestDtoAllOfFileIds(fileId)],
                 destFolderId: new BatchRequestDtoAllOfDestFolderId(destFolderId),
-                conflictResolveType: FileConflictResolveType.Skip),
+                conflictResolveType: FileConflictResolveType.Skip) { ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         return results[0].Id;
@@ -83,7 +83,7 @@ public abstract class OperationsStatusesTestBase(
             new BatchRequestDto(
                 fileIds: [new BatchRequestDtoAllOfFileIds(fileId)],
                 destFolderId: new BatchRequestDtoAllOfDestFolderId(destFolderId),
-                conflictResolveType: FileConflictResolveType.Skip),
+                conflictResolveType: FileConflictResolveType.Skip) { ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         return results[0].Id;
@@ -102,7 +102,8 @@ public abstract class OperationsStatusesTestBase(
     /// <summary>Starts emptying the trash and returns the operation id.</summary>
     protected async Task<string> StartEmptyTrash()
     {
-        var results = (await _filesOperationsApi.EmptyTrashAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        // single: only the operation this call queued, not an earlier delete the caller has not read yet
+        var results = (await _filesOperationsApi.EmptyTrashAsync(single: true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         return results[0].Id;
     }

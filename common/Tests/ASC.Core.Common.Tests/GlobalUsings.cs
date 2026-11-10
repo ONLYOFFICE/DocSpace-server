@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -33,33 +33,72 @@
 
 global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
+global using System.Globalization;
 global using System.Net;
+global using System.Net.NetworkInformation;
+global using System.Net.Sockets;
+global using System.Reflection;
+global using System.Runtime.CompilerServices;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
 global using System.Xml.Linq;
 
 global using ASC.Api.Core.Middleware;
+global using ASC.Api.Core.Webhook.Payloads;
 global using ASC.Common.Caching;
 global using ASC.Common.Notify.Patterns;
+global using ASC.Common.Threading.DistributedLock.Abstractions;
+global using ASC.Common.Threading.DistributedLock.InMemoryLock;
+global using ASC.Common.Web;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Data;
 global using ASC.Core.Tenants;
+global using ASC.Core.Users;
 global using ASC.FederatedLogin.Helpers;
+global using ASC.Files.Core.ApiModels.WebhookDto;
+global using ASC.Notify;
+global using ASC.Notify.Channels;
 global using ASC.Notify.Cron;
+global using ASC.Notify.Engine;
 global using ASC.Notify.Messages;
+global using ASC.Notify.Model;
 global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
+global using ASC.Notify.Sinks;
 global using ASC.Notify.Textile;
+global using ASC.Webhooks.Contract;
+global using ASC.Webhooks.Core;
 
 global using FluentAssertions;
 
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.WebUtilities;
+global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Caching.Distributed;
+global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging.Abstractions;
+global using Microsoft.Extensions.Options;
 
 global using Polly;
 global using Polly.Retry;
+
+global using WireMock;
+global using WireMock.Matchers;
+global using WireMock.RequestBuilders;
+global using WireMock.ResponseBuilders;
+global using WireMock.Server;
+global using WireMock.Settings;
+global using WireMock.Types;
+global using WireMock.Util;
+
+global using ZiggyCreatures.Caching.Fusion;
+global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
+
+global using static ASC.Core.Common.Tests.PaymentStubs;
+
+global using DbQuota = ASC.Core.Common.EF.DbQuota;
+global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;

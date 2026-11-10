@@ -43,19 +43,22 @@ public class KnowledgeSearchEngine(
     private const int ResultCount = 5;
     private const int SemanticCandidates = 100;
 
-    public async Task<List<KnowledgeSearchResult>> SearchAsync(Folder<int> agent, string query)
+    public async Task<List<KnowledgeSearchResult>> SearchAsync(Folder<int> chatFolder, IReadOnlyCollection<int> roomIds, string query)
     {
         query = query.Trim();
 
         ArgumentException.ThrowIfNullOrEmpty(query);
 
+        if (roomIds.Count == 0)
+        {
+            return [];
+        }
+
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        var generator = await embeddingGeneratorFactory.CreateAsync(agent);
+        var generator = await embeddingGeneratorFactory.CreateAsync(chatFolder);
         var embedding = await generator.GenerateAsync(query);
 
-        var collection = vectorStore.GetCollection<Chunk>(Chunk.IndexName, null);
-        var roomId = agent.Id;
         var searchQuery = new HybridSearchQuery<Chunk>
         {
             VectorField = x => x.Embedding,
@@ -64,10 +67,11 @@ public class KnowledgeSearchEngine(
             LexicalFields = [x => x.Title, x => x.TextEmbedding],
             Top = ResultCount,
             K = SemanticCandidates,
-            Filter = x => x.TenantId == tenantId && x.RoomId == roomId
+            Filter = x => x.TenantId == tenantId && roomIds.Contains(x.RoomId)
         };
 
-        return await collection.HybridSearchAsync(searchQuery)
+        return await vectorStore.GetCollection<Chunk>(Chunk.IndexName, null)
+            .HybridSearchAsync(searchQuery)
             .Select(x => new KnowledgeSearchResult
             {
                 FileId = x.FileId,

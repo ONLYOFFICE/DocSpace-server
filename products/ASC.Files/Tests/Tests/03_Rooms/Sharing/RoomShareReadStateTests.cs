@@ -269,6 +269,26 @@ public class RoomShareReadStateTests(
         ((int)response.StatusCode).Should().Be(404);
     }
 
+    /// <summary>
+    /// A whitespace-only id is bound to <c>null</c> by MVC, and the thirdparty selector lookup
+    /// used to throw <c>ArgumentNullException</c> on it, which surfaced as 400 instead of the 404
+    /// every other invalid id shape gets. <c>SelectorFactory.Match</c> now treats a null id as
+    /// "no selector", so it resolves to "not found".
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "84318")]
+    public async Task GetRoomSecurityInfo_WhitespaceOnlyRoomId_Returns404()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        using var response = await GetRoomSecurityInfoRaw("%20%20%20");
+
+        // Assert
+        ((int)response.StatusCode).Should().Be(404);
+    }
+
     [Fact]
     public async Task GetRoomSecurityInfo_RepeatedGet_ReturnsTheSameSecurityList()
     {

@@ -58,6 +58,7 @@ public class FileMovePermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(destRoom.Id),
                 ConflictResolveType = FileConflictResolveType.Skip,
                 FileIds = [new(file.Id)],
@@ -178,6 +179,7 @@ public class FileMovePermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(destRoom.Id),
                 ConflictResolveType = FileConflictResolveType.Skip,
                 FileIds = [new(file.Id)],
@@ -204,6 +206,7 @@ public class FileMovePermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(destRoom.Id),
                 ConflictResolveType = FileConflictResolveType.Skip,
                 FileIds = [new(file.Id)],
@@ -235,6 +238,7 @@ public class FileMovePermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(destRoom.Id),
                 ConflictResolveType = FileConflictResolveType.Skip,
                 FileIds = [new(file.Id)],
@@ -266,6 +270,7 @@ public class FileMovePermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(destRoom.Id),
                 ConflictResolveType = FileConflictResolveType.Skip,
                 FileIds = [new(file.Id)],
@@ -298,6 +303,7 @@ public class FileMovePermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(userMyDocsFolderId),
                 ConflictResolveType = FileConflictResolveType.Skip,
                 FileIds = [new(file.Id)],
@@ -332,6 +338,7 @@ public class FileMovePermissionsTests(
 
         await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(srcRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file.Id)],
@@ -411,6 +418,7 @@ public class FileMovePermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 DestFolderId = new(userMyDocsFolderId),
                 FolderIds = [new(room.Id)],
                 FileIds = []

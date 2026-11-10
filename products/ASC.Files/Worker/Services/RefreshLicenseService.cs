@@ -33,25 +33,45 @@
 
 namespace ASC.Files.Worker.Services;
 
+/// <summary>
+/// Re-reads the license in force from the license path, so a file replaced on disk or a renewal takes effect without
+/// a restart.
+/// </summary>
+/// <remarks>
+/// Nothing is applied before the license has been accepted (the setup wizard or the accept call), and a staged file
+/// is never touched: putting a license in force is the user's decision, not this service's.
+/// </remarks>
 [Singleton]
 public class RefreshLicenseService(
         IServiceScopeFactory scopeFactory,
         ILogger<RefreshLicenseService> logger,
-        LicenseReader licenseReader,
-        DocumentServiceLicense documentServiceLicense,
         IConfiguration configuration)
     : ActivePassiveBackgroundService<RefreshLicenseService>(logger, scopeFactory)
 {
+    private readonly IServiceScopeFactory _serviceScopeFactory = scopeFactory;
+
     protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:refreshLicense:period"] ?? "1", CultureInfo.InvariantCulture);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
         try
         {
-            if (!string.IsNullOrEmpty(licenseReader.LicensePath))
+            await using var scope = _serviceScopeFactory.CreateAsyncScope();
+
+            var licenseReader = scope.ServiceProvider.GetRequiredService<LicenseReader>();
+            if (string.IsNullOrEmpty(licenseReader.LicensePath))
             {
-                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+                return;
             }
+
+            var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
+            if (!await TariffSettings.GetLicenseAcceptAsync(settingsManager))
+            {
+                return;
+            }
+
+            var documentServiceLicense = scope.ServiceProvider.GetRequiredService<DocumentServiceLicense>();
+            await licenseReader.RefreshActiveLicenseAsync(documentServiceLicense.ValidateLicense);
         }
         catch (Exception ex)
         {

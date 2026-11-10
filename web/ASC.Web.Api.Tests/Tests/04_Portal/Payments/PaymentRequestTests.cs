@@ -175,6 +175,7 @@ public class PaymentRequestTests(
     }
 
     [Fact]
+    [Trait("Bug", "81525")]
     public async Task SendPaymentRequest_EmptyUserName_ThrowsBadRequest()
     {
         // Arrange

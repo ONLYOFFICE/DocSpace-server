@@ -56,7 +56,8 @@ public class BackupService(
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
         StorageFactory storageFactory,
-        MessageService messageService)
+        MessageService messageService,
+        ConsumerFactory consumerFactory)
 {
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
@@ -126,7 +127,7 @@ public class BackupService(
     {
         await DemandPermissionsBackupAsync();
 
-        var backupRecord = await backupRepository.GetBackupRecordAsync(backupId);
+        var backupRecord = await backupRepository.GetBackupRecordAsync(backupId) ?? throw new ItemNotFoundException("Backup not found");
         if (backupRecord.TenantId == -1)
         {
             await tenantExtra.DemandAccessSpacePermissionAsync();
@@ -138,7 +139,12 @@ public class BackupService(
                 return;
             }
         }
-        await backupRepository.DeleteBackupRecordAsync(backupRecord.Id);
+
+        if (!await backupRepository.TryMarkBackupRecordRemovedAsync(backupRecord.Id))
+        {
+            // Already removed, by an earlier or a concurrent delete: that one deletes the archive.
+            return;
+        }
 
         var storage = await backupStorageFactory.GetBackupStorageAsync(backupRecord);
         if (storage == null)
@@ -262,7 +268,8 @@ public class BackupService(
         else
         {
             request.StorageType = storageType;
-            request.FilePathOrId = storageParams["filePath"];
+            request.FilePathOrId = storageParams.GetValueOrDefault("filePath")
+                ?? throw new ArgumentException("backupId must be the ID of a backup, or storageParams must contain filePath");
 
             if (request.StorageType == BackupStorageType.Local && enqueueTask)
             {
@@ -377,6 +384,7 @@ public class BackupService(
         }
 
         ValidateCronSettings(cronParams);
+        ValidateScheduleStorage(storageType, storageParams);
 
         var scheduleRequest = new CreateScheduleRequest
         {
@@ -397,7 +405,7 @@ public class BackupService(
         {
             case BackupStorageType.ThridpartyDocuments:
             case BackupStorageType.Documents:
-                scheduleRequest.StorageBasePath = storageParams["folderId"];
+                scheduleRequest.StorageBasePath = storageParams.GetValueOrDefault("folderId") ?? throw new ArgumentException("storageParams must contain folderId");
                 break;
             case BackupStorageType.Local:
                 if (!coreBaseSettings.Standalone)
@@ -405,7 +413,7 @@ public class BackupService(
                     throw new Exception("Access denied");
                 }
 
-                scheduleRequest.StorageBasePath = storageParams["filePath"];
+                scheduleRequest.StorageBasePath = storageParams.GetValueOrDefault("filePath") ?? throw new ArgumentException("storageParams must contain filePath");
                 break;
         }
 
@@ -591,8 +599,50 @@ public class BackupService(
         return null;
     }
 
+    /// <summary>
+    /// Refuses a storage no scheduled backup could ever be written to, so that a broken request cannot
+    /// replace a working schedule: a storage type the backup storages do not handle, or a third-party
+    /// consumer without a known <c>module</c>.
+    /// </summary>
+    private void ValidateScheduleStorage(BackupStorageType storageType, Dictionary<string, string> storageParams)
+    {
+        if (storageType is not (BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments or BackupStorageType.DataStore
+            or BackupStorageType.Local or BackupStorageType.ThirdPartyConsumer))
+        {
+            throw new ArgumentException("storageType must be Documents, ThridpartyDocuments, DataStore, Local or ThirdPartyConsumer");
+        }
+
+        if (storageType == BackupStorageType.ThirdPartyConsumer)
+        {
+            var module = storageParams.GetValueOrDefault("module");
+
+            if (string.IsNullOrEmpty(module) || string.IsNullOrEmpty(consumerFactory.GetByKey<DataStoreConsumer>(module).Name))
+            {
+                throw new ArgumentException("storageParams must contain the module of a known storage");
+            }
+        }
+    }
+
     private static void ValidateCronSettings(CronParams cronParams)
     {
+        if (!Enum.IsDefined(cronParams.Period))
+        {
+            throw new ArgumentException("period must be EveryDay, EveryWeek or EveryMonth");
+        }
+
+        if (cronParams.Hour is < 0 or > 23)
+        {
+            throw new ArgumentException("hour must be 0 - 23");
+        }
+
+        switch (cronParams.Period)
+        {
+            case BackupPeriod.EveryWeek when cronParams.Day is < 1 or > 7:
+                throw new ArgumentException("day must be 1 - 7 for a weekly schedule");
+            case BackupPeriod.EveryMonth when cronParams.Day is < 1 or > 31:
+                throw new ArgumentException("day must be 1 - 31 for a monthly schedule");
+        }
+
         new CronExpression(cronParams.ToString());
     }
 

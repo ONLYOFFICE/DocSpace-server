@@ -174,6 +174,8 @@ public class FilesControllerHelper(
                           title.EndsWith(extension, StringComparison.OrdinalIgnoreCase) ? title : title + extension,
                           memStream.Length, memStream, updateIfExist);
 
+        await SendFileWrittenFromContentAsync(file);
+
         return await _fileDtoHelper.GetAsync(file);
     }
 
@@ -264,6 +266,15 @@ public class FilesControllerHelper(
     {
         var service = serviceProvider.GetService<FileStorageService>();
         var file = await _fileStorageService.GetFileAsync(fileId, -1);
+
+        // A copy made here is written in the clear: out of a private room it would keep nothing but
+        // ciphertext without its key, and into one it would put open content where only encrypted is allowed.
+        var destRoom = await _daoFactory.GetCacheFolderDao<TTemplate>().GetParentFoldersAsync(destFolderId).FirstOrDefaultAsync(f => f.IsRoom);
+        if (file.Encrypted || DocSpaceHelper.LocatedInPrivateRoom(destRoom) || await DocSpaceHelper.LocatedInPrivateRoomAsync(file, _daoFactory.GetCacheFolderDao<T>()))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         var ext = FileUtility.GetFileExtension(file.Title);
         var destExt = FileUtility.GetFileExtension(destTitle);
 

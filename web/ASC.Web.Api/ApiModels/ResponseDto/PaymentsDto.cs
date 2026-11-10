@@ -72,7 +72,7 @@ public class ReportDto
     /// How many movements match the filters in total, across every page.
     /// </summary>
     /// <example>137</example>
-    public long TotalQuantity { get; set; }
+    public int TotalQuantity { get; set; }
     /// <summary>
     /// How many pages those movements come to at the current `limit`.
     /// </summary>
@@ -165,6 +165,16 @@ public class OperationDto
     /// <example>99.99</example>
     public decimal Debit { get; set; }
     /// <summary>
+    /// Whether the AI operation ran on the portal's own provider key.
+    /// </summary>
+    /// <example>true</example>
+    public bool Byok { get; set; }
+    /// <summary>
+    /// The AI provider that ran the operation; `null` when it was not recorded.
+    /// </summary>
+    /// <example>anthropic</example>
+    public string Provider { get; set; }
+    /// <summary>
     /// What the AI provider charged for the whole `quantity` of an AI tools or AI search charge, as the billing
     /// service recorded it - the provider's side of the same operation `debit` bills the portal for. It is `null`
     /// on any other movement, and on an AI charge recorded without a provider cost.
@@ -229,6 +239,8 @@ public class OperationDto
         Currency = operation.Currency;
         Credit = operation.Credit;
         Debit = operation.Debit;
+        Byok = WalletServiceDescriptionManager.IsByok(operation.Metadata);
+        Provider = WalletServiceDescriptionManager.GetProvider(operation.Metadata);
         Cost = WalletServiceDescriptionManager.GetProviderCost(operation.Metadata);
         ParticipantName = operation.ParticipantName;
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
@@ -313,7 +325,8 @@ public class CustomerMonthlyUsageDto
 ///   "totalAmount": 49.99,
 ///   "operationCount": 2,
 ///   "price": 0.14,
-///   "subscription": true
+///   "subscription": true,
+///   "byok": false
 /// }
 /// </example>
 public class CustomerServiceUsageDto
@@ -378,6 +391,13 @@ public class CustomerServiceUsageDto
     /// <example>true</example>
     public bool Subscription { get; set; }
 
+    /// <summary>
+    /// Whether the total is AI consumption paid with the portal's own provider keys rather than from the wallet. It
+    /// is `false` on a total into which that consumption was merged, which mixes the two.
+    /// </summary>
+    /// <example>false</example>
+    public bool Byok { get; set; }
+
     public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, TenantQuota> walletQuotas, Dictionary<string, string> customUom)
     {
         var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(usage.Service, customUom);
@@ -396,6 +416,7 @@ public class CustomerServiceUsageDto
         OperationCount = usage.OperationCount;
         Price = quota?.Price ?? 0;
         Subscription = !string.IsNullOrEmpty(quota?.ProductId);
+        Byok = WalletServiceDescriptionManager.IsByokService(usage.Service);
     }
 }
 
@@ -437,7 +458,7 @@ public class CustomerServiceUsageReportDto
     /// How many services match the filters in total, across every page - services, not charges.
     /// </summary>
     /// <example>1</example>
-    public long TotalQuantity { get; set; }
+    public int TotalQuantity { get; set; }
 
     /// <summary>
     /// How many pages those entries come to at the current `limit`.

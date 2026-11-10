@@ -132,6 +132,7 @@ public class FolderHistoryFileActionsTests(
         await _filesOperationsApi.MoveBatchItemsAsync(
             new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 FolderIds = [new BatchRequestDtoAllOfFolderIds(subfolder.Id)],
                 DestFolderId = new BatchRequestDtoAllOfDestFolderId(destRoom.Id),
                 DeleteAfter = false
@@ -158,6 +159,7 @@ public class FolderHistoryFileActionsTests(
         await _filesOperationsApi.CopyBatchItemsAsync(
             new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 FolderIds = [new BatchRequestDtoAllOfFolderIds(subfolder.Id)],
                 DestFolderId = new BatchRequestDtoAllOfDestFolderId(destRoom.Id),
                 DeleteAfter = false
@@ -184,6 +186,7 @@ public class FolderHistoryFileActionsTests(
         await _filesOperationsApi.MoveBatchItemsAsync(
             new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 FileIds = [new BatchRequestDtoAllOfFileIds(file.Id)],
                 DestFolderId = new BatchRequestDtoAllOfDestFolderId(destRoom.Id),
                 DeleteAfter = false
@@ -210,6 +213,7 @@ public class FolderHistoryFileActionsTests(
         await _filesOperationsApi.CopyBatchItemsAsync(
             new BatchRequestDto
             {
+                ReturnSingleOperation = true,
                 FileIds = [new BatchRequestDtoAllOfFileIds(file.Id)],
                 DestFolderId = new BatchRequestDtoAllOfDestFolderId(destRoom.Id),
                 DeleteAfter = false

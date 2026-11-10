@@ -46,10 +46,10 @@ public class SetAppEnabledRequest
     /// <summary>
     /// Whether the application is available in this portal. Switching it off leaves its settings document stored, so
     /// switching it back on restores the configuration it had; connected clients are told of the new state without a
-    /// reload.
+    /// reload. The field is mandatory: a body without it is rejected with 400 and leaves the application as it was.
     /// </summary>
     /// <example>true</example>
-    public bool Enabled { get; set; }
+    public required bool Enabled { get; set; }
 }
 
 /// <summary>

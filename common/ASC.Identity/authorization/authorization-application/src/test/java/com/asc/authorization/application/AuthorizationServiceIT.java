@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.asc.authorization.application.security.oauth.service.GrpcRegisteredClientService;
 import com.asc.authorization.application.security.oauth.service.RegisteredClientService;
+import com.asc.authorization.messaging.listener.AuthorizationMessagingCleanupService;
 import com.asc.common.application.proto.ClientResponse;
 import com.asc.common.utilities.crypto.HashingService;
 import com.asc.common.utilities.crypto.MachinePseudoKeys;
@@ -47,8 +48,10 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -61,6 +64,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -69,6 +73,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
@@ -172,6 +177,9 @@ public class AuthorizationServiceIT {
   @MockitoBean private RegisteredClientService registeredClientService;
   @MockitoBean private GrpcRegisteredClientService grpcRegisteredClientService;
   @MockitoBean private HashingService hashingService;
+
+  @Autowired private JdbcTemplate jdbcTemplate;
+  @Autowired private AuthorizationMessagingCleanupService authorizationMessagingCleanupService;
 
   @DynamicPropertySource
   static void configureTestContainers(DynamicPropertyRegistry registry) {
@@ -536,6 +544,264 @@ public class AuthorizationServiceIT {
       var response = introspectToken(createClientIgnoringErrors(), clientId, "invalid-token");
 
       assertThat(response.getBody()).contains("\"active\":false");
+    }
+  }
+
+  @Nested
+  @DisplayName("Authorization cleanup")
+  class AuthorizationCleanupIT {
+    private static final int AUTHORIZATIONS = 2100;
+    private static final int CONSENTS = 1100;
+
+    private void insertAuthorizations(
+        long tenantId,
+        Long ownerTenantId,
+        String ownerUserId,
+        String clientPrefix,
+        String principalPrefix,
+        int count) {
+      var rows = new ArrayList<Object[]>(count);
+      for (var i = 0; i < count; i++)
+        rows.add(
+            new Object[] {
+              clientPrefix + "-" + i + "-id",
+              clientPrefix + (clientPrefix.endsWith("*") ? "-" + i : ""),
+              principalPrefix + (principalPrefix.endsWith("*") ? "-" + i : ""),
+              tenantId,
+              ownerTenantId,
+              ownerUserId
+            });
+
+      jdbcTemplate.batchUpdate(
+          "INSERT INTO identity_authorizations (id, registered_client_id, principal_id, tenant_id,"
+              + " owner_tenant_id, owner_user_id, authorization_grant_type, modified_at)"
+              + " VALUES (?, ?, ?, ?, ?, ?, 'authorization_code',"
+              + " UTC_TIMESTAMP(6) - INTERVAL 1 HOUR)",
+          rows);
+    }
+
+    private void insertConsents(
+        Long ownerTenantId,
+        String ownerUserId,
+        String clientPrefix,
+        String principalPrefix,
+        int count) {
+      var consents = new ArrayList<Object[]>(count);
+      var scopes = new ArrayList<Object[]>(count * 2);
+      for (var i = 0; i < count; i++) {
+        var clientId = clientPrefix + (clientPrefix.endsWith("*") ? "-" + i : "");
+        var principalId = principalPrefix + (principalPrefix.endsWith("*") ? "-" + i : "");
+        consents.add(new Object[] {clientId, principalId, ownerTenantId, ownerUserId});
+        scopes.add(new Object[] {clientId, principalId, "files:read"});
+        scopes.add(new Object[] {clientId, principalId, "files:write"});
+      }
+
+      jdbcTemplate.batchUpdate(
+          "INSERT INTO identity_consents (registered_client_id, principal_id, owner_tenant_id,"
+              + " owner_user_id, modified_at)"
+              + " VALUES (?, ?, ?, ?, UTC_TIMESTAMP(6) - INTERVAL 1 HOUR)",
+          consents);
+      jdbcTemplate.batchUpdate(
+          "INSERT INTO identity_consent_scopes (registered_client_id, principal_id, scopes)"
+              + " VALUES (?, ?, ?)",
+          scopes);
+    }
+
+    private void insertAuthorization(
+        String clientId,
+        String principalId,
+        long tenantId,
+        long ownerTenantId,
+        String ownerUserId,
+        Integer codeIssuedHours,
+        int modifiedHours) {
+      jdbcTemplate.update(
+          "INSERT INTO identity_authorizations (id, registered_client_id, principal_id, tenant_id,"
+              + " owner_tenant_id, owner_user_id, authorization_grant_type,"
+              + " authorization_code_issued_at, modified_at)"
+              + " VALUES (?, ?, ?, ?, ?, ?, 'authorization_code',"
+              + " UTC_TIMESTAMP(6) + INTERVAL ? HOUR, UTC_TIMESTAMP(6) + INTERVAL ? HOUR)",
+          clientId + "/" + principalId,
+          clientId,
+          principalId,
+          tenantId,
+          ownerTenantId,
+          ownerUserId,
+          codeIssuedHours,
+          modifiedHours);
+    }
+
+    private void insertConsent(
+        String clientId,
+        String principalId,
+        long ownerTenantId,
+        String ownerUserId,
+        int modifiedHours) {
+      jdbcTemplate.update(
+          "INSERT INTO identity_consents (registered_client_id, principal_id, owner_tenant_id,"
+              + " owner_user_id, modified_at) VALUES (?, ?, ?, ?, UTC_TIMESTAMP(6) + INTERVAL ? HOUR)",
+          clientId,
+          principalId,
+          ownerTenantId,
+          ownerUserId,
+          modifiedHours);
+      jdbcTemplate.update(
+          "INSERT INTO identity_consent_scopes (registered_client_id, principal_id, scopes)"
+              + " VALUES (?, ?, 'files:read')",
+          clientId,
+          principalId);
+    }
+
+    private List<String> authorizationsOf(String clientLike) {
+      return jdbcTemplate.queryForList(
+          "SELECT registered_client_id FROM identity_authorizations"
+              + " WHERE registered_client_id LIKE ? ORDER BY registered_client_id",
+          String.class,
+          clientLike);
+    }
+
+    private List<String> consentsOf(String clientLike) {
+      return jdbcTemplate.queryForList(
+          "SELECT registered_client_id FROM identity_consents"
+              + " WHERE registered_client_id LIKE ? ORDER BY registered_client_id",
+          String.class,
+          clientLike);
+    }
+
+    private long count(String sql, Object... args) {
+      return Objects.requireNonNull(jdbcTemplate.queryForObject(sql, Long.class, args));
+    }
+
+    private long scopesOf(String clientLike) {
+      return count(
+          "SELECT COUNT(*) FROM identity_consent_scopes WHERE registered_client_id LIKE ?",
+          clientLike);
+    }
+
+    @Test
+    void givenTenantWithManyGrants_whenRemoveTenantGrants_thenEveryGrantOfTenantIsRemoved() {
+      insertAuthorizations(9001, 9100L, "owner", "t9001-a*", "t9001-user", AUTHORIZATIONS);
+      insertConsents(9100L, "owner", "t9001-a*", "t9001-user", CONSENTS);
+      insertAuthorizations(9003, 9001L, "owner", "t9001-owned*", "t9003-user", 1050);
+      insertConsents(9001L, "owner", "t9001-owned*", "t9003-user", 550);
+      insertAuthorizations(9002, 9100L, "owner", "t9002-a*", "t9002-user", 13);
+      insertConsents(9100L, "owner", "t9002-a*", "t9002-user", 13);
+
+      authorizationMessagingCleanupService.onTenantRemoved(9001, null);
+
+      assertThat(
+              count(
+                  "SELECT COUNT(*) FROM identity_authorizations"
+                      + " WHERE tenant_id = 9001 OR owner_tenant_id = 9001"))
+          .isZero();
+      assertThat(
+              count(
+                  "SELECT COUNT(*) FROM identity_consents WHERE registered_client_id LIKE ?",
+                  "t9001-%"))
+          .isZero();
+      assertThat(scopesOf("t9001-%")).isZero();
+
+      assertThat(count("SELECT COUNT(*) FROM identity_authorizations WHERE tenant_id = 9002"))
+          .isEqualTo(13);
+      assertThat(
+              count(
+                  "SELECT COUNT(*) FROM identity_consents WHERE registered_client_id LIKE ?",
+                  "t9002-%"))
+          .isEqualTo(13);
+      assertThat(scopesOf("t9002-%")).isEqualTo(26);
+    }
+
+    @Test
+    void givenUserWithManyGrants_whenRemoveUserGrants_thenGrantsByAndToUserAreRemoved() {
+      insertAuthorizations(9011, 9100L, "owner", "u9011-a*", "u9011-user", AUTHORIZATIONS);
+      insertConsents(9100L, "owner", "u9011-a*", "u9011-user", CONSENTS);
+      insertAuthorizations(9012, 9011L, "u9011-user", "u9011-owned*", "u9012-user*", 1050);
+      insertConsents(9011L, "u9011-user", "u9011-owned*", "u9012-user*", 550);
+      insertAuthorizations(9011, 9011L, "u9011-other", "u9011-kept*", "u9011-other", 5);
+      insertConsents(9011L, "u9011-other", "u9011-kept*", "u9011-other", 5);
+
+      authorizationMessagingCleanupService.onUserRemoved(9011, "u9011-user", null);
+
+      assertThat(
+              count(
+                  "SELECT COUNT(*) FROM identity_authorizations WHERE principal_id = 'u9011-user'"
+                      + " OR (owner_tenant_id = 9011 AND owner_user_id = 'u9011-user')"))
+          .isZero();
+      assertThat(
+              count(
+                  "SELECT COUNT(*) FROM identity_consents WHERE principal_id = 'u9011-user'"
+                      + " OR (owner_tenant_id = 9011 AND owner_user_id = 'u9011-user')"))
+          .isZero();
+      assertThat(scopesOf("u9011-a%")).isZero();
+      assertThat(scopesOf("u9011-owned%")).isZero();
+
+      assertThat(
+              count(
+                  "SELECT COUNT(*) FROM identity_authorizations WHERE principal_id = 'u9011-other'"))
+          .isEqualTo(5);
+      assertThat(scopesOf("u9011-kept%")).isEqualTo(10);
+    }
+
+    @Test
+    void givenClientWithManyGrants_whenRemoveClientGrants_thenOnlyThatClientsGrantsAreRemoved() {
+      insertAuthorizations(9021, 9021L, "owner", "c9021-client", "c9021-user*", AUTHORIZATIONS);
+      insertConsents(9021L, "owner", "c9021-client", "c9021-user*", CONSENTS);
+      insertAuthorizations(9021, 9021L, "owner", "c9021-kept", "c9021-user*", 5);
+      insertConsents(9021L, "owner", "c9021-kept", "c9021-user*", 5);
+
+      authorizationMessagingCleanupService.onClientRemoved("c9021-client");
+
+      assertThat(
+              count(
+                  "SELECT COUNT(*) FROM identity_authorizations"
+                      + " WHERE registered_client_id = 'c9021-client'"))
+          .isZero();
+      assertThat(scopesOf("c9021-client")).isZero();
+      assertThat(
+              count(
+                  "SELECT COUNT(*) FROM identity_consents WHERE registered_client_id = 'c9021-kept'"))
+          .isEqualTo(5);
+      assertThat(scopesOf("c9021-kept")).isEqualTo(10);
+    }
+
+    @Test
+    void givenGrantsMadeAfterTenantRemoval_whenCleanupArrivesLate_thenOnlyEarlierGrantsRemoved() {
+      insertAuthorization("t9031-old-own", "t9031-user", 9031, 9031, "owner", -1, -1);
+      insertConsent("t9031-old-own", "t9031-user", 9031, "owner", -1);
+      insertAuthorization("t9031-old-foreign", "t9031-user", 9031, 9100, "owner", -1, -1);
+      insertConsent("t9031-old-foreign", "t9031-user", 9100, "owner", -1);
+      insertAuthorization("t9031-refreshed", "t9031-user", 9031, 9100, "owner", -1, 1);
+      insertAuthorization("t9031-new-own", "t9031-user", 9031, 9031, "owner", 1, 1);
+      insertConsent("t9031-new-own", "t9031-user", 9031, "owner", 1);
+      insertAuthorization("t9031-new-foreign", "t9031-user", 9031, 9100, "owner", 1, 1);
+      insertConsent("t9031-new-foreign", "t9031-user", 9100, "owner", 1);
+      insertAuthorization("t9031-pending", "t9031-user", 9031, 9031, "owner", null, 1);
+
+      authorizationMessagingCleanupService.onTenantRemoved(9031, Instant.now());
+
+      assertThat(authorizationsOf("t9031-%"))
+          .containsExactly("t9031-new-foreign", "t9031-new-own", "t9031-pending");
+      assertThat(consentsOf("t9031-%")).containsExactly("t9031-new-foreign", "t9031-new-own");
+      assertThat(scopesOf("t9031-old%")).isZero();
+    }
+
+    @Test
+    void givenGrantsMadeAfterUserRemoval_whenCleanupArrivesLate_thenOnlyEarlierGrantsRemoved() {
+      insertAuthorization("u9041-old-by", "u9041-user", 9041, 9100, "owner", -1, -1);
+      insertConsent("u9041-old-by", "u9041-user", 9100, "owner", -1);
+      insertAuthorization("u9041-refreshed-by", "u9041-user", 9041, 9100, "owner", -1, 1);
+      insertAuthorization("u9041-old-to", "u9042-user", 9042, 9041, "u9041-user", -1, -1);
+      insertConsent("u9041-old-to", "u9042-user", 9041, "u9041-user", -1);
+      insertAuthorization("u9041-new-by", "u9041-user", 9041, 9100, "owner", 1, 1);
+      insertConsent("u9041-new-by", "u9041-user", 9100, "owner", 1);
+      insertAuthorization("u9041-new-to", "u9042-user", 9042, 9041, "u9041-user", 1, 1);
+      insertConsent("u9041-new-to", "u9042-user", 9041, "u9041-user", 1);
+
+      authorizationMessagingCleanupService.onUserRemoved(9041, "u9041-user", Instant.now());
+
+      assertThat(authorizationsOf("u9041-%")).containsExactly("u9041-new-by", "u9041-new-to");
+      assertThat(consentsOf("u9041-%")).containsExactly("u9041-new-by", "u9041-new-to");
+      assertThat(scopesOf("u9041-old%")).isZero();
     }
   }
 }

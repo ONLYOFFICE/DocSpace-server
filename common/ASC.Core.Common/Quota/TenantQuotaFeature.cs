@@ -42,7 +42,9 @@ public class TenantQuotaFeature(string name, bool paid = false)
     public bool Paid { get; } = paid;
     public bool Standalone { get; init; }
 
-    public EmployeeType EmployeeType { get; init; } = EmployeeType.All;
+    // The lowest user type that is shown this feature in the current quota (compared by EmployeeTypeComparer).
+    // Billing data is for administrators unless a feature is opened up explicitly.
+    public EmployeeType EmployeeType { get; init; } = EmployeeType.DocSpaceAdmin;
 
     protected internal virtual void Multiply(int quantity)
     {

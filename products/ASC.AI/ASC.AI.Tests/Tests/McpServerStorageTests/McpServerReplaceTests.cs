@@ -35,61 +35,50 @@ namespace ASC.AI.Tests.Tests.McpServerStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/McpServers")]
-public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class McpServerReplaceTests(AspireAppFixture fixture) : PublicToolsTestBase(fixture)
 {
+    private async Task ReplaceAllAsync(Dictionary<string, object> map, string? entityId = null)
+    {
+        var result = await _aiTools.AiToolsReplaceAllCustomServersAsync(
+            new AiToolsReplaceAllCustomServersRequest(map: map, entityId: entityId!),
+            TestContext.Current.CancellationToken);
+
+        result.Success.Should().BeTrue($"replace-all-custom-servers rejected the map: {string.Join("; ", result.Errors?.Select(e => $"{e.Name}: {e.Error?.Message}") ?? [])}");
+    }
+
     [Fact]
     public async Task ReplaceAll_InsertsNewRows()
     {
-        var firstConfig = BuildMcpConfig("https://example.com/first");
-        var secondConfig = BuildMcpConfig("https://example.com/second");
+        await ReplaceAllAsync(new Dictionary<string, object>
+        {
+            ["server-1"] = McpConfig("https://example.com/first"),
+            ["server-2"] = McpConfig("https://example.com/second")
+        });
 
-        using var response = await _ai.PutAsync(
-            McpServersPath,
-            new
-            {
-                servers = new Dictionary<string, string>
-                {
-                    ["server-1"] = firstConfig,
-                    ["server-2"] = secondConfig
-                }
-            },
-            TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var all = await ReadAllMcpServersAsync();
+        var all = await ListCustomServersAsync();
         all.Should().HaveCount(2);
-        JsonEquals(all.Single(s => s.Name == "server-1").Config, firstConfig).Should().BeTrue();
-        JsonEquals(all.Single(s => s.Name == "server-2").Config, secondConfig).Should().BeTrue();
+        ConfigEquals(all["server-1"], "https://example.com/first").Should().BeTrue();
+        ConfigEquals(all["server-2"], "https://example.com/second").Should().BeTrue();
     }
 
     [Fact]
     public async Task ReplaceAll_UpdatesExistingRows()
     {
-        var initialConfig = BuildMcpConfig("https://example.com/old");
-        var newConfig = BuildMcpConfig("https://example.com/new");
-        var addedConfig = BuildMcpConfig("https://example.com/added");
+        await AddCustomServerAsync("server-1", "https://example.com/old");
 
-        await CreateMcpServerAsync("server-1", initialConfig);
+        await ReplaceAllAsync(new Dictionary<string, object>
+        {
+            ["server-1"] = McpConfig("https://example.com/new"),
+            ["server-2"] = McpConfig("https://example.com/added")
+        });
 
-        using var response = await _ai.PutAsync(
-            McpServersPath,
-            new
-            {
-                servers = new Dictionary<string, string>
-                {
-                    ["server-1"] = newConfig,
-                    ["server-2"] = addedConfig
-                }
-            },
-            TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        var all = await ReadAllMcpServersAsync();
+        var all = await ListCustomServersAsync();
         all.Should().HaveCount(2);
-        JsonEquals(all.Single(s => s.Name == "server-1").Config, newConfig).Should().BeTrue();
-        JsonEquals(all.Single(s => s.Name == "server-2").Config, addedConfig).Should().BeTrue();
+        ConfigEquals(all["server-1"], "https://example.com/new").Should().BeTrue();
+        ConfigEquals(all["server-2"], "https://example.com/added").Should().BeTrue();
     }
 
+    // Internal contract: per-entity MCP server scope has no public route (the chat service always stores under entityId null).
     [Fact]
     public async Task ReplaceAll_WithEntityId_IsolatedFromGlobal()
     {
@@ -97,7 +86,7 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
         var globalConfig = BuildMcpConfig("https://example.com/global");
         var scopedConfig = BuildMcpConfig("https://example.com/scoped");
 
-        await CreateMcpServerAsync("server-1", globalConfig);
+        await CreateMcpServerInternalAsync("server-1", globalConfig);
 
         using var response = await _ai.PutAsync(
             McpServersPath,
@@ -112,34 +101,103 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        JsonEquals((await ReadMcpServerAsync("server-1")).Config, globalConfig).Should().BeTrue();
-        JsonEquals((await ReadMcpServerAsync("server-1", roomId.ToString())).Config, scopedConfig).Should().BeTrue();
+        JsonEquals((await ReadMcpServerInternalAsync("server-1")).Config, globalConfig).Should().BeTrue();
+        JsonEquals((await ReadMcpServerInternalAsync("server-1", roomId.ToString())).Config, scopedConfig).Should().BeTrue();
 
-        (await ReadAllMcpServersAsync()).Should().ContainSingle().Which.Name.Should().Be("server-1");
-        (await ReadAllMcpServersAsync(roomId.ToString())).Should().ContainSingle().Which.Name.Should().Be("server-1");
+        (await ReadAllMcpServersInternalAsync()).Should().ContainSingle().Which.Name.Should().Be("server-1");
+        (await ReadAllMcpServersInternalAsync(roomId.ToString())).Should().ContainSingle().Which.Name.Should().Be("server-1");
     }
 
     [Fact]
     public async Task ReplaceAll_EmptyDict_ClearsAll()
     {
-        await CreateMcpServerAsync("server-1");
+        await AddCustomServerAsync("server-1");
 
-        using var response = await _ai.PutAsync(
-            McpServersPath,
-            new { servers = new Dictionary<string, string>() },
-            TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
+        await ReplaceAllAsync(new Dictionary<string, object>());
 
-        (await ReadAllMcpServersAsync()).Should().BeEmpty();
+        (await ListCustomServersAsync()).Should().BeEmpty();
     }
 
     [Fact]
     public async Task ReplaceAll_RemovesServersAbsentFromNewSet()
     {
-        var keptConfig = BuildMcpConfig("https://example.com/kept");
+        await AddCustomServerAsync("server-1");
+        await AddCustomServerAsync("server-2");
 
-        await CreateMcpServerAsync("server-1");
-        await CreateMcpServerAsync("server-2");
+        await ReplaceAllAsync(new Dictionary<string, object>
+        {
+            ["server-1"] = McpConfig("https://example.com/kept")
+        });
+
+        var all = await ListCustomServersAsync();
+        all.Should().ContainSingle().Which.Key.Should().Be("server-1");
+        ConfigEquals(all["server-1"], "https://example.com/kept").Should().BeTrue();
+    }
+
+    [Fact]
+    [Trait("Bug", "84406")]
+    public async Task ReplaceAll_RemovesToolPrefsOfDroppedServers()
+    {
+        await AddCustomServerAsync("kept");
+        await AddCustomServerAsync("dropped");
+
+        await SetDisabledAsync("kept", "t");
+        await SetDisabledAsync("dropped", "t");
+        await SetDisabledAsync(WebSearchServerType, "search");
+
+        await SetAllowAlwaysAsync("kept", "t");
+        await SetAllowAlwaysAsync("dropped", "t");
+        await SetAllowAlwaysAsync(WebSearchServerType, "preview");
+
+        await ReplaceAllAsync(new Dictionary<string, object>
+        {
+            ["kept"] = McpConfig()
+        });
+
+        var disabled = await GetDisabledAsync();
+        disabled.Should().NotContainKey("dropped");
+        disabled["kept"].Should().BeEquivalentTo(["t"]);
+        disabled[WebSearchServerType].Should().BeEquivalentTo(["search"]);
+
+        (await GetAllowAlwaysAsync()).Should().BeEquivalentTo([Token("kept", "t"), Token(WebSearchServerType, "preview")]);
+
+        // A server registered again under the dropped name starts without the old preferences.
+        await AddCustomServerAsync("dropped");
+
+        (await GetDisabledAsync()).Should().NotContainKey("dropped");
+        (await GetAllowAlwaysAsync()).Should().NotContain(Token("dropped", "t"));
+    }
+
+    // Internal contract: per-entity MCP server and tool-pref scopes have no public route (the chat service always stores under entityId null).
+    [Fact]
+    [Trait("Bug", "84406")]
+    public async Task ReplaceAll_WithEntityId_RemovesOnlyScopedToolPrefsOfDroppedServers()
+    {
+        var roomId = await CreateRoomAsync();
+        var entityId = roomId.ToString();
+
+        await CreateMcpServerInternalAsync("dropped");
+        await UpsertAllowAlwaysToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
+        {
+            ["dropped"] = ["global-tool"]
+        });
+
+        await CreateMcpServerInternalAsync("kept", entityId: entityId);
+        await CreateMcpServerInternalAsync("dropped", entityId: entityId);
+        await UpsertDisabledToolPrefsInternalAsync(
+            new Dictionary<string, HashSet<string>>
+            {
+                ["kept"] = ["t"],
+                ["dropped"] = ["t"]
+            },
+            entityId);
+        await UpsertAllowAlwaysToolPrefsInternalAsync(
+            new Dictionary<string, HashSet<string>>
+            {
+                ["kept"] = ["t"],
+                ["dropped"] = ["t"]
+            },
+            entityId);
 
         using var response = await _ai.PutAsync(
             McpServersPath,
@@ -147,32 +205,41 @@ public class McpServerReplaceTests(AspireAppFixture fixture) : BaseTest(fixture)
             {
                 servers = new Dictionary<string, string>
                 {
-                    ["server-1"] = keptConfig
-                }
+                    ["kept"] = BuildMcpConfig()
+                },
+                entityId
             },
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        var all = await ReadAllMcpServersAsync();
-        all.Should().ContainSingle().Which.Name.Should().Be("server-1");
-        JsonEquals(all.Single().Config, keptConfig).Should().BeTrue();
+        var scoped = await ReadToolPrefsInternalAsync(entityId);
+        scoped.Should().NotContainKey("dropped");
+        scoped["kept"].Disabled.Should().BeEquivalentTo(["t"]);
+        scoped["kept"].AllowAlways.Should().BeEquivalentTo(["t"]);
+
+        var global = await ReadToolPrefsInternalAsync();
+        global["dropped"].AllowAlways.Should().BeEquivalentTo(["global-tool"]);
+
+        await CreateMcpServerInternalAsync("dropped", entityId: entityId);
+
+        (await ReadToolPrefsInternalAsync(entityId)).Should().NotContainKey("dropped");
     }
 
     [Fact]
     public async Task ReplaceAll_NonExistentEntityId_Returns404()
     {
-        using var response = await _ai.PutAsync(
-            McpServersPath,
-            new
-            {
-                servers = new Dictionary<string, string>
-                {
-                    ["server-1"] = BuildMcpConfig()
-                },
-                entityId = "999999999"
-            },
-            TestContext.Current.CancellationToken);
+        await AddCustomServerAsync("server-1");
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _aiTools.AiToolsReplaceAllCustomServersAsync(
+                new AiToolsReplaceAllCustomServersRequest(
+                    map: new Dictionary<string, object> { ["server-2"] = McpConfig() },
+                    entityId: MissingEntityId),
+                TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(404);
+
+        // Bug 82975: an unreachable entityId must not fall back to the portal map and replace it.
+        (await ListCustomServersAsync()).Should().ContainSingle().Which.Key.Should().Be("server-1");
     }
 }

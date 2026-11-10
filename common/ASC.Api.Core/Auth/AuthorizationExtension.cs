@@ -40,6 +40,8 @@ public static class AuthorizationExtension
     {
         { "GET api/[^/]+/files/rooms", [ "rooms:read", "rooms:write" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[^/]+/files/rooms", [ "rooms:write" ] },
+        { "GET api/[^/]+/docs", [ "files:read", "files:write" ] },
+        { "(POST|PUT|DELETE|UPDATE) api/[^/]+/docs", [ "files:write" ] },
         { "GET api/[^/]+/files", [ "files:read", "files:write" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[^/]+/files", [ "files:write" ] },
         { "GET api/[^/]+/people/@self", [ "accounts.self:read", "accounts.self:write" ] },

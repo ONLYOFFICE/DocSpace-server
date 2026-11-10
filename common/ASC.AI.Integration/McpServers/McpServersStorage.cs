@@ -158,10 +158,12 @@ public class McpServersStorage(
 
                 if (entryId.HasValue)
                 {
+                    await context.DeleteToolPrefsOfMcpServersExceptByEntryAsync(tenantId, entryId.Value, servers.Keys);
                     await context.DeleteAllMcpServersByEntryAsync(tenantId, entryId.Value);
                 }
                 else
                 {
+                    await context.DeleteToolPrefsOfMcpServersExceptAsync(tenantId, servers.Keys);
                     await context.DeleteAllMcpServersAsync(tenantId);
                 }
 

@@ -1,0 +1,97 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Web.Studio.Core.Notify;
+
+/// <summary>
+/// What the retention policy keeps about a portal, with the portal's settings. While the portal is active:
+/// the last warning it was sent - the block keeps to the day that warning named, whatever schedule the
+/// portal falls under afterwards - the latest activity the policy has seen, which outlives the login
+/// history the portal's audit settings purge, and the day it last read it. Once it is blocked: the category
+/// it was blocked under - the letter about the block names the deletion date of that category, so the portal keeps it until it is
+/// deleted or unblocked, whatever its wallet shows in the meantime - the day the letters about the block
+/// went out, so that letters lost to a failure after the block are sent by the next run, and the days the
+/// reminders before the deletion went out, so that a run covering their days again does not send them twice.
+/// </summary>
+/// <remarks>
+/// A block replaces the whole record, and <c>PUT api/2.0/portal/unblock</c> clears it: what was kept about
+/// the active portal is of a count that is over either way. The block's part is read only while the portal
+/// is blocked; a portal unblocked some other way keeps it, but the next block overwrites it before it is
+/// read again.
+/// </remarks>
+public record PortalRetentionSettings : ISettings<PortalRetentionSettings>
+{
+    /// <summary>The category of the current block, or null for a portal that is not blocked by the policy.</summary>
+    public PortalRetentionCategory? Category { get; init; }
+
+    /// <summary>
+    /// The day the last reminder before the deletion went out, or null while it has not: the portal is not
+    /// deleted before a full notice period has passed since.
+    /// </summary>
+    public DateTime? FinalNoticeSentOn { get; init; }
+
+    /// <summary>The day the early reminder before the deletion went out, or null while it has not.</summary>
+    public DateTime? EarlyNoticeSentOn { get; init; }
+
+    /// <summary>
+    /// The day the letters about the block went out - to the owner, and to support where it steps in - or null
+    /// while they have not: the portal is blocked first, and a failure in between leaves them to the next run.
+    /// </summary>
+    public DateTime? BlockNoticeSentOn { get; init; }
+
+    /// <summary>
+    /// The latest sign of life of the active portal the policy has seen - an audit event or a sign-in. The
+    /// count never starts earlier than it, so a sign-in the login history purges later still counts, and the
+    /// activity is read again on a day the schedule counted from it may act on.
+    /// </summary>
+    public DateTime? LastActivityOn { get; init; }
+
+    /// <summary>
+    /// The day the policy last read the activity of the active portal. It is read again no later than a first
+    /// warning's number of days after it, so a sign-in that starts a new count is seen before that count's
+    /// first warning is due.
+    /// </summary>
+    public DateTime? LastActivityReadOn { get; init; }
+
+    /// <summary>The last warning before the block the active portal was sent, or null while none has.</summary>
+    public PortalRetentionWarning? LastWarning { get; init; }
+
+    public static Guid ID => new("{0FB77F96-4DFF-4CDF-BF86-A88AA6D0B531}");
+
+    public PortalRetentionSettings GetDefault()
+    {
+        return new PortalRetentionSettings();
+    }
+
+    public DateTime LastModified { get; set; }
+}

@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Klienta darbību ziņojums lejupielādēts</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Pakalpojuma izdevumu limits izveidots: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Pakalpojuma izdevumu limits atjaunināts: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Pakalpojuma izdevumu limits dzēsts: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Pakalpojuma personīgie izdevumu limiti iestatīti: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Pakalpojuma personīgie izdevumu limiti atspējoti: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Klienta abonements atjaunināts: {0}</value>
   </data>
@@ -731,6 +746,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portāls deaktivizēts</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portāls bloķēts saskaņā ar datu glabāšanas politiku</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portāls atbloķēts</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portāls dzēsts</value>
@@ -1221,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI profils piešķirts AI agentam darbībai: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>AI modeļa BYOK atslēga dzēsta: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>AI modeļa BYOK atslēga iestatīta: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Dokumentu aģenta iestatījumi atjaunināti</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI profils piešķirts darbībai: {0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Metadatu vērtības atjauninātas: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Failu atvēra Document Builder skripts: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Lietotne iespējota: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Lietotne atspējota: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Telpas piesaistītas MI projektam {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Telpas atsaistītas no MI projekta {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>MI projekta {0} AI modelis nomainīts uz {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Tika mēģināts atkārtoti piegādāt tīmekļa āķi: {0}</value>
   </data>
 </root>

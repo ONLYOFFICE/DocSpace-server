@@ -68,7 +68,13 @@ public enum SearchArea
     Forms,
 
     [Description("Form templates")]
-    FormTemplates
+    FormTemplates,
+
+    [Description("AiHub")]
+    AiHub,
+
+    [Description("Private rooms")]
+    PrivateRooms
 }
 
 /// <summary>
@@ -77,16 +83,17 @@ public enum SearchArea
 public static class SearchAreaExtensions
 {
     /// <summary>
-    /// Whether a room of the given folder type belongs to the section the search area stands for.
-    /// FillingFormsRoom rooms are surfaced in the Forms section, every other room in Rooms; areas
-    /// that do not take part in the split accept any room.
+    /// Whether a room belongs to the section the search area stands for. FillingFormsRoom rooms are
+    /// surfaced in the Forms section, private rooms in the private rooms section, every other room in
+    /// Rooms; areas that do not take part in the split accept any room.
     /// </summary>
-    public static bool MatchesRoomType(this SearchArea searchArea, FolderType folderType)
+    public static bool MatchesRoom<T>(this SearchArea searchArea, Folder<T> room)
     {
         return searchArea switch
         {
-            SearchArea.Active or SearchArea.Templates => folderType != FolderType.FillingFormsRoom,
-            SearchArea.Forms or SearchArea.FormTemplates => folderType == FolderType.FillingFormsRoom,
+            SearchArea.Active or SearchArea.Templates => room.FolderType != FolderType.FillingFormsRoom && !room.SettingsPrivate,
+            SearchArea.Forms or SearchArea.FormTemplates => room.FolderType == FolderType.FillingFormsRoom,
+            SearchArea.PrivateRooms => room.SettingsPrivate,
             _ => true
         };
     }

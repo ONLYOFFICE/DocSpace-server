@@ -38,7 +38,8 @@ public class BackupWorker(
     IDistributedTaskQueueFactory queueFactory,
     IServiceProvider serviceProvider,
     TempPath tempPath,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    ILogger<BackupWorker> logger)
 {
     public const string LockKey = "lock_backup";
 
@@ -61,9 +62,23 @@ public class BackupWorker(
         _upgradesPath = settings.UpgradesPath;
     }
 
-    public async Task StopAsync()
+    public async Task StopAsync(CancellationToken cancellationToken = default)
     {
-        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey))
+        try
+        {
+            await StopQueuesAsync(cancellationToken);
+        }
+        catch (Exception e)
+        {
+            // Cleanup on stop is best effort: Redis may already be gone or the lock held elsewhere,
+            // and a failure here must not turn a normal shutdown into a crash of the host.
+            logger.WarningStopQueues(e);
+        }
+    }
+
+    private async Task StopQueuesAsync(CancellationToken cancellationToken)
+    {
+        await using (await distributedLockProvider.TryAcquireLockAsync(LockKey, cancellationToken: cancellationToken))
         {
             if (_backupProgressQueue != null)
             {

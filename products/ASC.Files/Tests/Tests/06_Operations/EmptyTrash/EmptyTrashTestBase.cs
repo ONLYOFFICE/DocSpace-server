@@ -47,7 +47,7 @@ public abstract class EmptyTrashTestBase(
     protected async Task DeleteFileToTrashAsync(int fileId)
     {
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(fileId)], Immediately = false },
+            new DeleteBatchRequestDto { FileIds = [new(fileId)], Immediately = false, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
@@ -64,7 +64,7 @@ public abstract class EmptyTrashTestBase(
     protected async Task DeleteFolderToTrashAsync(int folderId)
     {
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FolderIds = [new(folderId)], Immediately = false },
+            new DeleteBatchRequestDto { FolderIds = [new(folderId)], Immediately = false, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
@@ -113,15 +113,17 @@ public abstract class EmptyTrashTestBase(
     /// <summary>
     /// Empties the Trash of the currently authenticated user and waits for the operation to finish.
     /// The started operation(s) are returned as last observed, per the same "may already be pruned"
-    /// caveat as every other batch operation endpoint.
+    /// caveat as every other batch operation endpoint. Unless the caller asks otherwise, only the
+    /// started operation is returned (<c>single</c>), so the wait follows that operation and not an
+    /// older one of the same user that happens to be listed first.
     /// </summary>
     protected async Task<List<FileOperationDto>> EmptyTrashAndWaitAsync(bool? single = null)
     {
-        var results = (await _filesOperationsApi.EmptyTrashAsync(single, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesOperationsApi.EmptyTrashAsync(single ?? true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {
-            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id) ?? [];
         }
 
         results.Should().NotContain(operation => !operation.Finished || !string.IsNullOrEmpty(operation.Error));
@@ -130,29 +132,22 @@ public abstract class EmptyTrashTestBase(
     }
 
     /// <summary>
-    /// Empties the Trash restricted to items originally located in the given section(s). The generated
-    /// SDK has no <c>folderType</c> parameter on <c>emptytrash</c>, so the request is issued directly.
+    /// Empties the Trash restricted to items originally located in the given section(s).
     /// </summary>
     protected async Task EmptyTrashForFolderTypesAndWaitAsync(bool single, params FolderType[] folderTypes)
     {
-        var url = $"api/2.0/files/fileops/emptytrash?single={(single ? "true" : "false")}";
-        url = folderTypes.Aggregate(url, (current, type) => current + $"&folderType={(int)type}");
+        var operations = (await _filesOperationsApi.EmptyTrashAsync(
+            single,
+            [.. folderTypes.Select(type => (int)type)],
+            TestContext.Current.CancellationToken)).Response;
 
-        using var response = await _filesClient.PutAsync(url, null, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        response.IsSuccessStatusCode.Should().BeTrue(body);
-
-        using var json = JsonDocument.Parse(body);
-        var operations = json.RootElement.GetProperty("response");
-
-        if (operations.GetArrayLength() == 0)
+        if (operations.Count == 0)
         {
             await WaitLongOperation();
             return;
         }
 
-        await WaitLongOperation(operations[0].GetProperty("id").GetString());
+        await WaitLongOperation(operations[0].Id);
     }
 
     /// <summary>

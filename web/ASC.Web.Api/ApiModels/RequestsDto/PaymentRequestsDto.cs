@@ -270,7 +270,7 @@ public class ChangeWalletServiceStateRequestDto
 /// <summary>
 /// The complete set of AI chat models that are to be barred on the portal.
 /// </summary>
-public class SetRestrictedAiModelsRequestDto
+public class SetRestrictedAiModelsRequestDto : IValidatableObject
 {
     /// <summary>
     /// The identifiers of the models no user of the portal may pick, taken from
@@ -281,4 +281,16 @@ public class SetRestrictedAiModelsRequestDto
     /// <example>["model1", "model2"]</example>
     [Required]
     public HashSet<string> Models { get; set; }
+
+    /// <summary>
+    /// A null entry is not a model identifier. It used to pass the binding, unlike the other wrong-typed entries,
+    /// and was then dropped on the way to the AI gateway, so the request replaced the stored set with an empty one.
+    /// </summary>
+    public IEnumerable<DataAnnotationsValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (Models != null && Models.Contains(null))
+        {
+            yield return new DataAnnotationsValidationResult("The model identifiers cannot be null.", [nameof(Models)]);
+        }
+    }
 }

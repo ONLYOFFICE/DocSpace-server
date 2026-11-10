@@ -41,6 +41,7 @@ import com.asc.authorization.application.exception.authorization.AuthorizationPe
 import com.asc.authorization.application.mapper.AuthorizationMapper;
 import com.asc.authorization.application.security.RegionUtils;
 import com.asc.authorization.application.security.authentication.BasicSignature;
+import com.asc.authorization.application.security.oauth.provider.PublicClientRefreshTokenAuthenticationProvider;
 import com.asc.authorization.data.authorization.entity.AuthorizationEntity;
 import com.asc.authorization.data.authorization.repository.JpaAuthorizationRepository;
 import com.asc.authorization.data.consent.repository.JpaConsentRepository;
@@ -62,6 +63,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames;
@@ -69,6 +71,7 @@ import org.springframework.security.oauth2.server.authorization.OAuth2Authorizat
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
+import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -264,10 +267,21 @@ public class AuthorizationService
    * <p>The authorization is encrypted, hashed, and stored. If the authorization already exists, it
    * is merged with the new data.
    *
-   * @param authorization the OAuth2 authorization to save.
+   * @param oauthAuthorization the OAuth2 authorization to save.
    * @throws AuthorizationPersistenceException if an error occurs while saving.
    */
-  public void save(OAuth2Authorization authorization) {
+  public void save(OAuth2Authorization oauthAuthorization) {
+    var authorization =
+        SecurityContextHolder.getContext().getAuthentication()
+                    instanceof OAuth2ClientAuthenticationToken client
+                && client.isAuthenticated()
+            ? OAuth2Authorization.from(oauthAuthorization)
+                .attribute(
+                    PublicClientRefreshTokenAuthenticationProvider
+                        .CLIENT_AUTHENTICATION_METHOD_ATTRIBUTE,
+                    client.getClientAuthenticationMethod().getValue())
+                .build()
+            : oauthAuthorization;
     try {
       MDC.put("id", authorization.getId());
       log.info("Saving authorization");

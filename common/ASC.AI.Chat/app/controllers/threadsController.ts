@@ -41,11 +41,16 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
-import { asyncHandler, unpackPositional, attachmentLimitError } from "./_helpers.js";
+import {
+  asyncHandler,
+  unpackPositional,
+  attachmentLimitError,
+  invalidMessageError,
+} from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
-import { agentAssignedProfileId } from "./agentProfile.js";
+import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -109,12 +114,11 @@ const assignmentsEngine = new AssignmentsEngine({ storage });
 // Gate for creating a thread (review #6, Bug 82719). Two requirements:
 //  1. If an `entityId` is supplied it must reference a folder the caller can
 //     access — a missing folder surfaces as 404, a no-access response as 403
-//     (see `assertEntityAccessible`). An accessible NON-agent folder is
-//     allowed BY DESIGN (Bug 82719 reopen decision): threads are either
-//     global or agent-scoped, so `HttpThreadsStorage` folds a non-agent
-//     entityId (e.g. the Trash root, an ordinary room — the main client
-//     sends the current location here) to the global scope instead of
-//     rejecting it. An absent entityId is the legitimate global scope.
+//     (see `assertEntityAccessible`). The client sends one only inside an AI
+//     project (the project id); any other accessible folder is allowed BY
+//     DESIGN (Bug 82719 reopen decision): threads are one list per user,
+//     so `HttpThreadsStorage` ignores the id instead of rejecting it. An
+//     absent entityId is the ordinary case.
 //  2. A live profile must be resolvable — an explicit `profileId` that exists,
 //     or the `Chat` assignment for the scope — otherwise there is no model to
 //     run the thread against, so reject with 404.
@@ -123,6 +127,24 @@ export async function assertThreadCreatable(
   profileId: string | undefined,
 ): Promise<void> {
   await assertEntityAccessible(entityId);
+  // Inside an AI project only its owner, Project managers and Members may
+  // chat; the project's model is what the round will use.
+  const project = await readAiProjectChatContext(entityId);
+  if (project) {
+    if (!project.canChat) {
+      throw Object.assign(new Error("You cannot chat in this AI project"), {
+        status: 403,
+        expose: true,
+      });
+    }
+    if (project.profileAvailable && project.effectiveProfileId) {
+      return;
+    }
+    throw Object.assign(new Error("The model of this AI project is not available"), {
+      status: 409,
+      expose: true,
+    });
+  }
   // A malformed profileId makes the C# lookup fail with a non-404 status;
   // treat that the same as "no such profile" and fall through to the
   // scope-assignment resolution instead of relaying an opaque error
@@ -173,15 +195,6 @@ interface UpdateMessageBody {
 
 export const threadsController = {
   create: asyncHandler<CreateBody>(async (req, res) => {
-    // The agent's assigned profile is authoritative for threads created in
-    // its room: substitute it over any caller-supplied profileId so a new
-    // thread cannot start on a different model (Bug 82915).
-    if (req.body && typeof req.body === "object") {
-      const agentProfileId = await agentAssignedProfileId(req.body.entityId);
-      if (agentProfileId) {
-        req.body.profileId = agentProfileId;
-      }
-    }
     await assertThreadCreatable(req.body?.entityId, req.body?.profileId);
     const thread = await engine.create(req.body);
     res.json(thread);
@@ -193,7 +206,7 @@ export const threadsController = {
     // object directly, so a missing/non-object profile means there is no model
     // to run the thread against → 404 (this also avoids the engine TypeError
     // that previously collapsed to a 500). A supplied entityId must be
-    // reachable; a non-agent one folds to the global scope downstream (see
+    // reachable; the thread itself is global whatever it names (see
     // `assertThreadCreatable` for the Bug 82719 design decision).
     const body = req.body;
     if (!isObject(body) || !isObject(body.profile)) {
@@ -217,16 +230,34 @@ export const threadsController = {
 
   appendUserMessage: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "message", "profileId"] as const);
+    if (typeof args.threadId !== "string" || args.threadId.length === 0) {
+      res.status(400).json({ error: "threadId required" });
+      return;
+    }
+    // The storage keeps the message verbatim, so an empty text or a foreign
+    // role used to be stored and served back as a user message (Bugs 84409,
+    // 84410). The route stores user messages only: the engine appends the
+    // other roles in-process, nothing sends them here.
+    const shapeError = invalidMessageError(args.message);
+    if (shapeError) {
+      res.status(400).json({ error: shapeError });
+      return;
+    }
+    const message = args.message as ThreadMessageInput;
+    if (message.role !== "user") {
+      res.status(400).json({ error: "append-user-message stores user messages only" });
+      return;
+    }
     // Enforce the composer's per-kind attachment cap server-side — the UI
     // cannot exceed it, so only a direct API call can (Bug 82894).
-    const limitError = attachmentLimitError(args.message);
+    const limitError = attachmentLimitError(message);
     if (limitError) {
       res.status(400).json({ error: limitError });
       return;
     }
     const messageId = await engine.appendUserMessage(
-      args.threadId as string,
-      args.message as ThreadMessageInput,
+      args.threadId,
+      message,
       args.profileId as string | undefined,
     );
     res.json({ messageId });
@@ -326,8 +357,10 @@ export const threadsController = {
 
   readMessages: asyncHandler(async (req, res) => {
     const threadId = asString(req.query["threadId"]);
+    // Used to answer 200 with an empty list, which hid a forgotten ID
+    // behind "no messages yet" (Bug 84408).
     if (!threadId) {
-      res.json([]);
+      res.status(400).json({ error: "threadId required" });
       return;
     }
     const count = parseInt10(req.query["count"]);
@@ -360,12 +393,41 @@ export const threadsController = {
       return;
     }
     const message = await engine.getMessageById(messageId);
+    // Storage folds the AI service's 404 into null; without this guard an
+    // unknown or deleted ID answered 200 with a null body (Bug 84411).
+    if (message === null) {
+      res.status(404).json({ error: "message not found" });
+      return;
+    }
     res.json(message);
   }),
 
   updateMessage: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["messageId", "message"] as const);
-    await engine.updateMessage(args.messageId as string, args.message as ThreadMessageInput);
+    if (typeof args.messageId !== "string" || args.messageId.length === 0) {
+      res.status(400).json({ error: "messageId required" });
+      return;
+    }
+    // The replacement is stored verbatim, so an empty one used to wipe the
+    // message (Bug 84412). The role is pinned to the stored one rather than
+    // to `user`: the widget rewrites assistant messages through this route
+    // when it cancels a client-side tool call (Bug 84413).
+    const shapeError = invalidMessageError(args.message);
+    if (shapeError) {
+      res.status(400).json({ error: shapeError });
+      return;
+    }
+    const message = args.message as ThreadMessageInput;
+    const stored = await storage.messages.readById(args.messageId);
+    if (stored === null) {
+      res.status(404).json({ error: "message not found" });
+      return;
+    }
+    if (message.role !== stored.role) {
+      res.status(400).json({ error: "the role of a stored message cannot be changed" });
+      return;
+    }
+    await engine.updateMessage(args.messageId, message);
     res.json({ success: true });
   }),
 

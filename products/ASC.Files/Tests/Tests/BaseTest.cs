@@ -49,12 +49,16 @@ public class BaseTest(
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    /// <summary>The id of this test's own portal.</summary>
+    protected int TenantId => _clients.TenantId;
+
     /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
     protected AspireAppFixture Fixture => fixture;
 
     protected HttpClient _filesClient = null!;
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;
+    protected HttpClient _studioClient = null!;
 
     protected FoldersApi _foldersApi = null!;
     protected FilesApi _filesApi = null!;
@@ -68,9 +72,11 @@ public class BaseTest(
     protected SharingApi _sharingApi = null!;
     protected PrivacyRoomApi _privacyRoomApi = null!;
     protected ThirdPartyIntegrationApi _thirdPartyApi = null!;
+    protected MetadataApi _metadataApi = null!;
 
     protected GroupApi _groupApi = null!;
     protected UserStatusApi _userStatusApi = null!;
+    protected UserDataApi _userDataApi = null!;
     protected PhotosApi _photosApi = null!;
     protected ProfilesApi _profilesApi = null!;
 
@@ -114,6 +120,7 @@ public class BaseTest(
         _filesClient = _clients.FilesHttpClient;
         _peopleClient = _clients.PeopleHttpClient;
         _webApiClient = _clients.WebApiHttpClient;
+        _studioClient = _clients.StudioHttpClient;
 
         _foldersApi = _clients.FoldersApi;
         _filesApi = _clients.FilesApi;
@@ -127,9 +134,11 @@ public class BaseTest(
         _sharingApi = _clients.SharingApi;
         _privacyRoomApi = _clients.PrivacyroomApi;
         _thirdPartyApi = _clients.ThirdPartyIntegrationApi;
+        _metadataApi = _clients.MetadataApi;
 
         _groupApi = _clients.GroupApi;
         _userStatusApi = _clients.UserStatusApi;
+        _userDataApi = _clients.UserDataApi;
         _photosApi = _clients.PhotosApi;
         _profilesApi = _clients.ProfilesApi;
 
@@ -157,6 +166,22 @@ public class BaseTest(
     protected Task<User> InviteContact(EmployeeType employeeType, User? user = null)
     {
         return Invitations.InviteContactAsync(_clients.ProfilesApi, _peopleClient, employeeType, user ?? Owner, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Connects a Socket.IO client to this test's portal as the given user. The test disposes it.</summary>
+    protected async Task<PortalSocket> ConnectSocket(User user)
+    {
+        await fixture.WaitForRouterAsync().WaitAsync(TestContext.Current.CancellationToken);
+
+        return await _clients.ConnectSocketAsync(user, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Connects with the given auth cookie, or with none: for what the service does with a bad one.</summary>
+    protected async Task<PortalSocket> ConnectSocket(string? token)
+    {
+        await fixture.WaitForRouterAsync().WaitAsync(TestContext.Current.CancellationToken);
+
+        return await PortalSocket.ConnectAsync(_clients.PortalName, token, TestContext.Current.CancellationToken);
     }
 
     protected Task<User> InviteGuest(User? user = null)
@@ -276,19 +301,13 @@ public class BaseTest(
     }
 
     /// <summary>
-    /// Reads the raw JSON because <c>FileEntryBaseDto</c> in the generated listing model carries
-    /// neither <c>id</c> nor <c>type</c>.
+    /// The id of the AI room's knowledge folder, found among its subfolders by <c>FolderType.Knowledge</c>.
     /// </summary>
     protected async Task<int> GetKnowledgeFolderIdAsync(int aiRoomId)
     {
-        var response = await _foldersApi.GetFoldersWithHttpInfoAsync(aiRoomId, TestContext.Current.CancellationToken);
+        var folders = (await _foldersApi.GetFoldersAsync(aiRoomId, TestContext.Current.CancellationToken)).Response;
 
-        using var payload = JsonDocument.Parse(response.RawContent);
-
-        return payload.RootElement.GetProperty("response").EnumerateArray()
-            .Where(f => f.GetProperty("type").GetInt32() == (int)FolderType.Knowledge)
-            .Select(f => f.GetProperty("id").GetInt32())
-            .First();
+        return folders.OfType<FolderDto>().First(f => f.Type == FolderType.Knowledge).Id;
     }
 
     /// <summary>

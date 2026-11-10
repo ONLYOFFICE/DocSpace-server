@@ -109,6 +109,15 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     return;
 
                 case ChunkedRequestType.Initiate:
+                    if (EqualityComparer<T>.Default.Equals(request.FileId, default))
+                    {
+                        await fileUploader.VerifyFolderForUploadAsync(request.FolderId);
+                    }
+                    else
+                    {
+                        await fileUploader.VerifyChunkedUploadForEditing(request.FileId, request.FileSize);
+                    }
+
                     var createdSession = await fileUploader.InitiateUploadAsync(request.FolderId, request.FileId, request.FileName, request.FileSize, request.Encrypted);
                     await WriteSuccess(context, await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true));
 
@@ -125,6 +134,11 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             if (resumedSession.UseChunks)
                             {
                                 resumedSession = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
+                            }
+                            else
+                            {
+                                // A small session stored the file with this part, so it ends here as a large one does when finalized.
+                                await chunkedUploadSessionHolder.RemoveSessionAsync(resumedSession);
                             }
 
                             await fileUploader.DeleteLinkAndMarkAsync(resumedSession.File);
@@ -192,6 +206,11 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                     if (session.UseChunks)
                     {
                         session = await fileUploader.FinalizeUploadSessionAsync<T>(request.UploadId);
+                    }
+                    else
+                    {
+                        // Left open, a small session could be aborted, finalized again or written to after this call.
+                        await chunkedUploadSessionHolder.RemoveSessionAsync(session);
                     }
 
                     await fileUploader.DeleteLinkAndMarkAsync(session.File);

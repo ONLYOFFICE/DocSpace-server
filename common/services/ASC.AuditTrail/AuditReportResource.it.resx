@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Report delle operazioni cliente scaricato</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Limite di spesa del servizio creato: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Limite di spesa del servizio aggiornato: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Limite di spesa del servizio eliminato: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Limiti di spesa personali del servizio impostati: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Limiti di spesa personali del servizio disattivati: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Abbonamento cliente aggiornato: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portale disattivato</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portale bloccato dalla politica di conservazione dei dati</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portale sbloccato</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portale eliminato</value>
@@ -1221,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profilo IA assegnato all'agente IA per l'azione: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Chiave BYOK eliminata per il modello IA: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Chiave BYOK impostata per il modello IA: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Impostazioni dell'agente documenti aggiornate</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profilo IA assegnato all'azione: {0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Valori dei metadati aggiornati: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>File aperto dallo script Document Builder: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>App attivata: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>App disattivata: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Stanze collegate al progetto IA {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Stanze scollegate dal progetto IA {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Modello IA del progetto IA {0} cambiato in {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Consegna del webhook ritentata: {0}</value>
   </data>
 </root>

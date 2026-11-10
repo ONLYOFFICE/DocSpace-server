@@ -92,6 +92,13 @@ public class DbTenantService(
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<int>> GetTenantIdsByStatusAsync(IEnumerable<TenantStatus> statuses)
+    {
+        await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await tenantDbContext.TenantIdsByStatusAsync(statuses).ToListAsync();
+    }
+
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash)
     {
         ArgumentException.ThrowIfNullOrEmpty(login);
@@ -219,7 +226,7 @@ public class DbTenantService(
 
         return await tenantDbContext.Tenants
             .Where(t => t.Id != -1)
-            .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending)
+            .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending && t.Status != TenantStatus.Blocked)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
             .Project()
@@ -512,7 +519,8 @@ public class DbTenantService(
                 dbTenant.TrustedDomainsEnabled = tenant.TrustedDomainsType;
                 dbTenant.CreationDateTime = tenant.CreationDateTime;
                 dbTenant.Status = tenant.Status;
-                dbTenant.StatusChanged = tenant.StatusChangeDate;
+                // A status never changed is read as MinValue; writing it back keeps it unrecorded rather than 0001-01-01.
+                dbTenant.StatusChanged = tenant.StatusChangeDate == DateTime.MinValue ? null : tenant.StatusChangeDate;
                 dbTenant.PaymentId = tenant.PaymentId;
                 dbTenant.LastModified = tenant.LastModified = DateTime.UtcNow;
                 dbTenant.Industry = tenant.Industry;

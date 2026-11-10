@@ -110,9 +110,30 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
     }
 
     /// <summary>
+    /// BUG 80022: selecting a file id that does not exist was not reported as "not found". Fixed by
+    /// <c>DefaultTemplateSettingsHelper.CheckAndCopyFile</c> throwing <c>ItemNotFoundException</c>
+    /// when the DAO finds no file.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "80022")]
+    public async Task SetDefaultTemplate_NonExistentSelectedFile_ReturnsNotFound()
+    {
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.SetDefaultTemplateAsync(
+                new DefaultTemplateSettingsRequestDto(new DefaultTemplateSettingsRequestDtoSelectedFile(9999999), ".docx"),
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    /// <summary>
     /// BUG 79837: uploading a template over 100MB made Kestrel abort the connection instead of
     /// answering. Fixed by putting <c>[DisableRequestSizeLimit]</c> on <c>UploadDefaultTemplate</c>
-    /// plus an explicit size check answering 400 with a message.
+    /// with a 100MB form limit of its own. That limit was first reported in the framework's words
+    /// ("Failed to read the request form. Multipart body length limit 104857600 exceeded.");
+    /// <c>[FormLimitError]</c> turns it into the portal's file-size message.
     /// </summary>
     [Fact]
     [Trait("Bug", "79837")]
@@ -127,7 +148,8 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
             async () => await _filesSettingsApi.UploadDefaultTemplateAsync(".docx", file, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
-        exception.ErrorContent?.ToString().Should().NotBeNullOrEmpty();
+        exception.ErrorContent?.ToString().Should().Contain("The maximum file size is exceeded (100 MB).")
+            .And.NotContain("Multipart body length limit");
     }
 
     /// <summary>

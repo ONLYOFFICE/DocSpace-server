@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Web.Api.Controllers;
-
 namespace ASC.Web.Api.Log;
 
 internal static partial class PortalControllerLogger

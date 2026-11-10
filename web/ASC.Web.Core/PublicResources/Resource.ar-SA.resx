@@ -145,7 +145,7 @@
     <value>الخدمة</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>ميزات الذكاء الاصطناعي</value>
+    <value>وكلاء وأدوات الذكاء الاصطناعي</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>دعم</value>
@@ -1177,7 +1177,7 @@
     <value>بحث الذكاء الاصطناعي</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>ميزات الذكاء الاصطناعي</value>
+    <value>وكلاء وأدوات الذكاء الاصطناعي</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>تتبع عمليات تسجيل الدخول والإجراءات</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>تكلفة المزوّد</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>الخطاف التلقائي (Webhook) معطّل. قم بتفعيله قبل إعادة محاولة عمليات التسليم الخاصة به</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>يتم إرسال الحدث الآن. أعد المحاولة بعد انتهاء المحاولة الحالية</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>تم تسجيل عملية التسليم بتنسيق خطاف تلقائي (Webhook) أقدم ولا يمكن إرسالها مرة أخرى</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>هدف الخطاف التلقائي (Webhook) ليس مستخدمًا أو مجموعة موجودة</value>
   </data>
 </root>

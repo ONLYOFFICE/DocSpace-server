@@ -61,7 +61,12 @@ public static class RoomGroupArea
     /// </summary>
     public static FolderType ToFolderType(this SearchArea searchArea)
     {
-        return searchArea == SearchArea.Forms ? FolderType.FillingFormsRoom : FolderType.DEFAULT;
+        return searchArea switch
+        {
+            SearchArea.Forms => FolderType.FillingFormsRoom,
+            SearchArea.PrivateRooms => FolderType.PrivateRooms,
+            _ => FolderType.DEFAULT
+        };
     }
 
     /// <summary>
@@ -69,7 +74,12 @@ public static class RoomGroupArea
     /// </summary>
     public static SearchArea ToSearchArea(this FolderType folderType)
     {
-        return folderType == FolderType.FillingFormsRoom ? SearchArea.Forms : SearchArea.Active;
+        return folderType switch
+        {
+            FolderType.FillingFormsRoom => SearchArea.Forms,
+            FolderType.PrivateRooms => SearchArea.PrivateRooms,
+            _ => SearchArea.Active
+        };
     }
 }
 

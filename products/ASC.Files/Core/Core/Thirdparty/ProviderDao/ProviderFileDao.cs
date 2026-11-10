@@ -461,7 +461,7 @@ internal class ProviderFileDao(
         return await fileDao.GetAvailableTitleAsync(requestTitle, selector.ConvertId(parentFolderId));
     }
 
-    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks = false)
+    public async Task<TTo> MoveFileAsync<TTo>(string fileId, TTo toFolderId, bool deleteLinks, string newTitle)
     {
         if (toFolderId is int tId)
         {
@@ -733,6 +733,21 @@ internal class ProviderFileDao(
         var selector = _selectorFactory.GetSelector(fileId);
         var fileDao = selector.GetFileDao(fileId);
         return fileDao.GetFileKeys(selector.ConvertId(fileId), userId);
+    }
+
+    public Task DeleteFileKeysAsync(IEnumerable<string> fileIds, IEnumerable<Guid> userIds)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteFileKeysAsync(Guid userId)
+    {
+        return Task.CompletedTask;
+    }
+
+    public IAsyncEnumerable<string> GetFileIdsWithKeyAsync(IEnumerable<string> fileIds, Guid userId)
+    {
+        return AsyncEnumerable.Empty<string>();
     }
     
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)

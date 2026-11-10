@@ -91,11 +91,33 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             case AccountingPaymentRequiredException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
+            // A charge refused by a spending limit belongs with the payment failures above, but it is the caller's
+            // own setting rather than a missing payment, so the reason (which limit, what is left, until when) is
+            // passed on, without a stack trace.
+            case AccountingServiceLimitExceededException e:
+                status = HttpStatusCode.PaymentRequired;
+                message = e.Message;
+                withStackTrace = false;
+                break;
             // Asking for the configuration, quota or usage of a DocsCloud tenant the portal never activated is a
             // client error, not a server fault: the caller is told what is missing, without a stack trace.
             // The other DocsCloud failures (service not configured, authorization rejected) are ours to fix,
             // so they stay 500 and keep being logged as critical.
             case DocsCloudNotFoundException e:
+                status = HttpStatusCode.BadRequest;
+                message = e.Message;
+                withStackTrace = false;
+                break;
+            // A service limit the accounting service refuses to create or change because of the values the caller chose
+            // (a second limit of the same scope, a quantity threshold for services with different units): the caller is
+            // told the reason, without a stack trace. The accounting client raises these two for the service limit
+            // routes only, so the answers of the other accounting operations stay as they were.
+            case AccountingConflictException e:
+                status = HttpStatusCode.Conflict;
+                message = e.Message;
+                withStackTrace = false;
+                break;
+            case AccountingBadRequestException e:
                 status = HttpStatusCode.BadRequest;
                 message = e.Message;
                 withStackTrace = false;
@@ -106,6 +128,13 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 break;
             case NotSupportedException:
                 status = HttpStatusCode.UnsupportedMediaType;
+                withStackTrace = false;
+                break;
+            // The request itself is malformed or over a limit ([RequestSizeLimit] gives 413): the exception
+            // already carries the status the client must see, it is not a server fault.
+            case Microsoft.AspNetCore.Http.BadHttpRequestException e:
+                status = (HttpStatusCode)e.StatusCode;
+                message = e.Message;
                 withStackTrace = false;
                 break;
             default:

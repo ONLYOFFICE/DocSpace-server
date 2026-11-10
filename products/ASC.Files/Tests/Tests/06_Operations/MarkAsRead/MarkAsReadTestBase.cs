@@ -92,13 +92,13 @@ public abstract class MarkAsReadTestBase(
     /// <summary>Builds a <c>markasread</c> request body carrying the given file ids.</summary>
     protected static BaseBatchRequestDto MarkAsReadFiles(params int[] fileIds)
     {
-        return new BaseBatchRequestDto(fileIds: [.. fileIds.Select(id => new BaseBatchRequestDtoAllOfFileIds(id))]);
+        return new BaseBatchRequestDto(fileIds: [.. fileIds.Select(id => new BaseBatchRequestDtoAllOfFileIds(id))]) { ReturnSingleOperation = true };
     }
 
     /// <summary>Builds a <c>markasread</c> request body carrying the given folder ids.</summary>
     protected static BaseBatchRequestDto MarkAsReadFolders(params int[] folderIds)
     {
-        return new BaseBatchRequestDto(folderIds: [.. folderIds.Select(id => new BaseBatchRequestDtoAllOfFolderIds(id))]);
+        return new BaseBatchRequestDto(folderIds: [.. folderIds.Select(id => new BaseBatchRequestDtoAllOfFolderIds(id))]) { ReturnSingleOperation = true };
     }
 
     /// <summary>

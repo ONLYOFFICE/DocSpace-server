@@ -35,6 +35,7 @@ package com.asc.authorization.application.security.oauth.service;
 
 import com.asc.authorization.data.client.cache.CachedRegisteredClient;
 import com.asc.authorization.data.client.cache.RegisteredClientCacheService;
+import com.asc.common.utilities.cache.CacheTicket;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
@@ -49,6 +50,14 @@ public class NoOpRegisteredClientCacheService implements RegisteredClientCacheSe
   public void put(CachedRegisteredClient client) {
     log.info("Skipping registered client cache write: caching is disabled outside saas profile");
   }
+
+  @Override
+  public CacheTicket ticket(String clientId) {
+    return new CacheTicket(0, null);
+  }
+
+  @Override
+  public void putUnlessInvalidated(CachedRegisteredClient client, CacheTicket ticket) {}
 
   @Override
   public Optional<CachedRegisteredClient> get(String clientId) {

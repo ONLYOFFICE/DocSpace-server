@@ -58,6 +58,7 @@ public class FileMoveConflictTests(
         // Seed a same-titled file already in the destination.
         await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file1.Id)],
@@ -73,6 +74,7 @@ public class FileMoveConflictTests(
         // Act
         await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file2.Id)],
@@ -103,6 +105,7 @@ public class FileMoveConflictTests(
         var file1 = await CreateFile(fileTitle, myDocsFolderId);
         await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file1.Id)],
@@ -118,6 +121,7 @@ public class FileMoveConflictTests(
         // Act
         await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Overwrite,
             FileIds = [new(file2.Id)],
@@ -144,6 +148,7 @@ public class FileMoveConflictTests(
         var file1 = await CreateFile(fileTitle, myDocsFolderId);
         await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file1.Id)],
@@ -156,6 +161,7 @@ public class FileMoveConflictTests(
         // Act
         await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Duplicate,
             FileIds = [new(file2.Id)],
@@ -178,6 +184,7 @@ public class FileMoveConflictTests(
         // Act & Assert - an empty batch is accepted gracefully, mirroring copyBatchItems
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(destRoom.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [],
@@ -198,6 +205,7 @@ public class FileMoveConflictTests(
         // Act & Assert - moving a file onto the folder it already lives in must not error out
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
         {
+            ReturnSingleOperation = true,
             DestFolderId = new(room.Id),
             ConflictResolveType = FileConflictResolveType.Skip,
             FileIds = [new(file.Id)],
@@ -208,18 +216,13 @@ public class FileMoveConflictTests(
     }
 
     /// <summary>
-    /// Reads the ids of the files directly in a folder from the raw response body.
-    /// <c>FolderContentDto.Files</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which
-    /// carries <c>Title</c> but not <c>Id</c> - an SDK model gap - so identity checks (same entry
-    /// vs. a new one with the same title) have to go through the raw JSON.
+    /// The ids of the files directly in a folder, for identity checks (same entry vs. a new one with the
+    /// same title).
     /// </summary>
     private async Task<List<int>> GetFileIdsInFolder(int folderId)
     {
-        var response = await _foldersApi.GetFolderByFolderIdWithHttpInfoAsync(folderId, cancellationToken: TestContext.Current.CancellationToken);
+        var (files, _) = await FolderListing.ReadAsync(_foldersApi, folderId, TestContext.Current.CancellationToken);
 
-        using var payload = JsonDocument.Parse(response.RawContent);
-        var files = payload.RootElement.GetProperty("response").GetProperty("files");
-
-        return [.. files.EnumerateArray().Select(f => f.GetProperty("id").GetInt32())];
+        return [.. files.Select(f => f.Id)];
     }
 }

@@ -111,6 +111,31 @@ public class AiGateway(
         return await GenerateKeyAsync(allowEmpty);
     }
 
+    public async Task<string> GetByokKeyAsync(string provider, Guid revisionId, string apiKey)
+    {
+        if (!Configured)
+        {
+            throw new AiGatewayNotConfiguredException();
+        }
+
+        if (!await IsAiEnabledAsync())
+        {
+            throw new AiServiceDisabledException();
+        }
+
+        return await GenerateKeyAsync(byok: (provider, revisionId, apiKey));
+    }
+
+    public async Task<bool> VerifyByokKeyAsync(string provider, string apiKey)
+    {
+        var content = JsonContent.Create(new VerifyByokKeyRequest { Provider = provider, ApiKey = apiKey });
+        var key = await GenerateKeyAsync();
+
+        var response = await SendAsync<VerifyByokKeyResponse>(HttpMethod.Post, "/byok/verify", content, key);
+
+        return response.Valid;
+    }
+
     public async Task<AiPricesResponse> GetPricesAsync()
     {
         var key = await GetKeyAsync(allowEmpty: true);
@@ -136,19 +161,26 @@ public class AiGateway(
     public async Task<ModelsResponse> GetModelsAsync()
     {
         var key = await GetKeyAsync(allowEmpty: true);
-        var path = string.IsNullOrEmpty(key) ? "/models" : "/customer/models";
-
-        var cacheKey = string.IsNullOrEmpty(key)
-            ? ModelsCacheKey
-            : GetCustomerModelsCacheKey();
+        if (string.IsNullOrEmpty(key))
+        {
+            return await GetAllModelsAsync();
+        }
 
         return await fusionCache.GetOrSetAsync<ModelsResponse>(
-            cacheKey,
-            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, path, key: key),
+            GetCustomerModelsCacheKey(),
+            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, "/customer/models", key: key),
             opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
     }
 
-    private async Task<string> GenerateKeyAsync(bool allowEmpty = false)
+    public async Task<ModelsResponse> GetAllModelsAsync()
+    {
+        return await fusionCache.GetOrSetAsync<ModelsResponse>(
+            ModelsCacheKey,
+            async (_, _) => await SendAsync<ModelsResponse>(HttpMethod.Get, "/models"),
+            opt => opt.SetDuration(_modelsCacheDuration).SetFailSafe(true));
+    }
+
+    private async Task<string> GenerateKeyAsync(bool allowEmpty = false, (string Provider, Guid RevisionId, string ApiKey)? byok = null)
     {
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
         if (customerInfo == null)
@@ -167,7 +199,10 @@ public class AiGateway(
             customerId = customerInfo.PortalId,
             id = user.Id,
             iat = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-            exp = DateTimeOffset.UtcNow.Add(aiGatewayConfiguration.Settings.TokenExpiration).ToUnixTimeSeconds()
+            exp = DateTimeOffset.UtcNow.Add(aiGatewayConfiguration.Settings.TokenExpiration).ToUnixTimeSeconds(),
+            byok = byok.HasValue
+                ? new { provider = byok.Value.Provider, revisionId = byok.Value.RevisionId, apiKey = byok.Value.ApiKey }
+                : null
         };
 
         return JsonWebToken.Encode(payload, aiGatewayConfiguration.Settings.Secret);
@@ -195,6 +230,17 @@ public class AiGateway(
     private string GetCustomerModelsCacheKey()
     {
         return $"{ModelsCacheKey}:{tenantManager.GetCurrentTenantId()}";
+    }
+
+    private sealed class VerifyByokKeyRequest
+    {
+        public required string Provider { get; init; }
+        public required string ApiKey { get; init; }
+    }
+
+    private sealed record VerifyByokKeyResponse
+    {
+        public bool Valid { get; init; }
     }
 }
 
@@ -265,6 +311,11 @@ public abstract record AiModelPricing<TPrice>
     public required string Id { get; init; }
 
     /// <summary>
+    /// The gateway revision of the model, the id BYOK keys are stored under.
+    /// </summary>
+    public required Guid RevisionId { get; init; }
+
+    /// <summary>
     /// The display name of the model.
     /// </summary>
     /// <example>GPT-4o</example>
@@ -277,18 +328,40 @@ public abstract record AiModelPricing<TPrice>
     public string OwnedBy { get; init; }
 
     /// <summary>
-    /// The provider that serves the model.
+    /// The providers the model can be called through: the built-in one first, then the BYOK ones.
+    /// </summary>
+    public required IReadOnlyList<AiProviderPricing<TPrice>> Providers { get; init; }
+}
+
+/// <summary>
+/// The price of a model called through one provider.
+/// </summary>
+public record AiProviderPricing<TPrice>
+{
+    /// <summary>
+    /// The provider type, the value BYOK keys store as their provider.
     /// </summary>
     /// <example>openai</example>
-    public string Provider { get; init; }
+    public required string Id { get; init; }
 
     /// <summary>
-    /// The link to the pricing page of the model.
+    /// The display name of the provider.
+    /// </summary>
+    /// <example>OpenAI</example>
+    public required string Name { get; init; }
+
+    /// <summary>
+    /// Whether the model is called through this provider with the built-in key.
+    /// </summary>
+    public bool BuiltIn { get; init; }
+
+    public required TPrice Price { get; init; }
+
+    /// <summary>
+    /// The model page for the built-in provider, the vendor's pricing page for a BYOK one.
     /// </summary>
     /// <example>https://openai.com/api/pricing</example>
     public string Link { get; init; }
-
-    public required TPrice Price { get; init; }
 }
 
 /// <summary>
@@ -483,6 +556,9 @@ public record Model
     public required string Alias { get; init; }
     public IEnumerable<string> Capabilities { get; init; }
 
+    [JsonPropertyName("owned_by")]
+    public string OwnedBy { get; init; }
+
     [JsonConverter(typeof(ModelTierJsonConverter))]
     public ModelTier? Tier { get; init; }
 
@@ -498,10 +574,19 @@ public record Model
 
     [JsonPropertyName("output_modalities")]
     public required IEnumerable<string> OutputModalities { get; init; }
+
+    [JsonPropertyName("byok_providers")]
+    public IEnumerable<ModelByokProvider> ByokProviders { get; init; } = [];
+}
+
+public record ModelByokProvider
+{
+    public required string Id { get; init; }
+    public required string Name { get; init; }
 }
 
 
 public record ModelsResponse
 {
-    public required IEnumerable<Model> Data { get; init; }
+    public required IReadOnlyList<Model> Data { get; init; }
 }

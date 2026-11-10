@@ -58,9 +58,8 @@ public class IsFormPdfTests(
     }
 
     /// <summary>
-    /// The TS source builds this file by converting a .docx through the document server
-    /// (<c>saveFileAsPdf</c>). No document-server resource is provisioned here, so the same intent —
-    /// a PDF with no ONLYOFFICE form signature — is reproduced with a hand-built PDF instead.
+    /// A PDF with no ONLYOFFICE form signature, built by hand; the one the document server writes is
+    /// checked by <see cref="IsFormPDF_PdfSavedFromDocx_ReturnsFalse"/>.
     /// </summary>
     [Fact]
     public async Task IsFormPDF_NonOnlyofficePdfFile_ReturnsFalse()
@@ -107,10 +106,7 @@ public class IsFormPdfTests(
     }
 
     /// <summary>
-    /// Merges the TS suite's "created via docx -&gt; docxf -&gt; pdf conversion chain" and "uploaded OO
-    /// form binary" cases: the conversion chain needs a document server that this AppHost does not
-    /// provision, so only the direct-upload path is reproducible, and it already exercises exactly
-    /// what both TS cases assert — a real ONLYOFFICE PDF form is recognised as one.
+    /// The TS suite's "uploaded OO form binary" case.
     /// </summary>
     [Fact]
     public async Task IsFormPDF_UploadedOnlyofficeForm_ReturnsTrue()
@@ -125,5 +121,51 @@ public class IsFormPdfTests(
 
         // Assert
         isForm.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// The TS suite's "created via docx -&gt; docxf -&gt; pdf conversion chain" case: the form the document
+    /// server writes is recognised as one. The other suites upload a fixed form instead, so this is the
+    /// test that notices when the signature the document server writes stops matching the one the portal
+    /// looks for.
+    /// </summary>
+    [Fact]
+    public async Task IsFormPDF_FormConvertedFromDocx_ReturnsTrue()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateFillingFormsRoom("Autotest IsFormPDF Converted Form Room");
+        var fileId = await ConvertToOoFormAsync(room.Id, "Autotest IsFormPDF Converted Form.pdf");
+
+        // Act
+        var isForm = (await _filesApi.IsFormPDFAsync(fileId, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        isForm.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// The TS suite's "Regular PDF converted from .docx" case: a plain PDF the document server writes is
+    /// not taken for a form.
+    /// </summary>
+    [Fact]
+    public async Task IsFormPDF_PdfSavedFromDocx_ReturnsFalse()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var source = await CreateFileInMy("Autotest IsFormPDF Source Docx.docx", Owner);
+        var room = await CreateCustomRoom("Autotest IsFormPDF Saved PDF Room");
+
+        var pdf = (await _filesApi.SaveFileAsPdfAsync(
+            source.Id,
+            new SaveAsPdfRequest(room.Id, "Autotest IsFormPDF Saved PDF"),
+            TestContext.Current.CancellationToken)).Response;
+
+        // Act
+        var isForm = (await _filesApi.IsFormPDFAsync(pdf.Id, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        pdf.Title.Should().EndWith(".pdf");
+        isForm.Should().BeFalse();
     }
 }

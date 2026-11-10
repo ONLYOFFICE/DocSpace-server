@@ -237,6 +237,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>고객 작업 보고서가 다운로드되었습니다</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>서비스 지출 한도가 생성되었습니다: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>서비스 지출 한도가 업데이트되었습니다: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>서비스 지출 한도가 삭제되었습니다: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>서비스 개인 지출 한도가 설정되었습니다: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>서비스 개인 지출 한도가 비활성화되었습니다: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>고객 구독이 업데이트되었습니다: {0}</value>
   </data>
@@ -725,6 +740,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>포털이 비활성화되었습니다</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>데이터 보존 정책에 따라 포털이 차단되었습니다</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>포털 차단이 해제되었습니다</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>포털이 삭제되었습니다</value>
@@ -1221,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI 에이전트에 작업용 AI 프로필이 할당되었습니다: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>AI 모델의 BYOK 키가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>AI 모델의 BYOK 키가 설정되었습니다: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>문서 에이전트 설정이 업데이트되었습니다</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>작업에 AI 프로필이 할당되었습니다: {0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>메타데이터 값이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Document Builder 스크립트에 의해 파일이 열렸습니다: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>앱이 활성화되었습니다: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>앱이 비활성화되었습니다: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>AI 프로젝트 {0}에 연결된 방: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>AI 프로젝트 {0}에서 연결 해제된 방: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI 프로젝트 {0}의 AI 모델이 {1}(으)로 변경되었습니다</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>웹훅 전송을 재시도했습니다: {0}</value>
   </data>
 </root>

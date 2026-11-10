@@ -54,7 +54,16 @@ public enum RoomType
     VirtualDataRoom = 8,
 
     [Description("AI Room")]
-    AiRoom = 9
+    AiRoom = 9,
+
+    [Description("Instructions room")]
+    InstructionsRoom = 10,
+
+    [Description("Knowledge room")]
+    KnowledgeRoom = 11,
+
+    [Description("AI project room")]
+    AiProjectRoom = 12
 }
 
 public static class RoomTypeExtensions
@@ -74,6 +83,9 @@ public static class RoomTypeExtensions
             RoomType.PublicRoom => FilterType.PublicRooms,
             RoomType.VirtualDataRoom => FilterType.VirtualDataRooms,
             RoomType.AiRoom => FilterType.AiRooms,
+            RoomType.InstructionsRoom => FilterType.InstructionsRooms,
+            RoomType.KnowledgeRoom => FilterType.KnowledgeRooms,
+            RoomType.AiProjectRoom => FilterType.AiProjectRooms,
             _ => FilterType.CustomRooms
         }).ToHashSet();
     }

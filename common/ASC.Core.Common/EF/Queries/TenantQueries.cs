@@ -48,6 +48,12 @@ public partial class TenantDbContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<int> TenantIdsByStatusAsync(IEnumerable<TenantStatus> statuses)
+    {
+        return Queries.TenantIdsByStatusAsync(this, statuses);
+    }
+
+    [PreCompileQuery]
     public Task<DbTenant> TenantAsync(int tenantId)
     {
         return Queries.TenantAsync(this, tenantId);
@@ -116,6 +122,13 @@ static file class Queries
             (TenantDbContext ctx, int tenantId) =>
                 ctx.Tenants.AsTracking().FirstOrDefault(r => r.Id == tenantId));
 
+
+    public static readonly Func<TenantDbContext, IEnumerable<TenantStatus>, IAsyncEnumerable<int>> TenantIdsByStatusAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (TenantDbContext ctx, IEnumerable<TenantStatus> statuses) =>
+                ctx.Tenants
+                    .Where(r => statuses.Contains(r.Status))
+                    .Select(r => r.Id));
 
     public static readonly Func<TenantDbContext, IAsyncEnumerable<TenantVersion>> TenantVersionsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

@@ -36,16 +36,32 @@ namespace ASC.Web.Api.Tests.ApiFactories;
 /// <summary>
 /// The Web.Api suite's Aspire host: Web.Api itself is always started by the base fixture, plus
 /// People (members and guests a test invites) and the two identity containers the OAuth2 suites
-/// talk to.
+/// talk to; Web.Studio and Files only for the webhook tests, which wait for them themselves.
 /// </summary>
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
+    // Web.Studio hosts the only subscriber that persists audit events published to the event bus,
+    // which the Apps audit trail suite reads back.
     protected override IEnumerable<string> Resources =>
-        [ResourceNames.People, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization];
+        [ResourceNames.People, ResourceNames.WebStudio, ResourceNames.IdentityRegistration, ResourceNames.IdentityAuthorization];
+
+    // the webhook tests (NeedsLazyResources) wait for these themselves. Web.Studio runs the sender, and Files publishes
+    // the file events of the payload tests; Files is the slowest service to come up, and the rest of the suite does
+    // not need it
+    protected override IEnumerable<string> LazyResources =>
+        [ResourceNames.WebStudio, ResourceNames.Files];
 
     protected override PortalClients CreateClients(PortalContext context)
     {
         return new PortalClients(context);
+    }
+
+    // Webhooks may still be delivered until the services stop, so the receiver outlives them.
+    protected override ValueTask OnStoppedAsync()
+    {
+        Tests._02_Settings.Webhooks.WebhookReceiver.StopServer();
+
+        return ValueTask.CompletedTask;
     }
 
     protected override async ValueTask WarmUpAsync(PortalClients clients)

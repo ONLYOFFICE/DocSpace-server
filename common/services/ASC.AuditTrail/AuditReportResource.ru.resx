@@ -249,6 +249,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Отчет об операциях клиента загружен</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Создан лимит расходов на сервис: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Обновлен лимит расходов на сервис: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Удален лимит расходов на сервис: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Установлены персональные лимиты расходов на сервис: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Отключены персональные лимиты расходов на сервис: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Подписка клиента обновлена: {0}</value>
   </data>
@@ -737,6 +752,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Деактивирован портал</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Портал заблокирован политикой хранения данных</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Портал разблокирован</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Удален портал</value>
@@ -1233,6 +1254,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Профиль ИИ назначен ИИ-агенту для действия: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Ключ BYOK для ИИ-модели удалён: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Ключ BYOK для ИИ-модели задан: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Настройки агента документов обновлены</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Профиль ИИ назначен для действия: {0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Значения метаданных обновлены: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Файл открыт скриптом Document Builder: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Приложение включено: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Приложение отключено: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Комнаты привязаны к ИИ-проекту {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Комнаты отвязаны от ИИ-проекта {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>ИИ-модель ИИ-проекта {0} изменена на {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Повторная попытка доставки вебхука: {0}</value>
   </data>
 </root>

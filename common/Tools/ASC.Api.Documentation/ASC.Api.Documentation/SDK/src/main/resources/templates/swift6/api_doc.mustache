@@ -12,13 +12,14 @@ Method | HTTP request | Description
 {{#operation}}
 # **{{{operationId}}}**{{#vendorExtensions.x-is-thirdparty-variant}} (third-party storage){{/vendorExtensions.x-is-thirdparty-variant}}
 ```swift
-{{^usePromiseKit}}
-{{^useRxSwift}}
 {{^useVapor}}
+{{#useAsyncAwait}}
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: String? = nil{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) async throws(ErrorResponse){{#returnType}} -> {{{returnType}}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}
+{{/useAsyncAwait}}
+{{#useObjcBlock}}
     {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} class func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#hasParams}}, {{/hasParams}}completion: @escaping (_ data: {{{returnType}}}{{^returnType}}Void{{/returnType}}?, _ error: Error?) -> Void)
+{{/useObjcBlock}}
 {{/useVapor}}
-{{/useRxSwift}}
-{{/usePromiseKit}}
 {{#usePromiseKit}}
     {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} class func {{operationId}}({{#allParams}} {{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}) -> Promise<{{{returnType}}}{{^returnType}}Void{{/returnType}}>
 {{/usePromiseKit}}
@@ -39,7 +40,8 @@ For more information, see [api.onlyoffice.com]({{vendorExtensions.x-seealsoUrl}}
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------{{/-last}}{{/allParams}}
 {{#allParams}} **{{paramName}}** | {{#isPrimitiveType}}**{{dataType}}**{{/isPrimitiveType}}{{^isPrimitiveType}}[**{{dataType}}**]({{baseType}}.md){{/isPrimitiveType}} | {{{description}}} | {{^required}}[optional] {{/required}}{{#defaultValue}}[default to {{.}}]{{/defaultValue}}
-{{/allParams}}
+{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}} **fields** | **String** | A comma-separated list of the response fields to return. | [optional]
+{{/vendorExtensions.x-hasFieldsParam}}
 
 ### Return type
 
@@ -73,9 +75,19 @@ import {{{projectName}}}
 {{#allParams}}let {{paramName}} = {{{vendorExtensions.x-swift-example}}} // {{{dataType}}} | {{{description}}}{{^required}} (optional){{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}
 {{/allParams}}
 
-{{^usePromiseKit}}
-{{^useRxSwift}}
 {{^useVapor}}
+{{#useAsyncAwait}}
+{{#summary}}
+// {{{.}}}
+{{/summary}}
+do {
+    {{#returnType}}let response = {{/returnType}}try await {{x-classname}}.{{{operationId}}}({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}){{#returnType}}
+    dump(response){{/returnType}}
+} catch {
+    print(error)
+}
+{{/useAsyncAwait}}
+{{#useObjcBlock}}
 {{#summary}}
 // {{{.}}}
 {{/summary}}
@@ -89,9 +101,8 @@ import {{{projectName}}}
         dump(response)
     }
 }
+{{/useObjcBlock}}
 {{/useVapor}}
-{{/useRxSwift}}
-{{/usePromiseKit}}
 {{#usePromiseKit}}
 {{#summary}}
 // {{{.}}}

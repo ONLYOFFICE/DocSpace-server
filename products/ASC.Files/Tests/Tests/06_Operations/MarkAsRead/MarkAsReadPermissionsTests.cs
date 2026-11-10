@@ -54,7 +54,7 @@ public class MarkAsReadPermissionsTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesOperationsApi.MarkAsReadAsync(new BaseBatchRequestDto(folderIds: [], fileIds: []), TestContext.Current.CancellationToken));
+            async () => await _filesOperationsApi.MarkAsReadAsync(new BaseBatchRequestDto(folderIds: [], fileIds: []) { ReturnSingleOperation = true }, TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -67,7 +67,7 @@ public class MarkAsReadPermissionsTests(
         await _filesClient.Authenticate(Owner);
 
         // Act & Assert
-        await _filesOperationsApi.MarkAsReadAsync(new BaseBatchRequestDto(folderIds: [], fileIds: []), TestContext.Current.CancellationToken);
+        await _filesOperationsApi.MarkAsReadAsync(new BaseBatchRequestDto(folderIds: [], fileIds: []) { ReturnSingleOperation = true }, TestContext.Current.CancellationToken);
     }
 
     [Theory]
@@ -83,7 +83,7 @@ public class MarkAsReadPermissionsTests(
 
         // Act & Assert
         await _filesClient.Authenticate(member);
-        await _filesOperationsApi.MarkAsReadAsync(new BaseBatchRequestDto(folderIds: [], fileIds: []), TestContext.Current.CancellationToken);
+        await _filesOperationsApi.MarkAsReadAsync(new BaseBatchRequestDto(folderIds: [], fileIds: []) { ReturnSingleOperation = true }, TestContext.Current.CancellationToken);
     }
 
     [Fact]

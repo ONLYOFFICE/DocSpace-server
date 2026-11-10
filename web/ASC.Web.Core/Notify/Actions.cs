@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -38,6 +38,14 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 {
     public override string ID => "portal_deactivate";
 
+    // a caller can repeat POST portal/suspend at will
+    public override bool SuppressRepeats => true;
+
+    // the links are valid only while the owner still has the address they were made for, so a request after an
+    // email change is a new letter; the address goes in as stored, since the check compares it the way the database
+    // does, which tells case apart on PostgreSQL
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -55,6 +63,7 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email),
             new TagValue(CommonTags.ActivateUrl, activateUrl),
             TagValues.OrangeButton(orangeButtonText, deactivateUrl),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
@@ -67,6 +76,14 @@ public sealed class PortalDeactivateNotifyAction(StudioNotifyHelper studioNotify
 public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelper, DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "portal_delete";
+
+    // a caller can repeat POST portal/delete at will
+    public override bool SuppressRepeats => true;
+
+    // the link is valid only while the owner still has the address it was made for, so a request after an email
+    // change is a new letter; the address goes in as stored, since the check compares it the way the database does,
+    // which tells case apart on PostgreSQL
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
 
     public override List<Pattern> Patterns
     {
@@ -85,6 +102,7 @@ public sealed class PortalDeleteNotifyAction(StudioNotifyHelper studioNotifyHelp
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email),
             TagValues.OrangeButton(orangeButtonText, url),
             TagValues.TrulyYours(studioNotifyHelper, bestRegardsTxt),
             new TagValue(CommonTags.AutoRenew, showAutoRenewText.ToString()),
@@ -136,7 +154,7 @@ public sealed class PortalDeletedToSupportNotifyAction(DisplayUserSettingsHelper
         ];
     }
 
-    public void Init(UserInfo user, string tenantDomain,  CustomerInfo customerInfo)
+    public void Init(UserInfo user, string tenantDomain, CustomerInfo customerInfo)
     {
         Tags =
         [
@@ -155,6 +173,13 @@ public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtilit
 {
     public override string ID => "profile_delete";
 
+    // a caller can repeat PUT people/self/delete at will
+    public override bool SuppressRepeats => true;
+
+    // the link is valid only while the account still has the address it was made for, so a request after an email
+    // change is a new letter; the address goes in as stored, since the check compares it exactly
+    public override string[] DeduplicationTags => [CommonTags.LinkAddress];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -172,6 +197,7 @@ public sealed class ProfileDeleteNotifyAction(CommonLinkUtility commonLinkUtilit
 
         Tags =
         [
+            new TagValue(CommonTags.LinkAddress, user.Email),
             TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, user.GetCulture().Name)
@@ -400,6 +426,9 @@ public sealed class ConfirmOwnerChangeNotifyAction(DisplayUserSettingsHelper dis
 public sealed class ActivateEmailNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "activate_email";
+
+    // a caller can repeat PUT people/invite at will
+    public override bool SuppressRepeats => true;
 
     public override List<Pattern> Patterns
     {
@@ -681,7 +710,7 @@ public sealed class PhoneChangeNotifyAction(CommonLinkUtility commonLinkUtility,
 }
 
 [Scope]
-public sealed class TfaChangeNotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class TfaChangeNotifyAction(CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "change_tfa";
 
@@ -722,7 +751,7 @@ public sealed class UserHasJoinNotifyAction(TenantManager tenantManager) : Notif
 }
 
 [Scope]
-public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "join";
 
@@ -1295,6 +1324,13 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
 {
     public override string ID => "saas_room_invite";
 
+    // a caller can repeat PUT files/rooms/{id}/share and POST files/rooms/{id}/resend at will
+    public override bool SuppressRepeats => true;
+
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1303,7 +1339,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         ];
     }
 
-    public void Init(string culture, string roomTitle, string confirmationUrl)
+    public void Init(string culture, string roomTitle, string confirmationUrl, EmployeeType inviteType)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1311,8 +1347,10 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
+            new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1325,6 +1363,13 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
 {
     public override string ID => "saas_agent_invite";
 
+    // a caller can repeat PUT files/rooms/{id}/share and POST files/rooms/{id}/resend at will
+    public override bool SuppressRepeats => true;
+
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1333,7 +1378,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         ];
     }
 
-    public void Init(string culture, string roomTitle, string confirmationUrl)
+    public void Init(string culture, string roomTitle, string confirmationUrl, EmployeeType inviteType)
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1341,8 +1386,10 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
+            new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -1354,6 +1401,13 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
 public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "saas_room_invite_existing_user";
+
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    // the room's address tells two rooms apart even in a letter that carries no room id: one sent by a node of the
+    // previous version during an update, or queued before it; it is built from the room id, so a rename keeps it
+    public override string[] DeduplicationTags => [CommonTags.InviteLink];
 
     public override List<Pattern> Patterns
     {
@@ -1370,7 +1424,7 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
+            new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, roomUrl),
             TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1383,6 +1437,13 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
 public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "saas_agent_invite_existing_user";
+
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    // the room's address tells two rooms apart even in a letter that carries no room id: one sent by a node of the
+    // previous version during an update, or queued before it; it is built from the room id, so a rename keeps it
+    public override string[] DeduplicationTags => [CommonTags.InviteLink];
 
     public override List<Pattern> Patterns
     {
@@ -1399,7 +1460,7 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
+            new TagValue(CommonTags.Message, (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", cultureInfo)).HtmlEncode()),
             new TagValue(CommonTags.InviteLink, roomUrl),
             TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1413,6 +1474,13 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
 {
     public override string ID => "saas_docspace_invite";
 
+    // a caller can repeat PUT people/invite at will
+    public override bool SuppressRepeats => true;
+
+    // the link carries the account type the invitee joins with and is signed with the portal's alias, so a re-invite
+    // with another type, or after the portal was renamed, is a new letter
+    public override string[] DeduplicationTags => [CommonTags.InviteType, CommonTags.PortalAlias];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -1421,7 +1489,7 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
         ];
     }
 
-    public void Init(string confirmationUrl, string culture = "")
+    public void Init(string confirmationUrl, EmployeeType inviteType, string culture = "")
     {
         var cultureInfo = string.IsNullOrEmpty(culture) ? GetCulture(null) : new CultureInfo(culture);
 
@@ -1431,6 +1499,8 @@ public sealed class SaasDocSpaceInviteNotifyAction(StudioNotifyHelper studioNoti
         Tags = [
 
             new TagValue(CommonTags.InviteLink, confirmationUrl),
+            new TagValue(CommonTags.InviteType, inviteType.ToStringFast()),
+            new TagValue(CommonTags.PortalAlias, GetTenantAlias()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
@@ -1673,127 +1743,470 @@ public sealed class SaasAdminWelcomeV1NotifyAction(CommonLinkUtility commonLinkU
 
 
 
-/// <summary>Six months after a paid tariff lapsed: the last word before the portal is deleted.</summary>
-[Scope]
-public sealed class SaasAdminWarningAfterHalfYearV1NotifyAction(
-    UserManager userManager,
-    StudioNotifyHelper studioNotifyHelper,
-    ITariffService tariffService,
-    ExternalResourceSettingsHelper externalResources,
-    PeriodicNotifyAction periodicNotifyAction,
-    TenantManager tenantManager)
-    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
-{
-    public override string ID => "saas_admin_warning_after_half_year_v1";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_half_year_v1)
-        ];
-    }
-
-    protected override bool ToOwner => true;
-    protected override bool TrulyYoursAsTableRow => true;
-
-    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
-    {
-        return Task.FromResult(!context.Quota.Free && context.Tariff.State == TariffState.NotPaid
-            && context.DueDateIsNotMax && context.DueDate.AddMonths(6) == context.NowDate);
-    }
-
-    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
-    {
-        tags.Add(TagValues.OrangeButton(Resource("ButtonLeaveFeedback", culture), externalResources.Site.GetRegionalFullEntry("registrationcanceled", culture)));
-        tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
-        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
-
-        return Task.CompletedTask;
-    }
-}
-
-/// <summary>Three months after a paid tariff lapsed: the portal is still there, but not for long.</summary>
-[Scope]
-public sealed class SaasAdminWarningAfterThreeMonthsV1NotifyAction(
+/// <summary>
+/// The letters of the portal retention policy. None of them is on a schedule of its own:
+/// <see cref="PortalRetentionJob"/> decides the day and the letter, and hands over the category and
+/// the decision through <see cref="Init"/>, which is where the dates the letter discloses come from.
+/// </summary>
+public abstract class PortalRetentionNotifyAction(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
-    ExternalResourceSettingsHelper externalResources,
+    TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
     : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    public override string ID => "saas_admin_warning_after_three_months_v1";
+    protected CommonLinkUtility CommonLinkUtility => commonLinkUtility;
+
+    protected PortalRetentionCategory Category { get; private set; }
+
+    protected PortalRetentionDecision Decision { get; private set; }
+
+    /// <summary>
+    /// The portal's address as it was before the removal renamed it, for the letter that names a portal
+    /// already gone; null for every other letter.
+    /// </summary>
+    protected string PortalDomain { get; private set; }
+
+    public void Init(PortalRetentionCategory category, PortalRetentionDecision decision, string portalDomain = null)
+    {
+        Category = category;
+        Decision = decision;
+        PortalDomain = portalDomain;
+    }
+
+    /// <summary>Never by itself: the retention job sends these letters when its schedule says so.</summary>
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(false);
+    }
+
+    protected override bool ToOwner => true;
+
+    /// <summary>Whoever paid for the portal hears about it too.</summary>
+    protected override bool ToPayer => FormerPaying;
+
+    /// <summary>
+    /// The block and the deletion are announced whatever the recipient's notification settings say, and the
+    /// settings page is out of reach anyway once the portal is blocked or gone.
+    /// </summary>
+    protected sealed override bool OffersUnsubscribe => false;
+
+    /// <summary>
+    /// Whether the portal's paid tariff lapsed. Such a portal is counted from the end of its subscription,
+    /// not from its last activity, and comes back unpaid, so its letters speak of the subscription.
+    /// </summary>
+    protected bool FormerPaying => Category is PortalRetentionCategory.FormerPaying or PortalRetentionCategory.FormerPayingWithBalance;
+
+    /// <summary>
+    /// Whether the owner may unblock the portal from the letter. A portal that has paid, or still has
+    /// money on its wallet, may; a free one is unblocked through support.
+    /// </summary>
+    protected bool CanUnblock => Category != PortalRetentionCategory.Free;
+
+    /// <summary>A switch the letter's text branches on, in the form its <c>#if</c> compares with.</summary>
+    protected static TagValue Flag(string tag, bool value)
+    {
+        return new TagValue(tag, value ? "True" : "False");
+    }
+
+    /// <summary>A day the letter discloses, written out in the recipient's culture.</summary>
+    protected static TagValue Date(string tag, DateTime date, CultureInfo culture)
+    {
+        return new TagValue(tag, date.ConvertNumerals("D", culture));
+    }
+
+    /// <summary>
+    /// The day of the block or the deletion, written out in the recipient's culture and in the portal's
+    /// time zone. See <see cref="PortalDay"/>.
+    /// </summary>
+    protected TagValue Deadline(string tag, DateTime utcDay, PeriodicLetterContext context, CultureInfo culture)
+    {
+        return new TagValue(tag, PortalDay(utcDay, context).ConvertNumerals("D", culture));
+    }
+
+    /// <summary>The same day as <see cref="Deadline"/>, as month and day only.</summary>
+    protected TagValue ShortDeadline(string tag, DateTime utcDay, PeriodicLetterContext context, CultureInfo culture)
+    {
+        return new TagValue(tag, PortalDay(utcDay, context).ConvertNumerals("M", culture));
+    }
+
+    /// <summary>
+    /// The policy counts in UTC days and acts on the first run of that day, so a deadline is the local day
+    /// on which that UTC day begins. West of UTC that is the day before: the letter then names a day that
+    /// ends before the job can act, never one it acts on before the reader's day is over.
+    /// </summary>
+    private DateTime PortalDay(DateTime utcDay, PeriodicLetterContext context)
+    {
+        return tenantUtil.DateTimeFromUtc(context.Tenant.TimeZone, DateTime.SpecifyKind(utcDay.Date, DateTimeKind.Utc)).Date;
+    }
+}
+
+/// <summary>
+/// A warning before the block. Each names the day of the block and of the deletion; what differs is what
+/// the reader is asked to do, which is the letter's own part.
+/// </summary>
+public abstract class PortalRetentionWarningNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    protected sealed override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Deadline("BlockDate", Decision.BlockOn, context, culture));
+        tags.Add(ShortDeadline("BlockDateShort", Decision.BlockOn, context, culture));
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
+
+        AddWarningTags(context, culture, tags);
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>What the reader is asked to do, and anything else only this warning says.</summary>
+    protected abstract void AddWarningTags(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags);
+}
+
+/// <summary>A free portal nobody has used for a month: when it is blocked, and when it is deleted.</summary>
+[Scope]
+public sealed class SaasOwnerRetentionInactivityWarningNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionWarningNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_inactivity_warning";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_three_months_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_three_months_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_inactivity_warning, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_inactivity_warning)
         ];
     }
 
-    protected override bool ToOwner => true;
-    protected override bool TrulyYoursAsTableRow => true;
-
-    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    protected override void AddWarningTags(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags)
     {
-        return Task.FromResult(!context.Quota.Free && context.Tariff.State == TariffState.NotPaid
-            && context.DueDateIsNotMax && context.DueDate.AddMonths(3) == context.NowDate);
+        tags.Add(TagValues.OrangeButton(Resource("ButtonKeepPortal", culture), CommonLinkUtility.GetFullAbsolutePath("~")));
+    }
+}
+
+/// <summary>A portal whose paid tariff lapsed and was not renewed: when it is blocked, and when it is deleted.</summary>
+[Scope]
+public sealed class SaasOwnerRetentionUnpaidWarningNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionWarningNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_unpaid_warning";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_unpaid_warning, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_unpaid_warning)
+        ];
+    }
+
+    protected override void AddWarningTags(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Date("DueDate", context.DueDate, culture));
+        tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), CommonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+    }
+}
+
+/// <summary>
+/// An unused portal that still has money on its wallet: the money goes with the portal, and the letter
+/// says by when. A free portal is told to sign in, which starts its count again. A portal whose paid
+/// tariff lapsed is counted from the due date, so signing in changes nothing for it, and it is told to
+/// renew instead.
+/// </summary>
+[Scope]
+public sealed class SaasOwnerRetentionWalletWarningNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionWarningNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_wallet_warning";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_wallet_warning, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_wallet_warning)
+        ];
+    }
+
+    protected override void AddWarningTags(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Flag("Unpaid", FormerPaying));
+        tags.Add(new TagValue("URL1", CommonLinkUtility.GetFullAbsolutePath("~/billing/wallet")));
+
+        if (FormerPaying)
+        {
+            tags.Add(Date("DueDate", context.DueDate, culture));
+            tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), CommonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+        }
+        else
+        {
+            tags.Add(TagValues.OrangeButton(Resource("ButtonKeepSpaceAndFunds", culture), CommonLinkUtility.GetFullAbsolutePath("~")));
+        }
+    }
+}
+
+/// <summary>
+/// A letter about a blocked portal: the block itself and the reminders before the deletion. Each names
+/// the day of the deletion and the way back - the unblocking link for the owner of a portal that has
+/// paid or still has money on its wallet, support for everyone else.
+/// </summary>
+public abstract class PortalRetentionBlockedLetterNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    SettingsManager settingsManager,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
+        tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
+        tags.Add(Flag("Unpaid", FormerPaying));
+
+        await AddWayBackTagsAsync(context, user, culture, tags);
+    }
+
+    /// <summary>
+    /// The unblocking button, or the button that sends the reader to support instead. Only the owner of a
+    /// portal that may be unblocked from the letter gets the link: it signs its holder in as the owner, so
+    /// it never goes to anyone else - the payer of a lapsed portal is sent to support like the owner of a
+    /// free one. The link is tied to this block and stops working with the next one.
+    /// </summary>
+    private async Task AddWayBackTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        var canUnblock = CanUnblock && user.Id == context.Tenant.OwnerId;
+
+        tags.Add(Flag("CanUnblock", canUnblock));
+
+        if (canUnblock)
+        {
+            tags.Add(TagValues.OrangeButton(Resource("ButtonUnblockPortal", culture),
+                CommonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PortalUnblock, CommonLinkUtility.GetPortalUnblockKeyPostfix(context.Tenant))));
+
+            return;
+        }
+
+        // An installation with support links switched off gets no button rather than one that leads nowhere.
+        var supportLink = await CommonLinkUtility.GetSupportLinkAsync(settingsManager);
+
+        tags.Add(string.IsNullOrEmpty(supportLink)
+            ? new TagValue("OrangeButton", string.Empty)
+            : TagValues.OrangeButton(Resource("ButtonContactSupport", culture), supportLink));
+    }
+}
+
+/// <summary>
+/// The portal has just been blocked. The owner of a portal that has paid, or still has money on its
+/// wallet, gets the link that unblocks it; the owner of a free one is sent to support.
+/// </summary>
+[Scope]
+public sealed class SaasOwnerRetentionBlockedNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    SettingsManager settingsManager,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionBlockedLetterNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, settingsManager, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_blocked";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_blocked, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_blocked)
+        ];
+    }
+}
+
+/// <summary>
+/// A blocked portal is about to be deleted. The two reminders share their text, which says whether this
+/// is the last one; each has a subject of its own.
+/// </summary>
+/// <remarks>
+/// Two actions rather than one with a subject chosen from its state: the engine reads an action's
+/// patterns when it processes the queued letter, by which time the same instance may already be
+/// preparing the letter of another portal.
+/// </remarks>
+public abstract class PortalRetentionDeletionReminderNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    SettingsManager settingsManager,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionBlockedLetterNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, settingsManager, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    /// <summary>Whether this is the last reminder before the deletion rather than the earlier one.</summary>
+    protected abstract bool Final { get; }
+
+    protected sealed override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        await base.AddTagsAsync(context, user, culture, tags);
+
+        tags.Add(Flag("FinalNotice", Final));
+    }
+}
+
+/// <summary>The earlier reminder, a month before the deletion; another one follows it.</summary>
+[Scope]
+public sealed class SaasOwnerRetentionDeletionReminderNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    SettingsManager settingsManager,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionDeletionReminderNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, settingsManager, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_deletion_reminder";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_deletion_reminder, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_deletion_reminder)
+        ];
+    }
+
+    protected override bool Final => false;
+}
+
+/// <summary>The last reminder, a week before the deletion: the last chance to keep the portal.</summary>
+[Scope]
+public sealed class SaasOwnerRetentionFinalReminderNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    SettingsManager settingsManager,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionDeletionReminderNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, settingsManager, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_final_reminder";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_final_reminder, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_deletion_reminder)
+        ];
+    }
+
+    protected override bool Final => true;
+}
+
+/// <summary>The portal has been deleted by the retention policy.</summary>
+[Scope]
+public sealed class SaasOwnerRetentionDeletedNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_deleted";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_deleted, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_deleted)
+        ];
     }
 
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        tags.Add(TagValues.OrangeButton(Resource("ButtonLogIn", culture), commonLinkUtility.GetFullAbsolutePath("~/dashboard")));
+        // The portal is gone, so it is named by the address it had, not linked to.
+        tags.Add(new TagValue("PortalName", PortalDomain ?? new Uri(CommonLinkUtility.GetFullAbsolutePath("~")).Host));
+        tags.Add(Flag("Unpaid", FormerPaying));
+        tags.Add(TagValues.OrangeButton(Resource("ButtonShareFeedback", culture), externalResources.Site.GetRegionalFullEntry("registrationcanceled", culture)));
         tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
+        tags.Add(new TagValue("URL2", externalResources.Site.GetRegionalDomain(culture)));
         tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
 
         return Task.CompletedTask;
     }
 }
 
-/// <summary>A free portal nobody has touched for six months: the last warning, a week before it is deleted.</summary>
+/// <summary>
+/// Tells support that the retention policy has blocked a portal that has paid or still has money on its
+/// wallet, so a manager can step in before it is deleted. It carries no unblocking link: that link signs
+/// its holder in as the owner, so it only ever goes to the owner.
+/// </summary>
 [Scope]
-public sealed class SaasAdminStartupWarningAfterHalfYearV1NotifyAction(
-    UserManager userManager,
-    StudioNotifyHelper studioNotifyHelper,
-    ITariffService tariffService,
-    ExternalResourceSettingsHelper externalResources,
-    PeriodicNotifyAction periodicNotifyAction,
-    TenantManager tenantManager)
-    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+public sealed class PortalRetentionBlockedToSupportNotifyAction(
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    TenantManager tenantManager) : NotifyAction(tenantManager)
 {
-    public override string ID => "saas_admin_startup_warning_after_half_year_v1";
+    public override string ID => "portal_retention_blocked_to_support";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_half_year_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_portal_retention_blocked_to_support, () => WebstudioNotifyPatternResource.pattern_portal_retention_blocked_to_support)
         ];
     }
 
-    protected override bool ToOwner => true;
-    protected override bool TrulyYoursAsTableRow => true;
-
-    /// <summary>
-    /// Exactly the portals removed a week from now: every one the removal takes is told first, however long
-    /// it has been idle, and none it spares is told it will go.
-    /// </summary>
-    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    public void Init(UserInfo owner, string tenantDomain, PortalRetentionCategory category, DateTime deleteOn)
     {
-        return context.IsUnusedPortalRemovedAsync(daysAhead: 7);
-    }
-
-    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
-    {
-        tags.Add(TagValues.OrangeButton(Resource("ButtonLeaveFeedback", culture), externalResources.Site.GetRegionalFullEntry("registrationcanceled", culture)));
-        tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
-        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
-
-        return Task.CompletedTask;
+        Tags =
+        [
+            new TagValue(CommonTags.PortalUrl, tenantDomain),
+            new TagValue(CommonTags.UserEmail, owner.Email),
+            new TagValue(CommonTags.UserName, owner.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue("Category", category.ToString()),
+            new TagValue("DeleteDate", deleteOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)),
+            new TagValue(CommonTags.Footer, null),
+            TagValues.WithoutUnsubscribe()
+        ];
     }
 }
 
@@ -2146,6 +2559,12 @@ public abstract class BasePeriodicNotifyAction(
     protected virtual bool RequiresSubscription => false;
 
     /// <summary>
+    /// Whether the footer offers the link to the recipient's notification settings. A letter no setting
+    /// there can stop leaves it out, rather than offer a way out that does nothing.
+    /// </summary>
+    protected virtual bool OffersUnsubscribe => true;
+
+    /// <summary>
     /// The tags this letter needs on top of <see cref="BuildCommonTagsAsync"/> — its buttons, links and
     /// images. Only the tags its own pattern references: an unused tag is dead weight, and a missing one
     /// leaves a raw <c>$URL1</c> in front of the reader.
@@ -2185,6 +2604,11 @@ public abstract class BasePeriodicNotifyAction(
     public async Task<List<ITagValue>> BuildTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture)
     {
         var tags = await BuildCommonTagsAsync(context, user, culture);
+
+        if (!OffersUnsubscribe)
+        {
+            tags.Add(TagValues.WithoutUnsubscribe());
+        }
 
         await AddTagsAsync(context, user, culture, tags);
 
@@ -2446,52 +2870,6 @@ public sealed class SaasAdminHandyAppsV1NotifyAction(
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
         tags.Add(TagValues.OrangeButton(Resource("ButtonGoToDocSpace", culture), commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
-
-        return Task.CompletedTask;
-    }
-}
-
-/// <summary>A free portal nobody has touched for three months: the first of two warnings before it is
-/// deleted.</summary>
-[Scope]
-public sealed class SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction(
-    UserManager userManager,
-    StudioNotifyHelper studioNotifyHelper,
-    ITariffService tariffService,
-    CommonLinkUtility commonLinkUtility,
-    PeriodicNotifyAction periodicNotifyAction,
-    TenantManager tenantManager)
-    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
-{
-    public override string ID => "saas_admin_startup_warning_after_three_months_v1";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_three_months_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_three_months_v1)
-        ];
-    }
-
-    protected override bool ToOwner => true;
-    protected override bool TrulyYoursAsTableRow => true;
-
-    public override async Task<bool> ShouldSendAsync(PeriodicLetterContext context)
-    {
-        if (!context.Quota.Free || context.NowDate < context.UnusedPortalNotifyFrom || !context.IsCreationAnniversary())
-        {
-            return false;
-        }
-
-        var lastActivity = await context.GetLastActivityDateAsync();
-
-        return lastActivity.AddMonths(3) <= context.NowDate && lastActivity.AddMonths(4) > context.NowDate;
-    }
-
-    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
-    {
-        tags.Add(TagValues.OrangeButton(Resource("ButtonLogIn", culture), commonLinkUtility.GetFullAbsolutePath("~/dashboard")));
-        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
 
         return Task.CompletedTask;
     }
@@ -3239,6 +3617,11 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
 {
     public override string ID => "user_type_changed";
 
+    // a caller can repeat PUT people/type/{type} at will
+    public override bool SuppressRepeats => true;
+
+    public override string[] DeduplicationTags => [CommonTags.NewUserType];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -3247,13 +3630,14 @@ public sealed class UserTypeChangedNotifyAction(StudioNotifyHelper studioNotifyH
         ];
     }
 
-    public void Init(UserInfo u, string userType)
+    public void Init(UserInfo u, EmployeeType type, string userType)
     {
         var culture = GetCulture(u);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         Tags =
         [
+            new TagValue(CommonTags.NewUserType, type.ToStringFast()),
             new TagValue("UserType", userType),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),
@@ -3267,6 +3651,11 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
 {
     public override string ID => "user_role_changed";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    public override string[] DeduplicationTags => [CommonTags.AccessLevel];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -3275,15 +3664,16 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
         ];
     }
 
-    public void Init(UserInfo user, string roomTitle, string roomUrl, string userRole)
+    public void Init(UserInfo user, string roomTitle, string roomUrl, string accessLevel, string userRole)
     {
         var culture = GetCulture(user);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         Tags =
         [
-            new TagValue("RoomTitle", roomTitle.HtmlEncode()),
+            new TagValue("RoomTitle", (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", culture)).HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
+            new TagValue(CommonTags.AccessLevel, accessLevel),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),
@@ -3297,6 +3687,11 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
 {
     public override string ID => "user_agent_role_changed";
 
+    // a caller can repeat PUT files/rooms/{id}/share at will
+    public override bool SuppressRepeats => true;
+
+    public override string[] DeduplicationTags => [CommonTags.AccessLevel];
+
     public override List<Pattern> Patterns
     {
         get =>
@@ -3305,15 +3700,16 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
         ];
     }
 
-    public void Init(UserInfo user, string roomTitle, string roomUrl, string userRole)
+    public void Init(UserInfo user, string roomTitle, string roomUrl, string accessLevel, string userRole)
     {
         var culture = GetCulture(user);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         Tags =
         [
-            new TagValue("RoomTitle", roomTitle.HtmlEncode()),
+            new TagValue("RoomTitle", (roomTitle ?? WebstudioNotifyPatternResource.ResourceManager.GetString("PrivateRoomTitle", culture)).HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
+            new TagValue(CommonTags.AccessLevel, accessLevel),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
             new TagValue(CommonTags.Culture, culture.Name),

@@ -37,4 +37,5 @@ public class UpsertToolPrefsRequestDto
 {
     public required IReadOnlyDictionary<string, HashSet<string>> Disabled { get; init; }
     public string? EntityId { get; init; }
+    public ToolPrefsScope Scope { get; init; }
 }

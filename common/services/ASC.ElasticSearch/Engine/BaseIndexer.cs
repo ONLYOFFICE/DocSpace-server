@@ -350,87 +350,65 @@ public abstract class BaseIndexer<T>(Client client,
 
         if (data[0] is ISearchItemDocument)
         {
-            var currentLength = 0L;
-            var portion = new List<T>();
-            var portionStart = 0;
+            // A portion goes out once its content reaches half of MaxContentLength, which mirrors OpenSearch's
+            // http.max_content_length (100 MB by default). Filling it up to the full limit let the JSON around the
+            // base64 content push the request over it: the bulk came back 413, and the fallback re-read every file
+            // of the portion one by one - a copy load test (2026-10-21) saw the process grow by 3.8 GB in a minute.
+            var portionLimit = settings.MaxContentLength.GetValueOrDefault() / 2;
+            var portion = new List<int>();
+            var portionLength = 0L;
 
             for (var i = 0; i < data.Count; i++)
             {
                 var t = data[i];
-                var runBulk = i == data.Count - 1;
 
                 await BeforeIndexAsync(t);
 
-                if (t is not ISearchItemDocument wwd || wwd.Document == null || string.IsNullOrEmpty(wwd.Document.Data))
+                var length = t is ISearchItemDocument { Document.Data: { } content } ? content.Length : 0;
+
+                if (length >= portionLimit)
                 {
-                    portion.Add(t);
-                }
-                else
-                {
-                    var dLength = wwd.Document.Data.Length;
-                    if (dLength >= settings.MaxContentLength)
+                    try
                     {
-                        try
+                        // the content is already prepared: IndexAsync(t) would read and encode the file once more
+                        await client.Instance.IndexAsync(t, idx => GetMeta(idx, t, immediately));
+                    }
+                    catch (OpenSearchClientException e)
+                    {
+                        if (e.Response.HttpStatusCode is 429 or 502)
                         {
-                            await IndexAsync(t, immediately);
-                        }
-                        catch (OpenSearchClientException e)
-                        {
-                            if (e.Response.HttpStatusCode is 429 or 502)
-                            {
-                                throw;
-                            }
-
-                            _logger.ErrorIndex(e);
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.ErrorIndex(e);
-                        }
-                        finally
-                        {
-                            wwd.Document.Data = null;
-                            wwd.Document = null;
-                            GC.Collect();
+                            throw;
                         }
 
-                        continue;
+                        _logger.ErrorIndex(e);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.ErrorIndex(e);
+                    }
+                    finally
+                    {
+                        Release(data, i);
                     }
 
-                    if (currentLength + dLength < settings.MaxContentLength)
-                    {
-                        portion.Add(t);
-                        currentLength += dLength;
-                    }
-                    else
-                    {
-                        runBulk = true;
-                        i--;
-                    }
+                    continue;
                 }
 
-                if (runBulk)
+                // the document that does not fit starts the next portion: it is prepared once, not again
+                if (portion.Count > 0 && portionLength + length > portionLimit)
                 {
-                    var portion1 = portion.ToList();
-                    LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments")));
-                    for (var j = portionStart; j < i; j++)
-                    {
-                        if (data[j] is ISearchItemDocument { Document: not null } doc)
-                        {
-                            doc.Document.Data = null;
-                            doc.Document = null;
-                        }
-
-                        data[j] = null;
-                    }
-
-                    portionStart = i;
+                    await BulkIndexAsync(data, portion);
                     portion = [];
-                    currentLength = 0L;
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
+                    portionLength = 0L;
                 }
+
+                portion.Add(i);
+                portionLength += length;
+            }
+
+            if (portion.Count > 0)
+            {
+                await BulkIndexAsync(data, portion);
             }
         }
         else
@@ -442,6 +420,51 @@ public abstract class BaseIndexer<T>(Client client,
 
             LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta)));
         }
+    }
+
+    /// <summary>
+    /// Sends the documents at <paramref name="indexes"/> in one bulk. A 413 halves the portion and sends both halves
+    /// with the content already prepared, instead of letting the caller re-read every file one by one; a document
+    /// refused even alone is logged and skipped. The references are dropped as soon as a document is sent, no forced
+    /// collection: a blocking full GC per portion stopped every thread of the process (gen2 313 vs gen0 27 in 90 s).
+    /// </summary>
+    private async Task BulkIndexAsync(List<T> data, List<int> indexes)
+    {
+        var items = indexes.Select(i => data[i]).ToList();
+
+        try
+        {
+            LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(items, GetMeta).SourceExcludes("attachments")));
+        }
+        catch (OpenSearchClientException e) when (e.Response?.HttpStatusCode == 413)
+        {
+            if (indexes.Count > 1)
+            {
+                var half = indexes.Count / 2;
+                await BulkIndexAsync(data, indexes.GetRange(0, half));
+                await BulkIndexAsync(data, indexes.GetRange(half, indexes.Count - half));
+
+                return;
+            }
+
+            _logger.ErrorIndex(e);
+        }
+
+        foreach (var i in indexes)
+        {
+            Release(data, i);
+        }
+    }
+
+    private static void Release(List<T> data, int index)
+    {
+        if (data[index] is ISearchItemDocument { Document: not null } doc)
+        {
+            doc.Document.Data = null;
+            doc.Document = null;
+        }
+
+        data[index] = null;
     }
 
     /// <summary>

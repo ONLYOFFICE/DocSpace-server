@@ -35,46 +35,50 @@ namespace ASC.AI.Tests.Tests.MessageStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Messages")]
-public class MessageUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class MessageUpdateTests(AspireAppFixture fixture) : MessageTestBase(fixture)
 {
     [Fact]
     public async Task Update_Existing_PersistsNewContents()
     {
-        var thread = await CreateThreadAsync();
-        var created = await CreateMessageAsync(thread.Id, BuildMessageContents("original"));
-        var updated = BuildMessageContents("updated");
+        var threadId = await CreateMessageThreadAsync();
+        var messageId = await AppendAsync(threadId, "original");
 
-        using var response = await _ai.PutAsync(
-            $"{MessagesPath}/{created.Id}",
-            new { contents = updated },
+        var result = await _aiThreads.AiThreadsUpdateMessageAsync(
+            new AiThreadsUpdateMessageRequest(messageId: messageId, message: BuildUserMessage("updated")),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        JsonEquals((await ReadMessageAsync(created.Id)).Contents, updated).Should().BeTrue();
+        result.Success.Should().BeTrue();
+
+        var stored = await GetMessageAsync(messageId);
+        stored.Id.Should().Be(messageId, "an update rewrites the message in place");
+        TextOf(stored).Should().Be("updated");
+        (await ReadMessagesAsync(threadId)).Should().ContainSingle(m => m.Id == messageId);
     }
 
     [Fact]
     public async Task Update_NonExisting_Returns404()
     {
-        using var response = await _ai.PutAsync(
-            $"{MessagesPath}/{Guid.NewGuid()}",
-            new { contents = BuildMessageContents("updated") },
-            TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _aiThreads.AiThreadsUpdateMessageAsync(
+            new AiThreadsUpdateMessageRequest(messageId: Guid.NewGuid().ToString(), message: BuildUserMessage("updated")),
+            TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
     [Fact]
-    public async Task Update_InvalidJson_Returns400()
+    public async Task Update_MissingMessage_Returns400()
     {
-        var thread = await CreateThreadAsync();
-        var created = await CreateMessageAsync(thread.Id);
+        var threadId = await CreateMessageThreadAsync();
+        var messageId = await AppendAsync(threadId, "original");
 
-        using var response = await _ai.PutAsync(
-            $"{MessagesPath}/{created.Id}",
-            new { foo = "bar" },
+        // Raw on purpose: `message` is a required constructor parameter of the SDK request, so a typed call cannot
+        // leave it out.
+        using var response = await new RawApiClient(_aiChatClient).PutRawAsync(
+            UpdateMessagePath,
+            JsonSerializer.Serialize(new { messageId, foo = "bar" }),
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        TextOf(await GetMessageAsync(messageId)).Should().Be("original", "a rejected update leaves the message as it was");
     }
 }

@@ -244,11 +244,19 @@ public class Tenant
 public static partial class TenantMapper
 {
     [MapProperty(nameof(DbTenant.TrustedDomainsEnabled), nameof(Tenant.TrustedDomainsType))]
+    [MapProperty(nameof(DbTenant.StatusChanged), nameof(Tenant.StatusChangeDate), Use = nameof(MapStatusChanged))]
     [MapNestedProperties(nameof(DbTenant.Partner))]
     public static partial Tenant Map(this DbTenant source);
 
+    [MapProperty(nameof(TenantUserSecurity.DbTenant), nameof(Tenant.StatusChangeDate), Use = nameof(MapTenantStatusChanged))]
     [MapNestedProperties(nameof(TenantUserSecurity.DbTenant))]
     public static partial Tenant Map(this TenantUserSecurity source);
+
+    // The names differ, so without this the date was never read: every loaded tenant carried the moment
+    // it was loaded, and saving it wrote that moment back. Expression-bodied so the projections inline it.
+    private static DateTime MapStatusChanged(DateTime? statusChanged) => statusChanged ?? DateTime.MinValue;
+
+    private static DateTime MapTenantStatusChanged(DbTenant tenant) => tenant.StatusChanged ?? DateTime.MinValue;
 
     public static partial IQueryable<Tenant> Project(this IQueryable<DbTenant> source);
     public static partial IQueryable<Tenant> Project(this IQueryable<TenantUserSecurity> source);

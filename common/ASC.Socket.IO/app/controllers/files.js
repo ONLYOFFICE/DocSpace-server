@@ -129,6 +129,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-service-limits", (req, res) => {
+    files.changeServiceLimits(req.body);
+    res.end();
+  });
+
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);
     res.end();
@@ -286,6 +291,36 @@ module.exports = (files) => {
 
   router.post("/form-suggested-questions", (req, res) => {
     files.formSuggestedQuestions(req.body);
+    res.end();
+  });
+
+  router.post("/plugin-event", (req, res) => {
+    files.pluginEvent(req.body);
+    res.end();
+  });
+
+  router.post("/add-webhook", (req, res) => {
+    files.addWebhook(req.body);
+    res.end();
+  });
+
+  router.post("/update-webhook", (req, res) => {
+    files.updateWebhook(req.body);
+    res.end();
+  });
+
+  router.post("/delete-webhook", (req, res) => {
+    files.deleteWebhook(req.body);
+    res.end();
+  });
+
+  router.post("/add-webhook-log", (req, res) => {
+    files.addWebhookLog(req.body);
+    res.end();
+  });
+
+  router.post("/update-webhook-log", (req, res) => {
+    files.updateWebhookLog(req.body);
     res.end();
   });
 

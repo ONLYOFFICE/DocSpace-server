@@ -46,10 +46,16 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 /// What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the
 /// entry type.
 /// </summary>
-[JsonDerivedType(typeof(FileDto<int>))]
-[JsonDerivedType(typeof(FileDto<string>))]
-[JsonDerivedType(typeof(FolderDto<int>))]
-[JsonDerivedType(typeof(FolderDto<string>))]
+/// <remarks>
+/// Where an answer declares the entry by this base - the items of a folder listing, which mix files and folders, portal
+/// and third-party ones - the serializer adds <c>entryKind</c> with the value below, so that a client can build the
+/// concrete type, the one carrying the id. An answer that declares the concrete type does not need it.
+/// </remarks>
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "entryKind")]
+[JsonDerivedType(typeof(FileDto<int>), "file")]
+[JsonDerivedType(typeof(FileDto<string>), "thirdPartyFile")]
+[JsonDerivedType(typeof(FolderDto<int>), "folder")]
+[JsonDerivedType(typeof(FolderDto<string>), "thirdPartyFolder")]
 public abstract class FileEntryBaseDto
 {
     /// <summary>
@@ -351,6 +357,29 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<int> AssignedMetadataTemplates { get; set; }
 
+    /// <summary>
+    /// Whether the entry has a metadata field a user can see and fill, by hand or with the AI filling: a field of a
+    /// visible assigned template, or a custom field. False when the entry has no metadata, when its assigned templates
+    /// are all hidden, or when they have no fields. It says nothing about the values: it stays true once every field is
+    /// filled, and nothing about the caller's rights: writing the values still needs the right to edit the entry
+    /// (`security.Edit`). It cannot be derived from `assignedMetadataTemplates`, which lists hidden templates too and
+    /// never lists the custom fields. Present, with a value, in the folder listing and in the file and folder info
+    /// responses; absent in the other responses that carry an entry (the answer to a creation, an upload or a rename),
+    /// which do not compute it, and for an entry of a third-party storage, which has no metadata. The same flag is
+    /// answered by `GET api/2.0/files/metadata/file/{fileId}` and `GET api/2.0/files/metadata/folder/{folderId}`.
+    /// </summary>
+    /// <example>true</example>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? HasMetadataFields { get; set; }
+
+    /// <summary>
+    /// Where the search text of the listing was met in the metadata of the entry: one item per string value holding
+    /// the text, in the order of the fields. Present only in a listing filtered by text, and only for the entries whose
+    /// metadata contain it; an entry found by its title alone carries nothing here.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<MetadataMatchDto> MetadataMatches { get; set; }
+
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
     {
@@ -396,39 +425,77 @@ public class FileEntryDtoHelper(
     /// <summary>
     /// Fills the assigned metadata templates of one entry. For the info endpoints: a client re-reads a single row by them
     /// after a socket event, and a row without its templates would drop them from the listing. The listing fills a whole
-    /// page at once with the other overload instead of paying a query per entry.
+    /// page at once with <see cref="SetMetadataAsync"/> instead of paying a query per entry.
     /// </summary>
     public async Task SetAssignedMetadataTemplatesAsync<T>(FileEntryDto<T> dto)
     {
         if (dto is FileEntryDto<int> entry)
         {
-            await SetAssignedMetadataTemplatesAsync([entry]);
+            await SetMetadataAsync([entry]);
         }
     }
 
     /// <summary>
-    /// Fills the assigned metadata templates of the entries in one round trip. A tenant without templates has no links
-    /// either, so the query is spared for it: the listing is the hottest read path.
+    /// Fills the metadata of the entries of one page: their assigned templates, whether they have a field to fill, and,
+    /// when the page was filtered by a search text, where that text was met in their values (in the hidden templates too
+    /// when the search looked there). One round trip per kind, over the files and the folders together, and nothing at
+    /// all for a tenant without templates, which has no links and no values: the listing is the hottest read path.
     /// </summary>
-    public async Task SetAssignedMetadataTemplatesAsync(IReadOnlyCollection<FileEntryDto<int>> dtos)
+    public async Task SetMetadataAsync(IReadOnlyCollection<FileEntryDto<int>> dtos, string searchText = null, bool includeHiddenTemplates = false)
     {
-        if (dtos.Count == 0 || !await metadataTemplatesCache.HasTemplatesAsync())
+        if (dtos.Count == 0)
         {
             return;
         }
 
-        var links = await _daoFactory.GetMetadataDao<int>()
-            .GetLinksAsync(
-                dtos.Where(d => d.FileEntryType == FileEntryType.File).Select(d => d.Id),
-                dtos.Where(d => d.FileEntryType == FileEntryType.Folder).Select(d => d.Id))
-            .ToListAsync();
+        // the flag is answered for every entry of the page, false included: an absent flag means "not computed here",
+        // and a client must be able to tell that from "nothing to fill"
+        foreach (var dto in dtos)
+        {
+            dto.HasMetadataFields = false;
+        }
 
-        if (links.Count == 0)
+        if (!await metadataTemplatesCache.HasTemplatesAsync())
         {
             return;
         }
 
-        var byEntry = links.ToLookup(l => (l.EntryType, (int)l.EntryId), l => l.TemplateId);
+        var fileIds = dtos.Where(d => d.FileEntryType == FileEntryType.File).Select(d => d.Id).ToList();
+        var folderIds = dtos.Where(d => d.FileEntryType == FileEntryType.Folder).Select(d => d.Id).ToList();
+        var metadataDao = _daoFactory.GetMetadataDao<int>();
+
+        var links = await metadataDao.GetLinksAsync(fileIds, folderIds).ToListAsync();
+
+        Assign(dtos, links.ToLookup(l => (l.EntryType, (int)l.EntryId), l => l.TemplateId),
+            (dto, templateIds) => dto.AssignedMetadataTemplates = templateIds.Distinct().ToList());
+
+        // a separate question from the links: a custom field is a value without a link, and a linked template may be
+        // hidden or empty
+        var withFields = await metadataDao.GetEntriesWithFieldsAsync(fileIds, folderIds);
+
+        Assign(dtos, withFields.ToLookup(e => (e.EntryType, e.EntryId)),
+            (dto, _) => dto.HasMetadataFields = true);
+
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            return;
+        }
+
+        var matches = await metadataDao.GetTextMatchesAsync(fileIds, folderIds, searchText, includeHiddenTemplates);
+
+        Assign(dtos, matches.ToLookup(m => (m.EntryType, m.EntryId)),
+            (dto, entryMatches) => dto.MetadataMatches = entryMatches.Select(m => m.Map()).ToList());
+    }
+
+    /// <summary>
+    /// Hands every entry of the page the rows read for it; an entry without rows is left as it is.
+    /// </summary>
+    private static void Assign<TRow>(IReadOnlyCollection<FileEntryDto<int>> dtos, ILookup<(FileEntryType, int), TRow> byEntry, Action<FileEntryDto<int>, IEnumerable<TRow>> set)
+    {
+        if (byEntry.Count == 0)
+        {
+            return;
+        }
 
         foreach (var dto in dtos)
         {
@@ -436,7 +503,7 @@ public class FileEntryDtoHelper(
 
             if (byEntry.Contains(key))
             {
-                dto.AssignedMetadataTemplates = byEntry[key].Distinct().ToList();
+                set(dto, byEntry[key]);
             }
         }
     }
@@ -471,7 +538,7 @@ public class FileEntryDtoHelper(
             entry = await _fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).FirstAsync();
         }
 
-        if (entry.RootFolderType == FolderType.VirtualRooms && entry.ParentRoomType == null && entry is not Folder<TId> { IsRoom: true })
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub && entry.ParentRoomType == null && entry is not Folder<TId> { IsRoom: true })
         {
             var room = await _daoFactory.GetCacheFolderDao<TId>().GetParentFoldersAsync(entry.ParentId).FirstOrDefaultAsync(r => r.IsRoom);
             if (room != null)

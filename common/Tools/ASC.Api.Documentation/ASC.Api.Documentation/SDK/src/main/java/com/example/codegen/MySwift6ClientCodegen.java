@@ -39,6 +39,12 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
     }
 
     @Override
+    public void preprocessOpenAPI(io.swagger.v3.oas.models.OpenAPI openAPI) {
+        Discriminators.strip(openAPI);
+        super.preprocessOpenAPI(openAPI);
+    }
+
+    @Override
     public void processOpts() {
         super.processOpts();
         this.outputFolder = "../../../../../sdk/docspace-api-sdk-swift";
@@ -69,6 +75,10 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         supportingFiles.add(new SupportingFile(
             "CHANGELOG.mustache", "", "CHANGELOG.md"
         ));
+
+        String sampleDir = "samples" + File.separator + "docspace-api-sdk-swift-sample";
+        supportingFiles.add(new SupportingFile("sample_Package.swift.mustache", sampleDir, "Package.swift"));
+        supportingFiles.add(new SupportingFile("sample_main.mustache", sampleDir + File.separator + "Sources" + File.separator + "Sample", "main.swift"));
     }
 
     // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document
@@ -97,13 +107,8 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
             OperationMap operationMap = objs.getOperations();
             List<CodegenOperation> operationList = operationMap.getOperation();
             String className = operationMap.getClassname();
-            if (className != null && className.endsWith(apiNameSuffix)) {
-                className = className.substring(0, className.length() - 3);
-            }
-            String sanitizedTag = sanitizeTag(className);
-            TagParts tagParts = tagMap.get(camelize(sanitizedTag));
-            operationMap.put("x-folder", tagParts.folderPart);
-            operationMap.put("x-classname", tagParts.classPart + apiNameSuffix);
+            operationMap.put("x-folder", folderOf(className));
+            operationMap.put("x-classname", className);
             boolean shouldSupportFields = false;
             boolean supportUseAt = false;
             Map<String, Map<String, Object>> rateLimitHeaders = new LinkedHashMap<>();
@@ -178,15 +183,8 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         for (OperationsMap api : apiInfo.getApis()) {
 
             OperationMap operationMap = api.getOperations();
-            String className = operationMap.getClassname();
-            if (className != null && className.endsWith(apiNameSuffix)) {
-                className = className.substring(0, className.length() - 3);
-            }
-            String sanitizedTag = sanitizeTag(className);
-            TagParts tagParts = tagMap.get(camelize(sanitizedTag));
-
-            String folder = tagParts.folderPart;
-            String classname = tagParts.classPart + apiNameSuffix;
+            String classname = operationMap.getClassname();
+            String folder = folderOf(classname);
             api.put("x-folder", folder);
             api.put("x-classname", classname);
 
@@ -217,6 +215,37 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
 
 
     private final Map<String, TagParts> tagMap = new HashMap<>();
+    private final Map<String, TagParts> apiNames = new HashMap<>();
+
+    // Every API class of the module lives in one namespace, so the folder of its tag stays in the name to keep
+    // it unique ("Files / Quota" and "People / Quota" are FilesQuotaApi and PeopleQuotaApi). A tag that repeats
+    // its folder ("AI / AI", "Files / Files") or has none ("Backup") takes the folder alone: AIApi, FilesApi,
+    // BackupApi. The base generator would name them <tag>API, which the suffix turned into AIAIAPIApi.
+    @Override
+    public String toApiName(String name) {
+        TagParts parts = tagMap.get(name);
+        if (parts == null) {
+            parts = tagMap.get(camelize(name));
+        }
+        if (parts == null) {
+            return camelize(name) + apiNameSuffix;
+        }
+
+        String base = parts.folderPart.equals(parts.classPart) ? parts.folderPart : parts.folderPart + parts.classPart;
+        String apiName = base + apiNameSuffix;
+        TagParts known = apiNames.putIfAbsent(apiName, parts);
+        if (known != null && !known.original.equals(parts.original)) {
+            throw new IllegalStateException("Tags '" + known.original + "' and '" + parts.original + "' both name the Swift API class " + apiName);
+        }
+
+        return apiName;
+    }
+
+    private String folderOf(String apiName) {
+        TagParts parts = apiNames.get(apiName);
+
+        return parts != null ? parts.folderPart : apiName;
+    }
 
     @Override
     public String sanitizeTag(String tag) {
@@ -245,13 +274,72 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
         String suffix = apiTemplateFiles().get(templateName);
         TagParts tagParts = tagMap.get(camelize(uniqueTag));
         if (tagParts == null) {
-            return apiFileFolder() + File.separator + toApiFilename(uniqueTag) + suffix;
+            return apiFileFolder() + File.separator + toApiName(uniqueTag) + suffix;
         }
 
-        String folderPath = apiFileFolder() + File.separator + tagParts.folderPart;
-        String filename = toApiFilename(tagParts.classPart) + suffix;
+        // The file is named after its class. SwiftPM names object files after the source file alone, so two
+        // files of one name in different folders would fail the build; the class names are unique already.
+        return apiFileFolder() + File.separator + tagParts.folderPart + File.separator + toApiName(uniqueTag) + suffix;
+    }
 
-        return folderPath + File.separator + filename;
+    // The API reference page is named after its class too, which is what the README links to.
+    @Override
+    public String toApiDocFilename(String name) {
+        return toApiName(name);
+    }
+
+    // The document writes patterns for JavaScript; the base class wraps them in /.../ delimiters, which
+    // NSRegularExpression would read as literal slashes, and leaves \/ unescaped for the Swift string literal.
+    @Override
+    public String toRegularExpression(String pattern) {
+        if (pattern == null) {
+            return null;
+        }
+        return pattern.replace("\\", "\\\\").replace("\"", "\\\"");
+    }
+
+    // A case named after a member every Swift type has (`X.Type`, `X.self`) cannot be declared or referenced.
+    private static final Set<String> TYPE_MEMBER_NAMES = new HashSet<>(Arrays.asList("Type", "Protocol", "self", "Self"));
+
+    @Override
+    protected void postProcessEnumVars(List<Map<String, Object>> enumVars) {
+        super.postProcessEnumVars(enumVars);
+        escapeTypeMemberNames(enumVars);
+    }
+
+    // x-enum-varnames are applied after postProcessEnumVars, so their names are checked once more here.
+    @Override
+    protected void updateEnumVarsWithExtensions(List<Map<String, Object>> enumVars, Map<String, Object> vendorExtensions, String dataType) {
+        super.updateEnumVarsWithExtensions(enumVars, vendorExtensions, dataType);
+        escapeTypeMemberNames(enumVars);
+    }
+
+    private void escapeTypeMemberNames(List<Map<String, Object>> enumVars) {
+        for (Map<String, Object> enumVar : enumVars) {
+            Object name = enumVar.get("name");
+            if (name instanceof String && TYPE_MEMBER_NAMES.contains(name)) {
+                enumVar.put("name", "_" + name);
+            }
+        }
+    }
+
+    // Swift6 only turns oneOf into an enum of alternatives; an anyOf schema came out as an empty struct
+    // that could not hold a value. For decoding and encoding the two are the same: the first type that fits.
+    @Override
+    public CodegenModel fromModel(String name, io.swagger.v3.oas.models.media.Schema model) {
+        CodegenModel codegenModel = super.fromModel(name, model);
+        if (codegenModel != null && codegenModel.oneOf.isEmpty() && !codegenModel.anyOf.isEmpty()
+            && codegenModel.vars.isEmpty()) {
+            codegenModel.oneOf.addAll(codegenModel.anyOf);
+            codegenModel.anyOf.clear();
+            codegenModel.vendorExtensions.put("x-is-one-of-interface", true);
+        }
+        // The document describes ApiDateTime as {utcTime, timeZoneOffset}, but the portal writes and reads it as
+        // one string ("2026-10-15T14:00:00.0000000+03:00"); modelApiDateTime.mustache decodes and encodes that.
+        if (codegenModel != null && codegenModel.classname != null && codegenModel.classname.endsWith("ApiDateTime")) {
+            codegenModel.vendorExtensions.put("x-is-api-date-time", true);
+        }
+        return codegenModel;
     }
 
     private String uniqueCaseInsensitiveString(String value, Map<String, String> seenValues) {

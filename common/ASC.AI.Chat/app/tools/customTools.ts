@@ -34,6 +34,7 @@
 import { SystemToolsSource } from "@onlyoffice/ai-chat/core";
 import type { McpHttpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
+import { AiServiceHttpError } from "../storage/httpClient.js";
 import { getSystemServerConfig } from "./systemTools.js";
 import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { setCustomServerNames } from "../requestContext.js";
@@ -42,16 +43,16 @@ import logger from "../log.js";
 
 /**
  * Custom MCP servers registered through the `tools/*` routes, resolved per
- * round: the portal-wide map plus the agent-scoped map when the round runs
- * in an agent room (agent entries win on a name collision). Until now the
- * registry was pure configuration — nothing connected it to the chat round,
- * so a registered server's tools never reached the model
+ * round from the portal-wide map (the registry is one map per portal; the
+ * `entityId` the tools source passes is ignored). Until the registry was
+ * wired here it was pure configuration — nothing connected it to the chat
+ * round, so a registered server's tools never reached the model
  * (Bugs 82989 / 82990).
  *
  * Filtered out here:
  * - the portal MCP server (built-in, always wired via systemTools);
- * - whitelist markers named after a configured system server (they only
- *   toggle the system group on for an agent — see agentServerWhitelist);
+ * - entries named after a configured system server (the system group is
+ *   wired by systemTools itself — see getSystemServerConfig);
  * - entries without an HTTP `url` (a browser-only transport cannot run
  *   server-side).
  *
@@ -60,31 +61,29 @@ import logger from "../log.js";
  * tools approval-required, same as the host-configured system servers.
  */
 export async function resolveCustomServers(
-  entityId?: string,
+  _entityId?: string,
+  options?: { strict?: boolean },
 ): Promise<Record<string, McpHttpServerConfig>> {
-  const [portal, scoped] = await Promise.all([
-    storage.mcpServers.readAll(undefined).catch((err: unknown) => {
-      logger.warn(
-        `customTools: portal-wide server map read failed: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-      return {};
-    }),
-    entityId
-      ? storage.mcpServers.readAll(entityId).catch((err: unknown) => {
-          logger.warn(
-            `customTools: scoped server map read failed for ${entityId}: ${
-              err instanceof Error ? err.message : String(err)
-            }`,
-          );
-          return {};
-        })
-      : Promise.resolve({}),
-  ]);
-  const merged = { ...portal, ...scoped };
+  // A failed read is tolerated so a round still runs with whatever servers
+  // could be resolved. A settings write must not: with `strict`, any failure
+  // is rethrown instead of leaving the registered names out of the valid
+  // set, which turned a refusal (Guest, AI disabled: Bugs 84400, 84401) or a
+  // passing upstream outage into a 400 "unknown serverType". Only a 404 —
+  // nothing stored for the scope — still reads as an empty map.
+  const tolerate = (what: string) => (err: unknown) => {
+    if (options?.strict && !(err instanceof AiServiceHttpError && err.status === 404)) {
+      throw err;
+    }
+    logger.warn(
+      `customTools: ${what} read failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return {};
+  };
+  const servers = await storage.mcpServers
+    .readAll(undefined)
+    .catch(tolerate("portal-wide server map"));
   const out: Record<string, McpHttpServerConfig> = {};
-  for (const [name, config] of Object.entries(merged)) {
+  for (const [name, config] of Object.entries(servers)) {
     if (name === PORTAL_MCP_SERVER_NAME) continue;
     if (getSystemServerConfig(name)) continue;
     if (!isObject(config) || typeof config.url !== "string" || config.url.length === 0) {
@@ -97,12 +96,12 @@ export async function resolveCustomServers(
 }
 
 /**
- * Prime the request context with the custom server names for the round's
- * scope. Called by the send handlers before the engine runs, because the
- * engine reads `systemServerTypes` (sync) before the tools adapter fires.
+ * Prime the request context with the registered custom server names.
+ * Called by the send handlers before the engine runs, because the engine
+ * reads `systemServerTypes` (sync) before the tools adapter fires.
  */
-export async function primeCustomServers(entityId?: string): Promise<void> {
-  await resolveCustomServers(entityId);
+export async function primeCustomServers(): Promise<void> {
+  await resolveCustomServers();
 }
 
 /**

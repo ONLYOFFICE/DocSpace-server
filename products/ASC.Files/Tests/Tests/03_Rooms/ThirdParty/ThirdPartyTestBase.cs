@@ -155,13 +155,13 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     /// itself is what the test acts on.
     /// </remarks>
     protected async Task<(int ProviderId, string FolderId, string RoomId)> CreateNextcloudRoom(
-        string title, RoomType roomType = RoomType.CustomRoom, bool createAsNewFolder = false)
+        string title, RoomType roomType = RoomType.CustomRoom, bool createAsNewFolder = false, bool denyDownload = false)
     {
         var connection = await ConnectNextcloud($"{title} (storage)");
 
         var room = await _roomsApi.CreateRoomThirdPartyAsync(
             connection.Id,
-            new CreateThirdPartyRoomRequest(title: title, roomType: roomType, createAsNewFolder: createAsNewFolder),
+            new CreateThirdPartyRoomRequest(title: title, roomType: roomType, createAsNewFolder: createAsNewFolder, denyDownload: denyDownload),
             TestContext.Current.CancellationToken);
 
         if (createAsNewFolder)
@@ -238,6 +238,61 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
             folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         return (content.Files.Select(f => f.Title).ToList(), content.Folders.Select(f => f.Title).ToList());
+    }
+
+    /// <summary>
+    /// Deletes a file of a WebDAV room from the storage through a fresh connection to the same
+    /// account, which leaves the tags made through the room's own connection in place: deleting
+    /// through the room itself would take its Recent and Favorites marks with it. On return the
+    /// room's own connection reports the file missing as well.
+    /// </summary>
+    protected async Task DeleteThroughAnotherConnection(string fileId)
+    {
+        // A WebDAV id is "sbox-<connection>-<base64url path>"; the path is the same for every
+        // connection to the account.
+        var encodedPath = fileId.Split('-', 3)[2].Replace('-', '+').Replace('_', '/');
+        var path = Encoding.UTF8.GetString(Convert.FromBase64String(encodedPath.PadRight(encodedPath.Length + (4 - encodedPath.Length % 4) % 4, '=')));
+
+        // A bare connection may not delete anything, so the second connection is turned into a room
+        // rooted at the account, which addresses the file by the same path.
+        var (_, _, removerRoomId) = await CreateNextcloudRoom(UniqueTitle("TP Remover"));
+
+        var results = (await _filesApi.DeleteFileAsync(
+            WebDavFolderId(removerRoomId, path), new DeleteFileRequest(false, true), cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var finished = await WaitLongOperation(results.FirstOrDefault()?.Id);
+
+        finished.Should().NotBeNull();
+        finished!.Should().OnlyContain(r => r.Finished && string.IsNullOrEmpty(r.Error));
+
+        // Each connection keeps the storage's answers for a minute, so the room's connection would go
+        // on serving the deleted file from its cache. Reading the file through the room drops that
+        // cached answer and asks the storage again, which no longer has it.
+        var missing = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken));
+
+        missing.ErrorCode.Should().Be(404);
+    }
+
+    /// <summary>
+    /// Polls the caller's Recent section on a deadline and returns the last titles it listed: adding
+    /// to Recent and removing from it are both applied after the request returns.
+    /// </summary>
+    protected async Task<List<string>> PollRecentTitlesUntil(Func<List<string>, bool> until)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+
+        while (true)
+        {
+            var titles = (await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken))
+                .Response.Files.Select(f => f.Title).ToList();
+
+            if (until(titles) || DateTime.UtcNow >= deadline)
+            {
+                return titles;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 
     /// <summary>

@@ -182,6 +182,7 @@ public class UrlValidatorTests
         result.IsValid.Should().BeFalse();
         result.Blacklisted.Should().BeFalse();
         result.ErrorMessage.Should().Contain("HTTPS is required");
+        result.Transient.Should().BeFalse();
     }
 
     [Fact]
@@ -242,7 +243,7 @@ public class UrlValidatorTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ValidateAsync_InvalidUrl_ShouldBlock(string url)
+    public async Task ValidateAsync_InvalidUrl_ShouldBlock(string? url)
     {
         var result = await _urlValidator.ValidateAsync(url);
 
@@ -273,6 +274,9 @@ public class UrlValidatorTests
         result.IsValid.Should().BeFalse();
         result.Blacklisted.Should().BeFalse();
         result.ErrorMessage.Should().Contain("DNS resolution failed");
+
+        // a failed lookup may pass the next time: the webhook sender retries it instead of disabling the subscription
+        result.Transient.Should().BeTrue();
     }
 
     [Fact]
@@ -384,6 +388,7 @@ public class UrlValidatorTests
 
         result.IsValid.Should().BeFalse();
         result.Blacklisted.Should().BeTrue();
+        result.Transient.Should().BeFalse();
     }
 
     [Fact]

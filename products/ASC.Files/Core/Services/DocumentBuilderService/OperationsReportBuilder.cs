@@ -49,8 +49,11 @@ public class OperationsReportBuilder(
 {
     protected override async Task<DocumentBuilderInputData> BuildCoreAsync(RenderContext context, CustomerOperationsReportTaskData taskData)
     {
-        var tenantWalletService = taskData.ServiceName is { Count: 1 }
-            ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
+        // An AI service may be asked for together with its BYOK variant; the two are still one service here.
+        var serviceNames = taskData.ServiceName?.Select(WalletServiceDescriptionManager.GetBaseServiceName).Distinct().ToList();
+
+        var tenantWalletService = serviceNames is { Count: 1 }
+            ? await GetTenantWalletServiceAsync(serviceNames[0])
             : null;
 
         // Both AI services record the source of the operation and the provider's cost in its metadata.
@@ -137,7 +140,7 @@ public class OperationsReportBuilder(
                     OrderType = taskData.OrderType
                 };
 
-                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter))
+                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter, context.CancellationToken))
                 {
                     if (records is not { Count: > 0 })
                     {
@@ -172,22 +175,15 @@ public class OperationsReportBuilder(
         return null;
     }
 
-    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter)
+    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var offset = 0;
-        var limit = 1000;
+        filter.Limit = 1000;
 
-        while (true)
+        await foreach (var report in tariffService.GetCustomerOperationPagesAsync(tenantId, filter, cancellationToken))
         {
-            filter.Offset = offset;
-            filter.Limit = limit;
-
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
-
             if (report?.Collection == null)
             {
-                yield return null;
-                break;
+                continue;
             }
 
             var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
@@ -197,7 +193,7 @@ public class OperationsReportBuilder(
                 var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
                 var (sourceId, sourceType, sourceTitle) = WalletServiceDescriptionManager.GetSourceInfo(operation.Metadata);
 
-                operation.Description = description;
+                operation.Description = WalletServiceDescriptionManager.MarkByok(description, operation.Service);
                 operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
                 operation.ServiceUnit = unitOfMeasurement;
                 operation.Quantity = quantity;
@@ -212,13 +208,6 @@ public class OperationsReportBuilder(
             }
 
             yield return report.Collection;
-
-            if (report.CurrentPage >= report.TotalPage)
-            {
-                break;
-            }
-
-            offset += limit;
         }
     }
 

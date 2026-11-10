@@ -91,6 +91,7 @@ public class PaymentCurrenciesTests(
     }
 
     [Fact]
+    [Trait("Bug", "81512")]
     public async Task GetPaymentCurrencies_RoomAdmin_ThrowsAccessDenied()
     {
         // Arrange
@@ -106,6 +107,7 @@ public class PaymentCurrenciesTests(
     }
 
     [Fact]
+    [Trait("Bug", "81512")]
     public async Task GetPaymentCurrencies_User_ThrowsAccessDenied()
     {
         // Arrange
@@ -121,6 +123,7 @@ public class PaymentCurrenciesTests(
     }
 
     [Fact]
+    [Trait("Bug", "81512")]
     public async Task GetPaymentCurrencies_Guest_ThrowsAccessDenied()
     {
         // Arrange

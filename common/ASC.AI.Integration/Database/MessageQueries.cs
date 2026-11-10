@@ -54,9 +54,9 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbMessage> GetMessagesByThreadFromCursorAsync(int tenantId, Guid threadId, DateTime timestamp, Guid id, int count)
+    public IAsyncEnumerable<DbMessage> GetMessagesByThreadFromCursorAsync(int tenantId, Guid threadId, DateTime timestampFrom, DateTime timestampTo, Guid id, int count)
     {
-        return MessageQueriesContainer.GetMessagesByThreadFromCursorAsync(this, tenantId, threadId, timestamp, id, count);
+        return MessageQueriesContainer.GetMessagesByThreadFromCursorAsync(this, tenantId, threadId, timestampFrom, timestampTo, id, count);
     }
 
     [PreCompileQuery]
@@ -66,9 +66,9 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<DbMessage> GetMessagesByThreadFromCursorDescAsync(int tenantId, Guid threadId, DateTime timestamp, Guid id, int count)
+    public IAsyncEnumerable<DbMessage> GetMessagesByThreadFromCursorDescAsync(int tenantId, Guid threadId, DateTime timestampFrom, DateTime timestampTo, Guid id, int count)
     {
-        return MessageQueriesContainer.GetMessagesByThreadFromCursorDescAsync(this, tenantId, threadId, timestamp, id, count);
+        return MessageQueriesContainer.GetMessagesByThreadFromCursorDescAsync(this, tenantId, threadId, timestampFrom, timestampTo, id, count);
     }
 
     [PreCompileQuery]
@@ -113,13 +113,13 @@ static file class MessageQueriesContainer
                     .ThenBy(x => x.Id)
                     .Take(count));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Guid, int, IAsyncEnumerable<DbMessage>> GetMessagesByThreadFromCursorAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, DateTime, DateTime, Guid, int, IAsyncEnumerable<DbMessage>> GetMessagesByThreadFromCursorAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid threadId, DateTime timestamp, Guid id, int count) =>
+            (AiIntegrationContext ctx, int tenantId, Guid threadId, DateTime timestampFrom, DateTime timestampTo, Guid id, int count) =>
                 ctx.Messages
                     .Where(x => x.TenantId == tenantId && x.ThreadId == threadId
-                                && (x.Timestamp > timestamp
-                                    || (x.Timestamp == timestamp && x.Id.CompareTo(id) > 0)))
+                                && (x.Timestamp >= timestampTo
+                                    || (x.Timestamp >= timestampFrom && x.Id.CompareTo(id) > 0)))
                     .OrderBy(x => x.Timestamp)
                     .ThenBy(x => x.Id)
                     .Take(count));
@@ -133,13 +133,13 @@ static file class MessageQueriesContainer
                     .ThenByDescending(x => x.Id)
                     .Take(count));
 
-    public static readonly Func<AiIntegrationContext, int, Guid, DateTime, Guid, int, IAsyncEnumerable<DbMessage>> GetMessagesByThreadFromCursorDescAsync =
+    public static readonly Func<AiIntegrationContext, int, Guid, DateTime, DateTime, Guid, int, IAsyncEnumerable<DbMessage>> GetMessagesByThreadFromCursorDescAsync =
         EF.CompileAsyncQuery(
-            (AiIntegrationContext ctx, int tenantId, Guid threadId, DateTime timestamp, Guid id, int count) =>
+            (AiIntegrationContext ctx, int tenantId, Guid threadId, DateTime timestampFrom, DateTime timestampTo, Guid id, int count) =>
                 ctx.Messages
                     .Where(x => x.TenantId == tenantId && x.ThreadId == threadId
-                                && (x.Timestamp < timestamp
-                                    || (x.Timestamp == timestamp && x.Id.CompareTo(id) < 0)))
+                                && (x.Timestamp < timestampFrom
+                                    || (x.Timestamp < timestampTo && x.Id.CompareTo(id) < 0)))
                     .OrderByDescending(x => x.Timestamp)
                     .ThenByDescending(x => x.Id)
                     .Take(count));

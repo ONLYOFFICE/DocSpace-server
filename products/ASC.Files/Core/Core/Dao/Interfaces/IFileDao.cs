@@ -281,7 +281,11 @@ public interface IFileDao<T>
     /// <param name="toFolderId">The ID of the destination folder</param>
     /// <param name="deleteLinks">Flag for removing links when moving</param>
     Task<T> MoveFileAsync(T fileId, T toFolderId, bool deleteLinks = false);
-    Task<TTo> MoveFileAsync<TTo>(T fileId, TTo toFolderId, bool deleteLinks = false);
+    /// <summary>
+    /// Moves the file. A non-null <paramref name="newTitle"/> is the title it arrives under, set by the move
+    /// itself; third-party storages pick a free title on their own and ignore it.
+    /// </summary>
+    Task<TTo> MoveFileAsync<TTo>(T fileId, TTo toFolderId, bool deleteLinks, string newTitle);
     Task<string> MoveFileAsync(T fileId, string toFolderId, bool deleteLinks = false);
     Task<int> MoveFileAsync(T fileId, int toFolderId, bool deleteLinks = false);
 
@@ -522,6 +526,15 @@ public interface IFileDao<T>
 
     Task SetFileKey(T fileId, IEnumerable<FileKeyData> keys);
     Task<List<FileKeys>> GetFileKeys(T fileId, Guid userId);
+
+    /// <summary>The ones of <paramref name="fileIds"/> that hold a key for <paramref name="userId"/>.</summary>
+    IAsyncEnumerable<T> GetFileIdsWithKeyAsync(IEnumerable<T> fileIds, Guid userId);
+
+    /// <summary>Removes the keys of <paramref name="fileIds"/> held for <paramref name="userIds"/>.</summary>
+    Task DeleteFileKeysAsync(IEnumerable<T> fileIds, IEnumerable<Guid> userIds);
+
+    /// <summary>Removes every file key held for <paramref name="userId"/> on the portal.</summary>
+    Task DeleteFileKeysAsync(Guid userId);
 
     #endregion
 }

@@ -51,6 +51,6 @@ public sealed class BackupWorkerService(
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        await backupWorker.StopAsync();
+        await backupWorker.StopAsync(cancellationToken);
     }
 }

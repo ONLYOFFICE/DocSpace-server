@@ -552,7 +552,7 @@ public class FileDtoHelper(
             var currentFolder = await currentFolderTask;
 
             Folder<T> currentRoom;
-            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates)
+            if (!currentFolder.IsRoom && file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive or FolderType.RoomTemplates or FolderType.DefaultTemplates)
             {
                 currentRoom = await DocSpaceHelper.GetParentRoom(file, folderDao) ?? currentFolder;
             }
@@ -702,7 +702,7 @@ public class FileDtoHelper(
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = canUpdateXlsx;
         }
 
-        if (!file.ProviderEntry && file.RootFolderType == FolderType.VirtualRooms && !expiration.HasValue)
+        if (!file.ProviderEntry && file.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub && !expiration.HasValue)
         {
             var room = await DocSpaceHelper.GetParentRoom(file, folderDao);
             if (room?.SettingsLifetime != null)

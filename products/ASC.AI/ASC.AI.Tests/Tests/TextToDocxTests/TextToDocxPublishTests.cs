@@ -37,16 +37,18 @@ namespace ASC.AI.Tests.Tests.TextToDocxTests;
 [Trait("Feature", "AI/TextToDocx")]
 public class TextToDocxPublishTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    private const string TextToDocxStartPath = "/internal/ai/text-to-docx/start";
+    // No NeedsDocumentServer: the 202 only means the job was queued, and no test here waits for the converted file.
 
     [Fact]
-    public async Task Publish_MyDocuments_ReturnsNoContent()
+    public async Task Publish_MyDocuments_ReturnsAccepted()
     {
         var folderId = await GetMyDocumentsFolderIdAsync();
 
-        using var response = await PublishAsync(folderId);
+        var response = await _aiExport.AiExportTextToDocxWithHttpInfoAsync(BuildRequest(folderId), TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        // The conversion runs in the background; the route only accepts the job.
+        response.StatusCode.Should().Be(HttpStatusCode.Accepted);
+        response.Data.Success.Should().BeTrue();
     }
 
     [Theory]
@@ -54,27 +56,24 @@ public class TextToDocxPublishTests(AspireAppFixture fixture) : BaseTest(fixture
     [InlineData(-1)]
     public async Task Publish_NonPositiveFolderId_ReturnsBadRequest(int folderId)
     {
-        using var response = await PublishAsync(folderId);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _aiExport.AiExportTextToDocxAsync(BuildRequest(folderId), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
     public async Task Publish_NonexistentFolderId_ReturnsNotFound()
     {
-        using var response = await PublishAsync(999999999);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _aiExport.AiExportTextToDocxAsync(BuildRequest(999999999), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
-    private Task<HttpResponseMessage> PublishAsync(int folderId) =>
-        _ai.PostAsync(
-            TextToDocxStartPath,
-            new
-            {
-                title = $"document-{Guid.NewGuid():N}",
-                content = "# Heading\n\nGenerated content.",
-                folderId
-            },
-            TestContext.Current.CancellationToken);
+    private static AiExportTextToDocxRequest BuildRequest(int folderId) =>
+        new(
+            title: $"document-{Guid.NewGuid():N}",
+            content: "# Heading\n\nGenerated content.",
+            folderId: new AiExportTextToDocxRequestFolderId((decimal)folderId));
 }

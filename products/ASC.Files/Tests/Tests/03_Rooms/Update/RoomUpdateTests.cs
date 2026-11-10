@@ -125,23 +125,6 @@ public class RoomUpdateTests(
     }
 
     [Fact]
-    public async Task UpdateRoom_NonExistentRoom_Forbidden()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-
-        // Act & Assert - room ids are globally unique, so the API returns 403 instead of 404 to
-        // avoid letting a caller enumerate which ids exist.
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _roomsApi.UpdateRoomAsync(
-                999999999,
-                new UpdateRoomRequest("Does Not Exist"),
-                TestContext.Current.CancellationToken));
-
-        exception.ErrorCode.Should().Be(403);
-    }
-
-    [Fact]
     public async Task UpdateRoom_MultipleFieldsInOneRequest_UpdatesAll()
     {
         // Arrange

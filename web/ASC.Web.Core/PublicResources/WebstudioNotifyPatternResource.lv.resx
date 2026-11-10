@@ -234,6 +234,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Apstiprināt konta darbības izbeigšanu</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Sazināties ar atbalstu</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Deaktivizēt portālu</value>
   </data>
@@ -260,6 +263,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Pievienoties telpai</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Saglabāt manu telpu</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Saglabāt manu telpu un līdzekļus</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Atstāt atsauksmi</value>
@@ -291,8 +300,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Iestatīt paroli</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Dalīties ar atsauksmi</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Uzsākt bezmaksas izmēģinājumu</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Atbloķēt manu telpu</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Atjaunināt</value>
@@ -755,6 +770,186 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portāls ${PortalUrl} ir bloķēts saskaņā ar datu glabāšanas politiku: tas netika izmantots vai tā abonements netika atjaunots. Kurš no gadījumiem, norāda tālāk esošā kategorija.
+
+*Portāls:* ${PortalUrl}
+*Īpašnieks:* ${UserName} ${UserEmail}
+*Kategorija:* ${Category}
+*Dzēšanas datums:* ${DeleteDate}
+
+Ja portāls netiks atbloķēts, tas un visi tā dati šajā datumā tiks dzēsti.
+
+Ja īpašnieks lūdz to saglabāt, aktivizējiet portālu atkārtoti pirms šī datuma.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Jūsu telpa ir bloķēta, bet nekas vēl nav zaudēts
+
+#if($Unpaid == "True")
+Tā kā jūsu ${LetterLogoText} telpas *"${__VirtualRootPath}":"${__VirtualRootPath}"* abonements ir beidzies, mēs to pagaidām esam bloķējuši. Tas nozīmē, ka pašlaik neviens no jūsu komandas nevar pierakstīties, taču visi jūsu dokumenti un iestatījumi joprojām ir drošībā.
+#else
+Tā kā jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* kādu laiku nav izmantota, mēs to pagaidām esam bloķējuši. Tas nozīmē, ka pašlaik neviens no jūsu komandas nevar pierakstīties, taču visi jūsu dokumenti un iestatījumi joprojām ir drošībā.
+#end
+
+Mēs glabāsim jūsu datus līdz šim datumam: *$DeleteDate*. Pēc tam telpa un viss tās saturs tiks neatgriezeniski dzēsts.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Labā ziņa: vēl nav par vēlu. Vienkārši atbloķējiet telpu (termiņš: $DeleteDateShort) un pēc tam atjaunojiet abonementu, lai atsāktu darbu. Viss būs tieši tur, kur to atstājāt.
+#else
+Labā ziņa: vēl nav par vēlu. Vienkārši atbloķējiet telpu (termiņš: $DeleteDateShort), un viss būs tieši tur, kur to atstājāt.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus datus, atbloķējiet telpu un izveidojiet to dublējumu (termiņš: $DeleteDateShort).
+#else
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, atbloķējiet telpu un lejupielādējiet tos (termiņš: $DeleteDateShort).
+#end
+#else
+Labā ziņa: vēl nav par vēlu. Vienkārši sazinieties ar mūsu atbalsta komandu (termiņš: $DeleteDateShort), un mēs palīdzēsim atgūt jūsu telpu tieši tādu, kādu to atstājāt.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, paziņojiet mums (termiņš: $DeleteDateShort), un mēs palīdzēsim jums tiem piekļūt.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Jūsu telpa ir dzēsta
+
+#if($Unpaid == "True")
+Tā kā jūsu ${LetterLogoText} telpas *$PortalName* abonements beidzās un netika atjaunots, mēs to esam dzēsuši kopā ar visiem tās datiem, kā aprakstīts mūsu "Privātuma politikā":"$URL1".
+#else
+Tā kā jūsu ${LetterLogoText} telpa *$PortalName* ilgu laiku netika izmantota, mēs to esam dzēsuši kopā ar visiem tās datiem, kā aprakstīts mūsu "Privātuma politikā":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Paldies, ka strādājāt ar mums. Mēs ļoti vēlētos uzzināt, kāpēc pārtraucāt to izmantot: vai kaut kas nedarbojās, vai atradāt piemērotāku risinājumu, vai arī tas jums vienkārši vairs nebija vajadzīgs? Tas aizņems tikai minūti, un katra atbilde palīdz mums pilnveidoties.
+#else
+Paldies, ka izmēģinājāt ${LetterLogoText}. Mēs ļoti vēlētos uzzināt, kāpēc pārtraucāt to izmantot: vai kaut kas nedarbojās, vai atradāt piemērotāku risinājumu, vai arī tas jums vienkārši vairs nebija vajadzīgs? Tas aizņems tikai minūti, un katra atbilde palīdz mums pilnveidoties.
+#end
+
+$OrangeButton
+
+Ja kādreiz vēlēsieties atgriezties, jūs vienmēr esat gaidīti. Jūs jebkurā laikā varat "izveidot jaunu telpu":"$URL2".
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Jūsu telpa drīzumā tiks dzēsta
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* joprojām ir bloķēta, jo tās abonements ir beidzies. Šis ir draudzīgs pēdējais atgādinājums: telpa un visi tās dati tiks neatgriezeniski dzēsti šajā datumā: *$DeleteDate*.
+#else
+Jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* joprojām ir bloķēta, jo tās abonements ir beidzies. Šis ir draudzīgs atgādinājums: telpa un visi tās dati tiks neatgriezeniski dzēsti šajā datumā: *$DeleteDate*.
+#end
+#else
+#if($FinalNotice == "True")
+Jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* joprojām ir bloķēta, jo tā kādu laiku nav izmantota. Šis ir draudzīgs pēdējais atgādinājums: telpa un visi tās dati tiks neatgriezeniski dzēsti šajā datumā: *$DeleteDate*.
+#else
+Jūsu ${LetterLogoText} telpa *"${__VirtualRootPath}":"${__VirtualRootPath}"* joprojām ir bloķēta, jo tā kādu laiku nav izmantota. Šis ir draudzīgs atgādinājums: telpa un visi tās dati tiks neatgriezeniski dzēsti šajā datumā: *$DeleteDate*.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Ja vēlaties to saglabāt, vēl ir laiks. Vienkārši atbloķējiet telpu (termiņš: $DeleteDateShort) un pēc tam atjaunojiet abonementu, lai atsāktu darbu. Viss būs tieši tur, kur to atstājāt.
+#else
+Ja vēlaties to saglabāt, vēl ir laiks. Vienkārši atbloķējiet telpu (termiņš: $DeleteDateShort), un viss būs tieši tur, kur to atstājāt.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus datus, atbloķējiet telpu un izveidojiet to dublējumu (termiņš: $DeleteDateShort), jo pēc tam mēs tos vairs nevarēsim atjaunot.
+#else
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, atbloķējiet telpu un lejupielādējiet tos (termiņš: $DeleteDateShort), jo pēc tam mēs tos vairs nevarēsim atjaunot.
+#end
+#else
+Ja vēlaties to saglabāt, vēl ir laiks. Vienkārši sazinieties ar mūsu atbalsta komandu (termiņš: $DeleteDateShort), un mēs palīdzēsim atgūt jūsu telpu tieši tādu, kādu to atstājāt.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Ja vēlaties saglabāt kādus failus, paziņojiet mums (termiņš: $DeleteDateShort), un mēs palīdzēsim jums tiem piekļūt, jo pēc tam mēs tos vairs nevarēsim atjaunot.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Sen neesam jūs redzējuši
+
+Jau kādu laiku neviens nav pierakstījies jūsu ${LetterLogoText} telpā *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Vēlējāmies sazināties ar jums, pirms ar jūsu dokumentiem un iestatījumiem kaut kas notiek.
+
+Lai viss darbotos raiti ikvienam, mēs bloķējam bezmaksas telpas, kas kādu laiku nav izmantotas. Lūk, ko tas nozīmē jūsu telpai:
+
+*$BlockDate*: jūsu telpa tiks bloķēta, un jūs nevarēsiet pierakstīties.
+*$DeleteDate*: telpa un visi tās dati tiks neatgriezeniski dzēsti.
+
+Labā ziņa: to saglabāt ir vienkārši. Pierakstieties vienreiz (termiņš: $BlockDateShort), un viss paliks tieši tā, kā to atstājāt.
+
+$OrangeButton
+
+Ja telpa jums vairs nav vajadzīga, jums nekas nav jādara. Tikai neaizmirstiet lejupielādēt failus, kurus vēlaties saglabāt (termiņš: $BlockDateShort).
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Jūsu abonements ir beidzies, bet jūsu telpa joprojām ir šeit
+
+Jūsu ${LetterLogoText} abonements telpai *"${__VirtualRootPath}":"${__VirtualRootPath}"* beidzās (*$DueDate*). Paldies, ka strādājāt ar mums. Ceram, ka ${LetterLogoText} jums kaut nedaudz atviegloja darbu.
+
+Lai viss darbotos raiti, mēs bloķējam telpas, kuru abonements ir beidzies. Lūk, ko tas nozīmē jūsu telpai:
+
+*$BlockDate*: jūsu telpa tiks bloķēta, un jūs nevarēsiet pierakstīties.
+*$DeleteDate*: telpa un visi tās dati tiks neatgriezeniski dzēsti.
+
+Labā ziņa: to saglabāt ir vienkārši. Vienkārši atjaunojiet abonementu (termiņš: $BlockDateShort), un jūsu dokumenti, iestatījumi un komanda paliks tieši tur, kur tos atstājāt.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Tikai neaizmirstiet izveidot dublējumu datiem, kurus vēlaties saglabāt (termiņš: $BlockDateShort).
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Jūsu abonements ir beidzies, bet jūsu telpa un līdzekļi joprojām ir šeit
+
+Jūsu ${LetterLogoText} abonements telpai *"${__VirtualRootPath}":"${__VirtualRootPath}"* beidzās (*$DueDate*). Paldies, ka strādājāt ar mums. Jūsu makā joprojām ir līdzekļi ("pārbaudīt atlikumu":"$URL1"), un mēs nevēlējāmies, lai jūs tos zaudētu, par to nezinot.
+
+Lai viss darbotos raiti, mēs bloķējam telpas, kuru abonements ir beidzies. Lūk, ko tas nozīmē jūsu telpai:
+
+*$BlockDate*: jūsu telpa tiks bloķēta, un jūs nevarēsiet pierakstīties.
+*$DeleteDate*: telpa un visi tās dati tiks neatgriezeniski dzēsti kopā ar līdzekļiem jūsu makā.
+
+Labā ziņa: saglabāt abus ir vienkārši. Vienkārši atjaunojiet abonementu (termiņš: $BlockDateShort), un jūsu dokumenti, iestatījumi un līdzekļi paliks tieši tur, kur tos atstājāt. Maka atlikums var pat segt daļu no maksas.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Tikai neaizmirstiet izveidot dublējumu datiem, kurus vēlaties saglabāt (termiņš: $BlockDateShort).
+#else
+h1.Jūsu telpā jūs joprojām gaida līdzekļi
+
+Jau kādu laiku neviens nav pierakstījies jūsu ${LetterLogoText} telpā *"${__VirtualRootPath}":"${__VirtualRootPath}"*, taču tās "makā":"$URL1" joprojām ir līdzekļi. Mēs nevēlējāmies, lai jūs tos zaudētu, par to nezinot.
+
+Lai viss darbotos raiti, mēs bloķējam neaktīvās telpas. Lūk, ko tas nozīmē jūsu telpai:
+
+*$BlockDate*: jūsu telpa tiks bloķēta, un jūs nevarēsiet pierakstīties.
+*$DeleteDate*: telpa un visi tās dati tiks neatgriezeniski dzēsti kopā ar līdzekļiem jūsu makā.
+
+Labā ziņa: saglabāt abus ir vienkārši. Pierakstieties vienreiz (termiņš: $BlockDateShort), un jūsu dokumenti, iestatījumi un līdzekļi paliks tieši tur, kur tos atstājāt.
+
+$OrangeButton
+
+Ja esat nolēmuši doties tālāk, tas ir pilnīgi normāli. Tikai neaizmirstiet lejupielādēt failus, kurus vēlaties saglabāt (termiņš: $BlockDateShort).
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Portāla "${__VirtualRootPath}":"${__VirtualRootPath}" deaktivizācija
 
@@ -1164,30 +1359,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} tiks &lt;span style="color: #FF6F3D;"&gt;dzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Jūs vairāk nekā pusgadu neesat iegājis savā ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tā kā esat nolēmis to vairs neizmantot, jūsu ${LetterLogoText} un visi dati tiks dzēsti saskaņā ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privātuma politiku&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Būsim pateicīgi par jūsu atsauksmēm. Kāpēc esat nolēmis pārtraukt lietot ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ja vēlaties turpināt izmantot savu ${LetterLogoText}, vienkārši atveriet to un veiciet jebkuru darbību.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} tiks &lt;span style="color: #FF6F3D;"&gt;dzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Jūs 3 mēnešus neesat iespējis savā ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Lūdzu, ņemiet vērā: jūsu ${LetterLogoText} un visi dati tiks dzēsti pēc 6 mēnešu neaktivitātes. Vienkārši piesakieties tagad, lai jūsu ${LetterLogoText} paliktu aktīvs un jūs varētu to turpināt izmantot.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Saņemiet &lt;span style="color: #FF6F3D;"&gt;bezmaksas&lt;/span&gt; ${LetterLogoText} lietojumprogrammas&lt;/td&gt;&lt;/tr&gt;
 
@@ -1202,32 +1373,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 600; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Lai rediģētu dokumentus mobilajās ierīcēs, iegūstiet programmu ${LetterLogoText} Documents operētājsistēmai&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; Margin: 0; padding-bottom: 32px; padding-left: 126px; padding-right: 126px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 34px;"&gt;&lt;img height="32" width="32" src="$IMG2" alt="iOS"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 8px; padding-right: 30px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;iOS&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 24px;"&gt;&lt;/td&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 20px;"&gt;&lt;img height="31" width="28" src="$IMG4" alt="Android"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 10px; padding-right: 16px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Android&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} tiks &lt;span style="color: #FF6F3D;"&gt;izdzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Jūs vairāk nekā pusgadu neesat iegājis savā ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tā kā nolēmt vairs to neizmantot, jūsu ${LetterLogoText} un visi dati tiks izdzēsti saskaņā ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Konfidencialitātes politiku&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Mēs būsim pateicīgi par jūsu atsauksmi. Kāpēc nolēmāt pārtraukt lietot ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ja uzskatāt, ka šī ir kļūda, un vēlaties turpināt lietot ${LetterLogoText}, sazinieties ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;atbalsta komandu&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Jūsu ${LetterLogoText} tiks &lt;span style="color: #FF6F3D;"&gt;izdzēsts&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Jūs 3 mēnešus neesat iespējis savā ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Tā kā jūs to neizmantojat, jūsu ${LetterLogoText} un visi dati pēc 6 mēnešu neaktivitātes tiks dzēsti saskaņā ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Privātuma politiku&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Ja uzskatāt, ka šī ir kļūda, un vēlaties turpināt lietot ${LetterLogoText}, sazinieties ar mūsu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;atbalsta komandu&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1671,6 +1816,30 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Jūsu parole ir veiksmīgi nomainīta</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portāls ${PortalUrl} ir bloķēts saskaņā ar datu glabāšanas politiku</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpa ir bloķēta, bet jūsu dati ir drošībā (termiņš: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpa ir dzēsta</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpa drīzumā tiks dzēsta (dzēšanas datums: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Pēdējā iespēja saglabāt jūsu ${LetterLogoText} telpu (dzēšanas datums: $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpai jūs pietrūkstat (rīcības termiņš: $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpai jūs pietrūkstat (rīcības termiņš: $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Jūsu ${LetterLogoText} telpā joprojām ir līdzekļi (rīcības termiņš: $BlockDate)</value>
+  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Portāla ${__VirtualRootHost} deaktivizācija</value>
   </data>
@@ -1743,20 +1912,8 @@ $TrulyYours</value>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>Atklājiet 4 noderīgas lietotnes savā ${LetterLogoText}</value>
   </data>
-  <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} tiks izdzēsts</value>
-  </data>
-  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} tiks izdzēsts</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Saņemiet bezmaksas ${LetterLogoText} lietojumprogrammas</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} tiks izdzēsts</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>Jūsu ${LetterLogoText} tiks izdzēsts</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Atklājiet ${LetterLogoText} biznesa abonementu</value>

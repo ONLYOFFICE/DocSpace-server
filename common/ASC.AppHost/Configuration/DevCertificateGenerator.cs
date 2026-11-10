@@ -31,7 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 

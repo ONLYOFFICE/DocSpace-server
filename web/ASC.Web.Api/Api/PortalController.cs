@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -30,8 +30,6 @@
 // Public License v3.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
-
-using ASC.Core.Common.Identity;
 
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -90,9 +88,8 @@ public class PortalController(
     QuotaHelper quotaHelper,
     QuotaSocketManager quotaSocketManager,
     ApiDateTimeHelper apiDateTimeHelper,
-    IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
-    IdentityClient client,
+    PortalRemovalService portalRemovalService,
     InvitationLinkDtoHelper invitationLinkDtoHelper,
     CountPaidUserChecker countPaidUserChecker)
     : ControllerBase
@@ -1009,24 +1006,23 @@ public class PortalController(
     /// records the request in the audit trail; the portal itself is not changed here. The caller has to be the portal
     /// owner and hold the portal-settings right, and on a server installation the last remaining space cannot be
     /// deactivated - the call is refused when every other space has limited access. The letter always goes to the
-    /// owner's own address, and the operation keeps working while the portal's payment has lapsed. It is mutating
-    /// only in that it sends a message, and it is rate-limited to five requests per fifteen minutes per user and path
-    /// by default, answering 429 above that. Nothing is returned in the body, so a client cannot tell from the answer
-    /// whether the mail was delivered. The first link in the letter authorizes `PUT api/2.0/portal/suspend`, which
-    /// suspends the portal, and the second one authorizes `PUT api/2.0/portal/continue`, which makes it active again.
-    /// To remove the portal instead of pausing it, use `POST api/2.0/portal/delete`.
+    /// owner's own address, and the operation keeps working while the portal's payment has lapsed. A repeat shortly
+    /// after the letter went out does nothing - no new links, no second letter, no audit record - while the links of
+    /// the first letter stay valid. Nothing is returned in the body. The first link in the letter authorizes
+    /// `PUT api/2.0/portal/suspend`, which suspends the portal, and the second one authorizes
+    /// `PUT api/2.0/portal/continue`, which makes it active again. To remove the portal instead of pausing it, use
+    /// `POST api/2.0/portal/delete`.
     /// </remarks>
     /// <summary>
     /// Send suspension instructions
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The deactivation letter has been handed to the mail service and the request is recorded in the audit trail; the portal itself is still active and the response carries no content")]
+    [SwaggerResponse(200, "The request is accepted: the deactivation letter is queued and the request recorded in the audit trail, unless the same letter already went out within the repeat period; the portal itself is still active and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [AllowNotPayment]
     [HttpPost("suspend")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendSuspendInstructions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -1035,11 +1031,18 @@ public class PortalController(
 
         await DemandPermissionToDeleteTenantAsync(tenant);
 
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeactivationAsync(tenant);
+        if (!acceptance.Accepted)
+        {
+            return;
+        }
+
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
         var suspendUrl = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalSuspend);
         var continueUrl = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalContinue);
 
         await studioNotifyService.SendMsgPortalDeactivationAsync(tenant, await urlShortener.GetShortenLinkAsync(suspendUrl), await urlShortener.GetShortenLinkAsync(continueUrl));
+        acceptance.Complete();
 
         messageService.Send(MessageAction.OwnerSentPortalDeactivationInstructions, MessageTarget.Create(owner.Id), owner.DisplayUserName(false, displayUserSettingsHelper));
     }
@@ -1050,10 +1053,10 @@ public class PortalController(
     /// installation the last remaining space cannot be removed - the call is refused when every other space has
     /// limited access. The letter goes to the owner's own address whoever asked for it, and it warns about the
     /// subscription that will stop renewing when the portal is on a paid plan. The operation keeps working while the
-    /// portal's payment has lapsed, is mutating only in that it sends a message, and is rate-limited to five requests
-    /// per fifteen minutes per user and path by default, answering 429 above that. Nothing is returned in the body.
-    /// The link in the letter authorizes `DELETE api/2.0/portal/delete`, which deletes the portal with all of its
-    /// rooms, files and accounts and cannot be undone. To pause the portal instead of deleting it, send the
+    /// portal's payment has lapsed. A repeat shortly after the letter went out does nothing - no new link, no second
+    /// letter - while the link of the first letter stays valid. Nothing is returned in the body. The link in the letter
+    /// authorizes `DELETE api/2.0/portal/delete`, which deletes the portal with all of its rooms, files and accounts
+    /// and cannot be undone. To pause the portal instead of deleting it, send the
     /// deactivation letter with `POST api/2.0/portal/suspend`.
     /// </remarks>
     /// <summary>
@@ -1061,12 +1064,11 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The removal letter has been handed to the mail service; nothing about the portal has changed yet and the response carries no content")]
+    [SwaggerResponse(200, "The request is accepted, and the removal letter is queued unless one already went out within the repeat period; nothing about the portal has changed yet and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpPost("delete")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task SendDeleteInstructions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -1074,6 +1076,12 @@ public class PortalController(
         var tenant = tenantManager.GetCurrentTenant();
 
         await DemandPermissionToDeleteTenantAsync(tenant);
+
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeletionAsync(tenant);
+        if (!acceptance.Accepted)
+        {
+            return;
+        }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
@@ -1084,6 +1092,7 @@ public class PortalController(
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), showAutoRenewText);
+        acceptance.Complete();
     }
 
     /// <remarks>
@@ -1094,7 +1103,8 @@ public class PortalController(
     /// Content Security Policy and refreshes its base domain, and a portal that is already active is simply left
     /// active. Nothing is returned in the body; read the result from `status` in `GET api/2.0/portal`. Deactivating
     /// the portal again means asking for a fresh letter with `POST api/2.0/portal/suspend`, because each link is
-    /// issued for one operation. This operation cannot bring back a removed portal: the deletion behind
+    /// issued for one operation; asked shortly after the previous letter, it sends none, and the deactivation link of
+    /// that letter still works. This operation cannot bring back a removed portal: the deletion behind
     /// `DELETE api/2.0/portal/delete` is final, and a removed portal has to be restored from a backup instead.
     /// </remarks>
     /// <summary>
@@ -1111,6 +1121,54 @@ public class PortalController(
         var tenant = tenantManager.GetCurrentTenant();
         tenant.SetStatus(TenantStatus.Active);
         await tenantManager.SaveTenantAsync(tenant);
+
+        var current = await settingsManager.LoadAsync<CspSettings>();
+        await cspSettingsHelper.SaveAsync(current.Domains, false);
+        await cspSettingsHelper.UpdateBaseDomainAsync();
+    }
+
+    /// <remarks>
+    /// Unblocks this portal, blocked by the retention policy after a long period without use, so its users can sign in
+    /// again. The portal must be blocked. The call is authorized only by the unblocking link the retention letters send
+    /// to the owner; it works for the current block only. The call is mutating: it makes the portal active, records the
+    /// unblocking in the audit trail, refreshes its Content Security Policy and restarts the retention count. Nothing
+    /// is returned in the body; to check the status, read `tenantStatus` from `GET api/2.0/settings`, which a blocked
+    /// portal still answers. A lapsed paid tariff stays unpaid after the unblocking, so renewing it is the next step.
+    /// The letters of a free portal carry no such link: support unblocks it. The call does not bring back a portal
+    /// deleted at the end of its retention period, or one its owner deactivated, which `PUT api/2.0/portal/continue`
+    /// brings back. An invalid link, a link of an earlier block, or a portal that is no longer blocked, a repeated call
+    /// included, is refused with 401; an ordinary sign-in token instead of the link is refused with 403.
+    /// </remarks>
+    /// <summary>
+    /// Unblock a portal
+    /// </summary>
+    /// <path>api/2.0/portal/unblock</path>
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The portal is active again and its users can sign in; the response carries no content")]
+    [SwaggerResponse(401, "The unblocking link is invalid, was mailed for an earlier block, or the portal is not blocked")]
+    [SwaggerResponse(403, "The call carries an ordinary sign-in token instead of the unblocking link")]
+    [AllowBlocked]
+    [AllowNotPayment]
+    [HttpPut("unblock")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalUnblock")]
+    public async Task UnblockPortal()
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+
+        // The link is refused for a portal that is not blocked before it gets here; a call that raced another one
+        // which has just unblocked the portal gets the same answer, not a second unblocking.
+        if (tenant.Status != TenantStatus.Blocked)
+        {
+            throw new AuthenticationException("The portal is not blocked");
+        }
+
+        // The new status date is also where the retention count starts again.
+        tenant.SetStatus(TenantStatus.Active);
+        await tenantManager.SaveTenantAsync(tenant);
+        messageService.Send(MessageAction.PortalUnblocked);
+
+        // The category of the block is over with it; the next block records its own.
+        await settingsManager.SaveAsync(new PortalRetentionSettings());
 
         var current = await settingsManager.LoadAsync<CspSettings>();
         await cspSettingsHelper.SaveAsync(current.Domains, false);
@@ -1186,32 +1244,25 @@ public class PortalController(
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
         var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
-        await client.DeleteTenantClientsAsync();
-        await tenantManager.RemoveTenantAsync(tenant);
-
-        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
-        {
-            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
-        }
-
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
         var redirectLink = externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled");
 
-        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
-
-        messageService.Send(MessageAction.PortalDeleted);
-
-        await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
-        await cspSettingsHelper.UpdateBaseDomainAsync();
-
-        if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
+        await portalRemovalService.RemoveAsync(tenant, securityContext.CurrentAccount.ID, auto: false, async () =>
         {
-            var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-            await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
-        }
+            await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
-        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+            messageService.Send(MessageAction.PortalDeleted);
+
+            await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
+            await cspSettingsHelper.UpdateBaseDomainAsync();
+
+            if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
+            {
+                var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+                await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
+            }
+        });
 
         return redirectLink;
     }
@@ -1269,7 +1320,11 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Sends the instructions to remove a portal of a user with the ID specified in the request.
+    /// Mails the portal owner the confirmation link that removes this portal; nothing about the portal changes until
+    /// that link is used. The call needs no authentication token: it works only on a server installation, for the
+    /// portal owner's ID, with a key issued for that ID and the removal, valid for an hour - anything else answers
+    /// 403. The letter goes to the owner's address as it is, without waiting for the address to be activated. A repeat
+    /// shortly after the letter went out sends nothing, and the link of that letter stays valid.
     /// </remarks>
     /// <summary>Send removal instructions to the user</summary>
     /// <path>api/2.0/portal/sendremoveinstructions</path>
@@ -1295,10 +1350,17 @@ public class PortalController(
             throw new SecurityException("Access Denied.");
         }
 
+        await using var acceptance = await studioNotifyService.TryAcceptPortalDeletionAsync(tenant, false);
+        if (!acceptance.Accepted)
+        {
+            return;
+        }
+
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
         var confirmLink = commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalRemove);
 
         await studioNotifyService.SendMsgPortalDeletionAsync(tenant, await urlShortener.GetShortenLinkAsync(confirmLink), false, false);
+        acceptance.Complete();
     }
 
     private async Task DemandPermissionToDeleteTenantAsync(Tenant tenant)

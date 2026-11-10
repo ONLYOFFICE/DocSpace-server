@@ -87,6 +87,12 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
     protected virtual void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope) { }
 
     /// <summary>
+    /// What the footer of every letter of a kind must or must not carry, checked in every culture - for a
+    /// family of letters whose base class decides it, so no letter of the family can forget the check.
+    /// </summary>
+    protected virtual void AssertFooter(RenderedLetter letter) { }
+
+    /// <summary>
     /// The smallest share of mail clients that must fully render this letter's markup, as MailPit's
     /// html-check scores it against the caniemail support matrix. The rest is nearly all *partial*
     /// support — the CSS that every table-based email leans on — and under 3% is unsupported outright.
@@ -98,6 +104,12 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
     /// do not, and the override says why.
     /// </summary>
     protected virtual double MinimumHtmlSupport => 75;
+
+    /// <summary>
+    /// The name the rendered letter is saved under. The letter id, unless one action is rendered in more
+    /// than one variant: then each variant names itself, so the classes do not write over each other.
+    /// </summary>
+    protected virtual string PreviewName(TAction action) => action.ID;
 
     [Theory]
     [MemberData(nameof(LetterCultures.All), MemberType = typeof(LetterCultures))]
@@ -121,6 +133,7 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
         letter.ShouldHaveSignature(tags);
         letter.ShouldRenderMarkupTags(tags);
 
+        AssertFooter(letter);
         AssertContent(letter, scope);
 
         if (cultureName == LetterCultures.DefaultCultureName)
@@ -128,7 +141,7 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
             AssertDefaultCultureText(letter, scope);
         }
 
-        await SaveForReviewAsync(letter, action.ID, culture);
+        await SaveForReviewAsync(letter, PreviewName(action), culture);
     }
 
     [Theory]
@@ -183,6 +196,15 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
         var action = scope.Services.GetRequiredService<TAction>();
 
         await InitAsync(action, scope);
+
+        // A tag the repeat check keys on but Init leaves out turns the check off for the letter: without the value it
+        // cannot be told from another letter of its kind, so it goes out every time.
+        foreach (var keyTag in action.DeduplicationTags)
+        {
+            action.Tags.Should().Contain(
+                t => t.Tag == keyTag && !string.IsNullOrEmpty(t.Value as string),
+                $"{typeof(TAction).Name}.Init has to fill '{keyTag}', which the repeat check keys on");
+        }
 
         var pattern = action.Patterns.Find(p => p.SenderName == ASC.Core.Configuration.Constants.NotifyEMailSenderSysName)
             ?? throw new InvalidOperationException(

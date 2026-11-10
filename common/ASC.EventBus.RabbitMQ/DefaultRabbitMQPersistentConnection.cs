@@ -41,8 +41,31 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     private readonly ILogger<DefaultRabbitMQPersistentConnection> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private IConnection _connection;
     private bool _disposed;
+    // running from the first connection attempt or the first shutdown until a connection is acquired or recovered,
+    // null while the connection is up. Only the connection code writes it, the health check just reads: a reader
+    // that started the clock could race the acquisition and leave it running on a live connection. A reference
+    // swaps atomically, so no lock: two writers that both find it stopped start two clocks microseconds apart
+    private volatile Stopwatch _outage;
 
     public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
+
+    public TimeSpan? GetDisconnectedTime()
+    {
+        // driven by the connection events rather than IsConnected: every failed recovery attempt opens a new
+        // connection before it aborts it, and a check landing in that moment must not restart the clock
+        return _outage?.Elapsed;
+    }
+
+    private void MarkDisconnected()
+    {
+        // the failed recovery attempts raise the shutdown again: the clock keeps the first outage moment
+        _outage ??= Stopwatch.StartNew();
+    }
+
+    private void MarkConnected()
+    {
+        _outage = null;
+    }
 
     public async Task<IChannel> CreateModelAsync()
     {
@@ -68,6 +91,8 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             _connection.ConnectionShutdownAsync -= OnConnectionShutdownAsync;
             _connection.CallbackExceptionAsync -= OnCallbackExceptionAsync;
             _connection.ConnectionBlockedAsync -= OnConnectionBlockedAsync;
+            _connection.RecoverySucceededAsync -= OnRecoverySucceededAsync;
+            _connection.ConnectionRecoveryErrorAsync -= OnConnectionRecoveryErrorAsync;
 
             _connection.Dispose();
         }
@@ -98,6 +123,9 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             return true;
         }
 
+        // no connection yet: the clock runs from here, and a failed attempt leaves it running
+        MarkDisconnected();
+
         var builder = new ResiliencePipelineBuilder();
 
         var pipeline = builder.AddRetry(new RetryStrategyOptions
@@ -123,6 +151,10 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             _connection.ConnectionShutdownAsync += OnConnectionShutdownAsync;
             _connection.CallbackExceptionAsync += OnCallbackExceptionAsync;
             _connection.ConnectionBlockedAsync += OnConnectionBlockedAsync;
+            _connection.RecoverySucceededAsync += OnRecoverySucceededAsync;
+            _connection.ConnectionRecoveryErrorAsync += OnConnectionRecoveryErrorAsync;
+
+            MarkConnected();
 
             _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
 
@@ -135,40 +167,65 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
 
     }
 
-    private async Task OnConnectionBlockedAsync(object sender, ConnectionBlockedEventArgs e)
+    // The handlers below only log. Automatic recovery reconnects on its own and keeps retrying on connectivity
+    // errors; waiting for it inside a connection event used to hold the client's shutdown sequence, and with it
+    // every channel's shutdown notice, until the recovery was done, and deadlocked when the recovery aborted
+    // the connection it had just reopened (a refused topology redeclaration): the abort waited for the handler,
+    // the handler for the recovery.
+
+    private Task OnConnectionBlockedAsync(object sender, ConnectionBlockedEventArgs e)
     {
-        if (_disposed)
+        if (!_disposed)
         {
-            return;
+            // a resource alarm on the broker: the connection is still there, publishes resume once it is unblocked
+            _logger.WarningRabbitMQConnectionBlocked(e.Reason);
         }
 
-        _logger.WarningRabbitMQConnectionShutdown();
-
-        await TryConnectAsync();
+        return Task.CompletedTask;
     }
 
-
-    private async Task OnCallbackExceptionAsync(object sender, CallbackExceptionEventArgs e)
+    private Task OnCallbackExceptionAsync(object sender, CallbackExceptionEventArgs e)
     {
-        if (_disposed)
+        if (!_disposed)
         {
-            return;
+            _logger.WarningRabbitMQConnectionThrowException(e.Exception);
         }
 
-        _logger.WarningRabbitMQConnectionThrowException();
-
-        await TryConnectAsync();
+        return Task.CompletedTask;
     }
-    private async Task OnConnectionShutdownAsync(object sender, ShutdownEventArgs reason)
+
+    private Task OnConnectionShutdownAsync(object sender, ShutdownEventArgs reason)
     {
-        if (_disposed)
+        if (!_disposed)
         {
-            return;
+            MarkDisconnected();
+
+            _logger.WarningRabbitMQConnectionIsOnShutDown(reason.ReplyCode, reason.ReplyText);
         }
 
-        _logger.WarningRabbitMQConnectionIsOnShutDown();
+        return Task.CompletedTask;
+    }
 
-        await TryConnectAsync();
+    private Task OnRecoverySucceededAsync(object sender, AsyncEventArgs e)
+    {
+        if (!_disposed)
+        {
+            MarkConnected();
+
+            _logger.InformationRabbitMQConnectionRecovered();
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private Task OnConnectionRecoveryErrorAsync(object sender, ConnectionRecoveryErrorEventArgs e)
+    {
+        if (!_disposed)
+        {
+            _logger.WarningRabbitMQConnectionRecoveryFailed(e.Exception);
+        }
+
+        return Task.CompletedTask;
     }
 
     public async Task<IConnection> GetConnection()

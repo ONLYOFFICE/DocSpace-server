@@ -167,15 +167,15 @@ public abstract class SecurityController<T>(
     /// <remarks>
     /// Grants, changes or withdraws the rights of the listed accounts and groups on one file, and answers with the
     /// rights those subjects hold afterwards. Every element of `share` names a subject and the level it is to get,
-    /// and the level that denies everything takes the access away instead; an empty `share` changes nothing and is
-    /// answered with an empty list. A subject the caller is not allowed to share with, such as a guest who belongs to
-    /// another member, is dropped without an error, so compare the answer with what was sent. With `notify` set, each
-    /// account named is emailed about the access it received and `sharingMessage` is put into that mail with its
-    /// markup stripped, while a message longer than the field allows is rejected as an invalid request. The caller
-    /// has to be allowed to change the sharing of the file, which its creator, the manager of the room it lies in and
-    /// a portal administrator acting as room manager are; anyone else, a guest and a member with read access
-    /// included, is refused. The call is mutating and safe to repeat. For several files and folders in one request
-    /// use `PUT api/2.0/files/share`.
+    /// and the level that denies everything removes the access; an empty `share` changes nothing and is
+    /// answered with an empty list. A subject the caller is not allowed to share with is dropped without an error, so
+    /// compare the answer with what was sent. With `notify` set, each account named is emailed about the access it
+    /// received and `sharingMessage` is put into that mail with its markup stripped, while a message longer than the
+    /// field allows is rejected as an invalid request; an account already mailed about the same access to this file a
+    /// short while ago is not mailed again, even with a new message. The caller has to be allowed to change the
+    /// sharing of the file, which its creator, the manager of the room it lies in and a portal administrator acting
+    /// as room manager are; anyone else is refused. The call is mutating and safe to repeat. For several files and
+    /// folders in one request use `PUT api/2.0/files/share`.
     /// </remarks>
     /// <summary>Share a file</summary>
     /// <path>api/2.0/files/file/{id}/share</path>
@@ -203,13 +203,14 @@ public abstract class SecurityController<T>(
     /// Grants, changes or withdraws the rights of the listed accounts and groups on one folder, and answers with the
     /// rights those subjects hold afterwards. Every element of `share` names a subject and the level it is to get,
     /// and the level that denies everything takes the access away instead; an empty `share` changes nothing and is
-    /// answered with an empty list. A subject the caller is not allowed to share with, such as a guest who belongs to
-    /// another member, is dropped without an error. With `notify` set, each account named is emailed about the access
-    /// it received and `sharingMessage` is put into that mail with its markup stripped, while a message longer than
-    /// the field allows is rejected as an invalid request. The caller has to be allowed to change the sharing of the
-    /// folder, which the manager of the room it belongs to and a portal administrator acting as room manager are;
-    /// anyone else, a guest and a member with read access included, is refused. The call is mutating and safe to
-    /// repeat. For a room use `PUT api/2.0/files/rooms/{id}/share`, which invites people by email as well.
+    /// answered with an empty list. A subject the caller is not allowed to share with is dropped without an error.
+    /// With `notify` set, each account named is emailed about the access it received and `sharingMessage` is put into
+    /// that mail with its markup stripped, while a message longer than the field allows is rejected as an invalid
+    /// request; an account already mailed about the same access to this folder a short while ago is not mailed again,
+    /// even with a new message. The caller has to be allowed to change the sharing of the folder, which the manager
+    /// of the room it belongs to and a portal administrator acting as room manager are; anyone else is refused. The
+    /// call is mutating and safe to repeat. For a room use `PUT api/2.0/files/rooms/{id}/share`, which invites
+    /// people by email as well.
     /// </remarks>
     /// <summary>Share a folder</summary>
     /// <path>api/2.0/files/folder/{id}/share</path>
@@ -417,10 +418,14 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <summary>Change the room or file owner</summary>
     /// <path>api/2.0/files/owner</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every listed room whose owner changes")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for a listed AI agent whose owner changes")]
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file whose owner changes")]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rooms and files whose owner has been changed, as folder and file objects", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
     [SwaggerResponse(403, "The new owner is not an active account allowed to manage rooms or has not set up encryption keys for a listed private room, the caller may not change the owner of a listed entry, a listed folder lies outside the rooms and common sections, or a listed file is locked, being edited or lies outside the common section")]
+    [SwaggerResponse(409, "The new owner holds no key for some encrypted files of a listed private room: `GET api/2.0/privacyroom/{roomId}/access/missing` names them, and the call can be repeated once their keys are written")]
     [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryBaseDto> ChangeFileOwner(ChangeOwnerRequestDto inDto)
@@ -429,8 +434,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
         var (fileIntIds, fileStringIds) = FileOperationsManager.GetIds(inDto.FileIds);
 
         var data = AsyncEnumerable.Empty<FileEntry>();
-        data = data.Concat(fileStorageService.ChangeOwnerAsync(folderIntIds, fileIntIds, inDto.UserId));
-        data = data.Concat(fileStorageService.ChangeOwnerAsync(folderStringIds, fileStringIds, inDto.UserId));
+        data = data.Concat(fileStorageService.ChangeOwnerAsync(folderIntIds, fileIntIds, inDto.UserId, demandFileKeys: true));
+        data = data.Concat(fileStorageService.ChangeOwnerAsync(folderStringIds, fileStringIds, inDto.UserId, demandFileKeys: true));
 
         await foreach (var e in data)
         {
@@ -479,8 +484,10 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// removing it would take the entry away from the account that owns it, and external links survive untouched -
     /// remove those through the link operations of the entry. The caller must be allowed to change the access of each
     /// entry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;
-    /// a caller whose only access came through an external link may use this call to drop the entry from its own
-    /// list, while a directly invited member or an unrelated account is refused. The answer is always `true` and
+    /// any other caller who can read the entry may use this call to drop it from their own list, which takes a room
+    /// member out of the room, while an unrelated account is refused. A private room answers to its members alone: a
+    /// portal administrator outside it is refused, and whoever loses access to it loses the wrapped file keys
+    /// (`PUT api/2.0/files/{fileId}/access`) along with it, except its creator. The answer is always `true` and
     /// identifiers that match nothing are skipped silently, so a successful answer is not proof that anything was
     /// revoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To
     /// take the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's
@@ -490,7 +497,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Always true: the accounts and groups that had access to the listed entries no longer have it", typeof(bool))]
-    [SwaggerResponse(403, "The caller may not change the access of a listed entry and may not drop it from their own list either, because it was shared with them directly or they cannot read it")]
+    [SwaggerResponse(403, "The caller may not change the access of a listed entry and cannot read it either, so it cannot be dropped from their own list. A portal administrator outside a private room gets this as well")]
     [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfo(BaseBatchRequestDto inDto)

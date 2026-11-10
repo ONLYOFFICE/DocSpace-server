@@ -44,6 +44,8 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
     public const string MetadataType = "type";
     public const string MetadataModel = "model";
     public const string MetadataCost = "cost";
+    public const string MetadataByok = "byok";
+    public const string MetadataProvider = "provider";
     public const string MetadataAgentTitle = "agent_title";
     public const string MetadataAgentId = "agent_id";
     public const string MetadataSourceId = "source_id";
@@ -69,8 +71,20 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
             BackRef = [backUrl]
         });
 
-        var link = JsonSerializer.Deserialize<string>(result);
-        return link;
+        return ReadJsonString(result, "POST /billing/GetAccountLink");
+    }
+
+    public async Task<string> GetInvoiceLinkAsync(string portalId, string paymentRef)
+    {
+        EnsureConfigured();
+
+        var result = await billingApi.GetInvoiceLinkAsync(new GetInvoiceLinkRequestDto
+        {
+            PortalId = [portalId],
+            PaymentRef = [paymentRef]
+        });
+
+        return ReadJsonString(result, "POST /billing/GetInvoiceLink");
     }
 
     public async Task<PaymentLast[]> GetCurrentPaymentsAsync(string portalId, bool refresh)
@@ -121,9 +135,7 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
         };
 
         var result = await billingApi.GetSinglePaymentUrlAsync(requestDto);
-        var paymentUrl = JsonSerializer.Deserialize<string>(result);
-
-        return paymentUrl;
+        return ReadJsonString(result, "POST /billing/GetSinglePaymentUrl");
     }
 
     public async Task<CustomerInfo> GetCustomerInfoAsync(string portalId)
@@ -149,7 +161,8 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
         };
 
         var result = await billingApi.DepositAsync(requestDto);
-        return result == "\"ok\"";
+
+        return IsOk(result, "POST /billing/Deposit");
     }
 
     public async Task<bool> ChangePaymentAsync(string portalId, IEnumerable<string> products, IEnumerable<int> quantity,
@@ -274,14 +287,51 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
             new BillingProductRequestDto { PortalId = [portalId], ProductId = [productId] });
     }
 
-    public async Task<bool> GetDocsCloudTrialAsync(string portalId)
+    public async Task<bool> GetDocsCloudTrialAsync(string portalId, DocsCloudTrialCustomer customer)
     {
         EnsureConfigured();
 
-        var result =
-            await billingApi.GetDocsCloudTrialAsync(new BillingPortalRequestDto { PortalId = [portalId] });
+        var requestDto = new GetDocsCloudTrialRequestDto
+        {
+            PortalId = [portalId],
+            Email = Optional(customer?.Email),
+            PortalLink = Optional(customer?.PortalLink),
+            Name = Optional(customer?.Name),
+            Phone = Optional(customer?.Phone),
+            LanguageCode = Optional(customer?.LanguageCode),
+            AffiliateId = Optional(customer?.AffiliateId)
+        };
 
-        return result == "\"ok\"";
+        var result = await billingApi.GetDocsCloudTrialAsync(requestDto);
+
+        return IsOk(result, "POST /billing/getwdocstrial");
+    }
+
+    // A deposit and a trial are answered with the JSON string "ok" when billing did what was asked; another string is
+    // its refusal. An answer that is no JSON string at all - a proxy's page, a JSON null - says nothing about the
+    // outcome, and the request may well have been applied, so it is a contract failure, never false: a caller retrying
+    // after a refusal could pay twice.
+    private static bool IsOk(string answer, string operation)
+    {
+        var value = ReadJsonString(answer, operation)
+            ?? throw new PaymentServiceContractException(BillingHttpClientExtension.ServiceName, operation, null,
+                new JsonException("The answer is null, not a JSON string"));
+
+        return value == "ok";
+    }
+
+    // The links come back as a JSON string the client reads itself, past the deserialization factory of Refit, so an
+    // answer that is not one is turned into the same contract failure here. The operation is the route of the call.
+    private static string ReadJsonString(string answer, string operation)
+    {
+        try
+        {
+            return JsonSerializer.Deserialize<string>(answer);
+        }
+        catch (JsonException exception)
+        {
+            throw new PaymentServiceContractException(BillingHttpClientExtension.ServiceName, operation, null, exception);
+        }
     }
 
     private void EnsureConfigured()
@@ -326,6 +376,35 @@ public class BillingPortalRequestDto
     public List<string> PortalId { get; set; }
 }
 
+/// <summary>
+/// The customer details sent to the billing service along with a Docs Connect trial request.
+/// Empty values are omitted from the request.
+/// </summary>
+/// <param name="Email">The e-mail of the user who starts the trial.</param>
+/// <param name="PortalLink">The absolute address of the portal.</param>
+/// <param name="Name">The display name of the user who starts the trial.</param>
+/// <param name="Phone">The mobile phone of the user who starts the trial.</param>
+/// <param name="LanguageCode">The two-letter ISO 639-1 code of the request language.</param>
+/// <param name="AffiliateId">The affiliate identifier the portal was registered with.</param>
+public record DocsCloudTrialCustomer(
+    string Email,
+    string PortalLink,
+    string Name,
+    string Phone,
+    string LanguageCode,
+    string AffiliateId);
+
+/// <summary>A Docs Connect trial request carrying the customer details.</summary>
+public class GetDocsCloudTrialRequestDto : BillingPortalRequestDto
+{
+    public List<string> Email { get; set; }
+    public List<string> PortalLink { get; set; }
+    public List<string> Name { get; set; }
+    public List<string> Phone { get; set; }
+    public List<string> LanguageCode { get; set; }
+    public List<string> AffiliateId { get; set; }
+}
+
 /// <summary>A portal-scoped request that targets a single product.</summary>
 public class BillingProductRequestDto : BillingPortalRequestDto
 {
@@ -336,6 +415,13 @@ public class BillingProductRequestDto : BillingPortalRequestDto
 public class GetAccountLinkRequestDto : BillingPortalRequestDto
 {
     public List<string> BackRef { get; set; }
+}
+
+/// <summary>Request for the hosted page of the invoice behind a payment.</summary>
+public class GetInvoiceLinkRequestDto : BillingPortalRequestDto
+{
+    /// <summary>The payment reference of the top-up: a Stripe payment intent (<c>pi_…</c>) or invoice (<c>in_…</c>).</summary>
+    public List<string> PaymentRef { get; set; }
 }
 
 /// <summary>Request for a single Stripe payment (checkout) URL.</summary>
@@ -429,6 +515,9 @@ public class GetProductsPricesRequestDto
 
 public static class BillingHttpClientExtension
 {
+    /// <summary>How the service is named in the exceptions of its client.</summary>
+    internal const string ServiceName = "Billing";
+
     private const string ResiliencePipelineName = "billingResiliencePipeline";
     internal const string RetryOptionKey = "billingRetryEnabled";
 
@@ -454,7 +543,8 @@ public static class BillingHttpClientExtension
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 }),
                 ExceptionFactory = CreateExceptionAsync,
-                TransportExceptionFactory = CreateTransportException
+                TransportExceptionFactory = CreateTransportException,
+                DeserializationExceptionFactory = CreateDeserializationExceptionAsync
             })
             .ConfigureHttpClient((_, client) =>
             {
@@ -496,6 +586,13 @@ public static class BillingHttpClientExtension
             });
     }
 
+    // An answer that is not the JSON the call expects (a proxy's HTML page, a changed contract) is no refusal of the
+    // service, so it leaves the BillingException hierarchy the callers handle as one - see PaymentServiceContractException.
+    private static ValueTask<Exception> CreateDeserializationExceptionAsync(HttpResponseMessage response, Exception exception)
+    {
+        return PaymentServiceContractException.FromResponse(ServiceName, response, exception);
+    }
+
     // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
     // surface as Refit.ApiRequestException and escape the BillingException hierarchy the callers catch.
     private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
@@ -506,7 +603,9 @@ public static class BillingHttpClientExtension
             return exception;
         }
 
-        return new BillingTransportException($"Billing request to {request.RequestUri} failed: {exception.Message}", exception);
+        // The route template, not the address: the address names the internal host and the portal key, and the message
+        // reaches the logs and the client of the API. What went wrong stays in the inner exception.
+        return new BillingTransportException($"Billing request {PaymentServiceOperation.Of(request)} failed", exception);
     }
     // The billing service reports errors as 200 OK with a '{"Message":"error...' body, so the content is inspected
     // for every response, not only for non-success status codes.

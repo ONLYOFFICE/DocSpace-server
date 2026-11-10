@@ -37,7 +37,8 @@ namespace ASC.Files.Tests.Tests._01_Files.FormFilling;
 /// <c>PUT /files/file/:fileId/startfilling</c>. <c>FileStorageService.StartFillingAsync</c> only
 /// touches the form-filling properties when the file is a PDF sitting directly in a
 /// <see cref="RoomType.FillingFormsRoom"/> - for every other file it is a no-op that just returns
-/// the file, which is why a plain docx or a PDF outside such a room also answers 200.
+/// the file, which is why a plain docx or a PDF outside such a room also answers 200 to a caller who
+/// can read it.
 /// </summary>
 [Trait("Category", "Features")]
 [Trait("Feature", "FormFilling")]

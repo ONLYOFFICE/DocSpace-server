@@ -105,6 +105,11 @@ public abstract class AbstractRegistrationServiceIT {
     }
 
     public String generate(String userId, boolean isAdmin, boolean isGuest, boolean isPublic) {
+      return generate(userId, DEFAULT_TENANT_ID, isAdmin, isGuest, isPublic);
+    }
+
+    public String generate(
+        String userId, long tenantId, boolean isAdmin, boolean isGuest, boolean isPublic) {
       try {
         var now = new Date();
         var claims =
@@ -113,7 +118,7 @@ public abstract class AbstractRegistrationServiceIT {
                 .claim("user_id", userId)
                 .claim("user_name", DEFAULT_USER_NAME)
                 .claim("user_email", DEFAULT_USER_EMAIL)
-                .claim("tenant_id", DEFAULT_TENANT_ID)
+                .claim("tenant_id", tenantId)
                 .claim("tenant_url", DEFAULT_TENANT_URL)
                 .claim("is_admin", isAdmin)
                 .claim("is_guest", isGuest)
@@ -145,6 +150,12 @@ public abstract class AbstractRegistrationServiceIT {
   protected String signatureCookie(
       String userId, boolean isAdmin, boolean isGuest, boolean isPublic) {
     return "x-signature=" + signatureGenerator.generate(userId, isAdmin, isGuest, isPublic);
+  }
+
+  protected String signatureCookie(
+      String userId, long tenantId, boolean isAdmin, boolean isGuest, boolean isPublic) {
+    return "x-signature="
+        + signatureGenerator.generate(userId, tenantId, isAdmin, isGuest, isPublic);
   }
 
   protected String defaultUserCookie() {

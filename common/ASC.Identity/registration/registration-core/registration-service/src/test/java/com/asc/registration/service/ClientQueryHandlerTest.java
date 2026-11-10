@@ -35,6 +35,7 @@ package com.asc.registration.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import com.asc.common.core.domain.value.ClientId;
@@ -45,6 +46,7 @@ import com.asc.common.core.domain.value.UserId;
 import com.asc.common.core.domain.value.enums.AuthenticationMethod;
 import com.asc.common.core.domain.value.enums.ClientVisibility;
 import com.asc.common.service.transfer.response.ClientResponse;
+import com.asc.common.utilities.cache.CacheTicket;
 import com.asc.common.utilities.crypto.EncryptionService;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.core.domain.exception.ClientNotFoundException;
@@ -433,5 +435,49 @@ public class ClientQueryHandlerTest {
       assertThrows(
           ClientNotFoundException.class, () -> clientQueryHandler.getClient(Role.ROLE_USER, query));
     }
+  }
+
+  @Test
+  public void whenClientMissesCache_thenStoreReadIsCachedWithTicketTakenBefore() {
+    var clientId = client.getId().getValue().toString();
+    var ticket = new CacheTicket(7L, 3L);
+
+    when(clientCacheService.ticket(client.getId())).thenReturn(ticket);
+    when(clientQueryRepository.findById(any(ClientId.class))).thenReturn(Optional.of(client));
+    when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
+    when(encryptionService.decrypt(anyString())).thenReturn("decryptedSecret");
+
+    clientQueryHandler.getClient(clientId);
+
+    var order = inOrder(clientCacheService, clientQueryRepository);
+    order.verify(clientCacheService).ticket(client.getId());
+    order.verify(clientQueryRepository).findById(any(ClientId.class));
+    order.verify(clientCacheService).putUnlessInvalidated(client, ticket);
+
+    verify(clientCacheService, never()).put(any(Client.class));
+  }
+
+  @Test
+  public void whenStoredClientIsRequested_thenCacheIsNeitherReadNorWritten() {
+    var clientId = client.getId().getValue().toString();
+
+    when(clientQueryRepository.findById(any(ClientId.class))).thenReturn(Optional.of(client));
+    when(clientDataMapper.toClientResponse(any(Client.class))).thenReturn(clientResponse);
+    when(encryptionService.decrypt(anyString())).thenReturn("decryptedSecret");
+
+    var response = clientQueryHandler.getStoredClient(clientId);
+
+    assertEquals("decryptedSecret", response.getClientSecret());
+    verifyNoInteractions(clientCacheService);
+  }
+
+  @Test
+  public void whenStoredClientIsMissing_thenThrowClientNotFoundException() {
+    when(clientQueryRepository.findById(any(ClientId.class))).thenReturn(Optional.empty());
+
+    assertThrows(
+        ClientNotFoundException.class,
+        () -> clientQueryHandler.getStoredClient(UUID.randomUUID().toString()));
+    verifyNoInteractions(clientCacheService);
   }
 }

@@ -288,7 +288,9 @@ public class TextileStyler(CoreBaseSettings coreBaseSettings,
     {
         var withoutUnsubscribe = message.GetArgument("WithoutUnsubscribe");
 
-        if (withoutUnsubscribe != null && bool.TryParse((string)withoutUnsubscribe.Value, out var val) && val)
+        // A bool when the tag is set in this process (TagValues.WithoutUnsubscribe), a string once the
+        // request has travelled through the notify queue.
+        if (withoutUnsubscribe?.Value is true || (withoutUnsubscribe?.Value is string text && bool.TryParse(text, out var val) && val))
         {
             return string.Empty;
         }

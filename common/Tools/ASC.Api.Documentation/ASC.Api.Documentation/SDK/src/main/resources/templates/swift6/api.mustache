@@ -14,16 +14,13 @@ extension {{projectName}}API {
 
 {{#description}}
 /** {{{.}}} */{{/description}}
-{{#objcCompatible}}@objcMembers {{/objcCompatible}}{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} class {{{{x-classname}}}}{{#objcCompatible}} : NSObject{{/objcCompatible}} {
+{{#objcCompatible}}@objcMembers {{/objcCompatible}}{{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} class {{{x-classname}}}{{#objcCompatible}} : NSObject{{/objcCompatible}} {
 {{^apiStaticMethod}}
     {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} let apiConfiguration: {{projectName}}APIConfiguration
     {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} init(apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared) {
         self.apiConfiguration = apiConfiguration
     }
 {{/apiStaticMethod}}
-{{#x-supportsFields}}
-var fields: String?
-{{/x-supportsFields}}
 {{#operation}}
     {{^vendorExtensions.x-is-thirdparty-variant}}
     {{#allParams}}
@@ -32,7 +29,7 @@ var fields: String?
     /**
      * enum for parameter {{paramName}}
      */
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} enum {{enumName}}_{{operationId}}: {{^isContainer}}{{{dataType}}}{{/isContainer}}{{#isContainer}}String{{/isContainer}}, Sendable, CaseIterable{{#useVapor}}, Content{{/useVapor}} {
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}public{{/nonPublicApi}} enum {{enumName}}_{{operationId}}: {{^isContainer}}{{{dataType}}}{{/isContainer}}{{#isContainer}}{{{items.dataType}}}{{/isContainer}}, Sendable, CaseIterable{{#useVapor}}, Content{{/useVapor}} {
         {{^enumUnknownDefaultCase}}
         {{#allowableValues}}
         {{#enumVars}}
@@ -65,7 +62,8 @@ var fields: String?
      REST API Reference for {{operationId}} Operation
      {{vendorExtensions.x-seealsoUrl}}
      {{#allParams}}
-     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#apiStaticMethod}}
+     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}
+     - parameter fields: (header) A comma-separated list of the response fields to return (optional){{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}
      - parameter apiConfiguration: The configuration for the http request.{{/apiStaticMethod}}
      - parameter completion: completion handler to receive the data and the error objects
      */
@@ -73,8 +71,8 @@ var fields: String?
     @available(*, deprecated, message: "This operation is deprecated.")
     {{/isDeprecated}}
     @discardableResult
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}, {{/allParams}}{{#apiStaticMethod}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared, {{/apiStaticMethod}}completion: @Sendable @escaping (_ data: {{{returnType}}}{{^returnType}}Void{{/returnType}}?, _ error: Error?) -> Void) -> RequestTask {
-        return {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute { result in
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}, {{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}fields: String? = nil, {{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared, {{/apiStaticMethod}}completion: @Sendable @escaping (_ data: {{{returnType}}}{{^returnType}}Void{{/returnType}}?, _ error: Error?) -> Void) -> RequestTask {
+        return {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: fields{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute { result in
             switch result {
             {{#returnType}}
             case let .success(response):
@@ -101,16 +99,17 @@ var fields: String?
      REST API Reference for {{operationId}} Operation
      {{vendorExtensions.x-seealsoUrl}}
      {{#allParams}}
-     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#apiStaticMethod}}
+     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}
+     - parameter fields: (header) A comma-separated list of the response fields to return (optional){{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}
      - parameter apiConfiguration: The configuration for the http request.{{/apiStaticMethod}}
      - returns: Promise<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}>
      */
     {{#isDeprecated}}
     @available(*, deprecated, message: "This operation is deprecated.")
     {{/isDeprecated}}
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) -> Promise<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: String? = nil{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) -> Promise<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {
         let deferred = Promise<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}>.pending()
-        {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute { result in
+        {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: fields{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute { result in
             switch result {
             {{#returnType}}
             case let .success(response):
@@ -138,16 +137,17 @@ var fields: String?
      REST API Reference for {{operationId}} Operation
      {{vendorExtensions.x-seealsoUrl}}
      {{#allParams}}
-     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#apiStaticMethod}}
+     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}
+     - parameter fields: (header) A comma-separated list of the response fields to return (optional){{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}
      - parameter apiConfiguration: The configuration for the http request.{{/apiStaticMethod}}
      - returns: Observable<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}>
      */
     {{#isDeprecated}}
     @available(*, deprecated, message: "This operation is deprecated.")
     {{/isDeprecated}}
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) -> Observable<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: String? = nil{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) -> Observable<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {
         return Observable.create { observer -> Disposable in
-            let requestTask = self.{{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute { result in
+            let requestTask = self.{{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: fields{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute { result in
                 switch result {
                 {{#returnType}}
                 case let .success(response):
@@ -180,7 +180,8 @@ var fields: String?
      REST API Reference for {{operationId}} Operation
      {{vendorExtensions.x-seealsoUrl}}
      {{#allParams}}
-     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#apiStaticMethod}}
+     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}
+     - parameter fields: (header) A comma-separated list of the response fields to return (optional){{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}
      - parameter apiConfiguration: The configuration for the http request.{{/apiStaticMethod}}
      - returns: AnyPublisher<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}, Error>
      */
@@ -189,8 +190,8 @@ var fields: String?
     @available(*, deprecated, message: "This operation is deprecated.")
     {{/isDeprecated}}
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) -> AnyPublisher<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}, Error> {
-        let requestBuilder = {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}})
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: String? = nil{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) -> AnyPublisher<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}, Error> {
+        let requestBuilder = {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: fields{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}})
         let requestTask = requestBuilder.requestTask
         return {{#combineDeferred}}Deferred { {{/combineDeferred}}Future<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}, Error> { promise in
             nonisolated(unsafe) let promise = promise
@@ -231,7 +232,8 @@ var fields: String?
      REST API Reference for {{operationId}} Operation
      {{vendorExtensions.x-seealsoUrl}}
      {{#allParams}}
-     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#apiStaticMethod}}
+     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}
+     - parameter fields: (header) A comma-separated list of the response fields to return (optional){{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}
      - parameter apiConfiguration: The configuration for the http request.{{/apiStaticMethod}}
      - returns: {{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}
      */
@@ -239,8 +241,8 @@ var fields: String?
     @available(*, deprecated, message: "This operation is deprecated.")
     {{/isDeprecated}}
     @available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 6.0, *)
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) async throws(ErrorResponse){{#returnType}} -> {{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{/returnType}} {
-        return try await {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute().body
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: String? = nil{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) async throws(ErrorResponse){{#returnType}} -> {{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{/returnType}} {
+        return try await {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: fields{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute().body
     }
 {{/useAsyncAwait}}
 {{#useResult}}
@@ -254,7 +256,8 @@ var fields: String?
      REST API Reference for {{operationId}} Operation
      {{vendorExtensions.x-seealsoUrl}}
      {{#allParams}}
-     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#apiStaticMethod}}
+     - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}
+     - parameter fields: (header) A comma-separated list of the response fields to return (optional){{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}
      - parameter apiConfiguration: The configuration for the http request.{{/apiStaticMethod}}
      - parameter completion: completion handler to receive the result
      */
@@ -262,8 +265,8 @@ var fields: String?
     @available(*, deprecated, message: "This operation is deprecated.")
     {{/isDeprecated}}
     @discardableResult
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}, {{/allParams}}{{#apiStaticMethod}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared, {{/apiStaticMethod}}completion: @Sendable @escaping (_ result: Swift.Result<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}, ErrorResponse>) -> Void) -> RequestTask {
-        return {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute { result in
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}, {{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}fields: String? = nil, {{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared, {{/apiStaticMethod}}completion: @Sendable @escaping (_ result: Swift.Result<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}, ErrorResponse>) -> Void) -> RequestTask {
+        return {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{paramName}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: fields{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: apiConfiguration{{/apiStaticMethod}}).execute { result in
             switch result {
             {{#returnType}}
             case let .success(response):
@@ -307,6 +310,9 @@ var fields: String?
      {{#allParams}}
      - parameter {{paramName}}: ({{#isFormParam}}form{{/isFormParam}}{{#isQueryParam}}query{{/isQueryParam}}{{#isPathParam}}path{{/isPathParam}}{{#isHeaderParam}}header{{/isHeaderParam}}{{#isBodyParam}}body{{/isBodyParam}}) {{{description}}} {{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}
      {{/allParams}}
+     {{#vendorExtensions.x-hasFieldsParam}}
+     - parameter fields: (header) A comma-separated list of the response fields to return (optional)
+     {{/vendorExtensions.x-hasFieldsParam}}
      {{#apiStaticMethod}}
      - parameter apiConfiguration: The configuration for the http request.
      {{/apiStaticMethod}}
@@ -315,7 +321,7 @@ var fields: String?
     {{#isDeprecated}}
     @available(*, deprecated, message: "This operation is deprecated.")
     {{/isDeprecated}}
-    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) -> RequestBuilder<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {
+    {{#nonPublicApi}}internal{{/nonPublicApi}}{{^nonPublicApi}}open{{/nonPublicApi}} {{#apiStaticMethod}}class {{/apiStaticMethod}}func {{operationId}}WithRequestBuilder({{#allParams}}{{paramName}}: {{#isEnum}}{{#isContainer}}[{{enumName}}_{{operationId}}]{{/isContainer}}{{^isContainer}}{{enumName}}_{{operationId}}{{/isContainer}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{/isEnum}}{{^required}}? = nil{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#vendorExtensions.x-hasFieldsParam}}, fields: String? = nil{{/vendorExtensions.x-hasFieldsParam}}{{#apiStaticMethod}}{{#hasParams}}, {{/hasParams}}apiConfiguration: {{projectName}}APIConfiguration = {{projectName}}APIConfiguration.shared{{/apiStaticMethod}}) -> RequestBuilder<{{{returnType}}}{{#returnType}}{{#isResponseOptional}}?{{/isResponseOptional}}{{/returnType}}{{^returnType}}Void{{/returnType}}> {
         {{^pathParams}}let{{/pathParams}}{{#pathParams}}{{#-first}}var{{/-first}}{{/pathParams}} localVariablePath = "{{{path}}}"{{#pathParams}}
         let {{paramName}}PreEscape = "\({{#isEnum}}{{paramName}}{{#isContainer}}{{{dataType}}}{{/isContainer}}{{^isContainer}}.rawValue{{/isContainer}}{{/isEnum}}{{^isEnum}}APIHelper.mapValueToPathItem({{paramName}}){{/isEnum}})"
         let {{paramName}}PostEscape = {{paramName}}PreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -344,27 +350,22 @@ var fields: String?
         let localVariableParameters: [String: any Sendable]? = nil
             {{/hasFormParams}}
 {{/bodyParam}}{{#hasQueryParams}}
-        var localVariableUrlComponents = URLComponents(string: localVariableURLString)
-        localVariableUrlComponents?.queryItems = APIHelper.mapValuesToQueryItems([{{^queryParams}}:{{/queryParams}}
+        let localVariableQueryItems: [String: (wrappedValue: (any Sendable)?, isExplode: Bool)] = [{{^queryParams}}:{{/queryParams}}
             {{#queryParams}}
             {{> _param}},
             {{/queryParams}}
-        ]){{/hasQueryParams}}{{^hasQueryParams}}
+        ]
+        var localVariableUrlComponents = URLComponents(string: localVariableURLString)
+        localVariableUrlComponents?.queryItems = APIHelper.mapValuesToQueryItems(localVariableQueryItems){{/hasQueryParams}}{{^hasQueryParams}}
         let localVariableUrlComponents = URLComponents(string: localVariableURLString){{/hasQueryParams}}
 
-        let localVariableNillableHeaders: [String: (any Sendable)?] = [{{^headerParams}}{{^hasFormParams}}{{^hasConsumes}}
-            :{{/hasConsumes}}{{/hasFormParams}}{{/headerParams}}{{#hasFormParams}}
+        let localVariableNillableHeaders: [String: (any Sendable)?] = [{{^headerParams}}{{^hasFormParams}}{{^hasConsumes}}{{^vendorExtensions.x-hasFieldsParam}}
+            :{{/vendorExtensions.x-hasFieldsParam}}{{/hasConsumes}}{{/hasFormParams}}{{/headerParams}}{{#hasFormParams}}
             "Content-Type": {{^consumes}}"multipart/form-data"{{/consumes}}{{#consumes.0}}"{{{mediaType}}}"{{/consumes.0}},{{/hasFormParams}}{{^hasFormParams}}{{#hasConsumes}}
             "Content-Type": {{#consumes.0}}"{{{mediaType}}}"{{/consumes.0}},{{/hasConsumes}}{{/hasFormParams}}{{#headerParams}}
-            {{> _param}},{{/headerParams}}
+            {{> _param}},{{/headerParams}}{{#vendorExtensions.x-hasFieldsParam}}
+            "fields": fields,{{/vendorExtensions.x-hasFieldsParam}}
         ]
-
-        {{#vendorExtensions.x-hasFieldsParam}}
-        if let fields = self.fields {
-            localVariableNillableHeaders["fields"] = fields
-            self.fields = nil
-        }
-        {{/vendorExtensions.x-hasFieldsParam}}
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
@@ -512,13 +513,4 @@ var fields: String?
 {{#swiftUseApiNamespace}}
 }
 {{/swiftUseApiNamespace}}
-{{#x-supportsFields}}
-extension {{{x-classname}}} {
-    @discardableResult
-    public func withFields(_ fields: String) -> {{{x-classname}}} {
-        self.fields = fields
-        return self
-    }
-}
-{{/x-supportsFields}}
 {{/operations}}

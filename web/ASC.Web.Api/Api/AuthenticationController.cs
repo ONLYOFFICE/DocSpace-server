@@ -489,7 +489,7 @@ public class AuthenticationController(
     [SwaggerResponse(200, "Whether the confirmation link may be used, with the room and the email it was issued for when it is an invitation", typeof(ConfirmDto))]
     [SwaggerResponse(400, "The request body cannot be read, or `email` is sent but empty or not a valid email address")]
     [SwaggerResponse(403, "The portal's IP restrictions do not allow this address to check an invitation link")]
-    [AllowNotPayment, AllowSuspended, AllowAnonymous]
+    [AllowNotPayment, AllowSuspended, AllowBlocked, AllowAnonymous]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(CheckConfirmRequestDto inDto)
     {
@@ -530,6 +530,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/setphone</path>
     [Tags("Authentication")]
     [SwaggerResponse(200, "The masked phone number the code was sent to and the moment that code expires - no authentication token yet", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(405, "SMS two-factor is switched on for the user but the portal cannot send SMS codes, for example because its plan does not include them; the number is stored and no code is sent")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
@@ -552,7 +553,8 @@ public class AuthenticationController(
     /// Sends a new SMS authentication code to the phone number stored for the user and reports when that code
     /// expires. The credentials in the body are checked exactly as by `POST api/2.0/authentication`, so use this
     /// operation to resend the code after that call answered with `sms`; the user needs SMS two-factor enabled and a
-    /// phone number already stored, which `POST api/2.0/authentication/setphone` registers. Open to unauthenticated
+    /// phone number already stored, which `POST api/2.0/authentication/setphone` registers, and valid credentials of
+    /// a user who signs in without SMS codes are refused with 405. Open to unauthenticated
     /// callers, mutating and not idempotent: every call sends a message, is counted in the portal's SMS usage and
     /// spends one of the few codes a number is allowed within the code lifetime (ten minutes by default), after which
     /// the call fails until those codes expire. Codes sent earlier stay valid, so a resent code does not invalidate
@@ -570,6 +572,7 @@ public class AuthenticationController(
     [SwaggerResponse(401, "The password, the confirmation key or the third-party profile was rejected")]
     [SwaggerResponse(403, "The user is disabled, or too many failed attempts have blocked further sign-ins for these credentials")]
     [SwaggerResponse(404, "No user of this portal matches the credentials in the request body")]
+    [SwaggerResponse(405, "SMS two-factor is not available on the portal or not required for this user, so there is no code to send")]
     [SwaggerResponse(429, "The portal rate limiter rejected the call - retry after the interval in the `Retry-After` header")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("sendsms")]

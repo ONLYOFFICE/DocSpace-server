@@ -36,4 +36,7 @@ internal static partial class BackupWorkerLogger
 {
     [LoggerMessage(LogLevel.Warning, "Configuration file {invalidConfigPath} not found")]
     public static partial void WarningCanNotBackupFile(this ILogger<BackupWorker> logger, string invalidConfigPath);
+
+    [LoggerMessage(LogLevel.Warning, "Failed to release the backup queues on stop")]
+    public static partial void WarningStopQueues(this ILogger<BackupWorker> logger, Exception exception);
 }

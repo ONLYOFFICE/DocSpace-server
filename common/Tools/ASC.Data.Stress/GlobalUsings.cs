@@ -31,18 +31,30 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.ComponentModel;
+global using System.Diagnostics;
+global using System.Globalization;
 global using System.Net;
+global using System.Net.Http.Headers;
+global using System.Net.Http.Json;
+global using System.Runtime.InteropServices;
+global using System.Text;
+global using System.Text.Json;
 global using System.Web;
 
 global using ASC.Data.Stress.Core;
 
 global using Bogus;
+
 global using DocSpace.API.SDK.Api.Files;
 global using DocSpace.API.SDK.Api.People;
 global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
+
 global using Microsoft.Extensions.DependencyInjection;
+
 global using Spectre.Console;
 global using Spectre.Console.Cli;
+
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using ValidationResult = Spectre.Console.ValidationResult;

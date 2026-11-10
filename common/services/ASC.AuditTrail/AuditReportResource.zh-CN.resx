@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>客户操作报告已下载</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>服务支出限额已创建: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>服务支出限额已更新: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>服务支出限额已删除: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>服务个人支出限额已设置: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>服务个人支出限额已停用: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>客户订阅已更新: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>门户已停用</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>门户已被数据保留策略锁定</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>门户已解锁</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>门户已删除</value>
@@ -1221,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI 配置文件已分配给 AI 代理以执行操作：{0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>已删除 AI 模型的 BYOK 密钥：{0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>已为 AI 模型设置 BYOK 密钥：{0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>文档代理设置已更新</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI 配置文件已分配给操作：{0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>元数据值已更新：{0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>文件由 Document Builder 脚本打开：{0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>已启用应用：{0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>已禁用应用：{0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>已关联到 AI 项目 {0} 的房间：[{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>已与 AI 项目 {0} 取消关联的房间：[{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI 项目 {0} 的 AI 模型已更改为 {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>已重试 Webhook 投递：{0}</value>
   </data>
 </root>

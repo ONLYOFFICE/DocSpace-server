@@ -32,13 +32,14 @@
 
 import { filterXSS } from "xss";
 
-// An agent's stored instruction (`chatSettings.prompt`) is untrusted user
-// input that ends up in the model's system prompt and can be reproduced verbatim
-// in a reply delivered to another room member — a stored HTML/XSS injection
-// vector (Bug 82726). The instruction is plain guidance for the model, so no
-// markup is meaningful: strip every tag (rather than escape it) and drop the
-// bodies of script/style tags, leaving only inert text. Attribute-based vectors
-// (onerror/onload) disappear with the tag they belong to.
+// A caller-supplied instruction (the `prompt` of a metadata request) is
+// untrusted user input that ends up in the model's system prompt and can be
+// reproduced verbatim in a reply delivered to another user — a stored
+// HTML/XSS injection vector (Bug 82726). The instruction is plain guidance
+// for the model, so no markup is meaningful: strip every tag (rather than
+// escape it) and drop the bodies of script/style tags, leaving only inert
+// text. Attribute-based vectors (onerror/onload) disappear with the tag they
+// belong to.
 export function sanitizeInstruction(text: string): string {
   if (!text) {
     return "";

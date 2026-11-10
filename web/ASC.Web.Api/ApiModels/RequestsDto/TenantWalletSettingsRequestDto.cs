@@ -49,7 +49,7 @@ public class TenantWalletSettingsRequestDto
 /// The part of the automatic top-up settings a payer chooses. The low-balance warning state is kept by the portal
 /// itself and cannot be set here.
 /// </summary>
-public class SetWalletTopUpSettingsRequest
+public class SetWalletTopUpSettingsRequest : IValidatableObject
 {
     /// <summary>
     /// Whether the payment method on file is charged automatically when the wallet balance runs low.
@@ -93,4 +93,16 @@ public class SetWalletTopUpSettingsRequest
     /// </summary>
     /// <example>2026-01-01T10:00:00</example>
     public DateTime LastModified { get; set; }
+
+    public IEnumerable<DataAnnotationsValidationResult> Validate(ValidationContext validationContext)
+    {
+        // A top-up has to lift the wallet above the balance that triggers it, or the next charge
+        // follows right after the first one.
+        if (UpToBalance <= MinBalance)
+        {
+            yield return new DataAnnotationsValidationResult(
+                $"The {nameof(UpToBalance)} field must be greater than the {nameof(MinBalance)} field.",
+                [nameof(UpToBalance)]);
+        }
+    }
 }

@@ -69,6 +69,20 @@ public class TenantStatusFilter(ILogger<TenantStatusFilter> logger, TenantManage
             return;
         }
 
+        if (tenant.Status == TenantStatus.Blocked)
+        {
+            if (context.ActionDescriptor is ControllerActionDescriptor blockedActionDescriptor &&
+                blockedActionDescriptor.EndpointMetadata.OfType<AllowBlockedAttribute>().Any())
+            {
+                await next();
+                return;
+            }
+
+            context.Result = new StatusCodeResult((int)HttpStatusCode.NotFound);
+            logger.WarningTenantIsBlocked(tenant.Id);
+            return;
+        }
+
         if (tenant.Status is TenantStatus.Transfering or TenantStatus.Restoring or TenantStatus.Encryption)
         {
             if (_passthroughtRequestEndings.Any(path => context.HttpContext.Request.Path.ToString().EndsWith(path, StringComparison.InvariantCultureIgnoreCase)))

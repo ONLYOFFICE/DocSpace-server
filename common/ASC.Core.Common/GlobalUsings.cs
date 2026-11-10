@@ -46,6 +46,7 @@ global using System.Net.Http.Headers;
 global using System.Net.Sockets;
 global using System.Net.Http.Json;
 global using System.Reflection;
+global using System.Runtime.CompilerServices;
 global using System.Runtime.Serialization;
 global using System.Security;
 global using System.Security.Authentication;
@@ -56,6 +57,7 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
+global using System.Threading.Channels;
 global using System.Web;
 
 global using Amazon;

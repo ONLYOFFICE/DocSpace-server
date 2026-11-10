@@ -41,7 +41,7 @@ namespace ASC.Core.Billing;
 public interface IAccountingApi
 {
     [Get("/customer/{portalId}/balance")]
-    Task<Balance> GetCustomerBalanceAsync(string portalId);
+    Task<Balance> GetCustomerBalanceAsync(string portalId, CancellationToken cancellationToken = default);
 
     [Post("/session/open")]
     Task<Session> OpenCustomerSessionAsync([Body] SessionOpenOperation data);
@@ -52,7 +52,7 @@ public interface IAccountingApi
     [Put("/session/extend")]
     Task<Session> ExtendCustomerSessionAsync([Query] int sessionId, [Query] int duration);
 
-    [Post("/operation/sessionComplete")]
+    [Post("/session/complete")]
     Task CompleteCustomerSessionAsync([Body] SessionCompleteOperation data);
 
     [Get("/customer/{portalId}/operations")]
@@ -64,12 +64,85 @@ public interface IAccountingApi
     [Get("/customer/{portalId}/usage")]
     Task<UsageReport> GetCustomerServiceUsageAsync(string portalId, UsageFilter filter);
 
+    /// <summary>
+    /// All operations matching the filter, page by page. Refit generates the loop: every page is a request with
+    /// the next <paramref name="offset"/>, which advances by the items received and stops at
+    /// <see cref="BaseReport{T}.TotalQuantity"/> or on an empty page. Leave <see cref="PagedFilter.Offset"/> unset -
+    /// the offset travels in its own query parameter.
+    /// </summary>
+    [Get("/customer/{portalId}/operations")]
+    [Paged(Items = nameof(Report.Collection), Total = nameof(Report.TotalQuantity))]
+    PagedEnumerable<Report, Operation> GetCustomerOperationPages(string portalId, [Query] OperationFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
+
+    /// <summary>
+    /// All service usage records matching the filter, page by page; paging as in <see cref="GetCustomerOperationPages"/>.
+    /// </summary>
+    [Get("/customer/{portalId}/usage")]
+    [Paged(Items = nameof(UsageReport.Collection), Total = nameof(UsageReport.TotalQuantity))]
+    PagedEnumerable<UsageReport, CustomerServiceUsage> GetCustomerServiceUsagePages(string portalId, UsageFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
+
+    [Get("/customer/{portalId}/deposits")]
+    Task<DepositReport> GetCustomerDepositsAsync(string portalId, [Query] DepositFilter filter);
+
+    /// <summary>
+    /// All balance top-ups matching the filter, page by page; paging as in <see cref="GetCustomerOperationPages"/>.
+    /// </summary>
+    [Get("/customer/{portalId}/deposits")]
+    [Paged(Items = nameof(DepositReport.Collection), Total = nameof(DepositReport.TotalQuantity))]
+    PagedEnumerable<DepositReport, Deposit> GetCustomerDepositPages(string portalId, [Query] DepositFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
+
     [Get("/currency/all")]
     Task<List<Currency>> GetAllCurrenciesAsync();
 
-    [Get("/service/{serviceName}/name")]
+    [Get("/service/by-name/{serviceName}")]
     Task<ServiceInfo> GetServiceInfoAsync(string serviceName);
 
-    [Get("/price/service/{serviceId}")]
+    /// <summary>
+    /// Services with their unit price and currency, page by page; paging as in <see cref="GetCustomerOperationPages"/>.
+    /// <paramref name="status"/> filters by the approval status of the service (Draft, Approved, Rejected),
+    /// <paramref name="names"/> by the service names, sent as repeated <c>names</c> parameters;
+    /// <paramref name="limit"/> is the page size.
+    /// </summary>
+    [Get("/service")]
+    [Paged(Items = nameof(ServiceReport.Collection), Total = nameof(ServiceReport.TotalQuantity))]
+    PagedEnumerable<ServiceReport, ServiceInfo> GetServicePages([Query] string status, [Query(CollectionFormat.Multi)] IEnumerable<string> names, [Query] int limit, [PageToken, AliasAs("offset")] int offset = 0);
+
+    [Get("/servicePrice/by-service/{serviceId}")]
     Task<List<ServicePriceInfo>> GetServicePricesAsync(int serviceId, [Query] bool active);
+
+    [Get("/serviceLimit/{id}")]
+    Task<ServiceLimit> GetServiceLimitAsync(int id);
+
+    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/total")]
+    Task<ServiceLimit> GetTotalServiceLimitAsync(string portalId, string groupName, [Query] bool includeUsage);
+
+    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/global")]
+    Task<ServiceLimit> GetGlobalServiceLimitAsync(string portalId, string groupName);
+
+    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants")]
+    Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(string portalId, string groupName, [Query] ServiceLimitFilter filter);
+
+    /// <summary>
+    /// The limit in force for every participant of the customer on a service group, page by page; paging as in
+    /// <see cref="GetCustomerOperationPages"/>. Leave <see cref="ServiceLimitFilter.Offset"/> unset - the offset
+    /// travels in its own query parameter.
+    /// </summary>
+    [Get("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants")]
+    [Paged(Items = nameof(ServiceLimitReport.Collection), Total = nameof(ServiceLimitReport.TotalQuantity))]
+    PagedEnumerable<ServiceLimitReport, ServiceLimit> GetParticipantServiceLimitPages(string portalId, string groupName, [Query] ServiceLimitFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
+
+    [Post("/serviceLimit")]
+    Task<ServiceLimit> CreateServiceLimitAsync([Body] ServiceLimitCreateOperation data);
+
+    [Put("/serviceLimit")]
+    Task<ServiceLimit> UpdateServiceLimitAsync([Body] ServiceLimitUpdateOperation data);
+
+    [Put("/serviceLimit/participants")]
+    Task<int> SetParticipantServiceLimitsAsync([Body] ServiceLimitParticipantSetOperation data);
+
+    [Put("/serviceLimit/by-customer/{portalId}/by-group/{groupName}/participants/disable")]
+    Task<int> DisableParticipantServiceLimitsAsync(string portalId, string groupName);
+
+    [Delete("/serviceLimit/{id}")]
+    Task DeleteServiceLimitAsync(int id);
 }

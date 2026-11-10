@@ -187,6 +187,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         var q2 = q1.Select(x => new AuditEventQuery
         {
             Event = x,
+            HidePrivateTitles = true,
             UserData = auditTrailContext.Users.Where(u => u.TenantId == tenant && u.Id == x.UserId).Select(u => new UserData
             {
                 FirstName = u.FirstName,
@@ -241,6 +242,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
                         select new AuditEventQuery
                         {
                             Event = e,
+                            HidePrivateTitles = true,
                             UserData = new UserData
                             {
                                 FirstName = u.FirstName,
@@ -325,14 +327,12 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         return q;
     }
 
-    public async Task<DbAuditEvent> GetLastEventAsync(int tenantId)
+    /// <summary>The date of the portal's last audit event, or null when it has none.</summary>
+    public async Task<DateTime?> GetLastEventDateAsync(int tenantId)
     {
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
 
-        return await auditTrailContext.AuditEvents
-            .Where(r => r.TenantId == tenantId)
-            .OrderByDescending(r => r.Id)
-            .FirstOrDefaultAsync();
+        return await auditTrailContext.LastAuditEventDateAsync(tenantId);
     }
 
     public async Task<IEnumerable<int>> GetTenantsAsync(DateTime? from = null, DateTime? to = null)

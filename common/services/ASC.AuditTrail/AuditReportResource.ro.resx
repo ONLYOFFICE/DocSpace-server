@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Raportul privind operaţiunile de client a fost descărcat</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Limita de cheltuieli pentru serviciu a fost creată: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Limita de cheltuieli pentru serviciu a fost actualizată: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Limita de cheltuieli pentru serviciu a fost ștearsă: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Limitele personale de cheltuieli pentru serviciu au fost setate: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Limitele personale de cheltuieli pentru serviciu au fost dezactivate: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Abonamentrul clientului a fost actualizat: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portalul a fost dezactivat</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portalul a fost blocat de politica de păstrare a datelor</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portalul a fost deblocat</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portalul a fost șters</value>
@@ -1221,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profilul AI a fost atribuit agentului AI pentru acțiunea: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Cheia BYOK pentru modelul AI a fost ștearsă: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Cheia BYOK pentru modelul AI a fost setată: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Setările agentului de documente au fost actualizate</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profilul AI a fost atribuit acțiunii: {0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Valorile metadatelor au fost actualizate: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Fișier deschis de scriptul Document Builder: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Aplicația a fost activată: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Aplicația a fost dezactivată: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Camere asociate proiectului AI {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Camere disociate de proiectul AI {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Modelul AI al proiectului AI {0} a fost schimbat în {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Livrarea webhook-ului a fost reîncercată: {0}</value>
   </data>
 </root>

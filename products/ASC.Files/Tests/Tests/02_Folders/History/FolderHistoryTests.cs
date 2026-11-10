@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -69,10 +69,7 @@ public class FolderHistoryTests(
         entry!.Initiator.DisplayName.Should().Be(ownerDisplayName);
     }
 
-    [Fact(Skip = "Depends on a room index export completing, which the integration-test profile " +
-                 "cannot do - see the same skip on " +
-                 "RoomIndexExportTests.StartRoomIndexExport_IndexingEnabledAfterCreation_CompletesWithoutError. " +
-                 "Skipped for the environment, not for the bug: 81640 itself is untested here.")]
+    [Fact]
     [Trait("Bug", "81640")]
     public async Task GetFolderHistory_ContainsRoomIndexExportSaved_AfterIndexExportCompletes()
     {
@@ -88,7 +85,8 @@ public class FolderHistoryTests(
 
         await _roomsApi.StartRoomIndexExportAsync(room.Id, TestContext.Current.CancellationToken);
 
-        var exportDeadline = DateTime.UtcNow.AddSeconds(30);
+        // 90s, as in RoomIndexExportTests: the first document builder run on a fresh editors container is slow.
+        var exportDeadline = DateTime.UtcNow.AddSeconds(90);
         DocumentBuilderTaskDto export;
 
         while (true)
@@ -103,7 +101,7 @@ public class FolderHistoryTests(
             await Task.Delay(2_000, TestContext.Current.CancellationToken);
         }
 
-        export.IsCompleted.Should().BeTrue("the room index export must complete within 30 seconds");
+        export.IsCompleted.Should().BeTrue("the room index export must complete within 90 seconds");
 
         // Act
         var entry = await PollHistoryEntryAsync(room.Id, MessageAction.RoomIndexExportSaved, TimeSpan.FromSeconds(60));

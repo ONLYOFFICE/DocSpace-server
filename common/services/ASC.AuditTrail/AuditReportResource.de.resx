@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Kundenvorgangsbericht heruntergeladen</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Ausgabenlimit für Service erstellt: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Ausgabenlimit für Service aktualisiert: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Ausgabenlimit für Service gelöscht: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Persönliche Ausgabenlimits für Service festgelegt: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Persönliche Ausgabenlimits für Service deaktiviert: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Kundenabonnement aktualisiert: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portal ist deaktiviert</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portal durch die Aufbewahrungsrichtlinie gesperrt</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portal entsperrt</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Das Portal ist gelöscht</value>
@@ -1221,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>KI-Profil dem KI-Agenten für Aktion zugewiesen: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>BYOK-Schlüssel für KI-Modell gelöscht: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>BYOK-Schlüssel für KI-Modell festgelegt: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Einstellungen des Dokument-Agenten aktualisiert</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>KI-Profil der Aktion zugewiesen: {0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Metadatenwerte aktualisiert: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Datei durch Document Builder-Skript geöffnet: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>App aktiviert: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>App deaktiviert: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Räume mit KI-Projekt {0} verknüpft: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Verknüpfung von Räumen mit KI-Projekt {0} aufgehoben: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>KI-Modell des KI-Projekts {0} geändert in {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook-Zustellung wiederholt: {0}</value>
   </data>
 </root>

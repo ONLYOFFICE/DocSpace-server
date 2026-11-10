@@ -41,12 +41,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.keygen.Base64StringKeyGenerator;
 import org.springframework.security.crypto.keygen.StringKeyGenerator;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.OAuth2RefreshToken;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationCode;
 import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2ClientAuthenticationToken;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
 
@@ -56,6 +53,10 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
  * <p>This generator creates URL-safe Base64 encoded refresh tokens and prepends a region prefix (in
  * the format "region:") for SaaS deployments. The prefix enables cross-region token identification
  * and routing in distributed authorization systems.
+ *
+ * <p>Unlike Spring's default generator, public clients (PKCE, no client secret) get refresh tokens
+ * too. They are single-use ({@code reuseRefreshTokens=false}) and redeemed through {@code
+ * PublicClientRefreshTokenAuthenticationProvider}.
  *
  * @see OAuth2TokenGenerator
  * @see OAuth2RefreshToken
@@ -108,28 +109,6 @@ public class PrefixedRefreshTokenGenerator implements OAuth2TokenGenerator<OAuth
   }
 
   /**
-   * Determines if the OAuth2 token context represents a public client using the authorization code
-   * grant.
-   *
-   * @param context the OAuth2 token context to evaluate
-   * @return {@code true} if the context represents a public client using authorization code grant,
-   *     {@code false} otherwise
-   */
-  private static boolean isPublicClientForAuthorizationCodeGrant(OAuth2TokenContext context) {
-    if (AuthorizationGrantType.AUTHORIZATION_CODE.equals(context.getAuthorizationGrantType())) {
-      var var2 = context.getAuthorizationGrant().getPrincipal();
-      if (var2 instanceof OAuth2ClientAuthenticationToken) {
-        var clientPrincipal = (OAuth2ClientAuthenticationToken) var2;
-        return clientPrincipal
-            .getClientAuthenticationMethod()
-            .equals(ClientAuthenticationMethod.NONE);
-      }
-    }
-
-    return false;
-  }
-
-  /**
    * Generates an OAuth2 refresh token with optional region prefix based on the provided context.
    *
    * <p>The region is determined from the authorization code in the context if available, otherwise
@@ -144,8 +123,6 @@ public class PrefixedRefreshTokenGenerator implements OAuth2TokenGenerator<OAuth
   @Override
   public OAuth2RefreshToken generate(OAuth2TokenContext context) {
     if (!OAuth2TokenType.REFRESH_TOKEN.equals(context.getTokenType())) {
-      return null;
-    } else if (isPublicClientForAuthorizationCodeGrant(context)) {
       return null;
     } else {
       var issuedAt = Instant.now();

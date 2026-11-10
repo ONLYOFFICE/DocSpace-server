@@ -39,4 +39,13 @@ public interface ISendInterceptor
     InterceptorPlace PreventPlace { get; }
     InterceptorLifetime Lifetime { get; }
     Task<bool> PreventSend(NotifyRequest request, InterceptorPlace place, IServiceScope serviceScope);
+
+    /// <summary>
+    /// Called when the channel did not deliver a message this interceptor let through at
+    /// <see cref="InterceptorPlace.MessageSend"/>: the channel answered anything but <c>OK</c> - <c>Inprogress</c>
+    /// included, since an SMTP or SES "try once again" is retried by nobody - or threw. A message that another
+    /// interceptor of the same place prevented is not reported here, so an interceptor that leaves state behind when
+    /// it lets a message through (the repeat check marks it) must not share that place with one that prevents sending.
+    /// </summary>
+    Task SendFailedAsync(NotifyRequest request, IServiceScope serviceScope) => Task.CompletedTask;
 }

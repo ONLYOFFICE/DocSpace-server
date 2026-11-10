@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -44,11 +44,16 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Error, "Subscription renewal failed: tenant {tenantId}, {description}")]
     public static partial void ErrorRenewSubscriptionServiceFail(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
 
-    [LoggerMessage(LogLevel.Warning, "Subscription renewal outcome is unknown, billing did not answer, will re-check: tenant {tenantId}, {description}: {reason}")]
-    public static partial void WarningRenewSubscriptionServiceOutcomeUnknown(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, string reason);
+    // an error, not a warning: money may have moved without the subscription being extended, and production logs
+    // keep errors only - this is the one trace of the attempt until the re-checks settle it
+    [LoggerMessage(LogLevel.Error, "Subscription renewal outcome is unknown, billing gave no readable answer, will re-check: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceOutcomeUnknown(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, Exception exception);
 
     [LoggerMessage(LogLevel.Warning, "Subscription renewal that timed out at {timedOutAt} is not confirmed yet: tenant {tenantId}, {description}: {reason}")]
-    public static partial void WarningRenewSubscriptionServiceNotConfirmed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, DateTime timedOutAt, string reason);
+    public static partial void WarningRenewSubscriptionServiceNotConfirmed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, DateTime timedOutAt, string reason, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "RenewSubscriptionService: error processing tenant {tenantId}")]
+    public static partial void ErrorRenewSubscriptionServiceTenant(this ILogger<RenewSubscriptionService> logger, int tenantId, Exception exception);
 
     [LoggerMessage(LogLevel.Error, "Subscription renewal for tenant {tenantId} scheduled a switch to unknown wallet quota {nextQuotaId}")]
     public static partial void ErrorRenewSubscriptionServiceUnknownNextQuota(this ILogger<RenewSubscriptionService> logger, int tenantId, int nextQuotaId);

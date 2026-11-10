@@ -31,14 +31,15 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ToolsEngine } from "@onlyoffice/ai-chat/core";
-import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
+import { ToolsEngine, isToolPrefsScope } from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, ToolPrefsScope } from "@onlyoffice/ai-chat/core";
 import {
   PORTAL_MCP_SERVER_NAME,
   DOCSPACE_INTEGRATION_SERVER_TYPE,
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
   WEB_SEARCH_TYPE,
   IMAGE_GENERATION_TYPE,
+  DOCUMENT_AGENT_TYPE,
 } from "../../config/index.js";
 import {
   customToolsSource,
@@ -89,12 +90,11 @@ function assertRoutableServerName(rawName: unknown): string {
 }
 
 // Resolve the config to store for an entry. Entries named after a
-// configured system server are whitelist markers (see agentServerWhitelist
-// in tools/systemTools.ts): they are pinned to the canonical system config
-// so a marker never shadows the system group with a broken connection.
-// When a caller attaches an existing portal-level server to an entity
-// without sending a config (the agent dialog flow), the portal-scope
-// config is copied.
+// configured system server are pinned to the canonical system config (see
+// getSystemServerConfig in tools/systemTools.ts) so such an entry never
+// shadows the system group with a broken connection. A write without a
+// config re-saves the entry already registered under that name; anything
+// else without a config is refused.
 async function resolveConfig(
   name: string,
   provided: McpServerConfig | undefined,
@@ -116,14 +116,13 @@ async function resolveConfig(
   );
 }
 
-// System-server entries are whitelist markers pinned to the canonical
-// internal endpoint (see resolveConfig above). Redact — never drop — the
-// config on the way out: system servers run server-side only (see
-// tools/systemTools.ts), so the browser must not receive a config it
-// would try to start itself, and the internal endpoint must not leak.
-// The name still round-trips: the agent dialog pre-selects by key, and
-// saving the whole map from the chat config editor re-pins the entry
-// through resolveConfig.
+// System-server entries are pinned to the canonical internal endpoint
+// (see resolveConfig above). Redact — never drop — the config on the way
+// out: system servers run server-side only (see tools/systemTools.ts), so
+// the browser must not receive a config it would try to start itself, and
+// the internal endpoint must not leak. The name still round-trips: saving
+// the whole map from the chat config editor re-pins the entry through
+// resolveConfig.
 function redactSystemServer(
   name: string,
   config: McpServerConfig,
@@ -131,16 +130,56 @@ function redactSystemServer(
   return getSystemServerConfig(name) ? {} : config;
 }
 
+const INVALID_SCOPE = Symbol("invalid tool-prefs scope");
+
+// The optional `scope` of a disabled-list read or write (Bug 84381):
+// `"user"` (the caller's own list, what an absent value means) or
+// `"tenant"` (the list an administrator keeps for everyone, which the AI
+// service folds into every user's list on read). Anything else is a 400
+// rather than a silent fall-back to the user list, so a settings screen
+// cannot believe it switched a tool off for everyone when it did not.
+function parseToolPrefsScope(
+  value: unknown,
+): ToolPrefsScope | undefined | typeof INVALID_SCOPE {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  return isToolPrefsScope(value) ? value : INVALID_SCOPE;
+}
+
+function invalidScopeMessage(value: unknown): string {
+  return `unknown scope "${String(value)}"; valid values: tenant, user`;
+}
+
+// Body narrowing for the two prefs writes. The library coerces instead of
+// checking: a string `toolNames` spreads into one entry per character, an
+// absent one reads as "clear the list" and `Boolean("false")` is true
+// (Bugs 84402, 84403, 84404, 84405). Each answers 400 with the field named,
+// before anything is read or written.
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function toolNamesError(value: unknown): string | undefined {
+  if (!Array.isArray(value)) {
+    return "toolNames is required and must be an array of tool names";
+  }
+  if (!value.every(isNonEmptyString)) {
+    return "toolNames must contain non-empty strings only";
+  }
+  return undefined;
+}
+
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
     const name = assertRoutableServerName(args.name);
     // A supplied entityId must at least be REACHABLE: a nonexistent or
-    // deleted id otherwise folds silently into the portal-wide scope and
-    // mutates it (Bug 82975). An accessible NON-agent folder still folds to
-    // global BY DESIGN (Bug 82863: the widget sends the current location
-    // here) — the gate is on accessibility, not agent-ness, mirroring the
-    // threads/create decision (Bug 82719).
+    // deleted id otherwise silently mutates the portal-wide registry
+    // (Bug 82975). An accessible folder is accepted and ignored — the
+    // registry is one map per portal (Bug 82863: the widget sends the
+    // current location here) — mirroring the threads/create decision
+    // (Bug 82719).
     await assertEntityAccessible(args.entityId as string | undefined);
     const result = await engine.addCustomServer(
       name,
@@ -193,9 +232,9 @@ export const toolsController = {
     const servers = await engine.listCustomServers(entityId);
     const redacted: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(servers)) {
-      // The portal MCP server is not user-manageable: legacy per-agent
-      // whitelist markers named after it must not surface as selectable
-      // entries (it is always enabled server-side, see systemTools).
+      // The portal MCP server is not user-manageable: a legacy registry
+      // entry named after it must not surface as a selectable entry (it is
+      // always enabled server-side, see systemTools).
       if (name === PORTAL_MCP_SERVER_NAME) continue;
       redacted[name] = redactSystemServer(name, config);
     }
@@ -224,7 +263,7 @@ export const toolsController = {
         : tools
     ) as Record<string, unknown>;
     // Hide the portal MCP server from every management surface (the MCP
-    // settings page's permission cards, the agent dialog's server picker):
+    // settings page's permission cards):
     // it is always enabled with all tools and cannot be configured. The
     // chat engine's tool context does not go through this listing, so the
     // tools themselves stay available everywhere.
@@ -235,9 +274,9 @@ export const toolsController = {
       groups: { ...systemGroups, ...custom.groups },
       errors: custom.errors,
       // `groups` mixes system and registered custom servers, so name the
-      // system ones explicitly — the agent dialog pre-selects and labels
-      // servers by this list; without it every registered custom server got
-      // the portal branding and a default pre-selection (Bug 83705).
+      // system ones explicitly — the settings page labels servers by this
+      // list; without it every registered custom server got the portal
+      // branding (Bug 83705).
       system: Object.keys(systemGroups),
     });
   }),
@@ -269,10 +308,27 @@ export const toolsController = {
   }),
 
   setDisabled: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["serverType", "toolNames", "entityId"] as const);
+    const args = unpackPositional(req.body, [
+      "serverType",
+      "toolNames",
+      "entityId",
+      "scope",
+    ] as const);
     // Same accessibility gate as the server writes above (Bug 82975): a
     // bogus entityId must not silently write prefs into the global scope.
     await assertEntityAccessible(args.entityId as string | undefined);
+    const scope = parseToolPrefsScope(args.scope);
+    if (scope === INVALID_SCOPE) {
+      res.status(400).json({ error: invalidScopeMessage(args.scope) });
+      return;
+    }
+    // An explicit empty list stays legal: it is the documented "switch
+    // everything back on" and what the settings page sends for it.
+    const toolNamesProblem = toolNamesError(args.toolNames);
+    if (toolNamesProblem !== undefined) {
+      res.status(400).json({ error: toolNamesProblem });
+      return;
+    }
     // The serverType must be a group key the round's tool filter actually
     // matches — an arbitrary string used to be stored verbatim and read back
     // "successfully" while never disabling anything (Bug 83013). Valid keys:
@@ -287,7 +343,8 @@ export const toolsController = {
       DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
       WEB_SEARCH_TYPE,
       IMAGE_GENERATION_TYPE,
-      ...Object.keys(await resolveCustomServers(entityId)),
+      DOCUMENT_AGENT_TYPE,
+      ...Object.keys(await resolveCustomServers(entityId, { strict: true })),
     ]);
     if (typeof serverType !== "string" || !validTypes.has(serverType)) {
       res.status(400).json({
@@ -297,17 +354,18 @@ export const toolsController = {
       });
       return;
     }
-    await engine.setDisabled(
-      args.serverType as string,
-      (args.toolNames as string[]) ?? [],
-      args.entityId as string | undefined,
-    );
+    await engine.setDisabled(serverType, args.toolNames as string[], entityId, scope);
     res.json({ success: true });
   }),
 
   getDisabled: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const map = await engine.getDisabled(entityId);
+    const scope = parseToolPrefsScope(req.query["scope"]);
+    if (scope === INVALID_SCOPE) {
+      res.status(400).json({ error: invalidScopeMessage(req.query["scope"]) });
+      return;
+    }
+    const map = await engine.getDisabled(entityId, scope);
     res.json(map);
   }),
 
@@ -330,10 +388,22 @@ export const toolsController = {
     );
     // Same accessibility gate as the server writes above (Bug 82975).
     await assertEntityAccessible(args.entityId as string | undefined);
+    if (!isNonEmptyString(args.serverType)) {
+      res.status(400).json({ error: "serverType is required and must be a non-empty string" });
+      return;
+    }
+    if (!isNonEmptyString(args.toolName)) {
+      res.status(400).json({ error: "toolName is required and must be a non-empty string" });
+      return;
+    }
+    if (typeof args.value !== "boolean") {
+      res.status(400).json({ error: "value is required and must be a boolean" });
+      return;
+    }
     await engine.setAllowAlways(
-      args.serverType as string,
-      args.toolName as string,
-      Boolean(args.value),
+      args.serverType,
+      args.toolName,
+      args.value,
       args.entityId as string | undefined,
     );
     res.json({ success: true });

@@ -131,4 +131,73 @@ public class UpdateApiKeyTests(
         var keys = await _apiKeysApi.GetApiKeysAsync(TestContext.Current.CancellationToken);
         keys.Response.Should().ContainSingle(k => k.Id == created.Response.Id && k.IsActive);
     }
+
+    /// <summary>
+    /// Bug 84485: PUT used to store a whitespace-only name and silently ignore an empty one, while POST
+    /// rejects both; the name now carries validation rules that answer 400 and leave the key untouched.
+    /// </summary>
+    [Trait("Bug", "84485")]
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task UpdateApiKey_EmptyOrWhitespaceName_ReturnsBadRequestAndKeepsName(string name)
+    {
+        // Arrange
+        await _peopleClient.Authenticate(Owner);
+        var created = await _apiKeysApi.CreateApiKeyAsync(
+            new CreateApiKeyRequestDto("Autotest original"), TestContext.Current.CancellationToken);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _apiKeysApi.UpdateApiKeyAsync(
+                created.Response.Id, new UpdateApiKeyRequest(name), TestContext.Current.CancellationToken));
+
+        // Assert
+        var keys = await _apiKeysApi.GetApiKeysAsync(TestContext.Current.CancellationToken);
+        keys.Response.Should().ContainSingle(k => k.Id == created.Response.Id).Which.Name.Should().Be("Autotest original");
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    /// <summary>
+    /// Bug 84482: updating a well-formed keyId that matched no key used to fail with a 500; the endpoint now
+    /// answers 404 when the key is not found.
+    /// </summary>
+    [Trait("Bug", "84482")]
+    [Fact]
+    public async Task UpdateApiKey_UnknownKeyId_ReturnsNotFound()
+    {
+        // Arrange
+        await _peopleClient.Authenticate(Owner);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _apiKeysApi.UpdateApiKeyAsync(
+                Guid.Empty, new UpdateApiKeyRequest("Autotest Renamed"), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
+
+    /// <summary>
+    /// Bug 84482: updating a key that had already been deleted used to fail with a 500; the endpoint now
+    /// answers 404 when the key is not found.
+    /// </summary>
+    [Trait("Bug", "84482")]
+    [Fact]
+    public async Task UpdateApiKey_DeletedKey_ReturnsNotFound()
+    {
+        // Arrange
+        await _peopleClient.Authenticate(Owner);
+        var created = await _apiKeysApi.CreateApiKeyAsync(
+            new CreateApiKeyRequestDto("Autotest Deleted Key"), TestContext.Current.CancellationToken);
+        await _apiKeysApi.DeleteApiKeyAsync(created.Response.Id, TestContext.Current.CancellationToken);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _apiKeysApi.UpdateApiKeyAsync(
+                created.Response.Id, new UpdateApiKeyRequest("Autotest Renamed"), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(404);
+    }
 }

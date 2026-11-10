@@ -45,9 +45,11 @@ public class WorkContext(IConfiguration configuration,
     SmtpSender smtpSender,
     NotifyServiceSender notifyServiceSender,
     TelegramSender notifyTelegramSender,
-    PushSender notifyPushSender)
+    PushSender notifyPushSender,
+    NotifyDeduplicationService notifyDeduplicationService)
 {
     private static readonly Lock _syncRoot = new();
+    private readonly DuplicateMessageInterceptor _duplicateMessageInterceptor = new(notifyDeduplicationService);
     private bool _notifyStarted;
     private static bool? _isMono;
 
@@ -136,6 +138,7 @@ public class WorkContext(IConfiguration configuration,
         //ValidateNotifySource(source);
         var client = serviceProvider.GetService<NotifyClientImpl>();
         client.Init(source);
+        client.AddInterceptor(_duplicateMessageInterceptor);
         NotifyClientRegistration?.Invoke(notifyContext, client);
 
         return client;

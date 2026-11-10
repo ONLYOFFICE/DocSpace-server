@@ -92,5 +92,6 @@ public class OperationIdRequestDto
     /// </summary>
     /// <example>b2f3e9a4-7c15-4d8e-9f60-3a1c5e7d0b42</example>
     [FromRoute(Name = "id")]
+    [DisplayFormat(ConvertEmptyStringToNull = false)]
     public required string Id { get; set; } = null;
 }

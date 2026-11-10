@@ -37,6 +37,8 @@ namespace ASC.ElasticSearch;
 public class Selector<T>(IServiceProvider serviceProvider)
     where T : class, ISearchItem
 {
+    private static readonly char[] _wordSeparators = [' ', '\r', '\n', '\t'];
+
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly QueryContainerDescriptor<T> _queryContainerDescriptor = new();
     private SortDescriptor<T> _sortContainerDescriptor = new();
@@ -194,6 +196,25 @@ public class Selector<T>(IServiceProvider serviceProvider)
         value);
 
         return this;
+    }
+
+    /// <summary>
+    /// The substring query of <see cref="Match(Expression{Func{T, object}}, string)"/> for a field inside a
+    /// <see cref="Nested"/> query, which builds its own query container: a wildcard per word of the value, every one
+    /// of which the field has to hold, the way the titles are searched. The value is prepared like a search text
+    /// (lowered, the backslashes escaped, the "ё" folded) so it meets the analyzed terms of the field.
+    /// </summary>
+    public static QueryContainer Contains(QueryContainerDescriptor<T> descriptor, Expression<Func<T, object>> field, string value)
+    {
+        var result = new QueryContainer();
+
+        foreach (var word in value.PrepareToSearch().Split(_wordSeparators, StringSplitOptions.RemoveEmptyEntries))
+        {
+            var pattern = word.WrapAsterisk();
+            result = result && descriptor.Wildcard(r => r.Field(field).Value(pattern));
+        }
+
+        return result;
     }
 
     public Selector<T> Nested(Expression<Func<T, object>> fieldSelector, Func<QueryContainerDescriptor<T>, QueryContainer> selector)

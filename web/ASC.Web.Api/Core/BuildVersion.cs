@@ -49,6 +49,11 @@ public class BuildVersion
     /// </summary>
     public string DocumentServer { get; set; }
 
+    /// <summary>
+    /// The ONLYOFFICE Docs AI tools version, null when the AI tools are disabled or the editors do not report it.
+    /// </summary>
+    public string AiTools { get; set; }
+
     [JsonIgnore]
     private readonly IConfiguration _configuration;
 
@@ -72,7 +77,10 @@ public class BuildVersion
     public async Task<BuildVersion> GetCurrentBuildVersionAsync()
     {
         DocSpace = GetDocSpaceVersion();
-        DocumentServer = await GetDocumentVersionAsync();
+
+        var documentVersions = await GetDocumentVersionsAsync();
+        DocumentServer = documentVersions?.Version;
+        AiTools = documentVersions?.AiToolsVersion;
 
         return this;
     }
@@ -82,24 +90,24 @@ public class BuildVersion
         return _configuration["version:number"] ?? "3.1.0";
     }
 
-    private async Task<string> GetDocumentVersionAsync()
+    private async Task<DocServiceVersions> GetDocumentVersionsAsync()
     {
         if (string.IsNullOrEmpty(_filesLinkUtility.DocServiceApiUrl))
         {
             return null;
         }
 
-        var cacheKey = "DocumentServiceVersion";
+        var cacheKey = "DocumentServiceVersions";
 
-        var version = _cache.Get<string>(cacheKey);
+        var versions = _cache.Get<DocServiceVersions>(cacheKey);
 
-        if (string.IsNullOrEmpty(version))
+        if (versions is null)
         {
-            version = await _documentServiceConnector.GetVersionAsync();
+            versions = await _documentServiceConnector.GetVersionsAsync();
 
-            _cache.Insert(cacheKey, version, DateTime.UtcNow.Add(TimeSpan.FromMinutes(15)));
+            _cache.Insert(cacheKey, versions, DateTime.UtcNow.Add(TimeSpan.FromMinutes(15)));
         }
 
-        return version;
+        return versions;
     }
 }

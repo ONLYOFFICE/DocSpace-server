@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -61,7 +61,7 @@ public class StudioNotifyService(
     public async Task SendMsgToAdminFromNotAuthUserAsync(string email, string message, string culture)
     {
         var userMessageToAdminNotifyAction = serviceProvider.GetService<UserMessageToAdminNotifyAction>();
-        userMessageToAdminNotifyAction.Init(email, message,culture);
+        userMessageToAdminNotifyAction.Init(email, message, culture);
 
         await studioNotifyServiceHelper.SendNoticeAsync(userMessageToAdminNotifyAction);
     }
@@ -150,29 +150,57 @@ public class StudioNotifyService(
         messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, displayUserName);
     }
 
-    public async Task SendEmailActivationInstructionsAsync(UserInfo user, string email)
+    // false when the same letter already went out within the repeat period: no link is built and nothing is sent
+    public async Task<bool> SendEmailActivationInstructionsAsync(UserInfo user, string email)
     {
         var activateEmailNotifyAction = serviceProvider.GetService<ActivateEmailNotifyAction>();
+
+        // the link is bound to this account, so a profile recreated with the same address is a new letter
+        var objectId = user.Id.ToString();
+        await using var acceptance = await studioNotifyServiceHelper.TryAcceptAsync(activateEmailNotifyAction, objectId, AddressRecipient(email), EMailSenderName);
+        if (!acceptance.Accepted)
+        {
+            return false;
+        }
+
         await activateEmailNotifyAction.Init(user, email);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(activateEmailNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(activateEmailNotifyAction, objectId, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+        acceptance.Complete();
+
+        return true;
+    }
+
+    // asked before the invitation link is built: refused for a repeat, which builds no link and spends no invitation;
+    // the caller completes the answer once the letter is sent and disposes it, which releases it after a failure
+    public async Task<NotifyAcceptance> TryAcceptEmailRoomInviteAsync(string email, string roomUniqId, EmployeeType inviteType, bool isAgent)
+    {
+        INotifyAction action = isAgent ? serviceProvider.GetService<SaasAgentInviteNotifyAction>() : serviceProvider.GetService<SaasRoomInviteNotifyAction>();
+
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, roomUniqId, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast(), tenantManager.GetCurrentTenant().Alias);
     }
 
     public async Task SendEmailRoomInviteAsync(
         string email,
+        string roomUniqId,
         string roomTitle,
         string confirmationUrl,
+        EmployeeType inviteType,
         bool isAgent,
         string culture = null,
-        bool limitation = false)
+        bool limitation = false,
+        NotifyAcceptance acceptance = null)
     {
         var saasAgentInviteNotifyAction = serviceProvider.GetService<SaasAgentInviteNotifyAction>();
-        saasAgentInviteNotifyAction.Init(culture, roomTitle, confirmationUrl);
+        saasAgentInviteNotifyAction.Init(culture, roomTitle, confirmationUrl, inviteType);
 
         var saasRoomInviteNotifyAction = serviceProvider.GetService<SaasRoomInviteNotifyAction>();
-        saasRoomInviteNotifyAction.Init(culture, roomTitle, confirmationUrl);
+        saasRoomInviteNotifyAction.Init(culture, roomTitle, confirmationUrl, inviteType);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteNotifyAction : saasRoomInviteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteNotifyAction : saasRoomInviteNotifyAction, roomUniqId, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+
+        // the letter has left: what fails from here on must not take its acceptance back
+        acceptance?.Complete();
 
         if (limitation)
         {
@@ -180,7 +208,7 @@ public class StudioNotifyService(
         }
     }
 
-    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomTitle, string roomUrl, bool isAgent)
+    public async Task SendEmailRoomInviteExistingUserAsync(UserInfo user, string roomUniqId, string roomTitle, string roomUrl, bool isAgent)
     {
         var saasAgentInviteExistingUserNotifyAction = serviceProvider.GetService<SaasAgentInviteExistingUserNotifyAction>();
         saasAgentInviteExistingUserNotifyAction.Init(user, roomTitle, roomUrl);
@@ -188,15 +216,27 @@ public class StudioNotifyService(
         var saasRoomInviteExistingUserNotifyAction = serviceProvider.GetService<SaasRoomInviteExistingUserNotifyAction>();
         saasRoomInviteExistingUserNotifyAction.Init(user, roomTitle, roomUrl);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteExistingUserNotifyAction : saasRoomInviteExistingUserNotifyAction, [user], [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? saasAgentInviteExistingUserNotifyAction : saasRoomInviteExistingUserNotifyAction, roomUniqId, [user], [EMailSenderName]);
     }
 
-    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, string culture = "", bool limitation = false)
+    // asked before the invitation link is built: refused for a repeat, which builds no link and spends no invitation;
+    // the caller completes the answer once the letter is sent and disposes it, which releases it after a failure
+    public async Task<NotifyAcceptance> TryAcceptDocSpaceInviteAsync(string email, EmployeeType inviteType)
+    {
+        var action = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
+
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, null, AddressRecipient(email), EMailSenderName, inviteType.ToStringFast(), tenantManager.GetCurrentTenant().Alias);
+    }
+
+    public async Task SendDocSpaceInviteAsync(string email, string confirmationUrl, EmployeeType inviteType, string culture = "", bool limitation = false, NotifyAcceptance acceptance = null)
     {
         var saasDocSpaceInviteNotifyAction = serviceProvider.GetService<SaasDocSpaceInviteNotifyAction>();
-        saasDocSpaceInviteNotifyAction.Init(confirmationUrl, culture);
+        saasDocSpaceInviteNotifyAction.Init(confirmationUrl, inviteType, culture);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(saasDocSpaceInviteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+
+        // the letter has left: what fails from here on must not take its acceptance back
+        acceptance?.Complete();
 
         if (limitation)
         {
@@ -410,12 +450,25 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(notifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]);
     }
 
-    public async Task SendMsgProfileDeletionAsync(UserInfo user)
+    // false when the same letter already went out within the repeat period: no link is built and nothing is sent
+    public async Task<bool> SendMsgProfileDeletionAsync(UserInfo user)
     {
         var profileDeleteNotifyAction = serviceProvider.GetService<ProfileDeleteNotifyAction>();
+
+        // the link is bound to this account, so a profile recreated with the same address is a new letter
+        var objectId = user.Id.ToString();
+        await using var acceptance = await studioNotifyServiceHelper.TryAcceptAsync(profileDeleteNotifyAction, objectId, AddressRecipient(user.Email), EMailSenderName, user.Email);
+        if (!acceptance.Accepted)
+        {
+            return false;
+        }
+
         await profileDeleteNotifyAction.Init(user);
 
-        await studioNotifyServiceHelper.SendNoticeToAsync(profileDeleteNotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+        await studioNotifyServiceHelper.SendNoticeToAsync(profileDeleteNotifyAction, objectId, await studioNotifyHelper.RecipientFromEmailAsync(user.Email, false), [EMailSenderName]);
+        acceptance.Complete();
+
+        return true;
     }
 
     public async Task SendMsgProfileHasDeletedItselfAsync(UserInfo user)
@@ -494,12 +547,12 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(saasAdminWelcomeV1NotifyAction, await studioNotifyHelper.RecipientFromEmailAsync(newUserInfo.Email, false), [EMailSenderName]);
     }
 
-    public async Task SendMsgUserTypeChangedAsync(UserInfo u, string userType)
+    public async Task SendMsgUserTypeChangedAsync(UserInfo u, EmployeeType type, string userType)
     {
         try
         {
             var userTypeChangedNotifyAction = serviceProvider.GetService<UserTypeChangedNotifyAction>();
-            userTypeChangedNotifyAction.Init(u, userType);
+            userTypeChangedNotifyAction.Init(u, type, userType);
 
             await studioNotifyServiceHelper.SendNoticeToAsync(userTypeChangedNotifyAction, [u], [EMailSenderName]);
         }
@@ -509,17 +562,18 @@ public class StudioNotifyService(
         }
     }
 
-    public async Task SendMsgUserRoleChangedAsync(UserInfo u, string roomTitle, string roomUrl, string userRole, bool isAgent = false)
+    // accessLevel is the role as the server names it, not its localized text: it tells repeated letters apart
+    public async Task SendMsgUserRoleChangedAsync(UserInfo u, string roomUniqId, string roomTitle, string roomUrl, string accessLevel, string userRole, bool isAgent = false)
     {
         try
         {
             var userAgentRoleChangedNotifyAction = serviceProvider.GetService<UserAgentRoleChangedNotifyAction>();
-            userAgentRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, userRole);
+            userAgentRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, accessLevel, userRole);
 
             var userRoleChangedNotifyAction = serviceProvider.GetService<UserRoleChangedNotifyAction>();
-            userRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, userRole);
+            userRoleChangedNotifyAction.Init(u, roomTitle, roomUrl, accessLevel, userRole);
 
-            await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? userAgentRoleChangedNotifyAction : userRoleChangedNotifyAction, [u], [EMailSenderName]);
+            await studioNotifyServiceHelper.SendNoticeToAsync(isAgent ? userAgentRoleChangedNotifyAction : userRoleChangedNotifyAction, roomUniqId, [u], [EMailSenderName]);
         }
         catch (Exception error)
         {
@@ -528,6 +582,26 @@ public class StudioNotifyService(
     }
 
     #region Portal Deactivation & Deletion
+
+    // asked before the links are built: refused for a repeat, which builds no links and records nothing; the caller
+    // completes the answer once the letter is sent and disposes it, which releases it after a failure
+    public async Task<NotifyAcceptance> TryAcceptPortalDeactivationAsync(Tenant t)
+    {
+        var owner = await userManager.GetUsersAsync(t.OwnerId);
+        var action = serviceProvider.GetService<PortalDeactivateNotifyAction>();
+
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, null, owner, EMailSenderName, owner.Email);
+    }
+
+    // asked before the link is built: refused for a repeat, which builds no link; the caller completes the answer once
+    // the letter is sent and disposes it, which releases it after a failure
+    public async Task<NotifyAcceptance> TryAcceptPortalDeletionAsync(Tenant t, bool checkActivation = true)
+    {
+        var owner = await userManager.GetUsersAsync(t.OwnerId);
+        var action = serviceProvider.GetService<PortalDeleteNotifyAction>();
+
+        return await studioNotifyServiceHelper.TryAcceptAsync(action, null, checkActivation ? owner : AddressRecipient(owner.Email), EMailSenderName, owner.Email);
+    }
 
     public async Task SendMsgPortalDeactivationAsync(Tenant t, string deactivateUrl, string activateUrl)
     {
@@ -557,6 +631,25 @@ public class StudioNotifyService(
         portalDeleteSuccessV1NotifyAction.Init(owner, url);
 
         await studioNotifyServiceHelper.SendNoticeToAsync(portalDeleteSuccessV1NotifyAction, [owner], [EMailSenderName]);
+    }
+
+    /// <summary>
+    /// Tells support that the retention policy has blocked a portal that has paid or still has money on its
+    /// wallet, so a manager can step in before the deletion date. Nothing is
+    /// sent when the installation has no support address.
+    /// </summary>
+    public async Task SendMsgPortalBlockedToSupportAsync(string tenantDomain, UserInfo owner, PortalRetentionCategory category, DateTime deleteOn)
+    {
+        var email = commonLinkUtility.GetSupportEmail();
+        if (string.IsNullOrEmpty(email))
+        {
+            return;
+        }
+
+        var action = serviceProvider.GetService<PortalRetentionBlockedToSupportNotifyAction>();
+        action.Init(owner, tenantDomain, category, deleteOn);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(action, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
     }
 
     public async Task SendMsgPaidPortalDeletedToSupportAsync(string tenantDomain, UserInfo owner, CustomerInfo customerInfo)
@@ -761,7 +854,7 @@ public class StudioNotifyService(
     {
         var storageEncryptionErrorNotifyAction = serviceProvider.GetService<StorageEncryptionErrorNotifyAction>();
 
-        var users =  await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
+        var users = await userManager.GetUsersByGroupAsync(ASC.Core.Users.Constants.GroupAdmin.ID);
 
         foreach (var u in users)
         {
@@ -947,5 +1040,14 @@ public class StudioNotifyService(
         }
 
         return culture ?? tenantManager.GetCurrentTenant(false)?.GetCulture() ?? CultureInfo.CurrentUICulture;
+    }
+
+    // the recipient RecipientFromEmailAsync makes of an address, built without counting a letter against the spam
+    // limit of a free portal: asking whether a letter is a repeat sends nothing
+    private static DirectRecipient AddressRecipient(string email)
+    {
+        var address = StudioNotifyHelper.RecipientAddress(email);
+
+        return new DirectRecipient(address, null, [address], false);
     }
 }

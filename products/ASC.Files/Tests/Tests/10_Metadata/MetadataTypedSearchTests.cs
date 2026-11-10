@@ -47,9 +47,9 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
     {
         var data = await ArrangeAsync();
 
-        var body = new { metadataTemplateId = data.TemplateId, metadataFilters = new object[] { new { fieldId = data.FieldId, op = "eq", value = "ACME" } } };
+        var body = new FolderMetadataSearch(data.TemplateId, [new MetadataFilterConditionRequest(fieldId: data.FieldId, op: "eq", value: "ACME")]);
 
-        var content = await PollFolderSearchAsync(data.Api, data.RoomId, body, data.MatchingFolderId, data.MatchingFileId);
+        var content = await PollFolderSearchAsync(data.RoomId, body, data.MatchingFolderId, data.MatchingFileId);
 
         content.FolderIds().Should().Equal(data.MatchingFolderId);
         content.FileIds().Should().Equal(data.MatchingFileId);
@@ -60,10 +60,10 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
     {
         var data = await ArrangeAsync();
 
-        var condition = new { fieldId = data.FieldId, op = "eq", value = "ACME" };
+        var condition = new MetadataFilterConditionRequest(fieldId: data.FieldId, op: "eq", value: "ACME");
 
-        var typed = await PollFolderSearchAsync(data.Api, data.RoomId, new { metadataTemplateId = data.TemplateId, metadataFilters = new object[] { condition } }, data.MatchingFolderId, data.MatchingFileId);
-        var listed = await data.Api.GetFolderContentAsync(data.RoomId, data.TemplateId, [condition], cancellationToken: TestContext.Current.CancellationToken);
+        var typed = await PollFolderSearchAsync(data.RoomId, new FolderMetadataSearch(data.TemplateId, [condition]), data.MatchingFolderId, data.MatchingFileId);
+        var listed = await _foldersApi.GetFolderContentWithMetadataAsync(data.RoomId, data.TemplateId, [condition], cancellationToken: TestContext.Current.CancellationToken);
 
         typed.FolderIds().Should().Equal(listed.FolderIds());
         typed.FileIds().Should().Equal(listed.FileIds());
@@ -75,43 +75,50 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
     {
         var data = await ArrangeAsync();
 
-        var body = new { metadataFilters = new object[] { new { fieldId = int.MaxValue, op = "eq", value = "ACME" } } };
+        var body = new FolderMetadataSearch(metadataFilters: [new MetadataFilterConditionRequest(fieldId: int.MaxValue, op: "eq", value: "ACME")]);
 
-        using var response = await data.Api.SearchFolderResponseAsync(data.RoomId, body, TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SearchFolderWithMetadataAsync(data.RoomId, body, TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the typed road validates the conditions the same way the listing does");
+        exception.ErrorCode.Should().Be(400, "the typed road validates the conditions the same way the listing does");
     }
 
     [Fact]
     public async Task SearchFolder_WithANumberGivenAsAJsonNumber_IsAccepted()
     {
         await _filesClient.Authenticate(Owner);
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Suffix();
 
-        var template = await api.CreateTemplateAsync("Amount " + suffix, [new MetadataFieldPayload { Name = "Amount", Type = 2 }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Amount " + suffix, [new MetadataFieldRequest("Amount", MetadataFieldType.Number)]);
         var fieldId = template.Field("Amount").Id;
         var room = await CreateCustomRoom($"Amount {suffix}");
         var matching = await CreateFolder($"Five {suffix}", room.Id);
         var other = await CreateFolder($"Seven {suffix}", room.Id);
 
-        await api.AssignFolderTemplatesAsync(matching.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.AssignFolderTemplatesAsync(other.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(matching.Id, [new MetadataValuePayload { FieldId = fieldId, NumberValue = 5 }], TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(other.Id, [new MetadataValuePayload { FieldId = fieldId, NumberValue = 7 }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(matching.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(other.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(matching.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, numberValue: 5)]), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(other.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, numberValue: 7)]), TestContext.Current.CancellationToken);
 
         // the value and the bounds are declared as strings; a client building the condition from a number used to get a 400
         var equal = new { metadataTemplateId = template.Id, metadataFilters = new object[] { new { fieldId, op = "eq", value = 5 } } };
         var range = new { metadataTemplateId = template.Id, metadataFilters = new object[] { new { fieldId, op = "range", from = 1, to = 6 } } };
 
-        var byValue = await PollFolderSearchAsync(api, room.Id, equal, c => c.FolderIds().Contains(matching.Id));
+        // raw: MetadataFilterConditionRequest declares value/from/to as strings, so the SDK cannot send a JSON number
+        var raw = new RawApiClient(_filesClient);
+
+        var byValue = await PollFolderSearchAsync(() => SearchFolderRawAsync(raw, room.Id, equal), c => c.FolderIds().Contains(matching.Id));
         byValue.FolderIds().Should().Equal(matching.Id);
 
-        var byRange = await PollFolderSearchAsync(api, room.Id, range, c => c.FolderIds().Contains(matching.Id));
+        var byRange = await PollFolderSearchAsync(() => SearchFolderRawAsync(raw, room.Id, range), c => c.FolderIds().Contains(matching.Id));
         byRange.FolderIds().Should().Equal(matching.Id);
 
-        // the listing takes the same conditions as a JSON string in the query, read by the same converter
-        var listed = await api.GetFolderContentAsync(room.Id, template.Id, [new { fieldId, op = "eq", value = 5 }], cancellationToken: TestContext.Current.CancellationToken);
+        // the listing takes the same conditions as a JSON string in the query, read by the same converter; the string is
+        // built here because the listing helper serializes the typed conditions, whose value is a JSON string
+        var listed = await _foldersApi.GetFolderContentWithMetadataAsync(room.Id,
+            metadataTemplateId: template.Id,
+            rawMetadataFilters: JsonSerializer.Serialize(new object[] { new { fieldId, op = "eq", value = 5 } }),
+            cancellationToken: TestContext.Current.CancellationToken);
         listed.FolderIds().Should().Equal(matching.Id);
     }
 
@@ -121,9 +128,10 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
         var data = await ArrangeAsync();
         var templatesId = await GetSectionRootIdAsync("api/2.0/files/@templates");
 
-        using var response = await data.Api.SearchFolderResponseAsync(templatesId, new { metadataTemplateId = data.TemplateId }, TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.SearchFolderWithMetadataAsync(templatesId, new FolderMetadataSearch(data.TemplateId), TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the section cannot apply the filter whichever road it arrives by");
+        exception.ErrorCode.Should().Be(400, "the section cannot apply the filter whichever road it arrives by");
     }
 
     [Fact]
@@ -135,7 +143,7 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
         await _filesApi.AddFileToRecentAsync(data.MatchingFileId, TestContext.Current.CancellationToken);
         await _filesApi.AddFileToRecentAsync(data.OtherFileId, TestContext.Current.CancellationToken);
 
-        var body = new { metadataTemplateId = data.TemplateId, metadataFilters = new object[] { new { fieldId = data.FieldId, op = "eq", value = "ACME" } } };
+        var body = new FolderMetadataSearch(data.TemplateId, [new MetadataFilterConditionRequest(fieldId: data.FieldId, op: "eq", value: "ACME")]);
 
         // the Recent tag is written after the request returns: the typed search of the section is polled until the file shows up
         var deadline = DateTime.UtcNow.AddSeconds(15);
@@ -143,7 +151,7 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
 
         while (true)
         {
-            content = await data.Api.SearchFolderAsync(recentId, body, TestContext.Current.CancellationToken);
+            content = await _foldersApi.SearchFolderWithMetadataAsync(recentId, body, TestContext.Current.CancellationToken);
 
             if (content.FileIds().Contains(data.MatchingFileId) || DateTime.UtcNow > deadline)
             {
@@ -161,23 +169,22 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
     public async Task SearchRooms_ByCustomFieldName_ReturnsTheMatchingRoom()
     {
         await _filesClient.Authenticate(Owner);
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Suffix();
         var field = $"Client {suffix}";
         var matching = await CreateCustomRoom($"Match {suffix}");
         var other = await CreateCustomRoom($"Other {suffix}");
 
-        await api.SetFolderCustomFieldAsync(matching.Id, field, "ACME", TestContext.Current.CancellationToken);
-        await api.SetFolderCustomFieldAsync(other.Id, field, "Globex", TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderCustomFieldsAsync(matching.Id, new SetCustomFields([new CustomFieldRequest(field, "ACME")]), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderCustomFieldsAsync(other.Id, new SetCustomFields([new CustomFieldRequest(field, "Globex")]), TestContext.Current.CancellationToken);
 
-        var body = new { metadataFilters = new object[] { new { name = field, op = "eq", value = "ACME" } } };
+        var body = new RoomsMetadataSearchRequestDto(metadataFilters: [new MetadataFilterConditionRequest(name: field, op: "eq", value: "ACME")]);
 
         var deadline = DateTime.UtcNow.AddSeconds(15);
         RoomsContentResponse rooms;
 
         while (true)
         {
-            rooms = await api.SearchRoomsAsync(body, TestContext.Current.CancellationToken);
+            rooms = await _roomsApi.SearchRoomsWithMetadataAsync(body, TestContext.Current.CancellationToken);
 
             if (rooms.RoomIds().Contains(matching.Id) || DateTime.UtcNow > deadline)
             {
@@ -195,18 +202,20 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
     /// Repeats the search until both the expected folder and the expected file are in the answer: the two metadata
     /// documents are refreshed independently, so one of them can be visible a moment before the other.
     /// </summary>
-    private static Task<FolderContentResponse> PollFolderSearchAsync(MetadataApiClient api, int folderId, object body, int expectedFolderId, int expectedFileId)
+    private Task<FolderContentResponse> PollFolderSearchAsync(int folderId, FolderMetadataSearch body, int expectedFolderId, int expectedFileId)
     {
-        return PollFolderSearchAsync(api, folderId, body, c => c.FolderIds().Contains(expectedFolderId) && c.FileIds().Contains(expectedFileId));
+        return PollFolderSearchAsync(
+            () => _foldersApi.SearchFolderWithMetadataAsync(folderId, body, TestContext.Current.CancellationToken),
+            c => c.FolderIds().Contains(expectedFolderId) && c.FileIds().Contains(expectedFileId));
     }
 
-    private static async Task<FolderContentResponse> PollFolderSearchAsync(MetadataApiClient api, int folderId, object body, Func<FolderContentResponse, bool> until)
+    private static async Task<FolderContentResponse> PollFolderSearchAsync(Func<Task<FolderContentResponse>> search, Func<FolderContentResponse, bool> until)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
         while (true)
         {
-            var content = await api.SearchFolderAsync(folderId, body, TestContext.Current.CancellationToken);
+            var content = await search();
 
             if (until(content) || DateTime.UtcNow > deadline)
             {
@@ -217,14 +226,20 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
         }
     }
 
+    private static async Task<FolderContentResponse> SearchFolderRawAsync(RawApiClient raw, int folderId, object body)
+    {
+        using var response = await raw.PostAsync($"api/2.0/files/{folderId}/search", body, TestContext.Current.CancellationToken);
+
+        return await MetadataListings.ReadAsync<FolderContentResponse>(response, TestContext.Current.CancellationToken);
+    }
+
     private async Task<SearchData> ArrangeAsync()
     {
         await _filesClient.Authenticate(Owner);
 
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Suffix();
 
-        var template = await api.CreateTemplateAsync("Typed " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = 0 }], TestContext.Current.CancellationToken);
+        var template = await CreateTemplateAsync("Typed " + suffix, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]);
         var fieldId = template.Field(ClientField).Id;
 
         var room = await CreateCustomRoom($"Typed {suffix}");
@@ -233,19 +248,24 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
         var matchingFile = await CreateFile($"matching-{suffix}.docx", room.Id);
         var otherFile = await CreateFile($"other-{suffix}.docx", room.Id);
 
-        await api.AssignFolderTemplatesAsync(matchingFolder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(matchingFolder.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = "ACME" }], TestContext.Current.CancellationToken);
-        await api.AssignFolderTemplatesAsync(otherFolder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(otherFolder.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = "Globex" }], TestContext.Current.CancellationToken);
-        await api.AssignFileTemplatesAsync(matchingFile.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(matchingFile.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = "ACME" }], TestContext.Current.CancellationToken);
-        await api.AssignFileTemplatesAsync(otherFile.Id, [template.Id], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(otherFile.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = "Globex" }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(matchingFolder.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(matchingFolder.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: "ACME")]), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(otherFolder.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(otherFolder.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: "Globex")]), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(matchingFile.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFileValuesAsync(matchingFile.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: "ACME")]), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(otherFile.Id, new AssignMetadataTemplates([template.Id]), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFileValuesAsync(otherFile.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: "Globex")]), TestContext.Current.CancellationToken);
 
-        return new SearchData(api, template.Id, fieldId, room.Id, matchingFolder.Id, matchingFile.Id, otherFile.Id);
+        return new SearchData(template.Id, fieldId, room.Id, matchingFolder.Id, matchingFile.Id, otherFile.Id);
     }
 
-    private sealed record SearchData(MetadataApiClient Api, int TemplateId, int FieldId, int RoomId, int MatchingFolderId, int MatchingFileId, int OtherFileId);
+    private async Task<MetadataTemplateDto> CreateTemplateAsync(string name, List<MetadataFieldRequest> fields)
+    {
+        return (await _metadataApi.CreateTemplateAsync(new CreateMetadataTemplateRequestDto(name, true, fields), TestContext.Current.CancellationToken)).Response;
+    }
+
+    private sealed record SearchData(int TemplateId, int FieldId, int RoomId, int MatchingFolderId, int MatchingFileId, int OtherFileId);
 
     private static string Suffix()
     {

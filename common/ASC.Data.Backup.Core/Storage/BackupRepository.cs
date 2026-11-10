@@ -73,6 +73,16 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
         return await Queries.BackupsAsync(backupContext, tenantId).ToListAsync();
     }
 
+    /// <summary>
+    /// The archive names of the tenant's backups that start with the prefix, deleted ones included:
+    /// a name is only reused once nothing in the history has ever carried it.
+    /// </summary>
+    public async Task<List<string>> GetBackupNamesAsync(int tenantId, string namePrefix)
+    {
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
+        return await Queries.BackupNamesAsync(backupContext, tenantId, namePrefix).ToListAsync();
+    }
+
     public async Task MigrationBackupRecordsAsync(int tenantId, int newTenantId, string region)
     {
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
@@ -101,6 +111,16 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
             backupContext.Update(backup);
             await backupContext.SaveChangesAsync();
         }
+    }
+
+    /// <summary>
+    /// Marks the record as removed unless it already is, and tells whether this call was the one that did
+    /// it. Of several deletes of the same backup running at once exactly one gets true.
+    /// </summary>
+    public async Task<bool> TryMarkBackupRecordRemovedAsync(Guid id)
+    {
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
+        return await Queries.MarkBackupRemovedAsync(backupContext, id) == 1;
     }
 
     public async Task SaveBackupScheduleAsync(BackupSchedule schedule)
@@ -190,6 +210,19 @@ static file class Queries
                 ctx.Backups
 
                     .Where(b => b.TenantId == tenantId && b.Removed == false));
+
+    public static readonly Func<BackupsContext, int, string, IAsyncEnumerable<string>> BackupNamesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (BackupsContext ctx, int tenantId, string namePrefix) =>
+                ctx.Backups
+                    .Where(b => b.TenantId == tenantId && b.Name.StartsWith(namePrefix))
+                    .Select(b => b.Name));
+
+    // Not precompiled on purpose: ExecuteUpdate fails to translate inside EF.CompileAsyncQuery.
+    public static readonly Func<BackupsContext, Guid, Task<int>> MarkBackupRemovedAsync =
+        (ctx, id) => ctx.Backups
+            .Where(b => b.Id == id && b.Removed == false)
+            .ExecuteUpdateAsync(s => s.SetProperty(b => b.Removed, true));
 
     public static readonly Func<BackupsContext, int, IAsyncEnumerable<BackupRecord>> BackupsForMigrationAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

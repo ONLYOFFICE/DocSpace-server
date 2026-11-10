@@ -148,6 +148,44 @@ function buildUpstream(
   };
 }
 
+// The plugin's body goes to the gateway as-is, and the gateway answers a
+// wrong field type with a 500 that names its Go struct fields. Check the
+// fields this route documents before anything is sent, so a malformed body
+// is a 400 naming the field (Bugs 84433, 84434).
+function bodyError(
+  subPath: "search" | "contents",
+  body: Record<string, unknown>,
+): { error: string; field: string } | undefined {
+  const engineName = body["engine"];
+  if (engineName !== undefined && engineName !== null && typeof engineName !== "string") {
+    return { error: "engine must be a string", field: "engine" };
+  }
+  if (subPath === "search") {
+    const query = body["query"];
+    if (typeof query !== "string" || query.trim().length === 0) {
+      return { error: "query is required and must be a non-empty string", field: "query" };
+    }
+    const numResults = body["numResults"];
+    if (
+      numResults !== undefined
+      && numResults !== null
+      && (!Number.isInteger(numResults) || (numResults as number) < 1)
+    ) {
+      return { error: "numResults must be a positive integer", field: "numResults" };
+    }
+    return undefined;
+  }
+  const urls = body["urls"];
+  if (
+    !Array.isArray(urls)
+    || urls.length === 0
+    || !urls.every((u) => typeof u === "string" && u.trim().length > 0)
+  ) {
+    return { error: "urls is required and must be a non-empty array of strings", field: "urls" };
+  }
+  return undefined;
+}
+
 function passthrough(subPath: "search" | "contents") {
   return asyncHandler(async (req, res) => {
     // Needed so an ONLYOFFICE-gateway config resolved from storage gets
@@ -170,6 +208,11 @@ function passthrough(subPath: "search" | "contents") {
       : undefined;
 
     const incoming = isObject(req.body) ? req.body : {};
+    const problem = bodyError(subPath, incoming);
+    if (problem) {
+      res.status(400).json(problem);
+      return;
+    }
     const upstream = buildUpstream(config, subPath, incoming, source);
     if (!upstream) {
       res.status(404).json({ error: "Web search is not configured" });
@@ -197,6 +240,19 @@ function passthrough(subPath: "search" | "contents") {
       }
       // Detail stays in the log — the error can carry the provider URL.
       logger.error(`web-search passthrough: upstream fetch failed: ${err}`);
+      res.status(502).json({ error: "Upstream request failed" });
+      return;
+    }
+
+    // A 5xx from the gateway, or from the AI service in front of it, is not
+    // relayed: its body carries internals (a stack trace, Go type names). The
+    // detail goes to the log and the client gets a fixed 502; 4xx answers
+    // still pass through for the plugin's `formatResponse`.
+    if (response.status >= 500) {
+      const detail = await response.text().catch(() => "");
+      logger.error(
+        `web-search passthrough ${subPath}: upstream answered ${response.status}: ${detail.slice(0, 1000)}`,
+      );
       res.status(502).json({ error: "Upstream request failed" });
       return;
     }

@@ -119,7 +119,7 @@ public class AiSettingsService(
     public async Task<AiSettings> GetAiSettingsAsync()
     {
         var aiStatusTask = accessibility.GetStatusAsync();
-        var toolPermissionModeTask = GetToolPermissionModeAsync();
+        var toolPermissionModeTask = ReadToolPermissionModeAsync();
 
         await Task.WhenAll(aiStatusTask, toolPermissionModeTask);
 
@@ -161,13 +161,15 @@ public class AiSettingsService(
 
     public async Task<ToolPermissionMode> GetToolPermissionModeAsync()
     {
-        var settings = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+        await ThrowIfNotToolPermissionModeAccess();
 
-        return settings.ToolPermissionMode;
+        return await ReadToolPermissionModeAsync();
     }
 
     public async Task<ToolPermissionMode> SetToolPermissionModeAsync(ToolPermissionMode mode)
     {
+        await ThrowIfNotToolPermissionModeAccess();
+
         if (!ToolPermissionModeExtensions.IsDefined(mode))
         {
             throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
@@ -206,6 +208,21 @@ public class AiSettingsService(
         messageService.Send(MessageAction.UserUpdatedAiSettings);
 
         return settings;
+    }
+
+    private async Task<ToolPermissionMode> ReadToolPermissionModeAsync()
+    {
+        var settings = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+
+        return settings.ToolPermissionMode;
+    }
+
+    private async Task ThrowIfNotToolPermissionModeAccess()
+    {
+        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
+        }
     }
 
     private async Task ThrowIfNotAccess()

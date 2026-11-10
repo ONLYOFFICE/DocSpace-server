@@ -31,11 +31,14 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using Aspire.Hosting;
-global using Aspire.Hosting.ApplicationModel;
+global using System.Diagnostics;
+global using System.Globalization;
+global using System.Net;
 
 global using ASC.AppHost.Configuration;
 
+global using Aspire.Hosting;
+global using Aspire.Hosting.ApplicationModel;
 global using Aspire.Hosting.JavaScript;
 
 global using Microsoft.Extensions.DependencyInjection;

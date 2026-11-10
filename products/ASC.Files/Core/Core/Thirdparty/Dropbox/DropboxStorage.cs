@@ -126,13 +126,13 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
 
             return data.AsFile;
         }
-        catch (AggregateException ex)
+        catch (ApiException<GetMetadataError> ex)
         {
-            if (ex.InnerException is ApiException<GetMetadataError>
-                && ex.InnerException.Message.StartsWith("path/not_found/"))
+            if (ex.Message.StartsWith("path/not_found/"))
             {
                 return null;
             }
+
             throw;
         }
     }

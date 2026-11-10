@@ -56,7 +56,7 @@ public class BatchDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
@@ -73,7 +73,7 @@ public class BatchDeletePermissionsTests(
 
         // Act
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -102,7 +102,7 @@ public class BatchDeletePermissionsTests(
         // Act
         await _filesClient.Authenticate(roomAdmin);
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -131,7 +131,7 @@ public class BatchDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -159,7 +159,7 @@ public class BatchDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -183,7 +183,7 @@ public class BatchDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);

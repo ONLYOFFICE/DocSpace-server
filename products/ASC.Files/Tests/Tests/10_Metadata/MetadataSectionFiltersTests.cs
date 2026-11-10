@@ -52,7 +52,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeRecentAsync();
 
         var content = await PollAsync(
-            () => data.Api.GetFolderContentAsync(data.SectionId, data.TemplateId, cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, data.TemplateId, cancellationToken: TestContext.Current.CancellationToken),
             c => c.FileIds().Contains(data.MatchingFileId) && c.FileIds().Contains(data.OtherFileId));
 
         content.FileIds().Should().BeEquivalentTo(new[] { data.MatchingFileId, data.OtherFileId }, "the bare file is in Recent too but carries no template");
@@ -65,7 +65,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeRecentAsync();
 
         var content = await PollAsync(
-            () => data.Api.GetFolderContentAsync(data.SectionId, data.TemplateId, [Eq(data.FieldId, "ACME")], cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, data.TemplateId, [Eq(data.FieldId, "ACME")], cancellationToken: TestContext.Current.CancellationToken),
             c => c.FileIds().Contains(data.MatchingFileId));
 
         content.FileIds().Should().Equal(new[] { data.MatchingFileId }, "the other file carries the template with another value");
@@ -78,10 +78,10 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
 
         // wait for the tags first: the filtered listing must be empty because of the filter, not because the tags are not there yet
         await PollAsync(
-            () => data.Api.GetFolderContentAsync(data.SectionId, cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, cancellationToken: TestContext.Current.CancellationToken),
             c => c.FileIds().Contains(data.MatchingFileId) && c.FileIds().Contains(data.OtherFileId));
 
-        var content = await data.Api.GetFolderContentAsync(data.SectionId, data.TemplateId, [Eq(data.FieldId, "NoSuchClient")], cancellationToken: TestContext.Current.CancellationToken);
+        var content = await _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, data.TemplateId, [Eq(data.FieldId, "NoSuchClient")], cancellationToken: TestContext.Current.CancellationToken);
 
         content.Files.Should().BeEmpty();
         content.Total.Should().Be(0);
@@ -93,7 +93,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeRecentAsync();
 
         var content = await PollAsync(
-            () => data.Api.GetSectionContentAsync("@recent", data.TemplateId, cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetSectionWithMetadataAsync("@recent", data.TemplateId, cancellationToken: TestContext.Current.CancellationToken),
             c => c.FileIds().Contains(data.MatchingFileId) && c.FileIds().Contains(data.OtherFileId));
 
         content.FileIds().Should().BeEquivalentTo(new[] { data.MatchingFileId, data.OtherFileId }, "the bare file carries no template");
@@ -103,11 +103,11 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
     public async Task RecentAlias_WithAnUnknownTemplate_ReturnsBadRequest()
     {
         await _filesClient.Authenticate(Owner);
-        var api = new MetadataApiClient(_filesClient);
 
-        using var response = await api.GetSectionContentResponseAsync("@recent", int.MaxValue, cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.GetSectionWithMetadataAsync("@recent", int.MaxValue, cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the alias validates the filter the same way the folder listing does");
+        exception.ErrorCode.Should().Be(400, "the alias validates the filter the same way the folder listing does");
     }
 
     #endregion
@@ -120,7 +120,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeFavoritesAsync();
 
         var content = await PollAsync(
-            () => data.Api.GetFolderContentAsync(data.SectionId, data.TemplateId, cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, data.TemplateId, cancellationToken: TestContext.Current.CancellationToken),
             c => c.FolderIds().Contains(data.FolderId) && c.FileIds().Contains(data.MatchingFileId));
 
         content.FolderIds().Should().Equal(data.FolderId);
@@ -134,7 +134,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeFavoritesAsync();
 
         var content = await PollAsync(
-            () => data.Api.GetFolderContentAsync(data.SectionId, data.TemplateId, [Eq(data.FieldId, "ACME")], cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, data.TemplateId, [Eq(data.FieldId, "ACME")], cancellationToken: TestContext.Current.CancellationToken),
             c => c.FolderIds().Contains(data.FolderId));
 
         content.FolderIds().Should().Equal(data.FolderId);
@@ -148,7 +148,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeFavoritesAsync();
 
         var content = await PollAsync(
-            () => data.Api.GetSectionContentAsync("@favorites", data.TemplateId, [Eq(data.FieldId, "Globex")], cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetSectionWithMetadataAsync("@favorites", data.TemplateId, [Eq(data.FieldId, "Globex")], cancellationToken: TestContext.Current.CancellationToken),
             c => c.FileIds().Contains(data.MatchingFileId));
 
         content.FileIds().Should().Equal(data.MatchingFileId);
@@ -165,7 +165,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeShareAsync();
 
         var content = await PollAsync(
-            () => data.Api.GetFolderContentAsync(data.SectionId, data.TemplateId, cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, data.TemplateId, cancellationToken: TestContext.Current.CancellationToken),
             c => c.FolderIds().Contains(data.FolderId) && c.FileIds().Contains(data.MatchingFileId));
 
         content.FolderIds().Should().Equal(data.FolderId);
@@ -179,7 +179,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeShareAsync();
 
         var content = await PollAsync(
-            () => data.Api.GetFolderContentAsync(data.SectionId, data.TemplateId, [Eq(data.FieldId, "ACME")], cancellationToken: TestContext.Current.CancellationToken),
+            () => _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, data.TemplateId, [Eq(data.FieldId, "ACME")], cancellationToken: TestContext.Current.CancellationToken),
             c => c.FileIds().Contains(data.MatchingFileId));
 
         content.FileIds().Should().Equal(data.MatchingFileId);
@@ -193,7 +193,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var data = await ArrangeShareAsync();
 
         // guards the tests above: the filter is what narrows the listing, not the share itself
-        var content = await data.Api.GetFolderContentAsync(data.SectionId, cancellationToken: TestContext.Current.CancellationToken);
+        var content = await _foldersApi.GetFolderContentWithMetadataAsync(data.SectionId, cancellationToken: TestContext.Current.CancellationToken);
 
         content.FolderIds().Should().Equal(data.FolderId);
         content.FileIds().Should().BeEquivalentTo(new[] { data.MatchingFileId, data.OtherFileId });
@@ -207,13 +207,13 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
     public async Task Templates_WithMetadataTemplateFilter_ReturnsBadRequest()
     {
         await _filesClient.Authenticate(Owner);
-        var api = new MetadataApiClient(_filesClient);
-        var template = await CreateTemplateAsync(api);
+        var template = await CreateTemplateAsync();
         var templatesId = await GetSectionRootIdAsync("api/2.0/files/@templates");
 
-        using var response = await api.GetFolderContentResponseAsync(templatesId, metadataTemplateId: template.Id, cancellationToken: TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.GetFolderContentWithMetadataAsync(templatesId, metadataTemplateId: template.Id, cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the section cannot apply the filter and must not pretend it did");
+        exception.ErrorCode.Should().Be(400, "the section cannot apply the filter and must not pretend it did");
     }
 
     #endregion
@@ -228,17 +228,16 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
     {
         await _filesClient.Authenticate(Owner);
 
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Suffix();
-        var template = await CreateTemplateAsync(api);
+        var template = await CreateTemplateAsync();
         var fieldId = template.Field(ClientField).Id;
 
         var matching = await CreateFileInMy($"matching-{suffix}.docx", Owner);
         var other = await CreateFileInMy($"other-{suffix}.docx", Owner);
         var bare = await CreateFileInMy($"bare-{suffix}.docx", Owner);
 
-        await SetFileValueAsync(api, matching.Id, template.Id, fieldId, "ACME");
-        await SetFileValueAsync(api, other.Id, template.Id, fieldId, "Globex");
+        await SetFileValueAsync(matching.Id, template.Id, fieldId, "ACME");
+        await SetFileValueAsync(other.Id, template.Id, fieldId, "Globex");
 
         foreach (var fileId in new[] { matching.Id, other.Id, bare.Id })
         {
@@ -247,7 +246,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
 
         var sectionId = await GetFolderIdAsync(FolderType.Recent, Owner);
 
-        return new SectionData(api, template.Id, fieldId, sectionId, 0, matching.Id, other.Id);
+        return new SectionData(template.Id, fieldId, sectionId, 0, matching.Id, other.Id);
     }
 
     /// <summary>
@@ -257,18 +256,17 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
     {
         await _filesClient.Authenticate(Owner);
 
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Suffix();
-        var template = await CreateTemplateAsync(api);
+        var template = await CreateTemplateAsync();
         var fieldId = template.Field(ClientField).Id;
 
         var folder = await CreateFolderInMy($"Favorite {suffix}", Owner);
         var matching = await CreateFileInMy($"matching-{suffix}.docx", Owner);
         var bare = await CreateFileInMy($"bare-{suffix}.docx", Owner);
 
-        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(folder.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = "ACME" }], TestContext.Current.CancellationToken);
-        await SetFileValueAsync(api, matching.Id, template.Id, fieldId, "Globex");
+        await _metadataApi.AssignFolderTemplatesAsync(folder.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(folder.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: "ACME")]), TestContext.Current.CancellationToken);
+        await SetFileValueAsync(matching.Id, template.Id, fieldId, "Globex");
 
         await _filesOperationsApi.AddFavoritesAsync(new BaseBatchRequestDto
         {
@@ -278,7 +276,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
 
         var sectionId = await GetFolderIdAsync(FolderType.Favorites, Owner);
 
-        return new SectionData(api, template.Id, fieldId, sectionId, folder.Id, matching.Id, bare.Id);
+        return new SectionData(template.Id, fieldId, sectionId, folder.Id, matching.Id, bare.Id);
     }
 
     /// <summary>
@@ -289,9 +287,8 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
     {
         await _filesClient.Authenticate(Owner);
 
-        var api = new MetadataApiClient(_filesClient);
         var suffix = Suffix();
-        var template = await CreateTemplateAsync(api);
+        var template = await CreateTemplateAsync();
         var fieldId = template.Field(ClientField).Id;
         var user = await InviteContact(EmployeeType.User);
 
@@ -299,9 +296,9 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         var matching = await CreateFileInMy($"matching-{suffix}.docx", Owner);
         var bare = await CreateFileInMy($"bare-{suffix}.docx", Owner);
 
-        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        await api.SetFolderValuesAsync(folder.Id, [new MetadataValuePayload { FieldId = fieldId, StringValue = "Globex" }], TestContext.Current.CancellationToken);
-        await SetFileValueAsync(api, matching.Id, template.Id, fieldId, "ACME");
+        await _metadataApi.AssignFolderTemplatesAsync(folder.Id, new AssignMetadataTemplates([template.Id], cascade: false), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFolderValuesAsync(folder.Id, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: "Globex")]), TestContext.Current.CancellationToken);
+        await SetFileValueAsync(matching.Id, template.Id, fieldId, "ACME");
 
         var share = new SecurityInfoSimpleRequestDto { Share = [new FileShareParams { ShareTo = user.Id, Access = FileShare.Read }] };
 
@@ -309,26 +306,28 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
         await _sharingApi.SetFileSecurityInfoAsync(matching.Id, share, TestContext.Current.CancellationToken);
         await _sharingApi.SetFileSecurityInfoAsync(bare.Id, share, TestContext.Current.CancellationToken);
 
-        // GetShareFolderIdAsync authenticates the client as the user; the api client shares that HttpClient
+        // GetShareFolderIdAsync authenticates the client as the user; the SDK clients share that HttpClient
         var sectionId = await GetShareFolderIdAsync(user);
 
-        return new SectionData(api, template.Id, fieldId, sectionId, folder.Id, matching.Id, bare.Id);
+        return new SectionData(template.Id, fieldId, sectionId, folder.Id, matching.Id, bare.Id);
     }
 
-    private static async Task<MetadataTemplateResponse> CreateTemplateAsync(MetadataApiClient api)
+    private async Task<MetadataTemplateDto> CreateTemplateAsync()
     {
-        return await api.CreateTemplateAsync("Sections " + Suffix(), [new MetadataFieldPayload { Name = ClientField, Type = 0 }], TestContext.Current.CancellationToken);
+        return (await _metadataApi.CreateTemplateAsync(
+            new CreateMetadataTemplateRequestDto("Sections " + Suffix(), true, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]),
+            TestContext.Current.CancellationToken)).Response;
     }
 
-    private static async Task SetFileValueAsync(MetadataApiClient api, int fileId, int templateId, int fieldId, string value)
+    private async Task SetFileValueAsync(int fileId, int templateId, int fieldId, string value)
     {
-        await api.AssignFileTemplatesAsync(fileId, [templateId], TestContext.Current.CancellationToken);
-        await api.SetFileValuesAsync(fileId, [new MetadataValuePayload { FieldId = fieldId, StringValue = value }], TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFileTemplatesAsync(fileId, new AssignMetadataTemplates([templateId]), TestContext.Current.CancellationToken);
+        await _metadataApi.SetFileValuesAsync(fileId, new SetMetadataValues([new MetadataValueRequest(fieldId, stringValue: value)]), TestContext.Current.CancellationToken);
     }
 
-    private static object Eq(int fieldId, string value)
+    private static MetadataFilterConditionRequest Eq(int fieldId, string value)
     {
-        return new { fieldId, op = "eq", value };
+        return new MetadataFilterConditionRequest(fieldId: fieldId, op: "eq", value: value);
     }
 
     /// <summary>
@@ -360,7 +359,7 @@ public class MetadataSectionFiltersTests(AspireAppFixture fixture) : BaseTest(fi
 
     /// <param name="FolderId">the folder under test, 0 for Recent which lists files only</param>
     /// <param name="OtherFileId">the second file: the one with another value in Recent, the bare one in Favorites and Share</param>
-    private sealed record SectionData(MetadataApiClient Api, int TemplateId, int FieldId, int SectionId, int FolderId, int MatchingFileId, int OtherFileId);
+    private sealed record SectionData(int TemplateId, int FieldId, int SectionId, int FolderId, int MatchingFileId, int OtherFileId);
 
     #endregion
 }

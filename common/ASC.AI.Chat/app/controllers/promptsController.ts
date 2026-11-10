@@ -32,12 +32,168 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { PromptsEngine } from "@onlyoffice/ai-chat/core";
-import type { CreatePromptInput, PromptBundle } from "@onlyoffice/ai-chat/core";
+import type {
+  CreatePromptInput,
+  FolderMutationResult,
+  ImportError,
+  ImportMode,
+  ImportResult,
+  PromptBundle,
+  PromptMutationResult,
+} from "@onlyoffice/ai-chat/core";
+import type { Response } from "express";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { asString, isObject } from "../narrow.js";
 
 const engine = new PromptsEngine({ storage });
+
+// A refusal as the engine reports it: `{ success: false, error }` with the
+// field named. The engine returns these instead of throwing, so the HTTP
+// status is the controller's to pick (Bugs 84307-84311): `code` says why
+// when the library sets it, and the message wording is the fallback for a
+// library that predates the field.
+type RefusalError = ImportError["error"];
+
+function refusalStatus(error: RefusalError): number {
+  const code = (error as { code?: string }).code;
+  if (code === "not_found") return 404;
+  if (code === "conflict") return 409;
+  if (code !== undefined) return 400;
+  if (/not found/i.test(error.message)) return 404;
+  if (/already exists/i.test(error.message)) return 409;
+  return 400;
+}
+
+function sendMutation(res: Response, result: PromptMutationResult | FolderMutationResult): void {
+  res.status(result.success ? 200 : refusalStatus(result.error)).json(result);
+}
+
+// An import answers 409 only when every refusal is a clash with the
+// caller's library, and 400 for anything else (a bad version, a dangling
+// folder reference, an empty entry), so a client offers "merge anyway" only
+// where it applies. A library clash exists in `merge` mode alone: `replace`
+// wipes the library first, so any refusal there is the bundle's own fault.
+// Twins inside the bundle are caught before the engine (`bundleTwinErrors`),
+// since the engine reports them with the same `conflict` code.
+function sendImport(res: Response, result: ImportResult, mode: ImportMode | undefined): void {
+  if (result.success) {
+    res.json(result);
+    return;
+  }
+  const statuses = result.errors.map((e) => refusalStatus(e.error));
+  const libraryClash =
+    mode !== "replace" && statuses.length > 0 && statuses.every((s) => s === 409);
+  res.status(libraryClash ? 409 : 400).json(result);
+}
+
+// Two folders, or two prompts of one folder, sharing a name - compared the
+// way the engine compares them (case-insensitively, the folder scope by the
+// bundle's own ids). The second twin is the one reported, as in the engine.
+// Blank names are left to the engine, which refuses them as `required`.
+function bundleTwinErrors(bundle: PromptBundle): ImportError[] {
+  const errors: ImportError[] = [];
+  const folderNames = new Set<string>();
+  for (const folder of bundle.folders) {
+    if (!folder.name.trim()) continue;
+    const key = folder.name.toLowerCase();
+    if (folderNames.has(key)) {
+      errors.push({
+        kind: "folder",
+        ref: folder.name.trim(),
+        error: { field: "name", message: "The bundle holds two folders of this name", code: "invalid" },
+      });
+      continue;
+    }
+    folderNames.add(key);
+  }
+  const promptNames = new Set<string>();
+  for (const prompt of bundle.prompts) {
+    if (!prompt.name.trim()) continue;
+    const key = `${prompt.folderId ?? ""}\u0000${prompt.name.toLowerCase()}`;
+    if (promptNames.has(key)) {
+      errors.push({
+        kind: "prompt",
+        ref: prompt.name.trim(),
+        error: {
+          field: "name",
+          message: "The bundle holds two prompts of this name in one folder",
+          code: "invalid",
+        },
+      });
+      continue;
+    }
+    promptNames.add(key);
+  }
+  return errors;
+}
+
+// Shape refusals raised here, before the engine: the same `{ success:
+// false, error }` body the engine produces, so the widget's stores read
+// them the same way. The engine assumes typed input and calls `.trim()`
+// on `name` / `text`, which made a number or null a 500 (Bug 84429).
+function shapeRefusal(res: Response, field: "name" | "text", message: string): void {
+  res.status(400).json({ success: false, error: { field, message, code: "invalid" } });
+}
+
+function isOptionalString(v: unknown): v is string | undefined {
+  return v === undefined || typeof v === "string";
+}
+
+function isFolderRef(v: unknown): v is string | null | undefined {
+  return v === undefined || v === null || typeof v === "string";
+}
+
+// A bundle as `POST prompts/import-bundle` accepts it: the exact shape
+// `GET prompts/export` produces. Anything else used to reach the engine,
+// which dereferences `bundle.version` / `.folders` / `.prompts` unguarded
+// and answered 500 (Bug 84423). Returns the refusals, empty when the
+// bundle is well-formed.
+function bundleShapeErrors(bundle: unknown): ImportError[] {
+  const refuse = (kind: ImportError["kind"], ref: string, message: string): ImportError => ({
+    kind,
+    ref,
+    error: { field: "name", message, code: "invalid" } as ImportError["error"],
+  });
+  if (!isObject(bundle)) {
+    return [refuse("folder", "<bundle>", "bundle is required and must be an object")];
+  }
+  if (bundle["version"] !== 1) {
+    return [refuse("folder", "<bundle>", `Unsupported bundle version: ${String(bundle["version"])}`)];
+  }
+  const errors: ImportError[] = [];
+  const folders = bundle["folders"];
+  const prompts = bundle["prompts"];
+  if (!Array.isArray(folders)) {
+    errors.push(refuse("folder", "<bundle>", "bundle.folders must be an array"));
+  } else {
+    folders.forEach((f, i) => {
+      if (!isObject(f) || typeof f["id"] !== "string" || typeof f["name"] !== "string") {
+        errors.push(refuse("folder", `folders[${i}]`, "a folder needs string id and name"));
+      }
+    });
+  }
+  if (!Array.isArray(prompts)) {
+    errors.push(refuse("prompt", "<bundle>", "bundle.prompts must be an array"));
+  } else {
+    prompts.forEach((p, i) => {
+      if (
+        !isObject(p)
+        || typeof p["id"] !== "string"
+        || typeof p["name"] !== "string"
+        || typeof p["text"] !== "string"
+        || !isFolderRef(p["folderId"])
+      ) {
+        errors.push(
+          refuse("prompt", `prompts[${i}]`, "a prompt needs string id, name and text, and a string or null folderId"),
+        );
+      }
+    });
+  }
+  return errors;
+}
+
+const IMPORT_MODES: ReadonlySet<string> = new Set(["merge", "replace"]);
 
 interface UpdateBody {
   id: string;
@@ -66,23 +222,74 @@ interface ImportBody {
 }
 
 export const promptsController = {
-  create: asyncHandler<CreatePromptInput>(async (req, res) => {
-    const result = await engine.create(req.body);
-    res.json(result);
+  create: asyncHandler(async (req, res) => {
+    const body: unknown = req.body;
+    if (!isObject(body)) {
+      shapeRefusal(res, "name", "the request body must be an object");
+      return;
+    }
+    if (typeof body["name"] !== "string") {
+      shapeRefusal(res, "name", "name is required and must be a string");
+      return;
+    }
+    if (typeof body["text"] !== "string") {
+      shapeRefusal(res, "text", "text is required and must be a string");
+      return;
+    }
+    if (!isFolderRef(body["folderId"])) {
+      shapeRefusal(res, "name", "folderId must be a string or null");
+      return;
+    }
+    const input: CreatePromptInput = {
+      name: body["name"],
+      text: body["text"],
+      folderId: body["folderId"],
+    };
+    sendMutation(res, await engine.create(input));
   }),
 
   update: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id", "updates"] as const);
-    const updates = (args.updates as Partial<UpdateBody>) ?? {};
-    const result = await engine.update(args.id as string, updates);
-    res.json(result);
+    if (typeof args.id !== "string" || args.id.length === 0) {
+      shapeRefusal(res, "name", "id is required and must be a string");
+      return;
+    }
+    const updates: unknown = args.updates ?? {};
+    if (!isObject(updates)) {
+      shapeRefusal(res, "name", "updates must be an object");
+      return;
+    }
+    if (!isOptionalString(updates["name"])) {
+      shapeRefusal(res, "name", "name must be a string");
+      return;
+    }
+    if (!isOptionalString(updates["text"])) {
+      shapeRefusal(res, "text", "text must be a string");
+      return;
+    }
+    if (!isFolderRef(updates["folderId"])) {
+      shapeRefusal(res, "name", "folderId must be a string or null");
+      return;
+    }
+    const patch: Partial<UpdateBody> = {};
+    if (updates["name"] !== undefined) patch.name = updates["name"];
+    if (updates["text"] !== undefined) patch.text = updates["text"];
+    if (updates["folderId"] !== undefined) patch.folderId = updates["folderId"];
+    sendMutation(res, await engine.update(args.id, patch));
   }),
 
   move: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id", "folderId"] as const);
-    const folderId = args.folderId === undefined ? null : (args.folderId as string | null);
-    const result = await engine.move(args.id as string, folderId);
-    res.json(result);
+    if (typeof args.id !== "string" || args.id.length === 0) {
+      shapeRefusal(res, "name", "id is required and must be a string");
+      return;
+    }
+    if (!isFolderRef(args.folderId)) {
+      shapeRefusal(res, "name", "folderId must be a string or null");
+      return;
+    }
+    const folderId = args.folderId === undefined ? null : args.folderId;
+    sendMutation(res, await engine.move(args.id, folderId));
   }),
 
   delete: asyncHandler(async (req, res) => {
@@ -110,14 +317,24 @@ export const promptsController = {
 
   createFolder: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name"] as const);
-    const result = await engine.createFolder(args.name as string);
-    res.json(result);
+    if (typeof args.name !== "string") {
+      shapeRefusal(res, "name", "name is required and must be a string");
+      return;
+    }
+    sendMutation(res, await engine.createFolder(args.name));
   }),
 
   renameFolder: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id", "name"] as const);
-    const result = await engine.renameFolder(args.id as string, args.name as string);
-    res.json(result);
+    if (typeof args.id !== "string" || args.id.length === 0) {
+      shapeRefusal(res, "name", "id is required and must be a string");
+      return;
+    }
+    if (typeof args.name !== "string") {
+      shapeRefusal(res, "name", "name is required and must be a string");
+      return;
+    }
+    sendMutation(res, await engine.renameFolder(args.id, args.name));
   }),
 
   deleteFolder: asyncHandler(async (req, res) => {
@@ -152,10 +369,41 @@ export const promptsController = {
 
   importBundle: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["bundle", "options"] as const);
+    const shapeErrors = bundleShapeErrors(args.bundle);
+    if (shapeErrors.length > 0) {
+      res.status(400).json({ success: false, errors: shapeErrors });
+      return;
+    }
     const bundle = args.bundle as PromptBundle;
-    const options = args.options as { mode?: "merge" | "replace" } | undefined;
-    const result = await engine.importBundle(bundle, options);
-    res.json(result);
+    const options: unknown = args.options;
+    let mode: ImportMode | undefined;
+    if (options !== undefined && options !== null) {
+      const rawMode = isObject(options) ? options["mode"] : options;
+      if (rawMode !== undefined && (typeof rawMode !== "string" || !IMPORT_MODES.has(rawMode))) {
+        res.status(400).json({
+          success: false,
+          errors: [
+            {
+              kind: "folder",
+              ref: "<options>",
+              error: { field: "name", message: "options.mode must be merge or replace", code: "invalid" },
+            },
+          ],
+        });
+        return;
+      }
+      mode = rawMode as ImportMode | undefined;
+    }
+    const twinErrors = bundleTwinErrors(bundle);
+    if (twinErrors.length > 0) {
+      res.status(400).json({ success: false, errors: twinErrors });
+      return;
+    }
+    sendImport(
+      res,
+      await engine.importBundle(bundle, mode === undefined ? undefined : { mode }),
+      mode,
+    );
   }),
 
   getById: asyncHandler(async (req, res) => {

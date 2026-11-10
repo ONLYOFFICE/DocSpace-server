@@ -243,6 +243,21 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Izveštaj o korisničkim operacijama preuzet</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Ograničenje potrošnje za uslugu je kreirano: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Ograničenje potrošnje za uslugu je ažurirano: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Ograničenje potrošnje za uslugu je izbrisano: {0}, {1}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Lična ograničenja potrošnje za uslugu su postavljena: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Lična ograničenja potrošnje za uslugu su onemogućena: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Pretplata korisnika je ažurirana: {0}</value>
   </data>
@@ -722,6 +737,12 @@
   </data>
   <data name="PortalDeactivated" xml:space="preserve">
     <value>Portal deaktiviran</value>
+  </data>
+  <data name="PortalBlocked" xml:space="preserve">
+    <value>Portal blokiran politikom čuvanja podataka</value>
+  </data>
+  <data name="PortalUnblocked" xml:space="preserve">
+    <value>Portal deblokiran</value>
   </data>
   <data name="PortalDeleted" xml:space="preserve">
     <value>Portal obrisan</value>
@@ -1221,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI profil dodeljen AI agentu za radnju: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>BYOK ključ za AI model je obrisan: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>BYOK ključ za AI model je postavljen: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Podešavanja agenta za dokumente su ažurirana</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI profil dodeljen radnji: {0}</value>
   </data>
@@ -1292,5 +1322,26 @@
   </data>
   <data name="MetadataValuesUpdated" xml:space="preserve">
     <value>Vrednosti metapodataka su ažurirane: {0}</value>
+  </data>
+  <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
+    <value>Datoteku je otvorila skripta Document Builder: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Aplikacija omogućena: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Aplikacija onemogućena: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Sobe povezane sa AI projektom {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Sobe odvezane od AI projekta {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>AI model AI projekta {0} je promenjen u {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Isporuka webhook-a je ponovo pokušana: {0}</value>
   </data>
 </root>

@@ -148,6 +148,27 @@ public class RabbitListenerContainerFactoryConfiguration {
   }
 
   /**
+   * Creates a listener container factory that hands messages over unconverted, for listeners that
+   * must accept any payload, such as those draining dead letters: with the JSON converter a payload
+   * that does not convert would be rejected before the listener ever sees it.
+   *
+   * @param connectionFactory the RabbitMQ connection factory.
+   * @return a factory whose containers deliver raw messages.
+   */
+  @Bean("rabbitRawListenerContainerFactory")
+  public SimpleRabbitListenerContainerFactory rabbitRawListenerContainerFactory(
+      ConnectionFactory connectionFactory) {
+    log.info("Building a raw message listener container factory");
+
+    var factory = new SimpleRabbitListenerContainerFactory();
+    factory.setConnectionFactory(connectionFactory);
+    factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
+    factory.setDefaultRequeueRejected(false);
+    factory.setPrefetchCount(20);
+    return factory;
+  }
+
+  /**
    * Configures a {@link SimpleRabbitListenerContainerFactory} bean for RabbitMQ listeners with
    * manual acknowledgment. This factory ensures that messages are acknowledged explicitly by the
    * listener, allowing for better control over message processing and error handling. It is

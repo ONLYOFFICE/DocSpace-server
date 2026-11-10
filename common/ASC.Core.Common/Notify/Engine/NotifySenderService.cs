@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Threading.Channels;
-
 namespace ASC.Core.Common.Notify.Engine;
 
 [Singleton]

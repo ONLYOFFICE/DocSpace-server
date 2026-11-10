@@ -44,17 +44,18 @@ public class ToolPrefsStorageService(
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
+    private static readonly EmployeeType[] _tenantWriteTypes = [EmployeeType.DocSpaceAdmin];
 
-    public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAsync(string? entityId = null)
+    public async Task<IReadOnlyDictionary<string, ToolPreference>> ReadAsync(string? entityId = null, ToolPrefsScope scope = ToolPrefsScope.User)
     {
         var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
 
-        return await ReadVerifiedAsync(entryId);
+        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), GetCreatedBy(scope), entryId);
     }
 
-    public async Task UpsertDisabledAsync(IReadOnlyDictionary<string, HashSet<string>> disabled, string? entityId = null)
+    public async Task UpsertDisabledAsync(IReadOnlyDictionary<string, HashSet<string>> disabled, string? entityId = null, ToolPrefsScope scope = ToolPrefsScope.User)
     {
-        var entryId = await AssertUserHasAccessAsync(_allowedTypes, entityId);
+        var entryId = await AssertUserHasAccessAsync(scope == ToolPrefsScope.Tenant ? _tenantWriteTypes : _allowedTypes, entityId);
 
         if (disabled.Count == 0)
         {
@@ -62,7 +63,7 @@ public class ToolPrefsStorageService(
         }
 
         var items = disabled.ToDictionary(kv => kv.Key, kv => new ToolPreference { Disabled = kv.Value });
-        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, items, entryId);
+        await storage.UpsertAsync(tenantManager.GetCurrentTenantId(), GetCreatedBy(scope), items, entryId);
     }
 
     public async Task UpsertAllowAlwaysAsync(IReadOnlyDictionary<string, HashSet<string>> allowAlways, string? entityId = null)
@@ -83,8 +84,8 @@ public class ToolPrefsStorageService(
         return await storage.ReadByScopesAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, firstEntryId, secondEntryId);
     }
 
-    private async Task<IReadOnlyDictionary<string, ToolPreference>> ReadVerifiedAsync(int? entryId)
+    private Guid GetCreatedBy(ToolPrefsScope scope)
     {
-        return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, entryId);
+        return scope == ToolPrefsScope.Tenant ? ToolPrefsStorage.TenantScopeCreatedBy : CurrentUserId;
     }
 }

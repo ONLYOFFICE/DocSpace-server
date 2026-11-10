@@ -231,6 +231,9 @@
   <data name="ButtonConfirmTermination" xml:space="preserve">
     <value>Confirmare închidere cont</value>
   </data>
+  <data name="ButtonContactSupport" xml:space="preserve">
+    <value>Contactează asistența</value>
+  </data>
   <data name="ButtonDeactivatePortal" xml:space="preserve">
     <value>Dezactivare portal</value>
   </data>
@@ -257,6 +260,12 @@
   </data>
   <data name="ButtonJoinRoom" xml:space="preserve">
     <value>Participare la sala</value>
+  </data>
+  <data name="ButtonKeepPortal" xml:space="preserve">
+    <value>Păstrează-mi spațiul</value>
+  </data>
+  <data name="ButtonKeepSpaceAndFunds" xml:space="preserve">
+    <value>Păstrează-mi spațiul și fondurile</value>
   </data>
   <data name="ButtonLeaveFeedback" xml:space="preserve">
     <value>Lasati un feedback</value>
@@ -288,8 +297,14 @@
   <data name="ButtonSetPassword" xml:space="preserve">
     <value>Setare parolă</value>
   </data>
+  <data name="ButtonShareFeedback" xml:space="preserve">
+    <value>Trimite feedback</value>
+  </data>
   <data name="ButtonStartFreeTrial" xml:space="preserve">
     <value>Începeți o perioadă de încercare gratuită</value>
+  </data>
+  <data name="ButtonUnblockPortal" xml:space="preserve">
+    <value>Deblochează-mi spațiul</value>
   </data>
   <data name="ButtonUpgrade" xml:space="preserve">
     <value>Face upgrade</value>
@@ -743,6 +758,186 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portalul ${PortalUrl} a fost blocat de politica de păstrare a datelor: nu a fost folosit sau abonamentul său nu a fost reînnoit; categoria de mai jos arată care dintre cazuri.
+
+*Portal:* ${PortalUrl}
+*Proprietar:* ${UserName} ${UserEmail}
+*Categorie:* ${Category}
+*Data ștergerii:* ${DeleteDate}
+
+Dacă nu este deblocat, portalul și toate datele sale vor fi șterse la această dată.
+
+Dacă proprietarul cere păstrarea lui, reactivați portalul înainte de această dată.</value>
+  </data>
+  <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
+    <value>h1.Spațiul dvs. este blocat, dar încă nu s-a pierdut nimic
+
+#if($Unpaid == "True")
+Deoarece abonamentul spațiului dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, a expirat, l-am blocat deocamdată. Asta înseamnă că nimeni din echipa dvs. nu se poate conecta momentan, dar toate documentele și setările dvs. sunt încă în siguranță.
+#else
+Deoarece spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, nu a mai fost folosit de ceva vreme, l-am blocat deocamdată. Asta înseamnă că nimeni din echipa dvs. nu se poate conecta momentan, dar toate documentele și setările dvs. sunt încă în siguranță.
+#end
+
+Vă vom păstra datele până *$DeleteDate*. După aceea, spațiul și tot conținutul său vor fi șterse definitiv.
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Vestea bună: nu este prea târziu. Deblocați spațiul până la $DeleteDateShort, apoi reînnoiți abonamentul pentru a vă relua activitatea. Totul va fi exact unde l-ați lăsat.
+#else
+Vestea bună: nu este prea târziu. Deblocați spațiul până la $DeleteDateShort și totul va fi exact unde l-ați lăsat.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există date pe care doriți să le păstrați, deblocați spațiul și faceți o copie de rezervă până la $DeleteDateShort.
+#else
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există fișiere pe care doriți să le păstrați, deblocați spațiul și descărcați-le până la $DeleteDateShort.
+#end
+#else
+Vestea bună: nu este prea târziu. Contactați echipa noastră de asistență până la $DeleteDateShort și vă vom ajuta să vă recuperați spațiul exact așa cum l-ați lăsat.
+
+$OrangeButton
+
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există fișiere pe care doriți să le păstrați, anunțați-ne până la $DeleteDateShort și vă vom ajuta să le accesați.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
+    <value>h1.Spațiul dvs. a fost șters
+
+#if($Unpaid == "True")
+Deoarece abonamentul spațiului dvs. ${LetterLogoText}, *$PortalName*, a expirat și nu a fost reînnoit, l-am șters împreună cu toate datele sale, așa cum este descris în "Politica de confidențialitate":"$URL1".
+#else
+Deoarece spațiul dvs. ${LetterLogoText}, *$PortalName*, nu a mai fost folosit de mult timp, l-am șters împreună cu toate datele sale, așa cum este descris în "Politica de confidențialitate":"$URL1".
+#end
+
+#if($Unpaid == "True")
+Vă mulțumim că ați lucrat cu noi. Ne-ar plăcea mult să aflăm de ce ați renunțat la el: ceva nu a funcționat, ați găsit o soluție mai potrivită sau pur și simplu nu mai aveați nevoie de el? Durează doar un minut, iar fiecare răspuns ne ajută să ne îmbunătățim.
+#else
+Vă mulțumim că ați încercat ${LetterLogoText}. Ne-ar plăcea mult să aflăm de ce ați renunțat la el: ceva nu a funcționat, ați găsit o soluție mai potrivită sau pur și simplu nu mai aveați nevoie de el? Durează doar un minut, iar fiecare răspuns ne ajută să ne îmbunătățim.
+#end
+
+$OrangeButton
+
+Dacă veți dori vreodată să reveniți, sunteți întotdeauna bineveniți. Puteți "crea un spațiu nou":"$URL2" oricând.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>h1.Spațiul dvs. va fi șters în curând
+
+#if($Unpaid == "True")
+#if($FinalNotice == "True")
+Spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, este în continuare blocat, deoarece abonamentul său a expirat. Acesta este un ultim memento prietenos: pe *$DeleteDate*, spațiul și toate datele sale vor fi șterse definitiv.
+#else
+Spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, este în continuare blocat, deoarece abonamentul său a expirat. Acesta este un memento prietenos: pe *$DeleteDate*, spațiul și toate datele sale vor fi șterse definitiv.
+#end
+#else
+#if($FinalNotice == "True")
+Spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, este în continuare blocat, deoarece nu a mai fost folosit de ceva vreme. Acesta este un ultim memento prietenos: pe *$DeleteDate*, spațiul și toate datele sale vor fi șterse definitiv.
+#else
+Spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, este în continuare blocat, deoarece nu a mai fost folosit de ceva vreme. Acesta este un memento prietenos: pe *$DeleteDate*, spațiul și toate datele sale vor fi șterse definitiv.
+#end
+#end
+
+#if($CanUnblock == "True")
+#if($Unpaid == "True")
+Dacă doriți să îl păstrați, mai este timp. Deblocați spațiul până la $DeleteDateShort, apoi reînnoiți abonamentul pentru a vă relua activitatea. Totul va fi exact unde l-ați lăsat.
+#else
+Dacă doriți să îl păstrați, mai este timp. Deblocați spațiul până la $DeleteDateShort și totul va fi exact unde l-ați lăsat.
+#end
+
+$OrangeButton
+
+#if($Unpaid == "True")
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există date pe care doriți să le păstrați, deblocați spațiul și faceți o copie de rezervă până la $DeleteDateShort, deoarece după aceea nu le vom mai putea recupera.
+#else
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există fișiere pe care doriți să le păstrați, deblocați spațiul și descărcați-le până la $DeleteDateShort, deoarece după aceea nu le vom mai putea recupera.
+#end
+#else
+Dacă doriți să îl păstrați, mai este timp. Contactați echipa noastră de asistență până la $DeleteDateShort și vă vom ajuta să vă recuperați spațiul exact așa cum l-ați lăsat.
+
+$OrangeButton
+
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Dacă există fișiere pe care doriți să le păstrați, anunțați-ne până la $DeleteDateShort și vă vom ajuta să le accesați, deoarece după aceea nu le vom mai putea recupera.
+#end
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>h1.Nu v-am mai văzut de ceva vreme
+
+A trecut ceva timp de când nimeni nu s-a mai conectat la spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*. Am vrut să vă contactăm înainte să se întâmple ceva cu documentele și setările dvs.
+
+Pentru ca totul să funcționeze bine pentru toți, blocăm spațiile gratuite care nu au mai fost folosite de ceva vreme. Iată ce înseamnă asta pentru spațiul dvs.:
+
+*$BlockDate*: spațiul dvs. va fi blocat și nu vă veți mai putea conecta.
+*$DeleteDate*: spațiul și toate datele sale vor fi șterse definitiv.
+
+Vestea bună: păstrarea lui este simplă. Conectați-vă o singură dată până la $BlockDateShort și totul va rămâne exact cum l-ați lăsat.
+
+$OrangeButton
+
+Dacă nu mai aveți nevoie de spațiu, nu trebuie să faceți nimic. Nu uitați doar să descărcați fișierele pe care doriți să le păstrați până la $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>h1.Abonamentul dvs. a expirat, dar spațiul dvs. este încă aici
+
+Abonamentul dvs. ${LetterLogoText} pentru *"${__VirtualRootPath}":"${__VirtualRootPath}"* a expirat pe *$DueDate*. Vă mulțumim că ați lucrat cu noi. Sperăm că ${LetterLogoText} v-a ușurat puțin munca.
+
+Pentru ca totul să funcționeze bine, blocăm spațiile al căror abonament a expirat. Iată ce înseamnă asta pentru spațiul dvs.:
+
+*$BlockDate*: spațiul dvs. va fi blocat și nu vă veți mai putea conecta.
+*$DeleteDate*: spațiul și toate datele sale vor fi șterse definitiv.
+
+Vestea bună: păstrarea lui este simplă. Reînnoiți abonamentul până la $BlockDateShort, iar documentele, setările și echipa dvs. vor rămâne exact unde le-ați lăsat.
+
+$OrangeButton
+
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Nu uitați doar să faceți o copie de rezervă a datelor pe care doriți să le păstrați până la $BlockDateShort.
+
+$TrulyYours</value>
+  </data>
+  <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>#if($Unpaid == "True")
+h1.Abonamentul dvs. a expirat, dar spațiul și fondurile dvs. sunt încă aici
+
+Abonamentul dvs. ${LetterLogoText} pentru *"${__VirtualRootPath}":"${__VirtualRootPath}"* a expirat pe *$DueDate*. Vă mulțumim că ați lucrat cu noi. Mai aveți fonduri în Portofel ("verificați soldul":"$URL1") și nu am vrut să le pierdeți fără să știți.
+
+Pentru ca totul să funcționeze bine, blocăm spațiile al căror abonament a expirat. Iată ce înseamnă asta pentru spațiul dvs.:
+
+*$BlockDate*: spațiul dvs. va fi blocat și nu vă veți mai putea conecta.
+*$DeleteDate*: spațiul și toate datele sale vor fi șterse definitiv, împreună cu fondurile din Portofel.
+
+Vestea bună: păstrarea ambelor este simplă. Reînnoiți abonamentul până la $BlockDateShort, iar documentele, setările și fondurile dvs. vor rămâne exact unde le-ați lăsat. Soldul Portofelului poate acoperi chiar o parte din cost.
+
+$OrangeButton
+
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Nu uitați doar să faceți o copie de rezervă a datelor pe care doriți să le păstrați până la $BlockDateShort.
+#else
+h1.Spațiul dvs. mai are fonduri care vă așteaptă
+
+A trecut ceva timp de când nimeni nu s-a mai conectat la spațiul dvs. ${LetterLogoText}, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, dar în "Portofelul":"$URL1" său mai există fonduri. Nu am vrut să le pierdeți fără să știți.
+
+Pentru ca totul să funcționeze bine, blocăm spațiile inactive. Iată ce înseamnă asta pentru spațiul dvs.:
+
+*$BlockDate*: spațiul dvs. va fi blocat și nu vă veți mai putea conecta.
+*$DeleteDate*: spațiul și toate datele sale vor fi șterse definitiv, împreună cu fondurile din Portofel.
+
+Vestea bună: păstrarea ambelor este simplă. Conectați-vă o singură dată până la $BlockDateShort, iar documentele, setările și fondurile dvs. vor rămâne exact unde le-ați lăsat.
+
+$OrangeButton
+
+Dacă ați decis să mergeți mai departe, este perfect în regulă. Nu uitați doar să descărcați fișierele pe care doriți să le păstrați până la $BlockDateShort.
+#end
+
+$TrulyYours</value>
+  </data>
   <data name="pattern_portal_deactivate" xml:space="preserve">
     <value>h1.Dezactivarea portalului "${__VirtualRootPath}":"${__VirtualRootPath}"
 
@@ -1152,30 +1347,6 @@ $TrulyYours</value>
 
 $TrulyYours</value>
   </data>
-  <data name="pattern_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiu dvs ${LetterLogoText} va fi &lt;span style="color: #FF6F3D;"&gt;șters&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Nu s-a înregistrat nicio activitate în contul dvs ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; mai mult de 6 luni. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Deoarece ați decis să nu-l mai utilizați, spațiul dvs ${LetterLogoText} și toate datele vor fi șterse în conformitate cu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politica noastră de confidențialitate&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Apreciem feedbackul din partea dvs. De ce ați decis să nu mai folosiți ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dacă doriți să folosiți ${LetterLogoText} mai departe, trebuie pur și simplu să-l accesați și să efectuați orice acțiune.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiu dvs ${LetterLogoText} va fi &lt;span style="color: #FF6F3D;"&gt;șters&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Nu s-a înregistrat nicio activitate în contul dvs ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; de 3 luni.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Vă informăm: spațiul dvs ${LetterLogoText} și toate datele vor fi șterse după 6 luni de inactivitate. Este suficient să vă conectați acum pentru ca spațiul dvs ${LetterLogoText} să rămână activ și să îl puteți folosi mai departe.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
   <data name="pattern_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Obțineți aplicații ${LetterLogoText} &lt;span style="color: #FF6F3D;"&gt;gratuit&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 
@@ -1190,32 +1361,6 @@ $TrulyYours</value>
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; font-weight: 600; line-height: 19px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 24px; text-align: center;"&gt;Pentru a edita documente de pe diapozitive mobile, obțineți aplicația ${LetterLogoText} Documents&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 16px; line-height: 1.8em; Margin: 0; padding-bottom: 32px; padding-left: 126px; padding-right: 126px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; empty-cells: show; Margin: 0 auto; max-width: 600px; padding: 0; vertical-align: top; width: 100%; text-align: left;"&gt;&lt;tbody&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 34px;"&gt;&lt;img height="32" width="32" src="$IMG2" alt="iOS"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 8px; padding-right: 30px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Pe iOS&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;td style="width: 24px;"&gt;&lt;/td&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center;width: 160px; height: 56px;"&gt;&lt;a href="$URL2" style="text-decoration: none;filter: grayscale(1);" target="_blank" onmouseover="this.style.filter='grayscale(0)';" onmouseout="this.style.filter='grayscale(1)';"&gt;&lt;table cellspacing="0" cellpadding="0" style="border: 0 none; border-collapse: collapse; border-spacing: 0; display: block; empty-cells: show; Margin: 0 auto; max-width: 160px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #ff6f3d; border-radius: 3px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="Margin:0 auto; vertical-align: middle; text-align: center; padding-left: 20px;"&gt;&lt;img height="31" width="28" src="$IMG4" alt="Android"&gt;&lt;/td&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 10px; padding-right: 16px; padding-top: 17px; padding-bottom: 17px; text-align: left;"&gt;Pe Android&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiul dvs ${LetterLogoText} va &lt;span style="color: #FF6F3D;"&gt;fi șters&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Nu s-a înregistrat nicio activitate în contul dvs ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; mai mult de 6 luni. &lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Deoarece ați decis să nu-l mai utilizați, spațiul dvs ${LetterLogoText} și toate datele vor fi șterse în conformitate cu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;politica noastră de confidențialitate&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;&lt;table cellspacing="0" cellpadding="0" background="#ffffff" style="background-color: #ffffff; border: 0 none; border-spacing: 0; -moz-border-radius: 8px; -webkit-border-radius: 8px; border-radius: 8px; empty-cells: show; height: 0px; Margin: 0 auto; max-width: 520px; padding: 0; vertical-align: top; width: 100%; text-align: left; border: 1px solid #FF6F3D; border-radius: 8px;"&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 22px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-top: 32px; padding-bottom: 24px; text-align: center;"&gt;Apreciem feedbackul din partea dvs. De ce ați decis să nu mai folosiți ${LetterLogoText}?&lt;/td&gt;&lt;/tr&gt;&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dacă aceasta a fost o greșeală și doriți să continuați să utilizați ${LetterLogoText}, contactați echipa &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;noastră de asistență&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-$TrulyYours</value>
-  </data>
-  <data name="pattern_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Spațiul dvs ${LetterLogoText} va &lt;span style="color: #FF6F3D;"&gt;fi șters&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 8px; text-align: center;"&gt;Nu s-a înregistrat nicio activitate în contul dvs ${LetterLogoText} &lt;a href="${__VirtualRootPath}" style="color: #FF6F3D"&gt;${__VirtualRootPath}&lt;/a&gt; de 3 luni.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Deoarece nu îl utilizați, spațiul dvs ${LetterLogoText} și toate datele vor fi șterse după 6 luni de inactivitate în conformitate cu &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="$URL1"&gt;Politica noastră de confidențialitate&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
-
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 13px; line-height: 20px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Dacă aceasta a fost o greșeală și doriți să continuați să utilizați ${LetterLogoText}, contactați echipa &lt;a style="color: #FF6F3D; text-decoration: underline;" target="_blank" href="${__SupportLink}"&gt;noastră de asistență&lt;/a&gt;.&lt;/td&gt;&lt;/tr&gt;
 
 $TrulyYours</value>
   </data>
@@ -1634,6 +1779,30 @@ $TrulyYours</value>
   <data name="subject_password_changed" xml:space="preserve">
     <value>Parola a fost schimbată cu succes</value>
   </data>
+  <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
+    <value>Portalul ${PortalUrl} a fost blocat de politica de păstrare a datelor</value>
+  </data>
+  <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
+    <value>Spațiul dvs. ${LetterLogoText} este blocat, dar datele dvs. sunt în siguranță până la $DeleteDateShort</value>
+  </data>
+  <data name="subject_saas_owner_retention_deleted" xml:space="preserve">
+    <value>Spațiul dvs. ${LetterLogoText} a fost șters</value>
+  </data>
+  <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
+    <value>Spațiul dvs. ${LetterLogoText} va fi șters în curând (ștergere pe $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Ultima șansă de a vă păstra spațiul ${LetterLogoText} (ștergere pe $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
+    <value>Spațiul dvs. ${LetterLogoText} vă duce dorul (acțiune necesară până la $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_unpaid_warning" xml:space="preserve">
+    <value>Spațiul dvs. ${LetterLogoText} vă duce dorul (acțiune necesară până la $BlockDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_wallet_warning" xml:space="preserve">
+    <value>Mai aveți fonduri în spațiul dvs. ${LetterLogoText} (acțiune necesară până $BlockDate)</value>
+  </data>
   <data name="subject_portal_deactivate" xml:space="preserve">
     <value>Dezactivarea portalului ${__VirtualRootHost}</value>
   </data>
@@ -1703,20 +1872,8 @@ $TrulyYours</value>
   <data name="subject_saas_admin_handy_apps_v1" xml:space="preserve">
     <value>Descoperiți 4 aplicații utile în ${LetterLogoText} dvs</value>
   </data>
-  <data name="subject_saas_admin_startup_warning_after_half_year_v1" xml:space="preserve">
-    <value>Spațiu dvs ${LetterLogoText} va fi șters</value>
-  </data>
-  <data name="subject_saas_admin_startup_warning_after_three_months_v1" xml:space="preserve">
-    <value>Spațiul dvs ${LetterLogoText} va fi șters</value>
-  </data>
   <data name="subject_saas_admin_user_apps_tips_v1" xml:space="preserve">
     <value>Obțineți aplicații ${LetterLogoText} gratuit</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_half_year_v1" xml:space="preserve">
-    <value>Spațiul dvs ${LetterLogoText} va fi șters</value>
-  </data>
-  <data name="subject_saas_admin_warning_after_three_months_v1" xml:space="preserve">
-    <value>Spațiul dvs ${LetterLogoText} va fi șters</value>
   </data>
   <data name="subject_saas_admin_welcome_v1" xml:space="preserve">
     <value>Descoperiți abonamentul ${LetterLogoText} business</value>

@@ -45,6 +45,9 @@ public sealed class PortalClients : PortalClientsBase
     public HttpClient FilesHttpClient { get; }
     public HttpClient PeopleHttpClient { get; }
 
+    /// <summary>Web.Studio, which serves the stored files under <c>/storage/{module}/...</c>.</summary>
+    public HttpClient StudioHttpClient { get; }
+
     // Files service
     public FoldersApi FoldersApi { get; }
     public FilesApi FilesApi { get; }
@@ -56,11 +59,13 @@ public sealed class PortalClients : PortalClientsBase
     public SharingApi SharingApi { get; }
     public PrivacyRoomApi PrivacyroomApi { get; }
     public ThirdPartyIntegrationApi ThirdPartyIntegrationApi { get; }
+    public MetadataApi MetadataApi { get; }
 
     // People service
     public ProfilesApi ProfilesApi { get; }
     public GroupApi GroupApi { get; }
     public UserStatusApi UserStatusApi { get; }
+    public UserDataApi UserDataApi { get; }
     public PhotosApi PhotosApi { get; }
 
     // WebApi service
@@ -75,6 +80,7 @@ public sealed class PortalClients : PortalClientsBase
     {
         FilesHttpClient = CreateClient(ResourceNames.Files);
         PeopleHttpClient = CreateClient(ResourceNames.People);
+        StudioHttpClient = CreateClient(ResourceNames.WebStudio);
 
         var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
         FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
@@ -87,11 +93,13 @@ public sealed class PortalClients : PortalClientsBase
         SharingApi = new SharingApi(FilesHttpClient, filesConfig);
         PrivacyroomApi = new PrivacyRoomApi(FilesHttpClient, filesConfig);
         ThirdPartyIntegrationApi = new ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
+        MetadataApi = new MetadataApi(FilesHttpClient, filesConfig);
 
         var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };
         ProfilesApi = new ProfilesApi(PeopleHttpClient, peopleConfig);
         GroupApi = new GroupApi(PeopleHttpClient, peopleConfig);
         UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
+        UserDataApi = new UserDataApi(PeopleHttpClient, peopleConfig);
         PhotosApi = new PhotosApi(PeopleHttpClient, peopleConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };

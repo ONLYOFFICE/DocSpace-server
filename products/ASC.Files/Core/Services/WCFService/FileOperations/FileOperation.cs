@@ -251,6 +251,8 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
 [ProtoInclude(105, typeof(FileMarkAsReadOperationData<string>))]
 [ProtoInclude(106, typeof(FileDownloadOperationData<int>))]
 [ProtoInclude(107, typeof(FileDownloadOperationData<string>))]
+[ProtoInclude(108, typeof(FileBuilderOperationData<int>))]
+[ProtoInclude(109, typeof(FileBuilderOperationData<string>))]
 public record FileOperationData<T>
 {
     [ProtoMember(1)]
@@ -367,6 +369,12 @@ public abstract class FileOperation<T, TId> : FileOperation where T : FileOperat
         {
             Err = FilesCommonResource.ErrorMessage_SecurityException;
             Logger.ErrorWithException(new SecurityException(Err, e));
+        }
+        catch (OperationCanceledException e) when (cancellationToken.IsCancellationRequested)
+        {
+            // a cancel that lands before the first entry is processed used to end with an empty error, as if the
+            // operation had finished; the half-way cancel reports the same text from the per-entry handlers
+            Err = e.Message;
         }
         catch (AggregateException ae)
         {

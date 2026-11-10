@@ -290,7 +290,7 @@ internal class SharePointFolderDao(
         await SharePointProviderInfo.DeleteFolderAsync(folderId);
     }
 
-    public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, CancellationToken? cancellationToken)
+    public async Task<TTo> MoveFolderAsync<TTo>(string folderId, TTo toFolderId, string newTitle, CancellationToken? cancellationToken)
     {
         if (toFolderId is int tId)
         {

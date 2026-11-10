@@ -3,11 +3,12 @@ paths:
   - "products/*/Tests/**/*.cs"
   - "common/Tests/**/*.cs"
   - "web/ASC.Web.Api.Tests/**/*.cs"
+  - "web/ASC.Web.Api.Billing.Tests/**/*.cs"
 ---
 
 # Integration Tests
 
-Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/` and `common/Tests/`. Style rules
+Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/`, `web/ASC.Web.Api.Billing.Tests/` and `common/Tests/`. Style rules
 (`csharp-style.md`) apply here too — including the mandatory `dotnet format style` check
 after editing any `.cs` file.
 
@@ -21,6 +22,8 @@ Everything that is not specific to one product is there, and every suite referen
 | `PortalClientsBase` / `PortalContext` | the per-portal HTTP clients, `Origin` binding, disposal |
 | `Initializer` | owner credentials, client-side password hashing, `HttpClient.Authenticate(user)`, `FakerMember` |
 | `RawApiClient` / `RawApiResponse<T>` | raw JSON access for endpoints the SDK does not expose |
+| `PortalSocket` | a real Socket.IO client on the running socket service, for tests of what an API call pushes to clients (`products/ASC.Files/Tests/Tests/05_Features/Socket/`); wait for the router first (`WaitForRouterAsync`), the service checks the cookie through it |
+| `FindSocketHubRefusalsAsync` | what the socket service refused in this run; `SocketContractTests` of each suite asks at the end, in a collection with `DisableParallelization`, because a failure in the fixture's disposal is reported once per test |
 | `User`, `Timing`, `RegisterPortalModel` … | the small shared data types |
 
 A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire resources it needs in
@@ -28,6 +31,21 @@ A suite adds only its own two files: an `AspireAppFixture` (naming the Aspire re
 `PortalClients` deriving from `PortalClientsBase`, which calls `CreateClient(ResourceNames.X)` per
 service and wires the typed SDK clients onto it. ApiSystem and Web.Api are always started — portal
 registration and authentication — so `WebApiHttpClient` and `WebApi` come from the base.
+Services only some classes need go in `LazyResources` instead: they start with the stack but the run
+does not wait for them, and a class that uses them overrides `NeedsLazyResources` (in the Web.Api and the
+AI `BaseTest`), which awaits `WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken)`
+before the portal is registered. A lazy Nextcloud still gets its `NEXTCLOUD_*` settings published at start-up.
+
+The document server has no health check of its own and restarts its converter ~70 s after the container
+starts, so a class that converts through it (an export to .docx/.pdf) overrides `NeedsDocumentServer` in the
+AI `BaseTest`; its setup awaits `WaitForDocumentServerAsync()`, which waits for that restart once per run.
+Set it on the classes that convert; a shared base gets it only when every class under it converts (the
+TextToDocx base), so the others do not wait.
+
+In the AI suite a test class cleans up in an override of `BaseTest.DisposeAsync` (calling base in a
+`finally`), never in `Dispose`: xUnit v3 calls only `DisposeAsync` on an `IAsyncLifetime` class. The other
+suites' `BaseTest.DisposeAsync` is not virtual yet; a class there that owns something to release needs that
+made virtual first.
 
 Do not copy any of this back into a suite. If a suite needs something the base does not do, extend
 the base.
@@ -35,7 +53,7 @@ the base.
 ## The SDK is the source of truth for signatures
 
 Tests call the API through the generated `DocSpace.API.SDK` (pinned in
-`Directory.Packages.props`, currently 3.7.0). **Read its source from the repo, never guess a
+`Directory.Packages.props`, currently 4.1.0). **Read its source from the repo, never guess a
 signature and never dig through the NuGet cache.** Paths are relative to the repo root
 (`server/`):
 
@@ -97,10 +115,11 @@ var exception = await Assert.ThrowsAsync<ApiException>(
     async () => await _roomsApi.DeleteRoomAsync(room.Id, new DeleteRoomRequest(false), TestContext.Current.CancellationToken));
 
 exception.ErrorCode.Should().Be(403);
-exception.ErrorContent?.ToString().Should().Contain("Access denied");
+exception.ErrorContent!.ToString().Should().Contain("Access denied");
 ```
 
-`ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`.
+`ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`. Read `ErrorContent` with
+`!`, never `?.`: with `?.` an empty body skips the whole assertion, and a check of the message can never fail.
 
 ## Endpoints the SDK does not expose
 
@@ -128,10 +147,15 @@ nullable property. The DTO accepts all of those and the server does the rejectin
 ordinary typed calls.
 
 One more carve-out, on the response side: a generated model can be too narrow to carry what the
-endpoint returns. `FolderContentDto.Folders` is typed `List<FileEntryBaseDto>`, which has
-`Title` but neither `Id` nor `Logo`, so a room read through a folder listing loses both. When the
-assertion needs a field the model drops, read the raw JSON — and say so in a comment, because
-that is an SDK defect worth reporting, not a preference.
+endpoint returns. When the assertion needs a field the model drops, read the raw JSON — and say
+so in a comment, because that is an SDK defect worth reporting, not a preference.
+
+A list typed with the base `FileEntryBaseDto` is not such a case. `FolderContentDto.Files` and
+`.Folders`, the preflight answers and the other entry lists arrive as their concrete models,
+picked by the `entryKind` discriminator, so take the fields from those:
+`content.Folders.OfType<FolderDto>()` carries `Id`, `RoomType`, `Logo`, `Pinned`;
+`OfType<ThirdPartyFolderDto>()` the third-party rooms with their string ids.
+`FolderListing` (`products/ASC.Files/Tests/Tests/06_Operations/`) reads a listing that way.
 
 Decide these by evidence, not by feel: read the `[DataMember(..., EmitDefaultValue = ...)]`
 attributes on the generated model and the constructor, which together determine what an
@@ -254,6 +278,35 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj --no-build -- --filt
 Filters use **Microsoft.Testing.Platform** syntax and go after `--`: `--filter-class`,
 `--filter-method`. VSTest's `--filter Name~...` does not apply.
 
+The webhook tests of `ASC.Web.Api.Tests` (the `Webhooks` folder) subscribe to `WebhookReceiver`, a
+WireMock.Net server in the test process, started on first use on the loopback alias `127.0.0.2:18089`
+(`WebhookReceiverHost`/`WebhookReceiverPort` in `common/ASC.AppHost/Configuration/Constants.cs`;
+`127.0.0.1` stays blocked by the webhook blacklist). Windows and Linux answer on all of
+`127.0.0.0/8`; macOS does not, and without `sudo ifconfig lo0 alias 127.0.0.2` (lost on reboot)
+the server cannot bind. The rest of the suite still runs, but every test that creates a
+subscription fails on starting it — an environment problem, not a product regression.
+
+Those tests read what the receiver and the delivery log got through `DocSpace.Webhooks.SDK` (`.nuget/packages`): a
+payload that stops matching the contract fails the parse. An optional value of a model is nullable, so a field left
+out reads as `null`, not as 0 (`Model.QuotaLimit.Should().BeNull()`). `DeliveredPayload<T>.Json` is the same payload as
+it went out, for the two things a model cannot say: that a field no model declares is not there, and the format of a
+value on the wire. Use it for those only.
+
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both
 belongs in code (e.g. `[assembly: CollectionBehavior(...)]`), not on the command line.
+
+## Payment services: two stacks
+
+The `integration-test` stack runs **no** billing, accounting or docscloud service, so a payment test there only
+sees 403 "Tariff service is not configured" or a check before it. Everything past that check goes to
+`web/ASC.Web.Api.Billing.Tests` (SaaS stack, the three services stubbed by `PaymentServiceStub`):
+
+- Script **only the test's own portal** through `Payments` (`Paid`, `Customer`, `Balance`, `On`). Requests that
+  name no portal (the checkout template, the price catalogue) are answered once for the whole run - never script them.
+- **Assert on what the stack did, not on the stub**: `PaymentCalls` lists only requests that name the portal (a
+  route by id is checked in the store, `HasServiceLimit`); a billing body is compared by field (`BillingValue`),
+  not by substring; a status reachable on several paths also checks `ErrorContent`.
+- Re-read cached data (tariff, customer, balance) with `refresh=true` after scripting a payment.
+- The stub profile overrides the payment addresses, key, secret, region, default quota and the first accounting
+  currency; never depend on the rest of `buildtools/config` (an unsupported currency is `XXX`).

@@ -40,15 +40,18 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 [Singleton(GenericArguments = [typeof(FileMarkAsReadOperation)])]
 [Singleton(GenericArguments = [typeof(FileDuplicateOperation)])]
 [Singleton(GenericArguments = [typeof(FileDownloadOperation)])]
+[Singleton(GenericArguments = [typeof(FileBuilderOperation)])]
 public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperation
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly IDistributedLockProvider _distributedLockProvider;
     private readonly DistributedTaskQueue<T> _tasks;
     private readonly SemaphoreSlim _busyCheckLock = new(1, 1);
 
-    public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider)
+    public FileOperationsManagerHolder(IDistributedTaskQueueFactory queueFactory, NotifyConfiguration notifyConfiguration, IServiceProvider serviceProvider, IDistributedLockProvider distributedLockProvider)
     {
         _serviceProvider = serviceProvider;
+        _distributedLockProvider = distributedLockProvider;
         _tasks = queueFactory.CreateQueue<T>();
         notifyConfiguration.Configure();
     }
@@ -122,7 +125,46 @@ public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperatio
         return await _tasks.PublishTask(task);
     }
 
-    public async Task CheckRunning(Guid userId, FileOperationType fileOperationType)
+    /// <summary>
+    /// Refuses a new operation while one of the same type started by <paramref name="userId"/> is queued or running.
+    /// The check alone is not enough: two requests can both pass it before either publishes its task, on one node or
+    /// on two. So it is made under a distributed lock per owner and type, and the caller holds the returned lock until
+    /// its task is published.
+    /// </summary>
+    public async Task<IAsyncDisposable> LockAndCheckRunning(Guid userId, FileOperationType fileOperationType, string error)
+    {
+        // an anonymous caller without a session has no identity of its own, and one lock would make all of them wait
+        if (userId == Guid.Empty)
+        {
+            await CheckRunning(userId, fileOperationType, error);
+            return null;
+        }
+
+        IDistributedLockHandle handle;
+        try
+        {
+            handle = await _distributedLockProvider.TryAcquireFairLockAsync($"file_operation_start_{fileOperationType}_{userId}");
+        }
+        catch (DistributedLockException)
+        {
+            // another start of this owner still holds the lock, so its operation is about to run
+            throw new InvalidOperationException(error);
+        }
+
+        try
+        {
+            await CheckRunning(userId, fileOperationType, error);
+        }
+        catch
+        {
+            await handle.DisposeAsync();
+            throw;
+        }
+
+        return handle;
+    }
+
+    private async Task CheckRunning(Guid userId, FileOperationType fileOperationType, string error)
     {
         var operations = (await _tasks.GetAllTasks())
             .Where(t => t.Owner == userId)
@@ -130,7 +172,7 @@ public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperatio
 
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ManyDownloads);
+            throw new InvalidOperationException(error);
         }
     }
 
@@ -355,6 +397,50 @@ public class FileMarkAsReadOperationsManager(
     }
 }
 
+[Scope(typeof(FileOperationsManager<FileBuilderOperation>))]
+public class FileBuilderOperationsManager(
+    IHttpContextAccessor httpContextAccessor,
+    IEventBus eventBus,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    FileOperationsManagerHolder<FileBuilderOperation> fileOperationsManagerHolder,
+    ExternalShare externalShare,
+    IServiceProvider serviceProvider) : FileOperationsManager<FileBuilderOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+{
+    public async Task<string> Publish(string script, int? folderId, Dictionary<string, FileBuilderOutputData> outputs, JsonElement? argument, string baseUri)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = _authContext.CurrentAccount.ID;
+        var sessionSnapshot = await _externalShare.TakeSessionSnapshotAsync();
+
+        await using var startLock = await _fileOperationsManagerHolder.LockAndCheckRunning(userId, FileOperationType.Build, "A document builder script of yours is already queued or running; wait until it finishes");
+
+        var (fileIds, folderIds) = DocumentBuilderScriptRunner.GetEntries(script, folderId, outputs);
+
+        var data = new FileBuilderOperationData<int>(folderIds, fileIds, script, folderId, outputs, argument?.GetRawText(), baseUri, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
+        var thirdPartyData = new FileBuilderOperationData<string>([], [], null, null, null, null, null, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
+
+        var permissionsCheck = _serviceProvider.GetService<BuilderPermissionsCheck<int>>();
+        await permissionsCheck.RunPermissionCheckAsync(data);
+
+        var permissionsCheckThirdParty = _serviceProvider.GetService<BuilderPermissionsCheck<string>>();
+        await permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
+
+        var op = _serviceProvider.GetService<FileBuilderOperation>();
+        op.Init(true);
+        var taskId = await _fileOperationsManagerHolder.Publish(op);
+
+        await _eventBus.PublishAsync(new FileBuilderIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId,
+            Data = data,
+            ThirdPartyData = thirdPartyData
+        });
+
+        return taskId;
+    }
+}
+
 [Scope(typeof(FileOperationsManager<FileDownloadOperation>))]
 public class FileDownloadOperationsManager(
     IHttpContextAccessor httpContextAccessor,
@@ -374,7 +460,7 @@ public class FileDownloadOperationsManager(
             throw new AuthenticationException();
         }
 
-        await _fileOperationsManagerHolder.CheckRunning(await GetUserIdAsync(), FileOperationType.Download);
+        await using var startLock = await _fileOperationsManagerHolder.LockAndCheckRunning(await GetUserIdAsync(), FileOperationType.Download, FilesCommonResource.ErrorMessage_ManyDownloads);
         if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {
             return null;

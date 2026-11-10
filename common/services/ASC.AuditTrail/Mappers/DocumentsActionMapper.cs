@@ -66,7 +66,7 @@ internal class FilesActionMapper : ILocationActionMapper
                     {
                         ActionType.Update, [
                             MessageAction.FileRenamed, MessageAction.FileUpdated, MessageAction.UserFileUpdated, MessageAction.FileUpdatedRevisionComment,
-                            MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileMarkedAsFavorite,
+                            MessageAction.FileLocked, MessageAction.FileUnlocked, MessageAction.FileOpenedForChange, MessageAction.FileOpenedByDocumentBuilder, MessageAction.FileMarkedAsFavorite,
                             MessageAction.FormStartedToFill, MessageAction.FormPartiallyFilled, MessageAction.FormCompletelyFilled, MessageAction.FormStopped,
                             MessageAction.FileSavedButUserQuotaExceeded, MessageAction.FileNotSavedDueToUserQuota,
                             MessageAction.FileSavedButRoomQuotaExceeded, MessageAction.FileNotSavedDueToRoomQuota,
@@ -190,7 +190,10 @@ internal class RoomsActionMapper : ILocationActionMapper
                             MessageAction.RoomDenyDownloadDisabled,
                             MessageAction.RoomWatermarkSet,
                             MessageAction.RoomWatermarkDisabled,
-                            MessageAction.RoomInviteResend
+                            MessageAction.RoomInviteResend,
+                            MessageAction.RoomsLinkedToAiProject,
+                            MessageAction.RoomsUnlinkedFromAiProject,
+                            MessageAction.AiProjectProfileAssigned
                         ]
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },
@@ -311,7 +314,8 @@ internal class PrivacyRoomActionMapper : ILocationActionMapper
         {
             {
                 ActionType.Create, [
-                    MessageAction.PrivacyRoomKeyCreated
+                    MessageAction.PrivacyRoomKeyCreated,
+                    MessageAction.FileKeysSet
                 ]
             },
             {
@@ -321,7 +325,8 @@ internal class PrivacyRoomActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Delete, [
-                    MessageAction.PrivacyRoomKeyDeleted
+                    MessageAction.PrivacyRoomKeyDeleted,
+                    MessageAction.RoomFileKeysRevoked
                 ]
             }
         };

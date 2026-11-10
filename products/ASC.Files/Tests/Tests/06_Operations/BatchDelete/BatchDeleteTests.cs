@@ -56,7 +56,7 @@ public class BatchDeleteTests(
 
         // Act
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = false },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = false, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -78,7 +78,7 @@ public class BatchDeleteTests(
 
         // Act
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -99,7 +99,7 @@ public class BatchDeleteTests(
 
         // Act
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FolderIds = [new(folder.Id)], Immediately = false },
+            new DeleteBatchRequestDto { FolderIds = [new(folder.Id)], Immediately = false, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -121,7 +121,7 @@ public class BatchDeleteTests(
 
         // Act
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FolderIds = [new(folder.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FolderIds = [new(folder.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -148,7 +148,7 @@ public class BatchDeleteTests(
 
         // Act
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file1.Id), new(file2.Id)], FolderIds = [new(folder1.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file1.Id), new(file2.Id)], FolderIds = [new(folder1.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -168,7 +168,7 @@ public class BatchDeleteTests(
 
         // Act
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [], FolderIds = [], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [], FolderIds = [], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert - an empty selection is a legal (if pointless) request, and must not throw.
@@ -183,7 +183,7 @@ public class BatchDeleteTests(
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(999999999)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(999999999)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -199,13 +199,13 @@ public class BatchDeleteTests(
         var file = await CreateFileInMy(fileName, Owner);
 
         var moveResults = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = false },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = false, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
         await WaitForBatchDelete(moveResults);
 
         // Act
         var results = (await _filesOperationsApi.DeleteBatchItemsAsync(
-            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true },
+            new DeleteBatchRequestDto { FileIds = [new(file.Id)], Immediately = true, ReturnSingleOperation = true },
             TestContext.Current.CancellationToken)).Response;
 
         // Assert

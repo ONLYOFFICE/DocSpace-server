@@ -39,9 +39,18 @@ public static class ArabicNumeralHelper
 
     public static string ConvertNumerals(this DateTime input, string format)
     {
-        if (!_langs.Contains(Thread.CurrentThread.CurrentCulture.Name))
+        return input.ConvertNumerals(format, Thread.CurrentThread.CurrentCulture);
+    }
+
+    /// <summary>
+    /// The same in <paramref name="culture"/> rather than the thread's, for text built for a recipient
+    /// whose culture the thread does not carry.
+    /// </summary>
+    public static string ConvertNumerals(this DateTime input, string format, CultureInfo culture)
+    {
+        if (!_langs.Contains(culture.Name))
         {
-            return input.ToString(format, Thread.CurrentThread.CurrentCulture);
+            return input.ToString(format, culture);
         }
 
         var result = input.ToString(format, new CultureInfo("ar"));

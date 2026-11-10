@@ -282,10 +282,25 @@ public partial class UserDbContext
     {
         return Queries.DeleteInvitationLinkAsync(this, tenantId, id);
     }
+
+    // The members of a group that is not a system group, by its membership rows: the users not removed and not
+    // terminated, as UserManager.GetUsersByGroupAsync counts them with EmployeeStatus.Default.
+    [PreCompileQuery]
+    public Task<int> GroupMembersCountAsync(int tenantId, Guid groupId)
+    {
+        return Queries.GroupMembersCountAsync(this, tenantId, groupId);
+    }
 }
 
 static file class Queries
 {
+    public static readonly Func<UserDbContext, int, Guid, Task<int>> GroupMembersCountAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (UserDbContext ctx, int tenantId, Guid groupId) =>
+                ctx.UserGroups.Count(ug =>
+                    ug.TenantId == tenantId && ug.UserGroupId == groupId && ug.RefType == UserGroupRefType.Contains && !ug.Removed &&
+                    ctx.Users.Any(u => u.TenantId == tenantId && u.Id == ug.Userid && !u.Removed && u.Status != EmployeeStatus.Terminated)));
+
     public static readonly Func<UserDbContext, int, Guid, Task<DateTime?>> LastModifiedAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (UserDbContext ctx, int tenantId, Guid userId) =>

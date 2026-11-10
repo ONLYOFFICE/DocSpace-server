@@ -47,6 +47,7 @@ app.Configure(config =>
     config.AddBaseCommand<ExecuteFileCreationAndSharingCommand>();
     config.AddBaseCommand<ExecuteRoomCreationAndSharingCommand>();
     config.AddBaseCommand<InviteContactsCommand>();
+    config.AddBaseCommand<CopyFolderLoadCommand>();
 });
 
 if (args.Length == 0)
@@ -54,7 +55,7 @@ if (args.Length == 0)
     var command = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .Title("Select a [green]command[/]:")
-            .AddChoices(CreateFolderWithFilesDepthCommand.Name, DeleteFolderContentCommand.Name, DeleteTrashContentCommand.Name, GetFolderCommand.Name, ExecuteFileCreationAndSharingCommand.Name, ExecuteRoomCreationAndSharingCommand.Name, InviteContactsCommand.Name)
+            .AddChoices(CreateFolderWithFilesDepthCommand.Name, DeleteFolderContentCommand.Name, DeleteTrashContentCommand.Name, GetFolderCommand.Name, ExecuteFileCreationAndSharingCommand.Name, ExecuteRoomCreationAndSharingCommand.Name, InviteContactsCommand.Name, CopyFolderLoadCommand.Name)
             .UseConverter(cmd => cmd switch
             {
                 _ when cmd == CreateFolderWithFilesDepthCommand.Name => CreateFolderWithFilesDepthCommand.Description,
@@ -64,6 +65,7 @@ if (args.Length == 0)
                 _ when cmd == ExecuteFileCreationAndSharingCommand.Name => ExecuteFileCreationAndSharingCommand.Description,
                 _ when cmd == ExecuteRoomCreationAndSharingCommand.Name => ExecuteRoomCreationAndSharingCommand.Description,
                 _ when cmd == InviteContactsCommand.Name => InviteContactsCommand.Description,
+                _ when cmd == CopyFolderLoadCommand.Name => CopyFolderLoadCommand.Description,
                 _ => cmd
             }));
 
@@ -74,5 +76,9 @@ else
     app.Run(args);
 }
 
-Console.WriteLine("\nPress any key to exit...");
-Console.ReadKey();
+// a run from a script or a redirected shell has no console to wait on
+if (!Console.IsInputRedirected)
+{
+    Console.WriteLine("\nPress any key to exit...");
+    Console.ReadKey();
+}

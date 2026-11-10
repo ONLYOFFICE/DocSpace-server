@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.Collections.Concurrent;
+global using System.Diagnostics;
 global using System.Net.Sockets;
 
 global using ASC.EventBus.Abstractions;
