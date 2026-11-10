@@ -55,6 +55,13 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Error, "Subscription renewal was interrupted at {stage} on attempt {attempt}, a process stopped half-way, resuming: tenant {tenantId}, {description}")]
     public static partial void ErrorRenewSubscriptionServiceInterrupted(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, string stage, int attempt);
 
+    // a warning: nothing was paid and the renewal is simply made by the next run - what a rollout leaves behind
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal was left queued by a process that stopped, starting it: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceLeftQueued(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal is not started, its journal entry is gone, changed or could not be marked - another instance has it: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceNotClaimed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
     [LoggerMessage(LogLevel.Error, "RenewSubscriptionService: error processing tenant {tenantId}")]
     public static partial void ErrorRenewSubscriptionServiceTenant(this ILogger<RenewSubscriptionService> logger, int tenantId, Exception exception);
 
