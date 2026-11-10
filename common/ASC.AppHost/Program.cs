@@ -63,6 +63,8 @@ switch (launchProfile)
     case "integration-test":
         connectionManager
             .AddMySql(withDataVolume: false, withTmpfs: true)
+            // a short limit for the read-only roles, so the test of a query ended from outside does not wait a minute
+            .AddFormsPostgres(withDataVolume: false, withTmpfs: true, roQueryTimeoutSeconds: 10)
             .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
             // no data volume, like MySQL: the tenant and entry ids start over with every run, so documents
@@ -192,6 +194,7 @@ switch (launchProfile)
     default:
         connectionManager
             .AddMySql(withDbGate: true)
+            .AddFormsPostgres(withDbGate: true)
             .AddRabbitMq()
             .AddRedis(withRedisInsight: true)
             .AddMcpServer()

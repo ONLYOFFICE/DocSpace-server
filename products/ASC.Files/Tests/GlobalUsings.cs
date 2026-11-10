@@ -71,9 +71,12 @@ global using FluentAssertions;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 
+global using Npgsql;
+
 global using Xunit;
 
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
+global using ConnectionState = System.Data.ConnectionState;
 global using CoreConstants = ASC.Core.Users.Constants;
 global using CoreExternalDatabaseType = ASC.FederatedLogin.DatabaseProviders.ExternalDatabaseType;
 global using CoreMetadataFieldType = ASC.Files.Core.MetadataFieldType;
