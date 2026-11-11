@@ -270,6 +270,13 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         {
             throw;
         }
+        catch (ThirdPartyStorageQuotaException error)
+        {
+            // Its own message is the one meant for the user; the provider's error it wraps is for the log
+            // only, so it must not be unwrapped like the others below.
+            logger.ErrorChunkedUploaderHandlerService(error);
+            await WriteError(context, error.Message);
+        }
         catch (Exception error)
         {
             logger.ErrorChunkedUploaderHandlerService(error);

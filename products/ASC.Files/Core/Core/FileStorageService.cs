@@ -3101,6 +3101,11 @@ public class FileStorageService //: IFileStorageService
             {
                 throw GenerateException(e, true);
             }
+            catch (ThirdPartyStorageQuotaException e)
+            {
+                // the message is meant for the user, the provider's error inside it is not
+                throw GenerateException(e);
+            }
             catch (Exception e)
             {
                 throw GenerateException(e.InnerException ?? e);
@@ -3221,6 +3226,11 @@ public class FileStorageService //: IFileStorageService
             catch (UnauthorizedAccessException e)
             {
                 throw GenerateException(e, true);
+            }
+            catch (ThirdPartyStorageQuotaException e)
+            {
+                // the message is meant for the user, the provider's error inside it is not
+                throw GenerateException(e);
             }
             catch (Exception e)
             {
@@ -6587,7 +6597,7 @@ public class FileStorageService //: IFileStorageService
 
     private Exception GenerateException<T>(T error, bool warning = false) where T : Exception
     {
-        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException)
+        if (warning || error is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or ThirdPartyStorageQuotaException or InvalidOperationException)
         {
             _logger.Information(error.ToString());
         }

@@ -102,6 +102,50 @@ public class ThirdPartyStorageQuotaTests(
     }
 
     /// <summary>
+    /// The upload the UI makes for every file opens a session with <c>upload/create_session</c> and sends
+    /// the bytes to <c>ChunkedUploader.ashx</c>, which answers an error with 200 and <c>success: false</c>.
+    /// The handler used to prefer the inner exception's text, which for this refusal is the provider's own
+    /// error — "Insufficient Storage" from WebDAV, <c>path/insufficient_space/</c> from Dropbox — so the
+    /// readable message never reached the user there.
+    /// </summary>
+    /// <remarks>
+    /// Raw HTTP on both steps, within the carve-outs of the tests rule: the SDK types the folder id of
+    /// <c>create_session</c> as an integer, which cannot address a third-party room, and the handler is not
+    /// a controller, so it has no SDK signature at all.
+    /// </remarks>
+    [Fact]
+    public async Task ChunkedUpload_IntoFullThirdPartyStorage_ReportsReadableReason()
+    {
+        // Arrange
+        RequireNextcloud();
+        await _filesClient.Authenticate(Owner);
+        var roomId = await CreateRoomOnFullStorage("TP Full Upload");
+        var title = $"{UniqueTitle("TP Full Upload")}.txt";
+        var content = Encoding.UTF8.GetBytes("content that does not fit into the storage");
+
+        using var created = await _filesClient.PostAsJsonAsync(
+            $"api/2.0/files/{Uri.EscapeDataString(roomId)}/upload/create_session",
+            new { fileName = title, fileSize = content.Length },
+            TestContext.Current.CancellationToken);
+        using var session = JsonDocument.Parse(await created.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        created.IsSuccessStatusCode.Should().BeTrue("opening a session writes nothing to the storage yet: {0}", session.RootElement);
+        var uploadId = session.RootElement.GetProperty("response").GetProperty("data").GetProperty("id").GetString();
+
+        // Act: one chunk holding the whole file, so the handler commits it to the storage at once
+        using var form = new MultipartFormDataContent();
+        using var file = new ByteArrayContent(content);
+        file.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+        form.Add(file, "file", title);
+
+        using var uploaded = await _filesClient.PostAsync($"ChunkedUploader.ashx?uid={uploadId}", form, TestContext.Current.CancellationToken);
+        using var answer = JsonDocument.Parse(await uploaded.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+
+        // Assert
+        answer.RootElement.GetProperty("success").GetBoolean().Should().BeFalse();
+        answer.RootElement.GetProperty("message").GetString().Should().Contain(OutOfSpaceText);
+    }
+
+    /// <summary>
     /// Creates a Nextcloud user whose quota is one byte, connects it and turns the connection into a
     /// room rooted at the account. Any upload into the room is then refused with 507.
     /// </summary>
