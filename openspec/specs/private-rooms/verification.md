@@ -42,11 +42,11 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:261-305 | TEST-CONFIRMED [run: PASS] |
 | Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED [run: PASS] |
 | Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED [run: PASS] |
-| File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:242-252 | TEST-CONFIRMED [run: PASS] |
+| File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:279-291 | TEST-CONFIRMED [run: PASS] |
 | New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5529-5537 | TEST-CONFIRMED [run: PASS] |
 | Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED [run: PASS] |
 | Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:172-216 | TEST-CONFIRMED [run: PASS] |
-| Revocation does not depend on a client being online | Sharing:RevokeFileKeysAsync; commit cc60512acd | CODE-ONLY |
+| Revocation does not depend on a client being online: the removal is a server-side API call with no client connected, and the next read already reports the key missing, also in a subfolder (run 2026-11-11) | T/PrivateRoomFileKeysTests.cs:171-204; Sharing:RevokeFileKeysAsync; commit cc60512acd | TEST-CONFIRMED [run: PASS] |
 | Clearing access: member and owner | T/PrivateRoomLeaveTests.cs:58-98 | TEST-CONFIRMED [run: PASS] |
 | Owner keeps the room and keys | T/PrivateRoomLeaveTests.cs:102-160 | TEST-CONFIRMED [run: PASS] |
 | Non-member admin cannot clear; ordinary room can | T/PrivateRoomLeaveTests.cs:176-194 | TEST-CONFIRMED [run: PASS] |
@@ -54,17 +54,17 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Keys and file keys not backed up | common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:68, :101 | TEST-CONFIRMED [run: NOT-IN-RUN] |
 | Room types that can be private; 403 otherwise | T/PrivateRoomCreateTests.cs:47-60, :67-102 | TEST-CONFIRMED [run: PASS] |
 | Empty key set counts as no key | T/PrivateRoomContentRulesTests.cs:129-139; Login:97-105 | TEST-CONFIRMED [run: PASS] |
-| Editors without the library: 403 create, 415 open | Storage:DemandPrivateRoomCanBeCreatedAsync; DocumentServiceHelper hunk of b562fc3fb1; yaml openEditFile 415 | CODE-ONLY |
+| Editors without the library: 403 create, 415 open | Storage:DemandPrivateRoomCanBeCreatedAsync; DocumentServiceHelper hunk of b562fc3fb1; yaml openEditFile 415 | CODE-ONLY (unreachable: the test stack's document server serves the library, `docServiceEncryptionSupported` is true, and the stack cannot switch it off) |
 | `docServiceEncryptionSupported` true on the test stack | T/PrivateRoomEditorTests.cs:255-266 | TEST-CONFIRMED [run: PASS] |
 | Connected storage refused 400 (test skipped unless Nextcloud is configured) | products/ASC.Files/Tests/Tests/03_Rooms/ThirdParty/ThirdPartyPrivateRoomTests.cs:49 | TEST-CONFIRMED [run: PASS] |
 | Settings refused, off and rename allowed, template fails | T/PrivateRoomSettingsTests.cs:51-143 | TEST-CONFIRMED [run: PASS] |
 | Inviting needs a key; guest always refused | T/PrivacyRoomIntegrationTests.cs:137-165; T/RoomAccessKeysPermissionsTests.cs:172-186; T/PrivacyRoomTest.cs:179-221 | TEST-CONFIRMED [run: PASS] |
 | No links | T/PrivateRoomContentBoundaryTests.cs:93-102 | TEST-CONFIRMED [run: PASS] |
-| Revoking an existing link stays possible | Sharing hunk of bd89a24dcd (`Access != None`) | CODE-ONLY |
-| No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:106-140 | TEST-CONFIRMED [run: PASS] |
+| Revoking an existing link stays possible: a revocation (`access: None`) passes the private-room check, invitation and external (run 2026-11-11) | T/PrivateRoomContentBoundaryTests.cs:105-142; Sharing hunk of bd89a24dcd (`Access != None`) | TEST-CONFIRMED [run: PASS]; revoking a link that really exists stays CODE-ONLY: the API cannot put a link on a private room, so the tests name an unknown id (an external one then meets the link limit of 0) |
+| No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:144-179 | TEST-CONFIRMED [run: PASS] |
 | Copy across the border 403 | T/PrivacyRoomTest.cs:225-277 | TEST-CONFIRMED [run: PASS] |
-| Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:144-176 | TEST-CONFIRMED [run: PASS] |
-| Copy-as refused | T/PrivateRoomContentBoundaryTests.cs:195-238 | TEST-CONFIRMED [run: PASS] |
+| Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:182-215 | TEST-CONFIRMED [run: PASS] |
+| Copy-as refused | T/PrivateRoomContentBoundaryTests.cs:232-277 | TEST-CONFIRMED [run: PASS] |
 | Plaintext: createFile and session 403; ordinary room accepts | T/PrivateRoomContentRulesTests.cs:62-91, :119-125 | TEST-CONFIRMED [run: PASS] |
 | Generated names | T/PrivateRoomContentRulesTests.cs:99-115; products/ASC.Files/Core/Utils/FileUploader.cs regex of cc60512acd | TEST-CONFIRMED [run: PASS] |
 | Abort bound to folder | T/PrivateRoomContentRulesTests.cs:143-157 | TEST-CONFIRMED [run: PASS] |
@@ -72,7 +72,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Restore, reference data, start filling, form flag | T/PrivateRoomEditorTests.cs:191-237 | TEST-CONFIRMED [run: PASS] |
 | Public document address | T/PrivateRoomEditorTests.cs:241-251 | TEST-CONFIRMED [run: PASS] |
 | Archived: non-member refused; ordinary unchanged | T/ArchivedPrivateRoomSecurityTests.cs:66-113, :177-193 | TEST-CONFIRMED [run: PASS] |
-| Archived: no copy; creator and member rights | T/ArchivedPrivateRoomSecurityTests.cs:117-173; T/PrivateRoomContentBoundaryTests.cs:180-189 | TEST-CONFIRMED [run: PASS] |
+| Archived: no copy; creator and member rights | T/ArchivedPrivateRoomSecurityTests.cs:117-173; T/PrivateRoomContentBoundaryTests.cs:218-228 | TEST-CONFIRMED [run: PASS] |
 | Section split by area and filter | T/PrivateRoomSectionTests.cs:64-85 | TEST-CONFIRMED [run: PASS] |
 | Section endpoint, root, browse by id | T/PrivateRoomSectionTests.cs:89-120 | TEST-CONFIRMED [run: PASS] |
 | App off | T/PrivateRoomSectionTests.cs:124-137 | TEST-CONFIRMED [run: PASS] |
@@ -85,7 +85,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | History keeps titles for members | same file:203-222 | TEST-CONFIRMED [run: NO-LINK] |
 | Letters use the neutral title (tags of the action, not rendered pushes) | common/Tests/ASC.Notify.Tests/Invites/PrivateRoomTitleInLettersTests.cs:115-177 | TEST-CONFIRMED [run: PASS] |
 | Webhooks: outsider gets nothing | web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/WebhookPrivateRoomAccessTests.cs:71-109 | TEST-CONFIRMED [run: PASS] |
-| Webhook contract: the room-type values of the payloads include the Private rooms section type (d8b46d2b9a); documentation only, no spec change | `sdk/docspace-api-spec/webhooks/docspace-webhooks.yaml` `components.schemas` room-type descriptions | CODE-ONLY |
+| Webhook contract: the room-type values of the payloads include the Private rooms section type (d8b46d2b9a); documentation only, no spec change | `sdk/docspace-api-spec/webhooks/docspace-webhooks.yaml` `components.schemas` room-type descriptions | CODE-ONLY (documentation, not stack behaviour; that the committed yaml matches what the generator emits is guarded by common/Tests/ASC.Core.Common.Tests/Webhooks/WebhookContractTests.cs, not run here) |
 
 ## Differences between the yaml and the server
 

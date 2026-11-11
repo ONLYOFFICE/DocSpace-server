@@ -165,6 +165,35 @@ public class UserTypeChangeTests(AspireAppFixture fixture) : BaseTest(fixture)
         progress.Error.Should().BeEmpty();
     }
 
+    /// <summary>A User who belongs to a group and is demoted to Guest is removed from the group.</summary>
+    [Fact]
+    public async Task StartUserTypeUpdate_GroupMemberDemotedToGuest_LeavesTheGroup()
+    {
+        var user = await InviteContact(EmployeeType.User);
+        var other = await InviteContact(EmployeeType.User);
+
+        await _peopleClient.Authenticate(Owner);
+        var group = (await _groupApi.AddGroupAsync(
+            new GroupRequestDto(groupName: Guid.NewGuid().ToString("N"), groupManager: Owner.Id, members: [user.Id, other.Id]),
+            TestContext.Current.CancellationToken)).Response;
+        group.Members.Select(m => m.Id).Should().Contain(user.Id);
+
+        await _userTypeApi.StartUserTypeUpdateAsync(
+            new StartUpdateUserTypeDto(EmployeeType.Guest, user.Id),
+            TestContext.Current.CancellationToken);
+
+        var progress = await UserTypeUpdatePolling.WaitForCompletionAsync(_userTypeApi, user.Id);
+        progress.Error.Should().BeEmpty();
+
+        var profile = (await _profilesApi.GetProfileByUserIdAsync(user.Id.ToString(), TestContext.Current.CancellationToken)).Response;
+        profile.IsVisitor.Should().BeTrue();
+
+        var after = (await _groupApi.GetGroupAsync(group.Id, includeMembers: true, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var memberIds = after.Members.Select(m => m.Id).ToList();
+        memberIds.Should().NotContain(user.Id);
+        memberIds.Should().Contain(other.Id);
+    }
+
     [Fact]
     public async Task GetUserTypeUpdateProgress_DocSpaceAdminDemotesRoomAdminToUser_ShouldReportCompletion()
     {

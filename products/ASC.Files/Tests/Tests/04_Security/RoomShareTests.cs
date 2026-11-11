@@ -1138,4 +1138,40 @@ public class RoomShareTests(
         var securityInfoAfterRemoval = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         securityInfoAfterRemoval.Should().NotContain(r => r.SharedToUser.Id == guest.Id);
     }
+
+    /// <summary>
+    /// Inside a room the member's personal right beats a link right: a Viewer of a custom room who opens a room
+    /// file with an Editing link to that file still holds Read.
+    /// </summary>
+    [Fact]
+    public async Task RoomFile_ViewerOpensEditingLink_PersonalReadWins()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Personal Beats Link");
+        var file = await CreateFile("Autotest Personal Beats Link.docx", room.Id);
+        var viewer = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, viewer, FileShare.Read);
+
+        await _filesClient.Authenticate(Owner);
+        var link = (await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest(access: FileShare.Editing), TestContext.Current.CancellationToken)).Response;
+        link.Access.Should().Be(FileShare.Editing);
+
+        // Act
+        await _filesClient.Authenticate(viewer);
+        _filesClient.DefaultRequestHeaders.TryAddWithoutValidation(HttpRequestExtensions.RequestTokenHeader, link.SharedLink.RequestToken);
+        FileDto fileInfo;
+        try
+        {
+            fileInfo = (await _filesApi.GetFileInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        }
+        finally
+        {
+            _filesClient.DefaultRequestHeaders.Remove(HttpRequestExtensions.RequestTokenHeader);
+        }
+
+        // Assert
+        fileInfo.Access.Should().Be(FileShare.Read);
+        fileInfo.Security.Edit.Should().BeFalse();
+    }
 }

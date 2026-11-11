@@ -161,6 +161,11 @@ there is no moderation of invitations.
 - **WHEN** a member removes only themselves from the room
 - **THEN** the membership is removed and the room is no longer accessible to them
 
+#### Scenario: Leave request naming another member
+
+- **WHEN** a member without the right to manage members sets no access for another member, alone or together with themselves
+- **THEN** naming the other member alone is rejected (403); together with themselves only the caller leaves, and the other member keeps the role
+
 #### Scenario: Owner cannot leave the room
 
 - **WHEN** the Room Owner removes themselves from the room
@@ -170,9 +175,9 @@ there is no moderation of invitations.
 
 The system SHALL allow content-level actions on files of an active room by role: every role views,
 prints, copies to the clipboard and downloads; every role but Viewer comments; Room Owner, Room manager,
-Content creator, Editor and Reviewer review; Room Owner, Room manager, Content creator, Editor and Form
-Filler fill forms; Room Owner, Room manager, Content creator and Editor edit. Form filling applies to PDF
-forms in Virtual Data Rooms and Form filling rooms only (see those specifications).
+Content creator, Editor and Reviewer review; Room Owner, Room manager, Content creator and Editor edit; only
+a Form Filler holds the fill right on a PDF form (the editing roles edit it). Form filling applies to PDF
+forms in Virtual Data Rooms and Form filling rooms (see those specifications).
 
 #### Scenario: Content action matrix by role
 
@@ -190,6 +195,13 @@ forms in Virtual Data Rooms and Form filling rooms only (see those specification
 | Review                               | ✔ | ✔ | ✔ | ✔ |   | ✔ |   |   |
 | Fill in form fields                  | ✔ | ✔ | ✔ | ✔ | ✔ |   |   |   |
 | Edit files                           | ✔ | ✔ | ✔ | ✔ |   |   |   |   |
+
+The "Fill in form fields" row counts editing for RO, RM, CC and ED; only FF holds the fill right itself.
+
+#### Scenario: Editing roles edit a PDF form instead of filling it
+
+- **WHEN** a Room manager, a Content creator or an Editor of a Virtual Data Room reads the rights on a PDF form of the room
+- **THEN** the form can be edited and the fill right is not granted, while a Form Filler holds the fill right and cannot edit
 
 #### Scenario: Viewer opens a file
 

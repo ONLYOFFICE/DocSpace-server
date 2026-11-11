@@ -59,6 +59,22 @@ public class GroupMembersAddTests(AspireAppFixture fixture) : BaseTest(fixture)
         result.Response.Members.Select(m => m.Id).Should().Contain(member.Id);
     }
 
+    /// <summary>A guest among the members added to an existing group is skipped; the request succeeds and the others are added.</summary>
+    [Fact]
+    public async Task AddMembersTo_WithGuest_GuestSkippedOthersAdded()
+    {
+        var user = await InviteContact(EmployeeType.User);
+        var guest = await InviteGuest();
+        var created = await CreateGroupAsync(Guid.NewGuid().ToString("N"));
+
+        await _groupApi.AddMembersToAsync(created.Response.Id, new MembersRequest([user.Id, guest.Id]), TestContext.Current.CancellationToken);
+
+        var group = await _groupApi.GetGroupAsync(created.Response.Id, includeMembers: true, cancellationToken: TestContext.Current.CancellationToken);
+        var memberIds = group.Response.Members.Select(m => m.Id).ToList();
+        memberIds.Should().Contain(user.Id);
+        memberIds.Should().NotContain(guest.Id);
+    }
+
     [Fact]
     public async Task AddMembersTo_MultipleUsers_AllAreAddedToTheGroup()
     {

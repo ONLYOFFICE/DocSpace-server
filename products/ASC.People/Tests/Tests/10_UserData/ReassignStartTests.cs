@@ -106,6 +106,76 @@ public class ReassignStartTests(AspireAppFixture fixture) : UserDataTestBase(fix
         exception.ErrorContent?.ToString().Should().Contain("Can not reassign data");
     }
 
+    /// <summary>
+    /// The destination of a reassignment must be an active Room admin or DocSpace admin: a DocSpace admin
+    /// reassigning a disabled Room admin's data to a User, a Guest or a disabled Room admin gets 400, an
+    /// active Room admin is accepted. <paramref name="targetType"/> null is a disabled Room admin.
+    /// </summary>
+    [Theory]
+    [InlineData(EmployeeType.User, false)]
+    [InlineData(EmployeeType.Guest, false)]
+    [InlineData(null, false)]
+    [InlineData(EmployeeType.RoomAdmin, true)]
+    public async Task StartReassign_AsDocSpaceAdmin_ByTargetType_OnlyActiveAdminAccepted(EmployeeType? targetType, bool accepted)
+    {
+        var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
+        var (source, _) = await CreateActorWithRoomAndFileAsync(EmployeeType.RoomAdmin, "Autotest Reassign Room", "Autotest Reassign File");
+        await TerminateUser(source);
+
+        var target = await InviteMember(targetType ?? EmployeeType.RoomAdmin);
+
+        if (targetType is null)
+        {
+            await TerminateUser(target);
+        }
+
+        await _peopleClient.Authenticate(admin);
+        var request = new StartReassignRequestDto(source.Id, target.Id);
+
+        if (accepted)
+        {
+            var result = await _userDataApi.StartReassignAsync(request, cancellationToken: TestContext.Current.CancellationToken);
+            result.Response.Error.Should().BeEmpty();
+            return;
+        }
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _userDataApi.StartReassignAsync(request, cancellationToken: TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("Can not reassign data to user");
+    }
+
+    /// <summary>
+    /// Only the portal owner reassigns the data of a disabled DocSpace admin: a DocSpace admin gets 400
+    /// ("Can not reassign data from user"), the owner is accepted.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task StartReassign_FromDisabledDocSpaceAdmin_OnlyOwnerAccepted(bool asOwner)
+    {
+        var caller = asOwner ? Owner : await InviteContact(EmployeeType.DocSpaceAdmin);
+        var (source, _) = await CreateActorWithRoomAndFileAsync(EmployeeType.DocSpaceAdmin, "Autotest Reassign Admin Room", "Autotest Reassign Admin File");
+        await TerminateUser(source);
+
+        await _peopleClient.Authenticate(caller);
+        var request = new StartReassignRequestDto(source.Id, caller.Id);
+
+        if (asOwner)
+        {
+            var result = await _userDataApi.StartReassignAsync(request, cancellationToken: TestContext.Current.CancellationToken);
+            result.Response.Error.Should().BeEmpty();
+            return;
+        }
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _userDataApi.StartReassignAsync(request, cancellationToken: TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("Can not reassign data from user");
+    }
+
     [Fact]
     public async Task StartReassign_Anonymous_ThrowsUnauthorized()
     {

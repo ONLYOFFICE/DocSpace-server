@@ -205,7 +205,7 @@ Evidence column:
 | F12, F10, H2 | file-operations, history-and-audit | 403 instead of 404 for a missing folder in `createFile` and a missing file in `getFileVersionInfo`; 403 instead of 401 for an anonymous caller of `file/{id}/history`; the sibling endpoints answer 404 / correctly. | red test, run 2026-11-10 | OPEN |
 | F6 | file-operations | `GET fileops/convert` and `fileops/import` → 400 instead of an empty list; `GET fileops/move` is shadowed by the check endpoint. | bug test (82225) | OPEN |
 | Q3 | quotas | `setTenantQuotaSettings` reports a non-admin caller or a hosted portal with `NotSupportedException` → 415 instead of 403. | red test, run 2026-11-10 | OPEN |
-| PS-6 | portal-settings | `closeAdminHelper` gives a signed-in non-administrator of a self-hosted portal 415 instead of 403, one branch for a role and for an edition; the yaml documents it. | red by code reading | OPEN |
+| PS-6 | portal-settings | `closeAdminHelper` gives a signed-in non-administrator of a self-hosted portal 415 instead of 403, one branch for a role and for an edition; the yaml documents it. | test, run 2026-11-11 (`AdminHelperTests.cs`) | OPEN |
 | T2 | portal-lifecycle | Confirming the owner change reports every business refusal ("User not found", "Access denied") as 500; the sibling `sendOwnerChangeInstructions` uses 400/403. | static | OPEN |
 | T4 | portal-lifecycle | The "last full-access space" rule and the "wizard passed" check throw plain exceptions and answer 500; the yaml documents the 500 as intended. | static | OPEN |
 | T7 | portal-lifecycle | System-API registration on a server installation validates `portalName` only inside the tenant registration: a taken or malformed name answers 500 instead of the 400 codes of `validateportalname`. | static | OPEN |
@@ -228,11 +228,11 @@ Evidence column:
 | FX7 | files-settings | `createRoomTag` with a name holding a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design. | per test comment | OPEN |
 | PS-3 | portal-settings | `configureDeepLink` with a body without `deepLinkSettings` fails on a null reference: 500 for a request fault, documented in the yaml. | red by code reading | OPEN |
 | PS-4 | portal-settings | `configureCsp` with a `null` entry in `domains` fails on a null reference: 500 for a request fault, documented in the yaml. | red by code reading | OPEN |
-| PS-5 | portal-settings | `saveDnsSettings` answers 500 through plain exceptions for a malformed or taken name and a hidden section, not 400 or 402 as the sibling settings do; the yaml documents the 500. | red by code reading | OPEN |
+| PS-5 | portal-settings | `saveDnsSettings` answers 500 through plain exceptions for a malformed or taken name and a hidden section, not 400 or 402 as the sibling settings do; the yaml documents the 500. | test, run 2026-11-11 (`DnsSettingsTests.cs`) | OPEN |
 | A24 | ai-agents | In a concurrent MCP add of one name the losers answer 403, not the soft "already registered". | per test (comment) | OPEN |
 | P4 | plugins | Every failure after the size checks, storage I/O included, is wrapped as 400 "Wrong plugin archive. …". | static | OPEN |
 | W9 | billing | `getPaymentUrl` quantity below 1 is validated after the configuration and admin checks: 403 without billing, 400 with it. | red test, run 2026-11-10 | OPEN |
-| AC-8 | access-settings | The 403 of `updateTfaSettings` for naming the owner depends on the `id` field, not the caller's role, so an owner listing themselves in `mandatoryUsers` with no `id` gets 403. | by code reading | OPEN |
+| AC-8 | access-settings | The 403 of `updateTfaSettings` for naming the owner depends on the `id` field, not the caller's role, so an owner listing themselves in `mandatoryUsers` with no `id` gets 403. | test, run 2026-11-11 (`TfaOwnerGuardTests.cs:89`) | OPEN |
 | AC-9 | access-settings | `unlinkTfaApp` never reaches the branch that treats an empty `id` as the caller: an empty `id` resolves to no account and answers 403 first. | by code reading | OPEN |
 | W2 | billing | `getCustomerInfo`/`getRestrictedAiModels` answer 200-empty to Guests when billing/AI is not configured and 403 when it is; the rule depends on the installation, not the caller. | red test, run 2026-11-10 | OPEN |
 | W8, W10 | billing | "No limits" vs "not a customer" are indistinguishable on the participants page; a failed balance read is cached 10 minutes as "no customer" (`c2f48e709e` only documents W10). | static | OPEN |
@@ -320,6 +320,9 @@ Evidence column:
 | R5 | room-role-permissions | `updateFileComment` (version comment) is refused for an Editor; design question, kept outside the Comment row. | static | OPEN |
 | FS1 | file-sharing | **Behaviour, not a defect**, recorded so nobody files it as one: `addFavorites` / `deleteFavoritesFromBody` skip a file the caller cannot read and answer `true`, the same as for a readable one; the spec states the skip. | test pins | NOT A DEFECT |
 | — | user-type-permissions | Matrix row "copy of an archived room" is allowed by the matrix but `room-types` refuses duplication of an archived room; kept MATRIX-ONLY and flagged, neither spec changed. | static | not re-checked |
+| AC-11 | access-settings | `getIpRestrictions` and `getSupportedCultures` compute the ETag by hashing a `MemoryStream` that is never rewound, so every list gets the same ETag (MD5 of zero bytes): after the IP list changes, a request with the old ETag still gets 304 and the client keeps the stale list. | red test, run 2026-11-11 (`IpRestrictionsRulesTests.GetIpRestrictions_ListChangedAfterTheETag_ReturnsList`, `Category=Bug`); code read | OPEN |
+| PS-7 | portal-settings | A refused `saveMailDomainSettings` (Custom list with a bad domain) and a refused `saveDnsSettings` (name mapped by another portal) change the cached portal object before the check: the database keeps the old value, but the portal then reports the refused value until the cache expires. | red test, run 2026-11-11 (`MailDomainSettingsTests.cs:70`, `DnsSettingsTests.cs:160`, `Category=Bug`) | OPEN |
+| FX10 | files-settings | `getGroupsMembersWithFolderSecurity` / `...FileSecurity` for a group with no share on the entry return an empty list, but `total` and `count` give the group's size: the count query skips the share check the list query has. | red test, run 2026-11-11 (`GroupMembersFolderSecurityTests.cs:120`, `Category=Bug`) | OPEN |
 
 ## Closed by v4.1.0
 

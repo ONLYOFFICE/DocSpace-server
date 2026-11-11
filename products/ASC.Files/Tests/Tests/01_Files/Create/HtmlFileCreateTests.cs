@@ -125,6 +125,28 @@ public class HtmlFileCreateTests(
     }
 
     [Fact]
+    public async Task CreateHtmlFileInMyDocuments_CreateNewIfExistTrue_StoresTheContentAsANewVersion()
+    {
+        await _filesClient.Authenticate(Owner);
+
+        var first = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Version", "<p>First</p>", createNewIfExist: false),
+            TestContext.Current.CancellationToken)).Response;
+
+        var second = (await _filesApi.CreateHtmlFileInMyDocumentsAsync(
+            new CreateTextOrHtmlFileRequest("Autotest HTML My Docs Version", "<p>Second, a longer content</p>", createNewIfExist: true),
+            TestContext.Current.CancellationToken)).Response;
+
+        var versions = (await _filesApi.GetFileVersionInfoAsync(first.Id, TestContext.Current.CancellationToken)).Response;
+
+        second.Id.Should().Be(first.Id);
+        second.Version.Should().Be(first.Version + 1);
+        second.PureContentLength.Should().Be(Encoding.UTF8.GetByteCount("<p>Second, a longer content</p>"));
+        first.PureContentLength.Should().Be(Encoding.UTF8.GetByteCount("<p>First</p>"));
+        versions.Should().HaveCount(2);
+    }
+
+    [Fact]
     public async Task CreateHtmlFileInMyDocuments_CreateNewIfExistFalse_CreatesNewFileWithSuffix()
     {
         await _filesClient.Authenticate(Owner);

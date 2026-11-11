@@ -72,6 +72,28 @@ public class GroupCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
         memberIds.Should().Contain(member2.Id);
     }
 
+    /// <summary>A group cannot be created with a guest among its members or as its manager: 400, and no group appears.</summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task AddGroup_WithGuestMemberOrManager_BadRequest(bool guestIsManager)
+    {
+        var guest = await InviteGuest();
+        var groupName = Guid.NewGuid().ToString("N");
+
+        var request = guestIsManager
+            ? new GroupRequestDto(groupName: groupName, groupManager: guest.Id)
+            : new GroupRequestDto(groupName: groupName, groupManager: Owner.Id, members: [guest.Id]);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _groupApi.AddGroupAsync(request, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
+
+        var groups = (await _groupApi.GetGroupsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        groups.Should().NotContain(g => g.Name == groupName);
+    }
+
     [Fact]
     public async Task AddGroup_WithEmptyMembersList_ManagerIsAddedAsTheOnlyMember()
     {

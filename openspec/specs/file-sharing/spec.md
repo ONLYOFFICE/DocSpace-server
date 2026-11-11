@@ -48,8 +48,8 @@ list the resulting rights of the subjects that were processed.
 #### Scenario: Accepted access levels
 
 - **WHEN** an account or a group is given access to an entry in My documents
-- **THEN** Full access (`ReadWrite`), Editing, Form filling, Review, Comment and Read are accepted and `None` withdraws the access
-- **AND** the levels reserved for room membership (Room manager, Content creator) and the pseudo-levels `Varies` and `Restrict` are not accepted on a share of a file or folder outside a room
+- **THEN** Full access (`ReadWrite`), Editing, Review, Comment, Read and `Restrict` are accepted, Form filling is accepted on a PDF form, and `None` withdraws the access
+- **AND** the levels reserved for room membership (Room manager, Content creator), the pseudo-level `Varies`, and Form filling on a file that is not a PDF are refused (403) on a share of a file or folder outside a room
 
 #### Scenario: File shared with two accounts at different levels
 
@@ -296,11 +296,16 @@ The section SHALL support the ordinary listing filters.
 
 ### Requirement: Removing a share and removing an entry from Shared with me
 
-`removeSecurityInfo` SHALL revoke the access of every account and group on the listed files and folders when
-the caller may change their access, keeping the owner's record and the external links, and clear the entries
-from the caller's own favorites, recent and new marks. A recipient of the share, or an account that reached
-the entry through a link, uses the same operation to take it out of its own Shared with me ("Remove from
-list"), changing nobody else's rights. It answers `true`.
+`removeSecurityInfo` SHALL revoke the access of every account and group on the listed entries when the
+caller may change their access, keeping the owner's record and the external links. A recipient of a share or
+a link uses it to take the entry out of its own Shared with me ("Remove from list"), which also clears the
+entry from the caller's favorites, recent and new marks and changes nobody else's rights. It answers `true`.
+
+#### Scenario: Marks of the caller
+
+- **WHEN** a recipient removes a shared file from its list, or the owner calls the operation for a file of their own My documents
+- **THEN** the recipient's favorite, recent and new marks of the file are gone, while the owner's own marks stay
+- **AND** the owner's record and the external link of the file are untouched
 
 #### Scenario: Owner revokes every share
 

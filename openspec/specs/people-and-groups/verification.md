@@ -4,6 +4,8 @@
 
 > Revision 2026-11-09 (bb406b409b..6fb013e745): the repeat check of letters (no letter for a repeat within the period, same answer); the rate limit of the resend and instruction endpoints is gone.
 
+> Revision 2026-11-11: the CODE-ONLY rows were covered by new integration tests where the `integration-test` stand reaches them, each class run alone (`dotnet test --filter-class`), all PASS. Rows still marked CODE-ONLY say why they are unreachable; partly covered rows name the part that stays CODE-ONLY.
+
 Paths are relative to the repo root. `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml` (working tree of the
 submodule, HEAD `baf28cf`, 2026-11-06). Tests are under `products/ASC.People/Tests/Tests/`, by folder: `P/`
 `01_Profiles`, `T/` `02_UserType`, `S/` `03_UserStatus`, `E/` `04_Email`, `F/` `06_Photos`, `Q/` `08_Search`, `H/`
@@ -30,14 +32,14 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Own address, every type, same as self profile | `P/GetProfileByEmailTests.cs:49` | TEST-CONFIRMED [run: PASS] |
 | Owner→admin, admin→Room admin, Room admin→User succeed | `P/GetProfileByEmailTests.cs:78` | TEST-CONFIRMED [run: PASS] |
 | User/Guest on another 403; unknown 404; anonymous 401 | `P/GetProfileByEmailTests.cs:116,130,102,91` | TEST-CONFIRMED [run: PASS] (by name) |
-| `encemail` decrypted; no address 400 | `User:1211-1220` | CODE-ONLY |
+| `encemail` decrypted; no address 400 | `P/ProfileLookupRulesTests.cs:44`; `User:1190-1220` | TEST-CONFIRMED [run: PASS] for the 400; `encemail` decryption stays CODE-ONLY (needs an address encrypted with the instance key) |
 | **Own profile and profile list** | | |
 | Self profile; Guest has no personal folder | `P/GetSelfProfileTests.cs:45,62,87` | TEST-CONFIRMED [run: PASS] (by name) |
 | List with flags for Owner/admin; User, Guest 403; anonymous 401 | `P/GetAllProfilesTests.cs:46,78,91,104` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Checking whether an email is taken** | | |
-| Roles LinkInvite, GuestShareLink, Authenticated; `exists`, `status`; blank → 400 | `User:1169-1187`, yaml `checkUserExistsByEmail` | CODE-ONLY |
+| Roles LinkInvite, GuestShareLink, Authenticated; `exists`, `status`; blank → 400 | `P/ProfileLookupRulesTests.cs:53,65,74,83,98` | TEST-CONFIRMED [run: PASS] for Authenticated, LinkInvite (invitation link query in the `confirm` header), `exists`/`status`, blank 400, anonymous without a key 401; the GuestShareLink role stays CODE-ONLY |
 | **Token diagnostics** | | |
-| `name`, `claims` as `type:value` | `User:121-131`, yaml `getClaims` | CODE-ONLY |
+| `name`, `claims` as `type:value` | `P/ProfileLookupRulesTests.cs:129` | TEST-CONFIRMED [run: PASS] |
 | **Editing a profile** | | |
 | Own names persist; `displayName` built from them (letters only, see PG-1) | `P/UpdateMemberTests.cs:49-70` | TEST-CONFIRMED [run: PASS] |
 | `12345` → 400 "Incorrect firstname or lastname" | `P/UpdateMemberTests.cs:126` | TEST-CONFIRMED [run: PASS] |
@@ -63,41 +65,41 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | **Listing accounts by status** | | |
 | Owner, admin, Room admin lists; Room admin Terminated empty 200; User, Guest 403 | `S/UserStatusGetTests.cs:43,106,174,199`; `S/UserStatusGetPermissionsTests.cs:44,62,86` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Activation status through a confirmation link** | | |
-| Roles Activation, EmailActivation; list must be the caller alone, else 400; welcome letter once | `User:2117-2159` | CODE-ONLY |
+| Roles Activation, EmailActivation; list must be the caller alone, else 400; welcome letter once | `User:2117-2159` | CODE-ONLY (unreachable: the confirmation key arrives only in a letter) |
 | **Who may start an email change** | | |
 | Allowed pairs | `E/EmailChangeInstructionsTests.cs:43-55,100-110` | TEST-CONFIRMED [run: PASS] |
 | Denied pairs 403 "Access denied" | `E/EmailChangeInstructionsPermissionsTests.cs:42-73` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | `E/EmailChangeInstructionsPermissionsTests.cs:134` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Immediate change versus instructions** | | |
 | Owner on self: 200, sign-in with the new address | `E/EmailChangeInstructionsTests.cs:94-120` | TEST-CONFIRMED [run: PASS] |
-| Non-admin only gets a letter; admin path writes the address | `User:1924-1985` | CODE-ONLY |
+| Non-admin only gets a letter; admin path writes the address | `E/EmailChangeInstructionsRulesTests.cs:44,59` | TEST-CONFIRMED [run: PASS] (stored address unchanged for a non-admin on self; written and `NotActivated` for the Owner on a User; the letter itself not read) |
 | Address switched back and forth by an admin six times: two letters, one per address | `E/EmailChangeInstructionsTests.cs:65-86` | TEST-CONFIRMED |
 | **Validation of an email change** | | |
 | Malformed 400 naming the Email field; unknown 404 message | `E/EmailChangeInstructionsPermissionsTests.cs:86-115` | TEST-CONFIRMED [run: PASS] |
 | Longer than 255 → 400 | `E/EmailChangeInstructionsPermissionsTests.cs:117` | TEST-CONFIRMED [run: PASS] (by name) |
-| Disabled/pending 404, taken address 400, same address 400 | `User:1924-1985` | CODE-ONLY |
+| Disabled/pending 404, taken address 400, same address 400 | `E/EmailChangeInstructionsRulesTests.cs:75,90,106,124` | TEST-CONFIRMED [run: PASS]; the account's own address is caught by the "taken" lookup before the "same address" check, so that check is unreachable but the answer is the same 400 |
 | **Applying an email change from a link** | | |
-| Role EmailChange; 403 cases; lower-cased; Activated; empty 400 | `User:684-737` | CODE-ONLY |
+| Role EmailChange; 403 cases; lower-cased; Activated; empty 400 | `User:684-737` | CODE-ONLY (unreachable: the EmailChange key arrives only in a letter) |
 | **Reading a user photo** | | |
 | Own; Owner/admin on anyone; Room admin except Guest | `F/PhotoGetTests.cs:49-85` | TEST-CONFIRMED [run: PASS] |
 | Room admin→Guest 403; User/Guest→others 403 | `F/PhotoGetPermissionsTests.cs:48-100` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401; unknown 404 | `F/PhotoEdgeCaseTests.cs:48,63` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Uploading a photo** | | |
 | Own upload `success` true (bug 80569) | `F/PhotoUploadTests.cs:49-70` | TEST-CONFIRMED [run: PASS] |
-| `autosave` versus temporary file | `Photo:298-335` | CODE-ONLY |
+| `autosave` versus temporary file | `F/PhotoCropAndUrlTests.cs:48,62` | TEST-CONFIRMED [run: PASS] |
 | **A refused upload answers 200** | | |
 | Other account: `success` false, "Security error." | `F/PhotoUploadPermissionsTests.cs:50-58` | TEST-CONFIRMED [run: PASS] |
 | 20 MB → message about 5 MB; SVG → `success` false; no part 400 | `F/PhotoEdgeCaseTests.cs:108-165` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | `F/PhotoEdgeCaseTests.cs:126` | TEST-CONFIRMED [run: PASS] |
 | **Setting a photo from a URL** | | |
-| Own only, empty 400, same URL skips download | `Photo:224-251`, yaml `updateMemberPhoto` | CODE-ONLY |
+| Own only, empty 400, same URL skips download | `F/PhotoCropAndUrlTests.cs:108,123,142` | TEST-CONFIRMED [run: PASS] (the download of a foreign URL is not exercised: no reachable image host) |
 | **Cropping a photo** | | |
-| Own only; `tmpFile` flow; zero size = whole image | `Photo:84-126`, yaml `createMemberPhotoThumbnails` | CODE-ONLY |
+| Own only; `tmpFile` flow; zero size = whole image | `F/PhotoCropAndUrlTests.cs:76,92` | TEST-CONFIRMED [run: PASS] (that the crop covers the whole image is read from the code; the test sees the avatar change) |
 | **Deleting a photo** | | |
 | Own, every type; others 403 | `F/PhotoDeleteTests.cs:48-58`; `F/PhotoDeletePermissionsTests.cs:48-60` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401; unknown 404 | `F/PhotoEdgeCaseTests.cs:78,93` | TEST-CONFIRMED [run: PASS] (by name) |
 | **People search reads the stored names** | | |
-| Plain query over stored columns, decoded name needed; never index lag | `common/ASC.Core.Common/Users/UserQueryHelper.cs:53`, `common/ASC.Core.Common/Data/DbUserService.cs:973`; comment and decode in `Q/SearchTestBase.cs:42-46` and its poll | CODE-ONLY (test helper comment agrees) |
+| Plain query over stored columns, decoded name needed; never index lag | `Q/SearchRulesTests.cs:49` (found with no poll right after the invitation); `common/ASC.Core.Common/Users/UserQueryHelper.cs:53` | TEST-CONFIRMED [run: PASS]; the HTML-encoded `displayName` part stays per test comment (PG-1) |
 | **Filtered people lists** | | |
 | Every type found for Owner | `Q/FilterSearchTests.cs:43-52` | TEST-CONFIRMED [run: PASS] |
 | Room admin does not see Owner's guest | `Q/FilterSearchPermissionsTests.cs:44-60` | TEST-CONFIRMED [run: PASS] |
@@ -113,25 +115,25 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Invited User finds a fellow member | `Q/SharedSearchTests.cs:168-185,446-460` | TEST-CONFIRMED [run: PASS] |
 | User NOT invited 403 (the tests say "RoomMember" but never invite him) | `Q/SharedSearchPermissionsTests.cs:116-126,312-322` | TEST-CONFIRMED [run: PASS] |
 | Invited Guest 403, bug 79218 | `Q/SharedSearchPermissionsTests.cs:343-360` | TEST-CONFIRMED [run: PASS] |
-| Rule: can read and not a guest; unknown 404 | `User:3257-3265,3338` | CODE-ONLY |
+| Rule: can read and not a guest; unknown 404 | `Q/SearchRulesTests.cs:60,73` | TEST-CONFIRMED [run: PASS] |
 | Folder variants; Owner, admin, Room admin finds; anonymous 401 | `Q/SharedSearchTests.cs:111-148,250-307,389-426`; `Q/SharedSearchPermissionsTests.cs:132,148,214-246,328,368` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Accounts and groups an entry can be shared with** | | |
 | Room manager finds; invited User with editing 403; outside admin 403 | `Q/SharedSearchTests.cs:89-104`; `Q/SharedSearchPermissionsTests.cs:47-82` | TEST-CONFIRMED [run: PASS] |
-| Rule: can edit access | `Accounts:175-180` | CODE-ONLY |
+| Rule: can edit access | `Q/SearchRulesTests.cs:73` (Editing member reads people, refused accounts) | TEST-CONFIRMED [run: PASS] |
 | Folder and room variants; Guest 403; anonymous 401 | `Q/SharedSearchTests.cs:190-228,329-367`; `Q/SharedSearchPermissionsTests.cs:83,101,163-199,261-297` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Accounts search needs a text** | | |
-| Empty text → count and total 0 | `Accounts:193-197` | CODE-ONLY |
+| Empty text → count and total 0 | `Q/SearchRulesTests.cs:91` | TEST-CONFIRMED [run: PASS] |
 | **Theme of an account** | | |
 | Default System; cycles through three themes, every type | `H/ThemeTests.cs:43-85,88-95` | TEST-CONFIRMED [run: PASS] |
-| Stored per caller | `User:1810-1815` (loaded for the current user) | CODE-ONLY |
+| Stored per caller | `H/ThemePerAccountTests.cs:43,61` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | `H/ThemePermissionsTests.cs:42,53` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Whether a reassignment is necessary** | | |
 | Owner, admin true; non-admin 403. The tests send no `userId`, so they prove only "true when rooms exist", not "this user's rooms" | `D/NecessaryReassignTests.cs:43-78` | TEST-CONFIRMED [run: PASS] |
-| Peer admin 403; Guest conversion counts shared entries | `Reassign:199-217` | CODE-ONLY |
+| Peer admin 403; Guest conversion counts shared entries | `D/UserDataRulesTests.cs:45,58,74` | TEST-CONFIRMED [run: PASS] |
 | **Starting a data reassignment** | | |
 | Owner starts; active source 400; non-admin 403 | `D/ReassignStartTests.cs:43-55,77-108` | TEST-CONFIRMED [run: PASS] |
 | admin starts; anonymous 401 | `D/ReassignStartTests.cs:59,110` | TEST-CONFIRMED [run: PASS] (by name) |
-| Recipient rule, Owner and self as source | `Reassign:106-135` | CODE-ONLY |
+| Recipient rule, Owner and self as source | `D/UserDataRulesTests.cs:108` (to User, Guest, disabled Room admin; from Owner, self) | TEST-CONFIRMED [run: PASS] |
 | **Watching a data reassignment** | | |
 | Completed, `error` empty; peer admin 403 (bug 78957) | `D/ReassignProgressTests.cs:43-58,105-125` | TEST-CONFIRMED [run: PASS] |
 | admin; non-admin 403; anonymous 401 | `D/ReassignProgressTests.cs:62,83,98` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -141,19 +143,19 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | **Starting a data removal** | | |
 | Room passes to the Owner, bug 80714 | `D/RemoveStartTests.cs:44-74` | TEST-CONFIRMED [run: PASS] |
 | Owner, admin start; non-admin 403; anonymous 401 | `D/RemoveStartTests.cs:77,92,109,125` | TEST-CONFIRMED [run: PASS] (by name) |
-| 400 cases | `Remove:132-151` | CODE-ONLY |
+| 400 cases | `D/UserDataRulesTests.cs:146` (unknown, Owner, self, active) | TEST-CONFIRMED [run: PASS] |
 | **Watching and cancelling a data removal** | | |
 | Progress `error` empty; terminate succeeds (Owner) | `D/RemoveProgressTests.cs:43-52`; `D/RemoveTerminateTests.cs:44-52` | TEST-CONFIRMED [run: PASS] |
 | admin; non-admin 403; anonymous 401 | `D/RemoveProgressTests.cs:57,73,88`; `D/RemoveTerminateTests.cs:56,70,89` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Asking to delete one's own profile** | | |
 | Member gets own email in the answer; Owner 403 | `D/SendInstructionsToDeleteTests.cs:52-61, 87-97` | TEST-CONFIRMED [run: PASS] |
-| LDAP 403 | `Remove:102-105` | CODE-ONLY |
+| LDAP 403 | `Remove:102-105` | CODE-ONLY (unreachable: no LDAP on the stand) |
 | Six calls in a row: each answer holds the email, one letter; no 429 (rate limit removed, `eeaf3b6988`) | `D/SendInstructionsToDeleteTests.cs:63-84` | TEST-CONFIRMED |
 | **Deleting a guest's personal folder** | | |
 | All five types 403 (a fresh Guest has no folder) | `D/DeletePersonalFolderTests.cs:43-62`; `Remove:219-224`; `Queue:147-154` | TEST-CONFIRMED [run: PASS] |
-| A Guest with a folder gets the job | `Remove:224-226`; `common/ASC.Data.Reassigns/DeletePersonalFolderProgressItem.cs:59-117` | CODE-ONLY |
+| A Guest with a folder gets the job | `D/UserDataRulesTests.cs:182` (a User with a personal file converted to Guest) | TEST-CONFIRMED [run: PASS] (the move of shared entries to the folder's modifier is not asserted) |
 | **Watching the personal folder deletion** | | |
-| Caller only, empty body when nothing queued | `Remove:243-250`, yaml `getDeletePersonalFolderProgress` | CODE-ONLY |
+| Caller only, empty body when nothing queued | `D/UserDataRulesTests.cs:167,182` | TEST-CONFIRMED [run: PASS] |
 | **Watching a type conversion** | | |
 | 100, `isCompleted`, `error` empty | `T/UserTypeChangeTests.cs:153-162` | TEST-CONFIRMED [run: PASS] |
 | Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:44,63,82` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -162,13 +164,13 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:101-212` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Listing third-party providers** | | |
 | No linked entry, each names a provider, env empty list | `X/ThirdPartyAuthProvidersTests.cs:48-75` | TEST-CONFIRMED [run: PASS] |
-| Anonymous allowed, login URL | `Third:93-135` | CODE-ONLY |
+| Anonymous allowed, login URL | `X/ThirdPartyAccountLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] for anonymous 200; the login URL stays CODE-ONLY (the stand configures no provider, the list is empty) |
 | **Linking a third-party account** | | |
-| 400, 403, cancellation (live OAuth not tested) | `Third:156-183`, yaml `linkThirdPartyAccount` | CODE-ONLY |
+| 400, 403, cancellation (live OAuth not tested) | `Third:156-183`, yaml `linkThirdPartyAccount` | CODE-ONLY (unreachable: needs a serialized profile from a completed provider authorization, encrypted with the instance key; 403 needs a SaaS tariff without OAuth) |
 | **Unlinking a third-party account** | | |
-| Link removed, 200 | `Third:381-388` | CODE-ONLY |
+| Link removed, 200 | `X/ThirdPartyAccountLinkTests.cs:58` | TEST-CONFIRMED [run: PASS] for 200 on a provider that is not linked; removing a real link stays CODE-ONLY (no link can be made here) |
 | **Joining through a third-party account** | | |
-| Anonymous, invitation check, cancellation empty body | `Third:207-300`, yaml `signupThirdPartyAccount` | CODE-ONLY |
+| Anonymous, invitation check, cancellation empty body | `Third:207-300`, yaml `signupThirdPartyAccount` | CODE-ONLY (unreachable: needs a provider-issued serialized profile) |
 | **Who may manage groups** | | |
 | User manager forbidden: `removeMembersFrom`, `setMembersTo` | `G/GroupPermissionRemoveMembersTests.cs:227-235`; `G/GroupPermissionSetMembersTests.cs:165` | TEST-CONFIRMED [run: PASS] |
 | DocSpace admin allowed, non-admin 403, anonymous 401, each operation | `G/GroupPermission*Tests.cs` (`_DocSpaceAdmin_`, `_NonAdminRoles_Forbidden`, `_Anonymous_Unauthorized`); `G/GroupPermissionDeleteGroupTests.cs:72,86` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -202,7 +204,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Manager left out; manager kept once | `G/GroupMembersReplaceTests.cs:169-198` | TEST-CONFIRMED [run: PASS] |
 | Unknown ID 400; malformed 400; disabled only 400 (bug 79368) | `G/GroupPermissionSetMembersTests.cs:70-90`; `M/GroupMembersTests.cs:44-66` | TEST-CONFIRMED [run: PASS] |
 | Empty and null lists 400; unknown group 404 | `G/GroupPermissionSetMembersTests.cs:47,93,105,118,130` | TEST-CONFIRMED [run: PASS] (by name) |
-| Valid + unknown mix keeps the valid ones (any-valid check) | `Groups:427-455` | CODE-ONLY |
+| Valid + unknown mix keeps the valid ones (any-valid check) | `G/GroupMembersReplaceTests.cs:235` | TEST-CONFIRMED [run: PASS] |
 | **Adding members to a group** | | |
 | All clauses, null list bug 81484 | `G/GroupMembersAddTests.cs:49-137`; `G/GroupPermissionAddMembersTests.cs:46,57,70,84` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Removing members from a group** | | |
@@ -228,9 +230,9 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | **Guests of a Room admin's list** | | |
 | All clauses, bug 80628 | `U/GuestsApiTests.cs:46,72`; `U/GuestsPermissionsTests.cs:44-156` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Marking the gift message as read** | | |
-| Per-account flag; error only logged | `Portal:838-851`, yaml `markGiftMessageAsRead` | CODE-ONLY |
+| Per-account flag; error only logged | `web/ASC.Web.Api.Tests/Tests/04_Portal/Users/GiftMessageMarkTests.cs:52,61` | TEST-CONFIRMED [run: PASS] for 200 for every role (repeated) and anonymous 401; the stored flag stays CODE-ONLY (no operation reads it) |
 | **Letters after portal registration** | | |
-| One-hour key; letters; not idempotent; also switches on the configured second factor for the portal (see PG-4) | `Portal:1278-1307`, yaml `sendCongratulations` | CODE-ONLY |
+| One-hour key; letters; not idempotent; also switches on the configured second factor for the portal (see PG-4) | `Portal:1278-1307`, yaml `sendCongratulations` | CODE-ONLY (unreachable: the key arrives only through the registration letter flow) |
 
 ## Differences between the yaml and the server
 

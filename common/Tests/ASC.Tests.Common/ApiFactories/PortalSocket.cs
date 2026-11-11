@@ -156,6 +156,40 @@ public sealed class PortalSocket : IAsyncDisposable
     }
 
     /// <summary>
+    /// Waits until at least <paramref name="count"/> events that match have arrived, counting the ones already there,
+    /// and returns the last of them. For an entry that was announced before the action under test: the action has to
+    /// add an event of its own, an earlier one in flight cannot stand in for it.
+    /// </summary>
+    /// <exception cref="TimeoutException">Too few matched in time; the message lists what did arrive.</exception>
+    public async Task<SocketEvent> WaitForCountAsync(
+        string name,
+        Func<JsonElement, bool> match,
+        int count,
+        TimeSpan? timeout = null,
+        CancellationToken cancellationToken = default)
+    {
+        var deadline = DateTime.UtcNow.Add(timeout ?? _defaultEventTimeout);
+
+        while (true)
+        {
+            var found = FindAll(name, match);
+
+            if (found.Count >= count)
+            {
+                return found[^1];
+            }
+
+            if (DateTime.UtcNow >= deadline)
+            {
+                throw new TimeoutException(
+                    $"{found.Count} of {count} matching '{name}' events arrived in time. Received: [{string.Join(", ", Received())}]");
+            }
+
+            await Task.Delay(_pollInterval, cancellationToken);
+        }
+    }
+
+    /// <summary>
     /// Whether an event that matches arrives within the window. For a test that has already seen the event reach
     /// someone else, so the window only has to cover the difference between two deliveries.
     /// </summary>
@@ -200,6 +234,14 @@ public sealed class PortalSocket : IAsyncDisposable
         lock (_eventsLock)
         {
             return _events.Find(e => e.Name == name && match(e.Payload));
+        }
+    }
+
+    private List<SocketEvent> FindAll(string name, Func<JsonElement, bool> match)
+    {
+        lock (_eventsLock)
+        {
+            return _events.FindAll(e => e.Name == name && match(e.Payload));
         }
     }
 

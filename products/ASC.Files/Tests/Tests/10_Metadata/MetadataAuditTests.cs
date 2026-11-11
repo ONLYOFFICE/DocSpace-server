@@ -84,6 +84,33 @@ public class MetadataAuditTests(AspireAppFixture fixture) : BaseTest(fixture)
         actions.Should().Contain("Metadata template deleted: " + renamed);
     }
 
+    [Fact]
+    public async Task CustomFieldWriteAndCascadeStart_AreWrittenToTheAuditTrail_WithTheEntryTitle()
+    {
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
+        var suffix = Guid.NewGuid().ToString()[..8];
+        var customRoomTitle = $"Custom audited {suffix}";
+        var cascadeRoomTitle = $"Cascade audited {suffix}";
+
+        var template = (await _metadataApi.CreateTemplateAsync(
+            new CreateMetadataTemplateRequestDto("Cascade " + suffix, true, [new MetadataFieldRequest(ClientField, MetadataFieldType.String)]), TestContext.Current.CancellationToken)).Response;
+
+        var customRoom = await CreateCustomRoom(customRoomTitle);
+        var cascadeRoom = await CreateCustomRoom(cascadeRoomTitle);
+
+        // the room of the custom field gets no template value, so its "values updated" event can only be the custom field's
+        await _metadataApi.SetFolderCustomFieldsAsync(customRoom.Id, new SetCustomFields([new CustomFieldRequest("Project code", "A-42")]), TestContext.Current.CancellationToken);
+        await _metadataApi.AssignFolderTemplatesAsync(cascadeRoom.Id, new AssignMetadataTemplates([template.Id], cascade: true), TestContext.Current.CancellationToken);
+
+        var cascadeText = "Metadata cascade assignment started: " + cascadeRoomTitle;
+        var events = await PollLastAuditEventsAsync(e => e.Any(x => x.Action == cascadeText));
+        var actions = events.Select(e => e.Action).ToList();
+
+        actions.Should().Contain("Metadata values updated: " + customRoomTitle, "a custom field write is audited as a values update");
+        actions.Should().Contain(cascadeText);
+    }
+
     private async Task<List<AuditEventDto>> PollLastAuditEventsAsync(Func<List<AuditEventDto>, bool> until)
     {
         var deadline = DateTime.UtcNow.AddSeconds(30);

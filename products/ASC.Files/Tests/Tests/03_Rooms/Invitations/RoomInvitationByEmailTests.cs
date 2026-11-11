@@ -151,4 +151,67 @@ public class RoomInvitationByEmailTests(
 
         exception.ErrorCode.Should().Be(400);
     }
+
+    /// <summary>
+    /// Inviting by e-mail by inviter type: a DocSpace admin and a Room admin on their own room, and a Room
+    /// admin holding the Room manager role in someone else's room, invite; the address becomes a member.
+    /// </summary>
+    [Theory]
+    [InlineData(EmployeeType.DocSpaceAdmin, true)]
+    [InlineData(EmployeeType.RoomAdmin, true)]
+    [InlineData(EmployeeType.RoomAdmin, false)]
+    public async Task SetRoomSecurity_ByEmail_AllowedInviter_AddsMember(EmployeeType inviterType, bool ownRoom)
+    {
+        var inviter = await InviteMember(inviterType);
+        await _peopleClient.Authenticate(Owner);
+
+        FolderDto room;
+
+        if (ownRoom)
+        {
+            await _filesClient.Authenticate(inviter);
+            room = await CreateCustomRoom($"Autotest Email Invite Own {inviterType}");
+        }
+        else
+        {
+            await _filesClient.Authenticate(Owner);
+            room = await CreateCustomRoom("Autotest Email Invite Managed");
+            await InviteToRoom(room.Id, inviter, FileShare.RoomManager);
+            await _filesClient.Authenticate(inviter);
+        }
+
+        var email = Initializer.Faker.Internet.Email();
+
+        await _roomsApi.SetRoomSecurityAsync(room.Id, ByEmail(email), cancellationToken: TestContext.Current.CancellationToken);
+
+        var profile = (await _profilesApi.GetProfileByEmailAsync(email: email, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        (await MemberOfRoomAsync(room.Id, profile.Id))!.Access.Should().Be(FileShare.Read);
+    }
+
+    /// <summary>
+    /// A User or a Guest who is a member of a room cannot invite by e-mail: 403, and the member list stays
+    /// as it was.
+    /// </summary>
+    [Theory]
+    [InlineData(EmployeeType.User, FileShare.Editing)]
+    [InlineData(EmployeeType.Guest, FileShare.Read)]
+    public async Task SetRoomSecurity_ByEmail_UserOrGuestMember_ForbiddenAndMembersUnchanged(EmployeeType memberType, FileShare access)
+    {
+        var member = await InviteMember(memberType);
+
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom($"Autotest Email Invite By {memberType}");
+        await InviteToRoom(room.Id, member, access);
+        var before = (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.Count;
+
+        await _filesClient.Authenticate(member);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.SetRoomSecurityAsync(room.Id, ByEmail(Initializer.Faker.Internet.Email()), cancellationToken: TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+
+        await _filesClient.Authenticate(Owner);
+        (await _roomsApi.GetRoomSecurityInfoAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.Should().HaveCount(before);
+    }
 }

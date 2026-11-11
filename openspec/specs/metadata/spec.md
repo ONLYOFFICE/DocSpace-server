@@ -1015,11 +1015,16 @@ before it. A bound carrying a time SHALL be an instant taken as is.
 
 ### Requirement: Sections that take or refuse the metadata filter
 
-The filter SHALL apply on the rooms (active, archive, Forms), on a folder or room, on My documents, Trash,
-Recent, Favorites and Shared with me, by the section's numeric identifier and by its alias (`@my`, `@trash`,
-`@recent`, `@favorites`, `@share`, `@forms`), validated the same way. The Templates and the Private room
-sections SHALL refuse a non-empty filter with 400 rather than answer unfiltered, by identifier, alias or typed
-search. Third-party storage entries carry no metadata.
+The filter SHALL apply on the rooms (active, archive, Forms, private), on a folder or room, on My documents, Trash,
+Recent, Favorites and Shared with me, by numeric identifier and by alias (`@my`, `@trash`, `@recent`,
+`@favorites`, `@share`, `@forms`), validated the same way. The Templates sections and the legacy Privacy folder
+SHALL refuse a non-empty filter with 400, by identifier, alias or typed search. Third-party entries carry no
+metadata.
+
+#### Scenario: Private rooms section
+
+- **WHEN** the private rooms section holds a private room with the template and a bare one, and is listed by its identifier, searched by `searchFolder` or listed as the rooms with `searchArea` `PrivateRooms`, with the template
+- **THEN** only the room carrying the template comes back
 
 #### Scenario: Recent, Favorites and Shared with me
 

@@ -102,6 +102,45 @@ public class PrivateRoomContentBoundaryTests(AspireAppFixture fixture) : Privacy
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// The link refusal applies only to a link that would give access: a request that revokes one
+    /// (<c>access: None</c>) passes the private-room check. No link can be created on a private room
+    /// through the API, so the revocation names a link id the room does not have.
+    /// </summary>
+    [Fact]
+    public async Task SetRoomLink_RevokingAnInvitationLink_IsNotRefused()
+    {
+        var room = await CreateRoomAsOwner();
+
+        await _roomsApi.SetRoomLinkAsync(
+            room.Id,
+            new RoomLinkRequest(linkId: Guid.NewGuid(), access: FileShare.None, linkType: LinkType.Invitation, title: "Link", denyDownload: false),
+            TestContext.Current.CancellationToken);
+
+        var links = (await _roomsApi.GetRoomLinksAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        links.Should().BeEmpty();
+    }
+
+    /// <summary>
+    /// An external revocation passes the private-room check too. The link id is unknown, so the server
+    /// treats it as a new link and the room's link limit (none for a private room) answers instead, with
+    /// its own message rather than the access-denied refusal of a link that would give access.
+    /// </summary>
+    [Fact]
+    public async Task SetRoomLink_RevokingAnExternalLink_PassesThePrivateRoomCheck()
+    {
+        var room = await CreateRoomAsOwner();
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(
+            room.Id,
+            new RoomLinkRequest(linkId: Guid.NewGuid(), access: FileShare.None, linkType: LinkType.External, title: "Link", denyDownload: false),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorContent!.ToString().Should().Contain("maximum number of links").And.NotContain("SecurityException");
+        (await _roomsApi.GetRoomLinksAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.Should().BeEmpty();
+    }
+
     [Fact]
     public async Task DuplicateRoom_MakesNoCopy()
     {

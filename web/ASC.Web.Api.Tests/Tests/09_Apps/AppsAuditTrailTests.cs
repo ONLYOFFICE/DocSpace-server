@@ -87,6 +87,77 @@ public class AppsAuditTrailTests(
         switches.Should().Equal(AppEnabled, AppDisabled);
     }
 
+    [Fact]
+    public async Task SetEnabled_SameValueTwice_IsRecordedBothTimes()
+    {
+        // Arrange
+        var id = (await PickAppsAsync(1))[0];
+
+        // Act — the second call repeats the value the first one stored
+        await SaveEnabledAsync(id, false);
+        await SaveEnabledAsync(id, false);
+
+        // Assert
+        var events = await PollAuditEventsAsync(all => all.Count(e => IsAppEvent(e, AppDisabled, id)) >= 2);
+        events.Where(e => IsAppEvent(e, AppDisabled, id)).Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task SetEnabled_RefusedCallAndUnknownId_LeaveNoEvent()
+    {
+        // Arrange
+        var ids = await PickAppsAsync(2);
+        var (refusedId, markerId) = (ids[0], ids[1]);
+        const string unknownId = "no-such-app-audit";
+        var member = await InviteMember(EmployeeType.User);
+
+        // Act — a call the member may not make, then an id the owner cannot switch
+        await _webApiClient.Authenticate(member);
+        var refused = await Assert.ThrowsAsync<ApiException>(
+            async () => await AppsApi.SetEnabledAsync(refusedId, new SetAppEnabledRequest(false), Ct));
+        await _webApiClient.Authenticate(Owner);
+        var unknown = await Assert.ThrowsAsync<ApiException>(
+            async () => await AppsApi.SetEnabledAsync(unknownId, new SetAppEnabledRequest(false), Ct));
+        await SaveEnabledAsync(markerId, false);
+
+        // Assert — once the later, accepted switch is in the trail, the two refused calls are not
+        refused.ErrorCode.Should().Be(403);
+        unknown.ErrorCode.Should().Be(404);
+        var events = await PollUntilSettledAsync(markerId);
+        events.Should().NotContain(e => e.Action.Contains(refusedId) || e.Action.Contains(unknownId));
+    }
+
+    [Fact]
+    public async Task SetSettings_SaveAndDrop_LeaveNoEvent()
+    {
+        // Arrange
+        var ids = await PickAppsAsync(2);
+        var (settingsId, markerId) = (ids[0], ids[1]);
+
+        // Act
+        await SaveSettingsAsync(settingsId, """{"audit":"probe"}""");
+        await SaveSettingsAsync(settingsId, "null");
+        await SaveEnabledAsync(markerId, false);
+
+        // Assert — once the later switch is in the trail, nothing names the application whose document changed
+        var events = await PollUntilSettledAsync(markerId);
+        events.Should().NotContain(e => e.Action.Contains(settingsId));
+    }
+
+    /// <summary>
+    /// Waits for the marker switch, then a little longer: the events are written by parallel consumers, so an event
+    /// published before the marker could still land after it.
+    /// </summary>
+    private async Task<List<AuditEventDto>> PollUntilSettledAsync(string markerId)
+    {
+        var withMarker = await PollAuditEventsAsync(all => all.Any(e => IsAppEvent(e, AppDisabled, markerId)));
+        withMarker.Should().Contain(e => IsAppEvent(e, AppDisabled, markerId), "the accepted switch has to reach the trail first");
+
+        await Task.Delay(TimeSpan.FromSeconds(3), Ct);
+
+        return (await _auditTrailDataApi.GetAuditEventsByFilterAsync(cancellationToken: Ct)).Response ?? [];
+    }
+
     private static bool IsAppEvent(AuditEventDto auditEvent, int action, string id)
     {
         return auditEvent.ActionId is { } actionId && (int)actionId == action && auditEvent.Action.Contains(id);

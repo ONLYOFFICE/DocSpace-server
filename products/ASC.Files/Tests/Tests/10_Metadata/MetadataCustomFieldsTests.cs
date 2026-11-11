@@ -321,6 +321,45 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
         afterDrop.ErrorCode.Should().Be(400);
     }
 
+    [Fact]
+    public async Task ConcurrentWritesOfOneNewName_CreateOneField_ThatFindsEveryRoom()
+    {
+        await _filesClient.Authenticate(Owner);
+        var suffix = Suffix();
+        var field = $"Parallel {suffix}";
+
+        var rooms = new List<FolderDto>();
+
+        for (var i = 0; i < 5; i++)
+        {
+            rooms.Add(await CreateCustomRoom($"Parallel {i} {suffix}"));
+        }
+
+        // the writes are serialised under one lock per portal: without it each request would find the name missing and
+        // create a field of its own, and a filter by the name would find the rooms of one of them only
+        var written = await Task.WhenAll(rooms.Select(r => SetFolderCustomFieldAsync(r.Id, field, "ACME")));
+
+        written.Should().AllSatisfy(fields => fields.Should().ContainSingle(f => f.Name == field && f.Value == "ACME"));
+
+        var condition = new MetadataFilterConditionRequest(name: field, op: "eq", value: "ACME");
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+        RoomsContentResponse found;
+
+        while (true)
+        {
+            found = await _roomsApi.GetRoomsWithMetadataAsync(metadataFilters: [condition], cancellationToken: TestContext.Current.CancellationToken);
+
+            if (found.Total >= rooms.Count || DateTime.UtcNow > deadline)
+            {
+                break;
+            }
+
+            await Task.Delay(200, TestContext.Current.CancellationToken);
+        }
+
+        found.RoomIds().Should().BeEquivalentTo(rooms.Select(r => r.Id), "every room holds the value of the one field the name means");
+    }
+
     private async Task<RoomsContentResponse> PollRoomsAsync(MetadataFilterConditionRequest condition, int expectedRoomId)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);

@@ -205,4 +205,30 @@ public class SetSecurityInfoTests(
 
         securityInfos.Select(e => e.SharedToUser?.Id).Should().NotContain(guest.Id);
     }
+
+    /// <summary>
+    /// A guest cannot re-share even with the highest access a share on My documents gives (Full access or
+    /// Editing): the refusal does not depend on the guest's own level.
+    /// </summary>
+    [Theory]
+    [InlineData(FileShare.ReadWrite)]
+    [InlineData(FileShare.Editing)]
+    public async Task SetFileSecurityInfo_GuestWithHighAccess_CannotReshare_Returns403(FileShare guestAccess)
+    {
+        var file = await CreateFileInMy($"Autotest Guest {guestAccess} Reshare.docx", Owner);
+        var guest = await InviteGuest();
+        var user = await InviteContact(EmployeeType.User);
+
+        await _filesClient.Authenticate(Owner);
+        await ShareFile(file.Id, guest.Id, guestAccess);
+
+        await _filesClient.Authenticate(guest);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ShareFile(file.Id, user.Id, FileShare.Read));
+
+        exception.ErrorCode.Should().Be(403);
+
+        await _filesClient.Authenticate(Owner);
+        var securityInfos = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        securityInfos.Should().NotContain(e => e.SharedToUser != null && e.SharedToUser.Id == user.Id);
+    }
 }

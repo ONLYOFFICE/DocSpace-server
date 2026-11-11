@@ -226,4 +226,23 @@ public class GroupMembersReplaceTests(AspireAppFixture fixture) : BaseTest(fixtu
         var profile = await _profilesApi.GetProfileByUserIdAsync(oldMember.Id.ToString(), TestContext.Current.CancellationToken);
         profile.Response.Id.Should().Be(oldMember.Id);
     }
+
+    /// <summary>
+    /// The payload check only asks whether ANY listed ID is a valid member, so one valid account
+    /// next to an ID that matches nobody passes it and the valid account becomes the group.
+    /// </summary>
+    [Fact]
+    public async Task SetMembersTo_ValidAndUnknownIdMixed_KeepsOnlyTheValidMember()
+    {
+        var oldMember = await InviteContact(EmployeeType.User);
+        var newMember = await InviteContact(EmployeeType.User);
+        var unknownId = Guid.NewGuid();
+        var created = await CreateGroupAsync(Guid.NewGuid().ToString("N"), members: [oldMember.Id]);
+
+        await _groupApi.SetMembersToAsync(created.Response.Id, new MembersRequest([newMember.Id, unknownId]), TestContext.Current.CancellationToken);
+
+        var group = await _groupApi.GetGroupAsync(created.Response.Id, includeMembers: true, cancellationToken: TestContext.Current.CancellationToken);
+        var memberIds = group.Response.Members.Select(m => m.Id).ToList();
+        memberIds.Should().BeEquivalentTo([newMember.Id]);
+    }
 }

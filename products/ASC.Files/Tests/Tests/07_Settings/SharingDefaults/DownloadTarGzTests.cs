@@ -67,6 +67,25 @@ public class DownloadTarGzTests(AspireAppFixture fixture) : SharingDefaultsTestB
         settings.DownloadTarGz.Should().Be(set);
     }
 
+    [Fact]
+    public async Task ChangeDownloadZip_AnswerIsTheSameEmptyObjectForBothFormats()
+    {
+        // Act
+        var tarGz = await _filesSettingsApi.ChangeDownloadZipAsync(new DisplayRequestDto(true), TestContext.Current.CancellationToken);
+        var zip = await _filesSettingsApi.ChangeDownloadZipAsync(new DisplayRequestDto(false), TestContext.Current.CancellationToken);
+
+        // Assert - the answer carries no field that tells the formats apart; only the settings do
+        tarGz.Response.Should().NotBeNull();
+        zip.Response.Should().NotBeNull();
+
+        using var tarGzJson = JsonDocument.Parse(tarGz.Response.ToString()!);
+        using var zipJson = JsonDocument.Parse(zip.Response.ToString()!);
+        tarGzJson.RootElement.ValueKind.Should().Be(JsonValueKind.Object);
+        tarGzJson.RootElement.EnumerateObject().Should().BeEmpty();
+        zipJson.RootElement.EnumerateObject().Should().BeEmpty();
+        (await GetFilesSettings()).DownloadTarGz.Should().BeFalse();
+    }
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]

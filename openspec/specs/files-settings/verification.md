@@ -36,18 +36,18 @@ None of those specs was edited.
 | `storeOriginal` | `T/07_Settings/Storage/StoreOriginalTests.cs:48-114` (84-95 read), `StoreOriginalPermissionsTests.cs:46-88` by name | TEST-CONFIRMED [run: PASS] |
 | `changeDeleteConfirm` | `T/07_Settings/SharingDefaults/ChangeDeleteConfirmTests.cs:56-149` (84-94 read, others by name) | TEST-CONFIRMED [run: PASS] |
 | **Switches for quick actions and room grouping** | | |
-| Stored per account, boolean answer | `S:495-499`, `S:739-744`, their remarks | CODE-ONLY |
-| `getRoomsFolder` not affected by the grouping | `S` remark at 722-734 (not traced further) | CODE-ONLY |
+| Stored per account, boolean answer | `T/07_Settings/Editor/ShowQuickActionsTests.cs`, `OrganizeRoomsGroupingTests.cs` (both derive the `SettingsToggleTestBase.cs:70-181` matrix: value, both ways, idempotent, `{}`, settings field, per user, every role, 401) | TEST-CONFIRMED [run: PASS] |
+| `getRoomsFolder` not affected by the grouping | `T/07_Settings/Editor/OrganizeRoomsGroupingTests.cs:56` (grouped and loose room, same ids with grouping on and off) | TEST-CONFIRMED [run: PASS] |
 | **Conversion prompt can only be hidden** | | |
 | Always true, two independent flags, `{}` true | `T/07_Settings/Editor/HideConfirmConvertTests.cs:67-116` | TEST-CONFIRMED [run: PASS] |
 | Isolated per user, every role, 401 | same file 120-168 by name | TEST-CONFIRMED [run: NO-LINK] |
 | **Download archive format** | | |
 | Value readable through `downloadTarGz`, per user | `T/07_Settings/SharingDefaults/DownloadTarGzTests.cs:58-68`, 97 by name | TEST-CONFIRMED [run: PASS] |
-| Answer object does not confirm the choice | `S` remark 100-114 | CODE-ONLY |
+| Answer object does not confirm the choice | `T/07_Settings/SharingDefaults/DownloadTarGzTests.cs:71` (both formats answer an empty object) | TEST-CONFIRMED [run: PASS] |
 | **Compatibility stubs store nothing** | | |
 | `storeForcesave` equals the settings value | `T/07_Settings/Storage/ForceSaveTests.cs:77-84` | TEST-CONFIRMED [run: PASS] |
-| `storeForcesave` returns the constant false | `S:409-414` | CODE-ONLY |
-| `updateFileIfExist` returns the constant false | `S:517-521` | CODE-ONLY |
+| `storeForcesave` returns the constant false | `T/07_Settings/Storage/CompatibilityStubsTests.cs:54` (two calls, three roles, settings false), 88 (401) | TEST-CONFIRMED [run: PASS] |
+| `updateFileIfExist` returns the constant false | `T/07_Settings/Storage/CompatibilityStubsTests.cs:71` (true, false, true, three roles), 88 (401) | TEST-CONFIRMED [run: PASS] |
 | **Trash auto-clearing** | | |
 | Enable with gap, disable, without gap, gap alone, `{}` | `T/07_Settings/Storage/AutoCleanupTests.cs:55-161` | TEST-CONFIRMED [run: PASS] |
 | Reflected in read and in settings, per user | same file 165-251 by name | TEST-CONFIRMED [run: NO-LINK] |
@@ -61,33 +61,34 @@ None of those specs was edited.
 | `isDefault`, version true/false, anonymous read | `T/07_Settings/Editor/GetDocServiceUrlTests.cs:56-62,77-93,97-107` | TEST-CONFIRMED [run: PASS] |
 | **Document Server address is changed with verification** | | |
 | 403 "Access denied", 401 anonymous/terminated | `T/07_Settings/Editor/CheckDocServiceUrlTests.cs:61-112` | TEST-CONFIRMED [run: PASS] |
-| Validation, mixed content, rollback, 500 on failed verification | `E:609-700`, yaml `checkDocServiceUrl` | CODE-ONLY |
-| **Default templates are read with the settings permission** | `S:628-634`, `DT:67-85` | CODE-ONLY |
+| Validation: query string and secret without header 400, nothing changed | `T/07_Settings/Editor/CheckDocServiceUrlTests.cs:123` | TEST-CONFIRMED [run: PASS] |
+| Mixed content, rollback, 500 on failed verification | `E:634-671`, yaml `checkDocServiceUrl` | CODE-ONLY (unreachable: the stand is served over http, so mixed content cannot arise; on standalone the addresses are stored for the default tenant (`FilesLinkUtility.cs:503`), so a call past validation changes them for every portal of the run) |
+| **Default templates are read with the settings permission** | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:51` (owner, administrator: every extension, `selectedFile` null), 72 (room admin, user, guest 403) | TEST-CONFIRMED [run: PASS] |
 | **Default template from an existing file** | | |
 | Missing `selectedFile` 400 | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:45-55` | TEST-CONFIRMED [run: PASS] |
 | Administrator on owner's file 403 | same file 65-80 | TEST-CONFIRMED [run: NO-LINK] |
 | Extension mismatch 400 | same file 98-109; `DT:218-221` (throws the 400 exception; the test's "still red" comment is stale by that code) | TEST-CONFIRMED [run: NO-LINK] |
 | Unknown file 404 | same file 119-128; `DT:210-211` | TEST-CONFIRMED [run: NO-LINK] |
-| Copy, previous file deleted, unknown extension is a silent 200 | `DT:87-123` | CODE-ONLY |
+| Copy, previous file deleted, unknown extension is a silent 200 | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:87,103,120` | TEST-CONFIRMED [run: PASS] |
 | **Default template from an upload** | | |
 | Over 100 MB 400 with the message | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:140-151`; `S:710-712` | TEST-CONFIRMED [run: PASS] |
 | Declared extension contradicted 400 | same file 165-213; `DT:129-134` (the comments saying 403 are stale by that code) | TEST-CONFIRMED [run: NO-LINK] |
-| PDF not a form 403; storing and previous file deleted | `DT:143-168`; `InvalidOperationException` maps to 403 per `common/ASC.Api.Core/Middleware/ResponseWrapper.cs` | CODE-ONLY |
-| **Default template reset** | `S:681-687`, `DT:87-123` | CODE-ONLY |
+| PDF not a form 403; storing and previous file deleted | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:134,151` | TEST-CONFIRMED [run: PASS] |
+| **Default template reset** | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:167` (entry null, stored copy 404, original kept), 184 (repeated), 198 (room admin 403); extension outside the set by `DT:91-94` only | TEST-CONFIRMED [run: PASS] |
 | **Editing a file alone** | | |
 | Owner and invited manager get a key | `T/01_Files/Editing/EditingStartTests.cs:52-62`, 73 by name | TEST-CONFIRMED [run: PASS] |
 | Second claim 403 | same file 116-136 | TEST-CONFIRMED [run: NO-LINK] |
 | 401 anonymous, 403 guest and read-only, 404 unknown | `T/01_Files/Editing/EditingStartPermissionsTests.cs:46-59,63-80`, 84 by name; `EditingStartTests.cs:92` by name | TEST-CONFIRMED [run: PASS] |
 | **Starting a shared editing session** | | |
 | `{}` or false: 403 "File editing start error" | `T/01_Files/Editing/EditingStartCoAuthoringTests.cs:47-59,65-80` (integration host has no Document Server tracking) | TEST-CONFIRMED [run: PASS] |
-| Key on success | `FSS:2365-2381` | CODE-ONLY |
+| Key on success | `FSS:2365-2381` | CODE-ONLY (unreachable: needs the Document Server to accept `StartTrackAsync`; the integration host does not) |
 | **Tracking an editing session** | | |
 | `key` true, empty `value` | `T/01_Files/Editing/EditingTrackTests.cs:126-140`; 51,81 | TEST-CONFIRMED [run: PASS] |
 | 401, 403 guest/read, 404, administrator allowed | `T/01_Files/Editing/EditingTrackPermissionsTests.cs:46-117`, 85 by name; `EditingTrackTests.cs:112-122` | TEST-CONFIRMED [run: PASS] |
-| Stale `docKeyForTrack` 403; `isFinish` drops the tab | yaml `trackEditFile` | CODE-ONLY |
+| Stale `docKeyForTrack` 403; `isFinish` drops the tab | `T/01_Files/Editing/EditingTrackSessionTests.cs:45` (a key the file never had; a key of a real older revision not built), 60 (claimed tab finished, editing mark gone), 76 (other tab, mark kept) | TEST-CONFIRMED [run: PASS] |
 | **Users offered for document protection** | | |
 | Guest 403 "Access denied" | `T/01_Files/Editing/ProtectUsersPermissionsTests.cs:47-67` | TEST-CONFIRMED [run: PASS] |
-| List content, unknown id 403 | yaml `getProtectedFileUsers` | CODE-ONLY |
+| List content, unknown id 403 | `T/01_Files/Editing/ProtectUsersTests.cs:45,66,82` (room members without the caller; group expansion, deleted accounts and the order not asserted) | TEST-CONFIRMED [run: PASS] |
 | **Address of a version's changes** | | |
 | Latest is version 0, API-bumped and first version have no `previous` | `T/01_Files/EditDiff/GetEditDiffTests.cs:44-57,77-92,96-106` | TEST-CONFIRMED [run: PASS] |
 | 404 message | same file 115-122 | TEST-CONFIRMED [run: NO-LINK] |
@@ -107,10 +108,10 @@ None of those specs was edited.
 | **HTML file in My documents** | | |
 | Created, 400, true same id, omitted new id | `T/01_Files/Create/HtmlFileCreateTests.cs:85-96,101-108,112-124,145-155`; 128 by name | TEST-CONFIRMED [run: PASS] |
 | Roles, guest 404, anonymous 401 | `T/01_Files/Create/HtmlFileCreatePermissionsTests.cs:102-111`; 47-88,115 by name | TEST-CONFIRMED [run: PASS] |
-| `true` updates the content with a version | yaml `createHtmlFileInMyDocuments` (not in the spec text beyond "use the file") | CODE-ONLY |
+| `true` updates the content with a version | `T/01_Files/Create/HtmlFileCreateTests.cs:128` (same id, version +1, new length, two versions) | TEST-CONFIRMED [run: PASS] |
 | **Encryption data of a file** | | |
 | Keys returned | `T/08_Private/PrivacyRoomTest.cs:149-159` | TEST-CONFIRMED [run: PASS] |
-| Read access required | yaml `getEncryptionInfo` | CODE-ONLY |
+| Read access required | `T/08_Private/EncryptionInfoAccessTests.cs:44` (no access 403), 59 (room reader 200, no file keys), 77 (unknown id 403) | TEST-CONFIRMED [run: PASS] |
 | **Primary external link of a file** | | |
 | Shape, lazily created | `T/01_Files/Links/FileLinkPrimaryTests.cs:47-67`; `FSS:4491-4542` | TEST-CONFIRMED [run: PASS] |
 | Same id, roles | same file 89,104-151 by name | TEST-CONFIRMED [run: NO-LINK] |
@@ -123,7 +124,8 @@ None of those specs was edited.
 | **Revoked primary link stays revoked on read** | | |
 | Folder: 404 after revoke | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:195-214` | TEST-CONFIRMED [run: PASS] |
 | Create after revocation: new primary link with a new id, read answers it (file and folder, 62419af921) | `T/01_Files/Links/FileLinkPrimaryTests.cs:238-242`; `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` | TEST-CONFIRMED |
-| File: same path; `primary` true clears the state; replaced in Public and Form filling rooms | `FSS:4491-4503,6622-6660` | CODE-ONLY |
+| File: same path; `primary` true clears the state; replaced in Public rooms | `T/01_Files/Links/FileLinkPrimaryRevocationTests.cs:46,62,81` | TEST-CONFIRMED [run: PASS] |
+| File: replaced in Form filling rooms | `FSS:6651-6660` | CODE-ONLY (reachable, not done: needs a PDF form in a form-filling room, whose read goes through the room-link path `FSS:4487-4500`) |
 | **Setting an external link of a file** | | |
 | Structure and fields | `T/01_Files/Links/FileLinkSetTests.cs:46-197` by name | TEST-CONFIRMED [run: PASS] |
 | ReadWrite 403, unknown id creates, 404, 401, 403 | same file 214-228,237-251,255-268,343-379; 383 by name | TEST-CONFIRMED [run: NO-LINK] |
@@ -165,10 +167,10 @@ None of those specs was edited.
 | Roles | `T/03_Rooms/Permissions/RoomTagDeletePermissionsTests.cs:111-178` | TEST-CONFIRMED [run: PASS] |
 | **Group members with their access** | | |
 | Guest 403 on the file operation | `T/04_Security/Sharing/GroupAndOwnerSharingTests.cs:49-85` | TEST-CONFIRMED [run: PASS] |
-| Fields, paging, folder operation, empty list | `Sec:320-345`, yaml `getGroupsMembersWithFolderSecurity` | CODE-ONLY |
+| Fields, paging, folder operation, empty list | `T/04_Security/Sharing/GroupMembersFolderSecurityTests.cs:48,81,98`; `total` of the empty list 120 (FX10) | TEST-CONFIRMED [run: PASS]; 120 [run: FAIL-BUG] |
 | **Unlocking a password-protected link** | | |
 | `InvalidPassword`, `Ok` | `T/04_Security/RoomShareTests.cs:434-439` | TEST-CONFIRMED [run: PASS] |
-| Attempt limit 403 | yaml `applyExternalSharePassword` | CODE-ONLY |
+| Attempt limit 403 | `T/04_Security/ExternalSharePasswordLimitTests.cs:56` (sixth wrong attempt and then the right password 403), 97 (right passwords not counted) | TEST-CONFIRMED [run: PASS] |
 
 ## Differences between the yaml and the server
 
@@ -201,6 +203,7 @@ owned by this capability. `setDefaultTemplate` on third-party string ids was not
 | FX7 | `createRoomTag` | A name with a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design | `T/03_Rooms/Tags/RoomTagCreateTests.cs:85-109` | per test comment |
 | FX8 | `setDefaultTemplate` | A numeric `selectedFile` that is not a 32-bit integer answers 500; the yaml even declares it | `DT:103`, yaml `setDefaultTemplate` | red by code reading |
 | FX9 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | `filterValue` with an uppercase letter matches nothing, per the yaml text | yaml `getGroupsMembersWithFolderSecurity`; not read in code | yaml text only |
+| FX10 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | For a group the entry is not shared with, the list is empty but `total` and `count` report the group's size: the count query does not check the group's share on the entry, the list query does | `products/ASC.Files/Core/Core/Dao/TeamlabDao/SecurityDao.cs:246-254` vs `295-311`; `T/04_Security/Sharing/GroupMembersFolderSecurityTests.cs:120` (`Category=Bug`) | red by test |
 
 Stale test comments seen (assertions cited above are unaffected): `DefaultTemplateTests.cs:90-95,156-162,178-181,197-200`
 say the mismatches answer 403, `DT:129-134,218-221` raise the 400 exception; `FileLinkPrimaryTests.cs:189-192` and

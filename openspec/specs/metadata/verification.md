@@ -52,7 +52,7 @@ rule changed: the tests poll).
 | Claim | Source | Status |
 |---|---|---|
 | **Listing the metadata templates** | | |
-| Any member, no right demanded; system template excluded; fields in display order | `Controller:57`; `Service:210-213` (`includeSystem: false`); yaml `getTemplates` (19613) | CODE-ONLY |
+| Any member, no right demanded; system template excluded; fields in display order | `T/MetadataSystemTemplateTests.cs:52-76` (Guest, custom fields present, fields sent out of order); `Service:210-213` | TEST-CONFIRMED [run: PASS] |
 | `visible` filter narrows to the shown or the hidden templates; creation order | `T/MetadataTemplateReadUpdateDeleteTests.cs:43-67` | TEST-CONFIRMED [run: PASS] |
 | Readable by a Room admin and a User (`getTemplates`, `getTemplate`) | `T/MetadataTemplatePermissionsTests.cs:121-132` | TEST-CONFIRMED [run: PASS] |
 | `createBy`/`modifiedBy` are user objects with the owner's id and display name; creator is the last editor until a change; dates present; fields ascending by `order` with the template id | `T/MetadataTemplateManagementTests.cs:139-159`; `T/MetadataTemplateChangesTests.cs:43-58`; `Dto:392-404` | TEST-CONFIRMED [run: PASS] |
@@ -68,7 +68,7 @@ rule changed: the tests poll).
 | Fields validated as a batch (an invalid choice field rejects the whole request), saved in one transaction with the template; every type with its options read back | `T/MetadataTemplateCreateTests.cs:43-69, 144-167`; `Service:101-117` | TEST-CONFIRMED [run: PASS] |
 | Five concurrent creations: one 200, the rest 400, one template listed; a template is listed once | `T/MetadataTemplateManagementTests.cs:352-380`; `T/MetadataTemplateCreateTests.cs:71-80`; `Service:114-123` (duplicate key → `ArgumentException`) | TEST-CONFIRMED [run: PASS] |
 | **Reading one metadata template** | | |
-| 404 for an unknown identifier, 0, -1, a deleted or the system template | `T/MetadataTemplateReadUpdateDeleteTests.cs:69-79`; `T/MetadataRequestLimitsTests.cs:225-255` (deleted); `Service:889-899` | TEST-CONFIRMED [run: PASS] (unknown, deleted), CODE-ONLY (system) |
+| 404 for an unknown identifier, 0, -1, a deleted or the system template | `T/MetadataTemplateReadUpdateDeleteTests.cs:69-79`; `T/MetadataRequestLimitsTests.cs:225-255` (deleted); `T/MetadataSystemTemplateTests.cs:78-97` (system: every identifier between a template created before and one created after the first custom field write); `Service:889-899` | TEST-CONFIRMED [run: PASS] |
 | **Template routes and anonymous callers** | | |
 | The eight template and field routes answer 401 to an anonymous caller and change nothing | `T/MetadataTemplatePermissionsTests.cs:134-159` | TEST-CONFIRMED [run: PASS] |
 | **Updating a metadata template** | | |
@@ -77,7 +77,7 @@ rule changed: the tests poll).
 | Answer carries the fields | `T/MetadataTemplateManagementTests.cs:161-172`; `Service:136-166` | TEST-CONFIRMED [run: PASS] |
 | Own name 200; another's name in another case 400, name kept; 256 characters 400, name kept; unknown 404 | `T/MetadataTemplateReadUpdateDeleteTests.cs:94-136`; `Service:140-164` | TEST-CONFIRMED [run: PASS] |
 | Renaming keeps the assignments and values of a file and a folder | `T/MetadataTemplateChangesTests.cs:76-100` | TEST-CONFIRMED [run: PASS] |
-| Hiding or showing notifies the clients of every entry the template is assigned to | `Service:150, 170-178`; `Notifier` | CODE-ONLY |
+| Hiding or showing notifies the clients of every entry the template is assigned to | `T/MetadataSocketEventsTests.cs:82-102` (hiding: a file and a folder); `Service:150, 170-178`; `Notifier` | TEST-CONFIRMED [run: PASS] (hiding; showing takes the same branch, CODE-ONLY) |
 | **Deleting a metadata template** | | |
 | DocSpace admin only, template kept on refusal (Room admin, User, Guest); admin deletion → 404 afterwards | `T/MetadataRightsTests.cs:72-91`; `T/MetadataTemplatePermissionsTests.cs:73-118` | TEST-CONFIRMED [run: PASS] |
 | Gone from `getTemplates`, from the entries, `getTemplate` 404, `searchFolder` with the id 400 | `T/MetadataRequestLimitsTests.cs:225-255`; `T/MetadataTemplateReadUpdateDeleteTests.cs:138-150`; `Service:183-199`; `Filter:238-242` | TEST-CONFIRMED [run: PASS] |
@@ -118,7 +118,7 @@ rule changed: the tests poll).
 | Custom field named like a template field kept apart; system template not in `templates` | `T/MetadataCustomFieldsTests.cs:182-201`; `Service:459-505` | TEST-CONFIRMED [run: PASS] |
 | `hasMetadataFields` carried by the read (rule below) | `T/MetadataHasFieldsFlagTests.cs:218-221` (every scenario reads it); `Service:500-502`; `Dto:299-308` | TEST-CONFIRMED [run: PASS] |
 | **The right to write the metadata of an entry** | | |
-| File: edit right; folder (not room): create right; roots and knowledge folder refused; room: edit right | `Security:522-544`; `Service:856-883` | CODE-ONLY |
+| File: edit right; folder (not room): create right; roots and knowledge folder refused; room: edit right | `T/MetadataWriteRuleTests.cs:44-116` (Review and Comment on a file 403, room manager writes the room, knowledge folder of an agent 403 for its owner); roots, Editor and Content creator in the rows below; `Security:522-544`; `Service:856-883` | TEST-CONFIRMED [run: PASS] |
 | Viewer: 403 on file values, room values, assign, unassign; nothing changed | `T/MetadataRightsTests.cs:125-169` | TEST-CONFIRMED [run: PASS] |
 | Read member: every write on the file and the folder (assign, unassign, values, custom fields, cascade switch) 403, template kept, no value, no custom field | `T/MetadataEntryPermissionsTests.cs:66-106` | TEST-CONFIRMED [run: PASS] |
 | Room manager writes values and custom fields on the file and the folder | `T/MetadataEntryPermissionsTests.cs:44-64` | TEST-CONFIRMED [run: PASS] |
@@ -129,9 +129,9 @@ rule changed: the tests poll).
 | **Assigning templates to a file** | | |
 | Editor assigns, template listed with every field empty, `cascade` false | `T/MetadataRightsTests.cs:171-214`; `T/MetadataFileAssignmentTests.cs:43-61`; `T/MetadataCascadeTests.cs:143-185` | TEST-CONFIRMED [run: PASS] |
 | Additive and idempotent; an empty list answers 200 and changes nothing | `T/MetadataFileAssignmentTests.cs:63-76`; `Service:507-535` (`Distinct`, upsert under a per-entry lock) | TEST-CONFIRMED [run: PASS] |
-| Unknown template in the list → 404, nothing of the list linked; unknown file → 404; system template 404 | `T/MetadataFileAssignmentTests.cs:78-98`; `Service:515-525, 889-899` | TEST-CONFIRMED [run: PASS] (unknown), CODE-ONLY (system) |
+| Unknown template in the list → 404, nothing of the list linked; unknown file → 404; system template 404 | `T/MetadataFileAssignmentTests.cs:78-98`; `T/MetadataSystemTemplateTests.cs:78-97` (system); `Service:515-525, 889-899` | TEST-CONFIRMED [run: PASS] |
 | Re-assigned after an unassignment: field empty | `T/MetadataFileAssignmentTests.cs:123-126` | TEST-CONFIRMED [run: PASS] |
-| Body without `templateIds` → 400 | `Controller:307`; yaml `assignFileTemplates` (20521) | CODE-ONLY |
+| Body without `templateIds` → 400 | `T/MetadataFileAssignmentTests.cs:100-111` (raw HTTP); `Controller:307` | TEST-CONFIRMED [run: PASS] |
 | **Assigning templates to a folder or a room** | | |
 | Without cascade: `{id:null, progress:100, isCompleted:true, error:null}`; progress endpoint reports the same; folder lists the template with `cascade` false and every field; file inside untouched | `T/MetadataCascadeTests.cs:440-453`; `T/MetadataFolderAssignmentTests.cs:43-60`; `Controller:338-344`; `Dto:445-461` | TEST-CONFIRMED [run: PASS] |
 | Additive and idempotent; unknown template in the list → 404, nothing linked; unknown folder → 404 | `T/MetadataFolderAssignmentTests.cs:62-90`; `Service:543-555` | TEST-CONFIRMED [run: PASS] |
@@ -143,14 +143,14 @@ rule changed: the tests poll).
 | Template the file does not carry → 200 no-op; unknown template → 404; unknown folder or template on the folder route → 404 | `T/MetadataFileAssignmentTests.cs:129-145`; `T/MetadataFolderAssignmentTests.cs:274-285`; `Service:702, 706` | TEST-CONFIRMED [run: PASS] |
 | The other template keeps its value | `T/MetadataFileAssignmentTests.cs:100-121` | TEST-CONFIRMED [run: PASS] |
 | An inherited template unassigned from a file is assigned again by the next cascade | `T/MetadataTemplateChangesTests.cs:153-172`; `Controller:367-372` | TEST-CONFIRMED [run: PASS] |
-| Link and values deleted in one transaction | `Service:704-706` (`DeleteLinkWithValuesAsync`) | CODE-ONLY |
+| Link and values deleted in one transaction | `Service:704-706` (`DeleteLinkWithValuesAsync`) — unreachable: atomicity shows only when the second delete fails, and the stand cannot inject that failure | CODE-ONLY |
 | **Setting the values of template fields** | | |
 | Answer is the whole entry metadata, earlier values and custom fields included | `T/MetadataTemplateManagementTests.cs:291-314`; `Service:769-771` | TEST-CONFIRMED [run: PASS] |
 | Every type in one request on a file and a folder, answer and read agree, Cyrillic and CJK intact | `T/MetadataFileValuesTests.cs:43-79`; `T/MetadataFolderValuesTests.cs:42-77` | TEST-CONFIRMED [run: PASS] |
 | Same field twice → 400 | `T/MetadataTemplateManagementTests.cs:316-336`; `T/MetadataFileValuesTests.cs:107-135`; `Service:723-728` | TEST-CONFIRMED [run: PASS] |
 | `{"values": null}` → 400 (raw HTTP) | `T/MetadataRequestLimitsTests.cs:122-133`; `Controller:573` | TEST-CONFIRMED [run: PASS] |
 | Refused batch writes none of its values: a string on a number field, a field of a template the entry does not carry, a number beyond the limit, a field twice (400), an unknown field (404) | `T/MetadataFileValuesTests.cs:107-135`; `T/MetadataFolderValuesTests.cs:79-98`; `T/MetadataValueBatchTests.cs:47-63`; `Service:738-761` | TEST-CONFIRMED [run: PASS] |
-| Custom field through values → 400 | `Service:745-750`; yaml `setFileValues` (21116) | CODE-ONLY |
+| Custom field through values → 400 | `T/MetadataSystemTemplateTests.cs:99-128` (the one custom field id of the gap answers 400 naming the customFields endpoint, nothing written); `Service:745-750` | TEST-CONFIRMED [run: PASS] |
 | Partial write keeps the other values; empty string clears; room no longer found by the cleared value | `T/MetadataFileValuesTests.cs:81-105`; `T/RoomsMetadataSearchTests.cs:188-203` | TEST-CONFIRMED [run: PASS] |
 | Value member left out clears a field of every type, sibling kept (raw HTTP) | `T/MetadataValueBatchTests.cs:65-78`; `Service:793-796` (`IsEmpty`) | TEST-CONFIRMED [run: PASS] |
 | **Validation of a value by its field type** | | |
@@ -178,7 +178,7 @@ rule changed: the tests poll).
 | 51 fields → 400, nothing written; 50 accepted and a request pushing over refused | `T/MetadataCustomFieldsTests.cs:166-180`; `T/MetadataFileValuesTests.cs:202-216`; `Service:57, 395-398` | TEST-CONFIRMED [run: PASS] |
 | Order across removals: `A,C,D` → `A,C,D,B` → `D,B,E` | `T/MetadataFieldOrderTests.cs:126-149`; `Service:419-421, 960-970` | TEST-CONFIRMED [run: PASS] |
 | Dropped name: filter by it 400 after the last value is removed, 200 before | `T/MetadataCustomFieldsTests.cs:304-331`; `Service:901-913`; `Filter:292-321` | TEST-CONFIRMED [run: PASS] |
-| Writes serialised under one lock per portal | `Service:339` | CODE-ONLY |
+| Writes serialised under one lock per portal | `T/MetadataCustomFieldsTests.cs:324-361` (five parallel writes of one new name: one field, a filter by the name finds all five rooms); `Service:339` | TEST-CONFIRMED [run: PASS] (the observable consequence; the lock itself CODE-ONLY) |
 | **Cascade of a template over the content of a folder** | | |
 | Every depth: sub-folder, folder two levels down and the files in both take the value; the folder reports the mode | `T/MetadataFolderAssignmentTests.cs:92-131` | TEST-CONFIRMED [run: PASS] |
 | Skip fills the empty ones and keeps the held values; overwrite replaces all, on files and sub-folders | `T/MetadataFolderAssignmentTests.cs:133-176`; `Op:197-259` | TEST-CONFIRMED [run: PASS] |
@@ -192,7 +192,7 @@ rule changed: the tests poll).
 | Idle folder: completed, no `id`, empty `templateIds`; pass named by its templates | `T/MetadataCascadeAssignmentTests.cs:81-104`; `T/MetadataFolderAssignmentTests.cs:178-188`; `Worker:91-99`; `Dto:445-461` | TEST-CONFIRMED [run: PASS] |
 | Finished pass stays reported with the same `id`, `templateIds`, progress 100, no error | `T/MetadataFolderAssignmentTests.cs:190-218` | TEST-CONFIRMED [run: PASS] |
 | Read right: non-member 403; missing folder 404 | `T/MetadataEntryPermissionsTests.cs:116-123`; `T/MetadataFolderAssignmentTests.cs:220-227`; `Service:676-681` | TEST-CONFIRMED [run: PASS] |
-| Failed pass completes with `error` | `Op:163-172`; `Dto:458` | CODE-ONLY |
+| Failed pass completes with `error` | `Op:163-172`; `Dto:458` — unreachable: no request makes a pass fail on the stand (it would need a database or index failure mid-pass) | CODE-ONLY |
 | **Switching the cascade of an assigned template** | | |
 | Off keeps template and values on the room, file keeps inherited as own, later file inherits nothing, off again is a no-op | `T/MetadataCascadeAssignmentTests.cs:106-146`; `Service:627-640` | TEST-CONFIRMED [run: PASS] |
 | On queues a pass (`id`, `templateIds`), file receives the value, mode stored on the link | `T/MetadataCascadeAssignmentTests.cs:148-178`; `T/MetadataFolderAssignmentTests.cs:173-175`; `Service:642-665` | TEST-CONFIRMED [run: PASS] |
@@ -204,7 +204,7 @@ rule changed: the tests poll).
 | Moved folder: itself stamped inline, content by a background stamp pass | `T/MetadataInheritanceOnMoveTests.cs:115-131`; `FolderDao:1305-1362`; `Op:261-333` | TEST-CONFIRMED [run: PASS] |
 | Moved cascading folder keeps its own cascade for its subtree, `Department` stays empty | `T/MetadataInheritanceOnMoveTests.cs:133-161`; `Op:286-295` | TEST-CONFIRMED [run: PASS] |
 | Moved out: inherited becomes own, a copy carries it (file and content of a moved folder) | `T/MetadataInheritanceOnMoveTests.cs:163-204`; `FolderDao:1317-1323` | TEST-CONFIRMED [run: PASS] |
-| Move to Trash stamps nothing | `FileDao:1593, 1695`; `FolderDao:1301, 1317` (`toFolderId != trashId`) | CODE-ONLY |
+| Move to Trash stamps nothing | `T/MetadataTrashMoveTests.cs:46-88` (a file and a folder trashed and restored: the inherited link stays inherited, a copy carries nothing); `FileDao:1593, 1695`; `FolderDao:1301, 1317` | TEST-CONFIRMED [run: PASS] |
 | **Metadata of a copy** | | |
 | Copy into a cascading room keeps copied and inherited values | `T/MetadataCascadeTests.cs:345-393`; `FileDao:1842-1845` | TEST-CONFIRMED [run: PASS] |
 | Folder copy carries its own and its content's metadata; source untouched | `T/MetadataLifecycleTests.cs:183-225`; `FolderDao:1434-1437` | TEST-CONFIRMED [run: PASS] |
@@ -221,7 +221,7 @@ rule changed: the tests poll).
 | Custom field only → true, no `assignedMetadataTemplates` on the file | `T/MetadataHasFieldsFlagTests.cs:105-127` | TEST-CONFIRMED [run: PASS] |
 | Follows hiding and showing the template | `T/MetadataHasFieldsFlagTests.cs:129-149`; `Service:170-178` | TEST-CONFIRMED [run: PASS] |
 | Stays true once filled; a Read member sees true next to `security.edit` false | `T/MetadataHasFieldsFlagTests.cs:151-193` | TEST-CONFIRMED [run: PASS] |
-| Absent in the answers of a creation, an upload or a rename, and on third-party entries | `EntryDto:360-372` | CODE-ONLY |
+| Absent in the answers of a creation and an upload and on third-party entries; the answer of a rename carries it | `T/MetadataHasFieldsFlagTests.cs:195-220` (file and folder creation: absent; rename: present and true, so the claim was wrong for the rename, corrected here; raw JSON); `EntryDto:360-372` (the property description still names the rename among the absent ones, see the OpenAPI section) | TEST-CONFIRMED [run: PASS] (creation absent, rename carries it), CODE-ONLY (upload, third-party entries) |
 | **Text of names, options and values** | | |
 | BMP text (Cyrillic, CJK, symbols) survives in the template name, a field name, an option, a string value and a custom field | `T/MetadataUnicodeTests.cs:44-71`; `T/MetadataTemplateCreateTests.cs:82-91` | TEST-CONFIRMED [run: PASS] (`MetadataUnicodeTests` outside the BMP are MD10, next row) |
 | Outside the BMP: the write fails with a 500 (scenario) | failure text of `CreateTemplate_WithACharacterOutsideTheBmpInTheName_StoresItIntact`, `CreateField_WithAnEmojiInTheFieldNameAndTheOptionValue_StoresThemIntact`, `SetFileValues_WithAnEmojiInAStringValueAndACustomField_StoresThemIntact` in run 365d87fe60 (MD10) | CODE-ONLY |
@@ -237,7 +237,7 @@ rule changed: the tests poll).
 | Invalid JSON, unknown field, field of another template, unknown template → 400 | `T/RoomsMetadataSearchTests.cs:205-306`; `T/MetadataTypedSearchTests.cs:74-85`; `Filter:233-290, 323-338` | TEST-CONFIRMED [run: PASS] |
 | Combined with room `type`, `searchArea` (archive found, active not), `filterValue`; invited user sees only their rooms | `T/RoomsMetadataSearchTests.cs:46-67, 134-175, 309-330` | TEST-CONFIRMED [run: PASS] |
 | Per-type conditions on rooms: string case-insensitive exact, number range inclusive/open, date range, choice OR, several conditions AND | `T/RoomsMetadataFieldFilterTests.cs:45-205`; `T/MetadataSearchQueryTests.cs:72-262` (unit predicate) | TEST-CONFIRMED [run: PASS] |
-| Third-party entries left out; index candidates confirmed against the database | `Query:74-127`; yaml `getFolderByFolderId` (16321) | CODE-ONLY |
+| Third-party entries left out; index candidates confirmed against the database | `Query:74-127`; yaml `getFolderByFolderId` (16321) — the candidates part is shown by `T/FoldersMetadataSearchTests.cs:211-231` (row under "The stored values are the truth of a filter"); third-party entries need a connected storage (Nextcloud), not in the integration-test stack | CODE-ONLY (third-party) |
 | **Access before the filter is validated** | | |
 | Anonymous with unknown `metadataTemplateId` → 401 | `T/FoldersMetadataSearchTests.cs:399-416`; `FoldersController:456-465` | TEST-CONFIRMED [run: PASS] |
 | **Conditions and operators of a filter** | | |
@@ -245,9 +245,9 @@ rule changed: the tests poll).
 | `gt`/`gte`/`lt`/`lte` on numbers; typed agrees | `T/MetadataFilterOperatorsTests.cs:98-148` | TEST-CONFIRMED [run: PASS] |
 | Choice `in` combines with OR, multi-choice room returned once | `T/RoomsMetadataFieldFilterTests.cs:145-177` | TEST-CONFIRMED [run: PASS] |
 | Refused forms: `contains` on number, `gt` on string, `gt` with `from`, `gt` without value, `eq` with bound, `range` with value (number and date), bound 2^53, `yesterday`, `startswith`, `range` on string, >20 conditions | `T/MetadataFilterOperatorsTests.cs:83-96, 150-221, 276-299`; `T/RoomsMetadataSearchTests.cs:233-262`; `T/FoldersMetadataSearchTests.cs:194-209`; `T/MetadataRequestLimitsTests.cs:98-120`; `Filter:340-600` | TEST-CONFIRMED [run: PASS] |
-| Custom field by `name` (listing and `searchRooms`); neither id nor name → 400 | `T/MetadataCustomFieldsTests.cs:283-302`; `T/MetadataTypedSearchTests.cs:169-193`; `Filter:292-321` | TEST-CONFIRMED [run: PASS] (name), CODE-ONLY (neither) |
+| Custom field by `name` (listing and `searchRooms`); neither id nor name → 400 | `T/MetadataCustomFieldsTests.cs:283-302`; `T/MetadataTypedSearchTests.cs:169-193`; `T/MetadataFilterDefaultsTests.cs:107-120` (neither); `Filter:292-321` | TEST-CONFIRMED [run: PASS] |
 | JSON numbers accepted in body and query | `T/MetadataTypedSearchTests.cs:87-124`; `Filter:157-180` | TEST-CONFIRMED [run: PASS] |
-| Defaults of an omitted `op` | `Filter:113-121, 340-436`; yaml `MetadataFilterConditionRequest.op` (84868-84900) | CODE-ONLY |
+| Defaults of an omitted `op` | `T/MetadataFilterDefaultsTests.cs:44-105` (string exact, number value exact, number bounds range, date range, single and multi choice `in`); `Filter:113-121, 340-436` | TEST-CONFIRMED [run: PASS] |
 | **Date bounds of a condition** | | |
 | Day-only `to` covers the day; a `to` with time is an instant | `T/MetadataDateValuesTests.cs:77-103` | TEST-CONFIRMED [run: PASS] |
 | `gt`/`gte`/`lt`/`lte` with day-only and timed bounds | `T/MetadataFilterOperatorsTests.cs:223-274`; `Filter:526-578` | TEST-CONFIRMED [run: PASS] |
@@ -255,12 +255,12 @@ rule changed: the tests poll).
 | Recent, Favorites, Shared with me by id: template and condition, `total` | `T/MetadataSectionFiltersTests.cs:50-205`; `EntryManager:402-508` | TEST-CONFIRMED [run: PASS] |
 | `@my`, `@trash`, `@share`, `@recent`, `@favorites`, `@forms`; unknown template 400 on alias | `T/MetadataSectionAliasFiltersTests.cs:48-186`; `T/MetadataSectionFiltersTests.cs:91-116`; `FoldersController:886-1117` | TEST-CONFIRMED [run: PASS] |
 | Templates section 400 by id, `@templates` alias (raw) and `searchFolder` | `T/MetadataSectionFiltersTests.cs:207-221`; `T/MetadataSectionAliasFiltersTests.cs:188-200`; `T/MetadataTypedSearchTests.cs:126-136`; `EntryManager:402-409` | TEST-CONFIRMED [run: PASS] |
-| Private room section refused too | `EntryManager:405-408` (`FolderType.Privacy`) | CODE-ONLY |
+| Private rooms section filtered like the rooms; only the legacy Privacy folder refused | `products/ASC.Files/Tests/Tests/08_Private/PrivateRoomSectionMetadataFilterTests.cs:46-60` (private rooms section by id, `searchFolder` and the rooms listing with `PrivateRooms`: filtered, not refused); `EntryManager:405-408` refuses `FolderType.Privacy` (13), the legacy folder of the desktop encryption, which the stand cannot open | TEST-CONFIRMED [run: PASS] (private rooms filtered; spec corrected), CODE-ONLY (legacy Privacy folder 400) |
 | **Typed metadata search** | | |
 | Agrees with the listing (ids and `total`) | `T/MetadataTypedSearchTests.cs:46-72`; `T/MetadataFilterOperatorsTests.cs:70-82, 138-148` | TEST-CONFIRMED [run: PASS] |
 | `count` 101/0/-1/absent, `startIndex` -1 → 400 on `searchFolder`; 101/-1 on `searchRooms` | `T/MetadataRequestLimitsTests.cs:50-96`; `Request` (`[Range(1, 100)]`, `[Range(0, int.MaxValue)]`) | TEST-CONFIRMED [run: PASS] |
 | Recent through the body; Templates 400 | `T/MetadataTypedSearchTests.cs:126-167` | TEST-CONFIRMED [run: PASS] |
-| Body fields and routes | `FoldersController:487-503`; `RoomsController:1394-1423`; yaml `searchFolder` (16771), `searchRooms` (33278) | CODE-ONLY |
+| Body fields and routes | `T/MetadataTypedSearchPagingTests.cs:43-99` (`count`, `startIndex`, `sortBy`, `sortOrder`, `total` on both routes); the filter, text and hidden members by `T/MetadataTypedSearchTests.cs`; `FoldersController:487-503`; `RoomsController:1394-1423` | TEST-CONFIRMED [run: PASS] |
 | **String metadata values in the free text search** | | |
 | Found by a custom field, match with null ids (sub-folder and room) | `T/FoldersMetadataSearchTests.cs:254-275`; `T/RoomsMetadataSearchTests.cs:69-89` | TEST-CONFIRMED [run: PASS] |
 | Found by a template field, match with template/field ids and the whole value | `T/FoldersMetadataSearchTests.cs:277-297`; `T/RoomsMetadataSearchTests.cs:91-111` | TEST-CONFIRMED [run: PASS] |
@@ -281,16 +281,28 @@ rule changed: the tests poll).
 | Editing link writes file values, read link 403 and nothing changed | `T/MetadataExternalLinkTests.cs:96-134` | TEST-CONFIRMED [run: PASS] |
 | Folder values, unassign, custom fields → 401 for anonymous | `T/MetadataExternalLinkTests.cs:149-168`; `Controller` (no `[AllowAnonymous]` on 378-548) | TEST-CONFIRMED [run: PASS] |
 | **Clients are told about metadata changes** | | |
-| `update-file` / `update-folder` after every write; cascade, template and field deletions and a visibility change notify affected entries by parent folder recipients | `Service:170-178, 1167-1196`; `Notifier:35-103`; `Op:323, 348, 387`; `Socket:86-93` | CODE-ONLY |
+| `update-file` / `update-folder` after every write; cascade, template and field deletions and a visibility change notify affected entries by parent folder recipients | `T/MetadataSocketEventsTests.cs:50-161` (file assign, values, unassign; folder custom fields; hiding; template and field deletion; cascade switched on: each file and the room); `Service:170-178, 1167-1196`; `Notifier:35-103`; `Socket:86-93` | TEST-CONFIRMED [run: PASS] (owner's client), CODE-ONLY (a failed send does not fail the call; recipients other than the owner) |
 | **Audit trail of the metadata actions** | | |
 | Eight event texts with the object's name after one session | `T/MetadataAuditTests.cs:47-91`; `Audit:1291-1318`; `MessageAction:1158-1191` | TEST-CONFIRMED [run: PASS] |
-| Custom field write audited as "Metadata values updated"; cascade start as "Metadata cascade assignment started" | `Service:440, 583, 662`; `Audit:1315-1318` | CODE-ONLY |
+| Custom field write audited as "Metadata values updated"; cascade start as "Metadata cascade assignment started" | `T/MetadataAuditTests.cs:87-112`; `Audit:1329-1333` | TEST-CONFIRMED [run: PASS] |
 | **Metadata in backup and restore** | | |
-| Four tables declared with user and date columns; template/field ids remapped, links and values follow template, field and entry ids, `source_folder_id` remapped | `Backup:80-101, 158-168` | CODE-ONLY |
+| Four tables declared with user and date columns; template/field ids remapped, links and values follow template, field and entry ids, `source_folder_id` remapped | `common/Tests/ASC.Data.Backup.Core.Tests/FilesModuleSpecificsTests.cs:339-420` (link: template, entry and `source_folder_id` remapped; value: field and entry remapped, unit); `BackupCoverageTests.cs:109` (every tenant table declared); `Backup:80-101, 158-168` | TEST-CONFIRMED [run: PASS] (unit), CODE-ONLY (a restore on a second installation; the user and date columns) |
 
-Counts: 191 rows — TEST-CONFIRMED 173 (three of them carry a CODE-ONLY part for the system-template or the
-"neither id nor name" case), CODE-ONLY 17, NOTES-ONLY 0, one row with no status (the non-BMP text, kept out of
-the spec as MD10). Spec: 44 requirements, 163 scenarios. Before the 4.1.0 revision (`3533ad8a89`): 138 rows
+Counts: 192 rows — TEST-CONFIRMED 187 (six of them keep a CODE-ONLY part: showing a template, the upload and
+third-party answers of the flag, the lock itself, the legacy Privacy folder, a failed socket send and other
+recipients, a restore on a second installation), CODE-ONLY 4 (one transaction for link and values, a failed
+cascade pass, the 500 outside the BMP of MD10, the third-party entries of a filter — none reachable on the
+integration-test stack), NOTES-ONLY 0, one row with no status (the non-BMP text, kept out of the spec as MD10).
+The earlier count of 17 CODE-ONLY rows was one short. Spec: 44 requirements, 164 scenarios.
+
+Code-only rows closed on 2026-11-11 (each class run alone, `dotnet test --filter-class`, all PASS): new classes
+`T/MetadataSystemTemplateTests.cs`, `T/MetadataFilterDefaultsTests.cs`, `T/MetadataWriteRuleTests.cs`,
+`T/MetadataTrashMoveTests.cs`, `T/MetadataSocketEventsTests.cs` (real socket client),
+`T/MetadataTypedSearchPagingTests.cs`, `products/ASC.Files/Tests/Tests/08_Private/PrivateRoomSectionMetadataFilterTests.cs`;
+new cases in `MetadataFileAssignmentTests`, `MetadataCustomFieldsTests`, `MetadataAuditTests`,
+`MetadataHasFieldsFlagTests`; the backup row by the existing unit tests of `common/Tests/ASC.Data.Backup.Core.Tests`.
+Two rows were wrong and are corrected: the private rooms section filters (only the legacy Privacy folder refuses),
+and the answer of a rename carries `hasMetadataFields`. Before the 4.1.0 revision (`3533ad8a89`): 138 rows
 (TEST-CONFIRMED 119, CODE-ONLY 19), 41 requirements, 109 scenarios; the rows upgraded from CODE-ONLY: the `visible` filter and creation
 order of `getTemplates`, the 404 of an unknown template id, the name taken / too long 400 and 404 of
 `updateTemplate`, the rules of the field options, the unknown template 404 of `createField`, the type change with
@@ -304,8 +316,9 @@ values, the name over 255 of a custom field, the 403 and 404 of `getCascadeProgr
 | yaml `getCascadeProgress` declares 200, 404 and the generic 401 only (20730-20774) | `Service:676-681` demands the read right on the folder, so a folder the caller cannot read answers 403 (`SecurityException`, `T/MetadataEntryPermissionsTests.cs:116-123`); the row is still missing after 4.1.0. |
 | yaml routes `…/customfields` (lower case, 21288, 21384) | The controller publishes `customFields` (`Controller:521, 547`); routing is case-insensitive, both forms work. |
 | yaml `assignFileTemplates` 400 "has no `templateIds`" (20521) | Only a body without the `templateIds` key (required) is refused; an empty list is accepted and answers 200 after writing nothing (`T/MetadataFileAssignmentTests.cs:63-76`; see MD4 for the audit it still writes). |
-| SDK 4.0.0 (the one the tests are pinned to) predates `hasMetadataFields`: `FileDto`, `FolderDto` and `EntryMetadataDto` carry no property for it | The server answers the flag on the listing, the info and the metadata reads (`EntryDto:360-372`, `Dto:299-308`); the tests read it from the raw JSON (`T/MetadataHasFieldsFlagTests.cs:195-241`). |
+| SDK 4.0.0 (the one the tests are pinned to) predates `hasMetadataFields`: `FileDto`, `FolderDto` and `EntryMetadataDto` carry no property for it | The server answers the flag on the listing, the info and the metadata reads (`EntryDto:360-372`, `Dto:299-308`); the tests read it from the raw JSON (`T/MetadataHasFieldsFlagTests.cs:221-270`). |
 | SDK `FolderMetadataSearch.Count` left out of the body when 0; `MetadataFilterConditionRequest.value/from/to` strings only; `SetMetadataValues`/`SetCustomFields` refuse a null list client-side; every value member is serialised, as null at the least; `numberValue` is a `long`, `dateValue` a `DateTime`, an option id a `Guid` | The server refuses a missing `count` with 400, accepts JSON numbers in the conditions, refuses a null list with 400, clears a field whose member is left out, refuses `42.5`, `1e30`, a date-only or offset-bearing string is read as UTC, a text that is no date or no identifier is refused — the tests use raw HTTP for these (`T/MetadataRequestLimitsTests.cs:50-96, 122-149`; `T/MetadataTypedSearchTests.cs:87-124`; `T/MetadataValueBatchTests.cs:65-110`; `T/MetadataDateAcceptedValueTests.cs:75-87`; `T/MetadataDateRefusedValueTests.cs:47-60`; `T/MetadataSingleChoiceValueTests.cs:97-110`). A null custom-field value goes through the SDK (`T/MetadataFolderValuesTests.cs:111`). |
+| Property description of `hasMetadataFields` (`EntryDto:360-372`): "absent in ... the answer of a creation, an upload or a rename" | The answer of a rename (`PUT api/2.0/files/file/{fileId}`) carries the flag with its value (true on a file under a cascading room), the creations of a file and a folder leave it out (`T/MetadataHasFieldsFlagTests.cs:195-220`). |
 | SDK has no method for `@share` and `@templates` | Both aliases exist on the server and take the filter / refuse it (`T/MetadataSectionAliasFiltersTests.cs:133-200`, raw HTTP). |
 | Release notes v1.1 – v4.0 (Privacy rooms included); none for v4.1.0 | No mention of metadata, templates or custom fields: the feature is unreleased at the time of writing, so nothing is NOTES-ONLY. |
 | Test comments "used to…" (default type String on update, position 0, filter dropped on aliases, worker folding requests, un-cascade 500, extension slip, stale documents, an empty template created and assigned) | All describe fixed behaviour; the tests assert the fixed state and the spec describes it. |
