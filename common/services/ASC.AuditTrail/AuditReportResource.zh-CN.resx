@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>已为 AI 模型设置 BYOK 密钥：{0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>文档代理设置已更新</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI 配置文件已分配给操作：{0}</value>
   </data>

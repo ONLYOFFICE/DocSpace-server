@@ -36,11 +36,19 @@ title and description across the contract and all eight SDKs.
 (`requiresAuthorization=false` only with `[AllowAnonymous]`); an agent that trusts a stale value
 builds a request it cannot authorize.
 
-An action or controller carrying `[ApiExplorerSettings(IgnoreApi = true)]` is kept out of the
-published documents and out of the SDKs, so nothing it says reaches an agent today. Document it to
-the same standard anyway: that attribute is a publication switch, flipped by someone who will not
-reread the doc comments underneath it, and until then the text is what the next person to touch the
-handler reads.
+An action or controller carrying `[ApiExplorerSettings(IgnoreApi = true)]` is for internal use only:
+it is kept out of the published documents and out of the SDKs, and this rule does not apply to it —
+no `<summary>`/`<remarks>` standard, no `[SwaggerResponse]` set, no `[RaisesWebhook]` (§2.1). The
+same holds for a DTO that only such actions bind or return; a DTO that a published operation also
+uses keeps the full standard of `openapi-dto-docs.md`. Two things still apply:
+
+* **The analyzer skips only a controller hidden as a whole.** An action hidden by its own attribute
+  inside a published controller still gets API002–API006 (`build-warnings.md`), and "zero new
+  warnings" still holds there: give it a short, true `<summary>` and `<remarks>` (what it is for,
+  who calls it) and its DTO properties a `<summary>` and `<example>`. Nothing more is required.
+* **Removing `IgnoreApi` publishes the action.** The change that removes it brings the action, its
+  DTOs and its response codes up to this rule and `openapi-dto-docs.md`, and adds `[RaisesWebhook]`
+  for what it raises — moving the `_otherSources` entry that described it, if there is one (§2.1).
 
 ## 1. `summary` — the title
 
@@ -105,8 +113,10 @@ each trigger from there. An action without it is missing from both, even though 
   queued operation, when nothing actually changed, when the webhook is *not* raised although the data changed.
 * Do **not** mention the webhook in `<remarks>`. The filter writes the sentence; a second copy in prose
   duplicates it and drifts.
-* An action hidden with `[ApiExplorerSettings(IgnoreApi = true)]` gets the attribute too, for the same reason
-  it gets its documentation (§0).
+* An action hidden with `[ApiExplorerSettings(IgnoreApi = true)]` needs no attribute: the filter only sees
+  operations that reach the documents, so on a hidden action it records nothing (§0). The receiver still gets
+  the delivery, so a webhook raised through a hidden action is described in `_otherSources` (next point) as
+  what the web client does, like any other source outside the REST API.
 * A new `WebhookManager.PublishAsync` / `UserWebhookManager.PublishAsync` call in a service: find every action
   that reaches it (LSP `incomingCalls`) and annotate each. A publish no API action reaches — an editor callback,
   a download handler, a background job of its own — belongs in `_otherSources` in

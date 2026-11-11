@@ -1260,6 +1260,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>Clé BYOK définie pour le modèle IA : {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Paramètres de l'agent de documents mis à jour</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profil IA attribué à l'action : {0}</value>
   </data>
