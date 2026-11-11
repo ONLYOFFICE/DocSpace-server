@@ -75,9 +75,39 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     /// </summary>
     protected const string NextcloudProviderKey = "WebDav";
 
-    private static string NextcloudUrl => Environment.GetEnvironmentVariable("NEXTCLOUD_URL") ?? "";
-    private static string NextcloudLogin => Environment.GetEnvironmentVariable("NEXTCLOUD_LOGIN") ?? "";
-    private static string NextcloudPassword => Environment.GetEnvironmentVariable("NEXTCLOUD_PASSWORD") ?? "";
+    protected static string NextcloudUrl => Environment.GetEnvironmentVariable("NEXTCLOUD_URL") ?? "";
+    protected static string NextcloudLogin => Environment.GetEnvironmentVariable("NEXTCLOUD_LOGIN") ?? "";
+    protected static string NextcloudPassword => Environment.GetEnvironmentVariable("NEXTCLOUD_PASSWORD") ?? "";
+
+    /// <summary>
+    /// The address Nextcloud is installed at: <see cref="NextcloudUrl"/> is the WebDAV root of the
+    /// account, <c>{origin}/remote.php/dav/files/{user}/</c>.
+    /// </summary>
+    protected static string NextcloudOrigin
+    {
+        get
+        {
+            var index = NextcloudUrl.IndexOf("/remote.php/", StringComparison.Ordinal);
+
+            return index < 0 ? NextcloudUrl.TrimEnd('/') : NextcloudUrl[..index];
+        }
+    }
+
+    /// <summary>
+    /// A client for Nextcloud's own API (provisioning, WebDAV) signed in as the given account, on the
+    /// fixture's shared connection pool. For what DocSpace does not expose, such as creating a Nextcloud
+    /// user or setting its quota.
+    /// </summary>
+    protected HttpClient CreateNextcloudClient(string login, string password)
+    {
+        var client = Fixture.CreateExternalClient(new Uri($"{NextcloudOrigin}/"));
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{login}:{password}")));
+        client.DefaultRequestHeaders.Add("OCS-APIRequest", "true");
+
+        return client;
+    }
 
     private readonly List<string> _foldersToDelete = [];
     private readonly List<string> _roomFolderTitlesToDelete = [];

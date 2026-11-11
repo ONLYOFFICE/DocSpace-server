@@ -528,6 +528,16 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// A client for a service a test drives directly, outside the portals — a third-party storage's own
+    /// API, such as the Nextcloud provisioning API. It runs on the fixture's shared connection pool, so
+    /// disposing it leaves the pool in place, and it sends no <c>Origin</c>.
+    /// </summary>
+    public HttpClient CreateExternalClient(Uri baseAddress)
+    {
+        return CreateRawClient(baseAddress, origin: null);
+    }
+
+    /// <summary>
     /// Hands the started Nextcloud to the tests the way the TypeScript suite is configured: through
     /// <c>NEXTCLOUD_URL</c> (the WebDAV root of the account), <c>NEXTCLOUD_LOGIN</c> and
     /// <c>NEXTCLOUD_PASSWORD</c>. Values already present in the environment win, so a run can still be

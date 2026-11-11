@@ -176,7 +176,7 @@ public class ThirdPartyStorageQuotaTests(
         var password = $"Qx!{Guid.NewGuid():N}";
         var davUrl = $"{NextcloudOrigin}/remote.php/dav/files/{login}/";
 
-        using var admin = CreateNextcloudAdminClient();
+        using var admin = CreateNextcloudClient(NextcloudLogin, NextcloudPassword);
 
         using var created = await admin.PostAsync(
             "ocs/v2.php/cloud/users?format=json",
@@ -208,49 +208,22 @@ public class ThirdPartyStorageQuotaTests(
         return (davUrl, login, password);
     }
 
-    /// <summary>
-    /// The address Nextcloud is installed at: <c>NEXTCLOUD_URL</c> is the WebDAV root of the account,
-    /// <c>{origin}/remote.php/dav/files/{user}/</c>.
-    /// </summary>
-    private static string NextcloudOrigin
-    {
-        get
-        {
-            var url = Environment.GetEnvironmentVariable("NEXTCLOUD_URL") ?? "";
-            var index = url.IndexOf("/remote.php/", StringComparison.Ordinal);
-
-            return index < 0 ? url.TrimEnd('/') : url[..index];
-        }
-    }
-
-    private static HttpClient CreateNextcloudAdminClient()
-    {
-        return CreateNextcloudClient(
-            Environment.GetEnvironmentVariable("NEXTCLOUD_LOGIN") ?? "",
-            Environment.GetEnvironmentVariable("NEXTCLOUD_PASSWORD") ?? "");
-    }
-
-    private static HttpClient CreateNextcloudClient(string login, string password)
-    {
-        var client = new HttpClient { BaseAddress = new Uri($"{NextcloudOrigin}/") };
-
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-            "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{login}:{password}")));
-        client.DefaultRequestHeaders.Add("OCS-APIRequest", "true");
-
-        return client;
-    }
-
     public override async ValueTask DisposeAsync()
     {
         try
         {
-            using var admin = CreateNextcloudAdminClient();
+            // A test skipped for want of Nextcloud created nothing, and has no address to build a client for.
+            if (_nextcloudUsersToDelete.Count == 0)
+            {
+                return;
+            }
+
+            using var admin = CreateNextcloudClient(NextcloudLogin, NextcloudPassword);
 
             foreach (var login in _nextcloudUsersToDelete)
             {
                 // Best effort: a user left behind only costs a row in the test container.
-                using var _ = await admin.DeleteAsync($"ocs/v2.php/cloud/users/{login}?format=json");
+                using var _ = await admin.DeleteAsync($"ocs/v2.php/cloud/users/{login}?format=json", TestContext.Current.CancellationToken);
             }
         }
         finally
