@@ -1114,6 +1114,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There is not enough free space in the connected third-party storage. Free up space in it and try again..
+        /// </summary>
+        public static string ErrorMessage_ThirdPartyStorageFull {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ThirdPartyStorageFull", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You cannot edit archived rooms.
         /// </summary>
         public static string ErrorMessage_UpdateArchivedRoom {

@@ -1,0 +1,217 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Files.Tests.Tests._03_Rooms.ThirdParty;
+
+/// <summary>
+/// A write into a connected storage whose own account is out of space: the user reads why, as a 400
+/// on a direct call and as the error text of a file operation, instead of the provider's error code
+/// (Dropbox answered <c>path/insufficient_space/</c>) or a server error.
+/// </summary>
+/// <remarks>
+/// Only the WebDAV path can be driven here: Nextcloud is the one storage the stack runs, and a user
+/// with a one-byte quota makes it answer 507 to any upload. Every test creates such a user through the
+/// Nextcloud provisioning API with the account's credentials (the admin of the container the
+/// <c>integration-test</c> profile starts) and removes it afterwards; a Nextcloud account that may not
+/// create users skips the tests. The OAuth providers (Dropbox, Google Drive, OneDrive, Box) recognise
+/// the same refusal in <c>ThirdPartyStorageQuota</c>, but no test can mint their tokens.
+/// </remarks>
+[Trait("Category", "Rooms")]
+[Trait("Requires", "Nextcloud")]
+[Collection("Nextcloud")]
+public class ThirdPartyStorageQuotaTests(
+    AspireAppFixture fixture)
+    : ThirdPartyTestBase(fixture)
+{
+    private const string OutOfSpaceText = "There is not enough free space in the connected third-party storage";
+
+    private readonly List<string> _nextcloudUsersToDelete = [];
+
+    [Fact]
+    public async Task CreateFile_InFullThirdPartyStorage_Returns400WithReadableReason()
+    {
+        // Arrange
+        RequireNextcloud();
+        await _filesClient.Authenticate(Owner);
+        var roomId = await CreateRoomOnFullStorage("TP Full Create");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.CreateFileAsync(
+                roomId, new CreateFileRequest($"{UniqueTitle("TP Full Create")}.docx"), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain(OutOfSpaceText);
+    }
+
+    [Fact]
+    public async Task CopyBatchItems_IntoFullThirdPartyStorage_ReportsReadableReason()
+    {
+        // Arrange
+        RequireNextcloud();
+        await _filesClient.Authenticate(Owner);
+        var roomId = await CreateRoomOnFullStorage("TP Full Copy");
+        var source = await CreateFileInMy($"{UniqueTitle("TP Full Copy")}.docx", Owner);
+
+        // Act
+        var results = (await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
+        {
+            ReturnSingleOperation = true,
+            FileIds = [new(source.Id)],
+            DestFolderId = new(roomId),
+            ConflictResolveType = FileConflictResolveType.Overwrite,
+            DeleteAfter = false
+        }, TestContext.Current.CancellationToken)).Response;
+        var finished = await WaitLongOperation(results.FirstOrDefault()?.Id);
+
+        // Assert
+        finished.Should().NotBeNull();
+        finished!.Should().ContainSingle().Which.Should().Match<FileOperationDto>(
+            r => r.Finished && r.Error != null && r.Error.Contains(OutOfSpaceText));
+    }
+
+    /// <summary>
+    /// Creates a Nextcloud user whose quota is one byte, connects it and turns the connection into a
+    /// room rooted at the account. Any upload into the room is then refused with 507.
+    /// </summary>
+    private async Task<string> CreateRoomOnFullStorage(string prefix)
+    {
+        var (davUrl, login, password) = await CreateNextcloudUserWithoutSpace();
+
+        var connection = (await _thirdPartyApi.SaveThirdPartyAsync(
+            new ThirdPartyRequestDto(
+                url: davUrl,
+                login: login,
+                password: password,
+                customerTitle: UniqueTitle($"{prefix} (storage)"),
+                providerKey: "Nextcloud"),
+            TestContext.Current.CancellationToken)).Response;
+
+        var room = await _roomsApi.CreateRoomThirdPartyAsync(
+            connection.Id,
+            new CreateThirdPartyRoomRequest(title: UniqueTitle($"{prefix} Room"), roomType: RoomType.CustomRoom),
+            TestContext.Current.CancellationToken);
+
+        return room.Response.Id;
+    }
+
+    private async Task<(string DavUrl, string Login, string Password)> CreateNextcloudUserWithoutSpace()
+    {
+        var login = $"dsquota{Guid.NewGuid():N}"[..20];
+        var password = $"Qx!{Guid.NewGuid():N}";
+        var davUrl = $"{NextcloudOrigin}/remote.php/dav/files/{login}/";
+
+        using var admin = CreateNextcloudAdminClient();
+
+        using var created = await admin.PostAsync(
+            "ocs/v2.php/cloud/users?format=json",
+            new FormUrlEncodedContent(new Dictionary<string, string> { ["userid"] = login, ["password"] = password }),
+            TestContext.Current.CancellationToken);
+
+        Assert.SkipUnless(created.IsSuccessStatusCode,
+            $"The configured Nextcloud account may not create users ({(int)created.StatusCode}), so no account can be filled up.");
+
+        _nextcloudUsersToDelete.Add(login);
+
+        // The first sign-in prepares the user's home (and copies the skeleton files, if any) while the
+        // quota is still unlimited; only then is the quota cut, so the home exists and has no space left.
+        using (var user = CreateNextcloudClient(login, password))
+        using (var propfind = new HttpRequestMessage(new HttpMethod("PROPFIND"), davUrl))
+        {
+            propfind.Headers.Add("Depth", "0");
+            using var home = await user.SendAsync(propfind, TestContext.Current.CancellationToken);
+            home.IsSuccessStatusCode.Should().BeTrue("the new Nextcloud user must be able to sign in");
+        }
+
+        using var quota = await admin.PutAsync(
+            $"ocs/v2.php/cloud/users/{login}?format=json",
+            new FormUrlEncodedContent(new Dictionary<string, string> { ["key"] = "quota", ["value"] = "1 B" }),
+            TestContext.Current.CancellationToken);
+
+        quota.IsSuccessStatusCode.Should().BeTrue("the admin must be able to set the quota of the user it created");
+
+        return (davUrl, login, password);
+    }
+
+    /// <summary>
+    /// The address Nextcloud is installed at: <c>NEXTCLOUD_URL</c> is the WebDAV root of the account,
+    /// <c>{origin}/remote.php/dav/files/{user}/</c>.
+    /// </summary>
+    private static string NextcloudOrigin
+    {
+        get
+        {
+            var url = Environment.GetEnvironmentVariable("NEXTCLOUD_URL") ?? "";
+            var index = url.IndexOf("/remote.php/", StringComparison.Ordinal);
+
+            return index < 0 ? url.TrimEnd('/') : url[..index];
+        }
+    }
+
+    private static HttpClient CreateNextcloudAdminClient()
+    {
+        return CreateNextcloudClient(
+            Environment.GetEnvironmentVariable("NEXTCLOUD_LOGIN") ?? "",
+            Environment.GetEnvironmentVariable("NEXTCLOUD_PASSWORD") ?? "");
+    }
+
+    private static HttpClient CreateNextcloudClient(string login, string password)
+    {
+        var client = new HttpClient { BaseAddress = new Uri($"{NextcloudOrigin}/") };
+
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+            "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{login}:{password}")));
+        client.DefaultRequestHeaders.Add("OCS-APIRequest", "true");
+
+        return client;
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        try
+        {
+            using var admin = CreateNextcloudAdminClient();
+
+            foreach (var login in _nextcloudUsersToDelete)
+            {
+                // Best effort: a user left behind only costs a row in the test container.
+                using var _ = await admin.DeleteAsync($"ocs/v2.php/cloud/users/{login}?format=json");
+            }
+        }
+        finally
+        {
+            await base.DisposeAsync();
+        }
+    }
+}

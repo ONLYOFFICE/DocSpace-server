@@ -444,6 +444,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>File editing start error</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>There is not enough free space in the connected third-party storage. Free up space in it and try again.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>You cannot edit archived rooms</value>
   </data>

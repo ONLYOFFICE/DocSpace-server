@@ -170,8 +170,8 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         var parentPath = parent.ParentReference.Path == null ? "" : parent.ParentReference.Path.Replace(RootPath, string.Empty) + $"/{parent.Name}";
         var path = $"{parentPath}/{title}";
 
-        return await OnedriveClient.Drive.Root.ItemWithPath(path)
-            .Content.Request().PutAsync<Item>(fileStream);
+        return await WriteAsync(() => OnedriveClient.Drive.Root.ItemWithPath(path)
+            .Content.Request().PutAsync<Item>(fileStream));
     }
 
     public async Task DeleteItemAsync(Item item)
@@ -192,12 +192,15 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 
     private async Task<Item> CopyItemAsync(string itemId, string newItemName, string toFolderId)
     {
-        var copyMonitor = await OnedriveClient.Drive.Items[itemId]
-            .Copy(newItemName, new ItemReference { Id = toFolderId })
-            .Request()
-            .PostAsync();
+        return await WriteAsync(async () =>
+        {
+            var copyMonitor = await OnedriveClient.Drive.Items[itemId]
+                .Copy(newItemName, new ItemReference { Id = toFolderId })
+                .Request()
+                .PostAsync();
 
-        return await copyMonitor.PollForOperationCompletionAsync(null, CancellationToken.None);
+            return await copyMonitor.PollForOperationCompletionAsync(null, CancellationToken.None);
+        });
     }
 
     private async Task<Item> RenameItemAsync(string itemId, string newName)
@@ -211,9 +214,33 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 
     public async Task<Item> SaveStreamAsync(string fileId, Stream fileStream)
     {
-        return await OnedriveClient.Drive.Items[fileId].Content
+        return await WriteAsync(() => OnedriveClient.Drive.Items[fileId].Content
             .Request()
-            .PutAsync<Item>(fileStream);
+            .PutAsync<Item>(fileStream));
+    }
+
+    // OneDrive refuses a write the account has no space for with 507 / quotaLimitReached, which would
+    // otherwise reach the user as the library's raw error text; it is replaced with a readable one.
+    private static async Task<T> WriteAsync<T>(Func<Task<T>> write)
+    {
+        try
+        {
+            return await write();
+        }
+        catch (Exception ex) when (ThirdPartyStorageQuota.IsOneDrive(ex))
+        {
+            throw ThirdPartyStorageQuota.CreateException(ex);
+        }
+    }
+
+    // The upload session goes over plain HTTP, so the same refusal comes back as a status and a JSON body;
+    // any other failure is left to the caller as before.
+    private static void ThrowIfOutOfSpace(HttpResponseMessage response, string responseBody)
+    {
+        if ((int)response.StatusCode >= 400 && ThirdPartyStorageQuota.IsOneDriveResponse(response.StatusCode, responseBody))
+        {
+            throw ThirdPartyStorageQuota.CreateException(new HttpRequestException(responseBody, null, response.StatusCode));
+        }
     }
 
     public Task<long> GetFileSizeAsync(Item file)
@@ -256,6 +283,8 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         using (var response = await httpClient.SendAsync(request))
         {
             var responseString = await response.Content.ReadAsStringAsync();
+            ThrowIfOutOfSpace(response, responseString);
+
             var responseJson = JObject.Parse(responseString);
             uploadSession.Location = responseJson.Value<string>("uploadUrl");
         }
@@ -287,6 +316,11 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 #pragma warning restore CA2000
 
         using var response = await httpClient.SendAsync(request);
+        if ((int)response.StatusCode >= 400)
+        {
+            ThrowIfOutOfSpace(response, await response.Content.ReadAsStringAsync());
+        }
+
         if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
         {
             oneDriveSession.BytesTransferred += chunkLength;

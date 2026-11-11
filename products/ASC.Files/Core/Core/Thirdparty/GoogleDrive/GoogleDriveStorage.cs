@@ -344,6 +344,8 @@ internal class GoogleDriveStorage(
 #pragma warning restore CA2000
         using var response = await httpClient.SendAsync(request);
 
+        await ThrowIfOutOfSpaceAsync(response);
+
         if (!response.IsSuccessStatusCode)
         {
             throw new InvalidOperationException(response.ReasonPhrase);
@@ -413,6 +415,8 @@ internal class GoogleDriveStorage(
 
         using (response)
         {
+            await ThrowIfOutOfSpaceAsync(response);
+
             if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
             {
                 googleDriveSession.BytesTransferred += chunkLength;
@@ -454,6 +458,12 @@ internal class GoogleDriveStorage(
         }
         catch (GoogleApiException ex)
         {
+            // an account out of space answers 403 as well, and must not read as "Access denied"
+            if (ThirdPartyStorageQuota.IsGoogleDrive(ex))
+            {
+                throw ThirdPartyStorageQuota.CreateException(ex);
+            }
+
             if (ex.HttpStatusCode == HttpStatusCode.Forbidden)
             {
                 throw new SecurityException(ex.Error.Message);
@@ -538,7 +548,7 @@ internal class GoogleDriveStorage(
         {
             if (request.ResponseBody == null)
             {
-                throw result.Exception;
+                throw TranslateUploadError(result.Exception);
             }
 
             _logger.ErrorWhileTryingToInsertEntity(result.Exception);
@@ -600,12 +610,33 @@ internal class GoogleDriveStorage(
 
         if (request.ResponseBody == null)
         {
-            throw result.Exception;
+            throw TranslateUploadError(result.Exception);
         }
 
         _logger.ErrorWhileTryingToInsertEntity(result.Exception);
 
         return request.ResponseBody;
+    }
+
+    private static Exception TranslateUploadError(Exception uploadError)
+    {
+        return ThirdPartyStorageQuota.IsGoogleDrive(uploadError) ? ThirdPartyStorageQuota.CreateException(uploadError) : uploadError;
+    }
+
+    // The resumable upload goes over plain HTTP, so an account out of space comes back as a 403 whose
+    // JSON body carries the reason; any other failure is left to the caller as before.
+    private static async Task ThrowIfOutOfSpaceAsync(HttpResponseMessage response)
+    {
+        if ((int)response.StatusCode < 400)
+        {
+            return;
+        }
+
+        var body = await response.Content.ReadAsStringAsync();
+        if (ThirdPartyStorageQuota.IsGoogleDriveResponse(body))
+        {
+            throw ThirdPartyStorageQuota.CreateException(new HttpRequestException(body, null, response.StatusCode));
+        }
     }
 
     private sealed class CachedHttpClientFactory : Google.Apis.Http.HttpClientFactory

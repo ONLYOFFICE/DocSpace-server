@@ -212,7 +212,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     public async Task<FolderMetadata> CreateFolderAsync(string title, string parentId)
     {
         var path = MakeDropboxPath(parentId, title);
-        var result = await _dropboxClient.Files.CreateFolderV2Async(path, true);
+        var result = await WriteAsync(() => _dropboxClient.Files.CreateFolderV2Async(path, true));
 
         return result.Metadata;
     }
@@ -221,7 +221,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     {
         var path = MakeDropboxPath(parentId, title);
 
-        return await _dropboxClient.Files.UploadAsync(path, WriteMode.Add.Instance, true, body: fileStream);
+        return await WriteAsync(() => _dropboxClient.Files.UploadAsync(path, WriteMode.Add.Instance, true, body: fileStream));
     }
 
     public async Task DeleteItemAsync(Metadata dropboxItem)
@@ -232,7 +232,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     public async Task<FolderMetadata> MoveFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
         var pathTo = MakeDropboxPath(toFolderId, newFolderName);
-        var result = await _dropboxClient.Files.MoveV2Async(folderId, pathTo, autorename: true);
+        var result = await WriteAsync(() => _dropboxClient.Files.MoveV2Async(folderId, pathTo, autorename: true));
 
         return (FolderMetadata)result.Metadata;
     }
@@ -249,7 +249,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     public async Task<FileMetadata> MoveFileAsync(string fileId, string newFileName, string toFolderId)
     {
         var pathTo = MakeDropboxPath(toFolderId, newFileName);
-        var result = await _dropboxClient.Files.MoveV2Async(fileId, pathTo, autorename: true);
+        var result = await WriteAsync(() => _dropboxClient.Files.MoveV2Async(fileId, pathTo, autorename: true));
 
         return (FileMetadata)result.Metadata;
     }
@@ -266,7 +266,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     public async Task<FolderMetadata> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
     {
         var pathTo = MakeDropboxPath(toFolderId, newFolderName);
-        var result = await _dropboxClient.Files.CopyV2Async(folderId, pathTo, autorename: true);
+        var result = await WriteAsync(() => _dropboxClient.Files.CopyV2Async(folderId, pathTo, autorename: true));
 
         return (FolderMetadata)result.Metadata;
     }
@@ -274,14 +274,14 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     public async Task<FileMetadata> CopyFileAsync(string fileId, string newFileName, string toFolderId)
     {
         var pathTo = MakeDropboxPath(toFolderId, newFileName);
-        var result = await _dropboxClient.Files.CopyV2Async(fileId, pathTo, autorename: true);
+        var result = await WriteAsync(() => _dropboxClient.Files.CopyV2Async(fileId, pathTo, autorename: true));
 
         return (FileMetadata)result.Metadata;
     }
 
     public async Task<FileMetadata> SaveStreamAsync(string fileId, Stream fileStream)
     {
-        var metadata = await _dropboxClient.Files.UploadAsync(fileId, WriteMode.Overwrite.Instance, body: fileStream);
+        var metadata = await WriteAsync(() => _dropboxClient.Files.UploadAsync(fileId, WriteMode.Overwrite.Instance, body: fileStream));
 
         return metadata.AsFile;
     }
@@ -309,10 +309,24 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     public async Task<Metadata> FinishRenewableSessionAsync(RenewableUploadShortSession shortSession, string dropboxFilePath)
     {
         using var tempBody = new MemoryStream();
-        return await _dropboxClient.Files.UploadSessionFinishAsync(
+        return await WriteAsync(() => _dropboxClient.Files.UploadSessionFinishAsync(
             new UploadSessionCursor(shortSession.Id, (ulong)shortSession.BytesTransferred),
             new CommitInfo(dropboxFilePath, WriteMode.Overwrite.Instance),
-            body: tempBody);
+            body: tempBody));
+    }
+
+    // Dropbox refuses a write the account has no space for with an error tag (path/insufficient_space/)
+    // that would otherwise reach the user as the whole message; it is replaced with a readable one.
+    private static async Task<T> WriteAsync<T>(Func<Task<T>> write)
+    {
+        try
+        {
+            return await write();
+        }
+        catch (Exception ex) when (ThirdPartyStorageQuota.IsDropbox(ex))
+        {
+            throw ThirdPartyStorageQuota.CreateException(ex);
+        }
     }
 
     private static string MakeId(Metadata dropboxItem)

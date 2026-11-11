@@ -122,6 +122,14 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 message = e.Message;
                 withStackTrace = false;
                 break;
+            // A connected storage (Dropbox, Google Drive, WebDAV…) is out of space in its own account. The
+            // user has to free space there, so it is a client error with a readable reason, not a server
+            // fault, and not the portal's own quota (402).
+            case ThirdPartyStorageQuotaException e:
+                status = HttpStatusCode.BadRequest;
+                message = e.Message;
+                withStackTrace = false;
+                break;
             case CustomHttpException httpException:
                 status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;

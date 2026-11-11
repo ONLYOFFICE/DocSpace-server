@@ -197,7 +197,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
 
         if (fileStream.CanSeek)
         {
-            return await _boxClient.FilesManager.UploadAsync(boxFileRequest, fileStream, _boxFields, setStreamPositionToZero: false);
+            return await WriteAsync(() => _boxClient.FilesManager.UploadAsync(boxFileRequest, fileStream, _boxFields, setStreamPositionToZero: false));
         }
 
         await using var tempBuffer = tempStream.Create();
@@ -205,7 +205,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
         await tempBuffer.FlushAsync();
         tempBuffer.Seek(0, SeekOrigin.Begin);
 
-        return await _boxClient.FilesManager.UploadAsync(boxFileRequest, tempBuffer, _boxFields, setStreamPositionToZero: false);
+        return await WriteAsync(() => _boxClient.FilesManager.UploadAsync(boxFileRequest, tempBuffer, _boxFields, setStreamPositionToZero: false));
     }
 
     public async Task DeleteItemAsync(BoxItem boxItem)
@@ -232,7 +232,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
             }
         };
 
-        return await _boxClient.FoldersManager.UpdateInformationAsync(boxFolderRequest, _boxFields);
+        return await WriteAsync(() => _boxClient.FoldersManager.UpdateInformationAsync(boxFolderRequest, _boxFields));
     }
 
     public async Task<BoxFile> MoveFileAsync(string fileId, string newFileName, string toFolderId)
@@ -247,7 +247,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
             }
         };
 
-        return await _boxClient.FilesManager.UpdateInformationAsync(boxFileRequest, null, _boxFields);
+        return await WriteAsync(() => _boxClient.FilesManager.UpdateInformationAsync(boxFileRequest, null, _boxFields));
     }
 
     public async Task<BoxFolder> CopyFolderAsync(string folderId, string newFolderName, string toFolderId)
@@ -262,7 +262,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
             }
         };
 
-        return await _boxClient.FoldersManager.CopyAsync(boxFolderRequest, _boxFields);
+        return await WriteAsync(() => _boxClient.FoldersManager.CopyAsync(boxFolderRequest, _boxFields));
     }
 
     public async Task<BoxFile> CopyFileAsync(string fileId, string newFileName, string toFolderId)
@@ -277,7 +277,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
             }
         };
 
-        return await _boxClient.FilesManager.CopyAsync(boxFileRequest, _boxFields);
+        return await WriteAsync(() => _boxClient.FilesManager.CopyAsync(boxFileRequest, _boxFields));
     }
 
     public async Task<BoxFolder> RenameFolderAsync(string folderId, string newName)
@@ -296,7 +296,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
 
     public async Task<BoxFile> SaveStreamAsync(string fileId, Stream fileStream)
     {
-        return await _boxClient.FilesManager.UploadNewVersionAsync(null, fileId, fileStream, fields: _boxFields, setStreamPositionToZero: false);
+        return await WriteAsync(() => _boxClient.FilesManager.UploadNewVersionAsync(null, fileId, fileStream, fields: _boxFields, setStreamPositionToZero: false));
     }
 
     public Task<long> GetFileSizeAsync(BoxFile file)
@@ -317,6 +317,20 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     {
         var boxRepresentation = new BoxRepresentationRequest { FileId = fileId, XRepHints = "[jpg?dimensions=320x320]" };
         return await _boxClient.FilesManager.GetRepresentationContentAsync(boxRepresentation);
+    }
+
+    // Box refuses a write the account has no space for with storage_limit_exceeded, which would otherwise
+    // reach the user as the library's raw error text; it is replaced with a readable one.
+    private static async Task<T> WriteAsync<T>(Func<Task<T>> write)
+    {
+        try
+        {
+            return await write();
+        }
+        catch (Exception ex) when (ThirdPartyStorageQuota.IsBox(ex))
+        {
+            throw ThirdPartyStorageQuota.CreateException(ex);
+        }
     }
 
     public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)

@@ -93,6 +93,11 @@ public class UnhandledExceptionMiddleware(RequestDelegate next)
             case BillingException:
                 status = HttpStatusCode.PaymentRequired;
                 break;
+            case ThirdPartyStorageQuotaException e:
+                status = HttpStatusCode.BadRequest;
+                message = e.Message;
+                withStackTrace = false;
+                break;
         }
 
         var result = new ErrorApiResponse(status, exception, message, withStackTrace);

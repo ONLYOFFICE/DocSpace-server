@@ -398,7 +398,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var response = await action();
         if (response.StatusCode != (int)HttpStatusCode.Unauthorized)
         {
-            return response;
+            return ThrowIfOutOfSpace(response);
         }
 
         if (response is IDisposable disposableResponse)
@@ -422,7 +422,27 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         _client = new WebDavClient(client);
 #pragma warning restore CA2000
 
-        return await action();
+        return ThrowIfOutOfSpace(await action());
+    }
+
+    // A server out of space answers a PUT, COPY, MOVE or MKCOL with 507. The callers read any other
+    // failure as "nothing written" and return null, which the user never gets a reason for, so this one
+    // is turned into an error the user can act on.
+    private static T ThrowIfOutOfSpace<T>(T response) where T : WebDavResponse
+    {
+        if (!ThirdPartyStorageQuota.IsWebDav(response.StatusCode))
+        {
+            return response;
+        }
+
+        var providerError = new HttpRequestException(response.Description, null, (HttpStatusCode)response.StatusCode);
+
+        if (response is IDisposable disposableResponse)
+        {
+            disposableResponse.Dispose();
+        }
+
+        throw ThirdPartyStorageQuota.CreateException(providerError);
     }
 
     public IDataWriteOperator CreateDataWriteOperator(CommonChunkedUploadSession chunkedUploadSession, CommonChunkedUploadSessionHolder sessionHolder)
