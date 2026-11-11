@@ -2467,7 +2467,10 @@ public class EntryManager(IDaoFactory daoFactory,
                     var sourceFile = await fileDao.GetFileAsync(sourceId);
 
                     await linkDao.DeleteLinkAsync(sourceId);
-                    await socketManager.UpdateFileAsync(sourceFile);
+                    if (sourceFile is not null)
+                    {
+                        await socketManager.UpdateFileAsync(sourceFile);
+                    }
 
                     await fileMarker.RemoveMarkAsNewForAllAsync(file);
                     await linkDao.DeleteAllLinkAsync(file.Id);
