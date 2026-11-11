@@ -36,7 +36,7 @@ using Folder = Microsoft.OneDrive.Sdk.Folder;
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Transient(typeof(IThirdPartyStorage<Item, Item, Item>))]
-internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper)
+internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper, ILogger<OneDriveStorage> logger)
     : IThirdPartyStorage<Item, Item, Item>
 {
     private OAuth20Token _token;
@@ -239,13 +239,29 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
     }
 
     // A copy stays in the same drive, so it needs as much free space as the item takes (a folder's size is
-    // that of everything in it). A drive that reports no quota is not checked.
+    // that of everything in it). A drive that reports no quota is not checked, and neither is one whose
+    // lookup fails: that says nothing about the space, so the copy goes ahead as it did before the check.
+    // The check is not atomic: two copies started together can both pass it, and the one that does not
+    // fit then fails on OneDrive's side with the monitor's own error, as before.
     private async Task ThrowIfCopyDoesNotFitAsync(string itemId)
     {
-        var item = await GetItemAsync(itemId);
-        var drive = await OnedriveClient.Drive.Request().GetAsync();
+        long? size;
+        long? remaining;
 
-        if (item?.Size is { } size && drive?.Quota?.Remaining is { } remaining && size > remaining)
+        try
+        {
+            size = (await GetItemAsync(itemId))?.Size;
+            remaining = size is null ? null : (await OnedriveClient.Drive.Request().GetAsync())?.Quota?.Remaining;
+        }
+        catch (Exception ex) when (ex is ServiceException or HttpRequestException or TaskCanceledException)
+        {
+            // no cancellation token is passed, so a TaskCanceledException here is the client's timeout
+            logger.WarningCopySpaceCheckSkipped(itemId, ex);
+
+            return;
+        }
+
+        if (size > remaining)
         {
             throw ThirdPartyStorageQuota.CreateException(
                 new InvalidOperationException($"The copy of {itemId} needs {size} bytes, the drive has {remaining} left"));

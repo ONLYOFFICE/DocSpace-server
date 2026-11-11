@@ -642,6 +642,13 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                         Result = sb.ToString();
                     }
+                    catch (ThirdPartyStorageQuotaException ex)
+                    {
+                        // the connected storage is full: the user has to free space there, it is not a server fault
+                        Err = ex.Message;
+
+                        Logger.InformationUnableFolderMoveCopyOperation(folderId.ToString(), ex.InnerException?.Message ?? ex.Message);
+                    }
                     catch (Exception ex)
                     {
                         Err = ex.Message;
@@ -1037,6 +1044,13 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     Err = ex.Message;
 
                     Logger.InformationUnableFileMoveCopyOperation(fileId.ToString(), ex.Message);
+                }
+                catch (ThirdPartyStorageQuotaException ex)
+                {
+                    // the connected storage is full: the user has to free space there, it is not a server fault
+                    Err = ex.Message;
+
+                    Logger.InformationUnableFileMoveCopyOperation(fileId.ToString(), ex.InnerException?.Message ?? ex.Message);
                 }
                 catch (Exception ex)
                 {

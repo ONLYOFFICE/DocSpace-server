@@ -53,7 +53,9 @@ public class ThirdPartyStorageQuotaTests(
     AspireAppFixture fixture)
     : ThirdPartyTestBase(fixture)
 {
-    private const string OutOfSpaceText = "There is not enough free space in the connected third-party storage";
+    // FilesCommonResource.ErrorMessage_ThirdPartyStorageFull as the owner's (English) portal shows it, in full, so a
+    // text that only starts with it — the provider's error glued on — fails the check
+    private const string OutOfSpaceText = "There is not enough free space in the connected third-party storage. Free up space in it and try again.";
 
     private readonly List<string> _nextcloudUsersToDelete = [];
 
@@ -97,8 +99,9 @@ public class ThirdPartyStorageQuotaTests(
 
         // Assert
         finished.Should().NotBeNull();
-        finished!.Should().ContainSingle().Which.Should().Match<FileOperationDto>(
-            r => r.Finished && r.Error != null && r.Error.Contains(OutOfSpaceText));
+        var operation = finished!.Should().ContainSingle().Subject;
+        operation.Finished.Should().BeTrue();
+        operation.Error.Should().Be(OutOfSpaceText);
     }
 
     /// <summary>
@@ -127,8 +130,9 @@ public class ThirdPartyStorageQuotaTests(
             $"api/2.0/files/{Uri.EscapeDataString(roomId)}/upload/create_session",
             new { fileName = title, fileSize = content.Length },
             TestContext.Current.CancellationToken);
-        using var session = JsonDocument.Parse(await created.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
-        created.IsSuccessStatusCode.Should().BeTrue("opening a session writes nothing to the storage yet: {0}", session.RootElement);
+        var sessionBody = await created.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        created.IsSuccessStatusCode.Should().BeTrue("opening a session writes nothing to the storage yet: {0} {1}", (int)created.StatusCode, sessionBody);
+        using var session = JsonDocument.Parse(sessionBody);
         var uploadId = session.RootElement.GetProperty("response").GetProperty("data").GetProperty("id").GetString();
 
         // Act: one chunk holding the whole file, so the handler commits it to the storage at once
@@ -142,7 +146,7 @@ public class ThirdPartyStorageQuotaTests(
 
         // Assert
         answer.RootElement.GetProperty("success").GetBoolean().Should().BeFalse();
-        answer.RootElement.GetProperty("message").GetString().Should().Contain(OutOfSpaceText);
+        answer.RootElement.GetProperty("message").GetString().Should().Be(OutOfSpaceText);
     }
 
     /// <summary>
@@ -183,8 +187,14 @@ public class ThirdPartyStorageQuotaTests(
             new FormUrlEncodedContent(new Dictionary<string, string> { ["userid"] = login, ["password"] = password }),
             TestContext.Current.CancellationToken);
 
-        Assert.SkipUnless(created.IsSuccessStatusCode,
-            $"The configured Nextcloud account may not create users ({(int)created.StatusCode}), so no account can be filled up.");
+        // Only a refusal of the right itself (a non-admin account set through NEXTCLOUD_*) is an environment
+        // this test cannot run in. On the integration-test stack the account is the container's admin, so a
+        // wrong password, a disabled provisioning API or a Nextcloud that is down is a broken harness: red.
+        Assert.SkipWhen(created.StatusCode == HttpStatusCode.Forbidden,
+            "The configured Nextcloud account may not create users (403), so no account can be filled up.");
+        created.IsSuccessStatusCode.Should().BeTrue(
+            "the Nextcloud admin must be able to create a user: {0} {1}",
+            (int)created.StatusCode, await created.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
 
         _nextcloudUsersToDelete.Add(login);
 
@@ -222,8 +232,17 @@ public class ThirdPartyStorageQuotaTests(
 
             foreach (var login in _nextcloudUsersToDelete)
             {
-                // Best effort: a user left behind only costs a row in the test container.
-                using var _ = await admin.DeleteAsync($"ocs/v2.php/cloud/users/{login}?format=json", TestContext.Current.CancellationToken);
+                // Best effort: a user left behind only costs a row in the test container, so neither a refused
+                // delete, a Nextcloud that stopped answering nor a cancelled run fails a test that has passed,
+                // and one failed delete does not keep the others from running.
+                try
+                {
+                    using var _ = await admin.DeleteAsync($"ocs/v2.php/cloud/users/{login}?format=json", TestContext.Current.CancellationToken);
+                }
+                catch (Exception ex) when (ex is HttpRequestException or OperationCanceledException)
+                {
+                    // dropped on purpose: the cleanup must not mask the test's own outcome
+                }
             }
         }
         finally
