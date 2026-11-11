@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>Cheia BYOK pentru modelul AI a fost setată: {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Setările agentului de documente au fost actualizate</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profilul AI a fost atribuit acțiunii: {0}</value>
   </data>

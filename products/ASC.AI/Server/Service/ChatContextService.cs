@@ -60,6 +60,7 @@ public class ChatContextService(
     ToolPrefsStorageService toolPrefsStorageService,
     McpServerStorageService mcpServerStorageService,
     WebSearchStorageService webSearchStorageService,
+    DocumentAgentSettingsService documentAgentSettingsService,
     ThreadStorageService threadStorageService,
     MessageStorageService messageStorageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
@@ -75,6 +76,7 @@ public class ChatContextService(
         var configTask = ReadConfigAsync();
         var threadTask = ReadThreadAsync(threadId, includeMessages);
         var webSearchTask = webSearchStorageService.ReadVerifiedAsync();
+        var documentAgentEnabledTask = documentAgentSettingsService.IsEnabledVerifiedAsync();
         var entityFolderTask = TryReadFolderAsync(entityId);
         var contextFolderTask = contextEntityId != entityId
             ? TryReadFolderAsync(contextEntityId)
@@ -93,7 +95,7 @@ public class ChatContextService(
         var entityFolderDtoTask = BuildFolderAsync(entityFolder);
         var contextFolderDtoTask = BuildFolderAsync(contextFolder);
 
-        await Task.WhenAll(configTask, profilesTask, threadTask, webSearchTask, assignmentsTask, preferencesTask, toolPrefsTask, mcpServersTask, entityFolderDtoTask, contextFolderDtoTask);
+        await Task.WhenAll(configTask, profilesTask, threadTask, webSearchTask, documentAgentEnabledTask, assignmentsTask, preferencesTask, toolPrefsTask, mcpServersTask, entityFolderDtoTask, contextFolderDtoTask);
 
         var scopes = new ScopeSources(await assignmentsTask, await preferencesTask, await toolPrefsTask, await mcpServersTask);
         var webSearch = await webSearchTask;
@@ -108,7 +110,8 @@ public class ChatContextService(
             ContextEntity = contextFolder is null ? null : scopes.Build(contextEntityId, contextFolder.Id, await contextFolderDtoTask),
             Thread = thread,
             Messages = messages,
-            WebSearch = webSearch is null ? null : WebSearchConfigMapper.MapToDto(webSearch)
+            WebSearch = webSearch is null ? null : WebSearchConfigMapper.MapToDto(webSearch),
+            DocumentAgentEnabled = await documentAgentEnabledTask
         };
     }
 

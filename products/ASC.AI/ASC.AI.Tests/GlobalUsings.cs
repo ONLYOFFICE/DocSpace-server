@@ -79,6 +79,8 @@ global using CommonSettingsApi = DocSpace.API.SDK.Api.Settings.CommonSettingsApi
 global using CreateProfileRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfileRequestDto;
 global using CreateProfilesRequestDto = ASCAi::ASC.AI.Models.RequestDto.Profiles.CreateProfilesRequestDto;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
+global using DocumentAgentReasoning = ASC.AI.Integration.DocumentAgent.DocumentAgentReasoning;
+global using DocumentAgentSettingsDto = ASCAi::ASC.AI.Models.ResponseDto.DocumentAgentSettingsDto;
 // The SDK enum, not ASC.Core.Users: invites go through the typed SDK client (Invitations helper).
 global using EmployeeType = DocSpace.API.SDK.Model.EmployeeType;
 global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
@@ -101,5 +103,6 @@ global using SharingApi = DocSpace.API.SDK.Api.Files.SharingApi;
 global using Task = System.Threading.Tasks.Task;
 global using ThreadDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadDto;
 global using ThreadsPageDto = ASCAi::ASC.AI.Models.ResponseDto.ThreadsPageDto;
+global using UpdateDocumentAgentSettingsRequestDto = ASCAi::ASC.AI.Models.RequestDto.DocumentAgent.UpdateDocumentAgentSettingsRequestDto;
 global using UpdateProfileBody = ASCAi::ASC.AI.Models.RequestDto.Profiles.UpdateProfileBody;
 global using User = ASC.Tests.Common.Data.User;

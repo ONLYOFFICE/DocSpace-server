@@ -50,6 +50,7 @@ global using ASC.Common.Caching;
 global using ASC.Common.Notify.Patterns;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Threading.DistributedLock.InMemoryLock;
+global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core.Billing;
 global using ASC.Core.Common.Security;
@@ -80,6 +81,7 @@ global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
+global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Logging.Abstractions;
 global using Microsoft.Extensions.Options;
 
