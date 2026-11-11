@@ -35,6 +35,10 @@ as matrix M3 of `review-branch` and cite them as `[configuration.md §N]`.
   `GetValue<int[]>(key, fallback)` gives the fallback for a list and `null` for `"1,2"`.
 - This rule does not ask for existing reads to be rewritten. A read you add or change uses the
   helper.
+- Moving an existing interval key to `ReadInterval` makes a value written the old way (`"7"`,
+  `"24:00:00"`) log the ambiguity warning of §3 at every start. In the same change, rewrite the
+  value as `d.hh:mm:ss` wherever it is set: `buildtools/config`, the AppHost configurators, test
+  settings.
 
 ## 2. An optional value never stops the host
 

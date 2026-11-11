@@ -468,6 +468,15 @@ def main() -> None:
         print(f"!! [git-commits.md] AI attribution in commit messages: {', '.join(attributed)}")
     if status and not a.worktree:
         print(f"!! working tree is dirty ({len(status)} files) - uncommitted changes are NOT scanned; pass --worktree to include them")
+    if a.worktree:
+        # `git diff` of the working tree sees tracked files only: a new file nobody added is reviewed by no one.
+        untracked = [l[3:] for l in git("status", "--porcelain", "--untracked-files=all").splitlines() if l.startswith("?? ")]
+        if untracked:
+            print(f"!! {len(untracked)} untracked file(s) are NOT scanned - offer the branch's own to the user for `git add` (SKILL.md §1):")
+            for p in untracked[:20]:
+                print(f"  {p}")
+            if len(untracked) > 20:
+                print(f"  ... and {len(untracked) - 20} more")
     print()
 
     # --- files ---------------------------------------------------------------------------------

@@ -26,10 +26,12 @@ with the rest of the report.
   nothing is left". Go to §9: two independent full passes on one frozen sha and an estimate of what
   is still unfound.
 - **Self-review** — the author checks a branch they wrote before handing it to review: "check my
-  branch before review", "self-review", or the step `CLAUDE.md` (Git Workflow) asks for when a
-  branch is finished. Run it as a first review, against the base the reviewer will use, with
-  `--worktree` while the work is uncommitted. Only the end differs: §8 "Self-review". A branch that
-  has already had a review round is checked with §7 instead.
+  branch before review", "self-review", or a yes to the self-review that `CLAUDE.md` (Git Workflow)
+  has the author offer when a branch is finished. It is offered, not run on its own: a full run of
+  this skill with its reviewer agents is the user's call. Run it as a first review, against the
+  base the reviewer will use, with `--worktree` while the work is uncommitted. Only the end
+  differs: §8 "Self-review". A branch that has already had a review round is checked with §7
+  instead.
 
 One review covers **one sha**. While fix rounds keep landing, a fresh first review of the whole
 branch finds new things every time for two reasons that look the same in the report: bugs in the
@@ -77,6 +79,12 @@ merges of the base into the branch do not show up as branch changes. Read its he
   re-run with an explicit `--base`. **0 commits** — wrong branch or already merged: stop and say so.
 - **The tree is clean**, or the user asked for `--worktree`. Uncommitted changes are not in the
   scan otherwise — say which one you reviewed.
+- **No new file is left out.** `--worktree` sees tracked files only, and so does `git diff HEAD`: a
+  file the branch created but nobody added is reviewed by no one. The scan lists the untracked
+  files (`!! ... untracked file(s) are NOT scanned`). Offer the ones that belong to the branch to the
+  user as a list to `git add` — leave out what is clearly not its own, such as a folder another
+  branch left behind or a saved review — and re-scan once they are added. A file the user keeps
+  untracked goes under "Not verified".
 - **Remember `HEAD`'s sha.** Branches here move during a review (a merge of the base, a rename of
   a migration). Check it again before the report; if it moved, re-scan and say what the new commits
   changed.
@@ -527,7 +535,9 @@ in order to fix what it finds. Reviewing someone else's branch stays read-only.
 1. Fix every finding in one batch (`fixing-findings.md`), then run §7 on that batch, once. Fix what
    the re-check finds as well; a third pass only when the re-check found a blocker.
    Uncommitted work has no fix commits for §7 to take: before fixing, save `git diff HEAD` to the
-   scratchpad. The re-check then reads the files the batch touched against that copy, gives the
+   scratchpad (it holds the new files only once they are added, §1 "No new file is left out"; a
+   new file the fixes create is offered for `git add` the same way). The re-check then reads the
+   files the batch touched against that copy, gives the
    fresh reviewer of §7 point 3 the difference, and proves a behavioural fix with `prove-red.sh
    --patch` holding the fix's own hunk instead of `--commit`.
 2. A finding whose fix would change behaviour or scope the user did not ask for goes to the user as

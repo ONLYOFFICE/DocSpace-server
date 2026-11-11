@@ -29,10 +29,11 @@ paths around it. Before a fix is handed back:
 5. **Fix a review in one batch.** Take all findings of one review (one sha) in one round and only
    then ask for the next review. Fixing between review runs moves the sha under the review, and
    each run then finds the bugs of the previous round's fixes mixed with what it missed before.
-6. **Check your own work before handing it back.** Before a branch first goes to review, run the
-   `review-branch` skill on it in self-review mode (its §0); after a round of fixes, run its §7
-   re-check on your fix commits. Fix what it finds, then ask for the review. The reviewer uses the
-   same skill, so what it finds here would otherwise cost a round (`CLAUDE.md`, Git Workflow).
+6. **Offer to check your own work before handing it back.** Before a branch first goes to review,
+   offer a self-review with the `review-branch` skill (its §0); after a round of fixes, offer its §7
+   re-check of your fix commits. On a yes, fix what it finds, then ask for the review. The reviewer
+   uses the same skill, so what it finds here would otherwise cost a round; the run itself costs a
+   full pass of the skill, so the user decides (`CLAUDE.md`, Git Workflow).
 
 A fix that adds state — a mark, an "accepted" flag, a lock, a retry, a fallback — is new code and
 goes through `failure-paths.md` like any other: in past rounds most new findings were in exactly

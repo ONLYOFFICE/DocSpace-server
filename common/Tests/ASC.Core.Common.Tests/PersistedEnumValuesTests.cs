@@ -39,9 +39,11 @@ namespace ASC.Core.Common.Tests;
 /// brought in a hotfix whose service-limit actions took 6112-6116) turns every row already written into another event.
 /// The snapshot lists every member of every stored enum, sorted by value, so two branches that take the same number
 /// collide in it when they are merged, and a moved, reused or removed number fails here.
-/// New members need no hand edit: when they are the only difference, the test writes them into the snapshot and fails
-/// once, so that the file is committed with the change that added them. A moved or removed number is never written:
-/// that one is a decision.
+/// New members need no hand edit: when they are the only difference and none of them takes a number another member of
+/// its enum already has, the test writes them into the snapshot and fails once, so that the file is committed with the
+/// change that added them. A moved or removed number is never written: that one is a decision. Nor is a new member on
+/// a taken number: written, it would turn its later move to a free number into a "changed" line for a value that was
+/// never committed.
 /// </summary>
 /// <remarks>
 /// The stored enums are found, not listed: every enum-typed property of an entity that some <see cref="DbContext"/>
@@ -102,19 +104,11 @@ public class PersistedEnumValuesTests
         }
 
         var content = SnapshotHeader + string.Join('\n', actual) + "\n";
-        var now = ToValues(actual);
-        var before = ToValues(snapshot);
+        var diff = Compare(snapshot, actual);
 
-        var changed = before.Where(e => now.TryGetValue(e.Key, out var value) && value != e.Value)
-            .Select(e => $"{e.Key}: {e.Value} -> {now[e.Key]}").ToList();
-        var removed = before.Keys.Where(k => !now.ContainsKey(k)).Select(k => $"{k}={before[k]}").ToList();
-        var added = now.Keys.Where(k => !before.ContainsKey(k)).Select(k => $"{k}={now[k]}").ToList();
-
-        if (changed.Count == 0 && removed.Count == 0)
+        if (diff.CanWrite)
         {
-            // Only new members, or the lines out of their sorted order after a merge: nothing stored before changes its
-            // meaning, so the snapshot is brought up to date here instead of by hand.
-            Assert.Fail(ExtendSnapshot(content, added));
+            Assert.Fail(ExtendSnapshot(content, diff.Added));
         }
 
         var received = Path.Combine(AppContext.BaseDirectory, "PersistedEnums.received.txt");
@@ -122,17 +116,93 @@ public class PersistedEnumValuesTests
 
         var message = new StringBuilder($"The stored enum values differ from {SnapshotPath}.\n");
 
-        Append(message, "Changed: rows stored with the old number now read as another member. Put the old value back, or decide it and update the snapshot", changed);
-        Append(message, "Removed: rows stored with this number lose their name", removed);
-        Append(message, "Added: written to the snapshot once the changes above are settled", added);
+        Append(message, "Changed: rows stored with the old number now read as another member. Put the old value back, or decide it and update the snapshot", diff.Changed);
+        Append(message, "Removed: rows stored with this number lose their name", diff.Removed);
+        Append(message, "Taken: a new member uses a number another member of its enum already has. Give it a free number; it is written once it has one", diff.Taken);
+        Append(message, "Added: written to the snapshot once the lines above are settled", [.. diff.Added.Except(diff.Taken)]);
 
         message.Append($"The whole expected snapshot is in {received}.");
 
         Assert.Fail(message.ToString());
     }
 
+    [Fact]
+    public void Compare_WithOnlyNewMembers_MayWriteThem()
+    {
+        var diff = Compare(["E.A=1"], ["E.A=1", "E.B=2"]);
+
+        diff.CanWrite.Should().BeTrue();
+        diff.Added.Should().Equal("E.B=2");
+    }
+
+    [Fact]
+    public void Compare_WithLinesOnlyReordered_MayWriteThem()
+    {
+        Compare(["E.B=2", "E.A=1"], ["E.A=1", "E.B=2"]).CanWrite.Should().BeTrue();
+    }
+
     /// <summary>
-    /// Writes the snapshot when the only difference is new members, and says what to commit. The test still fails, so
+    /// A new member on a taken number is not written: its fix, a move to a free number, would otherwise read as a changed
+    /// value. Once moved, it is a plain addition again.
+    /// </summary>
+    [Fact]
+    public void Compare_WithANewMemberOnATakenNumber_DoesNotWriteIt()
+    {
+        var taken = Compare(["E.A=1"], ["E.A=1", "E.B=1"]);
+        var moved = Compare(["E.A=1"], ["E.A=1", "E.B=2"]);
+
+        taken.CanWrite.Should().BeFalse();
+        taken.Taken.Should().Equal("E.B=1");
+        moved.CanWrite.Should().BeTrue();
+    }
+
+    [Fact]
+    public void Compare_WithAMovedOrRemovedNumber_DoesNotWriteIt()
+    {
+        var moved = Compare(["E.A=1", "E.B=2"], ["E.A=1", "E.B=3"]);
+        var removed = Compare(["E.A=1", "E.B=2"], ["E.A=1"]);
+
+        moved.CanWrite.Should().BeFalse();
+        moved.Changed.Should().Equal("E.B: 2 -> 3");
+        removed.CanWrite.Should().BeFalse();
+        removed.Removed.Should().Equal("E.B=2");
+    }
+
+    /// <summary>
+    /// The difference between the snapshot and the stored enums, each line as the failure message shows it.
+    /// </summary>
+    private sealed record SnapshotDiff(List<string> Changed, List<string> Removed, List<string> Added, List<string> Taken)
+    {
+        /// <summary>
+        /// Only new members, none on a taken number, or only the order of the lines: nothing stored before changes its
+        /// meaning, so the test may bring the snapshot up to date itself.
+        /// </summary>
+        public bool CanWrite => Changed.Count == 0 && Removed.Count == 0 && Taken.Count == 0;
+    }
+
+    private static SnapshotDiff Compare(List<string> snapshot, List<string> actual)
+    {
+        var now = ToValues(actual);
+        var before = ToValues(snapshot);
+        var added = now.Keys.Where(k => !before.ContainsKey(k)).ToList();
+
+        // A number shared by two members of one enum, unless both are declared aliases.
+        var shared = now
+            .Where(e => !_intendedAliases.Contains(e.Key))
+            .GroupBy(e => (Enum: e.Key[..e.Key.LastIndexOf('.')], e.Value))
+            .Where(g => g.Count() > 1)
+            .SelectMany(g => g.Select(e => e.Key))
+            .ToHashSet(StringComparer.Ordinal);
+
+        return new SnapshotDiff(
+            [.. before.Where(e => now.TryGetValue(e.Key, out var value) && value != e.Value).Select(e => $"{e.Key}: {e.Value} -> {now[e.Key]}")],
+            [.. before.Keys.Where(k => !now.ContainsKey(k)).Select(k => $"{k}={before[k]}")],
+            [.. added.Select(k => $"{k}={now[k]}")],
+            [.. added.Where(shared.Contains).Select(k => $"{k}={now[k]}")]);
+    }
+
+    /// <summary>
+    /// Writes the snapshot when <see cref="SnapshotDiff.CanWrite"/>, and says what to commit. The test still fails, so
     /// that a run never passes while the committed file lacks the lines: CI stays red until they are committed.
     /// </summary>
     private static string ExtendSnapshot(string content, List<string> added)
