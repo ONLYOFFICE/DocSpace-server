@@ -42,6 +42,7 @@ const fs = require('fs'),
 
 const downloadMaxRedirects = 5;
 const downloadTimeout = 30 * 1000;
+const downloadMaxBytes = 10 * 1024 * 1024;
 
 const config = require('../config');
 const appDataDirPath = path.join(__dirname, config.get("web:data"));
@@ -162,11 +163,13 @@ function deleteFile(pathToFile) {
         });
 }
 
-function getResponse(uri, redirectsLeft) {
+// Every failure must end in a rejection: anything thrown inside a response
+// callback is an uncaught exception that stops the whole service.
+function getResponse(location, baseUrl, signal, redirectsLeft) {
     return new Promise((resolve, reject) => {
         let url;
         try {
-            url = new URL(uri);
+            url = new URL(location, baseUrl);
         } catch (err) {
             reject(err);
             return;
@@ -179,7 +182,7 @@ function getResponse(uri, redirectsLeft) {
         }
 
         // IdP metadata is often published on hosts with self-signed certificates.
-        const req = client.get(url, { rejectUnauthorized: false, timeout: downloadTimeout }, (res) => {
+        const req = client.get(url, { rejectUnauthorized: false, signal }, (res) => {
             const { statusCode, headers } = res;
 
             if (statusCode >= 300 && statusCode < 400 && headers.location) {
@@ -188,7 +191,7 @@ function getResponse(uri, redirectsLeft) {
                     reject(new Error("Too many redirects"));
                     return;
                 }
-                resolve(getResponse(new URL(headers.location, url).toString(), redirectsLeft - 1));
+                resolve(getResponse(headers.location, url, signal, redirectsLeft - 1));
                 return;
             }
 
@@ -198,18 +201,46 @@ function getResponse(uri, redirectsLeft) {
                 return;
             }
 
+            const contentLength = Number(headers["content-length"]);
+            if (contentLength > downloadMaxBytes) {
+                res.destroy();
+                reject(new Error(`Download exceeds ${downloadMaxBytes} bytes`));
+                return;
+            }
+
             resolve(res);
         });
 
-        req.on("timeout", () => req.destroy(new Error("Download timed out")));
         req.on("error", reject);
     });
 }
 
-async function downloadFile(uri, filePath) {
-    const res = await getResponse(uri, downloadMaxRedirects);
-    await pipeline(res, fs.createWriteStream(filePath));
-    return filePath;
+async function* limitSize(source) {
+    let size = 0;
+    for await (const chunk of source) {
+        size += chunk.length;
+        if (size > downloadMaxBytes) {
+            throw new Error(`Download exceeds ${downloadMaxBytes} bytes`);
+        }
+        yield chunk;
+    }
+}
+
+// The deadline covers the whole download, redirects and body included:
+// a socket timeout alone never fires on a server that keeps sending a byte now and then.
+async function downloadFile(uri, filePath, options = {}) {
+    const timeout = options.timeout || downloadTimeout;
+    const signal = AbortSignal.timeout(timeout);
+    try {
+        const res = await getResponse(uri, undefined, signal, downloadMaxRedirects);
+        await pipeline(res, limitSize, fs.createWriteStream(filePath), { signal });
+        return filePath;
+    } catch (err) {
+        if (signal.aborted) {
+            throw new Error(`Download timed out after ${timeout} ms`, { cause: err });
+        }
+        throw err;
+    }
 }
 
 module.exports = { checkFileExist, createDir, copyFile, moveFile, deleteFile, getDataDirPath, downloadFile };

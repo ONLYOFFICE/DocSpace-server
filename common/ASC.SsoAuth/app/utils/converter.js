@@ -161,10 +161,13 @@ module.exports = function () {
         dataEncryptionAlgorithm:
           ssoConfig.SpCertificateAdvanced.EncryptAlgorithm,
 
-        // samlify refuses TripleDES-encrypted assertions unless allowed; the portal still offers TripleDES.
-        allowInsecureDecryptionAlgorithms:
-          ssoConfig.IdpCertificateAdvanced.DecryptAlgorithm ===
-          urn.algorithms.encryption.data.TRI_DEC,
+        // Keep accepting what samlify 2.10 accepted, so existing IdP setups go on working.
+        // The algorithm is taken from the incoming assertion, not from the portal setting,
+        // so TripleDES and RSA 1.5 are allowed for every portal; samlify logs a warning for each.
+        allowInsecureDecryptionAlgorithms: true,
+        // samlify 2.15 started to match Audience, Destination and Recipient against this SP;
+        // 2.10 did not, and IdP setups that never had to match them would stop logging in.
+        wantAudienceCheck: false,
 
         assertionConsumerService: [
           {

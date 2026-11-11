@@ -174,6 +174,7 @@ module.exports = function (app, config) {
           res.status(200).send(idpMetadata).end();
         })
         .catch((error) => {
+          logger.error(`onLoadMetadata ${getError(error)}`);
           fileManager.deleteFile(filePath);
           res.status(500).send("Metadata file not transferred");
         });

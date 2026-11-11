@@ -523,7 +523,6 @@ __metadata:
   dependencies:
     "@authenio/samlify-node-xmllint": "npm:^2.0.0"
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.1164.0"
-    body-parser: "npm:~1.20.9"
     co: "npm:^4.6.0"
     cookie-parser: "npm:~1.4.7"
     cors: "npm:^2.8.6"
@@ -597,7 +596,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"body-parser@npm:~1.20.5, body-parser@npm:~1.20.9":
+"body-parser@npm:~1.20.5":
   version: 1.20.9
   resolution: "body-parser@npm:1.20.9"
   dependencies:

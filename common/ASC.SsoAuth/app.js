@@ -39,7 +39,6 @@ const http = require("http"),
   express = require("express"),
   morgan = require("morgan"),
   cookieParser = require("cookie-parser"),
-  bodyParser = require("body-parser"),
   session = require("express-session"),
   winston = require("./app/log.js"),
   config = require("./config").get(),
@@ -67,8 +66,8 @@ app
   .use(favicon(path.join(__dirname, "public", "favicon.ico")))
   .use(morgan("combined", { stream: winston.stream }))
   .use(cookieParser())
-  .use(bodyParser.json())
-  .use(bodyParser.urlencoded({ extended: false }))
+  .use(express.json())
+  .use(express.urlencoded({ extended: false }))
   .use(
     session({
       resave: true,

@@ -5,12 +5,12 @@
   "homepage": "http://www.onlyoffice.com",
   "private": true,
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon app.js",
+    "test": "node --test"
   },
   "dependencies": {
     "@authenio/samlify-node-xmllint": "^2.0.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.1164.0",
-    "body-parser": "~1.20.9",
     "co": "^4.6.0",
     "cookie-parser": "~1.4.7",
     "cors": "^2.8.6",
