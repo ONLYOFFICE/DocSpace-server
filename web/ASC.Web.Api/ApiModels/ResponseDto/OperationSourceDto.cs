@@ -34,8 +34,8 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The part of a wallet movement's amount that fell on one sub-account of the portal: the money paid into the wallet, or
-/// the bonuses.
+/// The part of an amount - of one wallet movement, or of a service's usage total - that fell on one sub-account of the
+/// portal: the money paid into the wallet, or the bonuses.
 /// </summary>
 public class OperationSourceDto
 {
@@ -54,7 +54,8 @@ public class OperationSourceDto
     public bool IsBonus { get; init; }
 
     /// <summary>
-    /// The part of the movement's amount on that sub-account, in the `currency` of the movement.
+    /// The part of the amount on that sub-account, in the `currency` of the movement or of the usage total it belongs
+    /// to.
     /// </summary>
     /// <example>4.5</example>
     public decimal Amount { get; init; }

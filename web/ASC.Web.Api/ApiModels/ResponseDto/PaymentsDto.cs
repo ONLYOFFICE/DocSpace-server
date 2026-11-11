@@ -334,7 +334,8 @@ public class CustomerMonthlyUsageDto
 ///   "operationCount": 2,
 ///   "price": 0.14,
 ///   "subscription": true,
-///   "byok": false
+///   "byok": false,
+///   "sources": [{"subAccount": 53, "isBonus": true, "amount": 20.0}, {"subAccount": 0, "isBonus": false, "amount": 29.99}]
 /// }
 /// </example>
 public class CustomerServiceUsageDto
@@ -406,6 +407,14 @@ public class CustomerServiceUsageDto
     /// <example>false</example>
     public bool Byok { get; set; }
 
+    /// <summary>
+    /// Which sub-accounts of the portal `totalAmount` was taken from, and how much fell on each - the consumption may
+    /// be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a total the
+    /// billing service reported without the split.
+    /// </summary>
+    /// <example>[{"subAccount": 53, "isBonus": true, "amount": 20.0}, {"subAccount": 0, "isBonus": false, "amount": 29.99}]</example>
+    public List<OperationSourceDto> Sources { get; set; }
+
     public CustomerServiceUsageDto(CustomerServiceUsage usage, Dictionary<string, TenantQuota> walletQuotas, Dictionary<string, string> customUom)
     {
         var (serviceName, title, serviceUnit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(usage.Service, customUom);
@@ -425,6 +434,7 @@ public class CustomerServiceUsageDto
         Price = quota?.Price ?? 0;
         Subscription = !string.IsNullOrEmpty(quota?.ProductId);
         Byok = WalletServiceDescriptionManager.IsByokService(usage.Service);
+        Sources = usage.Sources?.Map();
     }
 }
 

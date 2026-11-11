@@ -292,7 +292,8 @@ public class PaymentHelper(
                 Currency = g.Key.Currency,
                 TotalQuantity = g.Sum(r => r.TotalQuantity),
                 TotalAmount = g.Sum(r => r.TotalAmount),
-                OperationCount = g.Sum(r => r.OperationCount)
+                OperationCount = g.Sum(r => r.OperationCount),
+                Sources = MergeSources(g)
             })
             .ToList();
 
@@ -305,6 +306,24 @@ public class PaymentHelper(
             TotalPage = (merged.Count + limit - 1) / limit,
             CurrentPage = offset / limit + 1
         };
+    }
+
+    // The split of the merged total by sub-account: the parts of every total added up per sub-account. A total
+    // reported without the split leaves the merged one without it too, since a partial split would not add up to it.
+    private static List<OperationSource> MergeSources(IEnumerable<CustomerServiceUsage> records)
+    {
+        var all = records.ToList();
+
+        if (all.Exists(r => r.Sources == null))
+        {
+            return null;
+        }
+
+        return all
+            .SelectMany(r => r.Sources)
+            .GroupBy(s => s.SubAccount)
+            .Select(g => new OperationSource { SubAccount = g.Key, Amount = g.Sum(s => s.Amount) })
+            .ToList();
     }
 
     /// <summary>

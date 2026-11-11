@@ -1147,6 +1147,11 @@ public class CustomerServiceUsage : CurrencyTotalAmount
     /// Number of individual purchase operations.
     /// </summary>
     public int OperationCount { get; init; }
+
+    /// <summary>
+    /// The total amount split by the sub-accounts of the customer it was taken from.
+    /// </summary>
+    public List<OperationSource> Sources { get; init; }
 }
 
 /// <summary>
@@ -1340,7 +1345,7 @@ public class Operation
 }
 
 /// <summary>
-/// The part of an operation amount that falls on one sub-account of the customer.
+/// The part of an amount - of an operation, or of a usage total - that falls on one sub-account of the customer.
 /// </summary>
 public class OperationSource
 {
@@ -1355,7 +1360,7 @@ public class OperationSource
     public int SubAccount { get; init; }
 
     /// <summary>
-    /// The part of the operation amount on the sub-account.
+    /// The part of the amount on the sub-account.
     /// </summary>
     public decimal Amount { get; init; }
 
@@ -1366,6 +1371,15 @@ public class OperationSource
     public bool IsBonus
     {
         get => SubAccount == BonusSubAccount;
+    }
+
+    /// <summary>
+    /// The part of an amount that fell on the bonuses, as a magnitude whatever sign the accounting service gives it;
+    /// 0 when <paramref name="sources"/> is null or has no bonus part.
+    /// </summary>
+    public static decimal BonusAmountOf(IEnumerable<OperationSource> sources)
+    {
+        return Math.Abs(sources?.Where(x => x.IsBonus).Sum(x => x.Amount) ?? 0);
     }
 }
 

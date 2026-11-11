@@ -167,6 +167,34 @@ public class AccountingClientOperationsTests
     }
 
     [Fact]
+    public async Task GetCustomerServiceUsage_ReadsTheSplitBySubAccount_AndNoSplitAsNull()
+    {
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, """
+            {"collection":[
+              {"service":"ai-tools","currency":"USD","totalQuantity":2204,"totalAmount":49.99,"operationCount":2,
+               "sources":[{"subAccount":53,"amount":20.0},{"subAccount":0,"amount":29.99}]},
+              {"service":"backup","currency":"USD","totalQuantity":1,"totalAmount":10,"operationCount":1}
+            ],"totalQuantity":2}
+            """));
+
+        var report = await client.GetCustomerServiceUsageAsync("portal-1", new UsageFilter());
+
+        var aiTools = report.Collection[0];
+        aiTools.Sources.Select(s => (s.SubAccount, s.Amount, s.IsBonus)).Should().Equal((53, 20.0m, true), (0, 29.99m, false));
+        OperationSource.BonusAmountOf(aiTools.Sources).Should().Be(20.0m);
+
+        report.Collection[1].Sources.Should().BeNull("a total reported without the split has none");
+        OperationSource.BonusAmountOf(report.Collection[1].Sources).Should().Be(0m);
+    }
+
+    [Fact]
+    public void BonusAmountOf_NegativeBonusPart_IsTakenAsAMagnitude()
+    {
+        OperationSource.BonusAmountOf([new OperationSource { SubAccount = 53, Amount = -4.5m }, new OperationSource { SubAccount = 0, Amount = -9.5m }])
+            .Should().Be(4.5m);
+    }
+
+    [Fact]
     public async Task GetCustomerOperationPages_ServerCapsPageSize_AdvancesByItemsReceived()
     {
         var offsets = new List<string>();
