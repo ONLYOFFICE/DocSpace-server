@@ -180,7 +180,8 @@ public abstract class Migrator(
     /// <returns><see langword="false"/> when <paramref name="cancellationToken"/> stopped the extraction.</returns>
     protected async Task<bool> ExtractZipAsync(ZipArchive archive, string root, Func<int, int, Task> onEntry, CancellationToken cancellationToken)
     {
-        // the central directory lists every entry up front, so an archive of too many is refused before anything is written
+        // the central directory lists every entry up front, so an archive of too many is refused before anything is
+        // written to disk; reading the directory itself still takes memory in proportion to the upload
         var count = archive.Entries.Count;
         CountExtractedEntries(count);
 
@@ -214,8 +215,9 @@ public abstract class Migrator(
     /// <summary>
     /// Unpacks a tar stream into <paramref name="root"/>, counting its entries and the bytes written against the limits.
     /// A path met twice in the archive keeps the later entry, as tar does. A hard link to a file unpacked earlier is
-    /// unpacked as a copy of it; symbolic links, other hard links, sparse files and devices are skipped with a line in
-    /// the log, as their target may lie outside the extraction folder. With <paramref name="replaceExisting"/> a file
+    /// unpacked as a copy of it; symbolic links, other hard links, devices and unknown types are skipped with a line in
+    /// the log, as their target may lie outside the extraction folder, and their data still counts against the byte
+    /// limit. A GNU sparse file fails the extraction: TarReader does not read it. With <paramref name="replaceExisting"/> a file
     /// that was there before the extraction is replaced rather than refused. <paramref name="onEntry"/> is called
     /// before each entry.
     /// A truncated tar - one that ends without its end-of-archive block, even when the cut falls on an entry boundary -
@@ -285,7 +287,7 @@ public abstract class Migrator(
                 // the archive's own metadata, not a file
                 case TarEntryType.GlobalExtendedAttributes:
                     break;
-                // symbolic links (their target may lie outside the folder), other hard links, sparse files, devices:
+                // symbolic links (their target may lie outside the folder), other hard links, devices, unknown types:
                 // logged, so that a file missing from the import can be traced
                 default:
                     Log(string.Format(MigrationResource.ArchiveEntrySkipped, entry.Name, entry.EntryType));
@@ -294,8 +296,14 @@ public abstract class Migrator(
 
             if (entry.DataStream is not null)
             {
-                // the data of an entry that was not unpacked (a sparse file) is read through too, see the end check above
-                await entry.DataStream.CopyToAsync(Stream.Null, cancellationToken);
+                // the data of an entry that was not unpacked (an unknown or a vendor type) is read through too, see the
+                // end check above; it is decompressed all the same, so it counts against the byte limit like written data
+                var buffer = new byte[81920];
+                int read;
+                while ((read = await entry.DataStream.ReadAsync(buffer, cancellationToken)) > 0)
+                {
+                    CountExtractedSize(read);
+                }
             }
 
             if (cancellationToken.IsCancellationRequested)
@@ -306,6 +314,16 @@ public abstract class Migrator(
     }
 
     private const int TarBlockSize = 512;
+
+    /// <summary>
+    /// Whether <paramref name="exception"/> is the operation being stopped through <paramref name="cancellationToken"/>,
+    /// as opposed to a broken archive or another failure. The token reaches every read and write of the extraction,
+    /// so a stop usually surfaces as such an exception rather than between two entries.
+    /// </summary>
+    protected static bool IsStopped(Exception exception, CancellationToken cancellationToken)
+    {
+        return exception is OperationCanceledException && cancellationToken.IsCancellationRequested;
+    }
 
     /// <summary>
     /// Writes an archive entry to a new file, counting the bytes actually written rather than the size the archive declares.

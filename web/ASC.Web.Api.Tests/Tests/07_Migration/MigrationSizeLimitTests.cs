@@ -113,6 +113,26 @@ public class MigrationSizeLimitTests(
     }
 
     /// <summary>
+    /// An entry of a type that is not unpacked is still decompressed to be read past, so its data counts against
+    /// the byte limit as well; otherwise a small archive could keep the parse inflating zeros for hours.
+    /// </summary>
+    [Fact]
+    public async Task Parse_NextcloudTarGzWithLargeSkippedEntry_FailsWithLargeBackup()
+    {
+        // Arrange
+        await UploadBackupAsync("backup.tar.gz", BuildUnknownTypeZeroTarGz("nextcloud/data/alice/files/zeros.bin"));
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var status = await WaitForParseAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().Contain(LargeBackupError);
+        status.ParseResult.FailedArchives.Should().Equal("backup.tar.gz");
+    }
+
+    /// <summary>
     /// A small .tar.gz of empty directories passes the byte limit however many it holds; the entry
     /// limit stops it, so it cannot exhaust inodes or keep the parse busy.
     /// </summary>
@@ -230,6 +250,38 @@ public class MigrationSizeLimitTests(
         using (var tar = new TarWriter(gzip))
         {
             WriteTarEntry(tar, entryName, new ZeroStream(MaxExtractedSize + 1024 * 1024));
+        }
+
+        return buffer.ToArray();
+    }
+
+    /// <summary>
+    /// A .tar.gz holding one entry of a type TarReader does not know ('Z'), with zeros one megabyte over the limit as
+    /// its data, then the end-of-archive block. TarWriter writes no such entry, so the ustar header is built by hand.
+    /// </summary>
+    private static byte[] BuildUnknownTypeZeroTarGz(string entryName)
+    {
+        var size = MaxExtractedSize + 1024 * 1024;
+        var header = new byte[512];
+        Encoding.ASCII.GetBytes(entryName).CopyTo(header, 0);
+        Encoding.ASCII.GetBytes("0000644\0").CopyTo(header, 100);
+        Encoding.ASCII.GetBytes("0000000\0").CopyTo(header, 108);
+        Encoding.ASCII.GetBytes("0000000\0").CopyTo(header, 116);
+        Encoding.ASCII.GetBytes(Convert.ToString(size, 8).PadLeft(11, '0') + "\0").CopyTo(header, 124);
+        Encoding.ASCII.GetBytes("00000000000\0").CopyTo(header, 136);
+        header[156] = (byte)'Z';
+        Encoding.ASCII.GetBytes("ustar\0" + "00").CopyTo(header, 257);
+        Array.Fill(header, (byte)' ', 148, 8);
+        var checksum = header.Sum(b => (int)b);
+        Encoding.ASCII.GetBytes(Convert.ToString(checksum, 8).PadLeft(6, '0') + "\0 ").CopyTo(header, 148);
+
+        using var buffer = new MemoryStream();
+        using (var gzip = new GZipStream(buffer, CompressionLevel.Optimal, leaveOpen: true))
+        {
+            gzip.Write(header);
+            new ZeroStream(size).CopyTo(gzip);
+            // the data is a whole number of blocks, so no padding; then the two zero blocks that end the archive
+            gzip.Write(new byte[1024]);
         }
 
         return buffer.ToArray();

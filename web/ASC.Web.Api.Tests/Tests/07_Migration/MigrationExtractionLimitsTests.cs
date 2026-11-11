@@ -55,11 +55,53 @@ public class MigrationExtractionLimitsTests
         var configuration = new ConfigurationBuilder().Build();
 
         // Act
-        var maxExtractedSize = ASC.Migration.Core.MigrationOperation.GetMaxExtractedSize(configuration, maxTotalSize);
+        var maxExtractedSize = ASC.Migration.Core.MigrationOperation.GetMaxExtractedSize(configuration, maxTotalSize, NullLogger.Instance);
 
         // Assert
         maxExtractedSize.Should().Be(ASC.Migration.Core.MigrationOperation.DefaultMaxExtractedSize);
         maxExtractedSize.Should().BeLessThan(long.MaxValue);
+    }
+
+    /// <summary>
+    /// A value an administrator mistyped, or a zero meant as "off", must not switch the ceiling off, and it must
+    /// not fail the parse either: an unreadable value gives the default, the rest the nearest bound.
+    /// </summary>
+    [Theory]
+    [InlineData("abc", ASC.Migration.Core.MigrationOperation.DefaultMaxExtractedSize)]
+    [InlineData("0", ASC.Migration.Core.MigrationOperation.MinMaxExtractedSize)]
+    [InlineData("-1", ASC.Migration.Core.MigrationOperation.MinMaxExtractedSize)]
+    [InlineData("9223372036854775807", ASC.Migration.Core.MigrationOperation.MaxMaxExtractedSize)]
+    public void GetMaxExtractedSize_BadValue_KeepsCeiling(string value, long expected)
+    {
+        // Arrange
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["migration:maxExtractedSize"] = value })
+            .Build();
+
+        // Act
+        var maxExtractedSize = ASC.Migration.Core.MigrationOperation.GetMaxExtractedSize(configuration, long.MaxValue, NullLogger.Instance);
+
+        // Assert
+        maxExtractedSize.Should().Be(expected);
+    }
+
+    [Theory]
+    [InlineData("abc", ASC.Migration.Core.MigrationOperation.DefaultMaxExtractedEntries)]
+    [InlineData("0", 1L)]
+    [InlineData("-1", 1L)]
+    [InlineData("9223372036854775807", ASC.Migration.Core.MigrationOperation.MaxMaxExtractedEntries)]
+    public void GetMaxExtractedEntries_BadValue_KeepsCeiling(string value, long expected)
+    {
+        // Arrange
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["migration:maxExtractedEntries"] = value })
+            .Build();
+
+        // Act
+        var maxExtractedEntries = ASC.Migration.Core.MigrationOperation.GetMaxExtractedEntries(configuration, NullLogger.Instance);
+
+        // Assert
+        maxExtractedEntries.Should().Be(expected);
     }
 
     [Fact]
@@ -69,7 +111,7 @@ public class MigrationExtractionLimitsTests
         var configuration = new ConfigurationBuilder().Build();
 
         // Act
-        var maxExtractedSize = ASC.Migration.Core.MigrationOperation.GetMaxExtractedSize(configuration, 1024);
+        var maxExtractedSize = ASC.Migration.Core.MigrationOperation.GetMaxExtractedSize(configuration, 1024, NullLogger.Instance);
 
         // Assert
         maxExtractedSize.Should().Be(1024);
@@ -80,14 +122,14 @@ public class MigrationExtractionLimitsTests
     {
         // Arrange
         var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["migration:maxExtractedSize"] = "2048" })
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["migration:maxExtractedSize"] = "134217728" })
             .Build();
 
         // Act
-        var maxExtractedSize = ASC.Migration.Core.MigrationOperation.GetMaxExtractedSize(configuration, long.MaxValue);
+        var maxExtractedSize = ASC.Migration.Core.MigrationOperation.GetMaxExtractedSize(configuration, long.MaxValue, NullLogger.Instance);
 
         // Assert
-        maxExtractedSize.Should().Be(2048);
+        maxExtractedSize.Should().Be(134217728);
     }
 
     /// <summary>
@@ -101,7 +143,7 @@ public class MigrationExtractionLimitsTests
         var configuration = new ConfigurationBuilder().Build();
 
         // Act
-        var maxExtractedEntries = ASC.Migration.Core.MigrationOperation.GetMaxExtractedEntries(configuration);
+        var maxExtractedEntries = ASC.Migration.Core.MigrationOperation.GetMaxExtractedEntries(configuration, NullLogger.Instance);
 
         // Assert
         maxExtractedEntries.Should().Be(ASC.Migration.Core.MigrationOperation.DefaultMaxExtractedEntries);

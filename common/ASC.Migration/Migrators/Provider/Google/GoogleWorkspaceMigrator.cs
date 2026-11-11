@@ -208,9 +208,15 @@ public class GoogleWorkspaceMigrator : Migrator
                 await ReportProgressAsync(100, ex.Message);
                 throw;
             }
-            catch (OperationCanceledException) when (!reportProgress && _cancellationToken.IsCancellationRequested)
+            catch (Exception ex) when (IsStopped(ex, _cancellationToken))
             {
-                // a stopped import ends here instead of going on with the takeouts unpacked so far
+                // a stop is not a broken takeout: the parse returns quietly, as it does between entries, and a stopped
+                // import ends here instead of going on with the takeouts unpacked so far
+                if (reportProgress)
+                {
+                    return null;
+                }
+
                 throw;
             }
             catch (Exception ex)

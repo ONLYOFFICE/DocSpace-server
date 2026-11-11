@@ -221,6 +221,101 @@ public class NextcloudParseTests(
         log.Should().NotContain("Couldn't unzip");
     }
 
+    /// <summary>
+    /// POST migration/init can be called again on the same upload. The second parse finds the tree the first
+    /// one unpacked and reads it, instead of failing on the first file already there.
+    /// </summary>
+    [Theory]
+    [InlineData("backup.zip")]
+    [InlineData("backup.tar.gz")]
+    public async Task Parse_SameUploadTwice_ReadsUnpackedTree(string fileName)
+    {
+        // Arrange
+        var archive = fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ? BuildZip() : BuildTarGz(withLink: false);
+        await UploadBackupAsync(fileName, archive);
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var first = await WaitForParseAsync();
+        first.Error.Should().BeNullOrEmpty();
+        first.ParseResult.Users.Should().ContainSingle().Which.Email.Should().Be(Email);
+
+        // the second parse then lists the user as existing, which tells its result from the first one's
+        var member = Initializer.FakerMember.Generate();
+        await _peopleClient.Authenticate(Owner);
+        await _profilesApi.AddMemberAsync(new MemberRequestDto
+        {
+            CultureName = "en-US",
+            Spam = false,
+            Email = Email,
+            Password = member.Password,
+            FirstName = member.FirstName,
+            LastName = member.LastName,
+            Type = EmployeeType.User
+        }, TestContext.Current.CancellationToken);
+
+        // Act
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var second = await WaitForSecondParseAsync();
+
+        // Assert
+        second.IsCompleted.Should().BeTrue();
+        second.Error.Should().BeNullOrEmpty();
+        second.ParseResult.FailedArchives.Should().BeEmpty();
+        second.ParseResult.ExistUsers.Should().ContainSingle().Which.Email.Should().Be(Email);
+    }
+
+    /// <summary>
+    /// The status keeps showing the finished first parse until the second one is queued, so the wait ends on a
+    /// completed parse that is either an error or lists the user as existing - only the second parse can be either.
+    /// </summary>
+    private async Task<MigrationStatusDto> WaitForSecondParseAsync()
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+
+        while (true)
+        {
+            var status = (await _migrationApi.GetMigrationStatusAsync(TestContext.Current.CancellationToken)).Response;
+
+            if (status is { IsCompleted: true } && (!string.IsNullOrEmpty(status.Error) || status.ParseResult?.ExistUsers?.Count > 0)
+                || DateTime.UtcNow >= deadline)
+            {
+                return status;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// POST migration/migrate takes the parse result from the request and needs no parse of the upload it imports:
+    /// an import of a freshly uploaded archive finds no unpacked tree next to it and unpacks the archive itself.
+    /// </summary>
+    [Theory]
+    [InlineData("backup.zip")]
+    [InlineData("backup.tar.gz")]
+    public async Task Migrate_UnparsedArchive_UnpacksAndImportsUser(string fileName)
+    {
+        // Arrange
+        var archive = fileName.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) ? BuildZip() : BuildTarGz(withLink: false);
+        await UploadBackupAsync(fileName, archive);
+        await _migrationApi.UploadAndInitializeMigrationAsync("Nextcloud", TestContext.Current.CancellationToken);
+        var parsed = await WaitForParseAsync();
+        parsed.Error.Should().BeNullOrEmpty();
+        var user = parsed.ParseResult.Users.Should().ContainSingle().Which;
+
+        // a new upload goes to a new folder, which holds the archive alone
+        await UploadBackupAsync(fileName, archive);
+
+        // Act
+        await StartMigrationAsync("Nextcloud", user, importPersonalFiles: true);
+        var status = await WaitForMigrationAsync();
+
+        // Assert
+        status.IsCompleted.Should().BeTrue();
+        status.Error.Should().BeNullOrEmpty();
+        status.ParseResult.SuccessedUsers.Should().Be(1);
+        status.ParseResult.FailedUsers.Should().Be(0);
+    }
+
     [Fact]
     public async Task Parse_UnsupportedArchive_ReportsAcceptedFormats()
     {

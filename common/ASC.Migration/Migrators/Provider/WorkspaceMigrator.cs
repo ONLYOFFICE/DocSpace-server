@@ -114,6 +114,17 @@ public class WorkspaceMigrator : Migrator
             }
 
         }
+        catch (Exception e) when (IsStopped(e, _cancellationToken))
+        {
+            // a stop is not a broken archive: the parse returns quietly, as it does between entries, and the
+            // import ends with the cancellation rather than an archive error
+            if (reportProgress)
+            {
+                return null;
+            }
+
+            throw;
+        }
         catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_backup));

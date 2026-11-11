@@ -90,21 +90,29 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         try
         {
-            // the parse that precedes a migration unpacks the archive next to it and leaves the tree behind, and the
-            // migration reads that tree: unpacking again would only collide with the files already there
-            if (MigrationInfo.Operation != OperationType.Migration)
+            // A successful parse unpacks the archive next to it and leaves the tree behind; a failed or stopped one
+            // clears the folder. A later parse or the migration reads that tree: unpacking again would only collide
+            // with the files already there. A migration started through the API without a parse finds only the
+            // archive in the folder and unpacks it itself, within the same limits.
+            if (Directory.GetDirectories(TmpFolder).Length == 0)
             {
                 try
                 {
                     var extracted = IsZip(_takeout)
-                        ? await ExtractZipAsync()
-                        : await ExtractTarGzAsync();
+                        ? await ExtractZipAsync(reportProgress)
+                        : await ExtractTarGzAsync(reportProgress);
                     if (!extracted)
                     {
-                        return null;
+                        if (reportProgress)
+                        {
+                            return null;
+                        }
+
+                        // the parse returns quietly when stopped; the import must not go on with an archive unpacked in part
+                        throw new OperationCanceledException(_cancellationToken);
                     }
                 }
-                catch (Exception ex) when (ex is not LargeBackupException)
+                catch (Exception ex) when (ex is not LargeBackupException && !IsStopped(ex, _cancellationToken))
                 {
                     // a truncated or broken archive fails the parse rather than leaving part of the backup out of it
                     Log(string.Format(MigrationResource.CanNotToUnzip, _takeout), ex);
@@ -202,6 +210,17 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             DbExtractGroup(dbFile);
         }
+        catch (Exception e) when (IsStopped(e, _cancellationToken))
+        {
+            // a stop is not a broken archive: the parse returns quietly, as it does between entries, and the
+            // import ends with the cancellation rather than an archive error
+            if (reportProgress)
+            {
+                return null;
+            }
+
+            throw;
+        }
         catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
@@ -230,18 +249,22 @@ public class NextcloudWorkspaceMigrator : Migrator
 
     // the archive lies in TmpFolder itself, next to what it unpacks to: a file that was there before the extraction
     // (the uploaded archive) is never replaced
-    private async Task<bool> ExtractZipAsync()
+    private async Task<bool> ExtractZipAsync(bool reportProgress)
     {
         await using var archive = await ZipFile.OpenReadAsync(_takeout, _cancellationToken);
-        return await ExtractZipAsync(archive, TmpFolder, (number, count) => ReportUnzippingAsync(5 + 45d * number / count), _cancellationToken);
+        return await ExtractZipAsync(archive, TmpFolder,
+            (number, count) => reportProgress ? ReportUnzippingAsync(5 + 45d * number / count) : Task.CompletedTask,
+            _cancellationToken);
     }
 
-    private async Task<bool> ExtractTarGzAsync()
+    private async Task<bool> ExtractTarGzAsync(bool reportProgress)
     {
         await using var fileStream = File.OpenRead(_takeout);
         await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
         // a gzip stream has no entry count up front, so progress follows the compressed bytes read
-        return await ExtractTarAsync(gzipStream, TmpFolder, false, () => ReportUnzippingAsync(5 + 45d * fileStream.Position / fileStream.Length), _cancellationToken);
+        return await ExtractTarAsync(gzipStream, TmpFolder, false,
+            () => reportProgress ? ReportUnzippingAsync(5 + 45d * fileStream.Position / fileStream.Length) : Task.CompletedTask,
+            _cancellationToken);
     }
 
     private void DbExtractGroup(string dbFile)
