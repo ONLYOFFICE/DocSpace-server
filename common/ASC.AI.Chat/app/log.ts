@@ -58,6 +58,8 @@ const fileName: string = logpath
   ? path.join(logpath, "web.ai-chat.%DATE%.log")
   : path.join(__dirname, "..", "..", "..", "..", "Logs", "web.ai-chat.%DATE%.log");
 const dirName = path.dirname(fileName);
+/** Where this service's logs go; a writable directory of the host. */
+export const logDir = dirName;
 
 const awsRoot: { cloudWatch?: AwsCloudWatchConfig } | undefined = config.get("aws");
 const aws: AwsCloudWatchConfig | undefined = awsRoot?.cloudWatch;

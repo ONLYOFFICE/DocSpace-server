@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>Ključ BYOK za model AI je bil nastavljen: {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Nastavitve agenta za dokumente so bile posodobljene</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profil AI je bil dodeljen dejanju: {0}</value>
   </data>
