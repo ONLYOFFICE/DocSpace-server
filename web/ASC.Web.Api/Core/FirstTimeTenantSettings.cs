@@ -95,7 +95,7 @@ public class FirstTimeTenantSettings(
                 throw new Exception(Resource.ErrorPasswordEmpty);
             }
 
-            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
+            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise && !await ApplyDocsTrialAsync())
             {
                 await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
 
@@ -163,9 +163,46 @@ public class FirstTimeTenantSettings(
 
     public async Task<bool> GetRequestLicense()
     {
-        return await tenantExtra.GetEnableTariffSettings() &&
-               tenantExtra.Enterprise &&
-               !File.Exists(licenseReader.LicensePath);
+        if (!await tenantExtra.GetEnableTariffSettings() ||
+            !tenantExtra.Enterprise ||
+            File.Exists(licenseReader.LicensePath))
+        {
+            return false;
+        }
+
+        // The editing service's own trial stands in for the license file until the trial ends. The question is asked
+        // without authentication, so a successful answer of the editing service is reused for a while.
+        var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: true);
+        return docsTrial.State != DocsTrialState.Active;
+    }
+
+    /// <summary>
+    /// Puts the editing service's own trial in force when no license file has been given, so the wizard can be
+    /// completed without one.
+    /// </summary>
+    /// <returns>
+    /// <c>true</c> when the trial was written; <c>false</c> when a license file is on disk, the editing service runs
+    /// no active trial or cannot be asked, or a license from a file is already in force — then the license file is
+    /// required as before.
+    /// </returns>
+    /// <remarks>
+    /// The license is not marked as accepted and no upload is recorded in the audit trail: no file was given, and a
+    /// file uploaded later is activated the usual way, replacing the trial.
+    /// </remarks>
+    private async Task<bool> ApplyDocsTrialAsync()
+    {
+        if (licenseReader.HasLicenseFile())
+        {
+            return false;
+        }
+
+        var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: false);
+        if (docsTrial.State != DocsTrialState.Active)
+        {
+            return false;
+        }
+
+        return await licenseReader.DocsTrialToDBAsync(docsTrial.Trial);
     }
 
     private void TrySetLanguage(Tenant tenant, string lng)

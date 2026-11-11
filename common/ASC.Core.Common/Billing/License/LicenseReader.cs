@@ -93,6 +93,14 @@ public class LicenseReader(
     /// <summary>The name of the license quota written from the trial the editing service runs without a license file.</summary>
     public const string DocsTrialQuotaName = "docstrial";
 
+    /// <summary>
+    /// Returns whether a license file is on disk, either the one in force or one uploaded and not yet accepted.
+    /// </summary>
+    public bool HasLicenseFile()
+    {
+        return !string.IsNullOrEmpty(LicensePath) && (File.Exists(LicensePath) || File.Exists(_licensePathTemp));
+    }
+
     public async Task SetCustomerIdAsync(string value)
     {
         await coreSettings.SaveSettingAsync(CustomerIdKey, value);

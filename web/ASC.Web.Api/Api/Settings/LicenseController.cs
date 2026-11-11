@@ -90,8 +90,8 @@ public class LicenseController(
     /// <remarks>
     /// Activates the license staged by `POST api/2.0/settings/license` on this self-hosted Enterprise installation:
     /// it records that the license was accepted, promotes the staged file to the active one and rewrites the
-    /// portal-wide quota and tariff from it. Upload a file first: with nothing staged and no license on disk there is
-    /// nothing to activate. The caller only has to be signed in, and the activation is recorded in the audit trail.
+    /// portal-wide quota and tariff from it, replacing the editing service's trial the portal may have been set up
+    /// on. Upload a file first: with nothing staged and no license on disk there is nothing to activate. The caller only has to be signed in, and the activation is recorded in the audit trail.
     /// Repeating the call is safe: the acceptance stamp is written only once and the same license is simply applied
     /// again. Read the outcome from the body rather than the status code - an empty string means the license is now
     /// active, and any other string is a message explaining why it is not: no license key was found, the key is not
@@ -199,12 +199,12 @@ public class LicenseController(
 
         await tenantManager.SaveTenantQuotaAsync(quota);
 
-        const int DEFAULT_TRIAL_PERIOD = 30;
+        const int defaultTrialPeriod = 30;
 
         var tariff = new Tariff
         {
             Quotas = [new Quota(quota.TenantId, 1)],
-            DueDate = DateTime.Today.AddDays(DEFAULT_TRIAL_PERIOD)
+            DueDate = DateTime.Today.AddDays(defaultTrialPeriod)
         };
 
         await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
@@ -218,13 +218,16 @@ public class LicenseController(
     /// Reports whether this installation still has to be given a license file before it can be used, which is the
     /// question the setup wizard asks before offering its license upload step. No authentication is needed, so it can
     /// be called on a portal nobody has signed in to yet, and the call is read-only. The answer is `true` only for a
-    /// self-hosted Enterprise build whose license file is not on disk yet; an open-source or SaaS portal, a portal
-    /// configured to let anyone in without an account, an installation whose configuration hides the pricing section,
-    /// and one that takes its setup from cloud-image metadata all answer `false`. A `false` answer therefore does not
-    /// mean the portal is licensed - it also covers every build that needs no license at all. Nothing here describes
-    /// a license already in place, neither its due date nor whether the editing service still accepts it, and the
-    /// answer turns to `false` only once a staged file has been activated by `POST api/2.0/settings/license/accept`,
-    /// not when it is uploaded. The operation stays reachable while the portal is unpaid.
+    /// self-hosted Enterprise build whose license file is not on disk yet and whose editing service does not run its
+    /// own trial; while that trial runs, the wizard is completed without a file and the portal follows the trial's end
+    /// date. The editing service's answer about its trial is reused for up to 15 minutes, and an editing service that
+    /// cannot be reached counts as no trial. An open-source or SaaS portal, a portal configured to let anyone in
+    /// without an account, an installation whose configuration hides the pricing section, and one that takes its
+    /// setup from cloud-image metadata all answer `false`. A `false` answer therefore does not mean the portal is
+    /// licensed - it also covers every build that needs no license at all. Nothing here describes a license already
+    /// in place, and the answer turns to `false` for a file only once a staged file has been activated by
+    /// `POST api/2.0/settings/license/accept`, not when it is uploaded. The operation stays reachable while the portal
+    /// is unpaid.
     /// </remarks>
     /// <summary>Check if a license is required</summary>
     /// <path>api/2.0/settings/license/required</path>

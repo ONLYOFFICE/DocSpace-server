@@ -809,7 +809,9 @@ public partial class SettingsController(
 
     /// <remarks>
     /// Finishes the initial portal setup wizard: sets the owner's password and locale, applies the supplied license
-    /// if one is required, and marks the wizard as completed so it is not shown again. This call is not for a normal
+    /// if one is required, and marks the wizard as completed so it is not shown again. On a self-hosted Enterprise
+    /// installation given no license file whose editing service runs its own trial, that trial is put in force
+    /// instead, ending on the trial's end date; a file activated later replaces it. This call is not for a normal
     /// logged-in session: it requires a confirmation link bearing the Wizard claim, of the kind issued when a new
     /// portal is created, and the link is consumed as part of authenticating the request; the caller must also hold
     /// the EditPortalSettings permission. An empty password or a malformed email address is rejected without
