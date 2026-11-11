@@ -10,7 +10,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
     -v admin_password="$FORMS_ADMIN_PASSWORD" \
     -v ro_timeout="$FORMS_RO_TIMEOUT" \
     -v ro_check="$FORMS_RO_CHECK" <<'EOSQL'
-CREATE ROLE :"admin_user" LOGIN CREATEROLE PASSWORD :'admin_password';
+-- CREATEDB: a portal given direct access gets a database of its own, so no other portal shows in its catalog.
+CREATE ROLE :"admin_user" LOGIN CREATEROLE CREATEDB PASSWORD :'admin_password';
 ALTER DATABASE :"db" OWNER TO :"admin_user";
 
 -- Step 3: the read-only roles connect to the forms database only.

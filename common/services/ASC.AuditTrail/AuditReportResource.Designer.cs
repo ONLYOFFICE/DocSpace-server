@@ -2383,6 +2383,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Read access to the built-in forms database issued.
+        /// </summary>
+        public static string BuiltinFormsDbAccessIssued {
+            get {
+                return ResourceManager.GetString("BuiltinFormsDbAccessIssued", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Private room encryption key {0} updated.
         /// </summary>
         public static string PrivacyRoomKeyUpdated {

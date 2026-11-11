@@ -545,7 +545,7 @@ public class FormFillingReportCreator(
 
     private Task<IDistributedLockHandle> AcquireTableLockAsync(string tableName)
     {
-        return distributedLockProvider.TryAcquireFairLockAsync($"forms_db_table_{tenantManager.GetCurrentTenantId()}_{tableName}");
+        return distributedLockProvider.TryAcquireFairLockAsync(FormsDbProvisioningService.GetTableLockKey(tenantManager.GetCurrentTenantId(), tableName));
     }
 
     // The first submission of a version decides at the latest: it can come before the background check or without a start.

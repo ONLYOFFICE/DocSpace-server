@@ -661,6 +661,9 @@ public enum MessageAction
     /// </summary>
     RoomFileKeysRevoked = 5165,
 
+    [Description("Built-in forms database read access issued")]
+    BuiltinFormsDbAccessIssued = 5166,
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 

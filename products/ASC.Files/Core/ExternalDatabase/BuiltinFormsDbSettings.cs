@@ -39,6 +39,9 @@ public class BuiltinFormsDbSettings : ISettings<BuiltinFormsDbSettings>
     public static Guid ID => new("4B7E2A1C-9F3D-4E8B-A012-5C6D7E8F9A0B");
 
     public string? SchemaName { get; set; }
+
+    /// <summary>The portal's own database once direct access was asked for; empty while it lives in the shared one.</summary>
+    public string? DatabaseName { get; set; }
     public string? RwUser { get; set; }
     public string? RwPassword { get; set; }
     public string? RoUser { get; set; }

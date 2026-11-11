@@ -1284,6 +1284,9 @@
   <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
     <value>Ключ шифрования приватной комнаты {0} удалён</value>
   </data>
+  <data name="BuiltinFormsDbAccessIssued" xml:space="preserve">
+    <value>Выдан доступ на чтение к встроенной базе форм</value>
+  </data>
   <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
     <value>Ключ шифрования приватной комнаты {0} обновлён</value>
   </data>

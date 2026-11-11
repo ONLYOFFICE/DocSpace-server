@@ -816,6 +816,9 @@
   <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
     <value>Private room encryption key {0} deleted</value>
   </data>
+  <data name="BuiltinFormsDbAccessIssued" xml:space="preserve">
+    <value>Read access to the built-in forms database issued</value>
+  </data>
   <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
     <value>Private room encryption key {0} updated</value>
   </data>

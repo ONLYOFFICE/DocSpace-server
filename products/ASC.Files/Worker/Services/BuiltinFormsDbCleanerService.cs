@@ -76,10 +76,14 @@ public class BuiltinFormsDbCleanerService(
 
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
-                if (!scope.ServiceProvider.GetRequiredService<FormsDbProvisioningService>().IsEnabled())
+                var provisioner = scope.ServiceProvider.GetRequiredService<FormsDbProvisioningService>();
+                if (!provisioner.IsEnabled())
                 {
                     return;
                 }
+
+                // Removes what a failed portal removal or an interrupted move into a portal's own database left behind.
+                await provisioner.ReconcileAsync(stoppingToken);
 
                 await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(stoppingToken);
                 tenantIds = await dbContext.ActiveTenantsWithSettingsAsync(BuiltinFormsDbSettings.ID).ToListAsync(stoppingToken);
