@@ -1117,6 +1117,9 @@ public enum MessageAction
     [Description("AI model BYOK key deleted")]
     AiByokKeyDeleted = 6125,
 
+    [Description("AI document agent settings updated")]
+    AiDocumentAgentSettingsUpdated = 6126,
+
     #endregion
 
     #region others

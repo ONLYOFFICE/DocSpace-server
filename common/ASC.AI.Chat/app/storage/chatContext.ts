@@ -226,6 +226,7 @@ export function parseChatContext(
     thread: parseThread(raw["thread"]),
     messages: parseMessages(raw["messages"]),
     webSearch: parseWebSearchConfig(raw["webSearch"]),
+    documentAgentEnabled: getBoolean(raw, "documentAgentEnabled"),
     stale: new Set(),
   };
 }

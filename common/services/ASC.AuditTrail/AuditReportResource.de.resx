@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>BYOK-Schlüssel für KI-Modell festgelegt: {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Einstellungen des Dokument-Agenten aktualisiert</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>KI-Profil der Aktion zugewiesen: {0}</value>
   </data>

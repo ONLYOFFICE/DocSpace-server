@@ -223,6 +223,15 @@ namespace ASC.AuditTrail {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Document agent settings updated.
+        /// </summary>
+        public static string AiDocumentAgentSettingsUpdated {
+            get {
+                return ResourceManager.GetString("AiDocumentAgentSettingsUpdated", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Default provider deleted.
         /// </summary>
         public static string AIDefaultProviderDeleted {

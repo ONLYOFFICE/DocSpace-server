@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>AI modeļa BYOK atslēga iestatīta: {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Dokumentu aģenta iestatījumi atjaunināti</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI profils piešķirts darbībai: {0}</value>
   </data>
