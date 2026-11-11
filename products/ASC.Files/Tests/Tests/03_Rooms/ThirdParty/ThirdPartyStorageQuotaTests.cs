@@ -74,7 +74,8 @@ public class ThirdPartyStorageQuotaTests(
 
         // Assert
         exception.ErrorCode.Should().Be(400);
-        exception.ErrorContent!.ToString().Should().Contain(OutOfSpaceText);
+        using var error = JsonDocument.Parse(exception.ErrorContent!.ToString()!);
+        error.RootElement.GetProperty("error").GetProperty("message").GetString().Should().Be(OutOfSpaceText);
     }
 
     [Fact]

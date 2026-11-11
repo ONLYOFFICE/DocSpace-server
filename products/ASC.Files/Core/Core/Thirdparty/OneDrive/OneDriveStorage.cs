@@ -253,9 +253,11 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
             size = (await GetItemAsync(itemId))?.Size;
             remaining = size is null ? null : (await OnedriveClient.Drive.Request().GetAsync())?.Quota?.Remaining;
         }
-        catch (Exception ex) when (ex is ServiceException or HttpRequestException or TaskCanceledException)
+        catch (Exception ex) when (ex is ServiceException or NewtonsoftJsonException)
         {
-            // no cancellation token is passed, so a TaskCanceledException here is the client's timeout
+            // The SDK's HttpProvider turns a timeout (code "timeout") and a failed send ("generalException") into
+            // a ServiceException itself; only a 200 whose body is not JSON (a proxy's page) comes out raw, as the
+            // JsonReaderException of its Newtonsoft deserializer.
             logger.WarningCopySpaceCheckSkipped(itemId, ex);
 
             return;

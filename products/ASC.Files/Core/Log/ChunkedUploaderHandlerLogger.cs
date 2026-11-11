@@ -37,6 +37,6 @@ internal static partial class ChunkedUploaderHandlerLogger
     [LoggerMessage(LogLevel.Error, "ChunkedUploaderHandlerService")]
     public static partial void ErrorChunkedUploaderHandlerService(this ILogger<ChunkedUploaderHandlerService> logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Information, "ChunkedUploaderHandlerService: the connected storage is out of space: {reason}")]
-    public static partial void InformationThirdPartyStorageFull(this ILogger<ChunkedUploaderHandlerService> logger, string reason);
+    [LoggerMessage(LogLevel.Information, "ChunkedUploaderHandlerService: upload {uploadId} refused, the connected storage is out of space: {reason}")]
+    public static partial void InformationThirdPartyStorageFull(this ILogger<ChunkedUploaderHandlerService> logger, string uploadId, string reason);
 }

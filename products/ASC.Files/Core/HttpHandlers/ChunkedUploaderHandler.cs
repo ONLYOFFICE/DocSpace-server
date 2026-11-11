@@ -75,6 +75,8 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
 
     private async Task Invoke<T>(HttpContext context)
     {
+        string uploadId = null;
+
         try
         {
             if (context.Request.Method == "OPTIONS")
@@ -85,6 +87,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
             }
 
             var request = new ChunkedRequestHelper<T>(context.Request);
+            uploadId = request.UploadId;
 
             if (!await TryAuthorizeAsync(request))
             {
@@ -274,8 +277,9 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
         {
             // Its own message is the one meant for the user; the provider's error it wraps is for the log
             // only, so it must not be unwrapped like the others below. The user has to free space in that
-            // storage, so it is not a server fault and is logged at Information, as GenerateException does.
-            logger.InformationThirdPartyStorageFull(error.InnerException?.Message ?? error.Message);
+            // storage, so it is not a server fault: it is logged at Information with the session and the
+            // provider's own text, which ties the entry to an upload without a stack trace.
+            logger.InformationThirdPartyStorageFull(uploadId, error.InnerException?.Message ?? error.Message);
             await WriteError(context, error.Message);
         }
         catch (Exception error)
