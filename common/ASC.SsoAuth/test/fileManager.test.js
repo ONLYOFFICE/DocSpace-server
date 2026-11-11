@@ -40,7 +40,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
-const { downloadFile } = require("../app/fileManager");
+const { downloadFile, createMetadataUploadForm } = require("../app/fileManager");
 
 const metadata = "<EntityDescriptor/>";
 const tooLarge = 10 * 1024 * 1024 + 1;
@@ -161,4 +161,71 @@ test("gives up on a server that keeps the body trickling past the deadline", asy
     const started = Date.now();
     await assert.rejects(downloadFile(`${baseUrl}/slow`, nextFile(), { timeout: 1000 }), /timed out/);
     assert.ok(Date.now() - started < 5000, "the deadline covers the whole download, not only idle time");
+});
+
+// Parses a multipart upload the way onUploadMetadata does and reports what was stored.
+// `parts` is a list of [field name, content, file name]; a part without a file name is a plain field.
+// formidable removes the files of a failed upload asynchronously, so the count of stored files is
+// read once it reaches `expectedStored` or after a deadline, whichever comes first.
+async function upload(parts, expectedStored) {
+    const uploadDir = fs.mkdtempSync(path.join(tempDir, "upload-"));
+    const uploadServer = http.createServer((req, res) => {
+        createMetadataUploadForm(uploadDir).parse(req, (err, fields, files) => {
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({
+                error: err ? err.message : null,
+                metadata: files && files.metadata ? files.metadata.length : 0,
+            }));
+        });
+    });
+    await new Promise((resolve) => uploadServer.listen(0, "127.0.0.1", resolve));
+    try {
+        const body = new FormData();
+        for (const [name, content, fileName] of parts) {
+            if (fileName) {
+                body.append(name, new Blob([content], { type: "application/xml" }), fileName);
+            } else {
+                body.append(name, content);
+            }
+        }
+        const res = await fetch(`http://127.0.0.1:${uploadServer.address().port}/`, { method: "POST", body });
+        const result = await res.json();
+
+        const deadline = Date.now() + 2000;
+        let stored = fs.readdirSync(uploadDir).length;
+        while (stored !== expectedStored && Date.now() < deadline) {
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            stored = fs.readdirSync(uploadDir).length;
+        }
+        return { ...result, stored };
+    } finally {
+        uploadServer.closeAllConnections();
+        await new Promise((resolve) => uploadServer.close(resolve));
+    }
+}
+
+test("stores an uploaded metadata file", async () => {
+    const result = await upload([["metadata", metadata, "metadata.xml"]], 1);
+    assert.deepEqual(result, { error: null, metadata: 1, stored: 1 });
+});
+
+test("does not store a file uploaded under another field name", async () => {
+    const result = await upload([["file", metadata, "metadata.xml"]], 0);
+    assert.deepEqual(result, { error: null, metadata: 0, stored: 0 });
+});
+
+test("stores only the first of two metadata files", async () => {
+    const result = await upload([["metadata", metadata, "first.xml"], ["metadata", metadata, "second.xml"]], 1);
+    assert.deepEqual(result, { error: null, metadata: 1, stored: 1 });
+});
+
+test("refuses an uploaded metadata file larger than the size limit and keeps nothing of it", async () => {
+    const result = await upload([["metadata", Buffer.alloc(tooLarge, "a"), "metadata.xml"]], 0);
+    assert.match(result.error, /FileSize .*exceeded/);
+    assert.equal(result.stored, 0);
+});
+
+test("refuses a large plain field", async () => {
+    const result = await upload([["metadata", "a".repeat(128 * 1024)]], 0);
+    assert.match(result.error, /maxFieldsSize .*exceeded/);
 });

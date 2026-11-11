@@ -50,6 +50,9 @@ module.exports = (app, config) => {
       try {
         const response = await fetch(url, options);
         if (response.status !== 200) {
+          // The body is not used, but an unread body keeps the pooled connection busy.
+          // A failed cancel must not turn a valid non-200 answer into a retry.
+          await response.body?.cancel().catch(() => {});
           return { response, text: null };
         }
         const headersObj = {};

@@ -50,6 +50,23 @@ const IdentityProvider = saml.IdentityProvider;
 
 const templDir = path.join(process.cwd(), "/app/templates/");
 
+// The certificate fields of IdP metadata the way samlify 2.10 extracted them; 2.15 drops
+// sharedCertificate and fills certificate differently, and the portal reads the 2.10 shape.
+const legacyCertificateFields = [
+  {
+    key: "sharedCertificate",
+    localPath: ["EntityDescriptor", "~SSODescriptor", "KeyDescriptor", "KeyInfo", "X509Data", "X509Certificate"],
+    attributes: [],
+  },
+  {
+    key: "certificate",
+    localPath: ["EntityDescriptor", "~SSODescriptor", "KeyDescriptor"],
+    index: ["use"],
+    attributePath: ["KeyInfo", "X509Data", "X509Certificate"],
+    attributes: [],
+  },
+];
+
 module.exports = function () {
   function removeCertHead(cert) {
     var newCert = cert;
@@ -75,7 +92,38 @@ module.exports = function () {
     }
   }
 
+  function toMetadataResponse(entityMeta) {
+    const { sharedCertificate, certificate } = saml.Extractor.extract(
+      entityMeta.xmlString,
+      legacyCertificateFields
+    );
+    const meta = { ...entityMeta.meta };
+    delete meta.sharedCertificate;
+
+    if (typeof sharedCertificate === "string") {
+      meta.certificate = { signing: sharedCertificate, encryption: sharedCertificate };
+    } else {
+      meta.sharedCertificate = sharedCertificate;
+      meta.certificate = certificate;
+    }
+
+    return { xmlString: entityMeta.xmlString, meta };
+  }
+
+  // Reads an IdP metadata file into the response the portal settings page expects.
+  // The XML parser of samlify 2.15 refuses a byte order mark or whitespace before the
+  // XML declaration, which 2.10 accepted and which files saved by Windows editors often have.
+  function readIdpMetadata(content) {
+    const xml = content.toString("utf8").replace(/^\uFEFF?\s*/, "");
+    const idp = IdentityProvider({ metadata: xml });
+    return toMetadataResponse(idp.entityMeta);
+  }
+
   return {
+    readIdpMetadata: readIdpMetadata,
+
+    toMetadataResponse: toMetadataResponse,
+
     toIdp: function (ssoConfig) {
       if (!ssoConfig && typeof ssoConfig !== "string") return undefined;
 
@@ -161,12 +209,16 @@ module.exports = function () {
         dataEncryptionAlgorithm:
           ssoConfig.SpCertificateAdvanced.EncryptAlgorithm,
 
-        // Keep accepting what samlify 2.10 accepted, so existing IdP setups go on working.
-        // The algorithm is taken from the incoming assertion, not from the portal setting,
-        // so TripleDES and RSA 1.5 are allowed for every portal; samlify logs a warning for each.
+        // Two of the checks samlify 2.15 added are switched off, as 2.10 did not have them,
+        // so that IdP setups that worked before go on working. Other new checks stay on and have
+        // no switch, for example: a bearer SubjectConfirmation with an expiry, InResponseTo,
+        // SessionNotOnOrAfter, the issuer and expiry of a LogoutRequest, the message type,
+        // the signed query string of the Redirect binding, and well-formed XML.
+        //
+        // The encryption algorithm is taken from the incoming assertion, not from the portal setting,
+        // so TripleDES and RSA 1.5 are allowed for every portal; samlify warns about each to stderr.
         allowInsecureDecryptionAlgorithms: true,
-        // samlify 2.15 started to match Audience, Destination and Recipient against this SP;
-        // 2.10 did not, and IdP setups that never had to match them would stop logging in.
+        // Audience, Destination and Recipient are not matched against this SP.
         wantAudienceCheck: false,
 
         assertionConsumerService: [

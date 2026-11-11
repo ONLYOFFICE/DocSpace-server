@@ -39,11 +39,11 @@ module.exports = function (app, config) {
   const logger = require("./log.js");
   const urlResolver = require("./utils/resolver")();
   const coder = require("./utils/coder");
+  const converter = require("./utils/converter")();
   const urn = saml.Constants;
   const fileManager = require('./fileManager');
   const forge = require('node-forge');
   const path = require('path');
-  const { IncomingForm } = require('formidable');
   const os = require('os');
   const UserModel = require("./model/user");
   const LogoutModel = require("./model/logout");
@@ -125,10 +125,7 @@ module.exports = function (app, config) {
 
       let idpMetadata;
       try {
-        const idp = saml.IdentityProvider({
-          metadata: fs.readFileSync(metadata.filepath)
-        });
-        idpMetadata = idp.entityMeta;
+        idpMetadata = converter.readIdpMetadata(fs.readFileSync(metadata.filepath));
       } catch (e) {
         logger.error(`onUploadMetadata ${getError(e)}`);
       }
@@ -146,7 +143,13 @@ module.exports = function (app, config) {
       res.status(200).send(idpMetadata).end();
     }
 
-    const form = new IncomingForm({ uploadDir, maxFiles: 1 });
+    // The form reads parts it does not store to the end, so a request body of any size would be read.
+    if (fileManager.isMetadataUploadTooLarge(req)) {
+      res.set("Connection", "close").status(413).send("Metadata file is too large").end();
+      return;
+    }
+
+    const form = fileManager.createMetadataUploadForm(uploadDir);
     form.parse(req, formParse);
   }
 
@@ -156,10 +159,12 @@ module.exports = function (app, config) {
 
       fileManager.downloadFile(req.body.url, filePath)
         .then((result) => {
-          const idp = saml.IdentityProvider({
-            metadata: fs.readFileSync(result)
-          });
-          const idpMetadata = idp.entityMeta;
+          let idpMetadata;
+          try {
+            idpMetadata = converter.readIdpMetadata(fs.readFileSync(result));
+          } catch (e) {
+            logger.error(`onLoadMetadata ${getError(e)}`);
+          }
 
           if (!idpMetadata ||
             !idpMetadata.meta ||

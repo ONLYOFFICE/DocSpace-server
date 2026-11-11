@@ -33,8 +33,9 @@
 
 "use strict";
 
-const { test } = require("node:test");
+const { test, describe } = require("node:test");
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 
 // The real logger needs the AWS section of the appsettings; the converter only logs template errors.
 const logPath = require.resolve("../app/log.js");
@@ -47,48 +48,204 @@ require.cache[logPath] = {
 };
 
 const saml = require("samlify");
+const forge = require("node-forge");
 const converter = require("../app/utils/converter")();
 
 const urn = saml.Constants;
+const portalUrl = "https://portal.example.com";
+const idpEntityId = "https://idp.example.com/metadata";
 
-function ssoConfig(decryptAlgorithm) {
+function credentials(commonName) {
+    const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
+        modulusLength: 2048,
+        publicKeyEncoding: { type: "spki", format: "pem" },
+        privateKeyEncoding: { type: "pkcs1", format: "pem" },
+    });
+    const cert = forge.pki.createCertificate();
+    cert.publicKey = forge.pki.publicKeyFromPem(publicKey);
+    cert.serialNumber = "01";
+    cert.validity.notBefore = new Date(Date.now() - 60 * 60 * 1000);
+    cert.validity.notAfter = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const attrs = [{ name: "commonName", value: commonName }];
+    cert.setSubject(attrs);
+    cert.setIssuer(attrs);
+    cert.sign(forge.pki.privateKeyFromPem(privateKey), forge.md.sha256.create());
+    return { key: privateKey, cert: forge.pki.certificateToPem(cert) };
+}
+
+const idpCredentials = credentials("idp.example.com");
+const spCredentials = credentials("portal.example.com");
+
+// The SSO settings of a portal as the portal hands them to the service.
+function ssoConfig({ encryptAssertions = false } = {}) {
     return {
         IdpSettings: {
-            EntityId: "https://idp.example.com/metadata",
+            EntityId: idpEntityId,
             NameIdFormat: urn.namespace.format.emailAddress,
-            SsoBinding: urn.namespace.binding.redirect,
+            SsoBinding: urn.namespace.binding.post,
             SsoUrl: "https://idp.example.com/sso",
             SloBinding: urn.namespace.binding.redirect,
             SloUrl: "https://idp.example.com/slo",
         },
-        IdpCertificates: [],
+        IdpCertificates: [{ Action: "verification", Crt: idpCredentials.cert }],
         IdpCertificateAdvanced: {
             VerifyAlgorithm: urn.algorithms.signature.RSA_SHA256,
-            DecryptAlgorithm: decryptAlgorithm,
+            // The portal setting says AES; the IdP below still encrypts with TripleDES and RSA 1.5.
+            DecryptAlgorithm: urn.algorithms.encryption.data.AES_256,
             VerifyAuthResponsesSign: true,
-            VerifyLogoutRequestsSign: true,
-            VerifyLogoutResponsesSign: true,
+            VerifyLogoutRequestsSign: false,
+            VerifyLogoutResponsesSign: false,
         },
-        SpCertificates: [],
+        SpCertificates: [{ Action: "signing and encrypt", Key: spCredentials.key, Crt: spCredentials.cert }],
         SpCertificateAdvanced: {
             SigningAlgorithm: urn.algorithms.signature.RSA_SHA256,
             EncryptAlgorithm: urn.algorithms.encryption.data.AES_256,
             SignAuthRequests: false,
             SignLogoutRequests: false,
             SignLogoutResponses: false,
-            EncryptAssertions: false,
+            EncryptAssertions: encryptAssertions,
         },
     };
 }
 
-// samlify 2.15 started to refuse what 2.10 accepted; the portal keeps the 2.10 behaviour
-// so that IdP setups that worked before the update go on working.
-for (const decryptAlgorithm of [urn.algorithms.encryption.data.AES_256, urn.algorithms.encryption.data.TRI_DEC]) {
-    test(`keeps the samlify 2.10 checks for ${decryptAlgorithm}`, () => {
-        const sp = converter.toSp(ssoConfig(decryptAlgorithm), "https://portal.example.com");
-
-        // The encryption algorithm is read from the incoming assertion, not from the portal setting.
-        assert.equal(sp.entitySetting.allowInsecureDecryptionAlgorithms, true);
-        assert.equal(sp.entitySetting.wantAudienceCheck, false);
+// Issues a signed login response the way an IdP would, for the SP described by `audience`.
+async function loginResponse({ audience, acs, encrypt = false }) {
+    const issuer = saml.IdentityProvider({
+        entityID: idpEntityId,
+        privateKey: idpCredentials.key,
+        signingCert: idpCredentials.cert,
+        isAssertionEncrypted: encrypt,
+        dataEncryptionAlgorithm: urn.algorithms.encryption.data.TRI_DEC,
+        keyEncryptionAlgorithm: urn.algorithms.encryption.key.RSA_1_5,
+        singleSignOnService: [{ Binding: urn.namespace.binding.post, Location: "https://idp.example.com/sso" }],
     });
+    const target = saml.ServiceProvider({
+        entityID: audience,
+        assertionConsumerService: [{ Binding: urn.namespace.binding.post, Location: acs }],
+        encryptCert: spCredentials.cert,
+        wantAssertionsSigned: true,
+    });
+    // The login request the portal sent; a response without InResponseTo fails the schema check.
+    const requestInfo = { extract: { request: { id: "_" + crypto.randomUUID() } } };
+    const { context } = await issuer.createLoginResponse(target, requestInfo, "post", { email: "user@example.com" });
+    return context;
 }
+
+async function parseOnPortal(samlResponse, config) {
+    const sp = converter.toSp(config, portalUrl);
+    const idp = converter.toIdp(config);
+    return sp.parseLoginResponse(idp, "post", { body: { SAMLResponse: samlResponse } });
+}
+
+// samlify 2.15 started to refuse what 2.10 accepted; the portal keeps the 2.10 behaviour
+// for the two checks that can be switched off, so that IdP setups that worked go on working.
+describe("login responses accepted as by samlify 2.10", () => {
+    test("a response addressed to this portal", async () => {
+        const sp = converter.toSp(ssoConfig(), portalUrl);
+        const context = await loginResponse({
+            audience: sp.entityMeta.getEntityID(),
+            acs: `${portalUrl}/sso/acs`,
+        });
+
+        const { extract } = await parseOnPortal(context, ssoConfig());
+
+        assert.equal(extract.nameID, "user@example.com");
+    });
+
+    test("a response whose Audience, Destination and Recipient name another service provider", async () => {
+        const context = await loginResponse({
+            audience: "https://other.example.com/sso/metadata",
+            acs: "https://other.example.com/sso/acs",
+        });
+
+        const { extract } = await parseOnPortal(context, ssoConfig());
+
+        assert.equal(extract.nameID, "user@example.com");
+    });
+
+    test("an assertion encrypted with TripleDES and RSA 1.5 while the portal setting says AES", async () => {
+        const sp = converter.toSp(ssoConfig(), portalUrl);
+        const context = await loginResponse({
+            audience: sp.entityMeta.getEntityID(),
+            acs: `${portalUrl}/sso/acs`,
+            encrypt: true,
+        });
+
+        const { extract } = await parseOnPortal(context, ssoConfig({ encryptAssertions: true }));
+
+        assert.equal(extract.nameID, "user@example.com");
+    });
+});
+
+const certA = "MIIC\n  AAAA\n  BBBB==";
+const certB = "MIIDCCCC";
+
+function keyDescriptor(use, cert) {
+    return `<md:KeyDescriptor${use ? ` use="${use}"` : ""}><ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">` +
+        `<ds:X509Data><ds:X509Certificate>${cert}</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor>`;
+}
+
+function idpMetadata(keyDescriptors) {
+    return `<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="${idpEntityId}">` +
+        `<md:IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">${keyDescriptors}` +
+        `<md:SingleSignOnService Binding="${urn.namespace.binding.redirect}" Location="https://idp.example.com/sso"/>` +
+        "</md:IDPSSODescriptor></md:EntityDescriptor>";
+}
+
+// The portal settings page reads the certificates of uploaded IdP metadata in the shape samlify 2.10 returned.
+// The expected values were produced by samlify 2.10.1 from the same metadata.
+describe("IdP metadata response in the samlify 2.10 shape", () => {
+    const cases = [
+        { name: "no key descriptor", keys: "", certificate: {}, sharedCertificate: null },
+        {
+            name: "one key descriptor without use",
+            keys: keyDescriptor(null, certA),
+            certificate: { signing: certA, encryption: certA },
+            sharedCertificate: undefined,
+        },
+        {
+            name: "one signing key descriptor",
+            keys: keyDescriptor("signing", certA),
+            certificate: { signing: certA, encryption: certA },
+            sharedCertificate: undefined,
+        },
+        {
+            name: "signing and encryption key descriptors",
+            keys: keyDescriptor("signing", certA) + keyDescriptor("encryption", certB),
+            certificate: { signing: certA, encryption: certB },
+            sharedCertificate: [certA, certB],
+        },
+        {
+            name: "a key descriptor without use and an encryption one",
+            keys: keyDescriptor(null, certA) + keyDescriptor("encryption", certB),
+            certificate: { encryption: certA },
+            sharedCertificate: [certA, certB],
+        },
+        {
+            name: "two key descriptors without use",
+            keys: keyDescriptor(null, certA) + keyDescriptor(null, certB),
+            certificate: {},
+            sharedCertificate: [certA, certB],
+        },
+        {
+            name: "two signing key descriptors",
+            keys: keyDescriptor("signing", certA) + keyDescriptor("signing", certB),
+            certificate: { signing: [certA, certB] },
+            sharedCertificate: [certA, certB],
+        },
+    ];
+
+    for (const { name, keys, certificate, sharedCertificate } of cases) {
+        test(name, () => {
+            const idp = saml.IdentityProvider({ metadata: Buffer.from(idpMetadata(keys)) });
+
+            const response = JSON.parse(JSON.stringify(converter.toMetadataResponse(idp.entityMeta)));
+
+            assert.deepEqual(response.meta.certificate, certificate);
+            assert.deepEqual(response.meta.sharedCertificate, sharedCertificate);
+            assert.equal(response.meta.entityID, idpEntityId);
+            assert.ok(response.meta.singleSignOnService);
+            assert.ok(response.xmlString);
+        });
+    }
+});
