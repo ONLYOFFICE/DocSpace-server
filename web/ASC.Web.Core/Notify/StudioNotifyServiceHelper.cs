@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -40,7 +40,8 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
     AuthContext authContext,
     TenantManager tenantManager,
     CommonLinkUtility commonLinkUtility,
-    IEventBus eventBus)
+    IEventBus eventBus,
+    NotifyDeduplicationService notifyDeduplicationService)
 {
     public async Task SendNoticeAsync(INotifyAction action)
     {
@@ -49,7 +50,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
 
         await SendNoticeToAsync(action, recipients, null, false, null);
     }
-    
+
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames)
     {
         await SendNoticeToAsync(action, recipients, senderNames, false, null);
@@ -59,13 +60,33 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
     {
         await SendNoticeToAsync(action, recipients, senderNames, false, baseUri);
     }
-    
+
+    // objectId names the entity the letter is about (a room, a user): repeats about the same entity are suppressed for a while
+    public async Task SendNoticeToAsync(INotifyAction action, string objectId, IRecipient[] recipients, string[] senderNames)
+    {
+        await SendNoticeToAsync(action, objectId, recipients, senderNames, false, null);
+    }
+
+    // whether to build the letter SendNoticeToAsync would send with these values: refused when it is a repeat,
+    // accepted when it is not, and then the letter is booked for a moment so that a burst of calls builds it once; the
+    // caller disposes the answer and completes it once the letter is sent, so a failure before that releases the
+    // booking; keyTags are the values of the action's DeduplicationTags, in their order
+    public async Task<NotifyAcceptance> TryAcceptAsync(INotifyAction action, string objectId, IRecipient recipient, string senderName, params string[] keyTags)
+    {
+        return await notifyDeduplicationService.TryAcceptAsync(tenantManager.GetCurrentTenantId(), action, senderName, recipient.ID, objectId, keyTags);
+    }
 
     public async Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri)
+    {
+        await SendNoticeToAsync(action, null, recipients, senderNames, checkSubsciption, baseUri);
+    }
+
+    private async Task SendNoticeToAsync(INotifyAction action, string objectId, IRecipient[] recipients, string[] senderNames, bool checkSubsciption, string baseUri)
     {
         var item = new NotifyItemIntegrationEvent(authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId())
         {
             Action = (NotifyAction)action,
+            ObjectId = objectId ?? "",
             CheckSubsciption = checkSubsciption,
             BaseUrl = baseUri ?? commonLinkUtility.GetFullAbsolutePath("")
         };
@@ -99,7 +120,7 @@ public class StudioNotifyServiceHelper(StudioNotifyHelper studioNotifyHelper,
 
         if (action.Tags != null)
         {
-            item.Tags = action.Tags.Select(Tag (r) => new Tag{ Key = r.Tag, Value = r.Value?.ToString() }).ToList();
+            item.Tags = action.Tags.Select(Tag (r) => new Tag { Key = r.Tag, Value = r.Value?.ToString() }).ToList();
         }
 
         await eventBus.PublishAsync(item);

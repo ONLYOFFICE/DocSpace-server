@@ -45,6 +45,7 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
     public DbSet<DbPromptFolder> PromptFolders { get; set; }
     public DbSet<DbPrompt> Prompts { get; set; }
     public DbSet<DbAttachment> Attachments { get; set; }
+    public DbSet<DbByokKey> ByokKeys { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,6 +60,7 @@ public partial class AiIntegrationContext(DbContextOptions<AiIntegrationContext>
             .AddDbPreferences()
             .AddDbPromptFolders()
             .AddDbPrompts()
-            .AddDbAttachments();
+            .AddDbAttachments()
+            .AddDbByokKeys();
     }
 }

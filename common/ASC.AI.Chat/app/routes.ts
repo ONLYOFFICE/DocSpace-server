@@ -56,9 +56,11 @@ import { contextController } from "./controllers/contextController.js";
 import { editorToolsController } from "./controllers/editorToolsController.js";
 import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
+import { byokKeysController } from "./controllers/byokKeysController.js";
 import { profilesController } from "./controllers/profilesController.js";
 import { promptsController } from "./controllers/promptsController.js";
 import { settingsController } from "./controllers/settingsController.js";
+import { documentAgentController } from "./controllers/documentAgentController.js";
 import { threadsController } from "./controllers/threadsController.js";
 import { toolsController } from "./controllers/toolsController.js";
 import { vectorizationController } from "./controllers/vectorizationController.js";
@@ -204,6 +206,9 @@ export default function registerRoutes(app: Application): void {
   // description for an Instructions room; the client saves it after review
   // (see skillsController).
   router.post("/skills/generate", skillsController.generate);
+  // Skill creation: saves a new Markdown skill, written from a template
+  // and named by its title, into an Instructions room.
+  router.post("/skills/create", skillsController.create);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);
@@ -212,8 +217,15 @@ export default function registerRoutes(app: Application): void {
   router.put("/config/user", settingsController.setUserSettings);
   router.get("/config/tool-mode", settingsController.getToolMode);
   router.put("/config/tool-mode", settingsController.setToolMode);
+  router.get("/document-agent/settings", documentAgentController.getSettings);
+  router.put("/document-agent/settings", documentAgentController.setSettings);
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
+
+  router.get("/byok", byokKeysController.list);
+  router.get("/byok/providers", byokKeysController.providers);
+  router.put("/byok/:id", byokKeysController.set);
+  router.delete("/byok/:id", byokKeysController.delete);
 
   // OpenAI-compatible passthrough for the document editor's AI plugin
   // (external-provider transport). Explicit sub-paths only — the allowlist

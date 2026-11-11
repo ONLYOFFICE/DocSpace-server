@@ -31,7 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { McpServerConfig, Profile, Thread, WebSearchConfig } from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, Thread, WebSearchConfig } from "@onlyoffice/ai-chat/core";
+import type { DocspaceProfile } from "./profilesStorage.js";
 import type { ToolPermissionMode } from "@onlyoffice/ai-chat/core";
 import type { ReasoningLevel } from "./reasoningDepth.js";
 import type { ThreadMessageLike } from "@assistant-ui/react";
@@ -96,7 +97,7 @@ export interface ChatContextSnapshot {
   toolPermissionMode: ToolPermissionMode | null;
   /** The portal's localized reason for `aiReady === false`; undefined when ready or absent. */
   aiNotReadyMessage: string | undefined;
-  profiles: Profile[];
+  profiles: DocspaceProfile[];
   global: ChatContextScope;
   /** `null` when `entityId` was given but the folder is inaccessible or unknown. */
   entity: ChatContextScope | null;
@@ -107,6 +108,11 @@ export interface ChatContextSnapshot {
   /** The requested thread's full history, or `null` when not requested. */
   messages: ThreadMessageLike[] | null;
   webSearch: WebSearchConfig | null;
+  /**
+   * Whether the portal offers the document agent to the chat; undefined
+   * when the aggregate predates the setting (the settings are read then).
+   */
+  documentAgentEnabled: boolean | undefined;
   stale: Set<ChatContextSlice>;
 }
 

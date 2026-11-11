@@ -220,7 +220,8 @@ function httpError(status: number, message: string): Error {
   return Object.assign(new Error(message), { status, expose: true });
 }
 
-async function assertInstructionsRoom(destId: string): Promise<void> {
+/** The folder is an Instructions room the caller may create files in, or the matching 4xx. */
+export async function assertInstructionsRoom(destId: string): Promise<void> {
   const info = await getFolderInfo(destId);
   if (!info) {
     throw httpError(404, "The folder does not exist");

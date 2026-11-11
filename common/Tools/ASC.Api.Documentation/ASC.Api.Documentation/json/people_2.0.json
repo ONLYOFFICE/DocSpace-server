@@ -3008,7 +3008,7 @@
           "People / Email"
         ],
         "summary": "Send instructions to change email",
-        "description": "Starts changing the email address of an account, and what it actually does depends on who calls it.\r\nA caller acting on their own account only gets a confirmation letter sent to the new address, and the address\r\nstays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userId}/email`.\r\nA DocSpace administrator acting on somebody else changes the address immediately instead: the account is\r\nmarked as not activated, every session of it is ended, and activation instructions are sent to the new\r\naddress - and passing the address the account already has is then rejected with 400.\r\nA caller who is not an administrator may only address their own account, nobody but the owner may change the\r\nowner's address, and only the owner may change the address of another DocSpace administrator.\r\nThe target has to be an account that is neither disabled nor a pending invitation, otherwise the operation\r\nanswers 404, and an address that already belongs to somebody answers 400.\r\nThe answer is a ready-to-display message naming the address the letter was sent to.",
+        "description": "Starts changing the email address of an account, and what it actually does depends on who calls it.\r\nA caller acting on their own account only gets a confirmation letter sent to the new address, and the address\r\nstays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userId}/email`.\r\nA DocSpace administrator acting on somebody else changes the address immediately instead: the account is\r\nmarked as not activated, every session of it is ended, and activation instructions are sent to the new\r\naddress - and passing the address the account already has is then rejected with 400. Changing it back to an\r\naddress that got activation instructions a moment ago sends no new letter, and the link of that letter works.\r\nA caller who is not an administrator may only address their own account, nobody but the owner may change the\r\nowner's address, and only the owner may change the address of another DocSpace administrator.\r\nThe target has to be an account that is neither disabled nor a pending invitation, otherwise the operation\r\nanswers 404, and an address that already belongs to somebody answers 400.\r\nThe answer is a ready-to-display message naming the address the letter was sent to.",
         "operationId": "sendEmailChangeInstructions",
         "requestBody": {
           "content": {
@@ -4900,7 +4900,7 @@
           "People / Profiles"
         ],
         "summary": "Invite users",
-        "description": "Invites people to the portal by email, creating a pending profile for each address and mailing it an\r\ninvitation link.\r\nThe caller has to be a room admin or a DocSpace admin - a member or a guest is rejected - the portal has to\r\nallow inviting members, and inviting a room admin additionally requires DocSpace admin rights while inviting\r\nanother DocSpace admin requires the portal owner; a `Guest` type is not accepted here at all.\r\nAn address that already belongs to a profile is not mailed again: the existing account is only related to the\r\ncaller, and its type is raised when the invitation asks for a higher one, while a disabled account rejects\r\nthe whole call with 400.\r\nThe whole call is rejected before anything is sent when the invitations would need more paid seats than the\r\ntariff has left, and a malformed or punycode address is rejected with 400, so the list is validated as a\r\nbatch but applied one address at a time - a failure partway through leaves the earlier invitations sent.\r\nThe answer is not the result of this call: it lists every profile of the portal that is still pending and\r\nthat the caller may see, so previously invited people appear in it as well.\r\nRepeated calls are throttled.\r\nUse `PUT api/2.0/people/invite` to send the invitation email again, and `POST api/2.0/people` to create a\r\nprofile without mailing anybody.\n\nRaises the `user.invited` webhook for every address that does not belong to a profile yet.",
+        "description": "Invites people to the portal by email, creating a pending profile for each address and mailing it an invitation\r\nlink. The caller has to be a room admin or a DocSpace admin and the portal has to allow inviting members; only a\r\nDocSpace admin invites a room admin, only the owner a DocSpace admin, and `Guest` is not accepted. An address\r\nthat already has a profile is not mailed: the account is only related to the caller and raised to a higher type\r\nwhen asked, while a disabled account rejects the call with 400. Nothing is sent when the invitations need more\r\npaid seats than the tariff has left, or for a malformed or punycode address (400); otherwise the addresses are\r\napplied one by one, so a failure partway leaves earlier invitations sent. The answer lists every pending profile\r\nthe caller may see, not only this call's. Inviting an address again shortly after its invitation went out -\r\nafter its pending profile was deleted - sends no second letter, and the link already sent still opens. Repeated\r\ncalls are throttled. Use `PUT api/2.0/people/invite` to resend the invitation, and `POST api/2.0/people` to\r\ncreate a profile without mailing anybody.\n\nRaises the `user.invited` webhook for every address that does not belong to a profile yet.",
         "operationId": "inviteUsers",
         "requestBody": {
           "content": {
@@ -4994,7 +4994,7 @@
           "People / Profiles"
         ],
         "summary": "Resend activation emails",
-        "description": "Sends the invitation or activation email again to the accounts that have not finished joining the portal.\r\nSet `resendAll` to true to reach every pending account of the portal, in which case `userIds` is ignored and\r\nthe caller has to be a room admin or a DocSpace admin; with the default false only the listed accounts are\r\nreached, and a member or a guest may then list nothing but their own ID.\r\nWhich email goes out depends on the state of each account: a pending invitation gets a fresh invitation link,\r\nwhile an account that exists but has not confirmed its address gets activation instructions instead.\r\nAccounts that are already active or that are disabled are skipped, and so are the pending accounts the caller\r\nhas no right to invite, without an error.\r\nThe answer lists only the targeted accounts the caller is allowed to see, so it can be shorter than the\r\nrequest and is not a delivery report.\r\nRepeated calls are throttled, and each call issues new links that make the previously sent ones useless.\r\nTo invite an address that has no profile yet, use `POST api/2.0/people/invite`.",
+        "description": "Sends the invitation or activation email again to the accounts that have not finished joining the portal.\r\nSet `resendAll` to true to reach every pending account of the portal, in which case `userIds` is ignored and\r\nthe caller has to be a room admin or a DocSpace admin; with the default false only the listed accounts are\r\nreached, and a member or a guest may then list nothing but their own ID.\r\nA pending invitation gets a fresh invitation link, while an account that has not confirmed its address gets\r\nactivation instructions instead.\r\nActive and disabled accounts are skipped without an error, and so are the pending accounts the caller has no\r\nright to invite.\r\nThe answer lists only the targeted accounts the caller is allowed to see, so it can be shorter than the\r\nrequest and is not a delivery report.\r\nAn account that got this letter a short while ago is not mailed again, and the link it already has stays\r\nvalid, so repeating the call is safe but delivers nothing new.\r\nTo invite an address that has no profile yet, use `POST api/2.0/people/invite`.",
         "operationId": "resendUserInvites",
         "requestBody": {
           "content": {
@@ -5011,39 +5011,13 @@
             "description": "The targeted accounts the caller is allowed to see",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
-                "schema": {
-                  "examples": [
-                    5
-                  ],
-                  "maximum": 5,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Requests remaining in the current 15-minute window.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "maximum": 5,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int64"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -5074,16 +5048,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "maximum": 900,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             },
             "content": {
@@ -10416,46 +10381,20 @@
           "People / User data"
         ],
         "summary": "Send the deletion instructions",
-        "description": "Emails the caller a confirmation link that lets them delete their own profile, and is the first step of the\r\nself-service profile removal.\r\nIt acts on the authenticated account only and takes no parameters, so it cannot be used to remove somebody\r\nelse - an administrator removes another user through `DELETE api/2.0/people/{userId}`.\r\nThe caller has to be a regular portal account: the portal owner and an account imported from LDAP are\r\nrejected, because neither can delete itself.\r\nThe call sends mail and does not change the profile; the deletion happens later, when the caller follows the\r\nemailed link and the client calls `DELETE api/2.0/people/@self` with the confirmation token from it.\r\nThe answer is a ready-to-display message naming the address the link was sent to, and the address is wrapped\r\nin bold HTML markup, so strip the markup before showing it outside a web page.\r\nRepeated calls are throttled, and each one sends a new link.",
+        "description": "Emails the caller a confirmation link that lets them delete their own profile, and is the first step of the\r\nself-service profile removal.\r\nIt acts on the authenticated account only and takes no parameters, so it cannot be used to remove somebody\r\nelse - an administrator removes another user through `DELETE api/2.0/people/{userId}`.\r\nThe caller has to be a regular portal account: the portal owner and an account imported from LDAP are\r\nrejected, because neither can delete itself.\r\nThe call sends mail and does not change the profile; the deletion happens later, when the caller follows the\r\nemailed link and the client calls `DELETE api/2.0/people/@self` with the confirmation token from it.\r\nThe answer is a ready-to-display message naming the address the link was sent to, and the address is wrapped\r\nin bold HTML markup, so strip the markup before showing it outside a web page.\r\nA repeat shortly after the letter went out sends no second letter, and the link already sent stays valid.",
         "operationId": "sendInstructionsToDelete",
         "responses": {
           "200": {
             "description": "The message stating which address the confirmation link was sent to",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
-                "schema": {
-                  "examples": [
-                    5
-                  ],
-                  "maximum": 5,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Requests remaining in the current 15-minute window.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "maximum": 5,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current 15-minute window resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int64"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -10483,16 +10422,7 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying (5 req / 15 min limit per user/IP).",
-                "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "maximum": 900,
-                  "minimum": 0,
-                  "type": "integer",
-                  "format": "int32"
-                }
+                "$ref": "#/components/headers/Retry-After"
               }
             },
             "content": {
@@ -11432,7 +11362,7 @@
           "People / User type"
         ],
         "summary": "Change a user type",
-        "description": "Changes the type of the existing portal users listed in `userIds` to the type given in the route, in one call.\r\nThe caller needs the permission to add and remove users of the requested type, cannot change their own type or\r\nthe type of the portal owner, and cannot use this operation at all while being a guest; changing somebody to\r\n`Guest` additionally requires the portal to allow inviting guests.\r\nEvery listed account has to be visible to the caller and must not be disabled.\r\nThe change is applied immediately: each converted user gets a notification email, and the accounts are\r\nprocessed one by one, so a rejection in the middle leaves the users before it\r\nalready converted - re-read them before retrying.\r\nThe answer streams the converted users with their detailed information, in the order they were processed.\r\nConverting somebody to a paid type takes a paid seat, so the operation answers 402 when the tariff or the\r\npaid-user quota does not allow one more.\r\nThis operation only moves the type and leaves the rooms and the shared files of the account where they are -\r\nto hand them over to another admin in the same step, use `POST api/2.0/people/type` instead.\n\nRaises the `user.updated` webhook for every converted user, one by one: a rejection in the middle leaves the webhooks of the users before it sent.",
+        "description": "Changes the type of the existing portal users listed in `userIds` to the type given in the route.\r\nThe caller needs the permission to add and remove users of the requested type, cannot change their own type or\r\nthe type of the portal owner, and must not be a guest; changing somebody to `Guest` also needs the portal to\r\nallow inviting guests.\r\nEvery listed account has to be visible to the caller and must not be disabled.\r\nThe change is applied immediately: each converted user gets a notification email, unless one about the same\r\ntype reached them a short while ago, and the accounts are processed one by one, so a rejection in the middle\r\nleaves the users before it already converted - re-read them before retrying.\r\nThe answer streams the converted users in detail, in the order they were processed.\r\nConverting somebody to a paid type takes a paid seat, so the operation answers 402 when the tariff or the\r\npaid-user quota does not allow one more.\r\nThis operation only moves the type and leaves the rooms and shared files of the account in place; to hand them\r\nover to another admin as well, use `POST api/2.0/people/type`.\n\nRaises the `user.updated` webhook for every converted user, one by one: a rejection in the middle leaves the webhooks of the users before it sent.",
         "operationId": "updateUserType",
         "parameters": [
           {

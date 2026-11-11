@@ -88,6 +88,8 @@ import type {
   RoomSkill,
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
+import type { ByokKey, ByokKeyInput, ByokProvider } from "../../app/storage/byokKeysStorage.js";
+import type { DocspaceProfile } from "../../app/storage/profilesStorage.js";
 
 /* ------------------------------ Common --------------------------------- */
 
@@ -510,6 +512,13 @@ export type Res_aiProfilesTestConnection = true | { message?: string };
 export type Res_aiProfilesGetById = Omit<Profile, "key" | "headers">;
 export type Res_aiProfilesList = Profile[];
 
+/* -------------------------------- BYOK --------------------------------- */
+
+export type Res_aiByokKeysList = ByokKey[];
+export type Res_aiByokProviders = ByokProvider[];
+export type Req_aiByokKeysSet = ByokKeyInput;
+export type Res_aiByokKeysSet = ByokKey;
+
 /* ------------------------------- Prompts ------------------------------- */
 
 export type Req_aiPromptsCreate = CreatePromptInput;
@@ -766,6 +775,19 @@ export type Res_aiSkillsGenerate = {
   name: string;
   /** The whole Markdown file, frontmatter included. Nothing is saved. */
   content: string;
+};
+
+export type Req_aiSkillsCreate = {
+  /** The integer id of the Instructions room the skill is created in. */
+  destId: string | number;
+  /** The file's title without the extension, at most 165 characters, with a letter or a digit. */
+  title: string;
+};
+export type Res_aiSkillsCreate = {
+  /** The ID of the new skill file. */
+  id: string;
+  /** The title the file was saved under, extension included. */
+  title: string;
 };
 
 export type Req_aiMetaFill = {

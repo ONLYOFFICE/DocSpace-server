@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -43,6 +43,7 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
+global using System.Threading.Channels;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
@@ -58,12 +59,13 @@ global using ASC.Core.Common.Tests;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
-global using ASC.Files.Core;
-global using ASC.Files.Core.Services.NotifyService;
 global using ASC.Data.Backup;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
+global using ASC.EventBus.Serializers;
+global using ASC.Files.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Services.NotifyService;
 global using ASC.MessagingSystem.Core;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
@@ -112,3 +114,8 @@ global using WireMock.Server;
 global using WireMock.Settings;
 global using WireMock.Types;
 global using WireMock.Util;
+
+global using ZiggyCreatures.Caching.Fusion;
+
+global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
+global using StudioNotifyServiceHelper = ASC.Web.Core.Notify.StudioNotifyServiceHelper;
