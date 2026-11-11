@@ -35,7 +35,8 @@ namespace ASC.Files.Worker.Services;
 
 /// <summary>
 /// Re-reads the license in force from the license path, so a file replaced on disk or a renewal takes effect without
-/// a restart.
+/// a restart. While no license file is on that path, keeps the installation's trial in step with the trial of the
+/// editing service.
 /// </summary>
 /// <remarks>
 /// Nothing is applied before the license has been accepted (the setup wizard or the accept call), and a staged file
@@ -64,18 +65,46 @@ public class RefreshLicenseService(
                 return;
             }
 
+            var documentServiceLicense = scope.ServiceProvider.GetRequiredService<DocumentServiceLicense>();
+
+            if (!File.Exists(licenseReader.LicensePath))
+            {
+                await RefreshDocsTrialAsync(licenseReader, documentServiceLicense);
+                return;
+            }
+
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             if (!await TariffSettings.GetLicenseAcceptAsync(settingsManager))
             {
                 return;
             }
 
-            var documentServiceLicense = scope.ServiceProvider.GetRequiredService<DocumentServiceLicense>();
             await licenseReader.RefreshActiveLicenseAsync(documentServiceLicense.ValidateLicense);
         }
         catch (Exception ex)
         {
             logger.ErrorWithException(ex);
+        }
+    }
+
+    /// <summary>
+    /// While no license file is in force and the installation runs its own trial, moves the trial's end to the end of
+    /// the trial the editing service runs, so the portal stops being usable when the editors do.
+    /// </summary>
+    /// <remarks>
+    /// An editing service that cannot be asked, or runs under a license file of its own, changes nothing.
+    /// </remarks>
+    private static async Task RefreshDocsTrialAsync(LicenseReader licenseReader, DocumentServiceLicense documentServiceLicense)
+    {
+        if (!await licenseReader.IsStartTrialInForceAsync())
+        {
+            return;
+        }
+
+        var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: false);
+        if (docsTrial.State is DocsTrialState.Active or DocsTrialState.Expired)
+        {
+            await licenseReader.DocsTrialToDBAsync(docsTrial.Trial);
         }
     }
 }
