@@ -92,6 +92,12 @@ public static class ResourceNames
     /// <summary>The mail server the letter tests deliver to. Endpoints: <c>smtp</c> and <c>http</c>.</summary>
     public const string MailPit = "mailpit";
 
+    /// <summary>
+    /// The Redis the services keep their distributed cache and locks in, for a suite that has to plant or read a
+    /// value no API call writes - also the name its connection string is published under.
+    /// </summary>
+    public const string Cache = "cache";
+
     /// <summary>The RabbitMQ the services publish their events on.</summary>
     public const string Messaging = "messaging";
 

@@ -70,6 +70,14 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
         return ValueTask.CompletedTask;
     }
 
+    /// <summary>
+    /// The renewal journal of Web.Studio in the stack's Redis, for a test of a renewal a stopped process left behind.
+    /// </summary>
+    public async Task<RenewalJournal> OpenRenewalJournalAsync(CancellationToken cancellationToken = default)
+    {
+        return await RenewalJournal.OpenAsync(await GetConnectionStringAsync(ResourceNames.Cache, cancellationToken));
+    }
+
     protected override async ValueTask WarmUpAsync(PortalClients clients)
     {
         await clients.WebApiHttpClient.Authenticate(clients.Owner);

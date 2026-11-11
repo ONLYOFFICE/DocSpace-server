@@ -59,6 +59,12 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
+global using Medallion.Threading.Redis;
+
+global using Microsoft.Extensions.Caching.StackExchangeRedis;
+
+global using StackExchange.Redis;
+
 global using WireMock;
 global using WireMock.Matchers;
 global using WireMock.RequestBuilders;
@@ -69,6 +75,9 @@ global using WireMock.Types;
 global using WireMock.Util;
 
 global using Xunit;
+
+global using ZiggyCreatures.Caching.Fusion;
+global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
 global using HttpMethodAttribute = Microsoft.AspNetCore.Mvc.Routing.HttpMethodAttribute;
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
