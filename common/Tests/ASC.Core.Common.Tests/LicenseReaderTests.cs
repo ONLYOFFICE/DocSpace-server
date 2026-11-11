@@ -109,6 +109,18 @@ public sealed class LicenseReaderTests : IDisposable
         File.Exists(_backupPath).Should().BeFalse();
     }
 
+    [Fact]
+    public async Task DocsTrialToDBAsync_LicenseFileOnDisk_WritesNothing()
+    {
+        // A license put in force from a file is never replaced by the editing service's trial. The reader has no
+        // database here, so reaching it would throw.
+        await File.WriteAllTextAsync(_licensePath, LicenseJson(ActiveCustomer), TestContext.Current.CancellationToken);
+
+        var written = await CreateReader().DocsTrialToDBAsync(new DocsTrialLicense(new DateTime(2099, 1, 1), false, false, false));
+
+        written.Should().BeFalse();
+    }
+
     private LicenseReader CreateReader()
     {
         var configuration = new ConfigurationBuilder()

@@ -103,4 +103,8 @@ global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 global using static ASC.Core.Common.Tests.PaymentStubs;
 
 global using DbQuota = ASC.Core.Common.EF.DbQuota;
+global using DocsTrialCheck = ASC.Files.Core.Helpers.DocsTrialCheck;
+global using DocsTrialState = ASC.Files.Core.Helpers.DocsTrialState;
+global using DocumentService = ASC.Files.Core.Helpers.DocumentService;
+global using DocumentServiceLicense = ASC.Files.Core.Helpers.DocumentServiceLicense;
 global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;
