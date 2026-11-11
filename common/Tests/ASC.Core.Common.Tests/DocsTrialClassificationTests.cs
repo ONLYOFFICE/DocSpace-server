@@ -72,7 +72,7 @@ public sealed class DocsTrialClassificationTests
         var check = Classify(FreshTrial);
 
         check.State.Should().Be(DocsTrialState.Active);
-        check.Trial.Should().Be(new DocsTrialLicense(new DateTime(2026, 12, 11, 0, 0, 0, DateTimeKind.Utc), Branding: false, Customization: true, AutomationApi: true));
+        check.Trial.Should().Be(new DocsTrialLicense(new DateTime(2026, 12, 11, 0, 0, 0, DateTimeKind.Utc)));
     }
 
     [Fact]

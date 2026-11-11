@@ -116,7 +116,7 @@ public sealed class LicenseReaderTests : IDisposable
         // database here, so reaching it would throw.
         await File.WriteAllTextAsync(_licensePath, LicenseJson(ActiveCustomer), TestContext.Current.CancellationToken);
 
-        var written = await CreateReader().DocsTrialToDBAsync(new DocsTrialLicense(new DateTime(2099, 1, 1), false, false, false));
+        var written = await CreateReader().DocsTrialToDBAsync(new DocsTrialLicense(new DateTime(2099, 1, 1)));
 
         written.Should().BeFalse();
     }

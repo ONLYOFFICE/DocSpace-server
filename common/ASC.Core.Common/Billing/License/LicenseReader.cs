@@ -64,10 +64,7 @@ public record LicenseValidationResult(bool IsValid, string ErrorMessage);
 /// command.
 /// </summary>
 /// <param name="DueDate">The UTC day the trial ends; only the date part is kept.</param>
-/// <param name="Branding">Whether the trial allows branding.</param>
-/// <param name="Customization">Whether the trial allows customization.</param>
-/// <param name="AutomationApi">Whether the trial allows the Automation API.</param>
-public record DocsTrialLicense(DateTime DueDate, bool Branding, bool Customization, bool AutomationApi);
+public record DocsTrialLicense(DateTime DueDate);
 
 [Scope]
 public class LicenseReader(
@@ -90,8 +87,19 @@ public class LicenseReader(
     /// <summary>The name of the license quota written from a license file.</summary>
     public const string LicenseQuotaName = "license";
 
-    /// <summary>The name of the license quota written from the trial the editing service runs without a license file.</summary>
-    public const string DocsTrialQuotaName = "docstrial";
+    /// <summary>
+    /// The name of the license quota of the trial an Enterprise installation runs while no license file is in force.
+    /// </summary>
+    public const string StartTrialQuotaName = "start_trial";
+
+    /// <summary>
+    /// Creates the license quota of the trial an Enterprise installation runs while no license file is in force: the
+    /// default quota, marked as a trial.
+    /// </summary>
+    public static TenantQuota CreateStartTrialQuota(TenantQuota defaultQuota)
+    {
+        return new TenantQuota(defaultQuota) { Name = StartTrialQuotaName, Trial = true, TenantId = LicenseQuotaId };
+    }
 
     /// <summary>
     /// Returns whether a license file is on disk, either the one in force or one uploaded and not yet accepted.
@@ -290,24 +298,49 @@ public class LicenseReader(
 
         await SetCustomerIdAsync(license.CustomerId);
 
-        await SaveLicenseQuotaAsync(
-            LicenseQuotaName,
-            license.DueDate,
-            trial: license.Trial,
-            lifetime: !license.Trial && !license.TimeLimited,
-            license.Branding,
-            license.Customization,
-            license.AutomationApi);
+        var defaultQuota = await tenantManager.GetTenantQuotaAsync(Tenant.DefaultTenant);
+
+        var quota = new TenantQuota(LicenseQuotaId)
+        {
+            Name = LicenseQuotaName,
+            Trial = license.Trial,
+            Audit = true,
+            Ldap = true,
+            Sso = true,
+            ThirdParty = true,
+            Restore = true,
+            Oauth = true,
+            ContentSearch = true,
+            MaxFileSize = defaultQuota.MaxFileSize,
+            DocsEdition = true,
+            Branding = license.Branding,
+            Customization = license.Customization,
+            Lifetime = !license.Trial && !license.TimeLimited,
+            AutomationApi = license.AutomationApi,
+            Statistic = true
+        };
+
+        await tenantManager.SaveTenantQuotaAsync(quota);
+
+        var tariff = new Tariff
+        {
+            Quotas = [new Quota(quota.TenantId, 1)],
+            DueDate = license.DueDate
+        };
+
+        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
     }
 
     /// <summary>
-    /// Writes the license quota and the tariff from the trial the editing service runs while neither it nor this
-    /// installation has a license file, so the portal can be set up and used until the trial ends.
+    /// Puts the installation's trial in force with the end date of the trial the editing service runs while neither
+    /// it nor this installation has a license file, so the portal can be set up and used until that trial ends.
     /// </summary>
     /// <remarks>
-    /// Never replaces a license put in force from a file: nothing is written while the license file is on disk or
-    /// while the license quota was written by anything else than this method. A license file accepted later replaces
-    /// the trial through the usual upload and accept. Repeating the call with the same trial changes nothing.
+    /// The license quota stays the installation's own trial quota (<see cref="StartTrialQuotaName"/>), created first
+    /// when it is missing or another trial is in force; only the end date comes from the editing service. Never
+    /// replaces a license put in force from a file: nothing is written while the license file is on disk or while the
+    /// license quota was written from a file. A license file accepted later replaces the trial through the usual
+    /// upload and accept. Repeating the call with the same trial changes nothing.
     /// </remarks>
     /// <returns><c>true</c> when the trial was written, <c>false</c> when it was skipped.</returns>
     public async Task<bool> DocsTrialToDBAsync(DocsTrialLicense trial)
@@ -325,69 +358,43 @@ public class LicenseReader(
             return false;
         }
 
-        var licenseQuota = (await tenantManager.GetTenantQuotasAsync(all: true)).FirstOrDefault(q => q.TenantId == LicenseQuotaId);
-        if (licenseQuota != null && licenseQuota.Name != DocsTrialQuotaName)
+        // Only a quota written from a license file is kept. The other license quotas are trials DocSpace starts by
+        // itself: the 30-day one of an Enterprise installation without a license, or the one activated on request
+        var quota = await GetLicenseQuotaAsync();
+        if (quota?.Name == LicenseQuotaName)
         {
-            logger.InfoDocsTrialSkippedLicenseQuota(licenseQuota.Name);
+            logger.InfoDocsTrialSkippedLicenseQuota(quota.Name);
             return false;
         }
 
-        await SaveLicenseQuotaAsync(
-            DocsTrialQuotaName,
-            trial.DueDate.Date,
-            trial: true,
-            lifetime: false,
-            trial.Branding,
-            trial.Customization,
-            trial.AutomationApi);
+        if (quota?.Name != StartTrialQuotaName)
+        {
+            quota = await tenantManager.SaveTenantQuotaAsync(CreateStartTrialQuota(await tenantManager.GetTenantQuotaAsync(Tenant.DefaultTenant)));
+        }
+
+        var tariff = new Tariff
+        {
+            Quotas = [new Quota(quota.TenantId, 1)],
+            DueDate = trial.DueDate.Date
+        };
+
+        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
 
         logger.InfoDocsTrialSaved(trial.DueDate.Date);
         return true;
     }
 
     /// <summary>
-    /// Returns whether the license quota in force was written from the editing service's trial rather than from a
-    /// license file.
+    /// Returns whether the installation's own trial is in force rather than a license from a file.
     /// </summary>
-    public async Task<bool> IsDocsTrialInForceAsync()
+    public async Task<bool> IsStartTrialInForceAsync()
     {
-        var licenseQuota = (await tenantManager.GetTenantQuotasAsync(all: true)).FirstOrDefault(q => q.TenantId == LicenseQuotaId);
-        return licenseQuota?.Name == DocsTrialQuotaName;
+        return (await GetLicenseQuotaAsync())?.Name == StartTrialQuotaName;
     }
 
-    private async Task SaveLicenseQuotaAsync(string name, DateTime dueDate, bool trial, bool lifetime, bool branding, bool customization, bool automationApi)
+    private async Task<TenantQuota> GetLicenseQuotaAsync()
     {
-        var defaultQuota = await tenantManager.GetTenantQuotaAsync(Tenant.DefaultTenant);
-
-        var quota = new TenantQuota(LicenseQuotaId)
-        {
-            Name = name,
-            Trial = trial,
-            Audit = true,
-            Ldap = true,
-            Sso = true,
-            ThirdParty = true,
-            Restore = true,
-            Oauth = true,
-            ContentSearch = true,
-            MaxFileSize = defaultQuota.MaxFileSize,
-            DocsEdition = true,
-            Branding = branding,
-            Customization = customization,
-            Lifetime = lifetime,
-            AutomationApi = automationApi,
-            Statistic = true
-        };
-
-        await tenantManager.SaveTenantQuotaAsync(quota);
-
-        var tariff = new Tariff
-        {
-            Quotas = [new Quota(quota.TenantId, 1)],
-            DueDate = dueDate
-        };
-
-        await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
+        return (await tenantManager.GetTenantQuotasAsync(all: true)).FirstOrDefault(q => q.TenantId == LicenseQuotaId);
     }
 
     private void LogError(Exception error)

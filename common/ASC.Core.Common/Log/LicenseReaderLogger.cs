@@ -43,6 +43,6 @@ internal static partial class LicenseReaderLogger
     [LoggerMessage(LogLevel.Information, "The editing service trial is not written: a license file is on disk")]
     public static partial void InfoDocsTrialSkippedLicenseFile(this ILogger<LicenseReader> logger);
 
-    [LoggerMessage(LogLevel.Information, "The editing service trial is not written: the license quota in force is {quotaName}")]
+    [LoggerMessage(LogLevel.Information, "The editing service trial is not written: the license quota in force was written from a license file ({quotaName})")]
     public static partial void InfoDocsTrialSkippedLicenseQuota(this ILogger<LicenseReader> logger, string quotaName);
 }

@@ -210,22 +210,17 @@ public class DocumentServiceLicense(ICache cache,
             case CommandResponse.ServerInfo.ResultTypes.SuccessLimit:
             case CommandResponse.ServerInfo.ResultTypes.Connections:
             case CommandResponse.ServerInfo.ResultTypes.UsersCount:
-                return new DocsTrialCheck(DocsTrialState.Active, ToTrialLicense(license, dueDate));
+                return new DocsTrialCheck(DocsTrialState.Active, new DocsTrialLicense(dueDate));
 
             case CommandResponse.ServerInfo.ResultTypes.ExpiredTrial:
             case CommandResponse.ServerInfo.ResultTypes.Expired:
             case CommandResponse.ServerInfo.ResultTypes.ExpiredLimited:
                 var yesterday = utcNow.Date.AddDays(-1);
-                return new DocsTrialCheck(DocsTrialState.Expired, ToTrialLicense(license, dueDate < yesterday ? dueDate : yesterday));
+                return new DocsTrialCheck(DocsTrialState.Expired, new DocsTrialLicense(dueDate < yesterday ? dueDate : yesterday));
 
             default:
                 return DocsTrialCheck.Unknown;
         }
-    }
-
-    private static DocsTrialLicense ToTrialLicense(License license, DateTime dueDate)
-    {
-        return new DocsTrialLicense(dueDate, license.Branding, license.Customization, license.AutomationApi);
     }
 }
 

@@ -278,7 +278,7 @@ public class TariffService(
                 {
                     var defaultQuota = await quotaService.GetTenantQuotaAsync(Tenant.DefaultTenant);
 
-                    var quota = new TenantQuota(defaultQuota) { Name = "start_trial", Trial = true, TenantId = -1000 };
+                    var quota = LicenseReader.CreateStartTrialQuota(defaultQuota);
 
                     await quotaService.SaveTenantQuotaAsync(quota);
 
