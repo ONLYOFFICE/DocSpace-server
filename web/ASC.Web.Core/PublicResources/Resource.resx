@@ -150,6 +150,9 @@
   <data name="AccountingCustomerOperationService" xml:space="preserve">
     <value>Service</value>
   </data>
+  <data name="AccountingCustomerOperationServiceByok" xml:space="preserve">
+    <value>{0} (BYOK)</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>AI agents &amp; tools</value>
   </data>

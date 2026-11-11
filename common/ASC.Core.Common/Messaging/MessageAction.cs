@@ -1111,9 +1111,17 @@ public enum MessageAction
     [Description("AI project model changed")]
     AiProjectProfileAssigned = 6123,
 
-    // 6124 and 6125 are taken by the BYOK key actions.
+    [Description("AI model BYOK key set")]
+    AiByokKeySet = 6124,
+
+    [Description("AI model BYOK key deleted")]
+    AiByokKeyDeleted = 6125,
+
+    [Description("AI document agent settings updated")]
+    AiDocumentAgentSettingsUpdated = 6126,
+
     [Description("Promo code applied")]
-    CustomerPromoCodeApplied = 6126,
+    CustomerPromoCodeApplied = 6127,
 
     #endregion
 

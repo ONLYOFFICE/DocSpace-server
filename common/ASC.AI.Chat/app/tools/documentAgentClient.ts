@@ -69,6 +69,8 @@ export interface DocumentAgentSettings {
   mcpServers?: Record<string, { url: string; headers?: Record<string, string> }>;
   /** Where the agent delivers every result file; required by the agent. */
   outputs: { url: string; headers?: Record<string, string> };
+  /** Where the agent delivers the task's full log (`task-log.md`); none without it. */
+  log?: { url: string; headers?: Record<string, string> };
   limits?: { maxToolCalls?: number; taskTimeoutSeconds?: number; maxFileBytes?: number };
 }
 
@@ -95,9 +97,12 @@ export interface DocumentTaskOutput {
     | "unknown";
   /** The agent's final text: its summary, or the reason it did not finish. */
   text: string;
-  /** One per delivered file: its name, type and where the outputs endpoint said it is. */
-  artifacts: { name: string; mediaType: string; url: string }[];
+  /** One per delivered file: its name, type and where the outputs endpoint said it is; the task's log is marked. */
+  artifacts: { name: string; mediaType: string; url: string; kind?: "log" }[];
 }
+
+/** The agent marks its own artifact kinds under `metadata.docagent.kind`; `log` is the task's log. */
+const LOG_ARTIFACT_KIND = "log";
 
 export class DocumentAgentError extends Error {
   constructor(message: string, options?: { cause?: unknown }) {
@@ -234,10 +239,12 @@ function artifactFiles(artifact: Artifact): DocumentTaskOutput["artifacts"] {
       continue;
     }
     const name = part.filename || artifact.name || "output";
+    const kind = (artifact.metadata?.["docagent"] as { kind?: unknown } | undefined)?.kind;
     out.push({
       name,
       mediaType: part.mediaType || "application/octet-stream",
       url: part.content.value,
+      ...(kind === LOG_ARTIFACT_KIND ? { kind: LOG_ARTIFACT_KIND } : {}),
     });
   }
   return out;

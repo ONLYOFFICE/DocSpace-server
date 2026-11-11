@@ -51,6 +51,11 @@
       "x-displayName": "Attachments"
     },
     {
+      "name": "AI / BYOK",
+      "description": "The portal's own provider keys that override built-in models.",
+      "x-displayName": "BYOK"
+    },
+    {
       "name": "AI / Context",
       "description": "Instructions rooms connected to the chat as context with their skills, and the Knowledge rooms the chat may search.",
       "x-displayName": "Context"
@@ -97,7 +102,7 @@
     },
     {
       "name": "AI / Skills",
-      "description": "AI-written skills for Instructions rooms.",
+      "description": "New skills for Instructions rooms: written by AI or created from the template.",
       "x-displayName": "Skills"
     },
     {
@@ -128,6 +133,7 @@
         "AI / AI",
         "AI / Assignments",
         "AI / Attachments",
+        "AI / BYOK",
         "AI / Context",
         "AI / Editor tools",
         "AI / Export",
@@ -9185,6 +9191,113 @@
         }
       }
     },
+    "/api/2.0/ai/skills/create": {
+      "post": {
+        "tags": [
+          "AI / Skills"
+        ],
+        "operationId": "aiSkillsCreate",
+        "summary": "Create a skill from the template",
+        "description": "Creates a new skill in an Instructions room from the skill template and saves it as `<title>.md`; no model is involved. `destId` is the integer id of the Instructions room, checked before anything is written: the caller has to be able to create files in it, and any other folder answers 400. `title` is the file's title, at most 165 characters, without the extension (a trailing `.md` is dropped), and has to hold a letter or a digit: the skill's `name` is derived from it as in `POST api/2.0/ai/skills/generate`, and its `description` starts as the title itself. The body is a skeleton of the sections a skill is made of, for the user to fill in. The file is saved through `POST api/2.0/files/{folderId}/insert`, so the Files service validates the frontmatter and the room's limits, and a title already taken in the room gets a numbered one. The answer carries the ID and the title of the new file.",
+        "responses": {
+          "200": {
+            "description": "The ID and the title of the new skill file.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the new skill file."
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "The title the file was saved under, extension included."
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "title"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller cannot create files in the room.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The room does not exist.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiSkillsCreateRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/ai/config": {
       "get": {
         "tags": [
@@ -9637,6 +9750,162 @@
         }
       }
     },
+    "/api/2.0/ai/document-agent/settings": {
+      "get": {
+        "tags": [
+          "AI / Settings"
+        ],
+        "operationId": "aiSettingsGetDocumentAgent",
+        "summary": "Get the document agent settings",
+        "description": "Returns the portal's document agent settings, as the Document Agent tab of the portal settings shows them: `enabled` (whether the `document_agent` tool is offered to the chat), `profileId` (the model profile its tasks run on, null for the chat's own model), `reasoning` (`default` for the model's own default, else `off`, `low`, `medium`, `high`, `max`), `maxToolCalls` and `maxFileBytes` (the limits of one task, at most the agent's own ceilings of 150 and 32 MiB), `taskLog` (whether every task leaves its full log as a file) and `taskLogFolderId` (where the logs go, null for next to the task's results). The settings are kept by the DocSpace AI service and proxied from it; a portal that never saved any gets the defaults, and a profile or a log folder that no longer exists comes back as null. Any member of the portal may read them, a guest may not.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "AI / Settings"
+        ],
+        "operationId": "aiSettingsSetDocumentAgent",
+        "summary": "Set the document agent settings",
+        "description": "Replaces the portal's document agent settings and returns the stored result. The whole object is required, every field as `GET api/2.0/ai/document-agent/settings` returns it; a limit above the agent's ceiling, an unknown reasoning level or a missing field is rejected rather than coerced. The DocSpace AI service stores them and checks the rest: the profile has to exist, and the log folder has to be a portal folder (not a third-party one, not in the trash) the caller may create files in. Only a portal administrator may write.",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A field is missing, has the wrong type, or a limit is above the agent's ceiling.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller is not a portal administrator, or may not create files in the log folder.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The log folder does not exist or is in the trash.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "description": "The portal's document agent settings, every field required. Read the current one with `GET api/2.0/ai/document-agent/settings` and send it back changed.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "examples": [
+                  {
+                    "enabled": true,
+                    "profileId": null,
+                    "reasoning": "default",
+                    "maxToolCalls": 150,
+                    "maxFileBytes": 33554432,
+                    "taskLog": false,
+                    "taskLogFolderId": null
+                  }
+                ]
+              }
+            }
+          },
+          "x-codegen-request-body-name": "AiSettingsSetDocumentAgentRequest"
+        }
+      }
+    },
     "/api/2.0/ai/vectorization/tasks": {
       "post": {
         "tags": [
@@ -9737,6 +10006,255 @@
             }
           }
         }
+      }
+    },
+    "/api/2.0/ai/byok": {
+      "get": {
+        "tags": [
+          "AI / BYOK"
+        ],
+        "operationId": "aiByokKeysList",
+        "summary": "List BYOK keys",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiByokKey"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/byok/providers": {
+      "get": {
+        "tags": [
+          "AI / BYOK"
+        ],
+        "operationId": "aiByokProviders",
+        "summary": "List BYOK providers",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AiByokProvider"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/byok/{id}": {
+      "put": {
+        "tags": [
+          "AI / BYOK"
+        ],
+        "operationId": "aiByokKeysSet",
+        "summary": "Set a BYOK key",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiByokKey"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiByokKeyInput"
+              }
+            }
+          },
+          "x-codegen-request-body-name": "AiByokKeyInput"
+        }
+      },
+      "delete": {
+        "tags": [
+          "AI / BYOK"
+        ],
+        "operationId": "aiByokKeysDelete",
+        "summary": "Delete a BYOK key",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/2.0/ai/openai/{profileId}/v1/chat/completions": {
@@ -12770,6 +13288,98 @@
         "additionalProperties": false,
         "description": "AI model metadata. Describes a single model available from a provider."
       },
+      "AiByokKey": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Model revision id the key is set for, used in the path when replacing or deleting it."
+          },
+          "name": {
+            "type": "string",
+            "description": "Model display name; absent when the model is no longer in the gateway catalogue."
+          },
+          "provider": {
+            "type": "string",
+            "description": "BYOK provider id the key belongs to, e.g. `anthropic`."
+          },
+          "image": {
+            "type": "string",
+            "description": "SVG markup of the logo of the model's owner."
+          }
+        },
+        "required": [
+          "id",
+          "provider"
+        ],
+        "additionalProperties": false
+      },
+      "AiByokProvider": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "BYOK provider id, passed as `provider` when setting a BYOK key."
+          },
+          "name": {
+            "type": "string",
+            "description": "Provider display name."
+          },
+          "image": {
+            "type": "string",
+            "description": "SVG markup of the logo of the provider's models' owner."
+          },
+          "models": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiByokModel"
+            },
+            "description": "Models that can be called through this provider with the portal's own key."
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "models"
+        ],
+        "additionalProperties": false
+      },
+      "AiByokModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Model id, used in the path when setting its BYOK key."
+          },
+          "name": {
+            "type": "string",
+            "description": "Model display name."
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "AiByokKeyInput": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "BYOK provider id from the model's `byok_providers`, e.g. `anthropic`."
+          },
+          "key": {
+            "type": "string",
+            "description": "Provider API key."
+          }
+        },
+        "required": [
+          "provider",
+          "key"
+        ],
+        "additionalProperties": false
+      },
       "AiCreatePromptInput": {
         "type": "object",
         "properties": {
@@ -14772,6 +15382,27 @@
           "destId",
           "title",
           "description"
+        ],
+        "additionalProperties": false
+      },
+      "AiSkillsCreateRequest": {
+        "type": "object",
+        "properties": {
+          "destId": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The integer id of the Instructions room the skill is created in."
+          },
+          "title": {
+            "type": "string",
+            "description": "The file's title without the extension, at most 165 characters, with a letter or a digit."
+          }
+        },
+        "required": [
+          "destId",
+          "title"
         ],
         "additionalProperties": false
       },

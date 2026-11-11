@@ -52,12 +52,15 @@ public class ChatContextService(
     FileSecurity fileSecurity,
     AiGateway gateway,
     AiSettingsService aiSettingsService,
+    PortalModelsService portalModelsService,
+    TenantManager tenantManager,
     ProfileStorageService profileStorageService,
     AssignmentsStorageService assignmentsStorageService,
     PreferencesStorageService preferencesStorageService,
     ToolPrefsStorageService toolPrefsStorageService,
     McpServerStorageService mcpServerStorageService,
     WebSearchStorageService webSearchStorageService,
+    DocumentAgentSettingsService documentAgentSettingsService,
     ThreadStorageService threadStorageService,
     MessageStorageService messageStorageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
@@ -71,17 +74,19 @@ public class ChatContextService(
 
         var modelsTask = ReadModelsAsync();
         var configTask = ReadConfigAsync();
-        var profilesTask = ReadProfilesAsync(modelsTask);
         var threadTask = ReadThreadAsync(threadId, includeMessages);
         var webSearchTask = webSearchStorageService.ReadVerifiedAsync();
+        var documentAgentEnabledTask = documentAgentSettingsService.IsEnabledVerifiedAsync();
         var entityFolderTask = TryReadFolderAsync(entityId);
         var contextFolderTask = contextEntityId != entityId
             ? TryReadFolderAsync(contextEntityId)
             : Task.FromResult<Folder<int>?>(null);
 
+        var models = await modelsTask;
+        var profilesTask = ReadProfilesAsync(models);
+
         var entityFolder = await entityFolderTask;
         var contextFolder = await contextFolderTask;
-        var models = await modelsTask;
 
         var assignmentsTask = assignmentsStorageService.ReadByScopesVerifiedAsync(entityFolder?.Id, contextFolder?.Id, models);
         var preferencesTask = preferencesStorageService.ReadByScopesVerifiedAsync(entityFolder?.Id, contextFolder?.Id);
@@ -90,7 +95,7 @@ public class ChatContextService(
         var entityFolderDtoTask = BuildFolderAsync(entityFolder);
         var contextFolderDtoTask = BuildFolderAsync(contextFolder);
 
-        await Task.WhenAll(configTask, profilesTask, threadTask, webSearchTask, assignmentsTask, preferencesTask, toolPrefsTask, mcpServersTask, entityFolderDtoTask, contextFolderDtoTask);
+        await Task.WhenAll(configTask, profilesTask, threadTask, webSearchTask, documentAgentEnabledTask, assignmentsTask, preferencesTask, toolPrefsTask, mcpServersTask, entityFolderDtoTask, contextFolderDtoTask);
 
         var scopes = new ScopeSources(await assignmentsTask, await preferencesTask, await toolPrefsTask, await mcpServersTask);
         var webSearch = await webSearchTask;
@@ -105,7 +110,8 @@ public class ChatContextService(
             ContextEntity = contextFolder is null ? null : scopes.Build(contextEntityId, contextFolder.Id, await contextFolderDtoTask),
             Thread = thread,
             Messages = messages,
-            WebSearch = webSearch is null ? null : WebSearchConfigMapper.MapToDto(webSearch)
+            WebSearch = webSearch is null ? null : WebSearchConfigMapper.MapToDto(webSearch),
+            DocumentAgentEnabled = await documentAgentEnabledTask
         };
     }
 
@@ -116,9 +122,7 @@ public class ChatContextService(
             return null;
         }
 
-        var response = await _gateway.GetModelsAsync();
-
-        return [.. response.Data];
+        return await portalModelsService.ReadAsync(tenantManager.GetCurrentTenantId());
     }
 
     private async Task<AiSettingsDto> ReadConfigAsync()
@@ -126,9 +130,9 @@ public class ChatContextService(
         return (await aiSettingsService.GetAiSettingsAsync()).MapToDto();
     }
 
-    private async Task<List<ProfileDto>> ReadProfilesAsync(Task<List<Model>?> modelsTask)
+    private async Task<List<ProfileDto>> ReadProfilesAsync(List<Model>? models)
     {
-        return (await profileStorageService.ReadAllVerifiedAsync(await modelsTask)).Select(ProfileMapper.MapToDto).ToList();
+        return (await profileStorageService.ReadAllVerifiedAsync(models)).Select(ProfileMapper.MapToDto).ToList();
     }
 
     private async Task<(ThreadDto? Thread, List<MessageDto>? Messages)> ReadThreadAsync(Guid? threadId, bool includeMessages)

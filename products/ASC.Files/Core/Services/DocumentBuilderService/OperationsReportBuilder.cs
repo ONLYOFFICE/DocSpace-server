@@ -49,8 +49,11 @@ public class OperationsReportBuilder(
 {
     protected override async Task<DocumentBuilderInputData> BuildCoreAsync(RenderContext context, CustomerOperationsReportTaskData taskData)
     {
-        var tenantWalletService = taskData.ServiceName is { Count: 1 }
-            ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
+        // An AI service may be asked for together with its BYOK variant; the two are still one service here.
+        var serviceNames = taskData.ServiceName?.Select(WalletServiceDescriptionManager.GetBaseServiceName).Distinct().ToList();
+
+        var tenantWalletService = serviceNames is { Count: 1 }
+            ? await GetTenantWalletServiceAsync(serviceNames[0])
             : null;
 
         // Both AI services record the source of the operation and the provider's cost in its metadata.
@@ -192,7 +195,7 @@ public class OperationsReportBuilder(
                 var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
                 var (sourceId, sourceType, sourceTitle) = WalletServiceDescriptionManager.GetSourceInfo(operation.Metadata);
 
-                operation.Description = description;
+                operation.Description = WalletServiceDescriptionManager.MarkByok(description, operation.Service);
                 operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
                 operation.ServiceUnit = unitOfMeasurement;
                 operation.Quantity = quantity;

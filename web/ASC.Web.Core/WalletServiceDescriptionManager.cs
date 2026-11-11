@@ -37,6 +37,13 @@ public class WalletServiceDescriptionManager
 {
     private const string AgentSourceType = "Agent";
 
+    // The accounting service books the AI consumption paid with the customer's own provider keys under a service
+    // of its own: the AI service name with this suffix.
+    private const string ByokSuffix = "-byok";
+
+    // The AI services that have a BYOK variant.
+    private static readonly HashSet<string> _byokServices = ["ai-tools", "ai-search"];
+
     private static readonly Dictionary<string, string> _mapping = new()
     {
         { "chat", "total_tokens" },
@@ -63,6 +70,9 @@ public class WalletServiceDescriptionManager
         {
             serviceName = serviceName.Replace("-1-hour", "");
         }
+
+        // A BYOK operation is described as the operation of its AI service; the client marks it by the byok flag.
+        serviceName = GetBaseServiceName(serviceName);
 
         if (operation.Type == OperationType.AiCredit && operation.Credit > 0)
         {
@@ -133,12 +143,45 @@ public class WalletServiceDescriptionManager
             serviceName = serviceName.Replace("-1-hour", "");
         }
 
-        var unit = customUom?.GetValueOrDefault(serviceName, serviceName) ?? serviceName;
+        // A BYOK service keeps its own name, so it stays apart from its AI service, and borrows the title and the
+        // unit of that service.
+        var baseServiceName = GetBaseServiceName(serviceName);
 
-        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}", culture);
+        var unit = customUom?.GetValueOrDefault(baseServiceName, baseServiceName) ?? baseServiceName;
+
+        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{baseServiceName}", culture);
         var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}", culture);
 
         return (serviceName, title, serviceUnit);
+    }
+
+    /// <summary>
+    /// Marks the description or the title of a BYOK service as BYOK, for the reports, which have no other place
+    /// for the mark; any other service keeps its text as it is.
+    /// </summary>
+    public static string MarkByok(string text, string serviceName, CultureInfo culture = null)
+    {
+        return string.IsNullOrEmpty(text) || !IsByokService(serviceName)
+            ? text
+            : string.Format(Resource.ResourceManager.GetString(nameof(Resource.AccountingCustomerOperationServiceByok), culture), text);
+    }
+
+    /// <summary>
+    /// Whether the service is the BYOK variant of an AI service.
+    /// </summary>
+    public static bool IsByokService(string serviceName)
+    {
+        return serviceName != null &&
+               serviceName.EndsWith(ByokSuffix, StringComparison.Ordinal) &&
+               _byokServices.Contains(serviceName[..^ByokSuffix.Length]);
+    }
+
+    /// <summary>
+    /// The AI service a BYOK service belongs to; any other service name comes back unchanged.
+    /// </summary>
+    public static string GetBaseServiceName(string serviceName)
+    {
+        return IsByokService(serviceName) ? serviceName[..^ByokSuffix.Length] : serviceName;
     }
 
     public static string GetServiceDetails(Dictionary<string, string> metadata)
@@ -235,6 +278,19 @@ public class WalletServiceDescriptionManager
                decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var cost)
             ? cost
             : null;
+    }
+
+    public static bool IsByok(Dictionary<string, string> metadata)
+    {
+        return metadata != null &&
+               metadata.TryGetValue(BillingClient.MetadataByok, out var value) &&
+               bool.TryParse(value, out var byok) &&
+               byok;
+    }
+
+    public static string GetProvider(Dictionary<string, string> metadata)
+    {
+        return metadata?.GetValueOrDefault(BillingClient.MetadataProvider);
     }
 
     /// <summary>

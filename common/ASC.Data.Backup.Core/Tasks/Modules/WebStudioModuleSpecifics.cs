@@ -36,6 +36,7 @@ namespace ASC.Data.Backup.Tasks.Modules;
 public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helpers) : ModuleSpecificsBase(helpers)
 {
     private const string EncryptedKeyProperty = "EncryptedKey";
+    private const string TaskLogFolderIdProperty = "TaskLogFolderId";
 
     public override ModuleName ModuleName => ModuleName.WebStudio;
     public override IEnumerable<TableInfo> Tables => _tables;
@@ -116,7 +117,8 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
             return (true, preparedRow);
         }
 
-        if (!prepared || table.Name != "webstudio_settings" || !IsWebSearchSettings(row["ID"]))
+        if (!prepared || table.Name != "webstudio_settings" || !Guid.TryParse(Convert.ToString(row["ID"]), out var settingsId)
+            || (settingsId != WebSearchSettings.ID && settingsId != DocumentAgentSettings.ID))
         {
             return (prepared, preparedRow);
         }
@@ -124,10 +126,52 @@ public class WebStudioModuleSpecifics(ILogger<ModuleProvider> logger, Helpers he
         var dataColumn = preparedRow.Keys.FirstOrDefault(x => x.Equals("data", StringComparison.OrdinalIgnoreCase));
         if (dataColumn != null)
         {
-            preparedRow[dataColumn] = ConvertEncryptedKey(preparedRow[dataColumn] as string, Helpers.CreateHash);
+            preparedRow[dataColumn] = settingsId == WebSearchSettings.ID
+                ? ConvertEncryptedKey(preparedRow[dataColumn] as string, Helpers.CreateHash)
+                : MapTaskLogFolder(preparedRow[dataColumn] as string, columnMapper);
         }
 
         return (true, preparedRow);
+    }
+
+    private string MapTaskLogFolder(string data, ColumnMapper columnMapper)
+    {
+        if (string.IsNullOrEmpty(data))
+        {
+            return data;
+        }
+
+        try
+        {
+            if (JsonNode.Parse(data) is not JsonObject settings)
+            {
+                return data;
+            }
+
+            var property = settings.FirstOrDefault(x => x.Key.Equals(TaskLogFolderIdProperty, StringComparison.OrdinalIgnoreCase));
+            if (property.Value == null)
+            {
+                return data;
+            }
+
+            var folderId = columnMapper.GetMapping("files_folder", "id", property.Value.ToJsonString());
+            if (folderId == null)
+            {
+                settings.Remove(property.Key);
+            }
+            else
+            {
+                settings[property.Key] = Convert.ToInt32(folderId, CultureInfo.InvariantCulture);
+            }
+
+            return settings.ToJsonString();
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorCanNotPrepareSettings(DocumentAgentSettings.ID, ex);
+
+            return data;
+        }
     }
 
     private static void SetNull(Dictionary<string, object> preparedRow, string column)

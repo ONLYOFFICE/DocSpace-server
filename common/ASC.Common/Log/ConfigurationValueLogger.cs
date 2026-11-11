@@ -31,50 +31,16 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Core;
+namespace ASC.Common.Log;
 
-[Singleton]
-public class WalletStaticProvider
+internal static partial class ConfigurationValueLogger
 {
-    private readonly ConcurrentDictionary<string, string> _cache = new();
+    [LoggerMessage(LogLevel.Warning, "Configuration value {key} = \"{value}\" cannot be read, the default {effective} is used instead")]
+    public static partial void WarningConfigurationValueUnreadable(this ILogger logger, string key, string value, string effective);
 
-    private static readonly Assembly _assembly = typeof(WalletStaticProvider).Assembly;
-    private static readonly string _assemblyName = _assembly.GetName().Name;
+    [LoggerMessage(LogLevel.Warning, "Configuration value {key} = \"{value}\" is outside {min}..{max}, {effective} is used instead")]
+    public static partial void WarningConfigurationValueOutOfRange(this ILogger logger, string key, string value, string min, string max, string effective);
 
-    private const string DefaultKey = "default";
-
-    public async ValueTask<string> GetImageAsync(string key)
-    {
-        if (_cache.TryGetValue(key, out var img))
-        {
-            return img;
-        }
-
-        img = await ReadSvgResourceAsync(key);
-        if (img == null && key != DefaultKey)
-        {
-            img = await GetImageAsync(DefaultKey);
-        }
-
-        if (img != null)
-        {
-            _cache.TryAdd(key, img);
-        }
-
-        return img;
-    }
-
-    private static async Task<string> ReadSvgResourceAsync(string key)
-    {
-        await using var stream = _assembly.GetManifestResourceStream($"{_assemblyName}.img.{key}.svg");
-
-        if (stream == null)
-        {
-            return null;
-        }
-
-        using var reader = new StreamReader(stream);
-
-        return await reader.ReadToEndAsync();
-    }
+    [LoggerMessage(LogLevel.Warning, "Configuration value {key} = \"{value}\" is read as {effective} (days.hours:minutes:seconds); write it in that form if this is what is meant")]
+    public static partial void WarningConfigurationValueAmbiguous(this ILogger logger, string key, string value, string effective);
 }

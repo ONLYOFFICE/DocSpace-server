@@ -31,22 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Globalization;
-
-using ASC.Core;
-using ASC.Core.Billing;
-using ASC.Core.Common.EF.Context;
-using ASC.Core.Common.Hosting;
-using ASC.Core.Common.Quota;
-using ASC.Core.Common.Settings;
-using ASC.Core.Tenants;
-using ASC.Core.Users;
-using ASC.MessagingSystem.Core;
-using ASC.Web.Core.PublicResources;
-using ASC.Web.Studio.Core.Notify;
-
-using Microsoft.EntityFrameworkCore;
-
 namespace ASC.Web.Studio.Wallet;
 
 [Singleton]
@@ -125,19 +109,9 @@ public class TopUpWalletService(
             // Only the auto top-up branch below needs the customer, so it is checked for null there: the
             // low-balance branch must keep working even while billing is unavailable.
             var customerInfo = await tariffService.GetCustomerInfoAsync(data.TenantId);
-            if (!string.IsNullOrEmpty(customerInfo?.Email))
-            {
-                payer = await userManager.GetUserByEmailAsync(customerInfo.Email);
-            }
+            payer = await userManager.GetActivePayerAsync(customerInfo);
 
-            if (payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id)
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, payer.Id);
-            }
-            else
-            {
-                await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, owner.Id);
-            }
+            await securityContext.AuthenticateMeWithoutCookieAsync(data.TenantId, (payer ?? owner).Id);
 
             var balance = await tariffService.GetCustomerBalanceAsync(data.TenantId, true);
             if (balance == null)
@@ -214,7 +188,7 @@ public class TopUpWalletService(
         }
         catch (Exception ex)
         {
-            logger.ErrorWithException(ex);
+            logger.ErrorTopUpWalletServiceTenant(data.TenantId, ex);
         }
 
         // the shared preamble above now also runs for tenants without auto top-up enabled (their
@@ -276,7 +250,7 @@ public class TopUpWalletService(
         }
         catch (Exception ex)
         {
-            logger.ErrorWithException(ex);
+            logger.ErrorTopUpWalletServiceTenant(tenantId, ex);
         }
     }
 
@@ -323,7 +297,7 @@ public class TopUpWalletService(
         }
         catch (Exception ex)
         {
-            logger.ErrorWithException(ex);
+            logger.ErrorTopUpWalletServiceTenant(tenantId, ex);
         }
     }
 }

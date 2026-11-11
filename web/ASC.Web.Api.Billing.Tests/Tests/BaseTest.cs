@@ -57,6 +57,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected DocsCloudApi _docsCloudApi = null!;
     protected CommonSettingsApi _commonSettingsApi = null!;
     protected ProfilesApi _profilesApi = null!;
+    protected UserStatusApi _userStatusApi = null!;
 
     /// <summary>The payment services of the whole run, for what belongs to no single portal.</summary>
     protected PaymentServiceStub PaymentServices => fixture.Payments;
@@ -103,6 +104,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         _docsCloudApi = _clients.DocsCloudApi;
         _commonSettingsApi = _clients.CommonSettingsApi;
         _profilesApi = _clients.ProfilesApi;
+        _userStatusApi = _clients.UserStatusApi;
 
         await _webApiClient.Authenticate(Owner);
     }
