@@ -119,7 +119,7 @@ def is_cs(p: str) -> bool:
 
 
 def is_test(p: str) -> bool:
-    return bool(re.match(r"(products/[^/]+/(Tests|ASC\.\w+\.Tests)/|common/Tests/|web/ASC\.Web\.Api\.Tests/)", p))
+    return bool(re.match(r"(products/[^/]+/(Tests|ASC\.\w+\.Tests)/|common/Tests/|web/ASC\.Web\.Api(\.Billing)?\.Tests/)", p))
 
 
 LINE_CHECKS = [
@@ -146,8 +146,11 @@ LINE_CHECKS = [
      re.compile(r"\.Log\w*\(\s*\$\""), is_cs),
     ("logging.md", "[LoggerMessage] outside a dedicated *Logger class file",
      re.compile(r"\[LoggerMessage\b"), lambda p: is_cs(p) and not p.endswith("Logger.cs")),
-    ("correctness", "* configuration value read - bounds checked (0, negative, above a framework limit)?",
-     re.compile(r"\.GetValue<\s*(int|long|double|TimeSpan|int\[\])|configuration\[\s*\"|\.GetSection\(\s*\"[^\"]*\"\s*\)\s*\.Get<"),
+    ("configuration.md", "* configuration value read - through ConfigurationValueExtensions (a list or a bound section: configuration.md §1), both bounds, 0 / negative / huge?",
+     re.compile(r"\.GetValue<\s*(int|long|double|bool|TimeSpan|int\[\])|configuration\[\s*\"|\.GetSection\(\s*\"[^\"]*\"\s*\)\s*\.Get<"),
+     lambda p: is_cs(p) and not is_test(p)),
+    ("configuration.md", "`Parse` of a configuration value (throws on a typo; use ConfigurationValueExtensions)",
+     re.compile(r"\b(TimeSpan|int|long|double|bool)\.Parse\s*\(\s*_?(configuration|config)\b"),
      lambda p: is_cs(p) and not is_test(p)),
     ("http-clients.md", "`new HttpClient(` (IHttpClientFactory required)",
      re.compile(r"new\s+HttpClient\s*\("), is_cs),
@@ -465,6 +468,15 @@ def main() -> None:
         print(f"!! [git-commits.md] AI attribution in commit messages: {', '.join(attributed)}")
     if status and not a.worktree:
         print(f"!! working tree is dirty ({len(status)} files) - uncommitted changes are NOT scanned; pass --worktree to include them")
+    if a.worktree:
+        # `git diff` of the working tree sees tracked files only: a new file nobody added is reviewed by no one.
+        untracked = [l[3:] for l in git("status", "--porcelain", "--untracked-files=all").splitlines() if l.startswith("?? ")]
+        if untracked:
+            print(f"!! {len(untracked)} untracked file(s) are NOT scanned - offer the branch's own to the user for `git add` (SKILL.md §1):")
+            for p in untracked[:20]:
+                print(f"  {p}")
+            if len(untracked) > 20:
+                print(f"  ... and {len(untracked) - 20} more")
     print()
 
     # --- files ---------------------------------------------------------------------------------
@@ -658,6 +670,28 @@ def main() -> None:
         print(f"  new [Trait(\"Bug\")]: {', '.join(bugs)}")
     for p in test_files[:20]:
         print(f"    {p}")
+    print()
+
+    # --- new projects --------------------------------------------------------------------------
+    # A project the solutions do not list is built by no one, and a test project that CLAUDE.md does not
+    # name reads, by CLAUDE.md's own wording, as a legacy one that `dotnet test` skips.
+    new_projects = [p for st, p in files if st.startswith("A") and p.endswith(".csproj")
+                    and not p.startswith(("sdk/", "thirdparty/"))]
+    print("## New projects")
+    if not new_projects:
+        print("  none")
+    else:
+        solutions = {s: (read_head(s) or b"").decode("utf-8", "replace") for s in ("ASC.Web.slnx", "ASC.Tests.slnx")}
+        claude_md = (read_head("CLAUDE.md") or b"").decode("utf-8", "replace")
+        for p in new_projects:
+            listed = [s for s, text in solutions.items() if f'Path="{p}"' in text]
+            notes = []
+            if not listed:
+                notes.append("in neither ASC.Web.slnx nor ASC.Tests.slnx (fine only for a tool built by a solution of its own)")
+            if is_test(p) and not p.startswith("products/") and Path(p).stem not in claude_md:
+                notes.append("a test project CLAUDE.md does not name (its Testing section calls the unnamed ones legacy)")
+            mark = "!! " if notes else ""
+            print(f"  {mark}{p}: {', '.join(listed) or '-'}" + (f" - {'; '.join(notes)}" if notes else ""))
     print()
 
     # --- junk ----------------------------------------------------------------------------------
