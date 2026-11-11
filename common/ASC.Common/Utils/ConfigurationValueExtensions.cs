@@ -208,8 +208,17 @@ public static class ConfigurationValueExtensions
         }
     }
 
+    /// <summary>
+    /// A value as the configuration would hold it, so that the warning can be copied back: <see cref="bool"/> is not
+    /// <see cref="IFormattable"/> and would print <c>True</c>, not the documented <c>true</c>.
+    /// </summary>
     private static string Format<T>(T value)
     {
-        return value is IFormattable formattable ? formattable.ToString(null, CultureInfo.InvariantCulture) : value.ToString();
+        return value switch
+        {
+            bool flag => flag ? "true" : "false",
+            IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
+            _ => value.ToString()
+        };
     }
 }

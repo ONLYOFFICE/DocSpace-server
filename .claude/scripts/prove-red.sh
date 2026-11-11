@@ -18,8 +18,8 @@
 #                    gives the code without the behaviour under test. Use it when the test calls what
 #                    the change adds, so taking the whole change away leaves it unable to build (exit 3)
 #   (neither)        take away every uncommitted product change of the working tree
-#   --exclude PATH   a file or directory to leave in place although it is product code, e.g. a local
-#                    edit of an appsettings file that is not part of the change
+#   --exclude PATH   a file or directory inside the repo to leave in place although it is product code,
+#                    e.g. a local edit of an appsettings file that is not part of the change
 #   --build PROJECT  one more project to build in both states, for code the test project does not
 #                    reference
 #
@@ -73,7 +73,7 @@ while [ $# -gt 0 ]; do
         --patch) patch="${2:-}"; shift 2 || usage ;;
         --test) test_project="${2:-}"; shift 2 || usage ;;
         --build) extra_builds+=("${2:-}"); shift 2 || usage ;;
-        --exclude) excluded="${2:-}"; excludes+=("${excluded%/}"); shift 2 || usage ;;
+        --exclude) excludes+=("${2:-}"); shift 2 || usage ;;
         --) shift; test_args=("$@"); break ;;
         -h|--help) usage ;;
         *) echo "Unknown argument: $1" >&2; usage ;;
@@ -108,10 +108,39 @@ if [ -f .gitmodules ]; then
     done < <(git config --file .gitmodules --get-regexp '\.path$' || true)
 fi
 
+repo_root=$(pwd -P)
+
+# Prints PATH as git prints the paths it reports, relative to the repo root, whatever form it was
+# passed in ("./x", "x\y", an absolute path). Fails for a path outside the repo and for the root
+# itself, which would match every file.
+repo_path() {
+    local p=${1//\\//} dir
+    if [ -d "$p" ]; then
+        dir=$(CDPATH='' cd -- "$p" 2>/dev/null && pwd -P) || return 1
+        p=$dir
+    else
+        dir=$(CDPATH='' cd -- "$(dirname -- "$p")" 2>/dev/null && pwd -P) || return 1
+        p=$dir/$(basename -- "$p")
+    fi
+    case "$p" in
+        "$repo_root"/?*) echo "${p#"$repo_root"/}" ;;
+        *) return 1 ;;
+    esac
+}
+
 # The folder of the --test project holds test code wherever it lies (thirdparty/*.Tests, a new suite).
-test_dir=$(dirname "$test_project")
-test_dir="${test_dir//\\//}"
-test_dir="${test_dir#./}/"
+test_dir=$(repo_path "$(dirname -- "${test_project//\\//}")") || {
+    echo "--test has to name a project in a folder of the repo, not at its root or outside it: $test_project" >&2
+    exit 2
+}
+test_dir="$test_dir/"
+
+resolved=()
+for e in ${excludes[@]+"${excludes[@]}"}; do
+    r=$(repo_path "$e") || { echo "--exclude has to name a path in an existing folder of the repo, not the root: $e" >&2; exit 2; }
+    resolved+=("$r")
+done
+excludes=(${resolved[@]+"${resolved[@]}"})
 
 # Prints what a changed path is: test or tooling (.claude/), never taken away; environment (the
 # root, submodules, sdk/, what --exclude names), left in place and listed; or product.

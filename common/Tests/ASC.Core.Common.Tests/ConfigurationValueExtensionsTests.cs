@@ -219,6 +219,21 @@ public class ConfigurationValueExtensionsTests
     }
 
     /// <summary>
+    /// The default a flag falls back to is written as the configuration spells it, so it can be copied back as is.
+    /// </summary>
+    [Theory]
+    [InlineData(true, "the default true is used")]
+    [InlineData(false, "the default false is used")]
+    public void ReadBool_Warning_SpellsTheDefaultAsTheConfigurationDoes(bool @default, string expected)
+    {
+        var logger = new RecordingLogger();
+
+        Configuration("maybe").ReadBool(Key, @default, logger);
+
+        logger.Warnings.Should().ContainSingle().Which.Should().Contain(expected);
+    }
+
+    /// <summary>
     /// The warning names the key and the text that was found, so the administrator can find the line to fix.
     /// </summary>
     [Fact]

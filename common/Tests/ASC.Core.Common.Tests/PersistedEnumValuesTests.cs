@@ -43,7 +43,8 @@ namespace ASC.Core.Common.Tests;
 /// its enum already has, the test writes them into the snapshot and fails once, so that the file is committed with the
 /// change that added them. A moved or removed number is never written: that one is a decision. Nor is a new member on
 /// a taken number: written, it would turn its later move to a free number into a "changed" line for a value that was
-/// never committed.
+/// never committed. Nor is a snapshot written over when it lists no member (missing, emptied) or holds a line that is
+/// not one member's value: rebuilt from the enums as they are now, it would take a moved number for the stored one.
 /// </summary>
 /// <remarks>
 /// The stored enums are found, not listed: every enum-typed property of an entity that some <see cref="DbContext"/>
@@ -116,10 +117,24 @@ public class PersistedEnumValuesTests
 
         var message = new StringBuilder($"The stored enum values differ from {SnapshotPath}.\n");
 
+        if (diff.Empty)
+        {
+            // Every member would be listed as added: the list says nothing, and the restored file is the answer.
+            message.Append(
+                "Missing: the snapshot lists no member, the file is missing, emptied or holds only comments. Restore it " +
+                $"from git (git checkout -- {SnapshotPath}): rebuilt from the enums as they are now, it would take a moved " +
+                "number for the stored one.\n");
+        }
+
+        Append(message, "Unreadable: lines that are not Enum.Member=Value or name a member twice. Fix them by hand, the test does not write over them", diff.Unreadable);
         Append(message, "Changed: rows stored with the old number now read as another member. Put the old value back, or decide it and update the snapshot", diff.Changed);
         Append(message, "Removed: rows stored with this number lose their name", diff.Removed);
         Append(message, "Taken: a new member uses a number another member of its enum already has. Give it a free number; it is written once it has one", diff.Taken);
-        Append(message, "Added: written to the snapshot once the lines above are settled", [.. diff.Added.Except(diff.Taken)]);
+
+        if (!diff.Empty)
+        {
+            Append(message, "Added: written to the snapshot once the lines above are settled", [.. diff.Added.Except(diff.Taken)]);
+        }
 
         message.Append($"The whole expected snapshot is in {received}.");
 
@@ -169,15 +184,44 @@ public class PersistedEnumValuesTests
     }
 
     /// <summary>
+    /// A snapshot that lists no member is not a snapshot with no members: written over, every stored number would be
+    /// taken as it is now, a moved one included.
+    /// </summary>
+    [Fact]
+    public void Compare_WithAnEmptySnapshot_DoesNotWriteIt()
+    {
+        var diff = Compare([], ["E.A=1", "E.B=2"]);
+
+        diff.Empty.Should().BeTrue();
+        diff.CanWrite.Should().BeFalse();
+    }
+
+    /// <summary>
+    /// A line that is not one member's value (a merge leftover, a typo, a member named twice) hides what was stored, so
+    /// the test does not write over it.
+    /// </summary>
+    [Fact]
+    public void Compare_WithAnUnreadableSnapshotLine_DoesNotWriteIt()
+    {
+        var garbled = Compare(["E.A=1", "<<<<<<< HEAD"], ["E.A=1", "E.B=2"]);
+        var twice = Compare(["E.A=1", "E.A=2"], ["E.A=1", "E.B=2"]);
+
+        garbled.CanWrite.Should().BeFalse();
+        garbled.Unreadable.Should().Equal("<<<<<<< HEAD");
+        twice.CanWrite.Should().BeFalse();
+        twice.Unreadable.Should().Equal("E.A=2");
+    }
+
+    /// <summary>
     /// The difference between the snapshot and the stored enums, each line as the failure message shows it.
     /// </summary>
-    private sealed record SnapshotDiff(List<string> Changed, List<string> Removed, List<string> Added, List<string> Taken)
+    private sealed record SnapshotDiff(bool Empty, List<string> Unreadable, List<string> Changed, List<string> Removed, List<string> Added, List<string> Taken)
     {
         /// <summary>
-        /// Only new members, none on a taken number, or only the order of the lines: nothing stored before changes its
-        /// meaning, so the test may bring the snapshot up to date itself.
+        /// A readable snapshot, and only new members, none on a taken number, or only the order of the lines: nothing
+        /// stored before changes its meaning, so the test may bring the snapshot up to date itself.
         /// </summary>
-        public bool CanWrite => Changed.Count == 0 && Removed.Count == 0 && Taken.Count == 0;
+        public bool CanWrite => !Empty && Unreadable.Count == 0 && Changed.Count == 0 && Removed.Count == 0 && Taken.Count == 0;
     }
 
     private static SnapshotDiff Compare(List<string> snapshot, List<string> actual)
@@ -185,6 +229,12 @@ public class PersistedEnumValuesTests
         var now = ToValues(actual);
         var before = ToValues(snapshot);
         var added = now.Keys.Where(k => !before.ContainsKey(k)).ToList();
+
+        // A line that is not Enum.Member=Value, or names a member an earlier line already gave a value.
+        var named = new HashSet<string>(StringComparer.Ordinal);
+        var unreadable = snapshot
+            .Where(l => l.Split('=', 2) is not [{ Length: > 0 } member, { Length: > 0 }] || !named.Add(member))
+            .ToList();
 
         // A number shared by two members of one enum, unless both are declared aliases.
         var shared = now
@@ -195,6 +245,8 @@ public class PersistedEnumValuesTests
             .ToHashSet(StringComparer.Ordinal);
 
         return new SnapshotDiff(
+            snapshot.Count == 0,
+            unreadable,
             [.. before.Where(e => now.TryGetValue(e.Key, out var value) && value != e.Value).Select(e => $"{e.Key}: {e.Value} -> {now[e.Key]}")],
             [.. before.Keys.Where(k => !now.ContainsKey(k)).Select(k => $"{k}={before[k]}")],
             [.. added.Select(k => $"{k}={now[k]}")],
