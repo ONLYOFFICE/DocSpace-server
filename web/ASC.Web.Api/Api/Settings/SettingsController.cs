@@ -808,17 +808,18 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Finishes the initial portal setup wizard: sets the owner's password and locale, applies the supplied license
-    /// if one is required, and marks the wizard as completed so it is not shown again. On a self-hosted Enterprise
-    /// installation given no license file whose editing service runs its own trial, that trial is put in force
-    /// instead, ending on the trial's end date; a file activated later replaces it. This call is not for a normal
-    /// logged-in session: it requires a confirmation link bearing the Wizard claim, of the kind issued when a new
-    /// portal is created, and the link is consumed as part of authenticating the request; the caller must also hold
-    /// the EditPortalSettings permission. An empty password or a malformed email address is rejected without
-    /// completing the wizard, and so is a missing, invalid, or expired license, or a license whose user quota does
-    /// not cover the portal. This call is meant to run once per portal; running it again is accepted but has no
-    /// further effect once the wizard is already completed. It returns the resulting wizard settings, including the
-    /// completed flag.
+    /// Finishes the initial portal setup wizard: sets the owner's password and locale, applies the supplied license if
+    /// one is required, and marks the wizard as completed so it is not shown again. On a self-hosted Enterprise
+    /// installation given no license file whose editing service runs its own trial, the portal's trial is put in force
+    /// instead, ending by the day the editing service's does, and the license counts as accepted; a file activated
+    /// later replaces it. If the editing service cannot be asked then, the call fails; retry later. This call is not
+    /// for a normal logged-in session: it requires a confirmation link bearing the Wizard claim, of the kind issued
+    /// when a new portal is created, and the link is consumed as part of authenticating the request; the caller must
+    /// also hold the EditPortalSettings permission. An empty password or a malformed email address is rejected without
+    /// completing the wizard, and so is a missing, invalid, or expired license, or a license whose user quota does not
+    /// cover the portal. This call is meant to run once per portal; running it again is accepted but has no further
+    /// effect once the wizard is already completed. It returns the resulting wizard settings, including the completed
+    /// flag.
     /// </remarks>
     /// <summary>Complete the Wizard settings</summary>
     /// <path>api/2.0/settings/wizard/complete</path>
@@ -826,7 +827,7 @@ public partial class SettingsController(
     [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettingsDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, or the license's start date is in the future")]
     [SwaggerResponse(403, "The account the confirmation link was issued for has no portal-settings right")]
-    [SwaggerResponse(500, "The wizard is already completed, the AMI instance ID does not match, the email address fails the portal's check, the password is empty, or the license is missing, unreadable, rejected by validation or of the wrong type")]
+    [SwaggerResponse(500, "The wizard is already completed, the AMI instance ID does not match, the email address fails the portal's check, the password is empty, the license is missing, unreadable, rejected by validation or of the wrong type, or the editing service whose trial stands in for the license cannot be asked")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]

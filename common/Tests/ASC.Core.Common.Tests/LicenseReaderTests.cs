@@ -121,6 +121,37 @@ public sealed class LicenseReaderTests : IDisposable
         written.Should().BeFalse();
     }
 
+    [Fact]
+    public void ChooseTrialDueDate_NoTrialInForce_TakesTheEditingServiceDay()
+    {
+        LicenseReader.ChooseTrialDueDate(null, new DateTime(2026, 12, 11, 16, 19, 17, DateTimeKind.Utc))
+            .Should().Be(new DateTime(2026, 12, 11));
+    }
+
+    [Fact]
+    public void ChooseTrialDueDate_TrialInForceEndsLater_IsBroughtCloser()
+    {
+        LicenseReader.ChooseTrialDueDate(new DateTime(2026, 12, 20, 10, 0, 0), new DateTime(2026, 12, 11))
+            .Should().Be(new DateTime(2026, 12, 11));
+    }
+
+    [Fact]
+    public void ChooseTrialDueDate_TrialInForceEndsEarlier_IsKept()
+    {
+        // An editing service reinstalled with a fresh trial must not extend the portal's trial.
+        LicenseReader.ChooseTrialDueDate(new DateTime(2026, 12, 5, 10, 0, 0), new DateTime(2027, 1, 10))
+            .Should().Be(new DateTime(2026, 12, 5, 10, 0, 0));
+    }
+
+    [Fact]
+    public void ChooseTrialDueDate_TrialInForceEndsLaterTheSameDay_IsKept()
+    {
+        // A clean installation starts its own trial at the time of day it was first read; the editing service's end is
+        // a whole day, and cutting the portal's trial to the start of that day would end it hours early.
+        LicenseReader.ChooseTrialDueDate(new DateTime(2026, 12, 11, 10, 0, 0), new DateTime(2026, 12, 11))
+            .Should().Be(new DateTime(2026, 12, 11, 10, 0, 0));
+    }
+
     private LicenseReader CreateReader()
     {
         var configuration = new ConfigurationBuilder()
@@ -132,6 +163,7 @@ public sealed class LicenseReaderTests : IDisposable
             tariffService: null!,
             coreSettings: null!,
             licenseReaderConfig: new LicenseReaderConfig(configuration),
+            distributedLockProvider: new InMemoryLockProvider(),
             logger: NullLogger<LicenseReader>.Instance);
     }
 

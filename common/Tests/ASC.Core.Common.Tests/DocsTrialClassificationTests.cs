@@ -119,6 +119,7 @@ public sealed class DocsTrialClassificationTests
     [InlineData("<html><body>502 Bad Gateway</body></html>")]
     [InlineData("""{"error":6}""")]
     [InlineData("""{"error":0,"license":{"trial":true,"end_date":null},"server":{"resultType":3}}""")]
+    [InlineData("""{"error":0,"license":{"trial":true},"server":{"resultType":3}}""")]
     [InlineData("""{"error":0,"license":{"trial":true,"end_date":"2026-12-11T00:00:00Z"}}""")]
     [InlineData("""{"error":0,"license":{"trial":true,"end_date":"2026-12-11T00:00:00Z"},"server":{"resultType":1}}""")]
     public void ClassifyTrial_AnswerThatSaysNothingAboutATrial_IsUnknown(string answer)

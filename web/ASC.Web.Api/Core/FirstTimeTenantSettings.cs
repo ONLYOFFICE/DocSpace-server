@@ -95,12 +95,22 @@ public class FirstTimeTenantSettings(
                 throw new Exception(Resource.ErrorPasswordEmpty);
             }
 
-            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise && !await ApplyDocsTrialAsync())
+            if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
             {
-                await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
+                if (await ApplyDocsTrialAsync())
+                {
+                    // Completing the wizard includes agreeing to the license terms, so the license counts as accepted
+                    // here as well: a license file that later appears on the license path is applied by the background
+                    // refresh without a separate accept
+                    await TariffSettings.SetLicenseAcceptAsync(settingsManager);
+                }
+                else
+                {
+                    await licenseReader.RefreshLicenseAsync(documentServiceLicense.ValidateLicense);
 
-                await TariffSettings.SetLicenseAcceptAsync(settingsManager);
-                messageService.Send(MessageAction.LicenseKeyUploaded);
+                    await TariffSettings.SetLicenseAcceptAsync(settingsManager);
+                    messageService.Send(MessageAction.LicenseKeyUploaded);
+                }
             }
 
             await securityContext.SetUserPasswordHashAsync(currentUser.Id, passwordHash);
@@ -181,14 +191,14 @@ public class FirstTimeTenantSettings(
     /// completed without one.
     /// </summary>
     /// <returns>
-    /// <c>true</c> when the trial was written; <c>false</c> when a license file is on disk, the editing service runs
-    /// no active trial or cannot be asked, or a license from a file is already in force — then the license file is
-    /// required as before.
+    /// <c>true</c> when the trial is in force; <c>false</c> when a license file is on disk, the editing service runs
+    /// no active trial, or a license from a file is already in force — then the license file is required as before.
     /// </returns>
     /// <remarks>
-    /// The license is not marked as accepted and no upload is recorded in the audit trail: no file was given, and a
-    /// file uploaded later is activated the usual way, replacing the trial.
+    /// No upload is recorded in the audit trail: no file was given, and a file uploaded later is activated the usual
+    /// way, replacing the trial.
     /// </remarks>
+    /// <exception cref="Exception">The editing service cannot be asked.</exception>
     private async Task<bool> ApplyDocsTrialAsync()
     {
         if (licenseReader.HasLicenseFile())
@@ -197,6 +207,16 @@ public class FirstTimeTenantSettings(
         }
 
         var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: false);
+
+        // The wizard skips the license upload only after it was told the editing service runs its trial; an editing
+        // service that cannot be asked now is not read as "no trial", which would ask for a file the wizard never
+        // offered. The fresh question also dropped the cached answer on every node, so the wizard page asks again next
+        // time whether a file is needed.
+        if (docsTrial.State == DocsTrialState.Unknown)
+        {
+            throw new Exception(FilesCommonResource.ErrorMessage_DocServiceException);
+        }
+
         if (docsTrial.State != DocsTrialState.Active)
         {
             return false;

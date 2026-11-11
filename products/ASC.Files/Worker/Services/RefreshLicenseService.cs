@@ -39,8 +39,10 @@ namespace ASC.Files.Worker.Services;
 /// editing service.
 /// </summary>
 /// <remarks>
-/// Nothing is applied before the license has been accepted (the setup wizard or the accept call), and a staged file
-/// is never touched: putting a license in force is the user's decision, not this service's.
+/// A license file is applied only once the license has been accepted (the setup wizard, also one completed on the
+/// editing service's trial, or the accept call), and a staged file is never touched: putting a license in force is
+/// the user's decision, not this service's. The installation's own trial follows the editing service's trial whether
+/// the license was accepted or not, also before the wizard is completed; its end is only ever brought closer.
 /// </remarks>
 [Singleton]
 public class RefreshLicenseService(
@@ -88,8 +90,9 @@ public class RefreshLicenseService(
     }
 
     /// <summary>
-    /// While no license file is in force and the installation runs its own trial, moves the trial's end to the end of
-    /// the trial the editing service runs, so the portal stops being usable when the editors do.
+    /// While no license file is in force and the installation runs its own trial, brings the trial's end closer to the
+    /// end of the trial the editing service runs, never later, so the portal stops being usable by the day the editors
+    /// do.
     /// </summary>
     /// <remarks>
     /// An editing service that cannot be asked, or runs under a license file of its own, changes nothing.
