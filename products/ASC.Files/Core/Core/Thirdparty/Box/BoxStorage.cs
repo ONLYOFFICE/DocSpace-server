@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Box.V2.Exceptions;
-
 namespace ASC.Files.Thirdparty.Box;
 
 [Transient(typeof(IThirdPartyStorage<BoxFile, BoxFolder, BoxItem>))]

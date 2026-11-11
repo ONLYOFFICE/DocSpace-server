@@ -211,6 +211,7 @@ global using ASC.Webhooks.Core;
 global using Box.V2;
 global using Box.V2.Auth;
 global using Box.V2.Config;
+global using Box.V2.Exceptions;
 global using Box.V2.Models;
 
 global using DocuSign.eSign.Api;

@@ -120,7 +120,7 @@ public static class ThirdPartyStorageQuota
     /// </summary>
     public static bool IsBox(Exception exception)
     {
-        return exception is global::Box.V2.Exceptions.BoxAPIException { Error.Code: BoxCode };
+        return exception is BoxAPIException { Error.Code: BoxCode };
     }
 
     /// <summary>
