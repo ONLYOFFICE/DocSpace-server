@@ -5,11 +5,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade106 : Migration
+    public partial class MigrationContext_Upgrade33_1 : Migration
     {
         // Mirrors the Flyway script V1_9_1: MySQL Group Replication refuses writes to a table with no primary key, and
-        // these four join tables have none. The key is INVISIBLE so SELECT * and column-less INSERTs keep their shape;
-        // the EF model stays keyless for the same reason, so this migration changes no snapshot.
+        // these four join tables, created keyless by Upgrade33, have none. From MySQL 9 it also refuses every write to
+        // their parents identity_clients and identity_scopes (even an UPDATE of no rows), so the key has to exist before
+        // the first later migration writes there (Upgrade46): hence this id, right after Upgrade33, applied out of order
+        // on databases that are already past it. The key is INVISIBLE so SELECT * and column-less INSERTs keep their
+        // shape; the EF model stays keyless for the same reason, so this migration changes no snapshot.
         private static readonly string[] _tables =
         [
             "identity_client_authentication_methods",
@@ -59,10 +62,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
         private static void RunIf(MigrationBuilder migrationBuilder, string condition, string statement)
         {
-            migrationBuilder.Sql($"SET @upgrade106_ddl = IF({condition}, '{statement}', 'DO 0');");
-            migrationBuilder.Sql("PREPARE upgrade106_ddl FROM @upgrade106_ddl;");
-            migrationBuilder.Sql("EXECUTE upgrade106_ddl;");
-            migrationBuilder.Sql("DEALLOCATE PREPARE upgrade106_ddl;");
+            migrationBuilder.Sql($"SET @upgrade33_1_ddl = IF({condition}, '{statement}', 'DO 0');");
+            migrationBuilder.Sql("PREPARE upgrade33_1_ddl FROM @upgrade33_1_ddl;");
+            migrationBuilder.Sql("EXECUTE upgrade33_1_ddl;");
+            migrationBuilder.Sql("DEALLOCATE PREPARE upgrade33_1_ddl;");
         }
     }
 }

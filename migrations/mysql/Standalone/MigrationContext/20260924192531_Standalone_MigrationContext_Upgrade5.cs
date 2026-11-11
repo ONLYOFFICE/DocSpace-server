@@ -48,7 +48,7 @@ public partial class MigrationContext_Upgrade5 : Migration
         // foreign key to identity_clients was declared with (they differ between installations),
         // and the old table is dropped together with its foreign keys, whatever they are named.
         // MySQL commits each DDL statement, so a copy left by a failed run is dropped first; and LIKE also copies the
-        // invisible my_row_id key that SaaS MigrationContext_Upgrade106 (applied before this context) adds, so
+        // invisible my_row_id key that SaaS MigrationContext_Upgrade33_1 (applied before this context) adds, so
         // ReplacePrimaryKey swaps it for the composite key in one statement
         migrationBuilder.Sql("DROP TABLE IF EXISTS identity_client_authentication_methods_new;");
         migrationBuilder.Sql("CREATE TABLE identity_client_authentication_methods_new LIKE identity_client_authentication_methods;");
