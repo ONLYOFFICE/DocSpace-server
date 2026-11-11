@@ -225,7 +225,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var path = CombinePath(parentId, title);
         var resourceUrl = BuildResourceUrl(path, true);
 
-        var response = await SendAsync(() => _client.Mkcol(resourceUrl));
+        var response = ThrowIfOutOfSpace(await SendAsync(() => _client.Mkcol(resourceUrl)));
         if (!response.IsSuccessful)
         {
             return null;
@@ -301,7 +301,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     {
         if (fileStream.CanSeek)
         {
-            return await SendAsync(() => _client.PutFile(url, fileStream));
+            return ThrowIfOutOfSpace(await SendAsync(() => _client.PutFile(url, fileStream)));
         }
 
         await using var tempBuffer = tempStream.Create();
@@ -309,7 +309,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         await tempBuffer.FlushAsync();
         tempBuffer.Seek(0, SeekOrigin.Begin);
 
-        return await SendAsync(() => _client.PutFile(url, tempBuffer));
+        return ThrowIfOutOfSpace(await SendAsync(() => _client.PutFile(url, tempBuffer)));
     }
 
     private async Task<WebDavEntry> GetEntryAsync(string url)
@@ -324,14 +324,14 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 
     private async Task<bool> MoveEntryAsync(string fromPath, string toPath)
     {
-        var response = await SendAsync(() => _client.Move(fromPath, toPath));
+        var response = ThrowIfOutOfSpace(await SendAsync(() => _client.Move(fromPath, toPath)));
 
         return response.IsSuccessful;
     }
 
     private async Task<bool> CopyEntryAsync(string fromPath, string toPath)
     {
-        var response = await SendAsync(() => _client.Copy(fromPath, toPath));
+        var response = ThrowIfOutOfSpace(await SendAsync(() => _client.Copy(fromPath, toPath)));
 
         return response.IsSuccessful;
     }
@@ -398,7 +398,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var response = await action();
         if (response.StatusCode != (int)HttpStatusCode.Unauthorized)
         {
-            return ThrowIfOutOfSpace(response);
+            return response;
         }
 
         if (response is IDisposable disposableResponse)
@@ -422,12 +422,13 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         _client = new WebDavClient(client);
 #pragma warning restore CA2000
 
-        return ThrowIfOutOfSpace(await action());
+        return await action();
     }
 
-    // A server out of space answers a PUT, COPY, MOVE or MKCOL with 507. The callers read any other
-    // failure as "nothing written" and return null, which the user never gets a reason for, so this one
-    // is turned into an error the user can act on.
+    // A server out of space answers a PUT, COPY, MOVE or MKCOL with 507, so only those requests go
+    // through here; a read answered 507 keeps the old meaning of a failed read. The callers read any
+    // other failure of a write as "nothing written" and return null, which the user never gets a reason
+    // for, so this one is turned into an error the user can act on.
     private static T ThrowIfOutOfSpace<T>(T response) where T : WebDavResponse
     {
         if (!ThirdPartyStorageQuota.IsWebDav(response.StatusCode))
