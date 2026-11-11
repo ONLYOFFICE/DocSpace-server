@@ -34,8 +34,9 @@
 namespace ASC.ClearEvents.Tests.Tests.AuditTrail;
 
 /// <summary>
-/// The daily pass is registered only when the cleanup is enabled: registered, its active/passive pair polls and
-/// writes the instance registration on every replica for a pass that returns at once. The enabled case claims the
+/// The daily pass is registered unless <c>enabled</c> is missing or an off value: registered, its active/passive pair
+/// polls and writes the instance registration on every replica. An unreadable value is registered too, and pays that
+/// polling for passes that return at once, so that the service can log why the cleanup is off. The enabled case claims the
 /// worker name, which a process may register only once; the in-process hosts of the suite run with the cleanup
 /// disabled, so the single test here that enables it is the one claim in the process — a second would fail.
 /// </summary>
@@ -44,6 +45,8 @@ public class AuditTrailCleanupRegistrationTests
     [Theory]
     [InlineData(null)]
     [InlineData("false")]
+    [InlineData("0")]
+    [InlineData("off")]
     public void AddClearEventsServices_CleanupNotEnabled_RegistersOnlyTheLoginHistoryCleanup(string? enabled)
     {
         // Arrange
@@ -99,5 +102,35 @@ public class AuditTrailCleanupRegistrationTests
 
         implementations.Should().Contain(typeof(ClearEventsService));
         implementations.Should().Contain(typeof(ClearAuditEventsService));
+    }
+
+    [Fact]
+    public void ClearAuditEventsService_EnabledUnreadable_SaysTheCleanupIsOff()
+    {
+        // Arrange: registered for an enabled value that is no flag (IsRequested), so that the service can say why
+        // the cleanup does not run; nothing else would.
+        var configuration = RetentionSection.Of(("enabled", "maybe"));
+        var logger = new RecordingLogger<ClearAuditEventsService>();
+
+        // Act
+        _ = new ClearAuditEventsService(logger, null!, configuration, new AuditTrailCleaner(new RecordingLogger<AuditTrailCleaner>(), null!));
+
+        // Assert
+        logger.Entries.Should().Contain(e => e.Level == LogLevel.Warning && e.Has("sectionName"), "the service says the cleanup is off");
+        logger.Entries.Should().Contain(e => e.Level == LogLevel.Warning && e.Has("key"), "the reader says which value it could not read");
+    }
+
+    [Fact]
+    public void ClearAuditEventsService_NoGracePeriod_SaysSoOnce()
+    {
+        // Arrange
+        var configuration = RetentionSection.Of(("enabled", "true"), ("paidGracePeriodDays", "0"));
+        var logger = new RecordingLogger<ClearAuditEventsService>();
+
+        // Act
+        _ = new ClearAuditEventsService(logger, null!, configuration, new AuditTrailCleaner(new RecordingLogger<AuditTrailCleaner>(), null!));
+
+        // Assert
+        logger.Entries.Should().ContainSingle(e => e.Level == LogLevel.Information && e.Has("sectionName"));
     }
 }

@@ -154,6 +154,11 @@ public class RoomHistoryRetentionTests(AspireAppFixture fixture) : BaseTest(fixt
 
         tenant.Values["count"].Should().Be(outsideHistory.Count);
         tenant.Values["pageCount"].Should().Be(1, "the page reads up to 20 events, the batch deletes up to 2");
+
+        // Five events in batches of two are three deletes, each followed by the 200 ms pause of AuditTrailCleaner:
+        // one delete of all five would take one pause. A lower bound only, so a slow database cannot fail it, and 50 ms
+        // under three pauses, since a timer may fire a delay a few milliseconds early - still far above one pause.
+        ((TimeSpan)tenant.Values["elapsed"]!).Should().BeGreaterThanOrEqualTo(TimeSpan.FromMilliseconds(3 * 200 - 50), "the deletes go a batch at a time, with a pause after each");
     }
 
     [Fact]

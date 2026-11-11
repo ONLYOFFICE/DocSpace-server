@@ -98,6 +98,47 @@ public class AuditTrailCleanupLoggingTests(AspireAppFixture fixture) : BaseTest(
 
         TenantCount(logger).Should().Be(removed);
         PassCount(logger).Should().BeGreaterThanOrEqualTo(removed);
+
+        logger.Entries.Should().ContainSingle(e => e.Has("walkedTenantCount")).Which.Values["stopped"].Should().Be(true, "the pass gave up on the stop");
+    }
+
+    [Fact]
+    public async Task ClearAsync_StoppedBeforeTheFirstTenant_LogsAStoppedPassWithNoTenant()
+    {
+        // Arrange
+        var logger = new RecordingLogger<AuditTrailCleaner>();
+
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+
+        await cts.CancelAsync();
+
+        // Act
+        var run = async () => await Fixture.Cleaner.CreateCleaner(logger).ClearAsync(Retention(), cts.Token);
+
+        // Assert: not the line of a pass that walked tenants, with a slowest tenant 0 that does not exist.
+        await run.Should().ThrowAsync<OperationCanceledException>();
+
+        var pass = logger.Entries.Should().ContainSingle(e => e.Has("stopped")).Subject;
+
+        pass.Has("walkedTenantCount").Should().BeFalse();
+        pass.Values["stopped"].Should().Be(true);
+    }
+
+    [Fact]
+    public async Task ClearAsync_TenantListUnreadable_LogsAFailedPass()
+    {
+        // Arrange: the database cannot be reached for the list of tenants.
+        var logger = new RecordingLogger<AuditTrailCleaner>();
+
+        // Act
+        var run = async () => await new AuditTrailCleaner(logger, new UnreachableDatabase()).ClearAsync(Retention(), TestContext.Current.CancellationToken);
+
+        // Assert: the failure reaches the hosting loop, and the summary does not read as a pass in which nothing
+        // qualified.
+        await run.Should().ThrowAsync<InvalidOperationException>();
+
+        logger.Entries.Should().ContainSingle(e => e.Level == LogLevel.Warning && e.Has("elapsed"), "the summary of a failed pass is a warning");
+        logger.Entries.Should().NotContain(e => e.Has("stopped"), "a failed pass is not logged as a finished one");
     }
 
     [Fact]
@@ -144,5 +185,14 @@ public class AuditTrailCleanupLoggingTests(AspireAppFixture fixture) : BaseTest(
             .Where(e => e.Has("tenantCount"))
             .Select(e => (int?)e.Values["count"])
             .SingleOrDefault();
+    }
+
+    /// <summary>A scope factory whose every scope fails, as a pass sees a database it cannot reach.</summary>
+    private sealed class UnreachableDatabase : IServiceScopeFactory
+    {
+        public IServiceScope CreateScope()
+        {
+            throw new InvalidOperationException("The database cannot be reached.");
+        }
     }
 }

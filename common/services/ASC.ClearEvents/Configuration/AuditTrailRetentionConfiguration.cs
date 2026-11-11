@@ -33,6 +33,12 @@
 
 namespace ASC.ClearEvents.Configuration;
 
+/// <summary>
+/// The installation's retention of audit events, from the <see cref="SectionName"/> section. <see cref="Read"/> takes
+/// every value through <see cref="ConfigurationValueExtensions"/>: a missing key gives the default, an unreadable one
+/// the default and a warning, one out of bounds the nearest bound and a warning, so no value stops the host or leaves
+/// the cleanup off without a word in the log.
+/// </summary>
 public class AuditTrailRetentionConfiguration
 {
     public const string SectionName = "clearEvents:auditTrail";
@@ -48,6 +54,12 @@ public class AuditTrailRetentionConfiguration
     /// smallest <see cref="DateTime"/> that subtracting it from today cannot fail.
     /// </summary>
     public const int MaxLifeTimeDays = 100 * 365;
+
+    /// <summary>
+    /// The longest grace period a pass accepts, a year: long enough for any late renewal, short enough that the grace
+    /// period stays a grace period rather than the paid life time of every portal that ever paid.
+    /// </summary>
+    public const int MaxPaidGracePeriodDays = 365;
 
     /// <summary>The largest batch a pass accepts: its ids travel to the database as one IN list.</summary>
     public const int MaxBatchSize = 10_000;
@@ -70,7 +82,7 @@ public class AuditTrailRetentionConfiguration
     /// <summary>
     /// How long a portal keeps the paid life time after its subscription ended - after the payment delay, which
     /// counts as paid on its own. A customer who renews within it loses none of the events past the free life time.
-    /// 0 turns it off; at most <see cref="MaxLifeTimeDays"/>.
+    /// 0 turns it off; at most <see cref="MaxPaidGracePeriodDays"/>.
     /// </summary>
     public int PaidGracePeriodDays { get; init; } = 7;
 
@@ -88,52 +100,80 @@ public class AuditTrailRetentionConfiguration
     public int ReadPageSize { get; init; } = 10_000;
 
     /// <summary>
-    /// Why the section could not be read, such as a period written as <c>1d</c>; null when it was. The other values
-    /// are then the defaults, and no pass runs.
-    /// </summary>
-    public string BindingError { get; private init; }
-
-    public bool IsPeriodUsable => Period >= MinPeriod && Period <= MaxPeriod;
-
-    /// <summary>
-    /// Whether a pass may run with these settings. A life time of a few days would delete almost the whole audit
-    /// trail of every portal, a free life time above the paid one would keep the events of free portals longer, and
-    /// values past the upper bounds would fail every pass or run them back to back.
+    /// Whether a pass may run with these settings. <see cref="Read"/> always returns usable settings; this guards the
+    /// ones built in code. A life time of a few days would delete almost the whole audit trail of every portal, a free
+    /// life time above the paid one would keep the events of free portals longer, and values past the upper bounds
+    /// would fail every pass or run them back to back.
     /// </summary>
     public bool IsUsable =>
-        BindingError is null &&
         FreeLifeTimeDays >= MinLifeTimeDays &&
         PaidLifeTimeDays >= FreeLifeTimeDays &&
         PaidLifeTimeDays <= MaxLifeTimeDays &&
-        PaidGracePeriodDays is >= 0 and <= MaxLifeTimeDays &&
+        PaidGracePeriodDays is >= 0 and <= MaxPaidGracePeriodDays &&
         BatchSize is > 0 and <= MaxBatchSize &&
         ReadPageSize is > 0 and <= MaxReadPageSize &&
-        IsPeriodUsable;
+        Period >= MinPeriod && Period <= MaxPeriod;
 
     /// <summary>
-    /// Reads the <see cref="SectionName"/> section. A value that does not convert does not throw: it would stop the
-    /// service, and the whole monolith with it, even with the cleanup disabled. The settings come back unusable
-    /// instead, with <see cref="BindingError"/> set and <see cref="Enabled"/> read on its own, so that an enabled
-    /// cleanup reports the error on every pass rather than going quiet. An <c>enabled</c> that is set to anything but
-    /// <c>false</c> counts as enabled, the unreadable ones too (<c>1</c>, <c>yes</c>, <c>on</c>): read as disabled,
-    /// such a value would leave the cleanup unregistered without a word in the log, and the trail growing unbounded.
-    /// No pass removes anything while the error is there.
+    /// Reads the <see cref="SectionName"/> section, once, when the service is created. Every value goes through
+    /// <see cref="ConfigurationValueExtensions"/>, so the settings that come back are always usable:
+    /// <list type="bullet">
+    /// <item><c>enabled</c>: <c>true</c>/<c>false</c>, <c>1</c>/<c>0</c>, <c>yes</c>/<c>no</c>, <c>on</c>/<c>off</c>;
+    /// anything else is off, with a warning.</item>
+    /// <item><c>paidLifeTimeDays</c> (1095) and <c>freeLifeTimeDays</c> (365): days, from <see cref="MinLifeTimeDays"/>
+    /// to <see cref="MaxLifeTimeDays"/>. A free life time above the paid one gets a warning, and the paid one is raised
+    /// to it: the cleanup deletes, so of two conflicting values it keeps the longer.</item>
+    /// <item><c>paidGracePeriodDays</c> (7): days, from 0 (off) to <see cref="MaxPaidGracePeriodDays"/>.</item>
+    /// <item><c>period</c> (<c>"1.00:00:00"</c>, one day): the time between passes, written <c>d.hh:mm:ss</c>, from
+    /// <see cref="MinPeriod"/> to <see cref="MaxPeriod"/>. <c>"24:00:00"</c> reads as 24 days and <c>"7"</c> as 7 days:
+    /// both are kept as read, with a warning.</item>
+    /// <item><c>batchSize</c> (1000): events deleted at once, from 1 to <see cref="MaxBatchSize"/>.</item>
+    /// <item><c>readPageSize</c> (10000): events read at once, from 1 to <see cref="MaxReadPageSize"/>.</item>
+    /// </list>
     /// </summary>
-    public static AuditTrailRetentionConfiguration Read(IConfiguration configuration)
+    public static AuditTrailRetentionConfiguration Read(IConfiguration configuration, ILogger logger)
     {
-        var section = configuration.GetSection(SectionName);
+        var defaults = new AuditTrailRetentionConfiguration();
 
-        try
+        var paidLifeTimeDays = configuration.ReadInt(Key(nameof(PaidLifeTimeDays)), defaults.PaidLifeTimeDays, MinLifeTimeDays, MaxLifeTimeDays, logger);
+        var freeLifeTimeDays = configuration.ReadInt(Key(nameof(FreeLifeTimeDays)), defaults.FreeLifeTimeDays, MinLifeTimeDays, MaxLifeTimeDays, logger);
+
+        if (freeLifeTimeDays > paidLifeTimeDays)
         {
-            return section.Get<AuditTrailRetentionConfiguration>() ?? new();
+            logger.WarningFreeLifeTimeAbovePaid(SectionName, freeLifeTimeDays, paidLifeTimeDays);
+
+            paidLifeTimeDays = freeLifeTimeDays;
         }
-        catch (InvalidOperationException ex)
+
+        return new AuditTrailRetentionConfiguration
         {
-            return new AuditTrailRetentionConfiguration
-            {
-                Enabled = !string.IsNullOrWhiteSpace(section[nameof(Enabled)]) && !(bool.TryParse(section[nameof(Enabled)], out var enabled) && !enabled),
-                BindingError = ex.InnerException?.Message is { } inner ? $"{ex.Message} {inner}" : ex.Message
-            };
-        }
+            Enabled = configuration.ReadBool(Key(nameof(Enabled)), defaults.Enabled, logger),
+            PaidLifeTimeDays = paidLifeTimeDays,
+            FreeLifeTimeDays = freeLifeTimeDays,
+            PaidGracePeriodDays = configuration.ReadInt(Key(nameof(PaidGracePeriodDays)), defaults.PaidGracePeriodDays, 0, MaxPaidGracePeriodDays, logger),
+            Period = configuration.ReadInterval(Key(nameof(Period)), defaults.Period, MinPeriod, MaxPeriod, logger),
+            BatchSize = configuration.ReadInt(Key(nameof(BatchSize)), defaults.BatchSize, 1, MaxBatchSize, logger),
+            ReadPageSize = configuration.ReadInt(Key(nameof(ReadPageSize)), defaults.ReadPageSize, 1, MaxReadPageSize, logger)
+        };
+    }
+
+    /// <summary>
+    /// Whether the cleanup has to be registered, decided at service registration, where there is no logger yet:
+    /// <c>enabled</c> is set to anything but an off value (<c>false</c>, <c>0</c>, <c>no</c>, <c>off</c>). An
+    /// unreadable value registers it too, so that the service, which reads the section with a logger, says why the
+    /// cleanup stays off instead of leaving no trace at all.
+    /// </summary>
+    public static bool IsRequested(IConfiguration configuration)
+    {
+        var key = Key(nameof(Enabled));
+
+        // The spellings are the helper's: an off value reads as false, an unreadable one falls to the default of
+        // true, without a warning here (the service writes it, with a logger).
+        return !string.IsNullOrWhiteSpace(configuration[key]) && configuration.ReadBool(key, true, NullLogger.Instance);
+    }
+
+    private static string Key(string name)
+    {
+        return $"{SectionName}:{name}";
     }
 }

@@ -44,6 +44,11 @@ public class AuditTrailGracePeriodTests(AspireAppFixture fixture) : BaseTest(fix
     [InlineData(13, 3, false, PaidGracePeriodDays, true)]
     [InlineData(16, 6, false, PaidGracePeriodDays, true)]
     [InlineData(18, 8, false, PaidGracePeriodDays, false)]
+    // The last day of the delay, or the due date, still counts as paid with the tariff service, which compares dates:
+    // the tariff is unpaid from the midnight after it, and a grace period of N days is N whole days from there.
+    [InlineData(17, 7, false, PaidGracePeriodDays, true)]
+    [InlineData(11, 1, false, 1, true)]
+    [InlineData(7, null, false, PaidGracePeriodDays, true)]
     [InlineData(3, null, false, PaidGracePeriodDays, true)]
     [InlineData(8, null, false, PaidGracePeriodDays, false)]
     [InlineData(13, 3, true, PaidGracePeriodDays, false)]
@@ -52,27 +57,41 @@ public class AuditTrailGracePeriodTests(AspireAppFixture fixture) : BaseTest(fix
     public async Task ClearAsync_SubscriptionEnded_KeepsThePaidRetentionForTheGracePeriod(
         int dueDaysAgo, int? delayEndedDaysAgo, bool freeQuota, int paidGracePeriodDays, bool keepsPaidRetention)
     {
-        // Arrange: the dates as the tariff service computes them, at the start of a day.
-        var today = DateTime.UtcNow.Date;
+        // The rows on the boundary of the grace period hold only while the pass runs on the day the dates are set
+        // from, so a case that runs across midnight (UTC) is run once more, with events of its own.
+        List<int> remaining;
+        int pastFreeLifeTime;
 
-        TestTariffs.Set(
-            TenantId,
-            TariffState.NotPaid,
-            freeQuota,
-            dueDate: today.AddDays(-dueDaysAgo),
-            delayDueDate: delayEndedDaysAgo is { } days ? today.AddDays(-days) : null);
+        for (var attempt = 1; ; attempt++)
+        {
+            // Arrange: the dates as the tariff service computes them, at the start of a day.
+            var today = DateTime.UtcNow.Date;
 
-        var pastFreeLifeTime = await SeedEventAsync(FreeLifeTimeDays + 30);
+            TestTariffs.Set(
+                TenantId,
+                TariffState.NotPaid,
+                freeQuota,
+                dueDate: today.AddDays(-dueDaysAgo),
+                delayDueDate: delayEndedDaysAgo is { } days ? today.AddDays(-days) : null);
 
-        // Past both life times: removed on every tariff, so a pass that skipped the tenant cannot pass for one that
-        // kept the paid retention.
-        var pastPaidLifeTime = await SeedEventAsync(PaidLifeTimeDays + 30);
+            pastFreeLifeTime = await SeedEventAsync(FreeLifeTimeDays + 30);
 
-        // Act
-        await RunCleanupAsync(Retention(paidGracePeriodDays: paidGracePeriodDays));
+            // Past both life times: removed on every tariff, so a pass that skipped the tenant cannot pass for one
+            // that kept the paid retention.
+            var pastPaidLifeTime = await SeedEventAsync(PaidLifeTimeDays + 30);
+
+            // Act
+            await RunCleanupAsync(Retention(paidGracePeriodDays: paidGracePeriodDays));
+
+            remaining = await RemainingEventsAsync([pastFreeLifeTime, pastPaidLifeTime]);
+
+            if (DateTime.UtcNow.Date == today || attempt == 2)
+            {
+                break;
+            }
+        }
 
         // Assert
-        var remaining = await RemainingEventsAsync([pastFreeLifeTime, pastPaidLifeTime]);
 
         if (keepsPaidRetention)
         {

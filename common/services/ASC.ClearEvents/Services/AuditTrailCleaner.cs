@@ -52,12 +52,6 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
             return;
         }
 
-        if (retention.BindingError is not null)
-        {
-            logger.WarningUnreadableConfiguration(AuditTrailRetentionConfiguration.SectionName, retention.BindingError);
-            return;
-        }
-
         if (!retention.IsUsable)
         {
             logger.WarningInvalidConfiguration(
@@ -69,6 +63,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
                 retention.Period,
                 AuditTrailRetentionConfiguration.MinLifeTimeDays,
                 AuditTrailRetentionConfiguration.MaxLifeTimeDays,
+                AuditTrailRetentionConfiguration.MaxPaidGracePeriodDays,
                 AuditTrailRetentionConfiguration.MaxBatchSize,
                 AuditTrailRetentionConfiguration.MaxReadPageSize,
                 AuditTrailRetentionConfiguration.MinPeriod,
@@ -81,7 +76,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         var freeThreshold = now.AddDays(-retention.FreeLifeTimeDays);
         var paidThreshold = now.AddDays(-retention.PaidLifeTimeDays);
 
-        // A subscription that ended after this date still counts as paid: see PaidGracePeriodDays.
+        // A subscription that ended after this moment still counts as paid: see PaidGracePeriodDays.
         var paidGraceStart = now.AddDays(-retention.PaidGracePeriodDays);
 
         // Every batch is committed as it is deleted, so what a pass removed is counted as it goes and logged however
@@ -90,12 +85,19 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         // history it walks again every day, which removes nothing.
         var totals = new PassTotals();
 
+        // Set where the pass gives up because of the stop, not read from the token at the end: a stop that arrives
+        // after the last tenant is done leaves a complete pass. A pass that failed outside a tenant (the list of
+        // tenants could not be read) says so, rather than reading as a pass in which nothing qualified.
+        var stopped = false;
+        var failed = false;
+
         try
         {
             foreach (var tenantId in await GetTenantIdsToClearAsync(freeThreshold, stoppingToken))
             {
                 if (stoppingToken.IsCancellationRequested)
                 {
+                    stopped = true;
                     return;
                 }
 
@@ -113,10 +115,37 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
                 }
             }
         }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            stopped = true;
+            throw;
+        }
+        catch
+        {
+            // Rethrown to the hosting loop, which logs the exception itself; here only the summary learns of it.
+            failed = true;
+            throw;
+        }
         finally
         {
+            LogPass(totals, stopped, failed);
+        }
+    }
+
+    private void LogPass(PassTotals totals, bool stopped, bool failed)
+    {
+        if (failed)
+        {
+            logger.WarningPassFailed(Stopwatch.GetElapsedTime(totals.Started));
+        }
+        else if (totals.WalkedTenants == 0)
+        {
+            logger.InformationPassFinishedNoTenant(stopped, Stopwatch.GetElapsedTime(totals.Started));
+        }
+        else
+        {
             logger.InformationPassFinished(
-                stoppingToken.IsCancellationRequested,
+                stopped,
                 Stopwatch.GetElapsedTime(totals.Started),
                 totals.WalkedTenants,
                 totals.Pages,
@@ -173,8 +202,11 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
 
         try
         {
-            while (!stoppingToken.IsCancellationRequested)
+            while (true)
             {
+                // Thrown, not just a loop condition: a walk cut short by the stop must not read as a finished one.
+                stoppingToken.ThrowIfCancellationRequested();
+
                 // A page reads more than a batch deletes: its rows are keys, dates and history flags from the
                 // (tenant_id, date) index, cheap next to a delete, and most of them are history a pass walks past.
                 var events = await ef.AuditEventsOlderThanAsync(tenantId, threshold ?? freeThreshold, afterDate, afterId, retention.ReadPageSize).ToListAsync(stoppingToken);
@@ -250,7 +282,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
     }
 
     /// <summary>
-    /// Whether the tenant keeps the paid life time: its tariff is paid, in the payment delay, or ended after
+    /// Whether the tenant keeps the paid life time: its tariff is paid, in the payment delay, or became unpaid after
     /// <paramref name="paidGraceStart"/>, and is not on a free quota.
     /// </summary>
     private static async Task<bool> IsPaidAsync(IServiceProvider serviceProvider, int tenantId, DateTime paidGraceStart)
@@ -262,7 +294,7 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
         var paid = tariff.State switch
         {
             TariffState.Paid or TariffState.Delay => true,
-            TariffState.NotPaid => PaidUntil(tariff) >= paidGraceStart,
+            TariffState.NotPaid => NotPaidSince(tariff) > paidGraceStart,
             _ => false
         };
 
@@ -270,13 +302,19 @@ public sealed class AuditTrailCleaner(ILogger<AuditTrailCleaner> logger, IServic
     }
 
     /// <summary>
-    /// When an unpaid tariff stopped counting as paid: the end of its payment delay when it went through one, its
-    /// due date otherwise. A tariff that was never paid has no due date (<see cref="DateTime.MinValue"/>), so no
-    /// grace period reaches it.
+    /// The moment an unpaid tariff became unpaid: the midnight (UTC) after the last day of its payment delay when it
+    /// went through one, after its due date otherwise. The tariff service keeps a tariff paid, or in the delay, through
+    /// the whole of that last day (it compares dates, not moments), so the grace period counts from the midnight
+    /// after it, not from the day itself, and a period of N days is N whole days. A due date of
+    /// <see cref="DateTime.MinValue"/> gives <see cref="DateTime.MinValue"/>: no grace period reaches it. A tariff the
+    /// tariff service saved as unpaid without a payment, such as an ended trial on a quota that is not free, has a due
+    /// date like any other and gets the grace period too, which keeps its events at most that many days longer.
     /// </summary>
-    private static DateTime PaidUntil(Tariff tariff)
+    private static DateTime NotPaidSince(Tariff tariff)
     {
-        return tariff.DelayDueDate > tariff.DueDate && tariff.DelayDueDate != DateTime.MaxValue ? tariff.DelayDueDate : tariff.DueDate;
+        var lastDay = tariff.DelayDueDate > tariff.DueDate && tariff.DelayDueDate != DateTime.MaxValue ? tariff.DelayDueDate : tariff.DueDate;
+
+        return lastDay == DateTime.MinValue || lastDay.Date == DateTime.MaxValue.Date ? lastDay : lastDay.Date.AddDays(1);
     }
 
     /// <summary>What a pass has read and removed so far, across the tenants it has been through.</summary>

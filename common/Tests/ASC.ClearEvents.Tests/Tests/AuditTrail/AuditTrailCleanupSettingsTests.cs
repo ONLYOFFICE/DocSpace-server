@@ -147,7 +147,7 @@ public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest
 
     [Theory]
     [InlineData(-1)]
-    [InlineData(MaxLifeTimeDays + 1)]
+    [InlineData(AuditTrailRetentionConfiguration.MaxPaidGracePeriodDays + 1)]
     public async Task ClearAsync_UnusableGracePeriod_RemovesNothing(int paidGracePeriodDays)
     {
         // Arrange
@@ -176,34 +176,54 @@ public class AuditTrailCleanupSettingsTests(AspireAppFixture fixture) : BaseTest
     }
 
     [Fact]
-    public async Task ClearAsync_UnreadableSection_RemovesNothing()
+    public async Task ClearAsync_SectionWithAnUnreadableValue_RunsOnItsDefault()
     {
-        // Arrange
+        // Arrange: a period written as "1d", which used to stop the whole cleanup; it now keeps the default of a day.
         var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
 
-        var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(("enabled", "true"), ("period", "1d")));
+        var retention = AuditTrailRetentionConfiguration.Read(
+            RetentionSection.Of(("enabled", "true"), ("period", "1d")),
+            new RecordingLogger<AuditTrailCleanupSettingsTests>());
 
         // Act
         await RunCleanupAsync(retention);
 
         // Assert
-        (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
+        (await RemainingEventsAsync([expired])).Should().BeEmpty();
     }
 
     [Fact]
-    public async Task ClearAsync_EnabledThatDoesNotConvert_WarnsAndRemovesNothing()
+    public async Task ClearAsync_EnabledWrittenAsOne_Runs()
     {
-        // Arrange: a switch the binder does not read as a bool, which used to leave the cleanup off without a word.
+        // Arrange: a spelling a flag takes, which used to stop every pass instead. The other spellings are the
+        // Read tests' (AuditTrailRetentionReadTests): a pass here walks every portal of the database.
         var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
 
-        var retention = AuditTrailRetentionConfiguration.Read(RetentionSection.Of(("enabled", "1")));
-        var logger = new RecordingLogger<AuditTrailCleaner>();
+        var retention = AuditTrailRetentionConfiguration.Read(
+            RetentionSection.Of(("enabled", "1")),
+            new RecordingLogger<AuditTrailCleanupSettingsTests>());
 
         // Act
-        await Fixture.Cleaner.CreateCleaner(logger).ClearAsync(retention, TestContext.Current.CancellationToken);
+        await RunCleanupAsync(retention);
 
         // Assert
-        logger.Entries.Should().ContainSingle(e => e.Level == LogLevel.Warning && e.Has("sectionName"));
+        (await RemainingEventsAsync([expired])).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task ClearAsync_EnabledUnreadable_RemovesNothing()
+    {
+        // Arrange: a value that is no flag, which Read takes as off (the off spellings are the Read tests').
+        var expired = await SeedEventAsync(PaidLifeTimeDays + 30);
+
+        var retention = AuditTrailRetentionConfiguration.Read(
+            RetentionSection.Of(("enabled", "maybe")),
+            new RecordingLogger<AuditTrailCleanupSettingsTests>());
+
+        // Act
+        await RunCleanupAsync(retention);
+
+        // Assert
         (await RemainingEventsAsync([expired])).Should().BeEquivalentTo([expired]);
     }
 }

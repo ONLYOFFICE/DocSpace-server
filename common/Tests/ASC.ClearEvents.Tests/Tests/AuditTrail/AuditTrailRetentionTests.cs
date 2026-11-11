@@ -78,16 +78,39 @@ public class AuditTrailRetentionTests(AspireAppFixture fixture) : BaseTest(fixtu
         // only other event is part of a history; the portal is picked on every pass with nothing to remove.
         const int roomId = int.MaxValue - 1;
 
-        var inHistory = await SeedEventAsync(PaidLifeTimeDays * 3, roomId);
-        var newest = await SeedEventAsync(PaidLifeTimeDays * 2);
+        int inHistory, newest, lookups;
+        bool disturbed;
 
-        await RemoveEventsExceptAsync(inHistory, newest);
+        var deadline = DateTime.UtcNow.AddSeconds(LateEventDeadlineSeconds);
 
-        // Act
-        await RunCleanupAsync();
+        while (true)
+        {
+            inHistory = await SeedEventAsync(PaidLifeTimeDays * 3, roomId);
+            newest = await SeedEventAsync(PaidLifeTimeDays * 2);
+
+            await RemoveEventsExceptAsync(inHistory, newest);
+
+            var lookupsBefore = TestTariffs.LookupsOf(TenantId);
+
+            // Act
+            await RunCleanupAsync();
+
+            lookups = TestTariffs.LookupsOf(TenantId) - lookupsBefore;
+
+            // The services record the portal's registration in the audit trail after the request returns. An event
+            // that landed after the arrangement, before the pass reached this portal, is newer than the seeded one
+            // and takes its place: the run says nothing, and the case is arranged again until one is undisturbed.
+            disturbed = await LateEventArrivedAsync(TenantId, inHistory, newest);
+
+            if (!disturbed || DateTime.UtcNow >= deadline)
+            {
+                break;
+            }
+        }
 
         // Assert
-        TestTariffs.LookupsOf(TenantId).Should().Be(0, "an event the pass keeps anyway is no reason to look the tariff up");
+        disturbed.Should().BeFalse("a late event of the portal took the place of the seeded newest one in every run");
+        lookups.Should().Be(0, "an event the pass keeps anyway is no reason to look the tariff up");
         (await RemainingEventsAsync([inHistory, newest])).Should().BeEquivalentTo([inHistory, newest]);
     }
 
@@ -169,18 +192,55 @@ public class AuditTrailRetentionTests(AspireAppFixture fixture) : BaseTest(fixtu
         // registration wrote included, are all past every life time.
         using var idlePortal = await Fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
 
-        await AgeTenantAuditTrailAsync(idlePortal.TenantId, PaidLifeTimeDays * 2);
+        int older, newest;
+        bool disturbed;
 
-        var older = await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 60);
-        var newest = await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 30);
+        var deadline = DateTime.UtcNow.AddSeconds(LateEventDeadlineSeconds);
 
-        // Act
-        await RunCleanupAsync();
+        while (true)
+        {
+            older = await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 60);
+            newest = await SeedEventForTenantAsync(idlePortal.TenantId, PaidLifeTimeDays + 30);
+
+            // Aged past both seeded events, every other event of the portal is older than them.
+            await AgeEventsExceptAsync(idlePortal.TenantId, PaidLifeTimeDays * 2, older, newest);
+
+            // Act
+            await RunCleanupAsync();
+
+            // The services record the portal's registration in the audit trail after the request returns. An event
+            // that landed after the aging, before the pass reached this portal, is newer than the seeded one and
+            // takes its place: the run says nothing, and the case is arranged again until one is undisturbed.
+            disturbed = await LateEventArrivedAsync(idlePortal.TenantId, older, newest);
+
+            if (!disturbed || DateTime.UtcNow >= deadline)
+            {
+                break;
+            }
+        }
 
         // Assert: the portal retention policy counts from the newest event, and must not fall back to the creation
         // date because the cleanup took every event away. The event itself is checked, not the date of the last
-        // activity: an event the services wrote for the portal after it was aged would hold that date on its own.
+        // activity, which a late event would hold on its own.
+        disturbed.Should().BeFalse("a late event of the portal took the place of the seeded newest one in every run");
         (await RemainingEventsAsync([older, newest])).Should().BeEquivalentTo([newest], "the newest event of a portal is its last activity");
+    }
+
+    /// <summary>How long a case that a late event of its portal disturbed is arranged again.</summary>
+    private const int LateEventDeadlineSeconds = 60;
+
+    /// <summary>
+    /// Whether the services wrote an event for <paramref name="tenantId"/> that is newer than the seeded ones: one
+    /// dated within the free life time. Both callers have removed or aged every other event of the portal first,
+    /// the recent one <see cref="BaseTest"/> seeds included, so such an event can only have been written since.
+    /// </summary>
+    private async Task<bool> LateEventArrivedAsync(int tenantId, params int[] seeded)
+    {
+        var recent = DateTime.UtcNow.AddDays(-FreeLifeTimeDays);
+
+        await using var ef = await Fixture.Cleaner.CreateDbContextAsync(TestContext.Current.CancellationToken);
+
+        return await ef.AuditEvents.AnyAsync(r => r.TenantId == tenantId && !seeded.Contains(r.Id) && r.Date > recent, TestContext.Current.CancellationToken);
     }
 
     /// <summary>Removes every audit event of this portal but <paramref name="eventIds"/>.</summary>
@@ -191,5 +251,15 @@ public class AuditTrailRetentionTests(AspireAppFixture fixture) : BaseTest(fixtu
         await ef.AuditEvents
             .Where(r => r.TenantId == TenantId && !eventIds.Contains(r.Id))
             .ExecuteDeleteAsync(TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>Moves every audit event of <paramref name="tenantId"/> but <paramref name="eventIds"/> <paramref name="days"/> days back.</summary>
+    private async Task AgeEventsExceptAsync(int tenantId, int days, params int[] eventIds)
+    {
+        await using var ef = await Fixture.Cleaner.CreateDbContextAsync(TestContext.Current.CancellationToken);
+
+        await ef.AuditEvents
+            .Where(r => r.TenantId == tenantId && !eventIds.Contains(r.Id))
+            .ExecuteUpdateAsync(s => s.SetProperty(r => r.Date, r => r.Date.AddDays(-days)), TestContext.Current.CancellationToken);
     }
 }

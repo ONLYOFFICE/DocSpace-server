@@ -36,8 +36,6 @@ namespace ASC.ClearEvents.Services;
 [Singleton]
 public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<ClearAuditEventsService>
 {
-    private static readonly AuditTrailRetentionConfiguration _defaults = new();
-
     private readonly AuditTrailCleaner _cleaner;
     private readonly AuditTrailRetentionConfiguration _retention;
 
@@ -49,10 +47,20 @@ public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<Cle
         : base(logger, scopeFactory)
     {
         _cleaner = cleaner;
-        _retention = AuditTrailRetentionConfiguration.Read(configuration);
+        _retention = AuditTrailRetentionConfiguration.Read(configuration, logger);
 
-        // A period Task.Delay rejects would fault the background service, and with it the host, after the first pass.
-        ExecuteTaskPeriod = _retention.IsPeriodUsable ? _retention.Period : _defaults.Period;
+        if (!_retention.Enabled)
+        {
+            // Registered for an enabled value that could not be read; the warning above says which.
+            logger.WarningAuditTrailCleanupOff(AuditTrailRetentionConfiguration.SectionName);
+        }
+        else if (_retention.PaidGracePeriodDays == 0)
+        {
+            logger.InformationPaidGracePeriodOff(AuditTrailRetentionConfiguration.SectionName);
+        }
+
+        // Within MinPeriod..MaxPeriod, which Task.Delay accepts: Read keeps every value inside its bounds.
+        ExecuteTaskPeriod = _retention.Period;
     }
 
     protected override TimeSpan ExecuteTaskPeriod { get; set; }

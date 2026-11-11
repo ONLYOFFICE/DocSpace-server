@@ -68,13 +68,15 @@ public static class TestTariffs
     /// <remarks>
     /// The dates are those <see cref="ITariffService"/> computes: an unpaid tariff has its <paramref name="dueDate"/>
     /// in the past, a year ago unless given, and the end of its payment delay in <paramref name="delayDueDate"/> when it
-    /// went through one. Any other tariff is due at <see cref="DateTime.MaxValue"/> unless given.
+    /// went through one. Any other tariff is due at <see cref="DateTime.MaxValue"/> unless given. A tariff that went
+    /// through no delay keeps <see cref="DateTime.MaxValue"/> as its delay due date, as the tariff service creates it
+    /// (<c>CreateDefaultAsync</c>) and sets the date only on entering the delay (<c>CalculateTariffAsync</c>).
     /// </remarks>
     public static void Set(int tenantId, TariffState state, bool freeQuota = false, DateTime? dueDate = null, DateTime? delayDueDate = null)
     {
         var due = dueDate ?? (state == TariffState.NotPaid ? DateTime.UtcNow.Date.AddYears(-1) : DateTime.MaxValue);
 
-        _tariffs[tenantId] = new TestTariff(state, freeQuota, due, delayDueDate ?? DateTime.MinValue);
+        _tariffs[tenantId] = new TestTariff(state, freeQuota, due, delayDueDate ?? DateTime.MaxValue);
     }
 
     /// <summary>
@@ -88,7 +90,7 @@ public static class TestTariffs
 
     private static TestTariff Get(int tenantId)
     {
-        return _tariffs.TryGetValue(tenantId, out var tariff) ? tariff : new TestTariff(TariffState.Trial, true, DateTime.MaxValue, DateTime.MinValue);
+        return _tariffs.TryGetValue(tenantId, out var tariff) ? tariff : new TestTariff(TariffState.Trial, true, DateTime.MaxValue, DateTime.MaxValue);
     }
 
     private sealed record TestTariff(TariffState State, bool FreeQuota, DateTime DueDate, DateTime DelayDueDate);

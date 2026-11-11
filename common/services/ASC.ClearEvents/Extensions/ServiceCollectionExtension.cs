@@ -38,11 +38,10 @@ public static class ServiceCollectionExtension
     {
         services.AddHostedService<ClearEventsService>();
 
-        // Only when enabled: registered, the active/passive pair keeps an instance registration row up to date and
-        // has every passive replica poll it each second, for a pass that would return at once.
-        var retention = AuditTrailRetentionConfiguration.Read(configuration);
-
-        if (retention.Enabled)
+        // Only when asked for: registered, the active/passive pair keeps an instance registration row up to date and
+        // has every passive replica poll it each second. An unreadable enabled value is asked for too and pays that
+        // polling, so that the service logs why the cleanup stays off (IsRequested).
+        if (AuditTrailRetentionConfiguration.IsRequested(configuration))
         {
             services.AddActivePassiveHostedService<ClearAuditEventsService>(configuration);
         }
