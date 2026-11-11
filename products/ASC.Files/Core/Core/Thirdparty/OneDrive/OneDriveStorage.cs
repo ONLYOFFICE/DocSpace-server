@@ -192,6 +192,11 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 
     private async Task<Item> CopyItemAsync(string itemId, string newItemName, string toFolderId)
     {
+        // OneDrive copies on its own side after it has accepted the request, and a copy that does not fit
+        // fails there: the monitor reports it as a bare generalException, with no status or code that says
+        // why. So the space is checked before the copy starts; WriteAsync still covers a refused request.
+        await ThrowIfCopyDoesNotFitAsync(itemId);
+
         return await WriteAsync(async () =>
         {
             var copyMonitor = await OnedriveClient.Drive.Items[itemId]
@@ -230,6 +235,20 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         catch (Exception ex) when (ThirdPartyStorageQuota.IsOneDrive(ex))
         {
             throw ThirdPartyStorageQuota.CreateException(ex);
+        }
+    }
+
+    // A copy stays in the same drive, so it needs as much free space as the item takes (a folder's size is
+    // that of everything in it). A drive that reports no quota is not checked.
+    private async Task ThrowIfCopyDoesNotFitAsync(string itemId)
+    {
+        var item = await GetItemAsync(itemId);
+        var drive = await OnedriveClient.Drive.Request().GetAsync();
+
+        if (item?.Size is { } size && drive?.Quota?.Remaining is { } remaining && size > remaining)
+        {
+            throw ThirdPartyStorageQuota.CreateException(
+                new InvalidOperationException($"The copy of {itemId} needs {size} bytes, the drive has {remaining} left"));
         }
     }
 
