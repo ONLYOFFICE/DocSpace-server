@@ -395,9 +395,7 @@ public partial class SettingsController(
     /// plan of a SaaS portal lacks the statistics feature, the call returns 402. The call changes data. You can
     /// repeat it with the same body. If `enableQuota` is false, the portal does not apply the size to new rooms. A
     /// zero or negative size saves 0. It returns the saved settings, not the usage of rooms. The call returns 403 if
-    /// `defaultQuota` is not a JSON number. It returns 500 if the size is not a whole 64-bit number or exceeds the
-    /// portal storage quota. On a Standalone installation with a portal quota turned on, a size above that quota also
-    /// returns 500.
+    /// `defaultQuota` is not a JSON number.
     /// </remarks>
     /// <summary>
     /// Save the room quota settings
@@ -408,7 +406,6 @@ public partial class SettingsController(
     [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for room quotas")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
-    [SwaggerResponse(500, "The `defaultQuota` is not a whole number within the 64-bit range, or exceeds the portal's total storage quota or, on a Standalone installation with a portal-wide quota enabled, that quota")]
     [HttpPost("roomquotasettings")]
     public async Task<EntityQuotaSettingsDto> SaveRoomQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -463,9 +460,7 @@ public partial class SettingsController(
     /// plan of a SaaS portal lacks the statistics feature, the call returns 402. The call changes data. You can
     /// repeat it with the same body. If `enableQuota` is false, the portal does not apply the size to new agents. A
     /// zero or negative size saves 0. It returns the saved settings, not the usage of agents. The call returns 403 if
-    /// `defaultQuota` is not a JSON number. It returns 500 if the size is not a whole 64-bit number or exceeds the
-    /// portal storage quota. On a Standalone installation with a portal quota turned on, a size above that quota also
-    /// returns 500.
+    /// `defaultQuota` is not a JSON number.
     /// </remarks>
     /// <summary>
     /// Save the AI Agent quota settings
@@ -476,7 +471,6 @@ public partial class SettingsController(
     [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for AI agent quotas")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
-    [SwaggerResponse(500, "The `defaultQuota` is not a whole number within the 64-bit range, or exceeds the portal's total storage quota or, on a Standalone installation with a portal-wide quota enabled, that quota")]
     [HttpPost("aiagentquotasettings")]
     public async Task<EntityQuotaSettingsDto> SaveAiAgentQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -528,7 +522,7 @@ public partial class SettingsController(
     /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
     /// call changes data. You can repeat it with the same body. It returns the saved settings. To read them without
     /// signing in, use `GET api/2.0/settings/deeplink`. If the mode is not a defined value, the call returns 400 and
-    /// saves nothing. If the body has no `deepLinkSettings`, it returns 500.
+    /// saves nothing.
     /// </remarks>
     /// <summary>
     /// Configure the deep link settings
@@ -538,7 +532,6 @@ public partial class SettingsController(
     [SwaggerResponse(200, "Saved deep link handling settings", typeof(TenantDeepLinkSettingsDto))]
     [SwaggerResponse(400, "The handling mode is not one of the supported deep link handling values")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The request body has no `deepLinkSettings`")]
     [HttpPost("deeplink")]
     public async Task<TenantDeepLinkSettingsDto> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
@@ -664,14 +657,17 @@ public partial class SettingsController(
     /// <remarks>
     /// Returns the time zones of the server, with the IANA ID and the display name of each. The list always includes
     /// UTC and is sorted from the lowest UTC offset to the highest. Requires a DocSpace admin, or the confirmation
-    /// token of the setup wizard. Other callers are refused. The call is read-only. It returns the whole list without
-    /// paging. Use the returned `id` values where the portal asks for a time zone.
+    /// token of the setup wizard. Other signed-in users get 403. An invalid or expired token returns 401. The call is
+    /// read-only. It returns the whole list without paging. Use the returned `id` values where the portal asks for a
+    /// time zone.
     /// </remarks>
     /// <summary>Get time zones</summary>
     /// <path>api/2.0/settings/timezones</path>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Every time zone known to the host, with its IANA ID and display name", typeof(List<TimezoneDto>))]
+    [SwaggerResponse(401, "The caller is not signed in and sent no setup wizard token, or the token is invalid or expired")]
+    [SwaggerResponse(403, "The caller is signed in but is not a DocSpace admin and sent no setup wizard token")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
@@ -701,15 +697,17 @@ public partial class SettingsController(
 
     /// <remarks>
     /// Returns the host name of the current request, as its `Host` header states it. Sign the request with the
-    /// confirmation token of the setup wizard. Other callers are refused. Take the token from `wizardToken` of
-    /// `GET api/2.0/settings` before setup is complete. The call is read-only. The value is the name that the caller
-    /// connected to, such as the public name of a proxy. It can differ from the alias or the custom domain of the
-    /// portal.
+    /// confirmation token of the setup wizard. A signed-in user without the token gets 403, even a DocSpace admin. An
+    /// invalid or expired token returns 401. Take the token from `wizardToken` of `GET api/2.0/settings` before setup
+    /// is complete. The call is read-only. The value is the name that the caller connected to, such as the public
+    /// name of a proxy. It can differ from the alias or the custom domain of the portal.
     /// </remarks>
     /// <summary>Get the portal hostname</summary>
     /// <path>api/2.0/settings/machine</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Hostname the current request arrived on", typeof(string))]
+    [SwaggerResponse(401, "The caller is not signed in and sent no setup wizard token, or the token is invalid or expired")]
+    [SwaggerResponse(403, "The caller is signed in but sent no setup wizard token, whatever their role")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
@@ -722,10 +720,8 @@ public partial class SettingsController(
     /// Sets a custom domain for the portal on a Standalone installation, or removes it. The portal address then
     /// changes to that domain. If `enable` is false or the name is empty, the call removes the custom domain. On
     /// SaaS, the call returns 415. Requires the EditPortalSettings permission, which the portal owner and DocSpace
-    /// admins have. Other callers get 403. The call changes data. A repeated call with the same domain returns 500,
-    /// since this portal already uses it. After the change, CSP settings that named the old domain name the new one.
-    /// The call returns 500 if the installation hides the DNS settings, or the name is not a valid host name. It also
-    /// returns 500 for a name under the base domain, of a wrong length, reserved, or taken.
+    /// admins have. Other callers get 403. The call changes data. Do not repeat it with the same domain. After the
+    /// change, CSP settings that named the old domain name the new one.
     /// </remarks>
     /// <summary>Save the DNS settings</summary>
     /// <path>api/2.0/settings/dns</path>
@@ -733,7 +729,6 @@ public partial class SettingsController(
     [SwaggerResponse(200, "Confirmation that the DNS mapping was updated", typeof(string))]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(415, "The portal is not a Standalone installation, so a custom domain cannot be mapped")]
-    [SwaggerResponse(500, "The installation hides the DNS settings section, or the domain name is not a valid host name, lies under the portal's base domain, has a length outside the allowed range, is reserved, or is already the alias or mapped domain of a portal, this one included")]
     [HttpPut("dns")]
     public async Task<string> SaveDnsSettings(DnsSettingsRequestsDto inDto)
     {
@@ -808,10 +803,9 @@ public partial class SettingsController(
     /// the time zone. It also applies the license if the installation needs one. Sign the request with the
     /// confirmation token of the setup wizard. Its account also needs the EditPortalSettings permission. Otherwise,
     /// the call returns 403. Take the token from `wizardToken` of `GET api/2.0/settings` before setup is complete.
-    /// The call changes data. Do not repeat it. After setup is complete, a repeated call returns 500. If the email
-    /// changes, the owner must confirm the new address. It returns the wizard settings with `completed` set. The call
-    /// returns 400 if `email` or `passwordHash` is missing, the email is malformed, or the license starts later. It
-    /// returns 500 for an empty password, a rejected email, a wrong AMI instance ID, or a bad license.
+    /// The call changes data. Do not repeat it. If the email changes, the owner must confirm the new address. It
+    /// returns the wizard settings with `completed` set. The call returns 400 if `email` or `passwordHash` is missing,
+    /// the email is malformed, or the license starts later.
     /// </remarks>
     /// <summary>Complete the Wizard settings</summary>
     /// <path>api/2.0/settings/wizard/complete</path>
@@ -819,7 +813,6 @@ public partial class SettingsController(
     [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettingsDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, or the license's start date is in the future")]
     [SwaggerResponse(403, "The account the confirmation link was issued for has no portal-settings right")]
-    [SwaggerResponse(500, "The wizard is already completed, the AMI instance ID does not match, the email address fails the portal's check, the password is empty, or the license is missing, unreadable, rejected by validation or of the wrong type")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]

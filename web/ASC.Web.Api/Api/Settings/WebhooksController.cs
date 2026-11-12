@@ -98,8 +98,7 @@ public class WebhooksController(
     /// creator can see. The call returns 400 if `name` or `uri` is empty, a value is too long, or `uri` is not
     /// allowed. It also returns 400 if `uri` answers the HEAD request with an error code. It also returns 400 if
     /// `secretKey` breaks the password rules or your role does not allow a trigger. For user or group events,
-    /// `targetId` must name a user or group that you can see. If it does not, the call returns 400. If `uri` gives no
-    /// answer, or has an invalid certificate while `ssl` is `true`, the call returns 500.
+    /// `targetId` must name a user or group that you can see. If it does not, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Create a webhook
@@ -109,7 +108,6 @@ public class WebhooksController(
     [SwaggerResponse(200, "The created webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
     [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the creator may see has that ID")]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
-    [SwaggerResponse(500, "The target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while `ssl` is `true`")]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(CreateWebhooksConfigRequestsDto inDto)
     {
@@ -138,8 +136,7 @@ public class WebhooksController(
     /// the same body. A missing `name` or `uri` returns 400 before any other check. If no subscription has this `id`,
     /// the call returns 404 before the access check. Then the call checks the body as `POST api/2.0/settings/webhook`
     /// does. It checks the triggers against the role of the subscription's creator, not of the caller. If a check
-    /// fails, the call returns 400. If `uri` gives no answer, or has an invalid certificate while `ssl` is `true`,
-    /// the call returns 500. To turn a subscription on or off only, use `PUT api/2.0/settings/webhook/enable`.
+    /// fails, the call returns 400. To turn a subscription on or off only, use `PUT api/2.0/settings/webhook/enable`.
     /// </remarks>
     /// <summary>
     /// Update a webhook
@@ -150,7 +147,6 @@ public class WebhooksController(
     [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the subscription's creator may see has that ID")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
-    [SwaggerResponse(500, "The target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while `ssl` is `true`")]
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
@@ -209,8 +205,7 @@ public class WebhooksController(
     /// nothing. Turning it on checks the stored values again. The call sends a HEAD request to the stored address. It
     /// checks the stored secret against the current password rules. It checks the stored triggers against the current
     /// role of the subscription's creator. If any of these checks fails, the call returns 400. So you cannot turn on
-    /// a subscription whose target no longer works. Update the subscription first. If the stored address gives no
-    /// answer, or has an invalid certificate while `ssl` is `true`, the call returns 500.
+    /// a subscription whose target no longer works. Update the subscription first.
     /// </remarks>
     /// <summary>
     /// Switch a webhook on or off
@@ -221,7 +216,6 @@ public class WebhooksController(
     [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, although this call reads only `id` and `enabled`, or on switching on the saved target answers the HEAD request with a non-success code or the saved secret no longer passes the password rules, or a saved trigger is no longer open to the creator's role")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
-    [SwaggerResponse(500, "On switching on, the saved target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while the subscription has `ssl` set")]
     [HttpPut("webhook/enable")]
     public async Task<WebhooksConfigDto> EnableWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {

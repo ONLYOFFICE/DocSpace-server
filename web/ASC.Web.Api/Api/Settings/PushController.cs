@@ -50,14 +50,12 @@ public class PushController(
     /// returns the stored registration unchanged. It then ignores `isSubscribed`. To turn an existing registration on
     /// or off, use `PUT api/2.0/settings/push/docsubscribe`. In the response, `application` is always `doc`. Only a
     /// subscribed device gets room activity messages, such as an invitation to a room or a new document. The
-    /// installation also needs Firebase credentials to send them. If the token is longer than 255 characters, the
-    /// database can refuse it, and the call returns 500.
+    /// installation also needs Firebase credentials to send them. Send a token of at most 255 characters.
     /// </remarks>
     /// <summary>Register a push device</summary>
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "The stored device registration of the calling user, with the Firebase token, the `doc` application and the subscription state as they are kept", typeof(FirebaseDeviceDto))]
-    [SwaggerResponse(500, "The Firebase token is longer than 255 characters and the database refuses to store it, as PostgreSQL and MySQL in strict mode do")]
     [HttpPost("docregisterdevice")]
     public async Task<FirebaseDeviceDto> DocRegisterPusnNotificationDevice(FirebaseRequestsDto inDto)
     {

@@ -636,8 +636,7 @@ public class SecurityController(
     /// portal owner and DocSpace admins have. Other callers get 403. The call changes data for the whole portal, and
     /// you can repeat it with the same body. The call returns 400 for an unreadable body, an invalid address, or an
     /// entry with non-ASCII characters. It then saves nothing. It also returns 403 if the built header is larger than
-    /// the installation allows, 15 KB by default. If an entry is `null`, the call returns 500. To read the current
-    /// policy, use `GET api/2.0/security/csp`.
+    /// the installation allows, 15 KB by default. To read the current policy, use `GET api/2.0/security/csp`.
     /// </remarks>
     /// <summary>
     /// Configure CSP settings
@@ -647,7 +646,6 @@ public class SecurityController(
     [SwaggerResponse(200, "The stored domains and the policy header the portal now serves", typeof(CspDto))]
     [SwaggerResponse(400, "The request body cannot be read, or an entry of `domains` is not a valid address or holds non-ASCII characters")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator, or the built policy header exceeds the size allowed for the installation")]
-    [SwaggerResponse(500, "An entry of `domains` is `null`")]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpPost("csp")]
     public async Task<CspDto> ConfigureCsp(CspRequestsDto request)

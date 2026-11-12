@@ -56,9 +56,8 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// as Drive with offline access for Google. Its `state` points to the `thirdparty/{provider}/code` page of the
     /// portal. There, the provider returns the code, or an error if the user declines. Only Google, Dropbox,
     /// DocuSign, Box, OneDrive, WordPress, and GitHub produce a URL. For any other provider, the call returns 200
-    /// with no URL. If the provider is not a valid value, the call returns 400. If the installation does not
-    /// register the provider, the call returns 500. With `desktop=true` in the query, the call copies the query
-    /// string into `state` for the callback. This call does not exchange the code. To
+    /// with no URL. If the provider is not a valid value, the call returns 400. With `desktop=true` in the query, the
+    /// call copies the query string into `state` for the callback. This call does not exchange the code. To
     /// connect a storage account, pass the code as `token` to `POST api/2.0/files/thirdparty`.
     /// </remarks>
     /// <summary>
@@ -68,7 +67,6 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "The consent URL of the provider, ready to be opened in a browser; empty when the requested provider is not one of the seven this operation supports", typeof(string))]
     [SwaggerResponse(400, "The `provider` in the path is not one of the login provider names or numbers")]
-    [SwaggerResponse(500, "The provider is one of the seven supported ones but is not registered among the installation's authorization consumers")]
     [HttpGet("{provider}")]
     public string GetThirdPartyCode(ConfirmationCodeUrlRequestDto inDto)
     {

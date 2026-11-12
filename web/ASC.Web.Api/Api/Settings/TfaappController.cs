@@ -123,8 +123,7 @@ public class TfaappController(
     /// also generates the backup codes. It returns `true` for the first activation, and `false` if an app was already
     /// linked. If the authenticator method is off on the portal, the call checks no code and returns `false`. If the
     /// code is wrong, the call returns 400. If the account exceeds the portal login attempt limit within a minute, the
-    /// call returns 403. If `code` is empty or has only spaces, the call returns 500. The call works even when the
-    /// portal payment is overdue.
+    /// call returns 403. The call works even when the portal payment is overdue.
     /// </remarks>
     /// <summary>Validate the TFA code</summary>
     /// <path>api/2.0/settings/tfaapp/validate</path>
@@ -132,7 +131,6 @@ public class TfaappController(
     [SwaggerResponse(200, "`true` when the code completed a first activation and backup codes were generated, `false` when an application was already linked", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `code`, or the code matches neither the authenticator application nor an unused backup code")]
     [SwaggerResponse(403, "The account the confirmation link was issued for has used up the portal's login attempt limit for TFA codes")]
-    [SwaggerResponse(500, "The code is `null`, empty or consists of whitespace only")]
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth")]

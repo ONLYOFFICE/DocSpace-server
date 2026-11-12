@@ -112,7 +112,8 @@ public class AuthenticationController(
     /// `POST api/2.0/authentication/sendsms`. The call returns 401 for a wrong, empty, or expired code. It also
     /// returns 401 if the user has no second factor. After too many wrong codes, even a right code returns 401 for up
     /// to 10 minutes. A wrong password or an unknown user also returns 401. The call returns 403 for a disabled user
-    /// or too many failed password attempts. A rejected key in `confirmData` returns 404.
+    /// or too many failed password attempts. A rejected key in `confirmData` returns 404. If `confirmData.email` is
+    /// not an email address, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Authenticate a user by code
@@ -519,9 +520,9 @@ public class AuthenticationController(
     /// that link. Other callers get 401. An authentication token alone does not work here. The call saves the number as not activated. The number becomes activated when
     /// `POST api/2.0/authentication/{code}` accepts a code sent to it. If a code sent to this number is still valid,
     /// the call sends no new SMS. You can repeat it to change a number that is not activated yet. The answer has no
-    /// token. To send another code, use `POST api/2.0/authentication/sendsms`. If the user already has an activated
-    /// number, the call returns 500. An empty number also returns 500. If SMS codes are on for the user but the
-    /// portal cannot send them, the call returns 405. It still saves the number but sends no SMS.
+    /// token. To send another code, use `POST api/2.0/authentication/sendsms`. The call cannot change an activated
+    /// number. If SMS codes are on for the user but the portal cannot send them, the call returns 405. It still saves
+    /// the number but sends no SMS.
     /// </remarks>
     /// <summary>
     /// Set a mobile phone
@@ -554,7 +555,7 @@ public class AuthenticationController(
     /// `POST api/2.0/authentication` does. Anyone can call it without signing in. Each call sends another SMS and
     /// counts toward the SMS usage of the portal. Earlier codes stay valid until they expire, by default after 10
     /// minutes. The first accepted code cancels every code of the number. By default, a number gets at most 6 codes
-    /// in 10 minutes. You can repeat the call up to this limit. More calls return 500 until the codes expire. The
+    /// in 10 minutes. You can repeat the call up to this limit. After it, wait until the codes expire. The
     /// answer has no token. To finish the sign-in, send the code to `POST api/2.0/authentication/{code}`. The call
     /// returns 401 for a wrong password or an unknown user. It returns 403 for a disabled user or after too many
     /// failed attempts. A rejected key in `confirmData` returns 404. If the user has no stored phone number, the call

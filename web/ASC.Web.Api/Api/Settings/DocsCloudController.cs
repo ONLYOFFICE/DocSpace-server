@@ -72,9 +72,8 @@ public class DocsCloudController(
     /// `POST api/2.0/settings/docscloud/switchtodevpack`. The call returns 400 if the portal already has a Docs
     /// Connect trial, Docs Connect, or Docs Connect Dev Pack. It returns 402 if the tariff is delayed or not paid. It
     /// returns 403 if the billing service is not configured. If the installation has no Docs Connect trial quota, the
-    /// call returns 404. After a granted trial, the call can still return 403 or 500, and the trial stays granted. It
-    /// returns 403 if the server address makes the Content Security Policy header too long. It returns 500 if reading
-    /// the Docs Connect tenant fails.
+    /// call returns 404. After a granted trial, the call returns 403 if the server address makes the Content Security
+    /// Policy header too long. The trial then stays granted.
     /// </remarks>
     /// <summary>
     /// Start the Docs Connect trial
@@ -86,7 +85,6 @@ public class DocsCloudController(
     [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the trial cannot be started")]
     [SwaggerResponse(403, "The caller has no portal-settings right, the billing service is not configured, or the trial was granted but the address of the assigned Docs Connect server would push the Content Security Policy header over its size limit")]
     [SwaggerResponse(404, "The Docs Connect trial quota is not available on this installation")]
-    [SwaggerResponse(500, "The trial was granted, but reading the Docs Connect tenant afterwards failed: the Docs Connect service is not configured on this installation, has no tenant for the portal yet, is unreachable, or answered with an error")]
     [HttpPost("trial")]
     public async Task<bool> StartDocsCloudTrial()
     {
@@ -227,8 +225,7 @@ public class DocsCloudController(
     /// tenant yet. This is a normal state, not an error. So use this call to check if Docs Connect is active. To read
     /// the license, the configuration, the user quota, or the usage, use `GET api/2.0/settings/docscloud/tenant/info`,
     /// `GET api/2.0/settings/docscloud/tenant/config`, `GET api/2.0/settings/docscloud/tenant/quota`, or
-    /// `GET api/2.0/settings/docscloud/tenant/usage`. Each of them returns 400 while the portal has no tenant. The
-    /// call returns 500 if the Docs Connect service is not configured or fails.
+    /// `GET api/2.0/settings/docscloud/tenant/usage`. Each of them returns 400 while the portal has no tenant.
     /// </remarks>
     /// <summary>
     /// Get the Docs Connect tenant
@@ -238,7 +235,6 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "The Docs Connect tenant of the portal, or an empty result if no Docs Connect tenant is assigned to it", typeof(DocsCloudTenantDto))]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant")]
     public async Task<DocsCloudTenantDto> GetTenant(bool refresh = false)
     {
@@ -259,8 +255,7 @@ public class DocsCloudController(
     /// The dates in the result are in UTC. For one total of active users without the split by role, use
     /// `GET api/2.0/settings/docscloud/tenant/usage`. To read the configuration, the users counted, or the server
     /// address, use `GET api/2.0/settings/docscloud/tenant/config`, `GET api/2.0/settings/docscloud/tenant/quota`,
-    /// or `GET api/2.0/settings/docscloud/tenant`. The call returns 500 if the Docs Connect service is not configured
-    /// or fails.
+    /// or `GET api/2.0/settings/docscloud/tenant`.
     /// </remarks>
     /// <summary>
     /// Get the Docs Connect tenant information
@@ -271,7 +266,6 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The Docs Connect license and server information of the portal, with the user limits of the license and the usage statistics for the current period", typeof(DocsCloudTenantInfoDto))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no license information to return")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/info")]
     public async Task<DocsCloudTenantInfoDto> GetTenantInfo(bool refresh = false)
     {
@@ -311,8 +305,7 @@ public class DocsCloudController(
     /// `security.secret` field is a credential, so treat the response as sensitive. An empty or missing
     /// `ipFilter.rules` means that no address is restricted. To read the license, the server address, the users
     /// counted, or the usage, use `GET api/2.0/settings/docscloud/tenant/info`, `GET api/2.0/settings/docscloud/tenant`,
-    /// `GET api/2.0/settings/docscloud/tenant/quota`, or `GET api/2.0/settings/docscloud/tenant/usage`. The call
-    /// returns 500 if the Docs Connect service is not configured or fails.
+    /// `GET api/2.0/settings/docscloud/tenant/quota`, or `GET api/2.0/settings/docscloud/tenant/usage`.
     /// </remarks>
     /// <summary>
     /// Get the Docs Connect tenant configuration
@@ -323,7 +316,6 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The configuration of the Docs Connect tenant of the portal, with its security, server, WOPI and IP filter settings", typeof(DocsCloudConfigDto))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no configuration to return")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/config")]
     public async Task<DocsCloudConfigDto> GetTenantConfig(bool refresh = false)
     {
@@ -343,8 +335,7 @@ public class DocsCloudController(
     /// changes data, and you can repeat it with the same body. The next read returns the new values without
     /// `refresh=true`. The call changes only these settings, never the subscription, the user quota, or the license.
     /// It returns 400 if the body cannot be read, a text is too long, or `server.fileSizeLimit` is out of range. In
-    /// that case, nothing reaches Docs Connect. The call returns 500 if the Docs Connect service is not configured,
-    /// fails, or rejects the values.
+    /// that case, nothing reaches Docs Connect.
     /// </remarks>
     /// <summary>
     /// Update the Docs Connect tenant configuration
@@ -354,7 +345,6 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The configuration of the Docs Connect tenant as Docs Connect stored it after the update", typeof(DocsCloudConfigDto))]
     [SwaggerResponse(400, "The request body cannot be read, a text field is longer than 255 characters, the file size limit is outside 0-209715200 bytes, or the portal has no activated Docs Connect tenant")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found, including a rejection of the new values")]
     [HttpPut("tenant/config")]
     public async Task<DocsCloudConfigDto> UpdateTenantConfig(DocsCloudConfigRequestDto inDto)
     {
@@ -375,8 +365,7 @@ public class DocsCloudController(
     /// date and time as a string. Empty lists mean that no user is counted yet. For the license limits and the totals
     /// by role, use `GET api/2.0/settings/docscloud/tenant/info`. For one total of active users, use
     /// `GET api/2.0/settings/docscloud/tenant/usage`. To get the same lists as an "xlsx" file, use
-    /// `POST api/2.0/settings/docscloud/tenant/quota/report`. The call returns 500 if the Docs Connect service is not
-    /// configured or fails.
+    /// `POST api/2.0/settings/docscloud/tenant/quota/report`.
     /// </remarks>
     /// <summary>
     /// Get the Docs Connect tenant quota
@@ -387,7 +376,6 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The editor and viewer users of the Docs Connect tenant of the portal, with the expiration date of each entry", typeof(DocsCloudQuotaDto))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no user quota to return")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/quota")]
     public async Task<DocsCloudQuotaDto> GetTenantQuota(bool refresh = false)
     {
@@ -518,8 +506,7 @@ public class DocsCloudController(
     /// caches the answer for a minute. To read the current state from Docs Connect, pass `refresh=true`. The
     /// `activeCount` field is one total for the whole tenant, with no split by role and no limit. For the editor and
     /// viewer split with the license limits, use `GET api/2.0/settings/docscloud/tenant/info`. To list the counted
-    /// users one by one, use `GET api/2.0/settings/docscloud/tenant/quota`. The call returns 500 if the Docs Connect
-    /// service is not configured or fails.
+    /// users one by one, use `GET api/2.0/settings/docscloud/tenant/quota`.
     /// </remarks>
     /// <summary>
     /// Get the Docs Connect tenant usage
@@ -530,7 +517,6 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The number of active Docs Connect users of the portal and the date the count starts from", typeof(DocsCloudUsageDto))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no usage information to return")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/usage")]
     public async Task<DocsCloudUsageDto> GetTenantUsage(bool refresh = false)
     {

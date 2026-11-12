@@ -143,8 +143,8 @@ public class StorageController(
     /// The server generates the password and never returns it. To email every user before the portals go down, set
     /// `notifyUsers` to true. The call returns `true` when the run is queued. In a custom build, it returns `false` and
     /// starts nothing. The call returns 415 if the installation does not offer encryption. It also returns 415 if the
-    /// current portal uses a third-party storage or CDN. If a backup of any portal is running, the call returns 500. If
-    /// the portal is not paid, the call returns 402.
+    /// current portal uses a third-party storage or CDN. Start it only when no portal runs a backup. If the portal is
+    /// not paid, the call returns 402.
     /// </remarks>
     /// <summary>
     /// Start the storage encryption
@@ -155,7 +155,6 @@ public class StorageController(
     [SwaggerResponse(402, "The portal pricing plan does not include storage encryption")]
     [SwaggerResponse(403, "The caller may not edit portal settings, or this installation does not allow storage encryption")]
     [SwaggerResponse(415, "Storage encryption is not available on this installation, or the storage or the CDN of the current portal is a third-party provider")]
-    [SwaggerResponse(500, "A backup of one of the portals is still running")]
     [HttpPost("encryption/start")]
     public async Task<bool> StartStorageEncryption(StorageEncryptionRequestsDto inDto)
     {

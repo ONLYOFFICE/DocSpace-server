@@ -300,9 +300,8 @@ public class MigrationController(
     /// `POST api/2.0/migration/clear`. The clean-up deletes the job and the uploaded backup, and the imported data
     /// stays. The call returns an empty body. After it, `GET api/2.0/migration/status` returns an empty result. Also,
     /// `GET api/2.0/migration/logs` returns 404, so download the log first. You can repeat the call with `false`.
-    /// With `true`, a repeat can send the emails again or return 500. The call returns 500 if `isSendWelcomeEmail`
-    /// is true and the import is missing, still running, or stopped before creating users. It returns 400 if the body
-    /// has no `isSendWelcomeEmail`.
+    /// With `true`, do not repeat it. A repeat can send the emails again. It returns 400 if the body has no
+    /// `isSendWelcomeEmail`.
     /// </remarks>
     /// <summary>
     /// Finish migration
@@ -312,7 +311,6 @@ public class MigrationController(
     [SwaggerResponse(200, "The activation emails have been sent if they were asked for and the clean-up has been queued. The response carries no content")]
     [SwaggerResponse(400, "The request body cannot be read or has no `isSendWelcomeEmail`")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
-    [SwaggerResponse(500, "`isSendWelcomeEmail` is true and the portal holds no import that has reached the user step: no job at all, only a parse pass, or an import still running or stopped before that step")]
     [HttpPost("finish")]
     public async Task FinishMigration(FinishDto inDto)
     {

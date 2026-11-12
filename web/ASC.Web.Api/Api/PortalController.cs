@@ -954,8 +954,8 @@ public class PortalController(
     /// admin. The call also works while the portal is unpaid. A repeated call shortly after the email went out does
     /// nothing, and the links of the first email stay valid. The first link signs `PUT api/2.0/portal/suspend`, and
     /// the second signs `PUT api/2.0/portal/continue`. To delete the portal instead, use
-    /// `POST api/2.0/portal/delete`. On a server installation, the call returns 500 if every other space has limited
-    /// access. So you cannot deactivate the last space.
+    /// `POST api/2.0/portal/delete`. On a server installation, you cannot deactivate the last space. Spaces with
+    /// limited access do not count.
     /// </remarks>
     /// <summary>
     /// Send suspension instructions
@@ -964,7 +964,6 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The request is accepted: the deactivation letter is queued and the request recorded in the audit trail, unless the same letter already went out within the repeat period; the portal itself is still active and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
-    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [AllowNotPayment]
     [HttpPost("suspend")]
     public async Task SendSuspendInstructions()
@@ -998,8 +997,7 @@ public class PortalController(
     /// first email stays valid. If the portal has payments and is not on trial, the email also warns that the
     /// subscription stops renewing. The link signs `DELETE api/2.0/portal/delete`, which deletes the portal and
     /// cannot be undone. To deactivate the portal instead, use `POST api/2.0/portal/suspend`. On a server
-    /// installation, the call returns 500 if every other space has limited access. So you cannot delete the last
-    /// space.
+    /// installation, you cannot delete the last space. Spaces with limited access do not count.
     /// </remarks>
     /// <summary>
     /// Send removal instructions
@@ -1008,7 +1006,6 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The request is accepted, and the removal letter is queued unless one already went out within the repeat period; nothing about the portal has changed yet and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
-    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpPost("delete")]
     public async Task SendDeleteInstructions()
@@ -1117,8 +1114,8 @@ public class PortalController(
     /// The call also checks that the token belongs to the portal owner. Other callers get 403, including an ordinary
     /// sign-in token. The call changes data. After it, the portal refuses most calls, so a repeated call fails. To
     /// make the portal active again, use `PUT api/2.0/portal/continue` with the second link of the email. To delete
-    /// the portal for good, use `DELETE api/2.0/portal/delete`. On a server installation, the call returns 500 if
-    /// every other space has limited access. So you cannot deactivate the last space.
+    /// the portal for good, use `DELETE api/2.0/portal/delete`. On a server installation, you cannot deactivate the
+    /// last space. Spaces with limited access do not count.
     /// </remarks>
     /// <summary>
     /// Deactivate a portal
@@ -1127,7 +1124,6 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The portal is now suspended, its users can no longer work in it and its content is kept; the response carries no content")]
     [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
-    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [HttpPut("suspend")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortal()
@@ -1151,8 +1147,8 @@ public class PortalController(
     /// first start a backup with `POST api/2.0/backup/startbackup`. The call also works while the portal is unpaid.
     /// After it, the portal refuses all calls, so a repeated call fails. The portal emails the owner a confirmation.
     /// The call returns the absolute URL of a feedback form to send the owner to. To deactivate the portal instead,
-    /// use `POST api/2.0/portal/suspend`. On a server installation, the call returns 500 if every other space has
-    /// limited access. So you cannot delete the last space.
+    /// use `POST api/2.0/portal/suspend`. On a server installation, you cannot delete the last space. Spaces with
+    /// limited access do not count.
     /// </remarks>
     /// <summary>
     /// Delete a portal
@@ -1161,7 +1157,6 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The absolute URL of the feedback form to send the owner of the removed portal to", typeof(string))]
     [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
-    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]

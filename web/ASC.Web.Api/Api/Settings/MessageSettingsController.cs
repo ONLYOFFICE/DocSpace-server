@@ -155,9 +155,9 @@ public class MessageSettingsController(
     /// <remarks>
     /// Sends a message to the DocSpace admins from someone who cannot get into the portal. This is the contact form
     /// of the sign-in page. First, turn the form on with `POST api/2.0/settings/messagesettings`. While the portal's
-    /// payment has lapsed, the form works without that. If the form is turned off, the call returns 500. The
-    /// `enableAdmMess` field of `GET api/2.0/settings` shows whether the form works. Anyone can call it without
-    /// signing in. The call returns 400 if `email` is not a valid address or `message` is empty without its markup.
+    /// payment has lapsed, the form works without that. The `enableAdmMess` field of `GET api/2.0/settings` shows
+    /// whether the form works. Anyone can call it without signing in. The call returns 400 if `email` is not a valid
+    /// address or `message` is empty without its markup.
     /// If the caller is not signed in and the installation has a CAPTCHA, `recaptchaResponse` must carry a solved
     /// challenge. If it is missing or not accepted, the call returns 403. The call queues the letter to the admins
     /// subscribed to admin notifications. So a success means that the portal accepted the message, not that anyone
@@ -174,7 +174,6 @@ public class MessageSettingsController(
     [SwaggerResponse(400, "The request body cannot be read or has no `email` or `message`, the email address is malformed or longer than 255 characters, or the message is longer than 255 characters or empty once its markup is stripped")]
     [SwaggerResponse(403, "The caller is not signed in, the installation has a CAPTCHA configured, and `recaptchaResponse` is missing or not accepted")]
     [SwaggerResponse(429, "Too many contact attempts came from the same address within the rate-limit window")]
-    [SwaggerResponse(500, "The contact form is switched off and the portal's payment has not lapsed")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -229,8 +228,7 @@ public class MessageSettingsController(
     /// member only after following the link. The trusted-domain settings make the new member a user or a room admin.
     /// When the portal's paid places are taken, the new member is always a user. If the installation limits
     /// invitations, each sent email spends one of `invitationLimit`. A success returns a localized confirmation
-    /// message. Do not repeat the call. Each call sends another email. After 11 calls from one network address,
-    /// each within two minutes of the last, the call returns 500.
+    /// message. Do not repeat the call. Each call sends another email.
     /// </remarks>
     /// <summary>
     /// Send an invitation email
@@ -240,9 +238,7 @@ public class MessageSettingsController(
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "A localized message confirming that the invitation with the join link has been sent", typeof(string))]
     [SwaggerResponse(400, "The request body cannot be read or has no `email`, the email address is malformed, internationalized or longer than 255 characters, lies outside the trusted domains, or already belongs to a member of the portal")]
-    [SwaggerResponse(403, "The portal is not accepting requests while it is being restored, transferred or encrypted")]
     [SwaggerResponse(405, "The portal publishes no trusted-domain policy, so it has nothing to join")]
-    [SwaggerResponse(500, "Eleven invitation requests from the same network address have already been counted, each less than two minutes after the one before")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<string> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)
