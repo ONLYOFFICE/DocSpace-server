@@ -37,10 +37,10 @@ namespace ASC.Web.Api.Tests.Tests._07_Migration;
 /// GET /api/2.0/migration/list, GET /api/2.0/migration/status and GET /api/2.0/migration/logs
 /// on a fresh portal where nothing has ever been uploaded and no migration has ever run.
 ///
-/// POST /api/2.0/migration/init/{migratorName} (uploads a real migration archive), POST
-/// /api/2.0/migration/migrate, POST /api/2.0/migration/finish and POST /api/2.0/migration/cancel
-/// all depend on a migration that has actually been initialized by a background worker, which
-/// this suite cannot produce, so they are out of scope. POST /api/2.0/migration/clear is
+/// POST /api/2.0/migration/init/{migratorName} is covered for Nextcloud backups by
+/// <see cref="NextcloudParseTests"/>. POST /api/2.0/migration/migrate, POST
+/// /api/2.0/migration/finish and POST /api/2.0/migration/cancel import or stop a parsed backup
+/// and are out of scope here. POST /api/2.0/migration/clear is
 /// deterministic on a fresh portal (there is nothing to clear) but has no observable response to
 /// assert beyond "did not throw", which the SDK's <c>Task</c> return already covers with no need
 /// for a dedicated test.
