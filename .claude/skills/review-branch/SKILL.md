@@ -1,6 +1,6 @@
 ---
 name: review-branch
-description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new. USE FOR: review the branch, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
+description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new, and the author's self-review of a finished branch before it goes to review. USE FOR: review the branch, check my branch before review, self-review, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request, except after a self-review), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
 ---
 
 # Review a branch against the repo rules
@@ -10,7 +10,8 @@ The review answers two questions: **does the branch follow the rules written in 
 alternative designs, "I would have written it differently" — stays out unless a rule backs it.
 
 The review is read-only. Never edit product code, never commit, never switch branches, never
-touch submodule checkouts or the user's running DocSpace. Fixing is a separate request.
+touch submodule checkouts or the user's running DocSpace. Fixing is a separate request; the one
+exception is the author's self-review of their own branch (§0, §8 "Self-review").
 
 Report in the user's language. Section headings below are given in English; translate them along
 with the rest of the report.
@@ -24,6 +25,13 @@ with the rest of the report.
 - **Saturation** — "find all the findings", "why does every run find something new", "review until
   nothing is left". Go to §9: two independent full passes on one frozen sha and an estimate of what
   is still unfound.
+- **Self-review** — the author checks a branch they wrote before handing it to review: "check my
+  branch before review", "self-review", or a yes to the self-review that `CLAUDE.md` (Git Workflow)
+  has the author offer when a branch is finished. It is offered, not run on its own: a full run of
+  this skill with its reviewer agents is the user's call. Run it as a first review, against the
+  base the reviewer will use, with `--worktree` while the work is uncommitted. Only the end
+  differs: §8 "Self-review". A branch that has already had a review round is checked with §7
+  instead.
 
 One review covers **one sha**. While fix rounds keep landing, a fresh first review of the whole
 branch finds new things every time for two reasons that look the same in the report: bugs in the
@@ -71,12 +79,20 @@ merges of the base into the branch do not show up as branch changes. Read its he
   re-run with an explicit `--base`. **0 commits** — wrong branch or already merged: stop and say so.
 - **The tree is clean**, or the user asked for `--worktree`. Uncommitted changes are not in the
   scan otherwise — say which one you reviewed.
+- **No new file is left out.** `--worktree` sees tracked files only, and so does `git diff HEAD`: a
+  file the branch created but nobody added is reviewed by no one. The scan lists the untracked
+  files (`!! ... untracked file(s) are NOT scanned`). Offer the ones that belong to the branch to the
+  user as a list to `git add` — leave out what is clearly not its own, such as a folder another
+  branch left behind or a saved review — and re-scan once they are added. A file the user keeps
+  untracked goes under "Not verified".
 - **Remember `HEAD`'s sha.** Branches here move during a review (a merge of the base, a rename of
   a migration). Check it again before the report; if it moved, re-scan and say what the new commits
   changed.
 
 Then read the commit messages: they are the branch's **declared intent**, the yardstick for scope
-creep in §3.
+creep in §3, and claims to verify like code (§3 B "claims the branch writes"). Read the PR
+description too when the user gives it or it can be reached: the next reviewer starts from it, so
+one that no longer describes the branch is a finding.
 
 ## 2. The scan output is hints, not findings
 
@@ -95,10 +111,14 @@ is read in context. What each section is for:
 | Changed endpoints | not a finding by itself: the rows of the cross-cutting matrix (§3 A0) |
 | Stateful / background processing | the files reviewer G walks (§3 G) |
 | Size | how many chunks reviewers B, D, E and G are split into (§3 Coverage) |
+| New projects | an `!!` line: a project in neither `ASC.Web.slnx` nor `ASC.Tests.slnx` (a tool with a solution of its own is the exception), or a test project outside `products/` that `CLAUDE.md` does not name |
 | Possibly committed by accident | a review `.md`, a `.binlog`, `.env` committed by accident |
 
 Things `scan.py` cannot see and you must look for yourself: broken indentation left by a merge,
-`<summary>`/`<remarks>` swapped, a new project not added to `ASC.Web.slnx` / `ASC.Tests.slnx`.
+`<summary>`/`<remarks>` swapped, a list in `CLAUDE.md` the branch leaves incomplete (services, launch
+profiles; new projects are the scan's "New projects" section). Guarantee
+words in comments ("never", "only", "cannot") are not scanned for: on a real branch they give about a
+hundred hits, so §3 B checks the claims while reading instead.
 
 ## 3. Fan out reviewers
 
@@ -155,13 +175,15 @@ count with the search it used, so a short matrix is visible as short.
 |---|---|---|
 | M1 payload fill | property of every new or changed response, event or webhook DTO | which code fills it on the path that builds **this** DTO (not on another path of the same entity — a listing fills fields a plain DAO read does not); `never` is a finding |
 | M2 after-action effects | call of a notification, webhook, socket, event bus or index update after the action took effect | is a failure caught and logged so the request neither fails nor rolls back; is it built from the entry in the state it describes |
-| M3 config bounds | read of a configuration value (`IConfiguration`, a `*Settings` bound from config) | lower bound, upper bound, what 0 / negative / huge does |
+| M3 config bounds | read of a configuration value (`IConfiguration`, a `*Settings` bound from config) | lower bound, upper bound, what 0 / negative / huge does, read through `ConfigurationValueExtensions`; cite `[configuration.md §N]` |
 | M4 loop termination | retry, requeue, hand-back, re-schedule or polling loop | where it ends (count, age window, terminal state), and what happens when the step throws after its side effect |
 | M5 catch blocks | `catch` added or changed in the diff | is the exception logged, rethrown or deliberately dropped with a comment; can a second fault replace the first |
-| M6 stored columns | column added or written by the branch | backup declaration (`UserIDColumns`, `DateColumns`, `RelationInfo`), length vs column, both databases |
+| M6 stored columns | column added or written by the branch | backup declaration (`UserIDColumns`, `DateColumns`, `RelationInfo`), length vs column (MySQL only, §3 C) |
 | M7 out-of-band sources | call site of a cross-cutting publish outside controllers (jobs, handlers, editor callbacks) | is it declared where the contract lists such sources (`_otherSources` for webhooks, `socket-events.md` recipients) |
 
-A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
+M2, M4 and M5 are the reviewer side of `.claude/rules/failure-paths.md` (§3, §8, §7); a finding in
+them, or one of B or G that matches a section of that rule, cites it as `[failure-paths.md §N]`, so
+the author finds the rule behind it. A matrix replaces neither B nor E — it closes the classes it names. When a reviewer's finding turns
 out to be a class that has no matrix yet and can be enumerated, say so in the report as a candidate
 row for this table (the review itself edits nothing).
 
@@ -189,7 +211,7 @@ edit here. Distribute every applicable rule to a reviewer:
   operation/property; `<summary>` = title, `<remarks>` = description (inverted!), every code named
   in prose has a `[SwaggerResponse]`, realistic `<example>`, behavioural facts on the operation, not
   the property; for a shared DTO find every operation that binds it.
-- **A3** — `tests.md`, only if test files changed. One feature = one folder, class under ~24 cases,
+- **A3** — `tests.md`, only if test files changed. One feature = one folder, an integration-suite class under ~24 cases (a unit-test class has no limit),
   SDK not raw HTTP outside the carve-outs, `ApiException` assertions, `TestContext.Current.CancellationToken`,
   deadline polling (no fixed `Task.Delay` before an assert, no timeout token inside the loop),
   access matrices that match `FileSecurity.AvailableRoomAccesses`, `[Trait("Bug")]` instead of Skip.
@@ -203,10 +225,25 @@ edit here. Distribute every applicable rule to a reviewer:
 - **blast radius**: for every changed member whose meaning changed (`IsForm` began to mean "any
   PDF"), run `findReferences` and walk the call sites — security filters, share rights, DTO
   mapping, sockets. This is where the expensive findings are;
+- **texts made untrue by the change**: the code changed and the text that describes it did not. These
+  texts sit far from the change, so the diff does not show them:
+  - the `<remarks>` and the DTO `<summary>` of every action that reaches a member whose behaviour
+    changed (LSP `incomingCalls` up to the controllers), even when the controller is not in the diff.
+    A sentence that was true on the base and is false on the branch is an `openapi-endpoint-docs.md`
+    §5 "Untrue" finding of this branch ("each converted user gets a notification email" after the
+    branch began to suppress repeats);
+  - comments elsewhere that state the old invariant. Search the table name, the setting key or the
+    entity in comments (`audit_events` led to a comment in `PortalRetentionJob` saying only login
+    history is ever deleted);
+- **claims the branch writes**: check every guarantee in a new or changed comment, `<remarks>`, commit
+  message or PR description ("never", "always", "only", "cannot", "at most", "exactly once", "no
+  longer") against the code, the same way as a finding: true, true except for a window (name it), or
+  false. A commit that promises what its diff does not contain (bounds "rejected", a retry "bounded")
+  is a finding, and so are two sentences of one text that disagree;
 - **the other path of each change**: a default added on create — what does update do when the field
   is left out; a filter narrowed for one caller — what about the caller that relied on the old
-  result; a new column — rows written before it existed, archives taken before it existed, the
-  other database (`migrations/postgre`); a new failure mode — the success path and the opposite
+  result; a new column — rows written before it existed, archives taken before it existed; a new
+  failure mode — the success path and the opposite
   failure (a refused URL vs a DNS timeout);
 - **side effects after the primary action**: a notification, webhook, socket event or index update
   that runs after the action took effect must not fail the request or roll the action back — it is
@@ -223,10 +260,13 @@ edit here. Distribute every applicable rule to a reviewer:
 **C. Data, contract, infrastructure** — if the branch touches migrations, contract files,
 `*.csproj`/`*.props`, AppHost, submodules or `ASC.Data.Backup*`:
 
-- migrations: which of the four variants `migrations/{mysql,postgre}/{SaaS,Standalone}` changed
-  and whether that is justified (`db-migrations` skill; a standalone-only change can be
-  deliberate); `*.Designer.cs` and the model snapshot updated; ordering after the newest migration
-  in the base; no edit of an already-applied migration; a new table is wired into backup/restore;
+- migrations: which variants changed and whether that is justified (`db-migrations` skill; a
+  standalone-only change in `mysql/Standalone` can be deliberate). Only MySQL is migrated until full
+  PostgreSQL support is added: a migration without a `migrations/postgre` counterpart is not a
+  finding, and PostgreSQL does not go under "Not verified" for the DocSpace schema. Code that talks to
+  a PostgreSQL server of its own (the forms database) is reviewed as usual. `*.Designer.cs` and the
+  model snapshot updated; ordering after the newest migration in the base; no edit of an
+  already-applied migration; a new table is wired into backup/restore;
 - contract: a renamed/removed property, a `bool` → `bool?`, a changed route is a breaking change for
   the SDKs — were the spec and `sdk/*` submodule pointers updated, or is regeneration knowingly
   postponed? Is the submodule pointer in the branch the one tests were built against?
@@ -424,7 +464,10 @@ conversation). Re-scan (§1) and then:
    - does the fix add a loop, a requeue or a fallback — then §3 G "termination";
    - does it change what old data means (rows, archives, settings saved before it);
    - did it fix the **class** or only the cited line — run the finding's `siblings` again;
-   - does it come with a test that fails without it; a behavioural fix without one is a remark;
+   - does it come with a test that fails without it; a behavioural fix without one is a remark. Do
+     not judge that by reading the test: run `.claude/scripts/prove-red.sh --commit <fix sha>` with
+     the test's filter (`--patch` with the behavioural hunk when the test calls what the fix adds).
+     STILL GREEN is a finding. A run the stand does not allow goes under "Not verified";
    - run the class matrices (§3 M) over the fix diff: a fix commit adds rows like any other code.
 3. Give the fix commits to one more reviewer **without** the previous findings — the code only,
    with §3 B and G. A reviewer handed the earlier list checks that list; the fresh one finds what
@@ -432,6 +475,9 @@ conversation). Re-scan (§1) and then:
 4. Re-evaluate findings that were dropped or accepted earlier ("acceptable", "not from this
    branch") when a fix changed the code around them.
 5. If an earlier finding turns out to be wrong, say so plainly and withdraw it.
+6. Re-read the texts the fixes may have made stale (§3 B "texts made untrue", "claims"): the claims in
+   the earlier rounds' commits and comments, the remarks of the actions the fixed behaviour reaches,
+   and the PR description — does it still describe the branch after the rounds of fixes.
 
 ## 8. Report
 
@@ -479,6 +525,29 @@ End the file with a `Coverage` section the next run reads (§3 Coverage): the re
 the matrices built with their row counts, and the files no reviewer read in full. Every run of a
 branch saves one, also when the user did not ask for the findings: offer it in the closing line,
 since without it the next run cannot tell what is new from what was missed.
+
+### Self-review
+
+The findings go back to the author, who fixes them before anyone else reads the branch. This is
+the one mode that is followed by fixing without a separate request: the author asked for the check
+in order to fix what it finds. Reviewing someone else's branch stays read-only.
+
+1. Fix every finding in one batch (`fixing-findings.md`), then run §7 on that batch, once. Fix what
+   the re-check finds as well; a third pass only when the re-check found a blocker.
+   Uncommitted work has no fix commits for §7 to take: before fixing, save `git diff HEAD` to the
+   scratchpad (it holds the new files only once they are added, §1 "No new file is left out"; a
+   new file the fixes create is offered for `git add` the same way). The re-check then reads the
+   files the batch touched against that copy, gives the
+   fresh reviewer of §7 point 3 the difference, and proves a behavioural fix with `prove-red.sh
+   --patch` holding the fix's own hunk instead of `--commit`.
+2. A finding whose fix would change behaviour or scope the user did not ask for goes to the user as
+   a question, not into a silent fix.
+3. Write what the self-review could not verify (a suite it could not run, a platform, a profile)
+   under "Not verified" in the commit message or the PR description, or, when the author does not
+   commit, in the commit message proposed to the one who does: the reviewer starts there.
+4. Do not hand the findings list to the reviewer. A reviewer given a list checks that list (§7,
+   point 3); the reviewer runs a first review of their own. Save the file, when asked, as
+   `<branch-name-with-dashes>-self-review.md`, so that no later run takes it for a review round.
 
 ## 9. Saturation mode
 

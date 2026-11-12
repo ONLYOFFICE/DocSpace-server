@@ -31,10 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using HealthChecks.UI.Client;
-
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-
 using NLog;
 
 var options = new WebApplicationOptions
@@ -55,7 +51,7 @@ var logger = LogManager.Setup()
                                 s.RegisterLayoutRenderer("application-context", _ => AppName);
                             })
                             .LoadConfiguration(builder.Configuration, builder.Environment)
-                            .GetLogger("ASC.ClearEvents");
+                            .GetLogger(Namespace);
 
 try
 {
@@ -63,12 +59,9 @@ try
 
     builder.Host.ConfigureDefault();
 
-    if (builder.Configuration.GetValue<bool>("openTelemetry:enable"))
-    {
-        builder.ConfigureOpenTelemetry();
-    }
+    var startup = new Startup(builder.Configuration);
 
-    await builder.Services.AddClearEventsServices(builder.Configuration, Namespace);
+    await startup.ConfigureServices(builder);
 
     builder.Host.ConfigureContainer<ContainerBuilder>((context, containerBuilder) =>
     {
@@ -82,18 +75,7 @@ try
 
     var app = builder.Build();
 
-    app.UseRouting();
-
-    app.MapHealthChecks("/health", new HealthCheckOptions
-    {
-        Predicate = _ => true,
-        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
-    }).ShortCircuit();
-
-    app.MapHealthChecks("/liveness", new HealthCheckOptions
-    {
-        Predicate = r => r.Name.Contains("self")
-    });
+    startup.Configure(app);
 
     logger.Info("Starting web host ({applicationContext})...", AppName);
 
@@ -113,6 +95,6 @@ finally
 
 public partial class Program
 {
-    public static readonly string Namespace = "ASC.ClearEvents";
+    public static readonly string Namespace = typeof(Startup).Namespace;
     public static readonly string AppName = Namespace[(Namespace.LastIndexOf('.') + 1)..];
 }
