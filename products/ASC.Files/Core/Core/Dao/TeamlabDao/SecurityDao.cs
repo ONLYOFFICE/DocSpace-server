@@ -803,7 +803,7 @@ internal abstract class SecurityBaseDao<T>(
         // accepted only for a related one (CanUserShareAnotherUserAsync), so a guest met in a room only is not offered.
         if (knownToSubjects != null)
         {
-            q = FilterByKnownTo(q, tenantId, _authContext.CurrentAccount.ID, entryId, entry.FileEntryType, knownToSubjects, parentUserIds, filesDbContext);
+            q = FilterByKnownTo(q, tenantId, _authContext.CurrentAccount.ID, knownToSubjects, parentUserIds, filesDbContext);
         }
 
         if (employeeStatus.HasValue)
@@ -1013,9 +1013,11 @@ internal abstract class SecurityBaseDao<T>(
 
     /// <summary>
     /// Keeps the users the caller already works with: the owners and the members of the rooms it is in, directly or
-    /// through a group, the members of the groups added to those rooms, the accounts it is related to, and the users
-    /// who already have access to the entry. The owner of a room has no record of its own - it is the author of the
-    /// room folder - so it is read from there. Restricted access is no membership - neither a Restrict record of
+    /// through a group, the members of the groups added to those rooms, the accounts it is related to, and the accounts
+    /// in the access list of the entry as the caller sees it (<paramref name="parentUserIds"/>: the records on the entry
+    /// and its parent folders, empty unless the caller may manage that access). The records on the entry are never read
+    /// here on their own: a caller that may only read the entry would learn whom else it is shared with. The owner of a
+    /// room has no record of its own - it is the author of the room folder - so it is read from there. Restricted access is no membership - neither a Restrict record of
     /// its own nor one that takes a member of a group out of a room the group is in - and room templates are not
     /// rooms. Rooms on third-party storage are not taken into account: their records carry no internal folder id
     /// to check the room type by.
@@ -1037,8 +1039,6 @@ internal abstract class SecurityBaseDao<T>(
         IQueryable<User> q,
         int tenantId,
         Guid currentUserId,
-        string entryId,
-        FileEntryType entryType,
         IReadOnlyCollection<Guid> knownToSubjects,
         IEnumerable<Guid> parentUserIds,
         FilesDbContext filesDbContext)
@@ -1115,12 +1115,6 @@ internal abstract class SecurityBaseDao<T>(
                 .Contains(u.Id))
             .Select(u => u.Id);
 
-        var sharedUsers =
-            from s in filesDbContext.Security
-            join u in users on s.Subject equals u.Id
-            where s.TenantId == tenantId && s.EntryId == entryId && s.EntryType == entryType
-            select u.Id;
-
         var parentUsers = users
             .Where(u => parentUserIds.Contains(u.Id))
             .Select(u => u.Id);
@@ -1129,7 +1123,6 @@ internal abstract class SecurityBaseDao<T>(
             .Union(roomOwners)
             .Union(roomGroupMembers)
             .Union(relatedUsers)
-            .Union(sharedUsers)
             .Union(parentUsers);
 
         return q.Join(knownUsers, u => u.Id, id => id, (u, _) => u);

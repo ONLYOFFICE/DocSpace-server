@@ -269,6 +269,32 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
     }
 
     /// <summary>
+    /// The access list of a document is shown only to those who may manage that access, so a user that may only
+    /// read somebody's document is not offered the others it is shared with - that would hand it contacts it
+    /// has no access to.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUserWithReadAccess_DoesNotOfferOtherRecipients()
+    {
+        var reader = await InviteContact(EmployeeType.User);
+        var otherRecipient = await InviteContact(EmployeeType.User);
+        var fileId = await CreateFileInMyDocumentsAsync();
+
+        await _sharingApi.SetFileSecurityInfoAsync(
+            fileId,
+            new SecurityInfoSimpleRequestDto(
+                [new FileShareParams(reader.Id, FileShare.Read), new FileShareParams(otherRecipient.Id, FileShare.Read)],
+                notify: false),
+            TestContext.Current.CancellationToken);
+
+        var offered = await UsersOfferedForFileAsync(reader, fileId);
+
+        offered.Select(u => u.Id).Should().NotContain(otherRecipient.Id);
+    }
+
+    /// <summary>
     /// A share to a guest is accepted only when the caller is related to that guest, so a guest the user
     /// met in a room only is not offered either - it used to be offered and then silently dropped on save.
     /// </summary>
