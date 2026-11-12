@@ -87,6 +87,7 @@ global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FilesQuotaApi = DocSpace.API.SDK.Api.Files.QuotaApi;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
+global using FormSchemaFormatter = ASCAi::ASC.AI.Tools.Core.FormSchemaFormatter;
 global using LegacyProviderMapper = ASCAi::ASC.AI.Migration.LegacyProviderMapper;
 global using McpServerDto = ASCAi::ASC.AI.Models.ResponseDto.McpServerDto;
 global using MessageDto = ASCAi::ASC.AI.Models.ResponseDto.MessageDto;

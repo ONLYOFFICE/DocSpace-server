@@ -84,6 +84,14 @@ public static class Constants
     public const string EditorsContainer = "onlyoffice-editors";
     public const string OpensearchContainer = "opensearch";
     public const string OpensearchVersion = "3.5.0";
+
+    // The built-in forms database (ConnectionStrings:formsAdmin): PostgreSQL with pg_cron, set up as a server shared
+    // by portals of different owners needs it. The port keeps clear of a local PostgreSQL on 5432.
+    public const string FormsPostgresContainer = "forms-postgres";
+    public const string PostgresVersion = "17";
+    public const int FormsPostgresPort = 35432;
+    public const string FormsDatabase = "forms";
+    public const string FormsAdminUser = "forms_admin";
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
     public const string DocumentAgentContainer = "onlyoffice-document-agent";

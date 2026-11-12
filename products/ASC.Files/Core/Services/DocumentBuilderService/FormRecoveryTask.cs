@@ -225,7 +225,7 @@ public class FormRecoveryTask : DistributedTaskProgress
         }
 
         // The first report fills the empty file made for it, and each next one adds a version.
-        await recoveryService.SetReportVersionChangedAsync(_reportData.RoomId, _reportData.OriginalFormId, false);
+        await recoveryService.SetReportVersionChangedAsync(_reportData.OriginalFormId, false);
 
         for (var i = 0; i < olderVersions.Count; i++)
         {
@@ -249,7 +249,7 @@ public class FormRecoveryTask : DistributedTaskProgress
 
             // At once, so that the requested report never takes the file for a new one once a version is in it.
             _reportData = _reportData with { IsNewFile = false };
-            await recoveryService.SetReportVersionChangedAsync(_reportData.RoomId, _reportData.OriginalFormId, true);
+            await recoveryService.SetReportVersionChangedAsync(_reportData.OriginalFormId, true);
         }
     }
 

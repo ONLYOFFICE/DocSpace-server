@@ -180,7 +180,7 @@ AI-powered functionality: AI assistant integration, background AI processing, ge
 **Ports:** 5157 (Server), 5154 (Worker)
 
 #### ASC.AppHost — Aspire Orchestrator
-.NET Aspire host that orchestrates all services and infrastructure: service discovery, Docker container management (MySQL, Redis, RabbitMQ, OpenSearch), development tools (MailPit, DBGate, RedisInsight).
+.NET Aspire host that orchestrates all services and infrastructure: service discovery, Docker container management (MySQL, the PostgreSQL of the built-in forms database, Redis, RabbitMQ, OpenSearch), development tools (MailPit, DBGate, RedisInsight).
 
 ### Event Bus
 
@@ -332,6 +332,7 @@ $c = docker ps -a --format '{{.Names}}' | Where-Object { $_ -match 'mysql|redis|
 | SSO Auth | 9834 | SSO authentication |
 | WebDAV | 1900 | WebDAV protocol |
 | MySQL | 3306 | Database server |
+| PostgreSQL (forms) | 35432 | Built-in forms database (`ConnectionStrings:formsAdmin`): the read-only portal roles cannot load the server |
 | Redis | 6379 | Cache server |
 | RabbitMQ | 5672, 15672 | Message broker + Management UI |
 | OpenSearch | 9200, 9600 | Search engine |
