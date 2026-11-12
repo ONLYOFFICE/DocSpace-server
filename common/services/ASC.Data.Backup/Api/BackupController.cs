@@ -144,7 +144,6 @@ public class BackupController(
     [SwaggerResponse(402, "The portal subscription does not cover scheduled backups, has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder was not found")]
-    [SwaggerResponse(500, "A key or value of `storageParams` is null, or `Local` storage was requested on a portal that is not a standalone installation")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(CreateBackupScheduleRequestDto inDto)
     {
@@ -243,7 +242,6 @@ public class BackupController(
     [SwaggerResponse(402, "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder or the backup quota was not found")]
-    [SwaggerResponse(500, "`Local` storage has no `filePath` or was requested on a portal that is not a standalone installation")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgressDto> StartBackup(StartBackupRequestDto inDto, [FromServices] TenantQuotaController quotaController)
@@ -526,14 +524,15 @@ public class BackupController(
     /// <remarks>
     /// Starts restoring the portal from a backup and returns the queued job. The restore replaces the current
     /// data of the portal. The source is a backup from the history, or a file in `storageParams` if `backupId`
-    /// is not a GUID. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins
-    /// have. Other callers get 403. With `dump`, a caller without the space access permission also gets 403.
-    /// The call queues work and cannot be undone. While the restore runs, most API calls return 403. To follow
-    /// the job, poll `GET api/2.0/backup/getrestoreprogress` until `isCompleted` is true. You cannot cancel a
-    /// restore through the API. A repeated call during the restore returns 403 or the running job. If the plan
-    /// does not allow restoring, the call returns 402. The call returns 400 if `backupId` is missing, or it is
-    /// not a GUID and `storageParams` has no `filePath`. It also returns 400 if an item of `storageParams` has
-    /// no key or value, or repeats a key. The call returns 404 if the backup, the file, or its folder does not
+    /// is not a GUID. An all-zero `backupId` selects no backup, so the job fails. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403.
+    /// With `dump`, a caller without the space access permission also gets 403. The call queues work and
+    /// cannot be undone. While the restore runs, most API calls return 403. To follow the job, poll
+    /// `GET api/2.0/backup/getrestoreprogress` until `isCompleted` is true. You cannot cancel a restore
+    /// through the API. A repeated call during the restore returns 403 or the running job. If the plan does
+    /// not allow restoring, the call returns 402. The call returns 400 if `backupId` is missing, or it is not
+    /// a GUID and `storageParams` has no `filePath`. It also returns 400 if an item of `storageParams` has no
+    /// key or value, or repeats a key. The call returns 404 if the backup, the file, or its folder does not
     /// exist. For `Local` storage, a missing uploaded archive also returns 404. It returns 403 if you cannot
     /// create files in the folder of the backup file.
     /// </remarks>

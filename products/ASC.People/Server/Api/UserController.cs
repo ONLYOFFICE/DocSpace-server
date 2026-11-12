@@ -236,13 +236,14 @@ public class UserController(
     /// room admin can create a user, and a DocSpace admin can also create a room admin. Only the portal owner can
     /// create a DocSpace admin. Other callers get 403. Without a link, the `Guest` type also returns 403. The call also
     /// returns 403 if the portal does not allow inviting members, or guests for a guest link. The call changes data. A
-    /// repeated call with the same email returns 400. If `password` breaks the portal password policy, the call
-    /// returns 400. It also returns 400 if the first and last names are not valid. Without `password` and
-    /// `passwordHash`, the portal sets a random password that nobody knows. If the portal has no free paid seat, the
-    /// call still creates the account, as a user. So check the type flags of the returned profile, such as
-    /// `isRoomAdmin`. The call also downloads the avatar from `files`. If the portal refuses that URL or its server
-    /// returns an error, the call returns 403. If the download fails in another way, the call returns 500. In both
-    /// cases, the account already exists. To invite several people by email, use `POST api/2.0/people/invite`.
+    /// repeated call with the same email returns 400. With an invitation link that `POST api/2.0/people/invite`
+    /// emailed, a repeat returns 403. If `password` breaks the portal password policy, the call returns 400. It also
+    /// returns 400 if the first and last names are not valid. Without `password` and `passwordHash`, the portal sets a
+    /// random password that nobody knows. If the portal has no free paid seat, the call still creates the account, as a
+    /// user. So check the type flags of the returned profile, such as `isRoomAdmin`. The call also downloads the avatar
+    /// from `files`. If the portal refuses that URL, the call returns 403 and creates no account. If its server returns
+    /// an error, the call also returns 403. Any failed download keeps the created account. To invite several people by
+    /// email, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Add a user
@@ -253,7 +254,6 @@ public class UserController(
     [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The password does not meet the portal password policy")]
     [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created")]
-    [SwaggerResponse(500, "The `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size; the account is created all the same")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -436,13 +436,14 @@ public class UserController(
     /// can invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal
     /// that does not allow inviting members also return 403. For an address that already has an account, the call
     /// sends no email. It links that account to the caller and raises its type if needed. The call changes data. A
-    /// repeated call sends no new emails, since the accounts then exist. If the pending account was deleted, a new
-    /// invitation to its address soon after the first sends no email. The first link still works. If the invitations
-    /// need more paid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400
-    /// for a malformed or punycode address, or for the address of a disabled account. The call handles the addresses
-    /// in order. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending
-    /// account that the caller can see, not only the new ones. The portal limits the rate of these calls. To send an
-    /// invitation again, use `PUT api/2.0/people/invite`.
+    /// repeated call sends no new emails, since the accounts then exist. Its seat check still counts each room admin
+    /// and DocSpace admin in the body. So a repeat can return 402. If the pending account was deleted, a new invitation
+    /// to its address soon after the first sends no email. The first link still works. If the invitations need more
+    /// paid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400 for a
+    /// malformed or punycode address, or for the address of a disabled account. The call handles the addresses in
+    /// order. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending account
+    /// that the caller can see, not only the new ones. The portal limits the rate of these calls. To send an invitation
+    /// again, use `PUT api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Invite users
@@ -569,8 +570,9 @@ public class UserController(
     /// must be `Active`. Otherwise the call returns 403. Only the portal owner can set the password of the portal
     /// owner. If no account has the ID, the call returns 404. Send `passwordHash`, or a plain `password` that the call
     /// checks against the password policy. The call returns 400 if both are missing or the policy rejects the password.
-    /// The call changes data, and a repeated call with the same token returns 401. It ends the other sessions of the
-    /// account and emails it a notice about the change. To get the recovery link, use `POST api/2.0/people/password`.
+    /// The call changes data. A repeated call with the token of a password change link returns 401. With the token of
+    /// an activation link, a repeat with the same password returns 400. It ends the other sessions of the account and
+    /// emails it a notice about the change. To get the recovery link, use `POST api/2.0/people/password`.
     /// </remarks>
     /// <summary>Change a user password</summary>
     /// <path>api/2.0/people/{userId}/password</path>
@@ -652,12 +654,12 @@ public class UserController(
 
     /// <remarks>
     /// Sets a new email address for an account. This is the last step of an email change. Sign the request with the
-    /// confirmation token from the emailed link. An expired or used token returns 401. The account must be `Active`.
-    /// Otherwise the call returns 403. Only the portal owner can change the address of the portal owner. If no account
+    /// confirmation token from the emailed link. An expired token, or the token of an earlier link, returns 401. The
+    /// account must be `Active`. Otherwise the call returns 403. Only the portal owner can change the address of the portal owner. If no account
     /// has the ID, the call returns 404. Pass the address in `email`, or encrypted in `encEmail` as the link has it.
-    /// The call returns 400 if the address is empty or malformed. The call changes data, and a repeated call with the
-    /// same token returns 401. It saves a new address in lowercase and marks the account `Activated`. An address equal
-    /// to the current one changes nothing. To send the link, use `POST api/2.0/people/email`.
+    /// The call returns 400 if the address is empty or malformed. The call changes data. You can repeat it with the
+    /// same body and token. It saves a new address in lowercase and marks the account `Activated`. An address equal to
+    /// the current one changes nothing. To send the link, use `POST api/2.0/people/email`.
     /// </remarks>
     /// <summary>Change a user email</summary>
     /// <path>api/2.0/people/{userId}/email</path>
@@ -731,9 +733,8 @@ public class UserController(
     /// and OAuth apps. A queued job then deletes its data. To track the job, use
     /// `GET api/2.0/people/remove/progress/{userId}`. If the account shared files from its own section, the job moves
     /// them to a new folder of the caller. To move rooms and shared files to another user first, use
-    /// `POST api/2.0/people/reassign/start`. If a reassignment of the account has not finished, the call returns 500.
-    /// The call returns the profile as it was before the deletion. To delete several accounts, use
-    /// `PUT api/2.0/people/delete`.
+    /// `POST api/2.0/people/reassign/start`. The call returns the profile as it was before the deletion. To delete
+    /// several accounts, use `PUT api/2.0/people/delete`.
     /// </remarks>
     /// <summary>
     /// Delete a user
@@ -745,7 +746,6 @@ public class UserController(
     [SwaggerResponse(200, "The profile as it was just before it was deleted", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, the caller may not delete a DocSpace administrator, or the OAuth service refused to remove the OAuth clients of the account")]
     [SwaggerResponse(404, "No user has the specified ID")]
-    [SwaggerResponse(500, "A reassignment of the data of the account has not finished yet, or the OAuth service cannot be reached")]
     [HttpDelete("{userId}")]
     public async Task<EmployeeFullDto> DeleteMember(GetMemberByIdRequestDto inDto)
     {
@@ -814,11 +814,11 @@ public class UserController(
     /// Disables the account of the caller at the request of its owner. This is the second step of self-removal. The
     /// first step, `PUT api/2.0/people/self/delete`, emails the confirmation link. Sign the request with the
     /// confirmation token from that link. The portal owner and an LDAP account get 403. If the account no longer
-    /// exists, the call returns 404. The call changes data. Do not repeat it. It sets the `Terminated` status, ends all
-    /// sessions of the account, and notifies the DocSpace admins. The account then cannot sign in. The call keeps its
-    /// rooms, files, and group memberships. A DocSpace admin can then delete the account with
-    /// `DELETE api/2.0/people/{userId}`. Until then, `PUT api/2.0/people/status/{status}` can enable it again. The call
-    /// returns the profile with the new status.
+    /// exists, the call returns 404. The call changes data, and a repeated call with the same token returns 401. It
+    /// sets the `Terminated` status, ends all sessions of the account, and notifies the DocSpace admins. The account
+    /// then cannot sign in. The call keeps its rooms, files, and group memberships. A DocSpace admin can then delete
+    /// the account with `DELETE api/2.0/people/{userId}`. Until then, `PUT api/2.0/people/status/{status}` can enable
+    /// it again. The call returns the profile with the new status.
     /// </remarks>
     /// <summary>
     /// Close my own profile
@@ -1032,9 +1032,8 @@ public class UserController(
     /// Searches the accounts with the status from the route. The term in `query` must be in the name, user name, email,
     /// or contacts. Requires a DocSpace admin. Other callers get 403, including a room admin. The call is read-only. It
     /// matches the term as a substring and ignores case. If `query` is missing, the call returns 400. With `filterBy`
-    /// set to `group`, `filterValue` is a group ID. The call then keeps only the members of that group. If that value
-    /// is not a valid ID, the call returns 500. The list has no paging, no total, and no fixed order. For a page with a
-    /// total, use `GET api/2.0/people/filter`.
+    /// set to `group`, `filterValue` is a group ID. The call then keeps only the members of that group. The list has no
+    /// paging, no total, and no fixed order. For a page with a total, use `GET api/2.0/people/filter`.
     /// </remarks>
     /// <summary>
     /// Search users by status filter
@@ -1045,7 +1044,6 @@ public class UserController(
     [SwaggerResponse(200, "The full profiles of the matching accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "A parameter has the wrong type, or `query` is missing")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
-    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByStatus(AdvancedSearchDto inDto)
     {
@@ -1081,8 +1079,7 @@ public class UserController(
     /// admin, or an admin of the People module. Other callers get 403. The call is read-only. The response has the
     /// total number of matches. If `count` is out of range, the call returns 400. With `filterBy` set to `group`,
     /// `filterValue` is a group ID. The call then also matches that ID against names and emails, so it usually finds
-    /// nothing. If the value is not a valid ID, the call returns 500. To filter by group, use
-    /// `GET api/2.0/people/filter` with `groupId`.
+    /// nothing. To filter by group, use `GET api/2.0/people/filter` with `groupId`.
     /// </remarks>
     /// <summary>
     /// Get the active profiles
@@ -1093,7 +1090,6 @@ public class UserController(
     [SwaggerResponse(200, "A page of active accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
-    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet]
     public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles(GetAllProfilesRequestDto inDto)
     {
@@ -1254,9 +1250,8 @@ public class UserController(
     /// DocSpace admin, or an admin of the People module. Other callers get 403. The call is read-only. The response has
     /// the total number of matches. If `count` is out of range, the call returns 400. The call filters the accounts by
     /// name and email with `filterValue`. With `filterBy` set to `group`, `filterValue` is also a group ID. The call
-    /// then matches that ID against names and emails too, so it usually finds nothing. If the value is not a valid ID,
-    /// the call returns 500. To filter by group, use `GET api/2.0/people/filter` with `groupId`. For active accounts
-    /// only, the same call is `GET api/2.0/people`.
+    /// then matches that ID against names and emails too, so it usually finds nothing. To filter by group, use
+    /// `GET api/2.0/people/filter` with `groupId`. For active accounts only, the same call is `GET api/2.0/people`.
     /// </remarks>
     /// <summary>
     /// Get profiles by status
@@ -1267,7 +1262,6 @@ public class UserController(
     [SwaggerResponse(200, "A page of accounts in the requested state, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
-    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
@@ -1476,12 +1470,13 @@ public class UserController(
     /// status of `PUT api/2.0/people/status/{status}`. If any listed account is still active, the call returns 403 and
     /// deletes nothing. Requires a DocSpace admin. Other callers get 403. Only the portal owner can delete a DocSpace
     /// admin. The call skips the others without an error. It ignores system and LDAP accounts and leaves them out of
-    /// the response. The call cannot be undone. Do not repeat it. The call returns the listed accounts, including the
-    /// skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`. A queued job
-    /// deletes the data of each account. To track it, use `GET api/2.0/people/remove/progress/{userId}`. If an account
-    /// shared files from its own section, the job moves them to a new folder of the caller. To move rooms and shared
-    /// files to another user first, use `POST api/2.0/people/reassign/start`. If a reassignment of a listed account has
-    /// not finished, the call returns 500. If `userIds` is missing, the call returns 400.
+    /// the response. The call cannot be undone, and a repeated call returns 403. A deleted or unknown account ID also
+    /// returns 403. If the call skipped every account, a repeat changes nothing. The call returns the listed accounts,
+    /// including the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.
+    /// A queued job deletes the data of each account. To track it, use `GET api/2.0/people/remove/progress/{userId}`.
+    /// If an account shared files from its own section, the job moves them to a new folder of the caller. To move rooms
+    /// and shared files to another user first, use `POST api/2.0/people/reassign/start`. If `userIds` is missing, the
+    /// call returns 400.
     /// </remarks>
     /// <summary>
     /// Delete users
@@ -1494,7 +1489,6 @@ public class UserController(
     [SwaggerResponse(200, "Every account that was asked for, including the ones that were skipped", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The userIds field is missing")]
     [SwaggerResponse(403, "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account")]
-    [SwaggerResponse(500, "A reassignment of the data of one of the listed accounts has not finished yet, or the OAuth service cannot be reached")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -1560,11 +1554,11 @@ public class UserController(
     /// admin for this mode. Other callers get 403. Without it, the call reaches only the listed accounts. A user or a
     /// guest can list only their own ID, and other IDs return 403. A pending invitation gets a new invitation link.
     /// An account that has not confirmed its email gets activation instructions. The call skips active and disabled
-    /// accounts, and accounts the caller cannot invite, without an error. The call changes data and sends emails. An
-    /// account that got this email a short while ago gets no new one, and its link stays valid. So you can repeat the
-    /// call, but a repeat sends nothing new. The response lists only the targeted accounts that the caller can see.
-    /// So it is not a delivery report. If `userIds` is missing and `resendAll` is false, the call returns 400. To
-    /// invite a new address, use `POST api/2.0/people/invite`.
+    /// accounts, and accounts the caller cannot invite, without an error. The call changes data and sends emails. By
+    /// default, an account that got this email in the last 10 minutes gets no new one. Its earlier link stays valid. So
+    /// you can repeat the call. A later repeat sends the emails again. The response lists only the targeted accounts
+    /// that the caller can see. So it is not a delivery report. If `userIds` is missing and `resendAll` is false, the
+    /// call returns 400. To invite a new address, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Resend activation emails
@@ -1840,9 +1834,9 @@ public class UserController(
     /// account requires a DocSpace admin, and other callers get 403. Only the portal owner can change the address of
     /// the portal owner. The same applies to another DocSpace admin. If the account does not exist, is disabled, or
     /// is a pending invitation, the call returns 404. The call returns 400 if the address is empty or malformed. It
-    /// also returns 400 if any account has the address, even this one. The call changes data. A repeated call sends
-    /// the link again, or returns 400 for a DocSpace admin. The portal limits the rate of these calls. It returns a
-    /// message for the user with the address.
+    /// also returns 400 if any account has the address, even this one. The call changes data. A repeated call by a
+    /// DocSpace admin returns 400. For other callers, each call emails a new link, and the earlier link stops working.
+    /// The portal limits the rate of these calls. It returns a message for the user with the address.
     /// </remarks>
     /// <summary>
     /// Send instructions to change email
@@ -1949,9 +1943,10 @@ public class UserController(
     /// account. A DocSpace admin can also ask for other accounts, except the portal owner. Only the portal owner can
     /// ask for another DocSpace admin. Other signed-in callers get 403. A signed-in caller also gets 403 if the account
     /// is missing or disabled. The same applies to an LDAP or SSO account, or one with a generated email. If `email` is
-    /// missing, malformed, or too long, the call returns 400. The call changes no data. A repeated call sends the email
-    /// again. The portal limits the rate of these calls. The link leads to `PUT api/2.0/people/{userId}/password`,
-    /// which sets the new password. The email never contains a password.
+    /// missing, malformed, or too long, the call returns 400. The call changes data, but not the password. Do not
+    /// repeat it. Each call sends the email again, and the earlier recovery link stops working. The portal limits the
+    /// rate of these calls. The link leads to `PUT api/2.0/people/{userId}/password`, which sets the new password. The
+    /// email never contains a password.
     /// </remarks>
     /// <summary>
     /// Remind a user password
@@ -2025,10 +2020,12 @@ public class UserController(
     /// <remarks>
     /// Sets the activation status of the account of the caller. A person uses it to confirm their email after following
     /// the emailed link. Sign the request with the confirmation token from that link. An invalid or expired token
-    /// returns 401. The `userIds` list must hold only the ID of the caller. Otherwise the call returns 400. The call
-    /// changes data. Do not repeat it. If the portal owner gets `Activated`, the call sends the admin welcome email
-    /// once per portal. If the account no longer exists, the response is empty. To enable or disable an account, use
-    /// `PUT api/2.0/people/status/{status}`.
+    /// returns 401. A signed-in caller without this token gets 403. A token from another kind of link also returns
+    /// 403. The `userIds` list must hold only the ID of the caller. Otherwise the call returns 400. The call changes
+    /// data. With the activation link of a new account, a repeated call returns 401. With a link that confirms an email
+    /// address, you can repeat it with the same body. If the portal owner gets `Activated`, the call sends the admin
+    /// welcome email once per portal. If the account no longer exists, the response is empty. To enable or disable an
+    /// account, use `PUT api/2.0/people/status/{status}`.
     /// </remarks>
     /// <summary>
     /// Set my activation status
@@ -2039,7 +2036,7 @@ public class UserController(
     [Tags("People / User status")]
     [SwaggerResponse(200, "The profile of the caller in its new activation state", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The list is empty, holds more than one ID, or names an account other than the caller")]
-    [SwaggerResponse(403, "The account may not edit its own profile")]
+    [SwaggerResponse(403, "The caller is signed in but sent no activation link token, or sent a valid confirmation token of another link type")]
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationStatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,EmailActivation")]
@@ -2138,10 +2135,9 @@ public class UserController(
     /// status. With `isUser` set to true, the account becomes a guest, and false makes it a user again. If the tariff
     /// or quota has no free seat for this, the call returns 402. The call ignores a request to make the portal owner, a
     /// DocSpace admin, or a module admin a guest. If the portal refuses the `files` URL or its server returns an error,
-    /// the call returns 403. Other download failures of the avatar return 500. If no account has the ID, the call
-    /// returns 404. The call changes data. You can repeat it with the same body. It returns the profile after the
-    /// update. To change the language, use `PUT api/2.0/people/{userId}/culture`. To change the type, use
-    /// `PUT api/2.0/people/type/{type}`.
+    /// the call returns 403. If no account has the ID, the call returns 404. The call changes data. You can repeat it
+    /// with the same body. It returns the profile after the update. To change the language, use
+    /// `PUT api/2.0/people/{userId}/culture`. To change the type, use `PUT api/2.0/people/type/{type}`.
     /// </remarks>
     /// <summary>
     /// Update a user
@@ -2154,7 +2150,6 @@ public class UserController(
     [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat")]
     [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
-    [SwaggerResponse(500, "On the caller's own profile, the `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size")]
     [HttpPut("{userId}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
     {
@@ -2555,10 +2550,11 @@ public class UserController(
     /// portal does not allow inviting guests. Only the portal owner can change a DocSpace admin. Otherwise the call
     /// returns 400. The call also returns 400 for a system or disabled account, or for the account of the caller. The
     /// recipient is `reassignUserId`, or the caller if it is empty. It must be an active room admin or DocSpace admin,
-    /// other than the account. Otherwise the call returns 400. The call queues work. Do not repeat it while the job
-    /// runs. Poll `GET api/2.0/people/type/progress/{userId}` until `isCompleted` is true. To cancel the job, use
-    /// `PUT api/2.0/people/type/terminate`. A failure inside the job shows in `error` of the progress, not as a status
-    /// code.
+    /// other than the account. Otherwise the call returns 400. The call queues work. While the job runs, a repeated
+    /// call returns its state and starts nothing. After the job ends, a repeat starts a new job, which emails the
+    /// caller again. Poll `GET api/2.0/people/type/progress/{userId}` until `isCompleted` is true. To cancel the job,
+    /// use `PUT api/2.0/people/type/terminate`. A failure inside the job shows in `error` of the progress, not as a
+    /// status code.
     /// </remarks>
     /// <summary>Start updating user type</summary>
     /// <path>api/2.0/people/type</path>

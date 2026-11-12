@@ -324,17 +324,19 @@ public class GroupController(
     /// <remarks>
     /// Moves the members of one group to another group. The source group stays, without these members. Requires a
     /// DocSpace admin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes
-    /// data, and you can repeat it. If both IDs are the same, the call changes nothing. The manager of the
-    /// destination group stays the same. The call skips disabled members, so they stay in the source group. A guest
-    /// member leaves the source group but does not join the destination. The response is the destination group
-    /// with its members. If no group has one of the IDs, the call returns 404. To delete the source group, use
-    /// `DELETE api/2.0/group/{id}`.
+    /// data, and you can repeat it. If both IDs are the same, the call changes nothing. The destination group keeps
+    /// its manager. If the manager of the source group leaves it, the source group has no manager after the call.
+    /// The call skips disabled members, so they stay in the source group. A guest member leaves the source group
+    /// but does not join the destination. The response is the destination group with its members. If no group has
+    /// one of the IDs, the call returns 404. To move only some members, use `PUT api/2.0/group/{id}/members` and
+    /// `DELETE api/2.0/group/{id}/members`. To delete the source group, use `DELETE api/2.0/group/{id}`.
     /// </remarks>
     /// <summary>
     /// Move group members
     /// </summary>
     /// <path>api/2.0/group/{fromId}/members/{toId}</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "for the source group if it had members, and for the destination if its members change. It does not raise `user.*` webhooks for the moved members")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "for the source group if the two IDs differ and the source has enabled members")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "for the destination group only when its members change. It does not raise `user.*` webhooks for the moved members")]
     [Tags("Group")]
     [SwaggerResponse(200, "The destination group with its members", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]

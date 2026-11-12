@@ -212,8 +212,6 @@ public class PhotoController(
     /// If `files` is empty, the call returns 400.
     /// It also returns 403 if the portal refuses the URL or the server behind it returns an error.
     /// If no user has the ID, the call returns 404.
-    /// The call returns 500 if the URL does not answer within 10 seconds.
-    /// It also returns 500 if the file is empty, is not an image, or is over the image size limit.
     /// </remarks>
     /// <summary>
     /// Update a user photo
@@ -225,7 +223,6 @@ public class PhotoController(
     [SwaggerResponse(400, "The request body cannot be read, or the files field is empty")]
     [SwaggerResponse(403, "The ID in the route is not the calling account, the account may not edit its own profile, the URL was refused, or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
-    [SwaggerResponse(500, "The URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size")]
     [HttpPut("{userId}/photo")]
     public async Task<ThumbnailsDataDto> UpdateMemberPhoto(UpdatePhotoMemberRequestDto inDto)
     {
