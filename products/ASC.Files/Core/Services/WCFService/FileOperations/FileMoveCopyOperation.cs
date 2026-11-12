@@ -642,6 +642,13 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                         Result = sb.ToString();
                     }
+                    catch (TenantQuotaException ex)
+                    {
+                        // a portal quota or limit (storage, room count) is reached, as in the file chain below: not a server fault
+                        Err = ex.Message;
+
+                        Logger.InformationUnableFolderMoveCopyOperation(folderId.ToString(), ex.Message);
+                    }
                     catch (ThirdPartyStorageQuotaException ex)
                     {
                         // the connected storage is full: the user has to free space there, it is not a server fault
