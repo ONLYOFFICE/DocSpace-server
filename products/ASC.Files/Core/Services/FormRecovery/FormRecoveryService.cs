@@ -56,9 +56,6 @@ public class FormRecoveryService(
     // Passing failures on this many forms in a row mean the builder or the network is down, not that the forms are bad.
     private const int MaxPassingFailuresInRow = 3;
 
-    // The key a form submission takes in EntryManager: the recovery is safe only while the two are the same.
-    private static string GetSubmissionLockKey(int roomId, int originalFormId) => $"fillform_{roomId}_{originalFormId}";
-
     private sealed class FormVersion(File<int> file)
     {
         public File<int> File { get; } = file;
@@ -134,11 +131,11 @@ public class FormRecoveryService(
     /// <summary>
     /// Sets whether the next report of the form starts a new version of its file, as a change of the form does.
     /// </summary>
-    public async Task SetReportVersionChangedAsync(int roomId, int originalFormId, bool changed)
+    public async Task SetReportVersionChangedAsync(int originalFormId, bool changed)
     {
         var fileDao = daoFactory.GetFileDao<int>();
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(roomId, originalFormId)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(formFillingReportCreator.GetSubmissionLockKey(originalFormId)))
         {
             var properties = await fileDao.GetProperties(originalFormId);
             if (properties?.FormFilling == null || properties.FormFilling.IsVersionChanged == changed)
@@ -238,7 +235,7 @@ public class FormRecoveryService(
                 // Not the file's fault: it is left for the next report, uncounted, so that an outage does not use up the
                 // attempts of every form, and the forms after it are still read.
                 logger.WarnRecoverySubmissionPostponed(passingFailure, orphan.Id, originalFormId);
-                await MarkPostponedAsync(orphan, roomId, form, fileDao);
+                await MarkPostponedAsync(orphan, form, fileDao);
                 if (++passingFailures >= MaxPassingFailuresInRow)
                 {
                     logger.WarnRecoveryStopped(passingFailure, originalFormId, i + 1, orphans.Count);
@@ -256,7 +253,7 @@ public class FormRecoveryService(
             }
             else if (outcome is RecoveryOutcome.Failed or RecoveryOutcome.Unrecoverable)
             {
-                await CountFailedAttemptAsync(orphan, roomId, form, fileDao, outcome == RecoveryOutcome.Unrecoverable);
+                await CountFailedAttemptAsync(orphan, form, fileDao, outcome == RecoveryOutcome.Unrecoverable);
             }
         }
 
@@ -433,7 +430,7 @@ public class FormRecoveryService(
         // A submission saves and indexes its PDF under this lock, refreshing the index, so a file still not indexed once
         // it is taken was lost. A file without a number gets the next one, saved on it so that a retry reuses it.
         int resultFormNumber;
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(roomId, form.Id)))
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(formFillingReportCreator.GetSubmissionLockKey(form.Id)))
         {
             var (success, indexed) = await factoryIndexerForm.TrySelectIdsAsync(r => r.Where(s => s.Id, orphan.Id).Limit(0, 1));
             if (!success)
@@ -460,6 +457,7 @@ public class FormRecoveryService(
                 }
 
                 resultFormNumber = ++formProperties.FormFilling.ResultFormNumber;
+                formProperties.FormFilling.LastSubmittedVersion = Math.Max(formProperties.FormFilling.LastSubmittedVersion, version.File.Version);
                 await fileDao.SaveProperties(form.Id, formProperties);
 
                 properties.FormFilling.OriginalFormId = form.Id;
@@ -484,9 +482,9 @@ public class FormRecoveryService(
 
     // Counted for the version of the file, so that a new version is read again; an unrecoverable file takes all the
     // attempts at once. Under the submission lock, as the other writes of the file's properties.
-    private Task CountFailedAttemptAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao, bool unrecoverable)
+    private Task CountFailedAttemptAsync(File<int> orphan, File<int> form, IFileDao<int> fileDao, bool unrecoverable)
     {
-        return UpdateRecoveryPropertiesAsync(orphan, roomId, form, fileDao, formFilling =>
+        return UpdateRecoveryPropertiesAsync(orphan, form, fileDao, formFilling =>
         {
             var attempts = formFilling.RecoveryFailedVersion == orphan.Version ? formFilling.RecoveryFailedAttempts ?? 0 : 0;
             formFilling.RecoveryFailedVersion = orphan.Version;
@@ -494,17 +492,17 @@ public class FormRecoveryService(
         });
     }
 
-    private Task MarkPostponedAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao)
+    private Task MarkPostponedAsync(File<int> orphan, File<int> form, IFileDao<int> fileDao)
     {
-        return UpdateRecoveryPropertiesAsync(orphan, roomId, form, fileDao, formFilling => formFilling.RecoveryPostponedOn = DateTime.UtcNow);
+        return UpdateRecoveryPropertiesAsync(orphan, form, fileDao, formFilling => formFilling.RecoveryPostponedOn = DateTime.UtcNow);
     }
 
     // Under the submission lock, as the other writes of the file's properties; a failure only loses the mark.
-    private async Task UpdateRecoveryPropertiesAsync(File<int> orphan, int roomId, File<int> form, IFileDao<int> fileDao, Action<FormFillingProperties<int>> update)
+    private async Task UpdateRecoveryPropertiesAsync(File<int> orphan, File<int> form, IFileDao<int> fileDao, Action<FormFillingProperties<int>> update)
     {
         try
         {
-            await using (await distributedLockProvider.TryAcquireFairLockAsync(GetSubmissionLockKey(roomId, form.Id)))
+            await using (await distributedLockProvider.TryAcquireFairLockAsync(formFillingReportCreator.GetSubmissionLockKey(form.Id)))
             {
                 var properties = await fileDao.GetProperties(orphan.Id) ?? new EntryProperties<int>();
                 update(properties.FormFilling ??= new FormFillingProperties<int>());

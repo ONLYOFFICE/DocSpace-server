@@ -95,7 +95,7 @@ Conventions for writing integration tests (per-test portal, roles, `ApiException
 - **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile; the billing suite uses `integration-test-billing`, the letter suite `notify-test`), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. The harness is shared: `common/Tests/ASC.Tests.Common` holds `AspireHostFixture<TClients>`, `PortalClientsBase`, `Initializer` and `RawApiClient`; each suite only derives a thin `AspireAppFixture`/`PortalClients` pair in its own `ApiFactories/` folder
 - **Fake data**: Bogus
 - **DB cleanup**: Respawn
-- **Test locations**: `products/*/Tests/`, `web/ASC.Web.Api.Tests/` (Web.Api REST suite), `web/ASC.Web.Api.Billing.Tests/` (payment endpoints on a SaaS stack whose billing, accounting and docscloud are a WireMock in the test process) and `common/Tests/` (`ASC.Core.Common.Tests`, `ASC.Notify.Tests` letter suite, `ASC.Data.Backup.Core.Tests`). The remaining projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
+- **Test locations**: `products/*/Tests/`, `web/ASC.Web.Api.Tests/` (Web.Api REST suite) and `common/Tests/` (`ASC.Core.Common.Tests`, `ASC.Notify.Tests` letter suite, `ASC.Data.Backup.Core.Tests`, `ASC.ClearEvents.Tests` audit trail cleanup suite). The remaining projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
 
 ```bash
 dotnet test ASC.Tests.slnx

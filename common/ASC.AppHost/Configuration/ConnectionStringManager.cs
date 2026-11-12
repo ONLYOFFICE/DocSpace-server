@@ -53,6 +53,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public RedisConfig? Redis { get; private set; }
 
     private IResourceBuilder<MySqlDatabaseResource>? MySqlDatabaseResource { get; set; }
+    private IResourceBuilder<PostgresServerResource>? FormsPostgresResource { get; set; }
+    private ReferenceExpression? FormsAdminConnectionString { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
     private IResourceBuilder<ProjectResource>? MigrateResource { get; set; }
@@ -143,6 +145,71 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
 
+
+        return this;
+    }
+
+    /// <summary>
+    /// The built-in forms database (ConnectionStrings:formsAdmin), set up as a server shared by portals of different
+    /// owners needs it: DocSpace connects as the owner of the database rather than a superuser, as it does in
+    /// production, and the read-only roles of the portals cannot load the server. The init script creates the owner
+    /// and applies the steps that need a superuser; a query of a read-only role is ended after
+    /// <paramref name="roQueryTimeoutSeconds"/>. The image runs the init script on an empty data directory only, so a
+    /// change of the script or of the limit reaches a development stack after its volume docspace-forms-postgres-data
+    /// is removed.
+    /// </summary>
+    public ConnectionStringManager AddFormsPostgres(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false, int roQueryTimeoutSeconds = 60)
+    {
+        var superuserPassword = builder.AddParameter("forms-postgres-password", "postgres", secret: true);
+        var adminPassword = builder.AddParameter("forms-admin-password", "forms", secret: true);
+        var basePath = Path.Combine(builder.AppHostDirectory, "Dockerfiles", "postgres");
+
+        // Steps 1 and 4 of the hardening: a role cannot lift temp_file_limit, and pg_cron ends the long queries of the
+        // read-only roles. Its jobs run in background workers: a job that connects over TCP is refused by the password
+        // authentication the image sets for every host. Each portal role keeps pools of its own in Files and Files.Worker,
+        // so a test run registering dozens of portals a minute runs past the default 100 connections.
+        var postgresResourceBuilder = builder.AddPostgres(Constants.FormsPostgresContainer, password: superuserPassword, port: Constants.FormsPostgresPort)
+            .WithDockerfile(basePath)
+            .WithImage("onlyoffice-postgres")
+            .WithImageTag(Constants.PostgresVersion)
+            .WithBuildArg("POSTGRES_VERSION", Constants.PostgresVersion)
+            .WithArgs("-c", "temp_file_limit=1GB", "-c", "shared_preload_libraries=pg_cron", "-c", $"cron.database_name={Constants.FormsDatabase}",
+                "-c", "cron.use_background_workers=on", "-c", "max_connections=300")
+            .WithEnvironment("POSTGRES_DB", Constants.FormsDatabase)
+            .WithEnvironment("FORMS_ADMIN_USER", Constants.FormsAdminUser)
+            .WithEnvironment("FORMS_ADMIN_PASSWORD", adminPassword)
+            .WithEnvironment("FORMS_RO_TIMEOUT", roQueryTimeoutSeconds.ToString())
+            // pg_cron takes an interval of 1 to 59 seconds; a longer one fails the init script and the container.
+            .WithEnvironment("FORMS_RO_CHECK", Math.Clamp(roQueryTimeoutSeconds / 2, 1, 59).ToString())
+            .WithInitFiles(Path.Combine(basePath, "init"));
+
+        // As for MySQL: a data volume when asked for, otherwise tmpfs when asked for, the cap only off tmpfs.
+        var datadirOnTmpfs = !withDataVolume && withTmpfs;
+
+        if (withDataVolume)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithDataVolume("docspace-forms-postgres-data");
+        }
+        else if (datadirOnTmpfs)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/postgresql/data");
+        }
+
+        if (!datadirOnTmpfs)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithMemoryLimit(ContainerMemoryExtensions.PostgresLimit);
+        }
+
+        if (withDbGate && DevTools)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithDbGate();
+        }
+
+        FormsPostgresResource = postgresResourceBuilder;
+
+        // The database the image creates from POSTGRES_DB, as its owner: the later keys win over the superuser's.
+        FormsAdminConnectionString = ReferenceExpression.Create(
+            $"{postgresResourceBuilder.Resource};Database={Constants.FormsDatabase};Username={Constants.FormsAdminUser};Password={adminPassword.Resource}");
 
         return this;
     }
@@ -250,7 +317,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             WithMcpInspector(McpResource);
         }
 
-        AddWaitFor(McpResource);
+        AddWaitFor(McpResource, includeFormsPostgres: false);
 
         return this;
     }
@@ -613,9 +680,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         bool includeRedis = true,
         bool includeEditors = false,
         bool includeOpensearch = true,
-        bool includeMailPit = false
+        bool includeMailPit = false,
+        bool includeFormsPostgres = true
         )  where T : IResourceWithWaitSupport
     {
+        if (includeFormsPostgres && FormsPostgresResource != null)
+        {
+            resourceBuilder.WaitFor(FormsPostgresResource);
+        }
+
         if (includeMigrate && MigrateResource != null)
         {
             resourceBuilder.WaitForCompletion(MigrateResource);
@@ -674,6 +747,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             // Same env var WithReference would set, so the services read it from the same config key.
             resourceBuilder.WithEnvironment("ConnectionStrings__default:connectionString",
                 ReferenceExpression.Create($"{MySqlDatabaseResource.Resource};{MySqlPoolOptions}"));
+        }
+
+        if (FormsAdminConnectionString != null)
+        {
+            // The whole entry, over whatever buildtools/config says: the services look a connection string up by its
+            // name, and buildtools ships this entry with an empty one.
+            resourceBuilder
+                .WithEnvironment("ConnectionStrings__formsAdmin:name", "formsAdmin")
+                .WithEnvironment("ConnectionStrings__formsAdmin:connectionString", FormsAdminConnectionString)
+                .WithEnvironment("ConnectionStrings__formsAdmin:providerName", "Npgsql");
         }
 
         if (MailResource != null)
@@ -832,7 +915,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => Redis?.Password ?? string.Empty);
         }
 
-        AddWaitFor(resourceBuilder);
+        AddWaitFor(resourceBuilder, includeFormsPostgres: false);
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
