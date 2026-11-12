@@ -25,6 +25,14 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="xunit.v3" />
+    <!-- PortalRetentionJobTests point the tariff service at a WireMock accounting service on loopback. -->
+    <PackageReference Include="WireMock.Net" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The stub of an external HTTP service the payment client tests use, compiled in from its one source rather
+         than copied, and not taken from ASC.Core.Common.Tests by reference: a test project is no library. -->
+    <Compile Include="..\ASC.Core.Common.Tests\HttpStub.cs" Link="Linked\ASC.Core.Common.Tests\HttpStub.cs" />
   </ItemGroup>
 
   <ItemGroup>

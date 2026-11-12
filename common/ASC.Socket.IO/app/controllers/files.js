@@ -299,5 +299,30 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/add-webhook", (req, res) => {
+    files.addWebhook(req.body);
+    res.end();
+  });
+
+  router.post("/update-webhook", (req, res) => {
+    files.updateWebhook(req.body);
+    res.end();
+  });
+
+  router.post("/delete-webhook", (req, res) => {
+    files.deleteWebhook(req.body);
+    res.end();
+  });
+
+  router.post("/add-webhook-log", (req, res) => {
+    files.addWebhookLog(req.body);
+    res.end();
+  });
+
+  router.post("/update-webhook-log", (req, res) => {
+    files.updateWebhookLog(req.body);
+    res.end();
+  });
+
   return router;
 };

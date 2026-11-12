@@ -52,7 +52,7 @@ public class UpdateClientPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _clientManagementApi.UpdateClientAsync(
                 "00000000-0000-0000-0000-000000000000",
-                new UpdateClientRequest(name: "Updated Client"),
+                ValidUpdateClientRequest(name: "Updated Client"),
                 TestContext.Current.CancellationToken));
 
         // Assert
@@ -71,7 +71,7 @@ public class UpdateClientPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _clientManagementApi.UpdateClientAsync(
                 "00000000-0000-0000-0000-000000000000",
-                new UpdateClientRequest(name: "Updated Client"),
+                ValidUpdateClientRequest(name: "Updated Client"),
                 TestContext.Current.CancellationToken));
 
         // Assert
@@ -88,10 +88,13 @@ public class UpdateClientPermissionsTests(
         await ApplySignatureAsync(user);
 
         // Act — an otherwise-valid body, so the 404 comes from the ownership check, not validation.
-        var result = await UpdateClientRawAsync(ownerClient.ClientId, ValidUpdateClientBody(name: "Hacked Name"));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _clientManagementApi.UpdateClientAsync(
+                ownerClient.ClientId, ValidUpdateClientRequest(name: "Hacked Name"),
+                TestContext.Current.CancellationToken));
 
         // Assert
-        result.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        exception.ErrorCode.Should().Be(404);
     }
 
     // BUG 81670: the server accepts a name outside [3, 256] characters on update (200), while
@@ -104,10 +107,13 @@ public class UpdateClientPermissionsTests(
         var created = await CreateClientAsAsync();
 
         // Act — everything but the name is valid, so a 400 here can only be the name bound.
-        var result = await UpdateClientRawAsync(created.ClientId, ValidUpdateClientBody(name: new string('a', 257)));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _clientManagementApi.UpdateClientAsync(
+                created.ClientId, ValidUpdateClientRequest(name: new string('a', 257)),
+                TestContext.Current.CancellationToken));
 
         // Assert
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     // BUG 81670: same defect as above, for the lower bound.
@@ -119,10 +125,13 @@ public class UpdateClientPermissionsTests(
         var created = await CreateClientAsAsync();
 
         // Act
-        var result = await UpdateClientRawAsync(created.ClientId, ValidUpdateClientBody(name: "ab"));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _clientManagementApi.UpdateClientAsync(
+                created.ClientId, ValidUpdateClientRequest(name: "ab"),
+                TestContext.Current.CancellationToken));
 
         // Assert
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -132,15 +141,21 @@ public class UpdateClientPermissionsTests(
         var created = await CreateClientAsAsync();
 
         // Act — redirect_uris/scopes stay valid, so only allowed_origins is under test.
-        var result = await UpdateClientRawAsync(
-            created.ClientId, ValidUpdateClientBody(name: "Test Client", allowedOrigins: ["not-a-url"]));
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _clientManagementApi.UpdateClientAsync(
+                created.ClientId, ValidUpdateClientRequest(name: "Test Client", allowedOrigins: ["not-a-url"]),
+                TestContext.Current.CancellationToken));
 
         // Assert
-        result.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
+    /// <remarks>
+    /// The test expected 400 while it could not reach the server at all (the request model threw on the client);
+    /// once it did, the service answered 404, as for another user's client and as the TypeScript suite asserts.
+    /// </remarks>
     [Fact]
-    public async Task UpdateClient_NonExistentClient_ThrowsBadRequest()
+    public async Task UpdateClient_NonExistentClient_ThrowsNotFound()
     {
         // Arrange
         await ApplySignatureAsync();
@@ -149,10 +164,10 @@ public class UpdateClientPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _clientManagementApi.UpdateClientAsync(
                 "00000000-0000-0000-0000-000000000000",
-                new UpdateClientRequest(name: "Updated Client"),
+                ValidUpdateClientRequest(name: "Updated Client"),
                 TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(400);
+        exception.ErrorCode.Should().Be(404);
     }
 }

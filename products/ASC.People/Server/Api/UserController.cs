@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -138,6 +138,7 @@ public class UserController(
     /// Add an activated user
     /// </summary>
     /// <path>api/2.0/people/active</path>
+    [RaisesWebhook(WebhookTrigger.UserCreated, When = "once the avatar named in `files`, if any, is saved: when that download fails, the profile exists but the webhook is not sent")]
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
@@ -249,7 +250,7 @@ public class UserController(
     /// generated and the account is created without anybody knowing it.
     /// When the portal has no free paid seat the account is still created, silently as a `User` instead of the
     /// requested type, so read the `type` in the answer rather than assuming the request was honoured.
-    /// Creating a profile raises a `UserCreated` webhook, downloads the avatar named in `files` if one is given, and
+    /// Creating a profile downloads the avatar named in `files` if one is given and
     /// answers with the new profile including its ID.
     /// To invite several people by email at once instead, use `POST api/2.0/people/invite`.
     /// </remarks>
@@ -257,6 +258,7 @@ public class UserController(
     /// Add a user
     /// </summary>
     /// <path>api/2.0/people</path>
+    [RaisesWebhook(WebhookTrigger.UserCreated, When = "once the avatar named in `files`, if any, is saved: when that download fails, the profile exists but the webhook is not sent")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The password does not meet the portal password policy")]
@@ -280,7 +282,7 @@ public class UserController(
         }
         else
         {
-            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type),Constants.Action_AddRemoveUser);
+            await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(Guid.Empty, inDto.Type), Constants.Action_AddRemoveUser);
             var tenant = tenantManager.GetCurrentTenant();
             var currentUser = await _userManager.GetUsersAsync(authContext.CurrentAccount.ID);
             var currentUserType = await _userManager.GetUserTypeAsync(currentUser.Id);
@@ -439,28 +441,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Invites people to the portal by email, creating a pending profile for each address and mailing it an
-    /// invitation link.
-    /// The caller has to be a room admin or a DocSpace admin - a member or a guest is rejected - the portal has to
-    /// allow inviting members, and inviting a room admin additionally requires DocSpace admin rights while inviting
-    /// another DocSpace admin requires the portal owner; a `Guest` type is not accepted here at all.
-    /// An address that already belongs to a profile is not mailed again: the existing account is only related to the
-    /// caller, and its type is raised when the invitation asks for a higher one, while a disabled account rejects
-    /// the whole call with 400.
-    /// The whole call is rejected before anything is sent when the invitations would need more paid seats than the
-    /// tariff has left, and a malformed or punycode address is rejected with 400, so the list is validated as a
-    /// batch but applied one address at a time - a failure partway through leaves the earlier invitations sent.
-    /// The answer is not the result of this call: it lists every profile of the portal that is still pending and
-    /// that the caller may see, so previously invited people appear in it as well.
-    /// Each newly invited profile raises a `UserInvited` webhook, and repeated calls are throttled.
-    /// Use `PUT api/2.0/people/invite` to send the invitation email again, and `POST api/2.0/people` to create a
-    /// profile without mailing anybody.
+    /// Invites people to the portal by email, creating a pending profile for each address and mailing it an invitation
+    /// link. The caller has to be a room admin or a DocSpace admin and the portal has to allow inviting members; only a
+    /// DocSpace admin invites a room admin, only the owner a DocSpace admin, and `Guest` is not accepted. An address
+    /// that already has a profile is not mailed: the account is only related to the caller and raised to a higher type
+    /// when asked, while a disabled account rejects the call with 400. Nothing is sent when the invitations need more
+    /// paid seats than the tariff has left, or for a malformed or punycode address (400); otherwise the addresses are
+    /// applied one by one, so a failure partway leaves earlier invitations sent. The answer lists every pending profile
+    /// the caller may see, not only this call's. Inviting an address again shortly after its invitation went out -
+    /// after its pending profile was deleted - sends no second letter, and the link already sent still opens. Repeated
+    /// calls are throttled. Use `PUT api/2.0/people/invite` to resend the invitation, and `POST api/2.0/people` to
+    /// create a profile without mailing anybody.
     /// </remarks>
     /// <summary>
     /// Invite users
     /// </summary>
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.UserInvited, When = "for every address that does not belong to a profile yet")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Every pending profile the caller may see, not only the ones just invited", typeof(List<EmployeeDto>))]
     [SwaggerResponse(400, "An address is malformed or written in punycode, or it belongs to a disabled account")]
@@ -542,11 +540,18 @@ public class UserController(
             }
 
             user = await userManagerWrapper.AddInvitedUserAsync(invite.Email, invite.Type, inDto.Culture, false);
-            var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
-            var shortenLink = await urlShortener.GetShortenLinkAsync(link);
 
-            await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, inDto.Culture, true);
-            messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            // the same invitation already went out within the period: no new link, no record, no spent invitation
+            await using var acceptance = await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, invite.Type);
+            if (acceptance.Accepted)
+            {
+                var link = commonLinkUtility.GetInvitationLink(user.Email, invite.Type, authContext.CurrentAccount.ID, inDto.Culture);
+                var shortenLink = await urlShortener.GetShortenLinkAsync(link);
+
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, invite.Type, inDto.Culture, true, acceptance);
+                messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
+            }
+
             await socketManager.AddUserAsync(user);
 
             await webhookManager.PublishAsync(WebhookTrigger.UserInvited, user);
@@ -745,13 +750,15 @@ public class UserController(
     /// `GET api/2.0/people/remove/progress/{userId}`.
     /// The removal is permanent and cannot be undone, so hand the rooms and the shared files over first through
     /// `POST api/2.0/people/reassign/start` - an account whose reassignment has not finished cannot be deleted.
-    /// The call raises a `UserDeleted` webhook and answers with the profile as it was just before it was removed.
+    /// The call answers with the profile as it was just before it was removed.
     /// To delete several accounts at once use `PUT api/2.0/people/delete`.
     /// </remarks>
     /// <summary>
     /// Delete a user
     /// </summary>
     /// <path>api/2.0/people/{userId}</path>
+    [RaisesWebhook(WebhookTrigger.UserDeleted)]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it was just before it was deleted", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, the caller may not delete a DocSpace administrator, or the OAuth service refused to remove the OAuth clients of the account")]
@@ -788,34 +795,35 @@ public class UserController(
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
 
-        if (!isGuest)
+        await webhookManager.PublishAfterAsync(WebhookTrigger.UserDeleted, user, async () =>
         {
-            await client.DeleteClientsAsync(user.Id);
-        }
-
-        await _userPhotoManager.RemovePhotoAsync(user.Id);
-        await _userManager.DeleteUserAsync(user.Id);
-        await fileSecurity.RemoveSubjectAsync(user.Id, true);
-        var tenant = tenantManager.GetCurrentTenant();
-        await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
-
-        messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
-        if (isGuest)
-        {
-            await socketManager.DeleteGuestAsync(user.Id);
-        }
-        else
-        {
-            await socketManager.DeleteUserAsync(user.Id);
-            foreach (var group in groups)
+            if (!isGuest)
             {
-                var groupInfo = await _userManager.GetGroupInfoAsync(group.ID);
-                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
-                await socketManager.UpdateGroupAsync(groupDto);
+                await client.DeleteClientsAsync(user.Id);
             }
-        }
 
-        await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
+            await _userPhotoManager.RemovePhotoAsync(user.Id);
+            await _userManager.DeleteUserAsync(user.Id);
+            await fileSecurity.RemoveSubjectAsync(user.Id, true);
+            var tenant = tenantManager.GetCurrentTenant();
+            await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
+
+            messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(user.Id), userName);
+            if (isGuest)
+            {
+                await socketManager.DeleteGuestAsync(user.Id);
+            }
+            else
+            {
+                await socketManager.DeleteUserAsync(user.Id);
+                foreach (var group in groups)
+                {
+                    var groupInfo = await _userManager.GetGroupInfoAsync(group.ID);
+                    var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
+                    await socketManager.UpdateGroupAsync(groupDto);
+                }
+            }
+        });
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -833,12 +841,13 @@ public class UserController(
     /// `DELETE api/2.0/people/{userId}` - that operation requires exactly this disabled state.
     /// The step is reversible until then: re-enabling the account through `PUT api/2.0/people/status/{status}`
     /// restores it.
-    /// The call raises a `UserUpdated` webhook, not a delete one, and answers with the profile in its new state.
+    /// The call answers with the profile in its new state.
     /// </remarks>
     /// <summary>
     /// Close my own profile
     /// </summary>
     /// <path>api/2.0/people/@self</path>
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "rather than `user.deleted`: the profile is only disabled")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile of the caller with the Terminated status", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The caller is the portal owner, an LDAP account or a system account")]
@@ -1545,8 +1554,8 @@ public class UserController(
     /// the portal owner.
     /// The answer lists every account that was asked for, including the ones that were skipped, so it is not proof
     /// that an account was deleted - read `GET api/2.0/people/{userId}` for that, which then answers 404.
-    /// The removal is permanent and cannot be undone, and each deleted account raises a `UserDeleted` webhook while
-    /// its data is erased by a queued job that can be watched through
+    /// The removal is permanent and cannot be undone, and the data of each deleted account is
+    /// erased by a queued job that can be watched through
     /// `GET api/2.0/people/remove/progress/{userId}`.
     /// Hand the rooms and the shared files over first through `POST api/2.0/people/reassign/start` - an account with
     /// an unfinished reassignment cannot be deleted.
@@ -1556,6 +1565,8 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/delete</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.UserDeleted, When = "for every account it deletes; an account the caller may not delete is skipped without one")]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "for every deleted account that shared files or folders from its personal section, once the queued data deletion creates the folder in the caller's personal section that takes them over")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Every account that was asked for, including the ones that were skipped", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The userIds field is missing")]
@@ -1598,17 +1609,18 @@ public class UserController(
 
             var isGuest = userType == EmployeeType.Guest;
 
-            if (!isGuest)
+            await webhookManager.PublishAfterAsync(WebhookTrigger.UserDeleted, user, async () =>
             {
-                await client.DeleteClientsAsync(user.Id);
-            }
+                if (!isGuest)
+                {
+                    await client.DeleteClientsAsync(user.Id);
+                }
 
-            await _userPhotoManager.RemovePhotoAsync(user.Id);
-            await _userManager.DeleteUserAsync(user.Id);
-            await fileSecurity.RemoveSubjectAsync(user.Id, true);
-            await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
-
-            await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
+                await _userPhotoManager.RemovePhotoAsync(user.Id);
+                await _userManager.DeleteUserAsync(user.Id);
+                await fileSecurity.RemoveSubjectAsync(user.Id, true);
+                await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
+            });
         }
 
         messageService.Send(MessageAction.UsersDeleted, MessageTarget.Create(users.Select(x => x.Id)), userNames);
@@ -1624,13 +1636,14 @@ public class UserController(
     /// Set `resendAll` to true to reach every pending account of the portal, in which case `userIds` is ignored and
     /// the caller has to be a room admin or a DocSpace admin; with the default false only the listed accounts are
     /// reached, and a member or a guest may then list nothing but their own ID.
-    /// Which email goes out depends on the state of each account: a pending invitation gets a fresh invitation link,
-    /// while an account that exists but has not confirmed its address gets activation instructions instead.
-    /// Accounts that are already active or that are disabled are skipped, and so are the pending accounts the caller
-    /// has no right to invite, without an error.
+    /// A pending invitation gets a fresh invitation link, while an account that has not confirmed its address gets
+    /// activation instructions instead.
+    /// Active and disabled accounts are skipped without an error, and so are the pending accounts the caller has no
+    /// right to invite.
     /// The answer lists only the targeted accounts the caller is allowed to see, so it can be shorter than the
     /// request and is not a delivery report.
-    /// Repeated calls are throttled, and each call issues new links that make the previously sent ones useless.
+    /// An account that got this letter a short while ago is not mailed again, and the link it already has stays
+    /// valid, so repeating the call is safe but delivers nothing new.
     /// To invite an address that has no profile yet, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
@@ -1644,7 +1657,6 @@ public class UserController(
     [SwaggerResponse(403, "A member or a guest asked for resendAll, or listed an account other than their own")]
     [AllowNotPayment]
     [HttpPut("invite")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async IAsyncEnumerable<EmployeeFullDto> ResendUserInvites(UpdateMembersRequestDto inDto)
     {
         List<UserInfo> users;
@@ -1685,6 +1697,7 @@ public class UserController(
         }
 
         Dictionary<Guid, UserRelation> userRelations = null;
+        List<UserInfo> sent = [];
 
         foreach (var user in users)
         {
@@ -1695,6 +1708,8 @@ public class UserController(
 
             if (currentUserType == EmployeeType.DocSpaceAdmin || currentUser.Id == user.Id)
             {
+                var activationStatus = user.ActivationStatus;
+
                 if (user.ActivationStatus == EmployeeActivationStatus.Activated)
                 {
                     user.ActivationStatus = EmployeeActivationStatus.NotActivated;
@@ -1704,7 +1719,12 @@ public class UserController(
                     user.ActivationStatus = EmployeeActivationStatus.AutoGenerated;
                 }
 
-                await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                // an account left as it was is not saved: the save would only move its modification date, once per
+                // account on every call
+                if (user.ActivationStatus != activationStatus)
+                {
+                    await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
+                }
             }
 
             if (user.ActivationStatus == EmployeeActivationStatus.Pending)
@@ -1715,11 +1735,19 @@ public class UserController(
                     continue;
                 }
 
+                await using var acceptance = await studioNotifyService.TryAcceptDocSpaceInviteAsync(user.Email, type);
+                if (!acceptance.Accepted)
+                {
+                    continue;
+                }
+
                 var culture = user.GetCulture()?.Name;
                 var link = commonLinkUtility.GetInvitationLink(user.Email, type, authContext.CurrentAccount.ID, culture);
                 var shortenLink = await urlShortener.GetShortenLinkAsync(link);
                 messageService.Send(MessageAction.SendJoinInvite, MessageTarget.Create(user.Id), currentUser.DisplayUserName(displayUserSettingsHelper), user.Email);
-                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, culture);
+                await studioNotifyService.SendDocSpaceInviteAsync(user.Email, shortenLink, type, culture);
+                acceptance.Complete();
+                sent.Add(user);
             }
             else
             {
@@ -1732,12 +1760,19 @@ public class UserController(
                     }
                 }
 
-                await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email);
+                if (await studioNotifyService.SendEmailActivationInstructionsAsync(user, user.Email))
+                {
+                    sent.Add(user);
+                }
             }
         }
 
-        messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(users.Select(x => x.Id)),
-            users.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        // only the accounts that got a letter: a repeat within the period is not mailed and not recorded
+        if (sent.Count > 0)
+        {
+            messageService.Send(MessageAction.UsersSentActivationInstructions, MessageTarget.Create(sent.Select(x => x.Id)),
+                sent.Select(x => x.DisplayUserName(false, displayUserSettingsHelper)));
+        }
 
         foreach (var user in users)
         {
@@ -1894,7 +1929,8 @@ public class UserController(
     /// stays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userId}/email`.
     /// A DocSpace administrator acting on somebody else changes the address immediately instead: the account is
     /// marked as not activated, every session of it is ended, and activation instructions are sent to the new
-    /// address - and passing the address the account already has is then rejected with 400.
+    /// address - and passing the address the account already has is then rejected with 400. Changing it back to an
+    /// address that got activation instructions a moment ago sends no new letter, and the link of that letter works.
     /// A caller who is not an administrator may only address their own account, nobody but the owner may change the
     /// owner's address, and only the owner may change the address of another DocSpace administrator.
     /// The target has to be an account that is neither disabled nor a pending invitation, otherwise the operation
@@ -1982,6 +2018,8 @@ public class UserController(
             await _userManager.UpdateUserInfoWithSyncCardDavAsync(user);
             await cookiesManager.ResetUserCookieAsync(user.Id);
             await studioNotifyService.SendEmailActivationInstructionsAsync(user, email);
+
+            // recorded even when the letter is a repeat: the record is the only trace of the address change itself
             messageService.Send(MessageAction.UserSentEmailChangeInstructions, MessageTarget.Create(user.Id), DateTime.UtcNow, user.DisplayUserName(false, displayUserSettingsHelper));
         }
 
@@ -2089,7 +2127,7 @@ public class UserController(
     /// more than one entry, or somebody else's ID is answered with 400, so it cannot be used to activate other
     /// people.
     /// Setting `Activated` on the portal owner sends the administrator welcome email, once per portal.
-    /// The change raises a `UserUpdated` webhook, and the answer holds the profile in its new state - or nothing at
+    /// The answer holds the profile in its new state - or nothing at
     /// all when the account has meanwhile disappeared, which is skipped without an error.
     /// The account status is a different thing and is changed through `PUT api/2.0/people/status/{status}`.
     /// </remarks>
@@ -2098,6 +2136,7 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/activationstatus/{activationStatus}</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.UserUpdated)]
     [Tags("People / User status")]
     [SwaggerResponse(200, "The profile of the caller in its new activation state", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The list is empty, holds more than one ID, or names an account other than the caller")]
@@ -2154,7 +2193,7 @@ public class UserController(
     /// from the portal settings rather than guessing a code.
     /// A caller may only change their own language - the ID in the route has to be the calling account, and an
     /// administrator gets 403 for anybody else - and the account must be allowed to edit its own profile.
-    /// The change takes effect immediately, raises a `UserUpdated` webhook, and answers with the profile carrying
+    /// The change takes effect immediately and answers with the profile carrying
     /// the new `cultureName`.
     /// Other profile fields are not touched here; use `PUT api/2.0/people/{userId}` for those.
     /// </remarks>
@@ -2162,6 +2201,7 @@ public class UserController(
     /// Update a user culture
     /// </summary>
     /// <path>api/2.0/people/{userId}/culture</path>
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "even when the culture does not change")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile with its new culture", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The specified culture is not enabled on the portal")]
@@ -2206,7 +2246,7 @@ public class UserController(
     /// The `isUser` flag turns the account into a guest when true and back into a member when false, both of which
     /// can answer 402 because either direction takes a seat; a request to make the portal owner, a DocSpace
     /// administrator or a module administrator a guest is ignored without an error.
-    /// A change raises a `UserUpdated` webhook and the answer holds the profile as it is afterwards, so read it
+    /// The answer holds the profile as it is afterwards, so read it
     /// instead of assuming the request was applied.
     /// For the language use `PUT api/2.0/people/{userId}/culture`, for the type
     /// `PUT api/2.0/people/type/{type}`, and for the status of several accounts at once
@@ -2216,6 +2256,7 @@ public class UserController(
     /// Update a user
     /// </summary>
     /// <path>api/2.0/people/{userId}</path>
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "when the call changes the profile; on another member's profile only `disable` and `isUser` change anything")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
@@ -2402,7 +2443,7 @@ public class UserController(
     /// Enabling only affects accounts that were disabled, and an account that had never filled in its name comes
     /// back as `Pending` rather than `Active` when it still has an unused invitation, so read the `status` in the
     /// answer instead of assuming it matches the request.
-    /// Each changed account raises a `UserUpdated` webhook, and disabling is what
+    /// Disabling is what
     /// `DELETE api/2.0/people/{userId}` requires before it will delete an account.
     /// </remarks>
     /// <summary>
@@ -2410,6 +2451,7 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "for every listed account, whether or not its status changes")]
     [Tags("People / User status")]
     [SwaggerResponse(200, "The listed accounts with their statuses after the change", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The requested status is neither Active nor Terminated")]
@@ -2536,25 +2578,26 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes the type of the existing portal users listed in `userIds` to the type given in the route, in one call.
+    /// Changes the type of the existing portal users listed in `userIds` to the type given in the route.
     /// The caller needs the permission to add and remove users of the requested type, cannot change their own type or
-    /// the type of the portal owner, and cannot use this operation at all while being a guest; changing somebody to
-    /// `Guest` additionally requires the portal to allow inviting guests.
+    /// the type of the portal owner, and must not be a guest; changing somebody to `Guest` also needs the portal to
+    /// allow inviting guests.
     /// Every listed account has to be visible to the caller and must not be disabled.
-    /// The change is applied immediately: each converted user gets a notification email and raises a `UserUpdated`
-    /// webhook, and the accounts are processed one by one, so a rejection in the middle leaves the users before it
-    /// already converted - re-read them before retrying.
-    /// The answer streams the converted users with their detailed information, in the order they were processed.
+    /// The change is applied immediately: each converted user gets a notification email, unless one about the same
+    /// type reached them a short while ago, and the accounts are processed one by one, so a rejection in the middle
+    /// leaves the users before it already converted - re-read them before retrying.
+    /// The answer streams the converted users in detail, in the order they were processed.
     /// Converting somebody to a paid type takes a paid seat, so the operation answers 402 when the tariff or the
     /// paid-user quota does not allow one more.
-    /// This operation only moves the type and leaves the rooms and the shared files of the account where they are -
-    /// to hand them over to another admin in the same step, use `POST api/2.0/people/type` instead.
+    /// This operation only moves the type and leaves the rooms and shared files of the account in place; to hand them
+    /// over to another admin as well, use `POST api/2.0/people/type`.
     /// </remarks>
     /// <summary>
     /// Change a user type
     /// </summary>
     /// <path>api/2.0/people/type/{type}</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "for every converted user, one by one: a rejection in the middle leaves the webhooks of the users before it sent")]
     [Tags("People / User type")]
     [SwaggerResponse(200, "The converted users with their detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userIds`")]
@@ -2610,7 +2653,7 @@ public class UserController(
             }
 
             await socketManager.ChangeUserTypeAsync(user, true);
-            await studioNotifyService.SendMsgUserTypeChangedAsync(user, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
+            await studioNotifyService.SendMsgUserTypeChangedAsync(user, inDto.Type, FilesCommonResource.ResourceManager.GetString("RoleEnum_" + inDto.Type.ToStringFast()));
             messageService.Send(MessageAction.UsersUpdatedType, MessageTarget.Create([user.Id]), [user.DisplayUserName(false, displayUserSettingsHelper)], [user.Id], inDto.Type);
             await webhookManager.PublishAsync(WebhookTrigger.UserUpdated, user);
         }
@@ -2636,6 +2679,9 @@ public class UserController(
     /// </remarks>
     /// <summary>Start updating user type</summary>
     /// <path>api/2.0/people/type</path>
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "once the queued type change finishes successfully, not when it is cancelled or fails")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every room the account owns, once the queued type change hands it over to the recipient")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead for an AI agent the account owns")]
     [Tags("People / User type")]
     [SwaggerResponse(200, "The state of the queued user type change", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The requested type is neither Guest nor User, the account is a system account, disabled or the caller, the recipient is the same account or is not an active admin, or a non-owner tried to convert a DocSpace admin")]
@@ -3333,7 +3379,7 @@ public class UserControllerAdditional<T>(
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         var knownToSubjects = await fileSharing.GetKnownToSubjectsAsync();
         var securityDao = daoFactory.GetSecurityDao<T>();
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
+        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
 
         var offset = inDto.StartIndex;
         var count = inDto.Count;

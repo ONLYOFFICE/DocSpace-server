@@ -42,6 +42,7 @@ namespace ASC.AI.Tests.Tests.ChatContextTests;
 [Trait("Feature", "AI/ChatContext")]
 public class ChatContextPermissionsTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_Unauthorized_Returns401()
     {
@@ -52,55 +53,60 @@ public class ChatContextPermissionsTests(AspireAppFixture fixture) : BaseTest(fi
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_RegularUser_Succeeds()
     {
         var user = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
         await _aiClient.Authenticate(user);
 
-        var context = await ReadChatContextAsync();
+        var context = await ReadChatContextInternalAsync();
 
         context.Global.Should().NotBeNull();
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_ForeignThread_OmitsThreadSection()
     {
-        var thread = await CreateThreadAsync();
-        await CreateMessageAsync(thread.Id);
+        var thread = await CreateThreadInternalAsync();
+        await CreateMessageInternalAsync(thread.Id);
 
         var user = await InviteContact(EmployeeType.RoomAdmin, TestContext.Current.CancellationToken);
         await _aiClient.Authenticate(user);
 
-        var context = await ReadChatContextAsync(threadId: thread.Id);
+        var context = await ReadChatContextInternalAsync(threadId: thread.Id);
 
         context.Thread.Should().BeNull();
         context.Messages.Should().BeNull();
         context.Global.Should().NotBeNull();
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_NonExistentEntityId_OmitsEntitySection()
     {
-        var context = await ReadChatContextAsync(entityId: "999999999");
+        var context = await ReadChatContextInternalAsync(entityId: "999999999");
 
         context.Entity.Should().BeNull();
         context.Global.Should().NotBeNull();
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_NonNumericEntityId_OmitsEntitySection()
     {
-        var context = await ReadChatContextAsync(entityId: "not-a-folder-id");
+        var context = await ReadChatContextInternalAsync(entityId: "not-a-folder-id");
 
         context.Entity.Should().BeNull();
         context.Global.Should().NotBeNull();
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_UnknownThreadId_OmitsThreadSection()
     {
-        var context = await ReadChatContextAsync(threadId: Guid.NewGuid());
+        var context = await ReadChatContextInternalAsync(threadId: Guid.NewGuid());
 
         context.Thread.Should().BeNull();
         context.Messages.Should().BeNull();

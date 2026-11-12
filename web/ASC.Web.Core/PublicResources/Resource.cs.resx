@@ -145,7 +145,7 @@
     <value>Služba</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Funkce AI</value>
+    <value>AI agenti a nástroje</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Záloha</value>
@@ -1177,7 +1177,7 @@
     <value>Vyhledávání AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Funkce AI</value>
+    <value>AI agenti a nástroje</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Sledování přihlášení a akcí</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Cena poskytovatele</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook je zakázán. Před opakováním jeho doručení jej povolte</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Událost se právě odesílá. Zkuste to znovu po dokončení pokusu</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Doručení bylo zaznamenáno ve starším formátu webhooku a nelze jej odeslat znovu</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Cíl webhooku není existující uživatel ani skupina</value>
   </data>
 </root>

@@ -435,6 +435,12 @@ public class EntryManager(IDaoFactory daoFactory,
             // folderType=FillingFormsRoom and no searchArea at all, and on this endpoint searchArea
             // is not nullable, so "not sent" arrives as Active and must not be read as "the Rooms
             // section, therefore not forms".
+            // Files are picked here by the type of their room, and a private room has no type of its own.
+            if (searchArea == SearchArea.PrivateRooms)
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(searchArea));
+            }
+
             if (folderType is not { Count: > 0 })
             {
                 folderType = searchArea switch
@@ -555,7 +561,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
-        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.Forms && !parent.ProviderEntry)
+        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
                 provider, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter, withAiFolder, metadataFilter);
@@ -653,8 +659,9 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesCount = count - folders.Count;
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
+                var filesParentType = room is { FolderType: FolderType.KnowledgeRoom } ? FolderType.KnowledgeRoom : parent.FolderType;
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
-                    excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto,
+                    excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, filesParentType, formsItemDto,
                     applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter, folderType: trashFolderType, metadataFilter: metadataFilter);
 
                 var files = await filesTask.ToListAsync();
@@ -1383,14 +1390,14 @@ public class EntryManager(IDaoFactory daoFactory,
 
                 if (Equals(properties.FormFilling.ResultsFolderId, default(T)))
                 {
-                    var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, sourceFile.Version, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao);
+                    var initFormFillingProperties = await InitFormFillingProperties(folderIfNew.Id, sourceTitle, sourceFile.Id, sourceFile.Version, inProcessFormFolderId, readyFormFolderId, folderIfNew.CreateBy, properties, fileDao, folderDao, false);
                     linkedFile.ParentId = initFormFillingProperties.FormFilling.ToFolderId;
                 }
                 else if (resultFolder is not { FolderType: FolderType.FormFillingFolderInProgress })
                 {
                     properties.FormFilling.ToFolderId = await CreateFormFillingFolder(sourceTitle, inProcessFormFolderId, FolderType.FormFillingFolderInProgress, folderIfNew.CreateBy, folderDao);
                     linkedFile.ParentId = properties.FormFilling.ToFolderId;
-                    await fileDao.SaveProperties(sourceFile.Id, properties);
+                    await formFillingReportCreator.SaveFormPropertiesAsync(sourceFile.Id, properties);
                 }
                 else
                 {
@@ -1529,6 +1536,12 @@ public class EntryManager(IDaoFactory daoFactory,
         if (file.RootFolderType == FolderType.TRASH)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+        }
+
+        // Whatever comes here for end-to-end encrypted content is ciphertext; saved without the flag it would turn into an open file.
+        if (!encrypted && (file.Encrypted || await DocSpaceHelper.LocatedInPrivateRoomAsync(file, daoFactory.GetCacheFolderDao<T>())))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
 
         var currentExt = file.ConvertedExtension;
@@ -1694,6 +1707,7 @@ public class EntryManager(IDaoFactory daoFactory,
         await fileMarker.MarkAsNewAsync(file);
         await fileMarker.RemoveMarkAsNewAsync(file);
 
+        // The file is saved already: a failure here must not fail the save the document server reported.
         if (file.IsPdf)
         {
             await OnFormVersionChangedAsync(file);
@@ -1702,22 +1716,59 @@ public class EntryManager(IDaoFactory daoFactory,
         return file;
     }
 
+    // After the save or the restore has taken effect: a busy lock must not fail a version already written, so a passing
+    // fault is tried once more and a failure is only logged. Left undone, the drafts of the earlier version stay linked
+    // and the fillers are not told the form changed; new drafts still take the version of the file itself.
     private async Task OnFormVersionChangedAsync<T>(File<T> file)
     {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var properties = await fileDao.GetProperties(file.Id);
-        if (properties?.FormFilling == null
-            || properties.FormFilling.OriginalFormVersion == 0
-            || properties.FormFilling.OriginalFormVersion == file.Version
-            || !Equals(properties.FormFilling.OriginalFormId, file.Id))
+        // Only the save of the properties is tried again: it waits for one lock, and what follows waits for its own.
+        EntryProperties<T> properties = null;
+        try
         {
+            await FormFillingReportCreator.RetryTransientAsync(async () => properties = await SaveFormVersionAsync(file),
+                FormFillingReportCreator.VersionStateSaveAttempts, FormFillingReportCreator.VersionStateSaveDelay);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorFormVersionStateNotUpdated(e, file.Id.ToString(), file.Version);
             return;
         }
 
-        await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(file.Id);
-        properties.FormFilling.OriginalFormVersion = file.Version;
-        properties.FormFilling.IsVersionChanged = true;
-        await fileDao.SaveProperties(file.Id, properties);
+        // Also for a save that overwrites the version.
+        if (file is File<int> form && properties is EntryProperties<int> formProperties)
+        {
+            await formFillingReportCreator.MarkEditorRenamesSavedAsync(form, formProperties.FormFilling);
+
+            // Without the check the first submission of the version decides its table.
+            try
+            {
+                await formFillingReportCreator.RequestVersionCheckAsync(form, formProperties.FormFilling);
+            }
+            catch (Exception e)
+            {
+                logger.WarnFormVersionCheckNotRequested(e, file.Id.ToString(), file.Version);
+            }
+        }
+    }
+
+    // The properties of the original form with the saved version recorded; null for a file that is not one.
+    private async Task<EntryProperties<T>> SaveFormVersionAsync<T>(File<T> file)
+    {
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
+        if (properties?.FormFilling == null || !Equals(properties.FormFilling.OriginalFormId, file.Id))
+        {
+            return null;
+        }
+
+        if (properties.FormFilling.OriginalFormVersion != 0 && properties.FormFilling.OriginalFormVersion != file.Version)
+        {
+            await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(file.Id);
+            properties.FormFilling.OriginalFormVersion = file.Version;
+            properties.FormFilling.IsVersionChanged = true;
+            await formFillingReportCreator.SaveFormPropertiesAsync(file.Id, properties);
+        }
+
+        return properties;
     }
 
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false, string fillingSessionId = null)
@@ -1754,7 +1805,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (await lockerManager.FileLockedForMeAsync(file.Id, userId))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
@@ -1819,7 +1870,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (await lockerManager.FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (checkRight && await fileTracker.IsEditingAsync(file.Id))
@@ -1972,9 +2023,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (newFile.IsPdf)
             {
-                // reverting a form is a content change like any editor save: without this the stored
-                // OriginalFormVersion keeps pointing at the pre-restore version and every later draft
-                // is rejected as obsolete on submit
+                // Reverting a form is a content change like any editor save: the drafts of the earlier version are let go
+                // and the fields of the restored version are checked against the table.
                 await OnFormVersionChangedAsync(newFile);
             }
 
@@ -2010,7 +2060,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (await lockerManager.FileLockedForMeAsync(fileVersion.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (fileVersion.RootFolderType == FolderType.TRASH)
@@ -2068,7 +2118,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
         if (await lockerManager.FileLockedForMeAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_LockedFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
         if (file.ProviderEntry && await fileTracker.IsEditingAsync(file.Id))
@@ -2167,7 +2217,7 @@ public class EntryManager(IDaoFactory daoFactory,
             await socketManager.CreateFolderAsync(formFolder);
         }
 
-        await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, file.Version, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao);
+        await InitFormFillingProperties(folder.Id, Path.GetFileNameWithoutExtension(file.Title), file.Id, file.Version, inProcessFormFolderId, readyFormFolderId, folder.CreateBy, properties, fileDao, folderDao, true);
     }
 
     public async Task<(T readyFormFolderId, T inProcessFolderId)> InitSystemFormFillingFolders<T>(T formFillingRoomId, IFolderDao<T> folderDao, Guid createBy)
@@ -2242,7 +2292,7 @@ public class EntryManager(IDaoFactory daoFactory,
             var resultsFolderId = await CreateFormFillingFolder(title, readyFormFolder.Id, FolderType.FormFillingFolderDone, form.CreateBy, folderDao);
             formFilling.ResultsFileID = await CreateFillResultsFile(resultsFolderId, form.CreateBy, title, fileDao);
             formFilling.ResultsFolderId = resultsFolderId;
-            await fileDao.SaveProperties(form.Id, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(form.Id, properties);
 
             return true;
         }
@@ -2250,7 +2300,7 @@ public class EntryManager(IDaoFactory daoFactory,
         if (resultsFile == null || !resultsFile.ParentId.Equals(resultFolder.Id))
         {
             formFilling.ResultsFileID = await CreateFillResultsFile(resultFolder.Id, form.CreateBy, title, fileDao);
-            await fileDao.SaveProperties(form.Id, properties);
+            await formFillingReportCreator.SaveFormPropertiesAsync(form.Id, properties);
 
             return true;
         }
@@ -2258,7 +2308,7 @@ public class EntryManager(IDaoFactory daoFactory,
         return false;
     }
 
-    private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, int sourceFileVersion, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao)
+    private async Task<EntryProperties<T>> InitFormFillingProperties<T>(T roomId, string sourceTitle, T sourceFileId, int sourceFileVersion, T inProcessFormFolderId, T readyFormFolderId, Guid createBy, EntryProperties<T> properties, IFileDao<T> fileDao, IFolderDao<T> folderDao, bool underFormLock)
     {
         var templatesFolderTask = CreateFormFillingFolder(sourceTitle, inProcessFormFolderId, FolderType.FormFillingFolderInProgress, createBy, folderDao);
         var resultsFolderTask = CreateFormFillingFolder(sourceTitle, readyFormFolderId, FolderType.FormFillingFolderDone, createBy, folderDao);
@@ -2276,7 +2326,15 @@ public class EntryManager(IDaoFactory daoFactory,
         properties.FormFilling.ResultsFolderId = resultsFolderId;
         properties.FormFilling.StartFilling = true;
 
-        await fileDao.SaveProperties(sourceFileId, properties);
+        // Read inside the form lock the properties are fresh; read outside it they would save over the version state.
+        if (underFormLock)
+        {
+            await fileDao.SaveProperties(sourceFileId, properties);
+        }
+        else
+        {
+            await formFillingReportCreator.SaveFormPropertiesAsync(sourceFileId, properties);
+        }
 
         return properties;
     }
@@ -2294,7 +2352,11 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FillFormDraftObsolete);
         }
 
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{room.Id}_{originalFormId}"))
+        // Runs once the submission lock is released (see FormFillingReportCreator.PublishSubmissionAsync).
+        Func<Task> publishSubmission = null;
+        File<T> result;
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(formFillingReportCreator.GetSubmissionLockKey(originalFormId)))
         {
             var origProperties = await daoFactory.GetFileDao<T>().GetProperties(originalFormId) ?? properties;
             if (userId.Equals(ASC.Core.Configuration.Constants.Guest.ID) &&
@@ -2305,6 +2367,11 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             origProperties.FormFilling.ResultFormNumber++;
+            if (originalForm != null)
+            {
+                origProperties.FormFilling.LastSubmittedVersion = Math.Max(origProperties.FormFilling.LastSubmittedVersion, originalForm.Version);
+            }
+
             await fileDao.SaveProperties(originalFormId, origProperties);
 
             var resultFolder = await folderDao.GetFolderAsync(origProperties.FormFilling.ResultsFolderId);
@@ -2343,7 +2410,6 @@ public class EntryManager(IDaoFactory daoFactory,
             pdfFile.Category = (int)FilterType.PdfForm;
             pdfFile.IsCompletedForm = true;
 
-            File<T> result;
             if (tmpStream.CanSeek)
             {
                 pdfFile.ContentLength = tmpStream.Length;
@@ -2406,15 +2472,15 @@ public class EntryManager(IDaoFactory daoFactory,
                         await fileDao.SaveProperties(originalFormId, origProperties);
                     }
 
-                    await formFillingReportCreator.UpdateFormFillingReport(
-                       origFormId,
-                       origProperties.FormFilling.OriginalFormVersion,
-                       rId,
-                       resProp.FormFilling.ResultFormNumber,
-                       formsDataUrl,
-                       result,
-                       room.SettingsSendFormToExternalDB,
-                       room.SettingsSaveFormAsXLSX);
+                    var submittedVersion = origProperties.FormFilling.OriginalFormVersion;
+                    var resultFormNumber = resProp.FormFilling.ResultFormNumber;
+                    await formFillingReportCreator.IndexSubmissionAsync(origFormId, submittedVersion, rId, resultFormNumber, formsDataUrl, result);
+
+                    var sendFormToExternalDb = room.SettingsSendFormToExternalDB;
+                    var saveFormAsXlsx = room.SettingsSaveFormAsXLSX;
+                    var submittedFile = result;
+                    publishSubmission = () => formFillingReportCreator.PublishSubmissionAsync(
+                        origFormId, submittedVersion, rId, resultFormNumber, formsDataUrl, submittedFile, sendFormToExternalDb, saveFormAsXlsx);
                 }
 
                 if (!securityContext.CurrentAccount.ID.Equals(ASC.Core.Configuration.Constants.Guest.ID))
@@ -2423,7 +2489,10 @@ public class EntryManager(IDaoFactory daoFactory,
                     var sourceFile = await fileDao.GetFileAsync(sourceId);
 
                     await linkDao.DeleteLinkAsync(sourceId);
-                    await socketManager.UpdateFileAsync(sourceFile);
+                    if (sourceFile is not null)
+                    {
+                        await socketManager.UpdateFileAsync(sourceFile);
+                    }
 
                     await fileMarker.RemoveMarkAsNewForAllAsync(file);
                     await linkDao.DeleteAllLinkAsync(file.Id);
@@ -2440,9 +2509,21 @@ public class EntryManager(IDaoFactory daoFactory,
             {
                 logger.LogError(ex, "Form submission error");
             }
-
-            return result;
         }
+
+        if (publishSubmission != null)
+        {
+            try
+            {
+                await publishSubmission();
+            }
+            catch (Exception ex)
+            {
+                logger.ErrorSubmissionNotPublished(ex, originalFormId.ToString());
+            }
+        }
+
+        return result;
     }
 
     private async Task<File<T>> SubmitUserFormAsync<T>(File<T> pdfFile, IFileDao<T> fileDao, Stream stream)

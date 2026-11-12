@@ -123,15 +123,15 @@ public class RoomContentRequestDto
 
     /// <summary>
     /// Splits the rooms by whether they are private, that is encrypted rooms whose content the portal cannot read.
-    /// Omitting it returns both kinds.
+    /// Omitting it returns both kinds, except in the active rooms, which leave private rooms out.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "privacyFilter")]
     public RoomPrivacyFilter? PrivacyFilter { get; set; }
 
     /// <summary>
-    /// Keeps only the rooms that hold a .ai folder in their root. The content of that folder is read with
-    /// `GET api/2.0/files/rooms/{id}/ai`. Omitting it returns rooms with and without the folder.
+    /// Keeps only the rooms that provide skills to the AI chat: Instructions rooms, whose Markdown files are read
+    /// with `GET api/2.0/files/rooms/{id}/ai`. Omitting it returns rooms of every type.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "withAiFolder")]

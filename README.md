@@ -180,7 +180,7 @@ AI-powered functionality: AI assistant integration, background AI processing, ge
 **Ports:** 5157 (Server), 5154 (Worker)
 
 #### ASC.AppHost — Aspire Orchestrator
-.NET Aspire host that orchestrates all services and infrastructure: service discovery, Docker container management (MySQL, Redis, RabbitMQ, OpenSearch), development tools (MailPit, DBGate, RedisInsight).
+.NET Aspire host that orchestrates all services and infrastructure: service discovery, Docker container management (MySQL, the PostgreSQL of the built-in forms database, Redis, RabbitMQ, OpenSearch), development tools (MailPit, DBGate, RedisInsight).
 
 ### Event Bus
 
@@ -332,6 +332,7 @@ $c = docker ps -a --format '{{.Names}}' | Where-Object { $_ -match 'mysql|redis|
 | SSO Auth | 9834 | SSO authentication |
 | WebDAV | 1900 | WebDAV protocol |
 | MySQL | 3306 | Database server |
+| PostgreSQL (forms) | 35432 | Built-in forms database (`ConnectionStrings:formsAdmin`): the read-only portal roles cannot load the server |
 | Redis | 6379 | Cache server |
 | RabbitMQ | 5672, 15672 | Message broker + Management UI |
 | OpenSearch | 9200, 9600 | Search engine |
@@ -350,6 +351,8 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj
 # Run tests for People
 dotnet test products/ASC.People/Tests/ASC.People.Tests.csproj
 ```
+
+On macOS, run `sudo ifconfig lo0 alias 127.0.0.2` once per boot before the webhook tests of `ASC.Web.Api.Tests`: their receiver is published on `127.0.0.2:18089` (see [Troubleshooting](#troubleshooting)).
 
 ### Database Migrations
 
@@ -392,6 +395,15 @@ taskkill /PID <PID> /F
 Ensure you have .NET 10.0 SDK installed. The `global.json` specifies `rollForward: latestMajor`, so any .NET 9.0+ SDK should work, but .NET 10.0 is recommended:
 ```bash
 dotnet --list-sdks
+```
+</details>
+
+<details>
+<summary><b>Webhook tests fail on macOS: the webhook receiver does not start</b></summary>
+
+The webhook tests of `ASC.Web.Api.Tests` run their receiver (WireMock.Net, in the test process) on the loopback alias `127.0.0.2:18089` (`common/ASC.AppHost/Configuration/Constants.cs`), because the webhook blacklist of the `integration-test` profile blocks `127.0.0.1`. Windows and Linux route the whole `127.0.0.0/8` to loopback; macOS only has `127.0.0.1` until the alias is added, so the server cannot bind the port and every webhook test that creates a subscription fails starting it; the rest of the suite is not affected. Add the alias (it does not survive a reboot):
+```bash
+sudo ifconfig lo0 alias 127.0.0.2
 ```
 </details>
 

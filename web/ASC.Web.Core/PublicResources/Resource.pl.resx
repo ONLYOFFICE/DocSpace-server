@@ -145,7 +145,7 @@
     <value>Usługa</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Funkcje AI</value>
+    <value>Agenci i narzędzia AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Kopia zapasowa</value>
@@ -1177,7 +1177,7 @@
     <value>Wyszukiwanie AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Funkcje AI</value>
+    <value>Agenci i narzędzia AI</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Śledzenie logowań i działań</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Koszt dostawcy</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook jest wyłączony. Włącz go przed ponowieniem jego dostarczeń</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Zdarzenie jest właśnie wysyłane. Ponów próbę po zakończeniu tej próby</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Dostarczenie zapisano we wcześniejszym formacie webhooka i nie można go wysłać ponownie</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Cel webhooka nie jest istniejącym użytkownikiem ani grupą</value>
   </data>
 </root>

@@ -38,13 +38,8 @@ namespace ASC.Files.Tests.Tests._07_Settings.SharingDefaults;
 /// sharing dialog.
 /// </summary>
 /// <remarks>
-/// SDK defect: the controller returns a bare <c>List&lt;FileShare&gt;</c> (a JSON array of ints), but
-/// the generated <c>ChangeDefaultAccessRightsAsync</c> deserialises the response as
-/// <c>FileShareArrayWrapper.Response</c> -&gt; <c>List&lt;FileShareDto&gt;</c> (an array of sharing-info
-/// objects with a required, non-nullable <c>subjectType</c>). Deserialising an array of ints into that
-/// shape fails, so every call in this class goes over raw HTTP instead and reads the array back as ints.
-/// This mirrors why <c>SettingsTests.ChangeDefaultAccessRights_ShouldUpdateAccessRights</c> is commented
-/// out in this project.
+/// Every call goes through <c>SettingsApi.ChangeDefaultAccessRightsAsync</c> except the request without a
+/// body, which the typed <c>List&lt;int&gt;</c> parameter cannot express.
 /// </remarks>
 [Trait("Category", "Settings")]
 [Trait("Feature", "SharingDefaults")]
@@ -61,34 +56,29 @@ public class DefaultAccessRightsTests(AspireAppFixture fixture) : SharingDefault
         EmployeeType.Guest
     ];
 
-    private async Task<HttpResponseMessage> PutRaw(List<int>? rights)
+    /// <summary>
+    /// A PUT without a body, which the typed <c>List&lt;int&gt;</c> parameter cannot send. It still carries a
+    /// Content-Type header: without any content ASP.NET answers 415 before the controller runs, which is not
+    /// the case under test. An empty payload with the header is what a real client sends and is refused as a
+    /// malformed body (400).
+    /// </summary>
+    private async Task<HttpResponseMessage> PutWithoutBody()
     {
-        using var request = new HttpRequestMessage(HttpMethod.Put, Path);
-
-        // "No body" still needs a Content-Type header: without any content ASP.NET answers 415
-        // before the controller runs, which is not the case under test. An empty payload with the
-        // header is what a real client sends and is refused as a malformed body (400).
-        request.Content = rights != null
-            ? new StringContent(JsonSerializer.Serialize(rights), Encoding.UTF8, "application/json")
-            : new StringContent(string.Empty, Encoding.UTF8, "application/json");
+        using var request = new HttpRequestMessage(HttpMethod.Put, Path)
+        {
+            Content = new StringContent(string.Empty, Encoding.UTF8, "application/json")
+        };
 
         return await _filesClient.SendAsync(request, TestContext.Current.CancellationToken);
     }
 
     private async Task<List<int>> ChangeDefaultAccessRights(params FileShare[] rights)
     {
-        using var response = await PutRaw([.. rights.Select(r => (int)r)]);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var response = (await _filesSettingsApi.ChangeDefaultAccessRightsAsync(
+            [.. rights.Select(r => (int)r)],
+            TestContext.Current.CancellationToken)).Response;
 
-        return await ReadRights(response);
-    }
-
-    private static async Task<List<int>> ReadRights(HttpResponseMessage response)
-    {
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(body);
-
-        return [.. json.RootElement.GetProperty("response").EnumerateArray().Select(e => e.GetInt32())];
+        return [.. response.Select(r => (int)r)];
     }
 
     [Fact]
@@ -140,7 +130,7 @@ public class DefaultAccessRightsTests(AspireAppFixture fixture) : SharingDefault
     public async Task ChangeDefaultAccessRights_NoBody_ReturnsBadRequest()
     {
         // Act
-        using var response = await PutRaw(null);
+        using var response = await PutWithoutBody();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -162,10 +152,11 @@ public class DefaultAccessRightsTests(AspireAppFixture fixture) : SharingDefault
     public async Task ChangeDefaultAccessRights_InvalidFileShareValue_ReturnsBadRequest()
     {
         // Act
-        using var response = await PutRaw([999]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.ChangeDefaultAccessRightsAsync([999], TestContext.Current.CancellationToken));
 
         // Assert - the product currently accepts an out-of-range FileShare value and returns 200
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -209,10 +200,11 @@ public class DefaultAccessRightsTests(AspireAppFixture fixture) : SharingDefault
         await _filesClient.Authenticate(null);
 
         // Act
-        using var response = await PutRaw([(int)FileShare.Read]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.ChangeDefaultAccessRightsAsync([(int)FileShare.Read], TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Theory]
@@ -243,9 +235,10 @@ public class DefaultAccessRightsTests(AspireAppFixture fixture) : SharingDefault
         await TerminateUser(admin);
 
         // Act
-        using var response = await PutRaw([(int)FileShare.Read]);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.ChangeDefaultAccessRightsAsync([(int)FileShare.Read], TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        exception.ErrorCode.Should().Be(401);
     }
 }

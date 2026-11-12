@@ -31,10 +31,11 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { McpServerConfig, Profile, Thread } from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, Thread } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { dtoToProfile } from "./profilesStorage.js";
+import type { DocspaceProfile } from "./profilesStorage.js";
 import { dtoToThread } from "./threadsStorage.js";
 import { dtoToMessage } from "./messagesStorage.js";
 import { parseMcpServerConfig } from "./mcpServersStorage.js";
@@ -88,16 +89,12 @@ export interface ChatContextRequest {
 }
 
 // `ChatContextFolderDto` -> the shape the Files API helpers already consume.
-// The prompt is left raw here; `safeGetAgentInstruction` sanitizes it at the
-// point of use, exactly as for a folder fetched from the Files API.
 function parseFolder(raw: unknown): DocspaceFolderInfo | undefined {
   if (!isObject(raw) || getEntityId(raw, "id") === undefined) {
     return undefined;
   }
   const info: DocspaceFolderInfo = {
-    isAgent: getBoolean(raw, "isAgent") ?? false,
     title: getString(raw, "title"),
-    prompt: getString(raw, "prompt"),
   };
   const folderType = getNumber(raw, "folderType");
   if (folderType !== undefined) {
@@ -162,8 +159,8 @@ function parseScope(raw: unknown, entityId: string | undefined): ChatContextScop
   };
 }
 
-function parseProfiles(raw: unknown): Profile[] {
-  const result: Profile[] = [];
+function parseProfiles(raw: unknown): DocspaceProfile[] {
+  const result: DocspaceProfile[] = [];
   if (!Array.isArray(raw)) {
     return result;
   }
@@ -229,6 +226,7 @@ export function parseChatContext(
     thread: parseThread(raw["thread"]),
     messages: parseMessages(raw["messages"]),
     webSearch: parseWebSearchConfig(raw["webSearch"]),
+    documentAgentEnabled: getBoolean(raw, "documentAgentEnabled"),
     stale: new Set(),
   };
 }
@@ -283,7 +281,7 @@ export async function primeChatContext(request: ChatContextRequest): Promise<voi
   logger.info(
     `chat-context: primed threadId=${request.threadId ?? "-"} entityId=${request.entityId ?? "-"} ` +
       `contextEntityId=${request.contextEntityId ?? "-"} profiles=${snapshot.profiles.length} ` +
-      `entity=${snapshot.entity ? (snapshot.entity.folder?.isAgent ? "agent" : "folder") : "none"} ` +
+      `entity=${snapshot.entity ? "folder" : "none"} ` +
       `thread=${snapshot.thread ? "yes" : "no"} messages=${snapshot.messages?.length ?? "-"} ` +
       `webSearch=${snapshot.webSearch ? "yes" : "no"}`,
   );

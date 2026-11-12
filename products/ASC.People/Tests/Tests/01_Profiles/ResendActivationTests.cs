@@ -72,6 +72,33 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task ResendUserInvites_SixTimesInARow_SendNoSecondLetter()
+    {
+        // A repeat builds nothing: no link, no audit record, no letter. In this stack no notify service marks letters,
+        // so the repeats are held back by the acceptance the first call records; the engine's mark is covered by
+        // RepeatAcceptKeyTests. A letter is handed to the notify service inside the request, so the bus shows each one.
+        await _peopleClient.Authenticate(Owner);
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
+
+        var email = Initializer.Faker.Internet.Email();
+        var invited = await _profilesApi.InviteUsersAsync(new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]), TestContext.Current.CancellationToken);
+        var invitedUserId = invited.Response.Single(u => u.DisplayName == email).Id;
+
+        for (var call = 0; call < 6; call++)
+        {
+            var resent = await _profilesApi.ResendUserInvitesAsync(new UpdateMembersRequestDto([invitedUserId]), TestContext.Current.CancellationToken);
+
+            resent.Response.Single().Id.Should().Be(invitedUserId);
+        }
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.SaasDocSpaceInviteNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("the invitation went out once, and none of the six resends builds another");
+    }
+
+    [Fact]
     public async Task ResendUserInvites_ByGuest_ShouldThrowAccessDenied()
     {
         var email = Initializer.Faker.Internet.Email();
@@ -112,6 +139,47 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task ResendUserInvites_ToPendingMember_LeavesTheAccountUnwritten()
+    {
+        // A resend changes nothing on a pending account, so it must not save it: a client calling the endpoint in a
+        // loop would rewrite every pending account each time. The account's modification date is set back by hand,
+        // so a save shows as that date moving.
+        await _peopleClient.Authenticate(Owner);
+
+        var email = Initializer.Faker.Internet.Email();
+        var invited = await _profilesApi.InviteUsersAsync(new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]), TestContext.Current.CancellationToken);
+        var invitedUserId = invited.Response.Single(u => u.DisplayName == email).Id;
+        var setBack = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        await SetLastModifiedAsync(invitedUserId, setBack);
+
+        await _profilesApi.ResendUserInvitesAsync(new UpdateMembersRequestDto([invitedUserId]), TestContext.Current.CancellationToken);
+
+        (await GetLastModifiedAsync(invitedUserId)).Should().Be(setBack);
+    }
+
+    [Fact]
+    public async Task InviteUsers_AgainAfterThePendingProfileWasDeleted_SendNoSecondLetter()
+    {
+        // The second invitation of the address creates a new pending profile, but the letter it would send is the one
+        // that just went out, and its link still opens.
+        await _peopleClient.Authenticate(Owner);
+        await using var bus = await Fixture.ListenToEventBusAsync(nameof(NotifyItemIntegrationEvent), TestContext.Current.CancellationToken);
+
+        var email = Initializer.Faker.Internet.Email();
+        var invited = await _profilesApi.InviteUsersAsync(new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]), TestContext.Current.CancellationToken);
+        var invitedUserId = invited.Response.Single(u => u.DisplayName == email).Id;
+        await TerminateUser(new User(email, string.Empty) { Id = invitedUserId });
+        await _profilesApi.DeleteMemberAsync(invitedUserId.ToString(), TestContext.Current.CancellationToken);
+        await _profilesApi.InviteUsersAsync(new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]), TestContext.Current.CancellationToken);
+
+        var letters = await bus.ReadAsync<NotifyItemIntegrationEvent>(
+            l => l.TenantId == TenantId && l.Action.NotifyActionType == "ASC.Web.Studio.Core.Notify.SaasDocSpaceInviteNotifyAction",
+            TestContext.Current.CancellationToken);
+
+        letters.Should().ContainSingle("the second invitation asks for the letter that just went out");
+    }
+
+    [Fact]
     public async Task ResendUserInvites_Anonymous_ShouldThrowUnauthorized()
     {
         await _peopleClient.Authenticate(null);
@@ -122,5 +190,30 @@ public class ResendActivationTests(AspireAppFixture fixture) : BaseTest(fixture)
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
+    }
+
+    private async Task SetLastModifiedAsync(Guid userId, DateTime lastModified)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE core_user SET last_modified = @lastModified WHERE tenant = @tenantId AND id = @userId";
+        command.Parameters.AddWithValue("@lastModified", lastModified);
+        command.Parameters.AddWithValue("@tenantId", TenantId);
+        command.Parameters.AddWithValue("@userId", userId.ToString());
+
+        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+    }
+
+    private async Task<DateTime> GetLastModifiedAsync(Guid userId)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT last_modified FROM core_user WHERE tenant = @tenantId AND id = @userId";
+        command.Parameters.AddWithValue("@tenantId", TenantId);
+        command.Parameters.AddWithValue("@userId", userId.ToString());
+
+        return DateTime.SpecifyKind((DateTime)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken))!, DateTimeKind.Utc);
     }
 }

@@ -34,27 +34,22 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// Contract tests for the Refit-backed <see cref="BillingClient"/>: they capture the outgoing
-/// <see cref="HttpRequestMessage"/> with a fake primary handler and assert the request line, the multimap
-/// JSON body wire format, the HMAC authorization header, the 200-with-error-body exception mapping and
-/// the refresh-only retry behaviour — without any network access.
+/// Contract tests for the Refit-backed <see cref="BillingClient"/>: the client talks to an <see cref="HttpStub"/>
+/// over loopback, and the tests assert the request line, the multimap JSON body wire format, the HMAC
+/// authorization header, the 200-with-error-body exception mapping and the refresh-only retry behaviour.
 /// </summary>
 public class BillingClientTests
 {
-    private const string BaseUrl = "https://billing.example.com";
-    private const string Key = "test-key";
-    private const string Secret = "test-secret";
-
     [Fact]
     public async Task GetCurrentPayments_BuildsExpectedUrlAndBody()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK,
             """[{"EndDate":"2024-01-15T10:30:00Z","PaymentEmail":"user@example.com","PaymentId":1,"PaymentStatus":2,"ProductId":3,"Quantity":4}]"""));
 
         var payments = await client.GetCurrentPaymentsAsync("portal-1", false);
 
         handler.LastMethod.Should().Be(HttpMethod.Post);
-        handler.LastUri!.ToString().Should().Be("https://billing.example.com/billing/GetActiveResources");
+        handler.LastUri!.PathAndQuery.Should().Be("/billing/GetActiveResources");
         handler.LastContentType.Should().Be("application/json; charset=utf-8");
 
         var body = JsonDocument.Parse(handler.LastRequestBody!);
@@ -69,17 +64,29 @@ public class BillingClientTests
     [Fact]
     public async Task BaseUrlWithSubPathAndTrailingSlash_PreservesSubPath()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "[]"), baseUrl: "https://billing.example.com/sub/");
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "[]"), path: "/sub/");
 
         await client.GetPaymentsAsync("portal-1");
 
-        handler.LastUri!.ToString().Should().Be("https://billing.example.com/sub/billing/GetPayments");
+        handler.LastUri!.PathAndQuery.Should().Be("/sub/billing/GetPayments");
+    }
+
+    [Fact]
+    public async Task RootBaseUrl_ProducesSingleSlashPath()
+    {
+        // A stub of its own: the shared one puts every stub under a path, which would make this a sub-path case.
+        using var stub = HttpStub.AtRoot(_ => Reply(HttpStatusCode.OK, "[]"));
+        var (client, handler) = CreateBillingClient(stub);
+
+        await client.GetPaymentsAsync("portal-1");
+
+        handler.LastUri!.PathAndQuery.Should().Be("/billing/GetPayments");
     }
 
     [Fact]
     public async Task GetPaymentUrl_BuildsMultimapBodyWithOptionalParameters()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"https://pay.example.com/checkout\""));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "\"https://pay.example.com/checkout\""));
 
         var url = await client.GetPaymentUrlAsync(
             "portal-1",
@@ -113,7 +120,7 @@ public class BillingClientTests
     [Fact]
     public async Task GetDocsCloudTrial_SendsCustomerDetailsAndOmitsEmptyOnes()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "\"ok\""));
 
         var customer = new DocsCloudTrialCustomer(
             "admin@example.com", "https://portal.example.com", "John Smith", null, "en", "");
@@ -136,7 +143,7 @@ public class BillingClientTests
     [Fact]
     public async Task TopUpDeposit_SendsInvariantAmountAndMetadataAsJsonString()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "\"ok\""));
 
         var metadata = new Dictionary<string, string> { { "details", "Auto top-up" } };
         var result = await client.TopUpDepositAsync("portal-1", 1234.56m, "USD", "participant", "site", metadata);
@@ -156,7 +163,7 @@ public class BillingClientTests
     [Fact]
     public async Task TopUpDeposit_ReturnsFalse_WhenResponseIsNotOk()
     {
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, "\"pending\""));
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "\"pending\""));
 
         var result = await client.TopUpDepositAsync("portal-1", 10m, "USD", null, null);
 
@@ -166,7 +173,7 @@ public class BillingClientTests
     [Fact]
     public async Task ChangePayment_SendsQuantitiesAndQuantityType()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "true"));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "true"));
 
         var changed = await client.ChangePaymentAsync("portal-1", ["product-1", "product-2"], [5, 10],
             (ProductQuantityType)1, "USD", "participant");
@@ -184,7 +191,7 @@ public class BillingClientTests
     [Fact]
     public async Task GetProductPriceInfo_Wallet_OmitsPortalIdAndUnwrapsEnvelope()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK,
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK,
             """{"11":{"product-1":{"USD":10.5}}}"""));
 
         var prices = await client.GetProductPriceInfoAsync(null, wallet: true, ["product-1", "product-2"]);
@@ -205,8 +212,8 @@ public class BillingClientTests
     {
         const string payments = """[{"PaymentId":1,"PaymentStatus":4},{"PaymentId":2,"PaymentStatus":1}]""";
 
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, payments));
-        var (testClient, _) = CreateClient(_ => Json(HttpStatusCode.OK, payments), test: true);
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, payments));
+        var (testClient, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, payments), test: true);
 
         (await client.GetCurrentPaymentsAsync("portal-1", false)).Should().ContainSingle()
             .Which.PaymentId.Should().Be(2);
@@ -216,7 +223,7 @@ public class BillingClientTests
     [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "\"ok\""));
 
         await client.GetDocsCloudTrialAsync("portal-1", null);
 
@@ -239,7 +246,7 @@ public class BillingClientTests
     [Fact]
     public async Task GetAccountLink_UnwrapsJsonStringResponse()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"https://billing.example.com/account\""));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, "\"https://billing.example.com/account\""));
 
         var link = await client.GetAccountLinkAsync("portal-1", "https://portal/back");
 
@@ -252,7 +259,7 @@ public class BillingClientTests
     [Fact]
     public async Task CannotFindErrorBody_ThrowsBillingNotFoundException_WithoutRetry()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, """{"Message":"error: cannot find portal"}"""));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, """{"Message":"error: cannot find portal"}"""));
 
         var act = async () => await client.GetPaymentsAsync("portal-1");
 
@@ -264,7 +271,7 @@ public class BillingClientTests
     [Fact]
     public async Task OtherErrorBody_ThrowsBillingException_CaseInsensitive()
     {
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, """{"message":"ERROR: something went wrong"}"""));
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, """{"message":"ERROR: something went wrong"}"""));
 
         var act = async () => await client.GetPaymentsAsync("portal-1");
 
@@ -279,17 +286,18 @@ public class BillingClientTests
         // TransportExceptionFactory keeps it inside the BillingException hierarchy instead of leaking
         // Refit.ApiRequestException to the callers. It gets its own type because no answer is not a
         // rejection: a timed-out request may still have been applied on the billing side.
-        var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
+        var (client, _) = CreateBillingClient(HttpStub.Unreachable());
 
         var act = async () => await client.GetPaymentsAsync("portal-1");
 
         (await act.Should().ThrowExactlyAsync<BillingTransportException>())
             .WithInnerException<HttpRequestException>();
     }
+
     [Fact]
     public async Task EmptyResponseBody_ThrowsBillingNotConfiguredException()
     {
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, ""));
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, ""));
 
         var act = async () => await client.GetPaymentsAsync("portal-1");
 
@@ -299,7 +307,7 @@ public class BillingClientTests
     [Fact]
     public async Task NonSuccessStatus_ThrowsBillingExceptionWithStatusAndBody()
     {
-        var (client, _) = CreateClient(_ => Json(HttpStatusCode.InternalServerError, "boom"));
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.InternalServerError, "boom"));
 
         var act = async () => await client.GetPaymentsAsync("portal-1");
 
@@ -311,12 +319,12 @@ public class BillingClientTests
     public async Task GetCurrentPayments_WithRefresh_RetriesOnCannotFind_ThenSucceeds()
     {
         var calls = 0;
-        var (client, handler) = CreateClient(_ =>
+        var (client, handler) = CreateBillingClient(_ =>
         {
-            calls++;
+            Interlocked.Increment(ref calls);
             return calls == 1
-                ? Json(HttpStatusCode.OK, """{"Message":"error: cannot find portal"}""")
-                : Json(HttpStatusCode.OK, """[{"PaymentId":1,"PaymentStatus":1}]""");
+                ? Reply(HttpStatusCode.OK, """{"Message":"error: cannot find portal"}""")
+                : Reply(HttpStatusCode.OK, """[{"PaymentId":1,"PaymentStatus":1}]""");
         });
 
         var payments = await client.GetCurrentPaymentsAsync("portal-1", true);
@@ -328,7 +336,7 @@ public class BillingClientTests
     [Fact]
     public async Task GetCurrentPayments_WithRefresh_ExhaustsRetries_ThenThrows()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, """{"Message":"error: cannot find portal"}"""));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, """{"Message":"error: cannot find portal"}"""));
 
         var act = async () => await client.GetCurrentPaymentsAsync("portal-1", true);
 
@@ -339,7 +347,7 @@ public class BillingClientTests
     [Fact]
     public async Task GetCurrentPayments_WithoutRefresh_IsNotRetried()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, """{"Message":"error: cannot find portal"}"""));
+        var (client, handler) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, """{"Message":"error: cannot find portal"}"""));
 
         var act = async () => await client.GetCurrentPaymentsAsync("portal-1", false);
 
@@ -348,97 +356,14 @@ public class BillingClientTests
     }
 
     [Fact]
-    public async Task NotConfigured_ThrowsBillingNotConfiguredException_WithoutSendingRequest()
+    public async Task NotConfigured_ThrowsBillingNotConfiguredException()
     {
-        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "[]"), baseUrl: null);
+        var client = BuildProvider().GetRequiredService<BillingClient>();
 
         client.Configured.Should().BeFalse();
 
         var act = async () => await client.GetPaymentsAsync("portal-1");
 
         await act.Should().ThrowExactlyAsync<BillingNotConfiguredException>();
-        handler.CallCount.Should().Be(0);
-    }
-
-    private static (BillingClient client, CapturingHandler handler) CreateClient(
-        Func<HttpRequestMessage, HttpResponseMessage> responder, string? baseUrl = BaseUrl, bool test = false)
-    {
-        var settings = new Dictionary<string, string?>
-        {
-            ["core:payment:key"] = Key,
-            ["core:payment:secret"] = Secret,
-            ["core:payment:test"] = test.ToString()
-        };
-
-        if (baseUrl != null)
-        {
-            settings["core:payment:url"] = baseUrl;
-        }
-
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(settings)
-            .Build();
-
-        var handler = new CapturingHandler(responder);
-
-        var services = new ServiceCollection();
-        services.AddSingleton<IConfiguration>(configuration);
-        services.AddScoped<BillingClient>();
-
-        services.AddBillingHttpClient(configuration);
-
-        // Replace the real network handler with our capturing one. AddRefitGeneratedClient sets a primary
-        // handler on its own named client, which overrides ConfigureHttpClientDefaults - so the
-        // override has to target that exact client by name.
-        services.AddHttpClient(Refit.UniqueName.ForType<IBillingApi>())
-                .ConfigurePrimaryHttpMessageHandler(() => handler);
-
-        var provider = services.BuildServiceProvider();
-        return (provider.GetRequiredService<BillingClient>(), handler);
-    }
-
-    private static HttpResponseMessage Json(HttpStatusCode status, string json)
-    {
-        return new HttpResponseMessage(status)
-        {
-            Content = new StringContent(json, Encoding.UTF8, "application/json")
-        };
-    }
-
-    private static string ExpectedToken(string key, string secret, string timestamp)
-    {
-        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(secret));
-        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", timestamp, key))));
-
-        return $"ASC {key}:{timestamp}:{hash}";
-    }
-
-    private sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
-    {
-        public int CallCount { get; private set; }
-        public Uri? LastUri { get; private set; }
-        public HttpMethod? LastMethod { get; private set; }
-        public string? LastAuthorization { get; private set; }
-        public string? LastRequestBody { get; private set; }
-        public string? LastContentType { get; private set; }
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        {
-            CallCount++;
-            LastUri = request.RequestUri;
-            LastMethod = request.Method;
-            LastAuthorization = request.Headers.Contains("Authorization")
-                ? request.Headers.GetValues("Authorization").First()
-                : null;
-            LastRequestBody = request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken);
-            LastContentType = request.Content?.Headers.ContentType?.ToString();
-
-            var response = responder(request);
-
-            // Mimic the real primary handler so the resilience pipeline can inspect the request options.
-            response.RequestMessage = request;
-
-            return response;
-        }
     }
 }

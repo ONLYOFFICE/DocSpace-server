@@ -119,4 +119,44 @@ public class StartFillingFilePermissionsTests(
 
         exception.ErrorCode.Should().Be(403);
     }
+
+    /// <summary>
+    /// Outside a form-filling room the call changes nothing but still answers the file, so a caller
+    /// who cannot read it must get 403 rather than its metadata.
+    /// </summary>
+    [Theory]
+    [InlineData("Autotest Foreign Document.docx")]
+    [InlineData("Autotest Foreign Form.pdf")]
+    public async Task StartFillingFile_ForeignFileOutsideFillingFormsRoom_ReturnsForbidden(string title)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy(title, Owner);
+        var user = await InviteMember(EmployeeType.User);
+        await _filesClient.Authenticate(user);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesApi.StartFillingFileAsync(file.Id, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task StartFillingFile_ReaderOfFileOutsideFillingFormsRoom_ReturnsFile()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest StartFilling Read Room " + Guid.NewGuid().ToString()[..8]);
+        var file = await CreateFile("Autotest Readable Document.docx", room.Id);
+        var user = await InviteMember(EmployeeType.User);
+        await InviteToRoom(room.Id, user, FileShare.Read);
+        await _filesClient.Authenticate(user);
+
+        // Act
+        var result = (await _filesApi.StartFillingFileAsync(file.Id, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        result.Id.Should().Be(file.Id);
+    }
 }

@@ -138,6 +138,11 @@ public class FormFillingProperties<T>
     public int ResultFormNumber { get; set; }
 
     /// <summary>
+    /// The latest version of the original form a response was submitted to; 0 for responses taken before it was kept.
+    /// </summary>
+    public int LastSubmittedVersion { get; set; }
+
+    /// <summary>
     /// The date when the form filling was stopped.
     /// </summary>
     public DateTime FillingStopedDate { get; set; }
@@ -154,6 +159,124 @@ public class FormFillingProperties<T>
     /// </summary>
     public string ExternalDbTableName { get; set; }
 
+    /// <summary>
+    /// The last form version whose fields were compared with the previous version.
+    /// </summary>
+    public int FieldsCheckedVersion { get; set; }
+
+    /// <summary>
+    /// The modification time, in ticks, of the checked version when it was compared; a version overwritten since is
+    /// compared again.
+    /// </summary>
+    public long FieldsCheckedStamp { get; set; }
+
+    /// <summary>
+    /// The form versions that keep their submissions in the table of an earlier version, in the forms database and in
+    /// the spreadsheet report.
+    /// </summary>
+    public List<FormVersionLink> VersionLinks { get; set; }
+
+    /// <summary>
+    /// The links the form versions take, applied with the first submission of the version or, when it already has
+    /// submissions, by moving them into the shared table in the background.
+    /// </summary>
+    public List<FormVersionLink> PendingVersionLinks { get; set; }
+
+    /// <summary>
+    /// The fields renamed in the editor sessions of the form since its versions were last compared, as the editor tracked
+    /// them by field id.
+    /// </summary>
+    public List<FormEditorFieldRenames> EditorFieldRenames { get; set; }
+
+    /// <summary>
+    /// The version of the completed form whose responses failed to be read back for the search index.
+    /// </summary>
+    public int? RecoveryFailedVersion { get; set; }
+
+    /// <summary>
+    /// The failed attempts to recover that version; at the limit recovery skips the file.
+    /// </summary>
+    public int? RecoveryFailedAttempts { get; set; }
+
+    /// <summary>
+    /// When reading the completed form back was last put off by a failure of the builder, the network or the index;
+    /// recovery reads such files after the others.
+    /// </summary>
+    public DateTime? RecoveryPostponedOn { get; set; }
+}
+
+/// <summary>
+/// A form version that continues the built-in table of an earlier version.
+/// </summary>
+public class FormVersionLink
+{
+    /// <summary>
+    /// The form version.
+    /// </summary>
+    public int Version { get; set; }
+
+    /// <summary>
+    /// The version the table is named after.
+    /// </summary>
+    public int TableVersion { get; set; }
+
+    /// <summary>
+    /// The fields renamed since the previous version.
+    /// </summary>
+    public List<FormFieldRename> Renames { get; set; }
+}
+
+/// <summary>
+/// The fields renamed in one editor session of an original form by one user, as the editor tracked them by field id. The
+/// fields not among them were added or removed.
+/// </summary>
+public class FormEditorFieldRenames
+{
+    /// <summary>
+    /// The version the editor opened; the keys of the renames are relative to the fields the user saw when it opened.
+    /// </summary>
+    public int OpenedVersion { get; set; }
+
+    /// <summary>
+    /// The user whose editor reported the renames.
+    /// </summary>
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The editor session that reported them, as the editor names it; null for the reports of an editor that names none.
+    /// </summary>
+    public string SessionId { get; set; }
+
+    /// <summary>
+    /// The number of the report taken, growing within the session; an older report that arrives later is dropped.
+    /// </summary>
+    public long Sequence { get; set; }
+
+    /// <summary>
+    /// The version the editor saved the session as; null until it saves it.
+    /// </summary>
+    public int? SavedVersion { get; set; }
+
+    /// <summary>
+    /// The renamed fields.
+    /// </summary>
+    public List<FormFieldRename> Renames { get; set; }
+}
+
+/// <summary>
+/// A form field whose key changed between two versions.
+/// </summary>
+public class FormFieldRename
+{
+    /// <summary>
+    /// The key in the previous version.
+    /// </summary>
+    public string OldKey { get; set; }
+
+    /// <summary>
+    /// The key in the new version.
+    /// </summary>
+    public string NewKey { get; set; }
 }
 
 /// <summary>

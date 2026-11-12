@@ -126,6 +126,11 @@ function parseFileInput(raw: unknown): ParseResult<FileInput> {
   return { ok: true, value };
 }
 
+// `entityId` on the save routes is the folder the client is in, as
+// @onlyoffice/ai-chat sends it. A saved file is an existing DocSpace entry
+// (`input.path` is its id), so the folder is only recorded on the attachment
+// and nothing depends on it: a save without one is the ordinary case for a
+// chat opened outside the file tree, not an error.
 export const attachmentsController = {
   saveFile: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["input", "entityId"] as const);

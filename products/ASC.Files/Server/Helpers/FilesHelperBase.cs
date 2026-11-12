@@ -55,6 +55,21 @@ public abstract class FilesHelperBase(
 
     protected readonly FileChecker _fileChecker = fileChecker;
 
+    /// <summary>
+    /// Records a file written out of content passed in the request (an HTML or a text file) the way creating a file
+    /// does: an audit entry, which is what the history of the file is read from, and the socket event that shows the
+    /// file to open clients. A brand-new file is logged as created, content saved over an existing file as a new
+    /// version of it. The webhook is published by the uploader itself.
+    /// </summary>
+    protected async Task SendFileWrittenFromContentAsync<T>(File<T> file)
+    {
+        await socketManager.CreateFileAsync(file);
+
+        await filesMessageService.SendAsync(file.Version > 1
+            ? MessageAction.FileUploadedWithOverwriting
+            : MessageAction.FileCreated, file, file.Title);
+    }
+
     public async Task<FileDto<T>> InsertFileAsync<T>(T folderId, Stream file, string title, bool createNewIfExist, bool keepConvertStatus = false)
     {
         try

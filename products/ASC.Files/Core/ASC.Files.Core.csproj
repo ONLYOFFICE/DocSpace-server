@@ -7,6 +7,9 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="ASC.Files.Tests" />
+  </ItemGroup>
+  <ItemGroup>
 
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
 
@@ -33,6 +36,7 @@
     <PackageReference Include="Microsoft.SharePoint.Client" />
     <PackageReference Include="SharpZipLib" />
     <PackageReference Include="WebDav.Client" />
+    <PackageReference Include="YamlDotNet" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\common\ASC.AI.Integration\ASC.AI.Integration.csproj" />
@@ -171,6 +175,7 @@
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\AuditReport.docbuilder" />
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\ExtractFormFieldsData.docbuilder" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\FilesCommonResource.de.resx">

@@ -412,7 +412,10 @@ public class SocketManager(
     {
         var (direct, shared) = await fileSecurity.WhoCanReadSeparatelyAsync(entry);
 
-        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.Archive)
+        // an administrator who is not a member of a private room has no access to it, so its title must not reach them either
+        if (entry.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.Archive &&
+            entry is not Folder<T> { IsRoom: true, SettingsPrivate: true } &&
+            !await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, daoFactory.GetCacheFolderDao<T>()))
         {
             var admins = await Admins();
             direct = direct.Concat(admins);

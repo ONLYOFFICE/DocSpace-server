@@ -190,7 +190,10 @@ internal class RoomsActionMapper : ILocationActionMapper
                             MessageAction.RoomDenyDownloadDisabled,
                             MessageAction.RoomWatermarkSet,
                             MessageAction.RoomWatermarkDisabled,
-                            MessageAction.RoomInviteResend
+                            MessageAction.RoomInviteResend,
+                            MessageAction.RoomsLinkedToAiProject,
+                            MessageAction.RoomsUnlinkedFromAiProject,
+                            MessageAction.AiProjectProfileAssigned
                         ]
                     },
                     { ActionType.Delete, [MessageAction.RoomDeleted] },
@@ -311,7 +314,8 @@ internal class PrivacyRoomActionMapper : ILocationActionMapper
         {
             {
                 ActionType.Create, [
-                    MessageAction.PrivacyRoomKeyCreated
+                    MessageAction.PrivacyRoomKeyCreated,
+                    MessageAction.FileKeysSet
                 ]
             },
             {
@@ -321,7 +325,8 @@ internal class PrivacyRoomActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Delete, [
-                    MessageAction.PrivacyRoomKeyDeleted
+                    MessageAction.PrivacyRoomKeyDeleted,
+                    MessageAction.RoomFileKeysRevoked
                 ]
             }
         };

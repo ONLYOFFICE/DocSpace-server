@@ -145,7 +145,7 @@
     <value>Υπηρεσία</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>Λειτουργίες AI</value>
+    <value>AI πράκτορες και εργαλεία</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Αντίγραφο ασφαλείας</value>
@@ -1177,7 +1177,7 @@
     <value>Αναζήτηση AI</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>Λειτουργίες AI</value>
+    <value>AI πράκτορες και εργαλεία</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Παρακολούθηση συνδέσεων και ενεργειών</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Κόστος παρόχου</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Το webhook είναι απενεργοποιημένο. Ενεργοποιήστε το πριν επαναλάβετε τις παραδόσεις του</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Το συμβάν αποστέλλεται αυτή τη στιγμή. Δοκιμάστε ξανά μόλις ολοκληρωθεί η προσπάθεια</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Η παράδοση καταγράφηκε σε προηγούμενη μορφή webhook και δεν μπορεί να σταλεί ξανά</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Ο προορισμός του webhook δεν είναι υπάρχων χρήστης ή ομάδα</value>
   </data>
 </root>

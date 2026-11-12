@@ -52,11 +52,11 @@ public class SenderChannel : ISenderChannel
         _firstSink = AddSink(_firstSink, dispatcherSink);
     }
 
-    public async Task SendAsync(INoticeMessage message, IServiceScope serviceScope)
+    public async Task<SendResponse> SendAsync(INoticeMessage message, IServiceScope serviceScope)
     {
         ArgumentNullException.ThrowIfNull(message);
 
-        await _firstSink.ProcessMessageAsync(message, serviceScope);
+        return await _firstSink.ProcessMessageAsync(message, serviceScope);
     }
 
     public async Task<SendResponse> DirectSend(INoticeMessage message, IServiceScope serviceScope)

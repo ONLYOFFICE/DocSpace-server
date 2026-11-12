@@ -122,7 +122,10 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.UserUpdatedAiSettings,
                     MessageAction.DocsCloudConfigUpdated,
                     MessageAction.AiProfileUpdated,
-                    MessageAction.AiProfileAssigned
+                    MessageAction.AiProfileAssigned,
+                    MessageAction.AppEnabled, MessageAction.AppDisabled,
+                    MessageAction.AiByokKeySet,
+                    MessageAction.AiDocumentAgentSettingsUpdated
                 ]
             },
             {
@@ -157,6 +160,7 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.ResetVectorizationSettings,
                     MessageAction.AiProfileDeleted,
                     MessageAction.AiProfileUnassigned,
+                    MessageAction.AiByokKeyDeleted,
                     MessageAction.WebpluginDeleted,
                     MessageAction.ScheduledBackupDeleted,
                     MessageAction.CustomerServiceLimitDeleted
@@ -164,7 +168,8 @@ internal class ProductsActionMapper : ILocationActionMapper
             },
             {
                 ActionType.Send, [
-                    MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions
+                    MessageAction.OwnerSentPortalDeleteInstructions, MessageAction.OwnerSentChangeOwnerInstructions,
+                    MessageAction.WebhookRetried
                 ]
             },
             {

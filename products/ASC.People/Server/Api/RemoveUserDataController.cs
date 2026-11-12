@@ -83,7 +83,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// emailed link and the client calls `DELETE api/2.0/people/@self` with the confirmation token from it.
     /// The answer is a ready-to-display message naming the address the link was sent to, and the address is wrapped
     /// in bold HTML markup, so strip the markup before showing it outside a web page.
-    /// Repeated calls are throttled, and each one sends a new link.
+    /// A repeat shortly after the letter went out sends no second letter, and the link already sent stays valid.
     /// </remarks>
     /// <summary>
     /// Send the deletion instructions
@@ -93,7 +93,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [SwaggerResponse(200, "The message stating which address the confirmation link was sent to", typeof(string))]
     [SwaggerResponse(403, "The caller is the portal owner or an LDAP account and cannot delete their own profile")]
     [HttpPut("self/delete")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<string> SendInstructionsToDelete()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -104,8 +103,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
             throw new SecurityException();
         }
 
-        await studioNotifyService.SendMsgProfileDeletionAsync(user);
-        messageService.Send(MessageAction.UserSentDeleteInstructions);
+        if (await studioNotifyService.SendMsgProfileDeletionAsync(user))
+        {
+            messageService.Send(MessageAction.UserSentDeleteInstructions);
+        }
 
         return string.Format(Resource.SuccessfullySentNotificationDeleteUserInfoMessage, "<b>" + user.Email + "</b>");
     }
@@ -124,6 +125,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </remarks>
     /// <summary>Start the data deletion</summary>
     /// <path>api/2.0/people/remove/start</path>
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued data deletion creates the folder in the caller's personal section that takes over the files and folders the account shared from its own; not when it shared none")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued deletion", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`, no user has the specified ID, or the account is the portal owner, the caller, or is not disabled")]
@@ -203,6 +205,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </remarks>
     /// <summary>Delete the personal folder</summary>
     /// <path>api/2.0/people/delete/personal/start</path>
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued job creates the folder that takes over the files and folders the caller shared from the personal folder, in the personal section of the member who last changed that folder or of the portal owner; not when the caller shared none")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued personal folder deletion", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(403, "The caller is not a guest, or is a guest whose personal folder has not been created")]

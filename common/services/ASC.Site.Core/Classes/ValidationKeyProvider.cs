@@ -46,18 +46,25 @@ namespace ASC.Site.Core.Classes
             return emailValidationKeyProvider.GetEmailKey(value, Tenant.DefaultTenant);
         }
 
-        public bool ValidateKey(string cacheKey, string publickey, string secretkey)
+        public KeyValidationResult ValidateKey(string cacheKey, string publickey, string secretkey)
         {
-            if (cache.Get<string>(cacheKey) != null)
+            var validationResult = emailValidationKeyProvider.ValidateEmailKey(publickey, secretkey, _validInterval, Tenant.DefaultTenant);
+
+            if (validationResult != EmailValidationKeyProvider.ValidationResult.Ok)
             {
-                return false; // single use only
+                return validationResult == EmailValidationKeyProvider.ValidationResult.Expired
+                    ? KeyValidationResult.Expired
+                    : KeyValidationResult.Invalid;
             }
 
-            var validationResult = emailValidationKeyProvider.ValidateEmailKey(publickey, secretkey, _validInterval, Tenant.DefaultTenant);
+            if (cache.Get<string>(cacheKey) != null)
+            {
+                return KeyValidationResult.AlreadyUsed; // single use only
+            }
 
             cache.Insert(cacheKey, validationResult.ToString(), _validInterval);
 
-            return validationResult == EmailValidationKeyProvider.ValidationResult.Ok;
+            return KeyValidationResult.Ok;
         }
 
         public async Task<string> EncryptAndEncode(string data)

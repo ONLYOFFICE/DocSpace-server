@@ -80,4 +80,11 @@ public class AuthKeyDto
     /// </summary>
     /// <example>s3</example>
     public string DependsOnValue { get; init; }
+
+    /// <summary>
+    /// Every value of the `dependsOn` key that makes this field visible, for a field shared by several of them; null when
+    /// only `dependsOnValue` applies. When present, it takes precedence over `dependsOnValue`.
+    /// </summary>
+    /// <example>["mysql", "postgresql"]</example>
+    public List<string> DependsOnValues { get; init; }
 }

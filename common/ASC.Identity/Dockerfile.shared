@@ -5,7 +5,7 @@ ARG AUTHORIZATION_JAR
 FROM eclipse-temurin:25-jdk-alpine AS jre-builder
 
 RUN $JAVA_HOME/bin/jlink \
-    --add-modules java.base,java.logging,java.sql,java.naming,java.management,jdk.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec,java.net.http,jdk.httpserver \
+    --add-modules java.base,java.logging,java.sql,java.naming,java.management,jdk.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec,java.net.http,jdk.httpserver,jdk.net \
     --strip-debug \
     --no-man-pages \
     --no-header-files \

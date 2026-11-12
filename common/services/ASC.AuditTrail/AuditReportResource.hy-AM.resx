@@ -1242,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI պրոֆիլը նշանակված է AI գործակալին գործողության համար՝ {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>ԱԲ մոդելի BYOK բանալին ջնջված է՝ {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>ԱԲ մոդելի BYOK բանալին սահմանված է՝ {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Փաստաթղթերի գործակալի կարգավորումները թարմացվել են</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>ԱԲ պրոֆիլը նշանակված է գործողության համար՝ {0}</value>
   </data>
@@ -1316,5 +1325,23 @@
   </data>
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Ֆայլը բացվել է Document Builder սցենարի կողմից՝ {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Հավելվածը միացվել է՝ {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Հավելվածը անջատվել է՝ {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>{0} ԱԲ նախագծին կապված սենյակներ՝ [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>{0} ԱԲ նախագծից անջատված սենյակներ՝ [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>{0} ԱԲ նախագծի ԱԲ մոդելը փոխվել է՝ {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook-ի առաքումը կրկին փորձարկվել է՝ {0}</value>
   </data>
 </root>

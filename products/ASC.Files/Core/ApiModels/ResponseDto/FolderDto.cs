@@ -274,10 +274,11 @@ public class FolderDtoHelper(
     FileSharing fileSharing,
     EntryStatusManager entryStatusManager,
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IFusionCache fusionCache,
     MetadataTemplatesCache metadataTemplatesCache,
     ILogger<FileEntryDtoHelper> logger)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
     private readonly TenantManager _tenantManager = tenantManager;
@@ -519,9 +520,9 @@ public class FolderDtoHelper(
                     canUpdateXlsx = originalForm != null && await _fileSecurity.CanUpdateXlsxAsync(originalForm);
                     if (canUpdateXlsx)
                     {
-                        // Responses can be analysed only when the form's submissions table really exists in the external database.
+                        // Responses can be analysed only when the form has them in the forms database.
                         var originalFormProperties = await fileDao.GetProperties(originalFormId);
-                        canAnalyze = await FormHasExternalDbTableAsync(originalFormProperties?.FormFilling?.ExternalDbTableName);
+                        canAnalyze = await FormHasAnalysableResponsesAsync(originalFormProperties?.FormFilling, originalForm.Version);
                     }
                 }
             }
@@ -564,7 +565,7 @@ public class FolderDtoHelper(
     {
         var newBadges = folder.NewForMe;
 
-        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates)
+        if (folder.RootFolderType is FolderType.VirtualRooms or FolderType.AiHub or FolderType.RoomTemplates or FolderType.DefaultTemplates)
         {
             var isEnabledBadges = await badgesSettingsHelper.GetEnabledForCurrentUserAsync();
 
@@ -575,7 +576,7 @@ public class FolderDtoHelper(
         }
 
         var result = await GetAsync<FolderDto<T>, T>(folder);
-        if (folder.FolderType is not (FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates or FolderType.AiAgents))
+        if (folder.FolderType is not (FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.DefaultTemplates or FolderType.AiAgents or FolderType.AiHub))
         {
             result.FilesCount = folder.FilesCount;
             result.FoldersCount = folder.FoldersCount;

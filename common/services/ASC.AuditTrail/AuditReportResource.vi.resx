@@ -1242,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Hồ sơ AI được giao cho tác nhân AI để thực hiện hành động: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Đã xóa khóa BYOK cho mô hình AI: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Đã đặt khóa BYOK cho mô hình AI: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Đã cập nhật cài đặt tác nhân tài liệu</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Hồ sơ AI được giao cho hành động: {0}</value>
   </data>
@@ -1316,5 +1325,23 @@
   </data>
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Tệp được mở bởi Script Document Builder: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Đã bật ứng dụng: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Đã tắt ứng dụng: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Đã liên kết phòng với dự án AI {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Đã hủy liên kết phòng khỏi dự án AI {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Đã thay đổi mô hình AI của dự án AI {0} thành {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Đã thử gửi lại webhook: {0}</value>
   </data>
 </root>

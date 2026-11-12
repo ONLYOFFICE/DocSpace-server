@@ -48,6 +48,7 @@ global using System.Text.RegularExpressions;
 global using System.Xml;
 global using System.Xml.Linq;
 
+global using ASC.AI.Integration.DocumentAgent;
 global using ASC.AI.Integration.WebSearch;
 global using ASC.Api.Utils;
 global using ASC.Common;
@@ -100,6 +101,7 @@ global using ASC.Web.Studio.Core.Notify;
 global using ASC.Web.Studio.Core.SMS;
 global using ASC.Web.Studio.Core.TFA;
 global using ASC.Web.Studio.Utility;
+global using ASC.Webhooks.Core;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Http;

@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Nemôžete použiť tento priečinok na ukladanie miestnosti</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Neplatná URL adresa pripojenia</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Nesprávny názov</value>
   </data>
@@ -607,9 +610,6 @@
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Výstupy chatu</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Miestnosť už obsahuje priečinok .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Úložisko nemožno odpojiť, kým ho miestnosť používa. Namiesto toho miestnosť odstráňte</value>
   </data>
@@ -621,5 +621,29 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Hľadať v metadátach priečinka</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Projekt AI môže prepojiť najviac {0} miestností s pokynmi</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Projekt AI môže prepojiť najviac {0} znalostných miestností</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Tieto miestnosti nie je možné prepojiť s projektom AI: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Do miestnosti s pokynmi je možné pridávať iba súbory Markdown (.md)</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Miestnosť s pokynmi môže obsahovať najviac {0} zručností</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Popis zručnosti musí mať 1 až 1024 znakov a nesmie obsahovať značky XML</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Súbor zručnosti musí začínať blokom YAML frontmatter medzi dvoma riadkami --- s poľami name a description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Názov zručnosti musí mať 1 až 64 znakov, môže obsahovať iba malé písmená, číslice a jednotlivé pomlčky a nesmie začínať ani končiť pomlčkou</value>
   </data>
 </root>

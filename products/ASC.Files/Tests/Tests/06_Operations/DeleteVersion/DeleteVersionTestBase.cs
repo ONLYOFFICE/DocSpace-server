@@ -59,23 +59,35 @@ public abstract class DeleteVersionTestBase(
         return file;
     }
 
+    /// <summary>A version-delete operation as the tests see it.</summary>
+    protected sealed record VersionDeleteOperation(string? Id);
+
     /// <summary>
     /// Deletes the given file versions and waits for the resulting operation to finish. Returns the
     /// operation the server first reported, so a caller checking its shape does not have to redo the
     /// call.
     /// </summary>
-    /// <summary>A version-delete operation as the tests see it.</summary>
-    protected sealed record VersionDeleteOperation(string? Id);
-
-    /// <remarks>
-    /// Sent over raw HTTP: the endpoint answers with an <b>array</b> of operations, while the
-    /// generated <c>DeleteFileVersionsAsync</c> is typed to a single <c>FileOperationDto</c>
-    /// (<c>FileOperationWrapper</c>), so every successful call dies in the client's deserializer —
-    /// an SDK/OpenAPI generation defect, not a preference for raw HTTP.
-    /// </remarks>
-    protected async Task<VersionDeleteOperation?> DeleteVersionsAndWait(int fileId, List<int> versions, bool returnSingleOperation = false)
+    protected async Task<VersionDeleteOperation?> DeleteVersionsAndWait(int fileId, List<int> versions)
     {
-        var payload = JsonSerializer.Serialize(new { fileId, versions, returnSingleOperation });
+        var operations = (await _filesOperationsApi.DeleteFileVersionsAsync(
+            new DeleteVersionBatchRequestDto(fileId: fileId, versions: versions),
+            TestContext.Current.CancellationToken)).Response ?? [];
+
+        var operation = operations.Count > 0 ? new VersionDeleteOperation(operations[0].Id) : null;
+
+        await WaitLongOperation(operation?.Id);
+
+        return operation;
+    }
+
+    /// <summary>
+    /// <see cref="DeleteVersionsAndWait"/> with <c>returnSingleOperation: true</c>. Sent over raw HTTP because
+    /// the generated <see cref="DeleteVersionBatchRequestDto"/> has no <c>returnSingleOperation</c> property,
+    /// although the endpoint reads it - an SDK/OpenAPI gap, not a preference for raw HTTP.
+    /// </summary>
+    protected async Task<VersionDeleteOperation?> DeleteVersionsAsSingleOperationAndWait(int fileId, List<int> versions)
+    {
+        var payload = JsonSerializer.Serialize(new { fileId, versions, returnSingleOperation = true });
         using var content = new StringContent(payload, Encoding.UTF8, "application/json");
         using var response = await _filesClient.PutAsync("api/2.0/files/fileops/deleteversion", content, TestContext.Current.CancellationToken);
 

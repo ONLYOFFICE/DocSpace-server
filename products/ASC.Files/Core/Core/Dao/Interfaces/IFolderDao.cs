@@ -448,12 +448,25 @@ public interface IFolderDao<T>
     Task<T> GetFolderIDAiAgentsAsync(bool createIfNotExists);
 
     /// <summary>
+    /// Returns id folder "AiHub"
+    /// Only in TMFolderDao
+    /// </summary>
+    /// <param name="createIfNotExists"></param>
+    /// <returns></returns>
+    Task<T> GetFolderIDAiHubAsync(bool createIfNotExists);
+
+    /// <summary>
     /// Returns id folder "Forms"
     /// Only in TMFolderDao
     /// </summary>
     /// <param name="createIfNotExists"></param>
     /// <returns></returns>
     Task<T> GetFolderIDFormsAsync(bool createIfNotExists);
+
+    /// <summary>
+    /// The ID of the root of the private rooms section.
+    /// </summary>
+    Task<T> GetFolderIDPrivateRoomsAsync(bool createIfNotExists);
 
     /// <summary>
     /// Return id of related object

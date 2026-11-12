@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.asc</groupId>
         <artifactId>common</artifactId>
-        <version>1.3.0</version>
+        <version>1.4.0</version>
     </parent>
 
     <artifactId>common-messaging</artifactId>
@@ -21,6 +21,11 @@
         <dependency>
             <groupId>com.asc</groupId>
             <artifactId>common-service</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.asc</groupId>
+            <artifactId>common-utilities</artifactId>
         </dependency>
 
         <!-- Spring AMQP Dependencies -->

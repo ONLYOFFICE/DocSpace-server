@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Het is niet mogelijk om in deze map de kamer op te slaan</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Ongeldig URL-adres voor de verbinding</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Onjuiste titel</value>
   </data>
@@ -610,9 +613,6 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Chat-uitvoer</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>De ruimte bevat al de map .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>De opslag kan niet worden losgekoppeld terwijl een ruimte deze gebruikt. Verwijder in plaats daarvan de ruimte</value>
   </data>
@@ -621,5 +621,29 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Zoeken in mapmetagegevens</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>Een AI-project kan maximaal {0} instructieruimtes koppelen</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>Een AI-project kan maximaal {0} kennisruimtes koppelen</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Deze ruimtes kunnen niet aan het AI-project worden gekoppeld: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Aan een instructieruimte kunnen alleen Markdown-bestanden (.md) worden toegevoegd</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Een instructieruimte kan maximaal {0} skills bevatten</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>De beschrijving van de skill moet 1 tot 1024 tekens lang zijn en mag geen XML-tags bevatten</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Het skillbestand moet beginnen met een YAML-frontmatterblok tussen twee regels met ---, met de velden name en description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>De naam van de skill moet 1 tot 64 tekens lang zijn, mag alleen kleine letters, cijfers en enkele koppeltekens bevatten en mag niet met een koppelteken beginnen of eindigen</value>
   </data>
 </root>

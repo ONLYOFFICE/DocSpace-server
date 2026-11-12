@@ -39,21 +39,18 @@ public class ProfileStorageService(
     AuthContext authContext,
     TenantManager tenantManager,
     ProfileStorage storage,
+    ByokKeyStorage byokKeyStorage,
     IDistributedLockProvider distributedLockProvider,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     AiGateway aiGateway,
-    BaseCommonLinkUtility linkUtility,
+    ProfileReader profileReader,
     MessageService messageService) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, aiGateway)
 {
     private readonly AiGateway _aiGateway = aiGateway;
 
     private static readonly IEnumerable<EmployeeType> _writeTypes = [EmployeeType.DocSpaceAdmin];
     private static readonly IEnumerable<EmployeeType> _readTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
-
-    private const string ImageModality = "image";
-    private const string ToolsCapability = "tools";
-    private const string ReasoningCapability = "reasoning";
 
     public async Task<Profile> CreateAsync(ProfileData profile)
     {
@@ -82,17 +79,109 @@ public class ProfileStorageService(
         return created;
     }
 
+    public async Task<ByokKeyDto> SetByokKeyAsync(Guid id, string provider, string key)
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var model = await FindByokModelAsync(id) ?? throw new ItemNotFoundException();
+        var type = GetByokType(model) ?? throw new ItemNotFoundException();
+
+        if (!model.AcceptsByokProvider(provider))
+        {
+            throw new ArgumentException(ErrorMessages.ModelNotAvailableForProvider);
+        }
+
+        if (!await _aiGateway.VerifyByokKeyAsync(provider, key))
+        {
+            throw new ArgumentException(ErrorMessages.InvalidKey);
+        }
+
+        await byokKeyStorage.SetAsync(tenantManager.GetCurrentTenantId(), id, type, provider, key);
+
+        messageService.Send(MessageAction.AiByokKeySet, MessageTarget.Create(id), model.Alias);
+
+        return new ByokKeyDto { Id = id, Name = model.Alias, Provider = provider, Image = AiModelImages.Get(model.OwnedBy) };
+    }
+
+    public async Task DeleteByokKeyAsync(Guid id)
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var name = await TryFindByokModelNameAsync(id) ?? id.ToString();
+
+        if (!await byokKeyStorage.DeleteAsync(tenantManager.GetCurrentTenantId(), id))
+        {
+            throw new ItemNotFoundException();
+        }
+
+        messageService.Send(MessageAction.AiByokKeyDeleted, MessageTarget.Create(id), name);
+    }
+
+    public async Task<List<ByokKeyDto>> ReadByokKeysAsync()
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var keys = await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId());
+        if (keys.Count == 0)
+        {
+            return [];
+        }
+
+        var models = (await _aiGateway.GetAllModelsAsync()).Data
+            .DistinctBy(m => m.RevisionId)
+            .ToDictionary(m => m.RevisionId);
+
+        return
+        [
+            .. keys
+                .Select(k =>
+                {
+                    var model = models.GetValueOrDefault(k.Id);
+
+                    return new ByokKeyDto
+                    {
+                        Id = k.Id,
+                        Name = model?.Alias,
+                        Provider = k.Provider,
+                        Image = AiModelImages.Get(model?.OwnedBy)
+                    };
+                })
+        ];
+    }
+
+    public async Task<List<ByokProviderDto>> ReadByokProvidersAsync()
+    {
+        await AssertUserHasAccessAsync(_writeTypes);
+        AssertGatewayConfigured();
+
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
+        var overridden = (await byokKeyStorage.ReadAllAsync(tenantManager.GetCurrentTenantId())).Select(k => k.Id).ToHashSet();
+
+        return
+        [
+            .. models
+                .Where(m => GetByokType(m).HasValue && !overridden.Contains(m.RevisionId))
+                .SelectMany(m => (m.ByokProviders ?? []).Select(p => (Provider: p, Model: m)))
+                .GroupBy(x => x.Provider.Id)
+                .Select(g => new ByokProviderDto
+                {
+                    Id = g.Key,
+                    Name = g.First().Provider.Name,
+                    Image = AiModelImages.Get(GetSingleOwner(g.Select(x => x.Model))),
+                    Models = [.. g.Select(x => new ByokModelDto { Id = x.Model.RevisionId, Name = x.Model.Alias })]
+                })
+                .OrderBy(p => p.Name, StringComparer.OrdinalIgnoreCase)
+        ];
+    }
+
     public async Task<Profile> ReadByIdAsync(Guid id)
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        if (_aiGateway.Configured)
-        {
-            var profiles = await GetGatewayProfilesAsync();
-            return profiles.FirstOrDefault(p => p.Id == id) ?? throw new ItemNotFoundException();
-        }
-
-        var profile = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
+        var profile = await profileReader.ReadByIdAsync(tenantManager.GetCurrentTenantId(), id);
 
         return profile ?? throw new ItemNotFoundException();
     }
@@ -136,101 +225,54 @@ public class ProfileStorageService(
         }
     }
 
-    internal async Task<List<Profile>> ReadAllVerifiedAsync(IEnumerable<Model>? models = null)
+    internal async Task<List<Profile>> ReadAllVerifiedAsync(List<Model>? models = null)
+    {
+        return await profileReader.ReadAllAsync(tenantManager.GetCurrentTenantId(), models);
+    }
+
+    internal async Task<ByokCredentials> ReadByokCredentialsAsync(Guid id)
+    {
+        await AssertUserHasAccessAsync(_readTypes);
+        AssertGatewayConfigured();
+
+        return await byokKeyStorage.ReadCredentialsAsync(tenantManager.GetCurrentTenantId(), id) ?? throw new ItemNotFoundException();
+    }
+
+    private void AssertGatewayConfigured()
     {
         if (!_aiGateway.Configured)
         {
-            return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
+            throw new ItemNotFoundException();
         }
-
-        var profiles = models is null ? await GetGatewayProfilesAsync() : MapGatewayProfiles(models);
-        return [.. profiles];
     }
 
-    private async Task<IEnumerable<Profile>> GetGatewayProfilesAsync()
+    private async Task<Model?> FindByokModelAsync(Guid id)
     {
-        var response = await _aiGateway.GetModelsAsync();
+        var models = (await _aiGateway.GetAllModelsAsync()).Data;
 
-        return MapGatewayProfiles(response.Data);
+        return models.FirstOrDefault(m => m.RevisionId == id);
     }
 
-    private IEnumerable<Profile> MapGatewayProfiles(IEnumerable<Model> models)
+    private async Task<string?> TryFindByokModelNameAsync(Guid id)
     {
-        return models
-            .Where(m => !string.Equals(m.Type, "embedding", StringComparison.OrdinalIgnoreCase))
-            .Select(m => new Profile
-            {
-                Id = m.RevisionId,
-                Name = m.Alias,
-                ProviderType = "onlyoffice",
-                BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
-                ModelId = m.Id,
-                Reasoning = MapReasoning(m),
-                CanUseTool = HasCapability(m, ToolsCapability),
-                Capabilities = MapCapabilities(m),
-                UseResponsesApi = false,
-                Key = "onlyoffice"
-            });
-    }
-
-    private static ReasoningConfig MapReasoning(Model model)
-    {
-        var reasoning = model.Reasoning;
-
-        return new ReasoningConfig
+        try
         {
-            Thinks = reasoning is not null || HasCapability(model, ReasoningCapability),
-            CanDisable = reasoning is null || !reasoning.Mandatory,
-            Depths = reasoning?.SupportedEfforts?.Select(ParseDepth).OfType<ReasoningDepth>().ToArray() ?? [],
-            DefaultDepth = reasoning is null
-                ? null
-                : reasoning.DefaultEnabled ? ParseDepth(reasoning.DefaultEffort) : ReasoningDepth.None
-        };
-    }
-
-    private static ReasoningDepth? ParseDepth(string? value)
-    {
-        return ReasoningDepthExtensions.TryParse(value, true, out var depth) ? depth : null;
-    }
-
-    private static Capabilities MapCapabilities(Model model)
-    {
-        var capabilities = Capabilities.None;
-
-        if (string.Equals(model.Type, "chat", StringComparison.OrdinalIgnoreCase))
-        {
-            capabilities |= Capabilities.Chat;
+            return (await FindByokModelAsync(id))?.Alias;
         }
-        else if (string.Equals(model.Type, "image", StringComparison.OrdinalIgnoreCase))
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or TimeoutException or JsonException)
         {
-            capabilities |= Capabilities.Image;
+            return null;
         }
-
-        if (HasModality(model.InputModalities, ImageModality))
-        {
-            capabilities |= Capabilities.Vision;
-        }
-
-        if (HasModality(model.OutputModalities, ImageModality))
-        {
-            capabilities |= Capabilities.Image;
-        }
-
-        if (HasCapability(model, ToolsCapability))
-        {
-            capabilities |= Capabilities.Tools;
-        }
-
-        return capabilities;
     }
 
-    private static bool HasCapability(Model model, string capability)
+    private static string? GetSingleOwner(IEnumerable<Model> models)
     {
-        return model.Capabilities?.Contains(capability, StringComparer.OrdinalIgnoreCase) == true;
+        var owners = models.Select(m => m.OwnedBy).Distinct(StringComparer.OrdinalIgnoreCase).Take(2).ToList();
+        return owners.Count == 1 ? owners[0] : null;
     }
 
-    private static bool HasModality(IEnumerable<string> modalities, string modality)
+    private static ByokKeyType? GetByokType(Model model)
     {
-        return modalities.Contains(modality, StringComparer.OrdinalIgnoreCase);
+        return ByokKeyTypeExtensions.TryParse(model.Type, ignoreCase: true, out var type) ? type : null;
     }
 }

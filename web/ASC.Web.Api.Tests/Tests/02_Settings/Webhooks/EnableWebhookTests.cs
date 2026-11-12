@@ -47,7 +47,7 @@ public class EnableWebhookTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var dto = WebhooksTestData.CreateWebhookDto(enabled: true);
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto(enabled: true);
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
         var toggleRequest = new UpdateWebhooksConfigRequestDto(created.Response.Id)
@@ -78,7 +78,7 @@ public class EnableWebhookTests(
         var userB = await InviteContact(EmployeeType.User);
 
         await _webApiClient.Authenticate(userB);
-        var dto = WebhooksTestData.CreateWebhookDto();
+        var dto = WebhooksTestData.CreateAcceptedWebhookDto();
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
         await _webApiClient.Authenticate(userA);

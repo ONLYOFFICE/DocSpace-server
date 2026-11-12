@@ -35,67 +35,63 @@ namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
-public class AssignmentsUpsertTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class AssignmentsUpsertTests(AspireAppFixture fixture) : AssignmentsTestBase(fixture)
 {
     [Fact]
     public async Task UpsertMany_InsertsNewRows()
     {
-        var chatProfile = await CreateProfileAsync();
-        var codeProfile = await CreateProfileAsync();
+        var chatProfile = await CreateAssignableProfileAsync();
+        var codeProfile = await CreateAssignableProfileAsync();
 
-        using var response = await _ai.PutAsync(
-            AssignmentsPath,
-            new
+        var result = await _aiAssignments.AiAssignmentsBulkAssignAsync(
+            new Dictionary<string, string>
             {
-                assignments = new Dictionary<string, Guid>
-                {
-                    ["Chat"] = chatProfile.Id,
-                    ["Code"] = codeProfile.Id
-                }
+                [nameof(AiActionType.Chat)] = chatProfile.Id,
+                [nameof(AiActionType.Code)] = codeProfile.Id
             },
             TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
 
-        var all = await ReadAllAssignmentsAsync();
-        all.Should().HaveCount(2);
-        all["Chat"].Should().Be(chatProfile.Id);
-        all["Code"].Should().Be(codeProfile.Id);
+        result.Success.Should().BeTrue();
+
+        // The first profile of the portal also holds the Default slot.
+        var all = await GetAllAssignmentsAsync();
+        all.Should().HaveCount(3);
+        all[nameof(AiActionType.Chat)].Should().Be(chatProfile.Id);
+        all[nameof(AiActionType.Code)].Should().Be(codeProfile.Id);
     }
 
     [Fact]
     public async Task UpsertMany_UpdatesExistingRows()
     {
-        var initialChat = await CreateProfileAsync();
-        var newChat = await CreateProfileAsync();
-        var newCode = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", initialChat.Id);
+        var initialChat = await CreateAssignableProfileAsync();
+        var newChat = await CreateAssignableProfileAsync();
+        var newCode = await CreateAssignableProfileAsync();
+        await AssignAsync(AiActionType.Chat, initialChat.Id);
 
-        using var response = await _ai.PutAsync(
-            AssignmentsPath,
-            new
+        var result = await _aiAssignments.AiAssignmentsBulkAssignAsync(
+            new Dictionary<string, string>
             {
-                assignments = new Dictionary<string, Guid>
-                {
-                    ["Chat"] = newChat.Id,
-                    ["Code"] = newCode.Id
-                }
+                [nameof(AiActionType.Chat)] = newChat.Id,
+                [nameof(AiActionType.Code)] = newCode.Id
             },
             TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
 
-        var all = await ReadAllAssignmentsAsync();
-        all["Chat"].Should().Be(newChat.Id);
-        all["Code"].Should().Be(newCode.Id);
+        result.Success.Should().BeTrue();
+
+        var all = await GetAllAssignmentsAsync();
+        all[nameof(AiActionType.Chat)].Should().Be(newChat.Id);
+        all[nameof(AiActionType.Code)].Should().Be(newCode.Id);
     }
 
+    // Internal contract: entity-scoped assignments have no public route (bulk-assign takes no entityId and the Node adapter drops it).
     [Fact]
     public async Task UpsertMany_WithEntityId_IsolatedFromGlobal()
     {
-        var globalProfile = await CreateProfileAsync();
-        var scopedProfile = await CreateProfileAsync();
+        var globalProfile = await CreateProfileInternalAsync();
+        var scopedProfile = await CreateProfileInternalAsync();
         var roomId = await CreateRoomAsync();
 
-        await CreateAssignmentAsync("Chat", globalProfile.Id);
+        await CreateAssignmentInternalAsync("Chat", globalProfile.Id);
 
         using var response = await _ai.PutAsync(
             AssignmentsPath,
@@ -110,26 +106,26 @@ public class AssignmentsUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
 
-        (await ReadAssignmentAsync("Chat")).Should().Be(globalProfile.Id);
-        (await ReadAssignmentAsync("Chat", roomId.ToString())).Should().Be(scopedProfile.Id);
+        (await ReadAssignmentInternalAsync("Chat")).Should().Be(globalProfile.Id);
+        (await ReadAssignmentInternalAsync("Chat", roomId.ToString())).Should().Be(scopedProfile.Id);
     }
 
     [Fact]
     public async Task UpsertMany_EmptyDict_NoOp()
     {
-        using var response = await _ai.PutAsync(
-            AssignmentsPath,
-            new { assignments = new Dictionary<string, Guid>() },
+        var result = await _aiAssignments.AiAssignmentsBulkAssignAsync(
+            new Dictionary<string, string>(),
             TestContext.Current.CancellationToken);
-        response.EnsureSuccessStatusCode();
 
-        (await ReadAllAssignmentsAsync()).Should().BeEmpty();
+        result.Success.Should().BeTrue();
+        (await GetAllAssignmentsAsync()).Should().BeEmpty();
     }
 
+    // Internal contract: entity-scoped assignments have no public route (bulk-assign takes no entityId and the Node adapter drops it).
     [Fact]
     public async Task UpsertMany_NonExistentEntityId_Returns404()
     {
-        var profile = await CreateProfileAsync();
+        var profile = await CreateProfileInternalAsync();
 
         using var response = await _ai.PutAsync(
             AssignmentsPath,

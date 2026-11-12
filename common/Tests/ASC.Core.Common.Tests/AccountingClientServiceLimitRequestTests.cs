@@ -69,7 +69,7 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task GetServiceLimit_BuildsIdPathAndDeserializesResponse()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, ServiceLimitJson));
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, ServiceLimitJson));
 
         var serviceLimit = await client.GetServiceLimitAsync(42);
 
@@ -96,7 +96,7 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task GetServiceLimit_LifetimeLimitForEveryUser_ReadsScopeAndUsageFrom()
     {
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
             """{"id":43,"serviceGroupName":"ai-services","scope":"Global","participant":null,"amountValue":100,"currency":"USD","period":"Lifetime","usageFrom":"2026-10-01T09:12:00Z","enabled":false}"""));
 
         var serviceLimit = await client.GetServiceLimitAsync(43);
@@ -111,14 +111,14 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task GetTotalServiceLimit_BuildsTotalPathAndReadsUsage()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK,
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
             $$"""{"id":41,"serviceGroupName":"ai-services","scope":"Total","participant":null,"amountValue":500,"currency":"USD","period":"Month","enabled":true,"usage":{{UsageJson}}}"""));
 
         var serviceLimit = await client.GetTotalServiceLimitAsync("portal-1", "ai-services", includeUsage: true);
 
         handler.LastMethod.Should().Be(HttpMethod.Get);
         handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/by-customer/portal-1/by-group/ai-services/total");
-        AccountingClientTests.ParseQuery(handler.LastUri)["includeUsage"].Should().Be("true");
+        ParseQuery(handler.LastUri)["includeUsage"].Should().Be("true");
 
         serviceLimit.Scope.Should().Be(ServiceLimitScope.Total);
         serviceLimit.Usage.Should().NotBeNull();
@@ -133,7 +133,7 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task GetTotalServiceLimit_LifetimeUsage_HasNoPeriodEnd()
     {
-        var (client, _) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK,
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
             """{"id":41,"scope":"Total","period":"Lifetime","usageFrom":"2026-10-01T09:12:00Z","usage":{"periodStart":"2026-10-01T09:12:00Z","periodEnd":null,"amountConsumed":5,"amountAvailable":95,"quantityConsumed":0}}"""));
 
         var serviceLimit = await client.GetTotalServiceLimitAsync("portal-1", "ai-services", includeUsage: true);
@@ -145,7 +145,7 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task GetGlobalServiceLimit_BuildsGlobalPath()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK,
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
             """{"id":43,"serviceGroupName":"ai-services","scope":"Global","amountValue":50,"currency":"USD","period":"Day","enabled":true}"""));
 
         var serviceLimit = await client.GetGlobalServiceLimitAsync("portal-1", "ai-services");
@@ -159,7 +159,7 @@ public class AccountingClientServiceLimitRequestTests
     public async Task GetParticipantServiceLimits_BuildsPathAndQueryAndDeserializesPage()
     {
         // The limit for every user repeats its ID for each user it applies to.
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK,
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
             $$"""
             {"collection":[
               {"id":42,"scope":"Custom","participant":"3f2504e0-4f89-11d3-9a0c-0305e82c3301","amountValue":200,"period":"Day","enabled":true,"usage":{{UsageJson}}},
@@ -182,7 +182,7 @@ public class AccountingClientServiceLimitRequestTests
         handler.LastMethod.Should().Be(HttpMethod.Get);
         handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/by-customer/portal-1/by-group/ai-services/participants");
 
-        var query = AccountingClientTests.ParseQuery(handler.LastUri);
+        var query = ParseQuery(handler.LastUri);
         query["offset"].Should().Be("10");
         query["limit"].Should().Be("5");
         query["orderBy"].Should().Be("Participant");
@@ -200,17 +200,17 @@ public class AccountingClientServiceLimitRequestTests
     public async Task GetParticipantServiceLimits_DefaultFilter_SendsNoQuery()
     {
         // Descending is the accounting default, so it is normalized away together with the unset values.
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, """{"collection":[]}"""));
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, """{"collection":[]}"""));
 
         await client.GetParticipantServiceLimitsAsync("portal-1", "ai-services", new ServiceLimitFilter { OrderType = OperationOrderType.Descending });
 
-        AccountingClientTests.ParseQuery(handler.LastUri!).Should().BeEmpty();
+        ParseQuery(handler.LastUri!).Should().BeEmpty();
     }
 
     [Fact]
     public async Task CreateServiceLimit_PostsBodyWithGroupScopeAndParticipant()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.Created, ServiceLimitJson));
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.Created, ServiceLimitJson));
 
         var serviceLimit = await client.CreateServiceLimitAsync("portal-1", "ai-services", ServiceLimitScope.Custom,
             "3f2504e0-4f89-11d3-9a0c-0305e82c3301", 50.5m, 1000, ServiceLimitPeriod.Day);
@@ -235,7 +235,7 @@ public class AccountingClientServiceLimitRequestTests
     public async Task CreateServiceLimit_TotalScopeWithOneThreshold_OmitsUnsetFields()
     {
         // The accounting service refuses a participant for a limit of the portal; an absent field is "not set".
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.Created, ServiceLimitJson));
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.Created, ServiceLimitJson));
 
         await client.CreateServiceLimitAsync("portal-1", "ai-services", ServiceLimitScope.Total, null, 500m, null, ServiceLimitPeriod.Month);
 
@@ -251,7 +251,7 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task UpdateServiceLimit_PutsBodyWithIdAndOnlyTheChangedFields()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, ServiceLimitJson));
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, ServiceLimitJson));
 
         await client.UpdateServiceLimitAsync(42, null, 2000, false);
 
@@ -269,7 +269,7 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task SetParticipantServiceLimits_PutsBodyWithGroupAndParticipantsAndReturnsCount()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, "2"));
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "2"));
 
         var count = await client.SetParticipantServiceLimitsAsync("portal-1", "ai-services",
             ["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"], 40m, null, ServiceLimitPeriod.Week);
@@ -293,7 +293,7 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task DisableParticipantServiceLimits_PutsToDisablePathAndReturnsCount()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, "5"));
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, "5"));
 
         var count = await client.DisableParticipantServiceLimitsAsync("portal-1", "ai-services");
 
@@ -305,7 +305,7 @@ public class AccountingClientServiceLimitRequestTests
     [Fact]
     public async Task DeleteServiceLimit_SendsDeleteToIdPath()
     {
-        var (client, handler) = AccountingClientTests.CreateClient(_ => new HttpResponseMessage(HttpStatusCode.NoContent));
+        var (client, handler) = CreateAccountingClient(_ => Reply(HttpStatusCode.NoContent, ""));
 
         await client.DeleteServiceLimitAsync(42);
 

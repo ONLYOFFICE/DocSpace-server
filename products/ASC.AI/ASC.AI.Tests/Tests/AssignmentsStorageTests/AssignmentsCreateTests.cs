@@ -35,49 +35,52 @@ namespace ASC.AI.Tests.Tests.AssignmentsStorageTests;
 
 [Trait("Category", "CRUD")]
 [Trait("Feature", "AI/Assignments")]
-public class AssignmentsCreateTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class AssignmentsCreateTests(AspireAppFixture fixture) : AssignmentsTestBase(fixture)
 {
     [Fact]
     public async Task Create_Owner_PersistsAndIsReadable()
     {
-        var profile = await CreateProfileAsync();
+        var profile = await CreateAssignableProfileAsync();
 
-        await CreateAssignmentAsync("Chat", profile.Id);
+        await AssignAsync(AiActionType.Chat, profile.Id);
 
-        var stored = await ReadAssignmentAsync("Chat");
-        stored.Should().Be(profile.Id);
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().Be(profile.Id);
     }
 
+    // Internal contract: entity-scoped assignments have no public route (the Node assign takes no entityId and its storage adapter drops it).
     [Fact]
     public async Task Create_WithEntityId_PersistsForFolder()
     {
-        var profile = await CreateProfileAsync();
+        var profile = await CreateProfileInternalAsync();
         var roomId = await CreateRoomAsync();
 
-        await CreateAssignmentAsync("Chat", profile.Id, roomId.ToString());
+        await CreateAssignmentInternalAsync("Chat", profile.Id, roomId.ToString());
 
-        (await ReadAssignmentAsync("Chat", roomId.ToString())).Should().Be(profile.Id);
-        (await ReadAssignmentAsync("Chat")).Should().BeNull();
+        (await ReadAssignmentInternalAsync("Chat", roomId.ToString())).Should().Be(profile.Id);
+        (await ReadAssignmentInternalAsync("Chat")).Should().BeNull();
     }
 
+    // Internal contract: the strict create (POST /assignments) has no public route (public assign is an upsert through PUT /assignments).
     [Fact]
     public async Task Create_DuplicateActionType_Fails()
     {
-        var profile = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", profile.Id);
+        var profile = await CreateProfileInternalAsync();
+        await CreateAssignmentInternalAsync("Chat", profile.Id);
 
         using var response = await _ai.PostAsync(
             AssignmentsPath,
             new { actionType = "Chat", profileId = profile.Id },
             TestContext.Current.CancellationToken);
 
-        response.IsSuccessStatusCode.Should().BeFalse();
+        // A refusal, not a crash: the service throws InvalidOperationException for an existing binding, which the API maps to 403.
+        ((int)response.StatusCode).Should().BeInRange(400, 499, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
+    // Internal contract: entity-scoped assignments have no public route (the Node assign takes no entityId and its storage adapter drops it).
     [Fact]
     public async Task Create_NonExistentEntityId_Returns404()
     {
-        var profile = await CreateProfileAsync();
+        var profile = await CreateProfileInternalAsync();
 
         using var response = await _ai.PostAsync(
             AssignmentsPath,
@@ -88,22 +91,26 @@ public class AssignmentsCreateTests(AspireAppFixture fixture) : BaseTest(fixture
     }
 
     [Fact]
-    public async Task Create_EmptyProfileId_Returns400()
+    public async Task Create_EmptyProfileId_ReportsProfileNotFound()
     {
-        using var response = await _ai.PostAsync(
-            AssignmentsPath,
-            new { actionType = "Chat", profileId = Guid.Empty },
+        // The engine looks the profile up before it writes: an id that names no profile is a soft failure
+        // (200 with success=false), and nothing is bound.
+        var result = await _aiAssignments.AiAssignmentsAssignAsync(
+            new AiAssignmentsAssignRequest(AiActionType.Chat, Guid.Empty.ToString()),
             TestContext.Current.CancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        result.Success.Should().BeFalse();
+        result.Error.Message.Should().Contain("Profile not found");
+        (await GetAssignmentAsync(AiActionType.Chat)).Should().BeNull();
     }
 
     [Fact]
-    public async Task Create_InvalidJson_Returns400()
+    public async Task Create_MissingProfileId_Returns400()
     {
-        const string invalidJson = """{ "actionType": "Chat" }""";
-
-        using var response = await _ai.PostRawAsync(AssignmentsPath, invalidJson, TestContext.Current.CancellationToken);
+        using var response = await new RawApiClient(_aiChatClient).PutRawAsync(
+            PublicAssignPath,
+            """{ "actionType": "Chat" }""",
+            TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }

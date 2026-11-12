@@ -36,7 +36,8 @@ namespace ASC.Web.Studio.IntegrationEvents.EventHandling;
 [Scope]
 public class WebhookRequestIntegrationEventHandler(
     ILogger<WebhookRequestIntegrationEventHandler> logger,
-    ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue) : IIntegrationEventHandler<WebhookRequestIntegrationEvent>
+    DbWorker dbWorker,
+    WorkerSignal workerSignal) : IIntegrationEventHandler<WebhookRequestIntegrationEvent>
 {
     public async Task Handle(WebhookRequestIntegrationEvent @event)
     {
@@ -44,9 +45,22 @@ public class WebhookRequestIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            concurrentQueue.Enqueue(@event);
+            // a publisher of this version wrote its row on the schedule already, and the worker only has to wake up.
+            // One of the previous version, still running during a rolling update, wrote it unscheduled and in the old
+            // payload format, which is never sent: the row is marked so that neither the sender nor a manual retry
+            // picks it up. The mark comes from the event, never from the row's state, which a row of this version
+            // stopped by a manual retry or cancelled before its first attempt shares
+            if (!@event.Scheduled)
+            {
+                if (await dbWorker.MarkPreviousVersionJournalEntryAsync(@event.TenantId, @event.WebhookLogId))
+                {
+                    logger.WarningPreviousVersionEvent(@event.TenantId, @event.WebhookLogId);
+                }
 
-            await Task.CompletedTask;
+                return;
+            }
+
+            workerSignal.Notify();
         }
     }
 }

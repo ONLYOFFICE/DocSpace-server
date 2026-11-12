@@ -1242,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>Profil AI przypisany do agenta AI dla akcji: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>Klucz BYOK dla modelu AI został usunięty: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>Klucz BYOK dla modelu AI został ustawiony: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Ustawienia agenta dokumentów zostały zaktualizowane</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profil AI przypisany do akcji: {0}</value>
   </data>
@@ -1316,5 +1325,23 @@
   </data>
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Plik otwarty przez skrypt Document Builder: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Włączona aplikacja: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Wyłączona aplikacja: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>Pokoje powiązane z projektem AI {0}: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>Pokoje odłączone od projektu AI {0}: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>Model AI projektu AI {0} zmieniono na {1}</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Ponowiono dostarczenie webhooka: {0}</value>
   </data>
 </root>

@@ -100,6 +100,19 @@ public class TenantUtil(TenantManager tenantManager)
 
     }
 
+    /// <summary>
+    /// The creation date of the portal, marked as UTC.
+    /// </summary>
+    /// <remarks>
+    /// The creation date is stored in UTC but read back without a kind, so it must not go through
+    /// <see cref="DateTimeToUtc(DateTime)"/>: that would read it in the portal time zone and move it by the portal's
+    /// offset.
+    /// </remarks>
+    public static DateTime GetUtcCreationDate(Tenant tenant)
+    {
+        return DateTime.SpecifyKind(tenant.CreationDateTime, DateTimeKind.Utc);
+    }
+
     public DateTime DateTimeNow()
     {
         return DateTimeNow(TimeZoneInfo);

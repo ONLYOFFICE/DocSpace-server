@@ -34,7 +34,6 @@
 global using System.Collections.Specialized;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
-global using System.Collections.Concurrent;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Mail;
@@ -45,10 +44,10 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
-global using System.Reflection;
 global using System.Web;
 
 global using ASC.AI.Integration.Extensions;
+global using ASC.AI.Integration.Profiles;
 global using ASC.ActiveDirectory;
 global using ASC.ActiveDirectory.Base;
 global using ASC.ActiveDirectory.Base.Settings;
@@ -59,6 +58,7 @@ global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Security;
 global using ASC.Api.Core.Socket;
+global using ASC.Api.Core.Webhook;
 global using ASC.Api.Settings;
 global using ASC.Api.Settings.Smtp;
 global using ASC.Api.Utils;

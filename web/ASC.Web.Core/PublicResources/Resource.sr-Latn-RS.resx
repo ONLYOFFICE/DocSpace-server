@@ -145,7 +145,7 @@
     <value>Usluga</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
-    <value>AI funkcije</value>
+    <value>AI agenti i alati</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Bekap</value>
@@ -1177,7 +1177,7 @@
     <value>AI pretraga</value>
   </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
-    <value>AI funkcije</value>
+    <value>AI agenti i alati</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Praćenje prijava i radnji</value>
@@ -1556,5 +1556,17 @@
   </data>
   <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
     <value>Trošak provajdera</value>
+  </data>
+  <data name="ErrorWebhookRetryDisabled" xml:space="preserve">
+    <value>Webhook je onemogućen. Omogućite ga pre ponovnog pokušaja njegovih isporuka</value>
+  </data>
+  <data name="ErrorWebhookRetryInProgress" xml:space="preserve">
+    <value>Događaj se upravo šalje. Pokušajte ponovo kada se pokušaj završi</value>
+  </data>
+  <data name="ErrorWebhookRetryOutdated" xml:space="preserve">
+    <value>Isporuka je zabeležena u ranijem formatu webhook-a i ne može se ponovo poslati</value>
+  </data>
+  <data name="ErrorWebhookTargetNotFound" xml:space="preserve">
+    <value>Cilj webhook-a nije postojeći korisnik ili grupa</value>
   </data>
 </root>

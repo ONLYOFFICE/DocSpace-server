@@ -1242,6 +1242,15 @@
   <data name="AiAgentProfileAssigned" xml:space="preserve">
     <value>AI profili, AI aracısına eylem için atandı: {0}</value>
   </data>
+  <data name="AiByokKeyDeleted" xml:space="preserve">
+    <value>AI modeli için BYOK anahtarı silindi: {0}</value>
+  </data>
+  <data name="AiByokKeySet" xml:space="preserve">
+    <value>AI modeli için BYOK anahtarı ayarlandı: {0}</value>
+  </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Belge ajanı ayarları güncellendi</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI profili eyleme atandı: {0}</value>
   </data>
@@ -1316,5 +1325,23 @@
   </data>
   <data name="FileOpenedByDocumentBuilder" xml:space="preserve">
     <value>Dosya Document Builder Komut Dosyası Tarafından Açıldı: {0}</value>
+  </data>
+  <data name="AppEnabled" xml:space="preserve">
+    <value>Uygulama etkinleştirildi: {0}</value>
+  </data>
+  <data name="AppDisabled" xml:space="preserve">
+    <value>Uygulama devre dışı bırakıldı: {0}</value>
+  </data>
+  <data name="RoomsLinkedToAiProject" xml:space="preserve">
+    <value>{0} yapay zeka projesine bağlanan odalar: [{1}]</value>
+  </data>
+  <data name="RoomsUnlinkedFromAiProject" xml:space="preserve">
+    <value>{0} yapay zeka projesiyle bağlantısı kaldırılan odalar: [{1}]</value>
+  </data>
+  <data name="AiProjectProfileAssigned" xml:space="preserve">
+    <value>{0} yapay zeka projesinin AI modeli {1} olarak değiştirildi</value>
+  </data>
+  <data name="WebhookRetried" xml:space="preserve">
+    <value>Webhook teslimatı yeniden denendi: {0}</value>
   </data>
 </root>

@@ -43,6 +43,7 @@ internal static class MarkdownBundle
 {
     private const string StaticDirectory = "static";
     private const string IndexFile = "llms.txt";
+    private const string UsageDirectory = "usage-api";
 
     public static async Task WriteAsync(
         string bundleDirectory,
@@ -52,6 +53,7 @@ internal static class MarkdownBundle
         IReadOnlyList<SectionDocument> sections,
         IReadOnlyList<OperationDocument> operations,
         IReadOnlyList<ModelDocument> models,
+        WebhooksDocument webhooks,
         CancellationToken cancellationToken = default)
     {
         // The path under the static root mirrors the site's own URLs: an endpoint page lives at
@@ -60,7 +62,7 @@ internal static class MarkdownBundle
         // is also what the site's sidebar reads.
         var root = Path.Combine(bundleDirectory, StaticDirectory);
         var aggregateDirectory = Path.Combine(root, "docspace", "api-backend");
-        var usageDirectory = Path.Combine(aggregateDirectory, "usage-api");
+        var usageDirectory = Path.Combine(aggregateDirectory, UsageDirectory);
 
         // An endpoint dropped from the API has to disappear from the bundle too, or it keeps being
         // served - and read - as though it were still part of the contract. The documents are
@@ -75,14 +77,44 @@ internal static class MarkdownBundle
 
         Copy(stagingDirectory, usageDirectory);
 
+        // The webhooks reference sits beside `usage-api`, replaced as a whole for the same reason. A run without a
+        // contract configured leaves whatever is there alone.
+        if (webhooks.StagingDirectory != null)
+        {
+            var webhooksDirectory = Path.Combine(aggregateDirectory, webhooks.DirectoryName);
+
+            if (Directory.Exists(webhooksDirectory))
+            {
+                Directory.Delete(webhooksDirectory, recursive: true);
+            }
+
+            Copy(webhooks.StagingDirectory, webhooksDirectory);
+        }
+
         // Earlier layouts published the section references beside `usage-api` rather than inside
         // it; nothing writes there now, and what is left is served alongside what replaced it.
         Prune(aggregateDirectory);
 
         await TextFile.WriteAsync(
             Path.Combine(root, IndexFile),
-            BuildIndex(siteUrl, title, sections, operations, models),
+            BuildIndex(siteUrl, title, sections, operations, models, webhooks),
             cancellationToken);
+    }
+
+    /// <summary>
+    /// Where an endpoint's page is published, relative to the directory that holds `usage-api`: the path the site
+    /// serves it under, and what a page of the webhooks reference beside `usage-api` links to.
+    /// </summary>
+    public static string PagePath(OperationDocument operation)
+    {
+        var path = new StringBuilder(UsageDirectory).Append('/').Append(Url(operation.Section)).Append('/');
+
+        if (operation.Group.Length > 0)
+        {
+            path.Append(Url(operation.Group)).Append('/');
+        }
+
+        return path.Append(operation.FileName).ToString();
     }
 
     /// <summary>
@@ -94,9 +126,11 @@ internal static class MarkdownBundle
         string title,
         IReadOnlyList<SectionDocument> sections,
         IReadOnlyList<OperationDocument> operations,
-        IReadOnlyList<ModelDocument> models)
+        IReadOnlyList<ModelDocument> models,
+        WebhooksDocument webhooks)
     {
-        var baseUrl = $"{siteUrl.TrimEnd('/')}/docspace/api-backend/usage-api/";
+        var aggregateUrl = $"{siteUrl.TrimEnd('/')}/docspace/api-backend/";
+        var baseUrl = $"{aggregateUrl}{UsageDirectory}/";
         var index = new StringBuilder();
 
         index.Append("# ").AppendLine(title);
@@ -176,6 +210,40 @@ internal static class MarkdownBundle
             }
         }
 
+        if (webhooks.Pages.Count > 0)
+        {
+            var webhooksUrl = $"{aggregateUrl}{Url(webhooks.DirectoryName)}/";
+
+            index.AppendLine();
+            index.AppendLine("## Webhooks");
+            index.AppendLine();
+            index
+                .Append("The deliveries DocSpace sends to a subscription's URL, one page per trigger, with the operations that raise it: [")
+                .Append(webhooks.Title).Append("](").Append(webhooksUrl)
+                .Append(WebhookMarkdown.IndexFileName(webhooks.DirectoryName)).AppendLine(").");
+
+            foreach (var family in webhooks.Pages.GroupBy(page => page.Family, StringComparer.Ordinal))
+            {
+                index.AppendLine();
+                index.Append("### ").AppendLine(family.Key);
+                index.AppendLine();
+
+                foreach (var page in family)
+                {
+                    index
+                        .Append("- [").Append(page.Trigger).Append("](").Append(webhooksUrl)
+                        .Append(Url(WebhookMarkdown.Slug(family.Key))).Append('/').Append(page.FileName).Append(')');
+
+                    if (page.Delivery != null)
+                    {
+                        index.Append(": ").Append(page.Delivery);
+                    }
+
+                    index.AppendLine();
+                }
+            }
+        }
+
         return index.ToString();
     }
 
@@ -214,6 +282,16 @@ internal static class MarkdownBundle
     /// sits inside `usage-api`.
     /// </summary>
     internal sealed record SectionDocument(string Name, string Title, string RelativePath);
+
+    /// <summary>
+    /// The webhooks reference: where it was rendered (null when no contract is configured), the directory it is
+    /// published in beside `usage-api`, its title and its trigger pages.
+    /// </summary>
+    internal sealed record WebhooksDocument(
+        string? StagingDirectory,
+        string DirectoryName,
+        string Title,
+        IReadOnlyList<WebhookMarkdown.WebhookPage> Pages);
 
     /// <summary>
     /// One published model: its title, and the page it is documented on.

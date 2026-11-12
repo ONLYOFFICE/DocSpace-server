@@ -36,8 +36,8 @@ namespace ASC.Files.Tests.Tests._01_Files.CopySave;
 /// <summary>
 /// <c>POST /files/file/{id}/saveaspdf</c> — who may create the PDF. Reading the source and creating
 /// in the destination are both checked before the conversion starts, so every refusal below is
-/// decided without a document server. The positive "can create" controls of the TS suite are not
-/// ported: they need the conversion itself (see <see cref="SaveFileAsPdfTests"/>).
+/// decided without a document server. The positive "can create" controls of the TS suite need the
+/// conversion itself and are not ported yet (see <see cref="SaveFileAsPdfTests"/>).
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "Files")]

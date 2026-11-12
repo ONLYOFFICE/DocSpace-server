@@ -1,0 +1,32 @@
+# frozen_string_literal: true
+
+# Entry point of the webhook payload models. Models-only output: the stock
+# entry point would also load api_client (and with it typhoeus) and
+# configuration, none of which a receiver uses - a webhook is parsed, never
+# requested. Overrides the generator's gem.mustache.
+
+require '{{gemName}}/api_model_base'
+require '{{gemName}}/version'
+
+{{#models}}
+{{#model}}
+{{^parent}}
+require '{{gemName}}/{{modelPackage}}/{{classFilename}}'
+{{/parent}}
+{{/model}}
+{{/models}}
+{{#models}}
+{{#model}}
+{{#parent}}
+require '{{gemName}}/{{modelPackage}}/{{classFilename}}'
+{{/parent}}
+{{/model}}
+{{/models}}
+
+# Trigger -> payload model table, written by tools/gen-trigger-map.py in the
+# post-step of the generate-webhook-sdk skill.
+require '{{gemName}}/webhook_triggers'
+
+# The webhook router, hand-written in ruby/shim/ and copied in by the same
+# post-step.
+require '{{gemName}}/webhook_router'

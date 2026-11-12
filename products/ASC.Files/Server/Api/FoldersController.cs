@@ -339,6 +339,7 @@ public abstract class FoldersController<T>(
     /// Create a folder
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
+    [RaisesWebhook(WebhookTrigger.FolderCreated)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder that was created", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
@@ -369,6 +370,10 @@ public abstract class FoldersController<T>(
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
+    [RaisesWebhook(WebhookTrigger.FolderTrashed, When = "once the queued operation moves the folder to the trash; the folders inside it raise none")]
+    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "instead when the folder is deleted at once: `immediately` is true, or it is already in the trash, inside a room or the root of a third-party storage")]
+    [RaisesWebhook(WebhookTrigger.RoomDeleted, When = "instead when the folder is a room")]
+    [RaisesWebhook(WebhookTrigger.AgentDeleted, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller may not delete the folder, or the folder is a room and `immediately` is not set")]
@@ -399,6 +404,7 @@ public abstract class FoldersController<T>(
     /// Set folder order
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/order</path>
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "when the order changes")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with the position it now holds", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read, or `order` is below 1 or is neither a number nor a dotted path ending in one")]
@@ -649,6 +655,9 @@ public abstract class FoldersController<T>(
     /// Rename a folder
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
+    [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "when the title changes")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "instead when the folder is a room")]
+    [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with its new title", typeof(FolderDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
@@ -697,8 +706,10 @@ public abstract class FoldersController<T>(
     /// be viewed, and `password` a secret to be asked for. Sending `access` with the value that grants nothing
     /// creates no link and answers with nothing. The caller needs the right to manage the links of the room the
     /// folder belongs to, which its manager and a portal administrator acting as room manager have, and a member with
-    /// content-creator or read access is refused with 403; an unknown folder is answered with 404. Read the address
-    /// from `sharedTo.shareLink`.
+    /// content-creator or read access is refused with 403; an unknown folder is answered with 404. A primary link
+    /// that was revoked is created anew by this call, with a new identifier, while
+    /// `GET api/2.0/files/folder/{id}/link` keeps answering such a link with 404. Read the address from
+    /// `sharedTo.shareLink`.
     /// </remarks>
     /// <summary>
     /// Create the folder primary external link
@@ -708,7 +719,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
     [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms")]
-    [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{id}/link")]
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
@@ -721,7 +732,8 @@ public abstract class FoldersController<T>(
             requiredAuth: inDto.FolderLink.Internal,
             allowUnlimitedDate: true,
             denyDownload: inDto.FolderLink.DenyDownload,
-            password: inDto.FolderLink.Password);
+            password: inDto.FolderLink.Password,
+            recreateRevoked: true);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -854,9 +866,13 @@ public class FoldersControllerCommon(
     SecurityContext securityContext,
     FilesSettingsHelper filesSettingsHelper,
     SettingsManager settingsManager,
-    MetadataFilterHelper metadataFilterHelper)
+    MetadataFilterHelper metadataFilterHelper,
+    AppSettingsService appSettingsService,
+    TenantManager tenantManager)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
+    private const string PrivateRoomsAppId = "e2e-rooms";
+
     /// <remarks>
     /// Returns the detailed list of files and folders located in the "Common" section. `metadataTemplateId` and
     /// `metadataFilters` narrow the listing to the entries carrying the template and matching the conditions, the
@@ -1110,6 +1126,46 @@ public class FoldersControllerCommon(
         return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFormsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
+    /// <remarks>
+    /// Returns the private rooms section: the flat list of end-to-end encrypted rooms the caller is a member of. Such
+    /// rooms are stored under the "Rooms" tree but are surfaced only here, so `GET api/2.0/files/rooms` leaves them out of
+    /// the active area and lists them when `searchArea` names the private rooms area instead. An administrator who is not
+    /// a member does not see a private room here either. The section is not expanded into room content, so `folders`
+    /// carries the rooms while `files` comes back empty; to read what is inside one of them, call
+    /// `GET api/2.0/files/{folderId}` with the room identifier. Nothing is modified, though passing `sortBy` saves the
+    /// requested order as the default order for this account. `filterType`, `filterValue`, `userIdOrGroupId` and the
+    /// sorting parameters narrow and order the room list, `metadataTemplateId` and `metadataFilters` keep only the rooms
+    /// carrying the template and matching the conditions, `count` and `startIndex` page through it, `total` reports how
+    /// many rooms match the request in full, and `current` describes the section folder itself. Archived private rooms
+    /// stay in the archive area; narrow it with `privacyFilter` of `GET api/2.0/files/rooms`.
+    /// </remarks>
+    /// <summary>Get the private rooms section</summary>
+    /// <path>api/2.0/files/@private</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "The private rooms section with one page of the private rooms the caller is a member of", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
+    [SwaggerResponse(403, "The caller is not allowed to read the private rooms section")]
+    [SwaggerResponse(404, "The end-to-end encrypted rooms app is turned off on this portal")]
+    [HttpGet("@private")]
+    public async Task<FolderContentDto<int>> GetPrivateRoomsFolder(GetCommonFolderRequestDto inDto)
+    {
+        if (!await IsPrivateRoomsAppEnabledAsync())
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters, inDto.IncludeHiddenMetadata ?? false);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderPrivateRoomsAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
+    }
+
+    private async Task<bool> IsPrivateRoomsAppEnabledAsync()
+    {
+        var app = await appSettingsService.GetAppAsync(tenantManager.GetCurrentTenantId(), PrivateRoomsAppId);
+
+        return app is { Enabled: true };
+    }
+
     private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var aiAccessSettingsTask = settingsManager.LoadAsync<TenantAiAccessSettings>();
@@ -1141,12 +1197,19 @@ public class FoldersControllerCommon(
 
         yield return await globalFolderHelper.FolderVirtualRoomsAsync;
         yield return await globalFolderHelper.FolderFormsAsync;
+
+        if (await IsPrivateRoomsAppEnabledAsync())
+        {
+            yield return await globalFolderHelper.FolderPrivateRoomsAsync;
+        }
+
         yield return await globalFolderHelper.FolderArchiveAsync;
 
         var aiAccessSettings = await aiAccessSettingsTask;
         if (aiAccessSettings.Enabled)
         {
             yield return await globalFolderHelper.FolderAiAgentsAsync;
+            yield return await globalFolderHelper.FolderAiHubAsync;
         }
     }
 }

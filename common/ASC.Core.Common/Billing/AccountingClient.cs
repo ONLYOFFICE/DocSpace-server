@@ -131,6 +131,25 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return accountingApi.GetCustomerServiceUsagePages(portalId, filter);
     }
 
+    public async Task<DepositReport> GetCustomerDepositsAsync(string portalId, DepositFilter filter)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetCustomerDepositsAsync(portalId, filter);
+    }
+
+    /// <summary>
+    /// Every balance top-up matching the filter, paged as in <see cref="GetCustomerOperationPages"/>.
+    /// </summary>
+    /// <exception cref="ArgumentException"><see cref="PagedFilter.Offset"/> is set.</exception>
+    public PagedEnumerable<DepositReport, Deposit> GetCustomerDepositPages(string portalId, DepositFilter filter)
+    {
+        EnsureConfigured();
+        EnsureNoOffset(filter);
+
+        return accountingApi.GetCustomerDepositPages(portalId, filter);
+    }
+
     // The page offset travels in a query parameter of its own, so a filter offset would put a second "offset"
     // into every request and leave it to the accounting service which one wins.
     private static void EnsureNoOffset(PagedFilter filter)
@@ -547,6 +566,17 @@ public class UsageFilter : PagedFilter
     /// Metadata key-value pairs to filter by.
     /// </summary>
     public Dictionary<string, string> Metadata { get; init; }
+}
+
+/// <summary>
+/// The filter for customer balance top-ups.
+/// </summary>
+public class DepositFilter : PagedFilter
+{
+    /// <summary>
+    /// The operation status to filter by.
+    /// </summary>
+    public OperationStatus? Status { get; init; }
 }
 
 /// <summary>
@@ -1060,6 +1090,70 @@ public class ServiceReport : BaseReport<ServiceInfo>
 }
 
 /// <summary>
+/// Represents a paged report of customer balance top-ups.
+/// </summary>
+public class DepositReport : BaseReport<Deposit>
+{
+}
+
+/// <summary>
+/// Represents a customer balance top-up with the reference of the payment behind it.
+/// </summary>
+public class Deposit
+{
+    /// <summary>
+    /// The operation ID.
+    /// </summary>
+    public long Id { get; init; }
+
+    /// <summary>
+    /// The date of the top-up.
+    /// </summary>
+    public DateTime Date { get; init; }
+
+    /// <summary>
+    /// The top-up amount.
+    /// </summary>
+    public decimal Sum { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol of the amount.
+    /// </summary>
+    public string Currency { get; init; }
+
+    /// <summary>
+    /// The operation status.
+    /// </summary>
+    public OperationStatus Status { get; init; }
+
+    /// <summary>
+    /// The name of the bank (payment system) that received the payment.
+    /// </summary>
+    public string BankName { get; init; }
+
+    /// <summary>
+    /// The external payment reference passed with the top-up.
+    /// </summary>
+    /// <remarks>A Stripe payment intent (<c>pi_…</c>) or invoice (<c>in_…</c>) has an invoice behind it.</remarks>
+    public string PaymentRef { get; init; }
+
+    /// <summary>
+    /// The additional metadata of the top-up.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; init; }
+
+    /// <summary>
+    /// Whether the billing service can give an invoice link for the payment behind the top-up.
+    /// </summary>
+    [JsonIgnore]
+    public bool HasInvoice
+    {
+        get => PaymentRef != null &&
+               (PaymentRef.StartsWith("pi_", StringComparison.Ordinal) || PaymentRef.StartsWith("in_", StringComparison.Ordinal));
+    }
+}
+
+/// <summary>
 /// Represents an operation.
 /// </summary>
 public class Operation
@@ -1548,6 +1642,9 @@ public record SessionCompleteOperation(
 
 public static class AccountingHttpClientExtension
 {
+    /// <summary>How the service is named in the exceptions of its client.</summary>
+    internal const string ServiceName = "Accounting";
+
     private const string ResiliencePipelineName = "accountingResiliencePipeline";
     internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
 
@@ -1570,6 +1667,7 @@ public static class AccountingHttpClientExtension
             UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
             ExceptionFactory = CreateExceptionAsync,
             TransportExceptionFactory = CreateTransportException,
+            DeserializationExceptionFactory = CreateDeserializationExceptionAsync,
             UrlParameterFormatterMap = {
                 // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default
                 // formatter renders them as "True"/"False". Everything else keeps the default formatting.
@@ -1641,6 +1739,13 @@ public static class AccountingHttpClientExtension
         });
     }
 
+    // An answer that is not the JSON the call expects (a proxy's HTML page, a changed contract) is no refusal of the
+    // service, so it leaves the AccountingException hierarchy the callers handle as one - see PaymentServiceContractException.
+    private static ValueTask<Exception> CreateDeserializationExceptionAsync(HttpResponseMessage response, Exception exception)
+    {
+        return PaymentServiceContractException.FromResponse(ServiceName, response, exception);
+    }
+
     // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
     // surface as Refit.ApiRequestException and escape the AccountingException hierarchy the callers catch.
     private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
@@ -1651,7 +1756,9 @@ public static class AccountingHttpClientExtension
             return exception;
         }
 
-        return new AccountingException($"Accounting request to {request.RequestUri} failed: {exception.Message}", exception);
+        // The route template, not the address: the address names the internal host and the portal key, and the message
+        // reaches the logs and the client of the API. What went wrong stays in the inner exception.
+        return new AccountingException($"Accounting request {PaymentServiceOperation.Of(request)} failed", exception);
     }
     // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found /
     // resource not found), and wraps any other failure into AccountingException with the status code and response body.

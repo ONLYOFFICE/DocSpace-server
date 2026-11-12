@@ -1096,6 +1096,8 @@ public partial class SettingsController(
             FolderType.Favorites,
             FolderType.Recent,
             FolderType.Forms,
+            FolderType.PrivateRooms,
+            FolderType.AiHub,
             FolderType.DEFAULT
         ];
 
@@ -1514,8 +1516,10 @@ public partial class SettingsController(
     /// <remarks>
     /// Turns AI functionality (chat, agents, vectorization) on or off for the whole portal; AI is enabled by default.
     /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission); every other caller is refused. Disabling
-    /// it immediately hides the AI Agents folder from root folder listings, makes AI status checks report disabled,
-    /// and makes AI chat endpoints unreachable for every user on the tenant, not only the caller. This is a mutating,
+    /// it immediately hides the AI Agents and AI rooms folders from root folder listings, refuses every access to the
+    /// AI rooms and their files with 403, makes AI status checks report disabled, and makes AI chat endpoints
+    /// unreachable for every user on the tenant, not only the caller; nothing is deleted, so turning AI back on
+    /// restores access. This is a mutating,
     /// idempotent, portal-wide call, and the change is pushed to already-connected clients over the real-time
     /// notification hub rather than waiting for their next request. It returns the saved setting.
     /// </remarks>

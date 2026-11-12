@@ -35,9 +35,10 @@ package com.asc.registration.application.configuration;
 
 import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
 import com.asc.common.utilities.cache.CacheNamespaceRegistry;
+import com.asc.common.utilities.cache.RedisCacheNamespaceCounterStore;
+import com.asc.common.utilities.cache.bus.RedisCacheInvalidationBus;
 import com.asc.registration.application.configuration.serialization.ClientDeserializer;
 import com.asc.registration.application.configuration.serialization.ClientSerializer;
-import com.asc.registration.application.service.RedisCacheNamespaceCounterStore;
 import com.asc.registration.core.domain.entity.Client;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -225,5 +226,19 @@ public class ClientCacheConfiguration {
   public CacheNamespaceRegistry clientCacheNamespaceRegistry(
       CacheNamespaceCounterStore counterStore) {
     return new CacheNamespaceRegistry(counterStore, "identity:registration:client:ver");
+  }
+
+  /**
+   * Creates the bus that broadcasts evictions to the in-process client cache of every instance.
+   *
+   * @param clientCacheRedisConnectionFactory The Redis connection factory for client cache.
+   * @return a {@link RedisCacheInvalidationBus} on the client cache's own channel
+   */
+  @Bean
+  public RedisCacheInvalidationBus clientCacheInvalidationBus(
+      @Qualifier("clientCacheRedisConnectionFactory")
+          RedisConnectionFactory clientCacheRedisConnectionFactory) {
+    return new RedisCacheInvalidationBus(
+        clientCacheRedisConnectionFactory, "identity:registration:client:invalidate");
   }
 }

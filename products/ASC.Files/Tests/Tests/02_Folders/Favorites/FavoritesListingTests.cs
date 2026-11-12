@@ -149,27 +149,16 @@ public class FavoritesListingTests(
     [Fact]
     public async Task GetFavorites_FileFromRoom_ShowsOriginRoomTitle()
     {
-        // Arrange - FolderContentDto.Files is typed List<FileEntryBaseDto>, which does not
-        // carry originRoomTitle, so this reads the raw response (see FavoritesTestBase).
+        // Arrange
         var room = await CreateCustomRoom("Autotest Favorites Origin Room");
         var file = await CreateFile("Autotest Favorites Room File.docx", room.Id);
         await ToggleFavorite(file.Id);
 
         // Act
-        var deadline = DateTime.UtcNow.AddSeconds(10);
-        List<RawFavoriteFile> rawFiles;
-        while (true)
-        {
-            rawFiles = await GetFavoritesFilesRawAsync();
-            if (rawFiles.Any(f => f.Title == file.Title) || DateTime.UtcNow >= deadline)
-            {
-                break;
-            }
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
+        var favorites = await PollFavorites(c => (c.Files ?? []).OfType<FileDto>().Any(f => f.Id == file.Id));
 
         // Assert
-        var favoriteFile = rawFiles.Should().ContainSingle(f => f.Title == file.Title).Subject;
+        var favoriteFile = (favorites.Files ?? []).OfType<FileDto>().Should().ContainSingle(f => f.Id == file.Id).Subject;
         favoriteFile.OriginRoomTitle.Should().Be("Autotest Favorites Origin Room");
         favoriteFile.IsFavorite.Should().BeTrue();
     }

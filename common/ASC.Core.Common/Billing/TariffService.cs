@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -545,9 +545,11 @@ public class TariffService(
             return false;
         }
 
+        string portalId = null;
+
         try
         {
-            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            portalId = await coreSettings.GetKeyAsync(tenantId);
 
             var result = await billingClient.GetDocsCloudTrialAsync(portalId, customer);
 
@@ -556,6 +558,18 @@ public class TariffService(
             await docsCloudClient.ClearCacheAsync(portalId);
 
             return result;
+        }
+        catch (PaymentServiceContractException error)
+        {
+            // The answer could not be read, so the trial may have been granted all the same: the cached tariff and
+            // DocsCloud tenant are dropped as after any answer, or they would hide the new quota until they expire.
+            LogError(error, tenantId.ToString());
+
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+
+            return false;
         }
         catch (Exception error)
         {
@@ -938,6 +952,15 @@ public class TariffService(
         return !string.IsNullOrEmpty(url) ? new Uri(url) : null;
     }
 
+    /// <summary>
+    /// The address of the hosted invoice page for the payment behind a top-up. Not cached, and failures are not
+    /// caught: the caller tells a payment the billing service cannot find from a service that did not answer.
+    /// </summary>
+    public async Task<string> GetInvoiceLinkAsync(int tenantId, string paymentRef)
+    {
+        return await billingClient.GetInvoiceLinkAsync(await coreSettings.GetKeyAsync(tenantId), paymentRef);
+    }
+
     public async Task<Tariff> GetBillingInfoAsync(int? tenant = null, int? id = null)
     {
         await using var coreDbContext = await coreDbContextManager.CreateDbContextAsync();
@@ -1303,6 +1326,14 @@ public class TariffService(
         return defaultQuota;
     }
 
+    private static IEnumerable<string> MessagesOf(Exception error)
+    {
+        for (var current = error; current != null; current = current.InnerException)
+        {
+            yield return current.Message;
+        }
+    }
+
     private void LogError(Exception error, string tenantId = null)
     {
         if (error is BillingNotFoundException)
@@ -1321,7 +1352,9 @@ public class TariffService(
             }
             else
             {
-                logger.ErrorBilling(tenantId, error.Message);
+                // No stack at this level, but the cause: the message of a payment client names only the call, and the
+                // timeout, DNS or TLS failure behind it is in the inner exception.
+                logger.ErrorBilling(tenantId, string.Join(" <- ", MessagesOf(error)));
             }
         }
     }
@@ -1770,6 +1803,55 @@ public class TariffService(
         }
     }
 
+    public async Task<DepositReport> GetCustomerDepositsAsync(int tenantId, DepositFilter filter)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerDepositsAsync(portalId, filter);
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// The balance top-up of the portal with the given operation ID, or null when the portal has none with it. The
+    /// accounting service looks top-ups up by filter only, so the pages of the given period are walked until the ID
+    /// turns up; the period is always passed, as with every other accounting read, rather than left to the accounting
+    /// service's default. Failures are not caught: a lookup that could not finish must not be taken for a missing
+    /// top-up.
+    /// </summary>
+    public async Task<Deposit> FindCustomerDepositAsync(int tenantId, long depositId, DateTime utcStartDate, DateTime utcEndDate, CancellationToken cancellationToken = default)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        var filter = new DepositFilter
+        {
+            UtcStartDate = utcStartDate,
+            UtcEndDate = utcEndDate,
+            Limit = 1000
+        };
+
+        await foreach (var deposit in accountingClient.GetCustomerDepositPages(portalId, filter).WithCancellation(cancellationToken))
+        {
+            if (deposit.Id == depositId)
+            {
+                return deposit;
+            }
+        }
+
+        return null;
+    }
+
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()
     {
         return await accountingClient.GetAllCurrenciesAsync();
@@ -2070,14 +2152,34 @@ public class TariffService(
         await hybridCache.SetAsync(GetServiceLimitsCacheVersionKey(tenantId, groupName), Guid.NewGuid().ToString("N"), _serviceLimitsCacheVersionDuration);
     }
 
+    /// <summary>
+    /// Creates the service limit. A portal the accounting service does not know yet - a billing customer whose wallet
+    /// was never topped up - is refused as a missing customer, as a portal without billing is.
+    /// </summary>
     public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string groupName, ServiceLimitScope scope, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var serviceLimit = await accountingClient.CreateServiceLimitAsync(portalId, groupName, scope, customerParticipantName, amountValue, quantityValue, period);
+        var serviceLimit = await ChangeServiceLimitsAsync(tenantId,
+            () => accountingClient.CreateServiceLimitAsync(portalId, groupName, scope, customerParticipantName, amountValue, quantityValue, period));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
         return serviceLimit;
+    }
+
+    // The reads answer a portal the accounting service does not know as one without limits; a change has nothing to act
+    // on there, so it is refused as a missing customer instead of failing as an error of the accounting service.
+    private async Task<T> ChangeServiceLimitsAsync<T>(int tenantId, Func<Task<T>> change)
+    {
+        try
+        {
+            return await change();
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            throw new ItemNotFoundException("Customer could not be found", exception);
+        }
     }
 
     /// <summary>
@@ -2112,7 +2214,8 @@ public class TariffService(
     public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string groupName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var count = await accountingClient.SetParticipantServiceLimitsAsync(portalId, groupName, customerParticipantNames, amountValue, quantityValue, period);
+        var count = await ChangeServiceLimitsAsync(tenantId,
+            () => accountingClient.SetParticipantServiceLimitsAsync(portalId, groupName, customerParticipantNames, amountValue, quantityValue, period));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 
@@ -2122,7 +2225,7 @@ public class TariffService(
     public async Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string groupName)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var count = await accountingClient.DisableParticipantServiceLimitsAsync(portalId, groupName);
+        var count = await ChangeServiceLimitsAsync(tenantId, () => accountingClient.DisableParticipantServiceLimitsAsync(portalId, groupName));
 
         await ClearServiceLimitsCacheAsync(tenantId, groupName);
 

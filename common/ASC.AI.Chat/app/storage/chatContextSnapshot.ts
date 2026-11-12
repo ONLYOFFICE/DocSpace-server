@@ -31,7 +31,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { McpServerConfig, Profile, Thread, WebSearchConfig } from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, Thread, WebSearchConfig } from "@onlyoffice/ai-chat/core";
+import type { DocspaceProfile } from "./profilesStorage.js";
 import type { ToolPermissionMode } from "@onlyoffice/ai-chat/core";
 import type { ReasoningLevel } from "./reasoningDepth.js";
 import type { ThreadMessageLike } from "@assistant-ui/react";
@@ -55,7 +56,13 @@ export type ChatContextSlice =
   | "thread"
   | "messages";
 
-/** One scope of the aggregate: the global one, or a folder's own. */
+/**
+ * One scope of the aggregate: the global one, or a folder's own. The
+ * per-user AI data (assignments, preferences, tool prefs, MCP servers) is
+ * global, so a round reads it from the global scope only; the folder scopes
+ * are kept for the folder descriptions they carry (see
+ * {@link lookupChatContextFolder}).
+ */
 export interface ChatContextScope {
   entityId: string | undefined;
   /** Absent for the global scope. */
@@ -90,7 +97,7 @@ export interface ChatContextSnapshot {
   toolPermissionMode: ToolPermissionMode | null;
   /** The portal's localized reason for `aiReady === false`; undefined when ready or absent. */
   aiNotReadyMessage: string | undefined;
-  profiles: Profile[];
+  profiles: DocspaceProfile[];
   global: ChatContextScope;
   /** `null` when `entityId` was given but the folder is inaccessible or unknown. */
   entity: ChatContextScope | null;
@@ -101,6 +108,11 @@ export interface ChatContextSnapshot {
   /** The requested thread's full history, or `null` when not requested. */
   messages: ThreadMessageLike[] | null;
   webSearch: WebSearchConfig | null;
+  /**
+   * Whether the portal offers the document agent to the chat; undefined
+   * when the aggregate predates the setting (the settings are read then).
+   */
+  documentAgentEnabled: boolean | undefined;
   stale: Set<ChatContextSlice>;
 }
 
@@ -128,39 +140,6 @@ export function hasChatContext(): boolean {
  */
 export function invalidateChatContext(slice: ChatContextSlice): void {
   getChatContextSnapshot()?.stale.add(slice);
-}
-
-/**
- * Resolve the scope a storage read for `entityId` must be served from.
- *
- * Mirrors `resolveAgentEntityId`: per-entity data only exists for agent
- * rooms, so a non-agent folder folds to the global scope. The C# aggregate
- * builds a folder-keyed scope for any accessible folder, which is why the
- * fold happens here rather than trusting `entity` blindly. Returns
- * `undefined` (a miss) for an id the snapshot does not describe, and for an
- * inaccessible folder — the HTTP path then produces the same 404 / 403 the
- * round would have seen before.
- */
-export function chatContextScope(
-  snapshot: ChatContextSnapshot,
-  entityId: string | undefined,
-): ChatContextScope | undefined {
-  if (!entityId) {
-    return snapshot.global;
-  }
-  let scope: ChatContextScope | null | undefined;
-  if (entityId === snapshot.requested.entityId) {
-    scope = snapshot.entity;
-  } else if (entityId === snapshot.requested.contextEntityId) {
-    scope = snapshot.contextEntity;
-  }
-  if (!scope) {
-    return undefined;
-  }
-  if (scope.folder && !scope.folder.isAgent) {
-    return snapshot.global;
-  }
-  return scope;
 }
 
 /**

@@ -182,7 +182,7 @@ public class MetadataCascadeAssignmentTests(AspireAppFixture fixture) : BaseTest
         await _filesClient.Authenticate(Owner);
         var suffix = Suffix();
 
-        var template = await CreateTemplateAsync("Absent " + suffix, []);
+        var template = await CreateTemplateAsync("Absent " + suffix, [new MetadataFieldRequest("Client", MetadataFieldType.String)]);
         var room = await CreateCustomRoom($"Absent {suffix}");
 
         // the call changes an assignment, it does not create one: the assignment is made with PUT .../templates

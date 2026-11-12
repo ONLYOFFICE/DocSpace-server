@@ -1268,7 +1268,7 @@ internal abstract class SecurityBaseDao<T>(
                                     filesDbContext.Folders.Any(f =>
                                         f.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) &&
                                         f.Id == r.ParentId &&
-                                        f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
+                                        f.FolderType != FolderType.AiAgents && f.FolderType != FolderType.AiHub && f.FolderType != FolderType.VirtualRooms && f.FolderType != FolderType.USER) &&
                                     filesDbContext.Security.Any(b => b.TenantId == Microsoft.EntityFrameworkCore.EF.Constant(tenantId) && b.InternalEntryId == r.ParentId && b.EntryType == FileEntryType.Folder))
                                 .OrderBy(r => r.Level)
                                 .Select(r => r.ParentId)
@@ -1312,7 +1312,7 @@ internal class SecurityDao(
         IDistributedLockProvider distributedLockProvider)
     : SecurityBaseDao<int>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<int>
 {
-    public async Task<IEnumerable<FileShareRecord<int>>> GetSharesAsync(FileEntry<int> entry, HashSet<Guid> subjects = null)
+    public async Task<IEnumerable<FileShareRecord<int>>> GetSharesAsync(FileEntry<int> entry, HashSet<Guid> subjects = null, bool includeAiProjectAccess = false)
     {
         if (entry == null)
         {
@@ -1367,6 +1367,11 @@ internal class SecurityDao(
             q = q.Concat(q1);
         }
 
+        if (includeAiProjectAccess)
+        {
+            q = q.Concat(GetAiProjectAccessQuery(filesDbContext, foldersInt, subjects));
+        }
+
         if (subjects is { Count: > 0 })
         {
             q = q.Where(r => subjects.Contains(r.Subject));
@@ -1378,6 +1383,37 @@ internal class SecurityDao(
             .ThenByDescending(r => r.Share, new FileShareRecord<int>.ShareComparer(entry.RootFolderType));
 
         return await records.ToListAsync();
+    }
+
+    private IQueryable<SecurityTreeRecord> GetAiProjectAccessQuery(FilesDbContext filesDbContext, List<int> foldersInt, HashSet<Guid> subjects)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var anySubject = subjects is not { Count: > 0 };
+
+        return filesDbContext.AiProjectRooms
+            .Where(apr => apr.TenantId == tenantId && foldersInt.Contains(apr.RoomId))
+            .Join(filesDbContext.Security,
+                apr => new { apr.TenantId, EntryId = apr.ProjectId },
+                s => new { s.TenantId, EntryId = s.InternalEntryId },
+                (apr, s) => new { apr, s })
+            .Where(x => x.s.EntryType == FileEntryType.Folder &&
+                        (x.s.SubjectType == SubjectType.User || x.s.SubjectType == SubjectType.Group) &&
+                        (anySubject || subjects.Contains(x.s.Subject)))
+            .Select(x => new SecurityTreeRecord
+            {
+                TenantId = x.s.TenantId,
+                EntryId = x.apr.RoomId.ToString(),
+                EntryType = FileEntryType.Folder,
+                SubjectType = SubjectType.AiProject,
+                Subject = x.s.Subject,
+                Owner = x.s.Owner,
+                Share = FileShare.Read,
+                TimeStamp = x.s.TimeStamp,
+                Options = x.s.Options,
+                FolderId = x.apr.RoomId,
+                ParentId = x.apr.RoomId,
+                Level = 0
+            });
     }
 }
 
@@ -1398,7 +1434,7 @@ internal class ThirdPartySecurityDao(
         IDistributedLockProvider distributedLockProvider)
     : SecurityBaseDao<string>(daoFactory, userManager, dbContextFactory, tenantManager, tenantUtil, setupInfo, maxTotalSizeStatistic, settingsManager, authContext, serviceProvider, mapper, distributedLockProvider), ISecurityDao<string>
 {
-    public async Task<IEnumerable<FileShareRecord<string>>> GetSharesAsync(FileEntry<string> entry, HashSet<Guid> subjects = null)
+    public async Task<IEnumerable<FileShareRecord<string>>> GetSharesAsync(FileEntry<string> entry, HashSet<Guid> subjects = null, bool includeAiProjectAccess = false)
     {
         var result = new List<FileShareRecord<string>>();
 

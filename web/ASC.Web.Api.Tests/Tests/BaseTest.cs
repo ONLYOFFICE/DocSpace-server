@@ -43,6 +43,12 @@ public class BaseTest(
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    /// <summary>The id of this test's own portal.</summary>
+    protected int TenantId => _clients.TenantId;
+
+    /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
+    protected AspireAppFixture Fixture => fixture;
+
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;
 
@@ -51,6 +57,17 @@ public class BaseTest(
     protected ProfilesApi _profilesApi = null!;
     protected ApiKeysApi _apiKeysApi = null!;
     protected MigrationApi _migrationApi = null!;
+
+    protected UserStatusApi _userStatusApi = null!;
+    protected GroupApi _groupApi = null!;
+    protected UserTypeApi _userTypeApi = null!;
+    protected HttpClient _filesClient = null!;
+    protected RoomsApi _roomsApi = null!;
+    protected PrivacyRoomApi _privacyRoomApi = null!;
+    protected SharingApi _sharingApi = null!;
+    protected FilesApi _filesApi = null!;
+    protected FoldersApi _foldersApi = null!;
+    protected OperationsApi _operationsApi = null!;
 
     protected HttpClient _identityClient = null!;
     protected ClientManagementApi _clientManagementApi = null!;
@@ -92,9 +109,20 @@ public class BaseTest(
     protected PortalSettingsApi _portalSettingsApi = null!;
     protected PortalUsersApi _portalUsersApi = null!;
 
+    /// <summary>
+    /// True for a test class that needs the services of <see cref="AspireAppFixture"/> the run does not wait for.
+    /// </summary>
+    protected virtual bool NeedsLazyResources => false;
+
     public async ValueTask InitializeAsync()
     {
         var setupSw = Stopwatch.StartNew();
+
+        if (NeedsLazyResources)
+        {
+            // the wait is shared by every class that needs them, so it is not cancelled itself: this test just stops waiting
+            await fixture.WaitForLazyResourcesAsync().WaitAsync(TestContext.Current.CancellationToken);
+        }
 
         // Register a brand-new portal for this test and bind a fresh set of clients to it.
         _clients = await fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
@@ -106,6 +134,17 @@ public class BaseTest(
         _profilesApi = _clients.ProfilesApi;
         _apiKeysApi = _clients.ApiKeysApi;
         _migrationApi = _clients.MigrationApi;
+
+        _userStatusApi = _clients.UserStatusApi;
+        _groupApi = _clients.GroupApi;
+        _userTypeApi = _clients.UserTypeApi;
+        _filesClient = _clients.FilesHttpClient;
+        _roomsApi = _clients.RoomsApi;
+        _privacyRoomApi = _clients.PrivacyRoomApi;
+        _sharingApi = _clients.SharingApi;
+        _filesApi = _clients.FilesApi;
+        _foldersApi = _clients.FoldersApi;
+        _operationsApi = _clients.OperationsApi;
 
         _identityClient = _clients.IdentityHttpClient;
         _clientManagementApi = _clients.ClientManagementApi;

@@ -82,8 +82,14 @@ public class FilesMappingAction(TenantUtil tenantUtil)
             case FolderType.AiAgents:
                 destination.Title = FilesUCResource.AiAgents;
                 break;
+            case FolderType.AiHub:
+                destination.Title = FilesUCResource.AiHub;
+                break;
             case FolderType.Forms:
                 destination.Title = FilesUCResource.Forms;
+                break;
+            case FolderType.PrivateRooms:
+                destination.Title = FilesUCResource.PrivateRooms;
                 break;
             case FolderType.ChatOutputs:
                 destination.Title = FilesCommonResource.ChatOutputsFolder;

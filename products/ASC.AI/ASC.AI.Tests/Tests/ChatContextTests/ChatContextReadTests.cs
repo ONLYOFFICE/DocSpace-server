@@ -40,30 +40,31 @@ public class ChatContextReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     // Every section of the aggregate must be byte-equal to the individual
     // endpoint it replaces: the Node service serves either from the same
     // snapshot payload, so any drift here is a live semantic divergence.
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_GlobalSections_MatchIndividualEndpoints()
     {
-        var profile = await CreateProfileAsync();
-        await CreateAssignmentAsync("Chat", profile.Id);
-        await UpsertPreferencesAsync(ReasoningDepth.High);
-        await UpsertDisabledToolPrefsAsync(new Dictionary<string, HashSet<string>>
+        var profile = await CreateProfileInternalAsync();
+        await CreateAssignmentInternalAsync("Chat", profile.Id);
+        await UpsertPreferencesInternalAsync(ReasoningDepth.High);
+        await UpsertDisabledToolPrefsInternalAsync(new Dictionary<string, HashSet<string>>
         {
             [SystemToolsServerType] = ["tool-a"]
         });
-        await CreateMcpServerAsync("srv-global");
+        await CreateMcpServerInternalAsync("srv-global");
 
-        var context = await ReadChatContextAsync();
+        var context = await ReadChatContextInternalAsync();
 
         context.Config.Should().NotBeNull();
         context.Profiles.Select(p => p.Id).Should().Contain(profile.Id);
 
         context.Global.EntityId.Should().BeNull();
         context.Global.Folder.Should().BeNull();
-        context.Global.Assignments.Should().BeEquivalentTo(await ReadAllAssignmentsAsync());
+        context.Global.Assignments.Should().BeEquivalentTo(await ReadAllAssignmentsInternalAsync());
         context.Global.Preferences.Should().NotBeNull();
         context.Global.Preferences!.Depth.Should().Be(ReasoningDepth.High);
-        context.Global.ToolPrefs.Should().BeEquivalentTo(await ReadToolPrefsAsync());
-        context.Global.McpServers.Should().BeEquivalentTo(await ReadAllMcpServersAsync());
+        context.Global.ToolPrefs.Should().BeEquivalentTo(await ReadToolPrefsInternalAsync());
+        context.Global.McpServers.Should().BeEquivalentTo(await ReadAllMcpServersInternalAsync());
 
         context.Entity.Should().BeNull();
         context.ContextEntity.Should().BeNull();
@@ -71,15 +72,16 @@ public class ChatContextReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         context.Messages.Should().BeNull();
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_WithEntityId_ReturnsScopedSectionsAndFolder()
     {
-        var profile = await CreateProfileAsync();
+        var profile = await CreateProfileInternalAsync();
         var roomId = await CreateRoomAsync("agent-room");
-        await CreateAssignmentAsync("Chat", profile.Id, roomId.ToString());
-        await CreateMcpServerAsync("srv-scoped", entityId: roomId.ToString());
+        await CreateAssignmentInternalAsync("Chat", profile.Id, roomId.ToString());
+        await CreateMcpServerInternalAsync("srv-scoped", entityId: roomId.ToString());
 
-        var context = await ReadChatContextAsync(entityId: roomId.ToString());
+        var context = await ReadChatContextInternalAsync(entityId: roomId.ToString());
 
         var entity = context.Entity;
         entity.Should().NotBeNull();
@@ -88,17 +90,18 @@ public class ChatContextReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         entity.Folder!.Id.Should().Be(roomId);
         entity.Folder.IsAgent.Should().BeTrue();
         entity.Folder.Title.Should().Be("agent-room");
-        entity.Assignments.Should().BeEquivalentTo(await ReadAllAssignmentsAsync(roomId.ToString()));
-        entity.McpServers.Should().BeEquivalentTo(await ReadAllMcpServersAsync(roomId.ToString()));
+        entity.Assignments.Should().BeEquivalentTo(await ReadAllAssignmentsInternalAsync(roomId.ToString()));
+        entity.McpServers.Should().BeEquivalentTo(await ReadAllMcpServersInternalAsync(roomId.ToString()));
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_WithContextEntityId_ReturnsBothScopes()
     {
         var entityRoom = await CreateRoomAsync();
         var contextRoom = await CreateRoomAsync();
 
-        var context = await ReadChatContextAsync(
+        var context = await ReadChatContextInternalAsync(
             entityId: entityRoom.ToString(),
             contextEntityId: contextRoom.ToString());
 
@@ -108,12 +111,13 @@ public class ChatContextReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         context.ContextEntity!.Folder!.Id.Should().Be(contextRoom);
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_SameContextEntityId_OmitsContextEntity()
     {
         var roomId = await CreateRoomAsync();
 
-        var context = await ReadChatContextAsync(
+        var context = await ReadChatContextInternalAsync(
             entityId: roomId.ToString(),
             contextEntityId: roomId.ToString());
 
@@ -121,14 +125,15 @@ public class ChatContextReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         context.ContextEntity.Should().BeNull();
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_WithThreadId_ReturnsThreadAndMessages()
     {
-        var thread = await CreateThreadAsync();
-        var first = await CreateMessageAsync(thread.Id);
-        var second = await CreateMessageAsync(thread.Id);
+        var thread = await CreateThreadInternalAsync();
+        var first = await CreateMessageInternalAsync(thread.Id);
+        var second = await CreateMessageInternalAsync(thread.Id);
 
-        var context = await ReadChatContextAsync(threadId: thread.Id);
+        var context = await ReadChatContextInternalAsync(threadId: thread.Id);
 
         context.Thread.Should().NotBeNull();
         context.Thread!.Id.Should().Be(thread.Id);
@@ -136,13 +141,14 @@ public class ChatContextReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         context.Messages!.Select(m => m.Id).Should().BeEquivalentTo([first.Id, second.Id]);
     }
 
+    // Internal contract: the chat-context aggregate has no public route (only the Node chat service reads it, to prime a chat round).
     [Fact]
     public async Task Read_IncludeMessagesFalse_OmitsMessages()
     {
-        var thread = await CreateThreadAsync();
-        await CreateMessageAsync(thread.Id);
+        var thread = await CreateThreadInternalAsync();
+        await CreateMessageInternalAsync(thread.Id);
 
-        var context = await ReadChatContextAsync(threadId: thread.Id, includeMessages: false);
+        var context = await ReadChatContextInternalAsync(threadId: thread.Id, includeMessages: false);
 
         context.Thread.Should().NotBeNull();
         context.Thread!.Id.Should().Be(thread.Id);

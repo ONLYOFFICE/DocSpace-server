@@ -53,12 +53,19 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public RedisConfig? Redis { get; private set; }
 
     private IResourceBuilder<MySqlDatabaseResource>? MySqlDatabaseResource { get; set; }
+    private IResourceBuilder<PostgresServerResource>? FormsPostgresResource { get; set; }
+    private ReferenceExpression? FormsAdminConnectionString { get; set; }
     private IResourceBuilder<RabbitMQServerResource>? RabbitMqResource { get; set; }
     private IResourceBuilder<RedisResource>? RedisResource { get; set; }
     private IResourceBuilder<ProjectResource>? MigrateResource { get; set; }
     private IResourceBuilder<ContainerResource>? EditorResource { get; set; }
     private IResourceBuilder<MailPitContainerResource>? MailResource { get; set; }
     private IResourceBuilder<ContainerResource>? OpensearchResource { get; set; }
+    private bool WebhookTestSettings { get; set; }
+
+    // Set by UsePaymentServices: the stub the billing, accounting and docscloud services are pointed at, "" for none;
+    // null leaves the services with whatever buildtools/config says.
+    private string? PaymentServicesUrl { get; set; }
 
     private IResourceBuilder<ContainerResource>? McpResource { get; set; }
     private IResourceBuilder<ContainerResource>? OtelCollectorResource { get; set; }
@@ -138,6 +145,71 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         MigrateResource.WithEnvironment("standalone", isStandalone ? "true" : "");
 
+
+        return this;
+    }
+
+    /// <summary>
+    /// The built-in forms database (ConnectionStrings:formsAdmin), set up as a server shared by portals of different
+    /// owners needs it: DocSpace connects as the owner of the database rather than a superuser, as it does in
+    /// production, and the read-only roles of the portals cannot load the server. The init script creates the owner
+    /// and applies the steps that need a superuser; a query of a read-only role is ended after
+    /// <paramref name="roQueryTimeoutSeconds"/>. The image runs the init script on an empty data directory only, so a
+    /// change of the script or of the limit reaches a development stack after its volume docspace-forms-postgres-data
+    /// is removed.
+    /// </summary>
+    public ConnectionStringManager AddFormsPostgres(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false, int roQueryTimeoutSeconds = 60)
+    {
+        var superuserPassword = builder.AddParameter("forms-postgres-password", "postgres", secret: true);
+        var adminPassword = builder.AddParameter("forms-admin-password", "forms", secret: true);
+        var basePath = Path.Combine(builder.AppHostDirectory, "Dockerfiles", "postgres");
+
+        // Steps 1 and 4 of the hardening: a role cannot lift temp_file_limit, and pg_cron ends the long queries of the
+        // read-only roles. Its jobs run in background workers: a job that connects over TCP is refused by the password
+        // authentication the image sets for every host. Each portal role keeps pools of its own in Files and Files.Worker,
+        // so a test run registering dozens of portals a minute runs past the default 100 connections.
+        var postgresResourceBuilder = builder.AddPostgres(Constants.FormsPostgresContainer, password: superuserPassword, port: Constants.FormsPostgresPort)
+            .WithDockerfile(basePath)
+            .WithImage("onlyoffice-postgres")
+            .WithImageTag(Constants.PostgresVersion)
+            .WithBuildArg("POSTGRES_VERSION", Constants.PostgresVersion)
+            .WithArgs("-c", "temp_file_limit=1GB", "-c", "shared_preload_libraries=pg_cron", "-c", $"cron.database_name={Constants.FormsDatabase}",
+                "-c", "cron.use_background_workers=on", "-c", "max_connections=300")
+            .WithEnvironment("POSTGRES_DB", Constants.FormsDatabase)
+            .WithEnvironment("FORMS_ADMIN_USER", Constants.FormsAdminUser)
+            .WithEnvironment("FORMS_ADMIN_PASSWORD", adminPassword)
+            .WithEnvironment("FORMS_RO_TIMEOUT", roQueryTimeoutSeconds.ToString())
+            // pg_cron takes an interval of 1 to 59 seconds; a longer one fails the init script and the container.
+            .WithEnvironment("FORMS_RO_CHECK", Math.Clamp(roQueryTimeoutSeconds / 2, 1, 59).ToString())
+            .WithInitFiles(Path.Combine(basePath, "init"));
+
+        // As for MySQL: a data volume when asked for, otherwise tmpfs when asked for, the cap only off tmpfs.
+        var datadirOnTmpfs = !withDataVolume && withTmpfs;
+
+        if (withDataVolume)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithDataVolume("docspace-forms-postgres-data");
+        }
+        else if (datadirOnTmpfs)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/postgresql/data");
+        }
+
+        if (!datadirOnTmpfs)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithMemoryLimit(ContainerMemoryExtensions.PostgresLimit);
+        }
+
+        if (withDbGate && DevTools)
+        {
+            postgresResourceBuilder = postgresResourceBuilder.WithDbGate();
+        }
+
+        FormsPostgresResource = postgresResourceBuilder;
+
+        // The database the image creates from POSTGRES_DB, as its owner: the later keys win over the superuser's.
+        FormsAdminConnectionString = ReferenceExpression.Create(
+            $"{postgresResourceBuilder.Resource};Database={Constants.FormsDatabase};Username={Constants.FormsAdminUser};Password={adminPassword.Resource}");
 
         return this;
     }
@@ -245,7 +317,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             WithMcpInspector(McpResource);
         }
 
-        AddWaitFor(McpResource);
+        AddWaitFor(McpResource, includeFormsPostgres: false);
 
         return this;
     }
@@ -405,6 +477,31 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         // sweep delivers a couple of thousand, so the default would drop letters mid-run.
         MailResource = builder.AddMailPit("mailpit")
             .WithArgs("--smtp-disable-rdns", "--max", "10000");
+
+        return this;
+    }
+
+    /// <summary>
+    /// Switches the services to the test webhook settings in <see cref="AddBaseConfig{T}"/>: a blacklist the
+    /// receiver of the webhook tests passes (a WireMock in the test process, on
+    /// <see cref="Constants.WebhookReceiverHost"/>) and short retry intervals.
+    /// </summary>
+    public ConnectionStringManager UseWebhookTestSettings()
+    {
+        WebhookTestSettings = true;
+
+        return this;
+    }
+
+    /// <summary>
+    /// Gives every service the billing, accounting and docscloud addresses in <see cref="AddBaseConfig{T}"/>, in place
+    /// of the ones in <c>buildtools/config/appsettings.json</c>, so a test run never depends on that file - a
+    /// developer's copy may point at a real payment service. Without <paramref name="stubUrl"/> the services get no
+    /// address and report the tariff service as not configured.
+    /// </summary>
+    public ConnectionStringManager UsePaymentServices(string? stubUrl = null)
+    {
+        PaymentServicesUrl = stubUrl ?? string.Empty;
 
         return this;
     }
@@ -583,9 +680,15 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         bool includeRedis = true,
         bool includeEditors = false,
         bool includeOpensearch = true,
-        bool includeMailPit = false
+        bool includeMailPit = false,
+        bool includeFormsPostgres = true
         )  where T : IResourceWithWaitSupport
     {
+        if (includeFormsPostgres && FormsPostgresResource != null)
+        {
+            resourceBuilder.WaitFor(FormsPostgresResource);
+        }
+
         if (includeMigrate && MigrateResource != null)
         {
             resourceBuilder.WaitForCompletion(MigrateResource);
@@ -646,11 +749,88 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 ReferenceExpression.Create($"{MySqlDatabaseResource.Resource};{MySqlPoolOptions}"));
         }
 
+        if (FormsAdminConnectionString != null)
+        {
+            // The whole entry, over whatever buildtools/config says: the services look a connection string up by its
+            // name, and buildtools ships this entry with an empty one.
+            resourceBuilder
+                .WithEnvironment("ConnectionStrings__formsAdmin:name", "formsAdmin")
+                .WithEnvironment("ConnectionStrings__formsAdmin:connectionString", FormsAdminConnectionString)
+                .WithEnvironment("ConnectionStrings__formsAdmin:providerName", "Npgsql");
+        }
+
         if (MailResource != null)
         {
             resourceBuilder
                 .WithReference(MailResource)
                 .WithEnvironment("core:notify:postman", "mailpit");
+        }
+
+        if (WebhookTestSettings)
+        {
+            // Only for the tests: the official image of the document server does not carry the crypto library, and without
+            // it no private room can be created. They drive the save callback themselves and need no real editor.
+            // An encrypted file could not really be edited on this stack.
+            resourceBuilder.WithEnvironment("files:docservice:encryption-assume-supported", "true");
+
+            // a blacklist the receiver passes (Constants.WebhookTestBlacklist), only for the services that reach the
+            // receiver: it replaces the default list for every UrlValidator caller of a service, not only for webhooks
+            if (Constants.WebhookTestBlacklistServices.Contains(resourceBuilder.Resource.Name))
+            {
+                var blacklist = Constants.WebhookTestBlacklist;
+
+                for (var i = 0; i < blacklist.Count; i++)
+                {
+                    resourceBuilder.WithEnvironment($"webhooks:blacklist:{i}", blacklist[i]);
+                }
+            }
+
+            // Retries due at once rather than after minutes to hours, so the tests can watch a delivery being
+            // retried and given up on: four attempts in all. The sender still notices a due retry only on its
+            // next poll (every 5 seconds), so a shorter interval would gain nothing.
+            for (var i = 0; i < Constants.WebhookTestRetryCount; i++)
+            {
+                resourceBuilder.WithEnvironment(
+                    $"webhooks:retryIntervals:{i}", Constants.WebhookTestRetryInterval.ToString());
+            }
+
+            // An attempt gives up on a silent target after 12 seconds rather than 30, so the test of a body that
+            // arrives after the limit waits that much less. It stays above the 9-second answer the slowest stubbed
+            // receiver gives (WebhookDeliveryStateTests), which has to arrive within the limit
+            resourceBuilder.WithEnvironment(
+                "webhooks:requestTimeout", Constants.WebhookTestRequestTimeout.ToString());
+        }
+
+        if (PaymentServicesUrl == string.Empty)
+        {
+            resourceBuilder
+                .WithEnvironment("core:payment:url", string.Empty)
+                .WithEnvironment("core:accounting:url", string.Empty)
+                .WithEnvironment("core:docscloud:url", string.Empty);
+        }
+        else if (PaymentServicesUrl != null)
+        {
+            var key = Constants.PaymentStubKey;
+            var secret = Constants.PaymentStubSecret;
+
+            resourceBuilder
+                .WithEnvironment("core:payment:url", PaymentServicesUrl + Constants.PaymentStubBillingPath)
+                .WithEnvironment("core:payment:key", key)
+                .WithEnvironment("core:payment:secret", secret)
+                .WithEnvironment("core:payment:region", Constants.PaymentStubRegion)
+                .WithEnvironment("core:payment:defaultquota", Constants.PaymentStubDefaultQuota.ToString(CultureInfo.InvariantCulture))
+                .WithEnvironment("core:accounting:url", PaymentServicesUrl + Constants.PaymentStubAccountingPath)
+                .WithEnvironment("core:accounting:key", key)
+                .WithEnvironment("core:accounting:secret", secret)
+                // An array is overridden index by index: a buildtools/config that lists more currencies keeps the
+                // ones after the first, so a test never relies on a currency being unsupported - it sends "XXX".
+                .WithEnvironment("core:accounting:currencies:0", "USD")
+                // the wallet poller of Web.Studio runs every few seconds rather than every minute, so a test of what
+                // it does to a portal waits seconds for its next run
+                .WithEnvironment("core:accounting:topupperiod", Constants.PaymentStubTopUpPeriod.ToString())
+                .WithEnvironment("core:docscloud:url", PaymentServicesUrl + Constants.PaymentStubDocsCloudPath)
+                .WithEnvironment("core:docscloud:key", key)
+                .WithEnvironment("core:docscloud:secret", secret);
         }
 
         if (isDocker)
@@ -692,7 +872,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         {
             resourceBuilder
                 .WithEnvironment("elastic:Scheme", () => "http")
-                .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
+                // 127.0.0.1, not localhost: Windows tries ::1 first, the port Docker publishes listens on IPv4
+                // only, and every new connection to the index waited ~2 s for that refusal.
+                .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : IPAddress.Loopback.ToString()))
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
                 .WithEnvironment("elastic:Threads", () => "1")
                 // Goes with the 512 MiB OpenSearch heap - see ContainerMemoryExtensions.
@@ -733,7 +915,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => Redis?.Password ?? string.Empty);
         }
 
-        AddWaitFor(resourceBuilder);
+        AddWaitFor(resourceBuilder, includeFormsPostgres: false);
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);

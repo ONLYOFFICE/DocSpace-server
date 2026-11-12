@@ -59,10 +59,12 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// </remarks>
     /// <summary>Create a room template</summary>
     /// <path>api/2.0/files/roomtemplate</path>
+    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "for the new template, once the queued operation builds it")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "after it when `quota` is given")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The state of the template creation just queued: `isCompleted` is still false, so the job has to be polled for its result", typeof(RoomTemplateStatusDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `roomId`, `title` is empty or longer than 400 characters, `color` is longer than 6 or `cover` longer than 50 characters, or `logo` has no `tmpFile` or a position or size outside 0-1280")]
-    [SwaggerResponse(403, "The source room is archived, the caller cannot edit it, or `quota` is set while the storage quota for rooms (for an AI agent, for agents) is turned off")]
+    [SwaggerResponse(403, "The source room is archived or private, the caller cannot edit it, or `quota` is set while the storage quota for rooms (for an AI agent, for agents) is turned off")]
     [SwaggerResponse(404, "No room with `roomId` exists in the Rooms section")]
     [HttpPost("")]
     public async Task<RoomTemplateStatusDto> CreateRoomTemplate(RoomTemplateDto dto)

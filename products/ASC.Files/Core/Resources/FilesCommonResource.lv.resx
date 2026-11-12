@@ -288,6 +288,9 @@
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Šo mapi nevar izmantot telpas uzglabāšanai</value>
   </data>
+  <data name="ErrorMessage_InvalidThirdPartyUrl" xml:space="preserve">
+    <value>Nederīga savienojuma URL adrese</value>
+  </data>
   <data name="ErrorMessage_InvalidTitle" xml:space="preserve">
     <value>Nepareizs nosaukums</value>
   </data>
@@ -610,9 +613,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ChatOutputsFolder" xml:space="preserve">
     <value>Tērzēšanas izvades</value>
   </data>
-  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
-    <value>Telpa jau satur mapi .ai</value>
-  </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Krātuvi nevar atvienot, kamēr to izmanto telpa. Tā vietā dzēsiet telpu</value>
   </data>
@@ -621,5 +621,29 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Meklēt mapes metadatos</value>
+  </data>
+  <data name="ErrorMessage_AiProjectInstructionsRoomsLimit" xml:space="preserve">
+    <value>MI projektam var piesaistīt ne vairāk kā {0} instrukciju telpas</value>
+  </data>
+  <data name="ErrorMessage_AiProjectKnowledgeRoomsLimit" xml:space="preserve">
+    <value>MI projektam var piesaistīt ne vairāk kā {0} zināšanu telpas</value>
+  </data>
+  <data name="ErrorMessage_AiProjectRoomsNotLinkable" xml:space="preserve">
+    <value>Šīs telpas nevar piesaistīt MI projektam: {0}</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
+    <value>Instrukciju telpai var pievienot tikai Markdown (.md) failus</value>
+  </data>
+  <data name="ErrorMessage_InstructionsRoomSkillsLimit" xml:space="preserve">
+    <value>Instrukciju telpā var būt ne vairāk kā {0} prasmes</value>
+  </data>
+  <data name="ErrorMessage_SkillDescriptionInvalid" xml:space="preserve">
+    <value>Prasmes aprakstam jābūt no 1 līdz 1024 rakstzīmēm, un tajā nedrīkst būt XML tagu</value>
+  </data>
+  <data name="ErrorMessage_SkillFrontmatterMissing" xml:space="preserve">
+    <value>Prasmes failam jāsākas ar YAML frontmatter bloku starp divām --- rindām, ar laukiem name un description</value>
+  </data>
+  <data name="ErrorMessage_SkillNameInvalid" xml:space="preserve">
+    <value>Prasmes nosaukumam jābūt no 1 līdz 64 rakstzīmēm, tajā drīkst būt tikai mazie burti, cipari un atsevišķas defises, un tas nedrīkst sākties vai beigties ar defisi</value>
   </data>
 </root>

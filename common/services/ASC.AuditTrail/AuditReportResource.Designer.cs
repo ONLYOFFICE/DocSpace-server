@@ -203,7 +203,34 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("AiAgentProfileAssigned", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to BYOK key deleted for AI model: {0}.
+        /// </summary>
+        public static string AiByokKeyDeleted {
+            get {
+                return ResourceManager.GetString("AiByokKeyDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to BYOK key set for AI model: {0}.
+        /// </summary>
+        public static string AiByokKeySet {
+            get {
+                return ResourceManager.GetString("AiByokKeySet", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Document agent settings updated.
+        /// </summary>
+        public static string AiDocumentAgentSettingsUpdated {
+            get {
+                return ResourceManager.GetString("AiDocumentAgentSettingsUpdated", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Default provider deleted.
         /// </summary>
@@ -268,6 +295,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI model of AI project {0} changed to {1}.
+        /// </summary>
+        public static string AiProjectProfileAssigned {
+            get {
+                return ResourceManager.GetString("AiProjectProfileAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to AI provider created: {0}.
         /// </summary>
         public static string AIProviderCreated {
@@ -318,6 +354,24 @@ namespace ASC.AuditTrail {
         public static string ApiKeyUpdated {
             get {
                 return ResourceManager.GetString("ApiKeyUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to App disabled: {0}.
+        /// </summary>
+        public static string AppDisabled {
+            get {
+                return ResourceManager.GetString("AppDisabled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to App enabled: {0}.
+        /// </summary>
+        public static string AppEnabled {
+            get {
+                return ResourceManager.GetString("AppEnabled", resourceCulture);
             }
         }
         
@@ -545,7 +599,7 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("CustomerServiceLimitCreated", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Service spending limit deleted: {0}, {1}.
         /// </summary>
@@ -554,7 +608,7 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("CustomerServiceLimitDeleted", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Personal service spending limits disabled: {0}.
         /// </summary>
@@ -563,7 +617,7 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("CustomerServiceLimitsDisabled", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Personal service spending limits set: {0}.
         /// </summary>
@@ -572,7 +626,7 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("CustomerServiceLimitsSet", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Service spending limit updated: {0}, {1}.
         /// </summary>
@@ -581,7 +635,7 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("CustomerServiceLimitUpdated", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Customer subscription updated: {0}.
         /// </summary>
@@ -1059,6 +1113,24 @@ namespace ASC.AuditTrail {
             }
         }
         
+        /// <summary>
+        ///   Looks up a localized string similar to Private room.
+        /// </summary>
+        public static string PrivateRoomTitle {
+            get {
+                return ResourceManager.GetString("PrivateRoomTitle", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to File keys issued for &quot;{0}&quot; to: {1}.
+        /// </summary>
+        public static string FileKeysSet {
+            get {
+                return ResourceManager.GetString("FileKeysSet", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to File Locked: {0}.
         /// </summary>
@@ -2644,6 +2716,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File keys in the room &quot;{0}&quot; removed for: {1}.
+        /// </summary>
+        public static string RoomFileKeysRevoked {
+            get {
+                return ResourceManager.GetString("RoomFileKeysRevoked", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Added group: {0}. Role: {1}.
         /// </summary>
         public static string RoomGroupAdded {
@@ -2779,11 +2860,29 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rooms linked to AI project {0}: [{1}].
+        /// </summary>
+        public static string RoomsLinkedToAiProject {
+            get {
+                return ResourceManager.GetString("RoomsLinkedToAiProject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Rooms.
         /// </summary>
         public static string RoomsModule {
             get {
                 return ResourceManager.GetString("RoomsModule", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rooms unlinked from AI project {0}: [{1}].
+        /// </summary>
+        public static string RoomsUnlinkedFromAiProject {
+            get {
+                return ResourceManager.GetString("RoomsUnlinkedFromAiProject", resourceCulture);
             }
         }
         
@@ -3576,6 +3675,15 @@ namespace ASC.AuditTrail {
         public static string WebhookDeleted {
             get {
                 return ResourceManager.GetString("WebhookDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook delivery retried: {0}.
+        /// </summary>
+        public static string WebhookRetried {
+            get {
+                return ResourceManager.GetString("WebhookRetried", resourceCulture);
             }
         }
         

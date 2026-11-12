@@ -70,6 +70,7 @@ public static class FilesWorkerServiceExtensions
 
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(configuration);
+            services.AddActivePassiveHostedService<BuiltinFormsDbCleanerService>(configuration);
             services.AddActivePassiveHostedService<AutoDeletePersonalFolderService>(configuration);
             services.AddActivePassiveHostedService<AutoDeactivateExpiredApiKeysService>(configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(configuration);
@@ -85,6 +86,7 @@ public static class FilesWorkerServiceExtensions
         }
 
         services.RegisterQueue<ExternalDbSyncTask>(10);
+        services.RegisterQueue<FormVersionCheckTask>(2);
         services.RegisterQueue<RoomIndexExportTask>();
         services.RegisterQueue<FileDeleteOperation>(10);
         services.RegisterQueue<FileMoveCopyOperation>(10);
@@ -92,7 +94,10 @@ public static class FilesWorkerServiceExtensions
         services.RegisterQueue<FileDownloadOperation>(10, timeUntilUnregisterInSeconds: 60 * 2);
         services.RegisterQueue<FileMarkAsReadOperation>(10);
         services.RegisterQueue<FileBuilderOperation>(10, timeUntilUnregisterInSeconds: FileBuilderOperation.TimeUntilUnregisterInSeconds);
-        services.RegisterQueue<FormFillingReportTask>();
+        // a report publishes only between its steps, and it waits for the one reader of the queue and the build silently:
+        // the window outlasts a build of a large form, as for FileBuilderOperation
+        services.RegisterQueue<FormFillingReportTask>(timeUntilUnregisterInSeconds: 60 * 11);
+        services.RegisterQueue<FormRecoveryTask>(2);
         services.RegisterQueue<CreateRoomTemplateOperation>();
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
         // the folder move runs here and stamps the moved subtree through the same queue
@@ -162,6 +167,10 @@ public static class FilesWorkerServiceExtensions
                 FormFillingReportIntegrationEventHandler>(),
             eventBus.SubscribeAsync<ExternalDbFormSubmissionIntegrationEvent,
                 ExternalDbFormSubmissionIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<BuiltinDbFormSubmissionIntegrationEvent,
+                BuiltinDbFormSubmissionIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<FormVersionCheckIntegrationEvent,
+                FormVersionCheckIntegrationEventHandler>(),
             eventBus.SubscribeAsync<ExternalDbRoomSyncIntegrationEvent,
                 ExternalDbRoomSyncIntegrationEventHandler>(),
             eventBus.SubscribeAsync<RoomNotifyIntegrationEvent,
