@@ -93,10 +93,11 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
     }
 
     /// <summary>
-    /// Credits a bonus to the customer's wallet at once, without the approval a manual operation needs, and returns
-    /// the completed operation. <paramref name="externalRef"/> is our reference of the bonus, and
-    /// <paramref name="utcExpiresAt"/> the moment the bonus expires, or <c>null</c> for one that does not. A credit the
-    /// accounting service refuses as conflicting throws <see cref="AccountingConflictException"/>. The request is
+    /// Credits a bonus to the customer's goodwill account at once, without the approval a manual operation needs, and
+    /// returns the completed operation. <paramref name="externalRef"/> is our reference of the bonus, and
+    /// <paramref name="utcExpiresAt"/> the moment the bonus expires, or <c>null</c> for one that does not. A 409 of the
+    /// accounting service throws <see cref="AccountingConflictException"/>; it does not say the bonus is not on the
+    /// account, as a credit with the same reference may have been made before. The request is
     /// never retried, so the caller decides what a failure means; the cached balance of the portal is not touched here.
     /// </summary>
     public async Task<OperationResult> CreditBonusAsync(string portalId, decimal sum, string currency, string externalRef,
@@ -431,6 +432,9 @@ public enum OperationType
     BankDeposit,
     [Description("BankWithdrawal")]
     BankWithdrawal,
+    /// <summary>
+    /// Bonus money credited to the portal's goodwill account, by a promo code or by the service itself.
+    /// </summary>
     [Description("GoodwillCredit")]
     GoodwillCredit,
     [Description("WriteOffProfit")]
@@ -441,6 +445,9 @@ public enum OperationType
     AiDebit,
     [Description("AiCredit")]
     AiCredit,
+    /// <summary>
+    /// The unspent rest of a bonus credit written off the goodwill account when the credit expires.
+    /// </summary>
     [Description("GoodwillExpiration")]
     GoodwillExpiration
 }

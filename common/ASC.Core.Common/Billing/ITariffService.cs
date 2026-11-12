@@ -50,7 +50,8 @@ public interface ITariffService
     Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId);
 
     /// <summary>
-    /// Redeems a promo code for the portal and drops the cached balance, so the next read shows the bonus. Failures
+    /// Redeems a promo code for the portal and forgets a remembered failure to read the balance, so the next read asks
+    /// the accounting service. Failures
     /// are not caught: a code the billing service refuses comes back as a <see cref="BillingPromoCodeException"/>.
     /// <paramref name="initiator"/> is the e-mail of the user who redeems the code.
     /// </summary>
@@ -85,8 +86,9 @@ public interface ITariffService
     Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
 
     /// <summary>
-    /// Credits a bonus to the portal's wallet at once and drops the cached balance, so the next read shows it.
-    /// Failures are not caught: the caller decides what a bonus that was not credited means.
+    /// Credits a bonus to the portal's goodwill account at once and forgets a remembered failure to read the balance,
+    /// so the next read asks the accounting service. Failures are not caught: the caller decides what a bonus that was
+    /// not credited means.
     /// </summary>
     Task<OperationResult> CreditBonusAsync(int tenantId, decimal sum, string currency, string externalRef, DateTime? utcExpiresAt = null, Dictionary<string, string> metadata = null);
     Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter);

@@ -934,16 +934,15 @@ public class PaymentController(
 
     /// <remarks>
     /// Redeems a promo code for the portal and credits the bonus money it carries. Only a DocSpace administrator may
-    /// call it, and an installation without a billing service answers 403. The call changes the portal's money and is
-    /// not idempotent: whether a code may be redeemed again is up to the billing service, and a code it refuses fails
-    /// with 400 without crediting anything, the error message being the billing reason code such as `promo_not_found`
-    /// or `promo_expired` for the client to show its own text. The letter case, spaces and dashes of the code do not
+    /// call it, and an installation without a billing service answers 403. The call is not idempotent: whether a
+    /// code may be redeemed twice is up to the billing service, and a code it refuses fails with 400 without crediting
+    /// anything, the error message being the billing reason code such as `promo_not_found` or `promo_expired`. The letter case, spaces and dashes of the code do not
     /// matter. It is limited to ten requests a minute per user by default. The answer says whether the bonus is
-    /// credited already or later (`status`), its amount, currency and expiry; the money lands on the bonus balance,
-    /// read with `GET api/2.0/portal/payment/customer/goodwill`, and the portal clients are told over their socket
-    /// connection once it is there. When the billing service cannot be reached, fails, or does not know the portal
-    /// yet, the call fails with 402; a request that timed out may still have credited the bonus, so read the bonus
-    /// balance before trying the same code again.
+    /// credited already (`status` Completed) or later (Pending), its amount, currency and expiry. The money lands on
+    /// the bonus balance, read with `GET api/2.0/portal/payment/customer/goodwill`; the portal clients are told over
+    /// their socket connection only of a completed credit, so read that balance again to see a pending one arrive.
+    /// When the billing service cannot be reached, fails, or does not know the portal yet, the call fails with 402;
+    /// the bonus may have been credited all the same, so read the bonus balance before trying the same code again.
     /// </remarks>
     /// <summary>
     /// Redeem a promo code
@@ -1014,10 +1013,8 @@ public class PaymentController(
     /// Only a DocSpace administrator may read it, an installation without a billing service answers 403, and a portal
     /// that has never been a customer gets an empty result. The call is read-only and is answered by the accounting
     /// service on every request, so a bonus shows up as soon as it is credited. The account part has the same shape as
-    /// the wallet balance - one sub-account per currency with the amount left on it, and the most recent credit -
-    /// while `lots` lists the individual credits that have neither expired nor been spent in full, in the order they
-    /// are spent, each with the amount credited, the amount remaining and the moment it expires, all in UTC. An empty
-    /// `lots` means no bonus is left. The money paid into the wallet is read with
+    /// the wallet balance, while `lots` lists the individual credits that have neither expired nor been spent in full,
+    /// in the order they are spent, with times in UTC. An empty `lots` means no bonus is left. The money paid into the wallet is read with
     /// `GET api/2.0/portal/payment/customer/balance` instead. An empty result is also what the portal gets when the
     /// accounting service cannot be reached, so a client should treat it as "nothing to show" rather than as zero.
     /// </remarks>

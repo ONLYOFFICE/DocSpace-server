@@ -46,7 +46,7 @@ public class PromoCodeTests(AspireAppFixture fixture) : BaseTest(fixture)
     {
         // Arrange
         Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
-            """{"Status":"completed","Amount":10.0000,"Currency":"usd","ExpiresAt":"2027-02-07T12:00:00Z"}""");
+            """{"Status":"completed","Amount":10.0000,"Currency":"USD","ExpiresAt":"2027-02-07T12:00:00Z"}""");
 
         // Act
         var bonus = (await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken)).Response;
@@ -54,12 +54,26 @@ public class PromoCodeTests(AspireAppFixture fixture) : BaseTest(fixture)
         // Assert
         bonus.Status.Should().Be(PromoCodeStatus.Completed);
         bonus.Amount.Should().Be(10);
-        bonus.Currency.Should().Be("USD", "the currency is passed on in upper case whatever billing spells it in");
+        bonus.Currency.Should().Be("USD");
         bonus.ExpiresAt!.Value.ToUniversalTime().Should().Be(new DateTime(2027, 2, 7, 12, 0, 0, DateTimeKind.Utc));
 
         var call = PaymentCalls.Should().ContainSingle(c => c.Route == ApplyPromoCodeRoute).Subject;
         BillingValue(call, "Code").Should().Be(PromoCode);
         BillingValue(call, "Initiator").Should().Be(Owner.Email);
+    }
+
+    [Fact]
+    public async Task ApplyPromoCode_CurrencyInLowerCase_IsPassedOnInUpperCase()
+    {
+        // Arrange
+        Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
+            """{"Status":"completed","Amount":10,"Currency":"usd","ExpiresAt":null}""");
+
+        // Act
+        var bonus = (await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        bonus.Currency.Should().Be("USD");
     }
 
     [Fact]
@@ -120,7 +134,25 @@ public class PromoCodeTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         exception.ErrorCode.Should().Be(402);
-        PaymentCalls.Should().Contain(c => c.Route == ApplyPromoCodeRoute);
+        exception.ErrorContent!.ToString().Should().Contain("cannot find");
+        PaymentCalls.Count(c => c.Route == ApplyPromoCodeRoute).Should().Be(1);
+    }
+
+    [Fact]
+    public async Task ApplyPromoCode_BillingFailsOnItsSide_ThrowsPaymentRequiredNotARefusal()
+    {
+        // Arrange: promo_failed comes in the shape of a refusal, but the code may have been redeemed all the same.
+        Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
+            """{"Message":"error: promo_failed","Code":"promo_failed"}""");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(402);
+        exception.ErrorContent!.ToString().Should().Contain("promo_failed");
+        PaymentCalls.Count(c => c.Route == ApplyPromoCodeRoute).Should().Be(1);
     }
 
     [Fact]

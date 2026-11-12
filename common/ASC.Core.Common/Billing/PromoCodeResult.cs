@@ -39,8 +39,10 @@ namespace ASC.Core.Billing;
 public class PromoCodeResult
 {
     /// <summary>
-    /// Whether the bonus is already credited or will be credited later.
+    /// Whether the bonus is already credited or will be credited later. Required: <see cref="PromoCodeStatus.Completed"/>
+    /// is the default value, so an answer without it would otherwise read as a bonus already credited.
     /// </summary>
+    [JsonRequired]
     public PromoCodeStatus Status { get; set; }
 
     /// <summary>

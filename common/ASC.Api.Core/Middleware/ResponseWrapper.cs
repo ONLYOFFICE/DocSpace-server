@@ -111,7 +111,8 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
             // A service limit the accounting service refuses to create or change because of the values the caller chose
             // (a second limit of the same scope, a quantity threshold for services with different units): the caller is
             // told the reason, without a stack trace. The accounting client raises these two for the service limit
-            // routes only, so the answers of the other accounting operations stay as they were.
+            // routes, and the conflict for a bonus credit as well, so the answers of the other accounting operations
+            // stay as they were.
             case AccountingConflictException e:
                 status = HttpStatusCode.Conflict;
                 message = e.Message;

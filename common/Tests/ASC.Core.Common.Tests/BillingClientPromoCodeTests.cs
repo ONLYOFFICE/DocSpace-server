@@ -87,7 +87,7 @@ public class BillingClientPromoCodeTests
     [Theory]
     [InlineData("""{"Message":"error: promo_not_found"}""", "promo_not_found")]
     [InlineData("""{"Message":"error: promo_expired","Code":"promo_expired"}""", "promo_expired")]
-    [InlineData("""{"Message":"error: promo_failed","Code":"promo_failed"}""", "promo_failed")]
+    [InlineData("""{"Message":"error: promo_not_found","Code":"promo_already_used"}""", "promo_already_used")]
     public async Task ApplyPromoCode_RefusedCode_ThrowsPromoCodeExceptionWithTheReasonCode(string answer, string code)
     {
         var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, answer));
@@ -95,6 +95,54 @@ public class BillingClientPromoCodeTests
         var act = async () => await client.ApplyPromoCodeAsync("portal-1", "K7QX-M42P-9TRB", "owner@example.com");
 
         (await act.Should().ThrowExactlyAsync<BillingPromoCodeException>()).Which.Code.Should().Be(code);
+    }
+
+    [Fact]
+    public async Task ApplyPromoCode_BillingFailedOnItsSide_StaysABillingFailure()
+    {
+        // promo_failed is the billing service failing, not refusing: the code may have been redeemed, so the caller must
+        // not be told it was refused.
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK,
+            """{"Message":"error: promo_failed","Code":"promo_failed"}"""));
+
+        var act = async () => await client.ApplyPromoCodeAsync("portal-1", "K7QX-M42P-9TRB", "owner@example.com");
+
+        await act.Should().ThrowExactlyAsync<BillingException>();
+    }
+
+    [Fact]
+    public async Task ApplyPromoCode_RefusalCutShort_StaysABillingFailure()
+    {
+        // A body cut short may have named promo_failed: what it would have said is unknown, so it is no refusal.
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK, """{"Message":"error: promo_f"""));
+
+        var act = async () => await client.ApplyPromoCodeAsync("portal-1", "K7QX-M42P-9TRB", "owner@example.com");
+
+        (await act.Should().ThrowAsync<BillingException>()).Which.Should().NotBeOfType<BillingPromoCodeException>();
+    }
+
+    [Fact]
+    public async Task ApplyPromoCode_RefusalShapeWithAFailingStatus_StaysABillingFailure()
+    {
+        // Only a successful answer refuses a code; a failing status leaves the outcome unknown.
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.BadGateway,
+            """{"Message":"error: promo_not_found","Code":"promo_not_found"}"""));
+
+        var act = async () => await client.ApplyPromoCodeAsync("portal-1", "K7QX-M42P-9TRB", "owner@example.com");
+
+        (await act.Should().ThrowAsync<BillingException>()).Which.Should().NotBeOfType<BillingPromoCodeException>();
+    }
+
+    [Fact]
+    public async Task ApplyPromoCode_AnswerWithoutStatus_IsAContractFailure()
+    {
+        // A bonus whose status the answer leaves out must not be read as credited.
+        var (client, _) = CreateBillingClient(_ => Reply(HttpStatusCode.OK,
+            """{"Amount":10,"Currency":"USD","ExpiresAt":null}"""));
+
+        var act = async () => await client.ApplyPromoCodeAsync("portal-1", "K7QX-M42P-9TRB", "owner@example.com");
+
+        await act.Should().ThrowAsync<PaymentServiceContractException>();
     }
 
     [Fact]

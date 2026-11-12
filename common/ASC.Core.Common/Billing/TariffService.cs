@@ -1575,8 +1575,17 @@ public class TariffService(
             var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
             if (toppedUp)
             {
-                var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
-                await quotaSocketManager.TopUpWallet(auto);
+                // The money has moved, so a failure to tell the clients must not fail the purchase that waits for it:
+                // the purchase is funded by then.
+                try
+                {
+                    var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+                    await quotaSocketManager.TopUpWallet(auto);
+                }
+                catch (Exception e)
+                {
+                    logger.WarningWalletChangeNotSent(tenantId, e);
+                }
             }
 
             balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);

@@ -55,7 +55,8 @@ public class OperationSourceDto
 
     /// <summary>
     /// The part of the amount on that sub-account, in the `currency` of the movement or of the usage total it belongs
-    /// to.
+    /// to. It carries the sign the accounting service gives it, so whether money came in or went out is told by the
+    /// movement's own credit and debit, not by this sign.
     /// </summary>
     /// <example>4.5</example>
     public decimal Amount { get; init; }

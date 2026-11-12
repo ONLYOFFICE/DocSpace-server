@@ -178,8 +178,17 @@ public class TopUpWalletService(
                 var description = $"{amount} {settings.Currency}";
                 messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletToppedUp, description);
 
-                var socketManager = scope.ServiceProvider.GetRequiredService<QuotaSocketManager>();
-                await socketManager.TopUpWallet(true);
+                // The wallet is topped up by now: a failure to tell the clients must not reach the catch below, which
+                // reports the top-up as failed to the payer.
+                try
+                {
+                    var socketManager = scope.ServiceProvider.GetRequiredService<QuotaSocketManager>();
+                    await socketManager.TopUpWallet(true);
+                }
+                catch (Exception e)
+                {
+                    logger.WarningTopUpWalletServiceNotificationNotSent(data.TenantId, e);
+                }
 
                 logger.InfoTopUpWalletServiceDone(data.TenantId, description);
 
@@ -233,8 +242,17 @@ public class TopUpWalletService(
                     return;
                 }
 
-                var socketManager = scope.ServiceProvider.GetRequiredService<QuotaSocketManager>();
-                await socketManager.WalletLowBalanceAsync();
+                // A failure to tell the clients must not keep the letter from going out: it would fail again on every
+                // pass while the socket service is down.
+                try
+                {
+                    var socketManager = scope.ServiceProvider.GetRequiredService<QuotaSocketManager>();
+                    await socketManager.WalletLowBalanceAsync();
+                }
+                catch (Exception e)
+                {
+                    logger.WarningTopUpWalletServiceNotificationNotSent(tenantId, e);
+                }
 
                 var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
                 await studioNotifyService.SendLowWalletBalanceAsync(payer, owner);

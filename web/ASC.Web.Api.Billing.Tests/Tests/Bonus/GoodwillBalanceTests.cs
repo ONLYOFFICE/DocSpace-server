@@ -66,15 +66,29 @@ public class GoodwillBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Assert
         goodwill.AccountNumber.Should().Be(Payments.AccountNumber);
-        goodwill.SubAccounts.Should().ContainSingle().Which.Amount.Should().Be(35.5);
+        goodwill.SubAccountNumber.Should().Be(53);
+        goodwill.AccountName.Should().Be("goodwill");
+        goodwill.AccountCurrency.Should().Be("USD");
+
+        var subAccount = goodwill.SubAccounts.Should().ContainSingle().Subject;
+        subAccount.Currency.Should().Be("USD");
+        subAccount.Amount.Should().Be(35.5);
+
+        goodwill.LastCredit.Amount.Should().Be(50);
+        goodwill.LastCredit.Currency.Should().Be("USD");
+        goodwill.LastCredit.Date.ToUniversalTime().Should().Be(new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
+
         goodwill.Lots.Should().HaveCount(2);
 
         var first = goodwill.Lots[0];
         first.OperationId.Should().Be(987654);
         first.Amount.Should().Be(50);
         first.Remaining.Should().Be(35.5);
+        first.Currency.Should().Be("USD");
+        first.Date.ToUniversalTime().Should().Be(new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
         first.ExpiresAt!.Value.ToUniversalTime().Should().Be(new DateTime(2026, 12, 1, 9, 0, 0, DateTimeKind.Utc));
 
+        goodwill.Lots[1].OperationId.Should().Be(987655);
         goodwill.Lots[1].ExpiresAt.Should().BeNull("a bonus that never expires has no expiry");
     }
 

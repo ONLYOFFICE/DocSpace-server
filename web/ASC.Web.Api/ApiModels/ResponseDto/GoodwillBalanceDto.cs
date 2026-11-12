@@ -40,8 +40,8 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <example>
 /// {
 ///   "accountNumber": 12345,
-///   "subAccountNumber": 12346,
-///   "accountName": "goodwill",
+///   "subAccountNumber": 12345,
+///   "accountName": "account name",
 ///   "accountCurrency": "USD",
 ///   "subAccounts": [{"currency": "USD", "amount": 35.5}],
 ///   "lastCredit": {"date": "2026-11-01T09:00:00Z", "currency": "USD", "amount": 50},
