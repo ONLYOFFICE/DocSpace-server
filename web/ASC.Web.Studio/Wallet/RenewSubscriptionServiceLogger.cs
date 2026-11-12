@@ -65,8 +65,8 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Warning, "Subscription renewal left behind by a process that stopped is not made, the subscription has changed or been extended since: tenant {tenantId}, {description}")]
     public static partial void WarningRenewSubscriptionServiceOutdated(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
 
-    [LoggerMessage(LogLevel.Warning, "Subscription renewal left behind by a process that stopped still waits for billing: tenant {tenantId}, {description}")]
-    public static partial void WarningRenewSubscriptionServiceStillWaits(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, Exception exception);
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal left behind by a process that stopped waits for billing to answer: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceWaits(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, Exception exception);
 
     [LoggerMessage(LogLevel.Warning, "Subscription renewal is taken out of the journal, the re-check of its payment change settles it: tenant {tenantId}, quota {quota}")]
     public static partial void WarningRenewSubscriptionServiceLeftToRecheck(this ILogger<RenewSubscriptionService> logger, int tenantId, int quota);

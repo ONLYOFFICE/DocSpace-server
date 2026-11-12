@@ -139,9 +139,24 @@ public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixtu
     [Fact]
     public async Task InterruptedRenewal_PendingListSettlesIt_IsNotRenewedAgain()
     {
-        // Arrange
         var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
 
+        await AssertPendingListSettlesAloneAsync(row, row.Quota);
+    }
+
+    // A pending renewal written before the quota was recorded - by the previous version, during a rollout - names
+    // the renewal by the tenant and the due date alone. The portal has one renewal of that date, so it is this one.
+    [Fact]
+    public async Task InterruptedRenewal_PendingWithoutQuotaSettlesIt_IsNotRenewedAgain()
+    {
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await AssertPendingListSettlesAloneAsync(row, pendingQuota: 0);
+    }
+
+    private async Task AssertPendingListSettlesAloneAsync(TariffRow row, int pendingQuota)
+    {
+        // Arrange
         await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
 
         // The process stopped between the two: the payment change had got no readable answer and was handed to the
@@ -149,7 +164,7 @@ public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixtu
         // for the re-check to take that as final.
         var pending = new PendingRenewal(
             TenantId,
-            row.Quota,
+            pendingQuota,
             Plans.AdminWalletProductId.ToString(CultureInfo.InvariantCulture),
             $"adminwallet {row.Quantity}",
             "admin",

@@ -44,8 +44,8 @@ namespace ASC.Web.Api.Billing.Tests.ApiFactories;
 /// the service changes the journal under. The lists are shared by every portal of the run and are handled as JSON
 /// arrays: an entry is added or taken out, the entries of the other portals stay as they were read, whatever fields
 /// the service gives them. The records mirror the private ones of the service by property name.
-/// The service rewrites the pending list outside the lock while it settles one, so only one test at a time plants a
-/// pending renewal: the tests that do are in one class.
+/// The service reads both lists from Redis and changes them under the same lock, so what is planted or taken out here
+/// is what its next run sees.
 /// </remarks>
 public sealed class RenewalJournal : IAsyncDisposable
 {
