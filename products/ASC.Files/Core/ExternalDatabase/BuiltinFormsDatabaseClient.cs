@@ -61,7 +61,8 @@ public class BuiltinFormsDatabaseClient(
 
     private FormsDbCredentials? _provisioned;
 
-    // The read-only account is kept for direct access by portal administrators, so its connection limit never blocks the server.
+    // The server works through the portal's own account only. The read-only account is created and kept for the direct
+    // access a portal administrator will get once portals live in databases of their own; nothing hands it out now.
     protected override async Task<DbConnection> CreateConnectionAsync(ExternalDatabaseType dbType)
     {
         var credentials = _provisioned ?? await provisioner.GetOrProvisionAsync(tenantManager.GetCurrentTenantId());

@@ -76,9 +76,24 @@ public class BuiltinFormsDbCleanerService(
 
             await using (var scope = _scopeFactory.CreateAsyncScope())
             {
-                if (!scope.ServiceProvider.GetRequiredService<FormsDbProvisioningService>().IsEnabled())
+                var provisioner = scope.ServiceProvider.GetRequiredService<FormsDbProvisioningService>();
+                if (!provisioner.IsEnabled())
                 {
                     return;
+                }
+
+                // A changed connection limit reaches the portals provisioned before it here; the cleanup goes on without.
+                try
+                {
+                    var changed = await provisioner.ApplyConnectionLimitAsync(stoppingToken);
+                    if (changed > 0)
+                    {
+                        logger.InfoConnectionLimitApplied(changed);
+                    }
+                }
+                catch (Exception e) when (e is not OperationCanceledException)
+                {
+                    logger.WarnConnectionLimitNotApplied(e);
                 }
 
                 await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(stoppingToken);
@@ -166,6 +181,12 @@ internal static partial class BuiltinFormsDbCleanerServiceLogger
 {
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: {key} = {value} is not a valid interval or is too short, {fallback} is used")]
     public static partial void WarnIntervalOutOfRange(this ILogger<BuiltinFormsDbCleanerService> logger, string key, string value, TimeSpan fallback);
+
+    [LoggerMessage(LogLevel.Information, "Built-in forms DB: the connection limit of {count} portal accounts was set to the configured one")]
+    public static partial void InfoConnectionLimitApplied(this ILogger<BuiltinFormsDbCleanerService> logger, int count);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the configured connection limit could not be applied to the existing portal accounts")]
+    public static partial void WarnConnectionLimitNotApplied(this ILogger<BuiltinFormsDbCleanerService> logger, Exception exception);
 
     [LoggerMessage(LogLevel.Information, "Built-in forms DB: dropped {count} idle tables of tenant {tenantId}")]
     public static partial void InfoIdleTablesDropped(this ILogger<BuiltinFormsDbCleanerService> logger, int tenantId, int count);

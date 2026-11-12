@@ -122,7 +122,7 @@ internal static partial class FormFillingReportCreatorLogger
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: idle table {tableName} is kept, the search index cannot be read to restore it")]
     public static partial void WarnIdleTableKeptIndexUnavailable(this ILogger<FormFillingReportCreator> logger, string tableName);
 
-    [LoggerMessage(LogLevel.Information, "Built-in forms DB: idle table {tableName} is kept, its {count} submissions are more than one restore reads")]
+    [LoggerMessage(LogLevel.Information, "Built-in forms DB: idle table {tableName} is kept, its {count} indexed submissions are more than the check against the table reads at once")]
     public static partial void InfoIdleTableKeptTooLarge(this ILogger<FormFillingReportCreator> logger, string tableName, long count);
 
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: idle table {tableName} is kept, it holds rows the {count} submissions of the search index do not")]

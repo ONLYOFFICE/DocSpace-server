@@ -410,8 +410,9 @@ public class FormFillingReportCreator(
 
     /// <summary>
     /// Drops a built-in table unused since <paramref name="cutoff"/> (UTC) only when the search index can rebuild it
-    /// whole on the next use: the table is the one its versions write to, and the index holds at least as many of their
-    /// submissions as the table, fewer than one rebuild reads. The table of a form that no longer exists is dropped.
+    /// whole on the next use: the table is the one its versions write to, and every row of it is in the index. The ids
+    /// are compared from one read of the index, so a table whose versions have more submissions than one read returns
+    /// is kept, although the restore itself would read them all. The table of a form that no longer exists is dropped.
     /// </summary>
     public async Task<bool> DropIdleBuiltinTableAsync(string tableName, DateTime cutoff)
     {
@@ -1015,15 +1016,55 @@ public class FormFillingReportCreator(
         }
     }
 
+    // Traces of consumed sessions kept; without its trace a very late report of an old session is taken again.
+    internal const int MaxConsumedEditorSessions = 20;
+
     // The sessions saved up to the compared version went into its link; a session the form moved past unsaved never will.
+    // A consumed session leaves a trace: its id and the number of its last report, without renames. A session can go on
+    // after a forcesave, so a report of it on a compared version is taken; the trace tells a late or repeated report of
+    // the part already taken from one that continues it. MatchFields leaves traces out: one can be newer than the version
+    // the next save is compared with (a version linked but never submitted to is compared past), and it would count as
+    // a tracked session there and turn off the match by the order of the fields.
     internal static void ConsumeEditorRenames(FormFillingProperties<int> state, int version)
     {
-        state.EditorFieldRenames?.RemoveAll(r => r.SavedVersion <= version || r.SavedVersion == null && r.OpenedVersion < version);
-        if (state.EditorFieldRenames?.Count == 0)
+        var sessions = state.EditorFieldRenames;
+        if (sessions == null)
+        {
+            return;
+        }
+
+        var traces = sessions
+            .Where(r => r.SavedVersion <= version && r.SessionId != null)
+            .Select(r => new FormEditorFieldRenames
+            {
+                OpenedVersion = r.OpenedVersion,
+                UserId = r.UserId,
+                SessionId = r.SessionId,
+                SavedVersion = r.SavedVersion,
+                Sequence = r.Sequence
+            })
+            .ToList();
+
+        sessions.RemoveAll(r => r.SavedVersion <= version || r.SavedVersion == null && r.OpenedVersion < version);
+        sessions.AddRange(traces);
+
+        // The latest by the version they were saved as, then by the order they began to report in, which is the order of
+        // the list: report numbers belong to one session and do not compare across sessions.
+        foreach (var oldest in sessions.Select((r, order) => (Session: r, Order: order)).Where(s => IsConsumedTrace(s.Session))
+                     .OrderByDescending(s => s.Session.SavedVersion).ThenByDescending(s => s.Order)
+                     .Skip(MaxConsumedEditorSessions).Select(s => s.Session).ToList())
+        {
+            sessions.Remove(oldest);
+        }
+
+        if (sessions.Count == 0)
         {
             state.EditorFieldRenames = null;
         }
     }
+
+    // A session saved and taken into a version decision already: only its id and its last report number are left.
+    internal static bool IsConsumedTrace(FormEditorFieldRenames session) => session.SavedVersion != null && session.Renames == null;
 
     /// <summary>
     /// The decision about a version, applied to the state. A link carries the editor sessions saved up to it on, so they
@@ -1221,7 +1262,7 @@ public class FormFillingReportCreator(
             .Select(p => (Version: p.Version, OpenedVersion: 0, p.Renames));
         // The sessions saved as one version, by several users, in the order they began to report.
         var sessions = (formFilling.EditorFieldRenames ?? [])
-            .Where(r => r.SavedVersion > since && r.SavedVersion <= version && r.OpenedVersion >= since)
+            .Where(r => r.SavedVersion > since && r.SavedVersion <= version && r.OpenedVersion >= since && !IsConsumedTrace(r))
             .Select(r => (Version: r.SavedVersion.Value, r.OpenedVersion, r.Renames))
             .ToList();
 
@@ -1450,7 +1491,9 @@ public class FormFillingReportCreator(
     // The next save is compared with the last version below it whose data is in a table, so a session opened before that
     // one can never count. A session opened after it still can, even on a version compared since: one that goes on after
     // a forcesave reports relative to the version it opened, and the save that ends it replaces the forcesaved version,
-    // which is then compared again with the versions below it. Data of the current version itself does not count.
+    // which is compared again with the versions below it while it has no responses and no link of its own. Once it has,
+    // its decision stands and the session is dropped unused at the next check; the current version's own data is not
+    // counted here, since whether it has a link is not known before that check.
     internal static bool IsOutdatedEditorSession(FormFillingProperties<int> state, int openedVersion, int formVersion)
     {
         var linked = state.VersionLinks?.Where(l => l.Version < formVersion).Select(l => l.Version).DefaultIfEmpty().Max() ?? 0;
@@ -1523,7 +1566,8 @@ public class FormFillingReportCreator(
 
         while (Total() > MaxEditorRenamesPerForm)
         {
-            var oldest = sessions.Where(r => r.SavedVersion != null && r != session).MinBy(r => r.SavedVersion);
+            // A trace holds no renames, so dropping it frees nothing and only loses its guard against late reports.
+            var oldest = sessions.Where(r => r.SavedVersion != null && r != session && !IsConsumedTrace(r)).MinBy(r => r.SavedVersion);
             if (oldest == null)
             {
                 return false;

@@ -63,7 +63,7 @@ switch (launchProfile)
     case "integration-test":
         connectionManager
             .AddMySql(withDataVolume: false, withTmpfs: true)
-            // a short limit for the read-only roles, so the test of a query ended from outside does not wait a minute
+            // a short limit for the read-only roles, so a long query of one is ended within seconds on the test stack
             .AddFormsPostgres(withDataVolume: false, withTmpfs: true, roQueryTimeoutSeconds: 10)
             .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()

@@ -222,7 +222,9 @@ public class FormEditorSessionsTests
 
         FormFillingReportCreator.ApplyVersionDecision(formFilling, 3, new FormVersionLink(), 2);
 
-        formFilling.EditorFieldRenames.Select(s => (s.OpenedVersion, s.SavedVersion)).Should().Equal((2, 3), (3, null));
+        formFilling.EditorFieldRenames.Where(s => !FormFillingReportCreator.IsConsumedTrace(s))
+            .Select(s => (s.OpenedVersion, s.SavedVersion)).Should().Equal((2, 3), (3, null));
+        formFilling.EditorFieldRenames.Where(FormFillingReportCreator.IsConsumedTrace).Select(s => s.SessionId).Should().Equal("1-2");
         formFilling.PendingVersionLinks.Should().BeEmpty();
     }
 
@@ -234,7 +236,8 @@ public class FormEditorSessionsTests
 
         FormFillingReportCreator.ApplyVersionDecision(formFilling, 3, link, 2);
 
-        formFilling.EditorFieldRenames.Select(s => s.OpenedVersion).Should().Equal(3);
+        formFilling.EditorFieldRenames.Where(s => !FormFillingReportCreator.IsConsumedTrace(s)).Select(s => s.OpenedVersion).Should().Equal(3);
+        formFilling.EditorFieldRenames.Where(FormFillingReportCreator.IsConsumedTrace).Select(s => s.SessionId).Should().Equal("2-3");
         formFilling.PendingVersionLinks.Should().ContainSingle().Which.Should().BeSameAs(link);
     }
 
@@ -415,15 +418,84 @@ public class FormEditorSessionsTests
         FormFillingReportCreator.KeepEditorRenames(state, 3, 200, _user, "tab", [Rename("a", "b"), Rename("c", "d")]).Should().BeTrue();
         FormFillingReportCreator.MarkEditorRenamesSaved(state, 5).Should().BeTrue();
 
-        var session = state.EditorFieldRenames.Should().ContainSingle().Subject;
+        var session = state.EditorFieldRenames.Where(s => !FormFillingReportCreator.IsConsumedTrace(s)).Should().ContainSingle().Subject;
         (session.OpenedVersion, session.SavedVersion).Should().Be((3, (int?)5));
         session.Renames.Select(r => (r.OldKey, r.NewKey)).Should().Equal(("a", "b"), ("c", "d"));
     }
 
-    // The save that ends the session replaces the forcesaved v4, which is compared with v3 again: responses to v4 itself
-    // do not make the session useless.
+    // A report sent before the forcesave but arriving after its check took the session: the trace of the session keeps
+    // its last report number, so the late report is not taken for a continuation and cannot bring back an older rename.
     [Fact]
-    public void KeepEditorRenames_ForcesavedVersionGotResponses_SessionIsKeptForTheSaveThatReplacesIt()
+    public void KeepEditorRenames_LateReportAfterTheSessionWasTaken_IsDropped()
+    {
+        var state = new FormFillingProperties { LastSubmittedVersion = 3 };
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 150, _user, "tab", [Rename("a", "b")]).Should().BeTrue();
+        FormFillingReportCreator.MarkEditorRenamesSaved(state, 4).Should().BeTrue();
+        FormFillingReportCreator.ConsumeEditorRenames(state, 4);
+        state.FieldsCheckedVersion = 4;
+
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 100, _user, "tab", [Rename("a", "x")]).Should().BeFalse();
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 150, _user, "tab", [Rename("a", "b")]).Should().BeFalse();
+
+        state.EditorFieldRenames.Should().OnlyContain(s => FormFillingReportCreator.IsConsumedTrace(s));
+    }
+
+    // v4 was linked but got no responses, so v5 is compared with v3 and the trace of the session saved as v4 is newer
+    // than v3. It must not count as a tracked session: that would turn off the match by the order of the fields.
+    [Fact]
+    public void MatchFields_TraceNewerThanTheComparedVersion_KeepsTheMatchByOrder()
+    {
+        var formFilling = new FormFillingProperties
+        {
+            EditorFieldRenames = [new FormEditorFieldRenames { OpenedVersion = 3, UserId = _user, SessionId = "tab", SavedVersion = 4, Sequence = 150 }]
+        };
+
+        FormFillingReportCreator.MatchFields(5, 1, Previous(3, "name", "email"), Fields("fullName", "email"), formFilling)
+            .Select(r => (r.OldKey, r.NewKey)).Should().Equal(("name", "fullName"));
+    }
+
+    // Making room for a report takes saved sessions with renames; a trace holds none, so it stays and keeps its guard.
+    [Fact]
+    public void KeepEditorRenames_BudgetRunsOut_TracesStay()
+    {
+        var big = Enumerable.Range(0, 1500).Select(i => Rename($"old{i}", $"new{i}")).ToList();
+        var state = new FormFillingProperties
+        {
+            EditorFieldRenames =
+            [
+                new FormEditorFieldRenames { OpenedVersion = 1, UserId = _user, SessionId = "trace", SavedVersion = 2, Sequence = 10 },
+                new FormEditorFieldRenames { OpenedVersion = 2, UserId = _user, SessionId = "saved", SavedVersion = 3, Sequence = 20, Renames = big }
+            ]
+        };
+
+        var report = Enumerable.Range(0, 600).Select(i => Rename($"a{i}", $"b{i}")).ToList();
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 30, _user, "new", report).Should().BeTrue();
+
+        state.EditorFieldRenames.Select(s => s.SessionId).Should().BeEquivalentTo("trace", "new");
+    }
+
+    // A trace carries no renames into a comparison, and only the latest traces are kept.
+    [Fact]
+    public void ConsumeEditorRenames_ManySessions_KeepsTheLatestTracesOnly()
+    {
+        var state = new FormFillingProperties();
+        for (var session = 0; session < FormFillingReportCreator.MaxConsumedEditorSessions + 5; session++)
+        {
+            FormFillingReportCreator.KeepEditorRenames(state, 1, 100 + session, Guid.NewGuid(), $"tab{session}", [Rename("a", "b")]).Should().BeTrue();
+        }
+
+        FormFillingReportCreator.MarkEditorRenamesSaved(state, 2);
+        FormFillingReportCreator.ConsumeEditorRenames(state, 2);
+
+        state.EditorFieldRenames.Should().HaveCount(FormFillingReportCreator.MaxConsumedEditorSessions)
+            .And.OnlyContain(s => FormFillingReportCreator.IsConsumedTrace(s));
+        state.EditorFieldRenames.Min(s => s.Sequence).Should().Be(105);
+    }
+
+    // The rule reads the versions below the current one only: whether responses to the forcesaved v4 gave it a link of
+    // its own is not known before its next check, which then drops the session if it did.
+    [Fact]
+    public void KeepEditorRenames_ResponsesToTheCurrentVersion_DoNotMakeTheSessionOutdated()
     {
         var state = new FormFillingProperties { LastSubmittedVersion = 4, FieldsCheckedVersion = 4 };
 

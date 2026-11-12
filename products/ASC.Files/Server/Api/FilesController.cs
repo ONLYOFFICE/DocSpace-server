@@ -1201,16 +1201,16 @@ public abstract class FilesController<T>(
 
     /// <remarks>
     /// Reports which fields of the original PDF form of a form-filling room the user renamed in the editor since it opened
-    /// `version`, told apart by the field ids the editor keeps. The editor sends it while the form is edited and when it
-    /// is left, only when its configuration from `GET api/2.0/files/file/{fileId}/openedit` has `trackFormFieldChanges`
-    /// true. The caller needs the right to edit the form; once its filling is started, a content creator keeps it only
-    /// for a form they created or started. Only the stored renames change: a report replaces the previous one of the
-    /// same `sessionId`, and one whose `sequence` is not above the last of that session is dropped, so a repeated or
-    /// late call is harmless; give every editor tab its own `sessionId`. A field left out of `renames` kept its key.
-    /// When the editor saves the version, a renamed field keeps its earlier answers under its new name in the forms
-    /// database and the spreadsheet report. A `version` the form does not have yet or already compared is ignored, as
-    /// is a new session past 20 of one user on one version and a report past the renames the form can keep; all still
-    /// answer 200. With Document Server Community Edition the call is refused with 403.
+    /// `version`, told apart by the field ids the editor keeps. The editor sends it while editing, only when
+    /// `GET api/2.0/files/file/{fileId}/openedit` returns `trackFormFieldChanges` true. The caller
+    /// needs the right to edit the form; once its filling is started, a content creator keeps it only for a form they
+    /// created or started. A report replaces the previous one of the same `sessionId`, even after a forcesave, and one
+    /// whose `sequence` is not above the last of that session is dropped, so a repeated or late call is harmless; give
+    /// every editor tab its own `sessionId`. A field left out of `renames` kept its key. When the editor saves the
+    /// version, a renamed field keeps its earlier answers under its new name in the forms database and the spreadsheet
+    /// report. Ignored, still with 200: a `version` the form does not have yet, a compared one older than the last
+    /// earlier version with responses, a new session past 20 of one user on one version, a report past the renames the
+    /// form can keep. With Document Server Community Edition the call is refused with 403.
     /// </remarks>
     /// <summary>
     /// Report renamed form fields

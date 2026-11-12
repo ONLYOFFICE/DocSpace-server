@@ -75,7 +75,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Xunit;
 
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
-global using ConnectionState = System.Data.ConnectionState;
+global using BuiltinFormsDbOptions = ASC.Files.Core.ExternalDatabase.BuiltinFormsDbOptions;
 global using CoreConstants = ASC.Core.Users.Constants;
 global using CoreExternalDatabaseType = ASC.FederatedLogin.DatabaseProviders.ExternalDatabaseType;
 global using CoreMetadataFieldType = ASC.Files.Core.MetadataFieldType;

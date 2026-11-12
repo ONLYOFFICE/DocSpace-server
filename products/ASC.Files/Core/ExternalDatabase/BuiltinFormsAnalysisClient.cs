@@ -36,10 +36,9 @@
 namespace ASC.Files.Core.ExternalDatabase;
 
 /// <summary>
-/// Reads the built-in forms database for the analysis of responses. It uses the portal's own account, whose connection
-/// limit is not the one kept for portal administrators, but every transaction is read-only and every statement bounded
-/// as on the read-only account, so a query an assistant builds can neither change the tables nor hold the server shared
-/// by all portals.
+/// Reads the built-in forms database for the analysis of responses. It uses the portal's own account, but every
+/// transaction is read-only and every statement bounded as on the read-only account, so a query an assistant builds can
+/// neither change the tables nor hold the server shared by all portals.
 /// </summary>
 [Scope]
 public class BuiltinFormsAnalysisClient(

@@ -1721,24 +1721,43 @@ public class EntryManager(IDaoFactory daoFactory,
     // and the fillers are not told the form changed; new drafts still take the version of the file itself.
     private async Task OnFormVersionChangedAsync<T>(File<T> file)
     {
+        // Only the save of the properties is tried again: it waits for one lock, and what follows waits for its own.
+        EntryProperties<T> properties = null;
         try
         {
-            await FormFillingReportCreator.RetryTransientAsync(() => UpdateFormVersionStateAsync(file),
+            await FormFillingReportCreator.RetryTransientAsync(async () => properties = await SaveFormVersionAsync(file),
                 FormFillingReportCreator.VersionStateSaveAttempts, FormFillingReportCreator.VersionStateSaveDelay);
         }
         catch (Exception e)
         {
             logger.ErrorFormVersionStateNotUpdated(e, file.Id.ToString(), file.Version);
+            return;
+        }
+
+        // Also for a save that overwrites the version.
+        if (file is File<int> form && properties is EntryProperties<int> formProperties)
+        {
+            await formFillingReportCreator.MarkEditorRenamesSavedAsync(form, formProperties.FormFilling);
+
+            // Without the check the first submission of the version decides its table.
+            try
+            {
+                await formFillingReportCreator.RequestVersionCheckAsync(form, formProperties.FormFilling);
+            }
+            catch (Exception e)
+            {
+                logger.WarnFormVersionCheckNotRequested(e, file.Id.ToString(), file.Version);
+            }
         }
     }
 
-    private async Task UpdateFormVersionStateAsync<T>(File<T> file)
+    // The properties of the original form with the saved version recorded; null for a file that is not one.
+    private async Task<EntryProperties<T>> SaveFormVersionAsync<T>(File<T> file)
     {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var properties = await fileDao.GetProperties(file.Id);
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
         if (properties?.FormFilling == null || !Equals(properties.FormFilling.OriginalFormId, file.Id))
         {
-            return;
+            return null;
         }
 
         if (properties.FormFilling.OriginalFormVersion != 0 && properties.FormFilling.OriginalFormVersion != file.Version)
@@ -1749,12 +1768,7 @@ public class EntryManager(IDaoFactory daoFactory,
             await formFillingReportCreator.SaveFormPropertiesAsync(file.Id, properties);
         }
 
-        // Also for a save that overwrites the version.
-        if (file is File<int> form && properties is EntryProperties<int> formProperties)
-        {
-            await formFillingReportCreator.MarkEditorRenamesSavedAsync(form, formProperties.FormFilling);
-            await formFillingReportCreator.RequestVersionCheckAsync(form, formProperties.FormFilling);
-        }
+        return properties;
     }
 
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false, string fillingSessionId = null)
