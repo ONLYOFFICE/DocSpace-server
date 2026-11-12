@@ -128,8 +128,9 @@ public class RenewSubscriptionService(
 
     // The changes of the pending list this process could not write, the list being out of reach at that moment:
     // the renewals to add and the settled ones to take out. The next run makes them before it reads the list. Only
-    // this process's memory holds them: a process that stops here loses a renewal to add - nobody re-checks it,
-    // as when the list itself is lost - and settles a settled one once more.
+    // this process's memory holds them: a process that stops here, or an instance that turns passive and does not
+    // run again, loses a renewal to add - nobody re-checks it, as when the list itself is lost - and leaves a
+    // settled one to be settled once more.
     private readonly List<PendingRenewal> _pendingToAdd = [];
     private readonly List<PendingRenewal> _pendingToRemove = [];
 
@@ -173,8 +174,10 @@ public class RenewSubscriptionService(
                 }
 
                 // The journal is put in line with the pending list before any pending renewal is settled: an entry
-                // the list covers leaves the journal first, so a run that stops anywhere after this leaves a pending
-                // renewal without an entry - which the next run settles - never an entry without its pending renewal.
+                // the list covers leaves the journal first, so a run that stops after this leaves a pending renewal
+                // without an entry - which the next run settles - not an entry whose pending renewal is gone. The
+                // exceptions are an entry a pending renewal without a quota cannot be matched to, which is only held
+                // back, and a pending renewal kept in memory (_pendingToAdd).
                 pending = await SyncPendingAsync(stoppingToken);
 
                 var pruned = PruneJournal(journal, pending, now);
@@ -205,8 +208,9 @@ public class RenewSubscriptionService(
             // that stops in between, as no later window covers their due dates again.
             await hybridCache.SetAsync(CacheKey, to, token: stoppingToken);
 
-            // before the renewals, which they must not wait behind
-            await VerifyPendingRenewalsAsync(pending);
+            // Before the renewals, which they must not wait behind, and only in a run that has reached the journal:
+            // while it is out of reach nothing is re-checked, and what waited is settled by the first run after.
+            await VerifyPendingRenewalsAsync(pending, stoppingToken);
 
             var renewals = interrupted.Select(entry => (Entry: entry, Interrupted: true))
                 .Concat(queued.Select(entry => (Entry: entry, Interrupted: false)))
@@ -638,8 +642,9 @@ public class RenewSubscriptionService(
     }
 
     // Re-checks the pending renewals, given as the run read them under the journal lock, and takes the settled ones
-    // out of the list.
-    private async Task VerifyPendingRenewalsAsync(List<PendingRenewal> pending)
+    // out of the list. The list is not claimed the way a journal entry is: two instances active at the same moment
+    // settle the same renewal each - two letters, or two audit entries - as they always did.
+    private async Task VerifyPendingRenewalsAsync(List<PendingRenewal> pending, CancellationToken stoppingToken)
     {
         if (pending.Count == 0)
         {
@@ -657,6 +662,12 @@ public class RenewSubscriptionService(
 
             foreach (var renewal in pending)
             {
+                // a stopping process settles no more: what is left stays in the list for the next one
+                if (stoppingToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
                 var (extended, error) = billingDown is null
                     ? await CheckExtendedAsync(renewal)
                     : (false, billingDown);
@@ -685,7 +696,7 @@ public class RenewSubscriptionService(
             {
                 var current = await LoadPendingAsync();
 
-                if (current.RemoveAll(settled.Contains) > 0)
+                if (current.RemoveAll(renewal => settled.Exists(renewal.IsSameRenewal)) > 0)
                 {
                     await SavePendingAsync(current);
                 }
@@ -781,10 +792,10 @@ public class RenewSubscriptionService(
         }
         catch (Exception ex)
         {
-            // the next run adds it before it reads the list
-            logger.ErrorRenewSubscriptionServiceTenant(renewal.TenantId, ex);
-
+            // the next run adds it before it reads the list; kept first, so that nothing can come between
             _pendingToAdd.Add(renewal);
+
+            logger.ErrorRenewSubscriptionServiceTenant(renewal.TenantId, ex);
         }
     }
 
@@ -794,9 +805,9 @@ public class RenewSubscriptionService(
     {
         var pending = await LoadPendingAsync(stoppingToken);
 
-        var changed = pending.RemoveAll(_pendingToRemove.Contains) > 0;
+        var changed = pending.RemoveAll(renewal => _pendingToRemove.Exists(renewal.IsSameRenewal)) > 0;
 
-        foreach (var renewal in _pendingToAdd.Where(renewal => !pending.Contains(renewal)))
+        foreach (var renewal in _pendingToAdd.Where(renewal => !pending.Exists(renewal.IsSameRenewal)))
         {
             pending.Add(renewal);
             changed = true;
@@ -846,8 +857,8 @@ public class RenewSubscriptionService(
     // may still be applying its payment change. A queued one has paid nothing, and every process claims an entry
     // before starting it, so it only waits out one period: the queue of a stopped process is renewed by the next run
     // rather than long after the due date. An entry of a quota this process does not know is left to one that does.
-    // Of several entries one of which a pending renewal without a quota re-checks, each is held back for as long
-    // as that pending renewal is there, as it was before the quota was recorded.
+    // An entry a pending renewal without a quota may re-check, though it could not be matched to it, is held back
+    // for as long as that pending renewal is there, as it was before the quota was recorded.
     private List<RenewalJournalEntry> GetInterruptedRenewals(List<RenewalJournalEntry> journal, List<PendingRenewal> pending, DateTime now)
     {
         return journal
@@ -861,9 +872,7 @@ public class RenewSubscriptionService(
     // An entry the pending list re-checks: a process that stops between writing the pending renewal and releasing its
     // claim leaves both, and the same renewal would be settled twice - by the pending list, and then again as an
     // interrupted one, renewed after the customer was told to renew manually. This is done before the run settles
-    // anything in the pending list, so the entry is gone by the time its pending renewal is. A pending renewal
-    // without a quota takes out an entry only when it is the tenant's one entry of that due date; with several, it
-    // cannot tell which is its own, and they are held back instead (GetInterruptedRenewals).
+    // anything in the pending list, so the entry is gone by the time its pending renewal is.
     // An entry whose quota this process does not know, once it is older than the journal's lifetime: every save
     // prolongs the whole journal, so it would never expire. Not before that: during a rollout another instance may
     // know a quota this one does not.
@@ -871,17 +880,11 @@ public class RenewSubscriptionService(
     {
         var pruned = false;
 
-        // counted before anything is taken out, so the result does not depend on the order of the entries
-        var entriesOfDate = journal
-            .GroupBy(entry => (entry.TenantId, entry.DueDate))
-            .ToDictionary(group => group.Key, group => group.Count());
-
         for (var i = journal.Count - 1; i >= 0; i--)
         {
             var entry = journal[i];
 
-            if (pending.Exists(renewal => Covers(renewal, entry)) ||
-                entriesOfDate[(entry.TenantId, entry.DueDate)] == 1 && pending.Exists(renewal => MayCover(renewal, entry)))
+            if (pending.Exists(renewal => Covers(renewal, entry)))
             {
                 logger.WarningRenewSubscriptionServiceLeftToRecheck(entry.TenantId, entry.Quota);
             }
@@ -901,16 +904,35 @@ public class RenewSubscriptionService(
         return pruned;
     }
 
-    // Whether the pending renewal is the renewal of the journal entry.
-    private static bool Covers(PendingRenewal renewal, RenewalJournalEntry entry)
+    // Whether the pending renewal is the renewal of the journal entry. One written before the quota was recorded - by
+    // a version that did not, or rewritten by one - is told by what it bought: the product and the service of the
+    // entry's quota, or of the quota the entry was to switch to.
+    private bool Covers(PendingRenewal renewal, RenewalJournalEntry entry)
     {
-        return renewal.Quota == entry.Quota && renewal.TenantId == entry.TenantId && renewal.PreviousDueDate == entry.DueDate;
+        if (renewal.TenantId != entry.TenantId || renewal.PreviousDueDate != entry.DueDate)
+        {
+            return false;
+        }
+
+        if (renewal.Quota != 0)
+        {
+            return renewal.Quota == entry.Quota;
+        }
+
+        return Bought(renewal, entry.Quota) || entry.NextQuota is { } nextQuota && Bought(renewal, nextQuota);
     }
 
-    // Whether a pending renewal written before the quota was recorded - by a version that did not, or rewritten by
-    // one - may be the renewal of the journal entry: the tenant and the due date are all there is to tell by, and
-    // another quota of the tenant can have the same date. Enough to take out the tenant's only entry of that date,
-    // and to hold back each of several.
+    private bool Bought(PendingRenewal renewal, int quota)
+    {
+        return _walletQuotas.TryGetValue(quota, out var walletQuota)
+               && walletQuota.ProductId == renewal.ProductId
+               && walletQuota.ServiceName == renewal.ServiceName;
+    }
+
+    // Whether a pending renewal without a quota may still be the renewal of a journal entry it could not be matched
+    // to by what it bought - the row may have been changed since the entry was written. The tenant and the due date
+    // are all there is left to tell by: enough to hold the entry back while the pending renewal is there, not to
+    // take it out.
     private static bool MayCover(PendingRenewal renewal, RenewalJournalEntry entry)
     {
         return renewal.Quota == 0 && renewal.TenantId == entry.TenantId && renewal.PreviousDueDate == entry.DueDate;
@@ -1090,7 +1112,15 @@ public class RenewSubscriptionService(
         DateTime PreviousDueDate,
         Guid OwnerId,
         Guid? PayerId,
-        DateTime TimedOutAt);
+        DateTime TimedOutAt)
+    {
+        // By what every version writes: a process of a version that does not record the quota rewrites the list
+        // without it, and the renewal is still the same one.
+        public bool IsSameRenewal(PendingRenewal other)
+        {
+            return other.TenantId == TenantId && other.ProductId == ProductId && other.PreviousDueDate == PreviousDueDate && other.TimedOutAt == TimedOutAt;
+        }
+    }
 
     private enum RenewalStage
     {

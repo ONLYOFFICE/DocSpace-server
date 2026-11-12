@@ -38,7 +38,7 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Renewal;
 /// process left in its journal, and one whose payment change got an answer that cannot be read.
 /// </summary>
 /// <remarks>
-/// A test cannot stop a process half-way, so the first three plant the entry such a process leaves
+/// A test cannot stop a process half-way, so all but the last plant the entry such a process leaves
 /// (<see cref="RenewalJournal"/>); the service finds it on its next run, a few seconds later, and asks billing what
 /// became of the subscription. Their subscription ends days from now, so the service never renews it by itself:
 /// whatever billing is asked or told about it comes from the planted entry, which is marked as started longer ago
@@ -145,11 +145,28 @@ public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixtu
     }
 
     // A pending renewal written before the quota was recorded - by the previous version, during a rollout - names
-    // the renewal by the tenant and the due date alone. The portal has one renewal of that date, so it is this one.
+    // the renewal by the tenant, the due date and what it bought: the product and the service of the wallet plan.
     [Fact]
     public async Task InterruptedRenewal_PendingWithoutQuotaSettlesIt_IsNotRenewedAgain()
     {
         var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await AssertPendingListSettlesAloneAsync(row, pendingQuota: 0);
+    }
+
+    // Two renewals of the portal have the same due date, and the pending renewal without a quota is one of them: it
+    // takes out the entry of the plan it bought and leaves the other, which is then closed on its own - the portal
+    // has no such row.
+    [Fact]
+    public async Task InterruptedRenewal_PendingWithoutQuotaAmongTwoOfTheDate_SettlesTheOneItBought()
+    {
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var other = StartedEntry(row) with { Quota = Plans.DocsCloudQuotaId };
+
+        await journal.PlantAsync(other, pending: null, TestContext.Current.CancellationToken);
 
         await AssertPendingListSettlesAloneAsync(row, pendingQuota: 0);
     }

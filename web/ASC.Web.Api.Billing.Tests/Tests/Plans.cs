@@ -54,6 +54,7 @@ internal static class Plans
     public const decimal AdminWalletPrice = 20m;
 
     // The DocsCloud wallet services: DocsCloud (quota -15) and its developer pack (quota -16).
+    public const int DocsCloudQuotaId = -15;
     public const int DocsCloudProductId = 1014;
     public const int DocsCloudDevPackProductId = 1015;
 }
