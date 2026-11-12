@@ -120,7 +120,7 @@ public abstract class EditorController<T>(
     [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file is saved and the stored version is returned", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The file id cannot be resolved to a storage that could accept the content")]
+    [SwaggerResponse(400, "The file id cannot be resolved to a storage that could accept the content, or the connected third-party storage that holds the file has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The content does not fit into the portal's storage quota, even with the overshoot allowed for editor saves")]
     [SwaggerResponse(403, "The caller cannot edit the file, or it is locked, in Trash, or open in somebody else's editing session")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
