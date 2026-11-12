@@ -393,12 +393,52 @@ public class FormEditorSessionsTests
     [Fact]
     public void KeepEditorRenames_VersionAlreadyCompared_IsDropped()
     {
-        var state = new FormFillingProperties { FieldsCheckedVersion = 3 };
+        var state = new FormFillingProperties { FieldsCheckedVersion = 3, LastSubmittedVersion = 3 };
 
         FormFillingReportCreator.KeepEditorRenames(state, 2, 100, _user, "tab", [Rename("fromWhom", "applicant")]).Should().BeFalse();
         FormFillingReportCreator.KeepEditorRenames(state, 3, 100, _user, "tab", [Rename("fromWhom", "applicant")]).Should().BeTrue();
 
         state.EditorFieldRenames.Should().ContainSingle().Which.OpenedVersion.Should().Be(3);
+    }
+
+    // An editor opens v3, which has responses, a forcesave writes v4 and its check takes the saved part of the session;
+    // the editor goes on renaming. v4 has no data, so v5 is compared with v3 and needs every rename since v3.
+    [Fact]
+    public void KeepEditorRenames_SessionGoesOnAfterAForcesaveIsChecked_IsKeptForTheNextSave()
+    {
+        var state = new FormFillingProperties { LastSubmittedVersion = 3 };
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 100, _user, "tab", [Rename("a", "b")]).Should().BeTrue();
+        FormFillingReportCreator.MarkEditorRenamesSaved(state, 4).Should().BeTrue();
+        FormFillingReportCreator.ConsumeEditorRenames(state, 4);
+        state.FieldsCheckedVersion = 4;
+
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 200, _user, "tab", [Rename("a", "b"), Rename("c", "d")]).Should().BeTrue();
+        FormFillingReportCreator.MarkEditorRenamesSaved(state, 5).Should().BeTrue();
+
+        var session = state.EditorFieldRenames.Should().ContainSingle().Subject;
+        (session.OpenedVersion, session.SavedVersion).Should().Be((3, (int?)5));
+        session.Renames.Select(r => (r.OldKey, r.NewKey)).Should().Equal(("a", "b"), ("c", "d"));
+    }
+
+    // The save that ends the session replaces the forcesaved v4, which is compared with v3 again: responses to v4 itself
+    // do not make the session useless.
+    [Fact]
+    public void KeepEditorRenames_ForcesavedVersionGotResponses_SessionIsKeptForTheSaveThatReplacesIt()
+    {
+        var state = new FormFillingProperties { LastSubmittedVersion = 4, FieldsCheckedVersion = 4 };
+
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 200, _user, "tab", [Rename("c", "d")], formVersion: 4).Should().BeTrue();
+    }
+
+    // Once a later version follows the forcesaved one that got responses, it is compared with that one, so a session
+    // opened before it can no longer count and is not kept.
+    [Fact]
+    public void KeepEditorRenames_LaterVersionFollowsAForcesaveWithResponses_SessionIsDropped()
+    {
+        var state = new FormFillingProperties { LastSubmittedVersion = 4, FieldsCheckedVersion = 5 };
+
+        FormFillingReportCreator.KeepEditorRenames(state, 3, 200, _user, "tab", [Rename("c", "d")], formVersion: 5).Should().BeFalse();
+        state.EditorFieldRenames.Should().BeNullOrEmpty();
     }
 
     // Reports of the largest allowed size from many sessions over many saved versions: the stored state keeps a fixed

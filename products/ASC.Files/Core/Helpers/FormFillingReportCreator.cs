@@ -1434,7 +1434,7 @@ public class FormFillingReportCreator(
                 return Task.FromResult(false);
             }
 
-            return Task.FromResult(KeepEditorRenames(state, openedVersion, sequence, userId, sessionId, renames));
+            return Task.FromResult(KeepEditorRenames(state, openedVersion, sequence, userId, sessionId, renames, form.Version));
         });
     }
 
@@ -1447,13 +1447,25 @@ public class FormFillingReportCreator(
         return sessions.Count >= MaxEditorSessionsPerUser && !sessions.Exists(r => r.SessionId == sessionId);
     }
 
+    // The next save is compared with the last version below it whose data is in a table, so a session opened before that
+    // one can never count. A session opened after it still can, even on a version compared since: one that goes on after
+    // a forcesave reports relative to the version it opened, and the save that ends it replaces the forcesaved version,
+    // which is then compared again with the versions below it. Data of the current version itself does not count.
+    internal static bool IsOutdatedEditorSession(FormFillingProperties<int> state, int openedVersion, int formVersion)
+    {
+        var linked = state.VersionLinks?.Where(l => l.Version < formVersion).Select(l => l.Version).DefaultIfEmpty().Max() ?? 0;
+        var submitted = state.LastSubmittedVersion < formVersion ? state.LastSubmittedVersion : 0;
+
+        return openedVersion < state.FieldsCheckedVersion && openedVersion < Math.Max(linked, submitted);
+    }
+
     // Each session keeps its place in the list, which is the order the sessions began to report in: the renames of a
     // session opened on top of another's are joined after them. A report without a session id, or with an empty one,
     // stands for all the sessions of the user on the version, as the editors before the session id did.
-    internal static bool KeepEditorRenames(FormFillingProperties<int> state, int openedVersion, long sequence, Guid userId, string sessionId, List<FormFieldRename> renames)
+    internal static bool KeepEditorRenames(FormFillingProperties<int> state, int openedVersion, long sequence, Guid userId, string sessionId, List<FormFieldRename> renames,
+        int formVersion = int.MaxValue)
     {
-        // A version compared already took the sessions opened before it; a report on one of them would be kept forever.
-        if (openedVersion < state.FieldsCheckedVersion || IsEditorSessionLimitReached(state, openedVersion, userId, sessionId))
+        if (IsOutdatedEditorSession(state, openedVersion, formVersion) || IsEditorSessionLimitReached(state, openedVersion, userId, sessionId))
         {
             return false;
         }
@@ -1628,14 +1640,17 @@ public class FormFillingReportCreator(
         }
     }
 
-    internal const int VersionStateSaveAttempts = 5;
+    // Each attempt may wait the whole lock timeout (30 s at least) while the table and version locks are held, and every
+    // writer of the form waits behind them; one retry rides out a burst of submissions, more would only lengthen the wait.
+    internal const int VersionStateSaveAttempts = 2;
+    internal static readonly TimeSpan VersionStateSaveDelay = TimeSpan.FromSeconds(1);
 
     // The table took the change already (on MySQL its ALTER commits at once), so the state is saved before the table lock
     // is let go: the next writer of the table must find the columns and the links in step. A passing fault, such as the
     // lock of the submissions taken too long, is tried again; the writers waiting meanwhile are completed by the gap fill.
     private Task SaveVersionStateInStepAsync(int originalFormId, FormFillingProperties<int> state)
     {
-        return RetryTransientAsync(() => SaveVersionStateAsync(originalFormId, state), VersionStateSaveAttempts, TimeSpan.FromSeconds(1));
+        return RetryTransientAsync(() => SaveVersionStateAsync(originalFormId, state), VersionStateSaveAttempts, VersionStateSaveDelay);
     }
 
     internal static async Task RetryTransientAsync(Func<Task> action, int attempts, TimeSpan delay)

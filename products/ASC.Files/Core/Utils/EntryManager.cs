@@ -1710,20 +1710,29 @@ public class EntryManager(IDaoFactory daoFactory,
         // The file is saved already: a failure here must not fail the save the document server reported.
         if (file.IsPdf)
         {
-            try
-            {
-                await OnFormVersionChangedAsync(file);
-            }
-            catch (Exception e)
-            {
-                logger.WarnFormVersionStateNotUpdated(e, file.Id.ToString(), file.Version);
-            }
+            await OnFormVersionChangedAsync(file);
         }
 
         return file;
     }
 
+    // After the save or the restore has taken effect: a busy lock must not fail a version already written, so a passing
+    // fault is tried once more and a failure is only logged. Left undone, the drafts of the earlier version stay linked
+    // and the fillers are not told the form changed; new drafts still take the version of the file itself.
     private async Task OnFormVersionChangedAsync<T>(File<T> file)
+    {
+        try
+        {
+            await FormFillingReportCreator.RetryTransientAsync(() => UpdateFormVersionStateAsync(file),
+                FormFillingReportCreator.VersionStateSaveAttempts, FormFillingReportCreator.VersionStateSaveDelay);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorFormVersionStateNotUpdated(e, file.Id.ToString(), file.Version);
+        }
+    }
+
+    private async Task UpdateFormVersionStateAsync<T>(File<T> file)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var properties = await fileDao.GetProperties(file.Id);
@@ -2000,9 +2009,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (newFile.IsPdf)
             {
-                // reverting a form is a content change like any editor save: without this the stored
-                // OriginalFormVersion keeps pointing at the pre-restore version and every later draft
-                // is rejected as obsolete on submit
+                // Reverting a form is a content change like any editor save: the drafts of the earlier version are let go
+                // and the fields of the restored version are checked against the table.
                 await OnFormVersionChangedAsync(newFile);
             }
 

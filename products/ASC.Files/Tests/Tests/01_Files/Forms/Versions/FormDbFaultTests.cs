@@ -117,19 +117,31 @@ public class FormDbFaultTests
     }
 
     [Fact]
-    public async Task RetryTransientAsync_LockOfTheSubmissionsBusyTwice_SavesOnTheThirdTry()
+    public async Task RetryTransientAsync_LockOfTheSubmissionsBusyOnce_SavesOnTheSecondTry()
     {
         var calls = 0;
 
         await FormFillingReportCreator.RetryTransientAsync(() =>
         {
             calls++;
-            return calls < 3
+            return calls < 2
                 ? throw new DistributedLockException(LockStatus.NotAcquired, "fillform", 30000)
                 : Task.CompletedTask;
         }, FormFillingReportCreator.VersionStateSaveAttempts, TimeSpan.Zero);
 
-        calls.Should().Be(3);
+        calls.Should().Be(2);
+    }
+
+    // The save is retried while the table and version locks are held, and each attempt may wait the whole lock timeout,
+    // which the lock providers never set below 30 s: the writers of the form waiting behind must not wait minutes.
+    [Fact]
+    public void VersionStateSave_WorstCaseWaitUnderTheLocks_StaysAboutOneMinute()
+    {
+        var lockTimeout = TimeSpan.FromSeconds(30);
+        var delays = Enumerable.Range(1, FormFillingReportCreator.VersionStateSaveAttempts - 1)
+            .Aggregate(TimeSpan.Zero, (sum, attempt) => sum + FormFillingReportCreator.VersionStateSaveDelay * attempt);
+
+        (lockTimeout * FormFillingReportCreator.VersionStateSaveAttempts + delays).Should().BeLessThanOrEqualTo(TimeSpan.FromSeconds(65));
     }
 
     [Fact]

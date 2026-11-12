@@ -520,7 +520,6 @@ public class FileEntryDtoHelper(
         return builtinFormsDatabaseClient.IsEnabled() && FormFillingReportCreator.HasResponsesInVersionTable(formFilling, currentVersion);
     }
 
-
     private async Task<bool> FormHasExternalDbTableAsync(string tableName)
     {
         if (string.IsNullOrEmpty(tableName) || !externalDatabaseClient.IsEnabled())

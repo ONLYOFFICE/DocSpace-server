@@ -334,7 +334,8 @@ public class FormsDbProvisioningService(
 
         await ExecuteAsync(connection, $"DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{role}') THEN " +
             $"CREATE ROLE \"{role}\" LOGIN PASSWORD '{escapedPassword}'; END IF; END $$");
-        await ExecuteAsync(connection, $"ALTER ROLE \"{role}\" WITH PASSWORD '{escapedPassword}'");
+        // LOGIN too: a role that could not be dropped was left NOLOGIN and would never sign in again.
+        await ExecuteAsync(connection, $"ALTER ROLE \"{role}\" WITH LOGIN PASSWORD '{escapedPassword}'");
     }
 
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
