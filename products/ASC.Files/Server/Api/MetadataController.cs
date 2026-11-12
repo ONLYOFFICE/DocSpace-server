@@ -335,7 +335,7 @@ public class MetadataController(
     /// Returns the running cascade pass of a folder, or the most recent one if none is running. A pass starts with
     /// `PUT api/2.0/files/metadata/folder/{folderId}/templates` or
     /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`. Requires read access to the folder. Other
-    /// callers are refused. The call is read-only. This is the call to poll. Repeat it until `isCompleted` is true. The
+    /// callers get 403. The call is read-only. This is the call to poll. Repeat it until `isCompleted` is true. The
     /// `templateIds` field names the templates of the pass. The `progress` field is the share of the subtree done. A
     /// failed pass has an `error`. A completed pass without an error has written all its templates and values. If the
     /// folder has no pass to report, the response is a completed operation with empty `templateIds`. If no folder or room
@@ -345,6 +345,7 @@ public class MetadataController(
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/progress</path>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "Cascade operation status; a completed operation without an ID when the folder has no cascade to report", typeof(MetadataOperationDto))]
+    [SwaggerResponse(403, "The caller cannot read the folder")]
     [SwaggerResponse(404, "No folder or room with this identifier exists")]
     [HttpGet("metadata/folder/{folderId:int}/templates/progress")]
     public async Task<MetadataOperationDto> GetCascadeProgress(FolderIdRequestDto<int> inDto)

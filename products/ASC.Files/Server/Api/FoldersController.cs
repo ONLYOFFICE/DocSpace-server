@@ -421,8 +421,7 @@ public abstract class FoldersController<T>(
     /// body, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`
     /// out of range, or a negative `startIndex`. An invalid metadata filter also returns 400. It also returns 400 if `roomId` is not a
     /// number but the folder ID is. It also returns 403 for a folder in the trash. If the folder does not exist, the
-    /// call returns 404. For an anonymous caller, it returns 403 instead. If a connected storage cannot deliver the
-    /// folder, the call returns 500.
+    /// call returns 404. For an anonymous caller, it returns 403 instead.
     /// </remarks>
     /// <summary>
     /// Get a folder by ID
@@ -434,7 +433,6 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the `roomId` is not a number while the folder id is one")]
     [SwaggerResponse(403, "The caller may not read this folder, the folder lies inside Trash, or an anonymous caller asks for a folder that does not exist")]
     [SwaggerResponse(404, "The folder does not exist")]
-    [SwaggerResponse(500, "The folder lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderByFolderId(GetFolderRequestDto<T> inDto)
@@ -721,8 +719,9 @@ public abstract class FoldersController<T>(
     /// right to manage the links of the folder. Other callers get 403. The room manager has this right, but a user
     /// with read access does not. A caller who is not signed in and has no external link gets 401. The first call
     /// can change data. Later calls are read-only and return the same link. If the primary link was revoked, the call
-    /// returns 404 and creates no new one. If the folder does not exist, the call also returns 404. To list all
-    /// external links of the folder, use `GET api/2.0/files/folder/{id}/links`.
+    /// returns 404 and creates no new one. If the folder does not exist, the call also returns 404. If a string `id`
+    /// points to a storage account that is not connected, the call returns 400. To list all external links of the
+    /// folder, use `GET api/2.0/files/folder/{id}/links`.
     /// </remarks>
     /// <summary>
     /// Get the folder primary external link
@@ -731,7 +730,7 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
-    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder")]
     [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
@@ -798,10 +797,11 @@ public abstract class FoldersController<T>(
 
     /// <remarks>
     /// Returns the external links of a folder or a room, including the primary link. The call returns at most the
-    /// first 100 links, without paging. Requires access to the folder. Other callers are refused. The call is
-    /// read-only. A user who can read the folder but cannot manage its links gets an empty list. So an empty list
-    /// does not prove that the folder has no links. If the folder does not exist, the call returns 404. To change or
-    /// revoke a link, pass its ID to `PUT api/2.0/files/folder/{id}/links`. To get only the primary link, use
+    /// first 100 links, without paging. Requires read access if the folder is a room. Other callers get 403. A caller
+    /// who can read the room but may not see its links gets an empty list. For other folders, a caller who cannot
+    /// manage the links gets an empty list instead of 403. So an empty list does not prove that the folder has no
+    /// links. The call is read-only. If the folder does not exist, the call returns 404. To change or revoke a link,
+    /// pass its ID to `PUT api/2.0/files/folder/{id}/links`. To get only the primary link, use
     /// `GET api/2.0/files/folder/{id}/link`.
     /// </remarks>
     /// <summary>
@@ -810,7 +810,8 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The external links of the folder the caller may manage", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(200, "The external links of the folder, or an empty list when the caller may not see them", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(403, "The folder is a room that the caller cannot read")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetFolderLinks(GetFolderLinksRequestDto<T> inDto)
@@ -882,8 +883,6 @@ public class FoldersControllerCommon(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section with one page of the entries the caller marked as favorite", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"Favorites\" section")]
-    [SwaggerResponse(404, "The \"Favorites\" section could not be resolved for this account")]
     [HttpGet("@favorites")]
     public async Task<FolderContentDto<int>> GetFavoritesFolder(GetFavoritesFolderRequestDto inDto)
     {
@@ -908,7 +907,6 @@ public class FoldersControllerCommon(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"My documents\" section with one page of its contents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"My documents\" section")]
     [SwaggerResponse(404, "This account has no personal section")]
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolder(GetMyTrashFolderRequestDto inDto)
@@ -957,8 +955,6 @@ public class FoldersControllerCommon(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section with one page of the files the caller opened lately", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, `searchArea` is `PrivateRooms`, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"Recent\" section")]
-    [SwaggerResponse(404, "The \"Recent\" section could not be resolved for this account")]
     [HttpGet("@recent")]
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolder(GetRecentFolderRequestDto inDto)
@@ -971,13 +967,15 @@ public class FoldersControllerCommon(
     /// <remarks>
     /// Returns every top-level section that the caller can see, each with its first page of content. Sections come
     /// in this order: "Favorites", "Recent", "Shared with me", "My documents", "Trash", "Rooms", "Forms", and
-    /// "Archive". While AI access is on for the portal, the AI agents and AI hub sections follow. The list has
+    /// "Archive". While the private rooms app is on, "Private rooms" comes before "Archive". While AI access is on for
+    /// the portal, the AI agents and AI hub sections follow. The list has
     /// "Recent" only after `PUT api/2.0/files/displayrecent` turns it on. It skips "My documents" if the account has
     /// none, which is usual for a guest. To skip "Trash", set `withoutTrash` to `true`. Any signed-in user can call
     /// it. The call is read-only, but a valid `sortBy` becomes the account's default order. It does not clear
     /// new-item marks. The filters, `count`, and `startIndex` apply to each section. So `count=1` returns one entry
     /// per section, and each section has its own `total`. This is the most expensive listing of the module. When you
-    /// need one section, read it directly, for example with `GET api/2.0/files/@my`.
+    /// need one section, read it directly, for example with `GET api/2.0/files/@my`. The call returns 400 if `count`
+    /// is outside its allowed range.
     /// </remarks>
     /// <summary>Get filtered sections</summary>
     /// <path>api/2.0/files/@root</path>
@@ -985,8 +983,6 @@ public class FoldersControllerCommon(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The sections available to the caller, each with one page of its content", typeof(IAsyncEnumerable<FolderContentDto<int>>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
-    [SwaggerResponse(403, "The caller is not allowed to read one of the sections")]
-    [SwaggerResponse(404, "One of the sections could not be resolved for this account")]
     [HttpGet("@root")]
     public async IAsyncEnumerable<FolderContentDto<int>> GetRootFolders(GetRootFolderRequestDto inDto)
     {
@@ -1059,7 +1055,6 @@ public class FoldersControllerCommon(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Trash\" section with one page of the entries the caller deleted", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"Trash\" section")]
     [SwaggerResponse(404, "This account has no \"Trash\" section")]
     [HttpGet("@trash")]
     public async Task<FolderContentDto<int>> GetTrashFolder(GetMyTrashFolderRequestDto inDto)
@@ -1082,8 +1077,6 @@ public class FoldersControllerCommon(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Forms\" section with one page of the form-filling rooms available to the caller", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"Forms\" section")]
-    [SwaggerResponse(404, "The \"Forms\" section could not be resolved for this account")]
     [HttpGet("@forms")]
     public async Task<FolderContentDto<int>> GetFormsFolder(GetCommonFolderRequestDto inDto)
     {

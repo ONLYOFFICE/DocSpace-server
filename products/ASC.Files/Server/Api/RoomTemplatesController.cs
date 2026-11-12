@@ -163,8 +163,8 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// user who can create rooms can use the template with `POST api/2.0/files/rooms/fromtemplate`. If `false`, only
     /// the owner of the template and the users it is shared with can use it. Requires read access to the template.
     /// Other callers get 403, even a DocSpace admin. The user types user and guest always get 403. The call is
-    /// read-only. It returns 404 if `id` is an ordinary room, a deleted template, or unknown. To change the setting,
-    /// use `PUT api/2.0/files/roomtemplate/public`.
+    /// read-only. It returns 404 if `id` is an ordinary room, a deleted template, or unknown. If `id` is less than 1,
+    /// the call returns 400. To change the setting, use `PUT api/2.0/files/roomtemplate/public`.
     /// </remarks>
     /// <summary>Get room template public access</summary>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
@@ -189,7 +189,8 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// users and groups of the template. This includes the users from `share` at creation. So you cannot add one
     /// recipient with this call. Only the owner of the template can call it. Other callers get 403, even the portal
     /// owner. The call changes data and returns nothing. You can repeat it with the same body. The call returns 404 if
-    /// `id` is an ordinary room or unknown. To read the setting, use `GET api/2.0/files/roomtemplate/{id}/public`.
+    /// `id` is an ordinary room or unknown. It returns 400 if the body has no `id` or `id` is less than 1. To read the
+    /// setting, use `GET api/2.0/files/roomtemplate/{id}/public`.
     /// </remarks>
     /// <summary>Set room template public access</summary>
     /// <path>api/2.0/files/roomtemplate/public</path>

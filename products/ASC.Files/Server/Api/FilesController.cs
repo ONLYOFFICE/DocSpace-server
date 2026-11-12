@@ -171,15 +171,17 @@ public abstract class FilesController<T>(
 {
     /// <remarks>
     /// Closes or reopens a revision group in the version history of a file. It returns every stored version of the
-    /// file, newest first. With `continueVersion=false`, the call stores the content of the version again as a new
-    /// version. That version starts a new revision group, so later edits no longer extend the previous one. With
-    /// `continueVersion=true`, the call merges the last revision group into the group before it. Then the next save
-    /// continues that revision. A file with one group stays as it is. A `version` of 0 means the current version.
-    /// Requires the right to change the version history, which a room manager and a content creator have. Other
-    /// callers get 403, including an editor. The call changes data. Do not repeat it. Each call changes the history
-    /// again. If the file or the version does not exist, the call returns 404. If completing the current version
-    /// exceeds the room or user storage quota, the call returns 402. The call refuses a locked file and a file that
-    /// someone is editing. It also refuses a file in the trash or a third-party storage.
+    /// file, newest first. A `version` of 0 means the current version. With `continueVersion=false`, the call copies
+    /// the current version as a new version. That version starts a new revision group, so later edits no longer
+    /// extend the previous one. For an older `version`, or while someone edits the file, it changes nothing. With
+    /// `continueVersion=true`, the call merges the revision group after `version` into the group of `version`. If no
+    /// group follows it, nothing changes. Requires the right to change the version history, which a room manager and
+    /// a content creator have. Other callers get 403, including an editor. The call changes data. Do not repeat it.
+    /// With `continueVersion=false`, a repeat adds another version only if `version` is 0. With
+    /// `continueVersion=true`, each call merges the next revision group, if any, into the group of `version`. If the
+    /// body has no `version`, the call returns 400. If the file or the version does not exist, the call returns 404.
+    /// If copying the current version exceeds the room or user storage quota, the call returns 402. The call refuses a
+    /// file that another user locked. It also refuses a file in the trash or a third-party storage.
     /// </remarks>
     /// <summary>
     /// Change version history
@@ -192,7 +194,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(402, "Completing the current version needs more space than the room or user storage quota leaves")]
     [SwaggerResponse(403, "The caller may not change the version history of the file, or the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
-    [SwaggerResponse(500, "When the current version is completed, the file is encrypted, another update of it is in progress, or storing the new version fails")]
     [HttpPut("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> ChangeVersionHistory(ChangeHistoryRequestDto<T> inDto)
     {
@@ -208,7 +209,7 @@ public abstract class FilesController<T>(
     /// is 100 or the list is empty. Read the converted file from `file` and the reason of a failure from `error`. The
     /// call returns a finished entry once and then deletes it. It deletes the entry of a stopped conversion a few
     /// minutes later. So an empty list means the result was already returned, the conversion never started, or no
-    /// file has this id.
+    /// file has this id. If `fileId` is neither a number nor the id of a third-party file, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get conversion status
@@ -259,8 +260,7 @@ public abstract class FilesController<T>(
     /// mark that the editors write into their forms. So an ordinary PDF and a PDF form from other software return
     /// `false`. A file without the PDF extension returns `false` without a read. Form filling can start only for a
     /// file that returns `true`. To read the state of the filling, use `GET api/2.0/files/file/{fileId}/formroles`.
-    /// If no file has this id, the call returns 404. For a caller who may only fill forms, a form whose filling has
-    /// not started returns 500.
+    /// If no file has this id, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Check the PDF file
@@ -270,7 +270,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "True when the file is a PDF form made in the editors, false otherwise", typeof(bool))]
     [SwaggerResponse(403, "The caller cannot read the file")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
-    [SwaggerResponse(500, "The file is a PDF form in a form-filling room whose filling has not started, and the caller may only fill forms there")]
     [HttpGet("file/{fileId}/isformpdf")]
     public async Task<bool> isFormPDF(FileIdRequestDto<T> inDto)
     {
@@ -303,7 +302,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
     [SwaggerResponse(415, "The installation filters uploads and does not accept the format of the new title")]
-    [SwaggerResponse(500, "The document service fails to convert the content, `destFolderId` is a fraction or outside the 32-bit range, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
     [HttpPost("file/{fileId}/copyas")]
     public async Task<FileEntryBaseDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
@@ -325,10 +323,9 @@ public abstract class FilesController<T>(
     /// right to create files in the folder. Other callers get 403. The call changes data. Do not repeat it. Each call
     /// creates another file. The call returns 403 in the Rooms root, the archive, and the template sections, even for
     /// a DocSpace admin. It also returns 403 for a missing or unreadable template, or no gallery form of this format.
-    /// If `templateId` is a string that matches no third-party file, the call
-    /// returns 404. If the new file exceeds the storage quota, the call returns 402. If the form gallery does not
-    /// know `formId`, the call returns 500. To create the file in your own section, use
-    /// `POST api/2.0/files/@my/file`.
+    /// If `templateId` is a string that matches no third-party file, the call returns 404. If the new file exceeds
+    /// the storage quota, the call returns 402. The call returns 400 if `title` is missing, empty, or too long. To
+    /// create the file in your own section, use `POST api/2.0/files/@my/file`.
     /// </remarks>
     /// <summary>
     /// Create a file
@@ -341,7 +338,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, the form gallery has no file of the title's format, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage")]
-    [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the folder id is 0 and the caller is a guest without My documents")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -412,9 +408,10 @@ public abstract class FilesController<T>(
     /// the call moves the file to the trash, where you can restore it. With `immediately=true`, the call deletes the
     /// file for good. It always deletes for good a file in the trash, an encrypted file, or a third-party file.
     /// Requires the right to delete the file. Other callers get 403, including an editor. A room manager has this
-    /// right, and a content creator has it for their own files. The call queues work. Do not repeat it. The file is
-    /// still there when the response arrives. Repeat `GET api/2.0/files/fileops` until the operation has `finished`
-    /// set to true. Then read its `error` to learn if the deletion failed. With `deleteAfter=true`,
+    /// right, and a content creator has it for their own files. The call queues work. Do not repeat it. A repeat
+    /// after the move to the trash deletes the file for good. The file is still there when the response arrives.
+    /// Repeat `GET api/2.0/files/fileops` until the operation has `finished` set to true. Then read its `error` to
+    /// learn if the deletion failed. With `deleteAfter=true`,
     /// `GET api/2.0/files/fileops` stops listing the operation when it ends. So you cannot read its result. With
     /// `returnSingleOperation=true`, the call returns only this deletion. If the file is locked by another user or
     /// open for editing, the call returns 403. If no file has this id, the call returns 404. To delete several items,
@@ -448,8 +445,8 @@ public abstract class FilesController<T>(
     /// call it without signing in. The session id in `fillingSessionId` is the only secret. The call is read-only.
     /// The portal keeps the result only for a limited time after the filling ends. So request it soon after the
     /// document service reports the session id. The call returns 404 for a session that never completed, has expired,
-    /// or has a wrong format. If `fillingSessionId` is missing, the call returns 400. If the original form was
-    /// deleted, the call returns 500. To read the filled copy, use `GET api/2.0/files/file/{fileId}`.
+    /// or has a wrong format. If `fillingSessionId` is missing, the call returns 400. To read the filled copy, use
+    /// `GET api/2.0/files/file/{fileId}`.
     /// </remarks>
     /// <summary>
     /// Get form-filling result
@@ -460,7 +457,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The result of the completed form-filling session", typeof(FillingFormResultDto<int>))]
     [SwaggerResponse(400, "The `fillingSessionId` is missing or empty")]
     [SwaggerResponse(404, "No completed form-filling session with this identifier is remembered")]
-    [SwaggerResponse(500, "The original form of the filled copy has been deleted")]
     [AllowAnonymous]
     [HttpGet("file/fillresult")]
     public async Task<FillingFormResultDto<T>> GetFillResult(GetFillResultRequestDto inDto)
@@ -628,8 +624,9 @@ public abstract class FilesController<T>(
     /// the right to read the file history. Other callers get 403, including a DocSpace admin with only read access
     /// and an anonymous caller. In a room, a room manager and a content creator have this right. In a personal
     /// section, editing access is enough. The call is read-only. If no file has this id, the call also returns 403.
-    /// To restore a version, use `POST api/2.0/files/file/{fileId}/restoreversion`. To close or reopen a revision
-    /// group, use `PUT api/2.0/files/file/{fileId}/history`.
+    /// If `fileId` is neither a number nor the id of a third-party file, the call returns 404. To restore a version,
+    /// use `POST api/2.0/files/file/{fileId}/restoreversion`. To close or reopen a revision group, use
+    /// `PUT api/2.0/files/file/{fileId}/history`.
     /// </remarks>
     /// <summary>
     /// Get file versions
@@ -707,7 +704,8 @@ public abstract class FilesController<T>(
     /// get 403, including an anonymous caller. With `url`, the call also requires editing access. The call changes
     /// data. Do not repeat it. Each call adds another version. The call deletes the links to drafts of the file. It
     /// marks the file as new for the other users who can read it. If `version` is missing or is the current version,
-    /// the call returns 400. If the file or the version does not exist, the call returns 404. If the content exceeds
+    /// the call returns 400. Without `url`, a `version` above the current one copies the current version. If the file
+    /// or the version does not exist, the call returns 404. If the content exceeds
     /// the storage quota, the call returns 402. The call refuses a locked or encrypted file and a file that someone
     /// is editing. It also refuses a file in the trash or a third-party storage.
     /// </remarks>
@@ -724,7 +722,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(402, "The restored content does not fit into the storage quota")]
     [SwaggerResponse(403, "The caller may not change the version history of the file, the file is locked by somebody else, or, with `url`, may not edit the file or the file is being edited")]
     [SwaggerResponse(404, "Without `url`, the file id or the requested version resolves to nothing")]
-    [SwaggerResponse(500, "The file is being edited, another restore of it is in progress, or storing the new version fails; with `url`, also when the file or the version does not exist or the address cannot be fetched")]
     [AllowAnonymous]
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
@@ -738,11 +735,12 @@ public abstract class FilesController<T>(
     /// `createNewIfExist=true`, the call creates a new file beside the source. With `false`, the default, it replaces
     /// the converted file that already exists. With `sync=true`, the call converts within the request and returns the
     /// finished result. Use it only for small documents. Requires the right to convert the file, which a room manager
-    /// and a content creator have. Other callers are refused. Without `sync`, the call queues work. Do not repeat it.
-    /// Each call converts the file again. After this call, repeat `GET api/2.0/files/file/{fileId}/checkconversion`
-    /// until `progress` is 100. Then read the converted file from `file`. If the format needs no conversion, the call
-    /// queues nothing and returns the current status. If `outputType` names a format that the file cannot convert to,
-    /// the call returns 400. To save a PDF copy in another folder, use `POST api/2.0/files/file/{id}/saveaspdf`.
+    /// and a content creator have. Other callers get 403. Without `sync`, the call queues work. While a queued
+    /// conversion runs, a repeated call without `sync` queues nothing. Otherwise, each call converts the file again.
+    /// After this call, repeat `GET api/2.0/files/file/{fileId}/checkconversion` until `progress` is 100. Then read
+    /// the converted file from `file`. If the format needs no conversion, the call queues nothing and returns the
+    /// current status. If `outputType` names a format that the file cannot convert to, the call returns 400. To save a
+    /// PDF copy in another folder, use `POST api/2.0/files/file/{id}/saveaspdf`.
     /// </remarks>
     /// <summary>
     /// Start file conversion
@@ -752,6 +750,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The conversion entry to poll, or the finished result when the conversion is synchronous", typeof(IAsyncEnumerable<ConversationResultDto>))]
     [SwaggerResponse(400, "`outputType` names a format the portal cannot convert this file to")]
+    [SwaggerResponse(403, "The caller may not convert the file")]
     [HttpPut("file/{fileId}/checkconversion")]
     public IAsyncEnumerable<ConversationResultDto> StartFileConversion(StartConversionRequestDto<T> inDto)
     {
@@ -793,10 +792,13 @@ public abstract class FilesController<T>(
     /// including a DocSpace admin who is not a room member. Renaming the file of another user also requires the room
     /// manager role. A content creator can rename their own files. An anonymous caller without an external link
     /// gets 401. The call changes data. You can repeat a rename with the same body, but each restore adds a version.
-    /// A rename marks the file as new for the other users who can read it. If `lastVersion` is the current version,
-    /// the call returns 400. If the file or `lastVersion` does not exist, the call returns 404. For a caller who may
-    /// only fill forms, a form whose filling has not started also returns 404. If the restore exceeds the room or
-    /// user storage quota, the call returns 402. The call refuses a file that another user locked.
+    /// In Dropbox, SharePoint, and WebDAV storages, a rename changes the file id. A repeat then needs the new id from
+    /// the response. A rename marks the file as new for the other users who can read it. If `lastVersion` is the
+    /// current version, the call returns 400. A `lastVersion` above the current one copies the current version. If
+    /// the file or `lastVersion` does not exist, the call returns 404. For
+    /// a caller who may only fill forms, a form whose filling has not started also returns 404. If the restore
+    /// exceeds the room or user storage quota, the call returns 402. The call refuses a file that another user
+    /// locked.
     /// </remarks>
     /// <summary>
     /// Update a file
@@ -811,7 +813,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(402, "Restoring `lastVersion` needs more space than the room or user storage quota leaves")]
     [SwaggerResponse(403, "The caller may not read or rename the file or change its version, or the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id, or `lastVersion` of it, resolves to nothing, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
-    [SwaggerResponse(500, "A third-party file is renamed while it is being edited, or restoring `lastVersion` fails because the file is being edited, another update of it is in progress or the new version cannot be stored")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFile(UpdateFileRequestDto<T> inDto)
@@ -852,8 +853,8 @@ public abstract class FilesController<T>(
     /// ID. Until then, `GET api/2.0/files/file/{id}/link` returns 404. The call returns 403 if links to this file
     /// cannot have this access level, or the link limit is reached. It also returns 403 if the portal allows external
     /// links only in public rooms. It returns 400 if the password does not meet the password policy or
-    /// `expirationDate` is over 10 years ahead. The address is in `sharedTo.shareLink`. To change the link, use
-    /// `PUT api/2.0/files/file/{id}/links`.
+    /// `expirationDate` is over 10 years ahead. If no file has this id, the call returns 404. The address is in
+    /// `sharedTo.shareLink`. To change the link, use `PUT api/2.0/files/file/{id}/links`.
     /// </remarks>
     /// <summary>
     /// Create the file primary external link
@@ -887,8 +888,8 @@ public abstract class FilesController<T>(
     /// returns the link of the room. Requires the right to share the file, which its author and a room manager have.
     /// Other callers get 403. An anonymous caller gets 401. The call changes data only on the first call, and later
     /// calls return the same link. If the primary link was revoked, the call returns 404 and does not create it
-    /// again. The address is in `sharedTo.shareLink`. To list all links of the file, use
-    /// `GET api/2.0/files/file/{id}/links`.
+    /// again. The address is in `sharedTo.shareLink`. If `count` is outside its allowed range, the call returns 400.
+    /// To list all links of the file, use `GET api/2.0/files/file/{id}/links`.
     /// </remarks>
     /// <summary>
     /// Get the file primary external link
@@ -915,8 +916,8 @@ public abstract class FilesController<T>(
     /// cannot share the file gets an empty list. The call is read-only. The response headers carry the total number
     /// of links, not the body. A file without links returns an empty list. The list includes the primary link after
     /// `GET api/2.0/files/file/{id}/link` creates it. For a PDF form in a form-filling room, the call adds the link
-    /// of the room at the end. If no file has this id, the call returns 404. To change or revoke a link, use
-    /// `PUT api/2.0/files/file/{id}/links` with its id.
+    /// of the room at the end. If no file has this id, the call returns 404. If `count` is outside its allowed range,
+    /// the call returns 400. To change or revoke a link, use `PUT api/2.0/files/file/{id}/links` with its id.
     /// </remarks>
     /// <summary>
     /// Get file external links
@@ -951,11 +952,11 @@ public abstract class FilesController<T>(
     /// `access` of `None` revokes the link, and the call returns an empty body. A later read does not create a
     /// revoked primary link again. With `primary=true`, the link becomes the primary link of the file. For a PDF form
     /// in a form-filling room, `FillForms` and `None` change the link of the room. Requires the right to share the
-    /// file. Other callers get 403. The call changes data. You can repeat it with the id of an existing link. With a
-    /// new or empty `linkId`, each call creates another link. The call returns 403 if links to this file cannot have
-    /// this access level, or the link limit is reached. It also returns 403 if the portal settings for external links
-    /// forbid the change. It returns 400 if the password does not meet the password policy or `expirationDate` is
-    /// over 10 years ahead. If no file has this id, the call returns 404.
+    /// file. Other callers get 403. The call changes data. Do not repeat a call with an empty `linkId`. Each such
+    /// call creates another link. With any other `linkId`, you can repeat it with the same body. The call returns
+    /// 403 if links to this file cannot have this access level, or the link limit is reached. It also returns 403 if
+    /// the portal settings for external links forbid the change. It returns 400 if the password does not meet the
+    /// password policy or `expirationDate` is over 10 years ahead. If no file has this id, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Set a file external link
@@ -1048,11 +1049,12 @@ public abstract class FilesController<T>(
     /// file, and the source stays as it is. The call adds `.pdf` to `title`. An empty `title` uses the name of the
     /// source. The document service converts the file within the request, so the call takes as long as the
     /// conversion. Requires read access to the source file and the right to create files in the destination folder.
-    /// Other callers get 403. The call changes data. Do not repeat it. Each call adds another PDF with a unique
-    /// title. The call marks the result as new in the room. It saves the result as a PDF form if the portal
-    /// recognizes the source as a form. If the file or the folder does not exist, the call returns 404. If the PDF
-    /// exceeds the storage quota, the call returns 402. If the conversion or the download of the result fails, the
-    /// call returns 500. To convert the file itself, use `PUT api/2.0/files/file/{fileId}/checkconversion`.
+    /// Other callers get 403. The call changes data. Do not repeat it. Each call adds another PDF with the same
+    /// title. In a third-party storage, each PDF gets a unique title instead. The call marks the result as new in the
+    /// room. It saves the result as a PDF form if the portal recognizes the source as a form. If the body has no
+    /// `folderId` or `title`, the call returns 400. If the file or the folder does not exist, the call returns 404.
+    /// If the PDF exceeds the storage quota, the call returns 402. To convert the file itself, use
+    /// `PUT api/2.0/files/file/{fileId}/checkconversion`.
     /// </remarks>
     /// <summary>
     /// Save a file as PDF
@@ -1065,7 +1067,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(402, "The PDF does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller cannot read the source file or may not create files in the destination folder")]
     [SwaggerResponse(404, "The source file or the destination folder does not exist")]
-    [SwaggerResponse(500, "The document service fails to convert the file to PDF, or the converted file cannot be downloaded")]
     [HttpPost("file/{id}/saveaspdf")]
     public async Task<FileDto<T>> SaveFileAsPdf(SaveAsPdfRequestDto<T> inDto)
     {
@@ -1077,12 +1078,13 @@ public abstract class FilesController<T>(
     /// records the caller as the user who started it. It notifies the users in the roles, except the caller. Members
     /// who may only fill forms can then see the form. Each role has a name, an account, and a sequence number that
     /// sets the turn. Roles with the same number are filled in parallel, and different numbers make a queue. The call
-    /// replaces the whole set of roles. An empty role list resets the filling and deletes the assignment. The call
+    /// replaces the whole set of roles. In a virtual data room, an empty role list resets a stopped filling and
+    /// deletes the assignment. Elsewhere, or before a stop, an empty list returns 403. The call
     /// reads the form id only from `formId` in the body. Send the same value in the route. The form must be a PDF in
     /// a room. Requires the right to start or reset the filling, which a room manager and a content creator have.
-    /// Other callers get 403. The call changes data. Do not repeat it. Each call notifies the users in the roles
-    /// again. If no file has the `formId`, the call returns 500. If `roles` is missing, the call returns 400. To read
-    /// the stored roles, use `GET api/2.0/files/file/{fileId}/formroles`.
+    /// Other callers get 403. The call changes data. Do not repeat it. In a virtual data room, a repeated call
+    /// returns 403. In a form-filling room, each call notifies the users in the roles again. If `roles` is missing,
+    /// the call returns 400. To read the stored roles, use `GET api/2.0/files/file/{fileId}/formroles`.
     /// </remarks>
     /// <summary>
     /// Save form role mapping
@@ -1092,7 +1094,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The roles were stored and the filling was started or reset")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId` or `roles`, or `roles` is null")]
     [SwaggerResponse(403, "The caller may not start or reset the filling of this form, or the file is not a PDF or lies outside a room")]
-    [SwaggerResponse(500, "No file with the `formId` exists")]
     // The handler reads the id from the body (`formId`), not from the route, so nothing binds this
     // placeholder; the client sends the same value in both places.
     [SwaggerPathParameter("fileId", "The form the role mapping belongs to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]
@@ -1127,18 +1128,21 @@ public abstract class FilesController<T>(
 
     /// <remarks>
     /// Changes the filling state of a PDF form as `action` sets. In a form-filling room, `Start` (2) opens the form
-    /// for filling to members who may only fill forms. If the form changed since the last start, `Start` also deletes
-    /// the drafts of the previous round. The action `Stop` (0) stops the filling. In a virtual data room, it records
-    /// who stopped it and at which role. It also notifies the users of the other roles. In a form-filling room,
-    /// `Stop` closes the form for filling. The action `Resume` (1) continues a stopped filling and clears that
-    /// record. The action `Edit` (3) returns the form to editing, closes it for filling, and remembers the version.
+    /// for filling to members who may only fill forms. If the form version differs from the one that `Edit`
+    /// remembered, `Start` also deletes the drafts of the previous round. The action `Stop` (0) stops the filling.
+    /// In a virtual data room, it records who stopped it and at which role. It also notifies the users of the other
+    /// roles. In a form-filling room, `Stop` closes the form for filling. The action `Resume` (1) continues a stopped
+    /// filling and clears that record. The action `Edit` (3) returns the form to editing, closes it for filling, and
+    /// remembers the version.
     /// The call reads the form id only from `formId` in the body. Send the same value in the route. The form must be
     /// a PDF in a room. The action `Start` requires the right to start the filling, which a room manager and a
     /// content creator have. Other callers get 403. Only a room manager can stop a filling that another user started.
     /// A content creator gets 403 there. In a form-filling room, `Edit` requires editing access to the form. The call
-    /// changes data. Do not repeat `Stop`. In a virtual data room, each call notifies the users again. If `action` is
-    /// not a known value, the call returns 403. If the form has no filling yet, or lies in a third-party storage, the
-    /// call returns 500. To read the resulting state, use `GET api/2.0/files/file/{fileId}/formroles`.
+    /// changes data. You can repeat `Resume` and `Edit` with the same body. A repeated `Stop` returns 403 in a
+    /// virtual data room and changes nothing in a form-filling room. Do not repeat `Start` in a form-filling room. A
+    /// repeat can delete the drafts that users started after the first call. If the body has no `formId`, the call
+    /// returns 400. If `action` is not a known value, the call returns 403. To read the resulting state, use
+    /// `GET api/2.0/files/file/{fileId}/formroles`.
     /// </remarks>
     /// <summary>
     /// Perform form filling action
@@ -1149,7 +1153,6 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The action was applied to the form")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
     [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling or, in a form-filling room, put it back into editing, or `action` is not one of the known values")]
-    [SwaggerResponse(500, "The form has no filling properties yet, as when a filling that was never started is resumed, or the form lies in a third-party storage")]
     // Same shape as formrolemapping above: the id travels in the body, the route placeholder is
     // unbound, and the client fills both with the same value.
     [SwaggerPathParameter("fileId", "The form the action applies to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]
@@ -1187,7 +1190,8 @@ public abstract class FilesController<T>(
     /// never returns the keys of other users. Requires read access to the file. Other callers get 403. If the file
     /// does not exist, the call also returns 403. The call is read-only. Without a key pair or an issued key, the
     /// lists are empty. So an empty `fileKeys` means that the caller cannot open the file, not that the file is
-    /// unencrypted. If the file cannot carry encryption keys, the call returns 400. To issue keys, use
+    /// unencrypted. If the file cannot carry encryption keys, the call returns 400. If `fileId` is neither a number
+    /// nor the id of a third-party file, the call returns 404. To issue keys, use
     /// `PUT api/2.0/files/{fileId}/access`. To manage your own key pairs, use `api/2.0/privacyroom/keys`.
     /// </remarks>
     /// <summary>
@@ -1200,7 +1204,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The key pairs of the caller and the file keys issued to them", typeof(FileEncryptionInfoDto))]
     [SwaggerResponse(400, "The file cannot carry encryption keys")]
     [SwaggerResponse(403, "The file does not exist, or the caller has no read access to it")]
-    [SwaggerResponse(404, "The file does not exist")]
+    [SwaggerResponse(404, "The file id is neither a number nor the id of a file in a known third-party storage")]
     [HttpGet("{fileId}/access")]
     public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
     {
@@ -1233,8 +1237,9 @@ public abstract class FilesController<T>(
     /// `GET api/2.0/files/file/{fileId}/publickeys`. The call replaces the keys of the named accounts and keeps all
     /// other keys. Requires read access to the file and the right to create content in the room. Other callers
     /// get 403. The call changes data. You can repeat it with the same body. If the file does not exist or is not in
-    /// a private room, the call also returns 403. The call skips recipients without read access to the file. It
-    /// returns them in `skippedUserIds`. To read the keys, use `GET api/2.0/files/{fileId}/access`.
+    /// a private room, the call also returns 403. If `fileId` is neither a number nor the id of a third-party file,
+    /// the call returns 404. The call skips recipients without read access to the file. It returns them in
+    /// `skippedUserIds`. To read the keys, use `GET api/2.0/files/{fileId}/access`.
     /// </remarks>
     /// <summary>
     /// Set file encryption information
@@ -1243,7 +1248,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file keys of the recipients who can read the file were stored; the others are listed in `skippedUserIds`", typeof(FileKeysWrittenDto))]
     [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, or the file is not in a private room")]
-    [SwaggerResponse(404, "The file does not exist")]
+    [SwaggerResponse(404, "The file id is neither a number nor the id of a file in a known third-party storage")]
     [HttpPut("{fileId}/access")]
     public async Task<FileKeysWrittenDto> SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
     {
@@ -1267,14 +1272,13 @@ public class FilesControllerCommon(
     /// copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that form from the
     /// form gallery. If neither is set, the portal uses its blank template for the format and the language of the
     /// caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user
-    /// can call it, except a guest. A guest gets 500. The call changes data. Do not repeat it. Each call creates
-    /// another file. The returned title shows the extension that the portal stored. To create a file in a room or
-    /// another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title` is missing, empty,
-    /// or too long. It returns 402 if the file does not fit into a storage quota. It returns 403 if the template does
-    /// not exist or the caller cannot read it. It also returns 403 if the form gallery has no file of the format of
-    /// the title. If a string `templateId` is not a file of a connected third-party storage, the call returns 404. It
-    /// returns 500 if `templateId` is a fraction, a string of digits, or a number outside the 32-bit range. It also
-    /// returns 500 if the form gallery does not know `formId` or cannot be reached.
+    /// can call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not repeat it.
+    /// Each call creates another file. The returned title shows the extension that the portal stored. To create a
+    /// file in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title`
+    /// is missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403
+    /// if the template does not exist or the caller cannot read it. It also returns 403 if the form gallery has no
+    /// file of the format of the title. If a string `templateId` is not a file of a connected third-party storage,
+    /// the call returns 404.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents
@@ -1285,9 +1289,8 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The template does not exist or cannot be read, or the form gallery has no file of the title's format")]
+    [SwaggerResponse(403, "The caller is a guest whose My documents still exists, the template does not exist or cannot be read, or the form gallery has no file of the title's format")]
     [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage")]
-    [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the caller is a guest, who has no My documents")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {
@@ -1317,10 +1320,11 @@ public class FilesControllerCommon(
     /// it creates one. If `createNewIfExist` is false, the default, the portal creates another file with a unique
     /// title, such as `Notes (1).html`. The portal does not update a file that is locked, open for editing, or
     /// encrypted. It creates another file with the same title instead. Any signed-in user can call it, except a
-    /// guest. A guest gets 404. The call changes data. A repeat with `createNewIfExist` true adds a version. A repeat
-    /// with false adds a numbered copy. To create the file in a room or another folder,
-    /// use `POST api/2.0/files/{folderId}/html`. The call returns 400 if `title` or `content` is missing, or if
-    /// `title` is blank or too long. It returns 402 if the content is too large for an upload or for a storage quota.
+    /// guest. A guest who has My documents gets 403. Other guests get 404. The call changes data. A repeat with
+    /// `createNewIfExist` true adds a version. A repeat with false adds a numbered copy. To create the file in a room
+    /// or another folder, use `POST api/2.0/files/{folderId}/html`. The call returns 400 if `title` or `content` is
+    /// missing, or if `title` is blank or too long. It returns 402 if the content is too large for an upload or for a
+    /// storage quota.
     /// </remarks>
     /// <summary>
     /// Create an HTML file in My documents
@@ -1331,7 +1335,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create a file in this section")]
+    [SwaggerResponse(403, "The caller is a guest whose My documents still exists, where a guest may not create files")]
     [SwaggerResponse(404, "The caller is a guest, who has no My documents")]
     [HttpPost("@my/html")]
     public async Task<FileDto<int>> CreateHtmlFileInMyDocuments(CreateTextOrHtmlFileRequest inDto)
@@ -1362,10 +1366,11 @@ public class FilesControllerCommon(
     /// a version to the file with this title. If there is no such file, it creates one. If `createNewIfExist` is
     /// false, the default, the portal creates another file with a unique title, such as `Notes (1).txt`. The portal
     /// does not update a file that is locked, open for editing, or encrypted. It creates another file with the same
-    /// title instead. Any signed-in user can call it, except a guest. A guest gets 404. The call changes data. A
-    /// repeat with `createNewIfExist` true adds a version. A repeat with false adds a numbered copy. To create the file in a room or another folder, use `POST api/2.0/files/{folderId}/text`. The
-    /// call returns 400 if `title` or `content` is missing, or if `title` is blank or too long. It returns 402 if the
-    /// content is too large for an upload or for a storage quota.
+    /// title instead. Any signed-in user can call it, except a guest. A guest who has My documents gets 403. Other
+    /// guests get 404. The call changes data. A repeat with `createNewIfExist` true adds a version. A repeat with
+    /// false adds a numbered copy. To create the file in a room or another folder, use
+    /// `POST api/2.0/files/{folderId}/text`. The call returns 400 if `title` or `content` is missing, or if `title`
+    /// is blank or too long. It returns 402 if the content is too large for an upload or for a storage quota.
     /// </remarks>
     /// <summary>
     /// Create a text file in My documents
@@ -1376,7 +1381,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
     [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create a file in this section")]
+    [SwaggerResponse(403, "The caller is a guest whose My documents still exists, where a guest may not create files")]
     [SwaggerResponse(404, "The caller is a guest, who has no My documents")]
     [HttpPost("@my/text")]
     public async Task<FileDto<int>> CreateTextFileInMyDocuments(CreateTextOrHtmlFileRequest inDto)

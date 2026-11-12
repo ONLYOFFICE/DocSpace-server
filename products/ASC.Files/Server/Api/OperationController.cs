@@ -50,14 +50,18 @@ public class OperationController(
 {
     /// <remarks>
     /// Starts a background job that packs files and folders into one archive. The call converts the files of
-    /// `fileConvertIds` before it packs them. Requires read access to the listed items. If the caller can read none
-    /// of them, the call returns 403. The archive skips the items the caller cannot read. A caller who is not signed
-    /// in needs an external link to the items. Without one, the call returns 401. The call queues work. Repeat
-    /// `GET api/2.0/files/fileops` until `finished` is true. Then take the archive address from `url`. A call during
-    /// a running download of the same caller returns 403. The call returns the download operations of the caller,
-    /// including the new one. An empty selection queues nothing and returns the existing operations. If none of the
-    /// listed items exists, the call returns 404. The call returns 400 if the body cannot be read or an item of
-    /// `fileConvertIds` has no `key` or `value`.
+    /// `fileConvertIds` before it packs them. Requires the right to download the listed items. If the caller can
+    /// download none of them, the call returns 403. A room that forbids downloads denies this right to the Read role.
+    /// The settings of an external link can deny it too. The call checks the portal's own items and the items on
+    /// third-party storage as two separate groups. Each group with listed items needs one item the caller can
+    /// download. The archive skips the items the caller cannot download and the ids that do not exist. A caller who
+    /// is not signed in needs an external link to the items. Without one, the call returns 401. The call queues work.
+    /// Repeat `GET api/2.0/files/fileops` until `finished` is true. Then take the archive address from `url`. Do not
+    /// repeat the call while the job runs. Until it ends, each call of the same caller returns 403, even with an empty
+    /// selection. At other times, an empty selection queues nothing and returns the existing operations. The call
+    /// returns the download operations of the caller, including the new one. If no listed item of a group exists, the
+    /// call returns 404. The call returns 400 if the body cannot be read or an item of `fileConvertIds` has no `key` or
+    /// `value`.
     /// </remarks>
     /// <summary>Bulk download</summary>
     /// <path>api/2.0/files/fileops/bulkdownload</path>
@@ -69,9 +73,8 @@ public class OperationController(
     [SwaggerResponse(200, "The download operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "The request body cannot be read, or an item of `fileConvertIds` has no `key` or `value`")]
     [SwaggerResponse(401, "The caller is not signed in and holds no external link")]
-    [SwaggerResponse(403, "None of the listed items that exist can be read by the caller, or another download of theirs is still running")]
+    [SwaggerResponse(403, "The caller can download none of the listed items that exist, counted separately for the portal's own items and for those on third-party accounts, or another download of theirs is still queued or running")]
     [SwaggerResponse(404, "None of the listed items exists, counted separately for the portal's own items and for those on third-party accounts")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [AllowAnonymous]
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
@@ -90,19 +93,21 @@ public class OperationController(
     /// <remarks>
     /// Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call
     /// copies the content of each listed folder, not the folder. Requires the right to create content in the
-    /// destination and read access to every listed item. Other callers get 403. In a room, room managers and content
-    /// creators have this right. The call queues work. Repeat `GET api/2.0/files/fileops` until `finished` is true.
-    /// Its `files` and `folders` then name the copies. A repeated call copies the items again, and
-    /// `conflictResolveType` settles the name clashes. The call returns the copy operations of the caller, including
-    /// the new one. An empty selection queues nothing and returns the existing operations. To find name clashes
-    /// first, use `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use
+    /// destination and to copy every listed item. Other callers get 403. In a room, room managers and content
+    /// creators can create content. A room that forbids downloads denies copying to the Read role. The call queues
+    /// work. Repeat `GET api/2.0/files/fileops` until `finished` is true. Its `files` and `folders` then name the
+    /// copies. What a repeated call does depends on `conflictResolveType`. With `Skip`, it copies only the files whose
+    /// names are still free in the destination. With `Overwrite`, it adds a new version to each earlier copy of a
+    /// file. With `Duplicate`, it makes new copies under new names. The call returns the copy operations of the
+    /// caller, including the new one. An empty selection queues nothing and returns the existing operations. To find
+    /// name clashes first, use `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use
     /// `GET api/2.0/files/fileops/checkdestfolder`. To move the items instead, use `PUT api/2.0/files/fileops/move`.
-    /// The call also returns 403 if the destination is inside a listed folder. A quota that would be exceeded also
-    /// returns 403. It also returns 403 if a file to overwrite is locked or the caller cannot edit it. A file that
-    /// is not a PDF form sent to a form-filling room also returns 403. If the destination or a listed file or folder
-    /// does not exist, the call returns 404. A missing first listed folder returns 500 instead. The call returns 415
-    /// for a file format the portal does not accept for upload. It also returns 415 for a format a knowledge folder
-    /// cannot index.
+    /// The call also returns 403 if the destination is inside a listed folder. A listed folder that would exceed a
+    /// room or user quota also returns 403. It also returns 403 if a file to overwrite is locked, open for editing, or
+    /// not editable by the caller. A file that is not a PDF form sent to a form-filling room also returns 403. A
+    /// listed file too large for a knowledge folder also returns 403. If the destination or a listed file or folder
+    /// does not exist, the call returns 404. The call returns 415 for a file format the portal does not accept for
+    /// upload. It also returns 415 for a format a knowledge folder cannot index.
     /// </remarks>
     /// <summary>Copy files and folders</summary>
     /// <path>api/2.0/files/fileops/copy</path>
@@ -112,10 +117,9 @@ public class OperationController(
     [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every copied file, including the files inside copied folders")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot read one of the listed items, the destination is a listed folder or lies inside one, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
-    [SwaggerResponse(404, "The destination folder, a listed file or a listed folder other than the first one does not exist")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot copy one of the listed items, the destination is a listed folder or lies inside one, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
+    [SwaggerResponse(404, "The destination folder, a listed file or a listed folder does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
-    [SwaggerResponse(500, "The first listed folder does not exist, or an id is a number that is not a 32-bit integer")]
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
@@ -154,7 +158,6 @@ public class OperationController(
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller does not have the rights to delete one of the listed items, one of them is locked by another user or open for editing, or a room is sent to Trash without `immediately`")]
     [SwaggerResponse(404, "A listed file or folder does not exist")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
@@ -314,7 +317,6 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The mark-as-read operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
@@ -331,18 +333,22 @@ public class OperationController(
     /// the content of each listed folder, not the folder. Requires the right to create content in the destination and
     /// to remove the items from their source. Other callers get 403. In a room, room managers and content creators
     /// have the right to create content. In a room, a content creator can move only the items they created. The call
-    /// queues work. Repeat `GET api/2.0/files/fileops` until `finished` is true. You can repeat it with the same body.
-    /// The call returns the move operations of the caller, including the new one. An empty selection queues nothing
-    /// and returns the existing operations. A room can move only between the Rooms section and the archive. To
-    /// archive a room, use `PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use
-    /// `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use
-    /// `GET api/2.0/files/fileops/checkdestfolder`. To keep the originals, use `PUT api/2.0/files/fileops/copy`. The
-    /// call also returns 403 if the destination is inside a listed folder. A quota that would be exceeded also
-    /// returns 403. It also returns 403 if a file to overwrite is locked or the caller cannot edit it. A file that is
-    /// not a PDF form sent to a form-filling room also returns 403. A folder or several files moved into a
-    /// form-filling room from outside also return 403. If the destination or a listed file or folder does not exist,
-    /// the call returns 404. A missing first listed folder returns 500 instead. The call returns 415 for a file
-    /// format the portal does not accept for upload. It also returns 415 for a format a knowledge folder cannot index.
+    /// queues work. Repeat `GET api/2.0/files/fileops` until `finished` is true. What a repeated call does depends on
+    /// `conflictResolveType`. With `Skip`, it changes nothing. With `Overwrite`, it adds to each listed file a new
+    /// version of itself. With `Duplicate`, it gives each listed folder a new name and a new id. The call returns the
+    /// move operations of the caller, including the new one. An empty selection queues nothing and returns the
+    /// existing operations. A room can move only between the Rooms section and the archive. To archive a room, use
+    /// `PUT api/2.0/files/rooms/{id}/archive`. To find name clashes first, use `GET api/2.0/files/fileops/move`. To
+    /// check that the destination accepts the files, use `GET api/2.0/files/fileops/checkdestfolder`. To keep the
+    /// originals, use `PUT api/2.0/files/fileops/copy`. The call also returns 403 if the destination is inside a
+    /// listed folder. A listed folder that would exceed a room or user quota also returns 403. It also returns 403 if
+    /// a listed file is locked or open for editing. A file open for editing inside a listed folder also returns 403.
+    /// A file to overwrite that is locked, open for editing, or not editable by the caller also returns 403. A file
+    /// that is not a PDF form sent to a form-filling room also returns 403. A folder or several files moved into a
+    /// form-filling room from outside also return 403. A listed file too large for a knowledge folder also returns
+    /// 403. If the destination or a listed file or folder does not exist, the call returns 404. The call returns 415
+    /// for a file format the portal does not accept for upload. It also returns 415 for a format a knowledge folder
+    /// cannot index.
     /// </remarks>
     /// <summary>Move files and folders</summary>
     /// <path>api/2.0/files/fileops/move</path>
@@ -355,10 +361,9 @@ public class OperationController(
     [RaisesWebhook(WebhookTrigger.FileRestored, When = "instead for a file moved out of the trash")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
-    [SwaggerResponse(404, "The destination folder, a listed file or a listed folder other than the first one does not exist")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, a listed file is locked or open for editing, a file inside a listed folder is open for editing, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
+    [SwaggerResponse(404, "The destination folder, a listed file or a listed folder does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
-    [SwaggerResponse(500, "The first listed folder does not exist, or an id is a number that is not a 32-bit integer")]
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
@@ -393,7 +398,6 @@ public class OperationController(
     [SwaggerResponse(403, "The caller cannot create items in the folder that holds one of the listed items, or cannot copy that item")]
     [SwaggerResponse(404, "A listed file or folder does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("duplicate")]
     public async IAsyncEnumerable<FileOperationDto> DuplicateBatchItems(DuplicateRequestDto inDto)
     {
@@ -421,7 +425,6 @@ public class OperationController(
     [SwaggerResponse(400, "`destFolderId` is not given")]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder, or the destination is the Rooms, Forms or AI agents section root, which holds rooms only")]
     [SwaggerResponse(404, "The destination folder does not exist")]
-    [SwaggerResponse(500, "A listed file is on a third-party account and the destination accepts it, or a listed file does not exist while the destination is a form-filling room")]
     [HttpGet("checkdestfolder")]
     public async Task<CheckDestFolderDto> CheckMoveOrCopyDestFolder([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {

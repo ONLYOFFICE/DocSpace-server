@@ -91,16 +91,18 @@ public abstract class UploadController<T>(
     /// No content is stored yet. Send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Each
     /// part is at most `chunkUploadSize` from `GET api/2.0/files/settings`. Then store the file with
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the
-    /// folder. Other callers get 403. Room managers and content creators have this right, but readers, editors, and
-    /// guests do not. A section root, such as Rooms or Archive, also returns 403. The call changes data. A repeated
-    /// call opens another session. It creates the folders of `relativePath` that do not exist yet. If the folder has a
-    /// file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With false, the upload adds a
-    /// new version to that file if the caller can edit it. A session expires 12 hours after it opens or gets its last
-    /// part. If the folder does not exist, the call returns 404. The call returns 400 for a negative `fileSize`. In a
-    /// private room, it also returns 400 if the name is not a lowercase UUID with an optional extension. The call
-    /// returns 402 if `fileSize` is over the limit for chunked uploads or for a knowledge folder. It returns 403 if
-    /// a private room gets a file without `encrypted`, or a knowledge folder gets an unsupported format.
-    /// If the installation does not allow uploads with this extension, the call returns 415.
+    /// folder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has
+    /// it there only as a content creator. In My documents, the owner and anyone with read and write access to the
+    /// folder have it. A section root, an archived room, and an AI agent or AI project root also return 403. The call
+    /// changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist
+    /// yet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With
+    /// false, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this
+    /// way. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call
+    /// returns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase
+    /// UUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or
+    /// for a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder
+    /// gets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an
+    /// instructions room. If the installation does not allow uploads with this extension, the call returns 415.
     /// </remarks>
     /// <summary>Chunked upload</summary>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
@@ -109,7 +111,7 @@ public abstract class UploadController<T>(
     [SwaggerResponse(200, "The created session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
-    [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format, or the file going into a private room is not marked `encrypted`")]
+    [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`")]
     [SwaggerResponse(404, "No folder with the specified ID")]
     [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("{folderId}/upload/create_session")]
@@ -125,22 +127,23 @@ public abstract class UploadController<T>(
     }
 
     /// <remarks>
-    /// Opens a chunked upload session for a file in the folder and returns the session. No content is stored yet.
-    /// The size in `fileSize` decides the next step. If it is below `chunkUploadSize` from
-    /// `GET api/2.0/files/settings`, send the whole file in one `POST api/2.0/files/{folderId}/session/{sessionId}`.
-    /// That call stores the file and returns 201. For a larger file, send the parts to
-    /// `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Then store the file with
+    /// Opens a chunked upload session for a file in the folder and returns it. If `fileSize` is below
+    /// `chunkUploadSize` from `GET api/2.0/files/settings`, send the whole file in one
+    /// `POST api/2.0/files/{folderId}/session/{sessionId}`. That call stores the file and returns 201. For a larger
+    /// file, send the parts to `POST api/2.0/files/{folderId}/session/{sessionId}/upload`. Then store the file with
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. Requires the right to create content in the
-    /// folder. Other callers get 403. Room managers and content creators have this right, but readers, editors, and
-    /// guests do not. A section root, such as Rooms or Archive, also returns 403. The call changes data. A repeated
-    /// call opens another session. It creates the folders of `relativePath` that do not exist yet. If the folder has a
-    /// file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With false, the upload adds a
-    /// new version to that file if the caller can edit it. A session expires 12 hours after it opens or gets its last
-    /// part. If the folder does not exist, the call returns 404. The call returns 400 for a negative `fileSize`. In a
-    /// private room, it also returns 400 if the name is not a lowercase UUID with an optional extension. The call
-    /// returns 402 if `fileSize` is over the limit for chunked uploads or for a knowledge folder. It returns 403 if
-    /// a private room gets a file without `encrypted`, or a knowledge folder gets an unsupported format.
-    /// If the installation does not allow uploads with this extension, the call returns 415.
+    /// folder. Other callers get 403. In a room, its owner, room managers, and content creators have it. A guest has
+    /// it there only as a content creator. In My documents, the owner and anyone with read and write access to the
+    /// folder have it. A section root, an archived room, and an AI agent or AI project root also return 403. The call
+    /// changes data. A repeated call opens another session. It creates the folders of `relativePath` that do not exist
+    /// yet. If the folder has a file with this name, `createNewIfExist` true stores a copy with a numeric suffix. With
+    /// false, the upload adds a new version to that file if the caller can edit it. A guest never adds a version this
+    /// way. A session expires 12 hours after it opens or gets its last part. A missing folder returns 404. The call
+    /// returns 400 for a negative `fileSize`. In a private room, it also returns 400 if the name is not a lowercase
+    /// UUID with an optional extension. The call returns 402 if `fileSize` is over the limit for chunked uploads or
+    /// for a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder
+    /// gets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an
+    /// instructions room. If the installation does not allow uploads with this extension, the call returns 415.
     /// </remarks>
     /// <summary>Create an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session</path>
@@ -148,7 +151,7 @@ public abstract class UploadController<T>(
     [SwaggerResponse(200, "The created upload session", typeof(ChunkedUploadSessionDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
-    [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format, or the file going into a private room is not marked `encrypted`")]
+    [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`")]
     [SwaggerResponse(404, "No folder with the specified ID")]
     [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("{folderId}/session")]
@@ -436,12 +439,13 @@ public abstract class UploadController<T>(
     /// <remarks>
     /// Returns the names from `filesTitle` that a file in the folder already has. Use it before an upload to choose
     /// between a new version and another name. The match ignores case. The call skips encrypted files, since an
-    /// upload cannot replace them. Requires the right to create content in the folder. Other callers get 403. Room
-    /// managers and content creators have this right, but readers, editors, and guests do not. An archived room and a
-    /// section root also return 403. The call is read-only. The list has no repeats and no order. An empty list means
-    /// that every name is free. If the folder does not exist, the call returns 404. The call returns 400 if
-    /// `filesTitle` is missing. An empty `filesTitle` returns an empty list. In a form-filling room template, a name
-    /// without the `.pdf` extension returns 403.
+    /// upload cannot replace them. Requires the right to create content in the folder. Other callers get 403. In a
+    /// room, its owner, room managers, and content creators have it. A guest has it there only as a content creator.
+    /// In My documents, the owner and anyone with read and write access to the folder have it. An archived room, the
+    /// Archive or room templates root, and an AI agent or AI project root also return 403. The call is read-only. The
+    /// list has no repeats and no order. An empty list means that every name is free. A missing folder returns 404.
+    /// The call returns 400 if `filesTitle` is missing. An empty `filesTitle` returns an empty list. In a form-filling
+    /// room template, a name without the `.pdf` extension returns 403.
     /// </remarks>
     /// <summary>Check for upload conflicts</summary>
     /// <path>api/2.0/files/{folderId}/upload/check</path>
@@ -499,17 +503,19 @@ public abstract class UploadController<T>(
     /// <remarks>
     /// Uploads a file to the folder in one request and names it by `title`. The content can be a multipart part or
     /// the raw request body. To name the file by the uploaded part, use `POST api/2.0/files/{folderId}/upload`.
-    /// Requires the right to create content in the folder. Other callers get 403. Readers, editors, and guests do not
-    /// have this right. A section root and an archived room also return 403. The call changes data. It removes
-    /// characters that a title cannot have and shortens a long name. If the folder has a file with this name,
-    /// `createNewIfExist` true stores a copy with a numeric suffix. With false, the call adds a new version to that
-    /// file if the caller can edit it. So a repeated call adds another version or another copy. A `version` above 1
-    /// in the response means that the call added a version. The portal converts some formats in the background after
-    /// the upload. To read that result with `GET api/2.0/files/file/{fileId}/checkconversion`, pass
-    /// `keepConvertStatus`. If the folder does not exist, the call returns 404. The call returns 402 if the file is
-    /// over the upload limit or a storage quota. If the installation does not allow uploads with this extension, the
-    /// call returns 415. If the file is not a PDF and the room is a form-filling room, the call returns 403. To upload
-    /// a large file, use `POST api/2.0/files/{folderId}/session`.
+    /// Requires the right to create content in the folder. Other callers get 403. In a room, its owner, room managers,
+    /// and content creators have it. A guest has it there only as a content creator. In My documents, the owner and
+    /// anyone with read and write access to the folder have it. A section root, an archived or private room, and an
+    /// AI agent or AI project root also return 403. The call changes data. It removes characters that a title cannot
+    /// have and shortens a long name. If the folder has a file with this name, `createNewIfExist` true stores a copy
+    /// with a numeric suffix. With false, the call adds a new version to that file if the caller can edit it.
+    /// Otherwise, it stores a second file with the same name. A guest never adds a version this way. So a repeated
+    /// call adds another version or another file. A `version` above 1 in the response means that the call added a
+    /// version. The portal converts some formats in the background after the upload. To read that result with
+    /// `GET api/2.0/files/file/{fileId}/checkconversion`, pass `keepConvertStatus`. A missing folder returns 404.
+    /// The call returns 402 if the file is over the upload limit or a storage quota. If the installation does not
+    /// allow uploads with this extension, the call returns 415. If the file is not a PDF and the room is a
+    /// form-filling room, the call returns 403. To upload a large file, use `POST api/2.0/files/{folderId}/session`.
     /// </remarks>
     /// <summary>Insert a file</summary>
     /// <path>api/2.0/files/{folderId}/insert</path>
@@ -517,7 +523,7 @@ public abstract class UploadController<T>(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one", typeof(FileDto<int>))]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
-    [SwaggerResponse(403, "The caller cannot add content to this folder, or a file that is not a PDF is stored in a form-filling room")]
+    [SwaggerResponse(403, "The caller cannot add content to this folder, the folder is a section root or in a private room, or a file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No folder with the specified ID")]
     [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("{folderId}/insert", Order = 1)]
@@ -530,15 +536,18 @@ public abstract class UploadController<T>(
     /// <remarks>
     /// Uploads a file to the folder in one multipart request and names it by the uploaded part. To give the name
     /// separately or send a raw body, use `POST api/2.0/files/{folderId}/insert`. Requires the right to create
-    /// content in the folder. Other callers get 403. Readers, editors, and guests do not have this right. A section
-    /// root and an archived room also return 403. The call changes data. If the folder has a file with this name,
-    /// `createNewIfExist` true stores a copy with a numeric suffix. With false, the call adds a new version to that
-    /// file if the caller can edit it. So a repeated call adds another version or another copy. The response is a
-    /// list with exactly one file. The call saves `storeOriginalFile` as a setting of the caller, like
-    /// `PUT api/2.0/files/storeoriginal`. Later uploads use it too. The call returns 400 if the request has no file
-    /// part. If the folder does not exist, the call returns 404. It returns 402 if the file is over the upload limit
-    /// or a storage quota. If the installation does not allow uploads with this extension, the call returns 415. If
-    /// the file is not a PDF and the room is a form-filling room, the call returns 403.
+    /// content in the folder. Other callers get 403. In a room, its owner, room managers, and content creators have
+    /// it. A guest has it there only as a content creator. In My documents, the owner and anyone with read and write
+    /// access to the folder have it. A section root, an archived or private room, and an AI agent or AI project root
+    /// also return 403. The call changes data. If the folder has a file with this name, `createNewIfExist` true stores
+    /// a copy with a numeric suffix. With false, the call adds a new version to that file if the caller can edit it.
+    /// Otherwise, it stores a second file with the same name. A guest never adds a version this way. So a repeated
+    /// call adds another version or another file. The response is a list with exactly one file. The call saves
+    /// `storeOriginalFile` as a setting of the caller, like `PUT api/2.0/files/storeoriginal`. It saves the setting
+    /// even when the upload then fails. Later uploads use it too. The call returns 400 if the request has no file
+    /// part. A missing folder returns 404. It returns 402 if the file is over the upload limit or a storage quota. If
+    /// the installation does not allow uploads with this extension, the call returns 415. If the file is not a PDF
+    /// and the room is a form-filling room, the call returns 403.
     /// </remarks>
     /// <summary>Upload a file</summary>
     /// <path>api/2.0/files/{folderId}/upload</path>
@@ -547,7 +556,7 @@ public abstract class UploadController<T>(
     [SwaggerResponse(200, "The stored file, as a list with one element", typeof(List<FileDto<int>>))]
     [SwaggerResponse(400, "The request has no file part")]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
-    [SwaggerResponse(403, "The caller cannot add content to this folder, or a file that is not a PDF is stored in a form-filling room")]
+    [SwaggerResponse(403, "The caller cannot add content to this folder, the folder is a section root or in a private room, or a file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No folder with the specified ID")]
     [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("{folderId}/upload", Order = 1)]

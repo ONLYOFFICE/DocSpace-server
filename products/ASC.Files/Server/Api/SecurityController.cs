@@ -386,7 +386,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// owner has no encryption keys. It also returns 403 for a folder that is not a room, or a file outside the
     /// common section. A file that is locked or being edited also returns 403. If the new owner lacks keys to some
     /// encrypted files of a private room, the call returns 409. To find these files, use
-    /// `GET api/2.0/privacyroom/{roomId}/access/missing`. After their keys are added, repeat the call.
+    /// `GET api/2.0/privacyroom/{roomId}/access/missing`. After their keys are added, repeat the call. Without
+    /// `userId`, the call returns 400. It also returns 400 if a string file id points to a storage account that is
+    /// not connected.
     /// </remarks>
     /// <summary>Change the room or file owner</summary>
     /// <path>api/2.0/files/owner</path>
@@ -396,10 +398,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file whose owner changes")]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rooms and files whose owner has been changed, as folder and file objects", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`, or a third-party file identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The new owner is not an active account allowed to manage rooms or has not set up encryption keys for a listed private room, the caller may not change the owner of a listed entry, a listed folder lies outside the rooms and common sections, or a listed file is locked, being edited or lies outside the common section")]
     [SwaggerResponse(409, "The new owner holds no key for some encrypted files of a listed private room: `GET api/2.0/privacyroom/{roomId}/access/missing` names them, and the call can be repeated once their keys are written")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryBaseDto> ChangeFileOwner(ChangeOwnerRequestDto inDto)
     {
@@ -432,7 +433,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The merged sharing rights of the listed files and folders, one record per account or group", typeof(IAsyncEnumerable<FileShareDto>))]
     [SwaggerResponse(403, "The caller may not read one of the listed files or folders")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPost("share")]
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfo(BaseBatchRequestDto inDto)
     {
@@ -465,7 +465,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Always true: the accounts and groups that had access to the listed entries no longer have it", typeof(bool))]
     [SwaggerResponse(403, "The caller may not change the access of a listed entry and cannot read it either, so it cannot be dropped from their own list. A portal administrator outside a private room gets this as well")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfo(BaseBatchRequestDto inDto)
     {
@@ -498,7 +497,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [SwaggerResponse(200, "The rights of the listed accounts and groups on every entry that was processed", typeof(IAsyncEnumerable<FileShareDto>))]
     [SwaggerResponse(400, "The request body cannot be read, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
     [SwaggerResponse(403, "The caller may not change the sharing of a listed entry, a listed subject cannot be given the requested access on it, or a listed private room has an account in `share` that has not set up its encryption keys")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfo(SecurityInfoRequestDto inDto)
     {

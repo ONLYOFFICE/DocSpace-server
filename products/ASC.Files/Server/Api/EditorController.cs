@@ -111,8 +111,9 @@ public abstract class EditorController<T>(
     /// editing session open. Without it, the call closes a session opened with `editingAlone` true. The call returns
     /// 403 if the file is locked by another user, is in Trash, or is encrypted. It also returns 403 for a file in a
     /// private room. Without `forcesave`, it also returns 403 while the file is open for co-editing. If the file does
-    /// not exist, the call returns 404. If the content exceeds the storage quota, it returns 402. For large content,
-    /// use `POST api/2.0/files/file/{fileId}/edit_session`.
+    /// not exist, the call returns 404. If a string `fileId` points to a storage account that is not connected, the
+    /// call returns 400. If the content exceeds the storage quota, it returns 402. For large content, use
+    /// `POST api/2.0/files/file/{fileId}/edit_session`.
     /// </remarks>
     /// <summary>
     /// Save edited file content
@@ -121,11 +122,10 @@ public abstract class EditorController<T>(
     [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file is saved and the stored version is returned", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "The file id cannot be resolved to a storage that could accept the content")]
+    [SwaggerResponse(400, "A form field has the wrong type, or a third-party file identifier refers to a storage account that is not connected")]
     [SwaggerResponse(402, "The content does not fit into the portal's storage quota, even with the overshoot allowed for editor saves")]
     [SwaggerResponse(403, "The caller cannot edit the file, or it is locked, in Trash, or open in somebody else's editing session")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
-    [SwaggerResponse(500, "The file lies in a third-party storage in another format and the document service fails to convert the content")]
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFileFromForm(SaveEditingRequestDto<T> inDto)
     {
@@ -157,7 +157,6 @@ public abstract class EditorController<T>(
     [SwaggerResponse(403, "The caller cannot edit the file, the file is locked or in Trash, somebody is already editing it and the session was claimed alone, or the document service did not accept the tracking request")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
-    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it, or, with `editingAlone=true`, the file lies in Trash")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<string> StartEditFile(StartEditRequestDto<T> inDto)
@@ -200,8 +199,7 @@ public abstract class EditorController<T>(
     /// anonymous caller needs an external link. Without a link, it gets 401. A refresh through a link that does not
     /// allow editing also returns 401. The call changes data of the session, not the document. You can repeat it. On
     /// success, `key` is true and `value` is empty. A failure returns an error code, not a false `key`. If the file
-    /// does not exist, the call returns 404. A refresh of a file that another user locked returns 403. A refresh of
-    /// a file in Trash returns 500.
+    /// does not exist, the call returns 404. A refresh of a file that another user locked returns 403.
     /// </remarks>
     /// <summary>
     /// Track an editing session
@@ -213,7 +211,6 @@ public abstract class EditorController<T>(
     [SwaggerResponse(401, "An anonymous caller has no external link, or refreshes the session through a link that does not grant editing")]
     [SwaggerResponse(403, "The document key does not match the revision being edited, the caller has none of the editing rights on the file, or the session is refreshed while the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
-    [SwaggerResponse(500, "The session is refreshed while the file lies in Trash")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<ItemKeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
@@ -246,7 +243,6 @@ public abstract class EditorController<T>(
     [SwaggerResponse(403, "The caller cannot read the file, asked for a past version without access to the file history, or the file is in Trash")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
     [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing, or it is an encrypted file of a private room and the connected document server cannot work with encrypted files")]
-    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
@@ -463,8 +459,7 @@ public abstract class EditorController<T>(
     /// `path` lookup, the call also checks read access to the source file and its folder. It also returns 403
     /// for an encrypted file or a file in a private room. The call is read-only. If nothing resolves, the call
     /// returns 200 with `error` set and the other fields empty. So read `error` before you use other fields. The call
-    /// returns 400 if the body has no `fileKey` or `instanceId`. If `instanceId` names this portal and `fileKey` is
-    /// not a number, the call returns 500.
+    /// returns 400 if the body has no `fileKey` or `instanceId`.
     /// </remarks>
     /// <summary>
     /// Resolve a spreadsheet reference
@@ -474,7 +469,6 @@ public abstract class EditorController<T>(
     [SwaggerResponse(200, "The reference descriptor, or the same object with the error text set when nothing resolved", typeof(FileReferenceDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `fileKey` or `instanceId`")]
     [SwaggerResponse(403, "The caller cannot read the source file, its folder or the referenced file")]
-    [SwaggerResponse(500, "`fileKey` is empty or not a number while `instanceId` names this portal")]
     [HttpPost("referencedata")]
     public async Task<FileReferenceDto> GetReferenceData(GetReferenceDataDto<T> inDto)
     {
@@ -577,8 +571,8 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// `http://` to an address without a scheme. Requires the EditPortalSettings permission, which the portal owner
     /// and DocSpace admins have. Other callers get 403. The call changes data, and you can repeat it with the same
     /// body. The check calls the editor api script, the healthcheck, the converter, the command service, and the
-    /// document builder. If one fails, the portal restores all previous settings. Then the call returns 500. It
-    /// returns what `GET api/2.0/files/docservice` returns without `version`. The call returns 400 if an address
+    /// document builder. If one fails, the portal restores all previous settings. Then the call fails. On success,
+    /// it returns what `GET api/2.0/files/docservice` returns without `version`. The call returns 400 if an address
     /// cannot be parsed or is an absolute address with a query string. It also returns 400 for a secret without a
     /// header. It also returns 400 for an `http` public address on a portal served over `https`.
     /// </remarks>
@@ -590,7 +584,6 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     [SwaggerResponse(200, "The settings are stored and the Document Server answered the verification requests", typeof(DocServiceUrlDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `docServiceUrl`, an address cannot be parsed or carries a query string, the signature secret is sent without its header, or an http address is given for a portal served over https")]
     [SwaggerResponse(403, "The caller is not the portal owner or a DocSpace administrator")]
-    [SwaggerResponse(500, "The Document Server fails one of the verification requests at the new settings, which are then rolled back")]
     //[SwaggerResponse(503, "Unable to establish a connection with the Document Server")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)

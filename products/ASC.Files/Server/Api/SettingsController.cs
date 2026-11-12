@@ -133,7 +133,6 @@ public class SettingsController(
     /// <path>api/2.0/files/displayrecent</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "true if the Recent section is offered to the caller", typeof(bool))]
-    [SwaggerResponse(403, "The caller is not allowed to change this setting")]
     [HttpPut("displayRecent")]
     public async Task<bool> DisplayRecent(DisplayRequestDto inDto)
     {
@@ -529,8 +528,7 @@ public class SettingsController(
     /// previous one. If the extension is not in the built-in template set, the call changes nothing. If the caller
     /// cannot copy the file, the call returns 403. The call returns 400 if `selectedFile` is neither a number nor a
     /// string. It also returns 400 if the file extension is not exactly `fileExtension`, including case. If the file
-    /// does not exist, the call returns 404. If `selectedFile` is a number that is not a 32-bit integer, the call
-    /// returns 500.
+    /// does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Change the default template setting</summary>
     /// <path>api/2.0/files/settings/defaulttemplate</path>
@@ -539,7 +537,6 @@ public class SettingsController(
     [SwaggerResponse(400, "The request body cannot be read or has no `selectedFile` or `fileExtension`, the file identifier is of an unsupported kind, or its extension is not the one requested")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or may not copy the selected file")]
     [SwaggerResponse(404, "The selected file does not exist")]
-    [SwaggerResponse(500, "The file identifier is a number that cannot be read as a 32-bit integer: fractional, in exponent notation or out of range")]
     [HttpPut("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
     {

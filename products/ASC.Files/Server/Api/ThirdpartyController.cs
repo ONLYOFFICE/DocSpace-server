@@ -278,9 +278,8 @@ public class ThirdpartyController(
     /// `url` is missing. The call returns 403 if third-party storage is turned off or the service rejects the
     /// credentials. It also returns 403 if `providerId` names the account of another user. For a new account, a title
     /// that is empty after the call removes invalid characters also returns 403. If no account has the `providerId`,
-    /// the call returns 404. If the service cannot be reached, the call returns 500. To create a room on the account,
-    /// use `POST api/2.0/files/rooms/thirdparty/{id}`. To connect backup storage, use
-    /// `POST api/2.0/files/thirdparty/backup`.
+    /// the call returns 404. To create a room on the account, use `POST api/2.0/files/rooms/thirdparty/{id}`. To
+    /// connect backup storage, use `POST api/2.0/files/thirdparty/backup`.
     /// </remarks>
     /// <summary>Connect a third-party account</summary>
     /// <path>api/2.0/files/thirdparty</path>
@@ -290,7 +289,6 @@ public class ThirdpartyController(
     [SwaggerResponse(400, "The request body cannot be read or has no `customerTitle` or `providerKey`, `providerId` is neither a number nor a numeric string, or, for a new account, `providerKey` names no known storage service, the `token` or `password` the service needs is missing, or `url` is missing or is not an HTTP address for a service that needs it")]
     [SwaggerResponse(403, "The caller cannot create rooms, the portal-wide third-party switch is off or no storage service is enabled, the title of a new account is empty once invalid characters are removed, the service rejects the credentials, or `providerId` names an account connected by another member")]
     [SwaggerResponse(404, "`providerId` names no third-party account on the portal")]
-    [SwaggerResponse(500, "The storage service cannot be reached or fails while the credentials are checked")]
     [HttpPost("thirdparty")]
     public async Task<FolderDto<string>> SaveThirdParty(ThirdPartyRequestDto inDto)
     {
@@ -317,9 +315,9 @@ public class ThirdpartyController(
     /// credentials leave the current account unchanged. The call returns 400 if `providerKey` names no known service or
     /// a needed `url` is missing. While no backup account exists, a missing `token` or `password` also returns 400. The
     /// call returns 403 if third-party storage is turned off or the service rejects the credentials. While no backup
-    /// account exists, a title that is empty after the call removes invalid characters also returns 403. If the service
-    /// cannot be reached, the call returns 500. The list of `GET api/2.0/files/thirdparty` does not have this account. To
-    /// read it, use `GET api/2.0/files/thirdparty/backup`. To remove it, use `DELETE api/2.0/files/thirdparty/{providerId}`.
+    /// account exists, a title that is empty after the call removes invalid characters also returns 403. The list of
+    /// `GET api/2.0/files/thirdparty` does not have this account. To read it, use `GET api/2.0/files/thirdparty/backup`.
+    /// To remove it, use `DELETE api/2.0/files/thirdparty/{providerId}`.
     /// </remarks>
     /// <summary>Connect the third-party backup storage</summary>
     /// <path>api/2.0/files/thirdparty/backup</path>
@@ -328,7 +326,6 @@ public class ThirdpartyController(
     [SwaggerResponse(200, "The root folder of the backup storage account", typeof(FolderDto<string>))]
     [SwaggerResponse(400, "The request body cannot be read, `providerKey` names no known storage service, `url` is missing or is not an HTTP address for a service that needs it, or, while no backup account is connected yet, the `token` or `password` the service needs is missing")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, the portal-wide third-party switch is off or no storage service is enabled, the service rejects the credentials, or, while no backup account is connected yet, the title is empty once invalid characters are removed")]
-    [SwaggerResponse(500, "The storage service cannot be reached or fails while the credentials are checked")]
     [HttpPost("thirdparty/backup")]
     public async Task<FolderDto<string>> SaveThirdPartyBackup(ThirdPartyBackupRequestDto inDto)
     {
