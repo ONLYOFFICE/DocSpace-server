@@ -47,8 +47,10 @@ public class DocumentServiceLicense(ICache cache,
 
     // The trial is asked about anonymously (does the setup wizard need a license file), so its answer is kept in the
     // memory cache: one request to the editing service at a time per process, at most 10 seconds of waiting for it, an
-    // answer kept for 15 minutes and a failure for one minute
+    // answer kept for 15 minutes. While the service fails, the last answer known stays in use for up to an hour and is
+    // asked about again once a minute; with none known, the failure itself is kept for a minute
     private static readonly TimeSpan _trialCacheDuration = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan _trialFailSafeMaxDuration = TimeSpan.FromHours(1);
     private static readonly TimeSpan _trialFailureCacheDuration = TimeSpan.FromMinutes(1);
     private static readonly TimeSpan _trialRequestHardTimeout = TimeSpan.FromSeconds(10);
     private static readonly string _trialCacheKey = $"{Tenant.DefaultTenant}docstrial";
@@ -81,9 +83,7 @@ public class DocumentServiceLicense(ICache cache,
                    clientFactory
                    );
 
-            // A failed answer is not kept: the editing service often starts later than the portal, and a cached
-            // failure would hide its license for the whole cache period
-            if (useCache && commandResponse is { Error: ErrorTypes.NoError })
+            if (useCache)
             {
                 cache.Insert(CacheKey, commandResponse, DateTime.UtcNow.Add(_cacheExpiration));
             }
@@ -163,9 +163,9 @@ public class DocumentServiceLicense(ICache cache,
     /// Asks the editing service whether it runs its own trial, the state it is in while it has no license file.
     /// </summary>
     /// <param name="useCache">
-    /// Whether an answer of the last 15 minutes, or a failure of the last minute, may be reused; the service is then
-    /// waited for at most 10 seconds. A fresh question drops the cached answer on every node, so the cached readers
-    /// ask again next time.
+    /// Whether an answer of the last 15 minutes may be reused; the service is then waited for at most 10 seconds, and
+    /// while it fails the last answer known is used for up to an hour (a failure with none known, for a minute). A
+    /// fresh question drops the cached answer on every node, so the cached readers ask again next time.
     /// </param>
     /// <returns>
     /// <see cref="DocsTrialState.NotTrial"/> on an installation that has no editing service to ask;
@@ -185,22 +185,23 @@ public class DocumentServiceLicense(ICache cache,
 
         try
         {
-            return await memoryCache.GetOrSetAsync<DocsTrialCheck>(_trialCacheKey, async (context, _) =>
+            return await memoryCache.GetOrSetAsync<DocsTrialCheck>(_trialCacheKey, async (_, _) =>
             {
                 var check = await RequestTrialAsync();
-                if (check.State == DocsTrialState.Unknown)
-                {
-                    context.Options.Duration = _trialFailureCacheDuration;
-                }
 
-                return check;
+                // An unknown answer is a failure, not an answer: it must not replace the last answer known
+                return check.State == DocsTrialState.Unknown
+                    ? throw new InvalidOperationException("The editing service did not say whether it runs its trial")
+                    : check;
             }, options => options
                 .SetDuration(_trialCacheDuration)
+                .SetFailSafe(true, _trialFailSafeMaxDuration, _trialFailureCacheDuration)
                 .SetFactoryTimeouts(hardTimeout: _trialRequestHardTimeout));
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            // The hard timeout: the request goes on in the background and replaces this answer when it ends
+            // No answer known to fall back on: the service failed, or the hard timeout ran out and the request goes on
+            // in the background, replacing this answer when it ends
             logger.WarningDocsTrialRequest(ex);
             await memoryCache.SetAsync(_trialCacheKey, DocsTrialCheck.Unknown, _trialFailureCacheDuration);
 
@@ -252,7 +253,10 @@ public class DocumentServiceLicense(ICache cache,
             return DocsTrialCheck.Unknown;
         }
 
-        var dueDate = DateTime.SpecifyKind(license.DueDate.ToUniversalTime().Date, DateTimeKind.Utc);
+        // The service writes the dates it computes in UTC with a zone, but echoes the dates of a license file as they
+        // are, possibly without one: a date without a zone is read as UTC, not as the time zone of this server
+        var end = license.DueDate.Kind == DateTimeKind.Unspecified ? license.DueDate : license.DueDate.ToUniversalTime();
+        var dueDate = DateTime.SpecifyKind(end.Date, DateTimeKind.Utc);
 
         switch (commandResponse.Server.ResultType)
         {

@@ -109,6 +109,19 @@ public sealed class DocsTrialClassificationTests
         check.Trial!.DueDate.Should().Be(new DateTime(2026, 11, 10, 0, 0, 0, DateTimeKind.Utc));
     }
 
+    [Theory]
+    [InlineData("2026-12-11T00:30:00")]
+    [InlineData("2026-12-11T23:30:00")]
+    public void ClassifyTrial_EndWithoutZone_IsReadAsUtc(string end)
+    {
+        // A date without a zone read as local time moves to the day before east of UTC (00:30) and to the day after
+        // west of it (23:30); on a machine whose time zone is UTC neither case can fail.
+        var check = Classify(FreshTrial.Replace("2026-12-11T16:19:17.013Z", end));
+
+        check.State.Should().Be(DocsTrialState.Active);
+        check.Trial!.DueDate.Should().Be(new DateTime(2026, 12, 11, 0, 0, 0, DateTimeKind.Utc));
+    }
+
     [Fact]
     public void ClassifyTrial_PaidLicense_IsNotATrial()
     {

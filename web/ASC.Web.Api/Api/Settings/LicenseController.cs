@@ -216,13 +216,13 @@ public class LicenseController(
 
     /// <remarks>
     /// Reports whether this installation still has to be given a license file before it can be used, which is the
-    /// question the setup wizard asks before offering its license upload step. No authentication is needed, so it can
-    /// be called on a portal nobody has signed in to yet, and the call is read-only. The answer is `true` only for a
-    /// self-hosted Enterprise build whose license file is not on disk and whose editing service does not run its own
-    /// trial; while that trial runs, the wizard is completed without a file and the portal's trial ends by the day the
-    /// editing service's does. The editing service's answer is reused for up to 15 minutes; one that cannot be reached
-    /// counts as no trial, and that answer is reused for up to a minute. Every other build answers `false` -
-    /// open-source, SaaS, open to anyone without an account, with the pricing section hidden, or set up from
+    /// question the setup wizard asks before offering its license upload step. It needs no authentication, so it works
+    /// before anyone has signed in, and it is read-only. The answer is `true` only for a self-hosted Enterprise build
+    /// whose license file is not on disk and whose editing service does not run its own trial; while that trial runs,
+    /// the wizard is completed without a file and the portal's trial ends by the day the editing service's does. The
+    /// editing service's answer is reused for up to 15 minutes, and for up to an hour while the service cannot be
+    /// reached; with no answer known yet, an unreachable service counts as no trial. Every other build answers `false`
+    /// - open-source, SaaS, open to anyone without an account, with the pricing section hidden, or set up from
     /// cloud-image metadata - so `false` does not mean the portal is licensed. For a file the answer turns to `false`
     /// only once a staged file has been activated by `POST api/2.0/settings/license/accept`, not when it is uploaded.
     /// The operation stays reachable while the portal is unpaid.
