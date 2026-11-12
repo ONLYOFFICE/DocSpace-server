@@ -675,7 +675,8 @@ class Analyzer:
         for m in re.finditer(r"\bthrow\s+new\s+([\w.]+)\s*(<[^>]*>)?\s*[({]", bl[a:b]):
             pos = a + m.start()
             exc = m.group(1).split(".")[-1]
-            if exc == self.custom_case:
+            # every type the handler answers with its own status (CustomHttpException, BadHttpRequestException)
+            if exc == self.custom_case or any(t == exc and c is None for t, c in self.table):
                 args = bl[pos:pos + 200]
                 cm = re.search(r"HttpStatusCode\.(\w+)|\b([1-5]\d\d)\b", args)
                 if cm and cm.group(1):

@@ -1,10 +1,52 @@
 [
   {
+    "id": "products/ASC.Files/Server/Api/EditorController.cs::CheckDocServiceUrl",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "6d3ce1104641041a",
+    "date": "2026-11-12"
+  },
+  {
     "id": "products/ASC.Files/Server/Api/PrivacyRoomController.cs::GetUserKeys",
     "code": 403,
     "reason": "Demand on the caller's own id (authContext.CurrentAccount.ID): role Self always passes Action_EditUser",
     "fingerprint": "4d0c54a1d29a200e",
     "date": "2026-10-01"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/PhotoController.cs::UpdateMemberPhoto",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "d620c46d1cf8b307",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/ThirdpartyController.cs::LinkThirdPartyAccount",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "7d4b16cc3b69248b",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/ThirdpartyController.cs::SignupThirdPartyAccount",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "8216722a218d3307",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::AddMember",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "5320a5ad537fa4f7",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::DeleteMember",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "a7040c992762828a",
+    "date": "2026-11-12"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::DeleteProfile",
@@ -14,11 +56,81 @@
     "date": "2026-10-01"
   },
   {
+    "id": "products/ASC.People/Server/Api/UserController.cs::RemoveUsers",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "034bdccf830f9138",
+    "date": "2026-11-12"
+  },
+  {
     "id": "products/ASC.People/Server/Api/UserController.cs::ResendUserInvites",
     "code": 500,
-    "reason": "Authentication rejects LostUser (InvalidCredentialException in SecurityContext), so an authenticated caller always resolves to an existing user",
-    "fingerprint": "cc7ea3bb9366462f",
-    "date": "2026-10-01"
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "79112102c61a3d00",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::UpdateMember",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "790f8ecf8cbb7aa8",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/MigrationController.cs::FinishMigration",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "acbf5792f13574a1",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/PortalController.cs::DeletePortal",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "0b3694b26ab81583",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/PortalController.cs::SendDeleteInstructions",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "1f1006d29e49ac07",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/PortalController.cs::SendSuspendInstructions",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "4a17551de9f2dcf7",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/PortalController.cs::SuspendPortal",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "b899b996b565e97f",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/LicenseController.cs::UploadLicense",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "adf6d2da9d8f35ed",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/MessageSettingsController.cs::SendAdminMail",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "9e60efcc60779b09",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/MessageSettingsController.cs::SendJoinInviteMail",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "a9f717074bcd53d4",
+    "date": "2026-11-12"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/OwnerController.cs::UpdatePortalOwner",
@@ -28,11 +140,46 @@
     "date": "2026-10-01"
   },
   {
+    "id": "web/ASC.Web.Api/Api/Settings/OwnerController.cs::UpdatePortalOwner",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "857c2a4bcba2a074",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/SettingsController.cs::SaveAiAgentQuotaSettings",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "e5d86d810636a922",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/SettingsController.cs::SaveRoomQuotaSettings",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "b8c6a45f8f758444",
+    "date": "2026-11-12"
+  },
+  {
     "id": "web/ASC.Web.Api/Api/Settings/SsoController.cs::ResetSsoSettingsV2",
     "code": 500,
-    "reason": "SaveAsync returns false only when DbSettingsManager catches a database write failure: an infrastructure fault, left undocumented as in SaveSsoSettingsV2",
-    "fingerprint": "f9e3c8e744c83633",
-    "date": "2026-10-01"
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "842a0ede14dc9e4d",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/SsoController.cs::SaveSsoSettingsV2",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "1b0c6db654d386f9",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/StorageController.cs::StartStorageEncryption",
+    "code": 500,
+    "reason": "чинится задачей «500», снимок от 11.11 (documented-500-snapshot-2026-11-11.md); 500 убран из документации по решению Q2 ветки fix/readable-api-docs",
+    "fingerprint": "645cf28a205cb982",
+    "date": "2026-11-12"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::GetTfaAppCodes",
