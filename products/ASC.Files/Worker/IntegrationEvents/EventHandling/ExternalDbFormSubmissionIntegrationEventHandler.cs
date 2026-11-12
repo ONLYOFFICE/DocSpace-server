@@ -37,6 +37,7 @@ namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 public class ExternalDbFormSubmissionIntegrationEventHandler(
     ILogger<ExternalDbFormSubmissionIntegrationEventHandler> logger,
     TenantManager tenantManager,
+    CommonLinkUtility commonLinkUtility,
     FormFillingReportCreator formFillingReportCreator)
     : IIntegrationEventHandler<ExternalDbFormSubmissionIntegrationEvent>
 {
@@ -50,18 +51,30 @@ public class ExternalDbFormSubmissionIntegrationEventHandler(
 
             try
             {
+                if (!string.IsNullOrEmpty(@event.BaseUri))
+                {
+                    commonLinkUtility.ServerUri = @event.BaseUri;
+                }
+
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
                 // No new submission when sent by the sync button — only the gap sync below runs.
                 if (!string.IsNullOrEmpty(@event.FormsDataUrl))
                 {
-                    await formFillingReportCreator.ExportToExternalDbAsync(
-                        @event.FileId,
-                        @event.OriginalFormId,
-                        @event.OriginalFormVersion,
-                        @event.RoomId,
-                        @event.ResultFormNumber,
-                        @event.FormsDataUrl);
+                    // A failed write is completed from the search index below, which already holds the submission.
+                    try
+                    {
+                        await formFillingReportCreator.ExportToExternalDbAsync(
+                            @event.FileId,
+                            @event.OriginalFormId,
+                            @event.OriginalFormVersion,
+                            @event.RoomId,
+                            @event.FormsDataUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.ErrorWithException(ex);
+                    }
                 }
 
                 await formFillingReportCreator.ExportMissingFromOpenSearchAsync(
