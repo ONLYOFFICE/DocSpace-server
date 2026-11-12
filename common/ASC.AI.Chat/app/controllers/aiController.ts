@@ -53,6 +53,12 @@ import {
 } from "../requestContext.js";
 import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { applyAiProjectChatContext } from "../storage/aiProjectChatContext.js";
+import {
+  buildContextFoldersLines,
+  contextFolderIdsOf,
+  resolveContextFolders,
+  type ContextFolder,
+} from "../storage/contextFolders.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
@@ -183,22 +189,11 @@ function stringField(body: unknown, key: string): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-// `actionArgs.folderContext.id`: the folder the user connected as context
-// in the composer, or `undefined` when none is connected.
-function folderContextIdOf(body: unknown): string | undefined {
-  if (!isObject(body)) {
-    return undefined;
-  }
-  const actionArgs = body["actionArgs"];
-  if (!isObject(actionArgs)) {
-    return undefined;
-  }
-  const folderContext = actionArgs["folderContext"];
-  if (!isObject(folderContext)) {
-    return undefined;
-  }
-  const id = folderContext["id"];
-  return typeof id === "string" && id.length > 0 ? id : undefined;
+// The folders and rooms the user selected as the chat's context in the
+// composer (`actionArgs.folderContexts`, up to `CONTEXT_FOLDERS_LIMIT`), by
+// id; empty when none is selected.
+function contextFolderIdsOfBody(body: unknown): string[] {
+  return isObject(body) ? contextFolderIdsOf(body["actionArgs"]) : [];
 }
 
 // The id the engine hands the tools adapters for the round — mirrors its
@@ -208,11 +203,10 @@ function toolsScopeOf(body: unknown): string | undefined {
   return stringField(body, "contextEntityId") ?? stringField(body, "entityId");
 }
 
-// The folder the user works in for this round: the folder context they
-// picked in the composer, else the folder or room they are in. The location
-// line of the prompt.
+// The folder the round is attributed to: the first of the context folders
+// the user selected, else the folder or room they are in.
 function locationOf(body: unknown): string | undefined {
-  return folderContextIdOf(body) ?? stringField(body, "contextEntityId");
+  return contextFolderIdsOfBody(body)[0] ?? stringField(body, "contextEntityId");
 }
 
 // The entry the round is attributed to for usage accounting: the location
@@ -314,20 +308,27 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
 
 // Build the context fragment that tells the model where it is operating and
 // how to scope tool calls. The location lines are emitted only when the
-// round has a location (see `locationOf`).
-function buildContextFragment(entityId: string | undefined): string {
+// user is somewhere (`entityId`) that is not already one of the context
+// folders; the context folders - the folders and rooms the user selected for
+// the chat, several of them at once - follow as a list the model can reach
+// by id through the tools.
+function buildContextFragment(
+  entityId: string | undefined,
+  contextFolders: readonly ContextFolder[] = [],
+): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
     "- You are an AI agent operating inside an ONLYOFFICE Apps workspace, not a generic standalone assistant.",
   ];
-  if (entityId) {
+  if (entityId && !contextFolders.some((folder) => folder.id === entityId)) {
     lines.push(
       `- You are currently in the folder or room with id ${entityId} — this is the user's current location. Any tool you call reads or modifies data on the user's behalf and with their permissions — never assume access beyond that.`,
       `- When a tool needs a folder, room, or scope identifier and the user did not specify one, use this folder/room id (${entityId}) — e.g. scope searches and listings to it.`,
       `- To see what is in the current location (its files and subfolders), call the get_folder_content tool with this id (${entityId}); use get_folder_info for the location's own properties. Do this when the user refers to "this folder/room", "these files", or asks what is here.`,
     );
   }
+  lines.push(...buildContextFoldersLines(contextFolders));
   lines.push(
     `- Today's date is ${today}.`,
     "- Prefer answering from the conversation when you can; use tools only when the request clearly needs data or actions in the workspace.",
@@ -336,16 +337,21 @@ function buildContextFragment(entityId: string | undefined): string {
   return lines.join("\n");
 }
 
-function withContextPrompt<T>(body: T): T {
+async function withContextPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
   }
-  // The location line must tell the model where the USER is: the folder
-  // they connected as context in the composer (`actionArgs.folderContext`)
-  // when they picked one to work in, else the folder or room they are in
-  // (`contextEntityId`). The project id (`entityId`) is never a location —
-  // inside a project `applyAiProjectChatContext` supplies the folder context.
-  return appendActionPrompt(body, buildContextFragment(locationOf(body)));
+  // The model is told two things. Where the USER is: the folder or room
+  // they are in (`contextEntityId`). And what they selected as the chat's
+  // context: the folders and rooms of `actionArgs.folderContexts`, read here
+  // under the caller's credentials so the names and rights are the server's.
+  // The project id (`entityId`) is never a location - inside a project
+  // `applyAiProjectChatContext` supplies `contextEntityId`.
+  const contextFolders = await resolveContextFolders(contextFolderIdsOfBody(body));
+  return appendActionPrompt(
+    body,
+    buildContextFragment(stringField(body, "contextEntityId"), contextFolders),
+  );
 }
 
 // Attribute the round to the DocSpace entry it runs for — the folder the
@@ -962,7 +968,7 @@ export const aiController = {
         return;
       }
     }
-    const body = withContextPrompt(
+    const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
     // The round's ids as the client sent them (see `toolsScopeOf`). An
@@ -1015,7 +1021,7 @@ export const aiController = {
         return;
       }
     }
-    const body = withContextPrompt(
+    const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
     await streamOpenAiSse(
@@ -1046,7 +1052,7 @@ export const aiController = {
     await primeCustomServers();
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
-    const body = withContextPrompt(
+    const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
     );
     await streamNdjson(

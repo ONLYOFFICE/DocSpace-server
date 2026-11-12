@@ -192,7 +192,6 @@ describe("applyAiProjectChatContext inside a project", () => {
         { cloud: "docspace", id: "7", skills: [{ id: "f1", name: "tone", description: "Tone." }] },
       ],
       knowledgeRooms: [{ cloud: "docspace", id: "9" }],
-      folderContext: { id: "1001" },
     });
     // The project, its sources, its model and the skills all come from the Files API.
     expect(filesApiGet).toHaveBeenCalledWith("rooms/42");
@@ -226,6 +225,15 @@ describe("applyAiProjectChatContext inside a project", () => {
       id: "555",
       name: "Q4 drafts",
     });
+    expect(getMyDocumentsFolderId).not.toHaveBeenCalled();
+  });
+
+  it("scopes the round to the first of several picked context folders and keeps them all", async () => {
+    const folderContexts = [{ id: "555" }, { id: "777", name: "Reports" }];
+    const body: Record<string, unknown> = { entityId: "42", actionArgs: { folderContexts } };
+    expect(await applyAiProjectChatContext(body)).toBeNull();
+    expect(body["contextEntityId"]).toBe("555");
+    expect((body["actionArgs"] as Record<string, unknown>)["folderContexts"]).toEqual(folderContexts);
     expect(getMyDocumentsFolderId).not.toHaveBeenCalled();
   });
 

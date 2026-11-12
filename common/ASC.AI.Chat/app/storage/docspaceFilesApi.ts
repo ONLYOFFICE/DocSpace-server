@@ -250,6 +250,15 @@ function getFolderInfoOnce(folderId: string): Promise<DocspaceFolderInfo | undef
   return pending;
 }
 
+/**
+ * A folder's info for a reader that asks about several folders of one
+ * round (the context folders): memoized per request, served from the
+ * primed chat context when it carries the folder.
+ */
+export function getFolderInfoCached(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  return getFolderInfoOnce(folderId);
+}
+
 /** What kind of DocSpace entry a client names as the round's source. */
 export type SourceKind = "folder" | "file";
 

@@ -43,6 +43,7 @@
 // rooms as knowledge bases. Every room the server lists is active and
 // readable by the caller.
 
+import { contextFolderIdsOf } from "./contextFolders.js";
 import { storage } from "./index.js";
 import {
   filesApiGet,
@@ -207,11 +208,11 @@ async function linkedSkillRooms(projectId: number, roomIds: number[]): Promise<J
  * `profileId` becomes the project's effective model, `actionArgs.contextRooms`
  * the linked Instructions rooms with their skills and
  * `actionArgs.knowledgeRooms` the linked Knowledge rooms (each limited to the
- * rooms the caller can read, in linked order). The Context folder is the one
- * the caller picked in the project (`actionArgs.folderContext`); with none
- * picked it is the caller's My documents, which a project has no location
- * of its own to offer — set as `contextEntityId` (the scope of the file
- * tools) and as the folder context (the location line of the prompt).
+ * rooms the caller can read, in linked order). The context folders are the
+ * ones the caller picked in the project (`actionArgs.folderContexts`, up to
+ * `CONTEXT_FOLDERS_LIMIT`); the first of them becomes `contextEntityId` (the
+ * scope of the file tools). With none picked that scope is the caller's My
+ * documents, which a project has no location of its own to offer.
  * Returns the refusal to answer instead of the round — 403 when the caller
  * may not chat in the project, 409 `projectModelUnavailable` when its model
  * is gone or cannot chat — or `null` to go on.
@@ -269,21 +270,22 @@ export async function applyAiProjectChatContext(
     delete nextArgs["knowledgeRooms"];
   }
   delete nextArgs["knowledgeRoom"];
-  const folderContext = isObject(nextArgs["folderContext"]) ? nextArgs["folderContext"] : undefined;
-  const pickedFolderId = folderContext ? getString(folderContext, "id") : undefined;
+  const [pickedFolderId] = contextFolderIdsOf(nextArgs);
   if (pickedFolderId) {
     body["contextEntityId"] = pickedFolderId;
   } else {
+    // My documents is where the round works, not a folder the user selected:
+    // it is the location, and the list of context folders stays empty.
+    delete nextArgs["folderContext"];
+    delete nextArgs["folderContexts"];
     const myDocumentsId = await getMyDocumentsFolderId();
     if (myDocumentsId) {
       body["contextEntityId"] = myDocumentsId;
-      nextArgs["folderContext"] = { id: myDocumentsId };
     } else {
       logger.warn(
         `AI project ${context.projectId}: My documents not resolved, the round has no folder context`,
       );
       delete body["contextEntityId"];
-      delete nextArgs["folderContext"];
     }
   }
   body["actionArgs"] = nextArgs;
