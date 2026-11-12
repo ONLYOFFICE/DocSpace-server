@@ -91,6 +91,54 @@ public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : Sharin
     }
 
     /// <summary>
+    /// Gives the account a Restrict record on the room, or turns its record into one. The room API
+    /// accepts no Restrict for a room member, yet such records are in the data (left by older releases)
+    /// and the room listing hides the room from a user restricted personally, so the record is written
+    /// directly. It is copied from the room's record of <paramref name="templateSubject"/> to keep the
+    /// tenant, the entry id and the owner as the product writes them.
+    /// </summary>
+    protected async Task RestrictInRoomAsync(int roomId, Guid subject, Guid templateSubject)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText =
+            """
+            INSERT INTO files_security (tenant_id, entry_id, internal_entry_id, entry_type, subject, owner, security, timestamp, subject_type, options)
+            SELECT tenant_id, entry_id, internal_entry_id, entry_type, @subject, owner, @restrict, UTC_TIMESTAMP(), 0, NULL
+            FROM files_security
+            WHERE internal_entry_id = @roomId AND entry_type = 1 AND subject = @templateSubject
+            ON DUPLICATE KEY UPDATE security = @restrict;
+            """;
+        command.Parameters.AddWithValue("@subject", subject.ToString());
+        command.Parameters.AddWithValue("@restrict", (int)FileShare.Restrict);
+        command.Parameters.AddWithValue("@roomId", roomId);
+        command.Parameters.AddWithValue("@templateSubject", templateSubject.ToString());
+
+        var written = await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        written.Should().BePositive("the room must have a record of the template subject to copy");
+    }
+
+    /// <summary>
+    /// Makes the account the manager of the group without being its member. The group API always adds
+    /// the manager as a member as well and removes both together, but <c>core_usergroup</c> keeps the
+    /// manager as a row of its own, so the state exists in the data (directory sync, older releases)
+    /// and is written directly: the manager row of the group is handed over to the account.
+    /// </summary>
+    protected async Task MakeManagerOnlyAsync(Guid groupId, Guid userId)
+    {
+        await using var connection = await Fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE core_usergroup SET userid = @userId WHERE groupid = @groupId AND ref_type = 1 AND removed = 0;";
+        command.Parameters.AddWithValue("@userId", userId.ToString());
+        command.Parameters.AddWithValue("@groupId", groupId.ToString());
+
+        var written = await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
+        written.Should().Be(1, "the group must have exactly one manager row to hand over");
+    }
+
+    /// <summary>
     /// The users the caller is offered for its file, read as the share dialog reads them: every
     /// active account of the area, without a search term.
     /// </summary>

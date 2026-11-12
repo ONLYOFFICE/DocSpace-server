@@ -757,7 +757,7 @@ public class FileSharing(
     {
         var currentUserId = authContext.CurrentAccount.ID;
 
-        if (!await userManager.IsUserAsync(currentUserId) && !await userManager.IsGuestAsync(currentUserId))
+        if (!await userManager.IsWithoutContactsAccessAsync(currentUserId))
         {
             return null;
         }
@@ -768,12 +768,15 @@ public class FileSharing(
     }
 
     /// <summary>
-    /// Whether the current user may pick any group of the portal when sharing. It is the same permission that lets it
-    /// read the group list; without it only the Everyone group is offered.
+    /// Whether the current user may pick any group of the portal when sharing; otherwise only the Everyone group is offered.
+    /// A user or a guest never may, by the same test that limits its users in <see cref="GetKnownToSubjectsAsync"/>, so
+    /// the two lists cannot drift apart. The permission to read the group list is checked as well, so the picker never
+    /// offers groups the group list itself refuses.
     /// </summary>
     public async Task<bool> CanPickAnyGroupAsync()
     {
-        return await permissionContext.CheckPermissionsAsync(Constants.Action_ReadGroups);
+        return !await userManager.IsWithoutContactsAccessAsync(authContext.CurrentAccount.ID)
+               && await permissionContext.CheckPermissionsAsync(Constants.Action_ReadGroups);
     }
 
     public async Task<bool> IsPublicAsync<T>(FileEntry<T> entry)

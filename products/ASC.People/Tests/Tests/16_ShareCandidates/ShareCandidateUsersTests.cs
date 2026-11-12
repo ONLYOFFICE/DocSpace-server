@@ -136,6 +136,118 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
         offered.Select(u => u.Id).Should().Contain(roomMember.Id).And.NotContain(stranger.Id);
     }
 
+    /// <summary>
+    /// A user restricted from a room personally does not see it, even when one of its groups has access,
+    /// so the members of that room are no people it works with.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUserRestrictedFromRoomOfItsGroup_DoesNotOfferRoomMembers()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var roomMember = await InviteContact(EmployeeType.User);
+        var callersGroup = await CreateGroupAsync(members: [caller.Id]);
+        var roomId = await CreateRoomWithMembersAsync(callersGroup.Id, roomMember.Id);
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        // Offered through the group first, so the absence below comes from the restriction alone.
+        (await UsersOfferedForFileAsync(caller, fileId)).Select(u => u.Id).Should().Contain(roomMember.Id);
+
+        await RestrictInRoomAsync(roomId, caller.Id, templateSubject: callersGroup.Id);
+        var offered = await UsersOfferedForFileAsync(caller, fileId);
+
+        offered.Select(u => u.Id).Should().NotContain(roomMember.Id);
+    }
+
+    /// <summary>
+    /// A Restrict record is no membership: the account holding it is not in the room for the caller.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_DoesNotOfferRoomMemberWithRestrictRecord()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var restricted = await InviteContact(EmployeeType.User);
+        var roomId = await CreateRoomWithMembersAsync(caller.Id, restricted.Id);
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        (await UsersOfferedForFileAsync(caller, fileId)).Select(u => u.Id).Should().Contain(restricted.Id);
+
+        await RestrictInRoomAsync(roomId, restricted.Id, templateSubject: restricted.Id);
+        var offered = await UsersOfferedForFileAsync(caller, fileId);
+
+        offered.Select(u => u.Id).Should().NotContain(restricted.Id);
+    }
+
+    /// <summary>
+    /// A member of a group that is restricted from the group's room personally is out of that room, so it
+    /// is no co-member of the caller there.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_DoesNotOfferGroupMemberRestrictedFromItsRoom()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var groupMember = await InviteContact(EmployeeType.User);
+        var group = await CreateGroupAsync(members: [groupMember.Id]);
+        var roomId = await CreateRoomWithMembersAsync(caller.Id, group.Id);
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        (await UsersOfferedForFileAsync(caller, fileId)).Select(u => u.Id).Should().Contain(groupMember.Id);
+
+        await RestrictInRoomAsync(roomId, groupMember.Id, templateSubject: group.Id);
+        var offered = await UsersOfferedForFileAsync(caller, fileId);
+
+        offered.Select(u => u.Id).Should().NotContain(groupMember.Id);
+    }
+
+    /// <summary>
+    /// The restriction takes the member out of one room only: the same group in another room of the caller
+    /// still makes it a co-member.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_OffersGroupMemberRestrictedFromOnlyOneOfItsRooms()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var groupMember = await InviteContact(EmployeeType.User);
+        var group = await CreateGroupAsync(members: [groupMember.Id]);
+        var restrictedRoomId = await CreateRoomWithMembersAsync(caller.Id, group.Id);
+        await CreateRoomWithMembersAsync(caller.Id, group.Id);
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        await RestrictInRoomAsync(restrictedRoomId, groupMember.Id, templateSubject: group.Id);
+        var offered = await UsersOfferedForFileAsync(caller, fileId);
+
+        offered.Select(u => u.Id).Should().Contain(groupMember.Id);
+    }
+
+    /// <summary>
+    /// The manager of a group added to the caller's room is kept apart from membership, so a manager that
+    /// is no member is not offered, while the members are.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_DoesNotOfferManagerOfGroupInItsRoomWhoIsNoMember()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var groupMember = await InviteContact(EmployeeType.User);
+        var managerOnly = await InviteContact(EmployeeType.RoomAdmin);
+        var group = await CreateGroupAsync(members: [groupMember.Id]);
+        await MakeManagerOnlyAsync(group.Id, managerOnly.Id);
+        await CreateRoomWithMembersAsync(caller.Id, group.Id);
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        var offered = await UsersOfferedForFileAsync(caller, fileId);
+
+        offered.Select(u => u.Id).Should().Contain(groupMember.Id).And.NotContain(managerOnly.Id);
+    }
+
     [Fact]
     [Trait("Category", "Bug")]
     [Trait("Bug", "79163")]

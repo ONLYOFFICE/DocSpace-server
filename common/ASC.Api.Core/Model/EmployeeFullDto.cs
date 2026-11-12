@@ -382,7 +382,6 @@ public class EmployeeFullDtoHelper(
     {
         var tenant = tenantManager.GetCurrentTenant();
 
-
         var result = await CreateWithTypeAsync(userInfo, shared);
         result.UserName = userInfo.UserName;
         //result.Birthday = apiDateTimeHelper.Get(userInfo.BirthDate);
@@ -470,7 +469,6 @@ public class EmployeeFullDtoHelper(
 
     private async Task<EmployeeFullDto> CreateWithTypeAsync(UserInfo userInfo, bool? shared)
     {
-        var currentType = await _userManager.GetUserTypeAsync(userInfo.Id);
         var tenant = tenantManager.GetCurrentTenant();
         var roles = await _userFieldsHelper.GetRoleFlagsAsync(userInfo, tenant);
 

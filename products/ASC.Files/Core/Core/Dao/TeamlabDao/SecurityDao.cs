@@ -1015,7 +1015,8 @@ internal abstract class SecurityBaseDao<T>(
     /// Keeps the users the caller already works with: the owners and the members of the rooms it is in, directly or
     /// through a group, the members of the groups added to those rooms, the accounts it is related to, and the users
     /// who already have access to the entry. The owner of a room has no record of its own - it is the author of the
-    /// room folder - so it is read from there. Restricted access is no membership, and room templates are not
+    /// room folder - so it is read from there. Restricted access is no membership - neither a Restrict record of
+    /// its own nor one that takes a member of a group out of a room the group is in - and room templates are not
     /// rooms. Rooms on third-party storage are not taken into account: their records carry no internal folder id
     /// to check the room type by.
     /// </summary>
@@ -1087,15 +1088,24 @@ internal abstract class SecurityBaseDao<T>(
 
         var roomGroups = roomSubjects
             .Where(s => s.SubjectType == SubjectType.Group)
-            .Select(s => s.Subject);
+            .Select(s => new { s.EntryId, GroupId = s.Subject })
+            .Distinct();
 
-        // A group added to many rooms is listed once, so its members are read once, not once per room. Only
-        // Contains rows are membership: the manager of a group has a row of its own, which is no membership.
+        // Only Contains rows are membership: the manager of a group has a row of its own, which is no membership.
+        // A member restricted from the room personally is no member of that room, although its group has access -
+        // the same rule as for the caller above - so the members are taken per room, and the Restrict check is a
+        // primary-key lookup per member.
         var roomGroupMembers =
-            from groupId in roomGroups.Distinct()
-            join ug in filesDbContext.UserGroup on groupId equals ug.UserGroupId
+            from roomGroup in roomGroups
+            join ug in filesDbContext.UserGroup on roomGroup.GroupId equals ug.UserGroupId
             join u in users on ug.Userid equals u.Id
-            where ug.TenantId == tenantId && !ug.Removed && ug.RefType == UserGroupRefType.Contains
+            where ug.TenantId == tenantId && !ug.Removed && ug.RefType == UserGroupRefType.Contains &&
+                  !filesDbContext.Security.Any(r =>
+                      r.TenantId == tenantId &&
+                      r.EntryId == roomGroup.EntryId &&
+                      r.EntryType == FileEntryType.Folder &&
+                      r.Subject == ug.Userid &&
+                      r.Share == Security.FileShare.Restrict)
             select u.Id;
 
         var relatedUsers = users
