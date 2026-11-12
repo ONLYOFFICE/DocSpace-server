@@ -71,18 +71,11 @@ public class NextcloudWorkspaceMigrator : Migrator
         MigrationInfo.Operation = operation;
 
         var files = Directory.GetFiles(path);
-        if (files.Length == 0 || !files.Any(f => f.EndsWith(".zip")))
+        _takeout = files.FirstOrDefault(IsSupportedArchive);
+        if (_takeout == null)
         {
             MigrationInfo.FailedArchives = files.ToList();
-            throw new Exception("Archive must be .zip");
-        }
-        foreach (var t in files)
-        {
-            if (t.EndsWith(".zip"))
-            {
-                _takeout = t;
-                break;
-            }
+            throw new Exception("Archive must be .zip, .tar.gz or .tgz");
         }
         MigrationInfo.Files = [Path.GetFileName(_takeout)];
         TmpFolder = path;
@@ -97,40 +90,34 @@ public class NextcloudWorkspaceMigrator : Migrator
         }
         try
         {
-            double progress = 5;
-            try
+            // A successful parse unpacks the archive next to it and leaves the tree behind; a failed or stopped one
+            // clears the folder. A later parse or the migration reads that tree: unpacking again would only collide
+            // with the files already there. A migration started through the API without a parse finds only the
+            // archive in the folder and unpacks it itself, within the same limits.
+            if (Directory.GetDirectories(TmpFolder).Length == 0)
             {
-                await using var archive = await ZipFile.OpenReadAsync(_takeout, _cancellationToken);
-                foreach (var entry in archive.Entries)
+                try
                 {
-                    if (reportProgress)
+                    var extracted = IsZip(_takeout)
+                        ? await ExtractZipAsync(reportProgress)
+                        : await ExtractTarGzAsync(reportProgress);
+                    if (!extracted)
                     {
-                        progress += 45d / archive.Entries.Count;
-                        await ReportProgressAsync(progress, MigrationResource.Unzipping);
-                    }
-                    var destPath = GetSafeExtractPath(TmpFolder, entry.FullName);
-                    if (string.IsNullOrEmpty(entry.Name))
-                    {
-                        Directory.CreateDirectory(destPath);
-                    }
-                    else
-                    {
-                        var dir = Path.GetDirectoryName(destPath);
-                        if (!Directory.Exists(dir))
+                        if (reportProgress)
                         {
-                            Directory.CreateDirectory(dir);
+                            return null;
                         }
-                        await entry.ExtractToFileAsync(destPath, _cancellationToken);
-                    }
-                    if (_cancellationToken.IsCancellationRequested && reportProgress)
-                    {
-                        return null;
+
+                        // the parse returns quietly when stopped; the import must not go on with an archive unpacked in part
+                        throw new OperationCanceledException(_cancellationToken);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                Log(string.Format(MigrationResource.CanNotToUnzip, _takeout), ex);
+                catch (Exception ex) when (ex is not LargeBackupException && !IsStopped(ex, _cancellationToken))
+                {
+                    // a truncated or broken archive fails the parse rather than leaving part of the backup out of it
+                    Log(string.Format(MigrationResource.CanNotToUnzip, _takeout), ex);
+                    throw;
+                }
             }
 
             if (reportProgress)
@@ -149,7 +136,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                 await ReportProgressAsync(60, MigrationResource.DumpParse);
             }
             var users = DbExtractUser(dbFile);
-            progress = 60;
+            double progress = 60;
             foreach (var user in users)
             {
                 if (_cancellationToken.IsCancellationRequested && reportProgress)
@@ -166,8 +153,9 @@ public class NextcloudWorkspaceMigrator : Migrator
                     try
                     {
                         var rootFolder = Directory.GetDirectories(TmpFolder)[0];
-                        var drivePath = Directory.Exists(Path.Combine(rootFolder, "data", user.Key, "cache")) ?
-                                Path.Combine(rootFolder, "data", user.Key, "cache") : null;
+                        // the user id comes from the dump, so the folder built from it must stay inside the backup
+                        var cachePath = GetSafeExtractPath(Path.Combine(rootFolder, "data"), Path.Combine(user.Key, "cache"));
+                        var drivePath = Directory.Exists(cachePath) ? cachePath : null;
                         if (drivePath == null)
                         {
                             user.Value.HasPhoto = false;
@@ -183,7 +171,7 @@ public class NextcloudWorkspaceMigrator : Migrator
                             var appdataDir = Directory.GetDirectories(Path.Combine(rootFolder, "data")).FirstOrDefault(dir => dir.Split(Path.DirectorySeparatorChar).Last().StartsWith("appdata_"));
                             if (appdataDir != null)
                             {
-                                var pathToAvatarDir = Path.Combine(appdataDir, "avatar", user.Key);
+                                var pathToAvatarDir = GetSafeExtractPath(Path.Combine(appdataDir, "avatar"), user.Key);
                                 user.Value.PathToPhoto = File.Exists(Path.Combine(pathToAvatarDir, "generated")) ? null : Path.Combine(pathToAvatarDir, "avatar.jpg");
                                 user.Value.HasPhoto = user.Value.PathToPhoto != null;
                             }
@@ -222,10 +210,21 @@ public class NextcloudWorkspaceMigrator : Migrator
             }
             DbExtractGroup(dbFile);
         }
+        catch (Exception e) when (IsStopped(e, _cancellationToken))
+        {
+            // a stop is not a broken archive: the parse returns quietly, as it does between entries, and the
+            // import ends with the cancellation rather than an archive error
+            if (reportProgress)
+            {
+                return null;
+            }
+
+            throw;
+        }
         catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_takeout));
-            var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
+            var error = e is LargeBackupException ? e.Message : string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_takeout));
             await ReportProgressAsync(100, error);
             throw new Exception(error, e);
         }
@@ -234,6 +233,38 @@ public class NextcloudWorkspaceMigrator : Migrator
             await ReportProgressAsync(100, MigrationResource.DataProcessingCompleted);
         }
         return MigrationInfo.ToApiInfo();
+    }
+
+    private static bool IsSupportedArchive(string file)
+    {
+        return IsZip(file)
+            || file.EndsWith(".tar.gz", StringComparison.OrdinalIgnoreCase)
+            || file.EndsWith(".tgz", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsZip(string file)
+    {
+        return file.EndsWith(".zip", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // the archive lies in TmpFolder itself, next to what it unpacks to: a file that was there before the extraction
+    // (the uploaded archive) is never replaced
+    private async Task<bool> ExtractZipAsync(bool reportProgress)
+    {
+        await using var archive = await ZipFile.OpenReadAsync(_takeout, _cancellationToken);
+        return await ExtractZipAsync(archive, TmpFolder,
+            (number, count) => reportProgress ? ReportUnzippingAsync(5 + 45d * number / count) : Task.CompletedTask,
+            _cancellationToken);
+    }
+
+    private async Task<bool> ExtractTarGzAsync(bool reportProgress)
+    {
+        await using var fileStream = File.OpenRead(_takeout);
+        await using var gzipStream = new GZipStream(fileStream, CompressionMode.Decompress);
+        // a gzip stream has no entry count up front, so progress follows the compressed bytes read
+        return await ExtractTarAsync(gzipStream, TmpFolder, false,
+            () => reportProgress ? ReportUnzippingAsync(5 + 45d * fileStream.Position / fileStream.Length) : Task.CompletedTask,
+            _cancellationToken);
     }
 
     private void DbExtractGroup(string dbFile)
@@ -385,8 +416,8 @@ public class NextcloudWorkspaceMigrator : Migrator
     {
         var rootFolder = Directory.GetDirectories(TmpFolder)[0];
 
-        var drivePath = Directory.Exists(Path.Combine(rootFolder, "data", key, "files")) ?
-            Path.Combine(rootFolder, "data", key, "files") : null;
+        var filesPath = GetSafeExtractPath(Path.Combine(rootFolder, "data"), Path.Combine(key, "files"));
+        var drivePath = Directory.Exists(filesPath) ? filesPath : null;
         if (drivePath == null)
         {
             return;
@@ -448,11 +479,18 @@ public class NextcloudWorkspaceMigrator : Migrator
 
             if (paths.Length >= 1)
             {
-                var tmpPath = drivePath;
-                for (var i = 1; i < paths.Length; i++)
+                // oc_filecache.path comes from the dump: a row with ".." segments must not reach files outside the user's folder
+                string tmpPath;
+                try
                 {
-                    tmpPath = Path.Combine(tmpPath, paths[i]);
+                    tmpPath = GetSafeExtractPath(drivePath, Path.Combine(paths[1..]));
                 }
+                catch (InvalidDataException ex)
+                {
+                    Log(string.Format(MigrationResource.CanNotCreateFile, entry.Path), ex);
+                    continue;
+                }
+
                 if (Directory.Exists(tmpPath) || File.Exists(tmpPath))
                 {
                     var attr = File.GetAttributes(tmpPath);
