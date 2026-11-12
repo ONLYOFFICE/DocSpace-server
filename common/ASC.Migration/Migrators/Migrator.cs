@@ -96,6 +96,18 @@ public abstract class Migrator(
         MigrationLogger.Log($"{value:0.00} progress: {status}");
     }
 
+    /// <summary>
+    /// Reports unpacking once per whole percent rather than per entry: every report publishes the operation state
+    /// and writes a line to the migration log, and a backup may hold hundreds of thousands of files.
+    /// </summary>
+    protected async Task ReportUnzippingAsync(double progress, string status = null)
+    {
+        if (Math.Floor(progress) > Math.Floor(_lastProgressUpdate))
+        {
+            await ReportProgressAsync(progress, status ?? MigrationResource.Unzipping);
+        }
+    }
+
     public void Log(string msg, Exception exception = null)
     {
         MigrationLogger.Log(msg, exception);
@@ -103,16 +115,230 @@ public abstract class Migrator(
 
     protected static string GetSafeExtractPath(string root, string entryName)
     {
-        var normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
-        var fullPath = Path.GetFullPath(Path.Combine(normalizedRoot, entryName));
-
-        if (!fullPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal)
-            && !fullPath.Equals(normalizedRoot, StringComparison.Ordinal))
+        if (!TryGetSafeExtractPath(root, entryName, out var fullPath))
         {
             throw new InvalidDataException($"Archive entry is outside the extraction directory: {entryName}");
         }
 
         return fullPath;
+    }
+
+    protected static bool TryGetSafeExtractPath(string root, string entryName, out string fullPath)
+    {
+        var normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        fullPath = Path.GetFullPath(Path.Combine(normalizedRoot, entryName));
+
+        return fullPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+            || fullPath.Equals(normalizedRoot, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// The most bytes the uploaded archives may unpack to, set by the operation from the tenant quota and the
+    /// <c>migration:maxExtractedSize</c> ceiling. The quota check before the parse sees only the compressed upload.
+    /// </summary>
+    public long MaxExtractedSize { get; set; } = long.MaxValue;
+
+    /// <summary>
+    /// The most entries the uploaded archives may hold, set by the operation from <c>migration:maxExtractedEntries</c>.
+    /// The byte limit does not see directories, empty files or the entry headers, which compress to a few bytes
+    /// each, so an archive of millions of empty entries would pass it and exhaust inodes, CPU and memory.
+    /// </summary>
+    public long MaxExtractedEntries { get; set; } = long.MaxValue;
+
+    /// <summary>
+    /// The most pixels a profile photo from a backup may have: 4096 x 4096, far beyond what a profile photo needs and
+    /// still well within what decoding it costs. A larger one is left out of the import with a line in the log.
+    /// </summary>
+    private const ulong MaxPhotoPixels = 4096UL * 4096;
+
+    private long _extractedSize;
+    private long _extractedEntries;
+
+    private void CountExtractedSize(long length)
+    {
+        _extractedSize += length;
+        if (_extractedSize > MaxExtractedSize)
+        {
+            throw new LargeBackupException(MigrationResource.LargeBackup);
+        }
+    }
+
+    private void CountExtractedEntries(long count)
+    {
+        _extractedEntries += count;
+        if (_extractedEntries > MaxExtractedEntries)
+        {
+            throw new LargeBackupException(MigrationResource.LargeBackup);
+        }
+    }
+
+    /// <summary>
+    /// Unpacks a zip archive into <paramref name="root"/>, counting its entries and the bytes written against the limits.
+    /// A path met twice in the archive keeps the later entry, as unzip does; a file that was there before the extraction
+    /// is never replaced. <paramref name="onEntry"/> is called before each entry with its 1-based number and the entry count.
+    /// </summary>
+    /// <returns><see langword="false"/> when <paramref name="cancellationToken"/> stopped the extraction.</returns>
+    protected async Task<bool> ExtractZipAsync(ZipArchive archive, string root, Func<int, int, Task> onEntry, CancellationToken cancellationToken)
+    {
+        // the central directory lists every entry up front, so an archive of too many is refused before anything is
+        // written to disk; reading the directory itself still takes memory in proportion to the upload
+        var count = archive.Entries.Count;
+        CountExtractedEntries(count);
+
+        var written = new HashSet<string>();
+        var number = 0;
+        foreach (var entry in archive.Entries)
+        {
+            await onEntry(++number, count);
+
+            var destPath = GetSafeExtractPath(root, entry.FullName);
+            if (string.IsNullOrEmpty(entry.Name))
+            {
+                Directory.CreateDirectory(destPath);
+            }
+            else
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                await using var entryStream = await entry.OpenAsync(cancellationToken);
+                await ExtractEntryAsync(entryStream, destPath, !written.Add(destPath), cancellationToken);
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Unpacks a tar stream into <paramref name="root"/>, counting its entries and the bytes written against the limits.
+    /// A path met twice in the archive keeps the later entry, as tar does. A hard link to a file unpacked earlier is
+    /// unpacked as a copy of it; symbolic links, other hard links, devices and unknown types are skipped with a line in
+    /// the log, as their target may lie outside the extraction folder, and their data still counts against the byte
+    /// limit. A GNU sparse file fails the extraction: TarReader does not read it. With <paramref name="replaceExisting"/> a file
+    /// that was there before the extraction is replaced rather than refused. <paramref name="onEntry"/> is called
+    /// before each entry.
+    /// A truncated tar - one that ends without its end-of-archive block, even when the cut falls on an entry boundary -
+    /// fails with <see cref="InvalidDataException"/> or <see cref="EndOfStreamException"/>.
+    /// </summary>
+    /// <returns><see langword="false"/> when <paramref name="cancellationToken"/> stopped the extraction.</returns>
+    protected async Task<bool> ExtractTarAsync(Stream tarStream, string root, bool replaceExisting, Func<Task> onEntry, CancellationToken cancellationToken)
+    {
+        // TarReader treats a stream that simply ends before the next header as the end of the archive when it can seek
+        // (a plain .tar file), and GZipStream does not check the gzip trailer, so a backup cut on an entry boundary
+        // would read as complete with the rest of it silently missing. The archive is read through a forward-only view
+        // that counts the bytes, and its end is accepted only where the reader found the block of zeros.
+        await using var counter = new ReadCountingStream(tarStream);
+        await using var reader = new TarReader(counter, leaveOpen: true);
+        var written = new HashSet<string>();
+        while (true)
+        {
+            var readBeforeHeader = counter.BytesRead;
+            var entry = await reader.GetNextEntryAsync(cancellationToken: cancellationToken);
+            if (entry is null)
+            {
+                // every entry's data has been read to its end below, so before the next header the reader reads at most
+                // the padding of the last entry, and a whole block more only when it found the end-of-archive block
+                if (counter.BytesRead - readBeforeHeader < TarBlockSize)
+                {
+                    throw new InvalidDataException("The archive is truncated: it ends without the end-of-archive block.");
+                }
+
+                return true;
+            }
+
+            // a tar has no entry count up front, so the entries are counted as they come
+            CountExtractedEntries(1);
+            await onEntry();
+
+            switch (entry.EntryType)
+            {
+                case TarEntryType.Directory:
+                    Directory.CreateDirectory(GetSafeExtractPath(root, entry.Name));
+                    break;
+                case TarEntryType.RegularFile or TarEntryType.V7RegularFile or TarEntryType.ContiguousFile:
+                    {
+                        var destPath = GetSafeExtractPath(root, entry.Name);
+                        Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                        var repeated = !written.Add(destPath);
+                        await ExtractEntryAsync(entry.DataStream ?? Stream.Null, destPath, replaceExisting || repeated, cancellationToken);
+                        break;
+                    }
+                // tar stores a file with several names once, and every other name as a hard link to the first one: the
+                // link is unpacked as a copy of that file, but only of one this extraction wrote, so it never reaches
+                // outside the folder or a file that was there before
+                case TarEntryType.HardLink
+                    when TryGetSafeExtractPath(root, entry.LinkName, out var targetPath) && written.Contains(targetPath):
+                    {
+                        var destPath = GetSafeExtractPath(root, entry.Name);
+                        if (destPath == targetPath)
+                        {
+                            break;
+                        }
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                        var repeated = !written.Add(destPath);
+                        await using var target = File.OpenRead(targetPath);
+                        await ExtractEntryAsync(target, destPath, replaceExisting || repeated, cancellationToken);
+                        break;
+                    }
+                // the archive's own metadata, not a file
+                case TarEntryType.GlobalExtendedAttributes:
+                    break;
+                // symbolic links (their target may lie outside the folder), other hard links, devices, unknown types:
+                // logged, so that a file missing from the import can be traced
+                default:
+                    Log(string.Format(MigrationResource.ArchiveEntrySkipped, entry.Name, entry.EntryType));
+                    break;
+            }
+
+            if (entry.DataStream is not null)
+            {
+                // the data of an entry that was not unpacked (an unknown or a vendor type) is read through too, see the
+                // end check above; it is decompressed all the same, so it counts against the byte limit like written data
+                var buffer = new byte[81920];
+                int read;
+                while ((read = await entry.DataStream.ReadAsync(buffer, cancellationToken)) > 0)
+                {
+                    CountExtractedSize(read);
+                }
+            }
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
+        }
+    }
+
+    private const int TarBlockSize = 512;
+
+    /// <summary>
+    /// Whether <paramref name="exception"/> is the operation being stopped through <paramref name="cancellationToken"/>,
+    /// as opposed to a broken archive or another failure. The token reaches every read and write of the extraction,
+    /// so a stop usually surfaces as such an exception rather than between two entries.
+    /// </summary>
+    protected static bool IsStopped(Exception exception, CancellationToken cancellationToken)
+    {
+        return exception is OperationCanceledException && cancellationToken.IsCancellationRequested;
+    }
+
+    /// <summary>
+    /// Writes an archive entry to a new file, counting the bytes actually written rather than the size the archive declares.
+    /// With <paramref name="overwrite"/> the file may already exist and is replaced; its bytes are counted again.
+    /// </summary>
+    private async Task ExtractEntryAsync(Stream source, string destPath, bool overwrite, CancellationToken cancellationToken)
+    {
+        await using var target = new FileStream(destPath, overwrite ? FileMode.Create : FileMode.CreateNew, FileAccess.Write);
+        var buffer = new byte[81920];
+        int read;
+        while ((read = await source.ReadAsync(buffer, cancellationToken)) > 0)
+        {
+            CountExtractedSize(read);
+            await target.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+        }
     }
 
     public string GetLogName()
@@ -235,12 +461,20 @@ public abstract class Migrator(
 
                     if (user.HasPhoto)
                     {
-                        using var ms = new MemoryStream();
-                        await using (var fs = File.OpenRead(user.PathToPhoto))
+                        // every migrator builds this path from the backup's contents, so it is checked once more where it is opened
+                        var photoPath = GetSafeExtractPath(TmpFolder, user.PathToPhoto);
+
+                        // the photo manager decodes the whole image, and a photo of a few kilobytes can declare gigapixels:
+                        // its size is read from the header first, which decodes no pixels
+                        var photoInfo = new MagickImageInfo(photoPath);
+                        if ((ulong)photoInfo.Width * photoInfo.Height > MaxPhotoPixels)
                         {
-                            await fs.CopyToAsync(ms);
+                            Log(string.Format(MigrationResource.PhotoTooLarge, user.Info.DisplayUserName(DisplayUserSettingsHelper), photoInfo.Width, photoInfo.Height));
                         }
-                        await UserPhotoManager.SaveOrUpdatePhoto(user.Info.Id, ms.ToArray());
+                        else
+                        {
+                            await UserPhotoManager.SaveOrUpdatePhoto(user.Info.Id, await File.ReadAllBytesAsync(photoPath));
+                        }
                     }
                 }
                 if (saved.Equals(Constants.LostUser))
@@ -398,7 +632,8 @@ public abstract class Migrator(
         {
             try
             {
-                await using var fs = new FileStream(file.Path, FileMode.Open);
+                // every migrator builds this path from the backup's contents, so it is checked once more where it is opened
+                await using var fs = new FileStream(GetSafeExtractPath(TmpFolder, file.Path), FileMode.Open, FileAccess.Read);
 
                 var newFile = ServiceProvider.GetService<File<int>>();
                 newFile.ParentId = matchingFilesIds[$"{FolderKey}-{file.Folder}"].Id;

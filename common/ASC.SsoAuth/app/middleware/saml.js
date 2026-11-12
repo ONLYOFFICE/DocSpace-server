@@ -39,7 +39,6 @@ module.exports = (app, config) => {
   const coder = require("../utils/coder");
   const converter = require("../utils/converter")();
   const _ = require("lodash");
-  const fetch = require("node-fetch");
   const routes = _.values(config.routes);
   const machineKey = config["core"].machinekey
     ? config["core"].machinekey
@@ -51,6 +50,9 @@ module.exports = (app, config) => {
       try {
         const response = await fetch(url, options);
         if (response.status !== 200) {
+          // The body is not used, but an unread body keeps the pooled connection busy.
+          // A failed cancel must not turn a valid non-200 answer into a retry.
+          await response.body?.cancel().catch(() => {});
           return { response, text: null };
         }
         const headersObj = {};

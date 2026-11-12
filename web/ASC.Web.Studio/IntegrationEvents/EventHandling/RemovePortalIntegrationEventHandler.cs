@@ -34,7 +34,10 @@
 namespace ASC.Web.Studio.IntegrationEvents;
 
 [Scope]
-public class RemovePortalIntegrationEventHandler(RemovePortalWorker worker, ILogger<RemovePortalIntegrationEventHandler> logger) : IIntegrationEventHandler<RemovePortalIntegrationEvent>
+public class RemovePortalIntegrationEventHandler(
+    RemovePortalWorker worker,
+    FormsDbProvisioningService formsProvisioner,
+    ILogger<RemovePortalIntegrationEventHandler> logger) : IIntegrationEventHandler<RemovePortalIntegrationEvent>
 {
     public async Task Handle(RemovePortalIntegrationEvent @event)
     {
@@ -42,7 +45,26 @@ public class RemovePortalIntegrationEventHandler(RemovePortalWorker worker, ILog
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
+            if (formsProvisioner.IsEnabled())
+            {
+                // Best-effort: a forms-DB deprovision failure must not block portal removal.
+                try
+                {
+                    await formsProvisioner.DeprovisionAsync(@event.TenantId);
+                }
+                catch (Exception e)
+                {
+                    logger.ErrorFormsDeprovisionFailed(e, @event.TenantId);
+                }
+            }
+
             await worker.StartAsync(@event.TenantId);
         }
     }
+}
+
+internal static partial class RemovePortalIntegrationEventHandlerLogger
+{
+    [LoggerMessage(LogLevel.Error, "Failed to deprovision forms database for tenant {tenantId}")]
+    public static partial void ErrorFormsDeprovisionFailed(this ILogger logger, Exception exception, int tenantId);
 }

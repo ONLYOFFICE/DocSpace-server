@@ -38,7 +38,7 @@ namespace ASC.FederatedLogin.DatabaseProviders;
 /// The engine of an external database.
 /// </summary>
 [EnumExtensions]
-public enum ExternalDatabaseType { MySql, Sqlite }
+public enum ExternalDatabaseType { MySql, Sqlite, PostgreSql }
 
 /// <summary>
 /// The outcome of a connection test against an external database.

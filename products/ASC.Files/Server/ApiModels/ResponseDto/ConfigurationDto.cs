@@ -125,6 +125,16 @@ public class ConfigurationDto<T>
     public StartFillingMode StartFillingMode { get; set; }
 
     /// <summary>
+    /// True when the editor should report the form fields renamed while the original form of a form-filling room is
+    /// edited, which is exactly when `PUT api/2.0/files/file/{fileId}/fieldchanges` accepts the reports. It is false
+    /// when the form is opened for viewing or filling, when the caller may not edit it, for a copy of a form, outside
+    /// a form-filling room, and with Document Server Community Edition, whose editors cannot tell the fields of the
+    /// open form.
+    /// </summary>
+    /// <example>true</example>
+    public bool TrackFormFieldChanges { get; set; }
+
+    /// <summary>
     /// Identifies the filling session this opening belongs to, and is empty when the document is not opened as part
     /// of one. Submissions made in the editor are collected under it.
     /// </summary>

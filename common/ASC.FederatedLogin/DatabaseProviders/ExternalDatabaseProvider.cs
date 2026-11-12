@@ -53,7 +53,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
     public ExternalDatabaseType DatabaseTypeEnum =>
         ExternalDatabaseTypeExtensions.TryParse(DatabaseType, ignoreCase: true, out var t) ? t : ExternalDatabaseType.MySql;
     public string Host => this["dbHost"];
-    public string Port => this["dbPort"] ?? "3306";
+    public string Port => this["dbPort"] ?? (DatabaseTypeEnum == ExternalDatabaseType.PostgreSql ? "5432" : "3306");
     public string Database => this["dbName"];
     public string User => this["dbUser"];
     public string Password => this["dbPassword"];
@@ -72,6 +72,9 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
             ExternalDatabaseType.MySql => !string.IsNullOrWhiteSpace(Host) &&
                                           !string.IsNullOrWhiteSpace(Database) &&
                                           !string.IsNullOrWhiteSpace(User),
+            ExternalDatabaseType.PostgreSql => !string.IsNullOrWhiteSpace(Host) &&
+                                               !string.IsNullOrWhiteSpace(Database) &&
+                                               !string.IsNullOrWhiteSpace(User),
             ExternalDatabaseType.Sqlite => IsSqliteAllowed && !string.IsNullOrWhiteSpace(SqliteFilePath),
             _ => false
         };
@@ -81,13 +84,13 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
 
     public AuthKeyMetadata GetKeyMetadata(string key) => key switch
     {
-        "databaseType"   => new() { Order = 0, Type = "select",   Options = IsSqliteAllowed ? ["mysql", "sqlite"] : ["mysql"] },
-        "dbHost"         => new() { Order = 1, DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbPort"         => new() { Order = 2, Type = "number", DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbName"         => new() { Order = 3, DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbUser"         => new() { Order = 4, DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbPassword"     => new() { Order = 5, Type = "password", DependsOn = "databaseType", DependsOnValue = "mysql" },
-        "dbSsl"          => new() { Order = 6, Type = "toggle",   DependsOn = "databaseType", DependsOnValue = "mysql" },
+        "databaseType"   => new() { Order = 0, Type = "select",   Options = IsSqliteAllowed ? ["mysql", "postgresql", "sqlite"] : ["mysql", "postgresql"] },
+        "dbHost"         => new() { Order = 1, DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
+        "dbPort"         => new() { Order = 2, Type = "number", DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
+        "dbName"         => new() { Order = 3, DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
+        "dbUser"         => new() { Order = 4, DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
+        "dbPassword"     => new() { Order = 5, Type = "password", DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
+        "dbSsl"          => new() { Order = 6, Type = "toggle",   DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
         "sqliteFilePath" => new() { Order = 7, DependsOn = "databaseType", DependsOnValue = "sqlite" },
         _                => new()
     };
@@ -136,6 +139,10 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
 
             connection = CreateSqliteConnection(path);
         }
+        else if (dbType == ExternalDatabaseType.PostgreSql)
+        {
+            connection = CreatePgConnection();
+        }
         else
         {
             connection = CreateMySqlConnection();
@@ -175,6 +182,10 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
 
                 connection = CreateSqliteConnection(path);
             }
+            else if (settings.DatabaseTypeEnum == ExternalDatabaseType.PostgreSql)
+            {
+                connection = CreatePgConnection(settings);
+            }
             else
             {
                 connection = CreateMySqlConnection(settings);
@@ -200,7 +211,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         {
             DatabaseType = DatabaseType,
             Host = Host,
-            Port = int.TryParse(Port, out var portValue) ? portValue : 3306,
+            Port = int.TryParse(Port, out var portValue) ? portValue : DatabaseTypeEnum == ExternalDatabaseType.PostgreSql ? 5432 : 3306,
             DatabaseName = Database,
             User = User,
             Password = Password,
@@ -216,6 +227,7 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         return dbType switch
         {
             ExternalDatabaseType.MySql => CreateMySqlConnection(),
+            ExternalDatabaseType.PostgreSql => CreatePgConnection(),
             ExternalDatabaseType.Sqlite => CreateSqliteConnection(ValidateSqlitePath(SqliteFilePath, await GetSqliteBasePathAsync())),
             _ => throw new NotSupportedException($"Database type '{DatabaseType}' is not supported yet.")
         };
@@ -285,6 +297,39 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         };
 
         return new MySqlConnection(builder.ConnectionString);
+    }
+
+    private DbConnection CreatePgConnection()
+    {
+        var builder = new NpgsqlConnectionStringBuilder
+        {
+            Host = Host,
+            Database = Database,
+            Username = User,
+            Password = Password,
+            Port = int.TryParse(Port, out var port) ? port : 5432,
+            Timezone = "UTC",
+            SslMode = bool.TryParse(UseSsl, out var useSsl) && useSsl
+                ? SslMode.Require
+                : SslMode.Disable
+        };
+
+        return new NpgsqlConnection(builder.ConnectionString);
+    }
+
+    private static DbConnection CreatePgConnection(ExternalDatabaseSettings settings)
+    {
+        var builder = new NpgsqlConnectionStringBuilder
+        {
+            Host = settings.Host,
+            Database = settings.DatabaseName,
+            Username = settings.User,
+            Password = settings.Password,
+            Port = settings.Port > 0 ? settings.Port : 5432,
+            SslMode = settings.UseSsl ? SslMode.Require : SslMode.Disable
+        };
+
+        return new NpgsqlConnection(builder.ConnectionString);
     }
 
     private static DbConnection CreateSqliteConnection(string filePath, SqliteOpenMode mode = SqliteOpenMode.ReadWriteCreate)

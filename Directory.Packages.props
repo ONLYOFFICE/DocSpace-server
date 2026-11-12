@@ -33,6 +33,7 @@
     <PackageVersion Include="Asp.Versioning.Mvc.ApiExplorer" Version="10.2.1" />
     <PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.1" />
     <PackageVersion Include="Aspire.Hosting.MySql" Version="13.6.1" />
+    <PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.1" />
     <PackageVersion Include="Aspire.Hosting.RabbitMQ" Version="13.6.1" />
     <PackageVersion Include="Aspire.Hosting.Redis" Version="13.6.1" />
     <PackageVersion Include="AspNetCore.HealthChecks.Kafka" Version="9.0.0" />
@@ -58,6 +59,7 @@
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MailPit" Version="13.6.0" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.McpInspector" Version="13.6.0" />
     <PackageVersion Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" Version="13.6.0" />
+    <PackageVersion Include="CommunityToolkit.Aspire.Hosting.PostgreSQL.Extensions" Version="13.6.0" />
     <PackageVersion Include="Confluent.Kafka" Version="2.15.1" />
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="CsvHelper" Version="33.1.0" />

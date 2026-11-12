@@ -31,16 +31,23 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Diagnostics;
 global using System.Linq.Expressions;
 
+global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
+global using ASC.ClearEvents;
+global using ASC.ClearEvents.Configuration;
 global using ASC.ClearEvents.Extensions;
 global using ASC.ClearEvents.Log;
 global using ASC.ClearEvents.Services;
 global using ASC.Common;
 global using ASC.Common.DependencyInjection;
 global using ASC.Common.Log;
+global using ASC.Common.Utils;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.Hosting;
 global using ASC.Core.Tenants;
 global using ASC.MessagingSystem.EF.Context;
 global using ASC.MessagingSystem.EF.Model;
@@ -51,3 +58,4 @@ global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Logging.Abstractions;
