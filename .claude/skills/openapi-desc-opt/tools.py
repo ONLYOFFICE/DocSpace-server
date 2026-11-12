@@ -1,9 +1,12 @@
 """The readability tools of the skill and their stand-in, shared by scan.py and check_texts.py.
 
-Vale and vacuum are optional. When one is on this machine it gives the verdict on the form of a
-description with the settings in readability/; when it is not, the same thresholds are computed here
-(`form_metrics`, a port of readability/vacuum/functions/description_form.js). So the queue follows the
-tools where they exist and still works where they do not.
+Vale and vacuum are optional. The same thresholds are always computed here as well (`form_metrics`, a
+port of readability/vacuum/functions/description_form.js), and the verdict on the form is the worst of
+the tools that ran and this count: a tool can add a finding, never take one away. So the queue is
+never milder with a tool than without it.
+
+Every run of a tool carries a canary, a description it has to flag. A tool that ran but left the canary
+unflagged checked nothing; its verdict is dropped and the note says so (`FAILED: …`).
 
 Finding the tools: a flag, else VALE_BIN / VACUUM_BIN, else PATH.
 """
@@ -64,6 +67,21 @@ def discover(vale=None, vacuum=None, use_tools=True):
 def source_name(found):
     names = [n for n, key in (("Vale", "vale"), ("vacuum", "vacuum")) if found.get(key)]
     return " + ".join(names) if names else "own checks"
+
+
+# The canary: one sentence of 28 plain words and a code span. Vale skips the code span, so the plain
+# words alone are over the limit for it too. It never reaches a caller: the run_* functions drop it.
+CANARY = ("This canary sentence is long on purpose, because every working form check has to flag a sentence "
+          "of more than twenty words like this one with `code` in it.")
+# vacuum reports a path with a dot as one quoted name and a path without one as separate segments;
+# a canary of each kind proves both are read back.
+CANARY_ROUTES = (("/internal/desc-opt-canary", "get"), ("/api/2.0/desc-opt-canary", "get"))
+_CANARY = object()
+
+
+def _canary_failure(rule, where=""):
+    return ("FAILED: the canary, a {0}-word sentence{1}, got no {2} — the tool checked nothing, so its "
+            "verdict is dropped and the own checks judge").format(max(form_metrics(CANARY)["lengths"]), where, rule)
 
 
 def published(raw):
@@ -132,13 +150,14 @@ def run_vale(binary, texts, work, docs_only=False):
     """{key: [(check, severity, match, message)]} for {key: text}, and a note on the styles used.
 
     `docs_only` keeps the run to the Docs styles, which carry the thresholds — the Microsoft
-    suggestions are for reading one text, not for sorting hundreds.
+    suggestions are for reading one text, not for sorting hundreds. Returns None in place of the
+    alerts when Vale failed or left the canary unflagged.
     """
     folder = os.path.join(work, "vale")
     os.makedirs(folder, exist_ok=True)
     names = {}
-    for n, (key, text) in enumerate(texts.items()):
-        name = "{0:04d}.md".format(n)
+    for n, (key, text) in enumerate(list(texts.items()) + [(_CANARY, CANARY)]):
+        name = "canary.md" if key is _CANARY else "{0:04d}.md".format(n)
         with open(os.path.join(folder, name), "w", encoding="utf-8") as f:
             f.write(re.sub(r"\s+", " ", text).strip() + "\n")
         names[name] = key
@@ -160,6 +179,9 @@ def run_vale(binary, texts, work, docs_only=False):
         key = names.get(os.path.basename(file))
         if key is not None:
             out[key] = [(a.get("Check"), a.get("Severity"), a.get("Match"), a.get("Message")) for a in alerts]
+    canary = out.pop(_CANARY, [])
+    if not any(a[0] == "Docs.SentenceLength" for a in canary):
+        return None, _canary_failure("Docs.SentenceLength")
     if docs_only or has_microsoft:
         note = "styles Docs" + (", Microsoft" if has_microsoft and not docs_only else "")
     else:
@@ -168,11 +190,27 @@ def run_vale(binary, texts, work, docs_only=False):
     return out, note
 
 
+# The path of a vacuum finding, joined back on the dots vacuum split it on. A route with a dot comes as
+# one quoted name, `paths['/api/2.0/files'].get.description` (`"` when the route holds a `'`); a route
+# without one as separate segments, `paths./internal/ai/agents/agentquota.put.description`.
+_VACUUM_PATH = re.compile(r"""^paths(?:\['(?P<single>.*)'\]|\["(?P<double>.*)"\]|\.(?P<bare>[^.'"\[]*))"""
+                          r"""\.(?P<verb>\w+)\.description$""")
+
+
+def _vacuum_route(segments):
+    m = _VACUUM_PATH.match(".".join(segments or []))
+    if not m:
+        return None
+    return next(g for g in (m.group("single"), m.group("double"), m.group("bare")) if g is not None), m.group("verb")
+
+
 def run_vacuum(binary, entries, work):
-    """{key: [(code, message)]} for [(key, path, verb, text)], and a note."""
+    """{key: [(code, message)]} for [(key, path, verb, text)], and a note. Returns None in place of
+    the findings when vacuum failed, left a canary unflagged or reported a finding on no known route."""
     spec = dict(openapi="3.0.1", info=dict(title="description check", version="1"), paths={})
     by_route = {}
-    for n, (key, path, verb, text) in enumerate(entries):
+    canaries = [(_CANARY, path, verb, CANARY) for path, verb in CANARY_ROUTES]
+    for n, (key, path, verb, text) in enumerate(list(entries) + canaries):
         spec["paths"].setdefault(path, {})[verb] = dict(
             operationId="op{0}".format(n), description=text, responses={"200": dict(description="OK")})
         by_route[(path, verb)] = key
@@ -191,13 +229,25 @@ def run_vacuum(binary, entries, work):
         data = None
     if data is None:
         return None, "vacuum failed: " + (proc.stderr or proc.stdout or "").strip()[:300]
-    out = {}
+    out, flagged, lost = {}, set(), []
     for r in data:
-        # vacuum splits the path on every dot, the one in `api/2.0` included: join it back.
-        m = re.match(r"paths\['(.*?)'\]\.(\w+)\.description$", ".".join(r.get("path") or []))
-        key = by_route.get((m.group(1), m.group(2))) if m else None
-        if key is not None:
-            out.setdefault(key, []).append((r.get("code"), r.get("message")))
+        if not str(r.get("code") or "").startswith("desc-"):
+            continue  # not a rule of readability/vacuum/ruleset.yaml, whose rules are all named desc-…
+        route = _vacuum_route(r.get("path"))
+        if route not in by_route:
+            lost.append(".".join(r.get("path") or []))
+        elif by_route[route] is _CANARY:
+            if r.get("code") == "desc-sentence-length":
+                flagged.add(route)
+        else:
+            out.setdefault(by_route[route], []).append((r.get("code"), r.get("message")))
+    if lost:
+        # A finding no route takes would be dropped in silence and read as a clean description.
+        return None, ("FAILED: {0} finding(s) on a path no operation takes, first {1} — the verdict is "
+                      "dropped and the own checks judge").format(len(lost), lost[0])
+    missed = [path for path, verb in CANARY_ROUTES if (path, verb) not in flagged]
+    if missed:
+        return None, _canary_failure("desc-sentence-length", " at " + ", ".join(missed))
     return out, "ruleset readability/vacuum"
 
 
@@ -207,8 +257,11 @@ def form_verdicts(entries, found, work):
     """Per key, how the description departs from the form: {long, paragraphs, average, grade}.
 
     `long` is the number of sentences over the limit, `average` and `grade` are set only when over
-    theirs. Each value comes from a tool where one is installed and covers it, else from
-    `form_metrics`; a description flagged by either tool is flagged. Returns (verdicts, source, notes).
+    theirs. Each value is the worst of `form_metrics`, always counted, and the tools that ran: a
+    description flagged by any of them is flagged. A tool that failed or left its canary unflagged
+    gives no verdict, and its note says so. Returns (verdicts, source, notes); `source` names the tools
+    whose verdict was used and adds "own checks" when one is missing or failed — the label of a run
+    with both stays "Vale + vacuum", the one the manifests of earlier batches hold.
     """
     vale = vacuum = None
     notes = []
@@ -220,35 +273,32 @@ def form_verdicts(entries, found, work):
         notes.append("vacuum: " + note)
 
     verdicts = {}
+    def worst(current, number):
+        return number if current is None or number > current else current
+
     for key, _, _, text in entries:
         own = form_metrics(text)
-        long_own = sum(1 for n in own["lengths"] if n > MAX_SENTENCE_WORDS)
-        v = dict(long=None, paragraphs=None, average=None, grade=None)
+        v = dict(long=sum(1 for n in own["lengths"] if n > MAX_SENTENCE_WORDS),
+                 paragraphs=own["paragraphs"],
+                 average=own["average"] if own["average"] > MAX_AVERAGE_WORDS else None,
+                 grade=own["grade"] if own["grade"] > MAX_GRADE else None)
         if vacuum is not None:
             alerts = vacuum.get(key, [])
-            v["long"] = sum(1 for c, _ in alerts if c == "desc-sentence-length")
-            v["paragraphs"] = any(c == "desc-one-paragraph" for c, _ in alerts)
+            v["long"] = max(v["long"], sum(1 for c, _ in alerts if c == "desc-sentence-length"))
+            v["paragraphs"] = v["paragraphs"] or any(c == "desc-one-paragraph" for c, _ in alerts)
             for c, msg in alerts:
                 number = re.search(r"(\d+(?:\.\d+)?)", msg or "")
                 if c == "desc-average-sentence" and number:
-                    v["average"] = float(number.group(1))
+                    v["average"] = worst(v["average"], float(number.group(1)))
                 if c == "desc-grade" and number:
-                    v["grade"] = float(number.group(1))
+                    v["grade"] = worst(v["grade"], float(number.group(1)))
         if vale is not None:
             alerts = vale.get(key, [])
-            v["long"] = max(v["long"] or 0, sum(1 for a in alerts if a[0] == "Docs.SentenceLength"))
+            v["long"] = max(v["long"], sum(1 for a in alerts if a[0] == "Docs.SentenceLength"))
             for a in alerts:
                 number = re.search(r"(\d+(?:\.\d+)?)", a[3] or "")
                 if a[0] == "Docs.Grade" and number:
-                    v["grade"] = max(v["grade"] or 0, float(number.group(1)))
-        if v["long"] is None:
-            v["long"] = long_own
-        if v["paragraphs"] is None:
-            v["paragraphs"] = own["paragraphs"]
-        if vacuum is None and own["average"] > MAX_AVERAGE_WORDS:
-            v["average"] = own["average"]
-        if vacuum is None and vale is None and own["grade"] > MAX_GRADE:
-            v["grade"] = own["grade"]
+                    v["grade"] = worst(v["grade"], float(number.group(1)))
         v["longest"] = max(own["lengths"] or [0])
         verdicts[key] = v
     if vale is None and vacuum is None:

@@ -29,6 +29,11 @@ A request only to install or check the readability tools (Vale, vacuum, textstat
 follow `references/tools-setup.md` through its step 4, report what it printed, and stop. Never
 install them in the middle of a pass — a new tool changes the judge between step 3 and step 7.
 
+Run a pass every time the OpenAPI documents are updated. This skill is the only check of the form of
+a description: no build, CI job or Spectral rule runs it, and the build analyzer (API002–API006) only
+checks that the texts exist. A description written by hand outside the campaign reaches the queue
+from the regenerated document and is closed in that pass.
+
 ## What the loop owns
 
 | File | What it is |
@@ -126,9 +131,12 @@ files      controllers=..  operations=..  actions=..  unmatched=0  stale=0  must
   regeneration silently failed.
 
 The queue finds descriptions both below the norm (`no-description`, `thin-description`) and above it
-(`off-form-description`, `heavy-description`, list rules §4). The second kind is the verdict of Vale
-and vacuum where they are installed and of the skill's own stand-in where they are not; the line
-`FORM: judged by …` says which. The scan finds the tools the way `check_texts.py` does (`--vale`,
+(`off-form-description`, `heavy-description`, list rules §4). The second kind is the worst of the
+skill's own count, which always runs, and of Vale and vacuum where they are installed: a tool adds
+findings, never removes one. The line `FORM: judged by …` names the tools whose verdict counted. Every
+run of a tool carries a canary, a description it has to flag; a tool that misses it, or that reports a
+finding on no known operation, is shown there as `FAILED: …` and its verdict is dropped — say so in the
+report. The scan finds the tools the way `check_texts.py` does (`--vale`,
 `--vacuum`, `VALE_BIN`, `VACUUM_BIN`, `PATH`); `--own-checks` makes it ignore them. Pass the same
 choice to `--batch` and `--verify-batch` — a different judge moves form findings by itself, and step 7
 reports that as a moved counter. A missing tool is not an error: name it at the end of the report, as
@@ -283,7 +291,9 @@ The tools are optional. The script looks for them before it runs them: `--vale` 
 last line, `MISSING TOOLS:`, names it — keep that line for the report. Do not install anything on
 your own. When the user asks for the tools, `references/tools-setup.md` has the commands per machine
 and the check that proves them (`check_texts.py --check-tools`); a tool that check marks `FAILED` is
-not used for the queue (`--own-checks`) until it is fixed.
+not used for the queue (`--own-checks`) until it is fixed. A tool that misses the canary of a run is
+dropped by the scripts themselves: its entry on the `TOOLS:` line starts with `FAILED:`, and its
+per-operation lines are not printed.
 
 Read the output as a list of places to look at, not as a score. A note about content — a missing
 refusal code, a missing repeat statement, a code not in the text — is a question to put to the code,

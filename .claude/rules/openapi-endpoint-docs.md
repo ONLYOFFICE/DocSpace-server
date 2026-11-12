@@ -27,7 +27,9 @@ swap them: a swap exchanges every title and description across the contract and 
 only with `[AllowAnonymous]`).
 
 An action or controller under `[ApiExplorerSettings(IgnoreApi = true)]` is documented to the same standard:
-the attribute is a publication switch, and the text under it gets published when someone flips it.
+the attribute is a publication switch, and the text under it gets published when someone flips it. No pass
+rewrites these texts on its own: bring an action under `IgnoreApi` to this standard when you change it or remove
+the attribute.
 
 ## 1. `summary` — the title
 

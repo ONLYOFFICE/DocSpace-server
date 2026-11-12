@@ -32,9 +32,17 @@ with a basic level can follow.
    apply"). State the fact, or name the parameter: "the minimums of `quantity`".
 5. **Compare the status codes.** Every 4xx and 5xx code of the current text and of the declared
    responses must be in the new text, or have a reason to be left out. Usual reasons: 401 for a missing
-   sign-in, 500, 502 and 503 of the pipeline, a code the type of a parameter already rules out. A
-   declared code is a candidate, not proof: check that the code can return it. `check_texts.py` lists
-   the codes of both texts, of the responses and of the parameters (`CODES` lines).
+   sign-in, 500, 502 and 503 of the pipeline, a code the type of a parameter already rules out.
+   - **The text of a `[SwaggerResponse]` and the old description are not sources of a fact.** They
+     only say where to look. Check each code and each condition you write in the code of the action
+     and the services it calls.
+   - A declared code is a candidate, not proof. If a path of the action returns it, name it in the
+     text. If no path returns it, remove the attribute.
+   - A code that the text gives to another operation (`` `GET api/2.0/x` returns 404 ``) is not a
+     code of this one.
+
+   `check_texts.py` lists the codes of both texts, of the responses and of the parameters (`CODES`
+   lines). Each `CODES` line is a question to the code of the action, not a phrase to add.
 
 ## 2. What stays, in this order
 

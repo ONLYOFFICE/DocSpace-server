@@ -1,7 +1,7 @@
 # Setting up textstat, Vale and vacuum
 
-The skill works without these tools. `tools.py` computes the form thresholds itself where Vale and
-vacuum are missing, and `check_texts.py` names what it skipped on its last line, `MISSING TOOLS:`.
+The skill works without these tools. `tools.py` computes the form thresholds itself on every run, and
+`check_texts.py` names what it skipped on its last line, `MISSING TOOLS:`.
 What the tools add is a second opinion kept outside this repo: Vale's sentence and grade styles,
 vacuum running the same ruleset a Spectral-style linter would, textstat's readability numbers.
 
@@ -14,8 +14,8 @@ never pipe an installer script into a shell (`curl … | sh`).
 | Tool | What it is | Used by | Adds | Without it |
 |---|---|---|---|---|
 | textstat | Python package | `check_texts.py` | Flesch-Kincaid grade, reading ease, fog index and difficult words per text | the `textstat` line is not printed |
-| Vale | CLI, one binary | `scan.py`, `check_texts.py` | the `Docs` styles of `readability/vale` (sentence length, grade); in `check_texts.py` also the `Microsoft` style once synced | the stand-in in `tools.py` |
-| vacuum | CLI, one binary | `scan.py`, `check_texts.py` | `readability/vacuum/ruleset.yaml` with its JavaScript function | the stand-in in `tools.py` |
+| Vale | CLI, one binary | `scan.py`, `check_texts.py` | the `Docs` styles of `readability/vale` (sentence length, grade); in `check_texts.py` also the `Microsoft` style once synced | the stand-in in `tools.py` alone |
+| vacuum | CLI, one binary | `scan.py`, `check_texts.py` | `readability/vacuum/ruleset.yaml` with its JavaScript function | the stand-in in `tools.py` alone |
 
 Last checked on 2026-11-10, on Windows: Vale 3.26.0 from winget, vacuum 0.39.3 from npm and textstat
 0.7.13 pass step 4. The macOS rows were not run on a Mac; their notes come from the Homebrew formula,
@@ -146,10 +146,11 @@ which break nothing. Each tool has to flag the first and pass the second. Every 
 print `ok`, and the run must end with `TOOLS OK` (exit code 0).
 
 A `FAILED` line means the tool runs but does not apply this skill's settings: another version, a
-changed flag or output format, a ruleset it cannot load. That is worse than a missing tool. The queue
-trusts a tool it finds, so a tool that reports nothing closes every form finding it never saw. Until
-the line is fixed, run `scan.py` with `--own-checks`, and give the user the `FAILED` line with the
-version the check printed.
+changed flag or output format, a ruleset it cannot load. A tool that reports nothing closes no
+finding: every run carries a canary, and a tool that misses it is marked `FAILED: …` on the `FORM:`
+line of `scan.py` and the `TOOLS:` line of `check_texts.py` and its verdict is dropped. A tool that
+flags the short sample still adds findings that are not there. Until the line is fixed, run `scan.py`
+with `--own-checks`, and give the user the `FAILED` line with the version the check printed.
 
 ## What changes once a tool is there
 
@@ -157,13 +158,17 @@ version the check printed.
   `off-form-description` and `heavy-description` can move by themselves. `--batch` records the judge
   per document and `--verify-batch` reports a change of it, so install between passes, never between
   step 3 and step 7 — or keep `--own-checks` on both.
-- A found tool's verdict replaces the stand-in's for the checks it covers. Vale counts no words in
-  backticks, so Vale without vacuum passes sentences that vacuum and the stand-in flag: install both.
-  On the 737 published descriptions of 2026-11-10, vacuum and the stand-in agreed on every sentence
-  length, average, sentence count and paragraph verdict; of the 712 descriptions with a sentence over
-  20 words, Vale passed 2.
-- Vale computes the grade with its own syllable count, and the queue takes the higher of Vale's and
-  vacuum's. On the same 737 descriptions 554 came out over grade 10 with both tools, 520 with the
-  stand-in alone, so `heavy-description` grows a little once the tools are in.
+- A found tool's verdict is merged with the stand-in's, which always runs: per check the worse of the
+  two counts. Vale counts no words in backticks and passes some sentences the stand-in flags; the
+  stand-in still flags them, so Vale alone is never milder than no tool. On the 737 published
+  descriptions of 2026-11-10, vacuum and the stand-in agreed on every sentence length, average,
+  sentence count and paragraph verdict; of the 712 descriptions with a sentence over 20 words, Vale
+  passed 2.
+- Vale computes the grade with its own syllable count, and the queue takes the highest of Vale's,
+  vacuum's and the stand-in's. On the same 737 descriptions 554 came out over grade 10 with both
+  tools, 520 with the stand-in alone, so `heavy-description` grows a little once the tools are in.
+- vacuum reports a finding on a route with a dot (`api/2.0/…`) as one quoted name and on a route
+  without one (`internal/ai/…`) as separate path segments. `tools.py` reads both; a finding it cannot
+  tie to an operation fails the vacuum run instead of being dropped.
 - `check_texts.py` adds a `Vale`, a `vacuum` and a `textstat` line per operation. Read them like the
   rest of its output: places to look, not a score.

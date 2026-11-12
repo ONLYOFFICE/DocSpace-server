@@ -4,14 +4,16 @@ What it checks, per operation:
 - its own checks, always: sentence length and count, the word order and plain words of §4 and §5.3,
   the place of access and effect, the repeat statement, the operations the text names (do they
   exist in a document), and the status codes against the old text, the declared responses and the
-  parameters (§1.5);
+  parameters (§1.5). A code the text gives to another operation (`GET api/2.0/x` returns 404, every
+  save call returns 402) is not a code of this one and takes no part in that comparison;
 - textstat, Vale and vacuum, each only when it is found on this machine. A tool that is missing is
   skipped and named on the last line, `MISSING TOOLS:`.
 
 Which operations: the description sites of the batch in batch-manifest.json, or the ones named with
 --op. Where the new text comes from:
-- --from source (default): the `<remarks>` in the C# sources; the old text is the description in the
-  document, so run it after the edit and before the document is regenerated;
+- --from source (default): the `<remarks>` in the C# sources, and the declared codes from the
+  [SwaggerResponse] attributes of the action; the old text is the description in the document, so
+  run it after the edit and before the document is regenerated;
 - --from document: the published description, webhook sentence included; run it after step 6.
 
 Finding the tools: --vale / VALE_BIN, --vacuum / VACUUM_BIN, else PATH; textstat is imported by this
@@ -47,7 +49,16 @@ PIPELINE_CODES = {"401", "500", "502", "503"}
 CODE_SPAN = re.compile(r"`[^`]*`")
 STATUS = re.compile(r"(?<![\w/{.-])([45]\d\d)(?![\w}])(?!\.\d)")
 ACCESS = re.compile(r"\b(Requires|can call it|Anyone can|Only (the|a|an)\b|Sign the request)")
-OPEN_ACCESS = re.compile(r"^(Anyone can call it without signing in|Any signed-in user can call it)\.?$")
+# Open access refuses nobody, so no refusal code follows it; "except a guest" is a refusal.
+OPEN_ACCESS = re.compile(r"^(Anyone|Any signed-in user)\b(?![^.]*\bexcept\b)[^.]*?\bcan call it\b")
+# A refusal that is no error: the sentence after the access phrase says what other callers get instead.
+REFUSAL_WITHOUT_ERROR = re.compile(r"\b(instead of an error|not an error|(gets|returns) 200)\b")
+SWAGGER_RESPONSE = re.compile(r'\[SwaggerResponse\(\s*(\d{3})\s*(?:,\s*"((?:[^"\\]|\\.)*)")?')
+# The subject of `returns N` / `gets N` when the code belongs to other operations, not to this one:
+# a named operation (OPREF after masking) or "every branding save call", "other calls".
+OTHER_CALLS = re.compile(r"\bOPREF\b|\b(every|other|those|these)\s+"
+                         r"(?!(repeated|second|next|later|further|following)\b)([\w-]+\s+){0,3}calls?\b", re.I)
+CODE_VERB = re.compile(r"\b(returns?|gets?)\b")
 EFFECT = re.compile(r"\b(read-only|changes data|cannot be undone|spends|queues)\b")
 # The effect is said of the call; "queues" in a sentence about something else is no effect statement.
 CALL_SUBJECT = re.compile(r"^(The call|This call|It)\b")
@@ -126,6 +137,51 @@ def words(sentence):
 
 def codes(text):
     return set(STATUS.findall(CODE_SPAN.sub(lambda m: m.group(0) if re.match(r"`[45]\d\d`", m.group(0)) else " ", text or "")))
+
+
+def split_codes(text, own_route):
+    """(codes of this operation, codes the text gives to other operations).
+
+    A code is another operation's when the subject of the `returns` or `gets` before it, in its own
+    clause, names an operation other than `own_route` or other calls: "Also, `GET api/2.0/migration/logs`
+    returns 404", "every branding save call returns 402". Everything else is this operation's."""
+    def other(verb, path):
+        return " OPREF " if route_ref(verb, path) != own_route else " "
+
+    def mask(m):
+        span = m.group(0)
+        if re.match(r"`[45]\d\d`$", span):
+            return span
+        ref = OPERATION_REF.search(span)
+        return other(*ref.groups()) if ref else " "
+
+    own, others = set(), set()
+    for sentence in sentences(text or ""):
+        masked = OPERATION_REF.sub(lambda r: other(*r.groups()), CODE_SPAN.sub(mask, sentence))
+        for m in STATUS.finditer(masked):
+            clause = re.split(r"[,;:]", masked[:m.start()])[-1]
+            verbs = list(CODE_VERB.finditer(clause))
+            subject = clause[verbs[-2].end() if len(verbs) > 1 else 0:verbs[-1].start()] if verbs else ""
+            (others if OTHER_CALLS.search(subject) else own).add(m.group(1))
+    return own, others
+
+
+SOURCE_FILES = {}
+
+
+def source_responses(root, action):
+    """{code: text} of the [SwaggerResponse] attributes of the action, read from its C# file: the
+    attribute block above the route attribute and the attributes between it and the method."""
+    path = os.path.join(root, action["file"])
+    if path not in SOURCE_FILES:
+        text = scan.read_text(path)
+        SOURCE_FILES[path] = (text, scan.mask_comments(text))
+    text, masked = SOURCE_FILES[path]
+    start = sum(len(line) + 1 for line in text.split("\n")[:action["line"] - 1])
+    decl = scan.METHOD_RE.search(masked, start)
+    region = scan.block_above(text, start) + "\n" + text[start:decl.start() if decl else start]
+    region = "\n".join(line for line in region.splitlines() if not re.match(r"\s*//(?!/)", line))
+    return {m.group(1): (m.group(2) or "").replace('\\"', '"') for m in SWAGGER_RESPONSE.finditer(region)}
 
 
 # --- operations --------------------------------------------------------------------------------
@@ -212,8 +268,16 @@ def collect(root, doc_key, wanted, source):
                 items.append(item)
                 continue
             action = candidates[0][1]
+            # The attributes, not the document: a [SwaggerResponse] added with the new text counts before
+            # the document is regenerated. The generator's own responses still come from the document.
+            attrs = source_responses(root, action)
             item.update(text=flatten(action["remarks"]), old=flatten(op["description"]),
-                        where="{0}:{1} {2}.{3}".format(action["file"], action["line"], action["cls"], action["method"]))
+                        where="{0}:{1} {2}.{3}".format(action["file"], action["line"], action["cls"], action["method"]),
+                        declared=sorted(c for c, text in attrs.items()
+                                        if c[:1] in "45" and (c, scan.norm(text)) not in defaults),
+                        declared_all=sorted({c for c in attrs if c[:1] in "45"}
+                                            | {c for c, text in op["responses"].items()
+                                               if c[:1] in "45" and (c, scan.norm(text)) in defaults}))
         else:
             item.update(text=flatten(op["description"]), old=None, where=meta["doc"])
         items.append(item)
@@ -250,8 +314,10 @@ def own_checks(item, source, words_to_replace, routes):
         notes.append(("ORDER", "no access phrase of §5.1 (§2.3)"))
     else:
         a = access[0]
-        if not OPEN_ACCESS.match(sents[a]) and not any(codes(s) for s in sents[a:a + 2]):
-            notes.append(("ORDER", "the access phrase is not followed by the refusal code (§2.3)"))
+        if not OPEN_ACCESS.match(sents[a]) and not any(codes(s) or REFUSAL_WITHOUT_ERROR.search(s)
+                                                       for s in sents[a:a + 2]):
+            notes.append(("ORDER", "the access phrase is not followed by the refusal code (§2.3). What does the "
+                                   "action return to other callers? Take it from its code"))
     if not effect:
         notes.append(("ORDER", "no effect statement: read-only, changes data, cannot be undone, spends, queues (§2.4)"))
     if access and said_of_call and said_of_call[0] < access[0]:
@@ -281,19 +347,28 @@ def own_checks(item, source, words_to_replace, routes):
                 notes.append(("REFS", "{0} {1} is in no document of the json folder; name the operation "
                                       "as the document publishes it (§4 Notation)".format(verb, path)))
 
-    new, params = codes(text), codes(item["params"])
-    old = codes(item["old"]) if item["old"] is not None else set()
+    # Only the codes of this operation: a code the text gives to another operation is neither named nor lost.
+    own_route = route_ref(item["verb"], item["path"])
+    new, others = split_codes(text, own_route)
+    params = codes(item["params"])
+    old = split_codes(item["old"], own_route)[0] if item["old"] is not None else set()
     lost = sorted(c for c in old - new - params)
     unstated = sorted(c for c in item["declared"] if c not in new and c not in params and c not in PIPELINE_CODES)
     undeclared = sorted(c for c in new if c not in item["declared_all"])
-    item["codes"] = dict(text=sorted(new), declared=item["declared"], old=sorted(old) if item["old"] is not None else None)
+    item["codes"] = dict(text=sorted(new), others=sorted(others), declared=item["declared"],
+                         old=sorted(old) if item["old"] is not None else None)
     if lost:
-        notes.append(("CODES", "in the old text, not in the new one or the parameters: {0} — keep or give a reason (§1.5)"
+        notes.append(("CODES", "in the old text, not in the new one or the parameters: {0}. Does the action still "
+                               "return it? Keep it if so, give the reason if not (§1.5)"
                       .format(", ".join(c + (" (usually left out)" if c in PIPELINE_CODES else "") for c in lost))))
     if unstated:
-        notes.append(("CODES", "declared, not in the text or the parameters: {0} — reachable? (§1.5)".format(", ".join(unstated))))
+        notes.append(("CODES", "declared, not in the text or the parameters: {0}. Can this operation return it? Find "
+                               "the path in the code of the action, not in the [SwaggerResponse] text. Reachable: "
+                               "name it in the text. Unreachable: remove the attribute (§1.5)".format(", ".join(unstated))))
     if undeclared:
-        notes.append(("CODES", "named in the text, no response declares it: {0}".format(", ".join(undeclared))))
+        notes.append(("CODES", "named in the text, no response declares it: {0}. Can this operation return it? "
+                               "Reachable: declare it. Unreachable: take it out of the text (§1.5)"
+                      .format(", ".join(undeclared))))
     return notes
 
 
@@ -516,8 +591,10 @@ def main():
             "{0} → ".format(old_words) if old_words is not None else "", s["words"],
             s["sentences"], s["average"], s["longest"]))
         c = item["codes"]
-        print("  codes: text {0} · declared by the action {1}{2}".format(
-            " ".join(c["text"]) or "none", " ".join(c["declared"]) or "none",
+        print("  codes: text {0}{1} · declared by the action {2}{3}".format(
+            " ".join(c["text"]) or "none",
+            " · of other operations {0}".format(" ".join(c["others"])) if c["others"] else "",
+            " ".join(c["declared"]) or "none",
             " · old text {0}".format(" ".join(c["old"]) or "none") if c["old"] is not None else ""))
         for kind, note in item["notes"]:
             print("  {0:7} {1}".format(kind, note))
