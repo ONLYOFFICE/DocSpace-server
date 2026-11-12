@@ -806,7 +806,9 @@ public class FileStorageService //: IFileStorageService
                     {
                         folder = await InternalCreateFolderAsync(parentId, title, folderType, false, indexing, denyDownload: denyDownload, color: color, cover: cover, names: tags, logo: logo);
                     }
-                    catch
+                    // a full storage keeps its own reason instead of "this folder cannot be used":
+                    // the folder is fine, the user only has to free space in the storage
+                    catch (Exception ex) when (ex is not ThirdPartyStorageQuotaException)
                     {
                         throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
                     }

@@ -151,10 +151,52 @@ public class ThirdPartyStorageQuotaTests(
     }
 
     /// <summary>
+    /// A room created as a new folder in the connected account: the folder creation used to be wrapped in a
+    /// catch that turned every failure into "It is not possible to use this folder to store the room", so
+    /// a full storage read as a folder the room could not use.
+    /// </summary>
+    [Fact]
+    public async Task CreateRoomAsNewFolder_InFullThirdPartyStorage_Returns400WithReadableReason()
+    {
+        // Arrange
+        RequireNextcloud();
+        await _filesClient.Authenticate(Owner);
+        var connectionId = await ConnectFullStorage("TP Full Room");
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.CreateRoomThirdPartyAsync(
+                connectionId,
+                new CreateThirdPartyRoomRequest(title: UniqueTitle("TP Full Room"), roomType: RoomType.CustomRoom, createAsNewFolder: true),
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+        using var error = JsonDocument.Parse(exception.ErrorContent!.ToString()!);
+        error.RootElement.GetProperty("error").GetProperty("message").GetString().Should().Be(OutOfSpaceText);
+    }
+
+    /// <summary>
     /// Creates a Nextcloud user whose quota is one byte, connects it and turns the connection into a
     /// room rooted at the account. Any upload into the room is then refused with 507.
     /// </summary>
     private async Task<string> CreateRoomOnFullStorage(string prefix)
+    {
+        var connectionId = await ConnectFullStorage(prefix);
+
+        var room = await _roomsApi.CreateRoomThirdPartyAsync(
+            connectionId,
+            new CreateThirdPartyRoomRequest(title: UniqueTitle($"{prefix} Room"), roomType: RoomType.CustomRoom),
+            TestContext.Current.CancellationToken);
+
+        return room.Response.Id;
+    }
+
+    /// <summary>
+    /// Creates a Nextcloud user whose quota is one byte and connects it, without a room yet; returns the
+    /// id of the connected folder, which a room is created from.
+    /// </summary>
+    private async Task<string> ConnectFullStorage(string prefix)
     {
         var (davUrl, login, password) = await CreateNextcloudUserWithoutSpace();
 
@@ -167,12 +209,7 @@ public class ThirdPartyStorageQuotaTests(
                 providerKey: "Nextcloud"),
             TestContext.Current.CancellationToken)).Response;
 
-        var room = await _roomsApi.CreateRoomThirdPartyAsync(
-            connection.Id,
-            new CreateThirdPartyRoomRequest(title: UniqueTitle($"{prefix} Room"), roomType: RoomType.CustomRoom),
-            TestContext.Current.CancellationToken);
-
-        return room.Response.Id;
+        return connection.Id;
     }
 
     private async Task<(string DavUrl, string Login, string Password)> CreateNextcloudUserWithoutSpace()
