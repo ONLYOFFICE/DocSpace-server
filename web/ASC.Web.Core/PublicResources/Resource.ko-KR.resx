@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
-    <value>크레딧 (보너스)</value>
+    <value>입금 (보너스)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
-    <value>직불 (보너스)</value>
+    <value>출금 (보너스)</value>
   </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>접촉</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>크레딧</value>
+    <value>입금</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>통화</value>
@@ -136,7 +136,7 @@
     <value>날짜</value>
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>직불</value>
+    <value>출금</value>
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>세부</value>

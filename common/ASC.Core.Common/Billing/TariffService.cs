@@ -489,6 +489,8 @@ public class TariffService(
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var result = await billingClient.ApplyPromoCodeAsync(portalId, promoCode, initiator);
+        // The bonus lands on the goodwill account, which is never cached. Only a failed read of the wallet balance is,
+        // and it must not outlive a call that has just reached the portal's customer - as after every other write.
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return result;
     }
@@ -1771,6 +1773,7 @@ public class TariffService(
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
         var result = await accountingClient.CreditBonusAsync(portalId, sum, currency, externalRef, utcExpiresAt, metadata);
+        // As in ApplyPromoCodeAsync: only a failed read of the wallet balance is cached, and it goes with this write.
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return result;
     }

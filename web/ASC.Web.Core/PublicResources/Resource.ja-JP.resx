@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
-    <value>クレジット (ボーナス)</value>
+    <value>入金 (ボーナス)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
-    <value>引き落とし (ボーナス)</value>
+    <value>出金 (ボーナス)</value>
   </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>連絡先</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>クレジット</value>
+    <value>入金</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>通貨</value>
@@ -136,7 +136,7 @@
     <value>日付</value>
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>引き落とし</value>
+    <value>出金</value>
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>詳細</value>

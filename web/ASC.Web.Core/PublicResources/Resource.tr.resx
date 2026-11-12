@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
-    <value>Kredi (bonuslar)</value>
+    <value>Alacak (bonuslar)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
     <value>Borç (bonuslar)</value>
@@ -127,7 +127,7 @@
     <value>Temas etmek</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Kredi</value>
+    <value>Alacak</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>Para birimi</value>

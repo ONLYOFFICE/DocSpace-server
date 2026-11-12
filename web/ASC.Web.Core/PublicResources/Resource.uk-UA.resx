@@ -121,7 +121,7 @@
     <value>Зарахування (бонуси)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
-    <value>Дебет (бонуси)</value>
+    <value>Списання (бонуси)</value>
   </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Контакти</value>
@@ -136,7 +136,7 @@
     <value>Дата</value>
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Дебет</value>
+    <value>Списання</value>
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Деталі</value>

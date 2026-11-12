@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
-    <value>Кредит (бонуси)</value>
+    <value>Одобрење (бонуси)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
     <value>Задужење (бонуси)</value>
@@ -127,7 +127,7 @@
     <value>Контакт</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Кредит</value>
+    <value>Одобрење</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>Валута</value>

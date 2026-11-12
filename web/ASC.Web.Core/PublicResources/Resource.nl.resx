@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
-    <value>Tegoed (bonussen)</value>
+    <value>Credit (bonussen)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
-    <value>Debiteren (bonussen)</value>
+    <value>Debet (bonussen)</value>
   </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Contact</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Tegoed</value>
+    <value>Credit</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>Valuta</value>
@@ -136,7 +136,7 @@
     <value>Datum</value>
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Debiteren</value>
+    <value>Debet</value>
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Details</value>

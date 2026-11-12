@@ -121,7 +121,7 @@
     <value>Πίστωση (μπόνους)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
-    <value>Χρέος (μπόνους)</value>
+    <value>Χρέωση (μπόνους)</value>
   </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Επαφή</value>
@@ -136,7 +136,7 @@
     <value>Ημερομηνία</value>
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Χρέος</value>
+    <value>Χρέωση</value>
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Καθέκαστα</value>

@@ -414,7 +414,7 @@ public class PaymentHelper(
             // transfer settles, so pushing a refresh would just show the old value.
             if (waitForChanges)
             {
-                await NotifyWalletChangedAsync();
+                await NotifyWalletChangedAsync(tenantId);
             }
 
             await EnsureLowBalanceThresholdAsync(waitForChanges);
@@ -464,7 +464,7 @@ public class PaymentHelper(
 
         messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, $"{transfer.Amount} {transfer.Currency}");
 
-        await NotifyWalletChangedAsync();
+        await NotifyWalletChangedAsync(tenantId);
 
         return transfer;
     }
@@ -494,7 +494,7 @@ public class PaymentHelper(
         // A pending bonus is not on the balance yet, so there is nothing new for the clients to read.
         if (result.Status == PromoCodeStatus.Completed)
         {
-            await NotifyWalletChangedAsync();
+            await NotifyWalletChangedAsync(tenantId);
         }
 
         return result;
@@ -502,7 +502,7 @@ public class PaymentHelper(
 
     // Tells the portal clients that the wallet changed. The money has moved by then, so a failure to tell them must not
     // turn the request into an error: the caller would retry an operation that already took effect.
-    private async Task NotifyWalletChangedAsync()
+    private async Task NotifyWalletChangedAsync(int tenantId)
     {
         try
         {
@@ -510,7 +510,7 @@ public class PaymentHelper(
         }
         catch (Exception e)
         {
-            logger.WarningWalletChangeNotSent(e);
+            logger.WarningWalletChangeNotSent(tenantId, e);
         }
     }
 

@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
-    <value>信用额度 (奖励金)</value>
+    <value>收入 (奖励金)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
-    <value>借记卡 (奖励金)</value>
+    <value>支出 (奖励金)</value>
   </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>联系方式</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>信用额度</value>
+    <value>收入</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>货币</value>
@@ -136,7 +136,7 @@
     <value>日期</value>
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>借记卡</value>
+    <value>支出</value>
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>详情</value>

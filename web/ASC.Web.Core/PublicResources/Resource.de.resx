@@ -118,16 +118,16 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
-    <value>Guthaben (Boni)</value>
+    <value>Gutschrift (Boni)</value>
   </data>
   <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
-    <value>Lastschrift (Boni)</value>
+    <value>Belastung (Boni)</value>
   </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Kontakt</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Guthaben</value>
+    <value>Gutschrift</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>Währung</value>
@@ -136,7 +136,7 @@
     <value>Datum</value>
   </data>
   <data name="AccountingCustomerOperationDebit" xml:space="preserve">
-    <value>Lastschrift</value>
+    <value>Belastung</value>
   </data>
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Details</value>

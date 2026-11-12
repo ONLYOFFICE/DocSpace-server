@@ -38,6 +38,6 @@ internal static partial class PaymentHelperLogger
     [LoggerMessage(LogLevel.Warning, "The gateway prices of model {revisionId} have no BYOK provider {provider}")]
     public static partial void WarningByokProviderNotPriced(this ILogger<PaymentHelper> logger, Guid revisionId, string provider);
 
-    [LoggerMessage(LogLevel.Warning, "The portal clients were not told that the wallet changed")]
-    public static partial void WarningWalletChangeNotSent(this ILogger<PaymentHelper> logger, Exception exception);
+    [LoggerMessage(LogLevel.Warning, "The clients of tenant {tenantId} were not told that the wallet changed")]
+    public static partial void WarningWalletChangeNotSent(this ILogger<PaymentHelper> logger, int tenantId, Exception exception);
 }
