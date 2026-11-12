@@ -35,8 +35,15 @@
 
 const fs = require('fs'),
     path = require('path'),
-    co = require("co"),
-    request = require("request");
+    http = require("http"),
+    https = require("https"),
+    { pipeline } = require("stream/promises"),
+    { IncomingForm } = require("formidable"),
+    co = require("co");
+
+const downloadMaxRedirects = 5;
+const downloadTimeout = 30 * 1000;
+const metadataMaxBytes = 10 * 1024 * 1024;
 
 const config = require('../config');
 const appDataDirPath = path.join(__dirname, config.get("web:data"));
@@ -157,22 +164,111 @@ function deleteFile(pathToFile) {
         });
 }
 
-function downloadFile(uri, filePath) {
+// Every failure must end in a rejection: anything thrown inside a response
+// callback escapes the promise and leaves the request without a response.
+function getResponse(location, baseUrl, signal, redirectsLeft) {
     return new Promise((resolve, reject) => {
-        const data = request
-            .get(uri, { rejectUnauthorized: false })
-            .on('error', (err) => {
-                reject(err);
-            })
-            .pipe(fs.createWriteStream(filePath))
-            .on('error', (err) => {
-                reject(err);
-            })
-            .on('finish', () => {
-                resolve(filePath);
-            });
+        let url;
+        try {
+            url = new URL(location, baseUrl);
+        } catch (err) {
+            reject(err);
+            return;
+        }
+
+        const client = url.protocol === "https:" ? https : url.protocol === "http:" ? http : null;
+        if (!client) {
+            reject(new Error(`Unsupported protocol ${url.protocol}`));
+            return;
+        }
+
+        // IdP metadata is often published on hosts with self-signed certificates.
+        const req = client.get(url, { rejectUnauthorized: false, signal }, (res) => {
+            const { statusCode, headers } = res;
+
+            if (statusCode >= 300 && statusCode < 400 && headers.location) {
+                res.resume();
+                if (redirectsLeft <= 0) {
+                    reject(new Error("Too many redirects"));
+                    return;
+                }
+                resolve(getResponse(headers.location, url, signal, redirectsLeft - 1));
+                return;
+            }
+
+            if (statusCode !== 200) {
+                res.resume();
+                reject(new Error(`Download failed with status ${statusCode}`));
+                return;
+            }
+
+            const contentLength = Number(headers["content-length"]);
+            if (contentLength > metadataMaxBytes) {
+                res.destroy();
+                reject(new Error(`Download exceeds ${metadataMaxBytes} bytes`));
+                return;
+            }
+
+            resolve(res);
+        });
+
+        req.on("error", reject);
     });
 }
 
-module.exports = { checkFileExist, createDir, copyFile, moveFile, deleteFile, getDataDirPath, downloadFile };
+async function* limitSize(source) {
+    let size = 0;
+    for await (const chunk of source) {
+        size += chunk.length;
+        if (size > metadataMaxBytes) {
+            throw new Error(`Download exceeds ${metadataMaxBytes} bytes`);
+        }
+        yield chunk;
+    }
+}
+
+// The deadline covers the whole download, redirects and body included:
+// a socket timeout alone never fires on a server that keeps sending a byte now and then.
+async function downloadFile(uri, filePath, options = {}) {
+    const timeout = options.timeout || downloadTimeout;
+    const signal = AbortSignal.timeout(timeout);
+    try {
+        const res = await getResponse(uri, undefined, signal, downloadMaxRedirects);
+        await pipeline(res, limitSize, fs.createWriteStream(filePath), { signal });
+        return filePath;
+    } catch (err) {
+        if (signal.aborted) {
+            throw new Error(`Download timed out after ${timeout} ms`, { cause: err });
+        }
+        throw err;
+    }
+}
+
+// An uploaded metadata file gets the same size limit as a download by URL. Only the first file
+// under `metadata` is stored, so the caller has exactly that one file to delete. A limit of
+// maxFiles is not used: formidable opens the extra file after it has already cleaned up for the
+// error, and that file would stay on disk.
+function createMetadataUploadForm(uploadDir) {
+    let metadataTaken = false;
+    return new IncomingForm({
+        uploadDir,
+        maxFileSize: metadataMaxBytes,
+        maxFieldsSize: 64 * 1024,
+        filter: (part) => {
+            if (part.name !== "metadata" || metadataTaken) {
+                return false;
+            }
+            metadataTaken = true;
+            return true;
+        },
+    });
+}
+
+// A metadata upload is one file within the limit plus a few form fields; a declared body larger
+// than that is refused before it is read. A chunked body has no length to check and is read in full.
+function isMetadataUploadTooLarge(req) {
+    return Number(req.headers["content-length"]) > metadataMaxBytes + 64 * 1024;
+}
+
+module.exports = { checkFileExist, createDir, copyFile, moveFile, deleteFile, getDataDirPath, downloadFile, createMetadataUploadForm, isMetadataUploadTooLarge };
 
