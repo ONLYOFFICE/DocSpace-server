@@ -242,6 +242,13 @@ public record SelfJoinCondition(string LeftColumn, string Operator, string Right
 public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<ExternalDatabaseClient> logger)
 {
     private static readonly Regex _tableNameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
+    private static readonly Regex _quotedOptionRegex = new("'((?:[^']|'')*)'", RegexOptions.Compiled);
+    private static readonly IEqualityComparer<string> _mySqlInsensitiveOptions =
+        new MySqlOptionComparer(StringComparer.Create(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreNonSpace));
+    private static readonly IEqualityComparer<string> _mySqlAccentSensitiveOptions =
+        new MySqlOptionComparer(StringComparer.Create(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase));
+    private static readonly IEqualityComparer<string> _mySqlCaseSensitiveOptions = new MySqlOptionComparer(StringComparer.Ordinal);
+    private static readonly Regex _varcharRegex = new(@"^varchar\((\d+)\)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static void ValidateTableName(string tableName)
     {
@@ -253,32 +260,38 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     private ExternalDatabaseProvider Provider => consumerFactory.Get<ExternalDatabaseProvider>();
 
-    public bool IsEnabled() => Provider.IsEnabled();
+    public virtual bool IsEnabled() => Provider.IsEnabled();
+
+    protected virtual ExternalDatabaseType DatabaseType => Provider.DatabaseTypeEnum;
+
+    protected virtual Task<DbConnection> CreateConnectionAsync(ExternalDatabaseType dbType) => Provider.CreateConnectionAsync(dbType);
 
     public async Task CreateTableIfNotExistsAsync(string tableName, IEnumerable<DbColumnDefinition> columns)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        var dbType = DatabaseType;
+        columns = ToStoredColumns(tableName, columns, dbType, new HashSet<string>());
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
+        var optionComparer = await GetOptionComparerAsync(connection, dbType, null);
 
         await using var cmd = connection.CreateCommand();
         cmd.CommandText = dbType switch
         {
-            ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
+            ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns, optionComparer),
             ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
-            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
+            ExternalDatabaseType.PostgreSql => BuildPgCreateTable(tableName, columns),
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
         await cmd.ExecuteNonQueryAsync();
     }
 
-    private static string BuildMySqlCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns)
+    private static string BuildMySqlCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns, IEqualityComparer<string> optionComparer)
     {
         var colDefs = columns.Select(c =>
         {
-            var type = MapMySqlType(c);
+            var type = MapMySqlType(c, optionComparer);
             return c.IsPrimaryKey ? $"`{c.Name}` {type} PRIMARY KEY" : $"`{c.Name}` {type}";
         });
         return $"CREATE TABLE IF NOT EXISTS `{tableName}` ({string.Join(", ", colDefs)});";
@@ -294,6 +307,30 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({string.Join(", ", colDefs)});";
     }
 
+    private static string BuildPgCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns)
+    {
+        var colDefs = columns.Select(c =>
+        {
+            var type = MapPgType(c);
+            return c.IsPrimaryKey ? $"\"{c.Name}\" {type} PRIMARY KEY" : $"\"{c.Name}\" {type}";
+        });
+        return $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({string.Join(", ", colDefs)});";
+    }
+
+    private static string MapPgType(DbColumnDefinition col) => col.Type switch
+    {
+        DbColumnType.Integer => "INTEGER",
+        DbColumnType.Boolean => "BOOLEAN",
+        DbColumnType.Date => "DATE",
+        DbColumnType.DateTime => "TIMESTAMP",
+        DbColumnType.Enum when col.EnumValues?.Count > 0 => $"TEXT {BuildPgOptionsCheck(col.Name, col.EnumValues)}",
+        DbColumnType.Enum => "TEXT",
+        _ => "TEXT"
+    };
+
+    private static string BuildPgOptionsCheck(string column, IEnumerable<string> options) =>
+        $"CHECK (\"{column}\" IN ({string.Join(", ", options.Select(v => $"'{v.Replace("'", "''")}'"))}))";
+
     private static string MapSqliteType(DbColumnDefinition col) => col.Type switch
     {
         DbColumnType.Integer => "INTEGER",
@@ -306,14 +343,14 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         _ => "TEXT"
     };
 
-    private static string MapMySqlType(DbColumnDefinition col) => col.Type switch
+    private static string MapMySqlType(DbColumnDefinition col, IEqualityComparer<string>? optionComparer = null) => col.Type switch
     {
         DbColumnType.Integer => "INT",
         DbColumnType.Boolean => "BOOLEAN",
         DbColumnType.Date => "DATE",
         DbColumnType.DateTime => "DATETIME",
         DbColumnType.Enum when col.EnumValues?.Count > 0 =>
-            $"ENUM({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("'", "\\'")}'"))})",
+            $"ENUM({string.Join(", ", col.EnumValues.Distinct(optionComparer ?? GetOptionComparer(ExternalDatabaseType.MySql)).Select(v => $"'{v.Replace("\\", "\\\\").Replace("'", "''")}'"))})",
         DbColumnType.Enum => "VARCHAR(255)",
         _ => "TEXT"
     };
@@ -321,9 +358,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     public async Task<bool> TableExistsAsync(string tableName)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        var dbType = DatabaseType;
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -332,7 +368,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         {
             ExternalDatabaseType.MySql => "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=@tableName",
             ExternalDatabaseType.Sqlite => "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@tableName",
-            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
+            ExternalDatabaseType.PostgreSql => "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = @tableName",
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
         var param = cmd.CreateParameter();
         param.ParameterName = "@tableName";
@@ -343,12 +380,551 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return Convert.ToInt64(result) > 0;
     }
 
+    /// <summary>
+    /// Renames the columns of a form table and adds the missing ones; one transaction except on MySQL, whose DDL commits
+    /// at once. Changes nothing when a column would take the name of another one or keep its name under another type:
+    /// the data of two fields would mix.
+    /// </summary>
+    public async Task<FormTableChange> AlterTableAsync(string tableName, IReadOnlyCollection<(string OldName, string NewName)> renames, IEnumerable<DbColumnDefinition> columns)
+    {
+        ValidateTableName(tableName);
+        var dbType = DatabaseType;
+        renames = ToStoredRenames(renames, dbType);
+        columns = ToStoredColumns(tableName, columns, dbType, new HashSet<string>());
+        var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
+
+        await using var connection = await CreateConnectionAsync(dbType);
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection, dbType);
+        await using var tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
+
+        var existing = await GetColumnTypesAsync(connection, tx, tableName, dbType);
+        if (existing.Count == 0)
+        {
+            return FormTableChange.Missing;
+        }
+
+        var optionComparer = await GetOptionComparerAsync(connection, dbType, tableName);
+        var statements = new List<string>();
+        if (!TryRename(tableName, q, existing, renames, statements))
+        {
+            return FormTableChange.Conflict;
+        }
+
+        // The options of a list are read under its new name; MySQL keeps them in the column type it has read already.
+        if (dbType != ExternalDatabaseType.MySql)
+        {
+            await ExecuteAsync(connection, tx, statements);
+            statements.Clear();
+        }
+
+        foreach (var column in columns)
+        {
+            var type = MapType(column, dbType, optionComparer);
+            if (existing.TryGetValue(ValidateColumnName(column.Name), out var existingType))
+            {
+                if (GetTypeClass(existingType) != GetTypeClass(type))
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                if (column is { Type: DbColumnType.Enum, EnumValues.Count: > 0 }
+                    && !await TryWidenOptionsAsync(connection, tx, tableName, column.Name, existingType, column.EnumValues, dbType, optionComparer, statements))
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                continue;
+            }
+
+            existing[column.Name] = type;
+            statements.Add($"ALTER TABLE {q}{tableName}{q} ADD COLUMN {q}{column.Name}{q} {type}");
+        }
+
+        await ExecuteAsync(connection, tx, statements);
+        if (tx != null)
+        {
+            await tx.CommitAsync();
+        }
+
+        return FormTableChange.Changed;
+    }
+
+    /// <summary>
+    /// Renames the columns of the target table, adds the columns of the source one and copies its rows; one transaction
+    /// except on MySQL, where the conflicts, a source value the target column cannot take among them, are found before
+    /// anything changes. A row whose form_id the target already holds is kept as it is there. Changes nothing on the same
+    /// conflicts as <see cref="AlterTableAsync"/>.
+    /// </summary>
+    public async Task<FormTableChange> MergeTableAsync(string targetTable, string sourceTable, IReadOnlyCollection<(string OldName, string NewName)> renames)
+    {
+        ValidateTableName(targetTable);
+        ValidateTableName(sourceTable);
+        var dbType = DatabaseType;
+        renames = ToStoredRenames(renames, dbType);
+        var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
+
+        await using var connection = await CreateConnectionAsync(dbType);
+        await connection.OpenAsync();
+        await SetupSqliteAsync(connection, dbType);
+        await using var tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
+
+        var target = await GetColumnTypesAsync(connection, tx, targetTable, dbType);
+        var source = await GetColumnTypesAsync(connection, tx, sourceTable, dbType);
+        if (target.Count == 0 || source.Count == 0)
+        {
+            return FormTableChange.Missing;
+        }
+
+        var optionComparer = await GetOptionComparerAsync(connection, dbType, targetTable);
+
+        var statements = new List<string>();
+        if (!TryRename(targetTable, q, target, renames, statements))
+        {
+            return FormTableChange.Conflict;
+        }
+
+        if (dbType != ExternalDatabaseType.MySql)
+        {
+            await ExecuteAsync(connection, tx, statements);
+            statements.Clear();
+        }
+
+        foreach (var (name, type) in source)
+        {
+            if (target.TryGetValue(ValidateColumnName(name), out var targetType))
+            {
+                if (GetTypeClass(targetType) != GetTypeClass(type)
+                    || dbType == ExternalDatabaseType.MySql && !await MySqlCopyFitsAsync(connection, sourceTable, name, type, targetType, optionComparer))
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                // A source column with any text keeps the target's list. A value outside it is a conflict found above on
+                // MySQL; elsewhere the copy fails, which says so.
+                var (sourceOptions, _) = await GetColumnOptionsAsync(connection, tx, sourceTable, name, type, dbType);
+                if (sourceOptions != null
+                    && !await TryWidenOptionsAsync(connection, tx, targetTable, name, targetType, sourceOptions, dbType, optionComparer, statements))
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                continue;
+            }
+
+            statements.Add($"ALTER TABLE {q}{targetTable}{q} ADD COLUMN {q}{name}{q} {type}");
+        }
+
+        var columnList = string.Join(", ", source.Keys.Select(c => $"{q}{c}{q}"));
+        statements.Add(dbType switch
+        {
+            ExternalDatabaseType.MySql =>
+                $"INSERT INTO `{targetTable}` ({columnList}) SELECT * FROM (SELECT {columnList} FROM `{sourceTable}`) AS src " +
+                $"ON DUPLICATE KEY UPDATE `{targetTable}`.`form_id` = `{targetTable}`.`form_id`",
+            ExternalDatabaseType.Sqlite =>
+                $"INSERT INTO \"{targetTable}\" ({columnList}) SELECT {columnList} FROM \"{sourceTable}\" WHERE true ON CONFLICT(\"form_id\") DO NOTHING",
+            _ =>
+                $"INSERT INTO \"{targetTable}\" ({columnList}) SELECT {columnList} FROM \"{sourceTable}\" ON CONFLICT (\"form_id\") DO NOTHING"
+        });
+
+        await ExecuteAsync(connection, tx, statements);
+        if (tx != null)
+        {
+            await tx.CommitAsync();
+        }
+
+        return FormTableChange.Changed;
+    }
+
+    /// <summary>
+    /// Whether the error says a value does not fit a column (its type, options or length), so the same statement fails
+    /// again however often it is retried; a lost connection is not such an error.
+    /// </summary>
+    public static bool IsDataViolation(Exception exception) => exception switch
+    {
+        PostgresException pg => pg.SqlState.StartsWith("22", StringComparison.Ordinal) || pg.SqlState.StartsWith("23", StringComparison.Ordinal),
+        MySqlConnector.MySqlException my => (int)my.ErrorCode is 1265 or 1366 or 1406 or 3819,
+        Microsoft.Data.Sqlite.SqliteException sqlite => sqlite.SqliteErrorCode is 19 or 20,
+        _ => false
+    };
+
+    // Column name to its declared type; empty when the table does not exist.
+    private static async Task<Dictionary<string, string>> GetColumnTypesAsync(DbConnection connection, DbTransaction? tx, string tableName, ExternalDatabaseType dbType)
+    {
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = dbType switch
+        {
+            ExternalDatabaseType.MySql =>
+                "SELECT COLUMN_NAME, COLUMN_TYPE FROM information_schema.COLUMNS " +
+                "WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = @tableName ORDER BY ORDINAL_POSITION",
+            ExternalDatabaseType.Sqlite => "SELECT name, type FROM pragma_table_info(@tableName) ORDER BY cid",
+            ExternalDatabaseType.PostgreSql =>
+                "SELECT column_name, data_type FROM information_schema.columns " +
+                "WHERE table_schema = current_schema() AND table_name = @tableName ORDER BY ordinal_position",
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
+        };
+        var param = cmd.CreateParameter();
+        param.ParameterName = "@tableName";
+        param.Value = tableName;
+        cmd.Parameters.Add(param);
+
+        var columns = new Dictionary<string, string>(GetColumnNameComparer(dbType));
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            columns[reader.GetString(0)] = reader.GetString(1);
+        }
+
+        return columns;
+    }
+
+    // MySQL commits each ALTER at once, so a copy that would fail after the columns were renamed is found first.
+    private static async Task<bool> MySqlCopyFitsAsync(DbConnection connection, string sourceTable, string column, string sourceType, string targetType,
+        IEqualityComparer<string> optionComparer)
+    {
+        var check = BuildMySqlCopyCheck(sourceTable, column, sourceType, targetType, optionComparer);
+        if (check == null)
+        {
+            return true;
+        }
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = check.Value.Sql;
+        AddParameters(cmd, check.Value.Parameters);
+
+        return Convert.ToInt64(await cmd.ExecuteScalarAsync()) == 0;
+    }
+
+    /// <summary>
+    /// The query that finds a source value the target column cannot take, null when every value fits: one outside the
+    /// options of the target list, widened by those of a source list, or longer than the target VARCHAR holds. Trailing
+    /// spaces do not count, as MySQL drops them storing a value there; whether two spellings are one option is left to the
+    /// collation of the source column.
+    /// </summary>
+    internal static (string Sql, Dictionary<string, object?> Parameters)? BuildMySqlCopyCheck(string sourceTable, string column, string sourceType, string targetType,
+        IEqualityComparer<string>? optionComparer = null)
+    {
+        var value = $"TRIM(TRAILING ' ' FROM `{column}`)";
+        var parameters = new Dictionary<string, object?>();
+        string condition;
+        if (targetType.StartsWith("enum(", StringComparison.OrdinalIgnoreCase))
+        {
+            var options = ParseOptions(targetType, ExternalDatabaseType.MySql);
+            if (sourceType.StartsWith("enum(", StringComparison.OrdinalIgnoreCase))
+            {
+                options = WidenOptions(options, ParseOptions(sourceType, ExternalDatabaseType.MySql), optionComparer ?? GetOptionComparer(ExternalDatabaseType.MySql));
+            }
+
+            for (var i = 0; i < options.Count; i++)
+            {
+                parameters[$"@option{i}"] = options[i];
+            }
+
+            condition = $"{value} NOT IN ({string.Join(", ", parameters.Keys)})";
+        }
+        else if (_varcharRegex.Match(targetType) is { Success: true } varchar && !string.Equals(sourceType, targetType, StringComparison.OrdinalIgnoreCase))
+        {
+            condition = $"CHAR_LENGTH({value}) > {varchar.Groups[1].Value}";
+        }
+        else
+        {
+            return null;
+        }
+
+        return ($"SELECT EXISTS (SELECT 1 FROM `{sourceTable}` WHERE `{column}` IS NOT NULL AND {condition})", parameters);
+    }
+
+    // A list column takes the options it lacks, old ones kept, as its values must still fit; a column with any text takes
+    // anything already. False when the list cannot be changed in place (SQLite).
+    private static async Task<bool> TryWidenOptionsAsync(DbConnection connection, DbTransaction? tx, string tableName, string column, string type, IEnumerable<string> options,
+        ExternalDatabaseType dbType, IEqualityComparer<string> optionComparer, List<string> statements)
+    {
+        var (current, constraint) = await GetColumnOptionsAsync(connection, tx, tableName, column, type, dbType);
+        if (current == null)
+        {
+            return true;
+        }
+
+        var widen = BuildWidenOptions(tableName, column, current, options, constraint, dbType, optionComparer);
+        if (widen == null)
+        {
+            return false;
+        }
+
+        statements.AddRange(widen);
+        return true;
+    }
+
+    // The options a list column accepts and, in PostgreSQL, the check that holds them; null options for any text.
+    private static async Task<(List<string>? Options, string? Constraint)> GetColumnOptionsAsync(DbConnection connection, DbTransaction? tx, string tableName, string column, string type, ExternalDatabaseType dbType)
+    {
+        if (dbType == ExternalDatabaseType.MySql)
+        {
+            return (type.StartsWith("enum(", StringComparison.OrdinalIgnoreCase) ? ParseOptions(type, dbType) : null, null);
+        }
+
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = dbType == ExternalDatabaseType.Sqlite
+            ? "SELECT NULL, sql FROM sqlite_master WHERE type = 'table' AND name = @tableName"
+            : "SELECT c.conname, pg_get_constraintdef(c.oid) FROM pg_constraint c " +
+              "JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY(c.conkey) " +
+              "WHERE c.conrelid = to_regclass(quote_ident(@tableName)) AND c.contype = 'c' AND a.attname = @column";
+        AddParameters(cmd, dbType == ExternalDatabaseType.Sqlite
+            ? new Dictionary<string, object?> { ["@tableName"] = tableName }
+            : new Dictionary<string, object?> { ["@tableName"] = tableName, ["@column"] = column });
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (!await reader.ReadAsync() || reader.IsDBNull(1))
+        {
+            return (null, null);
+        }
+
+        var definition = reader.GetString(1);
+        if (dbType == ExternalDatabaseType.Sqlite)
+        {
+            var check = Regex.Match(definition, $@"CHECK\(""{Regex.Escape(column)}"" IN \(((?:'(?:[^']|'')*'(?:, )?)*)\)\)");
+            return (check.Success ? ParseOptions(check.Groups[1].Value, dbType) : null, null);
+        }
+
+        return (ParseOptions(definition, dbType), reader.GetString(0));
+    }
+
+    // The quoted values of an ENUM type or a check constraint, unescaped.
+    internal static List<string> ParseOptions(string definition, ExternalDatabaseType dbType)
+    {
+        return _quotedOptionRegex.Matches(definition)
+            .Select(m => m.Groups[1].Value.Replace("''", "'"))
+            .Select(v => dbType == ExternalDatabaseType.MySql ? v.Replace(@"\\", @"\") : v)
+            .ToList();
+    }
+
+    // The current options and, after them, the given ones the list lacks.
+    private static List<string> WidenOptions(IReadOnlyList<string> current, IEnumerable<string> options, IEqualityComparer<string> optionComparer) =>
+        [.. current, .. options.Where(o => !current.Contains(o, optionComparer)).Distinct(optionComparer)];
+
+    /// <summary>
+    /// How the database tells two options of a list apart. MySQL does it by the collation, so options differing only in
+    /// case, accents or trailing spaces may be one option there and must not both be declared: a *_bin or *_cs collation
+    /// keeps case apart, an *_as_* one accents; null takes the default case and accent insensitive one.
+    /// </summary>
+    internal static IEqualityComparer<string> GetOptionComparer(ExternalDatabaseType dbType, string? collation = null)
+    {
+        if (dbType != ExternalDatabaseType.MySql)
+        {
+            return StringComparer.Ordinal;
+        }
+
+        var name = collation?.ToLowerInvariant() ?? string.Empty;
+        if (name.EndsWith("_bin", StringComparison.Ordinal) || name.EndsWith("_cs", StringComparison.Ordinal))
+        {
+            return _mySqlCaseSensitiveOptions;
+        }
+
+        return name.Contains("_as_", StringComparison.Ordinal) ? _mySqlAccentSensitiveOptions : _mySqlInsensitiveOptions;
+    }
+
+    // By the collation the columns of the table take, or the one of the database for a table yet to be created.
+    private static async Task<IEqualityComparer<string>> GetOptionComparerAsync(DbConnection connection, ExternalDatabaseType dbType, string? tableName)
+    {
+        if (dbType != ExternalDatabaseType.MySql)
+        {
+            return GetOptionComparer(dbType);
+        }
+
+        await using var cmd = connection.CreateCommand();
+        cmd.CommandText = tableName == null
+            ? "SELECT @@collation_database"
+            : "SELECT TABLE_COLLATION FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = @tableName";
+        if (tableName != null)
+        {
+            AddParameters(cmd, new Dictionary<string, object?> { ["@tableName"] = tableName });
+        }
+
+        return GetOptionComparer(dbType, await cmd.ExecuteScalarAsync() as string);
+    }
+
+    // MySQL drops the trailing spaces of the options it declares.
+    private sealed class MySqlOptionComparer(StringComparer collation) : IEqualityComparer<string>
+    {
+        public bool Equals(string? x, string? y) => collation.Equals(x?.TrimEnd(' '), y?.TrimEnd(' '));
+
+        public int GetHashCode(string obj) => collation.GetHashCode(obj.TrimEnd(' '));
+    }
+
+    // The statements that let a list column take the given options besides its own; empty when it has them all, null when
+    // the list cannot be changed in place.
+    internal static List<string>? BuildWidenOptions(string tableName, string column, IReadOnlyList<string> current, IEnumerable<string> options, string? constraint,
+        ExternalDatabaseType dbType, IEqualityComparer<string>? optionComparer = null)
+    {
+        optionComparer ??= GetOptionComparer(dbType);
+        var all = WidenOptions(current, options, optionComparer);
+        if (all.Count == current.Count)
+        {
+            return [];
+        }
+
+        return dbType switch
+        {
+            ExternalDatabaseType.MySql => [$"ALTER TABLE `{tableName}` MODIFY COLUMN `{column}` {MapMySqlType(new DbColumnDefinition(column, DbColumnType.Enum, all), optionComparer)}"],
+            ExternalDatabaseType.PostgreSql when constraint != null =>
+            [
+                $"ALTER TABLE \"{tableName}\" DROP CONSTRAINT \"{constraint}\"",
+                // The rows kept the old options, which the new list holds, so they are not scanned again.
+                $"ALTER TABLE \"{tableName}\" ADD CONSTRAINT \"{constraint}\" {BuildPgOptionsCheck(column, all)} NOT VALID"
+            ],
+            _ => null
+        };
+    }
+
+    // Renames in order; false when a new name is taken by another column.
+    internal static bool TryRename(string tableName, char q, Dictionary<string, string> columns, IEnumerable<(string OldName, string NewName)> renames, List<string> statements)
+    {
+        foreach (var rename in renames)
+        {
+            var oldName = ValidateColumnName(rename.OldName);
+            var newName = ValidateColumnName(rename.NewName);
+            if (oldName == newName || !columns.Remove(oldName, out var type))
+            {
+                continue;
+            }
+
+            if (!columns.TryAdd(newName, type))
+            {
+                return false;
+            }
+
+            statements.Add($"ALTER TABLE {q}{tableName}{q} RENAME COLUMN {q}{oldName}{q} TO {q}{newName}{q}");
+        }
+
+        return true;
+    }
+
+    internal static string MapType(DbColumnDefinition column, ExternalDatabaseType dbType, IEqualityComparer<string>? optionComparer = null) => dbType switch
+    {
+        ExternalDatabaseType.MySql => MapMySqlType(column, optionComparer),
+        ExternalDatabaseType.Sqlite => MapSqliteType(column),
+        _ => MapPgType(column)
+    };
+
+    // The kind of value a declared type holds, so that the types of the three databases compare: an option list is
+    // text, and SQLite keeps booleans as integers.
+    internal static string GetTypeClass(string type)
+    {
+        var t = type.ToLowerInvariant();
+
+        return t switch
+        {
+            _ when t.StartsWith("tinyint(1)", StringComparison.Ordinal) || t.StartsWith("bool", StringComparison.Ordinal) => "boolean",
+            _ when t.StartsWith("int", StringComparison.Ordinal) || t.StartsWith("bigint", StringComparison.Ordinal)
+                || t.StartsWith("smallint", StringComparison.Ordinal) || t.StartsWith("tinyint", StringComparison.Ordinal) => "integer",
+            _ when t.StartsWith("timestamp", StringComparison.Ordinal) || t.StartsWith("datetime", StringComparison.Ordinal) => "datetime",
+            "date" => "date",
+            _ => "text"
+        };
+    }
+
+    private static string ValidateColumnName(string name)
+    {
+        return _tableNameRegex.IsMatch(name) ? name : throw new ArgumentException($"Invalid column name: {name}", nameof(name));
+    }
+
+    /// <summary>
+    /// The column name as the database keeps it, to compare with the names it reports: PostgreSQL keeps 63 characters of
+    /// a name and cuts the rest without an error, MySQL 64.
+    /// </summary>
+    internal static string ToStoredColumnName(string name, ExternalDatabaseType dbType)
+    {
+        var maxLength = dbType switch
+        {
+            ExternalDatabaseType.PostgreSql => 63,
+            ExternalDatabaseType.MySql => 64,
+            _ => int.MaxValue
+        };
+
+        name = ValidateColumnName(name);
+        return name.Length > maxLength ? name[..maxLength] : name;
+    }
+
+    private static IReadOnlyCollection<(string OldName, string NewName)> ToStoredRenames(IEnumerable<(string OldName, string NewName)> renames, ExternalDatabaseType dbType)
+    {
+        return renames.Select(r => (ToStoredColumnName(r.OldName, dbType), ToStoredColumnName(r.NewName, dbType))).ToList();
+    }
+
+    /// <summary>The columns of the table as the database keeps them, the ones it would take for another column left out.</summary>
+    public List<DbColumnDefinition> GetStoredColumns(IEnumerable<DbColumnDefinition> columns) => ToStoredColumns(columns, DatabaseType, null);
+
+    // Quoted names are case sensitive in PostgreSQL only.
+    private static StringComparer GetColumnNameComparer(ExternalDatabaseType dbType) =>
+        dbType == ExternalDatabaseType.PostgreSql ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+
+    // Two fields whose names the database cuts to one would make one column: the first keeps it, the others are left out.
+    internal static List<DbColumnDefinition> ToStoredColumns(IEnumerable<DbColumnDefinition> columns, ExternalDatabaseType dbType, ISet<string>? leftOut)
+    {
+        var names = new HashSet<string>(GetColumnNameComparer(dbType));
+        var stored = new List<DbColumnDefinition>();
+        foreach (var column in columns)
+        {
+            var name = ToStoredColumnName(column.Name, dbType);
+            if (!names.Add(name))
+            {
+                leftOut?.Add(column.Name);
+                continue;
+            }
+
+            stored.Add(column with { Name = name });
+        }
+
+        return stored;
+    }
+
+    private List<DbColumnDefinition> ToStoredColumns(string tableName, IEnumerable<DbColumnDefinition> columns, ExternalDatabaseType dbType, ISet<string> leftOut)
+    {
+        var stored = ToStoredColumns(columns, dbType, leftOut);
+        foreach (var column in leftOut)
+        {
+            logger.WarnColumnNameTaken(tableName, column, ToStoredColumnName(column, dbType));
+        }
+
+        return stored;
+    }
+
+    /// <summary>
+    /// The values of a row under the column names the database keeps. The value of a field left out of the columns is
+    /// left out too, so the column keeps the values of the field it was made for; of other keys cut to one name the
+    /// first stays.
+    /// </summary>
+    internal static Dictionary<string, object> ToStoredRow(Dictionary<string, object> row, ExternalDatabaseType dbType, ISet<string>? leftOut = null)
+    {
+        var stored = new Dictionary<string, object>(GetColumnNameComparer(dbType));
+        foreach (var (name, value) in row)
+        {
+            if (leftOut?.Contains(name) != true)
+            {
+                stored.TryAdd(ToStoredColumnName(name, dbType), value);
+            }
+        }
+
+        return stored;
+    }
+
+    private static async Task ExecuteAsync(DbConnection connection, DbTransaction? tx, IEnumerable<string> statements)
+    {
+        foreach (var statement in statements)
+        {
+            await using var cmd = connection.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = statement;
+            await cmd.ExecuteNonQueryAsync();
+        }
+    }
+
     public async Task<long> CountAsync(string tableName)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        var dbType = DatabaseType;
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -356,8 +932,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         cmd.CommandText = dbType switch
         {
             ExternalDatabaseType.MySql => $"SELECT COUNT(*) FROM `{tableName}`",
-            ExternalDatabaseType.Sqlite => $"SELECT COUNT(*) FROM \"{tableName}\"",
-            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
+            ExternalDatabaseType.Sqlite or ExternalDatabaseType.PostgreSql => $"SELECT COUNT(*) FROM \"{tableName}\"",
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
 
         var result = await cmd.ExecuteScalarAsync();
@@ -395,6 +971,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     };
 
     public const int MaxRowsPerRequest = 500;
+
+    private const int InsertBatchSize = 500;
 
     /// <summary>
     /// Strips table-alias prefixes that models sometimes attach to column names
@@ -521,6 +1099,20 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             return $"{datePart.ToUpperInvariant()}({q}{column}{q})";
         }
 
+        if (dbType == ExternalDatabaseType.PostgreSql)
+        {
+            return datePart.ToUpperInvariant() switch
+            {
+                "YEAR"      => $"EXTRACT(YEAR FROM {q}{column}{q})::INTEGER",
+                "MONTH"     => $"EXTRACT(MONTH FROM {q}{column}{q})::INTEGER",
+                "WEEK"      => $"EXTRACT(WEEK FROM {q}{column}{q})::INTEGER",
+                "DAYOFYEAR" => $"EXTRACT(DOY FROM {q}{column}{q})::INTEGER",
+                "QUARTER"   => $"EXTRACT(QUARTER FROM {q}{column}{q})::INTEGER",
+                "DAYOFWEEK" => $"EXTRACT(DOW FROM {q}{column}{q})::INTEGER + 1",
+                _ => throw new ArgumentException($"Unsupported date part for PostgreSQL: {datePart}")
+            };
+        }
+
         return datePart.ToUpperInvariant() switch
         {
             "YEAR"      => $"CAST(strftime('%Y', {q}{column}{q}) AS INTEGER)",
@@ -544,6 +1136,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 "HOURS"   => $"ABS(TIMESTAMPDIFF(HOUR, {q}{startCol}{q}, {q}{endCol}{q})){plus1}",
                 "MINUTES" => $"ABS(TIMESTAMPDIFF(MINUTE, {q}{startCol}{q}, {q}{endCol}{q})){plus1}",
                 _         => $"ABS(DATEDIFF({q}{startCol}{q}, {q}{endCol}{q})){plus1}"
+            };
+        }
+
+        if (dbType == ExternalDatabaseType.PostgreSql)
+        {
+            return unit switch
+            {
+                "HOURS"   => $"ABS(EXTRACT(EPOCH FROM ({q}{endCol}{q}::TIMESTAMP - {q}{startCol}{q}::TIMESTAMP)) / 3600)::INTEGER{plus1}",
+                "MINUTES" => $"ABS(EXTRACT(EPOCH FROM ({q}{endCol}{q}::TIMESTAMP - {q}{startCol}{q}::TIMESTAMP)) / 60)::INTEGER{plus1}",
+                _         => $"ABS(({q}{endCol}{q}::DATE - {q}{startCol}{q}::DATE)){plus1}"
             };
         }
 
@@ -770,8 +1372,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var excludeDatePartFilterList = MergeDatePartFilters(excludeDatePartFilters?.ToList() ?? []);
         ValidateDatePartFilters(excludeDatePartFilterList, allowedColumns);
 
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = DatabaseType;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         string? innerExpr = dateDiffAggregate != null
@@ -873,7 +1474,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
         // No GROUP BY → aggregate returns exactly one row; LIMIT is intentionally omitted.
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -881,13 +1482,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         cmd.CommandText = sql.ToString();
         cmd.CommandTimeout = 60;
 
-        foreach (var (name, value) in parameters)
-        {
-            var param = cmd.CreateParameter();
-            param.ParameterName = name;
-            param.Value = value ?? DBNull.Value;
-            cmd.Parameters.Add(param);
-        }
+        AddParameters(cmd, parameters);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         var results = new List<Dictionary<string, object?>>();
@@ -920,8 +1515,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         DateDiffFilter? dateDiffFilter = null)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = DatabaseType;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         var selectList = selectColumns?.ToList();
@@ -994,7 +1588,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var pageOffset = Math.Max(0, offset);
         sql.Append($" LIMIT {pageSize} OFFSET {pageOffset}");
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -1002,13 +1596,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         cmd.CommandText = sql.ToString();
         cmd.CommandTimeout = 30;
 
-        foreach (var (name, value) in parameters)
-        {
-            var param = cmd.CreateParameter();
-            param.ParameterName = name;
-            param.Value = value ?? DBNull.Value;
-            cmd.Parameters.Add(param);
-        }
+        AddParameters(cmd, parameters);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         var results = new List<Dictionary<string, object?>>();
@@ -1109,8 +1697,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         ValidateDatePartFilters(datePartFilterList, allowedColumns);
 
         var pageSize = Math.Clamp(limit, 1, MaxRowsPerRequest);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = DatabaseType;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         List<string> selectParts;
@@ -1210,7 +1797,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
               $"WHERE {string.Join(" AND ", whereParts)} " +
               $"LIMIT {pageSize}";
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -1218,13 +1805,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         cmd.CommandText = sql;
         cmd.CommandTimeout = 120;
 
-        foreach (var (name, value) in parameters)
-        {
-            var param = cmd.CreateParameter();
-            param.ParameterName = name;
-            param.Value = value ?? DBNull.Value;
-            cmd.Parameters.Add(param);
-        }
+        AddParameters(cmd, parameters);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         var results = new List<Dictionary<string, object?>>();
@@ -1242,29 +1823,36 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return JsonSerializer.Serialize(results);
     }
 
-    public Task InsertDataAsync(string tableName, Dictionary<string, object> data)
-        => ExecuteInsertAsync(tableName, data, keyColumn: null);
-
-    public Task UpsertDataAsync(string tableName, Dictionary<string, object> data, string keyColumn)
-        => ExecuteInsertAsync(tableName, data, keyColumn);
-
-    public async Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, Dictionary<string, object> data, string keyColumn)
+    public Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, Dictionary<string, object> data, string keyColumn)
     {
-        ValidateTableName(tableName);
         if (data == null || data.Count == 0)
         {
             throw new ArgumentException("Data dictionary is empty.", nameof(data));
         }
 
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        return CreateTableAndUpsertAsync(tableName, columns, [data], keyColumn);
+    }
+
+    /// <summary>
+    /// Creates the table if needed and upserts the rows. On PostgreSQL and SQLite it is one transaction, so other sessions
+    /// see either no new table or all of its rows.
+    /// </summary>
+    public async Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, IReadOnlyCollection<Dictionary<string, object>> rows, string keyColumn)
+    {
+        ValidateTableName(tableName);
+
+        var dbType = DatabaseType;
+        var leftOut = new HashSet<string>();
+        columns = ToStoredColumns(tableName, columns, dbType, leftOut);
+        rows = rows.Select(r => ToStoredRow(r, dbType, leftOut)).ToList();
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
-        // SQLite only: MySQL DDL (CREATE TABLE) causes an implicit commit,
+        // MySQL DDL (CREATE TABLE) causes an implicit commit,
         // making it impossible to wrap CREATE TABLE + INSERT in one atomic transaction.
-        DbTransaction? tx = dbType == ExternalDatabaseType.Sqlite ? await connection.BeginTransactionAsync() : null;
+        var tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
+        var optionComparer = await GetOptionComparerAsync(connection, dbType, null);
 
         try
         {
@@ -1272,23 +1860,17 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             createCmd.Transaction = tx;
             createCmd.CommandText = dbType switch
             {
-                ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
+                ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns, optionComparer),
                 ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
-                _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
+                ExternalDatabaseType.PostgreSql => BuildPgCreateTable(tableName, columns),
+                _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
             };
             await createCmd.ExecuteNonQueryAsync();
 
-            await using var insertCmd = connection.CreateCommand();
-            insertCmd.Transaction = tx;
-            insertCmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn, dbType);
-            foreach (var kvp in data)
+            foreach (var chunk in rows.Chunk(InsertBatchSize))
             {
-                var param = insertCmd.CreateParameter();
-                param.ParameterName = "@" + kvp.Key;
-                param.Value = kvp.Value ?? DBNull.Value;
-                insertCmd.Parameters.Add(param);
+                await InsertRowsAsync(connection, tx, tableName, chunk, keyColumn, dbType);
             }
-            await insertCmd.ExecuteNonQueryAsync();
 
             if (tx != null)
             {
@@ -1312,6 +1894,46 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
     }
 
+    private static async Task InsertRowsAsync(DbConnection connection, DbTransaction? tx, string tableName, Dictionary<string, object>[] rows, string keyColumn, ExternalDatabaseType dbType)
+    {
+        if (rows.Length == 1 || !connection.CanCreateBatch)
+        {
+            foreach (var row in rows)
+            {
+                await using var insertCmd = connection.CreateCommand();
+                insertCmd.Transaction = tx;
+                insertCmd.CommandText = BuildInsertSql(tableName, row.Keys, keyColumn, dbType);
+                AddRowParameters(insertCmd.Parameters, insertCmd.CreateParameter, row);
+                await insertCmd.ExecuteNonQueryAsync();
+            }
+
+            return;
+        }
+
+        await using var batch = connection.CreateBatch();
+        batch.Transaction = tx;
+        foreach (var row in rows)
+        {
+            var insertCmd = batch.CreateBatchCommand();
+            insertCmd.CommandText = BuildInsertSql(tableName, row.Keys, keyColumn, dbType);
+            AddRowParameters(insertCmd.Parameters, insertCmd.CreateParameter, row);
+            batch.BatchCommands.Add(insertCmd);
+        }
+
+        await batch.ExecuteNonQueryAsync();
+    }
+
+    private static void AddRowParameters(DbParameterCollection parameters, Func<DbParameter> createParameter, Dictionary<string, object> row)
+    {
+        foreach (var kvp in row)
+        {
+            var param = createParameter();
+            param.ParameterName = "@" + kvp.Key;
+            param.Value = kvp.Value ?? DBNull.Value;
+            parameters.Add(param);
+        }
+    }
+
     public async Task<long> GetTableCountAsync(string tableName) =>
         await TableExistsAsync(tableName) ? await CountAsync(tableName) : 0;
 
@@ -1323,11 +1945,10 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
 
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = DatabaseType;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -1347,37 +1968,21 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return ids;
     }
 
-    private async Task ExecuteInsertAsync(string tableName, Dictionary<string, object> data, string? keyColumn)
+    private static void AddParameters(DbCommand cmd, Dictionary<string, object?> parameters)
     {
-        ValidateTableName(tableName);
-        try
+        foreach (var (name, value) in parameters)
         {
-            if (data == null || data.Count == 0)
-            {
-                throw new ArgumentException("Data dictionary is empty.", nameof(data));
-            }
-            var dbType = Provider.DatabaseTypeEnum;
-            await using var connection = await Provider.CreateConnectionAsync(dbType);
-            await connection.OpenAsync();
-            await SetupSqliteAsync(connection, dbType);
+            var param = cmd.CreateParameter();
+            param.ParameterName = name;
+            param.Value = value ?? DBNull.Value;
 
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn, dbType);
-
-            foreach (var kvp in data)
+            // Filter values arrive as strings: PostgreSQL, unlike MySQL and SQLite, must infer their type from the column.
+            if (value is string && param is NpgsqlParameter npgsqlParam)
             {
-                var param = cmd.CreateParameter();
-                param.ParameterName = "@" + kvp.Key;
-                param.Value = kvp.Value ?? DBNull.Value;
-                cmd.Parameters.Add(param);
+                npgsqlParam.NpgsqlDbType = NpgsqlDbType.Unknown;
             }
 
-            await cmd.ExecuteNonQueryAsync();
-        }
-        catch (Exception ex)
-        {
-            logger.ErrorInsertFailed(ex, tableName);
-            throw;
+            cmd.Parameters.Add(param);
         }
     }
 
@@ -1389,7 +1994,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return dbType switch
         {
             ExternalDatabaseType.MySql => BuildMySqlInsert(tableName, keyList, parameters, keyColumn),
-            ExternalDatabaseType.Sqlite => BuildSqliteInsert(tableName, keyList, parameters, keyColumn),
+            ExternalDatabaseType.Sqlite or ExternalDatabaseType.PostgreSql => BuildSqliteInsert(tableName, keyList, parameters, keyColumn),
             _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
     }
@@ -1442,6 +2047,13 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
 internal static partial class ExternalDatabaseClientLogger
 {
-    [LoggerMessage(LogLevel.Error, "Insert into table {TableName} failed")]
-    public static partial void ErrorInsertFailed(this ILogger<ExternalDatabaseClient> logger, Exception exception, string tableName);
+    [LoggerMessage(LogLevel.Warning, "Forms DB: column {column} of table {tableName} is left out, the database keeps its name as {storedName}, which another field took")]
+    public static partial void WarnColumnNameTaken(this ILogger<ExternalDatabaseClient> logger, string tableName, string column, string storedName);
+}
+
+public enum FormTableChange
+{
+    Changed,
+    Missing,
+    Conflict
 }

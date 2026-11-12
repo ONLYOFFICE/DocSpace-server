@@ -115,10 +115,10 @@ public class SendSmsCodeTests(
 
     /// <summary>
     /// Bug 84503: with valid credentials on a portal where SMS two-factor is not enabled the
-    /// endpoint answered 500 — <c>SmsManager.PutAuthCodeAsync</c> deliberately throws
-    /// MethodAccessException when SMS settings are unavailable or TFA is not enabled for the user
-    /// and nothing mapped it to a client response. The exact status is not specified (PUT
-    /// /settings/tfaapp reports the same condition as 405), so the test only asserts it is not a 500.
+    /// endpoint answered 500 — <c>SmsManager.PutAuthCodeAsync</c> threw MethodAccessException when
+    /// SMS settings were unavailable or TFA was not enabled for the user, and nothing mapped it to a
+    /// client response. Fixed by refusing it with 405 "SMS not available", the status PUT
+    /// /settings/tfaapp already reports for the same condition.
     /// </summary>
     [Trait("Bug", "84503")]
     [Fact]
@@ -143,6 +143,6 @@ public class SendSmsCodeTests(
         }
 
         // Assert
-        status.Should().NotBe(500);
+        status.Should().Be(405);
     }
 }

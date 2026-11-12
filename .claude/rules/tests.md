@@ -3,11 +3,12 @@ paths:
   - "products/*/Tests/**/*.cs"
   - "common/Tests/**/*.cs"
   - "web/ASC.Web.Api.Tests/**/*.cs"
+  - "web/ASC.Web.Api.Billing.Tests/**/*.cs"
 ---
 
 # Integration Tests
 
-Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/` and `common/Tests/`. Style rules
+Applies to `products/*/Tests/`, `web/ASC.Web.Api.Tests/`, `web/ASC.Web.Api.Billing.Tests/` and `common/Tests/`. Style rules
 (`csharp-style.md`) apply here too — including the mandatory `dotnet format style` check
 after editing any `.cs` file.
 
@@ -114,10 +115,70 @@ var exception = await Assert.ThrowsAsync<ApiException>(
     async () => await _roomsApi.DeleteRoomAsync(room.Id, new DeleteRoomRequest(false), TestContext.Current.CancellationToken));
 
 exception.ErrorCode.Should().Be(403);
-exception.ErrorContent?.ToString().Should().Contain("Access denied");
+exception.ErrorContent!.ToString().Should().Contain("Access denied");
 ```
 
-`ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`.
+`ErrorCode` is the HTTP status. Always pass `TestContext.Current.CancellationToken`. Read `ErrorContent` with
+`!`, never `?.`: with `?.` an empty body skips the whole assertion, and a check of the message can never fail.
+
+## A test has to be able to fail
+
+A guard test that stays green without the change it guards protects nothing, and reading the test
+does not tell: reviews kept finding tests that passed with the fix reverted. Prove it instead.
+`.claude/scripts/prove-red.sh` takes the product part of the change away, runs the test and expects
+red, then puts the change back and expects green. Paste its last line into the commit message.
+
+```bash
+.claude/scripts/prove-red.sh --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*NotifyRepeatOptInTests"
+.claude/scripts/prove-red.sh --commit c1bf173086 --test common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj -- --filter-class "*NotifyRepeatOptInTests"
+```
+
+The first form takes away the uncommitted product changes and leaves the test files and a local edit
+of the environment (`global.json`, `--exclude PATH`) in place; the second takes away the product part
+of a commit. When the
+test calls what the change adds, the whole change cannot be taken away (exit 3): pass `--patch` with
+only the behavioural hunk. When the run is impossible here (environment, cost), the commit says "not
+proven red" and why.
+
+What leaves a test unable to fail:
+
+- **Asserting that nothing threw.** Assert the effect instead: letters (Mailpit, `RecordingEventBus`),
+  audit and `short_links` rows, the stored state. Six calls that do not throw stay green whether the
+  repeat is suppressed or not.
+- **An environment the test only imagines.** The rate limiter is off in the stacks
+  (`rateLimiterOptions.enable: "false"` in `buildtools/config/appsettings.json`, and `BaseStartup`
+  adds it only when true), so no test relies on a 429. `integration-test` runs no payment services
+  (see "Payment services"). A test comment that says what the environment does is checked like code.
+- **An empty "nothing changed".** A refusal checked by comparing snapshots needs an Arrange that
+  creates what the refused call could change, and an assertion that the snapshot is not empty.
+- **Going around the path under test.** Enter where the product enters: the engine with a stub
+  channel, not the request's failure callback; the service with its real `Init`, not values typed
+  into the check; the handler that writes a state, not an SQL insert of it. Use SQL in Arrange only for
+  a state the API cannot produce, and then the code that produces it gets a test of its own.
+- **Substituting our own code.** Stub only what lies outside the process, at the HTTP boundary
+  (WireMock.Net), so that our client, its auth handler, the parsing and the error mapping run. A mock
+  of our own interface (`ITariffService`, `IBillingClient`) belongs only in a unit test of the class
+  that calls it. A suite that replaces a service of ours keeps one test on the real one, with its
+  real DI registration.
+- **A stub that answers what is convenient.** The stub's behaviour comes from the real service's
+  contract: its documentation, the comments of our client, the remarks of our endpoints, the
+  TypeScript suite that runs against the real service. A stub that disagrees with them is a finding.
+  It honours the parameters our code sends (paging, filters), or the test does not rely on them. It
+  can answer a 4xx, a 5xx, a timeout (`WithDelay`), a dropped connection (`WithFault`) and an
+  unreadable 200.
+- **A check looser than the right.** Check a right with the lowest role that can hold it: a "member
+  who is the payer" is a User, not an admin. Compare routes, counts and messages exactly, never with
+  `StartWith`.
+
+The test also has to fail only for a reason:
+
+- Filter assertions over shared state (the log entries of a pass, global tables) by the test's own
+  tenant.
+- A pass over every portal of the database gets no fixed time budget. Wait for the effect in the
+  test's own portal on a deadline (see "Anything written asynchronously has to be polled"), or
+  restrict the pass to that portal through a test entry point.
+- Never give something a short fixed budget to arrive ("the request reached the stub within one
+  second"): poll on a deadline.
 
 ## Endpoints the SDK does not expose
 
@@ -240,12 +301,24 @@ resolves its parent without a `using`, which matters here because usings are onl
 ## Class size drives parallelism
 
 xUnit parallelises **test collections**, and by default a collection is a class. Cases
-inside one class always run sequentially — there is no setting that changes this. A
-`[Theory]` with 16 cases is 16 sequential tests.
+inside one class run sequentially: a `[Theory]` with 16 cases is 16 sequential tests. xUnit 4
+can run them concurrently (`"parallelMode": "all"` in `xunit.runner.json`), but the repo does not
+set it.
 
-So: **one class per endpoint, and keep it under ~24 cases** (cases, not methods — count
-`InlineData` rows and `MemberData` sizes). Split by endpoint or by scenario group, put
-shared helpers in an intermediate base class, and shared `TheoryData` in a static data
+With no runner configuration (the repo has none), xUnit runs up to one class per logical core at a
+time — 24 on the development machine — and the cases of each class one after another. So a run
+lasts at least as long as its longest class. That matters in the integration suites, whose cases
+run against the Aspire stack: Files had ~3 850 cases with a median of 0.75 s (2026-09), about two
+and a half minutes of work per core, so one class of 200 such cases would alone take as long as the
+whole run while the other cores sit idle. ~24 cases keeps a class at tens of seconds, a small piece
+the scheduler can spread over the cores. It is an upper bound, not a target: once classes are much
+shorter than the run, splitting further gains nothing. A unit-test class — nothing started,
+milliseconds per case (`ConfigurationValueExtensionsTests`, `PersistedEnumValuesTests`) — has no
+limit.
+
+So, in an integration suite: **one class per endpoint, and keep it under ~24 cases** (cases,
+not methods — count `InlineData` rows and `MemberData` sizes). Split by endpoint or by scenario
+group, put shared helpers in an intermediate base class, and shared `TheoryData` in a static data
 class referenced explicitly:
 
 ```csharp
@@ -293,3 +366,18 @@ value on the wire. Use it for those only.
 Note that Rider does **not** use MTP for xUnit — it runs its own ReSharper test runner, so
 timings and parallelism there differ from `dotnet test`. Anything that must hold in both
 belongs in code (e.g. `[assembly: CollectionBehavior(...)]`), not on the command line.
+
+## Payment services: two stacks
+
+The `integration-test` stack runs **no** billing, accounting or docscloud service, so a payment test there only
+sees 403 "Tariff service is not configured" or a check before it. Everything past that check goes to
+`web/ASC.Web.Api.Billing.Tests` (SaaS stack, the three services stubbed by `PaymentServiceStub`):
+
+- Script **only the test's own portal** through `Payments` (`Paid`, `Customer`, `Balance`, `On`). Requests that
+  name no portal (the checkout template, the price catalogue) are answered once for the whole run - never script them.
+- **Assert on what the stack did, not on the stub**: `PaymentCalls` lists only requests that name the portal (a
+  route by id is checked in the store, `HasServiceLimit`); a billing body is compared by field (`BillingValue`),
+  not by substring; a status reachable on several paths also checks `ErrorContent`.
+- Re-read cached data (tariff, customer, balance) with `refresh=true` after scripting a payment.
+- The stub profile overrides the payment addresses, key, secret, region, default quota and the first accounting
+  currency; never depend on the rest of `buildtools/config` (an unsupported currency is `XXX`).

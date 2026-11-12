@@ -42,7 +42,12 @@ public record AssignmentPolicy
 }
 
 [Scope]
-public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfiguration, ILogger<AssignmentsResolver> logger)
+public class AssignmentsResolver(
+    AiGateway gateway,
+    PortalModelsService portalModelsService,
+    TenantManager tenantManager,
+    AiConfiguration aiConfiguration,
+    ILogger<AssignmentsResolver> logger)
 {
     private static readonly AssignmentPolicy[] _policies =
     [
@@ -154,8 +159,7 @@ public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfigurat
     {
         try
         {
-            var response = await gateway.GetModelsAsync();
-            return response?.Data?.ToList() ?? [];
+            return await portalModelsService.ReadAsync(tenantManager.GetCurrentTenantId());
         }
         catch (Exception e) when (e is HttpRequestException or TaskCanceledException or TimeoutException or JsonException)
         {

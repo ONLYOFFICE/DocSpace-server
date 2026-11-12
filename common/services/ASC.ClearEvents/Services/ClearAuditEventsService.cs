@@ -1,0 +1,72 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.ClearEvents.Services;
+
+[Singleton]
+public sealed class ClearAuditEventsService : ActivePassiveBackgroundService<ClearAuditEventsService>
+{
+    private readonly AuditTrailCleaner _cleaner;
+    private readonly AuditTrailRetentionConfiguration _retention;
+
+    public ClearAuditEventsService(
+        ILogger<ClearAuditEventsService> logger,
+        IServiceScopeFactory scopeFactory,
+        IConfiguration configuration,
+        AuditTrailCleaner cleaner)
+        : base(logger, scopeFactory)
+    {
+        _cleaner = cleaner;
+        _retention = AuditTrailRetentionConfiguration.Read(configuration, logger);
+
+        if (!_retention.Enabled)
+        {
+            // Registered for an enabled value that could not be read; the warning above says which.
+            logger.WarningAuditTrailCleanupOff(AuditTrailRetentionConfiguration.SectionName);
+        }
+        else if (_retention.PaidGracePeriodDays == 0)
+        {
+            logger.InformationPaidGracePeriodOff(AuditTrailRetentionConfiguration.SectionName);
+        }
+
+        // Within MinPeriod..MaxPeriod, which Task.Delay accepts: Read keeps every value inside its bounds.
+        ExecuteTaskPeriod = _retention.Period;
+    }
+
+    protected override TimeSpan ExecuteTaskPeriod { get; set; }
+
+    protected override Task ExecuteTaskAsync(CancellationToken stoppingToken)
+    {
+        return _cleaner.ClearAsync(_retention, stoppingToken);
+    }
+}

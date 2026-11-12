@@ -29,6 +29,7 @@
   <Project Path="common/services/ASC.Notify/ASC.Notify.csproj" />
   <Project Path="common/services/ASC.Studio.Notify/ASC.Studio.Notify.csproj" />
   <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />
+  <Project Path="common/Tests/ASC.ClearEvents.Tests/ASC.ClearEvents.Tests.csproj" />
   <Project Path="common/Tests/ASC.Core.Common.Tests/ASC.Core.Common.Tests.csproj" />
   <Project Path="common/Tests/ASC.Data.Backup.Core.Tests/ASC.Data.Backup.Core.Tests.csproj" />
   <Project Path="common/Tests/ASC.Data.Backup.Tests/ASC.Data.Backup.Tests.csproj" />
@@ -46,6 +47,7 @@
   <Project Path="products/ASC.Files/Worker/ASC.Files.Worker.csproj" />
   <Project Path="products/ASC.People/Server/ASC.People.csproj" />
   <Project Path="products/ASC.People/Tests/ASC.People.Tests.csproj" />
+  <Project Path="web/ASC.Web.Api.Billing.Tests/ASC.Web.Api.Billing.Tests.csproj" />
   <Project Path="web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj" />
   <Project Path="web/ASC.Web.Api/ASC.Web.Api.csproj" />
   <Project Path="web/ASC.Web.Core/ASC.Web.Core.csproj" />

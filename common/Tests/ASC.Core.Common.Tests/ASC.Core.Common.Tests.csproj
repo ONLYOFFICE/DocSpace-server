@@ -20,6 +20,9 @@
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
       <PackageReference Include="xunit.v3" />
+    <!-- The billing, accounting and docscloud client tests answer through a WireMock server on loopback, so the
+         requests cross the real handler chain (auth, resilience, sockets) rather than a fake primary handler. -->
+    <PackageReference Include="WireMock.Net" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,6 +38,11 @@
     <!-- ASC.Webhooks.Contract generates docspace-webhooks.yaml: WebhookContractTests fails when the committed contract
          no longer matches the payload DTOs. -->
     <ProjectReference Include="..\..\Tools\ASC.Webhooks.Contract\ASC.Webhooks.Contract.csproj" />
+    <!-- ASC.Migrations.Core carries MigrationContext, from which the migrations are generated: its model holds every
+         table of the schema, including those whose runtime context lives in a project not referenced here
+         (BackupsContext in ASC.Data.Backup.Core, LegacyAiDbContext in the AI service), so PersistedEnumValuesTests
+         sees every stored enum. -->
+    <ProjectReference Include="..\..\Tools\ASC.Migrations.Core\ASC.Migrations.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

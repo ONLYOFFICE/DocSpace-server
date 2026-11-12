@@ -54,4 +54,28 @@ public static class FormSchemaFormatter
             ? $"{desc} [{string.Join("/", values)}]"
             : $"{desc} [{string.Join("/", values.Take(maxEnumValues))}/...]";
     }
+
+    /// <summary>
+    /// Which versions of the form the rows of the table answer, so that a table continued by later versions is not taken
+    /// for the responses to one version only. <paramref name="apart"/>: the earlier versions with responses in other
+    /// tables; null when unknown.
+    /// </summary>
+    public static string FormatCoverage(int version, IReadOnlyList<int> inTable, IReadOnlyList<int>? apart)
+    {
+        var all = apart is { Count: 0 };
+        var coverage = inTable.Count > 1
+            ? $"These are {(all ? "all " : string.Empty)}the responses to the form, given to versions {string.Join(", ", inTable)}; " +
+              $"version {version} is the current one. A field renamed in a later version keeps its earlier answers in the column of its current name."
+            : all
+                ? "These are all the responses to the form."
+                : $"These are the responses to version {version} of the form, the current one.";
+
+        if (apart is not { Count: > 0 })
+        {
+            return coverage;
+        }
+
+        var versions = apart.Count == 1 ? $"version {apart[0]}" : $"versions {string.Join(", ", apart)}";
+        return $"{coverage} The responses to {versions} are kept apart and are not counted here.";
+    }
 }

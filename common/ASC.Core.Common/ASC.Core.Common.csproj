@@ -33,6 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Notify\Stylers\Resources\style.css" />
+    <EmbeddedResource Include="AI\img\*.svg" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AWSSDK.Core" />

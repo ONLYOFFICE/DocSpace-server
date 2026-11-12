@@ -1806,6 +1806,98 @@
       "additionalProperties": false,
       "description": "AI model metadata. Describes a single model available from a provider."
     },
+    "AiByokKey": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Model revision id the key is set for, used in the path when replacing or deleting it."
+        },
+        "name": {
+          "type": "string",
+          "description": "Model display name; absent when the model is no longer in the gateway catalogue."
+        },
+        "provider": {
+          "type": "string",
+          "description": "BYOK provider id the key belongs to, e.g. `anthropic`."
+        },
+        "image": {
+          "type": "string",
+          "description": "SVG markup of the logo of the model's owner."
+        }
+      },
+      "required": [
+        "id",
+        "provider"
+      ],
+      "additionalProperties": false
+    },
+    "AiByokProvider": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "BYOK provider id, passed as `provider` when setting a BYOK key."
+        },
+        "name": {
+          "type": "string",
+          "description": "Provider display name."
+        },
+        "image": {
+          "type": "string",
+          "description": "SVG markup of the logo of the provider's models' owner."
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiByokModel"
+          },
+          "description": "Models that can be called through this provider with the portal's own key."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "models"
+      ],
+      "additionalProperties": false
+    },
+    "AiByokModel": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Model id, used in the path when setting its BYOK key."
+        },
+        "name": {
+          "type": "string",
+          "description": "Model display name."
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "AiByokKeyInput": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "type": "string",
+          "description": "BYOK provider id from the model's `byok_providers`, e.g. `anthropic`."
+        },
+        "key": {
+          "type": "string",
+          "description": "Provider API key."
+        }
+      },
+      "required": [
+        "provider",
+        "key"
+      ],
+      "additionalProperties": false
+    },
     "AiCreatePromptInput": {
       "type": "object",
       "properties": {
@@ -3726,6 +3818,30 @@
         }
       }
     },
+    "aiByokKeysList": {
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AiByokKey"
+        }
+      }
+    },
+    "aiByokProviders": {
+      "response": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AiByokProvider"
+        }
+      }
+    },
+    "aiByokKeysSet": {
+      "request": {
+        "$ref": "#/components/schemas/AiByokKeyInput"
+      },
+      "response": {
+        "$ref": "#/components/schemas/AiByokKey"
+      }
+    },
     "aiPromptsCreate": {
       "request": {
         "$ref": "#/components/schemas/AiCreatePromptInput"
@@ -4664,6 +4780,47 @@
         "required": [
           "name",
           "content"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "aiSkillsCreate": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "destId": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The integer id of the Instructions room the skill is created in."
+          },
+          "title": {
+            "type": "string",
+            "description": "The file's title without the extension, at most 165 characters, with a letter or a digit."
+          }
+        },
+        "required": [
+          "destId",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the new skill file."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title the file was saved under, extension included."
+          }
+        },
+        "required": [
+          "id",
+          "title"
         ],
         "additionalProperties": false
       }

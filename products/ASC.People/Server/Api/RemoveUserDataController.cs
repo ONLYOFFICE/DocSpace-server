@@ -83,7 +83,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// emailed link and the client calls `DELETE api/2.0/people/@self` with the confirmation token from it.
     /// The answer is a ready-to-display message naming the address the link was sent to, and the address is wrapped
     /// in bold HTML markup, so strip the markup before showing it outside a web page.
-    /// Repeated calls are throttled, and each one sends a new link.
+    /// A repeat shortly after the letter went out sends no second letter, and the link already sent stays valid.
     /// </remarks>
     /// <summary>
     /// Send the deletion instructions
@@ -93,7 +93,6 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     [SwaggerResponse(200, "The message stating which address the confirmation link was sent to", typeof(string))]
     [SwaggerResponse(403, "The caller is the portal owner or an LDAP account and cannot delete their own profile")]
     [HttpPut("self/delete")]
-    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<string> SendInstructionsToDelete()
     {
         var user = await userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
@@ -104,8 +103,10 @@ public class RemoveUserDataController(PermissionContext permissionContext,
             throw new SecurityException();
         }
 
-        await studioNotifyService.SendMsgProfileDeletionAsync(user);
-        messageService.Send(MessageAction.UserSentDeleteInstructions);
+        if (await studioNotifyService.SendMsgProfileDeletionAsync(user))
+        {
+            messageService.Send(MessageAction.UserSentDeleteInstructions);
+        }
 
         return string.Format(Resource.SuccessfullySentNotificationDeleteUserInfoMessage, "<b>" + user.Email + "</b>");
     }

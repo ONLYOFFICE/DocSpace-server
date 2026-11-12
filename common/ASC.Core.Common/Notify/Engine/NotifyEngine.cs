@@ -273,7 +273,28 @@ public class NotifyEngine(Context context,
             return preventresponse;
         }
 
-        await channel.SendAsync(noticeMessage, serviceScope);
+        return await SendThroughChannelAsync(request, channel, noticeMessage, serviceScope);
+    }
+
+    // Anything but OK from the channel, or a throw, means the recipient did not get the message: the interceptors
+    // hear of it, so one that holds back repeats takes back the mark this message left.
+    internal static async Task<SendResponse> SendThroughChannelAsync(NotifyRequest request, ISenderChannel channel, NoticeMessage noticeMessage, IServiceScope serviceScope)
+    {
+        SendResponse sendResponse;
+        try
+        {
+            sendResponse = await channel.SendAsync(noticeMessage, serviceScope);
+        }
+        catch
+        {
+            await request.SendFailedAsync(serviceScope);
+            throw;
+        }
+
+        if (sendResponse is { Result: not SendResult.OK })
+        {
+            await request.SendFailedAsync(serviceScope);
+        }
 
         return new SendResponse(noticeMessage, channel.SenderName, SendResult.Inprogress);
     }

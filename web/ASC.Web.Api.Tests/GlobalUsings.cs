@@ -36,7 +36,9 @@ extern alias ASCWebApi;
 
 global using System.Collections.Concurrent;
 global using System.Diagnostics;
+global using System.Formats.Tar;
 global using System.Globalization;
+global using System.IO.Compression;
 global using System.Net;
 global using System.Net.Http.Json;
 global using System.Security.Cryptography;
@@ -62,6 +64,9 @@ global using DocSpace.Webhooks.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.Logging.Abstractions;
+
 global using WireMock;
 global using WireMock.RequestBuilders;
 global using WireMock.ResponseBuilders;
@@ -77,6 +82,8 @@ global using ApiKeysApi = DocSpace.API.SDK.Api.ApiKeys.ApiKeysApi;
 global using AuditTrailDataApi = DocSpace.API.SDK.Api.Security.AuditTrailDataApi;
 global using AuthorizationApi = DocSpace.API.SDK.Api.Settings.AuthorizationApi;
 global using CSPApi = DocSpace.API.SDK.Api.Security.CSPApi;
+// Not the whole System.Data namespace: the ONLYOFFICE backup fixture needs only these two, and the rest would crowd the SDK model names.
+global using DataTable = System.Data.DataTable;
 global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FirebaseApi = DocSpace.API.SDK.Api.Security.FirebaseApi;
 global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
@@ -84,6 +91,7 @@ global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
 global using GroupApi = DocSpace.API.SDK.Api.Group.GroupApi;
 global using LoginHistoryApi = DocSpace.API.SDK.Api.Security.LoginHistoryApi;
 global using MigrationApi = DocSpace.API.SDK.Api.Migration.MigrationApi;
+global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
 global using OAuth2Api = DocSpace.API.SDK.Api.Security.OAuth2Api;
 global using OperationsApi = DocSpace.API.SDK.Api.Files.OperationsApi;
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
@@ -101,3 +109,4 @@ global using SMTPSettingsApi = DocSpace.API.SDK.Api.Security.SMTPSettingsApi;
 global using Task = System.Threading.Tasks.Task;
 global using ThirdPartyApi = DocSpace.API.SDK.Api.ThirdParty.ThirdPartyApi;
 global using User = ASC.Tests.Common.Data.User;
+global using XmlWriteMode = System.Data.XmlWriteMode;

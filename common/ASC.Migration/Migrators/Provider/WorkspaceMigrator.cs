@@ -87,11 +87,16 @@ public class WorkspaceMigrator : Migrator
         }
         try
         {
-            _dataReader = DataOperatorFactory.GetReadOperator(_backup, false, reportProgress ? _cancellationToken : CancellationToken.None);
+            _dataReader = await ExtractBackupAsync(reportProgress);
 
             if (_cancellationToken.IsCancellationRequested && reportProgress)
             {
                 return null;
+            }
+
+            if (reportProgress)
+            {
+                await ReportProgressAsync(30, MigrationResource.UnzippingFinished);
             }
 
             var folders = _dataReader.GetDirectories("");
@@ -109,10 +114,21 @@ public class WorkspaceMigrator : Migrator
             }
 
         }
+        catch (Exception e) when (IsStopped(e, _cancellationToken))
+        {
+            // a stop is not a broken archive: the parse returns quietly, as it does between entries, and the
+            // import ends with the cancellation rather than an archive error
+            if (reportProgress)
+            {
+                return null;
+            }
+
+            throw;
+        }
         catch (Exception e)
         {
             MigrationInfo.FailedArchives.Add(Path.GetFileName(_backup));
-            var error = string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_backup));
+            var error = e is LargeBackupException ? e.Message : string.Format(MigrationResource.CanNotParseArchive, Path.GetFileNameWithoutExtension(_backup));
             await ReportProgressAsync(_lastProgressUpdate, error);
             throw new Exception(error, e);
         }
@@ -123,12 +139,46 @@ public class WorkspaceMigrator : Migrator
         return MigrationInfo.ToApiInfo();
     }
 
+    /// <summary>
+    /// Unpacks the backup in a single pass, counting the bytes actually written against the quota, into the folder
+    /// <see cref="DataOperatorFactory.GetReadOperator"/> would use. That operator unpacks everything in one go with no
+    /// way to stop it, and summing the tar headers ahead of it would decompress the whole backup a second time.
+    /// </summary>
+    private async Task<IDataReadOperator> ExtractBackupAsync(bool reportProgress)
+    {
+        // the backup's own name, so it needs no sanitizing: it already names a file on this file system
+        var folder = Path.Combine(Path.GetDirectoryName(_backup), Path.GetFileNameWithoutExtension(_backup));
+
+        // each stream is disposed once, by its own declaration: neither the gzip stream nor the reader owns what it reads
+        await using var file = File.OpenRead(_backup);
+        // the same test DataOperatorFactory.GetReadOperator uses to pick a gzipped or a plain tar
+        await using var gzip = _backup.EndsWith("tar.gz") ? new GZipStream(file, CompressionMode.Decompress, leaveOpen: true) : null;
+
+        // Files are replaced, not refused, as the shared read operator does: the parse that precedes a migration leaves
+        // its unpacked folder behind, and the migration parses the backup again into the same place. The migration
+        // unpacks with the operation's token as well: nothing is imported before the backup is unpacked, so stopping
+        // it there is safe, and a large backup could not be stopped otherwise.
+        var extracted = await ExtractTarAsync(gzip ?? (Stream)file, folder, true, async () =>
+        {
+            if (reportProgress)
+            {
+                // unpacking has the 5-30% share; a tar has no entry count up front, so progress follows the file bytes read
+                await ReportUnzippingAsync(5 + 25d * file.Position / file.Length);
+            }
+        }, _cancellationToken);
+
+        if (!extracted && !reportProgress)
+        {
+            // the parse returns quietly when stopped; the import must not go on with a backup unpacked in part
+            throw new OperationCanceledException(_cancellationToken);
+        }
+
+        // reading the unpacked backup during the import keeps ignoring cancellation, as it did before
+        return new FolderReadOperator(folder, reportProgress ? _cancellationToken : CancellationToken.None);
+    }
+
     private async Task InnerParseAsync(bool reportProgress, int count = 1)
     {
-        if (reportProgress)
-        {
-            await ReportProgressAsync(_lastProgressUpdate + (double)25 / count, MigrationResource.UnzippingFinished);
-        }
         await ParseUsersAsync(reportProgress, count);
 
         if (reportProgress)
@@ -264,10 +314,12 @@ public class WorkspaceMigrator : Migrator
                     if (rowPhoto["userId"].ToString() == key)
                     {
                         var bytes = rowPhoto["photo"] as byte[];
-                        using var img = new MagickImage(bytes);
-                        var format = img.Format;
+                        // only the format is needed here, and the header holds it: decoding the whole image would let a
+                        // photo that declares gigapixels exhaust memory during the parse
+                        var format = new MagickImageInfo(bytes).Format;
 
-                        u.PathToPhoto = Path.Combine(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");
+                        // the user id comes from the dump: the photo written under it must stay inside the backup folder
+                        u.PathToPhoto = GetSafeExtractPath(_dataReader.GetFolder(), $"{key}.{CommonPhotoManager.GetImgFormatName(format)}");
                         u.HasPhoto = true;
 
                         await using var fs = new FileStream(u.PathToPhoto, FileMode.Create);
@@ -471,7 +523,7 @@ public class WorkspaceMigrator : Migrator
                     Created = DateTime.Parse(row["create_on"].ToString()),
                     Modified = DateTime.Parse(row["modified_on"].ToString())
                 };
-                file.Path = Path.Combine(_dataReader.GetFolder(), $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
+                file.Path = GetSafeExtractPath(_dataReader.GetFolder(), $"{folderFiles}_{(Convert.ToInt32(file.Id) / 1000 + 1) * 1000}/file_{file.Id}/v{file.Version}/content{FileUtility.GetFileExtension(file.Title)}");
                 storage.Files.Add(file);
                 storage.BytesTotal += int.Parse(row["content_length"].ToString());
             }

@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -47,17 +47,28 @@ global using ASC.Common.Log;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Threading.DistributedLock.Common;
 global using ASC.Core;
+global using ASC.Core.Billing;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.EF.Context;
+global using ASC.Core.Common.Hosting;
+global using ASC.Core.Common.Quota;
+global using ASC.Core.Common.Quota.Features;
+global using ASC.Core.Common.Settings;
 global using ASC.Core.Tenants;
+global using ASC.Core.Users;
 global using ASC.Data.Storage;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;
 global using ASC.FederatedLogin;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.ExternalDatabase;
+global using ASC.MessagingSystem.Core;
 global using ASC.Migration.Core;
 global using ASC.Migration.Core.Core;
 global using ASC.Web.Core.HttpHandlers;
+global using ASC.Web.Core.PublicResources;
+global using ASC.Web.Core.Quota;
 global using ASC.Web.Core.RemovePortal;
 global using ASC.Web.Studio;
 global using ASC.Web.Studio.Core.Notify;
@@ -75,6 +86,8 @@ global using Autofac;
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.Http;
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Hosting.WindowsServices;
 global using Microsoft.Extensions.Logging;
 
+global using ZiggyCreatures.Caching.Fusion;

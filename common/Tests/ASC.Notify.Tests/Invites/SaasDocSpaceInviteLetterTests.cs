@@ -47,7 +47,7 @@ public class SaasDocSpaceInviteLetterTests : LetterTestBase<SaasDocSpaceInviteNo
 
     protected override Task InitAsync(SaasDocSpaceInviteNotifyAction action, LetterScope scope)
     {
-        action.Init(ConfirmUrl(scope), scope.Culture.Name);
+        action.Init(ConfirmUrl(scope), EmployeeType.User, scope.Culture.Name);
 
         return Task.CompletedTask;
     }

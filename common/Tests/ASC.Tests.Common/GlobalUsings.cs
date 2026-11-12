@@ -44,6 +44,8 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
+global using ASC.EventBus.Events;
+global using ASC.EventBus.Serializers;
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 
@@ -64,6 +66,8 @@ global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 
 global using MySqlConnector;
+
+global using RabbitMQ.Client;
 
 global using SocketIOClient;
 global using SocketIOClient.Common;
