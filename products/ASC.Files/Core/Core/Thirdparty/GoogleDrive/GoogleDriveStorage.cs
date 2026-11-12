@@ -537,7 +537,7 @@ internal class GoogleDriveStorage(
             var requestFolder = _driveService.Files.Create(body);
             requestFolder.Fields = GoogleLoginProvider.FilesFields;
 
-            return await requestFolder.ExecuteAsync();
+            return await WriteAsync(() => requestFolder.ExecuteAsync());
         }
 
         var request = _driveService.Files.Create(body, fileStream, mimeType);
@@ -583,7 +583,7 @@ internal class GoogleDriveStorage(
         request.AddParents = toFolderId;
         request.Fields = GoogleLoginProvider.FilesFields;
 
-        return request.ExecuteAsync();
+        return WriteAsync(() => request.ExecuteAsync());
     }
 
     private Task<DriveFile> RenameEntryAsync(string fileId, string newTitle)
@@ -591,7 +591,7 @@ internal class GoogleDriveStorage(
         var request = _driveService.Files.Update(FileConstructor(newTitle), fileId);
         request.Fields = GoogleLoginProvider.FilesFields;
 
-        return request.ExecuteAsync();
+        return WriteAsync(() => request.ExecuteAsync());
     }
 
     private async Task<DriveFile> SaveStreamAsync(string fileId, Stream fileStream, string fileTitle)
@@ -616,6 +616,20 @@ internal class GoogleDriveStorage(
         _logger.ErrorWhileTryingToInsertEntity(result.Exception);
 
         return request.ResponseBody;
+    }
+
+    // Google Drive refuses a write the account has no space for with 403 / storageQuotaExceeded, which would
+    // otherwise reach the user as the library's raw error text; it is replaced with a readable one.
+    private static async Task<T> WriteAsync<T>(Func<Task<T>> write)
+    {
+        try
+        {
+            return await write();
+        }
+        catch (Exception ex) when (ThirdPartyStorageQuota.IsGoogleDrive(ex))
+        {
+            throw ThirdPartyStorageQuota.CreateException(ex);
+        }
     }
 
     private static Exception TranslateUploadError(Exception uploadError)

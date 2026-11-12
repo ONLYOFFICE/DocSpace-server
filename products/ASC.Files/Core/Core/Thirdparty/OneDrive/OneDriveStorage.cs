@@ -153,9 +153,9 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
             Name = title
         };
 
-        return await GetItemRequest(parentId).Children
+        return await WriteAsync(() => GetItemRequest(parentId).Children
             .Request()
-            .AddAsync(newFolderItem);
+            .AddAsync(newFolderItem));
     }
 
 
@@ -185,9 +185,9 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
     {
         var updateItem = new Item { ParentReference = new ItemReference { Id = toFolderId }, Name = newItemName };
 
-        return await OnedriveClient.Drive.Items[itemId]
+        return await WriteAsync(() => OnedriveClient.Drive.Items[itemId]
             .Request()
-            .UpdateAsync(updateItem);
+            .UpdateAsync(updateItem));
     }
 
     private async Task<Item> CopyItemAsync(string itemId, string newItemName, string toFolderId)
@@ -212,9 +212,9 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
     {
         var updateItem = new Item { Name = newName };
 
-        return await OnedriveClient.Drive.Items[itemId]
+        return await WriteAsync(() => OnedriveClient.Drive.Items[itemId]
             .Request()
-            .UpdateAsync(updateItem);
+            .UpdateAsync(updateItem));
     }
 
     public async Task<Item> SaveStreamAsync(string fileId, Stream fileStream)

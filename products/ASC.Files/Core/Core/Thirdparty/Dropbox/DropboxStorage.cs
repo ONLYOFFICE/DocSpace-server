@@ -241,7 +241,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     {
         var folder = await GetFolderAsync(folderId);
         var pathTo = GetParentFolderId(folder);
-        var result = await _dropboxClient.Files.MoveV2Async(folderId, MakeDropboxPath(pathTo, newName), autorename: true);
+        var result = await WriteAsync(() => _dropboxClient.Files.MoveV2Async(folderId, MakeDropboxPath(pathTo, newName), autorename: true));
 
         return (FolderMetadata)result.Metadata;
     }
@@ -258,7 +258,7 @@ internal class DropboxStorage(TempStream tempStream, IHttpClientFactory httpClie
     {
         var file = await GetFileAsync(fileId);
         var pathTo = GetParentFolderId(file);
-        var result = await _dropboxClient.Files.MoveV2Async(fileId, MakeDropboxPath(pathTo, newName), autorename: true);
+        var result = await WriteAsync(() => _dropboxClient.Files.MoveV2Async(fileId, MakeDropboxPath(pathTo, newName), autorename: true));
 
         return (FileMetadata)result.Metadata;
     }

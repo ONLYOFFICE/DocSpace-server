@@ -179,7 +179,7 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
             }
         };
 
-        return await _boxClient.FoldersManager.CreateAsync(boxFolderRequest, _boxFields);
+        return await WriteAsync(() => _boxClient.FoldersManager.CreateAsync(boxFolderRequest, _boxFields));
     }
 
     public async Task<BoxFile> CreateFileAsync(Stream fileStream, string title, string parentId)
@@ -282,14 +282,14 @@ internal class BoxStorage(TempStream tempStream) : IThirdPartyStorage<BoxFile, B
     {
         var boxFolderRequest = new BoxFolderRequest { Id = folderId, Name = newName };
 
-        return await _boxClient.FoldersManager.UpdateInformationAsync(boxFolderRequest, _boxFields);
+        return await WriteAsync(() => _boxClient.FoldersManager.UpdateInformationAsync(boxFolderRequest, _boxFields));
     }
 
     public async Task<BoxFile> RenameFileAsync(string fileId, string newName)
     {
         var boxFileRequest = new BoxFileRequest { Id = fileId, Name = newName };
 
-        return await _boxClient.FilesManager.UpdateInformationAsync(boxFileRequest, null, _boxFields);
+        return await WriteAsync(() => _boxClient.FilesManager.UpdateInformationAsync(boxFileRequest, null, _boxFields));
     }
 
     public async Task<BoxFile> SaveStreamAsync(string fileId, Stream fileStream)
