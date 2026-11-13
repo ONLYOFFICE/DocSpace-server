@@ -145,8 +145,7 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     public bool IsRoomAdmin { get; set; }
 
     /// <summary>
-    /// Specifies if the LDAP settings are enabled for the user or not. Always false in the short profile a User or
-    /// a Guest gets of another account when searching whom to share an entry with.
+    /// Specifies if the LDAP settings are enabled for the user or not.
     /// </summary>
     /// <example>false</example>
     public bool IsLDAP { get; set; }
@@ -195,8 +194,7 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
-    /// Specifies if the SSO settings are enabled for the user or not. Always false in the short profile a User or
-    /// a Guest gets of another account when searching whom to share an entry with.
+    /// Specifies if the SSO settings are enabled for the user or not.
     /// </summary>
     /// <example>false</example>
     public bool IsSSO { get; set; }
@@ -422,8 +420,8 @@ public class EmployeeFullDtoHelper(
 
         // A user or a guest has no access to the contacts of another account - the same rule that leaves out its
         // groups and its profile link. The full profile reaches them through access lists, form roles and group
-        // members, so the contacts are withheld here rather than at each of those places. A socket event is built
-        // for whoever made the change and read by others, so UserSocketManager strips its own copy.
+        // members, so the contacts are withheld here rather than at each of those places. A socket event would be
+        // built for whoever made the change and read by others, so UserSocketManager sends the id alone.
         if (!await IsWithoutContactsAccessAsync(userInfo.Id))
         {
             if (!string.IsNullOrEmpty(userInfo.Location))
