@@ -378,6 +378,12 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiSkillsCreate:
     "Creates a new skill in an Instructions room from the skill template and saves it as `<title>.md`; no model is involved. `destId` is the integer id of the Instructions room, checked before anything is written: the caller has to be able to create files in it, and any other folder answers 400. `title` is the file's title, at most 165 characters, without the extension (a trailing `.md` is dropped), and has to hold a letter or a digit: the skill's `name` is derived from it as in `POST api/2.0/ai/skills/generate`, and its `description` starts as the title itself. The body is a skeleton of the sections a skill is made of, for the user to fill in. The file is saved through `POST api/2.0/files/{folderId}/insert`, so the Files service validates the frontmatter and the room's limits, and a title already taken in the room gets a numbered one. The answer carries the ID and the title of the new file.",
 
+  // Templates.
+  aiTemplatesList:
+    "Returns the templates shipped with the service, in three lists: `agents`, `skillSets` and `knowledgeBases`. Every template has an `id` (its path in the catalog), a `name`, a `description` and a `category`. A skill set and a knowledge base list the names of their `files`; an agent carries its `instructions` and, in `skills` and `knowledges`, the ids of the skill set and knowledge base templates it is linked to, each of which is a template of its own in the other two lists. The catalog is the same for every portal and every caller. This is a read-only operation.",
+  aiTemplatesInstall:
+    "Installs one template into the portal through the Files API with the caller's own credentials, so the Files service decides whether the caller may create the rooms. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`) linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given its instructions. Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The instructions are the exception: when they cannot be stored the agent is still returned, with `instructionsNotSaved` in `warnings`. The template's description and category are not written anywhere.",
+
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
     "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
@@ -766,6 +772,11 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room.",
     "403": "The caller cannot create files in the room.",
     "404": "The room does not exist.",
+  },
+  aiTemplatesInstall: {
+    "400": "`id` is missing or is not a string.",
+    "403": "The caller may not create a room of the kind the template needs.",
+    "404": "The catalog has no template with this `id`.",
   },
   aiSkillsGenerate: {
     "400":
@@ -1436,6 +1447,9 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiSkillsGenerate:
     "The skill's name and the whole Markdown file, frontmatter included; nothing is saved.",
   aiSkillsCreate: "The ID and the title of the new skill file.",
+  aiTemplatesList: "The agents, skill sets and knowledge bases of the catalog.",
+  aiTemplatesInstall:
+    "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
 
   aiOpenaiChatCompletions:
     "The provider's own response, relayed with its status and content type (a 5xx excepted).",

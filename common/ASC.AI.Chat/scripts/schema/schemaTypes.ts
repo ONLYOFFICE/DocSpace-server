@@ -790,6 +790,62 @@ export type Res_aiSkillsCreate = {
   title: string;
 };
 
+/** A skill set or a knowledge base of the catalog. */
+type TemplateSource = {
+  /** The template's id: its path in the catalog. */
+  id: string;
+  kind: "skillSet" | "knowledgeBase";
+  name: string;
+  description: string;
+  /** The category the template is listed under. */
+  category: string;
+  /** The names of the files the template holds, in the order they are uploaded. */
+  files: string[];
+};
+/** An agent of the catalog. */
+type TemplateAgent = {
+  /** The template's id: its path in the catalog. */
+  id: string;
+  kind: "agent";
+  name: string;
+  description: string;
+  /** The category the template is listed under. */
+  category: string;
+  /** The agent's instructions to the chat. */
+  instructions: string;
+  /** The ids of the skill set templates the agent is linked to. */
+  skills: string[];
+  /** The ids of the knowledge base templates the agent is linked to. */
+  knowledges: string[];
+};
+/** A room an installation made. */
+type TemplateRoom = {
+  /** The id of the template the room was made from. */
+  templateId: string;
+  /** The ID of the new room. */
+  id: string;
+  /** The title the room was created with. */
+  title: string;
+};
+export type Res_aiTemplatesList = {
+  agents: TemplateAgent[];
+  skillSets: TemplateSource[];
+  knowledgeBases: TemplateSource[];
+};
+export type Req_aiTemplatesInstall = {
+  /** The id of the template to install, as the catalog lists it. */
+  id: string;
+};
+export type Res_aiTemplatesInstall = TemplateRoom & {
+  kind: "agent" | "skillSet" | "knowledgeBase";
+  /** The Instructions rooms made for an agent's skill sets; empty for the other kinds. */
+  skillSets: TemplateRoom[];
+  /** The Knowledge rooms made for an agent's knowledge bases; empty for the other kinds. */
+  knowledgeBases: TemplateRoom[];
+  /** What was skipped: `instructionsNotSaved` when the agent's instructions could not be stored. */
+  warnings: string[];
+};
+
 export type Req_aiMetaFill = {
   /** The entry's table. Only `file` for now: a folder or a room answers 400. */
   kind: "file";

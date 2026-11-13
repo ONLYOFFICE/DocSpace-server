@@ -1597,6 +1597,10 @@
           "examples": [
             "Contract templates"
           ]
+        },
+        "path": {
+          "type": "string",
+          "description": "Where the folder sits, as the host shows it (\"My documents / Reports\"): a folder's pill names it in full."
         }
       },
       "required": [
@@ -4823,6 +4827,280 @@
           "title"
         ],
         "additionalProperties": false
+      }
+    },
+    "aiTemplatesList": {
+      "response": {
+        "type": "object",
+        "properties": {
+          "agents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The template's id: its path in the catalog."
+                },
+                "kind": {
+                  "type": "string",
+                  "const": "agent"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string",
+                  "description": "The category the template is listed under."
+                },
+                "instructions": {
+                  "type": "string",
+                  "description": "The agent's instructions to the chat."
+                },
+                "skills": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The ids of the skill set templates the agent is linked to."
+                },
+                "knowledges": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The ids of the knowledge base templates the agent is linked to."
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "name",
+                "description",
+                "category",
+                "instructions",
+                "skills",
+                "knowledges"
+              ],
+              "additionalProperties": false,
+              "description": "An agent of the catalog."
+            }
+          },
+          "skillSets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The template's id: its path in the catalog."
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "skillSet",
+                    "knowledgeBase"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string",
+                  "description": "The category the template is listed under."
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The names of the files the template holds, in the order they are uploaded."
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "name",
+                "description",
+                "category",
+                "files"
+              ],
+              "additionalProperties": false,
+              "description": "A skill set or a knowledge base of the catalog."
+            }
+          },
+          "knowledgeBases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "The template's id: its path in the catalog."
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "skillSet",
+                    "knowledgeBase"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "category": {
+                  "type": "string",
+                  "description": "The category the template is listed under."
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "description": "The names of the files the template holds, in the order they are uploaded."
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "name",
+                "description",
+                "category",
+                "files"
+              ],
+              "additionalProperties": false,
+              "description": "A skill set or a knowledge base of the catalog."
+            }
+          }
+        },
+        "required": [
+          "agents",
+          "skillSets",
+          "knowledgeBases"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "aiTemplatesInstall": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the template to install, as the catalog lists it."
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "skillSet",
+              "knowledgeBase"
+            ]
+          },
+          "skillSets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "templateId": {
+                  "type": "string",
+                  "description": "The id of the template the room was made from."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "The ID of the new room."
+                },
+                "title": {
+                  "type": "string",
+                  "description": "The title the room was created with."
+                }
+              },
+              "required": [
+                "templateId",
+                "id",
+                "title"
+              ],
+              "additionalProperties": false,
+              "description": "A room an installation made."
+            },
+            "description": "The Instructions rooms made for an agent's skill sets; empty for the other kinds."
+          },
+          "knowledgeBases": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "templateId": {
+                  "type": "string",
+                  "description": "The id of the template the room was made from."
+                },
+                "id": {
+                  "type": "string",
+                  "description": "The ID of the new room."
+                },
+                "title": {
+                  "type": "string",
+                  "description": "The title the room was created with."
+                }
+              },
+              "required": [
+                "templateId",
+                "id",
+                "title"
+              ],
+              "additionalProperties": false,
+              "description": "A room an installation made."
+            },
+            "description": "The Knowledge rooms made for an agent's knowledge bases; empty for the other kinds."
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "What was skipped: `instructionsNotSaved` when the agent's instructions could not be stored."
+          },
+          "templateId": {
+            "type": "string",
+            "description": "The id of the template the room was made from."
+          },
+          "id": {
+            "type": "string",
+            "description": "The ID of the new room."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title the room was created with."
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "knowledgeBases",
+          "skillSets",
+          "templateId",
+          "title",
+          "warnings"
+        ]
       }
     },
     "aiMetaFill": {

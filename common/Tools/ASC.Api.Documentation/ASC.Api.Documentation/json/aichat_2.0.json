@@ -106,6 +106,11 @@
       "x-displayName": "Skills"
     },
     {
+      "name": "AI / Templates",
+      "description": "Shipped templates of agents, skill sets and knowledge bases, and their installation.",
+      "x-displayName": "Templates"
+    },
+    {
       "name": "AI / Threads",
       "description": "Chat threads and their messages.",
       "x-displayName": "Threads"
@@ -144,6 +149,7 @@
         "AI / Prompts",
         "AI / Settings",
         "AI / Skills",
+        "AI / Templates",
         "AI / Threads",
         "AI / Tools",
         "AI / Vectorization",
@@ -9298,6 +9304,401 @@
         }
       }
     },
+    "/api/2.0/ai/templates": {
+      "get": {
+        "tags": [
+          "AI / Templates"
+        ],
+        "operationId": "aiTemplatesList",
+        "summary": "Get the templates",
+        "description": "Returns the templates shipped with the service, in three lists: `agents`, `skillSets` and `knowledgeBases`. Every template has an `id` (its path in the catalog), a `name`, a `description` and a `category`. A skill set and a knowledge base list the names of their `files`; an agent carries its `instructions` and, in `skills` and `knowledges`, the ids of the skill set and knowledge base templates it is linked to, each of which is a template of its own in the other two lists. The catalog is the same for every portal and every caller. This is a read-only operation.",
+        "responses": {
+          "200": {
+            "description": "The agents, skill sets and knowledge bases of the catalog.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "agents": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The template's id: its path in the catalog."
+                          },
+                          "kind": {
+                            "type": "string",
+                            "const": "agent"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string",
+                            "description": "The category the template is listed under."
+                          },
+                          "instructions": {
+                            "type": "string",
+                            "description": "The agent's instructions to the chat."
+                          },
+                          "skills": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "The ids of the skill set templates the agent is linked to."
+                          },
+                          "knowledges": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "The ids of the knowledge base templates the agent is linked to."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "name",
+                          "description",
+                          "category",
+                          "instructions",
+                          "skills",
+                          "knowledges"
+                        ],
+                        "additionalProperties": false,
+                        "description": "An agent of the catalog."
+                      }
+                    },
+                    "skillSets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The template's id: its path in the catalog."
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "skillSet",
+                              "knowledgeBase"
+                            ]
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string",
+                            "description": "The category the template is listed under."
+                          },
+                          "files": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "The names of the files the template holds, in the order they are uploaded."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "name",
+                          "description",
+                          "category",
+                          "files"
+                        ],
+                        "additionalProperties": false,
+                        "description": "A skill set or a knowledge base of the catalog."
+                      }
+                    },
+                    "knowledgeBases": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "description": "The template's id: its path in the catalog."
+                          },
+                          "kind": {
+                            "type": "string",
+                            "enum": [
+                              "skillSet",
+                              "knowledgeBase"
+                            ]
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string",
+                            "description": "The category the template is listed under."
+                          },
+                          "files": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            },
+                            "description": "The names of the files the template holds, in the order they are uploaded."
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "kind",
+                          "name",
+                          "description",
+                          "category",
+                          "files"
+                        ],
+                        "additionalProperties": false,
+                        "description": "A skill set or a knowledge base of the catalog."
+                      }
+                    }
+                  },
+                  "required": [
+                    "agents",
+                    "skillSets",
+                    "knowledgeBases"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/templates/install": {
+      "post": {
+        "tags": [
+          "AI / Templates"
+        ],
+        "operationId": "aiTemplatesInstall",
+        "summary": "Install a template",
+        "description": "Installs one template into the portal through the Files API with the caller's own credentials, so the Files service decides whether the caller may create the rooms. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`) linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given its instructions. Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The instructions are the exception: when they cannot be stored the agent is still returned, with `instructionsNotSaved` in `warnings`. The template's description and category are not written anywhere.",
+        "responses": {
+          "200": {
+            "description": "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "agent",
+                        "skillSet",
+                        "knowledgeBase"
+                      ]
+                    },
+                    "skillSets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "templateId": {
+                            "type": "string",
+                            "description": "The id of the template the room was made from."
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "The ID of the new room."
+                          },
+                          "title": {
+                            "type": "string",
+                            "description": "The title the room was created with."
+                          }
+                        },
+                        "required": [
+                          "templateId",
+                          "id",
+                          "title"
+                        ],
+                        "additionalProperties": false,
+                        "description": "A room an installation made."
+                      },
+                      "description": "The Instructions rooms made for an agent's skill sets; empty for the other kinds."
+                    },
+                    "knowledgeBases": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "templateId": {
+                            "type": "string",
+                            "description": "The id of the template the room was made from."
+                          },
+                          "id": {
+                            "type": "string",
+                            "description": "The ID of the new room."
+                          },
+                          "title": {
+                            "type": "string",
+                            "description": "The title the room was created with."
+                          }
+                        },
+                        "required": [
+                          "templateId",
+                          "id",
+                          "title"
+                        ],
+                        "additionalProperties": false,
+                        "description": "A room an installation made."
+                      },
+                      "description": "The Knowledge rooms made for an agent's knowledge bases; empty for the other kinds."
+                    },
+                    "warnings": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "What was skipped: `instructionsNotSaved` when the agent's instructions could not be stored."
+                    },
+                    "templateId": {
+                      "type": "string",
+                      "description": "The id of the template the room was made from."
+                    },
+                    "id": {
+                      "type": "string",
+                      "description": "The ID of the new room."
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "The title the room was created with."
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "knowledgeBases",
+                    "skillSets",
+                    "templateId",
+                    "title",
+                    "warnings"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`id` is missing or is not a string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The caller may not create a room of the kind the template needs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The catalog has no template with this `id`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiTemplatesInstallRequest"
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/2.0/ai/config": {
       "get": {
         "tags": [
@@ -13079,6 +13480,10 @@
             "examples": [
               "Contract templates"
             ]
+          },
+          "path": {
+            "type": "string",
+            "description": "Where the folder sits, as the host shows it (\"My documents / Reports\"): a folder's pill names it in full."
           }
         },
         "required": [
@@ -15403,6 +15808,19 @@
         "required": [
           "destId",
           "title"
+        ],
+        "additionalProperties": false
+      },
+      "AiTemplatesInstallRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The id of the template to install, as the catalog lists it."
+          }
+        },
+        "required": [
+          "id"
         ],
         "additionalProperties": false
       },

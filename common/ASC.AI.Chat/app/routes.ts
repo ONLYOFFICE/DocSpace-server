@@ -49,6 +49,7 @@ const openApiSchemas = createRequire(import.meta.url)(
 import { textToDocxController } from "./controllers/textToDocxController.js";
 import { metaController } from "./controllers/metaController.js";
 import { skillsController } from "./controllers/skillsController.js";
+import { templatesController } from "./controllers/templatesController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
@@ -209,6 +210,10 @@ export default function registerRoutes(app: Application): void {
   // Skill creation: saves a new Markdown skill, written from a template
   // and named by its title, into an Instructions room.
   router.post("/skills/create", skillsController.create);
+  // Templates shipped with the service: agents, skill sets and knowledge
+  // bases, and their installation into the portal through the Files API.
+  router.get("/templates", templatesController.list);
+  router.post("/templates/install", templatesController.install);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);

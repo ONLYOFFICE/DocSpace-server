@@ -154,6 +154,37 @@ export async function filesApiGet(path: string, query?: FilesApiQuery): Promise<
   }
 }
 
+/**
+ * A write to `api/2.0/files/{path}` on behalf of the current user, with a
+ * JSON body, answering the `response` of the DocSpace envelope (`undefined`
+ * when the answer carries none). Any non-2xx answer throws
+ * {@link DocspaceApiHttpError} with its status. `path` is relative to
+ * `api/2.0/files/` and must already be encoded.
+ */
+export async function filesApiSend(
+  method: "POST" | "PUT",
+  path: string,
+  body: unknown,
+): Promise<unknown> {
+  const url = `${proxyBaseUrl}/api/2.0/files/${path}`;
+  const { signal, cancel } = withTimeout(undefined);
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { ...getForwardedHeaders(), "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal,
+    });
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const raw: unknown = await res.json().catch(() => undefined);
+    return isObject(raw) ? raw["response"] : undefined;
+  } finally {
+    cancel();
+  }
+}
+
 function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   // DocSpace API responses are wrapped in a `{ response: ... }` envelope.
   const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
