@@ -61,7 +61,7 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task AddUserAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await GetUserDtoAsync(userInfo);
+        var dto = await GetListedUserDtoAsync(userInfo);
         await MakeRequest("add-user", new { tenantId, user = dto });
     }
 
@@ -78,6 +78,9 @@ public class UserSocketManager(ITariffService tariffService,
                 await UpdateGroupAsync(groupDto);
             }
         }
+
+        // The groups are read above to refresh them; the event itself carries none.
+        WithoutContactDetails(dto);
         await MakeRequest("update-user", new { tenantId, user = dto });
     }
 
@@ -108,7 +111,7 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task AddGuestAsync(UserInfo userInfo, bool notifyAdmins = true)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await GetUserDtoAsync(userInfo);
+        var dto = await GetListedUserDtoAsync(userInfo);
         var currentUser = securityContext.CurrentAccount.ID;
         await MakeRequest("add-guest", new { tenantId, room = currentUser, guest = dto });
         if (notifyAdmins)
@@ -124,7 +127,7 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task UpdateGuestAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await GetUserDtoAsync(userInfo);
+        var dto = await GetListedUserDtoAsync(userInfo);
         var relations = await userManager.GetUserRelationsByTargetAsync(userInfo.Id);
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         foreach (var relation in relations)
@@ -183,6 +186,32 @@ public class UserSocketManager(ITariffService tariffService,
     {
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
         dto.AiServicesLimit = null;
+
+        return dto;
+    }
+
+    /// <summary>
+    /// The DTO of an event about an account of a list (users, guests). The DTO is built for the account that made the
+    /// change, usually an administrator, and delivered to everybody who listens, a user or a guest among them, who
+    /// have no access to the contacts of another account. The clients take the id from the event and re-read the
+    /// profile through the API, which applies their own rights, so the event carries no contact details at all.
+    /// The event about the caller's own type is not one of these: its client takes the whole profile from it.
+    /// </summary>
+    private async Task<EmployeeFullDto> GetListedUserDtoAsync(UserInfo userInfo)
+    {
+        return WithoutContactDetails(await GetUserDtoAsync(userInfo));
+    }
+
+    private static EmployeeFullDto WithoutContactDetails(EmployeeFullDto dto)
+    {
+        dto.Contacts = null;
+        dto.MobilePhone = null;
+        dto.MobilePhoneActivationStatus = default;
+        dto.Location = null;
+        dto.Notes = null;
+        dto.Groups = null;
+        dto.Department = null;
+        dto.CreatedBy = null;
 
         return dto;
     }

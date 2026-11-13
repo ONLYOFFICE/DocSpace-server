@@ -55,6 +55,59 @@ public class SocketPortalEventsTests(AspireAppFixture fixture) : SocketTestBase(
             cancellationToken: cancellationToken);
     }
 
+    /// <summary>
+    /// The event about a changed account was built with the rights of whoever made the change - the account itself or
+    /// an administrator - and delivered to everybody listening to the users of the portal, so a user received the
+    /// contacts, the location and the notes of another account, which the API does not show to it. The event now
+    /// carries none: the client re-reads the profile by the id.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task UpdateUser_ReachesAUserWithoutContactDetails()
+    {
+        const string location = "Autotest Location";
+        const string notes = "Autotest Notes";
+        var cancellationToken = TestContext.Current.CancellationToken;
+        var listener = await InviteContact(EmployeeType.User);
+        var changed = await InviteContact(EmployeeType.User);
+
+        await using var socket = await ConnectSocket(listener);
+        await socket.SubscribeAsync(false, cancellationToken, "users");
+
+        // Location, notes and contacts can only be set by the account itself, which sees its own profile in full.
+        await _peopleClient.Authenticate(changed);
+        var asItself = (await _profilesApi.UpdateMemberAsync(
+            changed.Id.ToString(),
+            new UpdateMemberRequestDto(location: location, comment: notes, contacts: [new Contact("skype", "autotest.contact")]),
+            cancellationToken)).Response;
+
+        asItself.Location.Should().Be(location, "whoever made the change sees the details the event must not carry");
+        asItself.Notes.Should().Be(notes);
+        asItself.Contacts.Should().NotBeEmpty();
+
+        var updated = await socket.WaitForAsync(
+            "s:update-user",
+            payload => payload.GetProperty("id").GetGuid() == changed.Id,
+            cancellationToken: cancellationToken);
+
+        var data = updated.Payload.GetProperty("data");
+
+        data.GetProperty("id").GetGuid().Should().Be(changed.Id, "the client re-reads the profile by this id");
+        IsEmpty(data, "location").Should().BeTrue();
+        IsEmpty(data, "notes").Should().BeTrue();
+        IsEmpty(data, "contacts").Should().BeTrue();
+        IsEmpty(data, "mobilePhone").Should().BeTrue();
+        IsEmpty(data, "groups").Should().BeTrue();
+    }
+
+    private static bool IsEmpty(JsonElement data, string property)
+    {
+        return !data.TryGetProperty(property, out var value)
+               || value.ValueKind is JsonValueKind.Null
+               || (value.ValueKind is JsonValueKind.Array && value.GetArrayLength() == 0);
+    }
+
     [Fact]
     public async Task ChangeUserType_ReachesThatUser()
     {
