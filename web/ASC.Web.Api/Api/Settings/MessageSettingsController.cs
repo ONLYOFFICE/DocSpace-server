@@ -57,17 +57,15 @@ public class MessageSettingsController(
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Switches on or off the contact form the sign-in page offers a visitor who cannot get into the portal, and
-    /// which delivers their message to the portal administrators. The caller needs the portal-settings right of a
-    /// DocSpace administrator - the portal owner and a DocSpace administrator qualify, any other member is refused.
-    /// Send the new state as `turnOn`: `true` publishes the form, `false` hides it. The change covers the whole
-    /// portal, applies to the next sign-in page without a restart, is recorded in the audit trail, and repeating the
-    /// call with the same value leaves the portal as it is. What comes back is a localized confirmation message
-    /// rather than the stored flag - read the flag as `enableAdmMess` from `GET api/2.0/settings`, which needs no
-    /// token. That flag is also forced on while the portal's payment has lapsed, so it can report `true` on a portal
-    /// where the form was switched off here. The form itself posts to `POST api/2.0/settings/sendadmmail` and this
-    /// setting gates nothing else: the notifications administrators receive as portal members are subscribed
-    /// separately with `POST api/2.0/settings/notification`.
+    /// Turns on or off the contact form of the sign-in page for visitors who cannot get into the portal. The form
+    /// sends their message to the DocSpace admins. Requires the EditPortalSettings permission, which the portal owner
+    /// and DocSpace admins have. Other callers get 403. Send `turnOn` as `true` to show the form, or `false` to hide
+    /// it. The change covers the whole portal and applies to the next sign-in page. The call changes data, and you
+    /// can repeat it with the same body. It returns a localized confirmation message, not the stored flag. To read
+    /// the flag without signing in, use `GET api/2.0/settings` and its `enableAdmMess` field. That field is also
+    /// `true` while the portal's payment has lapsed, even if the form is turned off here. The form sends messages
+    /// with `POST api/2.0/settings/sendadmmail`. This setting does not change the notifications that admins get as
+    /// portal members. To subscribe to those, use `POST api/2.0/settings/notification`.
     /// </remarks>
     /// <summary>
     /// Enable or disable administrator messages
@@ -89,16 +87,15 @@ public class MessageSettingsController(
     }
 
     /// <remarks>
-    /// Returns how long an authentication session of this portal stays valid: `lifeTime` in minutes together with the
-    /// `enabled` flag that says whether that limit is applied at all. The caller needs the portal-settings right of a
-    /// DocSpace administrator - the portal owner and a DocSpace administrator qualify, any other member is refused -
-    /// and the call is read-only. The pair describes the whole portal rather than the calling user, and it is never
-    /// empty: a portal nobody has configured answers `lifeTime` 1440, one day, with `enabled` false. Read the two
-    /// fields together, because the number alone does not say how long a session lasts - while `enabled` is false the
-    /// stored number is ignored and an issued session is honoured for a year, and `lifeTime` 0 with `enabled` true
-    /// means a session that never expires on its own. On an installation whose configuration hides the cookie section
-    /// the built-in default pair comes back instead of the stored one. `GET api/2.0/settings` carries the same flag
-    /// as `cookieSettingsEnabled` without the number; change the pair with `PUT api/2.0/settings/cookiesettings`.
+    /// Returns how long a sign-in session of the portal stays valid. The answer has `lifeTime` in minutes and the
+    /// `enabled` flag that turns this limit on. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. The call is read-only. The pair is for the whole portal, not for
+    /// the calling user. A portal that nobody has configured returns `lifeTime` 1440, one day, with `enabled` false.
+    /// Read the two fields together. While `enabled` is false, the portal ignores the number and a session lasts a
+    /// year. If `lifeTime` is 0 and `enabled` is true, sessions never expire on their own. If the installation hides
+    /// the cookie section, the call returns the default pair instead of the stored one. The `cookieSettingsEnabled`
+    /// field of `GET api/2.0/settings` has the same flag without the number. To change the pair, use
+    /// `PUT api/2.0/settings/cookiesettings`.
     /// </remarks>
     /// <summary>
     /// Get the cookie lifetime settings
@@ -120,17 +117,15 @@ public class MessageSettingsController(
     }
 
     /// <remarks>
-    /// Stores how long an authentication session of this portal stays valid: `lifeTime` in minutes together with the
-    /// `enabled` flag that switches the limit on. The caller needs the portal-settings right of a DocSpace
-    /// administrator - the portal owner and a DocSpace administrator qualify, any other member is refused - and on an
-    /// installation whose configuration hides the cookie section nothing is stored and the call is answered with 402.
-    /// A `lifeTime` above 9999 minutes is not rejected but clamped to 9999, while 0 or less clears the number
-    /// instead, which with `enabled` true leaves sessions that never expire on their own. Any positive `lifeTime`
-    /// raises the session version of the portal: every session issued before the call stops being accepted, and with
-    /// `enabled` true the connections behind them are dropped as well. The caller is signed in again inside the same
-    /// call and gets a fresh session cookie in the response, so a client that keeps sending the token it held before
-    /// this call is the one locked out. The change is recorded in the audit trail. What comes back is a localized
-    /// confirmation message; read the stored pair with `GET api/2.0/settings/cookiesettings`.
+    /// Changes how long a sign-in session of the portal stays valid. Send the limit in minutes as `lifeTime`, and turn
+    /// it on with `enabled`. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins
+    /// have. Other callers get 403. If the installation hides the cookie section, the call saves nothing and
+    /// returns 402. The call changes a `lifeTime` over 9999 to 9999. A value of 0 or less clears the number. With
+    /// `enabled` true, sessions then never expire on their own. Any positive `lifeTime` ends every session issued
+    /// before the call. If `enabled` is also true, the portal closes their connections. The call signs the caller in
+    /// again and returns a new session cookie. Use that cookie for later calls. The call changes data. Each repeat
+    /// with a positive `lifeTime` ends all sessions again, and a repeat with 0 or less ends no session. It returns a
+    /// localized confirmation message. To read the stored pair, use `GET api/2.0/settings/cookiesettings`.
     /// </remarks>
     /// <summary>
     /// Update the cookie lifetime settings
@@ -158,18 +153,16 @@ public class MessageSettingsController(
     }
 
     /// <remarks>
-    /// Sends a message from someone who cannot get into the portal to its administrators - the contact form the
-    /// sign-in page offers unauthenticated visitors. No token is needed. The form has to be published first with
-    /// `POST api/2.0/settings/messagesettings` unless the portal's payment has lapsed, otherwise nothing is sent;
-    /// `enableAdmMess` in `GET api/2.0/settings` reports whether the call is worth making. `email` is the address the
-    /// administrators answer to and has to be a real address, and `message` is reduced to plain text first, so a body
-    /// carrying nothing but markup counts as empty - either fault is refused with 400. When the caller is not signed
-    /// in and this installation has a CAPTCHA configured, `recaptchaResponse` has to carry a solved challenge of the
-    /// `recaptchaType` that `GET api/2.0/settings` publishes together with the site key, and a missing or stale
-    /// answer refuses the call. `culture` picks the language of the letter. Delivery is queued and reaches the
-    /// administrators subscribed to administrator notifications, so a confirmed call means accepted rather than read,
-    /// and the answer is a localized confirmation. Attempts are rate limited per address and per operation, and
-    /// further ones are refused with 429.
+    /// Sends a message to the DocSpace admins from someone who cannot get into the portal. This is the contact form
+    /// of the sign-in page. First, turn the form on with `POST api/2.0/settings/messagesettings`. While the portal's
+    /// payment has lapsed, the form works without that. The `enableAdmMess` field of `GET api/2.0/settings` shows
+    /// whether the form works. Anyone can call it without signing in. The call returns 400 if `email` is not a valid
+    /// address or `message` is empty without its markup.
+    /// If the caller is not signed in and the installation has a CAPTCHA, `recaptchaResponse` must carry a solved
+    /// challenge. If it is missing or not accepted, the call returns 403. The call queues the letter to the admins
+    /// subscribed to admin notifications. So a success means that the portal accepted the message, not that anyone
+    /// read it. It returns a localized confirmation message. Do not repeat it, since each call sends another letter.
+    /// The portal limits attempts per network address. More attempts return 429.
     /// </remarks>
     /// <summary>
     /// Send a message to the administrator
@@ -181,7 +174,6 @@ public class MessageSettingsController(
     [SwaggerResponse(400, "The request body cannot be read or has no `email` or `message`, the email address is malformed or longer than 255 characters, or the message is longer than 255 characters or empty once its markup is stripped")]
     [SwaggerResponse(403, "The caller is not signed in, the installation has a CAPTCHA configured, and `recaptchaResponse` is missing or not accepted")]
     [SwaggerResponse(429, "Too many contact attempts came from the same address within the rate-limit window")]
-    [SwaggerResponse(500, "The contact form is switched off and the portal's payment has not lapsed")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -227,18 +219,16 @@ public class MessageSettingsController(
     }
 
     /// <remarks>
-    /// Sends an invitation email with a join link to the address in the request - the self-registration the sign-in
-    /// page's register link performs. No token is needed. The portal has to publish a trusted-domain policy first,
-    /// saved with `POST api/2.0/settings/maildomainsettings`: without one there is nothing to join and every caller
-    /// alike is answered with 405 - the same condition `GET api/2.0/settings` reports as `enabledJoin`. `email` has
-    /// to be a real address written in ASCII rather than an internationalized one, must not already belong to a
-    /// portal member, and, when the policy names domains rather than accepting all of them, has to end with one of
-    /// them - each of those faults is refused with 400. `culture` picks the language of the letter. The invitation is
-    /// not an account: the invitee becomes a member only after following the link, and the role it grants, user or
-    /// room administrator, follows the trusted-domain settings and drops to user once the portal's paid places are
-    /// taken. Where the installation caps invitations, an accepted call spends one of those counted by
-    /// `invitationLimit`, and only about a dozen calls from one address in two minutes are accepted. What comes back
-    /// is a localized confirmation.
+    /// Sends an email with a join link to the address in the request. This is the self-registration behind the
+    /// register link of the sign-in page. First, the portal needs a trusted-domain policy, which
+    /// `POST api/2.0/settings/maildomainsettings` saves. Without one, the call returns 405 to every caller. The
+    /// `enabledJoin` field of `GET api/2.0/settings` shows whether the portal has such a policy. Anyone can call it
+    /// without signing in. The call returns 400 if `email` is not a valid ASCII address or already belongs to a
+    /// member. It also returns 400 if the address is outside the trusted domains of the policy. The invitee becomes a
+    /// member only after following the link. The trusted-domain settings make the new member a user or a room admin.
+    /// When the portal's paid places are taken, the new member is always a user. If the installation limits
+    /// invitations, each sent email spends one of `invitationLimit`. A success returns a localized confirmation
+    /// message. Do not repeat the call. Each call sends another email.
     /// </remarks>
     /// <summary>
     /// Send an invitation email
@@ -248,9 +238,7 @@ public class MessageSettingsController(
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "A localized message confirming that the invitation with the join link has been sent", typeof(string))]
     [SwaggerResponse(400, "The request body cannot be read or has no `email`, the email address is malformed, internationalized or longer than 255 characters, lies outside the trusted domains, or already belongs to a member of the portal")]
-    [SwaggerResponse(403, "The portal is not accepting requests while it is being restored, transferred or encrypted")]
     [SwaggerResponse(405, "The portal publishes no trusted-domain policy, so it has nothing to join")]
-    [SwaggerResponse(500, "Eleven invitation requests from the same network address have already been counted, each less than two minutes after the one before")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<string> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)

@@ -59,17 +59,17 @@ public partial class ModuleEventsController(
     private const int MaxBodyBytes = 64 * 1024;
 
     /// <remarks>
-    /// Delivers one event from an integration module to the browsers of the portal named by the request host, over
-    /// the socket connection every open DocSpace page already keeps. No user session is needed: the caller
-    /// identifies itself with the module key in the `X-Module-Key` header, which the installation administrator
-    /// issues and allows for a list of portals. Set exactly one addressee - `user`, the e-mail of a portal user,
-    /// reaches only that user's open sessions without any subscription, and `room` reaches everyone in the portal
-    /// subscribed to `plugin-{module}-{room}`. Browsers receive `plugin:{module}:{event}` with `{ message }`, the
-    /// module name taken from the key, never from the body. The call only hands the event over: nothing is stored,
-    /// a user with no open session never sees it, and a repeated call delivers it again. Keep `message` a signal to
-    /// re-read, such as an unread count. The body is limited to 64 KB. A missing or unknown key fails with 401, a
-    /// portal the key is not allowed for with 403, an unknown or inactive user with 404, and invalid names or not
-    /// exactly one addressee with 400.
+    /// Sends one event from an integration module to the open DocSpace pages of the request host's portal. Set
+    /// exactly one addressee, `user` or `room`. With `user`, only that portal user's open sessions receive it. With
+    /// `room`, everyone in the portal subscribed to `plugin-{module}-{room}` receives it. Browsers receive the
+    /// socket event `plugin:{module}:{event}` with `{ message }`. The key, not the body, sets `{module}`. Anyone
+    /// can call it without signing in, with the module key in the `X-Module-Key` header. A missing or unknown key
+    /// returns 401. The installation administrator issues each key for a list of portals. A key not allowed for
+    /// this portal returns 403. The call only queues the event for delivery and stores nothing. A user with no open
+    /// session never sees the event. Each repeated call delivers the event again. If the portal's payment has
+    /// lapsed, the call returns 402. If `user` names no active user of this portal, the call returns 404. The call
+    /// returns 400 for a missing body, an invalid event or room name, or not exactly one addressee. A body over
+    /// 64 KB returns 413.
     /// </remarks>
     /// <summary>
     /// Send a module event

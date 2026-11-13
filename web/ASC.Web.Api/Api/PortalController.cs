@@ -95,17 +95,12 @@ public class PortalController(
     : ControllerBase
 {
     /// <remarks>
-    /// Returns the portal the request was addressed to - the tenant behind the current domain - with its name, alias,
-    /// owner, language, time zone, industry, trusted-domain rules, version and creation date. Nothing has to be
-    /// called first, the call is read-only and idempotent, and it keeps answering while the portal's payment has
-    /// lapsed. What comes back depends on the caller's rights: a caller with the portal-settings right gets the whole
-    /// record, while every other user gets an object in which only `tenantId` is filled and no error is raised - so
-    /// check `tenantAlias` for null before reading the rest. `status` says whether the portal is active, suspended or
-    /// pending removal, and `creationDateTime`, `statusChangeDate`, `lastModified` and `versionChanged` are UTC.
-    /// `region` names the data-center region a hosted portal is served from and stays empty on a server installation
-    /// and when the portal cache is off, while `hostedRegion` is the region written on the record itself. The
-    /// settings of the same portal are read with `GET api/2.0/settings`, its tariff with `GET api/2.0/portal/tariff`
-    /// and its quota with `GET api/2.0/portal/quota`.
+    /// Returns the record of the current portal, with its name, alias, owner, language, time zone, status, and dates.
+    /// Any signed-in user can call it, including a guest. A caller with the EditPortalSettings permission, which the
+    /// portal owner and DocSpace admins have, gets the full record. Other callers get an object with only `tenantId`
+    /// filled. So check `tenantAlias` for null first. The call is read-only and also works while the portal is
+    /// unpaid. To read the portal settings, use `GET api/2.0/settings`. To read the tariff and the quota, use
+    /// `GET api/2.0/portal/tariff` and `GET api/2.0/portal/quota`.
     /// </remarks>
     /// <summary>
     /// Get portal information
@@ -134,16 +129,12 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Returns one user of this portal, addressed by ID, in the shape the portal stores the account: display name,
-    /// e-mail, contacts, role and status flags, and the dates of the profile. Nothing has to be called first, and the
-    /// call is read-only and idempotent. Who may be read is decided per pair of accounts: a caller always reads their
-    /// own profile, a DocSpace administrator reads anyone, a room administrator reads anyone except a guest they have
-    /// no relation with, and a user or a guest reads nobody but themselves - a pair that is not allowed is refused.
-    /// An ID that belongs to no account of this portal and an ID of a system account are both answered as not found,
-    /// so a 404 does not tell the two apart. `userId` in the path has to be a GUID; the calling user's own profile is
-    /// easier to fetch with `GET api/2.0/people/@self`. This operation hands back the internal user record - use
-    /// `GET api/2.0/people/{userId}` for the same user in the People format, with the group, quota and access
-    /// information a client usually needs.
+    /// Returns an account of the current portal by its ID, in the internal user format. Any signed-in user can read
+    /// their own profile. A DocSpace admin can read any account. A room admin can read any account except a guest
+    /// they have no relation with. A user or a guest can read only their own profile. Other callers get 403, even for
+    /// an ID that does not exist. The call is read-only. It returns 404 for an unknown ID or a system account. To
+    /// read your own profile, use `GET api/2.0/people/@self`. To get the account in the People format, with groups,
+    /// quota, and access data, use `GET api/2.0/people/{userId}`.
     /// </remarks>
     /// <summary>
     /// Get a portal user
@@ -172,17 +163,14 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Deprecated - use `POST api/2.0/portal/users/invitationlink` and the neighbouring operations under that path,
-    /// which store the link and let it be read, changed and revoked. Builds a shortened URL that lets whoever opens
-    /// it join this portal with the role given in the path, and returns it as a bare string; nothing is stored, so
-    /// the link can afterwards be neither listed nor withdrawn. Inviting members has to be enabled for the portal -
-    /// `GET api/2.0/settings/invitationsettings` reports that - otherwise the call is refused. The caller needs the
-    /// right to add users of the requested role and only the portal owner may ask for a DocSpace administrator link;
-    /// a caller without that right gets an empty string instead of an error, so treat an empty answer as a refusal.
-    /// The call changes nothing on the portal and may be repeated, each time returning an equivalent link. The URL
-    /// carries a confirmation key bound to the calling account and the portal alias; it has no use limit and stops
-    /// being accepted once the portal's e-mail key lifetime has passed, seven days by default - neither of the two
-    /// can be set per link, which is what the replacement operations add.
+    /// Returns an invitation URL for the role in `employeeType`, and is deprecated. Use
+    /// `POST api/2.0/portal/users/invitationlink` and the other operations under that path instead. Anyone who opens
+    /// the URL can join the portal with that role. The portal does not store the link, so you cannot list or revoke
+    /// it later. If inviting members is turned off in `GET api/2.0/settings/invitationsettings`, the call
+    /// returns 403. The caller needs the right to add users of that role. Only the portal owner gets a DocSpace admin
+    /// link. Other callers get an empty string instead of an error. The call is read-only, and you can repeat it.
+    /// Each call returns an equivalent link as a bare string. The link is signed for the calling account and has no
+    /// use limit. It expires with the email key lifetime of the portal, by default after 7 days.
     /// </remarks>
     /// <summary>
     /// Get a legacy invitation link
@@ -220,17 +208,15 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Creates the portal's invitation link for one role and returns it together with the URL to share. A portal
-    /// keeps at most one link per role, so a call for a role that already has one is refused - read the existing link
-    /// with `GET api/2.0/portal/users/invitationlink/{employeeType}` and change it with
-    /// `PUT api/2.0/portal/users/invitationlink` instead. Inviting members has to be enabled for the portal
-    /// (`GET api/2.0/settings/invitationsettings`), `employeeType` has to be `DocSpaceAdmin`, `RoomAdmin` or `User`,
-    /// and `expiration`, when given, has to lie in the future and is read in the portal time zone. The caller needs
-    /// the right to add users of that role, only the portal owner may create the DocSpace administrator link, and a
-    /// link for a paying role is refused while the portal payment is overdue or the portal quota has no free paid
-    /// seat left. The call is mutating and not idempotent. The answer carries the `id` needed to update or delete the
-    /// link, the shortened `url`, `maxUseCount` and `currentUseCount`, `expiration` in the portal time zone - empty
-    /// for a link that never expires - and `isExpired`.
+    /// Creates the invitation link of the portal for one role and returns it with the URL to share. If inviting
+    /// members is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can
+    /// create a link for any role. A DocSpace admin can create the `RoomAdmin` and `User` links, and a room admin
+    /// only the `User` link. Other callers get 403. The call changes data. A role has at most one link, so a repeated
+    /// call returns 400. To change an existing link, use `PUT api/2.0/portal/users/invitationlink`. Without
+    /// `expiration`, the link never expires. Without `maxUseCount`, it has no use limit. The answer has the `id` that
+    /// the update and delete calls need. The call returns 400 for another role, an `expiration` in the past, or a
+    /// `maxUseCount` out of range. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if the payment is
+    /// overdue or no paid seat is free.
     /// </remarks>
     /// <summary>
     /// Create an invitation link
@@ -296,17 +282,13 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Returns the portal's invitation link for one role - the URL to share, how long it lasts and how often it has
-    /// already been used. Inviting members has to be enabled for the portal
-    /// (`GET api/2.0/settings/invitationsettings`) and `employeeType` has to be `DocSpaceAdmin`, `RoomAdmin` or
-    /// `User`; the caller needs the right to add users of that role, only the portal owner may read the DocSpace
-    /// administrator link, and for a paying role (`DocSpaceAdmin` or `RoomAdmin`) the call is refused while the
-    /// portal payment is overdue or the portal quota has no free paid seat left. The call is read-only and
-    /// idempotent, but the `url` it returns is signed for the calling account, so two administrators are handed two
-    /// different URLs for one and the same link. A role that has no link yet is answered with an empty body and 200
-    /// rather than a 404 - create the link with `POST api/2.0/portal/users/invitationlink`. `expiration` is in the
-    /// portal time zone and empty for a link without a deadline, `isExpired` says whether that deadline has passed,
-    /// and `currentUseCount` counts how many accounts have already joined through the link.
+    /// Returns the invitation link of the portal for one role, with its URL, deadline, and use count. If inviting
+    /// members is turned off in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can
+    /// read every link. A DocSpace admin can read the `RoomAdmin` and `User` links, and a room admin only the `User`
+    /// link. Other callers get 403. The call is read-only. If the role has no link yet, the call returns 200 with no
+    /// link. To create one, use `POST api/2.0/portal/users/invitationlink`. The call returns 400 for a role other
+    /// than `DocSpaceAdmin`, `RoomAdmin`, or `User`. For a `RoomAdmin` or `DocSpaceAdmin` link, it returns 402 if the
+    /// payment is overdue or no paid seat is free. It returns 402 even when the role has no link.
     /// </remarks>
     /// <summary>
     /// Get an invitation link by role
@@ -357,16 +339,16 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Changes the deadline and the use limit of an existing invitation link, addressed by its `id`. The role of a
-    /// link cannot be changed - delete it and create a link for the other role instead. Inviting members has to be
-    /// enabled for the portal (`GET api/2.0/settings/invitationsettings`), the link has to exist, and `maxUseCount`
-    /// may not be lower than the number of uses the link already has, which
-    /// `GET api/2.0/portal/users/invitationlink/{employeeType}` reports as `currentUseCount`. An `expiration` in the
-    /// past is refused; the body is applied as a whole, so omitting `expiration` clears the deadline and omitting
-    /// `maxUseCount` removes the use limit. The caller needs the right to add users of the link's role and only the
-    /// portal owner may change the DocSpace administrator link. The call is mutating, and repeating it with the same
-    /// body leaves the link as it is. The whole link comes back as it now stands, with `url` signed for the calling
-    /// account - the URL therefore differs between administrators while the link behind it is the same.
+    /// Changes the deadline and the use limit of an invitation link by its `id`. The call applies the whole body. So a
+    /// missing `expiration` removes the deadline, and a missing `maxUseCount` removes the use limit. You cannot change
+    /// the role of a link. To do this, delete the link and create a new one. If inviting members is turned off in
+    /// `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can change every link. A
+    /// DocSpace admin can change the `RoomAdmin` and `User` links, and a room admin only the `User` link. Other
+    /// callers get 403. The call changes data, and you can repeat it with the same body. It keeps the use count of the
+    /// link. After `expiration` passes, a repeated call returns 400. The call returns the whole link as it now stands.
+    /// If no link has this `id`, the call returns 404. The call returns 400 for an `expiration` in the past or a
+    /// `maxUseCount` out of range. It also returns 400 if `maxUseCount` is lower than the `currentUseCount` of the
+    /// link.
     /// </remarks>
     /// <summary>
     /// Update an invitation link
@@ -427,16 +409,14 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Deletes the portal's invitation link with the given `id`, so the URL shared from it stops letting anyone in;
-    /// accounts that already joined through it are not touched. Inviting members has to be enabled for the portal
-    /// (`GET api/2.0/settings/invitationsettings`) and the link has to exist - a second call with the same `id` is
-    /// answered as not found. The caller needs the right to add users of the link's role, and only the portal owner
-    /// may delete the DocSpace administrator link. The call is destructive and cannot be undone: a link for the same
-    /// role has to be created again with `POST api/2.0/portal/users/invitationlink`, and it gets a new `id`, a new
-    /// URL and a `currentUseCount` that starts from zero. Nothing is returned in the body. To stop invitations
-    /// without losing the links, switch inviting members off for the whole portal with
-    /// `PUT api/2.0/settings/invitationsettings` - the links then stay stored but are refused until it is switched on
-    /// again.
+    /// Deletes an invitation link of the portal by its `id`. Its URL then stops letting anyone join, and the accounts
+    /// that joined through it stay. If inviting members is turned off in `GET api/2.0/settings/invitationsettings`,
+    /// the call returns 403. The portal owner can delete every link. A DocSpace admin can delete the `RoomAdmin` and
+    /// `User` links, and a room admin only the `User` link. Other callers get 403. The call cannot be undone. A
+    /// repeated call or an unknown `id` returns 404. A body without `id` returns 400. A new link for the role gets a
+    /// new `id` and URL, and its use count starts from zero. To create it, use
+    /// `POST api/2.0/portal/users/invitationlink`. To stop invitations and keep the links, turn inviting off with
+    /// `PUT api/2.0/settings/invitationsettings`. The links then stop working until you turn it on again.
     /// </remarks>
     /// <summary>
     /// Delete an invitation link
@@ -515,15 +495,12 @@ public class PortalController(
 
 
     /// <remarks>
-    /// Returns how much space the content of this portal occupies, in gigabytes rounded to two decimals, so a client
-    /// can show the storage bar next to the allowance. The caller needs the portal-settings right and is refused
-    /// without it; the call is read-only and idempotent. The number is added up from the storage counters the portal
-    /// keeps per owner, which means content that belongs to no account - system data - is not part of it, and it is a
-    /// plain number, not an object. The counters are maintained as files are written and removed, so the value is
-    /// current but may lag a large operation that is still running. The allowance to compare it with is
-    /// `maxTotalSize` from `GET api/2.0/portal/quota`, in bytes rather than gigabytes, and the smallest quota that
-    /// would still fit the portal is suggested by `GET api/2.0/portal/quota/right`. This operation says nothing about
-    /// which room or user the space belongs to - the per-user figures come from the People API.
+    /// Returns the space that the content of the portal uses, in gigabytes rounded to two decimals. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
+    /// call is read-only. The answer is a number, not an object. The portal adds up the storage counters of its
+    /// accounts. So system data that belongs to no account is not counted. To compare the result with the allowance,
+    /// use `maxTotalSize` of `GET api/2.0/portal/quota`, which is in bytes. The call does not split the space by room
+    /// or user.
     /// </remarks>
     /// <summary>
     /// Get the portal used space
@@ -545,15 +522,11 @@ public class PortalController(
 
 
     /// <remarks>
-    /// Returns how many accounts this portal currently has in the active state, whatever their role, so a client can
-    /// show the seat usage next to the allowance. Accounts that were invited but have not joined yet and accounts
-    /// that were disabled or removed are not counted. The caller needs the portal-settings right and is refused
-    /// without it; the call is read-only and idempotent, and the number moves as soon as an account joins, is
-    /// disabled or is deleted. The answer is a plain number, not an object. Compare it with `countUser` and
-    /// `countPaidUser` from `GET api/2.0/portal/quota` to see how much of the allowance is left, and with
-    /// `GET api/2.0/portal/quota/right` for the smallest quota that would still hold everyone. When the accounts
-    /// themselves are needed, and not only how many there are, list them with the People API instead - this operation
-    /// cannot filter by role, group or status.
+    /// Returns how many accounts of the portal have the active status, of every user type. Disabled and deleted
+    /// accounts are not counted. Requires the EditPortalSettings permission, which the portal owner and DocSpace
+    /// admins have. Other callers get 403. The call is read-only. The answer is a number, not an object. To compare
+    /// it with the allowance, use `countUser` and `countPaidUser` of `GET api/2.0/portal/quota`. To list the accounts
+    /// or filter them by type, group, or status, use `GET api/2.0/people/filter`.
     /// </remarks>
     /// <summary>
     /// Get a number of portal users
@@ -570,17 +543,12 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Returns the tariff this portal runs on: its state, the end of the current period and the quotas - the plan and
-    /// its add-ons - it is made of. Nothing has to be called first, the call is read-only and idempotent, and it
-    /// keeps answering while the portal's payment has lapsed, which is what a client needs in order to show a payment
-    /// warning. How much of it is filled depends on the caller: every user gets `state`, which is `Trial`, `Paid`,
-    /// `Delay` for the grace period after the due date, or `NotPaid`; a room or DocSpace administrator also gets
-    /// `dueDate` and `delayDueDate`; and a caller with the portal-settings right additionally gets `id`,
-    /// `customerId`, `licenseDate`, the `openSource`, `enterprise` and `developer` flags and `quotas`, each entry
-    /// naming the quota, its quantity, its own due date and the quota it switches to next period. Dates are in the
-    /// portal time zone. Pass `refresh=true` to re-read the tariff from the billing system instead of the portal
-    /// cache - it is slower, so use it after a payment, not on every page. What the next period will cost is listed
-    /// by `GET api/2.0/portal/tariff/upcoming`.
+    /// Returns the tariff of the portal, with its state, the end of the current period, and its quotas. Any signed-in
+    /// user can call it, including a guest. Every caller gets `state`. A room admin or a DocSpace admin also gets
+    /// `dueDate` and `delayDueDate`. Only a caller with the EditPortalSettings permission gets the other fields. The
+    /// portal owner and DocSpace admins have this permission. The call is read-only and also works while the portal
+    /// is unpaid. With `refresh` set to `true`, the call reads the tariff from the billing system instead of the
+    /// cache. To see what the next period costs, use `GET api/2.0/portal/tariff/upcoming`.
     /// </remarks>
     /// <summary>
     /// Get the portal tariff
@@ -624,16 +592,12 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Lists what this portal will be charged next for the quotas of its current tariff - one entry per quota that is
-    /// going to be billed, with the amount, the currency and the due date. The caller needs the portal-settings right
-    /// and gets 403 without it; the call is read-only and idempotent and keeps answering while the portal's payment
-    /// has lapsed. Only quotas that are really charged appear: an overdue quota is skipped, and so is a quota that
-    /// has no price of its own, such as a trial or a free plan - which is why the list can come back empty on a
-    /// portal that does have a tariff. When a switch to another quota is scheduled for the next period, the entry
-    /// describes that next quota and its quantity, so `id` and `name` may differ from what
-    /// `GET api/2.0/portal/tariff` reports for today. `amount` is the unit price multiplied by `quantity`, in the
-    /// currency named by `currency` as an ISO 4217 code, `dueDate` is in the portal time zone, and `wallet` marks a
-    /// service paid from the portal wallet instead of the subscription.
+    /// Returns the next charges of the portal for the quotas of its tariff. The list has one entry per quota.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call is read-only and also works while the portal is unpaid. The list skips overdue quotas. It
+    /// also skips quotas without a price, such as a trial or a free plan. So the list can be empty on a portal with a
+    /// tariff. If a switch to another quota is planned, the entry shows the next quota and its quantity. With
+    /// `refresh` set to `true`, the call reads the tariff from the billing system instead of the cache.
     /// </remarks>
     /// <summary>
     /// Get upcoming payments
@@ -692,16 +656,13 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Returns the quota this portal runs on - the allowance its tariff grants: how many users and paid users it may
-    /// have, how many rooms, the largest total and single-file size, the price of the quota and the feature flags
-    /// that go with it. The caller needs the portal-settings right and gets 403 without it; the call is read-only and
-    /// idempotent. Sizes are in bytes, and `maxTotalSize` comes back as `0` when the calling account's own role is
-    /// user, rather than as the real allowance. This is what the portal is allowed, not what it consumes: the
-    /// consumption is reported by `GET api/2.0/portal/usedspace` in gigabytes and by `GET api/2.0/portal/userscount`.
-    /// The quotas the portal could move to are listed by `GET api/2.0/portal/payment/quotas`, and
-    /// `GET api/2.0/portal/quota/right` picks the smallest of them that would still fit. A free or trial quota
-    /// carries no price, and the billing state that goes with the quota - paid, in grace period or not paid - is read
-    /// from `GET api/2.0/portal/tariff`.
+    /// Returns the quota of the portal, which is the allowance its tariff gives. It has the limits on users, paid
+    /// users, rooms, total size, and file size, and the features. Requires the EditPortalSettings permission, which
+    /// the portal owner and DocSpace admins have. Other callers get 403. The call is read-only and also works while
+    /// the portal is unpaid. Sizes are in bytes. A free or trial quota has no price. The quota shows what the portal
+    /// may use, not what it uses. The usage comes from `GET api/2.0/portal/usedspace` and
+    /// `GET api/2.0/portal/userscount`. To list the quotas the portal can switch to, use
+    /// `GET api/2.0/portal/payment/quotas`. To read the billing state, use `GET api/2.0/portal/tariff`.
     /// </remarks>
     /// <summary>
     /// Get the portal quota
@@ -728,16 +689,11 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Recommends the cheapest quota this portal could run on and still fit: the lowest-priced quota that is not
-    /// billed yearly, whose user allowance is above the number of active accounts and whose storage allowance is
-    /// above the space already used. The caller needs the portal-settings right and gets 403 without it. The call is
-    /// read-only, idempotent and buys nothing - it only picks one quota out of those the portal may switch to,
-    /// comparing them with the figures that `GET api/2.0/portal/userscount` and `GET api/2.0/portal/usedspace`
-    /// report. The answer is a single quota in the same shape as `GET api/2.0/portal/quota`, with sizes in bytes;
-    /// when no quota is large enough the answer is an empty body with 200 and not an error, so handle the empty
-    /// result as nothing to recommend. Yearly quotas are left out by design, so the recommendation is always a
-    /// monthly one - the full list to choose from comes from `GET api/2.0/portal/payment/quotas`, and the purchase
-    /// itself is started with `PUT api/2.0/portal/payment/url`.
+    /// Returns the cheapest quota that is not yearly and allows more users than the portal has active accounts.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call is read-only and buys nothing. The answer has the shape of `GET api/2.0/portal/quota`, with
+    /// sizes in bytes. If no quota fits, the call returns 200 with no quota. To list all quotas, use
+    /// `GET api/2.0/portal/payment/quotas`. To buy one, use `PUT api/2.0/portal/payment/url`.
     /// </remarks>
     /// <summary>
     /// Get the recommended quota
@@ -763,16 +719,12 @@ public class PortalController(
 
 
     /// <remarks>
-    /// Turns a portal-relative path into the absolute URL a client can open, filling in the scheme, the current
-    /// portal domain and the virtual root the portal is hosted on. Any signed-in user may call it, nothing has to be
-    /// called first, and the call is read-only and idempotent - it neither checks that the path exists nor that the
-    /// caller is allowed to open it. `virtualPath` is taken as it is: an omitted or empty value yields the portal
-    /// root, a value starting with `/` is appended to that root, a value starting with `~/` is resolved against the
-    /// virtual root, and a value that already starts with `http://`, `https://` or `mailto:` is handed back
-    /// unchanged. The answer is a bare JSON string. The domain in the result is the one the portal answers on right
-    /// now, so a renamed portal starts returning the new domain without any change on the client. Use it to build
-    /// links that have to survive a rename; the portal's own addresses and settings are read from
-    /// `GET api/2.0/settings` instead.
+    /// Returns the absolute URL of a path on the portal, with the scheme, the current domain, and the virtual root.
+    /// Any signed-in user can call it, including a guest. The call is read-only. It does not check the path or the
+    /// access of the caller to it. An empty `virtualPath` returns the portal root. The call adds a path that starts
+    /// with `/` to the root and resolves `~/` against the virtual root. It returns a value that starts with
+    /// `http://`, `https://`, or `mailto:` unchanged. The answer is a JSON string. It has the current domain, so
+    /// after a rename the call returns the new domain.
     /// </remarks>
     /// <summary>
     /// Get a path to the portal
@@ -819,15 +771,11 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Marks the open-source gift message - the notice a server installation shows about its free edition - as read
-    /// for the calling user, so the client stops displaying it. Any signed-in user may call it and nothing has to be
-    /// called first. The flag is stored per user, so marking it read for one account leaves it unread for everybody
-    /// else on the portal. The call is mutating but idempotent: repeating it changes nothing. It never fails on the
-    /// caller's behalf - a storage error is written to the portal log and the operation still answers with a success,
-    /// so the answer is no proof that the flag was saved. Nothing is returned in the body, and no operation reads the
-    /// flag back or clears it again, which makes the change effectively permanent for that user. It touches only this
-    /// one notice: portal-wide announcements and the letters the portal sends are unaffected, and other per-user
-    /// settings are stored through the operations under `api/2.0/settings`.
+    /// Marks the open-source gift message as read for the calling user, so the app stops showing it. Any signed-in
+    /// user can call it. The portal saves the flag per user, so other accounts still see the message. The call
+    /// changes data, and you can repeat it. It returns success even if saving fails. In that case, it only writes the
+    /// error to the portal log. So a success does not prove that the portal saved the flag. No operation reads the
+    /// flag or clears it again.
     /// </remarks>
     /// <summary>
     /// Mark a gift message as read
@@ -1002,16 +950,14 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Mails the portal owner the two confirmation links that deactivate this portal and bring it back again, and
-    /// records the request in the audit trail; the portal itself is not changed here. The caller has to be the portal
-    /// owner and hold the portal-settings right, and on a server installation the last remaining space cannot be
-    /// deactivated - the call is refused when every other space has limited access. The letter always goes to the
-    /// owner's own address, and the operation keeps working while the portal's payment has lapsed. A repeat shortly
-    /// after the letter went out does nothing - no new links, no second letter, no audit record - while the links of
-    /// the first letter stay valid. Nothing is returned in the body. The first link in the letter authorizes
-    /// `PUT api/2.0/portal/suspend`, which suspends the portal, and the second one authorizes
-    /// `PUT api/2.0/portal/continue`, which makes it active again. To remove the portal instead of pausing it, use
-    /// `POST api/2.0/portal/delete`.
+    /// Sends the portal owner an email with the links that deactivate the portal and make it active again. This call
+    /// does not change the portal. Only the portal owner can call it. Other callers get 403, including a DocSpace
+    /// admin. The call also works while the portal is unpaid. By default, a repeated call within 10 minutes of the
+    /// email sends nothing and returns 200. A later call sends a new email, and the links of earlier emails keep
+    /// working. The first link signs `PUT api/2.0/portal/suspend`, and the second signs `PUT api/2.0/portal/continue`.
+    /// By default, the first link works for 7 days, and the second never expires. To delete the portal instead, use
+    /// `POST api/2.0/portal/delete`. On a server installation, you cannot deactivate the last space. Spaces with
+    /// limited access do not count.
     /// </remarks>
     /// <summary>
     /// Send suspension instructions
@@ -1020,7 +966,6 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The request is accepted: the deactivation letter is queued and the request recorded in the audit trail, unless the same letter already went out within the repeat period; the portal itself is still active and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
-    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [AllowNotPayment]
     [HttpPost("suspend")]
     public async Task SendSuspendInstructions()
@@ -1048,16 +993,14 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Mails the portal owner the confirmation link that removes this portal; nothing about the portal changes until
-    /// that link is used. The caller has to be the portal owner and hold the portal-settings right, and on a server
-    /// installation the last remaining space cannot be removed - the call is refused when every other space has
-    /// limited access. The letter goes to the owner's own address whoever asked for it, and it warns about the
-    /// subscription that will stop renewing when the portal is on a paid plan. The operation keeps working while the
-    /// portal's payment has lapsed. A repeat shortly after the letter went out does nothing - no new link, no second
-    /// letter - while the link of the first letter stays valid. Nothing is returned in the body. The link in the letter
-    /// authorizes `DELETE api/2.0/portal/delete`, which deletes the portal with all of its rooms, files and accounts
-    /// and cannot be undone. To pause the portal instead of deleting it, send the
-    /// deactivation letter with `POST api/2.0/portal/suspend`.
+    /// Sends the portal owner an email with the link that deletes the portal. This call does not change the portal.
+    /// Only the portal owner can call it. Other callers get 403, including a DocSpace admin. The call also works while
+    /// the portal is unpaid. By default, a repeated call within 10 minutes of the email sends nothing and returns 200.
+    /// A later call sends a new email, and the links of earlier emails keep working for 7 days by default. If the
+    /// portal has payments and is not on trial, the email also warns that the subscription stops renewing. The link
+    /// signs `DELETE api/2.0/portal/delete`, which deletes the portal and cannot be undone. To deactivate the portal
+    /// instead, use `POST api/2.0/portal/suspend`. On a server installation, you cannot delete the last space. Spaces
+    /// with limited access do not count.
     /// </remarks>
     /// <summary>
     /// Send removal instructions
@@ -1066,7 +1009,6 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The request is accepted, and the removal letter is queued unless one already went out within the repeat period; nothing about the portal has changed yet and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
-    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpPost("delete")]
     public async Task SendDeleteInstructions()
@@ -1096,16 +1038,11 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Brings a deactivated portal back to the active state, so its users can sign in again and its domain serves the
-    /// portal as before. It is reached only with the reactivation link that `POST api/2.0/portal/suspend` mails to
-    /// the portal owner: that link authorizes the call in place of an authentication token, and no ordinary token is
-    /// accepted here. The call is mutating and idempotent - it sets the status to active, re-applies the portal's
-    /// Content Security Policy and refreshes its base domain, and a portal that is already active is simply left
-    /// active. Nothing is returned in the body; read the result from `status` in `GET api/2.0/portal`. Deactivating
-    /// the portal again means asking for a fresh letter with `POST api/2.0/portal/suspend`, because each link is
-    /// issued for one operation; asked shortly after the previous letter, it sends none, and the deactivation link of
-    /// that letter still works. This operation cannot bring back a removed portal: the deletion behind
-    /// `DELETE api/2.0/portal/delete` is final, and a removed portal has to be restored from a backup instead.
+    /// Makes a deactivated portal active again, so its users can sign in. Sign the request with the confirmation
+    /// token from the second link of the email that `POST api/2.0/portal/suspend` sends. An ordinary sign-in token
+    /// does not work here. The call changes data, and you can repeat it. An active portal stays active. The call
+    /// returns no data. To check the result, read `status` from `GET api/2.0/portal`. The call cannot bring back a
+    /// deleted portal.
     /// </remarks>
     /// <summary>
     /// Restore a portal
@@ -1128,16 +1065,15 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Unblocks this portal, blocked by the retention policy after a long period without use, so its users can sign in
-    /// again. The portal must be blocked. The call is authorized only by the unblocking link the retention letters send
-    /// to the owner; it works for the current block only. The call is mutating: it makes the portal active, records the
-    /// unblocking in the audit trail, refreshes its Content Security Policy and restarts the retention count. Nothing
-    /// is returned in the body; to check the status, read `tenantStatus` from `GET api/2.0/settings`, which a blocked
-    /// portal still answers. A lapsed paid tariff stays unpaid after the unblocking, so renewing it is the next step.
-    /// The letters of a free portal carry no such link: support unblocks it. The call does not bring back a portal
-    /// deleted at the end of its retention period, or one its owner deactivated, which `PUT api/2.0/portal/continue`
-    /// brings back. An invalid link, a link of an earlier block, or a portal that is no longer blocked, a repeated call
-    /// included, is refused with 401; an ordinary sign-in token instead of the link is refused with 403.
+    /// Unblocks the portal after the retention policy blocked it for a long time without use. Its users can then sign
+    /// in again. Sign the request with the confirmation token from the unblocking link in the retention email to the
+    /// owner. An ordinary sign-in token gets 403. The call changes data and makes the portal active. It also restarts
+    /// the retention count. A repeated call returns 401. It also returns 401 for an invalid link, an earlier block's
+    /// link, or a portal that is not blocked. The call returns no data. To check the status, read `tenantStatus` from
+    /// `GET api/2.0/settings`, which a blocked portal still answers. A lapsed paid tariff stays unpaid, so renew it
+    /// next. The emails of a free portal have no such link, and support unblocks it. The call does not bring back a
+    /// deleted portal or one that its owner deactivated. To make a deactivated portal active, use
+    /// `PUT api/2.0/portal/continue`.
     /// </remarks>
     /// <summary>
     /// Unblock a portal
@@ -1176,16 +1112,13 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Deactivates this portal: its status becomes suspended and its users can no longer work in it, while all of its
-    /// rooms, files and accounts stay untouched. It is reached only with the deactivation link that
-    /// `POST api/2.0/portal/suspend` mails to the portal owner - that link authorizes the call instead of an
-    /// authentication token - and the owner is checked again here, so a link issued for another account is refused.
-    /// On a server installation the last remaining space cannot be deactivated. The call is mutating and idempotent:
-    /// it sets the status, records the deactivation in the audit trail and refreshes the portal's base domain, and
-    /// repeating it leaves the portal suspended. Nothing is returned in the body; the new state is read from `status`
-    /// in `GET api/2.0/portal`. Bring the portal back with `PUT api/2.0/portal/continue`, using the second link from
-    /// the same letter. To remove the portal and its content for good, use `DELETE api/2.0/portal/delete` instead -
-    /// that cannot be undone.
+    /// Deactivates the portal. Its users can no longer work in it, and its rooms, files, and accounts stay. Sign the
+    /// request with the confirmation token from the first link of the email that `POST api/2.0/portal/suspend` sends.
+    /// The call also checks that the token belongs to the portal owner. Other callers get 403, including an ordinary
+    /// sign-in token. The call changes data. After it, the portal returns 404 for most calls, and a repeated call also
+    /// returns 404. To make the portal active again, use `PUT api/2.0/portal/continue` with the second link of the
+    /// email. To delete the portal for good, use `DELETE api/2.0/portal/delete`. On a server installation, you cannot
+    /// deactivate the last space. Spaces with limited access do not count.
     /// </remarks>
     /// <summary>
     /// Deactivate a portal
@@ -1194,7 +1127,6 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The portal is now suspended, its users can no longer work in it and its content is kept; the response carries no content")]
     [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
-    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [HttpPut("suspend")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortal()
@@ -1211,16 +1143,14 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Removes this portal for good: its rooms, files, accounts, settings and OAuth clients go with it and its domain
-    /// stops serving the portal. It is reached only with the removal link that `POST api/2.0/portal/delete` mails to
-    /// the portal owner - that link authorizes the call instead of an authentication token - and the owner is checked
-    /// again here; on a server installation the last remaining space cannot be removed. The call is destructive and
-    /// cannot be undone, and there is no restore operation, so take a backup with `POST api/2.0/backup/startbackup`
-    /// first when the content still matters. It keeps working while the portal's payment has lapsed. Along the way
-    /// the portal is dropped from the hosting cache, the owner is mailed a confirmation, the removal is written to
-    /// the audit trail and, for a portal that was paying, the support team is notified as well. The answer is the
-    /// absolute URL of the feedback form to send the departing owner to. To pause the portal instead of erasing it,
-    /// use `PUT api/2.0/portal/suspend`.
+    /// Deletes the portal with its rooms, files, accounts, settings, and OAuth apps. Its domain then stops serving
+    /// the portal. Sign the request with the confirmation token from the email that `POST api/2.0/portal/delete`
+    /// sends. The call also checks that the token belongs to the portal owner. Other callers get 403, including an
+    /// ordinary sign-in token. The call cannot be undone, and no operation restores the portal. To keep the content,
+    /// first start a backup with `POST api/2.0/backup/startbackup`. The call also works while the portal is unpaid.
+    /// Do not repeat it. The portal emails the owner a confirmation. The call returns the absolute URL of a feedback
+    /// form to send the owner to. To deactivate the portal instead, use `POST api/2.0/portal/suspend`. On a server
+    /// installation, you cannot delete the last space. Spaces with limited access do not count.
     /// </remarks>
     /// <summary>
     /// Delete a portal
@@ -1229,7 +1159,6 @@ public class PortalController(
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The absolute URL of the feedback form to send the owner of the removed portal to", typeof(string))]
     [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
-    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]
@@ -1268,16 +1197,14 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Sends the welcome letter that follows the registration of a new portal to the account named by `userid` and
-    /// switches on the second authentication factor the installation is configured to require after registration; on
-    /// a hosted portal in custom mode the registration data is mailed to the sales address as well. Open to
-    /// unauthenticated callers: in place of a token it needs `key`, the confirmation key of the sign-in link the
-    /// portal issued for that account, and that key is accepted for one hour after it was created - a wrong, foreign
-    /// or expired key answers 403 and sends nothing. Both parameters go in the query string. The call is meant to be
-    /// made once, right after registration; it is not idempotent, and every call within that hour sends the letters
-    /// again. When the installation asks for SMS or an authenticator app after registration, this call is what
-    /// enables that method for the whole portal, unless the new account is an internal test address. Nothing is
-    /// returned in the body and there is no operation that reports afterwards whether the letters were delivered.
+    /// Sends the welcome email of a newly registered portal to the account in `userid`. Anyone can call it without
+    /// signing in. Instead of a token, `key` must be the confirmation key of the sign-in link for that account. The
+    /// key works for one hour. The call returns 403 for a wrong, foreign, or expired key, and then sends nothing. The
+    /// call changes data. Call it once, right after registration. Each repeated call with a valid key sends the emails
+    /// again. On a hosted portal, the password link of the earlier email then stops working. If the installation
+    /// requires SMS or an authenticator app after registration, the call turns that method on for the portal. It skips
+    /// this step for an internal test address. On a hosted portal in custom mode, the call also sends the registration
+    /// data to the sales address. The call returns no data.
     /// </remarks>
     /// <summary>
     /// Send congratulations

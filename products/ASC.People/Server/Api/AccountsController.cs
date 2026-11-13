@@ -74,17 +74,19 @@ public class AccountsController<T>(
     UserManager userManager) : ControllerBase
 {
     /// <remarks>
-    /// Searches the users and groups that can be given access to the room in the route, marking those that already hold
-    /// an access record.
-    /// It answers 403 without the right to manage that access, 404 for an unknown ID.
-    /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
-    /// space-separated terms, or any term with `filterSeparator`; an empty value returns nothing.
-    /// Groups come before users, paged together by `count` and `startIndex`, with the total of both.
-    /// `shared` marks the owner and any account with an access record, even a denying one, on the room; `excludeShared`
-    /// and `includeShared` filter by it.
-    /// A DocSpace administrator finds everyone; anybody else a guest only if related to it or holding such a record.
-    /// A room admin finds every member and group.
-    /// `inviterId` of another account works for a DocSpace administrator only.
+    /// Returns the users and groups that match a search, with whether each one has access to the room. Requires the right
+    /// to change the access of the room. Other callers get 403. If no room has the ID, the call returns 404. The call is
+    /// read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches users by first
+    /// name, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user must match every
+    /// term between spaces. With `filterSeparator`, a user may match any one term. Groups always match the whole text,
+    /// and they include the system group Everyone. The call returns groups first, sorted by name, and then users. The
+    /// `count` and `startIndex` parameters page over both together, and the total counts both. The `excludeShared` flag
+    /// keeps only accounts without access and wins over `includeShared`. The `includeShared` flag filters only users, so
+    /// groups without access still appear. Groups ignore the user filters, such as `employeeStatus`, `area`, and
+    /// `employeeTypes`. A caller who is not a DocSpace admin sees only the guests related to them. With `area` set to
+    /// `All`, they also see guests with access. The `shared` field is also true for the owner and for an account with a
+    /// record that denies access. Only a DocSpace admin can filter by the `inviterId` of another account. For other
+    /// callers, the call ignores such an `inviterId`. If `count` is out of range, the call returns 400.
     /// </remarks>
     /// <summary>Search accounts for a room</summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
@@ -105,20 +107,23 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Searches the users and groups that can be given access to the folder in the route, marking those that already
-    /// hold an access record.
-    /// It answers 403 without the right to manage that access, 404 for an unknown ID.
-    /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
-    /// space-separated terms, or any term with `filterSeparator`; an empty value returns nothing.
-    /// Groups come before users, paged together by `count` and `startIndex`, with the total of both.
-    /// `shared` marks the owner and any account with an access record, even a denying one, on the folder or a parent
-    /// folder; `excludeShared` and `includeShared` filter by it.
-    /// A DocSpace administrator finds everyone; anybody else a guest only if related to it or holding such a record.
-    /// A room admin finds every member and group; a user or a guest sharing its own folder only the Everyone group and
-    /// the accounts it works with: owners and members of its rooms, directly or through a group, and those holding a
-    /// granting record in person.
-    /// Of another account they get only id, names, email, avatars, type flags, status and `shared`.
-    /// `inviterId` of another account works for a DocSpace administrator only.
+    /// Returns the users and groups that match a search, with whether each one has access to the folder. Requires the
+    /// right to change the access of the folder. Other callers get 403. If no folder has the ID, the call returns 404.
+    /// The call is read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches
+    /// users by first name, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user
+    /// must match every term between spaces. With `filterSeparator`, a user may match any one term. Groups always match
+    /// the whole text, and they include the system group Everyone. The call returns groups first, sorted by name, and
+    /// then users. The `count` and `startIndex` parameters page over both together, and the total counts both. The
+    /// `excludeShared` flag keeps only accounts without access and wins over `includeShared`. The `includeShared` flag
+    /// filters only users, so groups without access still appear. Groups ignore the user filters, such as
+    /// `employeeStatus`, `area`, and `employeeTypes`. A caller who is not a DocSpace admin sees only the guests related
+    /// to them. With `area` set to `All`, they also see guests with access. The `shared` field is also true for the owner
+    /// and for an account with a record that denies access. A user or a guest can call it for their own folder. They find
+    /// only the group Everyone and the accounts they work with. These are the owners and members of their rooms, directly
+    /// or through a group. Accounts with their own record that gives access also count. A record on a parent folder
+    /// counts too. For another account, they get only the id, names, email, avatars, type flags, status, and `shared`.
+    /// Only a DocSpace admin can filter by the `inviterId` of another account. For other callers, the call ignores such
+    /// an `inviterId`. If `count` is out of range, the call returns 400.
     /// </remarks>
     /// <summary>Search accounts for a folder</summary>
     /// <path>api/2.0/accounts/folder/{id}/search</path>
@@ -139,20 +144,23 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Searches the users and groups that can be given access to the file in the route, marking those that already hold
-    /// an access record.
-    /// It answers 403 without the right to manage that access, 404 for an unknown ID.
-    /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
-    /// space-separated terms, or any term with `filterSeparator`; an empty value returns nothing.
-    /// Groups come before users, paged together by `count` and `startIndex`, with the total of both.
-    /// `shared` marks the owner and any account with an access record, even a denying one, on the file or a parent
-    /// folder; `excludeShared` and `includeShared` filter by it.
-    /// A DocSpace administrator finds everyone; anybody else a guest only if related to it or holding such a record.
-    /// A room admin finds every member and group; a user or a guest sharing its own file only the Everyone group and
-    /// the accounts it works with: owners and members of its rooms, directly or through a group, and those holding a
-    /// granting record in person.
-    /// Of another account they get only id, names, email, avatars, type flags, status and `shared`.
-    /// `inviterId` of another account works for a DocSpace administrator only.
+    /// Returns the users and groups that match a search, with whether each one has access to the file. Requires the right
+    /// to change the access of the file. Other callers get 403. If no file has the ID, the call returns 404. The call is
+    /// read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches users by first
+    /// name, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user must match every
+    /// term between spaces. With `filterSeparator`, a user may match any one term. Groups always match the whole text,
+    /// and they include the system group Everyone. The call returns groups first, sorted by name, and then users. The
+    /// `count` and `startIndex` parameters page over both together, and the total counts both. The `excludeShared` flag
+    /// keeps only accounts without access and wins over `includeShared`. The `includeShared` flag filters only users, so
+    /// groups without access still appear. Groups ignore the user filters, such as `employeeStatus`, `area`, and
+    /// `employeeTypes`. A caller who is not a DocSpace admin sees only the guests related to them. With `area` set to
+    /// `All`, they also see guests with access. The `shared` field is also true for the owner and for an account with a
+    /// record that denies access. A user or a guest can call it for their own file. They find only the group Everyone and
+    /// the accounts they work with. These are the owners and members of their rooms, directly or through a group.
+    /// Accounts with their own record that gives access also count. A record on a parent folder counts too. For another
+    /// account, they get only the id, names, email, avatars, type flags, status, and `shared`. Only a DocSpace admin can
+    /// filter by the `inviterId` of another account. For other callers, the call ignores such an `inviterId`. If `count`
+    /// is out of range, the call returns 400.
     /// </remarks>
     /// <summary>Search accounts for a file</summary>
     /// <path>api/2.0/accounts/file/{id}/search</path>

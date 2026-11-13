@@ -56,18 +56,14 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
 
 
     /// <remarks>
-    /// Returns the sign-in methods this portal offers, which a login client needs before anyone has signed in: LDAP
-    /// authentication and its domain, the external identity providers to show, the SAML single sign-on URL and its
-    /// label, and whether the built-in identity server is available. No token is needed and nothing has to be called
-    /// first - the operation is open to unauthenticated callers, answers even while the portal's payment has lapsed,
-    /// and is read-only and idempotent. `providers` holds provider keys such as `google` or `facebook`, ordered for
-    /// the country detected from the caller's IP address and reduced to the ones this installation has configured;
-    /// pass one of them as `provider` to `POST api/2.0/authentication`. An empty `providers` means external sign-in
-    /// is off and an empty `ssoUrl` means single sign-on is off; a capability whose settings cannot be read is
-    /// reported as disabled rather than failing the call, so a false flag means the method is not offered, not that
-    /// it is unknown. The answer describes the portal and never a user, and carries none of the configuration behind
-    /// these methods: an administrator reads that from `GET api/2.0/settings/ssov2` and
-    /// `GET api/2.0/settings/authservice`.
+    /// Returns the portal sign-in methods: LDAP, external identity providers, SAML single sign-on, and the built-in
+    /// identity server. A login app calls it before the user signs in. Anyone can call it without signing
+    /// in. It also works while the portal is not paid. The call is read-only. Only the `providers` list depends on
+    /// the caller. Its order follows the country of the caller's IP address. On a server installation, mobile apps
+    /// do not get Facebook and Apple ID in it. If the portal cannot read the settings of a method, it reports the
+    /// method as off. The call still succeeds. The answer holds no settings of these methods. To read them, use
+    /// `GET api/2.0/settings/ssov2` and `GET api/2.0/settings/authservice`. Both need the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have.
     /// </remarks>
     /// <summary>
     /// Get portal capabilities

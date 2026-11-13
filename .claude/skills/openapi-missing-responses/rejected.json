@@ -1,10 +1,52 @@
 [
   {
+    "id": "products/ASC.Files/Server/Api/EditorController.cs::CheckDocServiceUrl",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "6d3ce1104641041a",
+    "date": "2026-11-12"
+  },
+  {
     "id": "products/ASC.Files/Server/Api/PrivacyRoomController.cs::GetUserKeys",
     "code": 403,
     "reason": "Demand on the caller's own id (authContext.CurrentAccount.ID): role Self always passes Action_EditUser",
     "fingerprint": "4d0c54a1d29a200e",
     "date": "2026-10-01"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/PhotoController.cs::UpdateMemberPhoto",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "d620c46d1cf8b307",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/ThirdpartyController.cs::LinkThirdPartyAccount",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "7d4b16cc3b69248b",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/ThirdpartyController.cs::SignupThirdPartyAccount",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "8216722a218d3307",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::AddMember",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "5320a5ad537fa4f7",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::DeleteMember",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "a7040c992762828a",
+    "date": "2026-11-12"
   },
   {
     "id": "products/ASC.People/Server/Api/UserController.cs::DeleteProfile",
@@ -14,38 +56,129 @@
     "date": "2026-10-01"
   },
   {
+    "id": "products/ASC.People/Server/Api/UserController.cs::RemoveUsers",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "034bdccf830f9138",
+    "date": "2026-11-12"
+  },
+  {
     "id": "products/ASC.People/Server/Api/UserController.cs::ResendUserInvites",
     "code": 500,
-    "reason": "Authentication rejects LostUser (InvalidCredentialException in SecurityContext), so an authenticated caller always resolves to an existing user",
-    "fingerprint": "cc7ea3bb9366462f",
-    "date": "2026-10-01"
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "79112102c61a3d00",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::UpdateMember",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "790f8ecf8cbb7aa8",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/MigrationController.cs::FinishMigration",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "acbf5792f13574a1",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/PortalController.cs::DeletePortal",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "0b3694b26ab81583",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/PortalController.cs::SendDeleteInstructions",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "1f1006d29e49ac07",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/PortalController.cs::SendSuspendInstructions",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "4a17551de9f2dcf7",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/PortalController.cs::SuspendPortal",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "b899b996b565e97f",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/LicenseController.cs::UploadLicense",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "adf6d2da9d8f35ed",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/MessageSettingsController.cs::SendAdminMail",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "9e60efcc60779b09",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/MessageSettingsController.cs::SendJoinInviteMail",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "a9f717074bcd53d4",
+    "date": "2026-11-12"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/OwnerController.cs::UpdatePortalOwner",
-    "code": 403,
-    "reason": "UpdateUserTypeAsync to DocSpaceAdmin with the owner as initiator does not return false for RoomAdmin/User; guests and inactive users are rejected earlier with 500",
-    "fingerprint": "fb7ab279d458fd26",
-    "date": "2026-10-01"
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "857c2a4bcba2a074",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/SettingsController.cs::SaveAiAgentQuotaSettings",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "e5d86d810636a922",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/SettingsController.cs::SaveRoomQuotaSettings",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "b8c6a45f8f758444",
+    "date": "2026-11-12"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/SsoController.cs::ResetSsoSettingsV2",
     "code": 500,
-    "reason": "SaveAsync returns false only when DbSettingsManager catches a database write failure: an infrastructure fault, left undocumented as in SaveSsoSettingsV2",
-    "fingerprint": "f9e3c8e744c83633",
-    "date": "2026-10-01"
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "842a0ede14dc9e4d",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/SsoController.cs::SaveSsoSettingsV2",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "1b0c6db654d386f9",
+    "date": "2026-11-12"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/StorageController.cs::StartStorageEncryption",
+    "code": 500,
+    "reason": "Reachable 500, left undeclared on purpose: branch fix/readable-api-docs keeps the 500s that the action's own code throws out of the documents until those throws become 4xx codes in a change of their own. Drop this rejection with --unreject once that decision changes.",
+    "fingerprint": "645cf28a205cb982",
+    "date": "2026-11-12"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::GetTfaAppCodes",
     "code": 403,
     "reason": "IsOutsiderAsync branch: only the system OutsideUser, which never authenticates",
     "fingerprint": "af057bb320953d98",
-    "date": "2026-10-01"
-  },
-  {
-    "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::TfaAppGenerateSetupCode",
-    "code": 403,
-    "reason": "IsOutsiderAsync branch: only the system OutsideUser, which never authenticates",
-    "fingerprint": "823197af128d32b7",
     "date": "2026-10-01"
   },
   {
@@ -59,15 +192,15 @@
     "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::DeleteAdditionalWhiteLabelSettings",
     "code": 402,
     "reason": "DemandRebrandingPermissionAsync(false): the white-label tariff check is switched off by the literal argument",
-    "fingerprint": "c878bc895ce00d5b",
-    "date": "2026-10-01"
+    "fingerprint": "f46af207920f1ffc",
+    "date": "2026-11-13"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::DeleteCompanyWhiteLabelSettings",
     "code": 402,
     "reason": "DemandRebrandingPermissionAsync(false): the white-label tariff check is switched off by the literal argument",
-    "fingerprint": "a4eac28e3f7b0414",
-    "date": "2026-10-01"
+    "fingerprint": "5ecb8dc7804aa355",
+    "date": "2026-11-13"
   },
   {
     "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::RestoreWhiteLabelLogoText",

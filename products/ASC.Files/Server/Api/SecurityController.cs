@@ -79,18 +79,15 @@ public abstract class SecurityController<T>(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Lists the accounts and groups that hold rights on one file, one entry per subject, with the level each of them
-    /// has, whether the caller may still change that level, and which of them owns the file. The owner comes first,
-    /// then room managers, groups, ordinary members, guests, and last the accounts that have not accepted their
-    /// invitation yet, each of those ranked by access level and by name. External links are left out and are listed
-    /// by `GET api/2.0/files/file/{id}/links` instead, while a PDF form kept in a form-filling room also reports the
-    /// link of that room, because the form is filled out through it. `startIndex` and `count` page through the
-    /// subjects, and their total number is reported in the response headers rather than in the body. Listing takes
-    /// the right to change the sharing of the file, which its creator, the manager of its room and a portal
-    /// administrator acting as room manager have, while inside a public room reading the file is enough; a member who
-    /// may read but not share is answered with an empty list although the header still counts the subjects, and a
-    /// caller with no access, a guest included, is refused. A file that does not exist, or was deleted permanently,
-    /// is answered as missing. The call is read-only; for several entries at once use `POST api/2.0/files/share`.
+    /// Returns the accounts and groups that have access to a file, with the access level of each. The owner comes
+    /// first, and accounts that have not accepted their invitation come last. The list has no external links of the
+    /// file. To read them, use `GET api/2.0/files/file/{id}/links`. The list of a PDF form in a form-filling room
+    /// ends with the room's external link, if any. Any signed-in user can call it, except a guest. A guest gets 403.
+    /// A caller who cannot read the file also gets 403. A caller who can read the file but not change its access
+    /// gets an empty list. The total in the response headers still counts the hidden entries. Inside a public room,
+    /// read access is enough. The call is read-only. Use `startIndex` and `count` to page through the list. The
+    /// response headers carry the total. A `count` out of range returns 400. If the file does not exist, the call
+    /// returns 404. To read several entries in one call, use `POST api/2.0/files/share`.
     /// </remarks>
     /// <summary>Get file sharing rights</summary>
     /// <path>api/2.0/files/file/{id}/share</path>
@@ -122,18 +119,15 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Lists the accounts and groups that hold rights on one folder or room, one entry per subject, with the level
-    /// each of them has, whether the caller may still change that level, and which of them owns the entry. The owner
-    /// comes first, then room managers, groups, ordinary members, guests, and last the accounts that have not
-    /// accepted their invitation yet, each of those ranked by access level and by name. External links are left out
-    /// and are listed by `GET api/2.0/files/folder/{id}/links` instead. `startIndex` and `count` page through the
-    /// subjects, and their total number is reported in the response headers rather than in the body. For a room, and
-    /// for a folder inside a public room, read access is enough; any other folder is listed only to a caller who may
-    /// change its sharing, which the manager of its room and a portal administrator acting as room manager may, and a
-    /// member who may only read such a folder is answered with an empty list although the header still counts the
-    /// subjects. A caller with no access, a guest included, is refused, and a folder that does not exist is answered
-    /// as missing. The call is read-only. For a room prefer `GET api/2.0/files/rooms/{id}/share`, which filters the
-    /// same subjects by kind and by name.
+    /// Returns the accounts and groups that have access to a folder or room, with the access level of each. The
+    /// owner comes first, and accounts that have not accepted their invitation come last. The list has no external
+    /// links. To read them, use `GET api/2.0/files/folder/{id}/links`. Any signed-in user can call it, except a
+    /// guest. A guest gets 403. A caller who cannot read the folder also gets 403. For a room or a folder in a public
+    /// room, read access is enough. Any other folder requires the right to change its access. A caller who can only
+    /// read such a folder gets an empty list. The total in the response headers still counts the hidden entries.
+    /// The call is read-only. Use `startIndex` and `count` to page through the list. The response headers carry the
+    /// total. A `count` out of range returns 400. If the folder does not exist, the call returns 404. For a room, use
+    /// `GET api/2.0/files/rooms/{id}/share`, which also filters by kind and name.
     /// </remarks>
     /// <summary>Get folder sharing rights</summary>
     /// <path>api/2.0/files/folder/{id}/share</path>
@@ -165,17 +159,17 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Grants, changes or withdraws the rights of the listed accounts and groups on one file, and answers with the
-    /// rights those subjects hold afterwards. Every element of `share` names a subject and the level it is to get,
-    /// and the level that denies everything removes the access; an empty `share` changes nothing and is
-    /// answered with an empty list. A subject the caller is not allowed to share with is dropped without an error, so
-    /// compare the answer with what was sent. With `notify` set, each account named is emailed about the access it
-    /// received and `sharingMessage` is put into that mail with its markup stripped, while a message longer than the
-    /// field allows is rejected as an invalid request; an account already mailed about the same access to this file a
-    /// short while ago is not mailed again, even with a new message. The caller has to be allowed to change the
-    /// sharing of the file, which its creator, the manager of the room it lies in and a portal administrator acting
-    /// as room manager are; anyone else is refused. The call is mutating and safe to repeat. For several files and
-    /// folders in one request use `PUT api/2.0/files/share`.
+    /// Changes the access of accounts and groups to a file. The access `None` deletes the rights. Requires the right to
+    /// manage access to the file. Other callers get 403. The call changes data, and you can repeat it with the same
+    /// body. It skips subjects the caller may not share with. It also skips deactivated accounts, deleted groups, and
+    /// files outside My documents and rooms. If `notify` is true, the portal emails the accounts about the change. An
+    /// account that got an email about the same access to this file recently gets no new one. A new `sharingMessage`
+    /// does not change this. The call returns the new rights of the listed subjects. A repeat skips subjects that
+    /// already have the listed access, so it sends no email. A repeated `None` changes nothing but returns the rights
+    /// of the other listed subjects. An empty `share` or an unknown file changes nothing and returns an empty list. To
+    /// change several entries in one call, use `PUT api/2.0/files/share`. The call returns 400 for an invalid or too
+    /// long `email`, too many email invitations, or a too long `sharingMessage`. It also returns 403 if a subject
+    /// cannot get the access.
     /// </remarks>
     /// <summary>Share a file</summary>
     /// <path>api/2.0/files/file/{id}/share</path>
@@ -200,17 +194,18 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Grants, changes or withdraws the rights of the listed accounts and groups on one folder, and answers with the
-    /// rights those subjects hold afterwards. Every element of `share` names a subject and the level it is to get,
-    /// and the level that denies everything takes the access away instead; an empty `share` changes nothing and is
-    /// answered with an empty list. A subject the caller is not allowed to share with is dropped without an error.
-    /// With `notify` set, each account named is emailed about the access it received and `sharingMessage` is put into
-    /// that mail with its markup stripped, while a message longer than the field allows is rejected as an invalid
-    /// request; an account already mailed about the same access to this folder a short while ago is not mailed again,
-    /// even with a new message. The caller has to be allowed to change the sharing of the folder, which the manager
-    /// of the room it belongs to and a portal administrator acting as room manager are; anyone else is refused. The
-    /// call is mutating and safe to repeat. For a room use `PUT api/2.0/files/rooms/{id}/share`, which invites
-    /// people by email as well.
+    /// Changes the access of accounts and groups to a folder. The access `None` deletes the rights. Requires the right
+    /// to manage access to the folder. Other callers get 403. The call changes data, and you can repeat it with the
+    /// same body. It skips subjects the caller may not share with. It also skips deactivated accounts and deleted
+    /// groups. If `notify` is true, the portal emails the accounts about the change. An account that got an email about
+    /// the same access to this folder recently gets no new one. A new `sharingMessage` does not change this. The call
+    /// returns the new rights of the listed subjects. A repeat skips subjects that already have the listed access, so
+    /// it sends no email. A repeated `None` changes nothing but returns the rights of the other listed subjects. In a
+    /// room, a repeated `None` for an account emails a room invitation if `notify` is true. An empty `share` or an
+    /// unknown folder changes nothing and returns an empty list. For a room, use `PUT api/2.0/files/rooms/{id}/share`,
+    /// which also invites people by email. The call returns 400 for an invalid or too long `email`, too many email
+    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks
+    /// encryption keys for a private room.
     /// </remarks>
     /// <summary>Share a folder</summary>
     /// <path>api/2.0/files/folder/{id}/share</path>
@@ -235,16 +230,14 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Answers with the encryption keys that open one file kept in a private room: one entry per member who holds
-    /// rights on the file and has published keys, each carrying that member's public key, and the caller's own entry
-    /// carrying the encrypted private half as well. The private half of another member is never handed out. A member
-    /// who has not published keys yet is left out of the answer altogether, which is how a client tells that this
-    /// member cannot open the file until keys are published through `POST api/2.0/privacyroom/keys`; a member who
-    /// holds the file only through a group is not reported either, because group entries are skipped. The file has to
-    /// lie in a private room or in the encrypted section - a file kept anywhere else carries no keys and is rejected
-    /// as an unsupported request. The caller needs read access to the file and is answered with 403 otherwise, and a
-    /// file that does not exist is answered as missing. The call is read-only, and the answer changes as soon as a
-    /// member publishes or rotates keys, so read it again rather than caching it for a later session.
+    /// Returns the encryption keys that open a file in a private room. The list has the public keys of each member who
+    /// has access to the file and has keys. The caller's own entries also have the encrypted private key. The entries
+    /// of other members have no private key. The call skips members without keys and members who have access only
+    /// through a group. A member without keys cannot open the file. They add keys with `POST api/2.0/privacyroom/keys`,
+    /// then someone issues their file key. Requires read access to the file. Other callers get 403. The call is
+    /// read-only. Members can add or change keys at any time. So request the keys again before each use. If the file
+    /// does not exist, the call returns 404. If the file is outside a private room and the encrypted section, the call
+    /// returns 415.
     /// </remarks>
     /// <summary>Get file encryption keys</summary>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>
@@ -261,17 +254,13 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Emails the people named in `emails` that they were mentioned in a file, with a link that opens the file at the
-    /// place the mention sits when `actionLink` carries the anchor the editor produced. Only addresses that belong to
-    /// portal accounts are notified: an address that belongs to nobody is skipped, and the note is cut to its first
-    /// 200 characters in the mail, while a `message` longer than the field allows is refused with 400. The answer is
-    /// usually empty: the access list of the file comes back when the file is encrypted, or when one of the addresses
-    /// belongs to nobody and the caller may share the file - that is then the cue to invite that person with
-    /// `PUT api/2.0/files/file/{id}/share`. The caller needs comment rights, which the creator of the file, the
-    /// manager of its room and a member invited to comment, review or edit have, while a guest or a member without
-    /// access is refused with 403; a file that does not exist answers with 404 and a file in the trash is refused.
-    /// The operation is rate-limited and answers 429 once the caller sends too many notifications. A delivery failure
-    /// is swallowed, so 200 does not prove that the mail left the portal.
+    /// Sends an email to the accounts mentioned in a file, with a link to the file. The call skips addresses that
+    /// belong to no account. Requires the right to comment on the file. Other callers get 403. The call queues emails.
+    /// Do not repeat it. Each call sends the emails again. It returns one entry per mentioned account, with the
+    /// access of that account to the file. An account without access is in the list too. To give access, use
+    /// `PUT api/2.0/files/file/{id}/share`. If sending fails, the call still returns 200. The call is rate-limited.
+    /// The call returns 400 if `emails` is missing or `message` is too long. If the file does not exist, the call
+    /// returns 404.
     /// </remarks>
     /// <summary>Notify mentioned users</summary>
     /// <path>api/2.0/files/file/{fileId}/sendeditornotify</path>
@@ -291,19 +280,13 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Lists the members of one portal group together with the access each of them has on a folder or room that group
-    /// was granted rights to: `groupAccess` is the level the group itself carries, `userAccess` the level set on that
-    /// member alone, `overridden` says which of the two applies, `owner` marks the member who created the entry, and
-    /// `canEditAccess` says whether the caller may still change that member's level.
-    /// Take the group identifier from the group entries of `GET api/2.0/files/folder/{id}/share`.
-    /// The call is read-only; a guest gets 403.
-    /// `startIndex` and `count` page through the members, ordered by first name; `filterValue` keeps those whose first
-    /// name, last name or email contains the value, whatever its case; the response headers carry the number of
-    /// members.
-    /// An empty list with a count of 0, rather than an error, answers a group that holds no rights on this folder, a
-    /// folder that does not exist or that the caller cannot read, and a folder that is not a room when the caller may
-    /// not manage its access - so an empty answer does not mean that the group has no members.
-    /// A user gets no contacts, phone, location or notes of the other members.
+    /// Returns the members of a group with their access to a folder or room that the group has access to. Any signed-in
+    /// user can call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by first name. Use
+    /// `startIndex` and `count` to page through the list. The response headers carry the total. A `count` out of range
+    /// returns 400. The call returns an empty list for a group without access to the folder, or an unknown folder. It
+    /// also returns an empty list if the caller cannot read the folder. If the folder is not a room, a caller who cannot
+    /// change its access also gets an empty list. In these cases the total is 0. So an empty list does not mean that the
+    /// group has no members. A user gets no contacts, phone, location, or notes of the other members.
     /// </remarks>
     /// <summary>Get folder access of group members</summary>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
@@ -345,19 +328,13 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Lists the members of one portal group together with the access each of them has on a file that group was granted
-    /// rights to: `groupAccess` is the level the group itself carries, `userAccess` the level set on that member alone,
-    /// `overridden` says which of the two applies, `owner` marks the member who created the file, and `canEditAccess`
-    /// says whether the caller may still change that member's level.
-    /// Take the group identifier from the group entries of `GET api/2.0/files/file/{id}/share`.
-    /// The call is read-only; a guest gets 403.
-    /// `startIndex` and `count` page through the members, ordered by first name; `filterValue` keeps those whose first
-    /// name, last name or email contains the value, whatever its case; the response headers carry the number of
-    /// members.
-    /// An empty list with a count of 0, rather than an error, answers a group that holds no rights on this file, a file
-    /// that does not exist or that the caller cannot read, and a file whose access the caller may not manage - so an
-    /// empty answer does not mean that the group has no members.
-    /// A user gets no contacts, phone, location or notes of the other members.
+    /// Returns the members of a group with their access to a file that the group has access to. Any signed-in user can
+    /// call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by first name. Use
+    /// `startIndex` and `count` to page through the list. The response headers carry the total. A `count` out of range
+    /// returns 400. The call returns an empty list for a group without access to the file, or an unknown file. It also
+    /// returns an empty list if the caller cannot read the file. It also returns an empty list to a caller who cannot
+    /// change the access of the file. In these cases the total is 0. So an empty list does not mean that the group has no
+    /// members. A user gets no contacts, phone, location, or notes of the other members.
     /// </remarks>
     /// <summary>Get file access of group members</summary>
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
@@ -406,18 +383,18 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Hands the ownership of the listed rooms and files over to a single account, and returns the entries as they
-    /// look afterwards. Among folders only rooms are accepted - take their identifiers from
-    /// `GET api/2.0/files/rooms`; a plain folder is refused. A file is accepted only while it lies in the portal's
-    /// common section, so a file kept inside a room or in a personal section is refused as well, and so is a file
-    /// that is locked or currently open in the editor. The new owner has to be an active account that is allowed to
-    /// manage rooms, and a private room additionally requires that this account has already set up its encryption
-    /// keys; a deactivated account, a guest or a plain member is rejected. The caller must be the creator of every
-    /// listed room, or a portal administrator. The call mutates the entries one at a time and stops at the first item
-    /// it may not touch, leaving the entries already processed changed, so a partial answer is possible; an item
-    /// whose owner is already the target account is returned untouched, which makes a repeat safe. The previous owner
-    /// keeps access to a transferred room as its manager, while a transferred file is saved as a new version authored
-    /// by the new owner. An entry that lives on a connected third-party account is quietly left out.
+    /// Changes the owner of the listed rooms and files to one account. Requires the owner of each listed entry, or a
+    /// DocSpace admin. Other callers get 403. The call changes data, one entry at a time. It stops at the first entry
+    /// it may not change, and earlier entries stay changed. An entry that the account already owns stays unchanged,
+    /// so you can repeat the call. The previous owner stays in a transferred room as its room manager. A transferred
+    /// file gets a new version by the new owner. The call skips third-party files. The call returns 403 if the
+    /// new owner is not an active DocSpace admin or room admin. It also returns 403 for a private room if the new
+    /// owner has no encryption keys. It also returns 403 for a folder that is not a room, or a file outside the
+    /// common section. A file that is locked or being edited also returns 403. If the new owner lacks keys to some
+    /// encrypted files of a private room, the call returns 409. To find these files, use
+    /// `GET api/2.0/privacyroom/{roomId}/access/missing`. After their keys are added, repeat the call. Without
+    /// `userId`, the call returns 400. It also returns 400 if a string file id points to a storage account that is
+    /// not connected.
     /// </remarks>
     /// <summary>Change the room or file owner</summary>
     /// <path>api/2.0/files/owner</path>
@@ -427,10 +404,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for every file whose owner changes")]
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rooms and files whose owner has been changed, as folder and file objects", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`, or a third-party file identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The new owner is not an active account allowed to manage rooms or has not set up encryption keys for a listed private room, the caller may not change the owner of a listed entry, a listed folder lies outside the rooms and common sections, or a listed file is locked, being edited or lies outside the common section")]
     [SwaggerResponse(409, "The new owner holds no key for some encrypted files of a listed private room: `GET api/2.0/privacyroom/{roomId}/access/missing` names them, and the call can be repeated once their keys are written")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryBaseDto> ChangeFileOwner(ChangeOwnerRequestDto inDto)
     {
@@ -448,17 +424,14 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     }
 
     /// <remarks>
-    /// Returns who has access to the files and folders listed in the request, merged into one list of subjects, and
-    /// is the batch counterpart of `GET api/2.0/files/file/{id}/share` and `GET api/2.0/files/rooms/{id}/share`.
-    /// Identifiers come from any listing operation, such as `GET api/2.0/files/{folderId}`. The caller needs read
-    /// access to every listed entry: a single entry it cannot read makes the whole call fail instead of dropping that
-    /// entry, so the list has to be filtered beforehand. Identifiers that match nothing are skipped without an error,
-    /// and an empty list of identifiers gives an empty answer. The call is read-only. Each account or group appears
-    /// once: the caller's own record comes first, the owner's record second, and the rest are ordered by display
-    /// name. When the same subject holds different rights on the listed entries, its access is reported as the
-    /// `Varies` value instead of a real level, which means the entries have to be inspected one by one to see the
-    /// difference. Records that describe external links are included only for a caller that is allowed to read the
-    /// links of the entry.
+    /// Returns who has access to the listed files and folders, merged into one list. Each account or group appears
+    /// once. To read the rights of one entry, use `GET api/2.0/files/file/{id}/share` or
+    /// `GET api/2.0/files/rooms/{id}/share`. Requires read access to every listed entry. If the caller cannot read
+    /// one entry, the whole call returns 403, so filter the list first. The call is read-only. It skips IDs that
+    /// match nothing, and an empty list gives an empty answer. The caller's own record comes first, then the owner's
+    /// record, then the rest by display name. If a subject has different rights on the entries, or none on some, its
+    /// access is `Varies`. To see the difference, read the entries one by one. It shows external links only to a
+    /// caller who may read them.
     /// </remarks>
     /// <summary>Get sharing rights in batch</summary>
     /// <path>api/2.0/files/share</path>
@@ -466,7 +439,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The merged sharing rights of the listed files and folders, one record per account or group", typeof(IAsyncEnumerable<FileShareDto>))]
     [SwaggerResponse(403, "The caller may not read one of the listed files or folders")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPost("share")]
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfo(BaseBatchRequestDto inDto)
     {
@@ -483,26 +455,22 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     }
 
     /// <remarks>
-    /// Revokes the access of every account and group on the files and folders listed in the request, and clears the
-    /// entries from the caller's own favorites, recent and unread marks. The owner's own record is kept, since
-    /// removing it would take the entry away from the account that owns it, and external links survive untouched -
-    /// remove those through the link operations of the entry. The caller must be allowed to change the access of each
-    /// entry, which means the creator of the room, a portal administrator, or a member with the rights to manage it;
-    /// any other caller who can read the entry may use this call to drop it from their own list, which takes a room
-    /// member out of the room, while an unrelated account is refused. A private room answers to its members alone: a
-    /// portal administrator outside it is refused, and whoever loses access to it loses the wrapped file keys
-    /// (`PUT api/2.0/files/{fileId}/access`) along with it, except its creator. The answer is always `true` and
-    /// identifiers that match nothing are skipped silently, so a successful answer is not proof that anything was
-    /// revoked - read the rights back with `POST api/2.0/files/share`. The call is destructive and safe to repeat. To
-    /// take the rights of one account away instead of all of them, call `PUT api/2.0/files/share` with that account's
-    /// access set to `None`.
+    /// Deletes all sharing rights on the listed files and folders, or removes them from the caller's own list. The
+    /// owner's record and external links stay. To delete external links, use the link operations of the entry.
+    /// Requires read access to each entry. Other callers get 403. Only a caller who may manage access, or a DocSpace
+    /// admin outside a private room, deletes the rights. Any other caller only removes the entry from their own list.
+    /// For a room member, this means leaving the room. The call changes data, and you can repeat it. It stops at the
+    /// first entry it may not change, and earlier entries stay changed. In both modes, it clears the caller's
+    /// favorite, recent, and new marks on the entry. In a private room, every account
+    /// that loses access also loses its file keys. The call always returns `true` and skips IDs that match nothing.
+    /// To check the result, use `POST api/2.0/files/share`. To delete the rights of one account, use
+    /// `PUT api/2.0/files/share` with the access `None`.
     /// </remarks>
     /// <summary>Remove sharing rights in batch</summary>
     /// <path>api/2.0/files/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Always true: the accounts and groups that had access to the listed entries no longer have it", typeof(bool))]
     [SwaggerResponse(403, "The caller may not change the access of a listed entry and cannot read it either, so it cannot be dropped from their own list. A portal administrator outside a private room gets this as well")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfo(BaseBatchRequestDto inDto)
     {
@@ -517,17 +485,19 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
 
 
     /// <remarks>
-    /// Grants, changes or withdraws the access of the listed accounts and groups on every file and folder named in
-    /// the request at once, and returns the resulting rights. Entry identifiers come from a listing operation, and
-    /// the accounts and groups come from the portal's own account and group lists; an access of `None` withdraws the
-    /// rights instead of granting them. The caller must be allowed to change the access of every listed entry - the
-    /// creator of the room, a member with the rights to manage it, or a portal administrator - and a read-only member
-    /// or a guest is refused even when the payload changes nothing. A subject the caller is not allowed to share
-    /// with, such as a guest that belongs to another member, is skipped without an error, and an empty `share`
-    /// collection makes the call do nothing and answer with an empty list. Repeating the same request leaves the same
-    /// rights in place. The answer holds one record per listed subject for each entry that was actually processed, so
-    /// it is shorter than the request when something was skipped and worth comparing against it. For a single room
-    /// prefer `PUT api/2.0/files/rooms/{id}/share`, which also invites members by email.
+    /// Changes the access of accounts and groups to the listed files and folders. The access `None` deletes the rights.
+    /// Requires the right to manage access to each entry. Other callers get 403. The call changes data, one entry at a
+    /// time. You can repeat it with the same body. It stops at the first entry it may not change. Earlier entries stay
+    /// changed. It skips subjects the caller may not share with, such as another user's guest. It also skips
+    /// deactivated accounts, deleted groups, and files outside My documents and rooms. If `notify` is true, the portal
+    /// emails the accounts about the change. It returns the new rights of these subjects on each changed entry. A
+    /// skipped subject or entry is not in the answer. An empty `share` changes nothing and returns an empty list. A
+    /// repeat skips subjects that already have the listed access, so it sends no email. A repeated `None` changes
+    /// nothing but returns the rights of the other listed subjects on that entry. In a listed room, a repeated `None`
+    /// for an account emails a room invitation if `notify` is true. For one room, use
+    /// `PUT api/2.0/files/rooms/{id}/share`. The call returns 400 for an invalid or too long `email`, too many email
+    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks
+    /// encryption keys for a private room.
     /// </remarks>
     /// <summary>Set sharing rights in batch</summary>
     /// <path>api/2.0/files/share</path>
@@ -536,7 +506,6 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     [SwaggerResponse(200, "The rights of the listed accounts and groups on every entry that was processed", typeof(IAsyncEnumerable<FileShareDto>))]
     [SwaggerResponse(400, "The request body cannot be read, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
     [SwaggerResponse(403, "The caller may not change the sharing of a listed entry, a listed subject cannot be given the requested access on it, or a listed private room has an account in `share` that has not set up its encryption keys")]
-    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfo(SecurityInfoRequestDto inDto)
     {
@@ -562,18 +531,14 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     }
 
     /// <remarks>
-    /// Resolves the token of an external share link into the room or file it points at, and reports the outcome of
-    /// validating the link. The token is the `requestToken` of a link returned by the link operations of an entry,
-    /// such as `GET api/2.0/files/file/{id}/link` or `GET api/2.0/files/rooms/{id}/link`. The call needs no
-    /// authentication and answers a refused link in the `status` field rather than with an HTTP error, so that field
-    /// has to be read before anything else: a token that matches no link, and a link whose entry has been archived or
-    /// moved to the trash, both resolve as invalid; a link past its expiration date resolves as expired; a
-    /// password-protected link resolves as requiring a password, which is then submitted through
-    /// `POST api/2.0/files/share/{key}/password`; and a public link resolves as denied when the portal forbids
-    /// sharing with people outside it. The call is not read-only: for a signed-in caller the first successful
-    /// resolution puts the entry into the account's own lists, and for a visitor without an account it opens an
-    /// anonymous session that later requests with the same token reuse. Pass `fileId` or `folderId` to have an entry
-    /// inside the link's target echoed back.
+    /// Returns the room or file that an external share link points at, and the link status. Anyone can call it
+    /// without signing in. The call changes data, and you can repeat it. For a signed-in caller, the first valid call
+    /// adds the entry to their lists. For a visitor, it opens an anonymous session that later requests with
+    /// the same token reuse. The call reports a refused link in `status`, not with an HTTP error code. So read
+    /// `status` first. The status is invalid for an unknown token, and for a link to an archived or trashed entry. It
+    /// is expired for a link past its expiration date. For a protected link, the status asks for a password. To send
+    /// it, use `POST api/2.0/files/share/{key}/password`. A signed-in caller who can read the room gets no password
+    /// request. If the portal forbids sharing outside it, a public link is denied to an anonymous visitor.
     /// </remarks>
     /// <summary>Resolve an external share link</summary>
     /// <path>api/2.0/files/share/{key}</path>
@@ -590,16 +555,14 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     }
 
     /// <remarks>
-    /// Submits the password of a protected external share link and answers with the same resolved link data as
-    /// `GET api/2.0/files/share/{key}`, so this operation is called only after that one reported that a password is
-    /// required. The token in the path is the `requestToken` of the link, and the password is the one chosen by the
-    /// member who shared the entry. The call needs no authentication; a signed-in caller that may already read the
-    /// room is let through by the resolve operation itself and does not need the password at all. A correct password
-    /// is remembered for the caller, so later requests with the same token resolve without repeating it, and a wrong
-    /// one is reported in the `status` field as an invalid password rather than as an HTTP error, while the
-    /// remembered password is dropped. Attempts are counted per link and per calling address: once the portal's limit
-    /// is reached, further attempts are rejected until the block expires, which makes the operation unsuitable for
-    /// trying passwords in a loop. Nothing about the entry is changed by the call itself.
+    /// Checks the password of a protected external share link, and returns the same data as
+    /// `GET api/2.0/files/share/{key}`. Call it after that operation reports that the link requires a password.
+    /// Anyone can call it without signing in. A signed-in caller who can read the room does not need the password.
+    /// The call changes data but not the entry. The portal remembers a correct password for the caller, so later
+    /// requests with the token skip it. The portal counts only wrong passwords for each link and calling address. So
+    /// you can repeat the call with the correct password. A wrong password gives an invalid-password `status`, not an
+    /// HTTP error. The portal then forgets the remembered password. After too many attempts, the call returns 403 until
+    /// the block expires, even with the correct password.
     /// </remarks>
     /// <summary>Unlock a password-protected link</summary>
     /// <path>api/2.0/files/share/{key}/password</path>

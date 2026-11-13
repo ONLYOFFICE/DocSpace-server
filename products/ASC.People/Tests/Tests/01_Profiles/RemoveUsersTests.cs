@@ -120,6 +120,47 @@ public class RemoveUsersTests(AspireAppFixture fixture) : BaseTest(fixture)
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
     }
 
+    /// <summary>
+    /// A repeat for an account the first call deleted is a 200 with an empty list: the deleted account is
+    /// looked up as the system "lost" user, which the call skips like any other system account.
+    /// </summary>
+    [Fact]
+    public async Task RemoveUsers_RepeatedForDeletedAccount_ShouldReturnEmptyList()
+    {
+        var user = await InviteContact(EmployeeType.User);
+        await TerminateUser(user);
+        var request = new UpdateMembersRequestDto([user.Id]);
+
+        var first = await _profilesApi.RemoveUsersAsync(request, TestContext.Current.CancellationToken);
+        var repeat = await _profilesApi.RemoveUsersAsync(request, TestContext.Current.CancellationToken);
+
+        first.Response.Should().ContainSingle().Which.Id.Should().Be(user.Id);
+        repeat.Response.Should().BeEmpty();
+
+        var lookup = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _profilesApi.GetProfileByUserIdAsync(user.Id.ToString(), TestContext.Current.CancellationToken));
+
+        lookup.ErrorCode.Should().Be(404);
+    }
+
+    [Fact]
+    public async Task RemoveUsers_UnknownIdBesideDisabledAccount_ShouldSkipUnknownId()
+    {
+        var user = await InviteContact(EmployeeType.User);
+        await TerminateUser(user);
+
+        var removed = await _profilesApi.RemoveUsersAsync(
+            new UpdateMembersRequestDto([Guid.NewGuid(), user.Id]),
+            TestContext.Current.CancellationToken);
+
+        removed.Response.Should().ContainSingle().Which.Id.Should().Be(user.Id);
+
+        var lookup = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _profilesApi.GetProfileByUserIdAsync(user.Id.ToString(), TestContext.Current.CancellationToken));
+
+        lookup.ErrorCode.Should().Be(404);
+    }
+
     [Fact]
     public async Task RemoveUsers_Anonymous_ShouldThrowUnauthorized()
     {
