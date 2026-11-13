@@ -1,0 +1,9 @@
+{
+  "name": "Report standards",
+  "description": "The structure and the writing style reports follow.",
+  "category": "Document",
+  "files": [
+    "Report structure.docx",
+    "Style guide.md"
+  ]
+}

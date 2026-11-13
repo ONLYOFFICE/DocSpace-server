@@ -1,0 +1,9 @@
+{
+  "name": "Report writing",
+  "description": "Skills for drafting a structured report and for writing its executive summary.",
+  "category": "Document",
+  "files": [
+    "structured-report.md",
+    "executive-summary.md"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Data analysis",
+  "description": "Skills for profiling a dataset and for finding trends and outliers in it.",
+  "category": "Tables",
+  "files": [
+    "data-profile.md",
+    "trend-and-outliers.md"
+  ]
+}

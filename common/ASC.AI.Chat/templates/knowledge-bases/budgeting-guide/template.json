@@ -1,0 +1,9 @@
+{
+  "name": "Budgeting guide",
+  "description": "The budgeting method and the standard list of budget categories.",
+  "category": "Tables",
+  "files": [
+    "Budgeting method.docx",
+    "Budget categories.md"
+  ]
+}

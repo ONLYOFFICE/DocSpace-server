@@ -1,0 +1,9 @@
+{
+  "name": "Presentation standards",
+  "description": "The criteria a deck is reviewed against and the slide design checklist.",
+  "category": "Presentation",
+  "files": [
+    "Review criteria.docx",
+    "Slide design checklist.md"
+  ]
+}

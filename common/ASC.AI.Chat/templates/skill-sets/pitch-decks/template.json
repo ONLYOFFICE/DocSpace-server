@@ -1,0 +1,9 @@
+{
+  "name": "Pitch decks",
+  "description": "Skills for outlining a pitch deck and for writing speaker notes.",
+  "category": "Presentation",
+  "files": [
+    "deck-outline.md",
+    "speaker-notes.md"
+  ]
+}

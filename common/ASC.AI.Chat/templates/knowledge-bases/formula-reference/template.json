@@ -1,0 +1,9 @@
+{
+  "name": "Formula reference",
+  "description": "A reference of the most used functions and a guide to formula errors.",
+  "category": "Tables",
+  "files": [
+    "Function reference.docx",
+    "Error guide.md"
+  ]
+}

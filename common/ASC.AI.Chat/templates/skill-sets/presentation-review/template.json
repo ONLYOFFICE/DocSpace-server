@@ -1,0 +1,9 @@
+{
+  "name": "Presentation review",
+  "description": "Skills for reviewing a whole deck and for simplifying overloaded slides.",
+  "category": "Presentation",
+  "files": [
+    "deck-review.md",
+    "slide-simplify.md"
+  ]
+}

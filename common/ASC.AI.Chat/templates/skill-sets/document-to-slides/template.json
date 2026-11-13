@@ -1,0 +1,9 @@
+{
+  "name": "Document to slides",
+  "description": "Skills for extracting key messages from a document and turning them into slides.",
+  "category": "Presentation",
+  "files": [
+    "key-messages.md",
+    "document-to-slides.md"
+  ]
+}

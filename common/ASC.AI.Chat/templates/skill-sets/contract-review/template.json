@@ -1,0 +1,9 @@
+{
+  "name": "Contract review",
+  "description": "Skills for reviewing contracts clause by clause and comparing two versions of an agreement.",
+  "category": "Document",
+  "files": [
+    "clause-risk-check.md",
+    "version-compare.md"
+  ]
+}

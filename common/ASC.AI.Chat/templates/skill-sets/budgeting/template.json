@@ -1,0 +1,9 @@
+{
+  "name": "Budgeting",
+  "description": "Skills for building a budget table and for analysing plan-versus-actual variance.",
+  "category": "Tables",
+  "files": [
+    "budget-builder.md",
+    "variance-analysis.md"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Contract standards",
+  "description": "Standard clause wording and the checklist a contract is reviewed against.",
+  "category": "Document",
+  "files": [
+    "Standard clauses.docx",
+    "Review checklist.md"
+  ]
+}

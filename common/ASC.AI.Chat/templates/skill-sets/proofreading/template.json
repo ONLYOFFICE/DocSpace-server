@@ -1,0 +1,9 @@
+{
+  "name": "Proofreading",
+  "description": "Skills for correcting a text and for adjusting its tone to an audience.",
+  "category": "Document",
+  "files": [
+    "proofread.md",
+    "tone-adjust.md"
+  ]
+}
