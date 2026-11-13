@@ -90,12 +90,13 @@ public class ReassignController(
     /// Only the portal owner can move the data of a DocSpace admin or an admin of the People section.
     /// Other callers get 400 for such a source. The call queues work.
     /// Repeat `GET api/2.0/people/reassign/progress/{userId}` with the source ID until `isCompleted` is true.
-    /// While a job for the source runs, a repeated call returns that job and starts nothing new.
-    /// If `deleteProfile` is true, the job also deletes the other personal files of the source, then the profile.
-    /// This cannot be undone. Otherwise, the source keeps the personal files that it did not share.
-    /// The portal emails the caller when the job succeeds or fails.
-    /// The call returns 400 if the recipient is unknown or is not an active room admin or DocSpace admin.
-    /// It also returns 400 if the source is unknown, a system account, the portal owner, the caller, or not disabled.
+    /// While a job for the source runs, a repeated call returns that job and starts nothing new. After the job ends, a
+    /// repeated call starts a new job. The portal then emails the caller again. If the job deleted the source profile,
+    /// a repeated call returns 400. If `deleteProfile` is true, the job also deletes the other personal files of the
+    /// source, then the profile. This cannot be undone. Otherwise, the source keeps the personal files that it did not
+    /// share. The portal emails the caller when the job succeeds or fails. The call returns 400 if the recipient is
+    /// unknown or is not an active room admin or DocSpace admin. It also returns 400 if the source is unknown, a system
+    /// account, the portal owner, the caller, or not disabled.
     /// </remarks>
     /// <summary>Start the data reassignment</summary>
     /// <path>api/2.0/people/reassign/start</path>

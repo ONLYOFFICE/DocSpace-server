@@ -225,14 +225,14 @@ public class BackupController(
     /// Starts a backup of the portal and returns the queued job. Requires the EditPortalSettings permission,
     /// which the portal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller without
     /// the space access permission also gets 403. The call queues work. To follow the job, poll
-    /// `GET api/2.0/backup/getbackupprogress` until `isCompleted` is true. While a backup runs, a repeated call
-    /// starts no new job and returns the running one. After the portal spends its free backups of the month,
-    /// the call charges each backup to the portal wallet. It then also turns on the paid backup service. If the
-    /// wallet cannot pay for the backup, the call returns 402. It also returns 402 for a `Documents` backup if
-    /// the portal is over its storage quota. The call returns 400 if `folderId` is missing or does not match
-    /// `storageType`. It also returns 400 if an item of `storageParams` has no key or value, or repeats a key.
-    /// If the target folder does not exist, the call returns 404. It returns 403 if you cannot create files in
-    /// the folder. The root folders of rooms, the archive, and room templates also return 403.
+    /// `GET api/2.0/backup/getbackupprogress` until `isCompleted` is true. While a backup runs, a repeated call starts
+    /// no new job and returns the running one. Once the job ends, a repeated call makes another backup. After the
+    /// portal spends its free backups of the month, the call charges each backup to the portal wallet. It then also
+    /// turns on the paid backup service. If the wallet cannot pay for the backup, the call returns 402. It also returns
+    /// 402 for a `Documents` backup if the portal is over its storage quota. The call returns 400 if `folderId` is
+    /// missing or does not match `storageType`. It also returns 400 if an item of `storageParams` has no key or value,
+    /// or repeats a key. If the target folder does not exist, the call returns 404. It returns 403 if you cannot create
+    /// files in the folder. The root folders of rooms, the archive, and room templates also return 403.
     /// </remarks>
     /// <summary>Start the backup</summary>
     /// <path>api/2.0/backup/startbackup</path>
@@ -529,12 +529,12 @@ public class BackupController(
     /// With `dump`, a caller without the space access permission also gets 403. The call queues work and
     /// cannot be undone. While the restore runs, most API calls return 403. To follow the job, poll
     /// `GET api/2.0/backup/getrestoreprogress` until `isCompleted` is true. You cannot cancel a restore
-    /// through the API. A repeated call during the restore returns 403 or the running job. If the plan does
-    /// not allow restoring, the call returns 402. The call returns 400 if `backupId` is missing, or it is not
-    /// a GUID and `storageParams` has no `filePath`. It also returns 400 if an item of `storageParams` has no
-    /// key or value, or repeats a key. The call returns 404 if the backup, the file, or its folder does not
-    /// exist. For `Local` storage, a missing uploaded archive also returns 404. It returns 403 if you cannot
-    /// create files in the folder of the backup file.
+    /// through the API. A repeated call during the restore returns 403 or the running job. After the restore ends, a
+    /// repeated call restores the portal again. If the plan does not allow restoring, the call returns 402. The call
+    /// returns 400 if `backupId` is missing, or it is not a GUID and `storageParams` has no `filePath`. It also returns
+    /// 400 if an item of `storageParams` has no key or value, or repeats a key. The call returns 404 if the backup, the
+    /// file, or its folder does not exist. For `Local` storage, a missing uploaded archive also returns 404. It returns
+    /// 403 if you cannot create files in the folder of the backup file.
     /// </remarks>
     /// <summary>Start the restoring process</summary>
     /// <path>api/2.0/backup/startrestore</path>

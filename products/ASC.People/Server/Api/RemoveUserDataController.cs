@@ -72,12 +72,12 @@ public class RemoveUserDataController(PermissionContext permissionContext,
 
     /// <remarks>
     /// Emails the caller a link that confirms the deletion of their own profile. Any signed-in user can call it. The
-    /// portal owner and LDAP accounts get 403. The call changes no data and sends an email. A repeated call shortly
-    /// after the email went out sends no new email, and the link already sent stays valid. To delete the profile, the
-    /// app calls `DELETE api/2.0/people/@self` with the confirmation token from the link. To delete another account,
-    /// use `DELETE api/2.0/people/{userId}`. The call returns a text that you can show to the user, with the email
-    /// address of the link. The address is wrapped in HTML bold tags. Remove them before you show the text outside a
-    /// web page.
+    /// portal owner and LDAP accounts get 403. The call changes no data and sends an email. Within 10 minutes after the
+    /// email, a repeated call sends no new email but returns the same text. A later call emails a new link. Every link
+    /// sent stays valid for 7 days. To delete the profile, the app calls `DELETE api/2.0/people/@self` with the
+    /// confirmation token from the link. To delete another account, use `DELETE api/2.0/people/{userId}`. The call
+    /// returns a text that you can show to the user, with the email address of the link. The address is wrapped in HTML
+    /// bold tags. Remove them before you show the text outside a web page.
     /// </remarks>
     /// <summary>
     /// Send the deletion instructions
@@ -114,11 +114,11 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Only the portal owner can delete the data of another DocSpace admin. Other DocSpace admins get 403 for it.
     /// The call queues work, and the deletion cannot be undone.
     /// Repeat `GET api/2.0/people/remove/progress/{userId}` with the same user ID until `isCompleted` is true.
-    /// While a job for the account runs, a repeated call returns that job and starts nothing new.
-    /// The portal emails the caller when the job succeeds or fails.
-    /// To cancel a running job, use `PUT api/2.0/people/remove/terminate`.
-    /// To move the data to a user you choose, use `POST api/2.0/people/reassign/start` instead.
-    /// The call returns 400 if the user is unknown, the portal owner, the caller, or not disabled.
+    /// While a job for the account runs, a repeated call returns that job and starts nothing new. After the job
+    /// succeeds, a repeated call returns 400. After a failed job, a repeated call starts a new one. The portal emails
+    /// the caller when the job succeeds or fails. To cancel a running job, use `PUT api/2.0/people/remove/terminate`.
+    /// To move the data to a user you choose, use `POST api/2.0/people/reassign/start` instead. The call returns 400 if
+    /// the user is unknown, the portal owner, the caller, or not disabled.
     /// </remarks>
     /// <summary>Start the data deletion</summary>
     /// <path>api/2.0/people/remove/start</path>
@@ -196,7 +196,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// That member last changed the personal folder. If that member is a guest, the portal owner gets the new folder.
     /// The call queues work, and the deletion cannot be undone. You cannot cancel the job.
     /// Repeat `GET api/2.0/people/delete/personal/progress` until `isCompleted` is true.
-    /// While the job runs, a repeated call returns that job. After the job succeeds, a repeated call returns 403.
+    /// While the job runs, a repeated call returns that job. After the job succeeds, a repeated call returns 403. If
+    /// the job fails and the folder remains, a repeated call starts a new job.
     /// </remarks>
     /// <summary>Delete the personal folder</summary>
     /// <path>api/2.0/people/delete/personal/start</path>
