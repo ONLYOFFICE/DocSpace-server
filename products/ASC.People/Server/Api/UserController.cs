@@ -3130,8 +3130,13 @@ public class UserControllerAdditional<T>(
     /// only accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each profile
     /// shows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it, and
     /// `total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With `area`
-    /// set to `All`, they also see guests with access. If `count` is out of range, the call returns 400. To search users
-    /// and groups together, use `GET api/2.0/accounts/room/{id}/search`.
+    /// set to `All`, they also see guests with access. The `shared` field is also true for the owner and for an account
+    /// with a record that denies access. A user sees only the accounts they work with. These are the owners and members
+    /// of the user's rooms, directly or through a group. Accounts with their own record on the room that gives access
+    /// also count. For another account, a user gets only the id, names, email, avatars, type flags, status, and `shared`.
+    /// Only a DocSpace admin can filter by the `inviterId` of another account. For other callers, the call ignores such
+    /// an `inviterId`. If `count` is out of range, the call returns 400. To search users and groups together, use `GET
+    /// api/2.0/accounts/room/{id}/search`.
     /// </remarks>
     /// <summary>
     /// Search users for a room
@@ -3161,8 +3166,16 @@ public class UserControllerAdditional<T>(
     /// returns only accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each
     /// profile shows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it,
     /// and `total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With
-    /// `area` set to `All`, they also see guests with access. If `count` is out of range, the call returns 400. To search
-    /// users and groups together, use `GET api/2.0/accounts/folder/{id}/search`.
+    /// `area` set to `All`, they also see guests with access. The `shared` field is also true for the owner and for an
+    /// account with a record that denies access. Only a caller with the right to change the access learns who has access.
+    /// A member of a room also learns it if the folder is that room. For other callers, `shared` is always false, and
+    /// `includeShared` returns an empty list with a total of 0. For them, `excludeShared` removes no account. A user sees
+    /// only the accounts they work with. These are the owners and members of the user's rooms, directly or through a
+    /// group. If the user learns who has access, accounts with their own record that gives access also count. A record on
+    /// a parent folder counts too. For another account, a user gets only the id, names, email, avatars, type flags,
+    /// status, and `shared`. Only a DocSpace admin can filter by the `inviterId` of another account. For other callers,
+    /// the call ignores such an `inviterId`. If `count` is out of range, the call returns 400. To search users and groups
+    /// together, use `GET api/2.0/accounts/folder/{id}/search`.
     /// </remarks>
     /// <summary>
     /// Search users for a folder
@@ -3192,8 +3205,15 @@ public class UserControllerAdditional<T>(
     /// only accounts with access. If both are set, `excludeShared` wins. Without them, the `shared` field of each profile
     /// shows the access. The call does not sort the list. The `count` and `startIndex` parameters page over it, and
     /// `total` counts all matches. A caller who is not a DocSpace admin sees only the guests related to them. With `area`
-    /// set to `All`, they also see guests with access. If `count` is out of range, the call returns 400. To search users
-    /// and groups together, use `GET api/2.0/accounts/file/{id}/search`.
+    /// set to `All`, they also see guests with access. The `shared` field is also true for the owner and for an account
+    /// with a record that denies access. Only a caller with the right to change the access learns who has access. For
+    /// other callers, `shared` is always false, and `includeShared` returns an empty list with a total of 0. For them,
+    /// `excludeShared` removes no account. A user sees only the accounts they work with. These are the owners and members
+    /// of the user's rooms, directly or through a group. If the user learns who has access, accounts with their own
+    /// record that gives access also count. A record on a parent folder counts too. For another account, a user gets only
+    /// the id, names, email, avatars, type flags, status, and `shared`. Only a DocSpace admin can filter by the
+    /// `inviterId` of another account. For other callers, the call ignores such an `inviterId`. If `count` is out of
+    /// range, the call returns 400. To search users and groups together, use `GET api/2.0/accounts/file/{id}/search`.
     /// </remarks>
     /// <summary>
     /// Search users for a file
@@ -3226,14 +3246,25 @@ public class UserControllerAdditional<T>(
         }
 
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
+        var knownToSubjects = await fileSharing.GetKnownToSubjectsAsync();
         var securityDao = daoFactory.GetSecurityDao<T>();
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
+        // The access list as the caller sees it: every record marks an account as already having one (`shared`), but a
+        // Restrict record denies access and makes nobody known - any member of a room sees whom the room excludes.
+        // Read without the search text: these are sets of ids, and the query below matches the text word by word,
+        // while the access list would match it as one string and drop "Ann Lee" from both sets. Only the ids and
+        // the access are read: the full entries of the list cost a lookup per record on every request.
+        var shares = await fileSharing.GetPureShareSubjectsAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus);
+        var parentUserIds = shares.Select(r => r.Id).ToList();
+        var knownFromShares = shares.Where(r => r.Access != ASC.Files.Core.Security.FileShare.Restrict).Select(r => r.Id).ToList();
+
+        // Only read access is required here, so who has access to the entry is reported only to a caller that may see
+        // its access list - the same rule that leaves parentUserIds empty for anybody else.
+        var sharedVisible = await fileSharing.CanSeeSharesAsync(fileEntry, ShareFilterType.UserOrGroup);
 
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var filterValue = inDto.Text;
         var filterSeparator = inDto.FilterSeparator;
-
 
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             filterValue,
@@ -3241,8 +3272,11 @@ public class UserControllerAdditional<T>(
             inDto.ActivationStatus,
             inDto.ExcludeShared ?? false,
             inDto.IncludeShared ?? false,
+            sharedVisible,
             filterSeparator,
             includeStrangers,
+            knownToSubjects,
+            knownFromShares,
             inDto.Area,
             inDto.InvitedByMe,
             inDto.InviterId,
@@ -3257,8 +3291,11 @@ public class UserControllerAdditional<T>(
                            inDto.ActivationStatus,
                            inDto.ExcludeShared ?? false,
                            inDto.IncludeShared ?? false,
+                           sharedVisible,
                            filterSeparator,
                            includeStrangers,
+                           knownToSubjects,
+                           knownFromShares,
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,
@@ -3267,7 +3304,7 @@ public class UserControllerAdditional<T>(
                            offset,
                            count))
         {
-            yield return await employeeFullDtoHelper.GetFullAsync(u.UserInfo, u.Shared);
+            yield return await employeeFullDtoHelper.GetShareCandidateAsync(u.UserInfo, u.Shared);
         }
     }
 }

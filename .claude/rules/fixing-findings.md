@@ -12,7 +12,10 @@ paths around it. Before a fix is handed back:
 1. **Fix the class.** Name the pattern the finding is an instance of and find every other instance
    in the branch — `findReferences` on the member, the same call shape in sibling services (Files /
    People / Web.Api / Web.Studio), the same config/DTO/handler family. Fix them all, or say in the
-   commit message which ones were left and why.
+   commit message which ones were left and why. For a filter that decides what a caller may see, the
+   class is both tables of `visibility-filters.md` - every source of the result and every output
+   channel, per caller and entry kind - filled again for the whole method, not the cited branch: on
+   bug 79163 each round fixed one branch and the next review found its sibling.
 2. **Walk the other paths of the changed code.** Create vs update (a field left out on update),
    the lookup the old behaviour served, rows and backup archives written before the change, the
    other database in the code (the PostgreSQL branch of a model builder or of raw SQL), the success
@@ -34,6 +37,11 @@ paths around it. Before a fix is handed back:
    re-check of your fix commits. On a yes, fix what it finds, then ask for the review. The reviewer
    uses the same skill, so what it finds here would otherwise cost a round; the run itself costs a
    full pass of the skill, so the user decides (`CLAUDE.md`, Git Workflow).
+
+7. **Reject a finding only with the same evidence a fix needs.** Read the code for every caller, entry
+   kind and path the finding names, not for the one you know best. An argument that covers part of the
+   finding is not a rejection: on 79163 a correct finding about rooms was first rejected with a reason
+   that held only for personal files. When unsure, say which part is right and fix that part.
 
 A fix that adds state — a mark, an "accepted" flag, a lock, a retry, a fallback — is new code and
 goes through `failure-paths.md` like any other: in past rounds most new findings were in exactly

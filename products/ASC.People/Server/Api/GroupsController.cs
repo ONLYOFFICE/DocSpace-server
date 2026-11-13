@@ -692,13 +692,13 @@ public class GroupControllerAdditional<T>(
     GroupFullDtoHelper groupFullDtoHelper) : ControllerBase
 {
     /// <remarks>
-    /// Returns the portal groups for sharing the room. The `shared` field tells whether a group already has access.
-    /// The list also has the system group Everyone. Requires the right to change access to the room. Other callers
-    /// get 403. If no room has the ID, the call returns 404. The call is read-only. It sorts the groups by name and
-    /// pages them by `count` and `startIndex`, with a total count. An empty `filterValue` returns every group.
-    /// Otherwise, the call keeps the groups whose name contains the value, in any case. With `excludeShared`, the
-    /// call returns only the groups without access. The call returns 400 if `count` is outside 1 to 100. To search
-    /// users and groups together, use `GET api/2.0/accounts/room/{id}/search`.
+    /// Returns the portal groups for sharing the room. The `shared` field tells whether a group already has access. The
+    /// list also has the system group Everyone. Requires the right to change access to the room. Other callers get 403.
+    /// If no room has the ID, the call returns 404. The call is read-only. It sorts the groups by name and pages them by
+    /// `count` and `startIndex`, with a total count. An empty `filterValue` returns every group. Otherwise, the call
+    /// keeps the groups whose name contains the value, in any case. With `excludeShared`, the call returns only the
+    /// groups without access. The call returns 400 if `count` is outside 1 to 100. To search users and groups together,
+    /// use `GET api/2.0/accounts/room/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a room</summary>
     /// <path>api/2.0/group/room/{id}</path>
@@ -720,14 +720,14 @@ public class GroupControllerAdditional<T>(
     }
 
     /// <remarks>
-    /// Returns the portal groups for sharing the folder. The `shared` field tells whether a group already has access.
-    /// A group with access to a parent folder also counts. The list also has the system group Everyone. Requires the
-    /// right to change access to the folder. Other callers get 403. If no folder has the ID, the call returns 404.
-    /// The call is read-only. It sorts the groups by name and pages them by `count` and `startIndex`, with a total
-    /// count. An empty `filterValue` returns every group. Otherwise, the call keeps the groups whose name contains
-    /// the value, in any case. With `excludeShared`, the call returns only the groups without access. The call
-    /// returns 400 if `count` is outside 1 to 100. To search users and groups together, use
-    /// `GET api/2.0/accounts/folder/{id}/search`.
+    /// Returns the portal groups for sharing the folder. The `shared` field tells whether a group already has access. A
+    /// group with access to a parent folder also counts. The list also has the system group Everyone. A user or a guest
+    /// gets only that group. Requires the right to change access to the folder. Other callers get 403. If no folder has
+    /// the ID, the call returns 404. The call is read-only. It sorts the groups by name and pages them by `count` and
+    /// `startIndex`, with a total count. An empty `filterValue` returns every group. Otherwise, the call keeps the groups
+    /// whose name contains the value, in any case. With `excludeShared`, the call returns only the groups without access.
+    /// The call returns 400 if `count` is outside 1 to 100. To search users and groups together, use `GET
+    /// api/2.0/accounts/folder/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a folder</summary>
     /// <path>api/2.0/group/folder/{id}</path>
@@ -749,14 +749,14 @@ public class GroupControllerAdditional<T>(
     }
 
     /// <remarks>
-    /// Returns the portal groups for sharing the file. The `shared` field tells whether a group already has access.
-    /// A group with access to a parent folder also counts. The list also has the system group Everyone. Requires the
-    /// right to change access to the file. Other callers get 403. If no file has the ID, the call returns 404. The
-    /// call is read-only. It sorts the groups by name and pages them by `count` and `startIndex`, with a total count.
-    /// An empty `filterValue` returns every group. Otherwise, the call keeps the groups whose name contains the
-    /// value, in any case. With `excludeShared`, the call returns only the groups without access. The call returns
-    /// 400 if `count` is outside 1 to 100. To search users and groups together, use
-    /// `GET api/2.0/accounts/file/{id}/search`.
+    /// Returns the portal groups for sharing the file. The `shared` field tells whether a group already has access. A
+    /// group with access to a parent folder also counts. The list also has the system group Everyone. A user or a guest
+    /// gets only that group. Requires the right to change access to the file. Other callers get 403. If no file has the
+    /// ID, the call returns 404. The call is read-only. It sorts the groups by name and pages them by `count` and
+    /// `startIndex`, with a total count. An empty `filterValue` returns every group. Otherwise, the call keeps the groups
+    /// whose name contains the value, in any case. With `excludeShared`, the call returns only the groups without access.
+    /// The call returns 400 if `count` is outside 1 to 100. To search users and groups together, use `GET
+    /// api/2.0/accounts/file/{id}/search`.
     /// </remarks>
     /// <summary>Search groups for a file</summary>
     /// <path>api/2.0/group/file/{id}</path>
@@ -788,14 +788,17 @@ public class GroupControllerAdditional<T>(
         var count = inDto.Count;
         var text = inDto.Text;
 
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.Group, null, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
+        var everyoneOnly = !await fileSharing.CanPickAnyGroupAsync();
+        // Only the ids are needed, to mark the groups that already have a record: the full entries of the access list
+        // cost a lookup per record on every request.
+        var parentUserIds = (await fileSharing.GetPureShareSubjectsAsync(fileEntry, ShareFilterType.Group, null)).Select(r => r.Id).ToList();
         var securityDao = daoFactory.GetSecurityDao<T>();
 
-        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, parentUserIds);
+        var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, everyoneOnly, parentUserIds);
 
         apiContext.SetCount(Math.Min(Math.Max(totalGroups - offset, 0), count)).SetTotalCount(totalGroups);
 
-        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, offset, count, parentUserIds))
+        await foreach (var item in securityDao.GetGroupsWithSharedAsync(fileEntry, text, inDto.ExcludeShared ?? false, everyoneOnly, offset, count, parentUserIds))
         {
             yield return await groupFullDtoHelper.Get(item.GroupInfo, false, item.Shared);
         }

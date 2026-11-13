@@ -47,10 +47,17 @@ public interface ISecurityDao<T>
     IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status, string text, int offset = 0, int count = -1);
     IAsyncEnumerable<FileShareRecord<T>> GetPureSharesAsync(FileEntry<T> entry, IEnumerable<Guid> subjects);
     Task<bool> IsPublicAsync(FileEntry<T> entry);
-    IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1);
-    Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds);
-    IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count, IEnumerable<Guid> parentUserIds);
-    Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, IEnumerable<Guid> parentUserIds);
+    // knownToSubjects: the caller's own id and the ids of its groups when the caller may only see the users it
+    // already works with, or null when it may see every user of the portal.
+    // knownFromShares: the accounts of the entry's access list, as the caller sees it, that count as known to it - the
+    // list without its Restrict records, which deny access and make nobody known. Read only with knownToSubjects.
+    // sharedVisible: the caller may see the access list of the entry; without it nobody is reported as having access,
+    // includeShared returns nothing and excludeShared excludes nobody.
+    IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, IEnumerable<Guid> knownFromShares, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1);
+    Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus, bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, IEnumerable<Guid> knownFromShares, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds);
+    // everyoneOnly: the caller may not read the groups of the portal, so only the Everyone group is offered.
+    IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, bool everyoneOnly, int offset, int count, IEnumerable<Guid> parentUserIds);
+    Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, bool everyoneOnly, IEnumerable<Guid> parentUserIds);
     IAsyncEnumerable<GroupMemberSecurityRecord> GetGroupMembersWithSecurityAsync(FileEntry<T> entry, Guid groupId, string text, int offset, int count);
     Task<int> GetGroupMembersWithSecurityCountAsync(FileEntry<T> entry, Guid groupId, string text);
     Task<int> UpdateShareByFolderTypesAsync(Guid subject, IEnumerable<FolderType> folderTypes, FileShare share);

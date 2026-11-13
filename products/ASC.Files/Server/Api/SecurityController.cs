@@ -280,12 +280,13 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Returns the members of a group with their access to a folder or room that the group has access to. Any
-    /// signed-in user can call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by
-    /// first name. Use `startIndex` and `count` to page through the list. The response headers carry the total. A
-    /// `count` out of range returns 400. The call returns an empty list for a group without access to the folder,
-    /// or an unknown folder. It also returns an empty list if the caller cannot read the folder. So an empty
-    /// list does not mean that the group has no members.
+    /// Returns the members of a group with their access to a folder or room that the group has access to. Any signed-in
+    /// user can call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by first name. Use
+    /// `startIndex` and `count` to page through the list. The response headers carry the total. A `count` out of range
+    /// returns 400. The call returns an empty list for a group without access to the folder, or an unknown folder. It
+    /// also returns an empty list if the caller cannot read the folder. If the folder is not a room, a caller who cannot
+    /// change its access also gets an empty list. In these cases the total is 0. So an empty list does not mean that the
+    /// group has no members. A user gets no contacts, phone, location, or notes of the other members.
     /// </remarks>
     /// <summary>Get folder access of group members</summary>
     /// <path>api/2.0/files/folder/{folderId}/group/{groupId}/share</path>
@@ -327,12 +328,13 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Returns the members of a group with their access to a file that the group has access to. Any signed-in user
-    /// can call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by first name. Use
-    /// `startIndex` and `count` to page through the list. The response headers carry the total. A `count` out of
-    /// range returns 400. The call returns an empty list for a group without access to the file, or an
-    /// unknown file. It also returns an empty list if the caller cannot read the file. So an empty list does not mean
-    /// that the group has no members.
+    /// Returns the members of a group with their access to a file that the group has access to. Any signed-in user can
+    /// call it, except a guest. A guest gets 403. The call is read-only. It sorts the members by first name. Use
+    /// `startIndex` and `count` to page through the list. The response headers carry the total. A `count` out of range
+    /// returns 400. The call returns an empty list for a group without access to the file, or an unknown file. It also
+    /// returns an empty list if the caller cannot read the file. It also returns an empty list to a caller who cannot
+    /// change the access of the file. In these cases the total is 0. So an empty list does not mean that the group has no
+    /// members. A user gets no contacts, phone, location, or notes of the other members.
     /// </remarks>
     /// <summary>Get file access of group members</summary>
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
