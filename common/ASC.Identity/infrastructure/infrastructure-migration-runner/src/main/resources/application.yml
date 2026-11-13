@@ -8,6 +8,7 @@ spring:
     baselineOnMigrate: true
     enabled: true
     locations: classpath:migration/mysql/common,classpath:migration/mysql/server
+    ignore-migration-patterns: "*:future,*:ignored"
     password: ${JDBC_PASSWORD:my-secret-pw}
     repeatable-sql-migration-prefix: R
     schemas: ${JDBC_DATABASE:docspace}

@@ -170,7 +170,7 @@ public class GuestsPermissionsTests(AspireAppFixture fixture) : BaseTest(fixture
             new StartUpdateUserTypeDto(EmployeeType.Guest, invited.Id),
             TestContext.Current.CancellationToken);
 
-        var progress = await _02_UserType.UserTypeUpdatePolling.WaitForCompletionAsync(_userTypeApi, invited.Id);
+        var progress = await UserTypeUpdatePolling.WaitForCompletionAsync(_userTypeApi, invited.Id);
         progress.IsCompleted.Should().BeTrue();
         progress.Error.Should().BeEmpty();
 

@@ -70,14 +70,21 @@ public class AuthKeyDto
     public List<string> Options { get; init; }
 
     /// <summary>
-    /// The name of another key this field depends on for visibility.
+    /// The name of another key of the same form this field depends on for visibility; null when the field is always shown.
     /// </summary>
-    /// <example>storageType</example>
+    /// <example>databaseType</example>
     public string DependsOn { get; init; }
 
     /// <summary>
-    /// The value of the `dependsOn` key that makes this field visible.
+    /// The first of `dependsOnValues`, kept for clients that read a single value; null when the field is always shown.
     /// </summary>
-    /// <example>s3</example>
+    /// <example>mysql</example>
     public string DependsOnValue { get; init; }
+
+    /// <summary>
+    /// Every value of the `dependsOn` key that makes this field visible; null when the field is always shown. Read this
+    /// list rather than `dependsOnValue`, which holds only its first value.
+    /// </summary>
+    /// <example>["mysql", "postgresql"]</example>
+    public List<string> DependsOnValues { get; init; }
 }

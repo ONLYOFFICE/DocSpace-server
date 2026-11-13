@@ -83,24 +83,26 @@ public class PaymentController(
     : ControllerBase
 {
     /// <remarks>
-    /// Starts the purchase of a monthly paid plan for this portal by handing back the hosted checkout page the buyer
-    /// has to open; nothing is bought until that page is completed. The portal must have no paid plan yet - a portal
-    /// whose plan is already paid gets an empty result and changes its subscription through
-    /// `PUT api/2.0/portal/payment/update` instead - and the product name in `quantity` must be one of the monthly,
-    /// non-wallet plans listed by `GET api/2.0/portal/payment/quotas`. Only a DocSpace administrator may call it. The
-    /// call itself changes nothing on the portal and may be repeated: the money is taken by the payment provider on
-    /// the checkout page, and the plan becomes active once the provider confirms it. The returned URL is absolute and
-    /// single-purpose - it carries the caller's e-mail, the language of the request and the currency of the request
-    /// region, and it redirects to `successUrl` or `backUrl` when the buyer finishes or cancels. Exactly one product
-    /// per call is accepted and its quantity has to be greater than zero; yearly and wallet products are refused, and
-    /// wallet services are bought with `PUT api/2.0/portal/payment/updatewallet` instead.
+    /// Starts the purchase of a monthly paid plan for the portal and returns the URL of the hosted checkout page.
+    /// Nothing is bought until the buyer completes that page. The plan becomes active after the payment provider
+    /// confirms the payment. Requires a DocSpace admin. Other callers get 403. It also returns 403 if the
+    /// installation has no billing service. The call itself is read-only, so you can repeat it. If the portal already
+    /// has a paid plan, the call returns an empty result. If the billing service fails, the call also returns an empty
+    /// result. Repeated calls then return it for up to 10 minutes. To change a paid plan, use
+    /// `PUT api/2.0/portal/payment/update`. The URL carries the email of the caller and the language of the request.
+    /// It also carries a currency that the call picks from the IP address of the caller. The page redirects to
+    /// `successUrl` or `backUrl` when the buyer finishes or cancels. Take a monthly plan for `quantity` from
+    /// `GET api/2.0/portal/payment/quotas`. The call returns 400 if `quantity` holds more than one product or a
+    /// quantity of zero or less. It also returns 400 for a yearly plan or a wallet service. To buy wallet services,
+    /// use `PUT api/2.0/portal/payment/updatewallet`. The call returns 402 if the portal already exceeds a limit of
+    /// the requested plan. These limits cover admins, users, rooms, AI agents, and storage.
     /// </remarks>
     /// <summary>
     /// Get the payment page URL
     /// </summary>
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The absolute URL of the checkout page to open, or an empty result when the portal already has a paid plan", typeof(Uri))]
+    [SwaggerResponse(200, "The absolute URL of the checkout page to open, or an empty result when the portal already has a paid plan or the billing service failed", typeof(Uri))]
     [SwaggerResponse(400, "The request body cannot be read or has no `backUrl`, `successUrl` or `quantity`, `backUrl` or `successUrl` does not start with `http://`, `https://` or `ftp://` or is longer than 255 characters, or `quantity` does not hold exactly one product, holds a quantity that is not greater than zero, or a product that is not a monthly plan")]
     [SwaggerResponse(402, "The portal already has more administrators, users, rooms or AI agents, or stores more data, than the plan in the requested quantity allows")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
@@ -154,24 +156,25 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Changes how many units of the plan the portal is paying for - the number of administrators it covers - and
-    /// lets the payment provider bill the difference against the payment method already on file. The portal must have
-    /// a billing customer and a plan bought through `PUT api/2.0/portal/payment/url`, and while the portal is on a
-    /// priced plan the product name in `quantity` has to be that same plan, which `GET api/2.0/portal/payment/quota`
-    /// reports, because a subscription is changed here and not swapped. Only the payer - the portal user whose e-mail
-    /// is the billing customer's e-mail - may call it. The call is mutating and charges money, and it is guarded
-    /// against a double submission: once the new quantity is in effect, repeating the same request fails with 400
-    /// because that quantity is already set. The result is `true` when the provider accepted the change and `false`
-    /// when it declined it without an error. Exactly one product per call is accepted, the operation is limited to
-    /// ten requests a minute per user by default and answers 429 above that, and wallet services are not bought here
-    /// - use `PUT api/2.0/portal/payment/updatewallet` for those.
+    /// Changes the number of admins that the paid plan of the portal covers. The payment provider bills the
+    /// difference to the payment method on file. The portal needs a plan bought with
+    /// `PUT api/2.0/portal/payment/url`. If the portal has no billing customer, the call returns 404. The payer is
+    /// the portal user whose email is the email of the billing customer. Only the payer can call it. Other callers
+    /// get 403. The call also returns 403 if the installation has no billing service. The call spends money. If the
+    /// provider accepted the change, a repeated call with the same quantity returns 400. The call returns `true` if
+    /// the provider accepted the change. It returns `false` if the provider declined it, or if the call failed or
+    /// timed out. After a failure the change may still be applied, so check the plan before you repeat the call. On
+    /// a priced plan, `quantity` must name the current plan from `GET api/2.0/portal/payment/quota`. The call
+    /// returns 400 for more than one product, another plan, or a wallet service. It returns 402 if the portal
+    /// already exceeds a limit of the plan in the new quantity. By default, the limit is 10 calls a minute per user.
+    /// More calls return 429. To buy wallet services, use `PUT api/2.0/portal/payment/updatewallet`.
     /// </remarks>
     /// <summary>
     /// Change the subscription quantity
     /// </summary>
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "`true` when the provider accepted the new quantity, `false` when it declined it", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the provider accepted the new quantity, `false` when it declined it or the call failed or timed out", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the product is not a subscription plan or not the plan currently paid, or the quantity is already the one in effect")]
     [SwaggerResponse(402, "The portal already has more administrators, users, rooms or AI agents, or stores more data, than the plan in the new quantity allows")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
@@ -209,30 +212,37 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Buys more units of a wallet service - extra administrators, disk storage, backup, AI tools, AI search or
-    /// Docs Connect - or writes down the quantity that service will have after the next renewal, depending on
-    /// `productQuantityType`. With `Add` (1) the units are bought at once and paid out of the portal wallet, so the
-    /// wallet needs a sub-account in the accounting currency and enough money on it; with `Set` (0) nothing is
-    /// charged now and the quantity only takes effect in the next period, where an empty or zero quantity cancels a
-    /// change scheduled earlier. `Renew` and `Sub` are not accepted here. The portal needs a billing customer and the
-    /// caller has to be a DocSpace administrator; a service that is an add-on to the plan also needs the plan itself
-    /// to be paid, otherwise the answer is 402. Minimum quantities apply - disk storage starts at 100 units, the
-    /// Docs Connect Dev Pack at 10, and the administrators may not be fewer than the portal already has - and in
-    /// the `Add` form they are checked only while the portal does not hold that service yet. Asking for the Docs Connect
-    /// plan in the `Set` form while Docs Connect Dev Pack is active schedules the reversion to it at the next period,
-    /// while the upgrade in the other direction is not done here at all: use
-    /// `POST api/2.0/settings/docscloud/switchtodevpack`. The result is `true` when the change was accepted; the call
-    /// is mutating, spends money in its `Add` form and is limited to ten requests a minute per user by default. Price
-    /// the same purchase without paying for it with `PUT api/2.0/portal/payment/calculatewallet`.
+    /// Buys units of a wallet service, or schedules the quantity of the service for the next period. The mode comes
+    /// from `productQuantityType`. With `Add`, the call buys the units immediately and pays for them from the portal
+    /// wallet. With `Set`, the call charges nothing and changes the quantity from the next period. With `Set`, an
+    /// empty quantity cancels a change that was scheduled earlier. With a zero quantity, the portal does not renew the
+    /// service at the next period. The call returns 400 for `Renew` and `Sub`. If the portal has no billing customer,
+    /// the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
+    /// installation has no billing service. An `Add` call spends money. Do not repeat an `Add` call. Each call buys
+    /// the units again. You can repeat a `Set` call with the same body. With `Add`, the wallet needs a sub-account in
+    /// the accounting currency with enough money. If the wallet has no such sub-account, the call returns 404. If the
+    /// billing service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402
+    /// for an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400
+    /// if the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and
+    /// 10 for Docs Connect Dev Pack. With `Add`, the minimum for admins is the number
+    /// of admins the portal already has. With `Add`, the call checks the minimum only while the portal does not have
+    /// the service yet. With `Add`, an empty or zero quantity also returns 400. While Docs Connect is active, a
+    /// request for Docs Connect Dev Pack returns 400. To move to Docs Connect Dev Pack, use
+    /// `POST api/2.0/settings/docscloud/switchtodevpack`. While Docs Connect Dev Pack is active, `Set` with Docs
+    /// Connect schedules the return to it. The return happens at the next period and needs a quantity above zero. In
+    /// this case, `Add` with Docs Connect returns 400. With `Add`, the call returns `true`. With `Set`, it returns
+    /// `true`, or `false` if the portal does not have the service or cannot save the change. By default, the limit
+    /// is 10 calls a minute per user. More calls return 429. To get the price first, use
+    /// `PUT api/2.0/portal/payment/calculatewallet`.
     /// </remarks>
     /// <summary>
     /// Change a wallet service quantity
     /// </summary>
     /// <path>api/2.0/portal/payment/updatewallet</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "`true` when the purchase or the scheduled change was accepted, `false` when the provider declined it", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the units were bought or the change was scheduled; `false` only in the `Set` form, when the portal does not have the service or the change could not be saved", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, or that service is already set")]
-    [SwaggerResponse(402, "The plan of the portal is not paid and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
+    [SwaggerResponse(402, "The payment for the plan of the portal is overdue and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
     [HttpPut("updatewallet")]
@@ -342,21 +352,21 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Prices a wallet-service purchase without making it: it returns what buying the requested number of units would
-    /// cost right now, so a client can show the amount before asking for a confirmation. Only `productQuantityType`
-    /// `Add` (1) is accepted, the quantity must be greater than zero, and the portal needs a billing customer whose
-    /// wallet has a sub-account in the accounting currency. The caller has to be a DocSpace administrator. Nothing is
-    /// bought, charged or written down - the call is read-only and may be repeated - and the purchase itself is
-    /// `PUT api/2.0/portal/payment/updatewallet`. The answer carries the amount with its currency, the quantity it
-    /// was computed for and the identifier of the calculation. It is the price of this moment and is not held: it can
-    /// differ by the time the purchase is made.
+    /// Returns the price of a wallet service purchase without making it. Use it to show the amount before the user
+    /// confirms the purchase. The call returns 400 if `productQuantityType` is not `Add` or the quantity is not above
+    /// zero. It also returns 400 if the product is not a wallet service. If the portal has no billing customer or no
+    /// wallet sub-account in the accounting currency, the call returns 404. Requires a DocSpace admin. Other callers
+    /// get 403. The call also returns 403 if the installation has no billing service. The call is read-only and buys
+    /// nothing, so you can repeat it. To make the purchase, use `PUT api/2.0/portal/payment/updatewallet`. The price
+    /// is for the moment of the call and is not reserved. So it can change before the purchase. If the billing
+    /// service fails, the call returns 200 with an empty body.
     /// </remarks>
     /// <summary>
     /// Calculate the wallet payment amount
     /// </summary>
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for", typeof(PaymentCalculationDto))]
+    [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for, or an empty body when the billing service failed", typeof(PaymentCalculationDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
@@ -396,15 +406,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Reports in money how much of the portal's paid subscription period is still unused - the credit that
-    /// `POST api/2.0/portal/payment/subscription/movetowallet` would carry over to the wallet if the subscription
-    /// were ended now. The portal must have a billing customer and a plan in the paid state; a plan that is not paid
-    /// answers 402, and a paid plan without a subscription row gives 404. Only the payer - the portal user whose
-    /// e-mail is the billing customer's e-mail - may read it, and the call is read-only. The answer states the total
-    /// cost of the current period with its currency, the start and the end of that period in UTC, the moment the
-    /// unused part is measured up to, the days already elapsed, and the remaining balance both in the subscription
-    /// currency and converted to the wallet currency. Every figure is computed for the instant of the request, so it
-    /// changes between calls.
+    /// Returns the unused part of the current paid subscription period of the portal, in money. This is the credit
+    /// that `POST api/2.0/portal/payment/subscription/movetowallet` moves to the wallet. If the portal has no billing
+    /// customer, the call returns 404. The payer is the portal user whose email is the email of the billing customer.
+    /// Only the payer can call it. Other callers get 403. The call also returns 403 if the installation has no
+    /// billing service. The call is read-only. If the plan is not paid, the call returns 402. It also returns 402 if
+    /// the billing service fails or cannot be reached. If the paid plan has no subscription, the call returns 404. If
+    /// the paid plan is a wallet product or has no product ID, the call returns 400. The figures are for the moment
+    /// of the call, so they change between calls.
     /// </remarks>
     /// <summary>
     /// Get the subscription balance information
@@ -429,23 +438,31 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Ends the portal's paid subscription and moves it onto the wallet: the unused balance of the running period is
-    /// credited to the wallet, the wallet is topped up from the payment method on file if that credit does not cover
-    /// the purchase, and the requested number of administrators is then bought as a wallet service. The portal needs
-    /// a billing customer with a payment method set and a plan in the paid state, `quantity` has to name the
-    /// administrators wallet product, and the number asked for may not be below the administrators the portal already
-    /// has - read the credit that will be carried over from `GET api/2.0/portal/payment/subscription/balance` first.
-    /// Only the payer may call it. The call is mutating, spends money and cannot be undone: the subscription is ended
-    /// before the purchase is attempted, so a failure in the second half leaves the portal on the wallet with the
-    /// money credited but the administrators unbought, and a repeat would then buy them a second time. It is limited
-    /// to ten requests a minute per user by default. The result is `true` when the administrators were bought.
+    /// Ends the paid subscription of the portal and moves the portal to the wallet. First, the call adds the unused
+    /// balance of the period to the wallet. Then it tops up the wallet from the payment method if that credit does
+    /// not cover the price. Then it buys the requested number of admins as a wallet service. To read the credit
+    /// first, use `GET api/2.0/portal/payment/subscription/balance`. If the portal has no billing customer, the call
+    /// returns 404. If the customer has no payment method, the call returns 403. The payer is the portal user whose
+    /// email is the email of the billing customer. Only the payer can call it. Other callers get 403. The call also
+    /// returns 403 if the installation has no billing service. The call spends money and cannot be undone. Do not
+    /// repeat it. The call ends the subscription before it buys the admins. If the purchase fails, the call returns
+    /// `false` with 200. The portal is then on the wallet, with the credit and any top-up in it. To buy the admins
+    /// after that, use `Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the call
+    /// does not top up the wallet. Then the wallet must already cover the price. The call returns `true` if the
+    /// admins were bought. The product in `quantity` must be the admins wallet service. The call returns 400 for
+    /// another product or a quantity of zero or less. It also returns 400 for fewer admins than the portal already
+    /// has. If the paid plan is a wallet product, the call returns 400. If the plan is not paid, the call returns
+    /// 402. It also returns 402 if the balance cannot be moved. The next two errors come after the subscription has
+    /// ended. If the wallet still lacks money after the top-up, the call returns 402. If the wallet has no
+    /// sub-account in the accounting currency, the call returns 404. If the paid plan has no subscription, the call
+    /// returns 404. By default, the limit is 10 calls a minute per user. More calls return 429.
     /// </remarks>
     /// <summary>
     /// Move the subscription to the wallet
     /// </summary>
     /// <path>api/2.0/portal/payment/subscription/movetowallet</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "`true` when the balance was moved to the wallet and the administrators were bought", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the balance was moved to the wallet and the administrators were bought; `false` when the subscription has ended and the balance was moved, but the purchase of the administrators failed", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or does not name the administrators wallet product, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
     [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet is still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
@@ -515,14 +532,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Hands back the address of the portal page on which the billing account is managed - the payment method on
-    /// file, the invoices and the receipts - so a client can link to it instead of assembling the address itself. The
-    /// portal must already have a billing customer: one that has never had it gets an empty result, and an
-    /// installation without a billing service answers 403. Only the payer or the portal owner may read it, and the
-    /// call changes nothing. The value is relative to the portal root (`payment.ashx`), and the optional `backUrl` is
-    /// appended to it as a query parameter so the page can send the user back where they came from. It is not a
-    /// checkout page: a plan is bought with `PUT api/2.0/portal/payment/url` and a payment method is attached with
-    /// `GET api/2.0/portal/payment/checkoutsetupurl`.
+    /// Returns the address of the portal page where the payer manages the billing account. The page shows the payment
+    /// method, the invoices, and the receipts. The address is relative to the portal root. The call adds `backUrl` to
+    /// the address as a query parameter. If the portal has no billing customer, the call returns an empty result to
+    /// any caller. The payer is the portal user whose email is the email of the billing customer. Otherwise, only the
+    /// payer or the portal owner can call it. Other callers get 403. The call also returns 403 if the installation
+    /// has no billing service. The call is read-only. If `backUrl` is not a valid URL or is too long, the call
+    /// returns 400. The page buys nothing. To buy a plan, use `PUT api/2.0/portal/payment/url`. To attach a payment
+    /// method, use `GET api/2.0/portal/payment/checkoutsetupurl`.
     /// </remarks>
     /// <summary>
     /// Get the billing account page
@@ -552,14 +569,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Lists what one unit of every purchasable product costs, keyed by the product name that `quantity` takes in the
-    /// purchase operations, so a client can price a plan or a wallet service without reading the whole quota list.
-    /// Nothing has to be called first, and the caller needs the permission to edit the portal settings, which portal
-    /// administrators and the owner have. The call is read-only. Prices are given in the one currency resolved for
-    /// this request from the portal region, which `GET api/2.0/portal/payment/currencies` reports; a product with no
-    /// price in that currency comes back as `0` rather than being left out, so a zero means unpriced and not free.
-    /// The list covers the products on offer, not the portal's own plan - the plan in force, with its limits and its
-    /// usage, is `GET api/2.0/portal/payment/quota`.
+    /// Returns the price of one unit of each product that the portal can buy. The keys are the product names that
+    /// `quantity` takes in the purchase operations. Requires the EditPortalSettings permission, which the portal
+    /// owner and DocSpace admins have. Other callers get 403. The call is read-only. All prices are in one currency,
+    /// which the call picks from the IP address of the caller. If no product has a price in that currency, the call
+    /// uses EUR in Europe and USD elsewhere. A product without a price in the chosen currency has the price 0. So 0
+    /// means that the product has no price, not that it is free. To read the currencies of the portal, use
+    /// `GET api/2.0/portal/payment/currencies`. To read the current plan with its limits and usage, use
+    /// `GET api/2.0/portal/payment/quota`.
     /// </remarks>
     /// <summary>
     /// Get the product prices
@@ -580,14 +597,12 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Tells a client which currency the portal is billed in: the default currency of the portal region always comes
-    /// first, followed by the currency resolved for the current request when that one differs, so the answer holds
-    /// one or two items. Nothing has to be called first, the caller needs the permission to edit the portal settings,
-    /// and the call is read-only. Each item carries the country code of the region, the currency symbol and the
-    /// native name of the currency; the first item is the currency the amounts from
-    /// `GET api/2.0/portal/payment/prices` are expressed in. These are the currencies of the subscription prices, and
-    /// they are not the accounting currencies the wallet is topped up in - those come with the balance in
-    /// `GET api/2.0/portal/payment/customer/balance`.
+    /// Returns the currencies of the plan prices for the portal. The first item is always the default currency, USD.
+    /// The second item, if any, is the currency of the region of the request. The call finds that region from the IP
+    /// address of the caller or the language of the portal owner. If no product has a price in the currency of that
+    /// region, the list has only the first item. Requires the EditPortalSettings permission, which the portal owner
+    /// and DocSpace admins have. Other callers get 403. The call is read-only. The wallet uses other currencies, the
+    /// accounting currencies. To read them with the balance, use `GET api/2.0/portal/payment/customer/balance`.
     /// </remarks>
     /// <summary>
     /// Get the billing currencies
@@ -614,14 +629,12 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Lists the quotas the portal can be put on - the paid plans and the wallet services - each with its price, its
-    /// features and the limits it grants, which is what a pricing page is built from. Nothing has to be called first,
-    /// the caller needs the permission to edit the portal settings, and the call is read-only. Only quotas marked
-    /// visible are listed, newest first, and the two optional filters narrow that: `wallet` selects the wallet
-    /// services (`true`) or the subscription plans (`false`), `additional` selects the add-ons to a plan (`true`) or
-    /// the plans themselves (`false`), and an omitted filter keeps both kinds. A portal on a non-profit quota is a
-    /// special case - asking for `additional=false` returns that single quota and nothing else, because no other plan
-    /// may be bought for it. The quota the portal is actually on is not marked here; read it from
+    /// Returns the quotas that the portal can buy: the paid plans and the wallet services. Each quota has its price,
+    /// features, and limits, so you can build a pricing page from the list. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call is read-only. The
+    /// list has only the visible quotas, the newest first. The filters `wallet` and `additional` narrow the list, and
+    /// an omitted filter keeps both kinds. If the portal is on a non-profit quota, `additional=false` returns only
+    /// that quota. The list does not mark the current quota of the portal. To read it, use
     /// `GET api/2.0/portal/payment/quota`.
     /// </remarks>
     /// <summary>
@@ -650,14 +663,13 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Lists every service the portal may pay for out of its wallet - extra administrators, disk storage, backup, AI
-    /// tools, AI search and Docs Connect - with the price of a unit, the unit it is sold in and whether the portal has
-    /// it switched on. Nothing has to be called first, the caller needs the permission to edit the portal settings,
-    /// and the call is read-only. Services that are variants of one another are folded together: the visible one
-    /// carries the rest in its `innerServices`, so a client renders one card per group. The AI services are left out
-    /// entirely when AI is not enabled for the portal. This is the catalogue and not the state of the portal - what
-    /// is actually running is `GET api/2.0/portal/payment/activeservices`, one service on its own is
-    /// `GET api/2.0/portal/payment/walletservice`, and switching one on or off is
+    /// Returns every service that the portal can pay for from its wallet. The services are extra admins, disk
+    /// storage, backup, AI tools, AI search, and Docs Connect. Each item has the price of a unit, the unit, and
+    /// whether the service is turned on. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. The call is read-only. Variants of one service form a group. The
+    /// visible variant holds the others in `innerServices`. If AI is turned off for the portal, the list has no AI
+    /// services. To read the services that run on the portal, use `GET api/2.0/portal/payment/activeservices`. To
+    /// read one service, use `GET api/2.0/portal/payment/walletservice`. To turn a service on or off, use
     /// `POST api/2.0/portal/payment/servicestate`.
     /// </remarks>
     /// <summary>
@@ -677,14 +689,12 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns one wallet service by name, for a client that already knows which service it needs and does not want
-    /// the whole catalogue. `service` is the name of the service - `Storage`, `Backup`, `AITools`, `Admin`,
-    /// `DocsCloud`, `DocsCloudDevPack` or `AISearch` - and a name this installation does not sell answers 404.
-    /// Nothing has to be called first, the caller needs the permission to edit the portal settings, and the call is
-    /// read-only. The answer has the same shape as one item of `GET api/2.0/portal/payment/walletservices` - the
-    /// price of a unit, the unit, the limits the service grants and its service name - except that the variants of a
-    /// service are not grouped into `innerServices` here, because a single service is looked up directly. The price
-    /// is in the currency resolved for the request.
+    /// Returns one wallet service by its name. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. The call is read-only. The call returns 404 if the installation
+    /// does not sell the service. It also returns 404 for AI tools and AI search while AI is turned off for the
+    /// portal. If `service` is empty or is not a wallet service, the call returns 400. The item has the fields of an
+    /// item of `GET api/2.0/portal/payment/walletservices`. Unlike that list, it does not group the variants of a
+    /// service in `innerServices`. The price is in the currency of the request.
     /// </remarks>
     /// <summary>
     /// Get a wallet service
@@ -714,15 +724,15 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the quota the portal is on - its paid plan or the free one - with the limits its features grant and how
-    /// much of each is already used. Any signed-in member except a guest may call it. The call is read-only; the plan
-    /// comes from the cache, and `refresh=true` re-reads it from the billing service, a remote call meant for right
-    /// after a purchase. The answer is trimmed to the caller's user type: a DocSpace administrator or the owner gets
-    /// the price, the due date and all features, a room administrator only the `manager`, `room`, `total_size` and
-    /// `statistic` features, and a user only `total_size`. For both of the latter `price` is an empty object and
-    /// `dueDate` is omitted, while the storage quota settings (`usersQuota`, `roomsQuota`, `aiAgentsQuota`,
-    /// `tenantCustomQuota`) come back as for an administrator. The quotas that could be bought instead are
-    /// `GET api/2.0/portal/payment/quotas`. A guest is refused with 403.
+    /// Returns the quota of the portal, paid or free, with the limits of its features and their usage. Any signed-in
+    /// user can call it, except a guest. A guest gets 403. The call is read-only. By default, the call reads the plan
+    /// from the cache. With `refresh=true`, it reads the plan from the billing service, so use it right after a
+    /// purchase. The answer depends on the user type of the caller. A DocSpace admin or the portal owner gets the
+    /// price, the due date, and all features. A room admin gets only the `manager`, `room`, `total_size`, and
+    /// `statistic` features. A user gets only the `total_size` feature. For a room admin and a user, `price` is an
+    /// empty object and `dueDate` is missing. If the plan has the `statistic` feature or the installation is
+    /// standalone, every caller gets `usersQuota`, `roomsQuota`, `aiAgentsQuota`, and `tenantCustomQuota`. To read the
+    /// quotas that the portal can buy, use `GET api/2.0/portal/payment/quotas`.
     /// </remarks>
     /// <summary>
     /// Get the current plan and limits
@@ -746,14 +756,11 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Sends the portal's message to the ONLYOFFICE sales team - the contact-sales form behind a request for a quote,
-    /// an invoice or a plan that cannot be bought online. `email` has to be a well-formed address and is where the
-    /// answer will go, while `userName` and `message` say who is asking and what for; all three are required and none
-    /// may be empty. Only a DocSpace administrator may call it. Nothing on the portal changes: no plan, no quota and
-    /// no payment is touched, a message is mailed out and the request is written to the portal audit trail. There is
-    /// no response body - status 200 means the message was handed to the mail service - and the call is not
-    /// idempotent, so a repeat sends a second message. It is limited to ten requests a minute per user by default and
-    /// answers 429 above that.
+    /// Sends a message from the portal to the ONLYOFFICE sales team. Use it to ask for a quote, an invoice, or a plan
+    /// that cannot be bought online. The team sends the answer to `email`. Requires a DocSpace admin. Other callers
+    /// get 403. The call queues an email and changes no plan, quota, or payment. Do not repeat it. Each call sends
+    /// the message again. The response has no body. The call returns 400 if `email` is not a valid address or a field
+    /// is empty. By default, the limit is 10 calls a minute per user. More calls return 429.
     /// </remarks>
     /// <summary>
     /// Contact the sales team
@@ -780,15 +787,17 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Hands back the hosted page on which a payment method is attached to the portal's billing account, for the case
-    /// where money has to be taken later - a wallet top-up or an automatic one - rather than a plan bought now. A
-    /// portal that already has a payment method on file answers with an empty result; a DocSpace administrator may
-    /// ask for the page, but once the portal has a billing customer with an e-mail, only its payer may. The call
-    /// itself changes nothing and may be repeated: the payment method is stored by the payment provider when the
-    /// returned page is completed, after which `GET api/2.0/portal/payment/customerinfo` reports it as set. The URL
-    /// is absolute, carries the caller's e-mail, the language of the request and the currency of the region, and
-    /// redirects to `successUrl` or `backUrl` when the user finishes or cancels. It buys nothing - a plan is bought
-    /// with `PUT api/2.0/portal/payment/url`.
+    /// Returns the URL of the hosted page that attaches a payment method to the billing account of the portal. Use it
+    /// before a wallet top-up or an automatic top-up. Requires a DocSpace admin. Other callers get 403. The call also
+    /// returns 403 if the installation has no billing service. The payer is the portal user whose email is the email
+    /// of the billing customer. If the portal has a billing customer with an email, only the payer can call it. Other
+    /// admins get 403. If the portal already has a payment method, the call returns an empty result. The call is
+    /// read-only. The payment provider stores the payment method when the user completes the page. After this,
+    /// `GET api/2.0/portal/payment/customerinfo` reports the method as set. The URL carries the email of the caller
+    /// and the language of the request. It also carries a currency that the call picks from the IP address of the
+    /// caller. The page redirects to `successUrl` or `backUrl` when the user finishes or cancels. If `backUrl` or
+    /// `successUrl` is missing, invalid, or too long, the call returns 400. The page buys nothing. To buy a plan, use
+    /// `PUT api/2.0/portal/payment/url`.
     /// </remarks>
     /// <summary>
     /// Get the checkout setup page URL
@@ -838,14 +847,13 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the billing customer behind the portal: the e-mail its billing account is registered to, whether a
-    /// payment method is stored for it, and the portal user who is the payer of that account. Only a DocSpace
-    /// administrator may read it, and the call is read-only. The answer is empty in two ordinary cases - the
-    /// installation has no billing service configured at all, and the portal has never been a customer - so an empty
-    /// body is not an error. `payer` is filled in only when the billing e-mail belongs to a portal user; when it does
-    /// not, the e-mail is still shown but the field stays empty, and that is what makes every payer-only operation of
-    /// this group unreachable for everybody. `refresh=true` re-reads the customer from the billing provider instead
-    /// of the cache, which is worth doing right after a payment method has been attached.
+    /// Returns the billing customer of the portal. It has the billing email, whether a payment method is stored, and
+    /// the payer. The payer is the portal user whose email is the billing email. Requires a DocSpace admin. Other
+    /// callers get 403. The call is read-only. The call returns an empty result if the installation has no billing
+    /// service. It also returns an empty result if the portal has no billing customer. If no portal user has the
+    /// billing email, `payer` is empty. Then nobody can call the operations that only the payer can call. By default,
+    /// the call reads the customer from the cache. With `refresh=true`, it reads the customer from the billing
+    /// provider. Use it right after a payment method is attached.
     /// </remarks>
     /// <summary>
     /// Get the customer information
@@ -886,22 +894,24 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Charges the payment method on file and adds the amount to the portal's wallet, the balance every wallet
-    /// service is paid from. The portal needs a billing customer with a payment method set - attach one with
-    /// `GET api/2.0/portal/payment/checkoutsetupurl` - `currency` has to be one of the accounting currencies this
-    /// installation supports, and `amount` is a whole number of currency units between 1 and 999999. Only the payer
-    /// may call it. The call takes money and is not idempotent in any way: two identical requests charge twice, so a
-    /// client must not retry it blindly after a timeout, and it is limited to ten requests a minute per user by
-    /// default. A successful top-up pushes the new balance to the portal clients over their socket connection and
-    /// re-arms the low-balance notification. The result is `true` when the payment provider accepted the charge; read
-    /// the resulting balance back from `GET api/2.0/portal/payment/customer/balance`.
+    /// Charges the payment method of the portal and adds the amount to the portal wallet. The wallet services are
+    /// paid from this balance. If the portal has no billing customer, the call returns 404. If the customer has no
+    /// payment method, the call returns 403. To attach one, use `GET api/2.0/portal/payment/checkoutsetupurl`. The
+    /// payer is the portal user whose email is the email of the billing customer. Only the payer can call it. Other
+    /// callers get 403. The call also returns 403 if the installation has no billing service. The call spends money.
+    /// Do not repeat it. Each call charges the payment method again. If the call returns `false` or times out, check
+    /// the balance before you repeat it. With a delayed payment method, the balance shows the money only after the
+    /// transfer settles. The call returns 400 if `currency` is not a supported accounting currency or `amount` is out
+    /// of range. The call returns `true` if the payment provider accepted the charge. To read the new balance, use
+    /// `GET api/2.0/portal/payment/customer/balance`. By default, the limit is 10 calls a minute per user. More calls
+    /// return 429.
     /// </remarks>
     /// <summary>
     /// Top up the wallet
     /// </summary>
     /// <path>api/2.0/portal/payment/deposit</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "`true` when the payment provider accepted the charge and the wallet was credited", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the payment provider accepted the charge; with a delayed payment method the wallet is credited only after the transfer settles", typeof(bool))]
     [SwaggerResponse(400, "`currency` is not one of the supported accounting currencies, or `amount` is outside 1 to 999999")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
@@ -933,16 +943,15 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the money the portal has in its wallet as the accounting service holds it: the account with its own
-    /// currency, one sub-account per currency with the amount on it, and the most recent credit movement. Only a
-    /// DocSpace administrator may read it, an installation without a billing service answers 403, and a portal that
-    /// has never been a customer gets an empty result. The call is read-only. This balance is what the wallet
-    /// services are charged against, so it falls as they are used and rises with
-    /// `POST api/2.0/portal/payment/deposit`; the movements behind a change are listed by
-    /// `GET api/2.0/portal/payment/customer/operations`. Every read asks the accounting service, so the amount is
-    /// current, right after a top-up as well. Only a failed read is remembered: for ten minutes after the accounting
-    /// service could not be reached, or did not know the portal, the answer is an empty result without asking it
-    /// again - pass `refresh=true` to ask at once.
+    /// Returns the money in the portal wallet as the accounting service has it. The answer has a sub-account with its
+    /// amount for each currency and the last credit movement. Requires a DocSpace admin. Other callers get 403. The
+    /// call also returns 403 if the installation has no billing service. If the portal has no billing customer, the
+    /// call returns an empty result. The call is read-only. The wallet services spend this balance, and `POST
+    /// api/2.0/portal/payment/deposit` adds to it. To list the movements, use `GET
+    /// api/2.0/portal/payment/customer/operations`. Each call reads the balance from the accounting service, so it is
+    /// current right after a top-up too. Only a failed read is cached. A read fails if the service cannot be reached,
+    /// answers with an error, or does not know the portal. Then the call returns an empty result for 10 minutes. Use
+    /// `refresh=true` to read it again immediately.
     /// </remarks>
     /// <summary>
     /// Get the customer balance
@@ -970,19 +979,16 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Lists the money movements on the portal's wallet - top-ups, the charges of the wallet services, refunds and
-    /// corrections - one page at a time, as a billing history. Only a DocSpace administrator
-    /// may read it, a portal with no billing customer answers with an empty result, and the call is read-only. Every
-    /// filter is optional: `startDate` and `endDate` are read in the portal time zone and default to the portal
-    /// creation date and the present moment, `serviceName` narrows to particular wallet services and fails with 404
-    /// on a name this installation does not sell, `participantName`, `type` and `status` narrow to who caused a
-    /// movement and how it ended, and `credit` and `debit` include or exclude the two directions. AI consumption paid
-    /// with the portal's own provider keys is filed under `ai-tools-byok` and `ai-search-byok`, which `serviceName`
-    /// accepts; such a movement reads like its AI service with `byok` set. `offset` and `limit` page through the
-    /// result and default to 0 and 25, `orderBy` and `orderType` sort it, and the answer repeats them next to
-    /// `totalQuantity`, `totalPage` and `currentPage`. The same data as a downloadable file is
-    /// `POST api/2.0/portal/payment/customer/operationsreport`, and the figures added up per service are
-    /// `GET api/2.0/portal/payment/customer/usage`.
+    /// Returns a page of the money movements of the portal wallet. The movements are top-ups, service charges,
+    /// refunds, and corrections. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
+    /// installation has no billing service. If the portal has no billing customer, the call returns an empty result.
+    /// The call is read-only. All filters are optional. If `serviceName` has a name that the installation does not
+    /// sell, the call returns 404. If neither `credit` nor `debit` is set, the list has both directions. AI usage
+    /// paid with the portal's own provider keys has the service names `ai-tools-byok` and `ai-search-byok`. The
+    /// `serviceName` filter accepts them. Such a movement looks like its AI service, with `byok` set. By default,
+    /// `offset` is 0 and `limit` is 25. The answer repeats them next to `totalQuantity`, `totalPage`, and
+    /// `currentPage`. To get the same data as a file, use `POST api/2.0/portal/payment/customer/operationsreport`. To
+    /// get the totals per service, use `GET api/2.0/portal/payment/customer/usage`.
     /// </remarks>
     /// <summary>
     /// Get the wallet operations
@@ -1040,18 +1046,15 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Lists the top-ups of the portal's wallet - the payments into it - one page at a time, which is what a list of
-    /// payments with their invoices is built from. A portal that is not a billing customer yet has no top-ups and
-    /// gets an empty result rather than an error. Any DocSpace administrator may read it, not only the payer, and
-    /// the call is read-only. Every filter is optional: `startDate` and `endDate` default to the portal creation
-    /// date and the present moment, a value without `Z` or an offset is read in the portal time zone, and `status`
-    /// narrows to how a top-up ended. `offset` and `limit` default to 0 and 25 and are echoed next
-    /// to `totalQuantity`, `totalPage` and `currentPage`; a negative `offset` or a `limit` outside 1 to 100 fails
-    /// with 400. An empty result means the portal is not a billing customer, has no wallet at the accounting service
-    /// yet, or that service could not be read; a period without top-ups gives an empty `collection`. A top-up with
-    /// `hasInvoice` true has an invoice, opened with `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`.
-    /// For the full wallet history, charges and refunds included, use
-    /// `GET api/2.0/portal/payment/customer/operations`.
+    /// Returns a page of the top-ups of the portal wallet. Requires a DocSpace admin. Other callers get 403. The call
+    /// also returns 403 if the installation has no billing service. The caller does not have to be the payer. The
+    /// call is read-only. The call returns an empty result if the portal has no billing customer or no wallet yet. It
+    /// also returns an empty result if the accounting service cannot be read. A period without top-ups returns an
+    /// empty `collection`. By default, `offset` is 0 and `limit` is 25. The answer repeats them next to
+    /// `totalQuantity`, `totalPage`, and `currentPage`. The call returns 400 if `offset` or `limit` is out of range.
+    /// A top-up with `hasInvoice` true has an invoice. To open it, use
+    /// `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`. To get the full history with charges and refunds,
+    /// use `GET api/2.0/portal/payment/customer/operations`.
     /// </remarks>
     /// <summary>
     /// Get the wallet top-ups
@@ -1098,15 +1101,13 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Hands back the address of the page on which the billing provider shows the invoice for one top-up of the
-    /// portal's wallet, so a client can open or download it. The top-up is named by the `id` that
-    /// `GET api/2.0/portal/payment/customer/deposits` returns, and only one listed there with `hasInvoice` true has an
-    /// invoice to show. Any DocSpace administrator may read it, not only the payer, and the call changes nothing. The address is absolute and points to the billing provider rather than to the portal;
-    /// it is asked for anew on every call, so request it when the user is about to open the invoice instead of
-    /// storing it. A top-up this portal does not have, one without an invoice, or a portal that is not a billing
-    /// customer answers 404, and an `id` that is not a number fails with 400. An installation without a billing
-    /// service answers 403, and 402 means the billing or the accounting service rejected the request or did not
-    /// answer, which a later retry may get past.
+    /// Returns the address of the invoice page for one top-up of the portal wallet. The address is absolute and leads
+    /// to the billing provider. A top-up has an invoice only if `hasInvoice` is true. Requires a DocSpace admin.
+    /// Other callers get 403. The call also returns 403 if the installation has no billing service. The caller does
+    /// not have to be the payer. The call is read-only. Do not store the address. Request it right before the user
+    /// opens the invoice. The call returns 404 for an unknown top-up, a top-up without an invoice, or no billing
+    /// customer. If the billing or accounting service rejects the request or does not answer, the call returns 402. A
+    /// later retry may succeed.
     /// </remarks>
     /// <summary>
     /// Get the top-up invoice
@@ -1114,7 +1115,6 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/deposits/{id}/invoice</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The absolute address of the hosted invoice page for the top-up", typeof(string))]
-    [SwaggerResponse(400, "`id` is not a number")]
     [SwaggerResponse(402, "The billing or the accounting service rejected the request for the top-up or its invoice link, or did not answer")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, no top-up with this ID, or the top-up has no invoice")]
@@ -1178,14 +1178,12 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns what the portal spent from its wallet added up per calendar month, so a client can draw a spending
-    /// chart without paging through every movement. Only a DocSpace administrator may read it, a portal with no
-    /// billing customer answers with an empty result, and the call is read-only. `startDate` and `endDate` bound the
-    /// period, both inclusive, and default to the portal creation date and the present moment; the months are cut in
-    /// the portal time zone, so a movement at the edge of a month falls where the portal sees it and not where UTC
-    /// does. Each item names its year and month, the total charged in it with the currency, and how many operations
-    /// that total came from. The movements behind a month are in `GET api/2.0/portal/payment/customer/operations`,
-    /// and the same figures as a file come from `POST api/2.0/portal/payment/customer/usage/monthly/report`.
+    /// Returns the spending of the portal wallet, added up per calendar month. Use it to draw a spending chart.
+    /// Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing
+    /// service. If the portal has no billing customer, the call returns an empty result. The call is read-only. The
+    /// call cuts the months in the portal time zone. Months without spending are not listed. To list the movements of
+    /// a month, use `GET api/2.0/portal/payment/customer/operations`. To get the same figures as a file, use
+    /// `POST api/2.0/portal/payment/customer/usage/monthly/report`.
     /// </remarks>
     /// <summary>
     /// Get the customer monthly usage
@@ -1223,18 +1221,15 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns how much of each wallet service the portal consumed and what that cost, added up per service instead
-    /// of listed per movement. Only a DocSpace administrator may read it, a portal with no billing customer answers
-    /// with an empty result, and the call is read-only. The filters are optional: `serviceName` narrows to particular
-    /// services and fails with 404 on a name this installation does not sell, `participantName` and `status` narrow
-    /// to who consumed and how the operation ended, `startDate` and `endDate` bound the period in the portal time
-    /// zone, `metadata` matches the key and value pairs a service records with its usage, and `offset`, `limit`,
-    /// `orderBy` and `orderType` page and sort the result. Amounts come with the unit the service is sold in, except
-    /// AI tools, whose consumption is reported in tokens rather than in AI credits. AI consumption paid with the
-    /// portal's own provider keys is a total of its own, `ai-tools-byok` or `ai-search-byok`, titled like its AI
-    /// service and flagged by `byok`; `serviceName` accepts these names, and `mergeByok=true` folds them into their AI
-    /// services. The individual charges behind these totals are
-    /// `GET api/2.0/portal/payment/customer/operations`, and the same figures as a downloadable file are
+    /// Returns the consumption and the cost of each wallet service of the portal, added up per service. Requires a
+    /// DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service.
+    /// If the portal has no billing customer, the call returns an empty result. The call is read-only. All filters
+    /// are optional. If `serviceName` has a name that the installation does not sell, the call returns 404. The
+    /// amounts use the unit of each service. For AI tools, the unit is tokens, not AI credits. AI usage paid with the
+    /// portal's own provider keys has totals of its own, `ai-tools-byok` and `ai-search-byok`. They have the title of
+    /// their AI service and `byok` set, and `serviceName` accepts these names. With `mergeByok=true`, the call adds
+    /// them to the totals of their AI services. To list the charges behind the totals, use
+    /// `GET api/2.0/portal/payment/customer/operations`. To get the same figures as a file, use
     /// `POST api/2.0/portal/payment/customer/usage/report`.
     /// </remarks>
     /// <summary>
@@ -1303,15 +1298,15 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Lists the wallet services the portal is running right now: the add-ons its plan pays for that are in the
-    /// active state, plus the ones an administrator switched on by hand in the wallet service settings; the Docs Connect
-    /// trial is listed as well, although it is not paid from the wallet. Only a DocSpace administrator may call it,
-    /// no billing customer is needed for it, and the call is read-only. Every item names the service, its title and
-    /// the unit it is measured in, and says whether it is a subscription; a subscribed service also carries the limit
-    /// it grants and how much of it is used where that number is known - the editor seats and the editors currently
-    /// active for Docs Connect, the purchased units and the units already consumed for disk storage. A service listed
-    /// with no limit is one whose usage is not counted this way, not one without a limit. The catalogue of what could
-    /// be switched on is `GET api/2.0/portal/payment/walletservices`, and switching one is
+    /// Returns the wallet services that run on the portal now. The list has the active add-ons of the plan and the
+    /// services that an admin turned on by hand. It also has the Docs Connect trial, which the wallet does not pay
+    /// for. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no
+    /// billing service. The portal does not need a billing customer. The call is read-only. A subscription service
+    /// can have its limit and its usage. For Docs Connect, these are the editor seats and the active editors. For
+    /// disk storage, these are the bought units and the used units. An item without a limit is a service whose usage
+    /// is not counted this way. The call returns 400 if the Docs Connect service does not know the active Docs
+    /// Connect subscription. To read all services that the portal can buy, use
+    /// `GET api/2.0/portal/payment/walletservices`. To turn a service on or off, use
     /// `POST api/2.0/portal/payment/servicestate`.
     /// </remarks>
     /// <summary>
@@ -1322,7 +1317,6 @@ public class PaymentController(
     [SwaggerResponse(200, "The wallet services active on the portal, with their limits and usage where those are known", typeof(IEnumerable<ActiveServiceDto>))]
     [SwaggerResponse(400, "The portal has an active Docs Connect subscription that the Docs Connect service does not know")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(500, "The portal has an active Docs Connect subscription, and the Docs Connect service answers with an error or cannot be reached")]
     [HttpGet("activeservices")]
     public async Task<List<ActiveServiceDto>> GetActiveServices()
     {
@@ -1336,19 +1330,19 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Queues the history of the wallet movements as an `xlsx` file and returns the task that will build it; the file
-    /// is not ready when the response arrives. The portal needs a billing customer and the caller has to be a
-    /// DocSpace administrator. The body takes the same filters as `GET api/2.0/portal/payment/customer/operations` -
-    /// the service names, the date range, the participant, the operation type and status, the credit and debit
-    /// directions and the ordering - and an empty body reports everything from the portal creation date to now; a
-    /// service name this installation does not sell fails with 404, and the own-key AI services `ai-tools-byok` and
-    /// `ai-search-byok` are marked BYOK in the file. Poll
-    /// `GET api/2.0/portal/payment/customer/operationsreport` until `isCompleted` is true, then take the file from
-    /// `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's own My documents section,
-    /// where it counts against the portal storage like any other file. One operations report per user is tracked at a
-    /// time - a call made while the previous one is still running answers with that task - and
-    /// `DELETE api/2.0/portal/payment/customer/operationsreport` stops it. A build that fails ends the task with
-    /// `error` filled in rather than failing this call.
+    /// Starts a job that builds the history of the wallet movements as an `xlsx` file. If the portal has no billing
+    /// customer, the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if
+    /// the installation has no billing service. The call queues the job and returns it. The file is not ready when
+    /// the response arrives. The body takes the filters of `GET api/2.0/portal/payment/customer/operations`. An empty
+    /// body covers the time from the creation of the portal until now. If `serviceName` has a name that the
+    /// installation does not sell, the call returns 404. The file marks the AI services paid with the portal's own
+    /// provider keys, `ai-tools-byok` and `ai-search-byok`, as BYOK. Repeat
+    /// `GET api/2.0/portal/payment/customer/operationsreport` until `isCompleted` is true. Then take the file from
+    /// `resultFileUrl` or `resultFileId`. The portal saves the file in the My documents section of the caller. The
+    /// file counts against the portal storage. Each user has one report of this kind at a time. While it runs, a
+    /// repeated call returns the running job. After `isCompleted` becomes true, a repeated call starts a new job that
+    /// builds a new file. To stop a running job, use `DELETE api/2.0/portal/payment/customer/operationsreport`. If the
+    /// build fails, the job ends with `error` filled in.
     /// </remarks>
     /// <summary>
     /// Start the operations report
@@ -1403,15 +1397,16 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the state of the `xlsx` wallet operations report this user started with
-    /// `POST api/2.0/portal/payment/customer/operationsreport`: `percentage` while it is being built, `isCompleted`
-    /// when it is done, `resultFileId`, `resultFileName` and `resultFileUrl` pointing at the file in the caller's My
-    /// documents, and `error` when the build failed. The portal needs a billing customer and the caller has to be a
-    /// DocSpace administrator; the call is read-only and is the one to poll. The task is kept per user and per report
-    /// kind, so it never reports another administrator's report, nor the service usage and monthly usage ones, which
-    /// have their own status operations. An empty result means this user has no operations report at all - none was
-    /// started, or the finished one was already picked up or terminated. A completed task is dropped as soon as the
-    /// next report is started, so read the file link out of the same answer that first reports `isCompleted`.
+    /// Returns the state of the `xlsx` operations report that the caller started with
+    /// `POST api/2.0/portal/payment/customer/operationsreport`. This is the call to poll. Repeat it until
+    /// `isCompleted` is true. While the build runs, `percentage` shows its progress. When the file is ready,
+    /// `resultFileId`, `resultFileName`, and `resultFileUrl` point to it. The file is in the My documents section of
+    /// the caller. If the build fails, `error` is filled in. If the portal has no billing customer, the call
+    /// returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no
+    /// billing service. The call is read-only. It returns only the operations report of the caller, not the service
+    /// usage or monthly usage reports. An empty result means that the caller has no operations report. Either none
+    /// was started, or the job was stopped or removed. Starting a new report removes the completed job. So read the
+    /// file link from the first answer with `isCompleted` true.
     /// </remarks>
     /// <summary>
     /// Get the operations report status
@@ -1432,13 +1427,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Stops the `xlsx` wallet operations report this user has running and drops its task, for a report that was
-    /// started with the wrong filters or is no longer wanted. The portal needs a billing customer and the caller has
-    /// to be a DocSpace administrator. The stop is asked of the worker that builds the file rather than done here, so
-    /// `GET api/2.0/portal/payment/customer/operationsreport` can still answer for a moment afterwards. The call is
-    /// safe to repeat and does nothing at all when this user has no report running: there is no response body, and
-    /// status 200 says the stop was requested, not that a report was really stopped. A report that had already
-    /// finished keeps its file in My documents - nothing is deleted from there.
+    /// Stops the `xlsx` operations report that the caller has running and removes its job. Use it for a report with
+    /// wrong filters or a report that is no longer needed. If the portal has no billing customer, the call returns 404.
+    /// Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing
+    /// service. The call queues a stop request for the worker that builds the file. So `GET
+    /// api/2.0/portal/payment/customer/operationsreport` can still return the job for a short time. You can repeat the
+    /// call. It also deletes a finished report job. Without a job, it does nothing. The response has no body. A 200
+    /// response means that the stop was requested, not that a report was stopped. The call does not stop the service
+    /// usage or monthly usage reports. A finished report keeps its file in My documents.
     /// </remarks>
     /// <summary>
     /// Terminate the operations report
@@ -1459,18 +1455,20 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Queues the usage of the wallet services as an `xlsx` file and returns the task that will build it; the file is
-    /// not ready when the response arrives. The portal needs a billing customer and the caller has to be a DocSpace
-    /// administrator. The body takes the filters of `GET api/2.0/portal/payment/customer/usage` except `mergeByok` -
-    /// the service names, the date range, the participant, the operation status, the usage metadata and the ordering
-    /// - and an empty body reports every service from the portal creation date to now; a service name this
-    /// installation does not sell fails with 404, and `ai-tools-byok` and `ai-search-byok` stay totals of their own,
-    /// marked BYOK. Poll `GET api/2.0/portal/payment/customer/usage/report` until `isCompleted` is true, then take the
-    /// file from `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's own My documents
-    /// section, where it counts against the portal storage like any other file. One service usage report per user is
-    /// tracked at a time - a call made while the previous one is still running answers with that task - and
-    /// `DELETE api/2.0/portal/payment/customer/usage/report` stops it. Per-movement history is the separate
-    /// `POST api/2.0/portal/payment/customer/operationsreport`.
+    /// Starts a job that builds the usage of the wallet services as an `xlsx` file. If the portal has no billing
+    /// customer, the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if
+    /// the installation has no billing service. The call queues the job and returns it. The file is not ready when
+    /// the response arrives. The body takes the filters of `GET api/2.0/portal/payment/customer/usage`, except
+    /// `mergeByok`. An empty body covers the time from the creation of the portal until now. If `serviceName` has a
+    /// name that the installation does not sell, the call returns 404. In the file, `ai-tools-byok` and
+    /// `ai-search-byok`, paid with the portal's own provider keys, stay separate totals marked BYOK. Repeat
+    /// `GET api/2.0/portal/payment/customer/usage/report` until `isCompleted` is true. Then take the file from
+    /// `resultFileUrl` or `resultFileId`. The portal saves the file in the My documents section of the caller. The
+    /// file counts against the portal storage. Each user has one report of this kind at a time. While it runs, a
+    /// repeated call returns the running job. After `isCompleted` becomes true, a repeated call starts a new job that
+    /// builds a new file. To stop a running job, use `DELETE api/2.0/portal/payment/customer/usage/report`. If the
+    /// build fails, the job ends with `error` filled in. This report does not affect the operations report. To get
+    /// the history of the movements, use `POST api/2.0/portal/payment/customer/operationsreport`.
     /// </remarks>
     /// <summary>
     /// Start the service usage report
@@ -1523,15 +1521,16 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the state of the `xlsx` service usage report this user started with
-    /// `POST api/2.0/portal/payment/customer/usage/report`: `percentage` while it is being built, `isCompleted` when
-    /// it is done, `resultFileId`, `resultFileName` and `resultFileUrl` pointing at the file in the caller's My
-    /// documents, and `error` when the build failed. The portal needs a billing customer and the caller has to be a
-    /// DocSpace administrator; the call is read-only and is the one to poll. The task is kept per user and per report
-    /// kind, so it reports neither another administrator's report nor the operations and monthly usage ones, which
-    /// have their own status operations. An empty result means this user has no service usage report at all - none
-    /// was started, or the finished one was already picked up or terminated. A completed task is dropped as soon as
-    /// the next report is started, so read the file link out of the same answer that first reports `isCompleted`.
+    /// Returns the state of the `xlsx` service usage report that the caller started with
+    /// `POST api/2.0/portal/payment/customer/usage/report`. This is the call to poll. Repeat it until `isCompleted`
+    /// is true. While the build runs, `percentage` shows its progress. When the file is ready, `resultFileId`,
+    /// `resultFileName`, and `resultFileUrl` point to it. The file is in the My documents section of the caller. If
+    /// the build fails, `error` is filled in. If the portal has no billing customer, the call returns 404. Requires a
+    /// DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service.
+    /// The call is read-only. It returns only the service usage report of the caller, not the operations or monthly
+    /// usage reports. An empty result means that the caller has no service usage report. Either none was started, or
+    /// the job was stopped or removed. Starting a new report removes the completed job. So read the file link from
+    /// the first answer with `isCompleted` true.
     /// </remarks>
     /// <summary>
     /// Get the service usage report status
@@ -1552,13 +1551,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Stops the `xlsx` service usage report this user has running and drops its task, for a report that was started
-    /// with the wrong filters or is no longer wanted. The portal needs a billing customer and the caller has to be a
-    /// DocSpace administrator. The stop is asked of the worker that builds the file rather than done here, so
-    /// `GET api/2.0/portal/payment/customer/usage/report` can still answer for a moment afterwards. The call is safe
-    /// to repeat and does nothing at all when this user has no such report running: there is no response body, and
-    /// status 200 says the stop was requested, not that a report was really stopped. It leaves the operations and
-    /// monthly usage reports alone, and a report that had already finished keeps its file in My documents.
+    /// Stops the `xlsx` service usage report that the caller has running and removes its job. Use it for a report with
+    /// wrong filters or a report that is no longer needed. If the portal has no billing customer, the call returns 404.
+    /// Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing
+    /// service. The call queues a stop request for the worker that builds the file. So `GET
+    /// api/2.0/portal/payment/customer/usage/report` can still return the job for a short time. You can repeat the
+    /// call. It also deletes a finished report job. Without a job, it does nothing. The response has no body. A 200
+    /// response means that the stop was requested, not that a report was stopped. The call does not stop the operations
+    /// or monthly usage reports. A finished report keeps its file in My documents.
     /// </remarks>
     /// <summary>
     /// Terminate the service usage report
@@ -1579,17 +1579,19 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Queues the wallet spending added up per calendar month as an `xlsx` file and returns the task that will build
-    /// it; the file is not ready when the response arrives. The portal needs a billing customer and the caller has to
-    /// be a DocSpace administrator. The body takes only the period - `startDate` and `endDate`, both inclusive - and
-    /// an empty body covers everything from the portal creation date to now; the months are cut in the portal time
-    /// zone, exactly as in `GET api/2.0/portal/payment/customer/usage/monthly`. Poll
-    /// `GET api/2.0/portal/payment/customer/usage/monthly/report` until `isCompleted` is true, then take the file
-    /// from `resultFileUrl` or open `resultFileId`: the finished file is saved into the caller's own My documents
-    /// section, where it counts against the portal storage like any other file. One monthly usage report per user is
-    /// tracked at a time - a call made while the previous one is still running answers with that task - and
-    /// `DELETE api/2.0/portal/payment/customer/usage/monthly/report` stops it. There is no service filter here: for a
-    /// report per service use `POST api/2.0/portal/payment/customer/usage/report`.
+    /// Starts a job that builds the wallet spending per calendar month as an `xlsx` file. If the portal has no
+    /// billing customer, the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also
+    /// returns 403 if the installation has no billing service. The call queues the job and returns it. The file is
+    /// not ready when the response arrives. The body takes only the period, `startDate` and `endDate`. An empty body
+    /// covers the time from the creation of the portal until now. The call cuts the months in the portal time zone,
+    /// as `GET api/2.0/portal/payment/customer/usage/monthly` does. Repeat
+    /// `GET api/2.0/portal/payment/customer/usage/monthly/report` until `isCompleted` is true. Then take the file
+    /// from `resultFileUrl` or `resultFileId`. The portal saves the file in the My documents section of the caller.
+    /// The file counts against the portal storage. Each user has one report of this kind at a time. While it runs, a
+    /// repeated call returns the running job. After `isCompleted` becomes true, a repeated call starts a new job that
+    /// builds a new file. To stop a running job, use `DELETE api/2.0/portal/payment/customer/usage/monthly/report`.
+    /// If the build fails, the job ends with `error` filled in. The body has no service filter. For a report per
+    /// service, use `POST api/2.0/portal/payment/customer/usage/report`.
     /// </remarks>
     /// <summary>
     /// Start the monthly usage report
@@ -1634,16 +1636,16 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the state of the `xlsx` monthly usage report this user started with
-    /// `POST api/2.0/portal/payment/customer/usage/monthly/report`: `percentage` while it is being built,
-    /// `isCompleted` when it is done, `resultFileId`, `resultFileName` and `resultFileUrl` pointing at the file in
-    /// the caller's My documents, and `error` when the build failed. The portal needs a billing customer and the
-    /// caller has to be a DocSpace administrator; the call is read-only and is the one to poll. The task is kept per
-    /// user and per report kind, so it reports neither another administrator's report nor the operations and service
-    /// usage ones, which have their own status operations. An empty result means this user has no monthly usage
-    /// report at all - none was started, or the finished one was already picked up or terminated. A completed task is
-    /// dropped as soon as the next report is started, so read the file link out of the same answer that first reports
-    /// `isCompleted`.
+    /// Returns the state of the `xlsx` monthly usage report that the caller started with
+    /// `POST api/2.0/portal/payment/customer/usage/monthly/report`. This is the call to poll. Repeat it until
+    /// `isCompleted` is true. While the build runs, `percentage` shows its progress. When the file is ready,
+    /// `resultFileId`, `resultFileName`, and `resultFileUrl` point to it. The file is in the My documents section of
+    /// the caller. If the build fails, `error` is filled in. If the portal has no billing customer, the call
+    /// returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no
+    /// billing service. The call is read-only. It returns only the monthly usage report of the caller, not the
+    /// operations or service usage reports. An empty result means that the caller has no monthly usage report. Either
+    /// none was started, or the job was stopped or removed. Starting a new report removes the completed job. So read
+    /// the file link from the first answer with `isCompleted` true.
     /// </remarks>
     /// <summary>
     /// Get the monthly usage report status
@@ -1664,14 +1666,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Stops the `xlsx` monthly usage report this user has running and drops its task, for a report that was started
-    /// for the wrong period or is no longer wanted. The portal needs a billing customer and the caller has to be a
-    /// DocSpace administrator. The stop is asked of the worker that builds the file rather than done here, so
-    /// `GET api/2.0/portal/payment/customer/usage/monthly/report` can still answer for a moment afterwards. The call
-    /// is safe to repeat and does nothing at all when this user has no such report running: there is no response
-    /// body, and status 200 says the stop was requested, not that a report was really stopped. It leaves the
-    /// operations and service usage reports alone, and a report that had already finished keeps its file in My
-    /// documents.
+    /// Stops the `xlsx` monthly usage report that the caller has running and removes its job. Use it for a report with
+    /// wrong filters or a report that is no longer needed. If the portal has no billing customer, the call returns 404.
+    /// Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing
+    /// service. The call queues a stop request for the worker that builds the file. So `GET
+    /// api/2.0/portal/payment/customer/usage/monthly/report` can still return the job for a short time. You can repeat
+    /// the call. It also deletes a finished report job. Without a job, it does nothing. The response has no body. A 200
+    /// response means that the stop was requested, not that a report was stopped. The call does not stop the operations
+    /// or service usage reports. A finished report keeps its file in My documents.
     /// </remarks>
     /// <summary>
     /// Terminate the monthly usage report
@@ -1717,17 +1719,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the price list of one wallet service as the accounting service keeps it: every price record with its
-    /// time unit, cost and resulting price, volume threshold, validity period, status and discount category. Take
-    /// the service name from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`. The caller must
-    /// be a DocSpace administrator, and the server must have the billing and accounting services configured;
-    /// otherwise the call fails with 403. The call is read-only and can be repeated safely. By default the list
-    /// also holds retired and not yet started records; `active=true` keeps only the prices in force now. A service
-    /// with no prices comes back as an empty list. Amounts are in the currency of the service, which the records do
-    /// not name. The list is cached for all portals for up to an hour, so a change in the accounting service can
-    /// take that long to appear. For the current price of every plan and wallet service as the customer sees it, use
-    /// `GET api/2.0/portal/payment/quotas`. An unknown service name fails with 500, as does an unreachable
-    /// accounting service.
+    /// Returns the price list of one wallet service as the accounting service keeps it. Requires a DocSpace admin.
+    /// Other callers get 403. It also returns 403 if the installation has no billing or accounting service. The call
+    /// is read-only. By default, the list also has retired prices and prices that have not started yet. With
+    /// `active=true`, the list has only the prices in force now. A service without prices returns an empty list. The
+    /// amounts are in the currency of the service, which the records do not name. The installation caches the list
+    /// for all portals for up to an hour. So a change in the accounting service can take an hour to appear. To read
+    /// the current prices that the customer sees, use `GET api/2.0/portal/payment/quotas`. If `serviceName` is too
+    /// long, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Get the service prices from the accounting service
@@ -1737,7 +1736,6 @@ public class PaymentController(
     [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceDto>))]
     [SwaggerResponse(400, "The `serviceName` is longer than 255 characters")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the billing and accounting services are not configured on the server")]
-    [SwaggerResponse(500, "The accounting service does not know the service name, answers the price request with an error or cannot be reached")]
     [HttpGet("accounting/prices/{serviceName}")]
     public async Task<List<ServicePriceDto>> GetAccountingServicePrices(ServicePricesRequestDto inDto)
     {
@@ -1751,13 +1749,13 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns one spending limit on the AI services of the portal by its ID - the limit of the portal as a whole, the
-    /// one for every user, or a personal one. Only a DocSpace administrator may read it, an installation without a
-    /// billing service answers 403, and the call is read-only. The limit comes back with its scope, thresholds, their
-    /// currency and unit, the period and whether it is in force, but without its spending: that comes with
-    /// `GET api/2.0/portal/payment/servicelimit/total` for the portal and with
-    /// `GET api/2.0/portal/payment/servicelimit/participants` for each user. A portal with no billing customer, and an
-    /// ID that does not exist, belongs to another portal or is not a limit on the AI services, answer 404.
+    /// Returns one spending limit on the AI services of the portal by its ID. A limit applies to the portal as a
+    /// whole, to every user, or to one user. Requires a DocSpace admin. Other callers get 403. The call also returns
+    /// 403 if the installation has no billing service. The call is read-only. The answer has the scope, thresholds,
+    /// period, and state of the limit, but no spending. To read the spending of the portal, use
+    /// `GET api/2.0/portal/payment/servicelimit/total`. To read the spending of each user, use
+    /// `GET api/2.0/portal/payment/servicelimit/participants`. The call returns 404 if the portal has no billing
+    /// customer or no AI service limit with this ID. If `id` is zero or negative, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Get a service limit
@@ -1779,14 +1777,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the spending limit on the AI services for the portal as a whole - the ceiling the spending of every user
-    /// counts towards - together with what was spent against it in the current period and what is left. Only a
-    /// DocSpace administrator may read it, an installation without a billing service answers 403, and the call is
-    /// read-only. The limit is checked in addition to the limits
-    /// of the users, so a user can be stopped by it before reaching their own. The spending includes the expected cost
-    /// of AI operations still in progress. When no such limit has been set, or it was deleted, the answer is 200 with a
-    /// null `response`; create the limit with `POST api/2.0/portal/payment/servicelimit` and the scope `Total`. A
-    /// switched-off limit is still returned, with `enabled` false. A portal with no billing customer answers 404.
+    /// Returns the spending limit on the AI services for the portal as a whole. The spending of all users counts
+    /// towards this limit. The answer also has the spending in the current period and what is left. What is left
+    /// already subtracts the expected cost of AI operations that still run. Requires a DocSpace admin. Other callers
+    /// get 403. The call also returns 403 if the installation has no billing service. The call is read-only. The AI
+    /// services check this limit together with the limits of the users. So a user can reach it before their own limit.
+    /// If the limit is not set or was deleted, the call returns 200 with a null `response`. To create it, use `POST
+    /// api/2.0/portal/payment/servicelimit` with the scope `Total`. A turned-off limit is returned with `enabled`
+    /// false. If the portal has no billing customer, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get the portal service limit
@@ -1807,14 +1805,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the spending limit on the AI services for every user - the same ceiling applied to each user separately,
-    /// for any user without a personal limit in force. Only a DocSpace administrator may read it, an installation
-    /// without a billing service answers 403, and the call is read-only. It comes without spending, since that is
-    /// counted per user: read it for each user from `GET api/2.0/portal/payment/servicelimit/participants`; `periodEnd`
-    /// still says when the current period ends for everyone. When no
-    /// such limit has been set, or it was deleted, the answer is 200 with a null `response`; create the limit with
-    /// `POST api/2.0/portal/payment/servicelimit` and the scope `Global`. A switched-off limit is still returned, with
-    /// `enabled` false. A portal with no billing customer answers 404.
+    /// Returns the spending limit on the AI services for every user. It applies to each user separately, if the user
+    /// has no personal limit in force. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if
+    /// the installation has no billing service. The call is read-only. The answer has no spending, since each user has
+    /// their own. To read the spending of each user, use `GET api/2.0/portal/payment/servicelimit/participants`. The
+    /// `periodEnd` field shows when the current period ends for everyone, and is null for a lifetime limit. If the
+    /// limit is not set or was deleted, the call returns 200 with a null `response`. To create it, use `POST
+    /// api/2.0/portal/payment/servicelimit` with the scope `Global`. A turned-off limit is returned with `enabled`
+    /// false. If the portal has no billing customer, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get the global service limit
@@ -1835,15 +1833,16 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Lists, one page at a time, the spending limit on the AI services in force for each portal user, with what the
-    /// user spent against it in the current period and what is left. Only a DocSpace administrator may read it, an
-    /// installation without a billing service answers 403, a portal with no billing customer answers 404, and the call
-    /// is read-only; a portal with no limits gets an empty page. A user's own limit wins over the one for every user: an item with the scope `Custom` is a
-    /// personal limit, one with `Global` the limit for every user, its ID repeated for each user it applies to.
-    /// Switched-off limits are not listed, and a user who has not used the AI services yet may be missing. `offset`
-    /// and `limit` page through the result and default to 0 and 25, and the answer repeats them next to
-    /// `totalQuantity`, `totalPage` and `currentPage`; `orderBy` and `orderType` sort it, the newest limits first by
-    /// default.
+    /// Returns a page of the spending limits on the AI services that apply to the portal users. Each item has what
+    /// the user spent in the current period and what is left. Requires a DocSpace admin. Other callers get 403. The
+    /// call also returns 403 if the installation has no billing service. If the portal has no billing customer, the
+    /// call returns 404. The call is read-only. If the portal has no limits, the page is empty. A personal limit wins
+    /// over the limit for every user. An item with the scope `Custom` is a personal limit. An item with the scope
+    /// `Global` is the limit for every user. Its ID repeats for each user that it applies to. The list has no
+    /// turned-off limits. A user who has not used the AI services yet can be missing. By default, `offset` is 0 and
+    /// `limit` is 25. The answer repeats them next to `totalQuantity`, `totalPage`, and `currentPage`. By default,
+    /// the newest limits come first. The call returns 400 if `offset`, `limit`, `orderBy`, or `orderType` is out of
+    /// range.
     /// </remarks>
     /// <summary>
     /// Get the user service limits
@@ -1872,15 +1871,17 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Creates a spending limit on the AI services - AI tools and AI search together - with `scope` saying whom it
-    /// applies to: `Total` for the portal as a whole, `Global` for every user separately, `Custom` for the user in
-    /// `userId`, which only this scope takes. A personal limit applies to its user instead of the one for every user,
-    /// and the limit of the portal is checked on top of both. The portal needs a billing customer, and the caller needs
-    /// the permission to edit the portal settings as well as DocSpace administrator rights. At least one of
-    /// `amountValue` and `quantityValue` must be given; with both, the services stop as soon as either is reached. The
-    /// call is mutating and written to the portal audit trail. It is not idempotent: a second limit of the same scope,
-    /// or for the same user, is refused with 409 - change the existing one with
-    /// `PUT api/2.0/portal/payment/servicelimit` instead. The scope, the user and the period cannot be changed later.
+    /// Creates a spending limit on the AI services, which are AI tools and AI search together. The `scope` field sets
+    /// whom the limit applies to. The scope `Total` is for the portal as a whole, and `Global` is for every user
+    /// separately. The scope `Custom` is for the user in `userId`. Only `Custom` takes `userId`, and other cases return
+    /// 400. A personal limit applies to its user instead of the limit for every user. The AI services also check the
+    /// limit of the portal. If the portal has no billing customer, the call returns 404. Requires a DocSpace admin.
+    /// Other callers get 403. The call also returns 403 if the installation has no billing service. The call changes
+    /// data. The call returns 400 if neither `amountValue` nor `quantityValue` is set. With both, the AI services stop
+    /// when either is reached. The accounting service can also reject a threshold with 400. An example is a quantity
+    /// for services with different units. If the user does not exist, the call returns 404. A second limit of the same
+    /// scope or for the same user returns 409. So a repeated call returns 409. To change a limit, use `PUT
+    /// api/2.0/portal/payment/servicelimit`. The update call cannot change the scope, the user, or the period later.
     /// </remarks>
     /// <summary>
     /// Create a service limit
@@ -1936,16 +1937,17 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Changes the thresholds of an existing spending limit on the AI services, or switches it off and back on with
-    /// `enabled`. The portal needs a billing customer, and the caller needs the permission to edit the portal settings
-    /// as well as DocSpace administrator rights. Only the given fields change: an omitted threshold keeps its value, so
-    /// a threshold once set cannot be removed here - delete the limit with
-    /// `DELETE api/2.0/portal/payment/servicelimit/{id}` and create it anew with
-    /// `POST api/2.0/portal/payment/servicelimit`, which is also the way to change its scope, user or period. A
-    /// switched-off limit stops restricting the AI services at once. The call is mutating and idempotent, it is written
-    /// to the portal audit trail, and a new threshold applies from the very next operation; lowering it below what was
-    /// already spent blocks the AI services until the period ends. An ID that does not exist, belongs to another portal
-    /// or is not a limit on the AI services answers 404.
+    /// Changes the thresholds of a spending limit on the AI services, or turns it off and on with `enabled`. If the
+    /// portal has no billing customer, the call returns 404. Requires a DocSpace admin. Other callers get 403. The call
+    /// also returns 403 if the installation has no billing service. The call changes data, but only in the fields that
+    /// you send. An omitted threshold keeps its value, so you cannot remove a threshold here. To remove one, delete the
+    /// limit with `DELETE api/2.0/portal/payment/servicelimit/{id}`. Then create it again with `POST
+    /// api/2.0/portal/payment/servicelimit`. This is also the way to change the scope or the user. `PUT
+    /// api/2.0/portal/payment/servicelimit/participants` can change the period of a personal limit. A turned-off limit
+    /// stops restricting the AI services immediately. A new threshold applies from the next AI operation. If it is
+    /// below the spending, the AI services stop until the period ends. You can repeat the call with the same body. The
+    /// call returns 404 if the portal has no AI service limit with this ID. The accounting service can reject a
+    /// threshold with 400. An example is a quantity for services with different units.
     /// </remarks>
     /// <summary>
     /// Update a service limit
@@ -1976,16 +1978,17 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Sets the same personal spending limit on the AI services for each of the listed portal users in one call,
-    /// replacing the personal limit any of them already has and switching it on, so it is how a ceiling is rolled out
-    /// to a group of users. The portal needs a billing customer, and the caller needs the permission to edit the portal
-    /// settings as well as DocSpace administrator rights. At least one of `amountValue` and `quantityValue` must be
-    /// given, every user in `userIds` must exist on the portal, and a user listed twice is limited once. One call takes
-    /// at most 1000 users; split a larger group into several calls. Unlike
-    /// `PUT api/2.0/portal/payment/servicelimit`, this sets the whole limit: a threshold left out is removed, and the
-    /// period may change, though a lifetime limit set to lifetime again keeps counting from where it was. Each personal
-    /// limit applies instead of the one for every user, and the limit of the portal is checked on top. The call is mutating and idempotent, and it is written to the portal audit trail. The answer is
-    /// the number of personal limits that were set; the result is listed by
+    /// Sets the same personal spending limit on the AI services for each listed portal user. It replaces the personal
+    /// limit that a user already has and turns it on. If the portal has no billing customer, the call returns 404.
+    /// Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing
+    /// service. The call returns 400 if neither `amountValue` nor `quantityValue` is set. If a user in `userIds` does
+    /// not exist, the call returns 404. The call changes data. A user listed twice gets one limit. The call returns
+    /// 400 for an empty list or more than 1000 users. So split a larger group into several calls. Unlike
+    /// `PUT api/2.0/portal/payment/servicelimit`, this call sets the whole limit. So a threshold that you leave out
+    /// is removed. The period can change. A lifetime limit that stays lifetime keeps its count. Each personal limit
+    /// applies instead of the limit for every user. The AI services also check the limit of the portal. You can
+    /// repeat the call with the same body. The accounting service can reject a threshold with 400. The call returns
+    /// the number of personal limits that it set. To list them, use
     /// `GET api/2.0/portal/payment/servicelimit/participants`.
     /// </remarks>
     /// <summary>
@@ -2035,14 +2038,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Switches off every personal spending limit on the AI services in one call, so each user falls back to the limit
-    /// for every user, if one is set. The limit of the portal as a whole and the one for every user stay as they are.
-    /// The portal needs a billing customer, and the caller needs the permission to edit the portal settings as well as
-    /// DocSpace administrator rights. The switched-off limits stop restricting their users at once and are kept, so
-    /// each can be switched back on with `PUT api/2.0/portal/payment/servicelimit`. The call is mutating and
-    /// idempotent - repeating it switches off nothing more - and it is written to the portal audit trail. The answer is
-    /// the number of personal limits that were switched off, zero when none was in force. To switch off the limit of a
-    /// single user, use `PUT api/2.0/portal/payment/servicelimit` with `enabled` set to false.
+    /// Turns off every personal spending limit on the AI services. Each user then falls back to the limit for every
+    /// user, if it is set. The limit of the portal and the limit for every user do not change. If the portal has no
+    /// billing customer, the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also
+    /// returns 403 if the installation has no billing service. The turned-off limits stop restricting their users
+    /// immediately. The portal keeps them, so you can turn each one back on with
+    /// `PUT api/2.0/portal/payment/servicelimit`. The call changes data, and a repeated call turns off nothing more.
+    /// The call returns the number of limits that it turned off, or 0 if none was in force. To turn off the limit of
+    /// one user, use `PUT api/2.0/portal/payment/servicelimit` with `enabled` set to false.
     /// </remarks>
     /// <summary>
     /// Disable the user service limits
@@ -2072,14 +2075,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Removes one spending limit on the AI services completely - the limit of the portal as a whole, the one for
-    /// every user, or a personal one - so it no longer restricts anyone. The portal needs a billing customer, and the
-    /// caller needs the permission to edit the portal settings as well as DocSpace administrator rights. The call is
-    /// destructive and cannot be undone: unlike switching a limit off with `PUT api/2.0/portal/payment/servicelimit`,
-    /// which keeps its settings, a deleted limit is gone, and a new one has to be created with
-    /// `POST api/2.0/portal/payment/servicelimit`. Deleting a personal limit lets the limit for every user apply to
-    /// that user. It is written to the portal audit trail. An ID that does not exist, belongs to another portal or is
-    /// not a limit on the AI services answers 404, which is also what a repeated deletion of the same limit gets.
+    /// Deletes one spending limit on the AI services. This can be the limit of the portal, the limit for every user,
+    /// or a personal limit. If the portal has no billing customer, the call returns 404. Requires a DocSpace admin.
+    /// Other callers get 403. The call also returns 403 if the installation has no billing service. The call cannot
+    /// be undone. To keep the settings of a limit, turn it off with `PUT api/2.0/portal/payment/servicelimit`
+    /// instead. To get a deleted limit back, create a new one with `POST api/2.0/portal/payment/servicelimit`. After
+    /// a personal limit is deleted, the limit for every user applies to that user. The call returns 404 if the portal
+    /// has no AI service limit with this ID. A repeated call returns 404. The response has no body. If `id` is zero
+    /// or negative, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Delete a service limit
@@ -2163,18 +2166,13 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the portal's automatic wallet top-up settings - whether it is on, the balance that triggers a
-    /// charge, the balance it is topped up to, and the currency both are expressed in. Any DocSpace
-    /// administrator may read them, and unlike the operation that changes them this one needs neither a
-    /// billing customer nor a configured billing service, so it answers on a portal that has never paid for
-    /// anything. It is read-only and changes nothing.
-    /// A portal that has never configured top-up gets the defaults rather than an empty result: `enabled` is
-    /// false, `currency` is null, and `minBalance` and `upToBalance` are 0. Those two zeros are outside the
-    /// ranges `POST api/2.0/portal/payment/topupsettings` accepts - 5 to 1000 and 6 to 5000 - so the answer
-    /// cannot be sent straight back to it; supply real values instead. `lastModified` is
-    /// `0001-01-01T00:00:00` until the settings are stored for the first time.
-    /// `lowBalanceThreshold` and `lowBalanceNotified` are maintained by the portal itself: they are reported
-    /// here, but cannot be written.
+    /// Returns the automatic top-up settings of the portal wallet. Requires a DocSpace admin. Other callers get 403.
+    /// The portal does not need a billing customer or a billing service. The call is read-only. If the portal never set
+    /// up the top-up, the call returns the defaults. Then `enabled` is false, `currency` is null, and `minBalance` and
+    /// `upToBalance` are 0. These zeros are out of range for `POST api/2.0/portal/payment/topupsettings`. So send real
+    /// values instead of the defaults. Until the portal first saves the settings, `lastModified` is
+    /// `0001-01-01T00:00:00`. The portal sets `lowBalanceThreshold` and `lowBalanceNotified`. You cannot set them. A
+    /// save with `enabled` true clears `lowBalanceNotified`, and one with false resets `lowBalanceThreshold`.
     /// </remarks>
     /// <summary>
     /// Get the auto top-up settings
@@ -2193,17 +2191,17 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Switches the portal's automatic wallet top-up on or off and sets its thresholds: while it is on, the payment
-    /// method on file is charged whenever the wallet balance falls below `minBalance`, enough to bring it up to
-    /// `upToBalance`, in `currency`. The portal needs a billing customer whose wallet balance exists - a portal that
-    /// has never had one answers 404, so top the wallet up once with `POST api/2.0/portal/payment/deposit` first -
-    /// and only the payer may change the settings. The body replaces the stored settings as a whole and an omitted
-    /// body resets them to the defaults; `minBalance` is accepted between 5 and 1000 and `upToBalance` between 6 and
-    /// 5000, and `upToBalance` has to be greater than `minBalance`, so that a top-up lifts the wallet above the balance
-    /// that triggers it. The low-balance warning state (`lowBalanceThreshold`, `lowBalanceNotified`) and `lastModified` may be
-    /// sent for compatibility but are ignored: the portal keeps the values it had. The call is mutating and
-    /// idempotent, it charges nothing by itself, it is written to the portal audit trail, and switching the top-up on also re-arms the low-balance warning. The settings as they were stored come
-    /// back in the answer.
+    /// Turns the automatic top-up of the portal wallet on or off and sets its thresholds. While it is on, the portal
+    /// charges the payment method when the balance falls below `minBalance`. The charge brings the balance up to
+    /// `upToBalance` in `currency`. If the portal has no billing customer or no wallet balance, the call returns 404.
+    /// To create the balance, top up the wallet once with `POST api/2.0/portal/payment/deposit`. The payer is the
+    /// portal user whose email is the email of the billing customer. Only the payer can call it. Other callers
+    /// get 403. The call also returns 403 if the installation has no billing service. The body replaces all stored
+    /// settings, and an omitted body resets them to the defaults. The call returns 400 if `minBalance` or
+    /// `upToBalance` is missing or out of range. It also returns 400 if `upToBalance` is not greater than
+    /// `minBalance`. The call accepts `lowBalanceThreshold`, `lowBalanceNotified`, and `lastModified` but ignores
+    /// them. The call changes data but charges nothing. You can repeat it with the same body. Turning the top-up on
+    /// also resets the low-balance warning. The call returns the settings as the portal saved them.
     /// </remarks>
     /// <summary>
     /// Set the auto top-up settings
@@ -2259,12 +2257,11 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns which wallet services an administrator has switched on for this portal by hand, as opposed to the ones
-    /// its plan pays for. Only a DocSpace administrator may read it, an installation without a billing service
-    /// answers 403, no billing customer is needed, and the call is read-only. `enabledServices` holds the names of
-    /// those services and is empty when none was switched on. This is the stored setting and not the state of the
-    /// portal: a service the plan brings with it is active without appearing here, so the honest answer to what is
-    /// running is `GET api/2.0/portal/payment/activeservices`. One entry is changed with
+    /// Returns the wallet services that an admin turned on for the portal by hand. The services that the plan pays
+    /// for are not listed. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
+    /// installation has no billing service. The portal does not need a billing customer. The call is read-only. If no
+    /// service was turned on, `enabledServices` is empty. To read the services that run on the portal, use
+    /// `GET api/2.0/portal/payment/activeservices`. To change one entry, use
     /// `POST api/2.0/portal/payment/servicestate`.
     /// </remarks>
     /// <summary>
@@ -2287,15 +2284,13 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Switches one wallet service on or off for the portal: `service` names it and `enabled` says which way. The
-    /// portal needs a billing customer, and the caller needs both the permission to edit the portal settings and
-    /// DocSpace administrator rights. Order matters between the two AI services - AI tools has to be on before AI
-    /// search may be switched on, and switching AI tools off switches AI search off with it - so a request that
-    /// breaks that order is refused with 403. The call is mutating and idempotent: switching on a service that is
-    /// already on changes nothing. It is written to the portal audit trail, and switching AI tools notifies the
-    /// portal clients so the AI features appear or disappear for them without a reload. The whole updated set of
-    /// switched-on services comes back. Switching a service on does not buy it - its units are still bought with
-    /// `PUT api/2.0/portal/payment/updatewallet`.
+    /// Turns one wallet service on or off for the portal. If the portal has no billing customer, the call
+    /// returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no
+    /// billing service. AI tools must be on before you turn on AI search. If it is not, the call returns 403. Turning
+    /// off AI tools also turns off AI search. If AI is turned off for the portal, turning on an AI service
+    /// returns 403. The call changes data, and you can repeat it with the same body. The call returns all wallet services
+    /// that are on after the change. If `service` is not a wallet service, the call returns 400. Turning a service on
+    /// does not buy it. To buy units, use `PUT api/2.0/portal/payment/updatewallet`.
     /// </remarks>
     /// <summary>
     /// Switch a wallet service
@@ -2321,15 +2316,12 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the price list of the AI features the portal pays for out of its wallet: the chat models with the
-    /// price of their prompt and completion tokens, the embedding models, the image models with their per-image
-    /// price, and the web search providers with the price of one search. The installation needs both a billing
-    /// service and the AI gateway configured, otherwise the answer is 403, and only a DocSpace administrator may read
-    /// it; the call is read-only. Token prices are normalised per million tokens, and every price is in the single
-    /// `currency` the answer names. Each entry carries the model identifier to use when talking to the AI operations,
-    /// its display alias, its provider with the provider icon, and a link to the model's own page. It is a list of
-    /// what the models cost and not of what the portal spent - that is `GET api/2.0/portal/payment/customer/usage` -
-    /// and it says nothing about which of them are allowed here, which is
+    /// Returns the prices of the AI features that the portal pays for from its wallet. The list covers chat models,
+    /// embedding models, image models, and web search providers. Requires a DocSpace admin. Other callers get 403. It
+    /// also returns 403 if the installation has no billing service or no AI gateway. The call is read-only. Token
+    /// prices are per million tokens, and all prices are in the `currency` of the answer. Each entry has the model ID
+    /// that the AI operations take. The list does not show what the portal spent. To read the spending, use
+    /// `GET api/2.0/portal/payment/customer/usage`. To read the models that the portal bars, use
     /// `GET api/2.0/portal/payment/ai-model/restrictions`.
     /// </remarks>
     /// <summary>
@@ -2339,7 +2331,6 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The prices of the chat, embedding and image models and of the web search providers, with the currency they are in", typeof(AiPricesDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation has no billing service or no AI gateway configured")]
-    [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
     {
@@ -2351,12 +2342,12 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the AI chat models that are barred on this portal - the ones no user of it may pick for a
-    /// conversation, whatever the price list offers. Only a DocSpace administrator may read it, and the call is
-    /// read-only. When the installation has no billing service or AI is not enabled for the portal, the answer is an
-    /// empty set instead of an error, which is indistinguishable from a portal that restricts nothing. An empty
-    /// `models` therefore means every model in `GET api/2.0/portal/payment/ai-prices` may be used. The set names the
-    /// barred models and not the allowed ones; replace it with `PUT api/2.0/portal/payment/ai-model/restrictions`.
+    /// Returns the AI chat models that no user of the portal can pick. Requires a DocSpace admin. Other callers
+    /// get 403. The call is read-only. If the installation has no billing service or AI tools is off, the call returns an
+    /// empty set. That answer looks the same as a portal without restrictions. An empty `models` means that every
+    /// model of `GET api/2.0/portal/payment/ai-prices` is allowed. The call returns 402 if AI tools is on but the
+    /// billing service has no customer or fails. To replace the set, use
+    /// `PUT api/2.0/portal/payment/ai-model/restrictions`.
     /// </remarks>
     /// <summary>
     /// Get restricted AI models
@@ -2366,7 +2357,6 @@ public class PaymentController(
     [SwaggerResponse(200, "The identifiers of the AI chat models barred on this portal, empty when none is", typeof(RestrictedAiModelsDto))]
     [SwaggerResponse(402, "AI tools is on for the portal, but the billing service reports no customer for it or fails to answer")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
-    [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedAiModelsDto> GetRestrictedAiModels()
     {
@@ -2381,18 +2371,16 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Replaces the whole set of AI chat models barred on this portal: the body is the complete set that is to hold,
-    /// so adding one restriction means sending the new model together with the ones already restricted, lifting one
-    /// means leaving it out, and an empty set lifts them all. Read the current set from
-    /// `GET api/2.0/portal/payment/ai-model/restrictions` and the model identifiers from
-    /// `GET api/2.0/portal/payment/ai-prices` before calling. The installation needs a billing service and the AI
-    /// gateway configured, the portal needs a billing customer and the AI tools wallet service switched on with
-    /// `POST api/2.0/portal/payment/servicestate`, and the caller needs the permission to edit the portal settings as
-    /// well as DocSpace administrator rights. The call is mutating and idempotent - sending the same set twice leaves
-    /// the same state - and it is written to the portal audit trail. It takes effect on the next AI request, so a
-    /// conversation already open on a model that has just been barred cannot go on with it. The stored set comes
-    /// back in the answer. While AI tools is off the call is refused with 403 instead of being stored, because the
-    /// read reports an empty set then and nothing written could be read back.
+    /// Replaces the whole set of AI chat models that are barred on the portal. To bar one more model, send it together
+    /// with the models already barred. To lift a restriction, leave the model out. An empty set lifts all restrictions.
+    /// First, read the current set from `GET api/2.0/portal/payment/ai-model/restrictions`. Take the model IDs from
+    /// `GET api/2.0/portal/payment/ai-prices`. If the portal has no billing customer, the call returns 404. AI tools
+    /// must be on, and you turn it on with `POST api/2.0/portal/payment/servicestate`. While AI tools is off, the call
+    /// returns 403. Requires a DocSpace admin. Other callers get 403. It also returns 403 if the installation has no
+    /// billing service or no AI gateway. The call changes data, and you can repeat it with the same body. The set
+    /// applies from the next AI request. The AI gateway applies the new set from the next AI request, also in open
+    /// conversations. The call returns the stored set. If `models` is missing or has a null entry, the call returns
+    /// 400.
     /// </remarks>
     /// <summary>
     /// Set restricted AI models
@@ -2403,7 +2391,6 @@ public class PaymentController(
     [SwaggerResponse(400, "The request body cannot be read, or `models` is missing, `null` or holds a `null` entry")]
     [SwaggerResponse(403, "The caller has no portal-settings right or is not a DocSpace administrator, the installation has no billing service or no AI gateway configured, or the AI tools wallet service is off for the portal")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
-    [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
     [HttpPut("ai-model/restrictions")]
     public async Task<RestrictedAiModelsDto> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {

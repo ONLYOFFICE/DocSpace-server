@@ -11,11 +11,13 @@
     <ItemGroup>
         <PackageReference Include="Aspire.Hosting.JavaScript" />
         <PackageReference Include="Aspire.Hosting.MySql" />
+        <PackageReference Include="Aspire.Hosting.PostgreSQL" />
         <PackageReference Include="Aspire.Hosting.RabbitMQ" />
         <PackageReference Include="Aspire.Hosting.Redis" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MailPit" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.McpInspector" />
         <PackageReference Include="CommunityToolkit.Aspire.Hosting.MySql.Extensions" />
+        <PackageReference Include="CommunityToolkit.Aspire.Hosting.PostgreSQL.Extensions" />
     </ItemGroup>
 
     <ItemGroup>

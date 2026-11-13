@@ -59,17 +59,14 @@ public class ConnectionsController(
     : ControllerBase
 {
     /// <remarks>
-    /// Lists the connections the calling user currently has open on this portal - one item per successful sign-in
-    /// that is still active - so a client can show where the account is signed in and close what does not belong
-    /// there. Any signed-in user may call it, nothing has to be called first, and the answer always covers the caller
-    /// alone: the operation is read-only, idempotent and cannot show another user's connections. Items cover the last
-    /// year and are ordered newest sign-in first, with the caller's own connection moved to the top and its browser,
-    /// platform, IP address and location refreshed from the current request. `loginEvent` is the ID of that own
-    /// connection and is `0` when the request was authenticated with a token in the `Authorization` header instead of
-    /// the portal cookie; nothing is then marked as current, and a user with no stored connections gets a single item
-    /// describing the current request. `country` and `city` are resolved from the IP address and stay empty when it
-    /// cannot be located. Pass an item's `id` to `PUT api/2.0/security/activeconnections/logout/{loginEventId}` to
-    /// end that one connection.
+    /// Returns the active connections of the calling user on this portal. Each item is an active sign-in from the last
+    /// year, except one case without a cookie. Any signed-in user can call it, including a guest. The list never shows
+    /// other users' connections, even to a DocSpace admin. The call is read-only. Items come newest first. If the
+    /// request has a portal cookie, its connection comes first. That item shows the browser, platform, IP address, and
+    /// location of this request. The `loginEvent` field holds the ID of that connection. Without the cookie, for
+    /// example with a token in the `Authorization` header, `loginEvent` is 0. Then, if the user has no active
+    /// connections, the list has one item for this request. To end one connection, pass its `id` to `PUT
+    /// api/2.0/security/activeconnections/logout/{loginEventId}`.
     /// </remarks>
     /// <summary>
     /// Get active connections
@@ -158,18 +155,18 @@ public class ConnectionsController(
     }
 
     /// <remarks>
-    /// Closes every active connection of the calling user and returns the link that user has to open to set a new
-    /// password - the answer to a suspicious sign-in seen in `GET api/2.0/security/activeconnections`. Any signed-in
-    /// user may call it for their own account and nothing has to be called first; the same clean-up for somebody else
-    /// is `PUT api/2.0/security/activeconnections/logoutall/{userId}`. The call is mutating and destructive for
-    /// sessions - every token and cookie issued to the user before it stops working and the clients holding them are
-    /// disconnected - and it is not idempotent: the request is written to the portal audit trail, which invalidates
-    /// the link any earlier call returned, and the caller's own client is handed a fresh cookie in the response and
-    /// stays signed in through a new connection. The password itself is not changed here, and the link is handed back
-    /// to the caller rather than mailed to the user: the URL carries a time-limited `PasswordChange` key, which the
-    /// confirmation page it opens - or `PUT api/2.0/people/{userId}/password` - needs to accept the new password. A
-    /// failure is swallowed instead of reported, so an empty body with status 200 means nothing was done and the call
-    /// has to be repeated.
+    /// Ends all active connections of the calling user and returns a link to set a new password.
+    /// Use it after a suspicious sign-in.
+    /// Any signed-in user can call it for their own account, including a guest.
+    /// To end the connections of another user, use `PUT api/2.0/security/activeconnections/logoutall/{userId}`.
+    /// Every token and cookie issued to the user before the call stops working.
+    /// This cannot be undone.
+    /// The response sets a new auth cookie, so a cookie-based caller stays signed in.
+    /// The call does not change the password or email the link.
+    /// The link opens the page that sets the new password through `PUT api/2.0/people/{userId}/password`.
+    /// You can repeat the call, but each call makes the earlier link invalid.
+    /// Repeat it with the new cookie, not with the first token.
+    /// If the call fails, it still returns 200 with an empty result, so call it again.
     /// </remarks>
     /// <summary>
     /// Log out and reset password
@@ -207,16 +204,18 @@ public class ConnectionsController(
     }
 
     /// <remarks>
-    /// Closes every active connection of one portal user: the connections are marked inactive, every token and cookie
-    /// issued to that user before the call stops working, the clients holding them are disconnected and a logout
-    /// entry is written to the portal audit trail. Nothing has to be called first; `userId` is the portal user ID
-    /// that `GET api/2.0/people` returns. A user may pass their own ID, while ending somebody else's connections
-    /// requires a DocSpace administrator and any other caller is refused with 403. The call is mutating, destructive
-    /// for those sessions and idempotent - a user with nothing open is not an error - and it returns no content, so
-    /// the state afterwards is read from `GET api/2.0/security/activeconnections`. A caller who ends their own
-    /// connections is handed a fresh cookie in the response and stays signed in through a new connection. Nothing
-    /// else about the user changes: the account stays enabled and the password stays valid, and to keep the current
-    /// connection alive instead use `PUT api/2.0/security/activeconnections/logoutallexceptthis`.
+    /// Ends all active connections of one portal user.
+    /// Every token and cookie issued to that user before the call stops working.
+    /// This cannot be undone.
+    /// Any signed-in user can end their own connections, including a guest.
+    /// Only a DocSpace admin can end the connections of another user.
+    /// Other callers get 403.
+    /// You can repeat the call.
+    /// A user with no connections, or an unknown ID, also returns 200.
+    /// The response has no body.
+    /// If callers end their own connections, the response sets a new auth cookie, so they stay signed in.
+    /// The account stays active, and the password stays valid.
+    /// To keep the current connection, use `PUT api/2.0/security/activeconnections/logoutallexceptthis`.
     /// </remarks>
     /// <summary>
     /// Log out a user everywhere
@@ -238,16 +237,16 @@ public class ConnectionsController(
     }
 
     /// <remarks>
-    /// Closes every active connection of the calling user except the one this request was made with, so the current
-    /// client keeps working while every other browser and device is signed out. Any signed-in user may call it for
-    /// their own account and nothing has to be called first. The connection to keep is the one behind the portal
-    /// authentication cookie: a request authenticated with a token in the `Authorization` header has none, and then
-    /// every connection of the user is closed, including the one that token belongs to - read `loginEvent` from
-    /// `GET api/2.0/security/activeconnections` first to see which connection, if any, will survive. The call is
-    /// mutating and destructive for the other sessions, and idempotent: the tokens behind them stop working, their
-    /// clients are disconnected at once and a logout entry is written to the portal audit trail. It answers with the
-    /// display name of the calling user, while an empty answer with status 200 means the attempt failed and nothing
-    /// can be assumed about what was closed.
+    /// Ends all active connections of the calling user except the connection of this request.
+    /// Any signed-in user can call it, including a guest.
+    /// The call keeps the connection in the portal cookie of the request.
+    /// Without the cookie, for example with a token in the `Authorization` header, it ends every connection.
+    /// To see which connection stays, first read `loginEvent` of `GET api/2.0/security/activeconnections`.
+    /// The tokens and cookies of the ended connections stop working.
+    /// This cannot be undone, but you can repeat the call.
+    /// It returns the display name of the calling user.
+    /// If the call fails, it still returns 200 with an empty result.
+    /// Then you cannot tell which connections it ended.
     /// </remarks>
     /// <summary>
     /// Log out other connections
@@ -282,16 +281,18 @@ public class ConnectionsController(
     }
 
     /// <remarks>
-    /// Closes one active connection: the sign-in behind `loginEventId` is marked inactive, the token and cookie tied
-    /// to it stop working, the client holding it is disconnected and a logout entry is written to the portal audit
-    /// trail. Take `loginEventId` from the `id` of an item of `GET api/2.0/security/activeconnections`, which also
-    /// reports in `loginEvent` which connection the caller is using, so a client can avoid closing its own. A user
-    /// may close their own connections, while closing somebody else's requires a DocSpace administrator and any other
-    /// caller is refused with 403. The call is mutating, destructive for that one session and idempotent, and it
-    /// leaves every other connection of the user alone - `PUT api/2.0/security/activeconnections/logoutallexceptthis`
-    /// is the way to close the rest in one go. Only `true` means the connection was open and has just been closed;
-    /// `false` comes back when this portal has no such active connection, including one that was already closed, and
-    /// after any other failure.
+    /// Ends one active connection of a user on this portal.
+    /// Its token and cookie stop working, and this cannot be undone.
+    /// Other connections stay open.
+    /// Take `loginEventId` from the `id` of an item of `GET api/2.0/security/activeconnections`.
+    /// The `loginEvent` field of that call shows your own connection, so you can avoid ending it.
+    /// Any signed-in user can end their own connections, including a guest.
+    /// Only a DocSpace admin can end a connection of another user.
+    /// Other callers get 403.
+    /// The call returns `true` when it ended the connection.
+    /// It returns `false` if this portal has no such active connection or the call failed.
+    /// So a repeated call returns `false`.
+    /// To end all other connections in one call, use `PUT api/2.0/security/activeconnections/logoutallexceptthis`.
     /// </remarks>
     /// <summary>
     /// Log out one connection

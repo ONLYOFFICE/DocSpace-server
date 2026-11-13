@@ -4784,6 +4784,47 @@
         "additionalProperties": false
       }
     },
+    "aiSkillsCreate": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "destId": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "The integer id of the Instructions room the skill is created in."
+          },
+          "title": {
+            "type": "string",
+            "description": "The file's title without the extension, at most 165 characters, with a letter or a digit."
+          }
+        },
+        "required": [
+          "destId",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "response": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "The ID of the new skill file."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title the file was saved under, extension included."
+          }
+        },
+        "required": [
+          "id",
+          "title"
+        ],
+        "additionalProperties": false
+      }
+    },
     "aiMetaFill": {
       "request": {
         "type": "object",

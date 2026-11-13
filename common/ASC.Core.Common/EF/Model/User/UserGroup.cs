@@ -95,6 +95,10 @@ public static class DbUserGroupExtension
                 entity.HasIndex(e => e.LastModified)
                     .HasDatabaseName("last_modified");
 
+                // The primary key starts with the user, so finding the members of a group needs its own index.
+                entity.HasIndex(e => new { e.TenantId, e.UserGroupId, e.Removed })
+                    .HasDatabaseName("tenant_groupid");
+
                 entity.Property(e => e.TenantId).HasColumnName("tenant");
 
                 entity.Property(e => e.Userid)
@@ -136,6 +140,10 @@ public static class DbUserGroupExtension
                 // Define indexes
                 entity.HasIndex(e => e.LastModified)
                     .HasDatabaseName("core_usergroup_last_modified_idx");
+
+                // The primary key starts with the user, so finding the members of a group needs its own index.
+                entity.HasIndex(e => new { e.TenantId, e.UserGroupId, e.Removed })
+                    .HasDatabaseName("core_usergroup_tenant_groupid_idx");
 
                 // Map properties to database columns
                 entity.Property(e => e.TenantId).HasColumnName("tenant");

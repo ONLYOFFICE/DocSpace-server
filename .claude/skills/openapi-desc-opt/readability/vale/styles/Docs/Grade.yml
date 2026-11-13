@@ -1,0 +1,7 @@
+# Flesch-Kincaid grade of one description (one description per .md file).
+extends: metric
+message: "Flesch-Kincaid grade is %s, keep it at 10 or below."
+formula: |
+  (0.39 * (words / sentences)) + (11.8 * (syllables / words)) - 15.59
+condition: "> 10"
+level: suggestion

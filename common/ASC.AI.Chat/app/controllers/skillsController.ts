@@ -41,21 +41,40 @@ import {
   NoSkillProfileError,
 } from "../skills/generateSkill.js";
 import type { GenerateSkillInput } from "../skills/generateSkill.js";
+import { createSkill, MAX_TITLE_LENGTH } from "../skills/createSkill.js";
+import type { CreateSkillInput } from "../skills/createSkill.js";
 
 function badRequest(message: string): never {
   throw Object.assign(new Error(message), { status: 400, expose: true });
+}
+
+// Skills live in Instructions rooms, which are internal folders: a
+// positive integer id.
+function asDestId(body: Parameters<typeof getEntityId>[0]): string {
+  const destId = getEntityId(body, "destId");
+  if (destId === undefined || !/^[1-9]\d*$/.test(destId)) {
+    badRequest("destId must be the integer id of an Instructions room");
+  }
+  return destId;
+}
+
+function asCreateInput(body: unknown): CreateSkillInput {
+  if (!isObject(body)) {
+    badRequest("body must be an object");
+  }
+  const destId = asDestId(body);
+  const title = getString(body, "title")?.trim() ?? "";
+  if (!title || title.length > MAX_TITLE_LENGTH) {
+    badRequest(`title must be a non-empty string of at most ${MAX_TITLE_LENGTH} characters`);
+  }
+  return { destId, title };
 }
 
 function asInput(body: unknown): GenerateSkillInput {
   if (!isObject(body)) {
     badRequest("body must be an object");
   }
-  // Skills live in Instructions rooms, which are internal folders: a
-  // positive integer id.
-  const destId = getEntityId(body, "destId");
-  if (destId === undefined || !/^[1-9]\d*$/.test(destId)) {
-    badRequest("destId must be the integer id of an Instructions room");
-  }
+  const destId = asDestId(body);
   const title = getString(body, "title")?.trim() ?? "";
   if (!title || title.length > MAX_NAME_LENGTH) {
     badRequest(`title must be a non-empty string of at most ${MAX_NAME_LENGTH} characters`);
@@ -83,6 +102,12 @@ function relaysProviderMessage(err: ModelCallError): boolean {
 }
 
 export const skillsController = {
+  // The room type and the caller's right to create in it are checked in
+  // `createSkill`, before anything is written.
+  create: asyncHandler(async (req, res) => {
+    await assertAiAccess();
+    res.json(await createSkill(asCreateInput(req.body)));
+  }),
   generate: asyncHandler(async (req, res) => {
     await assertAiAccess();
     const input = asInput(req.body);

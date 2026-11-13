@@ -66,6 +66,9 @@ public static class ContainerMemoryExtensions
     /// </summary>
     public const string MySqlLimit = "1g";
 
+    /// <summary>The built-in forms database, 58 MiB measured idle; up to 300 connections, each a process of its own.</summary>
+    public const string PostgresLimit = "1g";
+
     /// <summary>
     /// Document Server: ~720 MiB anonymous memory idle once the broker and database live in the AppHost
     /// containers, the rest of its 1.5 GiB being page cache the cap lets the kernel reclaim. Conversions are

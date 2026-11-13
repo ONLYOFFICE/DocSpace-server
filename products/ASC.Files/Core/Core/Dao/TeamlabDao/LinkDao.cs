@@ -143,6 +143,12 @@ internal class LinkDao<T>(
 
         var link = await filesDbContext.FileLinkAsync(tenantId, mappedSourceId.Item1, _authContext.CurrentAccount.ID);
 
+        // A concurrent submission of the same draft may have removed the link already.
+        if (link is null)
+        {
+            return;
+        }
+
         filesDbContext.FilesLink.Remove(link);
 
         await filesDbContext.SaveChangesAsync();

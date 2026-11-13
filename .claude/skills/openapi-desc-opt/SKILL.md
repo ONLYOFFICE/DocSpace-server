@@ -1,6 +1,6 @@
 ---
 name: openapi-desc-opt
-description: "Closing the next batch of the endpoint-description queue, end to end: refresh the queue of controllers whose published `summary`/`description`/parameter/response texts still fail the endpoint-documentation rules (`.claude/rules/openapi-endpoint-docs.md` for the operation, `.claude/rules/openapi-dto-docs.md` for properties), take the batch it plans (one document, one check, a budgeted set of edit sites), rewrite the C# sources behind it, regenerate that service's OpenAPI document and prove the declared findings have left the queue. USE FOR: which controllers still have unoptimized descriptions, build or refresh the list of unoptimized controllers, optimize the next controller or the next batch, take the first entry of the list, continue the description campaign, are there any endpoints left with thin descriptions — use it even when the user names neither the list nor the campaign, as long as they mean the quality of the published endpoint texts. DO NOT USE FOR: Spectral linter findings on the documents (openapi-lint-fix), a DTO-property campaign of its own, hand-editing `json/*_2.0.json` or `sdk/docspace-api-spec/docspace-backend.yaml`, or regenerating the SDKs (generate-sdk)."
+description: "Closing the next batch of the endpoint-description queue end to end: refresh the queue of controllers whose published summary, description, parameter and response texts fail `.claude/rules/openapi-endpoint-docs.md` or `.claude/rules/openapi-dto-docs.md` (missing, thin, or sentences too long and heavy to read, judged by Vale and vacuum where installed), take the batch it plans, rewrite the C# sources by `references/description-rules.md`, check the new texts, regenerate that service's OpenAPI document and prove the findings left the queue. USE FOR: which controllers still have unoptimized descriptions, refresh the list, optimize the next controller or batch, continue the description campaign, endpoints left with thin descriptions, installing Vale or vacuum — even when the user names neither the list nor the campaign. DO NOT USE FOR: Spectral findings (openapi-lint-fix), a DTO-property campaign of its own, hand-editing `json/*_2.0.json` or `docspace-backend.yaml`, regenerating the SDKs (generate-sdk)."
 ---
 
 # Closing the next batch of the description queue
@@ -25,16 +25,30 @@ already right. Step 7, because the row has to be absent from a list rebuilt from
 *genuinely* regenerated after the edit — and the counts around it have to be unchanged, or the
 absence is a parsing accident.
 
+A request only to install or check the readability tools (Vale, vacuum, textstat) is not a pass:
+follow `references/tools-setup.md` through its step 4, report what it printed, and stop. Never
+install them in the middle of a pass — a new tool changes the judge between step 3 and step 7.
+
+Run a pass every time the OpenAPI documents are updated. This skill is the only check of the form of
+a description: no build, CI job or Spectral rule runs it, and the build analyzer (API002–API006) only
+checks that the texts exist. A description written by hand outside the campaign reaches the queue
+from the regenerated document and is closed in that pass.
+
 ## What the loop owns
 
 | File | What it is |
 |---|---|
-| `.claude/skills/openapi-desc-opt/scan.py` | builds the queue: indexes the C# actions, reads the documents, checks the surface against `EXPECTED_SURFACE`, runs the checks, writes the list and plans the batches |
+| `.claude/skills/openapi-desc-opt/scan.py` | builds the queue: indexes the C# actions, reads the documents, ties operations to actions, runs the checks, writes the list and plans the batches |
+| `.claude/skills/openapi-desc-opt/tools.py` | finds Vale and vacuum, runs them with the settings in `readability/`, and computes their thresholds itself where they are missing; shared by both scripts |
+| `.claude/skills/openapi-desc-opt/check_texts.py` | checks the rewritten descriptions of the batch (step 4 and step 6): its own form, order, plain-word and status-code checks, then textstat, Vale and vacuum when found |
+| `.claude/skills/openapi-desc-opt/readability/` | the Vale styles and the vacuum ruleset that `check_texts.py` runs |
+| `.claude/skills/openapi-desc-opt/references/tools-setup.md` | installing textstat, Vale and vacuum on request, and the check that proves they apply the settings of `readability/` |
 | `.claude/skills/openapi-desc-opt/unoptimized-controllers.md` | the list: the next batch, "Must fix" (tiers A and B) and "Recommended" (tier C), rewritten by every scan, deleted when both are empty |
 | `.claude/skills/openapi-desc-opt/batch-manifest.json` | what this pass declared it would close, written by `--batch` in step 3 and verified by `--verify-batch` in step 7; absent until a batch is committed, and removed by `--batch` when there is nothing left to declare |
 | `.claude/skills/openapi-desc-opt/references/list-rules.md` | how the queue is defined: units, checks, tiers, filters, the axis of a batch |
 | `.claude/skills/openapi-desc-opt/references/writing-traps.md` | what this codebase does to text you edit — read before the first edit |
-| `.claude/rules/openapi-endpoint-docs.md` | the quality bar for the operation: title, description, response codes |
+| `.claude/skills/openapi-desc-opt/references/description-rules.md` | how an operation description and a `[RaisesWebhook]` `When` text are written: what stays, in which order, the form, the phrases, the check |
+| `.claude/rules/openapi-endpoint-docs.md` | the quality bar for the operation: title, response codes, webhooks; its §2 is the short form of `description-rules.md`, which wins in detail |
 | `.claude/rules/openapi-dto-docs.md` | the quality bar for a parameter, a DTO property, an enum member |
 
 The queue and the manifest are working files of one pass: `.gitignore` keeps them out, and nothing
@@ -42,11 +56,15 @@ about them means anything on another machine. What a pass closed is recorded whe
 repository's history is — in the commit that closed it. Do not put findings in the repository's own
 documentation.
 
-Scope is the four documents of the public bundle — `api`, `files`, `people`, `backup`. `ai` and
-`apisystem` are outside it (list rules §5.5); they stay one flag away,
-`--scope api,files,people,backup,ai`, for the day that decision changes.
-Do not widen the scope on your own initiative: it triples the queue and the extra rows are texts
-nobody has agreed to own.
+Scope is the public bundle: the documents that `join` in
+`common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/appsettings.json` merges into the contract.
+`scan.py` reads the bundle and the project behind each document from the repository (list rules
+§5.5), and `--diag` prints their keys. A document outside the bundle is scanned only when `--scope`
+names it, for the day that decision changes. Do not widen the scope on your own initiative: the
+extra rows are texts nobody has agreed to own.
+
+The commands below call the interpreter `python`, its name on Windows. On macOS and Linux it is
+usually `python3`; use the name `command -v python3 python` finds.
 
 ## 1. Are the documents younger than their sources?
 
@@ -101,16 +119,28 @@ The summary line per document is worth reading before the list itself:
 files      controllers=..  operations=..  actions=..  unmatched=0  stale=0  must_fix=..  advisory=..
 ```
 
-- `controllers` and `actions` come from the C# sources, `operations` from the document. The scan
-  checks them against `EXPECTED_SURFACE` in `scan.py` itself and prints a `SURFACE:` line when they
-  disagree. Such a line means the index broke, not that the API changed — stop and find the commit
-  that moved it, because a controller the index lost takes its findings with it and reads exactly
-  like a closed batch.
-- `unmatched` must be 0. Operations are tied to actions by their normalised title; anything unmatched
-  is an operation whose findings nobody can attribute, and they are listed at the end of the file.
+- `controllers` and `actions` come from the C# sources, `operations` from the document. There is no
+  expected value to compare them with: the surface changes whenever someone adds an action. What
+  catches an index that lost a controller is the next line — its operations stop matching.
+- `unmatched` must be 0, and the scan prints an `UNMATCHED:` line when it is not. Operations are tied
+  to actions by their normalised title; anything unmatched is an operation whose findings nobody can
+  attribute, and they are listed at the end of the file. Either the index broke or the surface
+  changed; the listed operations and the diff of their controllers say which.
 - `stale` counts operations whose published description no longer matches the `<remarks>` behind it.
   On freshly regenerated documents it is zero or close to it; a jump means step 1 was skipped or a
   regeneration silently failed.
+
+The queue finds descriptions both below the norm (`no-description`, `thin-description`) and above it
+(`off-form-description`, `heavy-description`, list rules §4). The second kind is the worst of the
+skill's own count, which always runs, and of Vale and vacuum where they are installed: a tool adds
+findings, never removes one. The line `FORM: judged by …` names the tools whose verdict counted. Every
+run of a tool carries a canary, a description it has to flag; a tool that misses it, or that reports a
+finding on no known operation, is shown there as `FAILED: …` and its verdict is dropped — say so in the
+report. The scan finds the tools the way `check_texts.py` does (`--vale`,
+`--vacuum`, `VALE_BIN`, `VACUUM_BIN`, `PATH`); `--own-checks` makes it ignore them. Pass the same
+choice to `--batch` and `--verify-batch` — a different judge moves form findings by itself, and step 7
+reports that as a moved counter. A missing tool is not an error: name it at the end of the report, as
+in step 8.
 
 Under the header the list carries **"Batch of the next pass"**: the edit sites this pass should
 take, their weights, and — below it — the rest of the planned passes, so the size of what is left is
@@ -185,29 +215,110 @@ Then open the files the batch names. Two things about where the text actually li
 
 ## 4. Rewrite the text
 
-Read the rule the batch's check belongs to — the whole file, not from memory:
-`.claude/rules/openapi-endpoint-docs.md` for a description, a title or a response text,
-`.claude/rules/openapi-dto-docs.md` for a parameter finding, which is typed on a DTO property — and
+Read the rule the batch's check belongs to — the whole file, not from memory — and
 `references/writing-traps.md` before the first edit. The rule is the bar; the traps file is what this
 codebase does to text that looks fine in the editor.
 
+- **A description** (`no-description`, `thin-description`, `off-form-description`, `heavy-description`)
+  and the `When` of a `[RaisesWebhook]`:
+  `references/description-rules.md`. Opening the controller with the Read tool also brings
+  `.claude/rules/openapi-endpoint-docs.md` into context (a shell `cat` does not). Its §2 is the short form
+  of the reference; where the two differ in detail, the reference wins. Everything else of that rule
+  holds — §0, the title, the webhook mechanics, the response texts.
+- **A title or a response text**: `.claude/rules/openapi-endpoint-docs.md`.
+- **A parameter finding**, which is typed on a DTO property: `.claude/rules/openapi-dto-docs.md`.
+
 The checks are a map of where to look, never a specification of what to write. `thin-description`
-says the text is under three sentences; it does not say that three sentences will do. What the rule
-asks for is a description that lets an agent pick the operation, fill it in and read the answer with
-no other context: what it does, what it needs, what it changes, what it costs, and which neighbouring
-operation to use instead when this one is the wrong choice. Six to nine sentences is the normal shape
-that comes out of answering those honestly.
+says the text is under three sentences; it does not say that three sentences will do. A description
+has to let an agent pick the operation, fill it in and read the answer with no other context, and
+§2 of the reference lists what that takes, in order. The aim is the fewest words that keep every
+fact, not the shortest text: a fact missing from a short description is the failure the queue exists
+to remove.
 
 Read the handler before describing it. Every sentence is a claim about behaviour, and a confident
-sentence that is wrong is worse than the thin one it replaced — an agent has no way to tell. When
-reading the handler turns up a genuine bug, that is a normal outcome of this work: report it, do not
-fix it here. A documentation pass that changes behaviour is no longer reviewable as a documentation
-pass.
+sentence that is wrong is worse than the thin one it replaced — an agent has no way to tell. So the
+facts come before the prose: write down, for yourself, every fact the text will state next to the
+line of code that proves it, and only then write the sentences. Three facts go wrong most often, and
+each needs the code followed to its end rather than read at the first branch:
+
+- **Who may call.** Follow the permission check through every branch that grants the right, not only
+  the share it names: the creator of a room, the DocSpace admin bypass, a role that comes from
+  elsewhere. Then write who is allowed, and which code the others get.
+- **What a second call does.** Look at every state the object can be in when the call comes again —
+  done, running, queued but not started, partly applied — and write what happens in each. "You can
+  repeat it" is a claim about all of them; "Do not repeat it" is an equally good answer when the code
+  says so.
+- **Which code comes back.** The exception thrown, then the handler that maps it to a status (see
+  `references/writing-traps.md`), and which check runs first when two can fail.
+
+The integration tests of the operation (`products/*/Tests/Tests/**`, a folder per area, often a
+`*PermissionsTests` class) settle the codes and the roles faster than tracing; where none exist, say
+in the report that the codes rest on reading the code. When reading the handler turns up a genuine
+bug, that is a normal outcome of this work: report it, do not fix it here. A documentation pass that
+changes behaviour is no longer reviewable as a documentation pass.
 
 Stay inside the batch. The temptation to fix the neighbouring controller, or the tier C finding two
 lines below the one you came for, is exactly how a pass becomes unverifiable — and with a manifest it
 is no longer a matter of taste: step 7 will report the extra closure as undeclared, and the pass has
 to explain in its report what reached further than it said it would.
+
+### Check the rewritten descriptions
+
+When the batch rewrote descriptions, check them before the build, while the document still holds the
+old text:
+
+```bash
+python .claude/skills/openapi-desc-opt/check_texts.py
+```
+
+It takes the description sites of the batch from the manifest (`--doc files --op "PUT api/2.0/files/tags"`
+names operations by hand), reads the new text from `<remarks>` and the old one from the document, and
+prints a block per operation. Section numbers here and in its output are those of
+`references/description-rules.md`.
+
+- **its own checks**, which always run: `FORM` (sentence length and count, the average), `ORDER` (the
+  verb of the first sentence, the access phrase and its refusal code, the effect, the repeat statement),
+  `STYLE` (colons, word order, the expressions of §5.3, read from the rules file), `REFS` (every
+  `METHOD path` the text names exists in a document of the `json` folder), `CODES` (§1.5: codes of the
+  old text, of the responses the action declares and of the parameters against the new text);
+- **textstat** (Flesch-Kincaid grade, reading ease, fog index, difficult words), **Vale** (the
+  sentence-length and grade styles of `readability/vale`, plus the Microsoft style when it is synced)
+  and **vacuum** (the form rules of `readability/vacuum`) — each one only if it is on this machine.
+
+The tools are optional. The script looks for them before it runs them: `--vale` or `VALE_BIN`,
+`--vacuum` or `VACUUM_BIN`, else `PATH`; textstat is imported by the running Python, else by
+`--textstat-python` or `TEXTSTAT_PYTHON`. A tool that is not found is skipped without an error, and the
+last line, `MISSING TOOLS:`, names it — keep that line for the report. Do not install anything on
+your own. When the user asks for the tools, `references/tools-setup.md` has the commands per machine
+and the check that proves them (`check_texts.py --check-tools`); a tool that check marks `FAILED` is
+not used for the queue (`--own-checks`) until it is fixed. A tool that misses the canary of a run is
+dropped by the scripts themselves: its entry on the `TOOLS:` line starts with `FAILED:`, and its
+per-operation lines are not printed.
+
+Read the output as a list of places to look at, not as a score. A note about content — a missing
+refusal code, a missing repeat statement, a code not in the text — is a question to put to the code,
+never a sentence to add: the answer may be that the fact does not apply, or that it is the opposite of
+what the note's wording suggests.
+
+- **Fix**: a sentence over 20 words (the own counter counts like `Docs.SentenceLength` and adds code
+  as one word, so it is the stricter of the two), fewer than 3 sentences, a lost code without a
+  reason, an operation `REFS` cannot find, a colon that is not before a list, `or` in the sense of
+  otherwise, a refusal code or a repeat statement that §2 asks for and the code supports.
+- **Judge**: Microsoft suggestions, passive voice, difficult words, a Flesch-Kincaid grade above 10.
+  They point at a sentence worth a second look. Change it when a plainer wording exists
+  (§5.3, §5.4); a domain term (`portal`, `quota`, `webhook`) and a state in the passive (`is turned
+  off`, `read-only`) stay.
+- **Noise**: `is read` inside "read-only", `disabled` as an account status, `My` in the name of the
+  "My documents" section, `Microsoft.OxfordComma` on two verbs joined by `and` (it is no list), an
+  `ORDER` note where the text states the fact in words the script does not know — the patterns are a
+  heuristic, the order of §2 is the rule.
+
+Clean output on every parameter is not the goal: a text can keep a grade of 11 when every word is
+needed. Fix, run the script again, and stop when what is left is judged or noise. Then make the
+shortening pass of `description-rules.md` §6, step 3, and compare the word counts the script prints.
+
+A batch of titles, response texts or parameters rewrote no description; the script says so and there
+is nothing to check.
 
 ## 5. Check the code still compiles
 
@@ -224,6 +335,16 @@ failing the build. Read the warnings for the file you touched, not just the exit
 The same command as in step 1, for the one project you edited, and the same proof — the
 `Writing document named '2.0' to …` line. Without this step the next scan reads the old document and
 the row is still there, which looks exactly like a rewrite that did not work.
+
+When the batch rewrote descriptions, check what was published:
+
+```bash
+python .claude/skills/openapi-desc-opt/check_texts.py --from document
+```
+
+This is the text a reader gets: the generator has joined the lines and appended the sentence of each
+`[RaisesWebhook]`, whose `When` follows the same form. A `FORM` line that was not there in step 4
+usually points at that sentence.
 
 ## 7. Prove the declared findings have left the queue
 
@@ -270,8 +391,10 @@ plainly — "the N declared findings are closed, the controller still has M tier
 
 Report, in the user's language and in this order: which batch was closed — the document, the check, the edit
 sites and the controllers they cover — what was rewritten (actions, DTO properties, response texts),
-the proof from step 7 as `--verify-batch` printed it, and then where the campaign now stands, which is
-one of three endings and has to be said in as many words:
+the proof from step 7 as `--verify-batch` printed it, then, for a batch of descriptions, the check of
+the texts: per operation the words before → after and the sentences, and every tool finding that was
+left with the reason (judged, noise). Then where the campaign now stands, which is one of three
+endings and has to be said in as many words:
 
 - **"Must fix" still has rows** — how many findings and how many *passes* are left, and what the
   next batch is. Passes, not rows: rows are what the reader is trying to stop counting.
@@ -288,6 +411,11 @@ documentation, a response code the controller cannot actually return, a DTO prop
 wrong for one of the operations that share it. These are the findings that never reach the queue,
 because no check can see them.
 
+The last line of the report names the tools `check_texts.py` did not find, from its `MISSING TOOLS:`
+line: "textstat, Vale and vacuum are not installed on this machine; their checks were skipped; they
+install by `references/tools-setup.md`." Say it once, and leave it out when every tool ran or when
+the batch had no description to check.
+
 ## When the pass stops short
 
 This loop stops rather than improvises. Stopping with a clear account is a result; a pass that
@@ -298,9 +426,9 @@ half-closed a batch and cannot say which half is not.
   would be a stop is reporting the batch closed when it was not.
 - **The documents cannot be regenerated.** Work on the snapshot if you must, but do not report a
   finding as closed on the strength of an unregenerated document.
-- **The batch is heavier than the ceiling.** The planner says so on the batch itself: it happens when
-  one file holds more points than the budget allows, and a file is not split between passes. Carry it, or ask
-  whether to take only part of the file — and if you do take part, say which part in the report,
+- **The batch is heavier than the ceiling.** The planner says so on the batch itself: it happens only
+  when one site alone outweighs a pass, since a heavier file is cut into parts. Carry it, or ask
+  whether to take only part of the site — and if you do take part, say which part in the report,
   because the manifest will show the rest as surviving.
 - **The row's only open findings are tier C.** Then it is not in "Must fix" at all, and the pass
   does not start on it uninvited: report that the mandatory section is empty and ask whether to work
@@ -312,4 +440,8 @@ half-closed a batch and cannot say which half is not.
 - **The finding is an artefact.** A response text the generator prints everywhere, an operation whose
   title collides with another's, a controller that the index sees but the document does not. Fix
   `scan.py` or its filters rather than the controller, and check afterwards that the run prints no
-  `SURFACE:` line, to show the fix did not move anything else.
+  `UNMATCHED:` line and that `controllers`, `actions` and `operations` are where they were before the
+  fix, to show it did not move anything else.
+- **A `check_texts.py` finding that the rules allow** — a colon before a list, a domain word Vale
+  calls difficult. Leave the text as it is and name the finding in the report as judged. The script is
+  a heuristic over the rules, not the rules.

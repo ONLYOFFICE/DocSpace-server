@@ -375,6 +375,8 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   // Skills.
   aiSkillsGenerate:
     "Writes the text of one skill from a title and the caller's description of the skill they need, for an Instructions room, without saving it: the caller shows the text for review and saves the version the user accepts as `<name>.md` through `POST api/2.0/files/{folderId}/insert`, where the Files service validates the frontmatter. `destId` is the integer id of the Instructions room, checked before the model runs: the caller has to be able to create files in it, and any other folder answers 400. `title` becomes the skill's `name`: it is lower-cased and every run of characters other than letters and digits is folded into one hyphen, so `Sales report` becomes `sales-report`. `description` is a specification of the skill, passed to the model as data, never as an instruction. The model bound to the `Chat` action - the `Default` slot when that action has no profile of its own - runs once, without tools, and writes the description and the body; the frontmatter is then rebuilt here, with the description flattened to one line, stripped of tags and cut to 1 024 characters, so the text as returned always passes the Files service's skill validation. The answer carries the skill's name and the whole file, frontmatter included.",
+  aiSkillsCreate:
+    "Creates a new skill in an Instructions room from the skill template and saves it as `<title>.md`; no model is involved. `destId` is the integer id of the Instructions room, checked before anything is written: the caller has to be able to create files in it, and any other folder answers 400. `title` is the file's title, at most 165 characters, without the extension (a trailing `.md` is dropped), and has to hold a letter or a digit: the skill's `name` is derived from it as in `POST api/2.0/ai/skills/generate`, and its `description` starts as the title itself. The body is a skeleton of the sections a skill is made of, for the user to fill in. The file is saved through `POST api/2.0/files/{folderId}/insert`, so the Files service validates the frontmatter and the room's limits, and a title already taken in the room gets a numbered one. The answer carries the ID and the title of the new file.",
 
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
@@ -462,6 +464,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), inside the service's `response` envelope, proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
   aiSettingsSetToolMode:
     "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum with 400; the answer is the stored mode inside the service's `response` envelope. The mode applies to every chat of the user in the portal.",
+  aiSettingsGetDocumentAgent:
+    "Returns the portal's document agent settings, as the Document Agent tab of the portal settings shows them: `enabled` (whether the `document_agent` tool is offered to the chat), `profileId` (the model profile its tasks run on, null for the chat's own model), `reasoning` (`default` for the model's own default, else `off`, `low`, `medium`, `high`, `max`), `maxToolCalls` and `maxFileBytes` (the limits of one task, at most the agent's own ceilings of 150 and 32 MiB), `taskLog` (whether every task leaves its full log as a file) and `taskLogFolderId` (where the logs go, null for next to the task's results). The settings are kept by the DocSpace AI service and proxied from it; a portal that never saved any gets the defaults, and a profile or a log folder that no longer exists comes back as null. Any member of the portal may read them, a guest may not.",
+  aiSettingsSetDocumentAgent:
+    "Replaces the portal's document agent settings and returns the stored result. The whole object is required, every field as `GET api/2.0/ai/document-agent/settings` returns it; a limit above the agent's ceiling, an unknown reasoning level or a missing field is rejected rather than coerced. The DocSpace AI service stores them and checks the rest: the profile has to exist, and the log folder has to be a portal folder (not a third-party one, not in the trash) the caller may create files in. Only a portal administrator may write.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -755,6 +761,12 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "503": "No profile is bound to `GenerateMeta` and the `Default` slot is empty too.",
     "504": "Reading the files or the model round did not finish within the time budget.",
   },
+  aiSkillsCreate: {
+    "400":
+      "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room.",
+    "403": "The caller cannot create files in the room.",
+    "404": "The room does not exist.",
+  },
   aiSkillsGenerate: {
     "400":
       "`destId` is not an integer id, `title` or `description` is missing or too long, `title` has no letter or digit, or the folder is not an Instructions room.",
@@ -816,6 +828,11 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiPreferencesGetToolPermissionMode: { "400": "`entityId` is not a room ID." },
   aiSettingsSetUser: { "400": "`chatRecommendedModelVisible` is missing or not a boolean." },
   aiSettingsSetToolMode: { "400": "`mode` is not one of the `ToolPermissionMode` members." },
+  aiSettingsSetDocumentAgent: {
+    "400": "A field is missing, has the wrong type, or a limit is above the agent's ceiling.",
+    "403": "The caller is not a portal administrator, or may not create files in the log folder.",
+    "404": "The log folder does not exist or is in the trash.",
+  },
   aiPreferencesSetReasoningLevel: {
     "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
   },
@@ -1261,6 +1278,20 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
       "service rejects anything outside the enum.",
     example: { mode: 1 },
   },
+  aiSettingsSetDocumentAgent: {
+    description:
+      "The portal's document agent settings, every field required. Read the current one with " +
+      "`GET api/2.0/ai/document-agent/settings` and send it back changed.",
+    example: {
+      enabled: true,
+      profileId: null,
+      reasoning: "default",
+      maxToolCalls: 150,
+      maxFileBytes: 33554432,
+      taskLog: false,
+      taskLogFolderId: null,
+    },
+  },
   aiSettingsSetVectorization: {
     description:
       "The portal's vectorization settings, proxied unchanged to the DocSpace AI service, which " +
@@ -1404,6 +1435,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
 
   aiSkillsGenerate:
     "The skill's name and the whole Markdown file, frontmatter included; nothing is saved.",
+  aiSkillsCreate: "The ID and the title of the new skill file.",
 
   aiOpenaiChatCompletions:
     "The provider's own response, relayed with its status and content type (a 5xx excepted).",

@@ -53,3 +53,5 @@ common/services/ASC.Monolith/DocStore/
 # outside the pass that wrote them.
 /.claude/skills/openapi-desc-opt/unoptimized-controllers.md
 /.claude/skills/openapi-desc-opt/batch-manifest.json
+# The Microsoft style of Vale, downloaded by `vale sync` with the skill's .vale.ini.
+/.claude/skills/openapi-desc-opt/readability/vale/styles/Microsoft/

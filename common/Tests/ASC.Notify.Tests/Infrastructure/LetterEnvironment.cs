@@ -103,7 +103,7 @@ internal static class LetterEnvironment
             + "stack runs on: set 'pathToConf', or check out buildtools next to the server repository "
             + "so that buildtools/config/appsettings.json exists.");
 
-    private static readonly string? _configDirectory = FindConfigDirectory();
+    private static readonly string? _configDirectory = BuildtoolsConfig.FindDirectory();
 
     public static ExternalResourceSettingsHelper ExternalResources { get; } = new(Configuration);
 
@@ -187,7 +187,7 @@ internal static class LetterEnvironment
     /// <summary>A buildtools config file, or <c>null</c> when there is no config directory to take it from.</summary>
     private static string? FindConfigFile(string fileName)
     {
-        var directory = FindConfigDirectory();
+        var directory = BuildtoolsConfig.FindDirectory();
 
         if (directory == null)
         {
@@ -197,36 +197,5 @@ internal static class LetterEnvironment
         var path = Path.Combine(directory, fileName);
 
         return File.Exists(path) ? path : null;
-    }
-
-    /// <summary>
-    /// Looks for the buildtools config directory: <c>pathToConf</c> when the variable is set, otherwise
-    /// <c>buildtools/config</c> next to the repository — the layout every local checkout has. Recognised
-    /// by <c>appsettings.json</c>, the one file every consumer of the folder needs.
-    /// </summary>
-    private static string? FindConfigDirectory()
-    {
-        var pathToConf = Environment.GetEnvironmentVariable("pathToConf");
-
-        if (!string.IsNullOrEmpty(pathToConf) && File.Exists(Path.Combine(pathToConf, "appsettings.json")))
-        {
-            return pathToConf;
-        }
-
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-
-        while (directory != null)
-        {
-            var candidate = Path.Combine(directory.FullName, "buildtools", "config");
-
-            if (File.Exists(Path.Combine(candidate, "appsettings.json")))
-            {
-                return candidate;
-            }
-
-            directory = directory.Parent;
-        }
-
-        return null;
     }
 }

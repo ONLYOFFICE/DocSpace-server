@@ -108,6 +108,11 @@ export interface ChatContextSnapshot {
   /** The requested thread's full history, or `null` when not requested. */
   messages: ThreadMessageLike[] | null;
   webSearch: WebSearchConfig | null;
+  /**
+   * Whether the portal offers the document agent to the chat; undefined
+   * when the aggregate predates the setting (the settings are read then).
+   */
+  documentAgentEnabled: boolean | undefined;
   stale: Set<ChatContextSlice>;
 }
 

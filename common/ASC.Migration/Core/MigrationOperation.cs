@@ -140,6 +140,11 @@ public class MigrationOperation : DistributedTaskProgress
                 }
             }
 
+            // The check above sees only the compressed upload, so the migrator also bounds what it unpacks.
+            var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+            migrator.MaxExtractedSize = GetMaxExtractedSize(configuration, maxTotalSize, _logger);
+            migrator.MaxExtractedEntries = GetMaxExtractedEntries(configuration, _logger);
+
             await migrator.ParseAsync(onlyParse);
             if (!onlyParse)
             {
@@ -191,6 +196,51 @@ public class MigrationOperation : DistributedTaskProgress
             }
             await PublishChanges();
         }
+    }
+
+    /// <summary>
+    /// The ceiling on what an uploaded backup may unpack to when <c>migration:maxExtractedSize</c> is not configured.
+    /// A portal whose quota sets no limit (an unlimited plan, standalone) would otherwise have none, and a backup of a
+    /// few megabytes that unpacks to hundreds of gigabytes would fill the disk the service shares with every portal.
+    /// </summary>
+    public const long DefaultMaxExtractedSize = 100L * 1024 * 1024 * 1024;
+
+    /// <summary>The lowest <c>migration:maxExtractedSize</c> accepted: 1 MB, below it no real backup unpacks.</summary>
+    public const long MinMaxExtractedSize = 1024L * 1024;
+
+    /// <summary>The highest <c>migration:maxExtractedSize</c> accepted: 1 PB, so the ceiling stays finite.</summary>
+    public const long MaxMaxExtractedSize = 1024L * 1024 * 1024 * 1024 * 1024;
+
+    /// <summary>
+    /// The most bytes the uploaded backup may unpack to: the tenant quota, capped by <c>migration:maxExtractedSize</c>.
+    /// The setting is in bytes, 1 MB to 1 PB, for example <c>"107374182400"</c> for 100 GB; unset, it is
+    /// <see cref="DefaultMaxExtractedSize"/>. The ceiling cannot be switched off: an unreadable value gives the
+    /// default and 0, a negative or an out-of-range value the nearest bound, each with a warning. A quota of zero or
+    /// less sets no limit of its own, so the ceiling alone applies and the result is never zero or less.
+    /// </summary>
+    public static long GetMaxExtractedSize(IConfiguration configuration, long maxTotalSize, ILogger logger)
+    {
+        var maxExtractedSize = configuration.ReadLong("migration:maxExtractedSize", DefaultMaxExtractedSize, MinMaxExtractedSize, MaxMaxExtractedSize, logger);
+        return maxTotalSize > 0 ? Math.Min(maxExtractedSize, maxTotalSize) : maxExtractedSize;
+    }
+
+    /// <summary>
+    /// The most entries an uploaded backup may hold when <c>migration:maxExtractedEntries</c> is not configured.
+    /// </summary>
+    public const long DefaultMaxExtractedEntries = 1_000_000;
+
+    /// <summary>The highest <c>migration:maxExtractedEntries</c> accepted, so the ceiling stays finite.</summary>
+    public const long MaxMaxExtractedEntries = 100_000_000;
+
+    /// <summary>
+    /// The most entries - files, folders, links - the uploaded backup may hold: <c>migration:maxExtractedEntries</c>,
+    /// 1 to 100 000 000, for example <c>"1000000"</c>; unset, it is <see cref="DefaultMaxExtractedEntries"/>. The
+    /// ceiling cannot be switched off: an unreadable value gives the default and 0, a negative or an out-of-range value
+    /// the nearest bound, each with a warning.
+    /// </summary>
+    public static long GetMaxExtractedEntries(IConfiguration configuration, ILogger logger)
+    {
+        return configuration.ReadLong("migration:maxExtractedEntries", DefaultMaxExtractedEntries, 1, MaxMaxExtractedEntries, logger);
     }
 
     public static string GetMigrationFolderCacheKey(int tenantId)
