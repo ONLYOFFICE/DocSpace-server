@@ -3384,7 +3384,11 @@ public class UserControllerAdditional<T>(
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         var knownToSubjects = await fileSharing.GetKnownToSubjectsAsync();
         var securityDao = daoFactory.GetSecurityDao<T>();
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
+        // The access list as the caller sees it: every record marks an account as already having one (`shared`), but a
+        // Restrict record denies access and makes nobody known - any member of a room sees whom the room excludes.
+        var shares = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).ToListAsync();
+        var parentUserIds = shares.Select(r => r.Id).ToList();
+        var knownFromShares = shares.Where(r => r.Access != ASC.Files.Core.Security.FileShare.Restrict).Select(r => r.Id).ToList();
 
         // Only read access is required here, so who has access to the entry is reported only to a caller that may see
         // its access list - the same rule that leaves parentUserIds empty for anybody else.
@@ -3405,6 +3409,7 @@ public class UserControllerAdditional<T>(
             filterSeparator,
             includeStrangers,
             knownToSubjects,
+            knownFromShares,
             inDto.Area,
             inDto.InvitedByMe,
             inDto.InviterId,
@@ -3423,6 +3428,7 @@ public class UserControllerAdditional<T>(
                            filterSeparator,
                            includeStrangers,
                            knownToSubjects,
+                           knownFromShares,
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,

@@ -189,7 +189,11 @@ public class AccountsController<T>(
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         var knownToSubjects = await fileSharing.GetKnownToSubjectsAsync();
         var everyoneOnly = !await fileSharing.CanPickAnyGroupAsync();
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r=> r.Id).ToListAsync();
+        // The access list as the caller sees it: every record marks an account as already having one (`shared`), but a
+        // Restrict record denies access and makes nobody known.
+        var shares = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).ToListAsync();
+        var parentUserIds = shares.Select(r => r.Id).ToList();
+        var knownFromShares = shares.Where(r => r.Access != ASC.Files.Core.Security.FileShare.Restrict).Select(r => r.Id).ToList();
 
         if (string.IsNullOrEmpty(text))
         {
@@ -209,6 +213,7 @@ public class AccountsController<T>(
             separator,
             includeStrangers,
             knownToSubjects,
+            knownFromShares,
             inDto.Area,
             inDto.InvitedByMe,
             inDto.InviterId,
@@ -240,6 +245,7 @@ public class AccountsController<T>(
                            separator,
                            includeStrangers,
                            knownToSubjects,
+                           knownFromShares,
                            inDto.Area,
                            inDto.InvitedByMe,
                            inDto.InviterId,

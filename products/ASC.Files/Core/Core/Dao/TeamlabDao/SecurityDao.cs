@@ -730,7 +730,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
+        bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, IEnumerable<Guid> knownFromShares, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
     {
         if (entry == null || count == 0 || (includeShared && !sharedVisible))
         {
@@ -742,7 +742,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, sharedVisible, filesDbContext, separator,
-            includeStrangers, knownToSubjects, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
+            includeStrangers, knownToSubjects, knownFromShares, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         if (offset > 0)
         {
@@ -761,7 +761,7 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
+        bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, IEnumerable<Guid> knownFromShares, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null || (includeShared && !sharedVisible))
         {
@@ -772,7 +772,7 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, sharedVisible, filesDbContext, separator, includeStrangers, knownToSubjects, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, sharedVisible, filesDbContext, separator, includeStrangers, knownToSubjects, knownFromShares, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         return await q1.CountAsync();
     }
@@ -791,6 +791,7 @@ internal abstract class SecurityBaseDao<T>(
         string separator,
         bool includeStrangers,
         IReadOnlyCollection<Guid> knownToSubjects,
+        IEnumerable<Guid> knownFromShares,
         Area area,
         bool? invitedByMe,
         Guid? inviterId,
@@ -804,7 +805,7 @@ internal abstract class SecurityBaseDao<T>(
         // accepted only for a related one (CanUserShareAnotherUserAsync), so a guest met in a room only is not offered.
         if (knownToSubjects != null)
         {
-            q = FilterByKnownTo(q, tenantId, _authContext.CurrentAccount.ID, knownToSubjects, parentUserIds, filesDbContext);
+            q = FilterByKnownTo(q, tenantId, _authContext.CurrentAccount.ID, knownToSubjects, knownFromShares, filesDbContext);
         }
 
         if (employeeStatus.HasValue)
@@ -1020,12 +1021,13 @@ internal abstract class SecurityBaseDao<T>(
     /// <summary>
     /// Keeps the users the caller already works with: the owners and the members of the rooms it is in, directly or
     /// through a group, the members of the groups added to those rooms, the accounts it is related to, and the accounts
-    /// in the access list of the entry as the caller sees it (<paramref name="parentUserIds"/>: the records on the entry
-    /// and its parent folders, empty unless the caller may manage that access). The records on the entry are never read
-    /// here on their own: a caller that may only read the entry would learn whom else it is shared with. The owner of a
-    /// room has no record of its own - it is the author of the room folder - so it is read from there. Restricted access is no membership - neither a Restrict record of
-    /// its own nor one that takes a member of a group out of a room the group is in - and room templates are not
-    /// rooms. Rooms on third-party storage are not taken into account: their records carry no internal folder id
+    /// in the access list of the entry as the caller sees it (<paramref name="knownFromShares"/>: the records on the
+    /// entry and its parent folders without the Restrict ones, empty unless the caller may see that list). The records
+    /// on the entry are never read here on their own: a caller that may only read the entry would learn whom else it is
+    /// shared with. The owner of a room has no record of its own - it is the author of the room folder - so it is read
+    /// from there. Restricted access is no membership - neither a Restrict record of its own, nor one that takes a
+    /// member of a group out of a room the group is in, nor one in the access list of the entry, which any member of a
+    /// room sees - and room templates are not rooms. Rooms on third-party storage are not taken into account: their records carry no internal folder id
     /// to check the room type by.
     /// </summary>
     /// <remarks>
@@ -1046,7 +1048,7 @@ internal abstract class SecurityBaseDao<T>(
         int tenantId,
         Guid currentUserId,
         IReadOnlyCollection<Guid> knownToSubjects,
-        IEnumerable<Guid> parentUserIds,
+        IEnumerable<Guid> knownFromShares,
         FilesDbContext filesDbContext)
     {
         var roomTypes = DocSpaceHelper.RoomTypes;
@@ -1122,7 +1124,7 @@ internal abstract class SecurityBaseDao<T>(
             .Select(u => u.Id);
 
         var parentUsers = users
-            .Where(u => parentUserIds.Contains(u.Id))
+            .Where(u => knownFromShares.Contains(u.Id))
             .Select(u => u.Id);
 
         var knownUsers = roomUsers
