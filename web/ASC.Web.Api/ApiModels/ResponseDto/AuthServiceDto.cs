@@ -122,6 +122,10 @@ public class AuthServiceDto
         foreach (var item in keys)
         {
             var meta = metadataProvider?.GetKeyMetadata(item);
+            if (meta?.Hidden == true)
+            {
+                continue;
+            }
 
             result.Props.Add(new AuthKeyDto
             {
