@@ -36,6 +36,10 @@ import tools  # noqa: E402  (Vale, vacuum and their stand-in)
 DOC_TOOL_DIR = "common/Tools/ASC.Api.Documentation/ASC.Api.Documentation"
 JSON_DIR = DOC_TOOL_DIR + "/json"
 BUNDLE_SETTINGS = DOC_TOOL_DIR + "/appsettings.json"
+# Documents of JSON_DIR that no C# project emits on purpose: aichat comes from the Node service in
+# common/ASC.AI.Chat. Any other document without a project means the index lost one (a csproj marker
+# stopped matching), and the run stops instead of quietly scanning less.
+NON_CSHARP_DOCUMENTS = {"aichat_2.0.json"}
 LIST_PATH = ".claude/skills/openapi-desc-opt/unoptimized-controllers.md"
 
 VERBS = ("get", "post", "put", "delete", "patch", "head", "options", "trace")
@@ -686,7 +690,7 @@ def freshness(root, scope):
     verdicts = []
     for key in scope:
         meta = projects(root)[key]
-        doc_rel ="{0}/{1}".format(JSON_DIR, meta["doc"])
+        doc_rel = "{0}/{1}".format(JSON_DIR, meta["doc"])
         doc_commit = git(root, "log", "-1", "--format=%ct", "--", doc_rel)
         src_commit = git(root, "log", "-1", "--format=%ct", "--", meta["project"])
         dirty = [line for line in git(root, "status", "--porcelain", "--", meta["project"]).splitlines()
@@ -711,7 +715,7 @@ def run(root, scope, threshold, found_tools=None):
     result = dict(sections=[], diag=collections.OrderedDict(), stale=[], unmatched={},
                   form_source=collections.OrderedDict(), form_notes=collections.OrderedDict(),
                   doc_order={key: i for i, key in enumerate(projects(root))})
-    generator =generator_response_texts(root)
+    generator = generator_response_texts(root)
     found_tools = found_tools if found_tools is not None else tools.discover()
     work = tempfile.mkdtemp(prefix="desc-opt-scan-")
     try:
@@ -724,7 +728,7 @@ def run(root, scope, threshold, found_tools=None):
 def _run(root, scope, threshold, result, generator, found_tools, work):
     for key in scope:
         meta = projects(root)[key]
-        doc_path =os.path.join(root, JSON_DIR, meta["doc"])
+        doc_path = os.path.join(root, JSON_DIR, meta["doc"])
         if not os.path.exists(doc_path):
             result["diag"][key] = dict(error="no document " + meta["doc"])
             continue
@@ -1413,9 +1417,16 @@ def main():
         if unknown:
             sys.exit("unknown documents in --scope: {0} (known: {1})".format(", ".join(unknown), ", ".join(known)))
         scope = [k for k in known if k in wanted]
-    for name in unscanned_documents(args.root):
+    unscanned = unscanned_documents(args.root)
+    for name in unscanned:
         print("NOT SCANNED: {0} — no C# project emits it, so no controller ties its texts to a source "
               "(list rules §1); it needs a pass of its own".format(name))
+    lost = [name for name in unscanned if name not in NON_CSHARP_DOCUMENTS]
+    if lost:
+        sys.exit("INDEX: no project of the index emits {0}, but the document is there. A project file lost the "
+                 "markers projects() reads (<OpenApiDocumentsDirectory>, --file-name), or a new non-C# document "
+                 "needs a place in NON_CSHARP_DOCUMENTS. Fix that before trusting the queue."
+                 .format(", ".join(lost)))
 
     if args.freshness:
         stale = False

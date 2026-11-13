@@ -743,7 +743,7 @@
           "Authentication"
         ],
         "summary": "Authenticate a user",
-        "description": "Signs a user in to the current portal and returns an authentication token. If the user has a second factor, the\r\ncall returns what that factor needs instead. Send `userName` with `password` or `passwordHash`, a confirmation\r\nlink in `confirmData`, or a third-party account. Anyone can call it without signing in. The call changes data.\r\nEach successful call opens a new session. You can repeat it with the same password or third-party account.\r\nAfter a sign-in with a `confirmData` link, a repeated call with this link returns 404. A new `culture` also\r\nbecomes the user's language. With SMS codes on, the answer has `sms` and no `token`. Without an activated phone\r\nnumber, `confirmUrl` holds a phone activation link for `POST api/2.0/authentication/setphone`. Otherwise the call\r\nsends an SMS code. It sends none while an earlier code is still valid. With an authenticator app on, the answer\r\nhas `tfa` and no `token`. Before the app is connected, the answer also has its setup key in `tfaKey`. To finish\r\nsuch a sign-in, send the code to `POST api/2.0/authentication/{code}`. The call returns 401 for a wrong password,\r\nan unknown user, or a rejected third-party account. It also returns 401 if the portal does not allow third-party\r\nsign-in. A rejected `confirmData` key or its unknown user returns 404. The call returns 403 for a disabled user,\r\na wrong CAPTCHA, or too many failed attempts. Failed attempts count per user name and IP address. During a block,\r\na solved CAPTCHA in `recaptchaResponse` lets the call through. The portal's login settings set the attempt limit\r\nand the block time.",
+        "description": "Signs a user in to the current portal and returns an authentication token. If the user has a second factor, the\r\ncall returns what that factor needs instead. Send `userName` with `password` or `passwordHash`, a confirmation\r\nlink in `confirmData`, or a third-party account. Anyone can call it without signing in. The call changes data.\r\nEach successful call opens a new session. You can repeat it with the same password or third-party account. After\r\na sign-in with a `confirmData` link, a repeated call with this link returns 404. A new `culture` also becomes\r\nthe user's language. With SMS codes on, the answer has `sms` and no `token`. Without an activated phone number,\r\n`confirmUrl` holds a phone activation link for `POST api/2.0/authentication/setphone`. Otherwise the call sends\r\nan SMS code. It sends none while an earlier code is still valid. With an authenticator app on, the answer has\r\n`tfa` and no `token`. Before the app is connected, the answer also has its setup key in `tfaKey`. To finish such\r\na sign-in, send the code to `POST api/2.0/authentication/{code}`. The call returns 401 for a wrong password, an\r\nunknown user, or a rejected third-party account. It also returns 401 if the portal does not allow third-party\r\nsign-in. A rejected `confirmData` key or its unknown user returns 404. The call returns 403 for a disabled user,\r\na wrong CAPTCHA, or too many failed attempts. Failed attempts count per user name and IP address. During a\r\nblock, a solved CAPTCHA in `recaptchaResponse` lets the call through. The portal's login settings set the\r\nattempt limit and the block time. If `confirmData.email` is not an email address, the call returns 400.",
         "operationId": "authenticateMe",
         "requestBody": {
           "content": {
@@ -853,7 +853,7 @@
           "Authentication"
         ],
         "summary": "Authenticate a user by code",
-        "description": "Finishes a two-factor sign-in with a one-time code and returns the authentication token. Call it after\r\n`POST api/2.0/authentication` returns `sms` or `tfa`. Send the same credentials again, with the code in `code`.\r\nWith SMS codes on, the call checks an SMS code. Otherwise it checks an authenticator app code or a backup code.\r\nAnyone can call it without signing in. The call changes data. An SMS code or a backup code works only once, so a\r\nrepeated call returns 401. An app code is accepted again for up to 5 minutes, and each call opens a new session.\r\nAn accepted SMS code cancels the other codes and activates the phone number. The first accepted app code connects\r\nthe app and creates backup codes. A new `culture` also becomes the user's language. The answer has `token`, and\r\n`sms` or `tfa` shows the checked factor. To get a new SMS code, use `POST api/2.0/authentication/sendsms`. The\r\ncall returns 401 for a wrong, empty, or expired code. It also returns 401 if the user has no second factor. After\r\ntoo many wrong codes, even a right code returns 401 for up to 10 minutes. A wrong password or an unknown user\r\nalso returns 401. The call returns 403 for a disabled user or too many failed password attempts. A rejected key\r\nin `confirmData` returns 404. If `confirmData.email` is not an email address, the call returns 400.",
+        "description": "Finishes a two-factor sign-in with a one-time code and returns the authentication token. Call it after `POST\r\napi/2.0/authentication` returns `sms` or `tfa`. Send the same credentials again, with the code in `code`. With\r\nSMS codes on, the call checks an SMS code. Otherwise it checks an authenticator app code or a backup code.\r\nAnyone can call it without signing in. The call changes data. An SMS code or a backup code works only once, so a\r\nrepeated call returns 401. An app code is accepted again for up to 5 minutes, and each call opens a new session.\r\nAn accepted SMS code cancels the other codes and activates the phone number. The first accepted app code\r\nconnects the app and creates backup codes. A new `culture` also becomes the user's language. The answer has\r\n`token`, and `sms` or `tfa` shows the checked factor. To get a new SMS code, use `POST\r\napi/2.0/authentication/sendsms`. The call returns 401 for a wrong, empty, or expired code. It also returns 401\r\nif the user has no second factor. After too many wrong SMS codes, even a right one returns 401 for up to 10\r\nminutes. More app code attempts than the portal's login attempt limit return 401 until one minute passes without\r\nattempts. A wrong password or an unknown user also returns 401. The call returns 403 for a disabled user or too\r\nmany failed password attempts. A rejected key in `confirmData` returns 404. If `confirmData.email` is not an\r\nemail address, the call returns 400.",
         "operationId": "authenticateMeFromBodyWithCode",
         "parameters": [
           {
@@ -1166,7 +1166,7 @@
           "Authentication"
         ],
         "summary": "Set a mobile phone",
-        "description": "Saves the phone number of a user and sends an SMS code to it. Use it when `POST api/2.0/authentication`\r\nreturns `sms` with a phone activation link in `confirmUrl`. Sign the request with the confirmation token from\r\nthat link. Other callers get 401. An authentication token alone does not work here. The call saves the number as not activated. The number becomes activated when\r\n`POST api/2.0/authentication/{code}` accepts a code sent to it. If a code sent to this number is still valid,\r\nthe call sends no new SMS. You can repeat it to change a number that is not activated yet. The answer has no\r\ntoken. To send another code, use `POST api/2.0/authentication/sendsms`. The call cannot change an activated\r\nnumber. If SMS codes are on for the user but the portal cannot send them, the call returns 405. It still saves\r\nthe number but sends no SMS.",
+        "description": "Saves the phone number of a user and sends an SMS code to it. Use it when `POST api/2.0/authentication`\r\nreturns `sms` with a phone activation link in `confirmUrl`. Sign the request with the confirmation token from\r\nthat link. An anonymous call or an invalid or expired link returns 401. An authentication token alone returns\r\n403. The call changes data. It saves the number as not activated. The number becomes activated when\r\n`POST api/2.0/authentication/{code}` accepts a code sent to it. If a code sent to this number is still valid,\r\nthe call sends no new SMS. You can repeat it to change a number that is not activated yet. The answer has no\r\ntoken. To send another code, use `POST api/2.0/authentication/sendsms`. The call cannot change an activated\r\nnumber. If SMS codes are on for the user but the portal cannot send them, the call returns 405. It still saves\r\nthe number but sends no SMS.",
         "operationId": "saveMobilePhone",
         "requestBody": {
           "content": {
@@ -1200,18 +1200,14 @@
               }
             }
           },
+          "401": {
+            "description": "The request carries no confirmation token from a phone activation link, or the link is invalid or expired"
+          },
+          "403": {
+            "description": "The request is signed with an authentication token instead of the phone activation link"
+          },
           "405": {
             "description": "SMS two-factor is switched on for the user but the portal cannot send SMS codes, for example because its plan does not include them; the number is stored and no code is sent"
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -1990,7 +1986,7 @@
           "Migration"
         ],
         "summary": "Start migration",
-        "description": "Starts the import of the users, groups, and files selected in the body from the parsed backup. First, call\r\n`POST api/2.0/migration/init/{migratorName}` and wait until `isCompleted` is true. Then send `parseResult`\r\nfrom `GET api/2.0/migration/status` back here. Mark the users and groups to import with `shouldImport`, and\r\nthe content with the `import` flags. Requires a DocSpace admin. Other callers get 403. Only the portal owner\r\ncan import a user as `DocSpaceAdmin` who is not a DocSpace admin of this portal yet. If another admin tries\r\nthis, the call returns 403 and imports nothing. The call only queues the job and returns an empty body\r\nimmediately. Repeat `GET api/2.0/migration/status` until `isCompleted` is true. There, `successedUsers`,\r\n`failedUsers`, and `error` show the result. The log in `GET api/2.0/migration/logs` has a line for each step.\r\nThe import changes the portal and cannot be undone. Do not repeat the call. While the job runs, a repeated\r\ncall does nothing. After the job ends, the portal deletes the backup. A repeated call then starts a job that\r\nfails and replaces the result and the log of the import. So read them first, and upload and parse the backup\r\nbefore a new import. The call returns 400 for a missing or unreadable body, an unknown `userType`, or an empty\r\nor invalid `email`. When the import ends, close it with `POST api/2.0/migration/finish`. That call can also\r\nemail the imported users their activation links.\n\nRaises the `room.created` webhook for every room the queued import creates. Raises the `folder.created` webhook for every folder the import creates, including one per imported user for their files. Raises the `room.updated` webhook for every room the import moves to its original owner, a room admin or DocSpace admin.",
+        "description": "Starts the import of the users, groups, and files selected in the body from the parsed backup. First, call\r\n`POST api/2.0/migration/init/{migratorName}` and wait until `isCompleted` is true. Then send `parseResult`\r\nfrom `GET api/2.0/migration/status` back here. Mark the users and groups to import with `shouldImport`, and\r\nthe content with the `import` flags. Requires a DocSpace admin. Other callers get 403. Only the portal owner\r\ncan import a user as `DocSpaceAdmin` who is not a DocSpace admin of this portal yet. If another admin tries\r\nthis, the call returns 403 and imports nothing. The call only queues the job and returns an empty body\r\nimmediately. Repeat `GET api/2.0/migration/status` until `isCompleted` is true. There, `successedUsers`,\r\n`failedUsers`, and `error` show the result. The log in `GET api/2.0/migration/logs` has a line for each step.\r\nThe import changes the portal and cannot be undone. Do not repeat the call. While the job runs, a repeated\r\ncall does nothing. After the job ends, the portal deletes the backup. A repeated call then starts a job that\r\nfails and replaces the result and the log of the import. So read them first, and upload and parse the backup\r\nbefore a new import. The call returns 400 for a missing or unreadable body, an unknown `userType`, or an empty\r\nor invalid `email`. When the import ends, close it with `POST api/2.0/migration/finish`. That call can also\r\nemail the imported users their activation links.\n\nRaises the `room.created` webhook for every room the queued import creates. Raises the `folder.created` webhook for every folder the queued import creates, including one per imported user for their files. Raises the `room.updated` webhook for every room the queued import moves to its owner, a room admin or DocSpace admin.",
         "operationId": "startMigration",
         "requestBody": {
           "content": {
@@ -2091,7 +2087,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "folder.created",
-            "when": "for every folder the import creates, including one per imported user for their files"
+            "when": "for every folder the queued import creates, including one per imported user for their files"
           },
           {
             "trigger": "room.created",
@@ -2099,7 +2095,7 @@
           },
           {
             "trigger": "room.updated",
-            "when": "for every room the import moves to its original owner, a room admin or DocSpace admin"
+            "when": "for every room the queued import moves to its owner, a room admin or DocSpace admin"
           }
         ]
       }
@@ -3957,7 +3953,7 @@
           "Portal / Payment"
         ],
         "summary": "Get the current plan and limits",
-        "description": "Returns the quota of the portal, paid or free, with the limits of its features and their usage. Any signed-in\r\nuser can call it, except a guest. A guest gets 403. The call is read-only. By default, the call reads the plan\r\nfrom the cache. With `refresh=true`, it reads the plan from the billing service, so use it right after a\r\npurchase. The answer depends on the user type of the caller. A DocSpace admin or the portal owner gets the\r\nprice, the due date, and all features. A room admin gets only the `manager`, `room`, `total_size`, and\r\n`statistic` features. A user gets only the `total_size` feature. For a room admin and a user, `price` is an\r\nempty object and `dueDate` is missing. Every caller gets `usersQuota`, `roomsQuota`, `aiAgentsQuota`, and\r\n`tenantCustomQuota`. To read the quotas that the portal can buy, use `GET api/2.0/portal/payment/quotas`.",
+        "description": "Returns the quota of the portal, paid or free, with the limits of its features and their usage. Any signed-in\r\nuser can call it, except a guest. A guest gets 403. The call is read-only. By default, the call reads the plan\r\nfrom the cache. With `refresh=true`, it reads the plan from the billing service, so use it right after a\r\npurchase. The answer depends on the user type of the caller. A DocSpace admin or the portal owner gets the\r\nprice, the due date, and all features. A room admin gets only the `manager`, `room`, `total_size`, and\r\n`statistic` features. A user gets only the `total_size` feature. For a room admin and a user, `price` is an\r\nempty object and `dueDate` is missing. If the plan has the `statistic` feature or the installation is\r\nstandalone, every caller gets `usersQuota`, `roomsQuota`, `aiAgentsQuota`, and `tenantCustomQuota`. To read the\r\nquotas that the portal can buy, use `GET api/2.0/portal/payment/quotas`.",
         "operationId": "getQuotaPaymentInformation",
         "parameters": [
           {
@@ -27429,7 +27425,7 @@
           "Settings / TFA settings"
         ],
         "summary": "Get the TFA settings",
-        "description": "Returns the two-factor authentication methods the portal offers, with the portal-wide state of each. The list\r\nhas at most two entries, `sms` and `app`. Each entry appears only if its method is available on the portal. An\r\nempty list means the portal offers neither method. Any signed-in user can call it. The call is read-only. It\r\nreturns the portal policy, not the caller's own linked app. To change the policy, use\r\n`PUT api/2.0/settings/tfaapp`. To read your own backup codes, use `GET api/2.0/settings/tfaappcodes`.",
+        "description": "Returns the two-factor authentication methods the portal offers, with the portal-wide state of each. The list\r\nhas at most two entries, `sms` and `app`. Each entry appears only if the installation offers its method. Its\r\n`available` field says if the portal can turn it on. An empty list means the portal offers neither method. Any\r\nsigned-in user can call it. The call is read-only. It returns the portal policy, not the caller's own linked\r\napp. To change the policy, use `PUT api/2.0/settings/tfaapp`. To read your own backup codes, use `GET\r\napi/2.0/settings/tfaappcodes`.",
         "operationId": "getTfaSettings",
         "responses": {
           "200": {

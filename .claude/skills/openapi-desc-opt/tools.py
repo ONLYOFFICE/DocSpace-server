@@ -78,6 +78,23 @@ CANARY = ("This canary sentence is long on purpose, because every working form c
 CANARY_ROUTES = (("/internal/desc-opt-canary", "get"), ("/api/2.0/desc-opt-canary", "get"))
 _CANARY = object()
 
+# Seconds a Vale or vacuum run may take before it counts as failed; a full queue takes well under a minute.
+TOOL_TIMEOUT = 300
+
+
+def _json_array(text):
+    """The first `[` of `text` that opens a JSON array, or None. vacuum may print a banner or an ANSI
+    escape before its report, so the first `[` of the output is not always the report."""
+    decoder = json.JSONDecoder()
+    for m in re.finditer(r"\[", text):
+        try:
+            value, _ = decoder.raw_decode(text, m.start())
+        except ValueError:
+            continue
+        if isinstance(value, list):
+            return value
+    return None
+
 
 def _canary_failure(rule, where=""):
     return ("FAILED: the canary, a {0}-word sentence{1}, got no {2} — the tool checked nothing, so its "
@@ -181,8 +198,11 @@ def run_vale(binary, texts, work, docs_only=False):
         ini = re.sub(r"(?m)^Packages = .*\n", "", ini).replace("BasedOnStyles = Docs, Microsoft", "BasedOnStyles = Docs")
         with open(config, "w", encoding="utf-8") as f:
             f.write(re.sub(r"(?m)^Microsoft\..*\n", "", ini))
-    proc = subprocess.run([binary, "--config", config, "--output=JSON", "."], cwd=folder,
-                          capture_output=True, text=True, encoding="utf-8")
+    try:
+        proc = subprocess.run([binary, "--config", config, "--output=JSON", "."], cwd=folder,
+                              capture_output=True, text=True, encoding="utf-8", timeout=TOOL_TIMEOUT)
+    except (OSError, subprocess.SubprocessError) as e:
+        return None, "Vale failed: " + str(e)[:300]
     try:
         data = json.loads(proc.stdout or "{}")
     except ValueError:
@@ -231,15 +251,20 @@ def run_vacuum(binary, entries, work):
     with open(spec_path, "w", encoding="utf-8") as f:
         json.dump(spec, f, ensure_ascii=False, indent=1)
     env = dict(os.environ, VACUUM_NO_UPDATE_CHECK="true")
-    proc = subprocess.run([binary, "spectral-report", "-q", "-n", "-o",
-                           "-r", os.path.join(VACUUM_DIR, "ruleset.yaml"),
-                           "-f", os.path.join(VACUUM_DIR, "functions"), spec_path],
-                          capture_output=True, text=True, encoding="utf-8", env=env)
-    start = (proc.stdout or "").find("[")
+    argv = [binary, "spectral-report", "-q", "-n", "-o",
+            "-r", os.path.join(VACUUM_DIR, "ruleset.yaml"),
+            "-f", os.path.join(VACUUM_DIR, "functions"), spec_path]
+    # On Windows a .cmd/.bat shim (what npm installs) runs through cmd.exe, which parses the arguments
+    # again: a path with one of these characters would be split or run as a command.
+    if binary.lower().endswith((".cmd", ".bat")) and any(c in a for a in argv[1:] for c in '&|<>^%"'):
+        return None, ("vacuum failed: {0} is a cmd shim and a path holds one of & | < > ^ % \"; use another "
+                      "--work folder or point --vacuum at vacuum.exe").format(binary)
     try:
-        data = json.loads(proc.stdout[start:]) if start >= 0 else None
-    except ValueError:
-        data = None
+        proc = subprocess.run(argv, capture_output=True, text=True, encoding="utf-8", env=env,
+                              timeout=TOOL_TIMEOUT)
+    except (OSError, subprocess.SubprocessError) as e:
+        return None, "vacuum failed: " + str(e)[:300]
+    data = _json_array(proc.stdout or "")
     if data is None:
         return None, "vacuum failed: " + (proc.stderr or proc.stdout or "").strip()[:300]
     out, flagged, lost = {}, set(), []

@@ -214,8 +214,8 @@ public class MigrationController(
     /// </summary>
     /// <path>api/2.0/migration/migrate</path>
     [RaisesWebhook(WebhookTrigger.RoomCreated, When = "for every room the queued import creates")]
-    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "for every folder the import creates, including one per imported user for their files")]
-    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every room the import moves to its original owner, a room admin or DocSpace admin")]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "for every folder the queued import creates, including one per imported user for their files")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every room the queued import moves to its owner, a room admin or DocSpace admin")]
     [Tags("Migration")]
     [SwaggerResponse(200, "The import has been queued; the response carries no content and the progress is read from `GET api/2.0/migration/status`")]
     [SwaggerResponse(400, "The request body is missing or could not be read as a parse result, including an unknown `userType` name, or a user in `users`, `withoutEmailUsers` or `existUsers` has an `email` that is empty or not a valid address")]

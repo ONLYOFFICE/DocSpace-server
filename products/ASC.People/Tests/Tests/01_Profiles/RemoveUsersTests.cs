@@ -121,9 +121,8 @@ public class RemoveUsersTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     /// <summary>
-    /// The description promises that a repeat deletes nothing more: a deleted account is looked up as the
-    /// system "lost" user, which the call skips like any system account, so the repeat is a 200 with an
-    /// empty list, not the 403 an earlier text claimed.
+    /// A repeat for an account the first call deleted is a 200 with an empty list: the deleted account is
+    /// looked up as the system "lost" user, which the call skips like any other system account.
     /// </summary>
     [Fact]
     public async Task RemoveUsers_RepeatedForDeletedAccount_ShouldReturnEmptyList()
@@ -137,6 +136,11 @@ public class RemoveUsersTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         first.Response.Should().ContainSingle().Which.Id.Should().Be(user.Id);
         repeat.Response.Should().BeEmpty();
+
+        var lookup = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _profilesApi.GetProfileByUserIdAsync(user.Id.ToString(), TestContext.Current.CancellationToken));
+
+        lookup.ErrorCode.Should().Be(404);
     }
 
     [Fact]
@@ -150,6 +154,11 @@ public class RemoveUsersTests(AspireAppFixture fixture) : BaseTest(fixture)
             TestContext.Current.CancellationToken);
 
         removed.Response.Should().ContainSingle().Which.Id.Should().Be(user.Id);
+
+        var lookup = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _profilesApi.GetProfileByUserIdAsync(user.Id.ToString(), TestContext.Current.CancellationToken));
+
+        lookup.ErrorCode.Should().Be(404);
     }
 
     [Fact]

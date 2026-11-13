@@ -523,6 +523,19 @@ class Index:
         return out
 
 
+# The status a type the handler maps itself answers with when its constructor names none.
+DEFAULT_STATUS = {"BadHttpRequestException": 400}
+
+
+def ctor_args(bl, open_pos):
+    """The argument list of the constructor call whose `(` or `{` is at `open_pos` in the blanked source,
+    so a number in the next statement is no status (string contents are already blanked)."""
+    if open_pos >= len(bl) or bl[open_pos] not in "({":
+        return ""
+    close = ")" if bl[open_pos] == "(" else "}"
+    return bl[open_pos + 1:match_close(bl, open_pos, bl[open_pos], close)]
+
+
 def status_of(name):
     return http.HTTPStatus[re.sub(r"(?<!^)(?=[A-Z])", "_", name).upper()].value
 
@@ -677,12 +690,14 @@ class Analyzer:
             exc = m.group(1).split(".")[-1]
             # every type the handler answers with its own status (CustomHttpException, BadHttpRequestException)
             if exc == self.custom_case or any(t == exc and c is None for t, c in self.table):
-                args = bl[pos:pos + 200]
+                args = ctor_args(bl, a + m.end() - 1)
                 cm = re.search(r"HttpStatusCode\.(\w+)|\b([1-5]\d\d)\b", args)
                 if cm and cm.group(1):
                     code = status_of(cm.group(1))
                 elif cm:
                     code = int(cm.group(2))
+                elif exc in DEFAULT_STATUS:
+                    code = DEFAULT_STATUS[exc]
                 else:
                     add(Ev(500, "throw?", f, pos, exc, strong=False, detail="custom status not readable"), exc)
                     continue

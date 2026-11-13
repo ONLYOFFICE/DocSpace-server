@@ -730,8 +730,9 @@ public class PaymentController(
     /// purchase. The answer depends on the user type of the caller. A DocSpace admin or the portal owner gets the
     /// price, the due date, and all features. A room admin gets only the `manager`, `room`, `total_size`, and
     /// `statistic` features. A user gets only the `total_size` feature. For a room admin and a user, `price` is an
-    /// empty object and `dueDate` is missing. Every caller gets `usersQuota`, `roomsQuota`, `aiAgentsQuota`, and
-    /// `tenantCustomQuota`. To read the quotas that the portal can buy, use `GET api/2.0/portal/payment/quotas`.
+    /// empty object and `dueDate` is missing. If the plan has the `statistic` feature or the installation is
+    /// standalone, every caller gets `usersQuota`, `roomsQuota`, `aiAgentsQuota`, and `tenantCustomQuota`. To read the
+    /// quotas that the portal can buy, use `GET api/2.0/portal/payment/quotas`.
     /// </remarks>
     /// <summary>
     /// Get the current plan and limits

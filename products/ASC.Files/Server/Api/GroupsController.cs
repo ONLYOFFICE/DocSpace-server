@@ -44,16 +44,16 @@ public class GroupsController(
 {
 
     /// <remarks>
-    /// Creates a room group, a personal collection of rooms with a name and an icon. Other members of the portal
-    /// never see the group. Any signed-in user can call it, including a guest. The call checks read access to each
-    /// listed room. It changes data. Do not repeat it. Each call creates another group. The call returns 400 for a
-    /// blank or too long name, or an unknown icon. It also returns 400 if `searchArea` is not `Active` or `Forms`.
-    /// It also returns 400 for a malformed room identifier or a disconnected storage account. An empty
-    /// `rooms` list returns 403. If no listed room can be added, the call creates no group. It returns 403 if a
-    /// listed identifier exists but is not a room the caller can read. If all existing rooms are readable but in
-    /// the other section, it returns 400. If no listed room exists, it returns 404. A string identifier that names
-    /// no third-party storage also returns 404. If only some rooms can be added, the call creates the group with
-    /// them but returns 403. So read `GET api/2.0/files/group` before you retry.
+    /// Creates a room group, a personal collection of rooms with a name and an icon. Other members of the portal never
+    /// see the group. Any signed-in user can call it, including a guest. The call checks read access to each listed
+    /// room. It changes data. Do not repeat it. Each call creates another group. The call returns 400 for a blank or
+    /// too long name, or an unknown icon. It also returns 400 if `searchArea` is not `Active`, `Forms`, or
+    /// `PrivateRooms`. It also returns 400 for a malformed room identifier or a disconnected storage account. An empty
+    /// `rooms` list returns 403. If no listed room can be added, the call creates no group. It returns 403 if a listed
+    /// identifier exists but is not a room the caller can read. If all existing rooms are readable but in the other
+    /// section, it returns 400. If no listed room exists, it returns 404. A string identifier that names no third-party
+    /// storage also returns 404. If only some rooms can be added, the call creates the group with them but returns 403.
+    /// So read `GET api/2.0/files/group` before you retry.
     /// </remarks>
     /// <summary>
     /// Add a new room group
@@ -61,7 +61,7 @@ public class GroupsController(
     /// <path>api/2.0/files/group</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The created room group with the rooms that were linked to it", typeof(RoomGroupDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `name`, `icon` or `rooms`, the name is blank or longer than 128 characters, the icon is not a built-in cover, `searchArea` names a section other than `Active` and `Forms`, a room identifier is neither a positive number nor a non-numeric string, a third-party room identifier refers to a storage account that is not connected, or none of the listed rooms can be added and the existing ones all belong to the other section than `searchArea`")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name`, `icon` or `rooms`, the name is blank or longer than 128 characters, the icon is not a built-in cover, `searchArea` names a section other than `Active`, `Forms` and `PrivateRooms`, a room identifier is neither a positive number nor a non-numeric string, a third-party room identifier refers to a storage account that is not connected, or none of the listed rooms can be added and the existing ones all belong to the other section than `searchArea`")]
     [SwaggerResponse(403, "The `rooms` list is empty, the listed rooms exist but none of them is a room the caller can read, or only some of them could be added - the group is then created with those")]
     [SwaggerResponse(404, "None of the listed rooms exists, or a string room identifier does not name a third-party storage")]
     [HttpPost("")]
@@ -211,13 +211,13 @@ public class GroupsController(
     }
 
     /// <remarks>
-    /// Returns the room groups of the caller in the Rooms or Forms section, each with its rooms. Groups of other
-    /// members never appear, even for a DocSpace admin. Any signed-in user can call it, including a guest. The call
-    /// is read-only. The list has no paging or total, and its order is not fixed. An empty array means the caller
+    /// Returns the room groups of the caller in the section of `searchArea`, each with its rooms. Groups
+    /// of other members never appear, even for a DocSpace admin. Any signed-in user can call it, including a guest. The
+    /// call is read-only. The list has no paging or total, and its order is not fixed. An empty array means the caller
     /// has no groups in this section. With `includeMembers` set to false, `rooms` is null in every entry, but
-    /// `totalRooms` is still filled. Each `rooms` list skips archived rooms, rooms of the other section, and rooms
-    /// the caller can no longer read. The `totalRooms` count uses the same rule. A skipped room returns after it
-    /// leaves the archive or the caller gets access again. If `searchArea` is not `Active` or `Forms`, the call
+    /// `totalRooms` is still filled. Each `rooms` list skips archived rooms, rooms of the other section, and rooms the
+    /// caller can no longer read. The `totalRooms` count uses the same rule. A skipped room returns after it leaves the
+    /// archive or the caller gets access again. If `searchArea` is not `Active`, `Forms`, or `PrivateRooms`, the call
     /// returns 400. To get one group, use `GET api/2.0/files/group/{id}`.
     /// </remarks>
     /// <summary>

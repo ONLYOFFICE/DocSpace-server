@@ -48,7 +48,12 @@ function runRule(input) {
         case "minSentences":
             return s.length < Number(o.min) ? [{ message: s.length + " sentences, fewer than " + o.min }] : [];
         case "oneParagraph":
-            return /\n\s*\n|^\s*[-*] |^\s*\d+\. /m.test(String(input)) ? [{ message: "more than one paragraph or a list" }] : [];
+            // A numbered item starts a list only at the start of the text, or at a line start with the
+            // number 1 (CommonMark): a wrapped line that begins with "403. " continues the paragraph.
+            // tools.py has_paragraphs holds the same two expressions.
+            var raw = String(input);
+            return /\n\s*\n|^\s*[-*+] |^\s*1[.)] /m.test(raw) || /^\s*\d{1,9}[.)] /.test(raw)
+                ? [{ message: "more than one paragraph or a list" }] : [];
         case "grade":
             var w = letterWords(text), syl = 0;
             for (var j = 0; j < w.length; j++) syl += syllables(w[j]);

@@ -2143,7 +2143,8 @@ public class UserController(
     /// Update a user
     /// </summary>
     /// <path>api/2.0/people/{userId}</path>
-    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "when the call changes the account")]
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "on every call for the caller's own account, even one that changes nothing")]
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "for another account when `disable` is sent or `isUser` changes the type")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The first and last name pair is not a valid user name")]

@@ -222,17 +222,18 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Starts a backup of the portal and returns the queued job. Requires the EditPortalSettings permission,
-    /// which the portal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller without
-    /// the space access permission also gets 403. The call queues work. To follow the job, poll
-    /// `GET api/2.0/backup/getbackupprogress` until `isCompleted` is true. While a backup runs, a repeated call starts
-    /// no new job and returns the running one. Once the job ends, a repeated call makes another backup. After the
-    /// portal spends its free backups of the month, the call charges each backup to the portal wallet. It then also
-    /// turns on the paid backup service. If the wallet cannot pay for the backup, the call returns 402. It also returns
-    /// 402 for a `Documents` backup if the portal is over its storage quota. The call returns 400 if `folderId` is
-    /// missing or does not match `storageType`. It also returns 400 if an item of `storageParams` has no key or value,
-    /// or repeats a key. If the target folder does not exist, the call returns 404. It returns 403 if you cannot create
-    /// files in the folder. The root folders of rooms, the archive, and room templates also return 403.
+    /// Starts a backup of the portal and returns the queued job. Requires the EditPortalSettings permission, which the
+    /// portal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller without the space access
+    /// permission also gets 403. The call queues work. To follow the job, poll `GET api/2.0/backup/getbackupprogress`
+    /// until `isCompleted` is true. Do not repeat it while a backup runs. A repeat returns the running job. But after
+    /// the free backups of the month, it opens another payment session in the wallet. Once the job ends, a repeated
+    /// call makes another backup. After the portal spends its free backups of the month, the call charges each backup
+    /// to the portal wallet. It then also turns on the paid backup service. If the wallet cannot pay for the backup,
+    /// the call returns 402. It also returns 402 for a `Documents` backup if the portal is over its storage quota. The
+    /// call returns 400 if `folderId` is missing or does not match `storageType`. It also returns 400 if an item of
+    /// `storageParams` has no key or value, or repeats a key. If the target folder does not exist, the call returns
+    /// 404. It returns 403 if you cannot create files in the folder. The root folders of rooms, the archive, and room
+    /// templates also return 403.
     /// </remarks>
     /// <summary>Start the backup</summary>
     /// <path>api/2.0/backup/startbackup</path>

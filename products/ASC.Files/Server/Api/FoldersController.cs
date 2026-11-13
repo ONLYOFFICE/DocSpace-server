@@ -356,10 +356,11 @@ public abstract class FoldersController<T>(
     /// the response arrives. Repeat `GET api/2.0/files/fileops` until the job has `finished` set to true. Then read its
     /// `error` to see if the deletion failed. If `deleteAfter` is true, `GET api/2.0/files/fileops` does not list the
     /// job after it finishes. By default, the job moves the folder to the trash, where you can restore it. If
-    /// `immediately` is true, the deletion is final. In a room and in the trash, the deletion is always final. The same
-    /// applies to the root folder of a connected storage. If a file inside is blocked, for example open for editing,
-    /// the job deletes nothing. The call also returns 403 for a room if `immediately` is not true. If the folder does
-    /// not exist, the call returns 404. To delete several items in one call, use `PUT api/2.0/files/fileops/delete`.
+    /// `immediately` is true, the deletion is final. The deletion is always final in the trash and in a private room.
+    /// The same applies to the root folder of a connected storage. If a file inside is blocked, for example open for
+    /// editing, the job deletes nothing. The call also returns 403 for a room if `immediately` is not true. If the
+    /// folder does not exist, the call returns 404. To delete several items in one call, use `PUT
+    /// api/2.0/files/fileops/delete`.
     /// </remarks>
     /// <summary>
     /// Delete a folder

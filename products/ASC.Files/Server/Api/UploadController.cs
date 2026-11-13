@@ -522,7 +522,7 @@ public abstract class UploadController<T>(
     /// </remarks>
     /// <summary>Insert a file</summary>
     /// <path>api/2.0/files/{folderId}/insert</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded)]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "for a new file and for a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one", typeof(FileDto<int>))]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
@@ -554,7 +554,7 @@ public abstract class UploadController<T>(
     /// </remarks>
     /// <summary>Upload a file</summary>
     /// <path>api/2.0/files/{folderId}/upload</path>
-    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded)]
+    [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "for a new file and for a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file, as a list with one element", typeof(List<FileDto<int>>))]
     [SwaggerResponse(400, "The request has no file part")]

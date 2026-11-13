@@ -216,13 +216,13 @@ public class GroupController(
 
     /// <remarks>
     /// Changes the name and the manager of a group, and adds or removes members, in one call. Requires a DocSpace
-    /// admin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes data.
-    /// You can repeat it with the same body. A field that you leave out keeps its current value. This call cannot
-    /// remove the manager. It skips a guest, a disabled account, or an unknown ID in `groupManager` and
-    /// `membersToAdd`. It also skips an ID in `membersToRemove` that is not a member. The call adds members first
-    /// and then removes them. So an account in both lists ends up removed. The response is the group after the
-    /// update. Compare it with the request to see what the call skipped. If no group has this ID, the call
-    /// returns 404. The call returns 400 if `groupName` is too long.
+    /// admin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes data. You
+    /// can repeat it with the same body. A field that you leave out keeps its current value. The call cannot clear the
+    /// manager through `groupManager`. If `membersToRemove` lists the manager, the group is left without one. It skips
+    /// a guest, a disabled account, or an unknown ID in `groupManager` and `membersToAdd`. It also skips an ID in
+    /// `membersToRemove` that is not a member. The call adds members first and then removes them. So an account in both
+    /// lists ends up removed. The response is the group after the update. Compare it with the request to see what the
+    /// call skipped. If no group has this ID, the call returns 404. The call returns 400 if `groupName` is too long.
     /// </remarks>
     /// <summary>
     /// Update a group
@@ -516,7 +516,8 @@ public class GroupController(
     /// Removes the listed accounts from a group and keeps the other members. The accounts stay, but they lose the
     /// access they had through the group. Requires a DocSpace admin. Other callers get 403. A room admin can read
     /// groups but also gets 403 here. The call changes data. You can repeat it with the same body. The call skips
-    /// an ID that is not a member or matches no account. An empty list changes nothing. The response is the group
+    /// an ID that is not a member or matches no account. If the list includes the manager, the group is left without
+    /// one. An empty list changes nothing. The response is the group
     /// with the remaining members. If no group has this ID, the call returns 404. To remove all members, list them
     /// all here.
     /// </remarks>

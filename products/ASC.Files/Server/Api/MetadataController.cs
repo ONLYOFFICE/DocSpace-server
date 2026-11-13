@@ -304,7 +304,7 @@ public class MetadataController(
 
     /// <remarks>
     /// Assigns metadata templates to a folder or a room. With `cascade` true, it also passes them down to the content.
-    /// Requires the right to create content in the folder, which only the room manager has in a room. Other callers
+    /// Requires the right to create content in the folder, or a room manager for a room itself. Other callers
     /// get 403. The root folders of sections also return 403. The call changes data but writes no values.
     /// With `cascade` false, the assignment ends in the request. The response is then a completed operation without an
     /// ID. With `cascade` true, the call also queues a pass over all folders and files below. The pass assigns the
@@ -378,7 +378,7 @@ public class MetadataController(
 
     /// <remarks>
     /// Removes a metadata template from a folder or a room, together with the values of its fields. Requires the right to
-    /// create content in the folder, which only the room manager has in a room. Other callers get 403. The root folders
+    /// create content in the folder, or a room manager for a room itself. Other callers get 403. The root folders
     /// of sections also return 403. The deletion of the values cannot be undone. If this folder cascaded the
     /// template, the cascade stops here. A running pass also stops for this template. The folders and files below keep
     /// the template and their values as direct assignments. To remove it from them, call this operation or
@@ -402,7 +402,7 @@ public class MetadataController(
     /// <remarks>
     /// Turns the cascade of a metadata template on a folder or a room on or off. The template stays on the folder. First,
     /// assign the template with `PUT api/2.0/files/metadata/folder/{folderId}/templates`, or inherit it from a folder
-    /// above. Requires the right to create content in the folder, which only the room manager has in a room. Other
+    /// above. Requires the right to create content in the folder, or a room manager for a room itself. Other
     /// callers get 403. The root folders of sections also return 403. The call changes data. With `cascade` true, the
     /// template cascades with the given `conflictResolveType`. An inherited assignment becomes the folder's own. The call
     /// queues a pass, even if the cascade was already on. The response is that pass. Repeat
@@ -465,7 +465,7 @@ public class MetadataController(
 
     /// <remarks>
     /// Writes the values of metadata fields on a folder or a room. Requires the right to create content in the folder,
-    /// which only the room manager has in a room. Other callers get 403. The root folders of sections also
+    /// or a room manager for a room itself. Other callers get 403. The root folders of sections also
     /// return 403. The call changes data, and you can repeat it with the same body. Each field must belong to a template
     /// of the folder, assigned with `PUT api/2.0/files/metadata/folder/{folderId}/templates` or inherited. Fill only the
     /// member for the field type: `stringValue`, `numberValue`, `dateValue`, or `optionIds`. A text value has at most
@@ -518,7 +518,7 @@ public class MetadataController(
 
     /// <remarks>
     /// Sets the custom text fields of a folder or a room. These are name and value pairs that need no template. Requires
-    /// the right to create content in the folder, which only the room manager has in a room. Other callers
+    /// the right to create content in the folder, or a room manager for a room itself. Other callers
     /// get 403. The root folders of sections also return 403. The call changes data, and you can repeat it with the same
     /// body. The call matches names regardless of case. A listed name gets the value, and a null or empty value removes
     /// the field. The call leaves the names that are not listed unchanged. A new name creates the field for the whole

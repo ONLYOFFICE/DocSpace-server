@@ -102,18 +102,20 @@ public class AuthenticationController(
     }
 
     /// <remarks>
-    /// Finishes a two-factor sign-in with a one-time code and returns the authentication token. Call it after
-    /// `POST api/2.0/authentication` returns `sms` or `tfa`. Send the same credentials again, with the code in `code`.
-    /// With SMS codes on, the call checks an SMS code. Otherwise it checks an authenticator app code or a backup code.
+    /// Finishes a two-factor sign-in with a one-time code and returns the authentication token. Call it after `POST
+    /// api/2.0/authentication` returns `sms` or `tfa`. Send the same credentials again, with the code in `code`. With
+    /// SMS codes on, the call checks an SMS code. Otherwise it checks an authenticator app code or a backup code.
     /// Anyone can call it without signing in. The call changes data. An SMS code or a backup code works only once, so a
     /// repeated call returns 401. An app code is accepted again for up to 5 minutes, and each call opens a new session.
-    /// An accepted SMS code cancels the other codes and activates the phone number. The first accepted app code connects
-    /// the app and creates backup codes. A new `culture` also becomes the user's language. The answer has `token`, and
-    /// `sms` or `tfa` shows the checked factor. To get a new SMS code, use `POST api/2.0/authentication/sendsms`. The
-    /// call returns 401 for a wrong, empty, or expired code. It also returns 401 if the user has no second factor. After
-    /// too many wrong codes, even a right code returns 401 for up to 10 minutes. A wrong password or an unknown user
-    /// also returns 401. The call returns 403 for a disabled user or too many failed password attempts. A rejected key
-    /// in `confirmData` returns 404. If `confirmData.email` is not an email address, the call returns 400.
+    /// An accepted SMS code cancels the other codes and activates the phone number. The first accepted app code
+    /// connects the app and creates backup codes. A new `culture` also becomes the user's language. The answer has
+    /// `token`, and `sms` or `tfa` shows the checked factor. To get a new SMS code, use `POST
+    /// api/2.0/authentication/sendsms`. The call returns 401 for a wrong, empty, or expired code. It also returns 401
+    /// if the user has no second factor. After too many wrong SMS codes, even a right one returns 401 for up to 10
+    /// minutes. More app code attempts than the portal's login attempt limit return 401 until one minute passes without
+    /// attempts. A wrong password or an unknown user also returns 401. The call returns 403 for a disabled user or too
+    /// many failed password attempts. A rejected key in `confirmData` returns 404. If `confirmData.email` is not an
+    /// email address, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Authenticate a user by code
@@ -234,18 +236,18 @@ public class AuthenticationController(
     /// Signs a user in to the current portal and returns an authentication token. If the user has a second factor, the
     /// call returns what that factor needs instead. Send `userName` with `password` or `passwordHash`, a confirmation
     /// link in `confirmData`, or a third-party account. Anyone can call it without signing in. The call changes data.
-    /// Each successful call opens a new session. You can repeat it with the same password or third-party account.
-    /// After a sign-in with a `confirmData` link, a repeated call with this link returns 404. A new `culture` also
-    /// becomes the user's language. With SMS codes on, the answer has `sms` and no `token`. Without an activated phone
-    /// number, `confirmUrl` holds a phone activation link for `POST api/2.0/authentication/setphone`. Otherwise the call
-    /// sends an SMS code. It sends none while an earlier code is still valid. With an authenticator app on, the answer
-    /// has `tfa` and no `token`. Before the app is connected, the answer also has its setup key in `tfaKey`. To finish
-    /// such a sign-in, send the code to `POST api/2.0/authentication/{code}`. The call returns 401 for a wrong password,
-    /// an unknown user, or a rejected third-party account. It also returns 401 if the portal does not allow third-party
+    /// Each successful call opens a new session. You can repeat it with the same password or third-party account. After
+    /// a sign-in with a `confirmData` link, a repeated call with this link returns 404. A new `culture` also becomes
+    /// the user's language. With SMS codes on, the answer has `sms` and no `token`. Without an activated phone number,
+    /// `confirmUrl` holds a phone activation link for `POST api/2.0/authentication/setphone`. Otherwise the call sends
+    /// an SMS code. It sends none while an earlier code is still valid. With an authenticator app on, the answer has
+    /// `tfa` and no `token`. Before the app is connected, the answer also has its setup key in `tfaKey`. To finish such
+    /// a sign-in, send the code to `POST api/2.0/authentication/{code}`. The call returns 401 for a wrong password, an
+    /// unknown user, or a rejected third-party account. It also returns 401 if the portal does not allow third-party
     /// sign-in. A rejected `confirmData` key or its unknown user returns 404. The call returns 403 for a disabled user,
-    /// a wrong CAPTCHA, or too many failed attempts. Failed attempts count per user name and IP address. During a block,
-    /// a solved CAPTCHA in `recaptchaResponse` lets the call through. The portal's login settings set the attempt limit
-    /// and the block time.
+    /// a wrong CAPTCHA, or too many failed attempts. Failed attempts count per user name and IP address. During a
+    /// block, a solved CAPTCHA in `recaptchaResponse` lets the call through. The portal's login settings set the
+    /// attempt limit and the block time. If `confirmData.email` is not an email address, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Authenticate a user
@@ -518,7 +520,8 @@ public class AuthenticationController(
     /// <remarks>
     /// Saves the phone number of a user and sends an SMS code to it. Use it when `POST api/2.0/authentication`
     /// returns `sms` with a phone activation link in `confirmUrl`. Sign the request with the confirmation token from
-    /// that link. Other callers get 401. An authentication token alone does not work here. The call saves the number as not activated. The number becomes activated when
+    /// that link. An anonymous call or an invalid or expired link returns 401. An authentication token alone returns
+    /// 403. The call changes data. It saves the number as not activated. The number becomes activated when
     /// `POST api/2.0/authentication/{code}` accepts a code sent to it. If a code sent to this number is still valid,
     /// the call sends no new SMS. You can repeat it to change a number that is not activated yet. The answer has no
     /// token. To send another code, use `POST api/2.0/authentication/sendsms`. The call cannot change an activated
@@ -531,6 +534,8 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/setphone</path>
     [Tags("Authentication")]
     [SwaggerResponse(200, "The masked phone number the code was sent to and the moment that code expires - no authentication token yet", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(401, "The request carries no confirmation token from a phone activation link, or the link is invalid or expired")]
+    [SwaggerResponse(403, "The request is signed with an authentication token instead of the phone activation link")]
     [SwaggerResponse(405, "SMS two-factor is switched on for the user but the portal cannot send SMS codes, for example because its plan does not include them; the number is stored and no code is sent")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]

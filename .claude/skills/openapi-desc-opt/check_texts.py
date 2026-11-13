@@ -401,19 +401,32 @@ def textstat_metrics(texts):
 
 
 def run_textstat(texts, python):
+    """(metrics, python, problem). No metrics and no problem: textstat is not installed or configured.
+    No metrics with a problem: an interpreter is configured but the worker failed there, which is a broken
+    installation to report, not a missing one."""
     try:
         import textstat  # noqa: F401
-        return textstat_metrics(texts), sys.executable
+        return textstat_metrics(texts), sys.executable, None
     except ImportError:
         pass
     python = python or os.environ.get("TEXTSTAT_PYTHON")
-    if not python or not os.path.isfile(python):
-        return None, None
-    proc = subprocess.run([python, "-I", os.path.abspath(__file__), "--textstat-worker"],
-                          input=json.dumps(texts), capture_output=True, text=True, encoding="utf-8")
+    if not python:
+        return None, None, None
+    if not os.path.isfile(python):
+        return None, python, "the configured interpreter does not exist"
+    try:
+        proc = subprocess.run([python, "-I", os.path.abspath(__file__), "--textstat-worker"],
+                              input=json.dumps(texts), capture_output=True, text=True, encoding="utf-8",
+                              timeout=readability.TOOL_TIMEOUT)
+    except (OSError, subprocess.SubprocessError) as e:
+        return None, python, str(e)[:300]
     if proc.returncode != 0:
-        return None, None
-    return json.loads(proc.stdout), python
+        last = next((x for x in reversed((proc.stderr or "").splitlines()) if x.strip()), "")
+        return None, python, "the worker exited with code {0}: {1}".format(proc.returncode, last.strip()[:300])
+    try:
+        return json.loads(proc.stdout), python, None
+    except ValueError:
+        return None, python, "the worker printed no JSON"
 
 
 # --- the installation check --------------------------------------------------------------------
@@ -426,7 +439,7 @@ SAMPLE_LONG = ("Returns the list of all the files and folders that the current u
 SAMPLE_SHORT = "Returns the files of a room. The room is set by its ID. A missing room returns 404."
 VACUUM_RULES = {"desc-sentence-length", "desc-average-sentence", "desc-min-sentences", "desc-one-paragraph",
                 "desc-grade"}
-VACUUM_EXPECTED = {"desc-sentence-length", "desc-min-sentences"}
+VACUUM_EXPECTED = {"desc-sentence-length", "desc-average-sentence", "desc-min-sentences"}
 # The paragraph check: an XML comment wraps its lines, and a wrapped line that begins with a status code is
 # no numbered list; a blank line followed by bullets is a list.
 SAMPLE_WRAPPED = "Returns the files of a room. If the room does not exist, the call returns\n404. A guest gets 403."
@@ -471,8 +484,11 @@ def check_tools(args):
     else:
         print("  own checks  ok: a wrapped status code is one paragraph, bullets after a blank line are a list")
 
-    stats, python = run_textstat(samples, args.textstat_python)
-    if stats is None:
+    stats, python, problem = run_textstat(samples, args.textstat_python)
+    if problem:
+        failed.append("textstat")
+        print("  textstat    FAILED ({0}): {1}".format(python, problem))
+    elif stats is None:
         missing.append("textstat")
         print("  textstat    not found")
     else:
@@ -548,7 +564,9 @@ def main():
         except (AttributeError, ValueError):
             pass
     if "--textstat-worker" in sys.argv:
-        json.dump(textstat_metrics(json.load(sys.stdin)), sys.stdout)
+        # -I ignores PYTHONUTF8 and PYTHONIOENCODING, so stdin would be read in the console code page
+        # (cp1251 here) while the parent writes UTF-8: read the bytes and decode them ourselves.
+        json.dump(textstat_metrics(json.loads(sys.stdin.buffer.read().decode("utf-8"))), sys.stdout)
         return
 
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
@@ -581,8 +599,10 @@ def main():
 
     ran, missing = [], []
     texts = {str(i["key"]): i["text"] for i in ok}
-    stats, python = run_textstat(texts, args.textstat_python) if ok else (None, None)
-    if stats is None:
+    stats, python, problem = run_textstat(texts, args.textstat_python) if ok else (None, None, None)
+    if problem:
+        ran.append("textstat FAILED ({0}): {1}".format(python, problem))
+    elif stats is None:
         missing.append("textstat")
     else:
         ran.append("textstat ({0})".format(python))
@@ -648,6 +668,8 @@ def main():
     print("TOOLS: " + ("; ".join(ran) if ran else "none ran"))
     print("MISSING TOOLS: " + (", ".join(missing) if missing else "none"))
     print("tool inputs: " + work)
+    if any("error" in item for item in items):
+        sys.exit(1)
 
 
 if __name__ == "__main__":

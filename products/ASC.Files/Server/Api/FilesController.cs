@@ -322,8 +322,9 @@ public abstract class FilesController<T>(
     /// gallery. Without both, the call uses the blank template of the format in the caller's language. Requires the
     /// right to create files in the folder. Other callers get 403. The call changes data. Do not repeat it. Each call
     /// creates another file. The call returns 403 in the Rooms root, the archive, and the template sections, even for
-    /// a DocSpace admin. It also returns 403 for a missing or unreadable template, or no gallery form of this format.
-    /// If `templateId` is a string that matches no third-party file, the call returns 404. If the new file exceeds
+    /// a DocSpace admin. It also returns 403 for a missing or unreadable template. The call returns 404 for an
+    /// unknown `formId` or a gallery form without a file of this format. It also returns 404 if `templateId` is a
+    /// string that matches no third-party file. If the new file exceeds
     /// the storage quota, the call returns 402. The call returns 400 if `title` is missing, empty, or too long. To
     /// create the file in your own section, use `POST api/2.0/files/@my/file`.
     /// </remarks>
@@ -336,8 +337,8 @@ public abstract class FilesController<T>(
     [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, the form gallery has no file of the title's format, or the file is not a PDF and the folder lies in a form-filling room")]
-    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage")]
+    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
+    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -913,7 +914,7 @@ public abstract class FilesController<T>(
 
     /// <remarks>
     /// Returns the external links of a file. Requires read access to the file. Other callers get 403. A caller who
-    /// cannot share the file gets an empty list. The call is read-only. The response headers carry the total number
+    /// cannot share the file gets none of its own links. The call is read-only. The response headers carry the total number
     /// of links, not the body. A file without links returns an empty list. The list includes the primary link after
     /// `GET api/2.0/files/file/{id}/link` creates it. For a PDF form in a form-filling room, the call adds the link
     /// of the room at the end. If no file has this id, the call returns 404. If `count` is outside its allowed range,
@@ -1304,9 +1305,9 @@ public class FilesControllerCommon(
     /// Each call creates another file. The returned title shows the extension that the portal stored. To create a
     /// file in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title`
     /// is missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403
-    /// if the template does not exist or the caller cannot read it. It also returns 403 if the form gallery has no
-    /// file of the format of the title. If a string `templateId` is not a file of a connected third-party storage,
-    /// the call returns 404.
+    /// if the template does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a
+    /// gallery form without a file of the format of the title. If a string `templateId` is not a file of a connected
+    /// third-party storage, the call also returns 404.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents
@@ -1317,8 +1318,8 @@ public class FilesControllerCommon(
     [SwaggerResponse(200, "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
-    [SwaggerResponse(403, "The caller is a guest whose My documents still exists, the template does not exist or cannot be read, or the form gallery has no file of the title's format")]
-    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage")]
+    [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the template does not exist or cannot be read")]
+    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {

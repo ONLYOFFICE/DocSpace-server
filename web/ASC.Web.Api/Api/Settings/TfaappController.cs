@@ -61,10 +61,11 @@ public class TfaappController(
 {
     /// <remarks>
     /// Returns the two-factor authentication methods the portal offers, with the portal-wide state of each. The list
-    /// has at most two entries, `sms` and `app`. Each entry appears only if its method is available on the portal. An
-    /// empty list means the portal offers neither method. Any signed-in user can call it. The call is read-only. It
-    /// returns the portal policy, not the caller's own linked app. To change the policy, use
-    /// `PUT api/2.0/settings/tfaapp`. To read your own backup codes, use `GET api/2.0/settings/tfaappcodes`.
+    /// has at most two entries, `sms` and `app`. Each entry appears only if the installation offers its method. Its
+    /// `available` field says if the portal can turn it on. An empty list means the portal offers neither method. Any
+    /// signed-in user can call it. The call is read-only. It returns the portal policy, not the caller's own linked
+    /// app. To change the policy, use `PUT api/2.0/settings/tfaapp`. To read your own backup codes, use `GET
+    /// api/2.0/settings/tfaappcodes`.
     /// </remarks>
     /// <summary>Get the TFA settings</summary>
     /// <path>api/2.0/settings/tfaapp</path>
