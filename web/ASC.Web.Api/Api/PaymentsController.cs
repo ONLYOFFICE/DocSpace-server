@@ -2171,8 +2171,8 @@ public class PaymentController(
     /// up the top-up, the call returns the defaults. Then `enabled` is false, `currency` is null, and `minBalance` and
     /// `upToBalance` are 0. These zeros are out of range for `POST api/2.0/portal/payment/topupsettings`. So send real
     /// values instead of the defaults. Until the portal first saves the settings, `lastModified` is
-    /// `0001-01-01T00:00:00`. The portal sets `lowBalanceThreshold` and `lowBalanceNotified`. You cannot set them, but
-    /// switching `enabled` resets them.
+    /// `0001-01-01T00:00:00`. The portal sets `lowBalanceThreshold` and `lowBalanceNotified`. You cannot set them. A
+    /// save with `enabled` true clears `lowBalanceNotified`, and one with false resets `lowBalanceThreshold`.
     /// </remarks>
     /// <summary>
     /// Get the auto top-up settings

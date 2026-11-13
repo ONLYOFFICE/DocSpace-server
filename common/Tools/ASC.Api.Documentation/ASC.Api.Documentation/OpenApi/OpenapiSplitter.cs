@@ -481,6 +481,21 @@ internal static class OpenapiSplitter
                         continue;
                     }
 
+                    // A discriminator names its subtypes in `mapping` as plain strings, not as `$ref`
+                    // (FileEntryBaseDto maps entryKind to FileDto, FolderDto and their third-party twins).
+                    // A section that keeps the base but drops a mapped subtype makes openapi-generator
+                    // fail to look the subtype up, so the mapping targets travel with the base.
+                    if (property.Key == "discriminator" && property.Value?["mapping"] is JsonObject mapping)
+                    {
+                        foreach (var target in mapping)
+                        {
+                            if (target.Value?.GetValueKind() == JsonValueKind.String)
+                            {
+                                AddSchemaRef(target.Value.ToString(), schemas, usedSchemas);
+                            }
+                        }
+                    }
+
                     CollectSchemaRefs(property.Value, schemas, usedSchemas);
                 }
 
