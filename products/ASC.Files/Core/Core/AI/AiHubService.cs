@@ -40,9 +40,11 @@ public class AiHubService(
     AiProjectRoomDao aiProjectRoomDao,
     SkillDao skillDao,
     AssignmentsStorage assignmentsStorage,
+    ThreadsStorage threadsStorage,
     ProfileReader profileReader,
     FileSecurity fileSecurity,
     TenantManager tenantManager,
+    AuthContext authContext,
     GlobalFolderHelper globalFolderHelper,
     IDistributedLockProvider distributedLockProvider,
     FilesMessageService filesMessageService,
@@ -222,6 +224,19 @@ public class AiHubService(
         await socketManager.UpdateFolderAsync(project);
 
         return profile;
+    }
+
+    public async Task<int?> GetThreadArtifactsFolderIdAsync(int projectId, Guid threadId)
+    {
+        await GetProjectAsync(projectId);
+
+        var thread = await threadsStorage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), threadId);
+        if (thread is null || thread.EntryId != projectId || thread.CreatedBy != authContext.CurrentAccount.ID)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        return thread.ArtifactsFolderId;
     }
 
     private async Task<List<RoomSkills>> BuildRoomSkillsAsync(int tenantId, List<Folder<int>> rooms)

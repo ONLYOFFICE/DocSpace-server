@@ -40,6 +40,8 @@ public class AiHubController(
     AiHubService aiHubService,
     AiProjectSourcesDtoMapper aiProjectSourcesDtoMapper,
     AiSkillsDtoMapper aiSkillsDtoMapper,
+    FolderContentDtoHelper folderContentDtoHelper,
+    ApiContext apiContext,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
@@ -164,5 +166,51 @@ public class AiHubController(
         var profile = await aiHubService.SetModelAsync(inDto.Id, inDto.Model.ProfileId);
 
         return profile.Map();
+    }
+
+    /// <remarks>
+    /// Returns the artifacts of a thread in an AI project: the files the chat tools created in it. Only the author of the thread can read them.
+    /// </remarks>
+    /// <summary>Get the AI thread artifacts</summary>
+    /// <path>api/2.0/files/rooms/{id}/threads/{threadId}/artifacts</path>
+    /// <collection>list</collection>
+    [Tags("Rooms / AI")]
+    [SwaggerResponse(200, "The artifacts of the thread", typeof(IEnumerable<FileDto<int>>))]
+    [SwaggerResponse(400, "`count` is outside its allowed range or `startIndex` is negative")]
+    [SwaggerResponse(403, "The caller may not read the project, or the AI features are turned off on the portal")]
+    [SwaggerResponse(404, "No AI project has this id, or it has no such thread of the caller")]
+    [HttpGet("{id}/threads/{threadId:guid}/artifacts")]
+    public async Task<IEnumerable<FileDto<int>>> GetThreadArtifacts(GetAiThreadFilesRequestDto inDto)
+    {
+        var folderId = await aiHubService.GetThreadArtifactsFolderIdAsync(inDto.Id, inDto.ThreadId);
+        if (folderId is null)
+        {
+            apiContext.SetCount(0).SetTotalCount(0);
+
+            return [];
+        }
+
+        var content = await folderContentDtoHelper.GetAsync(
+            folderId.Value,
+            null,
+            null,
+            null,
+            0,
+            false,
+            false,
+            false,
+            ApplyFilterOption.All,
+            SearchArea.Active,
+            inDto.SortBy,
+            inDto.SortOrder,
+            inDto.StartIndex,
+            inDto.Count,
+            inDto.Text);
+
+        var files = content.Files.OfType<FileDto<int>>().ToList();
+
+        apiContext.SetCount(files.Count).SetTotalCount(content.Total);
+
+        return files;
     }
 }

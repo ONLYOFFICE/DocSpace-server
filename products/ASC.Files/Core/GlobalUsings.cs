@@ -308,6 +308,7 @@ global using SecurityContext = ASC.Core.SecurityContext;
 global using SocketManager = ASC.Web.Files.Utils.SocketManager;
 global using SortOrder = ASC.Api.Core.Core.SortOrder;
 global using Tag = ASC.Files.Core.Tag;
+global using ThreadsStorage = ASC.AI.Integration.Threads.ThreadsStorage;
 global using Thumbnail = ASC.Files.Core.Thumbnail;
 global using Token = ASC.Web.Files.ThirdPartyApp.Token;
 global using UserInfo = ASC.Core.Users.UserInfo;
