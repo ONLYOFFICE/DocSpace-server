@@ -1214,7 +1214,9 @@ public partial class SettingsController(
     /// currently has any configured. Requires Owner or DocSpaceAdmin (the EditPortalSettings permission). This is a
     /// read-only, idempotent call, and the list is not paginated; entries are ordered by the provider's configured
     /// display order. Only providers that expose at least one manageable key are included, so a provider with nothing
-    /// to configure is omitted entirely. Save or change a provider's keys with `POST api/2.0/settings/authservice`.
+    /// to configure is omitted entirely; a key the installation does not offer is left out as well, such as the SQLite
+    /// file path of the external database outside the server version. Save or change a provider's keys with
+    /// `POST api/2.0/settings/authservice`.
     /// </remarks>
     /// <summary>Get the authorization services</summary>
     /// <path>api/2.0/settings/authservice</path>
