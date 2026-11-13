@@ -172,7 +172,9 @@ produce the code and can name the check that rules it out, as for a rejection:
 Not removed:
 
 - a code that is reachable but only through the pipeline (§1) — it is a real response; moving it to a document
-  filter is a separate task;
+  filter is a separate task. The exception: a 403 or 404 that only a global MVC filter gives (`TenantStatusFilter`,
+  `IpSecurityFilter`, `ProductSecurityFilter`) is removed from the action — every action has it, so it belongs to
+  the document filter, and an action's attribute for it tells the reader nothing about this action;
 - a code you could not trace to the end — say so in the report instead;
 - a code the remarks of the action name: the remarks are not this skill's to change (`openapi-desc-opt`), and
   the rule requires every code named in the prose to be declared. Keep the attribute and report the contradiction.

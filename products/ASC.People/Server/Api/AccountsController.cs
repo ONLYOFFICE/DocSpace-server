@@ -74,19 +74,18 @@ public class AccountsController<T>(
     UserManager userManager) : ControllerBase
 {
     /// <remarks>
-    /// Searches the portal users and groups that can be given access to the room with the ID given in the route, and
-    /// reports for each of them whether it already has access to that room.
-    /// The caller has to be allowed to manage the access of that room, and the ID has to belong to an existing room,
-    /// so the operation answers 403 for a room the caller cannot share and 404 for an ID that matches nothing.
-    /// The search is read-only and needs `filterValue`: while it is empty the operation returns an empty list and a
-    /// total of 0 instead of every account, so it cannot be used to enumerate the portal.
-    /// `filterValue` is matched case-insensitively against the first name, the last name and the email; without
-    /// `filterSeparator` it is split on spaces and every term has to match, and with a separator it is split on that
-    /// separator and any term may match.
-    /// Matching groups are streamed first and users after them, both paged together by `count` and `startIndex`,
-    /// while the number of matches is reported in the total count of the response.
-    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
-    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// Returns the users and groups that match a search, with whether each one has access to the room. Requires the
+    /// right to change the access of the room. Other callers get 403. If no room has the ID, the call returns 404.
+    /// The call is read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches
+    /// users by first name, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user
+    /// must match every term between spaces. With `filterSeparator`, a user may match any one term. Groups always
+    /// match the whole text, and they include the system group Everyone. The call returns groups first, sorted by
+    /// name, and then users. The `count` and `startIndex` parameters page over both together, and the total counts
+    /// both. The `excludeShared` flag keeps only accounts without access and wins over `includeShared`. The
+    /// `includeShared` flag filters only users, so groups without access still appear. Groups ignore the user
+    /// filters, such as `employeeStatus`, `area`, and `employeeTypes`. A caller who is not a DocSpace admin sees only
+    /// the guests related to them. With `area` set to `All`, they also see guests with access. If `count` is out of
+    /// range, the call returns 400.
     /// </remarks>
     /// <summary>Search accounts for a room</summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
@@ -107,20 +106,18 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Searches the portal users and groups that can be given access to the folder with the ID given in the route,
-    /// and reports for each of them whether it already has access to that folder.
-    /// The caller has to be allowed to manage the access of that folder, and the ID has to belong to an existing
-    /// folder, so the operation answers 403 for a folder the caller cannot share and 404 for an ID that matches
-    /// nothing.
-    /// The search is read-only and needs `filterValue`: while it is empty the operation returns an empty list and a
-    /// total of 0 instead of every account, so it cannot be used to enumerate the portal.
-    /// `filterValue` is matched case-insensitively against the first name, the last name and the email; without
-    /// `filterSeparator` it is split on spaces and every term has to match, and with a separator it is split on that
-    /// separator and any term may match.
-    /// Matching groups are streamed first and users after them, both paged together by `count` and `startIndex`,
-    /// while the number of matches is reported in the total count of the response.
-    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
-    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// Returns the users and groups that match a search, with whether each one has access to the folder. Requires the
+    /// right to change the access of the folder. Other callers get 403. If no folder has the ID, the call
+    /// returns 404. The call is read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The
+    /// call matches users by first name, last name, or email, and groups by name, ignoring case. Without
+    /// `filterSeparator`, a user must match every term between spaces. With `filterSeparator`, a user may match any
+    /// one term. Groups always match the whole text, and they include the system group Everyone. The call returns
+    /// groups first, sorted by name, and then users. The `count` and `startIndex` parameters page over both together,
+    /// and the total counts both. The `excludeShared` flag keeps only accounts without access and wins over
+    /// `includeShared`. The `includeShared` flag filters only users, so groups without access still appear. Groups
+    /// ignore the user filters, such as `employeeStatus`, `area`, and `employeeTypes`. A caller who is not a DocSpace
+    /// admin sees only the guests related to them. With `area` set to `All`, they also see guests with access. If
+    /// `count` is out of range, the call returns 400.
     /// </remarks>
     /// <summary>Search accounts for a folder</summary>
     /// <path>api/2.0/accounts/folder/{id}/search</path>
@@ -141,19 +138,18 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Searches the portal users and groups that can be given access to the file with the ID given in the route, and
-    /// reports for each of them whether it already has access to that file.
-    /// The caller has to be allowed to manage the access of that file, and the ID has to belong to an existing file,
-    /// so the operation answers 403 for a file the caller cannot share and 404 for an ID that matches nothing.
-    /// The search is read-only and needs `filterValue`: while it is empty the operation returns an empty list and a
-    /// total of 0 instead of every account, so it cannot be used to enumerate the portal.
-    /// `filterValue` is matched case-insensitively against the first name, the last name and the email; without
-    /// `filterSeparator` it is split on spaces and every term has to match, and with a separator it is split on that
-    /// separator and any term may match.
-    /// Matching groups are streamed first and users after them, both paged together by `count` and `startIndex`,
-    /// while the number of matches is reported in the total count of the response.
-    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
-    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// Returns the users and groups that match a search, with whether each one has access to the file. Requires the
+    /// right to change the access of the file. Other callers get 403. If no file has the ID, the call returns 404.
+    /// The call is read-only. If `filterValue` is empty, it returns an empty list and a total of 0. The call matches
+    /// users by first name, last name, or email, and groups by name, ignoring case. Without `filterSeparator`, a user
+    /// must match every term between spaces. With `filterSeparator`, a user may match any one term. Groups always
+    /// match the whole text, and they include the system group Everyone. The call returns groups first, sorted by
+    /// name, and then users. The `count` and `startIndex` parameters page over both together, and the total counts
+    /// both. The `excludeShared` flag keeps only accounts without access and wins over `includeShared`. The
+    /// `includeShared` flag filters only users, so groups without access still appear. Groups ignore the user
+    /// filters, such as `employeeStatus`, `area`, and `employeeTypes`. A caller who is not a DocSpace admin sees only
+    /// the guests related to them. With `area` set to `All`, they also see guests with access. If `count` is out of
+    /// range, the call returns 400.
     /// </remarks>
     /// <summary>Search accounts for a file</summary>
     /// <path>api/2.0/accounts/file/{id}/search</path>

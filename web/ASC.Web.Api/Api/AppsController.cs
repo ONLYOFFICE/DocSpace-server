@@ -51,16 +51,14 @@ public class AppsController(
     TenantManager tenantManager) : ControllerBase
 {
     /// <remarks>
-    /// Returns every portal application available on this installation, each with the state it has for the current
-    /// portal: the feature modules the portal can turn on and configure, such as `ai-rooms` or `docs-cloud`. The set
-    /// of applications and their initial enabled state come from the installation configuration and cannot be changed
-    /// through the API; only the enabled flag and the settings document are stored per portal, by
-    /// `PUT api/2.0/apps/{id}/enabled` and `PUT api/2.0/apps/{id}/settings`. Any authenticated portal member may read
-    /// the list. The call is read-only and idempotent. The list follows the order of the configuration, and every item
-    /// carries the application identifier, whether the application is enabled for the current portal, and the settings
-    /// JSON document saved for it, which is empty while the portal has never saved one. An empty list means that no
-    /// applications are configured on this installation, not that they are all disabled. There is neither paging nor
-    /// filtering here: to read a single application use `GET api/2.0/apps/{id}`.
+    /// Returns all portal applications of the installation, each with its state on the current portal. An application
+    /// is a feature module that the portal can turn on and configure, such as `ai-rooms` or `docs-cloud`. The
+    /// installation configuration sets the list and the default state of each application. The API cannot add or
+    /// remove applications. Any signed-in user can call it. The call is read-only. The list follows the order of the
+    /// configuration, without paging or a total. The `settings` field is empty until the portal saves settings for
+    /// the application. An empty list means that the installation has no applications, not that all are turned off. To
+    /// read one application, use `GET api/2.0/apps/{id}`. To change the state or the settings, use
+    /// `PUT api/2.0/apps/{id}/enabled` or `PUT api/2.0/apps/{id}/settings`.
     /// </remarks>
     /// <summary>
     /// Get all apps
@@ -78,16 +76,12 @@ public class AppsController(
     }
 
     /// <remarks>
-    /// Returns one portal application by its identifier - one of the feature modules the portal can turn on, such as
-    /// `ai-rooms` or `docs-cloud` - with the enabled state and the settings document stored for the current portal.
-    /// The identifier must be an application declared in the installation configuration: take it
-    /// from `GET api/2.0/apps`, because an unknown identifier is rejected instead of creating anything. Any
-    /// authenticated portal member may read it. The call is read-only and idempotent. The result carries the
-    /// identifier, the enabled flag of the current portal and the settings JSON document, which is empty while the
-    /// portal has never saved settings for this application. An application that is not configured on this
-    /// installation fails with 404, so this is also the way to find out whether an application exists here at all.
-    /// Use `GET api/2.0/apps` to read all applications in one call, or `GET api/2.0/apps/{id}/settings` when only the
-    /// settings document is needed.
+    /// Returns one portal application with its state on the current portal. An application is a feature module that
+    /// the portal can turn on and configure, such as `ai-rooms` or `docs-cloud`. Take the identifier from
+    /// `GET api/2.0/apps`. It is case-sensitive. Any signed-in user can call it. The call is read-only. The `settings`
+    /// field is empty until the portal saves settings for the application. To read only the settings, use
+    /// `GET api/2.0/apps/{id}/settings`. If the installation has no application with this identifier, the call
+    /// returns 404.
     /// </remarks>
     /// <summary>
     /// Get an app
@@ -107,14 +101,12 @@ public class AppsController(
     }
 
     /// <remarks>
-    /// Returns only the settings document of one portal application, such as `ai-rooms` or `docs-cloud`: the JSON
-    /// that the current portal has saved for it through `PUT api/2.0/apps/{id}/settings`, with no wrapper around it.
-    /// The identifier must be an application declared in the installation configuration, as listed by
-    /// `GET api/2.0/apps`. Any authenticated portal member
-    /// may read it. The call is read-only and idempotent. The document comes back exactly as it was saved: its shape
-    /// is defined by the application itself and is not validated by the portal, and an empty result means that the
-    /// portal has never saved settings for this application, so the application uses its own defaults. The enabled
-    /// state is not part of the answer: read it from `GET api/2.0/apps/{id}`.
+    /// Returns only the settings of one portal application on the current portal. The answer is the saved JSON value
+    /// itself, not an application object. Take the identifier from `GET api/2.0/apps`. It is case-sensitive. Any
+    /// signed-in user can call it. The call is read-only. The portal returns the value as it was saved and never checks
+    /// its shape. An empty result means that the portal has no saved settings for the application. Then the application
+    /// uses its own defaults. To read the enabled state, use `GET api/2.0/apps/{id}`. If the installation has no
+    /// application with this identifier, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get app settings
@@ -135,16 +127,13 @@ public class AppsController(
     }
 
     /// <remarks>
-    /// Turns one portal application on or off for the current portal, and notifies the clients connected to the portal
-    /// so that they can show or hide it without being reloaded. The identifier must be an application declared in the
-    /// installation configuration, as listed by `GET api/2.0/apps`. The caller must be a portal administrator allowed
-    /// to edit the portal settings. The call is mutating and idempotent: it stores the flag for this portal, overriding
-    /// the default that the configuration gives the application, and repeating it with the same value changes nothing
-    /// in the state. Every call is recorded in the portal audit trail as the application being enabled or disabled.
-    /// Disabling an application does not delete its settings document, which stays saved and applies again as soon as
-    /// the application is enabled. The response is the application in its new state, including that settings document.
-    /// Only the enabled flag is affected here: to change the settings document use `PUT api/2.0/apps/{id}/settings`.
-    /// The enabled field is mandatory, and a body without it is rejected with 400 rather than read as false.
+    /// Turns one portal application on or off for the current portal. Take the identifier from `GET api/2.0/apps`. It
+    /// is case-sensitive. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. The call changes data. It saves the flag for this portal instead of the default from the
+    /// configuration. You can repeat it with the same body. Turning an application off keeps its saved settings. They
+    /// apply again when you turn it on. The call returns the application in its new state, with its settings. To
+    /// change the settings, use `PUT api/2.0/apps/{id}/settings`. The call returns 400 if the body is not valid JSON or
+    /// has no `enabled` field. If the installation has no application with this identifier, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Enable or disable an app
@@ -171,16 +160,16 @@ public class AppsController(
     }
 
     /// <remarks>
-    /// Stores the application-specific settings document of one portal application for the current portal. The
-    /// identifier must be an application declared in the installation configuration, as listed by `GET api/2.0/apps`.
-    /// The caller must be a portal administrator allowed to edit the portal settings. The call is mutating and
-    /// idempotent, and it replaces the whole document instead of merging into it: read the current one with
-    /// `GET api/2.0/apps/{id}/settings`, change it and send it back complete, or send `null` to drop the saved document
-    /// and let the application fall back to its own defaults. Any valid JSON value is accepted, since the content is
-    /// stored as it is and is interpreted by the application rather than by the portal, while a body that is not valid
-    /// JSON fails with 400 and stores nothing. The response is the application in its new state, with the stored
-    /// document echoed back. Unlike `PUT api/2.0/apps/{id}/enabled`, this operation sends no notification to the
-    /// connected clients, which pick the new settings up on their next read.
+    /// Saves the settings of one portal application for the current portal. Take the identifier from
+    /// `GET api/2.0/apps`. It is case-sensitive. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. The call changes data, and you can repeat it with the same body. It
+    /// replaces the whole saved value and does not merge into it. So first read the current value with
+    /// `GET api/2.0/apps/{id}/settings`, change it, and send it complete. The portal accepts any JSON value and never
+    /// checks its shape. If `settings` is `null` or missing, the call deletes the saved value. Then the application
+    /// uses its own defaults. The call returns the application in its new state, with the saved settings. It does not
+    /// change the enabled state. To turn the application on or off, use `PUT api/2.0/apps/{id}/enabled`. The call
+    /// returns 400 if the body is not valid JSON. If the installation has no application with this identifier, the
+    /// call returns 404.
     /// </remarks>
     /// <summary>
     /// Save app settings
