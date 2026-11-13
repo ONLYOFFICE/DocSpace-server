@@ -67,4 +67,9 @@ public class AuthKeyMetadata
     /// The value of <see cref="DependsOn"/> key that makes this field visible.
     /// </summary>
     public string DependsOnValue { get; init; }
+
+    /// <summary>
+    /// All values of <see cref="DependsOn"/> key that make this field visible; when set, it supersedes <see cref="DependsOnValue"/>.
+    /// </summary>
+    public List<string> DependsOnValues { get; init; }
 }
