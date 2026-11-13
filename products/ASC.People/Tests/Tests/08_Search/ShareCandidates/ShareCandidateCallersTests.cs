@@ -141,4 +141,31 @@ public class ShareCandidateCallersTests(AspireAppFixture fixture) : ShareCandida
 
         offered.Select(u => u.Id).Should().Contain(guest.Id);
     }
+
+    /// <summary>
+    /// A guest is offered to a caller related to it, and in the area of all accounts also to a caller that sees it on
+    /// the access list of the entry: a room admin gets the guest of its room, marked as having access, although it is
+    /// not related to it, and no guest from outside the room.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithRoomShared_AsRoomAdminNotRelatedToGuest_OffersOnlyTheGuestOfTheRoom()
+    {
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        var roomGuest = await InviteGuest();
+        var otherGuest = await InviteGuest();
+        var roomId = await CreateRoomWithMembersAsync(roomAdmin.Id, roomGuest.Id);
+
+        await _peopleClient.Authenticate(roomAdmin);
+        var offered = (await _peopleSearchApi.GetUsersWithRoomSharedAsync(
+            roomId,
+            employeeStatus: EmployeeStatus.Active,
+            area: AccountSearchArea.All,
+            count: 100,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        offered.Should().ContainSingle(u => u.Id == roomGuest.Id).Which.Shared.Should().Be(true);
+        offered.Select(u => u.Id).Should().NotContain(otherGuest.Id);
+    }
 }

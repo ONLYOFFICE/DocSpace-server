@@ -74,17 +74,17 @@ public class AccountsController<T>(
     UserManager userManager) : ControllerBase
 {
     /// <remarks>
-    /// Searches the users and groups that can be given access to the room given in the route, marking those that
-    /// already hold an access record.
-    /// It answers 403 without the right to manage that access and 404 when no room has the ID.
+    /// Searches the users and groups that can be given access to the room in the route, marking those that already hold
+    /// an access record.
+    /// It answers 403 without the right to manage that access, 404 for an unknown ID.
     /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
     /// space-separated terms, or any term with `filterSeparator`; an empty value returns nothing.
-    /// Groups come before users, paged together by `count` and `startIndex`.
-    /// `shared` marks an account with an access record, even a denying one, on the room; `excludeShared` and
-    /// `includeShared` filter by it.
+    /// Groups come before users, paged together by `count` and `startIndex`, with the total of both.
+    /// `shared` marks the owner and any account with an access record, even a denying one, on the room; `excludeShared`
+    /// and `includeShared` filter by it.
     /// A DocSpace administrator finds everyone; anybody else a guest only if related to it or holding such a record.
     /// A room admin finds every member and group.
-    /// `inviterId` naming another account works only for a DocSpace administrator and is ignored otherwise.
+    /// `inviterId` of another account works for a DocSpace administrator only.
     /// </remarks>
     /// <summary>Search accounts for a room</summary>
     /// <path>api/2.0/accounts/room/{id}/search</path>
@@ -105,20 +105,20 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Searches the users and groups that can be given access to the folder given in the route, marking those that
-    /// already hold an access record.
-    /// It answers 403 without the right to manage that access and 404 when no folder has the ID.
+    /// Searches the users and groups that can be given access to the folder in the route, marking those that already
+    /// hold an access record.
+    /// It answers 403 without the right to manage that access, 404 for an unknown ID.
     /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
     /// space-separated terms, or any term with `filterSeparator`; an empty value returns nothing.
-    /// Groups come before users, paged together by `count` and `startIndex`.
-    /// `shared` marks an account with an access record, even a denying one, on the folder or a parent folder;
-    /// `excludeShared` and `includeShared` filter by it.
+    /// Groups come before users, paged together by `count` and `startIndex`, with the total of both.
+    /// `shared` marks the owner and any account with an access record, even a denying one, on the folder or a parent
+    /// folder; `excludeShared` and `includeShared` filter by it.
     /// A DocSpace administrator finds everyone; anybody else a guest only if related to it or holding such a record.
     /// A room admin finds every member and group; a user or a guest sharing its own folder only the Everyone group and
-    /// the accounts it works with: owners and members of its rooms, directly or through a group, and holders of such a
-    /// record in person.
-    /// Of another account they get only the id, names, email, avatars, type flags, status and `shared`.
-    /// `inviterId` naming another account works only for a DocSpace administrator and is ignored otherwise.
+    /// the accounts it works with: owners and members of its rooms, directly or through a group, and those holding a
+    /// granting record in person.
+    /// Of another account they get only id, names, email, avatars, type flags, status and `shared`.
+    /// `inviterId` of another account works for a DocSpace administrator only.
     /// </remarks>
     /// <summary>Search accounts for a folder</summary>
     /// <path>api/2.0/accounts/folder/{id}/search</path>
@@ -139,20 +139,20 @@ public class AccountsController<T>(
         }
     }
     /// <remarks>
-    /// Searches the users and groups that can be given access to the file given in the route, marking those that
-    /// already hold an access record.
-    /// It answers 403 without the right to manage that access and 404 when no file has the ID.
+    /// Searches the users and groups that can be given access to the file in the route, marking those that already hold
+    /// an access record.
+    /// It answers 403 without the right to manage that access, 404 for an unknown ID.
     /// The search is read-only and needs `filterValue`, matched case-insensitively against names and email - all
     /// space-separated terms, or any term with `filterSeparator`; an empty value returns nothing.
-    /// Groups come before users, paged together by `count` and `startIndex`.
-    /// `shared` marks an account with an access record, even a denying one, on the file or a parent folder;
-    /// `excludeShared` and `includeShared` filter by it.
+    /// Groups come before users, paged together by `count` and `startIndex`, with the total of both.
+    /// `shared` marks the owner and any account with an access record, even a denying one, on the file or a parent
+    /// folder; `excludeShared` and `includeShared` filter by it.
     /// A DocSpace administrator finds everyone; anybody else a guest only if related to it or holding such a record.
     /// A room admin finds every member and group; a user or a guest sharing its own file only the Everyone group and
-    /// the accounts it works with: owners and members of its rooms, directly or through a group, and holders of such a
-    /// record in person.
-    /// Of another account they get only the id, names, email, avatars, type flags, status and `shared`.
-    /// `inviterId` naming another account works only for a DocSpace administrator and is ignored otherwise.
+    /// the accounts it works with: owners and members of its rooms, directly or through a group, and those holding a
+    /// granting record in person.
+    /// Of another account they get only id, names, email, avatars, type flags, status and `shared`.
+    /// `inviterId` of another account works for a DocSpace administrator only.
     /// </remarks>
     /// <summary>Search accounts for a file</summary>
     /// <path>api/2.0/accounts/file/{id}/search</path>

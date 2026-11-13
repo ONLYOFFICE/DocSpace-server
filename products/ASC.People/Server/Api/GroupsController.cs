@@ -837,7 +837,9 @@ public class GroupControllerAdditional<T>(
         var text = inDto.Text;
 
         var everyoneOnly = !await fileSharing.CanPickAnyGroupAsync();
-        var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.Group, null, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
+        // Only the ids are needed, to mark the groups that already have a record: the full entries of the access list
+        // cost a lookup per record on every request.
+        var parentUserIds = (await fileSharing.GetPureShareSubjectsAsync(fileEntry, ShareFilterType.Group, null)).Select(r => r.Id).ToList();
         var securityDao = daoFactory.GetSecurityDao<T>();
 
         var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, everyoneOnly, parentUserIds);

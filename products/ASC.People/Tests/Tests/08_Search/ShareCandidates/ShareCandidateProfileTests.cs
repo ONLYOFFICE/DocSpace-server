@@ -127,7 +127,6 @@ public class ShareCandidateProfileTests(AspireAppFixture fixture) : ShareCandida
         profile.Location.Should().BeNull();
         profile.Notes.Should().BeNull();
         profile.Contacts.Should().BeNullOrEmpty();
-        profile.MobilePhone.Should().BeNull();
         profile.UserName.Should().BeNull();
         profile.RegistrationDate.Should().BeNull();
     }

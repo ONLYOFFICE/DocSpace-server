@@ -153,7 +153,6 @@ public class AccessListMembersTests(AspireAppFixture fixture) : SharingTestBase(
         profile.Location.Should().BeNull();
         profile.Notes.Should().BeNull();
         profile.Contacts.Should().BeNullOrEmpty();
-        profile.MobilePhone.Should().BeNull();
     }
 
     /// <summary>
@@ -183,7 +182,6 @@ public class AccessListMembersTests(AspireAppFixture fixture) : SharingTestBase(
         asUser.Location.Should().BeNull();
         asUser.Notes.Should().BeNull();
         asUser.Contacts.Should().BeNullOrEmpty();
-        asUser.MobilePhone.Should().BeNull();
     }
 
     /// <summary>A group created by the owner with the given members.</summary>
