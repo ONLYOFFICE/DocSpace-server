@@ -144,6 +144,20 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         }
     }
 
+    public async Task<int> SetArtifactsFolderAsync(int tenantId, Guid threadId, int folderId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.SetThreadArtifactsFolderAsync(tenantId, threadId, folderId);
+    }
+
+    public async Task<int> SetAttachmentsFolderAsync(int tenantId, Guid threadId, int folderId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.SetThreadAttachmentsFolderAsync(tenantId, threadId, folderId);
+    }
+
     public async Task DeleteAsync(int tenantId, Guid threadId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
@@ -175,6 +189,8 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
             Title = entity.Title,
             ProfileId = entity.ProfileId,
             EntryId = entity.EntryId,
+            ArtifactsFolderId = entity.ArtifactsFolderId,
+            AttachmentsFolderId = entity.AttachmentsFolderId,
             CreatedBy = entity.CreatedBy,
             LastEditDate = entity.LastEditDate,
             CreatedAt = entity.CreatedAt

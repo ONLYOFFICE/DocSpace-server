@@ -637,6 +637,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<int?>("ArtifactsFolderId")
+                        .HasColumnType("int")
+                        .HasColumnName("artifacts_folder_id");
+
+                    b.Property<int?>("AttachmentsFolderId")
+                        .HasColumnType("int")
+                        .HasColumnName("attachments_folder_id");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime")
                         .HasColumnName("created_at");

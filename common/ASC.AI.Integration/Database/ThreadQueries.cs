@@ -84,6 +84,18 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
+    public Task<int> SetThreadArtifactsFolderAsync(int tenantId, Guid id, int folderId)
+    {
+        return ThreadQueriesContainer.SetThreadArtifactsFolderAsync(this, tenantId, id, folderId);
+    }
+
+    [PreCompileQuery]
+    public Task<int> SetThreadAttachmentsFolderAsync(int tenantId, Guid id, int folderId)
+    {
+        return ThreadQueriesContainer.SetThreadAttachmentsFolderAsync(this, tenantId, id, folderId);
+    }
+
+    [PreCompileQuery]
     public Task<int> DeleteThreadAsync(int tenantId, Guid id)
     {
         return ThreadQueriesContainer.DeleteThreadAsync(this, tenantId, id);
@@ -164,6 +176,18 @@ static file class ThreadQueriesContainer
                 .ExecuteUpdateAsync(x => x
                     .SetProperty(y => y.LastEditDate, lastEditDate)
                     .SetProperty(y => y.ProfileId, profileId));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, int, Task<int>> SetThreadArtifactsFolderAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid id, int folderId) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == id && x.ArtifactsFolderId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.ArtifactsFolderId, folderId));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, int, Task<int>> SetThreadAttachmentsFolderAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid id, int folderId) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == id && x.AttachmentsFolderId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.AttachmentsFolderId, folderId));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeleteThreadAsync =
         EF.CompileAsyncQuery(

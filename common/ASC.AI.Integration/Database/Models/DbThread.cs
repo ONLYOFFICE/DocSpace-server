@@ -44,6 +44,8 @@ public class DbThread : BaseEntity
 
     public Guid? ProfileId { get; init; }
     public int? EntryId { get; init; }
+    public int? ArtifactsFolderId { get; init; }
+    public int? AttachmentsFolderId { get; init; }
     public Guid CreatedBy { get; init; }
     public DateTime LastEditDate { get; init; }
     public DateTime CreatedAt { get; init; }
@@ -104,6 +106,14 @@ public static class DbThreadExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("int");
 
+            entity.Property(e => e.ArtifactsFolderId)
+                .HasColumnName("artifacts_folder_id")
+                .HasColumnType("int");
+
+            entity.Property(e => e.AttachmentsFolderId)
+                .HasColumnName("attachments_folder_id")
+                .HasColumnType("int");
+
             entity.Property(e => e.CreatedBy)
                 .HasColumnName("created_by")
                 .HasColumnType("char(36)")
@@ -157,6 +167,14 @@ public static class DbThreadExtension
 
             entity.Property(e => e.EntryId)
                 .HasColumnName("entry_id")
+                .HasColumnType("integer");
+
+            entity.Property(e => e.ArtifactsFolderId)
+                .HasColumnName("artifacts_folder_id")
+                .HasColumnType("integer");
+
+            entity.Property(e => e.AttachmentsFolderId)
+                .HasColumnName("attachments_folder_id")
                 .HasColumnType("integer");
 
             entity.Property(e => e.CreatedBy)
