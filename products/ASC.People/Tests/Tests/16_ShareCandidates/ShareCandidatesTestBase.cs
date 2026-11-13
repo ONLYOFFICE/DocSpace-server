@@ -90,6 +90,33 @@ public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : Sharin
         }
     }
 
+    /// <summary>
+    /// Moves the room to the archive as the owner. Archiving runs in the background, so the archive is polled on a
+    /// deadline and the last observed listing is asserted.
+    /// </summary>
+    protected async Task ArchiveRoomAsync(int roomId)
+    {
+        await _filesClient.Authenticate(Owner);
+        await _roomsApi.ArchiveRoomAsync(roomId, new ArchiveRoomRequest(deleteAfter: false), TestContext.Current.CancellationToken);
+
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            var archive = (await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.Archive, count: 100, cancellationToken: TestContext.Current.CancellationToken)).Response;
+            var archived = archive.Folders.OfType<FolderDto>().Select(f => f.Id).ToList();
+
+            if (archived.Contains(roomId) || DateTime.UtcNow >= deadline)
+            {
+                archived.Should().Contain(roomId, "the room must be in the archive within 30 seconds");
+
+                return;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
     protected const string ProfileLocation = "Autotest Location";
     protected const string ProfileNotes = "Autotest Notes";
     protected const string ProfileContactType = "skype";

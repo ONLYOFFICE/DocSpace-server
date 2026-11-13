@@ -67,15 +67,18 @@ public class ShareCandidateFiltersTests(AspireAppFixture fixture) : ShareCandida
     }
 
     /// <summary>
-    /// Who invited an account is shown to DocSpace admins only, so for a user <c>inviterId</c> filters only when it
-    /// names the user itself; for anybody else it is ignored rather than telling whom that person invited.
+    /// Who invited an account is shown to DocSpace admins only, so for a user and for a room admin <c>inviterId</c>
+    /// filters only when it names the caller itself; for anybody else it is ignored rather than telling whom that
+    /// account invited. It was first closed for a user only, and a room admin could still filter by any inviter.
     /// </summary>
-    [Fact]
+    [Theory]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.RoomAdmin)]
     [Trait("Category", "Bug")]
     [Trait("Bug", "79163")]
-    public async Task GetUsersWithFilesShared_AsUser_FiltersByInviterOnlyForItself()
+    public async Task GetUsersWithFilesShared_AsNonAdmin_FiltersByInviterOnlyForItself(EmployeeType callerType)
     {
-        var caller = await InviteContact(EmployeeType.User);
+        var caller = await InviteContact(callerType);
         var coMember = await InviteContact(EmployeeType.User);
         await CreateRoomWithMembersAsync(caller.Id, coMember.Id);
         var fileId = await CreateFileInMyDocumentsAsync(caller);
@@ -86,6 +89,24 @@ public class ShareCandidateFiltersTests(AspireAppFixture fixture) : ShareCandida
 
         byAnotherInviter.Select(u => u.Id).Should().Contain(coMember.Id);
         byItself.Select(u => u.Id).Should().NotContain(coMember.Id);
+    }
+
+    /// <summary>
+    /// A DocSpace admin is shown who invited an account, so for it <c>inviterId</c> filters by any account.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsDocSpaceAdmin_FiltersByAnyInviter()
+    {
+        var invitedNobody = await InviteContact(EmployeeType.User);
+        var fileId = await CreateFileInMyDocumentsAsync();
+
+        var unfiltered = await UsersOfferedForFileAsync(Owner, fileId);
+        var byAnotherInviter = await UsersOfferedForFileAsync(Owner, fileId, inviterId: invitedNobody.Id);
+
+        unfiltered.Select(u => u.Id).Should().Contain(invitedNobody.Id);
+        byAnotherInviter.Should().BeEmpty();
     }
 
     private async Task<List<EmployeeFullDto>> UsersOfferedForFileAsync(User caller, int fileId, string? filterValue = null, Guid? inviterId = null)

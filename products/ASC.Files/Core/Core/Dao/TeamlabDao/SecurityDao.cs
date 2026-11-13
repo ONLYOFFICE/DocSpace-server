@@ -257,6 +257,9 @@ internal abstract class SecurityBaseDao<T>(
 
         if (!string.IsNullOrEmpty(text))
         {
+            // Normalised as in the count: where the database compares with regard to case, a value with an uppercase
+            // letter would otherwise give an empty page under a total.
+            text = GetSearchText(text);
             users = users.Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text));
         }
 
@@ -715,8 +718,8 @@ internal abstract class SecurityBaseDao<T>(
     {
         var q = GetGroupsWithEveryone(tenantId, filesDbContext);
 
-        // Not precompiled on purpose: one more predicate on a query that is built per call from the request filters
-        // (text, excludeShared), so there is no compiled query to put it in.
+        // Not precompiled on purpose: an optional predicate could be compiled, but the query it narrows is built per
+        // call from the request filters (text, excludeShared) and has no compiled form to add it to.
         if (everyoneOnly)
         {
             var everyoneId = Constants.GroupEveryone.ID;
@@ -833,9 +836,10 @@ internal abstract class SecurityBaseDao<T>(
             q = q.Where(u => u.ActivationStatus == activationStatus.Value);
         }
 
-        // Who invited an account is shown to DocSpace admins only, so a caller limited to the accounts it knows may
-        // filter by itself as the inviter but not by anybody else: the filter would tell it whom that person invited.
-        if (knownToSubjects != null && inviterId.HasValue && inviterId.Value != _authContext.CurrentAccount.ID)
+        // Who invited an account is shown to DocSpace admins only (includeStrangers is set for them alone), so anybody
+        // else - a room admin as well as a caller limited to the accounts it knows - may filter by itself as the
+        // inviter but not by another account: the filter would tell it whom that account invited.
+        if (!includeStrangers && inviterId.HasValue && inviterId.Value != _authContext.CurrentAccount.ID)
         {
             inviterId = null;
         }
@@ -1049,7 +1053,9 @@ internal abstract class SecurityBaseDao<T>(
     /// shared with. The owner of a room has no record of its own - it is the author of the room folder - so it is read
     /// from there. Restricted access is no membership - neither a Restrict record of its own, nor one that takes a
     /// member of a group out of a room the group is in, nor one in the access list of the entry, which any member of a
-    /// room sees - and room templates are not rooms. Rooms on third-party storage are not taken into account: their records carry no internal folder id
+    /// room sees - and room templates are not rooms. A room in the archive stays a room of its members: they still
+    /// open it there and see each other in its access list, so its owner and members remain known to them.
+    /// Rooms on third-party storage are not taken into account: their records carry no internal folder id
     /// to check the room type by.
     /// </summary>
     /// <remarks>
@@ -1060,9 +1066,15 @@ internal abstract class SecurityBaseDao<T>(
     /// are found through the subject index: with the caller's groups looked up in a subquery, or with the sets
     /// written as correlated <c>Any</c> calls, every room of the portal was scanned.
     /// <para>
-    /// Not precompiled on purpose: it is a filter composed into the query of <c>GetUsersWithSharedQuery</c>, which
-    /// is itself built per call from the request filters (area, types, inviter, text, shared), so it cannot be a
-    /// compiled query of its own.
+    /// Not precompiled on purpose: the set of known users has a fixed shape, but it is joined into the query of
+    /// <c>GetUsersWithSharedQuery</c>, which is built per call from the request filters (area, types, inviter, text,
+    /// shared) and has no compiled form to join it to. Read on its own it would come back as a list of ids for an
+    /// <c>IN</c>, as long as the caller's rooms are populous.
+    /// </para>
+    /// <para>
+    /// The set is evaluated once for the count and once for the page, and the caller's rooms are read by three of
+    /// its branches, so the cost follows the members of the caller's rooms: for a caller in 200 rooms of 500 members
+    /// that is about 100 000 access records to deduplicate per statement.
     /// </para>
     /// </remarks>
     private static IQueryable<User> FilterByKnownTo(

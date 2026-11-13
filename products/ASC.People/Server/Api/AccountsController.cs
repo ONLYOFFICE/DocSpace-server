@@ -191,19 +191,21 @@ public class AccountsController<T>(
         var includeStrangers = await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID);
         var knownToSubjects = await fileSharing.GetKnownToSubjectsAsync();
         var everyoneOnly = !await fileSharing.CanPickAnyGroupAsync();
-        // The access list as the caller sees it: every record marks an account as already having one (`shared`), but a
-        // Restrict record denies access and makes nobody known.
-        // Read without the search text: these are sets of ids, and the query below matches the text word by word,
-        // while the access list would match it as one string and drop "Ann Lee" from both sets.
-        var shares = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, null, 0, int.MaxValue).ToListAsync();
-        var parentUserIds = shares.Select(r => r.Id).ToList();
-        var knownFromShares = shares.Where(r => r.Access != ASC.Files.Core.Security.FileShare.Restrict).Select(r => r.Id).ToList();
 
         if (string.IsNullOrEmpty(text))
         {
             apiContext.SetCount(0).SetTotalCount(0);
             yield break;
         }
+
+        // The access list as the caller sees it: every record marks an account as already having one (`shared`), but a
+        // Restrict record denies access and makes nobody known.
+        // Read without the search text: these are sets of ids, and the query below matches the text word by word,
+        // while the access list would match it as one string and drop "Ann Lee" from both sets. Only the ids and
+        // the access are read: the full entries of the list cost a lookup per record on every request.
+        var shares = await fileSharing.GetPureShareSubjectsAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus);
+        var parentUserIds = shares.Select(r => r.Id).ToList();
+        var knownFromShares = shares.Where(r => r.Access != ASC.Files.Core.Security.FileShare.Restrict).Select(r => r.Id).ToList();
 
 
         var totalGroups = await securityDao.GetGroupsWithSharedCountAsync(fileEntry, text, inDto.ExcludeShared ?? false, everyoneOnly, parentUserIds);

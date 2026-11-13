@@ -43,7 +43,7 @@ already relies on:
 | A Restrict record is no membership and no access - the caller's own, a member's of a room, one that takes a member of a group out of a room, one in an entry's access list | `FileShare.Restrict` |
 | The access list of an entry, and whether an account is on it, is told only to who may see that list: any reader of a room or of an entry of a public room, otherwise who may manage the access | `FileSharing.CanSeeSharesAsync` |
 | A group's manager row is no membership | `UserGroupRefType.Contains` |
-| A room template is no room; a third-party room has no internal id to check | the `RoomTemplates` parent, `InternalEntryId` |
+| A room template is no room; a third-party room has no internal id to check; a room in the archive stays a room of its members | the `RoomTemplates` parent, `InternalEntryId` |
 | A guest is offered only to whom it is related | `UserRelations` |
 | A User or a Guest gets no contacts of another account | `UserManager.IsWithoutContactsAccessAsync` |
 

@@ -60,6 +60,28 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
     }
 
     /// <summary>
+    /// A room moved to the archive stays a room of its members: they still open it there and see each other in it,
+    /// so a co-member of an archived room remains offered.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUser_OffersCoMemberOfArchivedRoom()
+    {
+        var caller = await InviteContact(EmployeeType.User);
+        var coMember = await InviteContact(EmployeeType.User);
+        var stranger = await InviteContact(EmployeeType.User);
+        var roomId = await CreateRoomWithMembersAsync(caller.Id, coMember.Id);
+        var fileId = await CreateFileInMyDocumentsAsync(caller);
+
+        await ArchiveRoomAsync(roomId);
+
+        var offered = await UsersOfferedForFileAsync(caller, fileId);
+
+        offered.Select(u => u.Id).Should().Contain(coMember.Id).And.NotContain(stranger.Id);
+    }
+
+    /// <summary>
     /// The owner of a room has no access record of its own - it is the author of the room - so it has to
     /// be offered as well, or a user cannot share with the one who invited it.
     /// </summary>

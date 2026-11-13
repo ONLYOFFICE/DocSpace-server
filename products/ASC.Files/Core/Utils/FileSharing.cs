@@ -859,6 +859,43 @@ public class FileSharing(
     }
 
     /// <summary>
+    /// The subjects of the entry's access list with the access of each, as the current user sees that list: the same
+    /// records as <see cref="GetPureSharesAsync{T}(FileEntry{T}, ShareFilterType, EmployeeActivationStatus?, string, int, int)"/>
+    /// returns without a search text, and nothing for a caller that may not see the list. For a caller that needs
+    /// the list as a set of ids: the full entries cost a user or a group lookup per record.
+    /// </summary>
+    public async Task<List<(Guid Id, FileShare Access)>> GetPureShareSubjectsAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)
+    {
+        if (entry == null)
+        {
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
+        }
+
+        _ = await fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).ToListAsync();
+
+        if (!await CanSeeSharesAsync(entry, filterType))
+        {
+            logger.InfoUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!, filterType.ToString());
+
+            return [];
+        }
+
+        var subjects = new List<(Guid Id, FileShare Access)>();
+
+        await foreach (var ace in GetDefaultAcesAsync(entry, filterType, status, null))
+        {
+            subjects.Add((ace.Id, ace.Access));
+        }
+
+        await foreach (var record in fileSecurity.GetPureSharesAsync(entry, filterType, status, null, 0, int.MaxValue))
+        {
+            subjects.Add((record.Subject, record.Share));
+        }
+
+        return subjects;
+    }
+
+    /// <summary>
     /// Whether the current user may see the access list of the entry (<see cref="GetPureSharesAsync{T}(FileEntry{T}, ShareFilterType, EmployeeActivationStatus?, string, int, int)"/>):
     /// for a room, or an entry of a public room, whoever may read it; otherwise only who may manage its access.
     /// Who has access to the entry, and who has not, is told only to those who may see that list.

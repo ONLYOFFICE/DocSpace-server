@@ -296,9 +296,8 @@ public abstract class SecurityController<T>(
     /// that member alone, `overridden` says which of the two applies, `owner` marks the member who created the entry,
     /// and `canEditAccess` says whether the caller may still change that member's level. Take the group identifier
     /// from the group entries of `GET api/2.0/files/folder/{id}/share`. `startIndex` and `count` page through the
-    /// members, `filterValue` keeps only those whose first name, last name or email contains the value - the
-    /// comparison is made in lower case, so an uppercase value matches nothing - and the number of members is
-    /// reported in the response headers. Members come back ordered by first name. A group that holds no rights on
+    /// members, `filterValue` keeps only those whose first name, last name or email contains the value, whatever
+    /// its case, and the number of members is reported in the response headers. Members come back ordered by first name. A group that holds no rights on
     /// this folder, a folder the caller cannot read, a folder whose access list the caller may not see - a folder
     /// that is not a room, which the caller may read but whose access it may not manage - and a folder that does
     /// not exist are all answered
@@ -351,9 +350,8 @@ public abstract class SecurityController<T>(
     /// member alone, `overridden` says which of the two applies, `owner` marks the member who created the file, and
     /// `canEditAccess` says whether the caller may still change that member's level. Take the group identifier from
     /// the group entries of `GET api/2.0/files/file/{id}/share`. `startIndex` and `count` page through the members,
-    /// `filterValue` keeps only those whose first name, last name or email contains the value - the comparison is
-    /// made in lower case, so an uppercase value matches nothing - and the number of members is reported in the
-    /// response headers. Members come back ordered by first name. A group that holds no rights on this file, a file
+    /// `filterValue` keeps only those whose first name, last name or email contains the value, whatever its case,
+    /// and the number of members is reported in the response headers. Members come back ordered by first name. A group that holds no rights on this file, a file
     /// the caller cannot read, a file whose access list the caller may not see - it may read the file but not
     /// manage its access - and a file that does not exist are all answered with an empty list and a
     /// count of 0 rather than an error, so an empty answer does not mean that the group has no members. A user or a
