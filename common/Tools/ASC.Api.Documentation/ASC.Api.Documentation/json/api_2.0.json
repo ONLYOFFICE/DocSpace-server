@@ -7913,7 +7913,7 @@
           "Portal / Payment"
         ],
         "summary": "Get the auto top-up settings",
-        "description": "Returns the automatic top-up settings of the portal wallet. Requires a DocSpace admin. Other callers get 403.\r\nThe portal does not need a billing customer or a billing service. The call is read-only. If the portal never set\r\nup the top-up, the call returns the defaults. Then `enabled` is false, `currency` is null, and `minBalance` and\r\n`upToBalance` are 0. These zeros are out of range for `POST api/2.0/portal/payment/topupsettings`. So send real\r\nvalues instead of the defaults. Until the portal first saves the settings, `lastModified` is\r\n`0001-01-01T00:00:00`. The portal sets `lowBalanceThreshold` and `lowBalanceNotified`. You cannot set them, but\r\nswitching `enabled` resets them.",
+        "description": "Returns the automatic top-up settings of the portal wallet. Requires a DocSpace admin. Other callers get 403.\r\nThe portal does not need a billing customer or a billing service. The call is read-only. If the portal never set\r\nup the top-up, the call returns the defaults. Then `enabled` is false, `currency` is null, and `minBalance` and\r\n`upToBalance` are 0. These zeros are out of range for `POST api/2.0/portal/payment/topupsettings`. So send real\r\nvalues instead of the defaults. Until the portal first saves the settings, `lastModified` is\r\n`0001-01-01T00:00:00`. The portal sets `lowBalanceThreshold` and `lowBalanceNotified`. You cannot set them. A\r\nsave with `enabled` true clears `lowBalanceNotified`, and one with false resets `lowBalanceThreshold`.",
         "operationId": "getTenantWalletSettings",
         "responses": {
           "200": {
