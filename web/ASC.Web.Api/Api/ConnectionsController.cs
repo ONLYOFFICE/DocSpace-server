@@ -169,6 +169,7 @@ public class ConnectionsController(
     /// The call does not change the password or email the link.
     /// The link opens the page that sets the new password through `PUT api/2.0/people/{userId}/password`.
     /// You can repeat the call, but each call makes the earlier link invalid.
+    /// Repeat it with the new cookie, not with the first token.
     /// If the call fails, it still returns 200 with an empty result, so call it again.
     /// </remarks>
     /// <summary>

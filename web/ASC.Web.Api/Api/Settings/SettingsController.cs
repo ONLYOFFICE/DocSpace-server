@@ -720,8 +720,8 @@ public partial class SettingsController(
     /// Sets a custom domain for the portal on a Standalone installation, or removes it. The portal address then
     /// changes to that domain. If `enable` is false or the name is empty, the call removes the custom domain. On
     /// SaaS, the call returns 415. Requires the EditPortalSettings permission, which the portal owner and DocSpace
-    /// admins have. Other callers get 403. The call changes data. Do not repeat it with the same domain. After the
-    /// change, CSP settings that named the old domain name the new one.
+    /// admins have. Other callers get 403. The call changes data. Do not repeat it with the same domain. You can repeat
+    /// a removal. After the change, CSP settings that named the old domain name the new one.
     /// </remarks>
     /// <summary>Save the DNS settings</summary>
     /// <path>api/2.0/settings/dns</path>

@@ -200,10 +200,10 @@ public class SmtpSettingsController(
     /// job uses the settings of the installation. Requires the EditPortalSettings permission, which the portal owner
     /// and DocSpace admins have. Other callers get 403. If the SMTP settings section is turned off for the portal, the
     /// call returns 402. The call queues work and sends an email. While a test runs, a repeated call returns the same
-    /// job. The call returns before the email is sent. Repeat `GET api/2.0/smtpsettings/smtp/test/status` until
-    /// `completed` is true. Then an empty `error` means that the mail server accepted the email. Otherwise, `error`
-    /// holds the reason. A failed test does not make the request fail. By default, the limit is 5 calls in 15 minutes
-    /// per user. More calls return 429.
+    /// job. After the test ends, each call sends another email. The call returns before the email is sent. Repeat
+    /// `GET api/2.0/smtpsettings/smtp/test/status` until `completed` is true. Then an empty `error` means that the
+    /// mail server accepted the email. Otherwise, `error` holds the reason. A failed test does not make the request
+    /// fail. By default, the limit is 5 calls in 15 minutes per user. More calls return 429.
     /// </remarks>
     /// <summary>
     /// Test SMTP settings

@@ -118,12 +118,14 @@ public class TfaappController(
     /// Checks a two-factor code for the account of the confirmation link. Then it completes the pending TFA step. Sign
     /// the request with the confirmation token of a `TfaActivation` or `TfaAuth` link. The sign-in flow or
     /// `GET api/2.0/settings/tfaapp/confirm` issues that link. With an ordinary sign-in token, the call returns 403. It
-    /// accepts a code from the app or an unused backup code, which it spends. The call changes data. It signs the
-    /// account in and clears the confirmation cookie, so the link cannot be used again. On the first activation, it
-    /// also generates the backup codes. It returns `true` for the first activation, and `false` if an app was already
-    /// linked. If the authenticator method is off on the portal, the call checks no code and returns `false`. If the
-    /// code is wrong, the call returns 400. If the account exceeds the portal login attempt limit within a minute, the
-    /// call returns 403. The call works even when the portal payment is overdue.
+    /// accepts a code from the app or an unused backup code, which it spends. The call changes data and signs the
+    /// account in. It clears the confirmation cookie, but the key stays valid for one hour by default. A repeat with
+    /// that key accepts the same app code for 5 minutes. It signs in again and returns `false`. For a `TfaAuth` link,
+    /// send the repeat without the new session cookie. A repeat with a spent backup code returns 400. On the first
+    /// activation, it also generates the backup codes. It returns `true` for the first activation, and `false` if an
+    /// app was already linked. If the authenticator method is off on the portal, the call checks no code and returns
+    /// `false`. If the code is wrong, the call returns 400. If the account exceeds the portal login attempt limit
+    /// within a minute, the call returns 403. The call works even when the portal payment is overdue.
     /// </remarks>
     /// <summary>Validate the TFA code</summary>
     /// <path>api/2.0/settings/tfaapp/validate</path>
@@ -155,10 +157,10 @@ public class TfaappController(
     /// user can call it, always for their own account. If the portal policy does not require TFA from the caller, the
     /// response body is empty. With the SMS method, the call is read-only and fills only `url`. The link activates a
     /// phone while the account has no activated number. After that, it authorizes the phone. With the authenticator
-    /// method, the call changes data. It issues a new confirmation key and sets it as a cookie. Each call replaces the
-    /// previous key. The link activates an app while none is linked, and verifies a code once one is linked. If the
-    /// portal last turned TFA off and the app was linked over a day ago, the call unlinks it. To send the code from
-    /// that flow, use `POST api/2.0/settings/tfaapp/validate`. To read the portal policy, use
+    /// method, the call changes data. It issues a new confirmation key and sets it as a cookie. Earlier keys stay valid
+    /// for one hour by default. The link activates an app while none is linked. Once one is linked, it verifies a code.
+    /// If the portal last turned TFA off and the app was linked over a day ago, the call unlinks it. To send the code
+    /// from that flow, use `POST api/2.0/settings/tfaapp/validate`. To read the portal policy, use
     /// `GET api/2.0/settings/tfaapp`.
     /// </remarks>
     /// <summary>Get TFA confirmation data</summary>
@@ -208,12 +210,12 @@ public class TfaappController(
     /// other off. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
     /// callers get 403. If `id` or `mandatoryUsers` names the portal owner while `id` is not the caller, the call
     /// returns 403. The call changes data and replaces the trusted and mandatory lists. Switching a method on signs out
-    /// every session on the portal, including the caller's. A repeated call saves the same policy and signs everyone
-    /// out again. It returns `true` if it switched a method on, and `false` if it turned TFA off. To also get the
-    /// caller's own confirmation link, use `PUT api/2.0/settings/tfaappwithlink`. If the method is unavailable on the
-    /// portal or SMS has no provider, the call returns 405. The call returns 400 for an unreadable `type` or a
-    /// malformed ID. It also returns 400 if a `trustedIps` entry is not an address, range, or CIDR block. It works even
-    /// when the portal payment is overdue.
+    /// every session on the portal, including the caller's. With `type` `1` or `2`, a repeated call saves the same
+    /// policy and signs everyone out again. You can repeat a call that turns TFA off. It returns `true` if it switched
+    /// a method on. It returns `false` if it turned TFA off. To also get the caller's own confirmation link, use
+    /// `PUT api/2.0/settings/tfaappwithlink`. If the method is unavailable on the portal or SMS has no provider, the
+    /// call returns 405. The call returns 400 for an unreadable `type` or a malformed ID. It also returns 400 if a
+    /// `trustedIps` entry is not an address, range, or CIDR block. It works even when the portal payment is overdue.
     /// </remarks>
     /// <summary>Update the TFA settings</summary>
     /// <path>api/2.0/settings/tfaapp</path>
@@ -327,13 +329,13 @@ public class TfaappController(
     /// confirmation link. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
     /// Other callers get 403. If `id` or `mandatoryUsers` names the portal owner while `id` is not the caller, the call
     /// returns 403. Any `type` other than `1` and `2` turns TFA off. The call changes data. Switching a method on signs
-    /// out every session on the portal. A repeated call saves the same policy and signs everyone out again. The call
-    /// returns an empty string if it turned TFA off or the caller is exempt. Usually, the caller is exempt through
-    /// their own address in `trustedIps`. For the authenticator method, the call sets the link's cookie but does not
-    /// return its value. To get the value, use `GET api/2.0/settings/tfaapp/confirm`, which issues a new link. If the
-    /// method is unavailable on the portal or SMS has no provider, the call returns 405. The call returns 400 for an
-    /// unreadable `type` or a malformed ID. It also returns 400 if a `trustedIps` entry is not an address, range, or
-    /// CIDR block.
+    /// out every session on the portal. With `type` `1` or `2`, a repeated call signs everyone out again and returns a
+    /// new link. You can repeat a call that turns TFA off. The call returns an empty string if it turned TFA off or the
+    /// caller is exempt. Usually, the caller is exempt through their own address in `trustedIps`. For the authenticator
+    /// method, the call sets the link's cookie but does not return its value. To get the value, use
+    /// `GET api/2.0/settings/tfaapp/confirm`, which issues a new link. If the method is unavailable on the portal or
+    /// SMS has no provider, the call returns 405. The call returns 400 for an unreadable `type` or a malformed ID. It
+    /// also returns 400 if a `trustedIps` entry is not an address, range, or CIDR block.
     /// </remarks>
     /// <summary>Update TFA settings with a link</summary>
     /// <path>api/2.0/settings/tfaappwithlink</path>
@@ -483,12 +485,12 @@ public class TfaappController(
     /// another account. Other callers get 403, including DocSpace admins. The call also returns 403 for a missing or
     /// unknown `id`, the empty GUID, or a terminated account. If the authenticator method is unavailable on the portal
     /// or the account has no app linked, the call returns 405. The call changes data and cannot be undone. It deletes
-    /// the app and the backup codes of the account. It also signs out all its sessions. A repeated call returns 405.
-    /// For your own account, the call returns the activation link to follow next and sets its confirmation cookie. For
-    /// another account, the call returns an empty string and emails its user about the reset. The portal policy does
-    /// not change. The account links a new app through `GET api/2.0/settings/tfaapp/confirm`. To turn TFA off for
-    /// everyone, use `PUT api/2.0/settings/tfaapp`. The call returns 400 if a body field is unreadable, such as an `id`
-    /// that is not a GUID.
+    /// the app and the backup codes of the account. It also signs out all sessions of the account. For your own
+    /// account, it then sets a new session cookie. A repeated call returns 405. For your own account, the call returns
+    /// the activation link to follow next and sets its confirmation cookie. For another account, the call returns an
+    /// empty string and emails its user about the reset. The portal policy does not change. The account links a new app
+    /// through `GET api/2.0/settings/tfaapp/confirm`. To turn TFA off for everyone, use `PUT api/2.0/settings/tfaapp`.
+    /// The call returns 400 if a body field is unreadable, such as an `id` that is not a GUID.
     /// </remarks>
     /// <summary>Unlink the TFA application</summary>
     /// <path>api/2.0/settings/tfaappnewapp</path>

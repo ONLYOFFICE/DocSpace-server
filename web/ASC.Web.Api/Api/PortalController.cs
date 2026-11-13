@@ -339,15 +339,16 @@ public class PortalController(
     }
 
     /// <remarks>
-    /// Changes the deadline and the use limit of an invitation link by its `id`. The call applies the whole body. So
-    /// a missing `expiration` removes the deadline, and a missing `maxUseCount` removes the use limit. You cannot
-    /// change the role of a link. To do this, delete the link and create a new one. If inviting members is turned off
-    /// in `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can change every link. A
+    /// Changes the deadline and the use limit of an invitation link by its `id`. The call applies the whole body. So a
+    /// missing `expiration` removes the deadline, and a missing `maxUseCount` removes the use limit. You cannot change
+    /// the role of a link. To do this, delete the link and create a new one. If inviting members is turned off in
+    /// `GET api/2.0/settings/invitationsettings`, the call returns 403. The portal owner can change every link. A
     /// DocSpace admin can change the `RoomAdmin` and `User` links, and a room admin only the `User` link. Other
-    /// callers get 403. The call changes data, and you can repeat it with the same body. It returns the whole link as
-    /// it now stands. If no link has this `id`, the call returns 404. The call returns 400 for an `expiration` in the
-    /// past or a `maxUseCount` out of range. It also returns 400 if `maxUseCount` is lower than the `currentUseCount`
-    /// of the link.
+    /// callers get 403. The call changes data, and you can repeat it with the same body. It keeps the use count of the
+    /// link. After `expiration` passes, a repeated call returns 400. The call returns the whole link as it now stands.
+    /// If no link has this `id`, the call returns 404. The call returns 400 for an `expiration` in the past or a
+    /// `maxUseCount` out of range. It also returns 400 if `maxUseCount` is lower than the `currentUseCount` of the
+    /// link.
     /// </remarks>
     /// <summary>
     /// Update an invitation link
@@ -951,9 +952,10 @@ public class PortalController(
     /// <remarks>
     /// Sends the portal owner an email with the links that deactivate the portal and make it active again. This call
     /// does not change the portal. Only the portal owner can call it. Other callers get 403, including a DocSpace
-    /// admin. The call also works while the portal is unpaid. A repeated call shortly after the email went out does
-    /// nothing, and the links of the first email stay valid. The first link signs `PUT api/2.0/portal/suspend`, and
-    /// the second signs `PUT api/2.0/portal/continue`. To delete the portal instead, use
+    /// admin. The call also works while the portal is unpaid. By default, a repeated call within 10 minutes of the
+    /// email sends nothing and returns 200. A later call sends a new email, and the links of earlier emails keep
+    /// working. The first link signs `PUT api/2.0/portal/suspend`, and the second signs `PUT api/2.0/portal/continue`.
+    /// By default, the first link works for 7 days, and the second never expires. To delete the portal instead, use
     /// `POST api/2.0/portal/delete`. On a server installation, you cannot deactivate the last space. Spaces with
     /// limited access do not count.
     /// </remarks>
@@ -992,12 +994,13 @@ public class PortalController(
 
     /// <remarks>
     /// Sends the portal owner an email with the link that deletes the portal. This call does not change the portal.
-    /// Only the portal owner can call it. Other callers get 403, including a DocSpace admin. The call also works
-    /// while the portal is unpaid. A repeated call shortly after the email went out does nothing, and the link of the
-    /// first email stays valid. If the portal has payments and is not on trial, the email also warns that the
-    /// subscription stops renewing. The link signs `DELETE api/2.0/portal/delete`, which deletes the portal and
-    /// cannot be undone. To deactivate the portal instead, use `POST api/2.0/portal/suspend`. On a server
-    /// installation, you cannot delete the last space. Spaces with limited access do not count.
+    /// Only the portal owner can call it. Other callers get 403, including a DocSpace admin. The call also works while
+    /// the portal is unpaid. By default, a repeated call within 10 minutes of the email sends nothing and returns 200.
+    /// A later call sends a new email, and the links of earlier emails keep working for 7 days by default. If the
+    /// portal has payments and is not on trial, the email also warns that the subscription stops renewing. The link
+    /// signs `DELETE api/2.0/portal/delete`, which deletes the portal and cannot be undone. To deactivate the portal
+    /// instead, use `POST api/2.0/portal/suspend`. On a server installation, you cannot delete the last space. Spaces
+    /// with limited access do not count.
     /// </remarks>
     /// <summary>
     /// Send removal instructions
@@ -1112,10 +1115,10 @@ public class PortalController(
     /// Deactivates the portal. Its users can no longer work in it, and its rooms, files, and accounts stay. Sign the
     /// request with the confirmation token from the first link of the email that `POST api/2.0/portal/suspend` sends.
     /// The call also checks that the token belongs to the portal owner. Other callers get 403, including an ordinary
-    /// sign-in token. The call changes data. After it, the portal refuses most calls, so a repeated call fails. To
-    /// make the portal active again, use `PUT api/2.0/portal/continue` with the second link of the email. To delete
-    /// the portal for good, use `DELETE api/2.0/portal/delete`. On a server installation, you cannot deactivate the
-    /// last space. Spaces with limited access do not count.
+    /// sign-in token. The call changes data. After it, the portal returns 404 for most calls, and a repeated call also
+    /// returns 404. To make the portal active again, use `PUT api/2.0/portal/continue` with the second link of the
+    /// email. To delete the portal for good, use `DELETE api/2.0/portal/delete`. On a server installation, you cannot
+    /// deactivate the last space. Spaces with limited access do not count.
     /// </remarks>
     /// <summary>
     /// Deactivate a portal
@@ -1145,10 +1148,9 @@ public class PortalController(
     /// sends. The call also checks that the token belongs to the portal owner. Other callers get 403, including an
     /// ordinary sign-in token. The call cannot be undone, and no operation restores the portal. To keep the content,
     /// first start a backup with `POST api/2.0/backup/startbackup`. The call also works while the portal is unpaid.
-    /// After it, the portal refuses all calls, so a repeated call fails. The portal emails the owner a confirmation.
-    /// The call returns the absolute URL of a feedback form to send the owner to. To deactivate the portal instead,
-    /// use `POST api/2.0/portal/suspend`. On a server installation, you cannot delete the last space. Spaces with
-    /// limited access do not count.
+    /// Do not repeat it. The portal emails the owner a confirmation. The call returns the absolute URL of a feedback
+    /// form to send the owner to. To deactivate the portal instead, use `POST api/2.0/portal/suspend`. On a server
+    /// installation, you cannot delete the last space. Spaces with limited access do not count.
     /// </remarks>
     /// <summary>
     /// Delete a portal
@@ -1198,10 +1200,11 @@ public class PortalController(
     /// Sends the welcome email of a newly registered portal to the account in `userid`. Anyone can call it without
     /// signing in. Instead of a token, `key` must be the confirmation key of the sign-in link for that account. The
     /// key works for one hour. The call returns 403 for a wrong, foreign, or expired key, and then sends nothing. The
-    /// call changes data. Call it once, right after registration. Each repeated call within the hour sends the emails
-    /// again. If the installation requires SMS or an authenticator app after registration, the call turns that method
-    /// on for the portal. It skips this step for an internal test address. On a hosted portal in custom mode, the
-    /// call also sends the registration data to the sales address. The call returns no data.
+    /// call changes data. Call it once, right after registration. Each repeated call with a valid key sends the emails
+    /// again. On a hosted portal, the password link of the earlier email then stops working. If the installation
+    /// requires SMS or an authenticator app after registration, the call turns that method on for the portal. It skips
+    /// this step for an internal test address. On a hosted portal in custom mode, the call also sends the registration
+    /// data to the sales address. The call returns no data.
     /// </remarks>
     /// <summary>
     /// Send congratulations

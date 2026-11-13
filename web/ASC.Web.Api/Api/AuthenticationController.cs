@@ -105,15 +105,15 @@ public class AuthenticationController(
     /// Finishes a two-factor sign-in with a one-time code and returns the authentication token. Call it after
     /// `POST api/2.0/authentication` returns `sms` or `tfa`. Send the same credentials again, with the code in `code`.
     /// With SMS codes on, the call checks an SMS code. Otherwise it checks an authenticator app code or a backup code.
-    /// Anyone can call it without signing in. The call changes data, and each code works only once. A repeated call
-    /// with the same code returns 401. An accepted SMS code cancels the other codes and activates the phone number.
-    /// The first accepted app code connects the app and creates backup codes. A new `culture` also becomes the user's
-    /// language. The answer has `token`, and `sms` or `tfa` shows the checked factor. To get a new SMS code, use
-    /// `POST api/2.0/authentication/sendsms`. The call returns 401 for a wrong, empty, or expired code. It also
-    /// returns 401 if the user has no second factor. After too many wrong codes, even a right code returns 401 for up
-    /// to 10 minutes. A wrong password or an unknown user also returns 401. The call returns 403 for a disabled user
-    /// or too many failed password attempts. A rejected key in `confirmData` returns 404. If `confirmData.email` is
-    /// not an email address, the call returns 400.
+    /// Anyone can call it without signing in. The call changes data. An SMS code or a backup code works only once, so a
+    /// repeated call returns 401. An app code is accepted again for up to 5 minutes, and each call opens a new session.
+    /// An accepted SMS code cancels the other codes and activates the phone number. The first accepted app code connects
+    /// the app and creates backup codes. A new `culture` also becomes the user's language. The answer has `token`, and
+    /// `sms` or `tfa` shows the checked factor. To get a new SMS code, use `POST api/2.0/authentication/sendsms`. The
+    /// call returns 401 for a wrong, empty, or expired code. It also returns 401 if the user has no second factor. After
+    /// too many wrong codes, even a right code returns 401 for up to 10 minutes. A wrong password or an unknown user
+    /// also returns 401. The call returns 403 for a disabled user or too many failed password attempts. A rejected key
+    /// in `confirmData` returns 404. If `confirmData.email` is not an email address, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Authenticate a user by code
@@ -231,20 +231,21 @@ public class AuthenticationController(
     }
 
     /// <remarks>
-    /// Signs a user in to the current portal and returns an authentication token. If the user has a second factor,
-    /// the call returns what that factor needs instead. Send `userName` with `password` or `passwordHash`, a
-    /// confirmation link in `confirmData`, or a third-party account. Anyone can call it without signing in. The call
-    /// changes data, and each successful call opens a new session. You can repeat it with the same body. A new
-    /// `culture` also becomes the user's language. With SMS codes on, the answer has `sms` and no `token`. Without an
-    /// activated phone number, `confirmUrl` holds a phone activation link for `POST api/2.0/authentication/setphone`.
-    /// Otherwise the call sends an SMS code. It sends none while an earlier code is still valid. With an
-    /// authenticator app on, the answer has `tfa` and no `token`. Before the app is connected, the answer also has
-    /// its setup key in `tfaKey`. To finish such a sign-in, send the code to `POST api/2.0/authentication/{code}`.
-    /// The call returns 401 for a wrong password, an unknown user, or a rejected third-party account. It also returns
-    /// 401 if the portal does not allow third-party sign-in. A rejected `confirmData` key or its unknown user
-    /// returns 404. The call returns 403 for a disabled user, a wrong CAPTCHA, or too many failed attempts. Attempts
-    /// count per user name and IP address. During a block, a solved CAPTCHA in `recaptchaResponse` lets the call through.
-    /// The portal's login settings set the attempt limit and the block time.
+    /// Signs a user in to the current portal and returns an authentication token. If the user has a second factor, the
+    /// call returns what that factor needs instead. Send `userName` with `password` or `passwordHash`, a confirmation
+    /// link in `confirmData`, or a third-party account. Anyone can call it without signing in. The call changes data.
+    /// Each successful call opens a new session. You can repeat it with the same password or third-party account.
+    /// After a sign-in with a `confirmData` link, a repeated call with this link returns 404. A new `culture` also
+    /// becomes the user's language. With SMS codes on, the answer has `sms` and no `token`. Without an activated phone
+    /// number, `confirmUrl` holds a phone activation link for `POST api/2.0/authentication/setphone`. Otherwise the call
+    /// sends an SMS code. It sends none while an earlier code is still valid. With an authenticator app on, the answer
+    /// has `tfa` and no `token`. Before the app is connected, the answer also has its setup key in `tfaKey`. To finish
+    /// such a sign-in, send the code to `POST api/2.0/authentication/{code}`. The call returns 401 for a wrong password,
+    /// an unknown user, or a rejected third-party account. It also returns 401 if the portal does not allow third-party
+    /// sign-in. A rejected `confirmData` key or its unknown user returns 404. The call returns 403 for a disabled user,
+    /// a wrong CAPTCHA, or too many failed attempts. Failed attempts count per user name and IP address. During a block,
+    /// a solved CAPTCHA in `recaptchaResponse` lets the call through. The portal's login settings set the attempt limit
+    /// and the block time.
     /// </remarks>
     /// <summary>
     /// Authenticate a user
@@ -552,14 +553,14 @@ public class AuthenticationController(
     /// <remarks>
     /// Sends a new SMS code to the stored phone number of a user. Use it to resend the code after
     /// `POST api/2.0/authentication` returns `sms`. The call checks the credentials in the body as
-    /// `POST api/2.0/authentication` does. Anyone can call it without signing in. Each call sends another SMS and
-    /// counts toward the SMS usage of the portal. Earlier codes stay valid until they expire, by default after 10
-    /// minutes. The first accepted code cancels every code of the number. By default, a number gets at most 6 codes
-    /// in 10 minutes. You can repeat the call up to this limit. After it, wait until the codes expire. The
-    /// answer has no token. To finish the sign-in, send the code to `POST api/2.0/authentication/{code}`. The call
-    /// returns 401 for a wrong password or an unknown user. It returns 403 for a disabled user or after too many
-    /// failed attempts. A rejected key in `confirmData` returns 404. If the user has no stored phone number, the call
-    /// returns 400. If SMS codes are off on the portal or for the user, it returns 405.
+    /// `POST api/2.0/authentication` does. Anyone can call it without signing in. Each call sends another SMS and counts
+    /// toward the SMS usage of the portal. Earlier codes stay valid until they expire, by default after 10 minutes. The
+    /// first accepted code cancels every code of the number. By default, a number gets at most 6 codes until its newest
+    /// code expires. You can repeat the call up to this limit. After it, wait until the newest code expires. The answer
+    /// has no token. To finish the sign-in, send the code to `POST api/2.0/authentication/{code}`. The call returns 401
+    /// for a wrong password or an unknown user. It returns 403 for a disabled user or after too many failed attempts. A
+    /// rejected key in `confirmData` returns 404. If the user has no stored phone number, the call returns 400. If SMS
+    /// codes are off on the portal or for the user, it returns 405.
     /// </remarks>
     /// <summary>
     /// Send SMS code

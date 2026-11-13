@@ -102,7 +102,7 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The absolute URL of the checkout page to open, or an empty result when the portal already has a paid plan", typeof(Uri))]
+    [SwaggerResponse(200, "The absolute URL of the checkout page to open, or an empty result when the portal already has a paid plan or the billing service failed", typeof(Uri))]
     [SwaggerResponse(400, "The request body cannot be read or has no `backUrl`, `successUrl` or `quantity`, `backUrl` or `successUrl` does not start with `http://`, `https://` or `ftp://` or is longer than 255 characters, or `quantity` does not hold exactly one product, holds a quantity that is not greater than zero, or a product that is not a monthly plan")]
     [SwaggerResponse(402, "The portal already has more administrators, users, rooms or AI agents, or stores more data, than the plan in the requested quantity allows")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
@@ -161,10 +161,11 @@ public class PaymentController(
     /// `PUT api/2.0/portal/payment/url`. If the portal has no billing customer, the call returns 404. The payer is
     /// the portal user whose email is the email of the billing customer. Only the payer can call it. Other callers
     /// get 403. The call also returns 403 if the installation has no billing service. The call spends money. If the
-    /// provider accepted the change, a repeated call with the same quantity returns 400. After `false`, a repeated
-    /// call requests the change again. The call returns `true` if the provider accepted the change and `false` if it
-    /// declined it. On a priced plan, `quantity` must name the current plan from `GET api/2.0/portal/payment/quota`.
-    /// The call returns 400 for more than one product, another plan, or a wallet service. It returns 402 if the portal
+    /// provider accepted the change, a repeated call with the same quantity returns 400. The call returns `true` if
+    /// the provider accepted the change. It returns `false` if the provider declined it, or if the call failed or
+    /// timed out. After a failure the change may still be applied, so check the plan before you repeat the call. On
+    /// a priced plan, `quantity` must name the current plan from `GET api/2.0/portal/payment/quota`. The call
+    /// returns 400 for more than one product, another plan, or a wallet service. It returns 402 if the portal
     /// already exceeds a limit of the plan in the new quantity. By default, the limit is 10 calls a minute per user.
     /// More calls return 429. To buy wallet services, use `PUT api/2.0/portal/payment/updatewallet`.
     /// </remarks>
@@ -173,7 +174,7 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "`true` when the provider accepted the new quantity, `false` when it declined it", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the provider accepted the new quantity, `false` when it declined it or the call failed or timed out", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the product is not a subscription plan or not the plan currently paid, or the quantity is already the one in effect")]
     [SwaggerResponse(402, "The portal already has more administrators, users, rooms or AI agents, or stores more data, than the plan in the new quantity allows")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
@@ -357,14 +358,15 @@ public class PaymentController(
     /// wallet sub-account in the accounting currency, the call returns 404. Requires a DocSpace admin. Other callers
     /// get 403. The call also returns 403 if the installation has no billing service. The call is read-only and buys
     /// nothing, so you can repeat it. To make the purchase, use `PUT api/2.0/portal/payment/updatewallet`. The price
-    /// is for the moment of the call and is not reserved. So it can change before the purchase.
+    /// is for the moment of the call and is not reserved. So it can change before the purchase. If the billing
+    /// service fails, the call returns 200 with an empty body.
     /// </remarks>
     /// <summary>
     /// Calculate the wallet payment amount
     /// </summary>
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for", typeof(PaymentCalculationDto))]
+    [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for, or an empty body when the billing service failed", typeof(PaymentCalculationDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
@@ -908,7 +910,7 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/deposit</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "`true` when the payment provider accepted the charge and the wallet was credited", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the payment provider accepted the charge; with a delayed payment method the wallet is credited only after the transfer settles", typeof(bool))]
     [SwaggerResponse(400, "`currency` is not one of the supported accounting currencies, or `amount` is outside 1 to 999999")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]

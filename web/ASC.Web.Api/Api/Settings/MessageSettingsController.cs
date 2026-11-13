@@ -123,9 +123,9 @@ public class MessageSettingsController(
     /// returns 402. The call changes a `lifeTime` over 9999 to 9999. A value of 0 or less clears the number. With
     /// `enabled` true, sessions then never expire on their own. Any positive `lifeTime` ends every session issued
     /// before the call. If `enabled` is also true, the portal closes their connections. The call signs the caller in
-    /// again and returns a new session cookie. Use that cookie for later calls. The call changes data, and each
-    /// repeat with a positive `lifeTime` ends all sessions again. It returns a localized confirmation message. To read
-    /// the stored pair, use `GET api/2.0/settings/cookiesettings`.
+    /// again and returns a new session cookie. Use that cookie for later calls. The call changes data. Each repeat
+    /// with a positive `lifeTime` ends all sessions again, and a repeat with 0 or less ends no session. It returns a
+    /// localized confirmation message. To read the stored pair, use `GET api/2.0/settings/cookiesettings`.
     /// </remarks>
     /// <summary>
     /// Update the cookie lifetime settings

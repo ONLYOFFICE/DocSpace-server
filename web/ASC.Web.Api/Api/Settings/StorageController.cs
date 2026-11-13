@@ -139,12 +139,12 @@ public class StorageController(
     /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
     /// get 403. The call also returns 403 if the installation is not self-hosted or limits the access space. The call
     /// queues work and deletes the backup schedules of all portals. Every portal stays unavailable until the run ends.
-    /// Repeat `GET api/2.0/settings/encryption/progress` until it returns 100. Do not repeat this call during a run.
-    /// The server generates the password and never returns it. To email every user before the portals go down, set
-    /// `notifyUsers` to true. The call returns `true` when the run is queued. In a custom build, it returns `false` and
-    /// starts nothing. The call returns 415 if the installation does not offer encryption. It also returns 415 if the
-    /// current portal uses a third-party storage or CDN. Start it only when no portal runs a backup. If the portal is
-    /// not paid, the call returns 402.
+    /// Repeat `GET api/2.0/settings/encryption/progress` until it returns 100. During a run, a repeated call returns
+    /// 403. After the run, a repeated call starts the opposite run. The server generates the password and never
+    /// returns it. To email every user before the portals go down, set `notifyUsers` to true. The call returns `true`
+    /// when the run is queued. In a custom build, it returns `false` and starts nothing. The call returns 415 if the
+    /// installation does not offer encryption. It also returns 415 if the current portal uses a third-party storage
+    /// or CDN. Start it only when no portal runs a backup. If the portal is not paid, the call returns 402.
     /// </remarks>
     /// <summary>
     /// Start the storage encryption
@@ -417,10 +417,10 @@ public class StorageController(
     /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
     /// get 403. The call also returns 403 if the installation is not self-hosted or limits the access space. The call
     /// queues work and returns no body. The portal stays unavailable until the move ends. Repeat
-    /// `GET api/2.0/settings/storage/progress` until it returns 100. Do not repeat this call during a move. Each call
-    /// starts a new move. The move copies the documents and does not delete them. The call deletes the saved keys of
-    /// the previous storage. To switch back, send them again with `PUT api/2.0/settings/storage`. Before
-    /// `POST api/2.0/settings/encryption/start`, reset the storage with this call.
+    /// `GET api/2.0/settings/storage/progress` until it returns 100. You can repeat the call. During a move, a
+    /// repeated call starts no second move. The move copies the documents and does not delete them. The call deletes
+    /// the saved keys of the previous storage. To switch back, send them again with `PUT api/2.0/settings/storage`.
+    /// Before `POST api/2.0/settings/encryption/start`, reset the storage with this call.
     /// </remarks>
     /// <summary>
     /// Reset the storage settings

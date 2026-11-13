@@ -90,15 +90,15 @@ public class WebhooksController(
     /// Creates a webhook subscription of the portal. The portal then posts a signed JSON payload to `uri` when a
     /// subscribed event happens. Any signed-in user can call it, except a guest. A guest gets 403. If the portal
     /// restricts the developer tools, only DocSpace admins can call it. Other callers then get 403. The call changes
-    /// data. Do not repeat it. Each call creates another subscription. The response never contains the secret key.
-    /// Before saving, the call sends a HEAD request to `uri` and does not follow redirects. If you leave out `ssl`,
-    /// it is `true` for an `https` address and `false` for an `http` one. If `triggers` is 0, the subscription gets
-    /// every event that the role of its creator allows. To find the triggers your role allows, use
+    /// data. A repeated call with the same `name` and `uri` returns 400. The response never contains the secret key.
+    /// Before saving, the call sends a HEAD request to `uri` and does not follow redirects. If you leave out `ssl`, it
+    /// is `true` for an `https` address and `false` for an `http` one. If `triggers` is 0, the subscription gets every
+    /// event that the role of its creator allows. To find the triggers your role allows, use
     /// `GET api/2.0/settings/webhook/triggers`. A subscription delivers only while it is on, and only events that its
-    /// creator can see. The call returns 400 if `name` or `uri` is empty, a value is too long, or `uri` is not
-    /// allowed. It also returns 400 if `uri` answers the HEAD request with an error code. It also returns 400 if
-    /// `secretKey` breaks the password rules or your role does not allow a trigger. For user or group events,
-    /// `targetId` must name a user or group that you can see. If it does not, the call returns 400.
+    /// creator can see. The call returns 400 if `name` or `uri` is empty, a value is too long, or `uri` is not allowed.
+    /// It also returns 400 if `uri` answers the HEAD request with an error code. It also returns 400 if `secretKey`
+    /// breaks the password rules or your role does not allow a trigger. For user or group events, `targetId` must name
+    /// a user or group that you can see. If it does not, the call returns 400.
     /// </remarks>
     /// <summary>
     /// Create a webhook
@@ -106,7 +106,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The created webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the creator may see has that ID")]
+    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key, a trigger flag or the `targetId` of user or group events was rejected: no user or group the creator may see has that ID, or the portal already has a subscription with the same `name` and `uri`")]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(CreateWebhooksConfigRequestsDto inDto)

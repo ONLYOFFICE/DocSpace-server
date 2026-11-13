@@ -66,14 +66,14 @@ public class DocsCloudController(
     /// first, use `GET api/2.0/portal/tariff`. Requires the EditPortalSettings permission, which the portal owner and
     /// DocSpace admins have. Other callers get 403. The call changes data, and a repeated call returns 400. It
     /// returns `true` if the trial is granted. It returns `false` if the billing service declines it, for example
-    /// after an earlier trial. Then nothing changes. It also returns `false` if the portal cannot read the answer of
-    /// the billing service. Then the trial may be granted, so check `GET api/2.0/portal/tariff` before you call
-    /// again. The call never buys a paid plan. To move a paid Docs Connect subscription to Docs Connect Dev Pack, use
-    /// `POST api/2.0/settings/docscloud/switchtodevpack`. The call returns 400 if the portal already has a Docs
-    /// Connect trial, Docs Connect, or Docs Connect Dev Pack. It returns 402 if the tariff is delayed or not paid. It
-    /// returns 403 if the billing service is not configured. If the installation has no Docs Connect trial quota, the
-    /// call returns 404. After a granted trial, the call returns 403 if the server address makes the Content Security
-    /// Policy header too long. The trial then stays granted.
+    /// after an earlier trial. Then nothing changes. It also returns `false` if the billing service does not answer,
+    /// or the portal cannot read its answer. Then the trial may be granted. So check `GET api/2.0/portal/tariff` with
+    /// `refresh=true` before you call again. The call never buys a paid plan. To move a paid Docs Connect
+    /// subscription to Docs Connect Dev Pack, use `POST api/2.0/settings/docscloud/switchtodevpack`. The call returns
+    /// 400 if the portal already has a Docs Connect trial, Docs Connect, or Docs Connect Dev Pack. It returns 402 if
+    /// the tariff is delayed or not paid. It returns 403 if the billing service is not configured. If the
+    /// installation has no Docs Connect trial quota, the call returns 404. After a granted trial, the call returns
+    /// 403 if the server address makes the Content Security Policy header too long. The trial then stays granted.
     /// </remarks>
     /// <summary>
     /// Start the Docs Connect trial
@@ -146,8 +146,10 @@ public class DocsCloudController(
     /// `POST api/2.0/settings/docscloud/calculatedevpack` with the same `quantity`. Requires a DocSpace admin. Other
     /// callers get 403. The call spends money, and a repeated call returns 400. Concurrent calls run one after
     /// another, so the portal charges the wallet once. It returns `true` if the subscription is switched. It returns
-    /// `false` if the billing service declines or fails the switch. Then the portal charges nothing and stays on Docs
-    /// Connect. To change the number of users, or to return to Docs Connect at the next billing period, use
+    /// `false` if the billing service declines the switch. Then the portal charges nothing and stays on Docs Connect.
+    /// It also returns `false` if the billing service does not answer, or the portal cannot read its answer. Then the
+    /// switch may be done. So check `GET api/2.0/portal/tariff` with `refresh=true` before you call again. To change
+    /// the number of users, or to return to Docs Connect at the next billing period, use
     /// `PUT api/2.0/portal/payment/updatewallet`. The call returns 400 if the body cannot be read. It also returns 400
     /// without an active Docs Connect subscription. It also returns 400 if the portal already has Docs Connect Dev Pack, or
     /// `quantity` is below its minimum. It returns 402 if the tariff is delayed or not paid. It returns 403 if the
@@ -393,9 +395,9 @@ public class DocsCloudController(
     /// the reason in `error`. The call queues work. Repeat `GET api/2.0/settings/docscloud/tenant/quota/report` until
     /// `isCompleted` is true. Then take the file from `resultFileId` or `resultFileUrl`. To cancel a running job, use
     /// `DELETE api/2.0/settings/docscloud/tenant/quota/report`. Each caller has one report job at a time. While it
-    /// runs, a repeated call returns that job and starts no second one. So you can repeat the call. The response is
-    /// the initial job state, with `percentage` 0, not the report. The report shows the quota at the moment of the
-    /// build, and its file name has the build date. To read the same data as JSON, use
+    /// runs, a repeated call returns that job and starts no second one. After the job ends, a repeated call builds a
+    /// new report and saves another file. A new job comes back with `percentage` 0, not the report. The report shows
+    /// the quota at the moment of the build, and its file name has the build date. To read the same data as JSON, use
     /// `GET api/2.0/settings/docscloud/tenant/quota`.
     /// </remarks>
     /// <summary>

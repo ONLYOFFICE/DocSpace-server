@@ -203,10 +203,11 @@ public class MigrationController(
     /// immediately. Repeat `GET api/2.0/migration/status` until `isCompleted` is true. There, `successedUsers`,
     /// `failedUsers`, and `error` show the result. The log in `GET api/2.0/migration/logs` has a line for each step.
     /// The import changes the portal and cannot be undone. Do not repeat the call. While the job runs, a repeated
-    /// call does nothing. After the job ends, the portal deletes the backup, so upload and parse it again first. The
-    /// call returns 400 for a missing or unreadable body, an unknown `userType`, or an empty or invalid `email`.
-    /// When the import ends, close it with `POST api/2.0/migration/finish`. That call can also email the imported
-    /// users their activation links.
+    /// call does nothing. After the job ends, the portal deletes the backup. A repeated call then starts a job that
+    /// fails and replaces the result and the log of the import. So read them first, and upload and parse the backup
+    /// before a new import. The call returns 400 for a missing or unreadable body, an unknown `userType`, or an empty
+    /// or invalid `email`. When the import ends, close it with `POST api/2.0/migration/finish`. That call can also
+    /// email the imported users their activation links.
     /// </remarks>
     /// <summary>
     /// Start migration

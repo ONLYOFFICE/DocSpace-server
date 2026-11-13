@@ -56,14 +56,14 @@ public class OwnerController(
     /// <remarks>
     /// Starts moving the portal to another owner. The portal sends a confirmation letter to the portal owner's email
     /// address. Ownership moves only after `PUT api/2.0/settings/owner` with the link from this letter. Requires the
-    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. A
-    /// DocSpace admin who is not the portal owner gets 200 with `status` 0 and a refusal text. The call also returns
-    /// `status` 0 for an unknown or inactive new owner. So read `status`, not the HTTP code. On success,
-    /// `status` is 1. The `message` then shows the owner's address as an HTML `mailto:` link. Do not repeat the
-    /// call. Each call sends a new letter with a new link. A link works for seven days by default. The call returns 400 if `ownerId`
-    /// is missing or the owner's email address is not confirmed. To check the address, read `activationStatus` from
-    /// `GET api/2.0/people/@self`. It also returns 403 if the new owner is a guest. To change a user type instead,
-    /// use `PUT api/2.0/people/type/{type}`.
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. A DocSpace
+    /// admin who is not the portal owner gets 200 with `status` 0 and a refusal text. The call also returns `status` 0
+    /// for an unknown or inactive new owner. So read `status`, not the HTTP code. On success, `status` is 1. The
+    /// `message` then shows the owner's address as an HTML `mailto:` link. Do not repeat the call. Each successful call
+    /// sends a new letter with a new link. Earlier links keep working until ownership moves. A link works for seven days
+    /// by default. The call returns 400 if `ownerId` is missing or the owner's email address is not confirmed. To check
+    /// the address, read `activationStatus` from `GET api/2.0/people/@self`. It also returns 403 if the new owner is a
+    /// guest. To change a user type instead, use `PUT api/2.0/people/type/{type}`.
     /// </remarks>
     /// <summary>
     /// Start the portal owner change

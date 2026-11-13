@@ -51,14 +51,14 @@ public class WebPluginsController(
     /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. If the
     /// installation turns off web plugins or their upload, the call also returns 403. Set `system` to true to
     /// install the plugin for every portal. If the installation is not standalone, `system` set to true returns 403.
-    /// The call changes data. You can repeat it with the same package. A package with an installed name
-    /// replaces its files and keeps its settings. The call adds the manifest domains to the portal Content Security
-    /// Policy. If this makes the policy header too large, the call returns 403, but the plugin stays installed. The
-    /// call returns 400 if the request has no file, several files, or a file that is not a `.zip`. It also returns
-    /// 400 for an empty or too large file, or a bad archive or manifest. A manifest name has only lowercase letters,
-    /// digits, `_`, `.`, and `-`. It also returns 400 if another plugin uses the same JavaScript object name,
-    /// `pluginName`. A new plugin also returns 400 if the portal already has the maximum, 100 plugins by default. To
-    /// list plugins, use `GET api/2.0/settings/webplugins`.
+    /// The call changes data. You can repeat it with the same package. A package with an installed name replaces its
+    /// files, keeps its settings, and switches the plugin on again. The call adds the manifest domains to the portal
+    /// Content Security Policy. If this makes the policy header too large, the call returns 403, but the plugin stays
+    /// installed. The call returns 400 if the request has no file, several files, or a file that is not a `.zip`. It
+    /// also returns 400 for an empty or too large file, or a bad archive or manifest. A manifest name has only
+    /// lowercase letters, digits, `_`, `.`, and `-`. It also returns 400 if another plugin uses the same JavaScript
+    /// object name, `pluginName`. A new plugin also returns 400 if the portal already has the maximum, 100 plugins by
+    /// default. To list plugins, use `GET api/2.0/settings/webplugins`.
     /// </remarks>
     /// <summary>Add a web plugin</summary>
     /// <path>api/2.0/settings/webplugins</path>
