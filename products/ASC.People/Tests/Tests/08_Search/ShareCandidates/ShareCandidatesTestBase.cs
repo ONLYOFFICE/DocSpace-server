@@ -31,14 +31,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.Tests._16_ShareCandidates;
+namespace ASC.People.Tests.Tests._08_Search.ShareCandidates;
 
 /// <summary>
 /// Shared setup for the share candidates: who a caller is offered when it shares an entry of its own
-/// through <c>GET /people/{file|folder}/{id}</c>, <c>GET /group/{file|folder}/{id}</c> and
-/// <c>GET /accounts/{file|folder}/{id}/search</c>. A user or a guest has no access to the contacts
-/// of the portal, so it is offered only the accounts it already works with and the Everyone group;
-/// administrators and room admins are offered the portal as before. The lists are read with plain
+/// through <c>GET /people/{file|folder|room}/{id}</c> and <c>GET /accounts/{file|folder}/{id}/search</c>;
+/// the groups offered through <c>GET /group/{file|folder}/{id}</c> are covered with the group search.
+/// A user or a guest has no access to the contacts of the portal, so it is offered only the accounts
+/// it already works with and the Everyone group; administrators and room admins are offered the portal
+/// as before. The lists are read with plain
 /// SQL, so a read right after the write that should change them is safe.
 /// </summary>
 public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : SharingTestBase(fixture)
@@ -199,5 +200,58 @@ public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : Sharin
             area: area,
             count: 100,
             cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>The same list for a folder of the caller.</summary>
+    protected async Task<List<EmployeeFullDto>> UsersOfferedForFolderAsync(User caller, int folderId)
+    {
+        await _peopleClient.Authenticate(caller);
+
+        return (await _peopleSearchApi.GetUsersWithFoldersSharedAsync(
+            folderId,
+            employeeStatus: EmployeeStatus.Active,
+            area: AccountSearchArea.People,
+            count: 100,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>
+    /// The list narrowed by the request's own filters on who has access, with its total: the filters and the total
+    /// are answers of their own, apart from the <c>shared</c> flag of each account.
+    /// </summary>
+    protected async Task<EmployeeFullArrayWrapper> UsersOfFileByAccessAsync(User caller, int fileId, bool? includeShared = null, bool? excludeShared = null)
+    {
+        await _peopleClient.Authenticate(caller);
+
+        return await _peopleSearchApi.GetUsersWithFilesSharedAsync(
+            fileId,
+            employeeStatus: EmployeeStatus.Active,
+            excludeShared: excludeShared,
+            includeShared: includeShared,
+            area: AccountSearchArea.People,
+            count: 100,
+            cancellationToken: TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>A document created by the owner in the room.</summary>
+    protected async Task<int> CreateFileInRoomAsync(int roomId)
+    {
+        await _filesClient.Authenticate(Owner);
+
+        var file = await _filesApi.CreateFileAsync(
+            roomId,
+            new CreateFileRequest("Autotest File " + Guid.NewGuid().ToString()[..8]),
+            TestContext.Current.CancellationToken);
+
+        return file.Response.Id;
+    }
+
+    /// <summary>The first and the last name of the account, as an administrator reads them.</summary>
+    protected async Task<string> FullNameOfAsync(User user)
+    {
+        await _peopleClient.Authenticate(Owner);
+        var profile = (await _profilesApi.GetProfileByUserIdAsync(user.Id.ToString(), TestContext.Current.CancellationToken)).Response;
+
+        return $"{profile.FirstName} {profile.LastName}";
     }
 }

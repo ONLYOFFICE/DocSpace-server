@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.Tests._16_ShareCandidates;
+namespace ASC.People.Tests.Tests._08_Search.ShareCandidates;
 
 /// <summary>
 /// The request filters of the share candidates of a document, <c>GET /people/file/{id}</c>, for a user: the search

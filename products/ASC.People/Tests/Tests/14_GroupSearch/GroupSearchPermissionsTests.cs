@@ -73,12 +73,57 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
         await ShareFileWithGroupAsync(fileId, group.Id, FileShare.Read);
 
         await _peopleClient.Authenticate(user);
-        var result = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var result = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken);
 
-        result.Should().ContainSingle().Which.Id.Should().Be(EveryoneGroupId);
+        result.Response.Should().ContainSingle().Which.Id.Should().Be(EveryoneGroupId);
+        result.Total.Should().Be(1, "the total must not count the groups that are left out");
 
         var access = (await _sharingApi.GetFileSecurityInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         access.Select(a => a.SharedToGroup?.Id).Should().Contain(group.Id);
+    }
+
+    /// <summary>
+    /// Bug 79163: a user could find any group of the portal by its name through the search of its own file.
+    /// An administrator finds the group by that name, so the empty answer comes from the user's rights.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetGroupsWithFilesShared_FileOwnerUserSearchingAGroupByName_FindsNothing()
+    {
+        var group = await CreateGroupAsync();
+        var user = await InviteContact(EmployeeType.User);
+        var fileId = await CreateFileInMyDocumentsAsync(user);
+        var ownersFileId = await CreateFileInMyDocumentsAsync();
+
+        await _peopleClient.Authenticate(Owner);
+        var asOwner = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(ownersFileId, filterValue: group.Name, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        asOwner.Select(g => g.Id).Should().Contain(group.Id);
+
+        await _peopleClient.Authenticate(user);
+        var asUser = await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, filterValue: group.Name, cancellationToken: TestContext.Current.CancellationToken);
+
+        asUser.Response.Should().BeEmpty();
+        asUser.Total.Should().Be(0);
+    }
+
+    /// <summary>
+    /// Bug 79163: the limit to the Everyone group is for the callers that may not read the groups of the portal;
+    /// a room admin sharing its own file is offered every group as before.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetGroupsWithFilesShared_FileOwnerRoomAdmin_IsOfferedPortalGroups()
+    {
+        var group = await CreateGroupAsync();
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        var fileId = await CreateFileInMyDocumentsAsync(roomAdmin);
+
+        await _peopleClient.Authenticate(roomAdmin);
+        var groups = (await _groupSearchApi.GetGroupsWithFilesSharedAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        groups.Select(g => g.Id).Should().Contain([group.Id, EveryoneGroupId]);
     }
 
     [Fact]
@@ -159,9 +204,10 @@ public class GroupSearchPermissionsTests(AspireAppFixture fixture) : GroupSearch
         await ShareFolderWithGroupAsync(folderId, group.Id, FileShare.Read);
 
         await _peopleClient.Authenticate(user);
-        var result = (await _groupSearchApi.GetGroupsWithFoldersSharedAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var result = await _groupSearchApi.GetGroupsWithFoldersSharedAsync(folderId, cancellationToken: TestContext.Current.CancellationToken);
 
-        result.Should().ContainSingle().Which.Id.Should().Be(EveryoneGroupId);
+        result.Response.Should().ContainSingle().Which.Id.Should().Be(EveryoneGroupId);
+        result.Total.Should().Be(1, "the total must not count the groups that are left out");
 
         var access = (await _sharingApi.GetFolderSecurityInfoAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
         access.Select(a => a.SharedToGroup?.Id).Should().Contain(group.Id);

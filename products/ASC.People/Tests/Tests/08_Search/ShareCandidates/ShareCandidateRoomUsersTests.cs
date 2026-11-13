@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.Tests._16_ShareCandidates;
+namespace ASC.People.Tests.Tests._08_Search.ShareCandidates;
 
 /// <summary>
 /// The users offered to a member of a room, through <c>GET /people/room/{id}</c>. Any member of a room sees its
