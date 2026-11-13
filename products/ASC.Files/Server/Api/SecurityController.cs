@@ -159,15 +159,17 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Changes the access of accounts and groups to a file. The access `None` deletes the rights. Requires the right
-    /// to manage access to the file. Other callers get 403. The call changes data. It skips subjects the caller may
-    /// not share with. It also skips deactivated accounts, deleted groups, and files outside My documents and rooms.
-    /// If `notify` is true, the portal emails the accounts about the change. An account that got an email about the
-    /// same access to this file recently gets no new one. A new `sharingMessage` does not change this. The call
-    /// returns the new rights of the listed subjects. It changes nothing and returns an empty list for an empty
-    /// `share`, a repeated call, or an unknown file. To change several entries in one call, use
-    /// `PUT api/2.0/files/share`. The call returns 400 for an invalid or too long `email`, too many email
-    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access.
+    /// Changes the access of accounts and groups to a file. The access `None` deletes the rights. Requires the right to
+    /// manage access to the file. Other callers get 403. The call changes data, and you can repeat it with the same
+    /// body. It skips subjects the caller may not share with. It also skips deactivated accounts, deleted groups, and
+    /// files outside My documents and rooms. If `notify` is true, the portal emails the accounts about the change. An
+    /// account that got an email about the same access to this file recently gets no new one. A new `sharingMessage`
+    /// does not change this. The call returns the new rights of the listed subjects. A repeat skips subjects that
+    /// already have the listed access, so it sends no email. A repeated `None` changes nothing but returns the rights
+    /// of the other listed subjects. An empty `share` or an unknown file changes nothing and returns an empty list. To
+    /// change several entries in one call, use `PUT api/2.0/files/share`. The call returns 400 for an invalid or too
+    /// long `email`, too many email invitations, or a too long `sharingMessage`. It also returns 403 if a subject
+    /// cannot get the access.
     /// </remarks>
     /// <summary>Share a file</summary>
     /// <path>api/2.0/files/file/{id}/share</path>
@@ -192,16 +194,18 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Changes the access of accounts and groups to a folder. The access `None` deletes the rights. Requires the
-    /// right to manage access to the folder. Other callers get 403. The call changes data. It skips subjects the
-    /// caller may not share with. It also skips deactivated accounts and deleted groups. If `notify` is true, the
-    /// portal emails the accounts about the change. An account that got an email about the same access to this folder
-    /// recently gets no new one. A new `sharingMessage` does not change this. The call returns the new rights of the
-    /// listed subjects. It changes nothing and returns an empty list for an empty `share`, a repeated call, or an
-    /// unknown folder. For a room, use `PUT api/2.0/files/rooms/{id}/share`, which also invites people by email. The
-    /// call returns 400 for an invalid or too long `email`, too many email invitations, or a too long
-    /// `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks encryption keys for a
-    /// private room.
+    /// Changes the access of accounts and groups to a folder. The access `None` deletes the rights. Requires the right
+    /// to manage access to the folder. Other callers get 403. The call changes data, and you can repeat it with the
+    /// same body. It skips subjects the caller may not share with. It also skips deactivated accounts and deleted
+    /// groups. If `notify` is true, the portal emails the accounts about the change. An account that got an email about
+    /// the same access to this folder recently gets no new one. A new `sharingMessage` does not change this. The call
+    /// returns the new rights of the listed subjects. A repeat skips subjects that already have the listed access, so
+    /// it sends no email. A repeated `None` changes nothing but returns the rights of the other listed subjects. In a
+    /// room, a repeated `None` for an account emails a room invitation if `notify` is true. An empty `share` or an
+    /// unknown folder changes nothing and returns an empty list. For a room, use `PUT api/2.0/files/rooms/{id}/share`,
+    /// which also invites people by email. The call returns 400 for an invalid or too long `email`, too many email
+    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks
+    /// encryption keys for a private room.
     /// </remarks>
     /// <summary>Share a folder</summary>
     /// <path>api/2.0/files/folder/{id}/share</path>
@@ -479,16 +483,19 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
 
 
     /// <remarks>
-    /// Changes the access of accounts and groups to the listed files and folders. The access `None` deletes the
-    /// rights. Requires the right to manage access to each entry. Other callers get 403. The call changes data, one
-    /// entry at a time. It stops at the first entry it may not change, and earlier entries stay changed. It skips
-    /// subjects the caller may not share with, such as another user's guest. It also skips deactivated accounts,
-    /// deleted groups, and files outside My documents and rooms. If `notify` is true, the portal emails the accounts
-    /// about the change. It returns the new rights of these subjects on each changed entry. A skipped subject or
-    /// entry is not in the answer. An empty `share` or a repeated call changes nothing and returns an empty list. For
-    /// one room, use `PUT api/2.0/files/rooms/{id}/share`. The call returns 400 for an invalid or too long `email`,
-    /// too many email invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the
-    /// access, or lacks encryption keys for a private room.
+    /// Changes the access of accounts and groups to the listed files and folders. The access `None` deletes the rights.
+    /// Requires the right to manage access to each entry. Other callers get 403. The call changes data, one entry at a
+    /// time. You can repeat it with the same body. It stops at the first entry it may not change. Earlier entries stay
+    /// changed. It skips subjects the caller may not share with, such as another user's guest. It also skips
+    /// deactivated accounts, deleted groups, and files outside My documents and rooms. If `notify` is true, the portal
+    /// emails the accounts about the change. It returns the new rights of these subjects on each changed entry. A
+    /// skipped subject or entry is not in the answer. An empty `share` changes nothing and returns an empty list. A
+    /// repeat skips subjects that already have the listed access, so it sends no email. A repeated `None` changes
+    /// nothing but returns the rights of the other listed subjects on that entry. In a listed room, a repeated `None`
+    /// for an account emails a room invitation if `notify` is true. For one room, use
+    /// `PUT api/2.0/files/rooms/{id}/share`. The call returns 400 for an invalid or too long `email`, too many email
+    /// invitations, or a too long `sharingMessage`. It also returns 403 if a subject cannot get the access, or lacks
+    /// encryption keys for a private room.
     /// </remarks>
     /// <summary>Set sharing rights in batch</summary>
     /// <path>api/2.0/files/share</path>
@@ -549,11 +556,11 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// Checks the password of a protected external share link, and returns the same data as
     /// `GET api/2.0/files/share/{key}`. Call it after that operation reports that the link requires a password.
     /// Anyone can call it without signing in. A signed-in caller who can read the room does not need the password.
-    /// The call changes data but not the entry. It counts the attempts per link and calling address. The portal
-    /// remembers a correct password for the caller, so later requests with the token skip it. You can repeat the
-    /// call with the correct password. A wrong password gives an
-    /// invalid-password `status`, not an HTTP error. The portal then forgets the remembered password. After too many
-    /// attempts, the call returns 403 until the block expires.
+    /// The call changes data but not the entry. The portal remembers a correct password for the caller, so later
+    /// requests with the token skip it. The portal counts only wrong passwords for each link and calling address. So
+    /// you can repeat the call with the correct password. A wrong password gives an invalid-password `status`, not an
+    /// HTTP error. The portal then forgets the remembered password. After too many attempts, the call returns 403 until
+    /// the block expires, even with the correct password.
     /// </remarks>
     /// <summary>Unlock a password-protected link</summary>
     /// <path>api/2.0/files/share/{key}/password</path>

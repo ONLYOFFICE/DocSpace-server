@@ -105,13 +105,14 @@ public class FoldersControllerInternal(
     /// covers the whole history. Any user with read access to the folder can call it, except a guest. Other callers
     /// get 403. The call queues work and returns the task, not the report. Repeat
     /// `GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true. Then take the file from
-    /// `resultFileId` and `resultFileUrl`. For a CSV file too large for the editor, the URL downloads the file. You
-    /// can repeat the call. While a report of the same folder and caller runs, the call returns that task. An XLSX
-    /// report keeps at most the 200,000 most recent events by default, and fewer for long events. Its header says how
-    /// many events it left out. A CSV report has every event of the period. Only a DocSpace admin gets the IP
-    /// address, browser, and platform columns. To stop a running report, use
-    /// `DELETE api/2.0/files/folder/{folderId}/log/report`. If the folder does not exist, the call returns 404. It
-    /// returns 402 only if the login history and audit trail section is turned off for the portal.
+    /// `resultFileId` and `resultFileUrl`. For a CSV file too large for the editor, the URL downloads the file. You can
+    /// repeat the call. While a report of the same folder and caller runs, the call returns that task. It starts no
+    /// second report. After the report ends, a repeat starts a new report and saves one more file. An XLSX report keeps
+    /// at most the 200,000 most recent events by default, and fewer for long events. Its header says how many events it
+    /// left out. A CSV report has every event of the period. Only a DocSpace admin gets the IP address, browser, and
+    /// platform columns. To stop a running report, use `DELETE api/2.0/files/folder/{folderId}/log/report`. If the
+    /// folder does not exist, the call returns 404. It returns 402 only if the login history and audit trail section is
+    /// turned off for the portal.
     /// </remarks>
     /// <summary>
     /// Start the folder history report generation
@@ -239,13 +240,15 @@ public class FoldersControllerInternal(
     }
 
     /// <remarks>
-    /// Rebuilds the spreadsheet with the answers to a form from the "Complete" folder of a form-filling room.
-    /// Requires the right to update the results of the form, which a room manager has. Other callers get 403. The
-    /// call changes data and queues work. You can repeat it. It returns the original form and the queued job in
-    /// `task`. In `isNewFile`, it says whether it creates a new spreadsheet or rewrites the existing one. The file is
-    /// not ready yet. Repeat `GET api/2.0/files/file/{fileId}/xlsx` with the ID of the form until the task is
-    /// completed. The call returns 404 if the folder does not exist, holds no completed form, or the original form is
-    /// deleted. It also returns 403 for another kind of folder or room, or a form whose filling is not started.
+    /// Rebuilds the spreadsheet with the answers to a form from the "Complete" folder of a form-filling room. Requires
+    /// the right to update the results of the form, which a room manager has. Other callers get 403. The call changes
+    /// data and queues work. You can repeat it. A repeat during a run returns that run. A later repeat rewrites the same
+    /// spreadsheet. If that spreadsheet was deleted or moved, it creates a new one. The call returns the original form
+    /// and the queued job in `task`. In `isNewFile`, it says whether it creates a new spreadsheet or rewrites the
+    /// existing one. The file is not ready yet. Repeat `GET api/2.0/files/file/{fileId}/xlsx` with the ID of the form
+    /// until the task is completed. The call returns 404 if the folder does not exist, holds no completed form, or the
+    /// original form is deleted. It also returns 403 for another kind of folder or room, or a form whose filling is not
+    /// started.
     /// </remarks>
     /// <summary>
     /// Generate XLSX report by folder
@@ -318,13 +321,13 @@ public abstract class FoldersController<T>(
     /// <remarks>
     /// Creates a folder in the parent folder named in the path. Requires the right to create content in the parent
     /// folder. Other callers get 403. The room manager, a content creator, and the owner of a personal section have
-    /// this right. The call changes data. Do not repeat it. Titles do not have to be unique, so each call creates one
-    /// more folder. The portal notifies the room members about the new folder. Take the ID of the new folder from
-    /// `id`. To upload files into it, use `POST api/2.0/files/{folderId}/upload`. To create a room, use
-    /// `POST api/2.0/files/rooms`. The call returns 400 if the title is empty, has only spaces, or is too long. It
-    /// returns 403 if the parent does not exist or is in the archive. It also returns 403 in the Rooms, Forms, and AI
-    /// agents section roots, which hold only rooms. For a string ID that is not a folder of a connected storage, the
-    /// call returns 404.
+    /// this right. The call changes data. Do not repeat it. Each call creates one more folder. In portal storage, every
+    /// new folder has the same title. In a connected storage, a taken title gets a free name instead. The portal
+    /// notifies the room members about each new folder. Take the ID of the new folder from `id`. To upload files into
+    /// it, use `POST api/2.0/files/{folderId}/upload`. To create a room, use `POST api/2.0/files/rooms`. The call
+    /// returns 400 if the title is empty, has only spaces, or is too long. It returns 403 if the parent does not exist
+    /// or is in the archive. It also returns 403 in the Rooms, Forms, and AI agents section roots, which hold only
+    /// rooms. For a string ID that is not a folder of a connected storage, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Create a folder
@@ -348,15 +351,15 @@ public abstract class FoldersController<T>(
     /// Queues a job that deletes a folder with all its contents. It returns the file operations of the caller,
     /// including the new job. Requires the right to delete the folder. Other callers get 403. The room manager and a
     /// content creator who owns the folder have this right. Editing access is not enough, and a guest also gets 403.
-    /// The call queues work and changes data. Do not repeat it. A second call on a folder in the trash deletes it
-    /// for good. The folder still exists when the response arrives. Repeat `GET api/2.0/files/fileops` until the job
-    /// has `finished` set to true. Then read its `error` to see if the deletion failed. If `deleteAfter` is true,
-    /// `GET api/2.0/files/fileops` does not list the job after it finishes. By default, the job moves the folder to
-    /// the trash, where you can restore it. If `immediately` is true, the deletion is final. In a room and in the
-    /// trash, the deletion is always final. The same applies to the root folder of a connected storage. If a file
-    /// inside is blocked, for example open for editing, the job deletes nothing. The call also returns 403 for a
-    /// room if `immediately` is not true. If the folder does not exist, the call returns 404. To delete several items
-    /// in one call, use `PUT api/2.0/files/fileops/delete`.
+    /// The call queues work and changes data. Do not repeat it. A repeat deletes for good the folder that the first
+    /// call moved to the trash. After a deletion for good, a repeated call returns 404. The folder still exists when
+    /// the response arrives. Repeat `GET api/2.0/files/fileops` until the job has `finished` set to true. Then read its
+    /// `error` to see if the deletion failed. If `deleteAfter` is true, `GET api/2.0/files/fileops` does not list the
+    /// job after it finishes. By default, the job moves the folder to the trash, where you can restore it. If
+    /// `immediately` is true, the deletion is final. In a room and in the trash, the deletion is always final. The same
+    /// applies to the root folder of a connected storage. If a file inside is blocked, for example open for editing,
+    /// the job deletes nothing. The call also returns 403 for a room if `immediately` is not true. If the folder does
+    /// not exist, the call returns 404. To delete several items in one call, use `PUT api/2.0/files/fileops/delete`.
     /// </remarks>
     /// <summary>
     /// Delete a folder
@@ -751,10 +754,11 @@ public abstract class FoldersController<T>(
     /// changes nothing. A repeated call with an empty `linkId` creates one more link. If `access` grants nothing, the
     /// call revokes the link and returns an empty response. A later read does not recreate a revoked primary link.
     /// In a public room or a form-filling room, revoking the primary link creates a new one with default settings.
-    /// The call then returns the new link. The call returns 400 if the title or password is too long, or the
-    /// password breaks the portal policy. It also returns 400 if `expirationDate` is more than 10 years ahead. It
-    /// also returns 403 if folder links cannot have this access level or the link limit is reached. The admin's
-    /// restriction on external links can also return 403. If the folder does not exist, the call returns 404.
+    /// The call then returns the new link. A repeated revocation finds no link and returns an empty response. If the
+    /// link limit is reached, it returns 403 instead. The call returns 400 if the title or password is too long, or the
+    /// password breaks the portal policy. It also returns 400 if `expirationDate` is more than 10 years ahead. It also
+    /// returns 403 if folder links cannot have this access level or the link limit is reached. The admin's restriction
+    /// on external links can also return 403. If the folder does not exist, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Set the folder external link

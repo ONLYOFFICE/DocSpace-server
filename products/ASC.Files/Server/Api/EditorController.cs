@@ -106,14 +106,14 @@ public abstract class EditorController<T>(
     /// empties the file. The call does not download content from `downloadUri`. It reads only the extension from it,
     /// when `fileExtension` is empty. If `fileExtension` differs from the stored format, the portal converts the
     /// content. If a third-party storage cannot convert it, the portal saves a renamed copy. Requires editing access
-    /// to the file. Other callers get 403. The call changes data. Do not repeat it. Each call adds a version, or
-    /// replaces the version of an earlier autosave. With `forcesave` true, the call saves an autosave and keeps the
-    /// editing session open. Without it, the call closes a session opened with `editingAlone` true. The call returns
-    /// 403 if the file is locked by another user, is in Trash, or is encrypted. It also returns 403 for a file in a
-    /// private room. Without `forcesave`, it also returns 403 while the file is open for co-editing. If the file does
-    /// not exist, the call returns 404. If a string `fileId` points to a storage account that is not connected, the
-    /// call returns 400. If the content exceeds the storage quota, it returns 402. For large content, use
-    /// `POST api/2.0/files/file/{fileId}/edit_session`.
+    /// to the file. Other callers get 403. The call changes data. Do not repeat it. Each call adds a version. If the
+    /// last save of the file was an autosave, the call replaces that version instead. With `forcesave` true, the call
+    /// saves an autosave and keeps the editing session open. Without it, the call closes a session opened with
+    /// `editingAlone` true. The call returns 403 if the file is locked by another user, is in Trash, or is encrypted.
+    /// It also returns 403 for a file in a private room. Without `forcesave`, it also returns 403 while the file is
+    /// open for co-editing. If the file does not exist, the call returns 404. If a string `fileId` points to a storage
+    /// account that is not connected, the call returns 400. If the content exceeds the storage quota, it returns 402.
+    /// For large content, use `POST api/2.0/files/file/{fileId}/edit_session`.
     /// </remarks>
     /// <summary>
     /// Save edited file content
@@ -140,11 +140,13 @@ public abstract class EditorController<T>(
     /// needs the right to edit, review, comment, fill forms, or edit filters. With `editingAlone` true, the caller
     /// claims the file alone. If anybody already edits the file, the call returns 403. Requires editing access to the
     /// file. Other callers get 403. With `editingAlone` true, an anonymous caller without editing access gets 401.
-    /// The call changes data, but not the document. A repeated call with `editingAlone` true returns 403. The call
-    /// also returns 403 if the file is locked or in Trash, or if the document service rejects tracking. If the file
-    /// does not exist, it returns 404. If the editors cannot open its format, it returns 415. To keep the session
-    /// alive, call `GET api/2.0/files/file/{fileId}/trackeditfile`. To end it, call that operation with `isFinish`
-    /// true.
+    /// The call changes data, but not the document. While the session lasts, a repeated call with `editingAlone` true
+    /// returns 403. That call also deletes the portal's record of every editing session of the file. With `editingAlone`
+    /// false, each call returns the same key until the file gets a new version. A version from an autosave keeps the
+    /// key. The call also returns 403 if the file is locked or in Trash, or if the document service rejects tracking.
+    /// If the file does not exist, it returns 404. If the editors cannot open its format, it returns 415. To keep the
+    /// session alive, call `GET api/2.0/files/file/{fileId}/trackeditfile`. To end it, call that operation with
+    /// `isFinish` true.
     /// </remarks>
     /// <summary>
     /// Open an editing session
@@ -169,9 +171,10 @@ public abstract class EditorController<T>(
     /// title, the starting account, and the original form id on the file. The portal then collects later submissions
     /// for this form. For any other file, the call changes nothing and returns the file. A caller who cannot read the
     /// file gets 403, whatever the file is. Requires a role in the room other than `FillForms`, or the right to edit
-    /// the room. Other callers get 403. The call changes data, and you can repeat it. It also returns 403 for an
-    /// encrypted file. If the file does not exist, the call returns 404. To build a spreadsheet of the submitted
-    /// answers, use `POST api/2.0/files/file/{fileId}/xlsx`.
+    /// the room. Other callers get 403. The call changes data, and you can repeat it. A repeated call makes the caller
+    /// the starting account and takes the title from the current file name. The call also returns 403 for an encrypted
+    /// file. If the file does not exist, the call returns 404. To build a spreadsheet of the submitted answers, use
+    /// `POST api/2.0/files/file/{fileId}/xlsx`.
     /// </remarks>
     /// <summary>
     /// Start filling a form
@@ -505,10 +508,11 @@ public abstract class EditorController<T>(
     /// call, start filling the form with `PUT api/2.0/files/file/{fileId}/startfilling`. The form must still be in
     /// the room that started it. Requires a DocSpace admin, or the room role room manager or content creator. Other
     /// callers get 403. It also returns 403 if form filling has not started or the room is not a form-filling room.
-    /// The call changes data and queues work. A repeated call during a run returns that run. The spreadsheet is not
-    /// ready when the response arrives. To track it, poll `GET api/2.0/files/file/{fileId}/xlsx` with the id of the
-    /// original form. When the task completes, take the file from the task. If the file or the form behind a result
-    /// file does not exist, the call returns 404.
+    /// The call changes data and queues work. A repeated call during a run returns that run. After the run, a repeated
+    /// call rebuilds the spreadsheet in the same file. If that file was deleted or moved, the call creates a new one.
+    /// Then `isNewFile` is true. The spreadsheet is not ready when the response arrives. To track it, poll
+    /// `GET api/2.0/files/file/{fileId}/xlsx` with the id of the original form. When the task completes, take the file
+    /// from the task. If the file or the form behind a result file does not exist, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Generate a form answers report

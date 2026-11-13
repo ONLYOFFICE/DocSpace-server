@@ -134,16 +134,17 @@ public class OperationController(
 
     /// <remarks>
     /// Starts a background job that deletes files and folders. With `immediately` false, the call moves them to the
-    /// Trash of the caller. With `immediately` true, it deletes them for good. It always deletes for good the items
-    /// in the Trash or on a third-party storage. The call deletes a folder with all its content. Requires the right
-    /// to delete each listed item. Other callers get 403. In a room, a room manager can delete any item, and a
-    /// content creator only their own. The call queues work, and a deletion for good cannot be undone. Repeat
+    /// Trash of the caller. With `immediately` true, it deletes them for good. It always deletes for good the items in
+    /// the Trash or on a third-party storage. The call deletes a folder with all its content. Requires the right to
+    /// delete each listed item. Other callers get 403. In a room, a room manager can delete any item, and a content
+    /// creator only their own. The call queues work, and a deletion for good cannot be undone. Repeat
     /// `GET api/2.0/files/fileops` until `finished` is true. A failure on one item shows in `error`, not as a status
-    /// code. A repeated call deletes again the items restored in the meantime. The call returns the delete operations
-    /// of the caller, including the new one. An empty selection queues nothing and returns the existing operations.
-    /// To empty the Trash, use `PUT api/2.0/files/fileops/emptytrash`. The call also returns 403 if an item is locked
-    /// by another user or open for editing. It also returns 403 for a room when `immediately` is false. If a listed
-    /// file or folder does not exist, the call returns 404.
+    /// code. Do not repeat the call. A repeat deletes for good the items that the first call moved to the Trash. It
+    /// moves the items restored in the meantime to the Trash again. After a deletion for good, a repeated call returns
+    /// 404. The call returns the delete operations of the caller, including the new one. An empty selection queues
+    /// nothing and returns the existing operations. To empty the Trash, use `PUT api/2.0/files/fileops/emptytrash`.
+    /// The call also returns 403 if an item is locked by another user or open for editing. It also returns 403 for a
+    /// room when `immediately` is false. If a listed file or folder does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Delete files and folders</summary>
     /// <path>api/2.0/files/fileops/delete</path>
@@ -205,10 +206,11 @@ public class OperationController(
     /// Starts a background job that deletes for good the content of the Trash of the caller. With `folderType`, the
     /// call deletes only the items that came from sections or rooms of those types. Without it, the call empties the
     /// whole Trash. Any signed-in user can call it. The call queues work, and the deletion cannot be undone. Repeat
-    /// `GET api/2.0/files/fileops` until `finished` is true. You can repeat the call. On an empty Trash, it queues
-    /// nothing and returns the existing operations. The call returns the delete operations of the caller, including
-    /// the new one. To move items to the Trash, use `PUT api/2.0/files/fileops/delete`. If `folderType` is not a
-    /// folder type, the call returns 400.
+    /// `GET api/2.0/files/fileops` until `finished` is true. You can repeat the call. A repeat while a job of this
+    /// call still runs can show `error` for the items that job deleted. On an empty Trash, the call queues nothing and
+    /// returns the existing operations. The call returns the delete operations of the caller, including the new one.
+    /// To move items to the Trash, use `PUT api/2.0/files/fileops/delete`. If `folderType` is not a folder type, the
+    /// call returns 400.
     /// </remarks>
     /// <summary>Empty the "Trash" folder</summary>
     /// <path>api/2.0/files/fileops/emptytrash</path>

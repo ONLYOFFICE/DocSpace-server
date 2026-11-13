@@ -83,18 +83,19 @@ public class VirtualRoomsInternalController(
     /// <remarks>
     /// Creates a room in the Rooms section and returns it. The call creates an Instructions room, a Knowledge room,
     /// or an AI project in the AI rooms section instead. You cannot change `roomType` after this call. Requires a DocSpace admin
-    /// or a room admin. Other callers get 403. The call changes data. Do not repeat it. Each call creates another
-    /// room. The call adds the tag names that the portal does not have yet. A public room and a form filling room get
-    /// a primary external link. To invite members, use `PUT api/2.0/files/rooms/{id}/share` after this call. The call
-    /// returns 400 if `title` is blank, `cover` is unknown, or `share` is not empty. It also returns 400 if `private`
-    /// is set together with `indexing`, a lifetime, or a watermark. A room of the AI rooms section also returns 400
-    /// with settings that do not apply to its type. The call returns 402 if the portal reached the room limit of its
-    /// plan or its payment is overdue. Rooms of the AI rooms section do not count toward this limit. A logo that does
-    /// not fit into the storage quota also returns 402. The call returns 403 if `quota` is set while room quotas are
-    /// turned off, or is over the portal limit. It also returns 403 for a public room while the portal forbids
-    /// external sharing. A private room also returns 403 if the caller has no encryption keys. A Knowledge room
-    /// returns 403 while vectorization is turned off. If `logo.tmpFile` names no uploaded picture, or one already
-    /// used, the call returns 404.
+    /// or a room admin. Other callers get 403. The call changes data. Do not repeat it. Each call creates another room.
+    /// A repeat with the same `logo` returns 404 but still creates a room. That room has no logo, tags, or primary
+    /// external link. The call adds the tag names that the portal does not have yet. A public room and a form filling
+    /// room get a primary external link. To invite members, use `PUT api/2.0/files/rooms/{id}/share` after this call.
+    /// The call returns 400 if `title` is blank, `cover` is unknown, or `share` is not empty. It also returns 400 if
+    /// `private` is set together with `indexing`, a lifetime, or a watermark. A room of the AI rooms section also
+    /// returns 400 with settings that do not apply to its type. The call returns 402 if the portal reached the room
+    /// limit of its plan or its payment is overdue. Rooms of the AI rooms section do not count toward this limit. A
+    /// logo that does not fit into the storage quota also returns 402. The call returns 403 if `quota` is set while
+    /// room quotas are turned off, or is over the portal limit. It also returns 403 for a public room while the portal
+    /// forbids external sharing. A private room also returns 403 if the caller has no encryption keys. A Knowledge room
+    /// returns 403 while vectorization is turned off. If `logo.tmpFile` names no uploaded picture, or one already used,
+    /// the call returns 404.
     /// </remarks>
     /// <summary>Create a room</summary>
     /// <path>api/2.0/files/rooms</path>
@@ -278,9 +279,10 @@ public class VirtualRoomsInternalController(
     /// returns 403. The call queues work and returns the job record. Repeat
     /// `GET api/2.0/files/rooms/{id}/externaldbsync` until `isCompleted` is true. Then read `forms` for the result of each form. A form that fails does not stop
     /// the others. It gets `success` false and its own `error`. While a job runs, a new call returns that job and
-    /// starts no second one. So you can repeat the call. After a job ends, a new call starts a new job. The room keeps
-    /// one job record. If no external database is configured, the call returns 400 and queues nothing. If the room
-    /// does not exist, the call returns 404.
+    /// starts no second one. So you can repeat the call. After a job ends, a new call starts a new job. The new job
+    /// exports only the form data that the database does not have yet. The room keeps one job record. If no external
+    /// database is configured, the call returns 400 and queues nothing. If the room does not exist, the call returns
+    /// 404.
     /// </remarks>
     /// <summary>Start external DB sync</summary>
     /// <path>api/2.0/files/rooms/{id}/externaldbsync</path>
@@ -449,18 +451,19 @@ public abstract class VirtualRoomsController<T>(
     /// Changes the settings of a room and returns the whole room. The call changes only the fields in the body. An
     /// empty body changes nothing. Requires the room manager role in the room. Other callers get 403. A DocSpace
     /// admin without an invitation also gets 403. The call changes data, and you can repeat it with the same body.
-    /// Only a repeated `logo` fails. The portal deletes the uploaded image after use, so the call returns 404. The
+    /// The portal deletes an uploaded image after use. So a repeated `logo` or uploaded `watermark.imageUrl` returns
+    /// 404. After each call with `lifetime`, the portal waits 6 hours by default before it deletes expired files. The
     /// call trims a `title` and cleans it as at room creation. A blank `title` changes nothing. The `tags` array
-    /// replaces all tags of the room, and an empty array removes them. An empty `color` restores the default color.
-    /// An empty `cover` removes the cover. A `quota` of `-1` removes the custom limit. Any other negative `quota`
-    /// restores the portal default. A positive `quota` works only while the room quota feature is turned on. If you
-    /// turn on `indexing`, the call renumbers the room contents. The call returns 400 if the body has a property
-    /// that the room update does not define. It also returns 400 for `chatSettings` in a room that is not an AI
-    /// room. A private room with `indexing`, `lifetime`, or `watermark` also returns 400. If a new logo or
-    /// watermark image does not fit the portal storage quota, the call returns 402. It returns 403 for a room in
-    /// Trash or in the archive, or a `quota` over the portal limit. It also returns 403 if
-    /// `logo.tmpFile` is not an image the caller uploaded. If the room or the uploaded image does not exist, the
-    /// call returns 404. To crop and set only a logo, use `POST api/2.0/files/rooms/{id}/logo`.
+    /// replaces all tags of the room, and an empty array removes them. An empty `color` restores the default color. An
+    /// empty `cover` removes the cover. A `quota` of `-1` removes the custom limit. Any other negative `quota` restores
+    /// the portal default. A positive `quota` works only while the room quota feature is turned on. If you turn on
+    /// `indexing`, the call renumbers the room contents. The call returns 400 if the body has a property that the room
+    /// update does not define. It also returns 400 for `chatSettings` in a room that is not an AI room. A private room
+    /// with `indexing`, `lifetime`, or `watermark` also returns 400. If a new logo or watermark image does not fit the
+    /// portal storage quota, the call returns 402. It returns 403 for a room in Trash or in the archive, or a `quota`
+    /// over the portal limit. It also returns 403 if `logo.tmpFile` is not an image the caller uploaded. If the room or
+    /// the uploaded image does not exist, the call returns 404. To crop and set only a logo, use
+    /// `POST api/2.0/files/rooms/{id}/logo`.
     /// </remarks>
     /// <summary>Update a room</summary>
     /// <path>api/2.0/files/rooms/{id}</path>
@@ -590,9 +593,9 @@ public abstract class VirtualRoomsController<T>(
     /// to delete the room. Other callers get 403. The call checks the right before it queues the job. The job checks
     /// it again, so read the `error` of the finished job. Repeat `GET api/2.0/files/fileops` until `finished` is
     /// true. You can also read the record by its `id`. The portal keeps the record until you read it once after the
-    /// job ends. The job ignores `deleteAfter` in the body. If the room does not exist, the call returns 404. A
-    /// repeated call returns 404. If a string `id` points to a storage account that is not connected, the call
-    /// returns 400.
+    /// job ends. The job ignores `deleteAfter` in the body. If the room does not exist, the call returns 404. A repeat
+    /// after the job ends also returns 404. A repeat while the job runs queues a second job. If a string `id` points to
+    /// a storage account that is not connected, the call returns 400.
     /// </remarks>
     /// <summary>Remove a room</summary>
     /// <path>api/2.0/files/rooms/{id}</path>
@@ -698,16 +701,17 @@ public abstract class VirtualRoomsController<T>(
     /// Changes the members of a room in one call, and returns the access of the listed subjects. The call can add,
     /// change, and remove members. Each entry names an account, a group, or the email of a person without an account.
     /// An `access` of `None` removes the subject from the room. Requires the room manager role in the room. Other
-    /// callers get 403. The call changes data, and you can repeat it with the same body. If `notify` is true, the
-    /// portal emails the invitation with `message`. A person who got the same invitation or access email for this
-    /// room recently gets no new one. A new `message` does not change this. The call ignores an entry without an
-    /// access level. If a subject is listed twice, the last level wins. An empty list changes nothing. The call skips
-    /// subjects that the caller cannot see, so compare the answer with the request. Without `force`, the call does
-    /// not remove a member who has a form role. It reports this in `error` instead. The answer can also carry a
-    /// `warning`. The call returns 400 for an invalid or too long `email`, too many email invitations, or an invalid
-    /// `culture`. It returns 403 if an entry has an email and the portal forbids guest invitations. It also returns
-    /// 403 if a subject cannot get the access, such as a user or guest as room manager. In a private room, a subject
-    /// without encryption keys also returns 403. If the room does not exist, the call returns 404.
+    /// callers get 403. The call changes data, and you can repeat it with the same body. It skips a subject that
+    /// already has the listed access, so a repeat sends no email. If `notify` is true, the portal emails the invitation
+    /// with `message`. A person who got the same invitation or access email for this room recently gets no new one. A
+    /// new `message` does not change this. The call ignores an entry without an access level. If a subject is listed
+    /// twice, the last level wins. An empty list changes nothing. The call skips subjects that the caller cannot see,
+    /// so compare the answer with the request. Without `force`, the call does not remove a member who has a form role.
+    /// It reports this in `error` instead. The answer can also carry a `warning`. The call returns 400 for an invalid
+    /// or too long `email`, too many email invitations, or an invalid `culture`. It returns 403 if an entry has an
+    /// email and the portal forbids guest invitations. It also returns 403 if a subject cannot get the access, such as
+    /// a user or guest as room manager. In a private room, a subject without encryption keys also returns 403. If the
+    /// room does not exist, the call returns 404.
     /// </remarks>
     /// <summary>Set the room access rights</summary>
     /// <path>api/2.0/files/rooms/{id}/share</path>
@@ -1202,10 +1206,11 @@ public abstract class VirtualRoomsController<T>(
     /// pending invitation of the room and ignores `usersIds`. Otherwise, it sends it only to the accounts in
     /// `usersIds`. The call skips accounts that are not room members or that the caller cannot see. If `resendAll` is
     /// false and `usersIds` is empty, the call does nothing. So a 200 does not prove that an email was sent. Requires
-    /// the room manager role in the room. Other callers get 403. An archived room also returns 403. The call changes
-    /// no data, and you can repeat it. A member who got the invitation to this room recently gets no new email. The
-    /// link in the earlier email stays valid. The response has no body. A body that cannot be read returns 400. If
-    /// the room does not exist or is a room template, the call returns 404.
+    /// the room manager role in the room. Other callers get 403. An archived room also returns 403. The call changes no
+    /// data. Do not repeat it. By default, a member who got this invitation in the last 10 minutes gets no new email.
+    /// After that, each call sends the email again. The link in the earlier email stays valid. The response has no
+    /// body. A body that cannot be read returns 400. If the room does not exist or is a room template, the call returns
+    /// 404.
     /// </remarks>
     /// <summary>Resend the room invitations</summary>
     /// <path>api/2.0/files/rooms/{id}/resend</path>
@@ -1646,12 +1651,12 @@ public class VirtualRoomsCommonController(
     /// have indexing turned on. Requires a DocSpace admin or the room role room manager in this room. Other callers
     /// get 403. It also returns 403 if the folder is not a room, the room is archived, or indexing is turned off. The
     /// call queues work. Each account has one export job. If an earlier job still runs, the call returns that job and
-    /// starts nothing. So a repeated call during the export changes nothing. The new job replaces a finished one.
-    /// Repeat `GET api/2.0/files/rooms/indexexport` until `isCompleted` is true. Then read `status` to tell success
-    /// from failure or cancellation. The portal saves the spreadsheet in the My documents section of the caller, not
-    /// in the room. The `resultFileId` and `resultFileUrl` fields of the job point to it. To cancel the job, use
-    /// `DELETE api/2.0/files/rooms/indexexport`. If the room does not exist or is a room template, the call
-    /// returns 404.
+    /// starts nothing. So a repeated call during the export changes nothing. After the job ends, a new call replaces it
+    /// with a new job, which saves another spreadsheet. Repeat `GET api/2.0/files/rooms/indexexport` until
+    /// `isCompleted` is true. Then read `status` to tell success from failure or cancellation. The portal saves the
+    /// spreadsheet in the My documents section of the caller, not in the room. The `resultFileId` and `resultFileUrl`
+    /// fields of the job point to it. To cancel the job, use `DELETE api/2.0/files/rooms/indexexport`. If the room does
+    /// not exist or is a room template, the call returns 404.
     /// </remarks>
     /// <summary>Start the room index export</summary>
     /// <path>api/2.0/files/rooms/{id}/indexexport</path>

@@ -195,14 +195,15 @@ public abstract class UploadController<T>(
     /// Uploads the next part of a file to a chunked upload session. Send the part as the multipart `File` field. The
     /// call adds parts in the order they arrive. Do not send two parts to one session at the same time. Any signed-in
     /// user with the session ID can call it. The call finds the session by its ID and ignores the folder in the path.
-    /// The call changes data. Do not repeat a part, because the session adds it again. While bytes are missing, the
-    /// response has `uploaded` false. When the parts reach the size of the session, the call stores the file. It then
-    /// returns 201, `uploaded` true, and the file in `file`. A session below `chunkUploadSize` from
-    /// `GET api/2.0/files/settings` stores the file on the first call. It needs no
-    /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. The call returns 400 if the request has no `File`
-    /// part. It returns 402 if the part is over `chunkUploadSize`, or the file is over a quota or size limit. If the
-    /// session does not exist, is finalized, or has expired, the call returns 404. If the file is not a PDF and the
-    /// room is a form-filling room, the call returns 403.
+    /// The call changes data. Do not repeat a part. The session stores a repeated part as the next part. Then the file
+    /// has that part twice, or the session never stores the file. While bytes are missing, the response has `uploaded`
+    /// false. When the parts reach the size of the session, the call stores the file. It then returns 201, `uploaded`
+    /// true, and the file in `file`. A session below `chunkUploadSize` from `GET api/2.0/files/settings` stores the
+    /// file on the first call. It needs no `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. After the call
+    /// that stores the file, a repeated call returns 404. The call returns 400 if the request has no `File` part. It
+    /// returns 402 if the part is over `chunkUploadSize`, or the file is over a quota or size limit. If the session
+    /// does not exist, is finalized, or has expired, the call returns 404. If the file is not a PDF and the room is a
+    /// form-filling room, the call returns 403.
     /// </remarks>
     /// <summary>Upload the next chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
@@ -297,14 +298,16 @@ public abstract class UploadController<T>(
     /// parts by number. So you can resend a failed part with the same number. Without `chunkNumber`, the call numbers
     /// parts in the order they arrive. Split the file into parts of at most `chunkUploadSize` from
     /// `GET api/2.0/files/settings`. Any signed-in user with the session ID can call it. The call ignores the folder
-    /// in the path. It changes data. A repeated part replaces the part with that number. The call returns the
-    /// session, not the file. After the last part, store the file with
+    /// in the path. It changes data. With `chunkNumber`, a repeated part replaces the part with that number. Without
+    /// it, the session stores a repeated part as the next part. Then the file has that part twice, or the session
+    /// never stores the file. The call returns the session, not the file. After the last part, store the file with
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. A session below `chunkUploadSize` stores the file
-    /// on this call but still needs that call. To store the file with the last part, use
-    /// `POST api/2.0/files/{folderId}/session/{sessionId}`. The call returns 400 if the request has no `File` part,
-    /// or `chunkNumber` is below 1. It returns 402 if the part is over `chunkUploadSize`, or the file is over a quota
-    /// or size limit. If the session does not exist, is finalized, or has expired, the call returns 404. If the file
-    /// is not a PDF and the room is a form-filling room, the call returns 403.
+    /// on this call but still needs that call. In such a session, each repeated call stores the file again and adds a
+    /// version. A session from `POST api/2.0/files/file/{fileId}/edit_session` keeps the version instead. To store the
+    /// file with the last part, use `POST api/2.0/files/{folderId}/session/{sessionId}`. The call returns 400 if the
+    /// request has no `File` part, or `chunkNumber` is below 1. It returns 402 if the part is over `chunkUploadSize`,
+    /// or the file is over a quota or size limit. If the session does not exist, is finalized, or has expired, the
+    /// call returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 403.
     /// </remarks>
     /// <summary>Upload a numbered chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>

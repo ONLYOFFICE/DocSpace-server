@@ -272,14 +272,16 @@ public class ThirdpartyController(
     /// `providerId`. It returns the root folder of the account. Third-party storage must be turned on with
     /// `PUT api/2.0/files/thirdparty`. Requires the right to create rooms. Other callers get 403. The call changes data.
     /// It checks the credentials at the service before it saves anything. Without `providerId`, each call adds a new
-    /// account, so do not repeat it. You can repeat a re-authentication with the same body. A re-authenticated room
-    /// account keeps its server address. The call returns 400 if `customerTitle` or `providerKey` is missing, or
-    /// `providerKey` names no known service. For a new account, it also returns 400 if a needed `token`, `password`, or
-    /// `url` is missing. The call returns 403 if third-party storage is turned off or the service rejects the
-    /// credentials. It also returns 403 if `providerId` names the account of another user. For a new account, a title
-    /// that is empty after the call removes invalid characters also returns 403. If no account has the `providerId`,
-    /// the call returns 404. To create a room on the account, use `POST api/2.0/files/rooms/thirdparty/{id}`. To
-    /// connect backup storage, use `POST api/2.0/files/thirdparty/backup`.
+    /// account, so do not repeat it. You can repeat a re-authentication with the same body if it has no `token`. A
+    /// `token` is a one-time code of Google Drive, Box, Dropbox, or OneDrive. So the service rejects a repeat with the
+    /// same `token`. A re-authenticated room account keeps its server address. The call returns 400 if `customerTitle`
+    /// or `providerKey` is missing, or `providerKey` names no known service. For a new account, it also returns 400 if a
+    /// needed `token`, `password`, or `url` is missing. The call returns 403 if third-party storage is turned off or the
+    /// service rejects the credentials. It also returns 403 if `providerId` names the account of another user. For a new
+    /// account, a title that is empty after the call removes invalid characters also returns 403. If no account has the
+    /// `providerId`, the call returns 404. To create a room on the account, use
+    /// `POST api/2.0/files/rooms/thirdparty/{id}`. To connect backup storage, use
+    /// `POST api/2.0/files/thirdparty/backup`.
     /// </remarks>
     /// <summary>Connect a third-party account</summary>
     /// <path>api/2.0/files/thirdparty</path>
@@ -310,14 +312,15 @@ public class ThirdpartyController(
     /// Connects the third-party storage account where the portal saves backups, and returns its root folder. Third-party
     /// storage must be turned on with `PUT api/2.0/files/thirdparty`. Requires a DocSpace admin. Other callers get 403.
     /// The call changes data. A portal has one backup account. A second call re-authenticates and renames that account
-    /// instead of adding one. So you can repeat the call with the same body. The credentials follow the rules of
-    /// `POST api/2.0/files/thirdparty`. The call checks them at the service before it saves anything. So wrong
-    /// credentials leave the current account unchanged. The call returns 400 if `providerKey` names no known service or
-    /// a needed `url` is missing. While no backup account exists, a missing `token` or `password` also returns 400. The
-    /// call returns 403 if third-party storage is turned off or the service rejects the credentials. While no backup
-    /// account exists, a title that is empty after the call removes invalid characters also returns 403. The list of
-    /// `GET api/2.0/files/thirdparty` does not have this account. To read it, use `GET api/2.0/files/thirdparty/backup`.
-    /// To remove it, use `DELETE api/2.0/files/thirdparty/{providerId}`.
+    /// instead of adding one. So you can repeat the call with the same body if it has no `token`. A `token` is a
+    /// one-time code of Google Drive, Box, Dropbox, or OneDrive. So the service rejects a repeat with the same `token`.
+    /// The credentials follow the rules of `POST api/2.0/files/thirdparty`. The call checks them at the service before
+    /// it saves anything. So wrong credentials leave the current account unchanged. The call returns 400 if
+    /// `providerKey` names no known service or a needed `url` is missing. While no backup account exists, a missing
+    /// `token` or `password` also returns 400. The call returns 403 if third-party storage is turned off or the service
+    /// rejects the credentials. While no backup account exists, a title that is empty after the call removes invalid
+    /// characters also returns 403. The list of `GET api/2.0/files/thirdparty` does not have this account. To read it,
+    /// use `GET api/2.0/files/thirdparty/backup`. To remove it, use `DELETE api/2.0/files/thirdparty/{providerId}`.
     /// </remarks>
     /// <summary>Connect the third-party backup storage</summary>
     /// <path>api/2.0/files/thirdparty/backup</path>

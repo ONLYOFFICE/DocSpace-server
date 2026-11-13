@@ -179,11 +179,13 @@ public class MetadataController(
     /// <remarks>
     /// Changes the name, the type, the options, or the display order of a metadata field. Requires a DocSpace admin.
     /// Other callers get 403. The call changes data. A property left out keeps its value. The `options` list replaces
-    /// all options of the field. Send a new option without an ID. The response gives it a new ID. So a repeated call
-    /// gives new IDs to such options. The values already written stay as they are. The call returns 400 if another field
-    /// of the template has the new name in any case. It also returns 400 if you change the type of a field with values.
-    /// It also returns 400 if you remove an option that an entry has selected, or if the field is invalid. If the
-    /// template has no field with this ID, the call returns 404. A field of another template also returns 404.
+    /// all options of the field. Send a new option without an ID. The response gives it a new ID. So a repeat replaces
+    /// the options of the first call with new options and new IDs. If an entry has selected one of them by then, the
+    /// repeat returns 400. To repeat safely, send the options with the IDs from the response. The values already written
+    /// stay as they are. The call returns 400 if another field of the template has the new name in any case. It also
+    /// returns 400 if you change the type of a field with values. It also returns 400 if you remove an option that an
+    /// entry has selected, or if the field is invalid. If the template has no field with this ID, the call returns 404.
+    /// A field of another template also returns 404.
     /// </remarks>
     /// <summary>Update a metadata field</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}</path>
@@ -312,8 +314,10 @@ public class MetadataController(
     /// `Overwrite` replaces it with the folder value. A folder below that cascades the same template keeps its own values for its
     /// content. A template that already cascades keeps cascading. To turn a cascade off, use
     /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`. You can repeat the call. With `cascade`
-    /// true, each call queues a new pass. An empty list changes nothing. If the folder or any template does not exist,
-    /// the call returns 404. The call returns 400 if the body has no `templateIds`.
+    /// true, each call queues a new pass. It runs after the earlier passes in the same room or section. If a pass with
+    /// the same templates and `conflictResolveType` has not started yet, the call returns it instead. An empty list
+    /// changes nothing. If the folder or any template does not exist, the call returns 404. The call returns 400 if the
+    /// body has no `templateIds`.
     /// </remarks>
     /// <summary>Assign templates to a folder</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates</path>
@@ -406,9 +410,10 @@ public class MetadataController(
     /// false or left out, the call turns the cascade off. The folder then keeps the template and its values. The entries
     /// below keep them as their own assignments. New entries no longer inherit the template from this folder. A running
     /// pass stops at its next batch. The response is then a completed operation without an ID, and the call ignores
-    /// `conflictResolveType`. You can repeat the call. With `cascade` true, each call queues a new pass. The call returns
-    /// 404 if the folder or template does not exist, or the template is not on the folder. If the body cannot be
-    /// read, the call returns 400.
+    /// `conflictResolveType`. You can repeat the call. With `cascade` true, each call queues a new pass. It runs after
+    /// the earlier passes in the same room or section. If a pass of this template with the same `conflictResolveType`
+    /// has not started yet, the call returns it instead. The call returns 404 if the folder or template does not exist,
+    /// or the template is not on the folder. If the body cannot be read, the call returns 400.
     /// </remarks>
     /// <summary>Update a template assignment on a folder</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/{templateId}</path>

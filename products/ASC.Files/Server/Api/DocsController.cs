@@ -50,13 +50,14 @@ public class DocsController(
 {
     /// <remarks>
     /// Converts a portal file to another format and saves the result as a new file. Requires read access to a file that
-    /// allows copying and the right to create files in the folder. Other callers get 403. It also returns 403 if the file
-    /// or folder is in a private room or a room with a watermark. Without `folderId`, the portal saves the result in the "My
-    /// documents" section of the caller. A guest has no such section, so a guest without `folderId` gets 400. A plain conversion
-    /// needs only `outputtype`. The call passes the other fields to the document service. The call changes data, keeps
-    /// the source, and returns the new file. Each repeated call adds another file with a free name. The call returns only
-    /// after the conversion ends. So a large file keeps the request open. The call accepts only files stored in the
-    /// portal itself. To convert a file while you copy it to another folder, including a third-party one, use
+    /// allows copying and the right to create files in the folder. Other callers get 403. It also returns 403 if the
+    /// file or folder is in a private room or a room with a watermark. Without `folderId`, the portal saves the result
+    /// in the "My documents" section of the caller. A guest has no such section, so a guest without `folderId` gets 400.
+    /// A plain conversion needs only `outputtype`. The call passes the other fields to the document service. The call
+    /// changes data, keeps the source, and returns the new file. Each repeated call adds another file with a free name.
+    /// In a room, the portal notifies the room members about each new file. The call returns only after the conversion
+    /// ends. So a large file keeps the request open. The call accepts only files stored in the portal itself. To convert
+    /// a file while you copy it to another folder, including a third-party one, use
     /// `POST api/2.0/files/file/{fileId}/copyas`. To convert a file to the editable format of the portal next to the
     /// source, use `PUT api/2.0/files/file/{fileId}/checkconversion`. The call returns 400 for a missing or unsupported
     /// `outputtype`. It also returns 400 for a wrong or missing `password`, or a file too large to convert. Repeating
@@ -99,21 +100,23 @@ public class DocsController(
     /// <remarks>
     /// Queues a document builder script to run in the background. The script can open only portal files, by id. Requires
     /// edit and copy access to every file the script opens. Other callers get 403. Each file `outputs` replaces needs
-    /// edit access, and each target folder needs the right to create files. Without them, the call also returns 403. It
-    /// also returns 403 if a replaced file is locked, open in an editor, or in the trash. A file or folder in a private
-    /// room or a room with a watermark also returns 403. The call queues work and returns the started operation. Do not
-    /// repeat it. Each call starts a new run. A caller can run one script at a time. A new call while an earlier script
-    /// is queued or running returns 403. To track the run, poll `GET api/2.0/files/fileops` with the returned `id` until
-    /// `finished` is true. Then `files` lists the saved files, including those saved before a failure. A replaced file
-    /// appears with its new version. On a failure, `error` gives the reason. The portal stops a build after 10 minutes
-    /// and reports it as failed. The portal saves files missing from `outputs` in `folderId` or the folder of the
-    /// opened file. To only change the format of a file, use `POST api/2.0/docs/converter`. The call returns 400 if
-    /// the script has more than 20 OpenFile or SaveFile calls. It also returns 400 for an `outputs` key that the script
-    /// never saves. It also returns 400 if an `outputs` entry has both `fileId` and `folderId`, or neither. A replaced
-    /// file keeps its title, so an entry with `fileId` and `title` returns 400. It also returns 400 if the saved name has
-    /// another extension than the file at `fileId`. A malformed script or argument also returns 400, and so does a saved
-    /// file with nowhere to go. The call returns 404 if an opened or replaced file, or a target folder, does not exist.
-    /// The call returns these codes before it queues the script.
+    /// edit access. Each target folder needs the right to create files. Without these rights, the call also returns 403.
+    /// It also returns 403 if a replaced file is locked, open in an editor, or in the trash. A file or folder in a
+    /// private room or a room with a watermark also returns 403. The call queues work and returns the started operation.
+    /// Do not repeat it. A caller can run one script at a time. A new call while an earlier script is queued or running
+    /// returns 403. After a run ends, each call runs the script again. It saves new files under free names. In a room,
+    /// the portal notifies the room members about each new file. It adds a new version to each replaced file. To track
+    /// the run, poll `GET api/2.0/files/fileops` with the returned `id` until `finished` is true. Then `files` lists the
+    /// saved files, including those saved before a failure. A replaced file appears with its new version. On a failure,
+    /// `error` gives the reason. The portal stops a build after 10 minutes and reports it as failed. The portal saves
+    /// files missing from `outputs` in `folderId` or the folder of the opened file. To only change the format of a file,
+    /// use `POST api/2.0/docs/converter`. The call returns 400 if the script has more than 20 OpenFile or SaveFile
+    /// calls. It also returns 400 for an `outputs` key that the script never saves. It also returns 400 if an `outputs`
+    /// entry has both `fileId` and `folderId`, or neither. A replaced file keeps its title, so an entry with `fileId`
+    /// and `title` returns 400. It also returns 400 if the saved name has another extension than the file at `fileId`. A
+    /// malformed script or argument also returns 400, and so does a saved file with nowhere to go. The call returns 404
+    /// if an opened or replaced file, or a target folder, does not exist. The call returns these codes before it queues
+    /// the script.
     /// </remarks>
     /// <summary>Run a document builder script</summary>
     /// <path>api/2.0/docs/builder</path>

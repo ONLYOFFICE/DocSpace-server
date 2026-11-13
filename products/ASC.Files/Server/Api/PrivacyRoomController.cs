@@ -50,10 +50,10 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Creates an encryption key pair for the calling user. A user needs at least one key before anyone can invite
     /// them to a private room. Any signed-in user can call it, except a guest. A guest gets 403. The call changes data,
-    /// and a repeated call with the same `id` returns 409. It returns 201 with every key the caller now holds. Before
-    /// DocSpace 4.0, it returned 200 with the same body. To change an existing pair, use
-    /// `PUT api/2.0/privacyroom/keys`. The call returns 400 if the body is missing, `publicKey` or `privateKeyEnc` is
-    /// blank, or a key is too long. A malformed `id` also returns 400.
+    /// and a repeated call with the same `id` returns 409. A body without `id` uses the all-zero `id`, so its repeat
+    /// also returns 409. It returns 201 with every key the caller now holds. Before DocSpace 4.0, it returned 200 with
+    /// the same body. To change an existing pair, use `PUT api/2.0/privacyroom/keys`. The call returns 400 if the body
+    /// is missing, `publicKey` or `privateKeyEnc` is blank, or a key is too long. A malformed `id` also returns 400.
     /// </remarks>
     /// <summary>
     /// Create an encryption key

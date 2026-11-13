@@ -57,11 +57,11 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// returns the address of the form itself. It does the same for a caller who can edit the form, and before
     /// filling starts. Otherwise, a caller with fill-forms access gets a personal draft. The first such call changes
     /// data. It copies the form to the in-progress folder under the caller's name and clears its new mark. A repeated
-    /// call returns the same draft until the caller deletes it. Without a sign-in, each call creates a new draft. For
-    /// an invalid draft, the call returns its address with a notice to discard it. A draft becomes invalid if the form
-    /// is deleted or changed, or the caller loses fill-forms access. The next call on the form then creates a new
-    /// draft. When the call creates or rejects a draft, the
-    /// address ends with a `#message/` notice for the editor. For the full editor configuration, use
+    /// call returns the same draft. It creates a new one if the draft is deleted, in Trash, or locked by another user.
+    /// Without a sign-in, each call creates a new draft. For an invalid draft, the call returns its address with a
+    /// notice to discard it. A draft becomes invalid if the form is deleted or changed, or the caller loses fill-forms
+    /// access. The next call on the form then creates a new draft. When the call creates or rejects a draft, the address
+    /// ends with a `#message/` notice for the editor. For the full editor configuration, use
     /// `GET api/2.0/files/file/{fileId}/openedit`. The call returns 403 for a form in Trash or in a folder where the
     /// caller cannot fill forms. It also returns 403 for a past revision without history access. The call returns
     /// 404 for an unknown file or revision. It returns 400 if the body has no `version`. It returns 415 for a format
