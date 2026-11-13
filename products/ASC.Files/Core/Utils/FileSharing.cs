@@ -832,11 +832,7 @@ public class FileSharing(
             fileSecurity.CanEditExpirationAsync(entry)
         ).ContinueWith(t => (t.Result[0], t.Result[1], t.Result[2]));
 
-        var canAccess = entry is Folder<T> { IsRoom: true } || entry.ParentRoomType is FolderType.PublicRoom
-            ? await CheckAccessAsync(entry, filterType)
-            : canEditAccess;
-
-        if (!canAccess)
+        if (!await CanSeeSharesAsync(entry, filterType, canEditAccess))
         {
             logger.InfoUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!, filterType.ToString());
 
@@ -860,6 +856,23 @@ public class FileSharing(
         {
             yield return await ToAceAsync(entry, record, canEditAccess, canEditInternal, canEditExpiration);
         }
+    }
+
+    /// <summary>
+    /// Whether the current user may see the access list of the entry (<see cref="GetPureSharesAsync{T}(FileEntry{T}, ShareFilterType, EmployeeActivationStatus?, string, int, int)"/>):
+    /// for a room, or an entry of a public room, whoever may read it; otherwise only who may manage its access.
+    /// Who has access to the entry, and who has not, is told only to those who may see that list.
+    /// </summary>
+    public async Task<bool> CanSeeSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
+    {
+        return await CanSeeSharesAsync(entry, filterType, await fileSecurity.CanEditAccessAsync(entry));
+    }
+
+    private async Task<bool> CanSeeSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, bool canEditAccess)
+    {
+        return entry is Folder<T> { IsRoom: true } || entry.ParentRoomType is FolderType.PublicRoom
+            ? await CheckAccessAsync(entry, filterType)
+            : canEditAccess;
     }
 
     public async Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, string text)

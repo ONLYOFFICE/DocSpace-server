@@ -295,6 +295,41 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
     }
 
     /// <summary>
+    /// A room co-member is offered to a user that may only read somebody's document, but whether the document
+    /// is shared with that co-member is not told - neither by <c>shared</c> nor by <c>includeShared</c> - since the
+    /// access list of the document is not shown to it.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetUsersWithFilesShared_AsUserWithReadAccess_DoesNotTellWhichCoMembersHaveAccess()
+    {
+        var reader = await InviteContact(EmployeeType.User);
+        var coMember = await InviteContact(EmployeeType.User);
+        await CreateRoomWithMembersAsync(reader.Id, coMember.Id);
+        var fileId = await CreateFileInMyDocumentsAsync();
+
+        await _sharingApi.SetFileSecurityInfoAsync(
+            fileId,
+            new SecurityInfoSimpleRequestDto(
+                [new FileShareParams(reader.Id, FileShare.Read), new FileShareParams(coMember.Id, FileShare.Read)],
+                notify: false),
+            TestContext.Current.CancellationToken);
+
+        var offered = await UsersOfferedForFileAsync(reader, fileId);
+        var onlyShared = (await _peopleSearchApi.GetUsersWithFilesSharedAsync(
+            fileId,
+            employeeStatus: EmployeeStatus.Active,
+            includeShared: true,
+            area: AccountSearchArea.People,
+            count: 100,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        offered.Should().ContainSingle(u => u.Id == coMember.Id).Which.Shared.Should().Be(false);
+        onlyShared.Should().BeEmpty();
+    }
+
+    /// <summary>
     /// A share to a guest is accepted only when the caller is related to that guest, so a guest the user
     /// met in a room only is not offered either - it used to be offered and then silently dropped on save.
     /// </summary>

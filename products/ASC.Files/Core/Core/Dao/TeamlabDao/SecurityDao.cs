@@ -730,9 +730,9 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
+        bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
     {
-        if (entry == null || count == 0)
+        if (entry == null || count == 0 || (includeShared && !sharedVisible))
         {
             yield break;
         }
@@ -741,7 +741,7 @@ internal abstract class SecurityBaseDao<T>(
         var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator,
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, sharedVisible, filesDbContext, separator,
             includeStrangers, knownToSubjects, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         if (offset > 0)
@@ -761,9 +761,9 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
+        bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
     {
-        if (entry == null)
+        if (entry == null || (includeShared && !sharedVisible))
         {
             return 0;
         }
@@ -772,7 +772,7 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, includeStrangers, knownToSubjects, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, sharedVisible, filesDbContext, separator, includeStrangers, knownToSubjects, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         return await q1.CountAsync();
     }
@@ -786,6 +786,7 @@ internal abstract class SecurityBaseDao<T>(
         EmployeeActivationStatus? activationStatus,
         bool excludeShared,
         bool includeShared,
+        bool sharedVisible,
         FilesDbContext filesDbContext,
         string separator,
         bool includeStrangers,
@@ -911,7 +912,12 @@ internal abstract class SecurityBaseDao<T>(
 
         q = UserQueryHelper.FilterByText(q, text, separator);
 
-        var q1 = excludeShared
+        // Who has access to the entry is told only to a caller that may see its access list (FileSharing.CanSeeSharesAsync):
+        // otherwise a reader of somebody's document would learn which of its contacts the document is shared with.
+        // includeShared without it is answered with nothing before the query is built.
+        var q1 = !sharedVisible
+            ? q.Select(u => new UserWithShared { User = u, Shared = false })
+            : excludeShared
             ? q.Where(u =>
                     !filesDbContext.Security.Any(s =>
                         s.TenantId == tenantId &&

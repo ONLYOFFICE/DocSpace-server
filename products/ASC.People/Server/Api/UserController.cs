@@ -3303,9 +3303,10 @@ public class UserControllerAdditional<T>(
     /// tells them apart.
     /// A DocSpace administrator sees every account and a room admin every member but only related guests.
     /// A user sees the members it works with - owners and members of its rooms, directly or through a group, and
-    /// accounts given access to the folder in person, on it or a parent folder, these only when it may see the folder's
-    /// access list (it manages that access, or the folder is in a public room) - and, like a room admin, related
-    /// guests.
+    /// accounts given access to the folder in person, on it or a parent folder, these only when it may manage that
+    /// access - and, like a room admin, related guests.
+    /// Without the right to manage the folder's access no account is reported as having it: `shared` is false for
+    /// every account, `includeShared` returns an empty list and `excludeShared` excludes nobody.
     /// Members of a group given access are not added, and for a user only the id, names, email, avatars, type flags,
     /// status and `shared` are filled in.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
@@ -3341,8 +3342,10 @@ public class UserControllerAdditional<T>(
     /// tells them apart.
     /// A DocSpace administrator sees every account and a room admin every member but only related guests.
     /// A user sees the members it works with - owners and members of its rooms, directly or through a group, and
-    /// accounts given access to the file in person, on it or a parent folder, these only when it may see the file's
-    /// access list (it manages that access, or the file is in a public room) - and, like a room admin, related guests.
+    /// accounts given access to the file in person, on it or a parent folder, these only when it may manage that
+    /// access - and, like a room admin, related guests.
+    /// Without the right to manage the file's access no account is reported as having it: `shared` is false for every
+    /// account, `includeShared` returns an empty list and `excludeShared` excludes nobody.
     /// Members of a group given access are not added, and for a user only the id, names, email, avatars, type flags,
     /// status and `shared` are filled in.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
@@ -3383,11 +3386,14 @@ public class UserControllerAdditional<T>(
         var securityDao = daoFactory.GetSecurityDao<T>();
         var parentUserIds = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).Select(r => r.Id).ToListAsync();
 
+        // Only read access is required here, so who has access to the entry is reported only to a caller that may see
+        // its access list - the same rule that leaves parentUserIds empty for anybody else.
+        var sharedVisible = await fileSharing.CanSeeSharesAsync(fileEntry, ShareFilterType.UserOrGroup);
+
         var offset = inDto.StartIndex;
         var count = inDto.Count;
         var filterValue = inDto.Text;
         var filterSeparator = inDto.FilterSeparator;
-
 
         var totalUsers = await securityDao.GetUsersWithSharedCountAsync(fileEntry,
             filterValue,
@@ -3395,6 +3401,7 @@ public class UserControllerAdditional<T>(
             inDto.ActivationStatus,
             inDto.ExcludeShared ?? false,
             inDto.IncludeShared ?? false,
+            sharedVisible,
             filterSeparator,
             includeStrangers,
             knownToSubjects,
@@ -3412,6 +3419,7 @@ public class UserControllerAdditional<T>(
                            inDto.ActivationStatus,
                            inDto.ExcludeShared ?? false,
                            inDto.IncludeShared ?? false,
+                           sharedVisible,
                            filterSeparator,
                            includeStrangers,
                            knownToSubjects,
