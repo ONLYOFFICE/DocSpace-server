@@ -53,6 +53,8 @@ ACCESS = re.compile(r"\b(Requires|can call it|Anyone can|Only (the|a|an)\b|Sign 
 OPEN_ACCESS = re.compile(r"^(Anyone|Any signed-in user)\b(?![^.]*\bexcept\b)[^.]*?\bcan call it\b")
 # A refusal that is no error: the sentence after the access phrase says what other callers get instead.
 REFUSAL_WITHOUT_ERROR = re.compile(r"\b(instead of an error|not an error|(gets|returns) 200)\b")
+# The call itself refuses: "The call refuses …", "It also rejects …" — not "a license the service rejects".
+REFUSAL_BY_CALL = re.compile(r"^(The call|This call|It)\s+(also\s+)?(refuses|rejects|denies)\b")
 SWAGGER_RESPONSE = re.compile(r'\[SwaggerResponse\(\s*(\d{3})\s*(?:,\s*"((?:[^"\\]|\\.)*)")?')
 # The subject of `returns N` / `gets N` when the code belongs to other operations, not to this one:
 # a named operation (OPREF after masking) or "every branding save call", "other calls".
@@ -301,7 +303,7 @@ def own_checks(item, source, words_to_replace, routes):
     if item["stats"]["average"] > readability.MAX_AVERAGE_WORDS:
         notes.append(("FORM", "average {0} words per sentence, more than {1} (§4)".format(
             item["stats"]["average"], readability.MAX_AVERAGE_WORDS)))
-    if not source and re.search(r"\n\s*\n(?!\s*Raises the )|^\s*([-*]|\d+\.) ", item["raw"], re.M):
+    if not source and readability.has_paragraphs(readability.published(item["raw"])):
         notes.append(("FORM", "more than one paragraph or a list (§4)"))
 
     first = CODE_SPAN.sub("", sents[0]).split() if sents else []
@@ -318,6 +320,12 @@ def own_checks(item, source, words_to_replace, routes):
                                                        for s in sents[a:a + 2]):
             notes.append(("ORDER", "the access phrase is not followed by the refusal code (§2.3). What does the "
                                    "action return to other callers? Take it from its code"))
+    # "The call refuses a locked file." names a refusal but not the answer that signals it.
+    for n, s in enumerate(sents, 1):
+        if REFUSAL_BY_CALL.match(s) and not codes(s):
+            notes.append(("ORDER", "sentence {0} names a refusal without its code (§2.3): {1}. Take the code from "
+                                   "the code of the action and write `returns N`; a 500 is left out, then say the "
+                                   "call does not work".format(n, s)))
     if not effect:
         notes.append(("ORDER", "no effect statement: read-only, changes data, cannot be undone, spends, queues (§2.4)"))
     if access and said_of_call and said_of_call[0] < access[0]:
@@ -419,6 +427,11 @@ SAMPLE_SHORT = "Returns the files of a room. The room is set by its ID. A missin
 VACUUM_RULES = {"desc-sentence-length", "desc-average-sentence", "desc-min-sentences", "desc-one-paragraph",
                 "desc-grade"}
 VACUUM_EXPECTED = {"desc-sentence-length", "desc-min-sentences"}
+# The paragraph check: an XML comment wraps its lines, and a wrapped line that begins with a status code is
+# no numbered list; a blank line followed by bullets is a list.
+SAMPLE_WRAPPED = "Returns the files of a room. If the room does not exist, the call returns\n404. A guest gets 403."
+SAMPLE_LIST = "Returns the files of a room. Each entry has two fields.\n\n- `id`, the file ID.\n- `title`, its name."
+PARAGRAPH_SAMPLES = {"wrapped": (SAMPLE_WRAPPED, False), "list": (SAMPLE_LIST, True)}
 
 
 def tool_version(binary, *variants):
@@ -451,6 +464,12 @@ def check_tools(args):
     else:
         failed.append("own checks")
         print("  own checks  FAILED: longest sentence {0} and {1} words".format(own["long"], own["short"]))
+    wrong = [k for k, (t, expected) in PARAGRAPH_SAMPLES.items() if readability.has_paragraphs(t) != expected]
+    if wrong:
+        failed.append("own checks")
+        print("  own checks  FAILED: the paragraph check is wrong on the {0} sample".format(" and ".join(wrong)))
+    else:
+        print("  own checks  ok: a wrapped status code is one paragraph, bullets after a blank line are a list")
 
     stats, python = run_textstat(samples, args.textstat_python)
     if stats is None:
@@ -491,13 +510,20 @@ def check_tools(args):
         where = "{0}, {1}".format(found["vacuum"], tool_version(found["vacuum"], ["version"], ["--version"]))
         # The dot of `api/2.0` is part of the check: vacuum splits the reported path on it.
         entries = [(k, "/api/2.0/tool-check/" + k, "get", t) for k, t in samples.items()]
+        entries += [(k, "/api/2.0/tool-check/" + k, "get", t) for k, (t, _) in PARAGRAPH_SAMPLES.items()]
         out, note = readability.run_vacuum(found["vacuum"], entries, work)
         if out is None:
             failed.append("vacuum")
             print("  vacuum      FAILED ({0}): {1}".format(where, note))
         else:
-            codes = {k: {c for c, _ in out.get(k, []) if c in VACUUM_RULES} for k in samples}
-            if VACUUM_EXPECTED <= codes["long"] and not codes["short"]:
+            codes = {k: {c for c, _ in out.get(k, []) if c in VACUUM_RULES} for k, _, _, _ in entries}
+            wrong = [k for k, (_, expected) in PARAGRAPH_SAMPLES.items()
+                     if ("desc-one-paragraph" in codes[k]) != expected]
+            if wrong:
+                failed.append("vacuum")
+                print("  vacuum      FAILED ({0}): desc-one-paragraph is wrong on the {1} sample".format(
+                    where, " and ".join(wrong)))
+            elif VACUUM_EXPECTED <= codes["long"] and not codes["short"]:
                 print("  vacuum      ok ({0}): {1}".format(where, ", ".join(sorted(codes["long"]))))
             else:
                 failed.append("vacuum")

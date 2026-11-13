@@ -180,8 +180,8 @@ public abstract class FilesController<T>(
     /// With `continueVersion=false`, a repeat adds another version only if `version` is 0. With
     /// `continueVersion=true`, each call merges the next revision group, if any, into the group of `version`. If the
     /// body has no `version`, the call returns 400. If the file or the version does not exist, the call returns 404.
-    /// If copying the current version exceeds the room or user storage quota, the call returns 402. The call refuses a
-    /// file that another user locked. It also refuses a file in the trash or a third-party storage.
+    /// If copying the current version exceeds the room or user storage quota, the call returns 402. A file that another
+    /// user locked also returns 403. The call does not work for a file in the trash or on a third-party storage.
     /// </remarks>
     /// <summary>
     /// Change version history
@@ -706,8 +706,9 @@ public abstract class FilesController<T>(
     /// marks the file as new for the other users who can read it. If `version` is missing or is the current version,
     /// the call returns 400. Without `url`, a `version` above the current one copies the current version. If the file
     /// or the version does not exist, the call returns 404. If the content exceeds
-    /// the storage quota, the call returns 402. The call refuses a locked or encrypted file and a file that someone
-    /// is editing. It also refuses a file in the trash or a third-party storage.
+    /// the storage quota, the call returns 402. A file that another user locked also returns 403. Without `url`, the
+    /// call does not work for an encrypted file or a file that someone is editing. It also does not work for a file in
+    /// the trash or on a third-party storage.
     /// </remarks>
     /// <summary>
     /// Restore a file version
@@ -765,7 +766,7 @@ public abstract class FilesController<T>(
     /// Requires the right to change the version history, which a room manager and a content creator have. Other
     /// callers get 403, including an editor of another user's file. The call changes data, and you can repeat it with
     /// the same body. If the version does not exist, the call returns 400. If no file has this id, the call
-    /// returns 404. A file that another user locked also returns 403. The call also refuses a file in the trash. To
+    /// returns 404. A file that another user locked or a file in the trash also returns 403. To
     /// read the comments of all versions, use `GET api/2.0/files/file/{fileId}/edit/history`.
     /// </remarks>
     /// <summary>
@@ -797,8 +798,7 @@ public abstract class FilesController<T>(
     /// current version, the call returns 400. A `lastVersion` above the current one copies the current version. If
     /// the file or `lastVersion` does not exist, the call returns 404. For
     /// a caller who may only fill forms, a form whose filling has not started also returns 404. If the restore
-    /// exceeds the room or user storage quota, the call returns 402. The call refuses a file that another user
-    /// locked.
+    /// exceeds the room or user storage quota, the call returns 402. A file that another user locked also returns 403.
     /// </remarks>
     /// <summary>
     /// Update a file

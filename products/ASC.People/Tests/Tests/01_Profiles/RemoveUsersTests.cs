@@ -120,6 +120,38 @@ public class RemoveUsersTests(AspireAppFixture fixture) : BaseTest(fixture)
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
     }
 
+    /// <summary>
+    /// The description promises that a repeat deletes nothing more: a deleted account is looked up as the
+    /// system "lost" user, which the call skips like any system account, so the repeat is a 200 with an
+    /// empty list, not the 403 an earlier text claimed.
+    /// </summary>
+    [Fact]
+    public async Task RemoveUsers_RepeatedForDeletedAccount_ShouldReturnEmptyList()
+    {
+        var user = await InviteContact(EmployeeType.User);
+        await TerminateUser(user);
+        var request = new UpdateMembersRequestDto([user.Id]);
+
+        var first = await _profilesApi.RemoveUsersAsync(request, TestContext.Current.CancellationToken);
+        var repeat = await _profilesApi.RemoveUsersAsync(request, TestContext.Current.CancellationToken);
+
+        first.Response.Should().ContainSingle().Which.Id.Should().Be(user.Id);
+        repeat.Response.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task RemoveUsers_UnknownIdBesideDisabledAccount_ShouldSkipUnknownId()
+    {
+        var user = await InviteContact(EmployeeType.User);
+        await TerminateUser(user);
+
+        var removed = await _profilesApi.RemoveUsersAsync(
+            new UpdateMembersRequestDto([Guid.NewGuid(), user.Id]),
+            TestContext.Current.CancellationToken);
+
+        removed.Response.Should().ContainSingle().Which.Id.Should().Be(user.Id);
+    }
+
     [Fact]
     public async Task RemoveUsers_Anonymous_ShouldThrowUnauthorized()
     {

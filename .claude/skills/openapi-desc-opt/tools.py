@@ -124,8 +124,21 @@ def form_metrics(raw):
     return dict(
         lengths=lengths,
         average=round(sum(lengths) / n_sent, 1),
-        paragraphs=bool(re.search(r"\n\s*\n|^\s*[-*] |^\s*\d+\. ", str(raw), re.M)),
+        paragraphs=has_paragraphs(raw),
         grade=round(grade, 1))
+
+
+# A blank line, a bullet at the start of a line, or a numbered item where CommonMark starts a list: at
+# the start of the text, or at the start of a line only when the number is 1. A wrapped line of the XML
+# comment that begins with a status code ("…the call returns\n403. A…") continues the paragraph and is
+# no list. readability/vacuum/functions/description_form.js holds the same two expressions.
+_PARAGRAPH_OR_LIST = re.compile(r"\n\s*\n|^\s*[-*+] |^\s*1[.)] ", re.M)
+_LIST_AT_START = re.compile(r"\s*\d{1,9}[.)] ")
+
+
+def has_paragraphs(raw):
+    text = str(raw)
+    return bool(_PARAGRAPH_OR_LIST.search(text) or _LIST_AT_START.match(text))
 
 
 # --- the tools ---------------------------------------------------------------------------------------

@@ -1470,9 +1470,9 @@ public class UserController(
     /// status of `PUT api/2.0/people/status/{status}`. If any listed account is still active, the call returns 403 and
     /// deletes nothing. Requires a DocSpace admin. Other callers get 403. Only the portal owner can delete a DocSpace
     /// admin. The call skips the others without an error. It ignores system and LDAP accounts and leaves them out of
-    /// the response. The call cannot be undone, and a repeated call returns 403. A deleted or unknown account ID also
-    /// returns 403. If the call skipped every account, a repeat changes nothing. The call returns the listed accounts,
-    /// including the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.
+    /// the response. It does the same with the IDs of deleted and unknown accounts. The call cannot be undone. A
+    /// repeat deletes nothing more and returns only the listed accounts that still exist. The call returns the listed
+    /// accounts, including the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.
     /// A queued job deletes the data of each account. To track it, use `GET api/2.0/people/remove/progress/{userId}`.
     /// If an account shared files from its own section, the job moves them to a new folder of the caller. To move rooms
     /// and shared files to another user first, use `POST api/2.0/people/reassign/start`. If `userIds` is missing, the
@@ -1486,7 +1486,7 @@ public class UserController(
     [RaisesWebhook(WebhookTrigger.UserDeleted, When = "for every account it deletes, not for a skipped one")]
     [RaisesWebhook(WebhookTrigger.FolderCreated, When = "for every deleted account that shared files, once the job creates a folder for them")]
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Every account that was asked for, including the ones that were skipped", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(200, "The listed accounts, including the skipped DocSpace admins; system, LDAP, deleted and unknown accounts are left out", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The userIds field is missing")]
     [SwaggerResponse(403, "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account")]
     [HttpPut("delete", Order = -1)]

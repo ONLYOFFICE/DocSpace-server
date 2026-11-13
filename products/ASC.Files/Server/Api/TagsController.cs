@@ -208,13 +208,14 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// Deletes files from the personal template list of the calling account. The files themselves stay unchanged.
     /// Any signed-in user can call it, except a guest. A guest gets 403. The call skips files without read access.
     /// The call changes data. You can repeat it with the same body. It returns `true` even when it deletes nothing.
-    /// The call rejects a request without a body. To add files to the list, use `POST api/2.0/files/templates`. That
-    /// call takes an object with `fileIds`, not a bare array.
+    /// The body is a bare JSON array of file ids. The call returns 400 if the body is not such an array. To add files
+    /// to the list, use `POST api/2.0/files/templates`. That call takes an object with `fileIds`, not a bare array.
     /// </remarks>
     /// <summary>Delete template files</summary>
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Always true: the files named in the array are no longer templates of the caller", typeof(bool))]
+    [SwaggerResponse(400, "The body is not a JSON array of file ids")]
     [SwaggerResponse(403, "The caller is a guest")]
     [HttpDelete("templates")]
     public async Task<bool> DeleteTemplates(DeleteTemplateFilesRequestDto inDto)

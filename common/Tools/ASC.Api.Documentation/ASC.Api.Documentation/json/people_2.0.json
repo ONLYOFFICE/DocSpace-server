@@ -5874,7 +5874,7 @@
           "People / Profiles"
         ],
         "summary": "Delete users",
-        "description": "Deletes several accounts and queues the deletion of their data. First disable each account with the `Terminated`\r\nstatus of `PUT api/2.0/people/status/{status}`. If any listed account is still active, the call returns 403 and\r\ndeletes nothing. Requires a DocSpace admin. Other callers get 403. Only the portal owner can delete a DocSpace\r\nadmin. The call skips the others without an error. It ignores system and LDAP accounts and leaves them out of\r\nthe response. The call cannot be undone, and a repeated call returns 403. A deleted or unknown account ID also\r\nreturns 403. If the call skipped every account, a repeat changes nothing. The call returns the listed accounts,\r\nincluding the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.\r\nA queued job deletes the data of each account. To track it, use `GET api/2.0/people/remove/progress/{userId}`.\r\nIf an account shared files from its own section, the job moves them to a new folder of the caller. To move rooms\r\nand shared files to another user first, use `POST api/2.0/people/reassign/start`. If `userIds` is missing, the\r\ncall returns 400.\n\nRaises the `user.deleted` webhook for every account it deletes, not for a skipped one. Raises the `folder.created` webhook for every deleted account that shared files, once the job creates a folder for them.",
+        "description": "Deletes several accounts and queues the deletion of their data. First disable each account with the `Terminated`\r\nstatus of `PUT api/2.0/people/status/{status}`. If any listed account is still active, the call returns 403 and\r\ndeletes nothing. Requires a DocSpace admin. Other callers get 403. Only the portal owner can delete a DocSpace\r\nadmin. The call skips the others without an error. It ignores system and LDAP accounts and leaves them out of\r\nthe response. It does the same with the IDs of deleted and unknown accounts. The call cannot be undone. A\r\nrepeat deletes nothing more and returns only the listed accounts that still exist. The call returns the listed\r\naccounts, including the skipped DocSpace admins. To check a deletion, read the account with `GET api/2.0/people/{userId}`.\r\nA queued job deletes the data of each account. To track it, use `GET api/2.0/people/remove/progress/{userId}`.\r\nIf an account shared files from its own section, the job moves them to a new folder of the caller. To move rooms\r\nand shared files to another user first, use `POST api/2.0/people/reassign/start`. If `userIds` is missing, the\r\ncall returns 400.\n\nRaises the `user.deleted` webhook for every account it deletes, not for a skipped one. Raises the `folder.created` webhook for every deleted account that shared files, once the job creates a folder for them.",
         "operationId": "removeUsers",
         "requestBody": {
           "content": {
@@ -5888,7 +5888,7 @@
         },
         "responses": {
           "200": {
-            "description": "Every account that was asked for, including the ones that were skipped",
+            "description": "The listed accounts, including the skipped DocSpace admins; system, LDAP, deleted and unknown accounts are left out",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"

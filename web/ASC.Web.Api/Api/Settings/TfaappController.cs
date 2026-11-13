@@ -360,8 +360,8 @@ public class TfaappController(
 
     /// <remarks>
     /// Returns the secret that the current user enters in an authenticator app, as a QR code and a key. Sign the
-    /// request with the confirmation token of a `TfaActivation` link. The sign-in flow or
-    /// `GET api/2.0/settings/tfaapp/confirm` issues that link. The call refuses an ordinary sign-in token. The
+    /// request with the confirmation token of a `TfaActivation` link. With an ordinary sign-in token, the call returns
+    /// 403. The sign-in flow or `GET api/2.0/settings/tfaapp/confirm` issues that link. The
     /// authenticator method must be the current portal policy, and the account must have no app linked. Otherwise, the
     /// call returns 405. To replace a linked app, first unlink it with `PUT api/2.0/settings/tfaappnewapp`. The first
     /// call changes data and creates the secret. Later calls return the same secret until the app is unlinked. To
@@ -372,6 +372,7 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaapp/setup</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "The account label, the manual entry key and the QR-code image for linking an authenticator application", typeof(TfaSetupCodeDto))]
+    [SwaggerResponse(403, "The request is signed with an ordinary sign-in token, not with the confirmation token of a TfaActivation link")]
     [SwaggerResponse(405, "The authenticator method is not enabled on this portal, or the account already has an application linked")]
     [HttpGet("tfaapp/setup")]
     [AllowNotPayment]
