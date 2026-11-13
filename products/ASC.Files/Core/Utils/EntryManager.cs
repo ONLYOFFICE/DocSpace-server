@@ -1710,26 +1710,54 @@ public class EntryManager(IDaoFactory daoFactory,
         // The file is saved already: a failure here must not fail the save the document server reported.
         if (file.IsPdf)
         {
-            try
-            {
-                await OnFormVersionChangedAsync(file);
-            }
-            catch (Exception e)
-            {
-                logger.WarnFormVersionStateNotUpdated(e, file.Id.ToString(), file.Version);
-            }
+            await OnFormVersionChangedAsync(file);
         }
 
         return file;
     }
 
+    // After the save or the restore has taken effect: a busy lock must not fail a version already written, so a passing
+    // fault is tried once more and a failure is only logged. Left undone, the drafts of the earlier version stay linked
+    // and the fillers are not told the form changed; new drafts still take the version of the file itself.
     private async Task OnFormVersionChangedAsync<T>(File<T> file)
     {
-        var fileDao = daoFactory.GetFileDao<T>();
-        var properties = await fileDao.GetProperties(file.Id);
+        // Only the save of the properties is tried again: it waits for one lock, and what follows waits for its own.
+        EntryProperties<T> properties = null;
+        try
+        {
+            await FormFillingReportCreator.RetryTransientAsync(async () => properties = await SaveFormVersionAsync(file),
+                FormFillingReportCreator.VersionStateSaveAttempts, FormFillingReportCreator.VersionStateSaveDelay);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorFormVersionStateNotUpdated(e, file.Id.ToString(), file.Version);
+            return;
+        }
+
+        // Also for a save that overwrites the version.
+        if (file is File<int> form && properties is EntryProperties<int> formProperties)
+        {
+            await formFillingReportCreator.MarkEditorRenamesSavedAsync(form, formProperties.FormFilling);
+
+            // Without the check the first submission of the version decides its table.
+            try
+            {
+                await formFillingReportCreator.RequestVersionCheckAsync(form, formProperties.FormFilling);
+            }
+            catch (Exception e)
+            {
+                logger.WarnFormVersionCheckNotRequested(e, file.Id.ToString(), file.Version);
+            }
+        }
+    }
+
+    // The properties of the original form with the saved version recorded; null for a file that is not one.
+    private async Task<EntryProperties<T>> SaveFormVersionAsync<T>(File<T> file)
+    {
+        var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
         if (properties?.FormFilling == null || !Equals(properties.FormFilling.OriginalFormId, file.Id))
         {
-            return;
+            return null;
         }
 
         if (properties.FormFilling.OriginalFormVersion != 0 && properties.FormFilling.OriginalFormVersion != file.Version)
@@ -1740,12 +1768,7 @@ public class EntryManager(IDaoFactory daoFactory,
             await formFillingReportCreator.SaveFormPropertiesAsync(file.Id, properties);
         }
 
-        // Also for a save that overwrites the version.
-        if (file is File<int> form && properties is EntryProperties<int> formProperties)
-        {
-            await formFillingReportCreator.MarkEditorRenamesSavedAsync(form, formProperties.FormFilling);
-            await formFillingReportCreator.RequestVersionCheckAsync(form, formProperties.FormFilling);
-        }
+        return properties;
     }
 
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false, string fillingSessionId = null)
@@ -2000,9 +2023,8 @@ public class EntryManager(IDaoFactory daoFactory,
 
             if (newFile.IsPdf)
             {
-                // reverting a form is a content change like any editor save: without this the stored
-                // OriginalFormVersion keeps pointing at the pre-restore version and every later draft
-                // is rejected as obsolete on submit
+                // Reverting a form is a content change like any editor save: the drafts of the earlier version are let go
+                // and the fields of the restored version are checked against the table.
                 await OnFormVersionChangedAsync(newFile);
             }
 

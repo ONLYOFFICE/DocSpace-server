@@ -27,6 +27,9 @@
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Tests.Tests._01_Files.FormFilling;
 
@@ -104,6 +107,91 @@ public class FormFieldChangesPermissionsTests(AspireAppFixture fixture) : FormFi
             """{"version":1,"sequence":1,"sessionId":"tab","renames":[null]}""", TestContext.Current.CancellationToken);
 
         ((int)response.StatusCode).Should().Be(400);
+    }
+
+    public enum Caller
+    {
+        Author,
+        RoomManager,
+        ContentCreatorWhoStarted,
+        ContentCreatorNotAuthor,
+        Filler
+    }
+
+    // The editor sends renames only when its configuration says so: the flag must be true exactly when the report is
+    // taken, or the editor sends reports that are refused, or keeps renames the portal would have taken to itself.
+    // The report is sent first, since opening the form for editing takes it off filling.
+    [Theory]
+    [InlineData(Caller.Author)]
+    [InlineData(Caller.RoomManager)]
+    [InlineData(Caller.ContentCreatorWhoStarted)]
+    [InlineData(Caller.ContentCreatorNotAuthor)]
+    [InlineData(Caller.Filler)]
+    public async Task OpenEdit_TrackFormFieldChanges_MatchesWhetherTheReportIsTaken(Caller caller)
+    {
+        var (roomId, formId, user) = await ArrangeCallerAsync(caller);
+
+        await _filesClient.Authenticate(user);
+        using var report = await ReportAsync(formId);
+        var body = await report.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var tracked = await ReadTrackFormFieldChangesAsync(formId);
+
+        // With Community Edition editors nobody's renames are tracked, and an equality of two falses proves nothing: a
+        // caller who may edit the form tells that stack apart by a refusal that is not about access.
+        if (caller is Caller.Author or Caller.RoomManager or Caller.ContentCreatorWhoStarted)
+        {
+            Assert.SkipWhen(report.StatusCode == HttpStatusCode.Forbidden && !body.Contains(EditRefusal),
+                "Document Server Community Edition: the editors do not track renamed fields");
+            ((int)report.StatusCode).Should().Be(200, body);
+        }
+
+        tracked.Should().Be(report.StatusCode == HttpStatusCode.OK,
+            "{0} got {1} from fieldchanges in room {2}", caller, (int)report.StatusCode, roomId);
+    }
+
+    private async Task<(int RoomId, int FormId, User User)> ArrangeCallerAsync(Caller caller)
+    {
+        if (caller == Caller.ContentCreatorWhoStarted)
+        {
+            await _filesClient.Authenticate(Owner);
+            var room = await CreateFillingFormsRoom("Autotest FieldChanges Parity " + Guid.NewGuid().ToString()[..8]);
+            var form = await CreateFormInRoom(room.Id);
+            var starter = await InviteMember(EmployeeType.User);
+            await InviteToRoom(room.Id, starter, FileShare.ContentCreator);
+            await _filesClient.Authenticate(starter);
+            await StartFormFilling(form.Id);
+
+            return (room.Id, form.Id, starter);
+        }
+
+        var (roomId, formId) = await CreateStartedFormAsync();
+        switch (caller)
+        {
+            case Caller.Author:
+                return (roomId, formId, Owner);
+            case Caller.RoomManager:
+                var manager = await InviteMember(EmployeeType.RoomAdmin);
+                await InviteToRoom(roomId, manager, FileShare.RoomManager);
+                return (roomId, formId, manager);
+            case Caller.ContentCreatorNotAuthor:
+                var contentCreator = await InviteMember(EmployeeType.User);
+                await InviteToRoom(roomId, contentCreator, FileShare.ContentCreator);
+                return (roomId, formId, contentCreator);
+            default:
+                var filler = await InviteMember(EmployeeType.User);
+                await InviteToRoom(roomId, filler, FileShare.FillForms);
+                return (roomId, formId, filler);
+        }
+    }
+
+    // The ConfigurationDto of the SDK 4.1.0 has no trackFormFieldChanges yet, so the raw JSON is read.
+    private async Task<bool> ReadTrackFormFieldChangesAsync(int formId)
+    {
+        var files = new RawApiClient(_filesClient);
+        using var response = await files.GetAsync($"api/2.0/files/file/{formId}/openedit?edit=true", TestContext.Current.CancellationToken);
+        var config = await files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+
+        return config.TryGetProperty("trackFormFieldChanges", out var tracked) && tracked.GetBoolean();
     }
 
     private async Task<(int RoomId, int FormId)> CreateStartedFormAsync()

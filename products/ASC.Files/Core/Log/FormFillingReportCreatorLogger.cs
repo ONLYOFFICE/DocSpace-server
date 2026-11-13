@@ -47,9 +47,17 @@ internal static partial class FormFillingReportCreatorLogger
     public static partial void WarnGapSyncBatchFailed(
         this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName);
 
-    [LoggerMessage(LogLevel.Warning, "Forms DB: table {TableName} is not restored, {Count} submissions exceed the search index query limit")]
-    public static partial void WarnTableRestoreTooLarge(
-        this ILogger<FormFillingReportCreator> logger, string tableName, long count);
+    [LoggerMessage(LogLevel.Warning, "Forms DB: table {TableName} restored only in part, the search index stopped answering; the gap fill completes it")]
+    public static partial void WarnTableRestoreIncomplete(
+        this ILogger<FormFillingReportCreator> logger, string tableName);
+
+    [LoggerMessage(LogLevel.Warning, "Forms DB: the table of version {Version} of form {FormId} could not be decided, the submission goes to the table its stored state names")]
+    public static partial void WarnVersionDecisionFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, int formId, int version);
+
+    [LoggerMessage(LogLevel.Error, "Forms DB: the link of version {Version} is in table {TableName} but could not be saved with the form")]
+    public static partial void ErrorVersionLinkNotSaved(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName, int version);
 
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: failed to record the use of table {TableName}")]
     public static partial void WarnBuiltinDbTouchFailed(
@@ -114,7 +122,7 @@ internal static partial class FormFillingReportCreatorLogger
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: idle table {tableName} is kept, the search index cannot be read to restore it")]
     public static partial void WarnIdleTableKeptIndexUnavailable(this ILogger<FormFillingReportCreator> logger, string tableName);
 
-    [LoggerMessage(LogLevel.Information, "Built-in forms DB: idle table {tableName} is kept, its {count} submissions are more than one restore reads")]
+    [LoggerMessage(LogLevel.Information, "Built-in forms DB: idle table {tableName} is kept, its {count} indexed submissions are more than the check against the table reads at once")]
     public static partial void InfoIdleTableKeptTooLarge(this ILogger<FormFillingReportCreator> logger, string tableName, long count);
 
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: idle table {tableName} is kept, it holds rows the {count} submissions of the search index do not")]

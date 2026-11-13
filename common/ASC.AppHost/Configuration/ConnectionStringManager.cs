@@ -179,7 +179,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithEnvironment("FORMS_ADMIN_USER", Constants.FormsAdminUser)
             .WithEnvironment("FORMS_ADMIN_PASSWORD", adminPassword)
             .WithEnvironment("FORMS_RO_TIMEOUT", roQueryTimeoutSeconds.ToString())
-            .WithEnvironment("FORMS_RO_CHECK", Math.Max(1, roQueryTimeoutSeconds / 2).ToString())
+            // pg_cron takes an interval of 1 to 59 seconds; a longer one fails the init script and the container.
+            .WithEnvironment("FORMS_RO_CHECK", Math.Clamp(roQueryTimeoutSeconds / 2, 1, 59).ToString())
             .WithInitFiles(Path.Combine(basePath, "init"));
 
         // As for MySQL: a data volume when asked for, otherwise tmpfs when asked for, the cap only off tmpfs.

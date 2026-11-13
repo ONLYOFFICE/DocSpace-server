@@ -65,12 +65,21 @@ public class BuiltinDbFormSubmissionIntegrationEventHandler(
                 }
                 else
                 {
-                    await formFillingReportCreator.ExportToBuiltinDbAsync(
-                        @event.FileId,
-                        @event.OriginalFormId,
-                        @event.OriginalFormVersion,
-                        @event.RoomId,
-                        @event.FormsDataUrl);
+                    try
+                    {
+                        await formFillingReportCreator.ExportToBuiltinDbAsync(
+                            @event.FileId,
+                            @event.OriginalFormId,
+                            @event.OriginalFormVersion,
+                            @event.RoomId,
+                            @event.FormsDataUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        // The search index already holds the submission, so the table is completed from it at once.
+                        logger.ErrorWithException(ex);
+                        await formFillingReportCreator.SyncBuiltinDbTableAsync(@event.OriginalFormId, @event.OriginalFormVersion, @event.RoomId);
+                    }
                 }
             }
             catch (Exception ex)

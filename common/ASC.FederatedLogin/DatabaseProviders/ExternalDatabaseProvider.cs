@@ -44,7 +44,7 @@ namespace ASC.FederatedLogin.DatabaseProviders;
 [Scope]
 public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IValidateKeysProvider, IConsumerKeyMetadataProvider
 {
-    private StorageFactory? _storageFactory;
+    private readonly StorageFactory? _storageFactory;
 
     private const string ExternalDbModule = "externaldb";
 
@@ -91,7 +91,8 @@ public class ExternalDatabaseProvider : Consumer, IExternalDatabaseProvider, IVa
         "dbUser"         => new() { Order = 4, DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
         "dbPassword"     => new() { Order = 5, Type = "password", DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
         "dbSsl"          => new() { Order = 6, Type = "toggle",   DependsOn = "databaseType", DependsOnValue = "mysql", DependsOnValues = ["mysql", "postgresql"] },
-        "sqliteFilePath" => new() { Order = 7, DependsOn = "databaseType", DependsOnValue = "sqlite" },
+        // A SaaS portal cannot reach a database file, so it is not offered SQLite at all.
+        "sqliteFilePath" => new() { Order = 7, Hidden = !IsSqliteAllowed, DependsOn = "databaseType", DependsOnValue = "sqlite", DependsOnValues = ["sqlite"] },
         _                => new()
     };
 

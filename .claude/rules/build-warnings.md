@@ -49,6 +49,10 @@ and `ASC.ApiSystem`. A DTO declared in a `*.Core` project is checked only when t
 that uses it is built, and the warning then points at the **action method**, not at the DTO. After
 changing such a DTO, build the consuming controller project too.
 
+A controller hidden as a whole with `[ApiExplorerSettings(IgnoreApi = true)]` is skipped; an action
+hidden by its own attribute inside a published controller is not, so API002–API006 still fire on it
+and on its DTOs. What such an action needs to satisfy them is in `openapi-endpoint-docs.md` §0.
+
 ## Never silence
 
 Forbidden: `NoWarn` additions, `#pragma warning disable`, `[SuppressMessage]`, or lowering a severity

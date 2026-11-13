@@ -60,6 +60,7 @@ public class FormsDbProvisioningService(
     TenantManager tenantManager,
     IServiceScopeFactory serviceScopeFactory,
     Microsoft.Extensions.Hosting.IHostApplicationLifetime applicationLifetime,
+    BuiltinFormsDbOptions options,
     ILogger<FormsDbProvisioningService> logger)
 {
     private static readonly TimeSpan _credentialsExpiration = TimeSpan.FromMinutes(10);
@@ -73,15 +74,10 @@ public class FormsDbProvisioningService(
 
     private const string LiveDatabaseComment = "docspace forms: live";
 
-    // Every portal gets its own pools on the shared server, so keep them small and short-lived.
-    private const int MaxPoolSize = 5;
+    // Every portal gets its own pools on the shared server, so keep them short-lived; their size is configured.
     private const int ConnectionIdleLifetime = 60;
 
     private const int RoConnectionLimit = 5;
-
-    // Above what the pools of every service of one portal may open (two pools of five per process), so it only stops a
-    // single portal from taking the server's connections.
-    private const int RwConnectionLimit = 50;
     internal const string RoStatementTimeout = "30s";
 
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
@@ -421,6 +417,48 @@ public class FormsDbProvisioningService(
     }
 
     /// <summary>
+    /// Gives the accounts of the portals provisioned before the connection limit was changed the configured one: the
+    /// limit is set when an account is created, so a new value would otherwise reach only new portals. An account
+    /// without a limit is one being provisioned right now, which sets the limit itself; an account that cannot be changed
+    /// (dropped with its portal meanwhile, or changed at the same moment) is left to the next pass. Returns how many
+    /// accounts were changed.
+    /// </summary>
+    public async Task<int> ApplyConnectionLimitAsync(CancellationToken cancellationToken)
+    {
+        await using var connection = new NpgsqlConnection(AdminConnectionString);
+        await connection.OpenAsync(cancellationToken);
+
+        var roles = new List<string>();
+        await using (var cmd = connection.CreateCommand())
+        {
+            cmd.CommandText = "SELECT rolname FROM pg_roles WHERE rolname ~ '^forms_t[0-9]+_rw$' AND rolconnlimit <> -1 AND rolconnlimit <> @limit";
+            cmd.Parameters.Add(new NpgsqlParameter("@limit", options.RwConnectionLimit));
+            await using var reader = await cmd.ExecuteReaderAsync(cancellationToken);
+            while (await reader.ReadAsync(cancellationToken))
+            {
+                roles.Add(reader.GetString(0));
+            }
+        }
+
+        var changed = 0;
+        foreach (var role in roles)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                await ExecuteAsync(connection, $"ALTER ROLE \"{role}\" CONNECTION LIMIT {options.RwConnectionLimit}");
+                changed++;
+            }
+            catch (PostgresException e)
+            {
+                logger.WarnFormsDbConnectionLimitNotSet(e, role);
+            }
+        }
+
+        return changed;
+    }
+
+    /// <summary>
     /// The stored credentials of the portal when they still sign in, or null; never provisions, so background work
     /// cannot recreate a dropped schema or reset its passwords.
     /// </summary>
@@ -629,7 +667,7 @@ public class FormsDbProvisioningService(
 
         await CreateOrResetRoleAsync(connection, rwUser, rwPassword);
         await CreateOrResetRoleAsync(connection, roUser, roPassword);
-        await ExecuteAsync(connection, $"ALTER ROLE \"{rwUser}\" CONNECTION LIMIT {RwConnectionLimit}");
+        await ExecuteAsync(connection, $"ALTER ROLE \"{rwUser}\" CONNECTION LIMIT {options.RwConnectionLimit}");
         await ExecuteAsync(connection, $"ALTER ROLE \"{roUser}\" CONNECTION LIMIT {RoConnectionLimit}");
         await ExecuteAsync(connection, $"ALTER ROLE \"{roUser}\" SET statement_timeout = '{RoStatementTimeout}'");
 
@@ -797,7 +835,7 @@ public class FormsDbProvisioningService(
             Password = password,
             SearchPath = schemaName,
             Timezone = "UTC",
-            MaxPoolSize = MaxPoolSize,
+            MaxPoolSize = options.MaxPoolSize,
             ConnectionIdleLifetime = ConnectionIdleLifetime
         };
 
@@ -828,7 +866,8 @@ public class FormsDbProvisioningService(
 
         await ExecuteAsync(connection, $"DO $$ BEGIN IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{role}') THEN " +
             $"CREATE ROLE \"{role}\" LOGIN PASSWORD '{escapedPassword}'; END IF; END $$");
-        await ExecuteAsync(connection, $"ALTER ROLE \"{role}\" WITH PASSWORD '{escapedPassword}'");
+        // LOGIN too: a role that could not be dropped was left NOLOGIN and would never sign in again.
+        await ExecuteAsync(connection, $"ALTER ROLE \"{role}\" WITH LOGIN PASSWORD '{escapedPassword}'");
     }
 
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
@@ -864,4 +903,7 @@ internal static partial class FormsDbProvisioningServiceLogger
 
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: leftovers of tenant {tenantId} could not be checked")]
     public static partial void WarnFormsDbNotReconciled(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the connection limit of role {role} was not changed, the next cleanup pass tries again")]
+    public static partial void WarnFormsDbConnectionLimitNotSet(this ILogger<FormsDbProvisioningService> logger, Exception exception, string role);
 }

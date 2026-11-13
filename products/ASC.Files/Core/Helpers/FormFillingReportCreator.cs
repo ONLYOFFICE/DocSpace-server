@@ -163,7 +163,7 @@ public class FormFillingReportCreator(
 
     public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, string formsDataUrl)
     {
-        var formFilling = await DecideVersionTableAsync(externalDatabaseClient, originalFormId, originalFormVersion);
+        var formFilling = await DecideVersionTableOrStoredAsync(externalDatabaseClient, originalFormId, originalFormVersion);
         var tableName = await WriteSubmissionAsync(externalDatabaseClient, formFilling, fileId, originalFormId, originalFormVersion, roomId, formsDataUrl);
         if (tableName != null)
         {
@@ -175,10 +175,33 @@ public class FormFillingReportCreator(
     public async Task ExportToBuiltinDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, string formsDataUrl)
     {
         var db = GetBuiltinDb();
-        var formFilling = await DecideVersionTableAsync(db, originalFormId, originalFormVersion);
+        var formFilling = await DecideVersionTableOrStoredAsync(db, originalFormId, originalFormVersion);
         if (db != null)
         {
             await WriteSubmissionAsync(db, formFilling, fileId, originalFormId, originalFormVersion, roomId, formsDataUrl);
+        }
+    }
+
+    // A decision that fails (its lock, the database) must not cost the submission: it goes where the stored state says,
+    // a version not decided yet to a table of its own, and the next submission decides again.
+    private Task<FormFillingProperties<int>> DecideVersionTableOrStoredAsync(ExternalDatabaseClient db, int originalFormId, int originalFormVersion)
+    {
+        return DecideOrFallBackAsync(
+            () => DecideVersionTableAsync(db, originalFormId, originalFormVersion),
+            () => GetFormFillingAsync(originalFormId),
+            e => logger.WarnVersionDecisionFailed(e, originalFormId, originalFormVersion));
+    }
+
+    internal static async Task<T> DecideOrFallBackAsync<T>(Func<Task<T>> decide, Func<Task<T>> stored, Action<Exception> log)
+    {
+        try
+        {
+            return await decide();
+        }
+        catch (Exception e)
+        {
+            log(e);
+            return await stored();
         }
     }
 
@@ -387,8 +410,9 @@ public class FormFillingReportCreator(
 
     /// <summary>
     /// Drops a built-in table unused since <paramref name="cutoff"/> (UTC) only when the search index can rebuild it
-    /// whole on the next use: the table is the one its versions write to, and the index holds at least as many of their
-    /// submissions as the table, fewer than one rebuild reads. The table of a form that no longer exists is dropped.
+    /// whole on the next use: the table is the one its versions write to, and every row of it is in the index. The ids
+    /// are compared from one read of the index, so a table whose versions have more submissions than one read returns
+    /// is kept, although the restore itself would read them all. The table of a form that no longer exists is dropped.
     /// </summary>
     public async Task<bool> DropIdleBuiltinTableAsync(string tableName, DateTime cutoff)
     {
@@ -443,48 +467,90 @@ public class FormFillingReportCreator(
         }
     }
 
-    // Created and filled in one transaction; holds every version linked to the table, under the latest column names.
+    // Holds every version linked to the table, under the latest column names. The first page creates the table in one
+    // transaction; a restore broken off after it leaves the rest to the gap fill, which reads the index the same way.
     private async Task<bool> RestoreTableAsync(ExternalDatabaseClient db, string tableName, int originalFormId, int tableVersion, int roomId, FormFillingProperties<int> formFilling)
     {
         var versions = GetTableVersions(formFilling, tableVersion);
+        var created = false;
 
         await factoryIndexerForm.RefreshAsync();
-        var (countSuccess, count) = await factoryIndexerForm.TryCountAsync(r =>
-            r.Where(s => s.RoomId, roomId)
-             .Where(s => s.OriginalFormId, originalFormId)
-             .In(s => s.OriginalFormVersion, versions));
-
-        if (!countSuccess || count == 0)
+        var read = await ReadSubmissionPagesAsync(roomId, originalFormId, versions, async page =>
         {
-            return false;
+            var (columns, rows, _) = await BuildTableRowsAsync(originalFormId, formFilling, versions, page, tableName);
+            if (rows.Count > 0)
+            {
+                await db.CreateTableAndUpsertAsync(tableName, columns.Values.ToList(), rows.Select(r => r.Row).ToList(), keyColumn: "form_id");
+                created = true;
+            }
+        });
+
+        if (!read && created)
+        {
+            logger.WarnTableRestoreIncomplete(tableName);
         }
 
-        if (count >= BaseIndexer<DbFormsItemDataSearch>.QueryLimit)
+        return created;
+    }
+
+    // Size of one read of the submissions; the index refuses to page past QueryLimit by offset, so pages follow the id.
+    internal const int SubmissionPageSize = 1000;
+
+    // Every indexed submission of the versions, page by page in the order of their ids. False when a page could not be
+    // read; the pages before it were handed over.
+    private Task<bool> ReadSubmissionPagesAsync(int roomId, int originalFormId, int[] versions, Func<IReadOnlyCollection<DbFormsItemDataSearch>, Task> onPage)
+    {
+        return ReadPagesAsync(
+            afterId =>
+            {
+                double? after = afterId;
+                return afterId.HasValue
+                    ? factoryIndexerForm.TrySelectAsync(r => r
+                        .Where(s => s.RoomId, roomId)
+                        .Where(s => s.OriginalFormId, originalFormId)
+                        .In(s => s.OriginalFormVersion, versions)
+                        .Gt(s => s.Id, after)
+                        .Sort(s => s.Id, true)
+                        .Limit(0, SubmissionPageSize))
+                    : factoryIndexerForm.TrySelectAsync(r => r
+                        .Where(s => s.RoomId, roomId)
+                        .Where(s => s.OriginalFormId, originalFormId)
+                        .In(s => s.OriginalFormVersion, versions)
+                        .Sort(s => s.Id, true)
+                        .Limit(0, SubmissionPageSize));
+            },
+            s => s.Id,
+            SubmissionPageSize,
+            onPage);
+    }
+
+    // Keyset paging: each page starts after the last id of the previous one, until a page comes back short.
+    internal static async Task<bool> ReadPagesAsync<T>(
+        Func<int?, Task<(bool Success, IReadOnlyCollection<T> Items)>> select,
+        Func<T, int> id,
+        int pageSize,
+        Func<IReadOnlyCollection<T>, Task> onPage)
+    {
+        int? afterId = null;
+        while (true)
         {
-            logger.WarnTableRestoreTooLarge(tableName, count);
-            return false;
+            var (success, items) = await select(afterId);
+            if (!success)
+            {
+                return false;
+            }
+
+            if (items.Count > 0)
+            {
+                await onPage(items);
+                afterId = items.Max(id);
+            }
+
+            if (items.Count < pageSize)
+            {
+                return true;
+            }
         }
-
-        var (success, submissions) = await factoryIndexerForm.TrySelectAsync(r =>
-            r.Where(s => s.RoomId, roomId)
-             .Where(s => s.OriginalFormId, originalFormId)
-             .In(s => s.OriginalFormVersion, versions)
-             .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
-
-        if (!success || submissions.Count == 0)
-        {
-            return false;
-        }
-
-        var (columns, rows, _) = await BuildTableRowsAsync(originalFormId, formFilling, versions, submissions, tableName);
-        if (rows.Count == 0)
-        {
-            return false;
-        }
-
-        await db.CreateTableAndUpsertAsync(tableName, columns.Values.ToList(), rows.Select(r => r.Row).ToList(), keyColumn: "form_id");
-
-        return true;
     }
 
     // The rows of the submissions under the latest column names of their table, and the columns of the versions. Each
@@ -950,15 +1016,55 @@ public class FormFillingReportCreator(
         }
     }
 
+    // Traces of consumed sessions kept; without its trace a very late report of an old session is taken again.
+    internal const int MaxConsumedEditorSessions = 20;
+
     // The sessions saved up to the compared version went into its link; a session the form moved past unsaved never will.
+    // A consumed session leaves a trace: its id and the number of its last report, without renames. A session can go on
+    // after a forcesave, so a report of it on a compared version is taken; the trace tells a late or repeated report of
+    // the part already taken from one that continues it. MatchFields leaves traces out: one can be newer than the version
+    // the next save is compared with (a version linked but never submitted to is compared past), and it would count as
+    // a tracked session there and turn off the match by the order of the fields.
     internal static void ConsumeEditorRenames(FormFillingProperties<int> state, int version)
     {
-        state.EditorFieldRenames?.RemoveAll(r => r.SavedVersion <= version || r.SavedVersion == null && r.OpenedVersion < version);
-        if (state.EditorFieldRenames?.Count == 0)
+        var sessions = state.EditorFieldRenames;
+        if (sessions == null)
+        {
+            return;
+        }
+
+        var traces = sessions
+            .Where(r => r.SavedVersion <= version && r.SessionId != null)
+            .Select(r => new FormEditorFieldRenames
+            {
+                OpenedVersion = r.OpenedVersion,
+                UserId = r.UserId,
+                SessionId = r.SessionId,
+                SavedVersion = r.SavedVersion,
+                Sequence = r.Sequence
+            })
+            .ToList();
+
+        sessions.RemoveAll(r => r.SavedVersion <= version || r.SavedVersion == null && r.OpenedVersion < version);
+        sessions.AddRange(traces);
+
+        // The latest by the version they were saved as, then by the order they began to report in, which is the order of
+        // the list: report numbers belong to one session and do not compare across sessions.
+        foreach (var oldest in sessions.Select((r, order) => (Session: r, Order: order)).Where(s => IsConsumedTrace(s.Session))
+                     .OrderByDescending(s => s.Session.SavedVersion).ThenByDescending(s => s.Order)
+                     .Skip(MaxConsumedEditorSessions).Select(s => s.Session).ToList())
+        {
+            sessions.Remove(oldest);
+        }
+
+        if (sessions.Count == 0)
         {
             state.EditorFieldRenames = null;
         }
     }
+
+    // A session saved and taken into a version decision already: only its id and its last report number are left.
+    internal static bool IsConsumedTrace(FormEditorFieldRenames session) => session.SavedVersion != null && session.Renames == null;
 
     /// <summary>
     /// The decision about a version, applied to the state. A link carries the editor sessions saved up to it on, so they
@@ -1156,7 +1262,7 @@ public class FormFillingReportCreator(
             .Select(p => (Version: p.Version, OpenedVersion: 0, p.Renames));
         // The sessions saved as one version, by several users, in the order they began to report.
         var sessions = (formFilling.EditorFieldRenames ?? [])
-            .Where(r => r.SavedVersion > since && r.SavedVersion <= version && r.OpenedVersion >= since)
+            .Where(r => r.SavedVersion > since && r.SavedVersion <= version && r.OpenedVersion >= since && !IsConsumedTrace(r))
             .Select(r => (Version: r.SavedVersion.Value, r.OpenedVersion, r.Renames))
             .ToList();
 
@@ -1369,7 +1475,7 @@ public class FormFillingReportCreator(
                 return Task.FromResult(false);
             }
 
-            return Task.FromResult(KeepEditorRenames(state, openedVersion, sequence, userId, sessionId, renames));
+            return Task.FromResult(KeepEditorRenames(state, openedVersion, sequence, userId, sessionId, renames, form.Version));
         });
     }
 
@@ -1382,13 +1488,27 @@ public class FormFillingReportCreator(
         return sessions.Count >= MaxEditorSessionsPerUser && !sessions.Exists(r => r.SessionId == sessionId);
     }
 
+    // The next save is compared with the last version below it whose data is in a table, so a session opened before that
+    // one can never count. A session opened after it still can, even on a version compared since: one that goes on after
+    // a forcesave reports relative to the version it opened, and the save that ends it replaces the forcesaved version,
+    // which is compared again with the versions below it while it has no responses and no link of its own. Once it has,
+    // its decision stands and the session is dropped unused at the next check; the current version's own data is not
+    // counted here, since whether it has a link is not known before that check.
+    internal static bool IsOutdatedEditorSession(FormFillingProperties<int> state, int openedVersion, int formVersion)
+    {
+        var linked = state.VersionLinks?.Where(l => l.Version < formVersion).Select(l => l.Version).DefaultIfEmpty().Max() ?? 0;
+        var submitted = state.LastSubmittedVersion < formVersion ? state.LastSubmittedVersion : 0;
+
+        return openedVersion < state.FieldsCheckedVersion && openedVersion < Math.Max(linked, submitted);
+    }
+
     // Each session keeps its place in the list, which is the order the sessions began to report in: the renames of a
     // session opened on top of another's are joined after them. A report without a session id, or with an empty one,
     // stands for all the sessions of the user on the version, as the editors before the session id did.
-    internal static bool KeepEditorRenames(FormFillingProperties<int> state, int openedVersion, long sequence, Guid userId, string sessionId, List<FormFieldRename> renames)
+    internal static bool KeepEditorRenames(FormFillingProperties<int> state, int openedVersion, long sequence, Guid userId, string sessionId, List<FormFieldRename> renames,
+        int formVersion = int.MaxValue)
     {
-        // A version compared already took the sessions opened before it; a report on one of them would be kept forever.
-        if (openedVersion < state.FieldsCheckedVersion || IsEditorSessionLimitReached(state, openedVersion, userId, sessionId))
+        if (IsOutdatedEditorSession(state, openedVersion, formVersion) || IsEditorSessionLimitReached(state, openedVersion, userId, sessionId))
         {
             return false;
         }
@@ -1446,7 +1566,8 @@ public class FormFillingReportCreator(
 
         while (Total() > MaxEditorRenamesPerForm)
         {
-            var oldest = sessions.Where(r => r.SavedVersion != null && r != session).MinBy(r => r.SavedVersion);
+            // A trace holds no renames, so dropping it frees nothing and only loses its guard against late reports.
+            var oldest = sessions.Where(r => r.SavedVersion != null && r != session && !IsConsumedTrace(r)).MinBy(r => r.SavedVersion);
             if (oldest == null)
             {
                 return false;
@@ -1545,13 +1666,50 @@ public class FormFillingReportCreator(
                 link.TableVersion = tableVersion;
                 AddLink(state, link);
 
-                await SaveVersionStateAsync(form.Id, state);
+                await SaveVersionStateInStepAsync(form.Id, state);
             }
         }
         catch (Exception e)
         {
-            logger.WarnVersionLinkFailed(e, tableName, form.Version);
+            if (tableChanged)
+            {
+                logger.ErrorVersionLinkNotSaved(e, tableName, form.Version);
+            }
+            else
+            {
+                logger.WarnVersionLinkFailed(e, tableName, form.Version);
+            }
+
             KeepLinkAfterFailure(state, link, tableChanged, IsTransient(e));
+        }
+    }
+
+    // Each attempt may wait the whole lock timeout (30 s at least) while the table and version locks are held, and every
+    // writer of the form waits behind them; one retry rides out a burst of submissions, more would only lengthen the wait.
+    internal const int VersionStateSaveAttempts = 2;
+    internal static readonly TimeSpan VersionStateSaveDelay = TimeSpan.FromSeconds(1);
+
+    // The table took the change already (on MySQL its ALTER commits at once), so the state is saved before the table lock
+    // is let go: the next writer of the table must find the columns and the links in step. A passing fault, such as the
+    // lock of the submissions taken too long, is tried again; the writers waiting meanwhile are completed by the gap fill.
+    private Task SaveVersionStateInStepAsync(int originalFormId, FormFillingProperties<int> state)
+    {
+        return RetryTransientAsync(() => SaveVersionStateAsync(originalFormId, state), VersionStateSaveAttempts, VersionStateSaveDelay);
+    }
+
+    internal static async Task RetryTransientAsync(Func<Task> action, int attempts, TimeSpan delay)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await action();
+                return;
+            }
+            catch (Exception e) when (attempt < attempts && IsTransient(e))
+            {
+                await Task.Delay(delay * attempt);
+            }
         }
     }
 
@@ -1639,12 +1797,12 @@ public class FormFillingReportCreator(
                 if (change == FormTableChange.Conflict)
                 {
                     logger.WarnTableColumnConflict(targetTable, version);
-                    await SaveVersionStateAsync(originalFormId, state);
+                    await SaveVersionStateInStepAsync(originalFormId, state);
                     return;
                 }
 
                 RetargetLinks(state, link, continuing, tableVersion);
-                await SaveVersionStateAsync(originalFormId, state);
+                await SaveVersionStateInStepAsync(originalFormId, state);
 
                 if (db is BuiltinFormsDatabaseClient builtin)
                 {
@@ -1757,24 +1915,32 @@ public class FormFillingReportCreator(
         }
 
         var existingIds = await db.GetExistingFormIdsAsync(tableName);
+        var hadFailure = false;
+        var exported = false;
+        var conflict = false;
 
-        var (success, allSubmissions) = await factoryIndexerForm.TrySelectAsync(r =>
-            r.Where(s => s.RoomId, roomId)
-             .Where(s => s.OriginalFormId, originalFormId)
-             .In(s => s.OriginalFormVersion, versions)
-             .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
-
-        if (!success)
+        var read = await ReadSubmissionPagesAsync(roomId, originalFormId, versions, async page =>
         {
-            return (false, false);
-        }
+            var missing = page.Where(item => !existingIds.Contains(item.Id)).ToList();
+            if (missing.Count == 0 || conflict)
+            {
+                return;
+            }
 
-        var missing = allSubmissions.Where(item => !existingIds.Contains(item.Id)).ToList();
-        if (missing.Count == 0)
-        {
-            return (true, false);
-        }
+            var (pageFailed, pageExported, pageConflict) = await FillMissingRowsAsync(db, tableName, originalFormId, originalFormVersion, formFilling, missing);
+            hadFailure |= pageFailed;
+            exported |= pageExported;
+            conflict = pageConflict;
+        });
 
+        return (read && !hadFailure, exported);
+    }
+
+    // One page of the gap fill: whether a row failed or was left out, whether any was written, and whether the columns
+    // conflict with the table, which the next pages would only repeat.
+    private async Task<(bool Failed, bool Exported, bool Conflict)> FillMissingRowsAsync(ExternalDatabaseClient db, string tableName, int originalFormId, int originalFormVersion,
+        FormFillingProperties<int> formFilling, List<DbFormsItemDataSearch> missing)
+    {
         var (columns, rows, incomplete) = await BuildTableRowsAsync(
             originalFormId, formFilling, missing.Select(item => item.OriginalFormVersion).Distinct(), missing, tableName);
         var hadFailure = incomplete;
@@ -1785,18 +1951,18 @@ public class FormFillingReportCreator(
             && await db.AlterTableAsync(tableName, [], columns.Values) == FormTableChange.Conflict)
         {
             logger.WarnTableColumnConflict(tableName, originalFormVersion);
-            return (false, false);
+            return (true, false, true);
         }
 
         if (rows.Count == 0)
         {
-            return (!hadFailure, false);
+            return (hadFailure, false, false);
         }
 
         try
         {
             await db.CreateTableAndUpsertAsync(tableName, columns.Values, rows.Select(r => r.Row).ToList(), keyColumn: "form_id");
-            return (!hadFailure, true);
+            return (hadFailure, true, false);
         }
         catch (Exception e)
         {
@@ -1818,7 +1984,7 @@ public class FormFillingReportCreator(
             }
         }
 
-        return (!hadFailure, exported);
+        return (hadFailure, exported, false);
     }
 
     private async Task<bool?> HasMissingRowsAsync(ExternalDatabaseClient db, string tableName, int originalFormId, int[] versions, int roomId)
