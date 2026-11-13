@@ -80,6 +80,38 @@ public class GetAuthServicesTests(
         AssertServicesAndS3Keys(services, s3AuthService);
     }
 
+    // The integration-test stack is the server version, so the external database offers SQLite: the type list has it and
+    // the file path field is in the form. Every field that depends on the type lists the values it shows for, and its
+    // single value is the first of them.
+    [Fact]
+    public async Task GetAuthServices_ServerVersion_ExternalDatabaseOffersSqliteAndListsDependsOnValues()
+    {
+        await _webApiClient.Authenticate(Owner);
+
+        var services = await _settingsAuthorizationApi.GetAuthServicesAsync(TestContext.Current.CancellationToken);
+        var externalDb = services.Response.Single(s => s.Name == "externaldb");
+        externalDb.Props.Single(p => p.Name == "databaseType").Options.Should().Contain("sqlite");
+        externalDb.Props.Should().Contain(p => p.Name == "sqliteFilePath");
+
+        // The AuthKeyDto of the SDK 4.1.0 has no dependsOnValues yet, so the raw JSON is read.
+        var raw = new RawApiClient(_webApiClient);
+        using var response = await raw.GetAsync("api/2.0/settings/authservice", TestContext.Current.CancellationToken);
+        var rawServices = await raw.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+        var dependent = rawServices.EnumerateArray().Single(s => s.GetProperty("name").GetString() == "externaldb")
+            .GetProperty("props").EnumerateArray()
+            .Where(p => p.TryGetProperty("dependsOn", out var dependsOn) && dependsOn.ValueKind == JsonValueKind.String)
+            .ToList();
+
+        dependent.Should().NotBeEmpty();
+        foreach (var prop in dependent)
+        {
+            var name = prop.GetProperty("name").GetString();
+            var values = prop.GetProperty("dependsOnValues").EnumerateArray().Select(v => v.GetString()).ToList();
+            values.Should().NotBeEmpty("{0} depends on the database type", name);
+            prop.GetProperty("dependsOnValue").GetString().Should().Be(values[0], "{0} keeps the first value for older clients", name);
+        }
+    }
+
     private static void AssertServicesAndS3Keys(AuthServiceArrayWrapper services, SaveAuthKeysRequestDto s3AuthService)
     {
         services.StatusCode.Should().Be(200);
