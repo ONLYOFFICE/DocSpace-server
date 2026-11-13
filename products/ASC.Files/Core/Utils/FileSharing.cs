@@ -899,6 +899,9 @@ public class FileSharing(
     /// Whether the current user may see the access list of the entry (<see cref="GetPureSharesAsync{T}(FileEntry{T}, ShareFilterType, EmployeeActivationStatus?, string, int, int)"/>):
     /// for a room, or an entry of a public room, whoever may read it; otherwise only who may manage its access.
     /// Who has access to the entry, and who has not, is told only to those who may see that list.
+    /// The room type of an entry is taken from <see cref="FileEntry.ParentRoomType"/> as the caller left it: an entry
+    /// read from the DAO without it - as the account searches and the members of a group read theirs - counts as
+    /// outside a public room, so there only who may manage the access is told.
     /// </summary>
     public async Task<bool> CanSeeSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
     {

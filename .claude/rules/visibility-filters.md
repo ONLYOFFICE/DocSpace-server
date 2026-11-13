@@ -40,11 +40,11 @@ already relies on:
 
 | Invariant | Where it is decided |
 |---|---|
-| A Restrict record is no membership and no access - the caller's own, a member's of a room, one that takes a member of a group out of a room, one in an entry's access list | `FileShare.Restrict` |
-| The access list of an entry, and whether an account is on it, is told only to who may see that list: any reader of a room or of an entry of a public room, otherwise who may manage the access | `FileSharing.CanSeeSharesAsync` |
+| A Restrict record is no membership and no access - the caller's own, a member's of a room, a group's, one that takes a member of a group out of a room, one in an entry's access list. The `shared` flag is the exception: it marks any access record, a denying one included | `FileShare.Restrict` |
+| The access list of an entry, and whether an account is on it, is told only to who may see that list: any reader of a room, or of an entry of a public room where the caller has determined the parent room type, otherwise who may manage the access | `FileSharing.CanSeeSharesAsync` |
 | A group's manager row is no membership | `UserGroupRefType.Contains` |
 | A room template is no room; a third-party room has no internal id to check; a room in the archive stays a room of its members | the `RoomTemplates` parent, `InternalEntryId` |
-| A guest is offered only to whom it is related | `UserRelations` |
+| A guest is offered only to whom it is related, or who sees it on the access list of the entry | `UserRelations`, the `shared` flag |
 | A User or a Guest gets no contacts of another account | `UserManager.IsWithoutContactsAccessAsync` |
 
 Every cell is `yes (path:line)`, `n/a (why)` or a finding.
