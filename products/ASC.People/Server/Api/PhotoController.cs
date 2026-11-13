@@ -217,7 +217,7 @@ public class PhotoController(
     /// Update a user photo
     /// </summary>
     /// <path>api/2.0/people/{userId}/photo</path>
-    [RaisesWebhook(WebhookTrigger.UserUpdated)]
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "on every call, even when `files` is the current avatar")]
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the photo sizes built from the downloaded image", typeof(ThumbnailsDataDto))]
     [SwaggerResponse(400, "The request body cannot be read, or the files field is empty")]

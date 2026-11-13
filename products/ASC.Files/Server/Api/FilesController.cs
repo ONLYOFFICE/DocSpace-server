@@ -316,17 +316,17 @@ public abstract class FilesController<T>(
     /// <remarks>
     /// Creates a file in a folder and returns the stored file. The extension in `title` decides the format. The call
     /// changes a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. It adds DOCX to a title
-    /// without an extension. It keeps an unknown extension and the few formats that the portal stores as they are.
-    /// With `enableExternalExt=true`, the call keeps the title exactly as sent. If `templateId` is set, the call
-    /// copies that file, which the caller must be able to read. Otherwise, `formId` copies a form from the form
-    /// gallery. Without both, the call uses the blank template of the format in the caller's language. Requires the
-    /// right to create files in the folder. Other callers get 403. The call changes data. Do not repeat it. Each call
-    /// creates another file. The call returns 403 in the Rooms root, the archive, and the template sections, even for
-    /// a DocSpace admin. It also returns 403 for a missing or unreadable template. The call returns 404 for an
-    /// unknown `formId` or a gallery form without a file of this format. It also returns 404 if `templateId` is a
-    /// string that matches no third-party file. If the new file exceeds
-    /// the storage quota, the call returns 402. The call returns 400 if `title` is missing, empty, or too long. To
-    /// create the file in your own section, use `POST api/2.0/files/@my/file`.
+    /// without an extension. It keeps an unknown extension and the few formats that the portal stores as they are. With
+    /// `enableExternalExt=true`, the call keeps the extension of `title` in lower case and does not change the format.
+    /// If `templateId` is set, the call copies that file, which the caller must be able to read. Otherwise, `formId`
+    /// copies a form from the form gallery. Without both, the call uses the blank template of the format in the
+    /// caller's language. Requires the right to create files in the folder. Other callers get 403. The call changes
+    /// data. Do not repeat it. Each call creates another file. The call returns 403 in the Rooms root, the archive, and
+    /// the template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable template. The
+    /// call returns 404 for an unknown `formId` or a gallery form without a file of this format. It also returns 404 if
+    /// `templateId` is a string that matches no third-party file. If the new file exceeds the storage quota, the call
+    /// returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
+    /// section, use `POST api/2.0/files/@my/file`.
     /// </remarks>
     /// <summary>
     /// Create a file
@@ -410,7 +410,7 @@ public abstract class FilesController<T>(
     /// file for good. It always deletes for good a file in the trash, an encrypted file, or a third-party file.
     /// Requires the right to delete the file. Other callers get 403, including an editor. A room manager has this
     /// right, and a content creator has it for their own files. The call queues work. Do not repeat it. A repeat
-    /// after the move to the trash deletes the file for good. The file is still there when the response arrives.
+    /// after the move to the trash deletes the file for good. The file may still be there when the response arrives.
     /// Repeat `GET api/2.0/files/fileops` until the operation has `finished` set to true. Then read its `error` to
     /// learn if the deletion failed. With `deleteAfter=true`,
     /// `GET api/2.0/files/fileops` stops listing the operation when it ends. So you cannot read its result. With
@@ -424,7 +424,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.FileTrashed, When = "once the queued operation moves the file to the trash")]
-    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "instead if `immediately` is true or the file is in the trash or third-party storage")]
+    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "instead when the file is deleted for good, not moved to the trash")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller may not delete the file, or the file is locked by somebody else or open in an editing session")]
@@ -647,14 +647,14 @@ public abstract class FilesController<T>(
     }
 
     /// <remarks>
-    /// Locks a file so that other users cannot change it, or removes the lock. It returns the file with its lock
-    /// state. With `lockFile=true`, the call removes all other users from the editing session of the file. The lock
-    /// then blocks editing, renaming, and deleting for everyone except its owner and room managers. With
+    /// Locks a file so that only its owner and room managers can change it, or removes the lock. It returns the file
+    /// with its lock state. With `lockFile=true`, the call removes all other users from the editing session of the
+    /// file. The lock then blocks editing, renaming, and deleting for everyone except its owner and room managers. With
     /// `lockFile=false`, the call adds a note about the unlock to the comment of the current version. A file in a
     /// third-party storage gets no note. Requires the right to lock the file, which a room manager and a content
-    /// creator have. Other callers get 403. A file in the trash also returns 403. Only a room manager can remove a
-    /// lock that another user set. The call changes data. You can repeat it with the same body. A repeated call
-    /// changes nothing and returns the file again. If no file has this id, the call returns 404.
+    /// creator have. Other callers get 403. A file in the trash also returns 403. Only a room manager can remove a lock
+    /// that another user set. The call changes data. You can repeat it with the same body. A repeated call changes
+    /// nothing and returns the file again. If no file has this id, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Lock a file
@@ -739,10 +739,10 @@ public abstract class FilesController<T>(
     /// finished result. Use it only for small documents. Requires the right to convert the file, which a room manager
     /// and a content creator have. Other callers get 403. Without `sync`, the call queues work. While a queued
     /// conversion runs, a repeated call without `sync` queues nothing. Otherwise, each call converts the file again.
-    /// After this call, repeat `GET api/2.0/files/file/{fileId}/checkconversion` until `progress` is 100. Then read
-    /// the converted file from `file`. If the format needs no conversion, the call queues nothing and returns the
-    /// current status. If `outputType` names a format that the file cannot convert to, the call returns 400. To save a
-    /// PDF copy in another folder, use `POST api/2.0/files/file/{id}/saveaspdf`.
+    /// After this call, repeat `GET api/2.0/files/file/{fileId}/checkconversion` until `progress` is 100. Then read the
+    /// converted file from `file`. If the format needs no conversion, the call queues nothing and returns the current
+    /// status. For a file that needs conversion, an `outputType` it cannot convert to returns 400. To save a PDF copy
+    /// in another folder, use `POST api/2.0/files/file/{id}/saveaspdf`.
     /// </remarks>
     /// <summary>
     /// Start file conversion
@@ -845,15 +845,15 @@ public abstract class FilesController<T>(
     }
 
     /// <remarks>
-    /// Returns the primary external link of a file, and creates it if the file has none. The body sets only a new
-    /// link: its rights, lifetime, password, download restriction, and sign-in requirement. In a personal section, a
-    /// link without `expirationDate` never expires. A PDF form always gets the rights that filling needs. For a form
-    /// in a form-filling room, the call returns the link of the room. Requires the right to share the file. Other
-    /// callers get 403. The call changes data only when it creates the link. You can repeat it. Later calls return
-    /// the existing link and ignore the body. If the primary link was revoked, the call creates a new one with a new
-    /// ID. Until then, `GET api/2.0/files/file/{id}/link` returns 404. The call returns 403 if links to this file
-    /// cannot have this access level, or the link limit is reached. It also returns 403 if the portal allows external
-    /// links only in public rooms. It returns 400 if the password does not meet the password policy or
+    /// Returns the primary external link of a file, and creates it if the file has none. The body sets only a new link:
+    /// its rights, lifetime, password, download restriction, and sign-in requirement. In a personal section, a link
+    /// without `expirationDate` never expires. A new link to a PDF allows filling, except in a public room, where it is
+    /// read-only. For a form in a form-filling room, the call returns the link of the room. Requires the right to share
+    /// the file. Other callers get 403. The call changes data only when it creates the link. You can repeat it. Later
+    /// calls return the existing link and ignore the body. If the primary link was revoked, the call creates a new one
+    /// with a new ID. Until then, `GET api/2.0/files/file/{id}/link` returns 404. The call returns 403 if links to this
+    /// file cannot have this access level, or the link limit is reached. It also returns 403 if the portal allows
+    /// external links only in public rooms. It returns 400 if the password does not meet the password policy or
     /// `expirationDate` is over 10 years ahead. If no file has this id, the call returns 404. The address is in
     /// `sharedTo.shareLink`. To change the link, use `PUT api/2.0/files/file/{id}/links`.
     /// </remarks>
@@ -914,11 +914,12 @@ public abstract class FilesController<T>(
 
     /// <remarks>
     /// Returns the external links of a file. Requires read access to the file. Other callers get 403. A caller who
-    /// cannot share the file gets none of its own links. The call is read-only. The response headers carry the total number
-    /// of links, not the body. A file without links returns an empty list. The list includes the primary link after
-    /// `GET api/2.0/files/file/{id}/link` creates it. For a PDF form in a form-filling room, the call adds the link
-    /// of the room at the end. If no file has this id, the call returns 404. If `count` is outside its allowed range,
-    /// the call returns 400. To change or revoke a link, use `PUT api/2.0/files/file/{id}/links` with its id.
+    /// cannot share the file gets no links, except in a public room, where reading links is enough. The call is
+    /// read-only. The response headers carry the total number of links, not the body. A file without links returns an
+    /// empty list. The list includes the primary link after `GET api/2.0/files/file/{id}/link` creates it. For a PDF
+    /// form in a form-filling room, the call adds the link of the room at the end. If no file has this id, the call
+    /// returns 404. If `count` is outside its allowed range, the call returns 400. To change or revoke a link, use `PUT
+    /// api/2.0/files/file/{id}/links` with its id.
     /// </remarks>
     /// <summary>
     /// Get file external links
@@ -1149,7 +1150,7 @@ public abstract class FilesController<T>(
     /// Perform form filling action
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
-    [RaisesWebhook(WebhookTrigger.FormStopped, When = "when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started")]
+    [RaisesWebhook(WebhookTrigger.FormStopped, When = "for every `Stop`, even a repeated one, and for `Edit` that ends a started filling")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
     [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
@@ -1215,13 +1216,13 @@ public abstract class FilesController<T>(
 
     /// <remarks>
     /// Returns the keys that the caller needs to decrypt a file of an end-to-end encrypted private room. The field
-    /// `userKeys` holds the key pairs of the caller, and `fileKeys` the file keys issued to the caller. The call
-    /// never returns the keys of other users. Requires read access to the file. Other callers get 403. If the file
-    /// does not exist, the call also returns 403. The call is read-only. Without a key pair or an issued key, the
-    /// lists are empty. So an empty `fileKeys` means that the caller cannot open the file, not that the file is
-    /// unencrypted. If the file cannot carry encryption keys, the call returns 400. If `fileId` is neither a number
-    /// nor the id of a third-party file, the call returns 404. To issue keys, use
-    /// `PUT api/2.0/files/{fileId}/access`. To manage your own key pairs, use `api/2.0/privacyroom/keys`.
+    /// `userKeys` holds the key pairs of the caller, and `fileKeys` the file keys issued to the caller. The call never
+    /// returns the keys of other users. Requires read access to the file. Other callers get 403. If the file does not
+    /// exist, the call also returns 403. The call is read-only. Without a key pair, `userKeys` is null. An empty
+    /// `fileKeys` means that no key was issued to the caller, whether or not the file is encrypted. A file in a
+    /// third-party storage also returns an empty `fileKeys`. If `fileId` is neither a number nor the id of a
+    /// third-party file, the call returns 404. To issue keys, use `PUT api/2.0/files/{fileId}/access`. To manage your
+    /// own key pairs, use `api/2.0/privacyroom/keys`.
     /// </remarks>
     /// <summary>
     /// Get file encryption information
@@ -1231,7 +1232,6 @@ public abstract class FilesController<T>(
     /// private room has any.</param>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The key pairs of the caller and the file keys issued to them", typeof(FileEncryptionInfoDto))]
-    [SwaggerResponse(400, "The file cannot carry encryption keys")]
     [SwaggerResponse(403, "The file does not exist, or the caller has no read access to it")]
     [SwaggerResponse(404, "The file id is neither a number nor the id of a file in a known third-party storage")]
     [HttpGet("{fileId}/access")]
@@ -1295,19 +1295,19 @@ public class FilesControllerCommon(
 {
     /// <remarks>
     /// Creates a file in the "My documents" section of the caller and returns it. The extension in the title sets the
-    /// format. The portal changes a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. A
-    /// title without an extension gets DOCX. The portal keeps an unknown extension and a few other formats. If
-    /// `enableExternalExt` is true, the portal keeps the title exactly as sent. If `templateId` is set, the portal
-    /// copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that form from the
-    /// form gallery. If neither is set, the portal uses its blank template for the format and the language of the
-    /// caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user
+    /// format. The portal changes a known text, spreadsheet, or presentation extension to DOCX, XLSX, or PPTX. A title
+    /// without an extension gets DOCX. The portal keeps an unknown extension and a few other formats. If
+    /// `enableExternalExt` is true, the portal keeps the extension of the title in lower case. If `templateId` is set,
+    /// the portal copies that file and ignores `formId`. Otherwise, a nonzero `formId` makes the portal copy that form
+    /// from the form gallery. If neither is set, the portal uses its blank template for the format and the language of
+    /// the caller. If there is no such template, or `enableExternalExt` is true, the file is empty. Any signed-in user
     /// can call it, except a guest. A guest who has My documents gets 403. The call changes data. Do not repeat it.
-    /// Each call creates another file. The returned title shows the extension that the portal stored. To create a
-    /// file in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title`
-    /// is missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403
-    /// if the template does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a
-    /// gallery form without a file of the format of the title. If a string `templateId` is not a file of a connected
-    /// third-party storage, the call also returns 404.
+    /// Each call creates another file. The returned title shows the extension that the portal stored. To create a file
+    /// in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title` is
+    /// missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403 if the
+    /// template does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a gallery form
+    /// without a file of the format of the title. If a string `templateId` is not a file of a connected third-party
+    /// storage, the call also returns 404.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents

@@ -363,9 +363,9 @@ public class SettingsController(
     /// <remarks>
     /// Changes whether new documents get the default name without asking the user. The setting is for the calling
     /// account and only guides the app. It returns the value that is now stored. Any signed-in user can call it. The
-    /// call changes data, and you can repeat it with the same body. Calls that create files, such as
-    /// `POST api/2.0/files/{folderId}/file`, always use the title they get. To read the value, use the
-    /// `keepNewFileName` field of `GET api/2.0/files/settings`.
+    /// call changes data, and you can repeat it with the same body. Calls that create files, such as `POST
+    /// api/2.0/files/{folderId}/file`, never pick a default name, but may change the extension. To read the value, use
+    /// the `keepNewFileName` field of `GET api/2.0/files/settings`.
     /// </remarks>
     /// <summary>Keep the default file name</summary>
     /// <path>api/2.0/files/keepnewfilename</path>

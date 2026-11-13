@@ -59,18 +59,14 @@ public class ConnectionsController(
     : ControllerBase
 {
     /// <remarks>
-    /// Returns the active connections of the calling user on this portal.
-    /// Each item is a sign-in from the last year that is still active.
-    /// Any signed-in user can call it, including a guest.
-    /// The list never shows other users' connections, even to a DocSpace admin.
-    /// The call is read-only.
-    /// Items come newest first.
-    /// If the request has a portal cookie, its connection comes first.
-    /// That item shows the browser, platform, IP address, and location of this request.
-    /// The `loginEvent` field holds the ID of that connection.
-    /// Without the cookie, for example with a token in the `Authorization` header, `loginEvent` is 0.
-    /// Then, if the user has no active connections, the list has one item for this request.
-    /// To end one connection, pass its `id` to `PUT api/2.0/security/activeconnections/logout/{loginEventId}`.
+    /// Returns the active connections of the calling user on this portal. Each item is an active sign-in from the last
+    /// year, except one case without a cookie. Any signed-in user can call it, including a guest. The list never shows
+    /// other users' connections, even to a DocSpace admin. The call is read-only. Items come newest first. If the
+    /// request has a portal cookie, its connection comes first. That item shows the browser, platform, IP address, and
+    /// location of this request. The `loginEvent` field holds the ID of that connection. Without the cookie, for
+    /// example with a token in the `Authorization` header, `loginEvent` is 0. Then, if the user has no active
+    /// connections, the list has one item for this request. To end one connection, pass its `id` to `PUT
+    /// api/2.0/security/activeconnections/logout/{loginEventId}`.
     /// </remarks>
     /// <summary>
     /// Get active connections

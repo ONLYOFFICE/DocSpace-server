@@ -938,7 +938,7 @@
           "Group"
         ],
         "summary": "Add a new group",
-        "description": "Creates a group with a name and, optionally, a manager and members. The manager also becomes a member.\r\nRequires a DocSpace admin. Other callers get 403. A room admin can read groups but also gets 403 here. The\r\ncall changes data. Do not repeat it. Group names are not unique, so each call creates another group. The\r\nresponse is the new group with its members. The call returns 400 if the name is missing, blank, or too long.\r\nIt also returns 400 if the manager or any member is a guest, a disabled account, or an unknown ID. In that\r\ncase, the call creates nothing.\n\nRaises the `group.created` webhook once for the new group. It does not raise `user.*` webhooks for the manager or the members.",
+        "description": "Creates a group with a name and, optionally, a manager and members. The manager also becomes a member.\r\nRequires a DocSpace admin. Other callers get 403. A room admin can read groups but also gets 403 here. The\r\ncall changes data. Do not repeat it. Group names are not unique, so each call creates another group. The\r\nresponse is the new group with its members. The call returns 400 if the name is missing, blank, or too long.\r\nIt also returns 400 if the manager or any member is a guest, a disabled account, or an unknown ID. In that\r\ncase, the call creates nothing.\n\nRaises the `group.created` webhook once for the new group, without `user.*` webhooks for its members.",
         "operationId": "addGroup",
         "requestBody": {
           "content": {
@@ -1046,7 +1046,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "group.created",
-            "when": "once for the new group. It does not raise `user.*` webhooks for the manager or the members"
+            "when": "once for the new group, without `user.*` webhooks for its members"
           }
         ]
       }
@@ -1194,7 +1194,7 @@
           "Group"
         ],
         "summary": "Update a group",
-        "description": "Changes the name and the manager of a group, and adds or removes members, in one call. Requires a DocSpace\r\nadmin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes data. You\r\ncan repeat it with the same body. A field that you leave out keeps its current value. The call cannot clear the\r\nmanager through `groupManager`. If `membersToRemove` lists the manager, the group is left without one. It skips\r\na guest, a disabled account, or an unknown ID in `groupManager` and `membersToAdd`. It also skips an ID in\r\n`membersToRemove` that is not a member. The call adds members first and then removes them. So an account in both\r\nlists ends up removed. The response is the group after the update. Compare it with the request to see what the\r\ncall skipped. If no group has this ID, the call returns 404. The call returns 400 if `groupName` is too long.\n\nRaises the `group.updated` webhook only when the name, the manager, or the members change. It does not raise `user.*` webhooks for those accounts.",
+        "description": "Changes the name and the manager of a group, and adds or removes members, in one call. Requires a DocSpace\r\nadmin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes data. You\r\ncan repeat it with the same body. A field that you leave out keeps its current value. The call cannot clear the\r\nmanager through `groupManager`. If `membersToRemove` lists the manager, the group is left without one. It skips\r\na guest, a disabled account, or an unknown ID in `groupManager` and `membersToAdd`. It also skips an ID in\r\n`membersToRemove` that is not a member. The call adds members first and then removes them. So an account in both\r\nlists ends up removed. The response is the group after the update. Compare it with the request to see what the\r\ncall skipped. If no group has this ID, the call returns 404. The call returns 400 if `groupName` is too long.\n\nRaises the `group.updated` webhook only when the name, the manager, or the members change, without `user.*` webhooks.",
         "operationId": "updateGroup",
         "parameters": [
           {
@@ -1322,7 +1322,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "group.updated",
-            "when": "only when the name, the manager, or the members change. It does not raise `user.*` webhooks for those accounts"
+            "when": "only when the name, the manager, or the members change, without `user.*` webhooks"
           }
         ]
       },
@@ -1331,7 +1331,7 @@
           "Group"
         ],
         "summary": "Delete a group",
-        "description": "Deletes a group and removes its access to rooms, folders, and files. Members who had access only through the\r\ngroup lose it. The call keeps the accounts of the members. Requires a DocSpace admin. Other callers get 403.\r\nThe deletion cannot be undone. A repeated call returns 404. The call returns 204 with no body. If no group\r\nhas this ID, the call returns 404. To empty a group without deleting it, use\r\n`DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.deleted` webhook once for the deleted group. It does not raise `user.*` webhooks for its former members.",
+        "description": "Deletes a group and removes its access to rooms, folders, and files. Members who had access only through the\r\ngroup lose it. The call keeps the accounts of the members. Requires a DocSpace admin. Other callers get 403.\r\nThe deletion cannot be undone. A repeated call returns 404. The call returns 204 with no body. If no group\r\nhas this ID, the call returns 404. To empty a group without deleting it, use\r\n`DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.deleted` webhook once for the deleted group, without `user.*` webhooks for its former members.",
         "operationId": "deleteGroup",
         "parameters": [
           {
@@ -1436,7 +1436,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "group.deleted",
-            "when": "once for the deleted group. It does not raise `user.*` webhooks for its former members"
+            "when": "once for the deleted group, without `user.*` webhooks for its former members"
           }
         ]
       }
@@ -1572,7 +1572,7 @@
           "Group"
         ],
         "summary": "Move group members",
-        "description": "Moves the members of one group to another group. The source group stays, without these members. Requires a\r\nDocSpace admin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes\r\ndata, and you can repeat it. If both IDs are the same, the call changes nothing. The destination group keeps\r\nits manager. If the manager of the source group leaves it, the source group has no manager after the call.\r\nThe call skips disabled members, so they stay in the source group. A guest member leaves the source group\r\nbut does not join the destination. The response is the destination group with its members. If no group has\r\none of the IDs, the call returns 404. To move only some members, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`. To delete the source group, use `DELETE api/2.0/group/{id}`.\n\nRaises the `group.updated` webhook for the source group if the two IDs differ and the source has enabled members. Raises the `group.updated` webhook for the destination group only when its members change. It does not raise `user.*` webhooks for the moved members.",
+        "description": "Moves the members of one group to another group. The source group stays, without these members. Requires a\r\nDocSpace admin. Other callers get 403. A room admin can read groups but also gets 403 here. The call changes\r\ndata, and you can repeat it. If both IDs are the same, the call changes nothing. The destination group keeps\r\nits manager. If the manager of the source group leaves it, the source group has no manager after the call.\r\nThe call skips disabled members, so they stay in the source group. A guest member leaves the source group\r\nbut does not join the destination. The response is the destination group with its members. If no group has\r\none of the IDs, the call returns 404. To move only some members, use `PUT api/2.0/group/{id}/members` and\r\n`DELETE api/2.0/group/{id}/members`. To delete the source group, use `DELETE api/2.0/group/{id}`.\n\nRaises the `group.updated` webhook for the source group if the two IDs differ and the source has enabled members. Raises the `group.updated` webhook for the destination group only when its members change, without `user.*` webhooks.",
         "operationId": "moveMembersTo",
         "parameters": [
           {
@@ -1712,7 +1712,7 @@
           },
           {
             "trigger": "group.updated",
-            "when": "for the destination group only when its members change. It does not raise `user.*` webhooks for the moved members"
+            "when": "for the destination group only when its members change, without `user.*` webhooks"
           }
         ]
       }
@@ -1723,7 +1723,7 @@
           "Group"
         ],
         "summary": "Replace group members",
-        "description": "Replaces the members of a group with the listed accounts. Requires a DocSpace admin. Other callers get 403. A\r\nroom admin can read groups but also gets 403 here. The call changes data. You can repeat it with the same\r\nbody. First, the call removes the current members, except disabled ones. Then it adds the listed accounts. It\r\nskips a guest, a disabled account, or an unknown ID. These two steps are not atomic. So a failure between\r\nthem can leave the group empty. The response is the group with the members it ends up with. If no group has\r\nthis ID, the call returns 404. The call returns 400 if the list is missing, empty, or has no account that can\r\nbe a member. In that case, the group does not change. To add or remove a few accounts, use\r\n`PUT api/2.0/group/{id}/members` or `DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the members or the manager change. It does not raise `user.*` webhooks for the added or removed members.",
+        "description": "Replaces the members of a group with the listed accounts. Requires a DocSpace admin. Other callers get 403. A\r\nroom admin can read groups but also gets 403 here. The call changes data. You can repeat it with the same\r\nbody. First, the call removes the current members, except disabled ones. Then it adds the listed accounts. It\r\nskips a guest, a disabled account, or an unknown ID. These two steps are not atomic. So a failure between\r\nthem can leave the group empty. The response is the group with the members it ends up with. If no group has\r\nthis ID, the call returns 404. The call returns 400 if the list is missing, empty, or has no account that can\r\nbe a member. In that case, the group does not change. To add or remove a few accounts, use\r\n`PUT api/2.0/group/{id}/members` or `DELETE api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the members or the manager change, without `user.*` webhooks for them.",
         "operationId": "setMembersTo",
         "parameters": [
           {
@@ -1851,7 +1851,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "group.updated",
-            "when": "only when the members or the manager change. It does not raise `user.*` webhooks for the added or removed members"
+            "when": "only when the members or the manager change, without `user.*` webhooks for them"
           }
         ]
       },
@@ -1860,7 +1860,7 @@
           "Group"
         ],
         "summary": "Add group members",
-        "description": "Adds the listed accounts to a group and keeps its current members. Requires a DocSpace admin. Other callers\r\nget 403. A room admin can read groups but also gets 403 here. The call changes data. You can repeat it with\r\nthe same body. The call skips a guest, a disabled account, an unknown ID, and a current member. An empty list\r\nchanges nothing. The response is the group with its members after the call. If no group has this ID, the call\r\nreturns 404. This call does not change the manager. To set the manager, use\r\n`PUT api/2.0/group/{id}/manager`. To replace all members, use `POST api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the call adds at least one account. It does not raise `user.*` webhooks for the added members.",
+        "description": "Adds the listed accounts to a group and keeps its current members. Requires a DocSpace admin. Other callers\r\nget 403. A room admin can read groups but also gets 403 here. The call changes data. You can repeat it with\r\nthe same body. The call skips a guest, a disabled account, an unknown ID, and a current member. An empty list\r\nchanges nothing. The response is the group with its members after the call. If no group has this ID, the call\r\nreturns 404. This call does not change the manager. To set the manager, use\r\n`PUT api/2.0/group/{id}/manager`. To replace all members, use `POST api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the call adds an account, without `user.*` webhooks for it.",
         "operationId": "addMembersTo",
         "parameters": [
           {
@@ -1995,7 +1995,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "group.updated",
-            "when": "only when the call adds at least one account. It does not raise `user.*` webhooks for the added members"
+            "when": "only when the call adds an account, without `user.*` webhooks for it"
           }
         ]
       },
@@ -2004,7 +2004,7 @@
           "Group"
         ],
         "summary": "Remove group members",
-        "description": "Removes the listed accounts from a group and keeps the other members. The accounts stay, but they lose the\r\naccess they had through the group. Requires a DocSpace admin. Other callers get 403. A room admin can read\r\ngroups but also gets 403 here. The call changes data. You can repeat it with the same body. The call skips\r\nan ID that is not a member or matches no account. If the list includes the manager, the group is left without\r\none. An empty list changes nothing. The response is the group\r\nwith the remaining members. If no group has this ID, the call returns 404. To remove all members, list them\r\nall here.\n\nRaises the `group.updated` webhook only when the call removes at least one member. It does not raise `user.*` webhooks for the removed members.",
+        "description": "Removes the listed accounts from a group and keeps the other members. The accounts stay, but they lose the\r\naccess they had through the group. Requires a DocSpace admin. Other callers get 403. A room admin can read\r\ngroups but also gets 403 here. The call changes data. You can repeat it with the same body. The call skips\r\nan ID that is not a member or matches no account. If the list includes the manager, the group is left without\r\none. An empty list changes nothing. The response is the group\r\nwith the remaining members. If no group has this ID, the call returns 404. To remove all members, list them\r\nall here.\n\nRaises the `group.updated` webhook only when the call removes a member, without `user.*` webhooks for it.",
         "operationId": "removeMembersFrom",
         "parameters": [
           {
@@ -2139,7 +2139,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "group.updated",
-            "when": "only when the call removes at least one member. It does not raise `user.*` webhooks for the removed members"
+            "when": "only when the call removes a member, without `user.*` webhooks for it"
           }
         ]
       }
@@ -2150,7 +2150,7 @@
           "Group"
         ],
         "summary": "Set a group manager",
-        "description": "Makes an account the manager of a group and replaces the previous manager. The account also becomes a member.\r\nThe previous manager stays a member. Requires a DocSpace admin. Other callers get 403. A room admin can read\r\ngroups but also gets 403 here. The call changes data. You can repeat it with the same body. If the account is\r\na guest or disabled, the call changes nothing. The response is the group with its manager. The call returns\r\n404 if no group has this ID or no account has `userId`. It also returns 400 if `userId` is missing. To\r\nchange the members, use `PUT api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the manager or the members change. It does not raise `user.*` webhooks for the new or previous manager.",
+        "description": "Makes an account the manager of a group and replaces the previous manager. The account also becomes a member.\r\nThe previous manager stays a member. Requires a DocSpace admin. Other callers get 403. A room admin can read\r\ngroups but also gets 403 here. The call changes data. You can repeat it with the same body. If the account is\r\na guest or disabled, the call changes nothing. The response is the group with its manager. The call returns\r\n404 if no group has this ID or no account has `userId`. It also returns 400 if `userId` is missing. To\r\nchange the members, use `PUT api/2.0/group/{id}/members`.\n\nRaises the `group.updated` webhook only when the manager or the members change, without `user.*` webhooks for them.",
         "operationId": "setGroupManager",
         "parameters": [
           {
@@ -2278,7 +2278,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "group.updated",
-            "when": "only when the manager or the members change. It does not raise `user.*` webhooks for the new or previous manager"
+            "when": "only when the manager or the members change, without `user.*` webhooks for them"
           }
         ]
       }
@@ -4229,7 +4229,7 @@
           "People / Photos"
         ],
         "summary": "Update a user photo",
-        "description": "Sets the avatar of your own profile from an image that the portal downloads from the URL in `files`.\r\nAny signed-in user can call it for their own profile only.\r\nA call for another profile returns 403, even from a DocSpace admin.\r\nThe URL is absolute or relative to the portal.\r\nIt must use HTTPS. Only a request that came over HTTP may pass an HTTP URL.\r\nThe call changes data and replaces the avatar and all its sizes.\r\nYou can repeat it with the same body.\r\nIf `files` is the URL the profile already uses, the call keeps the current image.\r\nTo send the image bytes, use `POST api/2.0/people/{userId}/photo`.\r\nTo delete the avatar, use `DELETE api/2.0/people/{userId}/photo`.\r\nIf `files` is empty, the call returns 400.\r\nIt also returns 403 if the portal refuses the URL or the server behind it returns an error.\r\nIf no user has the ID, the call returns 404.\n\nRaises the `user.updated` webhook.",
+        "description": "Sets the avatar of your own profile from an image that the portal downloads from the URL in `files`.\r\nAny signed-in user can call it for their own profile only.\r\nA call for another profile returns 403, even from a DocSpace admin.\r\nThe URL is absolute or relative to the portal.\r\nIt must use HTTPS. Only a request that came over HTTP may pass an HTTP URL.\r\nThe call changes data and replaces the avatar and all its sizes.\r\nYou can repeat it with the same body.\r\nIf `files` is the URL the profile already uses, the call keeps the current image.\r\nTo send the image bytes, use `POST api/2.0/people/{userId}/photo`.\r\nTo delete the avatar, use `DELETE api/2.0/people/{userId}/photo`.\r\nIf `files` is empty, the call returns 400.\r\nIt also returns 403 if the portal refuses the URL or the server behind it returns an error.\r\nIf no user has the ID, the call returns 404.\n\nRaises the `user.updated` webhook on every call, even when `files` is the current avatar.",
         "operationId": "updateMemberPhoto",
         "parameters": [
           {
@@ -4355,7 +4355,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "user.updated"
+            "trigger": "user.updated",
+            "when": "on every call, even when `files` is the current avatar"
           }
         ]
       },
@@ -4624,7 +4625,7 @@
           "People / Profiles"
         ],
         "summary": "Add a user",
-        "description": "Creates an account in the portal. An admin can add a person directly, or a person can accept an invitation link.\r\nTo accept a link, set `fromInviteLink` to true and pass the `key` of the link. The link then sets the account\r\ntype, and the call ignores `type`. If the link is invalid or expired, the call returns 403. Without a link, a\r\nroom admin can create a user, and a DocSpace admin can also create a room admin. Only the portal owner can\r\ncreate a DocSpace admin. Other callers get 403. Without a link, the `Guest` type also returns 403. The call also\r\nreturns 403 if the portal does not allow inviting members, or guests for a guest link. The call changes data. A\r\nrepeated call with the same email returns 400. With an invitation link that `POST api/2.0/people/invite`\r\nemailed, a repeat returns 403. If `password` breaks the portal password policy, the call returns 400. It also\r\nreturns 400 if the first and last names are not valid. Without `password` and `passwordHash`, the portal sets a\r\nrandom password that nobody knows. If the portal has no free paid seat, the call still creates the account, as a\r\nuser. So check the type flags of the returned profile, such as `isRoomAdmin`. The call also downloads the avatar\r\nfrom `files`. If the portal refuses that URL, the call returns 403 and creates no account. If its server returns\r\nan error, the call also returns 403. Any failed download keeps the created account. To invite several people by\r\nemail, use `POST api/2.0/people/invite`.\n\nRaises the `user.created` webhook after the portal saves the avatar from `files`, if any, but not if the download fails.",
+        "description": "Creates an account in the portal. An admin can add a person directly, or a person can accept an invitation link.\r\nTo accept a link, set `fromInviteLink` to true and pass the `key` of the link. The link then sets the account\r\ntype, and the call ignores `type`. If the link is invalid or expired, the call returns 403. Without a link, a\r\nroom admin can create a user, and a DocSpace admin can also create a room admin. Only the portal owner can\r\ncreate a DocSpace admin. Other callers get 403. Without a link, the `Guest` type also returns 403. The call also\r\nreturns 403 if the portal does not allow inviting members, or guests for a guest link. The call changes data. A\r\nrepeated call with the same email returns 400. With an invitation link that `POST api/2.0/people/invite`\r\nemailed, a repeat returns 403. If `password` breaks the portal password policy, the call returns 400. It also\r\nreturns 400 if the first and last names are not valid. Without `password` and `passwordHash`, the portal sets a\r\nrandom password that nobody knows. Without a free paid seat, the call creates a user instead. If the user limit\r\nis also reached, it returns 402. So check the type flags of the returned profile, such as `isRoomAdmin`. The\r\ncall also downloads the avatar from `files`. If the portal refuses that URL, the call returns 403 and creates no\r\naccount. If its server returns an error, the call also returns 403. Any failed download keeps the created\r\naccount. To invite several people by email, use `POST api/2.0/people/invite`.\n\nRaises the `user.created` webhook after the portal saves the avatar from `files`, if any, but not if the download fails.",
         "operationId": "addMember",
         "requestBody": {
           "content": {
@@ -4925,7 +4926,7 @@
           "People / Profiles"
         ],
         "summary": "Invite users",
-        "description": "Invites people to the portal by email. For each new address, the call creates a pending account and emails it\r\nan invitation link. Requires a room admin or a DocSpace admin. Other callers get 403. Only a DocSpace admin\r\ncan invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal\r\nthat does not allow inviting members also return 403. For an address that already has an account, the call\r\nsends no email. It links that account to the caller and raises its type if needed. The call changes data. A\r\nrepeated call sends no new emails, since the accounts then exist. Its seat check still counts each room admin\r\nand DocSpace admin in the body. So a repeat can return 402. If the pending account was deleted, a new invitation\r\nto its address soon after the first sends no email. The first link still works. If the invitations need more\r\npaid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400 for a\r\nmalformed or punycode address, or for the address of a disabled account. The call handles the addresses in\r\norder. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending account\r\nthat the caller can see, not only the new ones. The portal limits the rate of these calls. To send an invitation\r\nagain, use `PUT api/2.0/people/invite`.\n\nRaises the `user.invited` webhook for every address that has no account yet.",
+        "description": "Invites people to the portal by email. For each new address, the call creates a pending account and emails it\r\nan invitation link. Requires a room admin or a DocSpace admin. Other callers get 403. Only a DocSpace admin\r\ncan invite a room admin, and only the portal owner can invite a DocSpace admin. The `Guest` type and a portal\r\nthat does not allow inviting members also return 403. For an address that already has an account, the call\r\nsends no email. It links that account to the caller and raises its type if needed. The call changes data. A\r\nrepeated call sends no new emails, since the accounts then exist. Its seat check still counts each room admin\r\nand DocSpace admin in the body. So a repeat can return 402. If the pending account was deleted, a new invitation\r\nto its address soon after the first sends no email. The first link still works. If the invitations need more\r\npaid seats than the tariff has left, the call returns 402 and sends nothing. The call returns 400 for a\r\nmalformed or punycode address, or for the address of a disabled account. The call handles the addresses in\r\norder. So a 400 or 403 in the middle leaves the earlier invitations sent. The call returns every pending account\r\nthat the caller can see, not only the new ones. The portal limits the rate of these calls. To send an invitation\r\nagain, use `PUT api/2.0/people/invite`.\n\nRaises the `user.invited` webhook for every address without an account, not for an existing account whose type it raises.",
         "operationId": "inviteUsers",
         "requestBody": {
           "content": {
@@ -5010,7 +5011,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "user.invited",
-            "when": "for every address that has no account yet"
+            "when": "for every address without an account, not for an existing account whose type it raises"
           }
         ]
       },
@@ -5536,7 +5537,7 @@
           "People / Profiles"
         ],
         "summary": "Close my own profile",
-        "description": "Disables the account of the caller at the request of its owner. This is the second step of self-removal. The\r\nfirst step, `PUT api/2.0/people/self/delete`, emails the confirmation link. Sign the request with the\r\nconfirmation token from that link. The portal owner and an LDAP account get 403. If the account no longer\r\nexists, the call returns 404. The call changes data, and a repeated call with the same token returns 401. It\r\nsets the `Terminated` status, ends all sessions of the account, and notifies the DocSpace admins. The account\r\nthen cannot sign in. The call keeps its rooms, files, and group memberships. A DocSpace admin can then delete\r\nthe account with `DELETE api/2.0/people/{userId}`. Until then, `PUT api/2.0/people/status/{status}` can enable\r\nit again. The call returns the profile with the new status.\n\nRaises the `user.updated` webhook and not `user.deleted`.",
+        "description": "Disables the account of the caller at the request of its owner. This is the second step of self-removal. The\r\nfirst step, `PUT api/2.0/people/self/delete`, emails the confirmation link. Sign the request with the\r\nconfirmation token from that link. The portal owner and an LDAP account get 403. If the account no longer\r\nexists, the call returns 401. The call changes data, and a repeated call with the same token returns 401. It\r\nsets the `Terminated` status, ends all sessions of the account, and notifies the DocSpace admins. The account\r\nthen cannot sign in. The call keeps its rooms, files, and group memberships. A DocSpace admin can then delete\r\nthe account with `DELETE api/2.0/people/{userId}`. Until then, `PUT api/2.0/people/status/{status}` can enable\r\nit again. The call returns the profile with the new status.\n\nRaises the `user.updated` webhook and not `user.deleted`.",
         "operationId": "deleteProfile",
         "responses": {
           "200": {
@@ -5563,18 +5564,8 @@
           "403": {
             "description": "The caller is the portal owner, an LDAP account or a system account"
           },
-          "404": {
-            "description": "The calling account no longer exists"
-          },
           "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The link is invalid or expired, or the calling account no longer exists"
           },
           "429": {
             "description": "Too Many Requests.",
@@ -6138,7 +6129,7 @@
           "People / Quota"
         ],
         "summary": "Change a user quota limit",
-        "description": "Sets a storage limit for each listed account, instead of the portal default. Pass `quota` as a whole number of\r\nbytes. The value -1 means no limit, and -2 returns the account to the portal default. Requires the\r\nEditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The call\r\nreturns 400 if `quota` is not a whole number or is over the storage the tariff allows. On a standalone\r\ninstallation, it also returns 400 for a value over the portal quota. The call changes data. You can repeat it\r\nwith the same body. It skips system accounts without an error. It returns the changed accounts. A limit deletes\r\nnothing and frees no space. An account over its limit cannot add more files. To return accounts to the portal\r\ndefault, use `PUT api/2.0/people/resetquota`.",
+        "description": "Sets a storage limit for each listed account, instead of the portal default. Pass `quota` as a whole number of\r\nbytes. The value -1 means no limit, and -2 returns the account to the portal default. Requires the\r\nEditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The call\r\nreturns 400 if `quota` is not a whole number or is over the storage the tariff allows. On a standalone\r\ninstallation, it also returns 400 for a value over the portal quota. The call changes data. You can repeat it\r\nwith the same body. It skips system accounts without an error. It returns the changed accounts. A limit deletes\r\nnothing and frees no space. While user quotas are on, an account over its limit cannot add more files. To return\r\naccounts to the portal default, use `PUT api/2.0/people/resetquota`.",
         "operationId": "updateUserQuota",
         "requestBody": {
           "content": {
@@ -9155,7 +9146,7 @@
           "People / Theme"
         ],
         "summary": "Get the portal theme",
-        "description": "Returns the interface theme of the caller, which is `Base`, `Dark`, or `System`. The theme belongs to the\r\naccount, not to the portal. Any signed-in user can call it, including a guest. The call is read-only. If the\r\ncaller has never chosen a theme, the call returns the portal default. The `theme` field of\r\n`GET api/2.0/people/@self` has the same value.",
+        "description": "Returns the interface theme of the caller, which is `Base`, `Dark`, or `System`. The theme belongs to the\r\naccount, not to the portal. Any signed-in user can call it, including a guest. The call is read-only. If the\r\ncaller has never chosen a theme, the call returns `System`. The `theme` field of `GET api/2.0/people/@self` has\r\nthe same value.",
         "operationId": "getPortalTheme",
         "responses": {
           "200": {
@@ -9720,7 +9711,7 @@
           "People / Third-party accounts"
         ],
         "summary": "Unlink a third-party account",
-        "description": "Deletes the link between the account of the caller and a third-party provider. After this call, the account\r\ncan no longer sign in through that provider. The account itself stays, with its password. Any signed-in user\r\ncan call it. The call changes data and returns no body. If the provider is not linked, the call changes\r\nnothing and returns 200. So you can repeat it. To link the provider again, use\r\n`PUT api/2.0/people/thirdparty/linkaccount`.",
+        "description": "Deletes the link between the account of the caller and a third-party provider. A later sign-in through that\r\nprovider links the account again if the provider returns its email. The account itself stays, with its password.\r\nAny signed-in user can call it. The call changes data and returns no body. If the provider is not linked, the\r\ncall changes nothing and returns 200. So you can repeat it. To link the provider again, use `PUT\r\napi/2.0/people/thirdparty/linkaccount`.",
         "operationId": "unlinkThirdPartyAccount",
         "parameters": [
           {
@@ -9958,7 +9949,7 @@
           "People / User data"
         ],
         "summary": "Start the data reassignment",
-        "description": "Starts a job that moves the data of a disabled user to another user.\r\nThe job moves the rooms, third-party storage accounts, and files of the source.\r\nFiles and folders that the source shared from the personal section move to a new folder of the recipient.\r\nFirst, disable the source account through `PUT api/2.0/people/status/{status}`.\r\nTo check whether any data needs to move, use `GET api/2.0/people/reassign/necessary`.\r\nRequires a DocSpace admin. Other callers get 403.\r\nOnly the portal owner can move the data of a DocSpace admin or an admin of the People section.\r\nOther callers get 400 for such a source. The call queues work.\r\nRepeat `GET api/2.0/people/reassign/progress/{userId}` with the source ID until `isCompleted` is true.\r\nWhile a job for the source runs, a repeated call returns that job and starts nothing new. After the job ends, a\r\nrepeated call starts a new job. The portal then emails the caller again. If the job deleted the source profile,\r\na repeated call returns 400. If `deleteProfile` is true, the job also deletes the other personal files of the\r\nsource, then the profile. This cannot be undone. Otherwise, the source keeps the personal files that it did not\r\nshare. The portal emails the caller when the job succeeds or fails. The call returns 400 if the recipient is\r\nunknown or is not an active room admin or DocSpace admin. It also returns 400 if the source is unknown, a system\r\naccount, the portal owner, the caller, or not disabled.\n\nRaises the `user.deleted` webhook when `deleteProfile` is true and the job succeeds. Raises the `folder.created` webhook when the job creates a folder for shared files.",
+        "description": "Starts a job that moves the data of a disabled user to another user.\r\nThe job moves the rooms, third-party storage accounts, and files of the source.\r\nFiles and folders that the source shared from the personal section move to a new folder of the recipient.\r\nFirst, disable the source account through `PUT api/2.0/people/status/{status}`.\r\nTo check whether any data needs to move, use `GET api/2.0/people/reassign/necessary`.\r\nRequires a DocSpace admin. Other callers get 403.\r\nOnly the portal owner can move the data of a DocSpace admin or an admin of the People section.\r\nOther callers get 400 for such a source. The call queues work.\r\nRepeat `GET api/2.0/people/reassign/progress/{userId}` with the source ID until `isCompleted` is true.\r\nWhile a job for the source runs, a repeated call returns that job and starts nothing new. After the job ends, a\r\nrepeated call starts a new job. The portal then emails the caller again. If the job deleted the source profile,\r\na repeated call returns 400. If `deleteProfile` is true, the job also deletes the other personal files of the\r\nsource, then the profile. This cannot be undone. Otherwise, the source keeps the personal files that it did not\r\nshare. The portal emails the caller when the job succeeds or fails. The call returns 400 if the recipient is\r\nunknown or is not an active room admin or DocSpace admin. It also returns 400 if the source is unknown, a system\r\naccount, the portal owner, the caller, or not disabled.\n\nRaises the `user.deleted` webhook when `deleteProfile` is true and the job succeeds. Raises the `folder.created` webhook when the job creates a folder for shared files, but not `room.updated` for moved rooms.",
         "operationId": "startReassign",
         "requestBody": {
           "content": {
@@ -10070,7 +10061,7 @@
           },
           {
             "trigger": "folder.created",
-            "when": "when the job creates a folder for shared files"
+            "when": "when the job creates a folder for shared files, but not `room.updated` for moved rooms"
           }
         ]
       }
@@ -10552,7 +10543,7 @@
           "People / User data"
         ],
         "summary": "Start the data deletion",
-        "description": "Starts a job that deletes the data and the profile of a disabled user.\r\nThe job deletes the personal files of the account. It moves the rooms and third-party storage accounts to the\r\ncaller. Files and folders that the account shared from the personal section move to a new folder of the caller.\r\nFirst, disable the account through `PUT api/2.0/people/status/{status}`.\r\nRequires a DocSpace admin. Other callers get 403.\r\nOnly the portal owner can delete the data of another DocSpace admin. Other DocSpace admins get 403 for it.\r\nThe call queues work, and the deletion cannot be undone.\r\nRepeat `GET api/2.0/people/remove/progress/{userId}` with the same user ID until `isCompleted` is true.\r\nWhile a job for the account runs, a repeated call returns that job and starts nothing new. After the job\r\nsucceeds, a repeated call returns 400. After a failed job, a repeated call starts a new one. The portal emails\r\nthe caller when the job succeeds or fails. To cancel a running job, use `PUT api/2.0/people/remove/terminate`.\r\nTo move the data to a user you choose, use `POST api/2.0/people/reassign/start` instead. The call returns 400 if\r\nthe user is unknown, the portal owner, the caller, or not disabled.\n\nRaises the `folder.created` webhook when the job moves shared files of the account to a new folder of the caller.",
+        "description": "Starts a job that deletes the data and the profile of a disabled user.\r\nThe job deletes the personal files of the account. It moves the rooms and third-party storage accounts to the\r\ncaller. Files and folders that the account shared from the personal section move to a new folder of the caller.\r\nFirst, disable the account through `PUT api/2.0/people/status/{status}`.\r\nRequires a DocSpace admin. Other callers get 403.\r\nOnly the portal owner can delete the data of another DocSpace admin. Other DocSpace admins get 403 for it.\r\nThe call queues work, and the deletion cannot be undone.\r\nRepeat `GET api/2.0/people/remove/progress/{userId}` with the same user ID until `isCompleted` is true.\r\nWhile a job for the account runs, a repeated call returns that job and starts nothing new. After the job\r\nsucceeds, a repeated call returns 400. After a failed job, a repeated call starts a new one. The portal emails\r\nthe caller when the job succeeds or fails. To cancel a running job, use `PUT api/2.0/people/remove/terminate`.\r\nTo move the data to a user you choose, use `POST api/2.0/people/reassign/start` instead. The call returns 400 if\r\nthe user is unknown, the portal owner, the caller, or not disabled.\n\nRaises the `folder.created` webhook when the job moves shared files to a new folder of the caller, but no `user.deleted`.",
         "operationId": "startRemove",
         "requestBody": {
           "content": {
@@ -10660,7 +10651,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "folder.created",
-            "when": "when the job moves shared files of the account to a new folder of the caller"
+            "when": "when the job moves shared files to a new folder of the caller, but no `user.deleted`"
           }
         ]
       }
@@ -11172,7 +11163,7 @@
           "People / User status"
         ],
         "summary": "Change a user status",
-        "description": "Enables or disables several accounts. A disabled account keeps its data and can be enabled later. The route\r\naccepts only `Active` and `Terminated`. Any other status returns 400. Requires a DocSpace admin. Other callers\r\nget 403. The call checks the whole list before it changes anything. If the list has a system or LDAP account,\r\nthe portal owner, or the caller, the call returns 403. Only the portal owner can change a DocSpace admin. The\r\ncall changes data. You can repeat it with the same body. Disabling ends all sessions of the account and frees\r\nits seat. Enabling takes a seat again. If the tariff or quota has no free seat, the call returns 402. The call\r\nenables the accounts one by one, so a 402 leaves the earlier ones enabled. Enabling changes only disabled\r\naccounts. An account with no name and an unused invitation becomes `Pending`, not `Active`. So check `status` in\r\nthe response. Deletion with `DELETE api/2.0/people/{userId}` requires the `Terminated` status.\n\nRaises the `user.updated` webhook for every listed account, whether or not its status changes.",
+        "description": "Enables or disables several accounts. A disabled account keeps its data and can be enabled later. The route\r\naccepts only `Active` and `Terminated`. Any other status returns 400. Requires a DocSpace admin. Other callers\r\nget 403. The call checks the whole list before it changes anything. If the list has a system or LDAP account,\r\nthe portal owner, or the caller, the call returns 403. Only the portal owner can change a DocSpace admin. The\r\ncall changes data. You can repeat it with the same body. Disabling ends all sessions of the account and frees\r\nits seat. Enabling takes a seat again. If the tariff or quota has no free seat, the call returns 402. The call\r\nenables the accounts one by one, so a 402 leaves the earlier ones enabled. Enabling changes only disabled\r\naccounts. An account with no name and an unused invitation becomes `Pending`, not `Active`. So check `status` in\r\nthe response. Deletion with `DELETE api/2.0/people/{userId}` requires the `Terminated` status.\n\nRaises the `user.updated` webhook for every listed account, changed or not, and for none after a 402.",
         "operationId": "updateUserStatus",
         "parameters": [
           {
@@ -11297,7 +11288,7 @@
         "x-docspace-webhooks": [
           {
             "trigger": "user.updated",
-            "when": "for every listed account, whether or not its status changes"
+            "when": "for every listed account, changed or not, and for none after a 402"
           }
         ]
       }
@@ -11308,7 +11299,7 @@
           "People / User status"
         ],
         "summary": "Set my activation status",
-        "description": "Sets the activation status of the account of the caller. A person uses it to confirm their email after following\r\nthe emailed link. Sign the request with the confirmation token from that link. An invalid or expired token\r\nreturns 401. A signed-in caller without this token gets 403. A token from another kind of link also returns\r\n403. The `userIds` list must hold only the ID of the caller. Otherwise the call returns 400. The call changes\r\ndata. With the activation link of a new account, a repeated call returns 401. With a link that confirms an email\r\naddress, you can repeat it with the same body. If the portal owner gets `Activated`, the call sends the admin\r\nwelcome email once per portal. If the account no longer exists, the response is empty. To enable or disable an\r\naccount, use `PUT api/2.0/people/status/{status}`.\n\nRaises the `user.updated` webhook.",
+        "description": "Sets the activation status of the account of the caller. A person uses it to confirm their email after following\r\nthe emailed link. Sign the request with the confirmation token from that link. An invalid or expired token\r\nreturns 401. A signed-in caller without this token gets 403. A token from another kind of link also returns 403.\r\nThe `userIds` list must hold only the ID of the caller. Otherwise the call returns 400. The call changes data.\r\nWith the activation link of a new account, a repeated call returns 401. With a link that confirms an email\r\naddress, you can repeat it with the same body. If the portal owner gets `Activated`, the call sends the admin\r\nwelcome email once per portal. If the account no longer exists or is disabled, the call returns 401. To enable\r\nor disable an account, use `PUT api/2.0/people/status/{status}`.\n\nRaises the `user.updated` webhook for the caller's account, even when the status does not change.",
         "operationId": "updateUserActivationStatus",
         "parameters": [
           {
@@ -11359,18 +11350,11 @@
           "400": {
             "description": "The list is empty, holds more than one ID, or names an account other than the caller"
           },
+          "401": {
+            "description": "The link is invalid or expired, or the account no longer exists or is disabled"
+          },
           "403": {
             "description": "The caller is signed in but sent no activation link token, or sent a valid confirmation token of another link type"
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -11429,7 +11413,8 @@
         ],
         "x-docspace-webhooks": [
           {
-            "trigger": "user.updated"
+            "trigger": "user.updated",
+            "when": "for the caller's account, even when the status does not change"
           }
         ]
       }

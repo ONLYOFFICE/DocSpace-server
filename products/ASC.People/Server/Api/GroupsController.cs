@@ -162,7 +162,7 @@ public class GroupController(
     /// Add a new group
     /// </summary>
     /// <path>api/2.0/group</path>
-    [RaisesWebhook(WebhookTrigger.GroupCreated, When = "once for the new group. It does not raise `user.*` webhooks for the manager or the members")]
+    [RaisesWebhook(WebhookTrigger.GroupCreated, When = "once for the new group, without `user.*` webhooks for its members")]
     [Tags("Group")]
     [SwaggerResponse(200, "The new group, with its members", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `groupName`, the group name is `null`, blank or longer than 128 characters, or one of the listed members or the manager is a guest, is disabled or does not exist")]
@@ -228,7 +228,7 @@ public class GroupController(
     /// Update a group
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the name, the manager, or the members change. It does not raise `user.*` webhooks for those accounts")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the name, the manager, or the members change, without `user.*` webhooks")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group as it is after the update", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read, or `groupName` is longer than 128 characters")]
@@ -296,7 +296,7 @@ public class GroupController(
     /// Delete a group
     /// </summary>
     /// <path>api/2.0/group/{id}</path>
-    [RaisesWebhook(WebhookTrigger.GroupDeleted, When = "once for the deleted group. It does not raise `user.*` webhooks for its former members")]
+    [RaisesWebhook(WebhookTrigger.GroupDeleted, When = "once for the deleted group, without `user.*` webhooks for its former members")]
     [Tags("Group")]
     [SwaggerResponse(204, "The group is deleted. No content is returned")]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -336,7 +336,7 @@ public class GroupController(
     /// </summary>
     /// <path>api/2.0/group/{fromId}/members/{toId}</path>
     [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "for the source group if the two IDs differ and the source has enabled members")]
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "for the destination group only when its members change. It does not raise `user.*` webhooks for the moved members")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "for the destination group only when its members change, without `user.*` webhooks")]
     [Tags("Group")]
     [SwaggerResponse(200, "The destination group with its members", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -391,7 +391,7 @@ public class GroupController(
     /// Replace group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the members or the manager change. It does not raise `user.*` webhooks for the added or removed members")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the members or the manager change, without `user.*` webhooks for them")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members it ends up with", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `members` list, or none of the listed accounts can be a group member")]
@@ -446,7 +446,7 @@ public class GroupController(
     /// Add group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the call adds at least one account. It does not raise `user.*` webhooks for the added members")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the call adds an account, without `user.*` webhooks for it")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its members after the addition", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
@@ -485,7 +485,7 @@ public class GroupController(
     /// Set a group manager
     /// </summary>
     /// <path>api/2.0/group/{id}/manager</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the manager or the members change. It does not raise `user.*` webhooks for the new or previous manager")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the manager or the members change, without `user.*` webhooks for them")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its new manager", typeof(GroupDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
@@ -525,7 +525,7 @@ public class GroupController(
     /// Remove group members
     /// </summary>
     /// <path>api/2.0/group/{id}/members</path>
-    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the call removes at least one member. It does not raise `user.*` webhooks for the removed members")]
+    [RaisesWebhook(WebhookTrigger.GroupUpdated, When = "only when the call removes a member, without `user.*` webhooks for it")]
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members that remain", typeof(GroupDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]

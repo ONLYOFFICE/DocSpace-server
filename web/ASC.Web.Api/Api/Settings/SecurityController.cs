@@ -475,12 +475,12 @@ public class SecurityController(
     /// Updates the brute-force protection of the portal sign-in. After `attemptCount` failed attempts within
     /// `checkPeriod` seconds, the portal blocks the sign-in for `blockTime` seconds. The call replaces all three values
     /// together. So to change one value, first read the others with `GET api/2.0/settings/security/loginsettings`.
-    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
-    /// get 403. The call changes data, and you can repeat it with the same body. The new values apply to attempts made
-    /// after this call. Running counters and blocks stay as they are. The portal counts failed attempts per user name and
-    /// IP address. So one blocked member does not block the rest of the portal. A blocked pair cannot sign in even with
-    /// the correct password. The call returns 400 if the body cannot be read, or a value is missing or out of range. It
-    /// returns the stored settings and whether they match the defaults.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get
+    /// 403. The call changes data, and you can repeat it with the same body. The new values apply to attempts made
+    /// after this call. Running counters and blocks stay as they are. The portal counts failed attempts per user name
+    /// and IP address. So one blocked member does not block the rest of the portal. A blocked pair cannot sign in even
+    /// with the correct password, unless it passes the CAPTCHA. The call returns 400 if the body cannot be read, or a
+    /// value is missing or out of range. It returns the stored settings and whether they match the defaults.
     /// </remarks>
     /// <summary>
     /// Update login settings

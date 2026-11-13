@@ -449,11 +449,11 @@ public class BackupController(
 
     /// <remarks>
     /// Returns the backups of the portal whose archive is still in its storage. Requires the EditPortalSettings
-    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. With `dump`, a
-    /// caller without the space access permission also gets 403. The call changes data. It deletes the record
-    /// of each backup whose archive is no longer in its storage. It skips backups whose storage it cannot
-    /// reach, and keeps their records. You can repeat the call. The list has no set order, so sort it by
-    /// `createdOn`. If the portal subscription has expired or is not paid, the call returns 402.
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller
+    /// without the space access permission also gets 403. The call changes data. It deletes the record of each backup
+    /// whose archive is gone, in the Trash, or unreadable. It skips a backup only when its storage cannot be opened,
+    /// and keeps its record. You can repeat the call. The list has no set order, so sort it by `createdOn`. If the
+    /// portal subscription has expired or is not paid, the call returns 402.
     /// </remarks>
     /// <summary>Get the backup history</summary>
     /// <path>api/2.0/backup/getbackuphistory</path>

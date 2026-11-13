@@ -103,10 +103,10 @@ public class AppsController(
     /// <remarks>
     /// Returns only the settings of one portal application on the current portal. The answer is the saved JSON value
     /// itself, not an application object. Take the identifier from `GET api/2.0/apps`. It is case-sensitive. Any
-    /// signed-in user can call it. The call is read-only. The portal returns the value as it was saved and never
-    /// checks its shape. An empty result means that the portal has never saved settings for the application. Then
-    /// the application uses its own defaults. To read the enabled state, use `GET api/2.0/apps/{id}`. If the
-    /// installation has no application with this identifier, the call returns 404.
+    /// signed-in user can call it. The call is read-only. The portal returns the value as it was saved and never checks
+    /// its shape. An empty result means that the portal has no saved settings for the application. Then the application
+    /// uses its own defaults. To read the enabled state, use `GET api/2.0/apps/{id}`. If the installation has no
+    /// application with this identifier, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get app settings

@@ -123,16 +123,16 @@ public class GroupsController(
     /// <remarks>
     /// Updates a room group of the caller. It can rename the group, add rooms, and remove rooms in one call. Any
     /// signed-in user can call it, including a guest. A missing group or a group of another account returns 404, even
-    /// for a DocSpace admin. The call changes data. You can repeat it with the same body. It
-    /// applies the name first, then `roomsToAdd`, then `roomsToRemove`. A later failure does not undo the earlier
-    /// steps. An empty body changes nothing. If every field the body sends is null, the call returns 400. The call
-    /// always removes a room that is in the group, even if the caller lost access to it. If no room of `roomsToAdd`
-    /// can be added, the call fails. It returns 403 if a listed identifier exists but is not a
-    /// room the caller can read. If all existing rooms are readable but in the other section, it returns 400. If no
-    /// listed room exists, it returns 404. These rules also apply to the identifiers of `roomsToRemove` that are not
-    /// in the group, without the section check. If only some rooms can be applied, the call applies them but
-    /// returns 403. A string identifier that names no third-party storage also returns 404. The call returns 400 for
-    /// a blank or too long name, a malformed room identifier, or a disconnected storage account.
+    /// for a DocSpace admin. The call changes data. You can repeat it with the same body. It applies the name first,
+    /// then `roomsToAdd`, then `roomsToRemove`. A later failure does not undo the earlier steps. An empty body changes
+    /// nothing. If every field the body sends is null, the call returns 400. The call removes a linked room even
+    /// without access, unless an earlier step of the call fails. If no room of `roomsToAdd` can be added, the call
+    /// fails. It returns 403 if a listed identifier exists but is not a room the caller can read. If all existing rooms
+    /// are readable but in the other section, it returns 400. If no listed room exists, it returns 404. These rules
+    /// also apply to the identifiers of `roomsToRemove` that are not in the group, without the section check. If only
+    /// some rooms can be applied, the call applies them but returns 403. A string identifier that names no third-party
+    /// storage also returns 404. The call returns 400 for a blank or too long name, a malformed room identifier, or a
+    /// disconnected storage account.
     /// </remarks>
     /// <summary>
     /// Update room group

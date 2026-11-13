@@ -198,14 +198,14 @@ public class WebhooksController(
     /// Turns a webhook subscription on or off and keeps its other parameters. The call reads only `id` and `enabled`
     /// from the body. The schema still requires `name` and `uri`, but the call ignores their values. To change other
     /// fields, use `PUT api/2.0/settings/webhook`. Any signed-in user can call it, except a guest. A guest gets 403.
-    /// The portal owner and DocSpace admins can switch any subscription. Other users can switch only the
-    /// subscriptions they created and get 403 for others. If the portal restricts the developer tools, users who are
-    /// not DocSpace admins get 403 too. The call changes data. You can repeat it with the same body. If no
-    /// subscription has this `id`, the call returns 404 before the access check. Turning a subscription off checks
-    /// nothing. Turning it on checks the stored values again. The call sends a HEAD request to the stored address. It
-    /// checks the stored secret against the current password rules. It checks the stored triggers against the current
-    /// role of the subscription's creator. If any of these checks fails, the call returns 400. So you cannot turn on
-    /// a subscription whose target no longer works. Update the subscription first.
+    /// The portal owner and DocSpace admins can switch any subscription. Other users can switch only the subscriptions
+    /// they created and get 403 for others. If the portal restricts the developer tools, users who are not DocSpace
+    /// admins get 403 too. The call changes data. You can repeat it with the same body. If no subscription has this
+    /// `id`, the call returns 404 before the access check. Turning a subscription off checks nothing. Turning it on
+    /// checks the stored values again. The call sends a HEAD request to the stored address. It checks the stored secret
+    /// against the current password rules. It checks the stored triggers against the current role of the subscription's
+    /// creator. If any of these checks fails, the call returns 400. So you cannot turn on a subscription whose address
+    /// no longer answers. A deleted `targetId` is not checked. Update the subscription first.
     /// </remarks>
     /// <summary>
     /// Switch a webhook on or off

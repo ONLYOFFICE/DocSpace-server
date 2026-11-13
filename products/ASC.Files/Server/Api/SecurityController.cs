@@ -230,14 +230,14 @@ public abstract class SecurityController<T>(
     }
 
     /// <remarks>
-    /// Returns the encryption keys that open a file in a private room. The list has the public keys of each member
-    /// who has access to the file and has keys. The caller's own entries also have the encrypted private key.
-    /// The entries of other members have no private key.
-    /// The call skips members without keys and members who have access only through a group. A member without keys
-    /// cannot open the file until they add keys with `POST api/2.0/privacyroom/keys`. Requires read access to the
-    /// file. Other callers get 403. The call is read-only. Members can add or change keys at any time. So request the
-    /// keys again before each use. If the file does not exist, the call returns 404. If the file is outside a private
-    /// room and the encrypted section, the call returns 415.
+    /// Returns the encryption keys that open a file in a private room. The list has the public keys of each member who
+    /// has access to the file and has keys. The caller's own entries also have the encrypted private key. The entries
+    /// of other members have no private key. The call skips members without keys and members who have access only
+    /// through a group. A member without keys cannot open the file. They add keys with `POST api/2.0/privacyroom/keys`,
+    /// then someone issues their file key. Requires read access to the file. Other callers get 403. The call is
+    /// read-only. Members can add or change keys at any time. So request the keys again before each use. If the file
+    /// does not exist, the call returns 404. If the file is outside a private room and the encrypted section, the call
+    /// returns 415.
     /// </remarks>
     /// <summary>Get file encryption keys</summary>
     /// <path>api/2.0/files/file/{fileId}/publickeys</path>

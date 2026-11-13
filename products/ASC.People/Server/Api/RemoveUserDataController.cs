@@ -122,7 +122,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// </remarks>
     /// <summary>Start the data deletion</summary>
     /// <path>api/2.0/people/remove/start</path>
-    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "when the job moves shared files of the account to a new folder of the caller")]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "when the job moves shared files to a new folder of the caller, but no `user.deleted`")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued deletion", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `userId`, no user has the specified ID, or the account is the portal owner, the caller, or is not disabled")]

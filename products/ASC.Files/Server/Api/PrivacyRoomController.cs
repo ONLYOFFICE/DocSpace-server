@@ -114,10 +114,10 @@ public class PrivacyRoomControllerCommon(
     /// <remarks>
     /// Returns every encryption key pair of the calling user, including the encrypted private half. Any signed-in user
     /// can call it. The call is read-only. If the caller has no key yet, the answer is an empty list or has no body. A
-    /// guest cannot create keys, so a guest always gets this empty answer. A user without a key cannot be invited to a
-    /// private room. To create a key, use `POST api/2.0/privacyroom/keys`. To get the keys of a private room, use
-    /// `GET api/2.0/privacyroom/{roomId}/access`. To get the keys of one file, use
-    /// `GET api/2.0/files/file/{fileId}/publickeys`.
+    /// guest cannot create keys, so a guest gets this empty answer unless they had keys before. A user without a key
+    /// cannot be invited to a private room. To create a key, use `POST api/2.0/privacyroom/keys`. To get the keys of a
+    /// private room, use `GET api/2.0/privacyroom/{roomId}/access`. To get the keys of one file, use `GET
+    /// api/2.0/files/file/{fileId}/publickeys`.
     /// </remarks>
     /// <summary>
     /// Get own encryption keys

@@ -142,7 +142,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `POST api/2.0/people/invite` (Invite users), for every address that has no account yet
+        - `POST api/2.0/people/invite` (Invite users), for every address without an account, not for an existing account whose type it raises
       tags:
         - user
       parameters:
@@ -194,15 +194,15 @@ webhooks:
         Raised by these REST API operations:
 
         - `DELETE api/2.0/people/@self` (Close my own profile), and not `user.deleted`
-        - `PUT api/2.0/people/activationstatus/{activationStatus}` (Set my activation status)
-        - `PUT api/2.0/people/status/{status}` (Change a user status), for every listed account, whether or not its status changes
+        - `PUT api/2.0/people/activationstatus/{activationStatus}` (Set my activation status), for the caller's account, even when the status does not change
+        - `PUT api/2.0/people/status/{status}` (Change a user status), for every listed account, changed or not, and for none after a 402
         - `POST api/2.0/people/type` (Start updating user type), once the queued type change succeeds, not when it is cancelled or fails
         - `PUT api/2.0/people/type/{type}` (Change a user type), for every changed account, one by one
         - `PUT api/2.0/people/{userId}` (Update a user), on every call for the caller's own account, even one that changes nothing
         - `PUT api/2.0/people/{userId}` (Update a user), for another account when `disable` is sent or `isUser` changes the type
         - `PUT api/2.0/people/{userId}/culture` (Update a user culture), even when the culture does not change
         - `POST api/2.0/people/{userId}/photo` (Upload a user photo), only when `autosave` is true and the image is saved to the profile
-        - `PUT api/2.0/people/{userId}/photo` (Update a user photo)
+        - `PUT api/2.0/people/{userId}/photo` (Update a user photo), on every call, even when `files` is the current avatar
         - `DELETE api/2.0/people/{userId}/photo` (Delete a user photo), even when the profile had no avatar
 
         Not raised when the groups of a user are changed through the group API - `PUT api/2.0/group/{id}`, `POST`, `PUT` and `DELETE api/2.0/group/{id}/members`, `PUT api/2.0/group/{fromId}/members/{toId}` and `PUT api/2.0/group/{id}/manager`: those raise `group.updated` of each group concerned instead, and the `groups` of the user's payload are read again from the next `user.*` event. A change of the `department` list through `PUT api/2.0/people/{userId}` is the other way round: it arrives as `user.updated` of that user, and the groups it adds the user to or removes them from raise no `group.updated`; `department` given on creating a profile arrives within its `user.created` only.
@@ -309,7 +309,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `POST api/2.0/group` (Add a new group), once for the new group. It does not raise `user.*` webhooks for the manager or the members
+        - `POST api/2.0/group` (Add a new group), once for the new group, without `user.*` webhooks for its members
       tags:
         - group
       parameters:
@@ -361,12 +361,12 @@ webhooks:
         Raised by these REST API operations:
 
         - `PUT api/2.0/group/{fromId}/members/{toId}` (Move group members), for the source group if the two IDs differ and the source has enabled members
-        - `PUT api/2.0/group/{fromId}/members/{toId}` (Move group members), for the destination group only when its members change. It does not raise `user.*` webhooks for the moved members
-        - `PUT api/2.0/group/{id}` (Update a group), only when the name, the manager, or the members change. It does not raise `user.*` webhooks for those accounts
-        - `PUT api/2.0/group/{id}/manager` (Set a group manager), only when the manager or the members change. It does not raise `user.*` webhooks for the new or previous manager
-        - `POST api/2.0/group/{id}/members` (Replace group members), only when the members or the manager change. It does not raise `user.*` webhooks for the added or removed members
-        - `PUT api/2.0/group/{id}/members` (Add group members), only when the call adds at least one account. It does not raise `user.*` webhooks for the added members
-        - `DELETE api/2.0/group/{id}/members` (Remove group members), only when the call removes at least one member. It does not raise `user.*` webhooks for the removed members
+        - `PUT api/2.0/group/{fromId}/members/{toId}` (Move group members), for the destination group only when its members change, without `user.*` webhooks
+        - `PUT api/2.0/group/{id}` (Update a group), only when the name, the manager, or the members change, without `user.*` webhooks
+        - `PUT api/2.0/group/{id}/manager` (Set a group manager), only when the manager or the members change, without `user.*` webhooks for them
+        - `POST api/2.0/group/{id}/members` (Replace group members), only when the members or the manager change, without `user.*` webhooks for them
+        - `PUT api/2.0/group/{id}/members` (Add group members), only when the call adds an account, without `user.*` webhooks for it
+        - `DELETE api/2.0/group/{id}/members` (Remove group members), only when the call removes a member, without `user.*` webhooks for it
       tags:
         - group
       parameters:
@@ -417,7 +417,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `DELETE api/2.0/group/{id}` (Delete a group), once for the deleted group. It does not raise `user.*` webhooks for its former members
+        - `DELETE api/2.0/group/{id}` (Delete a group), once for the deleted group, without `user.*` webhooks for its former members
       tags:
         - group
       parameters:
@@ -599,7 +599,7 @@ webhooks:
         - `PUT api/2.0/files/file/{fileId}/comment` (Update a comment)
         - `PUT api/2.0/files/file/{fileId}/lock` (Lock a file), on every call, even one that changes nothing, and twice for an unlock in portal storage
         - `POST api/2.0/files/file/{fileId}/restoreversion` (Restore a file version)
-        - `PUT api/2.0/files/file/{fileId}/saveediting` (Save edited file content)
+        - `PUT api/2.0/files/file/{fileId}/saveediting` (Save edited file content), for the saved file, also for a renamed copy in third-party storage, never `file.created`
         - `PUT api/2.0/files/fileops/deleteversion` (Delete file versions), once for every removed version
         - `PUT api/2.0/files/order` (Set order of files), for every file in the list whose order changes
         - `POST api/2.0/files/owner` (Change the room or file owner), for every file whose owner changes
@@ -710,8 +710,9 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `DELETE api/2.0/files/file/{fileId}` (Delete a file), instead if `immediately` is true or the file is in the trash or third-party storage
+        - `DELETE api/2.0/files/file/{fileId}` (Delete a file), instead when the file is deleted for good, not moved to the trash
         - `PUT api/2.0/files/fileops/delete` (Delete files and folders), instead for a listed file deleted for good, not moved to the trash
+        - `PUT api/2.0/files/fileops/deleteversion` (Delete file versions), instead when `versions` is empty, which deletes the whole file for good
         - `PUT api/2.0/files/fileops/emptytrash` (Empty the "Trash" folder), for each file directly in the trash, not for the files inside trashed folders
 
         Also raised by the automatic clean-up of the trash, and the clean-up of a room with a file lifetime set to delete permanently, for every file they delete.
@@ -816,7 +817,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `PUT api/2.0/files/fileops/copy` (Copy files and folders), for every copied file, including the files inside copied folders
+        - `PUT api/2.0/files/fileops/copy` (Copy files and folders), for every copied file, and for files inside copied folders only within one storage
         - `PUT api/2.0/files/fileops/duplicate` (Duplicate files and folders), for every duplicated file, including the files inside duplicated folders and rooms
       tags:
         - file
@@ -868,7 +869,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `PUT api/2.0/files/fileops/move` (Move files and folders), for each listed file, and for files of folders that merge into existing folders
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), for each listed file, and for files of merged folders
       tags:
         - file
       parameters:
@@ -976,8 +977,8 @@ webhooks:
         - `POST api/2.0/migration/migrate` (Start migration), for every folder the queued import creates, including one per imported user for their files
         - `PUT api/2.0/people/delete` (Delete users), for every deleted account that shared files, once the job creates a folder for them
         - `POST api/2.0/people/delete/personal/start` (Delete the personal folder), when the job moves shared files of the caller to a new folder of another member
-        - `POST api/2.0/people/reassign/start` (Start the data reassignment), when the job creates a folder for shared files
-        - `POST api/2.0/people/remove/start` (Start the data deletion), when the job moves shared files of the account to a new folder of the caller
+        - `POST api/2.0/people/reassign/start` (Start the data reassignment), when the job creates a folder for shared files, but not `room.updated` for moved rooms
+        - `POST api/2.0/people/remove/start` (Start the data deletion), when the job moves shared files to a new folder of the caller, but no `user.deleted`
         - `DELETE api/2.0/people/{userId}` (Delete a user), once the data deletion job creates a folder for the files that the account shared
 
         Also raised by the automatic clean-up of a guest's personal folder left unchanged for 30 days, once for the folder it creates in the personal section of the member who takes over the files and folders the guest shared from it.
@@ -1247,8 +1248,9 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `PUT api/2.0/files/fileops/copy` (Copy files and folders), for every copied folder, the folders inside it included
+        - `PUT api/2.0/files/fileops/copy` (Copy files and folders), for every copied folder, and for its subfolders only within one storage
         - `PUT api/2.0/files/fileops/duplicate` (Duplicate files and folders), for every duplicated folder, the folders inside it included
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), instead for a listed folder merged into an existing one
       tags:
         - folder
       parameters:
@@ -1299,7 +1301,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `PUT api/2.0/files/fileops/move` (Move files and folders), for each listed folder, and for its subfolders only when it merges into an existing folder
+        - `PUT api/2.0/files/fileops/move` (Move files and folders), for each listed folder, and for subfolders of a merged folder
       tags:
         - folder
       parameters:
@@ -1405,7 +1407,7 @@ webhooks:
         - `POST api/2.0/files/rooms/fromtemplate` (Create a room from the template), once the queued operation builds the room
         - `POST api/2.0/files/rooms/thirdparty/{id}` (Create a third-party room), when `roomType` is not `AiRoom`
         - `POST api/2.0/files/roomtemplate` (Create a room template), for the new template, once the queued operation builds it
-        - `POST api/2.0/migration/migrate` (Start migration), for every room the queued import creates
+        - `POST api/2.0/migration/migrate` (Start migration), for every room the queued import creates, but no webhooks for imported users, groups, and files
       tags:
         - room
       parameters:
@@ -1459,7 +1461,7 @@ webhooks:
         - `PUT api/2.0/files/folder/{folderId}` (Rename a folder), instead when the folder is a room
         - `POST api/2.0/files/owner` (Change the room or file owner), for every listed room whose owner changes
         - `POST api/2.0/files/rooms/fromtemplate` (Create a room from the template), after it when `quota` is given
-        - `PUT api/2.0/files/rooms/resetquota` (Reset the room quota limit), for every listed room
+        - `PUT api/2.0/files/rooms/resetquota` (Reset the room quota limit), for every listed room, even when its quota does not change
         - `PUT api/2.0/files/rooms/roomquota` (Change the room quota limit), for every listed room, even when its quota does not change
         - `PUT api/2.0/files/rooms/{id}` (Update a room), on every successful call, even one that changes nothing
         - `POST api/2.0/files/rooms/{id}/cover` (Change the room cover), when the color or the cover changes
@@ -1827,7 +1829,7 @@ webhooks:
 
         Raised by these REST API operations:
 
-        - `PUT api/2.0/files/file/{fileId}/manageformfilling` (Perform form filling action), when `action` is `Stop`, and for `Edit` in a form-filling room where filling had started
+        - `PUT api/2.0/files/file/{fileId}/manageformfilling` (Perform form filling action), for every `Stop`, even a repeated one, and for `Edit` that ends a started filling
         - `GET api/2.0/files/file/{fileId}/openedit` (Get the editor configuration), when `edit` true stops the filling of a form in a form-filling room
       tags:
         - form
@@ -1880,7 +1882,9 @@ webhooks:
         Raised by these REST API operations:
 
         - `POST api/2.0/files/rooms` (Create a room), instead when `roomType` is `AiRoom`, which creates an AI agent in the Rooms section
+        - `POST api/2.0/files/rooms/fromtemplate` (Create a room from the template), instead for a room built from an AI agent template
         - `POST api/2.0/files/rooms/thirdparty/{id}` (Create a third-party room), instead when `roomType` is `AiRoom`
+        - `POST api/2.0/files/roomtemplate` (Create a room template), instead for an AI agent template
         - `POST internal/ai/agents` (Create an ai agent)
       tags:
         - agent
@@ -1934,12 +1938,14 @@ webhooks:
 
         - `PUT api/2.0/files/folder/{folderId}` (Rename a folder), instead when it is an AI agent
         - `POST api/2.0/files/owner` (Change the room or file owner), instead for a listed AI agent whose owner changes
+        - `POST api/2.0/files/rooms/fromtemplate` (Create a room from the template), instead for such a room with `quota`
         - `PUT api/2.0/files/rooms/resetquota` (Reset the room quota limit), instead for a listed AI agent
         - `PUT api/2.0/files/rooms/roomquota` (Change the room quota limit), instead for a listed AI agent
         - `PUT api/2.0/files/rooms/{id}` (Update a room), instead when the room is an AI agent
         - `POST api/2.0/files/rooms/{id}/cover` (Change the room cover), instead when the room is an AI agent
         - `POST api/2.0/files/rooms/{id}/logo` (Set the room logo), instead when the room is an AI agent
         - `DELETE api/2.0/files/rooms/{id}/logo` (Remove a room logo), instead when the room is an AI agent
+        - `POST api/2.0/files/roomtemplate` (Create a room template), instead for an AI agent template with `quota`
         - `POST api/2.0/people/type` (Start updating user type), instead for an AI agent the account owns
         - `PUT internal/ai/agents/agentquota` (Change the AI agent quota limit), for every listed agent, even when its quota does not change
         - `PUT internal/ai/agents/resetquota` (Reset the AI agents quota limit), for every listed agent

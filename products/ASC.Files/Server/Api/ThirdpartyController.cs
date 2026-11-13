@@ -169,8 +169,8 @@ public class ThirdpartyController(
     /// <remarks>
     /// Returns the third-party storage accounts of the legacy Common section, as folder entries. Each entry stands for
     /// one account, and the folder operations can browse it. Any signed-in user can call it. The call skips accounts
-    /// whose owner the caller cannot read, so the list differs between users. The call is read-only. It returns a plain
-    /// array without paging. In most portals the array is empty, and that is not an error. The reason is that
+    /// whose folder the caller cannot read, so the list differs between users. The call is read-only. It returns a
+    /// plain array without paging. In most portals the array is empty, and that is not an error. The reason is that
     /// `POST api/2.0/files/thirdparty` attaches accounts to the Rooms section, not to Common. So only accounts from an
     /// older portal appear here. The array is also empty if third-party storage is turned off or no storage service is
     /// set up. For the caller's own accounts in any section, use `GET api/2.0/files/thirdparty`.

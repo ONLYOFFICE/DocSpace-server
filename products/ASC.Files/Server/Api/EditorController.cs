@@ -124,7 +124,7 @@ public abstract class EditorController<T>(
     /// Save edited file content
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/saveediting</path>
-    [RaisesWebhook(WebhookTrigger.FileUpdated)]
+    [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for the saved file, also for a renamed copy in third-party storage, never `file.created`")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file is saved and the stored version is returned", typeof(FileDto<int>))]
     [SwaggerResponse(400, "A form field has the wrong type, or a third-party file identifier refers to a storage account that is not connected")]
@@ -139,17 +139,17 @@ public abstract class EditorController<T>(
     }
 
     /// <remarks>
-    /// Opens an editing session on the file and returns its document key. An editor app passes this key to the
-    /// document service to join co-editing of this revision. While the session lasts, nobody can delete or move the
-    /// file. With `editingAlone` false, the portal asks the document service to track the document. The caller then
-    /// needs the right to edit, review, comment, fill forms, or edit filters. With `editingAlone` true, the caller
-    /// claims the file alone. If anybody already edits the file, the call returns 403. Requires editing access to the
-    /// file. Other callers get 403. With `editingAlone` true, an anonymous caller without editing access gets 401.
-    /// The call changes data, but not the document. While the session lasts, a repeated call with `editingAlone` true
-    /// returns 403. That call also deletes the portal's record of every editing session of the file. With `editingAlone`
-    /// false, each call returns the same key until the file gets a new version. A version from an autosave keeps the
-    /// key. The call also returns 403 if the file is locked or in Trash, or if the document service rejects tracking.
-    /// If the file does not exist, it returns 404. If the editors cannot open its format, it returns 415. To keep the
+    /// Opens an editing session on the file and returns its document key. An editor app passes this key to the document
+    /// service to join co-editing of this revision. While the session lasts, nobody can delete or move the file. With
+    /// `editingAlone` false, the portal asks the document service to track the document. The caller then needs the
+    /// right to edit, review, comment, fill forms, or edit filters. With `editingAlone` true, the caller claims the
+    /// file alone. If anybody already edits the file, the call returns 403. Requires editing access to the file. Other
+    /// callers get 403. With `editingAlone` true, an anonymous caller without editing access gets 401. The call changes
+    /// data, but not the document. While the session lasts, a repeated call with `editingAlone` true returns 403. That
+    /// call also deletes the portal's record of every editing session of the file. With `editingAlone` false, each call
+    /// returns the same key until the file gets a new version. A version from an autosave keeps the key. The call also
+    /// returns 403 if the file is locked or in Trash, or if the document service rejects tracking. If the file does not
+    /// exist, it returns 404. With `editingAlone` false, a format that the editors cannot open returns 415. To keep the
     /// session alive, call `GET api/2.0/files/file/{fileId}/trackeditfile`. To end it, call that operation with
     /// `isFinish` true.
     /// </remarks>

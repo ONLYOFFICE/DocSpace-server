@@ -236,13 +236,13 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Returns the logo slots of the current portal with the image URLs to show. Anyone can call it without signing
-    /// in. The call takes the portal from the request address. The call is read-only. Each item has the slot number
-    /// in `type`, its name, its image size, and the URLs in `path`. If `isDark` is `true`, the call fills only
-    /// `dark`. If `isDark` is `false`, it fills only `light`. Without `isDark`, the call fills both URLs. Then `dark`
-    /// is empty for a slot without a separate dark image. The list leaves out the notification slot 8, which only
-    /// letters use. With `isDefault=true`, the call returns the installation-wide default logos instead. To learn
-    /// which slots still have built-in images, use `GET api/2.0/settings/whitelabel/logos/isdefault`.
+    /// Returns the logo slots of the current portal with the image URLs to show. Anyone can call it without signing in.
+    /// The call takes the portal from the request address. The call is read-only. Each item has the slot number in
+    /// `type`, its name, its image size, and the URLs in `path`. If `isDark` is `true`, the call fills only `dark`. If
+    /// `isDark` is `false`, it fills only `light`. Without `isDark`, the call fills both URLs. Then `dark` is empty for
+    /// a slot without a separate dark image. The list leaves out the notification slot 8, which only letters use. With
+    /// `isDefault=true`, the call returns the installation-wide default logos instead. To learn which slots have no
+    /// image of the portal's own, use `GET api/2.0/settings/whitelabel/logos/isdefault`.
     /// </remarks>
     /// <summary>Get the white label logos</summary>
     /// <path>api/2.0/settings/whitelabel/logos</path>
@@ -320,14 +320,14 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Returns whether each logo slot of the current portal still has the built-in image. Requires the
-    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. The
-    /// call is read-only. The list includes the notification slot 8. So it has one entry more than
-    /// `GET api/2.0/settings/whitelabel/logos`. Each entry has the slot name in `name`. Its `default` is `true` until
-    /// the portal stores an image for the slot in either theme. Slot 8 always has the same `default` as the
-    /// login-page slot 2. With `isDefault=true`, the call checks the installation-wide default logos instead. To get
-    /// the logo URLs, use `GET api/2.0/settings/whitelabel/logos`. To check the logo text, use
-    /// `GET api/2.0/settings/whitelabel/logotext/isdefault`.
+    /// Returns whether each logo slot of the current portal has no image of its own and shows the installation default.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get
+    /// 403. The call is read-only. The list includes the notification slot 8. So it has one entry more than `GET
+    /// api/2.0/settings/whitelabel/logos`. Each entry has the slot name in `name`. Its `default` is `true` until the
+    /// portal stores an image for the slot in either theme. Slot 8 always has the same `default` as the login-page slot
+    /// 2. With `isDefault=true`, the call checks the installation-wide default logos instead. To get the logo URLs, use
+    /// `GET api/2.0/settings/whitelabel/logos`. To check the logo text, use `GET
+    /// api/2.0/settings/whitelabel/logotext/isdefault`.
     /// </remarks>
     /// <summary>Check the default white label logos</summary>
     /// <path>api/2.0/settings/whitelabel/logos/isdefault</path>
@@ -501,14 +501,13 @@ public class WhitelabelController(
     }
 
     /// <remarks>
-    /// Returns whether the current portal still uses the built-in logo text. Requires the EditPortalSettings
-    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call is read-only. The
-    /// answer has `name` set to `logotext`. Its `default` is `true` while the portal has no stored text. Saving
-    /// `ONLYOFFICE` itself clears the setting, so `default` stays `true`. After
-    /// `POST api/2.0/settings/whitelabel/logotext/save` with another text, `default` becomes `false`. After
-    /// `PUT api/2.0/settings/whitelabel/logotext/restore`, it becomes `true` again. With `isDefault=true`, the call
-    /// checks the installation-wide default text instead. To check the logos, use
-    /// `GET api/2.0/settings/whitelabel/logos/isdefault`.
+    /// Returns whether the current portal has no logo text of its own. Requires the EditPortalSettings permission,
+    /// which the portal owner and DocSpace admins have. Other callers get 403. The call is read-only. The answer has
+    /// `name` set to `logotext`. Its `default` is `true` while the portal has no stored text. Saving `ONLYOFFICE`
+    /// itself clears the setting, so `default` stays `true`. After `POST api/2.0/settings/whitelabel/logotext/save`
+    /// with another text, `default` becomes `false`. After `PUT api/2.0/settings/whitelabel/logotext/restore`, it
+    /// becomes `true` again. With `isDefault=true`, the call checks the installation-wide default text instead. To
+    /// check the logos, use `GET api/2.0/settings/whitelabel/logos/isdefault`.
     /// </remarks>
     /// <summary>Check the default logo text</summary>
     /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>

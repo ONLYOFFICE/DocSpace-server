@@ -357,11 +357,11 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Deletes the link between the account of the caller and a third-party provider. After this call, the account
-    /// can no longer sign in through that provider. The account itself stays, with its password. Any signed-in user
-    /// can call it. The call changes data and returns no body. If the provider is not linked, the call changes
-    /// nothing and returns 200. So you can repeat it. To link the provider again, use
-    /// `PUT api/2.0/people/thirdparty/linkaccount`.
+    /// Deletes the link between the account of the caller and a third-party provider. A later sign-in through that
+    /// provider links the account again if the provider returns its email. The account itself stays, with its password.
+    /// Any signed-in user can call it. The call changes data and returns no body. If the provider is not linked, the
+    /// call changes nothing and returns 200. So you can repeat it. To link the provider again, use `PUT
+    /// api/2.0/people/thirdparty/linkaccount`.
     /// </remarks>
     /// <summary>
     /// Unlink a third-party account

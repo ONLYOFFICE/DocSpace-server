@@ -352,15 +352,15 @@ public abstract class FoldersController<T>(
     /// including the new job. Requires the right to delete the folder. Other callers get 403. The room manager and a
     /// content creator who owns the folder have this right. Editing access is not enough, and a guest also gets 403.
     /// The call queues work and changes data. Do not repeat it. A repeat deletes for good the folder that the first
-    /// call moved to the trash. After a deletion for good, a repeated call returns 404. The folder still exists when
+    /// call moved to the trash. After a deletion for good, a repeated call returns 404. The folder may still exist when
     /// the response arrives. Repeat `GET api/2.0/files/fileops` until the job has `finished` set to true. Then read its
     /// `error` to see if the deletion failed. If `deleteAfter` is true, `GET api/2.0/files/fileops` does not list the
     /// job after it finishes. By default, the job moves the folder to the trash, where you can restore it. If
-    /// `immediately` is true, the deletion is final. The deletion is always final in the trash and in a private room.
-    /// The same applies to the root folder of a connected storage. If a file inside is blocked, for example open for
-    /// editing, the job deletes nothing. The call also returns 403 for a room if `immediately` is not true. If the
-    /// folder does not exist, the call returns 404. To delete several items in one call, use `PUT
-    /// api/2.0/files/fileops/delete`.
+    /// `immediately` is true, the deletion is final. The deletion is always final in the trash and for a private room
+    /// itself. Its subfolders go to the trash. The same applies to the root folder of a connected storage. If a file
+    /// inside is blocked, for example open for editing, the job deletes nothing. The call also returns 403 for a room
+    /// if `immediately` is not true. If the folder does not exist, the call returns 404. To delete several items in one
+    /// call, use `PUT api/2.0/files/fileops/delete`.
     /// </remarks>
     /// <summary>
     /// Delete a folder
@@ -801,13 +801,13 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Returns the external links of a folder or a room, including the primary link. The call returns at most the
-    /// first 100 links, without paging. Requires read access if the folder is a room. Other callers get 403. A caller
-    /// who can read the room but may not see its links gets an empty list. For other folders, a caller who cannot
-    /// manage the links gets an empty list instead of 403. So an empty list does not prove that the folder has no
-    /// links. The call is read-only. If the folder does not exist, the call returns 404. To change or revoke a link,
-    /// pass its ID to `PUT api/2.0/files/folder/{id}/links`. To get only the primary link, use
-    /// `GET api/2.0/files/folder/{id}/link`.
+    /// Returns the external links of a folder or a room, including the primary link. The call returns at most the first
+    /// 100 links, without paging. Requires read access if the folder is a room. Other callers get 403. A caller who can
+    /// read the room but may not see its links gets an empty list. In other folders, a caller who cannot manage links
+    /// gets an empty list. In a public room, an unreadable folder returns 403. So an empty list does not prove that the
+    /// folder has no links. The call is read-only. If the folder does not exist, the call returns 404. To change or
+    /// revoke a link, pass its ID to `PUT api/2.0/files/folder/{id}/links`. To get only the primary link, use `GET
+    /// api/2.0/files/folder/{id}/link`.
     /// </remarks>
     /// <summary>
     /// Get folder external links

@@ -91,30 +91,30 @@ public class OperationController(
     }
 
     /// <remarks>
-    /// Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call
-    /// copies the content of each listed folder, not the folder. Requires the right to create content in the
-    /// destination and to copy every listed item. Other callers get 403. In a room, room managers and content
-    /// creators can create content. A room that forbids downloads denies copying to the Read role. The call queues
-    /// work. Repeat `GET api/2.0/files/fileops` until `finished` is true. Its `files` and `folders` then name the
-    /// copies. What a repeated call does depends on `conflictResolveType`. With `Skip`, it copies only the files whose
-    /// names are still free in the destination. With `Overwrite`, it adds a new version to each earlier copy of a
-    /// file. With `Duplicate`, it makes new copies under new names. The call returns the copy operations of the
-    /// caller, including the new one. An empty selection queues nothing and returns the existing operations. To find
-    /// name clashes first, use `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use
-    /// `GET api/2.0/files/fileops/checkdestfolder`. To move the items instead, use `PUT api/2.0/files/fileops/move`.
-    /// The call also returns 403 if the destination is inside a listed folder. A listed folder that would exceed a
-    /// room or user quota also returns 403. It also returns 403 if a file to overwrite is locked, open for editing, or
-    /// not editable by the caller. A file that is not a PDF form sent to a form-filling room also returns 403. A
-    /// listed file too large for a knowledge folder also returns 403. If the destination or a listed file or folder
-    /// does not exist, the call returns 404. The call returns 415 for a file format the portal does not accept for
-    /// upload. It also returns 415 for a format a knowledge folder cannot index.
+    /// Starts a background job that copies files and folders into `destFolderId`. With `content` true, the call copies
+    /// the content of each listed folder, not the folder. Requires the right to create content in the destination and
+    /// to copy every listed item. Other callers get 403. In a room, room managers and content creators can create
+    /// content. A room that forbids downloads denies copying to the Read role. The call queues work. Repeat `GET
+    /// api/2.0/files/fileops` until `finished` is true. Its `files` and `folders` then name the copies. What a repeated
+    /// call does depends on `conflictResolveType`. With `Skip`, it skips clashing files, except encrypted files, rooms,
+    /// and copies into knowledge folders. With `Overwrite`, it adds a new version to each earlier copy of a file. With
+    /// `Duplicate`, it makes new copies under new names. The call returns the copy operations of the caller, including
+    /// the new one. An empty selection queues nothing and returns the existing operations. To find name clashes first,
+    /// use `GET api/2.0/files/fileops/move`. To check that the destination accepts the files, use `GET
+    /// api/2.0/files/fileops/checkdestfolder`. To move the items instead, use `PUT api/2.0/files/fileops/move`. The
+    /// call also returns 403 if the destination is inside a listed folder. A listed folder that would exceed a room or
+    /// user quota also returns 403. It also returns 403 if a file to overwrite is locked, open for editing, or not
+    /// editable by the caller. A file that is not a PDF form sent to a form-filling room also returns 403. A listed
+    /// file too large for a knowledge folder also returns 403. If the destination or a listed file or folder does not
+    /// exist, the call returns 404. The call returns 415 for a file format the portal does not accept for upload. It
+    /// also returns 415 for a format a knowledge folder cannot index.
     /// </remarks>
     /// <summary>Copy files and folders</summary>
     /// <path>api/2.0/files/fileops/copy</path>
     /// <collection>list</collection>
-    [RaisesWebhook(WebhookTrigger.FolderCopied, When = "for every copied folder, the folders inside it included")]
+    [RaisesWebhook(WebhookTrigger.FolderCopied, When = "for every copied folder, and for its subfolders only within one storage")]
     [RaisesWebhook(WebhookTrigger.RoomCopied, When = "for every listed room copied into its own section, an AI agent included")]
-    [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every copied file, including the files inside copied folders")]
+    [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every copied file, and for files inside copied folders only within one storage")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot copy one of the listed items, the destination is a listed folder or lies inside one, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
@@ -187,6 +187,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/deleteversion</path>
     /// <collection>list</collection>
     [RaisesWebhook(WebhookTrigger.FileUpdated, When = "once for every removed version")]
+    [RaisesWebhook(WebhookTrigger.FileDeleted, When = "instead when `versions` is empty, which deletes the whole file for good")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `fileId` or `versions`")]
@@ -356,11 +357,12 @@ public class OperationController(
     /// <summary>Move files and folders</summary>
     /// <path>api/2.0/files/fileops/move</path>
     /// <collection>list</collection>
-    [RaisesWebhook(WebhookTrigger.FolderMoved, When = "for each listed folder, and for its subfolders only when it merges into an existing folder")]
+    [RaisesWebhook(WebhookTrigger.FolderMoved, When = "for each listed folder, and for subfolders of a merged folder")]
+    [RaisesWebhook(WebhookTrigger.FolderCopied, When = "instead for a listed folder merged into an existing one")]
     [RaisesWebhook(WebhookTrigger.FolderRestored, When = "instead for a folder moved out of the trash")]
     [RaisesWebhook(WebhookTrigger.RoomArchived, When = "for every listed room moved to the archive")]
     [RaisesWebhook(WebhookTrigger.RoomRestored, When = "for every listed room moved out of the archive")]
-    [RaisesWebhook(WebhookTrigger.FileMoved, When = "for each listed file, and for files of folders that merge into existing folders")]
+    [RaisesWebhook(WebhookTrigger.FileMoved, When = "for each listed file, and for files of merged folders")]
     [RaisesWebhook(WebhookTrigger.FileRestored, When = "instead for a file moved out of the trash")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]

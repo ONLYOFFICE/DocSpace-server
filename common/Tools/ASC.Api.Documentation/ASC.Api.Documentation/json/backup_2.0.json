@@ -763,7 +763,7 @@
           "Backup"
         ],
         "summary": "Get the backup history",
-        "description": "Returns the backups of the portal whose archive is still in its storage. Requires the EditPortalSettings\r\npermission, which the portal owner and DocSpace admins have. Other callers get 403. With `dump`, a\r\ncaller without the space access permission also gets 403. The call changes data. It deletes the record\r\nof each backup whose archive is no longer in its storage. It skips backups whose storage it cannot\r\nreach, and keeps their records. You can repeat the call. The list has no set order, so sort it by\r\n`createdOn`. If the portal subscription has expired or is not paid, the call returns 402.",
+        "description": "Returns the backups of the portal whose archive is still in its storage. Requires the EditPortalSettings\r\npermission, which the portal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller\r\nwithout the space access permission also gets 403. The call changes data. It deletes the record of each backup\r\nwhose archive is gone, in the Trash, or unreadable. It skips a backup only when its storage cannot be opened,\r\nand keeps its record. You can repeat the call. The list has no set order, so sort it by `createdOn`. If the\r\nportal subscription has expired or is not paid, the call returns 402.",
         "operationId": "getBackupHistory",
         "parameters": [
           {

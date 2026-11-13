@@ -544,12 +544,12 @@ public class StorageController(
 
     /// <remarks>
     /// Clears the CDN settings of the portal, so the portal serves its static content itself again. The call does not
-    /// upload, move, or delete files. Files on the CDN stay there until you delete them in the provider console. Links
-    /// that the portal builds after the call no longer use the CDN. An open page may use the CDN until you reload it.
-    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
-    /// get 403. The call also returns 403 if the installation is not self-hosted or limits the access space. The call
-    /// changes data and returns no body. You can repeat it. To see the current CDN, use
-    /// `GET api/2.0/settings/storage/cdn`. To select a CDN again, use `PUT api/2.0/settings/storage/cdn`. To reset the
+    /// upload, move, or delete files. Files on the CDN stay there until you delete them in the provider console. After
+    /// the change reaches all services, the links that the portal builds no longer use the CDN. An open page may use
+    /// the CDN until you reload it. Requires the EditPortalSettings permission, which the portal owner and DocSpace
+    /// admins have. Other callers get 403. The call also returns 403 if the installation is not self-hosted or limits
+    /// the access space. The call changes data and returns no body. You can repeat it. To see the current CDN, use `GET
+    /// api/2.0/settings/storage/cdn`. To select a CDN again, use `PUT api/2.0/settings/storage/cdn`. To reset the
     /// document storage, use `DELETE api/2.0/settings/storage`.
     /// </remarks>
     /// <summary>

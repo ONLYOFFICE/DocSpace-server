@@ -213,7 +213,7 @@ public class MigrationController(
     /// Start migration
     /// </summary>
     /// <path>api/2.0/migration/migrate</path>
-    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "for every room the queued import creates")]
+    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "for every room the queued import creates, but no webhooks for imported users, groups, and files")]
     [RaisesWebhook(WebhookTrigger.FolderCreated, When = "for every folder the queued import creates, including one per imported user for their files")]
     [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every room the queued import moves to its owner, a room admin or DocSpace admin")]
     [Tags("Migration")]

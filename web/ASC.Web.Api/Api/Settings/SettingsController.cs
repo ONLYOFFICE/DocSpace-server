@@ -656,10 +656,10 @@ public partial class SettingsController(
 
     /// <remarks>
     /// Returns the time zones of the server, with the IANA ID and the display name of each. The list always includes
-    /// UTC and is sorted from the lowest UTC offset to the highest. Requires a DocSpace admin, or the confirmation
-    /// token of the setup wizard. Other signed-in users get 403. An invalid or expired token returns 401. The call is
-    /// read-only. It returns the whole list without paging. Use the returned `id` values where the portal asks for a
-    /// time zone.
+    /// UTC and is sorted by standard UTC offset, without daylight saving time. Requires a DocSpace admin, or the
+    /// confirmation token of the setup wizard. Other signed-in users get 403. An invalid or expired token returns 401.
+    /// The call is read-only. It returns the whole list without paging. Use the returned `id` values where the portal
+    /// asks for a time zone.
     /// </remarks>
     /// <summary>Get time zones</summary>
     /// <path>api/2.0/settings/timezones</path>

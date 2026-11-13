@@ -239,11 +239,11 @@ public class UserController(
     /// repeated call with the same email returns 400. With an invitation link that `POST api/2.0/people/invite`
     /// emailed, a repeat returns 403. If `password` breaks the portal password policy, the call returns 400. It also
     /// returns 400 if the first and last names are not valid. Without `password` and `passwordHash`, the portal sets a
-    /// random password that nobody knows. If the portal has no free paid seat, the call still creates the account, as a
-    /// user. So check the type flags of the returned profile, such as `isRoomAdmin`. The call also downloads the avatar
-    /// from `files`. If the portal refuses that URL, the call returns 403 and creates no account. If its server returns
-    /// an error, the call also returns 403. Any failed download keeps the created account. To invite several people by
-    /// email, use `POST api/2.0/people/invite`.
+    /// random password that nobody knows. Without a free paid seat, the call creates a user instead. If the user limit
+    /// is also reached, it returns 402. So check the type flags of the returned profile, such as `isRoomAdmin`. The
+    /// call also downloads the avatar from `files`. If the portal refuses that URL, the call returns 403 and creates no
+    /// account. If its server returns an error, the call also returns 403. Any failed download keeps the created
+    /// account. To invite several people by email, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Add a user
@@ -450,7 +450,7 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
-    [RaisesWebhook(WebhookTrigger.UserInvited, When = "for every address that has no account yet")]
+    [RaisesWebhook(WebhookTrigger.UserInvited, When = "for every address without an account, not for an existing account whose type it raises")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Every pending profile the caller may see, not only the ones just invited", typeof(List<EmployeeDto>))]
     [SwaggerResponse(400, "An address is malformed or written in punycode, or it belongs to a disabled account")]
@@ -814,7 +814,7 @@ public class UserController(
     /// Disables the account of the caller at the request of its owner. This is the second step of self-removal. The
     /// first step, `PUT api/2.0/people/self/delete`, emails the confirmation link. Sign the request with the
     /// confirmation token from that link. The portal owner and an LDAP account get 403. If the account no longer
-    /// exists, the call returns 404. The call changes data, and a repeated call with the same token returns 401. It
+    /// exists, the call returns 401. The call changes data, and a repeated call with the same token returns 401. It
     /// sets the `Terminated` status, ends all sessions of the account, and notifies the DocSpace admins. The account
     /// then cannot sign in. The call keeps its rooms, files, and group memberships. A DocSpace admin can then delete
     /// the account with `DELETE api/2.0/people/{userId}`. Until then, `PUT api/2.0/people/status/{status}` can enable
@@ -828,7 +828,7 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile of the caller with the Terminated status", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The caller is the portal owner, an LDAP account or a system account")]
-    [SwaggerResponse(404, "The calling account no longer exists")]
+    [SwaggerResponse(401, "The link is invalid or expired, or the calling account no longer exists")]
     [HttpDelete("@self")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
     public async Task<EmployeeFullDto> DeleteProfile()
@@ -1733,8 +1733,8 @@ public class UserController(
     /// <remarks>
     /// Returns the interface theme of the caller, which is `Base`, `Dark`, or `System`. The theme belongs to the
     /// account, not to the portal. Any signed-in user can call it, including a guest. The call is read-only. If the
-    /// caller has never chosen a theme, the call returns the portal default. The `theme` field of
-    /// `GET api/2.0/people/@self` has the same value.
+    /// caller has never chosen a theme, the call returns `System`. The `theme` field of `GET api/2.0/people/@self` has
+    /// the same value.
     /// </remarks>
     /// <summary>
     /// Get the portal theme
@@ -2020,22 +2020,23 @@ public class UserController(
     /// <remarks>
     /// Sets the activation status of the account of the caller. A person uses it to confirm their email after following
     /// the emailed link. Sign the request with the confirmation token from that link. An invalid or expired token
-    /// returns 401. A signed-in caller without this token gets 403. A token from another kind of link also returns
-    /// 403. The `userIds` list must hold only the ID of the caller. Otherwise the call returns 400. The call changes
-    /// data. With the activation link of a new account, a repeated call returns 401. With a link that confirms an email
+    /// returns 401. A signed-in caller without this token gets 403. A token from another kind of link also returns 403.
+    /// The `userIds` list must hold only the ID of the caller. Otherwise the call returns 400. The call changes data.
+    /// With the activation link of a new account, a repeated call returns 401. With a link that confirms an email
     /// address, you can repeat it with the same body. If the portal owner gets `Activated`, the call sends the admin
-    /// welcome email once per portal. If the account no longer exists, the response is empty. To enable or disable an
-    /// account, use `PUT api/2.0/people/status/{status}`.
+    /// welcome email once per portal. If the account no longer exists or is disabled, the call returns 401. To enable
+    /// or disable an account, use `PUT api/2.0/people/status/{status}`.
     /// </remarks>
     /// <summary>
     /// Set my activation status
     /// </summary>
     /// <path>api/2.0/people/activationstatus/{activationStatus}</path>
     /// <collection>list</collection>
-    [RaisesWebhook(WebhookTrigger.UserUpdated)]
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "for the caller's account, even when the status does not change")]
     [Tags("People / User status")]
     [SwaggerResponse(200, "The profile of the caller in its new activation state", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The list is empty, holds more than one ID, or names an account other than the caller")]
+    [SwaggerResponse(401, "The link is invalid or expired, or the account no longer exists or is disabled")]
     [SwaggerResponse(403, "The caller is signed in but sent no activation link token, or sent a valid confirmation token of another link type")]
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationStatus}")]
@@ -2333,7 +2334,7 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
-    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "for every listed account, whether or not its status changes")]
+    [RaisesWebhook(WebhookTrigger.UserUpdated, When = "for every listed account, changed or not, and for none after a 402")]
     [Tags("People / User status")]
     [SwaggerResponse(200, "The listed accounts with their statuses after the change", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The requested status is neither Active nor Terminated")]
@@ -2713,8 +2714,8 @@ public class UserController(
     /// returns 400 if `quota` is not a whole number or is over the storage the tariff allows. On a standalone
     /// installation, it also returns 400 for a value over the portal quota. The call changes data. You can repeat it
     /// with the same body. It skips system accounts without an error. It returns the changed accounts. A limit deletes
-    /// nothing and frees no space. An account over its limit cannot add more files. To return accounts to the portal
-    /// default, use `PUT api/2.0/people/resetquota`.
+    /// nothing and frees no space. While user quotas are on, an account over its limit cannot add more files. To return
+    /// accounts to the portal default, use `PUT api/2.0/people/resetquota`.
     /// </remarks>
     /// <summary>
     /// Change a user quota limit

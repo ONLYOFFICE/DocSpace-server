@@ -946,12 +946,12 @@ public class PaymentController(
     /// Returns the money in the portal wallet as the accounting service has it. The answer has a sub-account with its
     /// amount for each currency and the last credit movement. Requires a DocSpace admin. Other callers get 403. The
     /// call also returns 403 if the installation has no billing service. If the portal has no billing customer, the
-    /// call returns an empty result. The call is read-only. The wallet services spend this balance, and
-    /// `POST api/2.0/portal/payment/deposit` adds to it. To list the movements, use
-    /// `GET api/2.0/portal/payment/customer/operations`. Each call reads the balance from the accounting service, so
-    /// it is current right after a top-up too. Only a failed read is cached. A read fails if the service cannot be
-    /// reached or does not know the portal. Then the call returns an empty result for 10 minutes. Use `refresh=true`
-    /// to read it again immediately.
+    /// call returns an empty result. The call is read-only. The wallet services spend this balance, and `POST
+    /// api/2.0/portal/payment/deposit` adds to it. To list the movements, use `GET
+    /// api/2.0/portal/payment/customer/operations`. Each call reads the balance from the accounting service, so it is
+    /// current right after a top-up too. Only a failed read is cached. A read fails if the service cannot be reached,
+    /// answers with an error, or does not know the portal. Then the call returns an empty result for 10 minutes. Use
+    /// `refresh=true` to read it again immediately.
     /// </remarks>
     /// <summary>
     /// Get the customer balance
@@ -1428,11 +1428,11 @@ public class PaymentController(
 
     /// <remarks>
     /// Stops the `xlsx` operations report that the caller has running and removes its job. Use it for a report with
-    /// wrong filters or a report that is no longer needed. If the portal has no billing customer, the call
-    /// returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no
-    /// billing service. The call queues a stop request for the worker that builds the file. So
-    /// `GET api/2.0/portal/payment/customer/operationsreport` can still return the job for a short time. You can
-    /// repeat the call. If the caller has no running report, the call does nothing. The response has no body. A 200
+    /// wrong filters or a report that is no longer needed. If the portal has no billing customer, the call returns 404.
+    /// Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing
+    /// service. The call queues a stop request for the worker that builds the file. So `GET
+    /// api/2.0/portal/payment/customer/operationsreport` can still return the job for a short time. You can repeat the
+    /// call. It also deletes a finished report job. Without a job, it does nothing. The response has no body. A 200
     /// response means that the stop was requested, not that a report was stopped. The call does not stop the service
     /// usage or monthly usage reports. A finished report keeps its file in My documents.
     /// </remarks>
@@ -1551,14 +1551,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Stops the `xlsx` service usage report that the caller has running and removes its job. Use it for a report
-    /// with wrong filters or a report that is no longer needed. If the portal has no billing customer, the call
-    /// returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation
-    /// has no billing service. The call queues a stop request for the worker that builds the file. So
-    /// `GET api/2.0/portal/payment/customer/usage/report` can still return the job for a short time. You can repeat
-    /// the call. If the caller has no running report, the call does nothing. The response has no body. A 200 response
-    /// means that the stop was requested, not that a report was stopped. The call does not stop the operations or
-    /// monthly usage reports. A finished report keeps its file in My documents.
+    /// Stops the `xlsx` service usage report that the caller has running and removes its job. Use it for a report with
+    /// wrong filters or a report that is no longer needed. If the portal has no billing customer, the call returns 404.
+    /// Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing
+    /// service. The call queues a stop request for the worker that builds the file. So `GET
+    /// api/2.0/portal/payment/customer/usage/report` can still return the job for a short time. You can repeat the
+    /// call. It also deletes a finished report job. Without a job, it does nothing. The response has no body. A 200
+    /// response means that the stop was requested, not that a report was stopped. The call does not stop the operations
+    /// or monthly usage reports. A finished report keeps its file in My documents.
     /// </remarks>
     /// <summary>
     /// Terminate the service usage report
@@ -1666,14 +1666,14 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Stops the `xlsx` monthly usage report that the caller has running and removes its job. Use it for a report
-    /// with wrong filters or a report that is no longer needed. If the portal has no billing customer, the call
-    /// returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation
-    /// has no billing service. The call queues a stop request for the worker that builds the file. So
-    /// `GET api/2.0/portal/payment/customer/usage/monthly/report` can still return the job for a short time. You can
-    /// repeat the call. If the caller has no running report, the call does nothing. The response has no body. A 200
-    /// response means that the stop was requested, not that a report was stopped. The call does not stop the
-    /// operations or service usage reports. A finished report keeps its file in My documents.
+    /// Stops the `xlsx` monthly usage report that the caller has running and removes its job. Use it for a report with
+    /// wrong filters or a report that is no longer needed. If the portal has no billing customer, the call returns 404.
+    /// Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing
+    /// service. The call queues a stop request for the worker that builds the file. So `GET
+    /// api/2.0/portal/payment/customer/usage/monthly/report` can still return the job for a short time. You can repeat
+    /// the call. It also deletes a finished report job. Without a job, it does nothing. The response has no body. A 200
+    /// response means that the stop was requested, not that a report was stopped. The call does not stop the operations
+    /// or service usage reports. A finished report keeps its file in My documents.
     /// </remarks>
     /// <summary>
     /// Terminate the monthly usage report
@@ -1778,13 +1778,13 @@ public class PaymentController(
 
     /// <remarks>
     /// Returns the spending limit on the AI services for the portal as a whole. The spending of all users counts
-    /// towards this limit. The answer also has the spending in the current period and what is left. The spending
-    /// includes the expected cost of AI operations that still run. Requires a DocSpace admin. Other callers get 403.
-    /// The call also returns 403 if the installation has no billing service. The call is read-only. The AI services
-    /// check this limit together with the limits of the users. So a user can reach it before their own limit. If the
-    /// limit is not set or was deleted, the call returns 200 with a null `response`. To create it, use
-    /// `POST api/2.0/portal/payment/servicelimit` with the scope `Total`. A turned-off limit is returned with
-    /// `enabled` false. If the portal has no billing customer, the call returns 404.
+    /// towards this limit. The answer also has the spending in the current period and what is left. What is left
+    /// already subtracts the expected cost of AI operations that still run. Requires a DocSpace admin. Other callers
+    /// get 403. The call also returns 403 if the installation has no billing service. The call is read-only. The AI
+    /// services check this limit together with the limits of the users. So a user can reach it before their own limit.
+    /// If the limit is not set or was deleted, the call returns 200 with a null `response`. To create it, use `POST
+    /// api/2.0/portal/payment/servicelimit` with the scope `Total`. A turned-off limit is returned with `enabled`
+    /// false. If the portal has no billing customer, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get the portal service limit
@@ -1807,12 +1807,12 @@ public class PaymentController(
     /// <remarks>
     /// Returns the spending limit on the AI services for every user. It applies to each user separately, if the user
     /// has no personal limit in force. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if
-    /// the installation has no billing service. The call is read-only. The answer has no spending, since each user
-    /// has their own. To read the spending of each user, use `GET api/2.0/portal/payment/servicelimit/participants`.
-    /// The `periodEnd` field still shows when the current period ends for everyone. If the limit is not set or was
-    /// deleted, the call returns 200 with a null `response`. To create it, use
-    /// `POST api/2.0/portal/payment/servicelimit` with the scope `Global`. A turned-off limit is returned with
-    /// `enabled` false. If the portal has no billing customer, the call returns 404.
+    /// the installation has no billing service. The call is read-only. The answer has no spending, since each user has
+    /// their own. To read the spending of each user, use `GET api/2.0/portal/payment/servicelimit/participants`. The
+    /// `periodEnd` field shows when the current period ends for everyone, and is null for a lifetime limit. If the
+    /// limit is not set or was deleted, the call returns 200 with a null `response`. To create it, use `POST
+    /// api/2.0/portal/payment/servicelimit` with the scope `Global`. A turned-off limit is returned with `enabled`
+    /// false. If the portal has no billing customer, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get the global service limit
@@ -1873,16 +1873,15 @@ public class PaymentController(
     /// <remarks>
     /// Creates a spending limit on the AI services, which are AI tools and AI search together. The `scope` field sets
     /// whom the limit applies to. The scope `Total` is for the portal as a whole, and `Global` is for every user
-    /// separately. The scope `Custom` is for the user in `userId`. Only `Custom` takes `userId`, and other cases
-    /// return 400. A personal limit applies to its user instead of the limit for every user. The AI services also
-    /// check the limit of the portal. If the portal has no billing customer, the call returns 404. Requires a
-    /// DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service.
-    /// The call changes data. The call returns 400 if neither `amountValue` nor `quantityValue` is set. With both,
-    /// the AI services stop when either is reached. The accounting service can also reject a threshold with 400. An
-    /// example is a quantity for services with different units. If the user does not exist, the call returns 404. A
-    /// second limit of the same scope or for the same user returns 409. So a repeated call returns 409. To change a
-    /// limit, use `PUT api/2.0/portal/payment/servicelimit`. You cannot change the scope, the user, or the period
-    /// later.
+    /// separately. The scope `Custom` is for the user in `userId`. Only `Custom` takes `userId`, and other cases return
+    /// 400. A personal limit applies to its user instead of the limit for every user. The AI services also check the
+    /// limit of the portal. If the portal has no billing customer, the call returns 404. Requires a DocSpace admin.
+    /// Other callers get 403. The call also returns 403 if the installation has no billing service. The call changes
+    /// data. The call returns 400 if neither `amountValue` nor `quantityValue` is set. With both, the AI services stop
+    /// when either is reached. The accounting service can also reject a threshold with 400. An example is a quantity
+    /// for services with different units. If the user does not exist, the call returns 404. A second limit of the same
+    /// scope or for the same user returns 409. So a repeated call returns 409. To change a limit, use `PUT
+    /// api/2.0/portal/payment/servicelimit`. The update call cannot change the scope, the user, or the period later.
     /// </remarks>
     /// <summary>
     /// Create a service limit
@@ -1939,15 +1938,16 @@ public class PaymentController(
 
     /// <remarks>
     /// Changes the thresholds of a spending limit on the AI services, or turns it off and on with `enabled`. If the
-    /// portal has no billing customer, the call returns 404. Requires a DocSpace admin. Other callers get 403. The
-    /// call also returns 403 if the installation has no billing service. The call changes data, but only in the
-    /// fields that you send. An omitted threshold keeps its value, so you cannot remove a threshold here. To remove
-    /// one, delete the limit with `DELETE api/2.0/portal/payment/servicelimit/{id}`. Then create it again with
-    /// `POST api/2.0/portal/payment/servicelimit`. This is also the way to change the scope, the user, or the period.
-    /// A turned-off limit stops restricting the AI services immediately. A new threshold applies from the next AI
-    /// operation. If it is below the spending, the AI services stop until the period ends. You can repeat the call
-    /// with the same body. The call returns 404 if the portal has no AI service limit with this ID. The accounting
-    /// service can reject a threshold with 400. An example is a quantity for services with different units.
+    /// portal has no billing customer, the call returns 404. Requires a DocSpace admin. Other callers get 403. The call
+    /// also returns 403 if the installation has no billing service. The call changes data, but only in the fields that
+    /// you send. An omitted threshold keeps its value, so you cannot remove a threshold here. To remove one, delete the
+    /// limit with `DELETE api/2.0/portal/payment/servicelimit/{id}`. Then create it again with `POST
+    /// api/2.0/portal/payment/servicelimit`. This is also the way to change the scope or the user. `PUT
+    /// api/2.0/portal/payment/servicelimit/participants` can change the period of a personal limit. A turned-off limit
+    /// stops restricting the AI services immediately. A new threshold applies from the next AI operation. If it is
+    /// below the spending, the AI services stop until the period ends. You can repeat the call with the same body. The
+    /// call returns 404 if the portal has no AI service limit with this ID. The accounting service can reject a
+    /// threshold with 400. An example is a quantity for services with different units.
     /// </remarks>
     /// <summary>
     /// Update a service limit
@@ -2167,12 +2167,12 @@ public class PaymentController(
 
     /// <remarks>
     /// Returns the automatic top-up settings of the portal wallet. Requires a DocSpace admin. Other callers get 403.
-    /// The portal does not need a billing customer or a billing service. The call is read-only. If the portal never
-    /// set up the top-up, the call returns the defaults. Then `enabled` is false, `currency` is null, and
-    /// `minBalance` and `upToBalance` are 0. These zeros are out of range for
-    /// `POST api/2.0/portal/payment/topupsettings`. So send real values instead of the defaults. Until the portal
-    /// first saves the settings, `lastModified` is `0001-01-01T00:00:00`. The portal sets `lowBalanceThreshold` and
-    /// `lowBalanceNotified`, and you cannot change them.
+    /// The portal does not need a billing customer or a billing service. The call is read-only. If the portal never set
+    /// up the top-up, the call returns the defaults. Then `enabled` is false, `currency` is null, and `minBalance` and
+    /// `upToBalance` are 0. These zeros are out of range for `POST api/2.0/portal/payment/topupsettings`. So send real
+    /// values instead of the defaults. Until the portal first saves the settings, `lastModified` is
+    /// `0001-01-01T00:00:00`. The portal sets `lowBalanceThreshold` and `lowBalanceNotified`. You cannot set them, but
+    /// switching `enabled` resets them.
     /// </remarks>
     /// <summary>
     /// Get the auto top-up settings
@@ -2371,15 +2371,16 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Replaces the whole set of AI chat models that are barred on the portal. To bar one more model, send it
-    /// together with the models already barred. To lift a restriction, leave the model out. An empty set lifts all
-    /// restrictions. First, read the current set from `GET api/2.0/portal/payment/ai-model/restrictions`. Take the
-    /// model IDs from `GET api/2.0/portal/payment/ai-prices`. If the portal has no billing customer, the call
-    /// returns 404. AI tools must be on, and you turn it on with `POST api/2.0/portal/payment/servicestate`. While AI tools
-    /// is off, the call returns 403. Requires a DocSpace admin. Other callers get 403. It also returns 403 if the
-    /// installation has no billing service or no AI gateway. The call changes data, and you can repeat it with the
-    /// same body. The set applies from the next AI request. So an open conversation on a barred model cannot go on
-    /// with it. The call returns the stored set. If `models` is missing or has a null entry, the call returns 400.
+    /// Replaces the whole set of AI chat models that are barred on the portal. To bar one more model, send it together
+    /// with the models already barred. To lift a restriction, leave the model out. An empty set lifts all restrictions.
+    /// First, read the current set from `GET api/2.0/portal/payment/ai-model/restrictions`. Take the model IDs from
+    /// `GET api/2.0/portal/payment/ai-prices`. If the portal has no billing customer, the call returns 404. AI tools
+    /// must be on, and you turn it on with `POST api/2.0/portal/payment/servicestate`. While AI tools is off, the call
+    /// returns 403. Requires a DocSpace admin. Other callers get 403. It also returns 403 if the installation has no
+    /// billing service or no AI gateway. The call changes data, and you can repeat it with the same body. The set
+    /// applies from the next AI request. The AI gateway applies the new set from the next AI request, also in open
+    /// conversations. The call returns the stored set. If `models` is missing or has a null entry, the call returns
+    /// 400.
     /// </remarks>
     /// <summary>
     /// Set restricted AI models
