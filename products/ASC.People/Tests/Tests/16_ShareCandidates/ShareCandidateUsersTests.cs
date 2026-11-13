@@ -562,26 +562,6 @@ public class ShareCandidateUsersTests(AspireAppFixture fixture) : ShareCandidate
         strangerFound.Should().BeEmpty();
     }
 
-    private const string ProfileLocation = "Autotest Location";
-    private const string ProfileNotes = "Autotest Notes";
-    private const string ProfileContactType = "skype";
-    private const string ProfileContactValue = "autotest.contact";
-
-    /// <summary>
-    /// Location, notes and contacts can only be set by the account itself, so it signs in to fill them.
-    /// </summary>
-    private async Task FillContactDetailsAsync(User user)
-    {
-        await _peopleClient.Authenticate(user);
-        await _profilesApi.UpdateMemberAsync(
-            user.Id.ToString(),
-            new UpdateMemberRequestDto(
-                location: ProfileLocation,
-                comment: ProfileNotes,
-                contacts: [new Contact(ProfileContactType, ProfileContactValue)]),
-            TestContext.Current.CancellationToken);
-    }
-
     private async Task<List<Guid>> SearchAccountIdsAsync(int fileId, string filterValue)
     {
         var entries = (await _peopleSearchApi.GetAccountsEntriesWithFilesSharedAsync(

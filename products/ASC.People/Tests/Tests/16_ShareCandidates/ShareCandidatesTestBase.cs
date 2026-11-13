@@ -90,6 +90,26 @@ public abstract class ShareCandidatesTestBase(AspireAppFixture fixture) : Sharin
         }
     }
 
+    protected const string ProfileLocation = "Autotest Location";
+    protected const string ProfileNotes = "Autotest Notes";
+    protected const string ProfileContactType = "skype";
+    protected const string ProfileContactValue = "autotest.contact";
+
+    /// <summary>
+    /// Location, notes and contacts can only be set by the account itself, so it signs in to fill them.
+    /// </summary>
+    protected async Task FillContactDetailsAsync(User user)
+    {
+        await _peopleClient.Authenticate(user);
+        await _profilesApi.UpdateMemberAsync(
+            user.Id.ToString(),
+            new UpdateMemberRequestDto(
+                location: ProfileLocation,
+                comment: ProfileNotes,
+                contacts: [new Contact(ProfileContactType, ProfileContactValue)]),
+            TestContext.Current.CancellationToken);
+    }
+
     /// <summary>
     /// Gives the account a Restrict record on the room, or turns its record into one. The room API
     /// accepts no Restrict for a room member, yet such records are in the data (left by older releases)

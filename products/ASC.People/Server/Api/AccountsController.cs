@@ -118,7 +118,8 @@ public class AccountsController<T>(
     /// members of its rooms, directly or through a group, and accounts given access to the folder in person, on it or a
     /// parent folder - and, like a room admin, related guests.
     /// Members of a group given access are not added, and for these callers only the id, names, email, avatars, type
-    /// flags, status and `shared` are filled in.
+    /// flags, status and `shared` are filled in; `inviterId` filters for these callers only when it names the
+    /// caller, and is ignored otherwise, since who invited whom is shown to DocSpace admins only.
     /// </remarks>
     /// <summary>Search accounts for a folder</summary>
     /// <path>api/2.0/accounts/folder/{id}/search</path>
@@ -152,7 +153,8 @@ public class AccountsController<T>(
     /// members of its rooms, directly or through a group, and accounts given access to the file in person, on it or a
     /// parent folder - and, like a room admin, related guests.
     /// Members of a group given access are not added, and for these callers only the id, names, email, avatars, type
-    /// flags, status and `shared` are filled in.
+    /// flags, status and `shared` are filled in; `inviterId` filters for these callers only when it names the
+    /// caller, and is ignored otherwise, since who invited whom is shown to DocSpace admins only.
     /// </remarks>
     /// <summary>Search accounts for a file</summary>
     /// <path>api/2.0/accounts/file/{id}/search</path>
@@ -191,7 +193,9 @@ public class AccountsController<T>(
         var everyoneOnly = !await fileSharing.CanPickAnyGroupAsync();
         // The access list as the caller sees it: every record marks an account as already having one (`shared`), but a
         // Restrict record denies access and makes nobody known.
-        var shares = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).ToListAsync();
+        // Read without the search text: these are sets of ids, and the query below matches the text word by word,
+        // while the access list would match it as one string and drop "Ann Lee" from both sets.
+        var shares = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, null, 0, int.MaxValue).ToListAsync();
         var parentUserIds = shares.Select(r => r.Id).ToList();
         var knownFromShares = shares.Where(r => r.Access != ASC.Files.Core.Security.FileShare.Restrict).Select(r => r.Id).ToList();
 

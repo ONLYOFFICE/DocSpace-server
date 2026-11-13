@@ -1134,7 +1134,9 @@ public class FileSharing(
 
     public async IAsyncEnumerable<GroupMemberSecurity> GetGroupMembersAsync<T>(FileEntry<T> entry, Guid groupId, string text, int offset, int count)
     {
-        if (entry == null || !await fileSecurity.CanReadAsync(entry))
+        // The members of a group given access, each with its own access, are part of the entry's access list, so they
+        // are shown only to who may see that list.
+        if (entry == null || !await fileSecurity.CanReadAsync(entry) || !await CanSeeSharesAsync(entry, ShareFilterType.User))
         {
             yield break;
         }
@@ -1160,7 +1162,7 @@ public class FileSharing(
 
     public async Task<int> GetGroupMembersCountAsync<T>(FileEntry<T> entry, Guid groupId, string text)
     {
-        if (entry == null || !await fileSecurity.CanReadAsync(entry))
+        if (entry == null || !await fileSecurity.CanReadAsync(entry) || !await CanSeeSharesAsync(entry, ShareFilterType.User))
         {
             return 0;
         }

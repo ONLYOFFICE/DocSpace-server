@@ -3268,7 +3268,8 @@ public class UserControllerAdditional<T>(
     /// A user sees the members it works with - owners and members of its rooms, directly or through a group, and
     /// accounts given access to the room in person, on it or a parent folder - and, like a room admin, related guests.
     /// Members of a group given access are not added, and for a user only the id, names, email, avatars, type flags,
-    /// status and `shared` are filled in.
+    /// status and `shared` are filled in; `inviterId` filters for a user only when it names the caller, and is
+    /// ignored otherwise, since who invited whom is shown to DocSpace admins only.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/room/{id}/search` instead.
     /// </remarks>
@@ -3308,7 +3309,8 @@ public class UserControllerAdditional<T>(
     /// Without the right to manage the folder's access no account is reported as having it: `shared` is false for
     /// every account, `includeShared` returns an empty list and `excludeShared` excludes nobody.
     /// Members of a group given access are not added, and for a user only the id, names, email, avatars, type flags,
-    /// status and `shared` are filled in.
+    /// status and `shared` are filled in; `inviterId` filters for a user only when it names the caller, and is
+    /// ignored otherwise, since who invited whom is shown to DocSpace admins only.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/folder/{id}/search` instead.
     /// </remarks>
@@ -3347,7 +3349,8 @@ public class UserControllerAdditional<T>(
     /// Without the right to manage the file's access no account is reported as having it: `shared` is false for every
     /// account, `includeShared` returns an empty list and `excludeShared` excludes nobody.
     /// Members of a group given access are not added, and for a user only the id, names, email, avatars, type flags,
-    /// status and `shared` are filled in.
+    /// status and `shared` are filled in; `inviterId` filters for a user only when it names the caller, and is
+    /// ignored otherwise, since who invited whom is shown to DocSpace admins only.
     /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
     /// `GET api/2.0/accounts/file/{id}/search` instead.
     /// </remarks>
@@ -3386,7 +3389,9 @@ public class UserControllerAdditional<T>(
         var securityDao = daoFactory.GetSecurityDao<T>();
         // The access list as the caller sees it: every record marks an account as already having one (`shared`), but a
         // Restrict record denies access and makes nobody known - any member of a room sees whom the room excludes.
-        var shares = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, inDto.Text, 0, int.MaxValue).ToListAsync();
+        // Read without the search text: these are sets of ids, and the query below matches the text word by word,
+        // while the access list would match it as one string and drop "Ann Lee" from both sets.
+        var shares = await fileSharing.GetPureSharesAsync(fileEntry, ShareFilterType.UserOrGroup, inDto.ActivationStatus, null, 0, int.MaxValue).ToListAsync();
         var parentUserIds = shares.Select(r => r.Id).ToList();
         var knownFromShares = shares.Where(r => r.Access != ASC.Files.Core.Security.FileShare.Restrict).Select(r => r.Id).ToList();
 

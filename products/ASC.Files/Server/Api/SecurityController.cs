@@ -299,8 +299,11 @@ public abstract class SecurityController<T>(
     /// members, `filterValue` keeps only those whose first name, last name or email contains the value - the
     /// comparison is made in lower case, so an uppercase value matches nothing - and the number of members is
     /// reported in the response headers. Members come back ordered by first name. A group that holds no rights on
-    /// this folder, a folder the caller cannot read and a folder that does not exist are all answered with an empty
-    /// list rather than an error, so an empty answer does not mean that the group has no members. A guest is refused.
+    /// this folder, a folder the caller cannot read, a folder whose access list the caller may not see - a folder
+    /// that is not a room, which the caller may read but whose access it may not manage - and a folder that does
+    /// not exist are all answered
+    /// with an empty list and a count of 0 rather than an error, so an empty answer does not mean that the group has
+    /// no members. A user or a guest gets no contacts, phone, location or notes of the members. A guest is refused.
     /// The call is read-only.
     /// </remarks>
     /// <summary>Get folder access of group members</summary>
@@ -351,9 +354,10 @@ public abstract class SecurityController<T>(
     /// `filterValue` keeps only those whose first name, last name or email contains the value - the comparison is
     /// made in lower case, so an uppercase value matches nothing - and the number of members is reported in the
     /// response headers. Members come back ordered by first name. A group that holds no rights on this file, a file
-    /// the caller cannot read and a file that does not exist are all answered with an empty list rather than an
-    /// error, so an empty answer does not mean that the group has no members. A guest is refused. The call is
-    /// read-only.
+    /// the caller cannot read, a file whose access list the caller may not see - it may read the file but not
+    /// manage its access - and a file that does not exist are all answered with an empty list and a
+    /// count of 0 rather than an error, so an empty answer does not mean that the group has no members. A user or a
+    /// guest gets no contacts, phone, location or notes of the members. A guest is refused. The call is read-only.
     /// </remarks>
     /// <summary>Get file access of group members</summary>
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>

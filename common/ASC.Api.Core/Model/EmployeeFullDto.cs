@@ -66,7 +66,8 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     public string Email { get; set; }
 
     /// <summary>
-    /// The list of user contacts.
+    /// The list of user contacts. Not returned to a User or a Guest for another account, as they have no access to
+    /// the contacts of the portal.
     /// </summary>
     /// <example>[{"type": "email", "value": "user@example.com"}]</example>
     public List<Contact> Contacts { get; set; }
@@ -114,19 +115,19 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     // public ApiDateTime WorkFrom { get; set; }
 
     /// <summary>
-    /// The list of user groups.
+    /// The list of user groups. Not returned to a User or a Guest for another account.
     /// </summary>
     /// <example>[{"id": "00000000-0000-0000-0000-000000000000", "name": "Marketing"}]</example>
     public List<GroupSummaryDto> Groups { get; set; }
 
     /// <summary>
-    /// The user location.
+    /// The user location. Not returned to a User or a Guest for another account.
     /// </summary>
     /// <example>Palo Alto</example>
     public string Location { get; set; }
 
     /// <summary>
-    /// The user notes.
+    /// The user notes. Not returned to a User or a Guest for another account.
     /// </summary>
     /// <example>Notes to worker</example>
     public string Notes { get; set; }
@@ -180,7 +181,7 @@ public class EmployeeFullDto : EmployeeDto, IAccountEntryDto
     public string CultureName { get; set; }
 
     /// <summary>
-    /// The user mobile phone number.
+    /// The user mobile phone number. Not returned to a User or a Guest for another account.
     /// </summary>
     /// <example>+1 (555) 123-4567</example>
     public string MobilePhone { get; set; }
@@ -416,29 +417,36 @@ public class EmployeeFullDtoHelper(
         //     result.Sex = userInfo.Sex.Value ? "male" : "female";
         // }
 
-        if (!string.IsNullOrEmpty(userInfo.Location))
+        // A user or a guest has no access to the contacts of another account - the same rule that leaves out its
+        // groups and its profile link. The full profile reaches them through access lists, form roles and group
+        // members, so the contacts are withheld here rather than at each of those places.
+        if (!await IsWithoutContactsAccessAsync(userInfo.Id))
         {
-            result.Location = userInfo.Location;
-        }
+            if (!string.IsNullOrEmpty(userInfo.Location))
+            {
+                result.Location = userInfo.Location;
+            }
 
-        if (!string.IsNullOrEmpty(userInfo.Notes))
-        {
-            result.Notes = userInfo.Notes;
-        }
+            if (!string.IsNullOrEmpty(userInfo.Notes))
+            {
+                result.Notes = userInfo.Notes;
+            }
 
-        if (!string.IsNullOrEmpty(userInfo.MobilePhone))
-        {
-            result.MobilePhone = userInfo.MobilePhone;
-        }
+            if (!string.IsNullOrEmpty(userInfo.MobilePhone))
+            {
+                result.MobilePhone = userInfo.MobilePhone;
+            }
 
-        result.MobilePhoneActivationStatus = userInfo.MobilePhoneActivationStatus;
+            result.MobilePhoneActivationStatus = userInfo.MobilePhoneActivationStatus;
+
+            FillConacts(result, userInfo);
+        }
 
         if (!string.IsNullOrEmpty(userInfo.CultureName))
         {
             result.CultureName = coreBaseSettings.GetRightCultureName(userInfo.GetCulture());
         }
 
-        FillConacts(result, userInfo);
         await FillGroupsAsync(result, userInfo);
 
         var listAdminModules = await userInfo.GetListAdminModulesAsync(webItemSecurity, webItemManager);

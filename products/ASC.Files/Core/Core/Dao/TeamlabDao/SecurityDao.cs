@@ -243,10 +243,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var groupShare = await filesDbContext.Security
-            .Where(s => s.TenantId == tenantId && s.EntryId == mappedId && s.EntryType == entry.FileEntryType && s.Subject == groupId)
-            .Select(s => s.Share)
-            .FirstOrDefaultAsync();
+        var groupShare = await GetGroupShareAsync(filesDbContext, tenantId, mappedId, entry.FileEntryType, groupId);
 
         if (groupShare == FileShare.None)
         {
@@ -292,6 +289,16 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
+    /// <summary>
+    /// The access the group has on the entry by a record of its own, or <see cref="FileShare.None"/> without one.
+    /// </summary>
+    private static async Task<FileShare> GetGroupShareAsync(FilesDbContext filesDbContext, int tenantId, string entryId, FileEntryType entryType, Guid groupId)
+    {
+        var record = await filesDbContext.EntrySharesBySubjectsAsync(tenantId, entryId, entryType, [groupId]).FirstOrDefaultAsync();
+
+        return record?.Share ?? FileShare.None;
+    }
+
     public async Task<int> GetGroupMembersWithSecurityCountAsync(FileEntry<T> entry, Guid groupId, string text)
     {
         if (entry == null)
@@ -300,8 +307,16 @@ internal abstract class SecurityBaseDao<T>(
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
+        var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        // The same condition as the list: a group without access to the entry has no members to show here, and a count
+        // of any group would tell its size, and with a text whether a name or an email is among its members.
+        if (await GetGroupShareAsync(filesDbContext, tenantId, mappedId, entry.FileEntryType, groupId) == FileShare.None)
+        {
+            return 0;
+        }
 
         var q = filesDbContext.UserGroup.Where(g =>
             g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains);
@@ -816,6 +831,13 @@ internal abstract class SecurityBaseDao<T>(
         if (activationStatus.HasValue)
         {
             q = q.Where(u => u.ActivationStatus == activationStatus.Value);
+        }
+
+        // Who invited an account is shown to DocSpace admins only, so a caller limited to the accounts it knows may
+        // filter by itself as the inviter but not by anybody else: the filter would tell it whom that person invited.
+        if (knownToSubjects != null && inviterId.HasValue && inviterId.Value != _authContext.CurrentAccount.ID)
+        {
+            inviterId = null;
         }
 
         q = UserQueryHelper.FilterByInviter(q, invitedByMe, inviterId, _authContext.CurrentAccount.ID);
