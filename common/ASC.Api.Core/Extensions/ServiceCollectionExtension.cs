@@ -465,6 +465,65 @@ public static class ServiceCollectionExtension
 
             return services;
         }
+
+        /// <summary>
+        /// Registers the default HTTP client and the standard named clients that shared code asks for by name.
+        /// </summary>
+        /// <remarks>
+        /// Both <see cref="BaseStartup"/> and <see cref="BaseWorkerStartup"/> call this, because the same code runs
+        /// in both kinds of host. <see cref="IHttpClientFactory"/> does not refuse a name that was never registered.
+        /// It returns a client with the default handler, which keeps cookies. Every client created for that name
+        /// within one handler's lifetime (two minutes by default) shares one cookie container, for as long as those
+        /// clients live. Before this was
+        /// shared, the workers registered only the default client. <c>WebDavStorage</c> in Files.Worker then
+        /// replayed one Nextcloud account's session cookie on requests made for another account (bug 83399).
+        /// <c>RequestHelper</c> also sent OAuth token refreshes with cookies, the worker side of the defect that
+        /// bug 81139 fixed for the API hosts.
+        /// </remarks>
+        public IServiceCollection AddStandardHttpClients()
+        {
+            services.AddHttpClient();
+            services.AddHttpClient("customHttpClient", _ => { })
+                .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
+                {
+                    AllowAutoRedirect = false
+                });
+            services.AddHttpClient("customHttpClientSslIgnore", _ => { })
+                .ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    var handler = new SocketsHttpHandler { AllowAutoRedirect = false };
+                    handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                    return handler;
+                });
+            services.AddHttpClient("customHttpClientNoCookie", _ => { })
+                .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
+                {
+                    UseCookies = false
+                });
+            services.AddHttpClient(UrlValidator.PinnedHttpClient)
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
+                .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
+                {
+                    AllowAutoRedirect = false,
+                    ConnectCallback = UrlValidator.PinnedConnectCallback
+                });
+            services.AddHttpClient(UrlValidator.PinnedHttpClientSslIgnore)
+                .SetHandlerLifetime(TimeSpan.FromMinutes(5))
+                .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
+                .ConfigurePrimaryHttpMessageHandler(_ =>
+                {
+                    var handler = new SocketsHttpHandler
+                    {
+                        AllowAutoRedirect = false,
+                        ConnectCallback = UrlValidator.PinnedConnectCallback
+                    };
+                    handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
+                    return handler;
+                });
+
+            return services;
+        }
     }
 
     private static readonly List<string> _registeredActivePassiveHostedService = [];

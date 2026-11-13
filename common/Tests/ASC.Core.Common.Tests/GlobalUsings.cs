@@ -36,14 +36,17 @@ global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.NetworkInformation;
+global using System.Net.Security;
 global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Security.Cryptography;
+global using System.Security.Cryptography.X509Certificates;
 global using System.Text;
 global using System.Text.Json;
 global using System.Xml.Linq;
 
+global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Middleware;
 global using ASC.Api.Core.Webhook.Payloads;
 global using ASC.Common.Caching;
