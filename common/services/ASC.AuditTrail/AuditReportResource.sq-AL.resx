@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>Çelësi BYOK për modelin AI u caktua: {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Cilësimet e agjentit të dokumenteve u përditësuan</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>Profili i AI caktuar për veprim: {0}</value>
   </data>

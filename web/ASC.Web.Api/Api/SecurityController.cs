@@ -43,10 +43,10 @@ namespace ASC.Web.Api.Controllers;
 
 /// <remarks>
 /// Portal security: the audit trail and the login history the portal records, the reports built out of them and the
-/// retention that bounds both, the Content Security Policy the portal serves to browsers, and the JWT that identifies
-/// the caller to the identity service. Every audit operation needs the portal-settings right of a DocSpace
+/// lifetimes that bound the reports and the recent events, the Content Security Policy the portal serves to browsers,
+/// and the JWT that identifies the caller to the identity service. Every audit operation needs the portal-settings right of a DocSpace
 /// administrator, and in a cloud installation the matching section has to be enabled for the portal as well: the two
-/// operations ending in `last` need nothing more, while filtering, reports and retention changes also need the audit
+/// operations ending in `last` need nothing more, while filtering, reports and lifetime changes also need the audit
 /// option of the portal's pricing plan, and the filtering operations quietly fall back to the twenty most recent
 /// events when that option is missing. Reports are built in the background, one per caller and kind, and land in the
 /// caller's My documents section. The connections a user currently has open live under
@@ -184,8 +184,9 @@ public class SecurityController(
     /// `moduleType` and `actionType`. With `action`, the call matches `target` exactly. With `entryType`, it keeps
     /// the events whose `target` contains the value. It ignores `entryType` without `target`, and `target` without
     /// `action` or `entryType`. The call applies the filters first and the page
-    /// window after them. So a full page means more matching events may exist, and there is no total count. The call
-    /// returns 400 for a parameter of the wrong type, a `count` out of range, or an invalid date.
+    /// window after them. So a full page means more matching events may exist, and there is no total count. The audit
+    /// trail lifetime does not limit this call. Without `from`, it returns events back to the oldest one the portal
+    /// stores. The call returns 400 for a parameter of the wrong type, a `count` out of range, or an invalid date.
     /// </remarks>
     /// <summary>
     /// Get filtered audit events
@@ -493,8 +494,9 @@ public class SecurityController(
         await TerminateAuditReportAsync(AuditReportKind.AuditTrail);
     }
 
-    // A report never reaches past the retention window: older events are purged anyway, and the
-    // window is what keeps an unbounded request from exporting everything the portal still holds.
+    // A report never reaches past the lifetime of its log. Login events older than that are purged anyway; audit
+    // events are not, they stay as long as the installation's retention keeps them. For both, the window is what
+    // keeps an unbounded request from exporting everything the portal still holds.
     private static (DateTime From, DateTime To) ResolveReportPeriod(DateTime? from, DateTime? to, int lifeTimeDays)
     {
         var now = DateTime.UtcNow;
@@ -505,7 +507,7 @@ public class SecurityController(
 
         if (resolvedFrom > resolvedTo)
         {
-            throw new ArgumentException("The report period ends before it starts or lies outside the retention window");
+            throw new ArgumentException("The report period ends before it starts or lies outside the lifetime of the log");
         }
 
         return (resolvedFrom, resolvedTo);
@@ -552,12 +554,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns how many days the portal keeps its login history and its audit trail. Requires the EditPortalSettings
-    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. In a cloud installation,
-    /// the call returns 402 if the login history and audit trail section is turned off. The call does not need the
-    /// audit option of the pricing plan. The call is read-only. The audit trail lifetime sets how far
-    /// `GET api/2.0/security/audit/events/last` and the audit trail report look back. The login history lifetime does
-    /// the same for the login history report. To change the lifetimes, use
+    /// Returns the lifetimes of the login history and the audit trail, in days. The portal deletes login events older
+    /// than the login history lifetime. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. In a cloud installation, the call returns 402 if the login history
+    /// and audit trail section is turned off. The call does not need the audit option of the pricing plan. The call
+    /// is read-only. The audit trail lifetime sets how far `GET api/2.0/security/audit/events/last` and the audit
+    /// trail report look back. The login history lifetime does the same for the login history report. The audit
+    /// trail lifetime deletes no events and does not limit `GET api/2.0/security/audit/events/filter`. The
+    /// installation decides how long it stores audit events. To change the lifetimes, use
     /// `POST api/2.0/security/audit/settings/lifetime`.
     /// </remarks>
     /// <summary>
@@ -581,13 +585,16 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Sets how many days the portal keeps its login history and its audit trail, and returns the stored values.
+    /// Sets the lifetimes of the login history and the audit trail, in days, and returns the stored values.
     /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
     /// get 403. In a cloud installation, the call returns 402 if the pricing plan has no audit option. It also
     /// returns 402 if the login history and audit trail section is turned off. The call changes data and replaces
     /// both values. So send both in `settings`, with the current value for the one that stays. To read the current
     /// values, use `GET api/2.0/security/audit/settings/lifetime`. You can repeat the call with the same body. The
-    /// change takes effect immediately for `GET api/2.0/security/audit/events/last` and for both reports. The call
+    /// change takes effect immediately for `GET api/2.0/security/audit/events/last` and for both reports. A shorter
+    /// login history lifetime lets the daily cleanup permanently delete older login events. A shorter audit trail
+    /// lifetime deletes nothing. Older audit events stay in `GET api/2.0/security/audit/events/filter`. They return
+    /// to the recent events and the report when the lifetime grows. The call
     /// returns 400 if the body has no `settings` or a lifetime is outside 1 to 180 days. It then saves neither value.
     /// </remarks>
     /// <summary>

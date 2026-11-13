@@ -38,7 +38,7 @@ global using ASC.AI.Worker.Extensions;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.ApiSystem.Extensions;
-global using ASC.ClearEvents.Services;
+global using ASC.ClearEvents.Extensions;
 global using ASC.Data.Backup.Extension;
 global using ASC.Data.Backup.Worker.Extension;
 global using ASC.Data.Storage;

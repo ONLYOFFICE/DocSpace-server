@@ -573,7 +573,8 @@ public class PortalRetentionJob(
     /// Keeps the latest activity with the portal when it is later than the one kept, and the day it was read.
     /// The activity is the lower bound the next runs count from without asking the database, and it outlives
     /// the login history: the portal's audit settings purge that, down to a day, and a count started from what
-    /// is left would jump back and bring the block at once. The day of the read decides when the database is
+    /// is left would jump back and bring the block at once. The last audit event does not go missing that way:
+    /// the audit trail cleanup keeps the newest event of every portal. The day of the read decides when the database is
     /// asked again in any case.
     /// </summary>
     private async Task<PortalRetentionSettings> KeepLastActivityAsync(int tenantId, DateTime lastActivityOn, DateTime today, PortalRetentionSettings kept)

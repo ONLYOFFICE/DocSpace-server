@@ -84,6 +84,14 @@ public static class Constants
     public const string EditorsContainer = "onlyoffice-editors";
     public const string OpensearchContainer = "opensearch";
     public const string OpensearchVersion = "3.5.0";
+
+    // The built-in forms database (ConnectionStrings:formsAdmin): PostgreSQL with pg_cron, set up as a server shared
+    // by portals of different owners needs it. The port keeps clear of a local PostgreSQL on 5432.
+    public const string FormsPostgresContainer = "forms-postgres";
+    public const string PostgresVersion = "17";
+    public const int FormsPostgresPort = 35432;
+    public const string FormsDatabase = "forms";
+    public const string FormsAdminUser = "forms_admin";
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
     public const string DocumentAgentContainer = "onlyoffice-document-agent";
@@ -118,11 +126,23 @@ public static class Constants
     // the addresses, key, secret, region, default quota and the first accounting currency. A portal's payment key is
     // the region followed by the tenant id, which is how the stub tells the portals apart; a portal billing knows
     // nothing about falls back to the free startup quota rather than becoming unpaid. The other payment settings
-    // (core:payment:test and :delay, core:accounting:topupperiod, the limits) still come from buildtools/config.
+    // (core:payment:test and :delay, the limits) still come from buildtools/config.
     public const string PaymentStubRegion = "stub-";
     public const string PaymentStubKey = "stub-key";
     public const string PaymentStubSecret = "stub-secret";
     public const int PaymentStubDefaultQuota = -3;
+
+    // core:accounting:topupperiod of that profile: how often TopUpWalletService walks the portals with wallet settings.
+    // The billing tests of what it does (LowBalanceWarningTests) wait for its next run, so it is seconds, not the
+    // minute buildtools/config sets.
+    public static TimeSpan PaymentStubTopUpPeriod { get; } = TimeSpan.FromSeconds(5);
+    // The most bytes an uploaded migration backup may unpack to under the integration-test profile
+    // (migration:maxExtractedSize, set in ProjectConfigurator). The test portals run on an unlimited quota, which sets
+    // no limit of its own, so without it MigrationSizeLimitTests would have to unpack gigabytes to reach one.
+    public const long MigrationTestMaxExtractedSize = 64L * 1024 * 1024;
+    // migration:maxExtractedEntries of the same profile: the most entries such a backup may hold, low enough that
+    // MigrationSizeLimitTests reach it with an archive of a few kilobytes.
+    public const long MigrationTestMaxExtractedEntries = 1000;
 
     // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
     // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,

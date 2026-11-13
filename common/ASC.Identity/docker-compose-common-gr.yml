@@ -1,0 +1,157 @@
+x-mysql-gr-node: &mysql-gr-node
+  image: mysql:8.4
+  environment:
+    MYSQL_ROOT_PASSWORD: my-secret-pw
+    MYSQL_DATABASE: docspace
+  healthcheck:
+    test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+    interval: 5s
+    timeout: 5s
+    retries: 30
+  networks:
+    - onlyoffice
+
+services:
+  onlyoffice-redis:
+    image: redis:7.0-alpine
+    container_name: onlyoffice-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - onlyoffice
+
+  onlyoffice-rabbitmq:
+    image: rabbitmq:3.11-management-alpine
+    container_name: onlyoffice-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - onlyoffice
+
+  onlyoffice-mysql-server:
+    <<: *mysql-gr-node
+    container_name: onlyoffice-mysql-server
+    hostname: onlyoffice-mysql-server
+    ports:
+      - "3306:3306"
+    command: >-
+      --server-id=1 --report-host=onlyoffice-mysql-server
+      --gtid-mode=ON --enforce-gtid-consistency=ON --event-scheduler=ON
+      --plugin-load-add=group_replication.so
+      --loose-group-replication-group-name=${MYSQL_GR_GROUP_NAME:-6c4c6cd9-f2e4-4100-bbc1-5f9b35c5b616}
+      --loose-group-replication-local-address=onlyoffice-mysql-server:33061
+      --loose-group-replication-group-seeds=onlyoffice-mysql-server:33061,onlyoffice-mysql-server-2:33061,onlyoffice-mysql-server-3:33061
+      --loose-group-replication-start-on-boot=OFF
+      --loose-group-replication-ip-allowlist=0.0.0.0/0
+      --loose-group-replication-recovery-get-public-key=ON
+
+  onlyoffice-mysql-server-2:
+    <<: *mysql-gr-node
+    container_name: onlyoffice-mysql-server-2
+    hostname: onlyoffice-mysql-server-2
+    ports:
+      - "3307:3306"
+    command: >-
+      --server-id=2 --report-host=onlyoffice-mysql-server-2
+      --gtid-mode=ON --enforce-gtid-consistency=ON --event-scheduler=ON
+      --plugin-load-add=group_replication.so
+      --loose-group-replication-group-name=${MYSQL_GR_GROUP_NAME:-6c4c6cd9-f2e4-4100-bbc1-5f9b35c5b616}
+      --loose-group-replication-local-address=onlyoffice-mysql-server-2:33061
+      --loose-group-replication-group-seeds=onlyoffice-mysql-server:33061,onlyoffice-mysql-server-2:33061,onlyoffice-mysql-server-3:33061
+      --loose-group-replication-start-on-boot=OFF
+      --loose-group-replication-ip-allowlist=0.0.0.0/0
+      --loose-group-replication-recovery-get-public-key=ON
+
+  onlyoffice-mysql-server-3:
+    <<: *mysql-gr-node
+    container_name: onlyoffice-mysql-server-3
+    hostname: onlyoffice-mysql-server-3
+    ports:
+      - "3308:3306"
+    command: >-
+      --server-id=3 --report-host=onlyoffice-mysql-server-3
+      --gtid-mode=ON --enforce-gtid-consistency=ON --event-scheduler=ON
+      --plugin-load-add=group_replication.so
+      --loose-group-replication-group-name=${MYSQL_GR_GROUP_NAME:-6c4c6cd9-f2e4-4100-bbc1-5f9b35c5b616}
+      --loose-group-replication-local-address=onlyoffice-mysql-server-3:33061
+      --loose-group-replication-group-seeds=onlyoffice-mysql-server:33061,onlyoffice-mysql-server-2:33061,onlyoffice-mysql-server-3:33061
+      --loose-group-replication-start-on-boot=OFF
+      --loose-group-replication-ip-allowlist=0.0.0.0/0
+      --loose-group-replication-recovery-get-public-key=ON
+
+  onlyoffice-mysql-initializer:
+    image: mysql:8.4
+    container_name: onlyoffice-mysql-initializer
+    restart: "no"
+    environment:
+      MYSQL_PWD: my-secret-pw
+    entrypoint: ["sh", "-ec"]
+    command:
+      - |
+        sql() { mysql -h "$$1" -uroot -N -e "$$2"; }
+        state() { sql "$$1" "SELECT MEMBER_STATE FROM performance_schema.replication_group_members WHERE MEMBER_HOST = '$$1'"; }
+        for node in onlyoffice-mysql-server onlyoffice-mysql-server-2 onlyoffice-mysql-server-3; do
+          if [ "$$(sql $$node "SELECT COUNT(*) FROM mysql.user WHERE user = 'gr_recovery'")" = 0 ]; then
+            echo "$$node: first start, preparing for group replication"
+            sql $$node "RESET BINARY LOGS AND GTIDS; SET SQL_LOG_BIN = 0;
+                        CREATE USER gr_recovery@'%' IDENTIFIED BY 'gr-recovery-pw';
+                        GRANT REPLICATION SLAVE, CONNECTION_ADMIN, BACKUP_ADMIN, GROUP_REPLICATION_STREAM ON *.* TO gr_recovery@'%';
+                        SET SQL_LOG_BIN = 1;
+                        CHANGE REPLICATION SOURCE TO SOURCE_USER = 'gr_recovery', SOURCE_PASSWORD = 'gr-recovery-pw'
+                          FOR CHANNEL 'group_replication_recovery';"
+          fi
+        done
+        if [ "$$(state onlyoffice-mysql-server)" != ONLINE ]; then
+          echo "bootstrapping the group on onlyoffice-mysql-server"
+          sql onlyoffice-mysql-server "SET GLOBAL group_replication_bootstrap_group = ON; START GROUP_REPLICATION;
+                                       SET GLOBAL group_replication_bootstrap_group = OFF;"
+        fi
+        for node in onlyoffice-mysql-server-2 onlyoffice-mysql-server-3; do
+          [ "$$(state $$node)" = ONLINE ] || { echo "joining $$node"; sql $$node "START GROUP_REPLICATION;"; }
+        done
+        for i in $$(seq 1 60); do
+          online=$$(sql onlyoffice-mysql-server "SELECT COUNT(*) FROM performance_schema.replication_group_members WHERE MEMBER_STATE = 'ONLINE'")
+          [ "$$online" = 3 ] && break
+          sleep 2
+        done
+        sql onlyoffice-mysql-server "SELECT MEMBER_HOST, MEMBER_STATE, MEMBER_ROLE FROM performance_schema.replication_group_members"
+        [ "$$online" = 3 ]
+    depends_on:
+      onlyoffice-mysql-server:
+        condition: service_healthy
+      onlyoffice-mysql-server-2:
+        condition: service_healthy
+      onlyoffice-mysql-server-3:
+        condition: service_healthy
+    networks:
+      - onlyoffice
+
+  migration-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: infrastructure/infrastructure-migration-runner
+    image: migration-runner:latest
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      JDBC_URL: onlyoffice-mysql-server:3306
+      JDBC_DATABASE: docspace
+      JDBC_USER_NAME: root
+      JDBC_PASSWORD: my-secret-pw
+      JDBC_PARAMETERS: allowPublicKeyRetrieval=true&useSSL=false
+      REDIS_HOST: onlyoffice-redis
+      RABBIT_HOST: onlyoffice-rabbitmq
+    depends_on:
+      onlyoffice-mysql-initializer:
+        condition: service_completed_successfully
+    networks:
+      - onlyoffice
+
+networks:
+  onlyoffice:
+    driver: bridge

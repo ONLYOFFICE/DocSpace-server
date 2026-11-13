@@ -26,10 +26,19 @@ swap them: a swap exchanges every title and description across the contract and 
 `<path>`, `<collection>`, `<requiresAuthorization>` are facts: keep them true (`requiresAuthorization=false`
 only with `[AllowAnonymous]`).
 
-An action or controller under `[ApiExplorerSettings(IgnoreApi = true)]` is documented to the same standard:
-the attribute is a publication switch, and the text under it gets published when someone flips it. No pass
-rewrites these texts on its own: bring an action under `IgnoreApi` to this standard when you change it or remove
-the attribute.
+An action or controller carrying `[ApiExplorerSettings(IgnoreApi = true)]` is for internal use only:
+it is kept out of the published documents and out of the SDKs, and this rule does not apply to it —
+no `<summary>`/`<remarks>` standard, no `[SwaggerResponse]` set, no `[RaisesWebhook]` (§2.1). The
+same holds for a DTO that only such actions bind or return; a DTO that a published operation also
+uses keeps the full standard of `openapi-dto-docs.md`. Two things still apply:
+
+* **The analyzer skips only a controller hidden as a whole.** An action hidden by its own attribute
+  inside a published controller still gets API002–API006 (`build-warnings.md`), and "zero new
+  warnings" still holds there: give it a short, true `<summary>` and `<remarks>` (what it is for,
+  who calls it) and its DTO properties a `<summary>` and `<example>`. Nothing more is required.
+* **Removing `IgnoreApi` publishes the action.** The change that removes it brings the action, its
+  DTOs and its response codes up to this rule and `openapi-dto-docs.md`, and adds `[RaisesWebhook]`
+  for what it raises — moving the `_otherSources` entry that described it, if there is one (§2.1).
 
 ## 1. `summary` — the title
 
@@ -103,7 +112,9 @@ description and into `x-docspace-webhooks`, and `docspace-webhooks.yaml` lists t
   an active verb: ``When = "only when `autosave` is true"``.
 * State what a receiver cannot guess: per item of a list, per nested entry or not, on completion of a queued
   operation, when nothing changed, when the webhook is *not* raised although the data changed.
-* No mention of the webhook in `<remarks>`. `IgnoreApi` actions get the attribute too.
+* No mention of the webhook in `<remarks>`.
+* An `IgnoreApi` action needs no attribute: the filter never sees it. Describe a webhook it raises in
+  `_otherSources` (next point), as what the web client does.
 * A new `WebhookManager.PublishAsync` / `UserWebhookManager.PublishAsync` call: annotate every action that
   reaches it (LSP `incomingCalls`). A publish no action reaches goes into `_otherSources` in
   `common/Tools/ASC.Webhooks.Contract/ContractHeader.cs`.

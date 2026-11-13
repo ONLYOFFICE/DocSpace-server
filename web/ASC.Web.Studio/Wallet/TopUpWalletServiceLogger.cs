@@ -53,6 +53,9 @@ internal static partial class TopUpWalletServiceLogger
     [LoggerMessage(LogLevel.Error, "TopUpWalletService: customer is null for tenant {tenantId}")]
     public static partial void ErrorTopUpWalletServiceCustomerIsNull(this ILogger<TopUpWalletService> logger, int tenantId);
 
+    [LoggerMessage(LogLevel.Error, "TopUpWalletService: error processing tenant {tenantId}")]
+    public static partial void ErrorTopUpWalletServiceTenant(this ILogger<TopUpWalletService> logger, int tenantId, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "TopUpWalletService: balance is null for tenant {tenantId}")]
     public static partial void ErrorTopUpWalletServiceBalanceIsNull(this ILogger<TopUpWalletService> logger, int tenantId);
 }

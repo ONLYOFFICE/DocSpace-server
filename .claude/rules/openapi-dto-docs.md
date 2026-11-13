@@ -12,6 +12,10 @@ An agent fills a bound property in from its text and reads a returned property w
 context a colleague has. The operation half — title, description, response codes — is
 `.claude/rules/openapi-endpoint-docs.md`, with the same section numbers for what is here (§3.1–§3.6).
 
+A DTO that only actions hidden with `[ApiExplorerSettings(IgnoreApi = true)]` bind or return is
+internal and outside this rule (`openapi-endpoint-docs.md` §0). Once a published operation uses it,
+every property of it is held to the rule.
+
 | OpenAPI field | Source in C# |
 |---|---|
 | parameter / property `description` | `<summary>` on the property |

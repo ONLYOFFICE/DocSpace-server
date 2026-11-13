@@ -1248,6 +1248,9 @@
   <data name="AiByokKeySet" xml:space="preserve">
     <value>AI modeli üçün BYOK açarı təyin edildi: {0}</value>
   </data>
+  <data name="AiDocumentAgentSettingsUpdated" xml:space="preserve">
+    <value>Sənəd agentinin parametrləri yeniləndi</value>
+  </data>
   <data name="AiProfileAssigned" xml:space="preserve">
     <value>AI profili əməliyyat üçün təyin edildi: {0}</value>
   </data>

@@ -1163,13 +1163,41 @@ public abstract class FilesController<T>(
     }
 
     /// <remarks>
+    /// Reports which fields of the original PDF form of a form-filling room the user renamed in the editor since it opened
+    /// `version`, told apart by the field ids the editor keeps. The editor sends it while editing, only when
+    /// `GET api/2.0/files/file/{fileId}/openedit` returns `trackFormFieldChanges` true. The caller
+    /// needs the right to edit the form; once its filling is started, a content creator keeps it only for a form they
+    /// created or started. A report replaces the previous one of the same `sessionId`, even after a forcesave, and one
+    /// whose `sequence` is not above the last of that session is dropped, so a repeated or late call is harmless; give
+    /// every editor tab its own `sessionId`. A field left out of `renames` kept its key. When the editor saves the
+    /// version, a renamed field keeps its earlier answers under its new name in the forms database and the spreadsheet
+    /// report. Ignored, still with 200: a `version` the form does not have yet, a compared one older than the last
+    /// earlier version with responses, a new session past 20 of one user on one version, a report past the renames the
+    /// form can keep. With Document Server Community Edition the call is refused with 403.
+    /// </remarks>
+    /// <summary>
+    /// Report renamed form fields
+    /// </summary>
+    /// <path>api/2.0/files/file/{fileId}/fieldchanges</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "The report was taken; a late, repeated or surplus one is dropped without an error")]
+    [SwaggerResponse(400, "The request body is missing, `version` is less than 1, `sequence` is negative, `renames` has more than 500 entries or a null one, a key is empty or longer than 255 characters, or `sessionId` is longer than 64 characters or has other characters than letters, digits, hyphens and underscores")]
+    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, it is a copy of a form, the caller may not edit it, or the document editors are Community Edition, which do not track renamed fields")]
+    [SwaggerResponse(404, "No file with this identifier exists")]
+    [HttpPut("file/{fileId}/fieldchanges")]
+    public Task SetFormFieldChanges(SetFormFieldChangesRequestDto inDto)
+    {
+        return fileStorageService.SetEditorFieldRenamesAsync(inDto.FileId, inDto.Changes.Version, inDto.Changes.Sequence, inDto.Changes.SessionId, inDto.Changes.Renames);
+    }
+
+    /// <remarks>
     /// Returns all submissions of a PDF form. The field `metadata` describes the form fields in layout order, and
     /// `submissions` has one record per completed copy. The call returns only the submissions of the version that is
-    /// being filled now. The spreadsheet report of `POST api/2.0/files/file/{fileId}/xlsx` uses the same data.
-    /// Requires read access to the form. Other callers get 403. The call is read-only. The call also returns 403 if
-    /// the file does not exist or is not a PDF form. It returns 403 if the filling never started, the file is a
-    /// filled copy, or the form left its room. To read the roles and whose turn it is, use
-    /// `GET api/2.0/files/file/{fileId}/formroles`.
+    /// being filled now. The spreadsheet report of `POST api/2.0/files/file/{fileId}/xlsx` covers every version, one
+    /// sheet per group of versions with the same fields. Requires read access to the form. Other callers get 403.
+    /// The call is read-only. The call also returns 403 if the file does not exist or is not a PDF form. It returns
+    /// 403 if the filling never started, the file is a filled copy, or the form left its room. To read the roles and
+    /// whose turn it is, use `GET api/2.0/files/file/{fileId}/formroles`.
     /// </remarks>
     /// <summary>
     /// Get form submission results

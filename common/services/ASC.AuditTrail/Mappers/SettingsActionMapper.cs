@@ -124,7 +124,8 @@ internal class ProductsActionMapper : ILocationActionMapper
                     MessageAction.AiProfileUpdated,
                     MessageAction.AiProfileAssigned,
                     MessageAction.AppEnabled, MessageAction.AppDisabled,
-                    MessageAction.AiByokKeySet
+                    MessageAction.AiByokKeySet,
+                    MessageAction.AiDocumentAgentSettingsUpdated
                 ]
             },
             {

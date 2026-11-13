@@ -39,12 +39,11 @@ const http = require("http"),
   express = require("express"),
   morgan = require("morgan"),
   cookieParser = require("cookie-parser"),
-  bodyParser = require("body-parser"),
   session = require("express-session"),
   winston = require("./app/log.js"),
   config = require("./config").get(),
   path = require("path"),
-  exphbs = require("express-handlebars"),
+  { engine } = require("express-handlebars"),
   favicon = require("serve-favicon"),
   cors = require("cors");
 
@@ -56,7 +55,7 @@ const app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.engine("handlebars", engine({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
 const machineKey = config["core"].machinekey
@@ -67,8 +66,8 @@ app
   .use(favicon(path.join(__dirname, "public", "favicon.ico")))
   .use(morgan("combined", { stream: winston.stream }))
   .use(cookieParser())
-  .use(bodyParser.json())
-  .use(bodyParser.urlencoded({ extended: false }))
+  .use(express.json())
+  .use(express.urlencoded({ extended: false }))
   .use(
     session({
       resave: true,
