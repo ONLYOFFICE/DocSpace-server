@@ -1,5 +1,7 @@
 # invitations — verification
 
+> Revision 2026-11-14 (09d4de0768..6fb6dfb17a): operationIds named in two requirements; no invitation behaviour changed in the range.
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 > Revision 2026-11-09 (bb406b409b..6fb013e745): the repeat check of letters (no letter for a repeat within the period, same answer); the rate limit of the resend and instruction endpoints is gone.
@@ -303,3 +305,11 @@ portal/users/invite/{type}` never refuses) and R3 (400 vs 403 for the Guest type
 `user-type-permissions` and are still open as of 2026-11-04 (`PortalController.cs` is outside the 4.1.0
 range). No new defect: the invitation tests of the range (`InvitationSettingsTests`, the AI-project suites)
 are green by their remarks and carry no bug trait.
+
+## Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
+| Claim | Source | Status |
+|---|---|---|
+| Portal invitation links per user type: `createInvitationLink`, `getInvitationLinkByEmployeeType`, `updateInvitationLink`, `deleteInvitationLink` are the four routes the requirement described | `web/ASC.Web.Api.Tests/Tests/04_Portal/Users/InvitationLink{Create,Get,Update,Delete,Rules}Tests.cs` | naming only, rows above unchanged |
+| Invitation settings: `getTenantUserInvitationSettings`, `updateInvitationSettings` | `web/ASC.Web.Api.Tests/Tests/02_Settings/Common/InvitationSettingsTests.cs` | naming only, rows above unchanged |
+| `signupThirdPartyAccount` 403 now also names an invitation link with no uses left; documented 500 removed (`9c6fcec6c5`) | `products/ASC.People/Server/Api/ThirdpartyController.cs` | READ |

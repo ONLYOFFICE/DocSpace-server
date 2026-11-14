@@ -1,5 +1,7 @@
 # file-operations — verification
 
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
@@ -462,3 +464,13 @@ Re-checked against `3533ad8a89`, by reading: no test was run. FIXED rows keep th
 Bug tests named in this revision and their rows: `UploadSessionDefectTests` F14, F15, F29; `CheckPreflightBugTests`
 F25; `CheckSdkSerializationBugTests` F13 (bug 84727, no new defect); `FileConversionOutputTypeBugTests` F26;
 `MoveBatchBugTests` F18, F27, F28.
+
+## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)
+
+| Claim | Source | Status |
+|---|---|---|
+| The operationId of `POST api/2.0/files/@my/insert` is `insertFileToMyFromBody` (the spec named `insertFileToMy`) | yaml `sdk/docspace-api-spec/docspace-backend.yaml` | CODE-ONLY (name only) |
+| Removing templates: `true` for every list, 400 for a non-array body, 403 Guest, 401 anonymous | yaml `deleteTemplates` | TEST-CONFIRMED (`products/ASC.Files/Tests/Tests/01_Files/Templates/DeleteTemplatesTests.cs:49-145`; `TemplatesPermissionsTests.cs:130`, `:149-159`) |
+| My documents listing: members 200 with `rootFolderType` USER, Guest 404 | yaml `getMyFolder` | TEST-CONFIRMED (`products/ASC.Files/Tests/Tests/02_Folders/Subfolders/RootFoldersPermissionsTests.cs:98-114`) |
+| HEIC and HEIF images: `.heif` added to the image extensions and to the default thumbnail extensions | `399833377a` (bug 84707): `FileUtility.ExtsImage`, `Global` default `files:thumbnail:img-exts` | CODE-ONLY (no test uploads a `.heif`) |
+| Documented 500 removed from `copyBatchItems`, `moveBatchItems`, `deleteBatchItems`, `duplicateBatchItems`, `markAsRead`, `bulkDownload`, `checkDestFolder`, `createFile`, `copyFileAs`, `updateFile`, `changeVersionHistory`, `restoreFileVersion`, `saveFileAsPdf`, `startedit`, `saveediting` and others; finalize documented 201 (was 200), a completing part 201, `startFileConversion` 403 added | `0ff3031b59`, `323e09b214`, `3066a96517`; per-action `[SwaggerResponse]` diff 09d4de0768 vs 6fb6dfb17a | READ: the spec already states 201 and the 403; the F-rows that cite a 500 (F17, F20 edited half, F21 `saveediting` half) describe server behaviour the range did not touch, so they stay STILL OPEN |

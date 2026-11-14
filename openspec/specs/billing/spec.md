@@ -273,6 +273,11 @@ The change is charged to the payment method on file, audited, and answers `true`
 - **WHEN** the owner is the payer and a DocSpace admin calls `updatePayment`
 - **THEN** the system answers 403 "Access denied"
 
+#### Scenario: Provider declines or does not answer
+
+- **WHEN** the payment provider declines the new quantity, or the call to it fails or times out
+- **THEN** `updatePayment` answers 200 `false`
+
 ### Requirement: Billing account page and payment method
 
 `getPaymentAccount` SHALL answer the payer or the owner (403 otherwise) with the portal-relative address
@@ -435,6 +440,7 @@ and a balance (404 "Balance could not be found"), take `settings` with `enabled`
 
 - **WHEN** the payer stores `enabled` true
 - **THEN** the stored low-balance warning state is reset so the next dip is reported again
+- **AND** a save with `enabled` false keeps that state and resets `lowBalanceThreshold` to the default instead
 
 ### Requirement: Automatic top-up and low-balance watch
 
@@ -453,6 +459,11 @@ With it off, a balance below the threshold (1 by default) SHALL send the low-bal
 
 - **WHEN** automatic top-up is off and the balance falls under 1
 - **THEN** the payer and the owner get the low-balance letter of `notifications` once, and not again until the balance recovered to 2 and fell again
+
+#### Scenario: Payer disabled in the portal
+
+- **WHEN** the billing e-mail belongs to a disabled portal user, or to nobody on the portal
+- **THEN** the job and the subscription renewal run as the portal owner, the low-balance warning is still raised, and the wallet letters go to the owner alone
 
 ### Requirement: Wallet services switched on per portal
 
@@ -521,10 +532,25 @@ has a money threshold (`amountValue`, 0 to 10000) and/or a count threshold (`qua
 ### Requirement: Managing the AI spending limits
 
 The operations under `portal/payment/servicelimit` SHALL need the billing service (403), a DocSpace admin
-and a billing customer (404; a write also when the accounting service does not know the portal). Reads:
-one limit by `id`, the portal limit with its spending, the global limit, a page per user; a missing
-limit answers empty. Writes also need the portal-settings right: create (`scope` required; 409 for a
-duplicate), update, set one personal limit for up to 1000 `userIds`, disable all, delete.
+and a billing customer (404; a write also when the accounting service does not know the portal). Writes
+also need the portal-settings right: `createServiceLimit` (`scope` required; 409 for a duplicate),
+`updateServiceLimit`, `setParticipantServiceLimits` for up to 1000 `userIds`,
+`disableParticipantServiceLimits`, `deleteServiceLimit`.
+
+#### Scenario: Reading the limits
+
+- **WHEN** a DocSpace admin calls `getServiceLimit`, `getTotalServiceLimit`, `getGlobalServiceLimit` or `getParticipantServiceLimits`
+- **THEN** `getServiceLimit` answers the limit without spending, 404 for an `id` the portal has no limit with and 400 for an `id` below 1
+- **AND** `getTotalServiceLimit` (with the spending of the period) and `getGlobalServiceLimit` answer 200 with a null `response` when that limit is not set
+- **AND** `getParticipantServiceLimits` pages (`offset` 0, `limit` 25 by default, 400 out of range) the enabled limit in force for each user with its spending, a global one repeated for every user it applies to
+
+#### Scenario: Changing, switching off and deleting limits
+
+- **WHEN** a DocSpace admin calls `updateServiceLimit` with an `id` and some thresholds or `enabled`
+- **THEN** only the sent fields change, an omitted threshold is kept, and an `id` the portal has no limit with answers 404
+- **AND** `setParticipantServiceLimits` replaces each listed user's personal limit as a whole, switches it on and answers the count; a user listed twice gets one limit
+- **AND** `disableParticipantServiceLimits` switches every personal limit off and answers the count, 0 on a repeat, leaving the portal and global limits as they are
+- **AND** `deleteServiceLimit` answers 200 with no body and 404 on a repeat
 
 #### Scenario: Create a personal limit
 
@@ -619,6 +645,12 @@ name not sold), `startDate`/`endDate` in the portal time zone, `participantName`
 - **THEN** the task id starts with `DocumentBuilderTask_`, `isCompleted` turns true with `percentage` 100, an empty `error`, a `resultFileId` and a `resultFileUrl` of a document in My documents
 - **AND** a Room admin, a User and a Guest get 403 "Access denied" on create, get and terminate, an anonymous caller 401
 
+#### Scenario: Usage reports and stopping a report
+
+- **WHEN** a DocSpace admin calls `createCustomerServiceUsageReport` (the filters of `getCustomerServiceUsage` but `mergeByok`) or `createCustomerMonthlyUsageReport` (only `startDate`, `endDate`) and polls `getCustomerServiceUsageReport` or `getCustomerMonthlyUsageReport`
+- **THEN** each kind builds its own `xlsx` file in the caller's My documents, one job of a kind per user; the status read answers empty when the caller has no job of that kind
+- **AND** `terminateCustomerOperationsReport`, `terminateCustomerServiceUsageReport` and `terminateCustomerMonthlyUsageReport` request a stop of the caller's job of that kind and remove it, answer 200 with no body also without a job, and leave a finished file in place
+
 ### Requirement: Wallet top-ups and their invoices
 
 `getCustomerDeposits` SHALL page the payments into the wallet for a DocSpace admin (403 otherwise and
@@ -665,7 +697,7 @@ characters (400). The list is cached for all portals for up to an hour.
 
 `updateWalletPayment` SHALL require the billing service, a DocSpace admin and a customer, one wallet
 product and `productQuantityType` `Set` or `Add` (400 "Invalid product quantity type"). `Add` buys
-the units now from the wallet (404 without a sub-account; 402 when the plan is not paid and the service is
+the units now from the wallet (404 without a sub-account; 402 when the plan payment is overdue and the service is
 an add-on; minimums: storage 100, Dev Pack 10, administrators not fewer than the portal has; 400 "Invalid
 quantity"). `Set` writes the next period's quantity, zero cancelling it.
 
@@ -679,6 +711,7 @@ quantity"). `Set` writes the next period's quantity, zero cancelling it.
 
 - **WHEN** the owner or a DocSpace admin calls `calculateWalletPayment` with 100 storage units and `Add`
 - **THEN** the answer carries `operationId`, `amount`, `currency` USD and `quantity` 100, and nothing is bought
+- **AND** when the billing service fails the answer is an empty body; `updateWalletPayment` answers `false` only for a `Set` the portal cannot apply (it does not have the service, or the change is not saved)
 
 #### Scenario: Negative or non-numeric quantity
 

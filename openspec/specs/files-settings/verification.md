@@ -1,5 +1,7 @@
 # files-settings — verification
 
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
@@ -201,7 +203,7 @@ owned by this capability. `setDefaultTemplate` on third-party string ids was not
 | FX5 | `getDocServiceUrl` | The anonymous answer includes the internal Document Server address, the portal address as the service sees it, the signature header name and the SSL flag | `E:721-746`; `T/07_Settings/Editor/GetDocServiceUrlTests.cs:97-107` pins anonymous reading only | red by code reading |
 | FX6 | `setFilesOrder` | Items are applied one at a time with no transaction, so a later item's 403 or 404 leaves earlier items reordered while the caller sees an error | `FSS:2824-2870` | red by code reading |
 | FX7 | `createRoomTag` | A name with a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design | `T/03_Rooms/Tags/RoomTagCreateTests.cs:85-109` | per test comment |
-| FX8 | `setDefaultTemplate` | A numeric `selectedFile` that is not a 32-bit integer answers 500; the yaml even declares it | `DT:103`, yaml `setDefaultTemplate` | red by code reading |
+| FX8 | `setDefaultTemplate` | A numeric `selectedFile` that is not a 32-bit integer answers 500 (`GetInt32` in `DefaultTemplateSettings.cs:102`); STILL OPEN after 09d4de0768..6fb6dfb17a, which only removed the documented 500, so the 500 is now undeclared | `DT:103`, yaml `setDefaultTemplate` | red by code reading |
 | FX9 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | `filterValue` with an uppercase letter matches nothing, per the yaml text | yaml `getGroupsMembersWithFolderSecurity`; not read in code | yaml text only |
 | FX10 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | For a group the entry is not shared with, the list is empty but `total` and `count` report the group's size: the count query does not check the group's share on the entry, the list query does | `products/ASC.Files/Core/Core/Dao/TeamlabDao/SecurityDao.cs:246-254` vs `295-311`; `T/04_Security/Sharing/GroupMembersFolderSecurityTests.cs:120` (`Category=Bug`) | red by test |
 
@@ -209,3 +211,12 @@ Stale test comments seen (assertions cited above are unaffected): `DefaultTempla
 say the mismatches answer 403, `DT:129-134,218-221` raise the 400 exception; `FileLinkPrimaryTests.cs:189-192` and
 `FolderLinkCreateTests.cs:271-274` say "currently answers 200", while `FSS:4523` refuses and commits `021004d5bd` and
 `cdddfed875` are titled as fixing bug 81575. Whether those tests are green now was not established.
+
+## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)
+
+| Claim | Source | Status |
+|---|---|---|
+| `displayRecent` no longer documents 403: the yaml now matches "every role down to a guest may change its own value" | `3066a96517`, `0ff3031b59`; `SettingsController.cs` `[HttpPut("displayRecent")]` declares only 200 | CODE-ONLY (the spec text already said so; `DisplayRecentPermissionsTests.cs:46-88` unchanged) |
+| `setDefaultTemplate` no longer documents 500 | the same commits | FX8 STILL OPEN (see above) |
+| No other status code cited by this spec changed in the range (Files `SettingsController`, `EditorController`, `TagsController`, `FoldersController` links: only documented 500s removed, or a 403/404 added where the spec already states it) | script diff of `[SwaggerResponse]` per action, 09d4de0768 vs 6fb6dfb17a | READ |
+

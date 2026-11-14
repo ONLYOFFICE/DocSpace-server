@@ -1,5 +1,7 @@
 # user-type-permissions — verification
 
+> Revision 2026-11-14 (09d4de0768..6fb6dfb17a): `updateUserType` named; the share search now matches the matrix row on Contacts.
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
@@ -210,3 +212,10 @@ D-numbers are the ones of `openspec/deviations.md` ("Suspected defects"); R-numb
 | R1 | Room visibility | A private room was listed to a non-member Owner and DocSpace admin (bug 82956). The administrator's listing has dropped such a room since `73aa4e8ab8`; the earlier STILL OPEN came from the stale "expected to fail" remark of `PrivateRoomVisibilityTests.cs:44-92`, which still stands although those tests now pass trivially after `c866c055e1`, for members as well. | `FileSecurity.cs:3069-3073`; `git log -S` on that comment; `PrivateRoomSectionTests.cs:141-153` is the assertion that can fail | FIXED (`73aa4e8ab8`). Third-party rooms do not pass through that filter, see the revision rows. `openspec/deviations.md` R1 still says OPEN |
 | R2 | Disabling users | A DocSpace admin can deactivate another DocSpace admin and the Owner; the spec, the matrix and the tests say 403. | `03_UserStatus/UserStatusUpdatePermissionsTests.cs:59-98` (bug 79900, comment says the product allows it, tests red) | STILL OPEN (2026-11-04: `updateUserStatus` changed only in its webhook declaration; the commit "fix Bug 79900" of 2026-02 predates the previous revision and the test still asserts against the product) |
 | R3 | Inviting users by type | The invitation-link endpoint refuses the Guest type with 400 ("EmployeeType"), the people endpoints with 403 "Access denied": the same rule, two status codes. | `InvitationLinkCreateTests.cs:116-135`; `InviteUsersTests.cs:74-98`; `PortalController.cs:253-256` | STILL OPEN (2026-11-04: `PortalController.cs` is outside the range) |
+
+## Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
+| Claim | Source | Status |
+|---|---|---|
+| "See the list of users and groups in Contacts": User and Guest ✗ now holds in the share search too: only the accounts they work with, only the group Everyone, no contact details | `people-and-groups` revision 2026-11-14 rows; `products/ASC.People/Tests/Tests/08_Search/ShareCandidates/`; `products/ASC.People/Tests/Tests/14_GroupSearch/GroupSearchPermissionsTests.cs:66,92` | CROSS-REFERENCE |
+| `updateUserType` is the operation of "Changing a user's type" | `products/ASC.People/Server/Api/UserController.cs:2462-2487` | naming only |

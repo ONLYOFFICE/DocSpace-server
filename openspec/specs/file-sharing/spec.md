@@ -518,3 +518,26 @@ restriction applies to documents, to rooms, and to links that already exist.
 
 - **WHEN** existing links are blocked and an anonymous visitor resolves a file link created before
 - **THEN** the status is `ExternalAccessDenied`; the same link resolved by a signed-in account answers `Ok`
+
+### Requirement: Members of a group on an entry's access list
+
+`getGroupsMembersWithFileSecurity` and `getGroupsMembersWithFolderSecurity` SHALL list the members of a group that holds access to the entry, each with its own access, only to a caller who may see the entry's access list: any reader of a room, otherwise who may manage its access. Another reader, and any caller asking about a group with no record on the entry, SHALL get an empty list with a total of 0. `filterValue` SHALL ignore case in the list and in the count alike.
+
+#### Scenario: Reader of a shared file
+
+- **WHEN** a User with read access to a file shared with a group asks for that group's members
+- **THEN** the list is empty with a total of 0, while the owner gets the members
+
+#### Scenario: Group without access
+
+- **WHEN** the group asked about has no record on the file
+- **THEN** the list is empty with a total of 0
+
+### Requirement: Reading the access list of a room
+
+`getRoomSecurityInfo` SHALL return a page of the room's access entries, the owner first, then room managers, groups, other members, guests and pending invitations, selected by `filterType` (accounts and groups by default) and `filterValue`, with the total in the response. Links SHALL be listed only to a caller who may see them, others get an empty page. Read access to the room SHALL be required: other callers get 403, an unknown room 404, an out-of-range `count` 400.
+
+#### Scenario: Member reads the list
+
+- **WHEN** a User member of a room reads its access list
+- **THEN** the other members are listed, without their contact details

@@ -148,32 +148,32 @@ public class WebPluginStateTests(
     }
 
     [Fact]
-    public async Task Update_SettingsOf255Characters_AreStored()
+    public async Task Update_SettingsOf4096Characters_AreStored()
     {
         // Arrange
-        await UploadAsOwnerAsync("state-255");
-        var settings = new string('s', 255);
+        await UploadAsOwnerAsync("state-4096");
+        var settings = new string('s', 4096);
 
         // Act
-        await UpdatePluginAsync("state-255", true, settings);
+        await UpdatePluginAsync("state-4096", true, settings);
 
         // Assert
-        (await GetPluginAsync("state-255")).Settings.Should().Be(settings);
+        (await GetPluginAsync("state-4096")).Settings.Should().Be(settings);
     }
 
     [Fact]
-    public async Task Update_SettingsLongerThan255Characters_ThrowsBadRequest()
+    public async Task Update_SettingsLongerThan4096Characters_ThrowsBadRequest()
     {
         // Arrange
-        await UploadAsOwnerAsync("state-256");
+        await UploadAsOwnerAsync("state-4097");
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _webpluginsApi.UpdateWebPluginWithHttpInfoAsync("state-256", new WebPluginRequest(true, new string('s', 256)), TestContext.Current.CancellationToken));
+            async () => await _webpluginsApi.UpdateWebPluginWithHttpInfoAsync("state-4097", new WebPluginRequest(true, new string('s', 4097)), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
-        (await GetPluginAsync("state-256")).Settings.Should().BeNull();
+        (await GetPluginAsync("state-4097")).Settings.Should().BeNull();
     }
 
     [Fact]

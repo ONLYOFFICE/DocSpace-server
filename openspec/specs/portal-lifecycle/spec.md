@@ -482,10 +482,10 @@ with `status` 0 and the localized refusal.
 
 ### Requirement: Confirming the owner change
 
-`updatePortalOwner` with `ownerId` SHALL be reached with the PortalOwnerChange link only (403 with an
-ordinary token, 401 without one), require the link's address to still be the owner's (500 "Access
-denied" otherwise, which is what a replayed link gets) and the named member to exist, be active and
-not a guest (500). Then the portal's `ownerId` changes and the answer is 200 without a body.
+`updatePortalOwner` with `ownerId` SHALL be reached with a valid PortalOwnerChange link only (403 with an
+ordinary token, 401 without one); a link whose address is no longer the owner's, or whose new-owner account
+is gone or terminated, is not valid (401, which is what a replayed link gets). The named member SHALL exist,
+be active and not a guest (500). Then the portal's `ownerId` changes and the answer is 200 without a body.
 
 #### Scenario: Promotion, audit and the previous owner
 

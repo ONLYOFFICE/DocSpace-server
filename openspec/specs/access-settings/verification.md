@@ -1,5 +1,7 @@
 # access-settings — verification
 
+> Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the yaml now documents 403 for `tfaAppGenerateSetupCode` and 401/403 for `saveMobilePhone`, so both difference rows are gone; `getIsAuthentificated` specified.
+
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
@@ -144,8 +146,6 @@ and from the method body where a row needed the request; test line numbers point
 
 | Operation | yaml | Server |
 |---|---|---|
-| `tfaAppGenerateSetupCode` | 200, 405, 401, no 403 | An ordinary token gets 403 before the action (`TfaAppGenerateSetupCodeTests.cs:55,66`) |
-| `saveMobilePhone` | 200, 401, no 403 | An ordinary token gets 403 (`SaveMobilePhonePermissionsTests.cs:67`) |
 | `getTfaAppCodes`, `updateTfaAppCodes` | no 403 | `Tfa:439-442,481-484` can answer 403 for an outsider account |
 | `authenticateMeFromBodyWithCode`, `sendSmsCode` | 404 for no matching user | With a password, an unknown account gets 401 (`SendSmsCodeTests.cs:68`, `BruteForceLoginManager.cs:162-165`); 404 was not traced to a reachable path |
 | Routes | `settings/security/loginsettings` | Code declares `loginSettings`; tests reach it through the SDK with the yaml spelling |
@@ -181,3 +181,14 @@ No test was run. "Red by code reading" means the code as read would fail that te
 | AC-9 | `unlinkTfaApp` | The branch that treats an empty `id` as the caller is not reached: an empty `id` resolves to no account and answers 403 first | `Tfa:520-528`; `TfaUnlinkAppTests.cs:120` | by code reading |
 | AC-10 | `updateTfaAppCodes` | Does not check that the method is on at portal level, while `getTfaAppCodes` does; with the method off and an application still linked the two disagree | `Tfa:432-434` vs `Tfa:476` | by code reading |
 | AC-11 | `getIpRestrictions` | The ETag is the MD5 of zero bytes for every list: `HttpContextExtension.CalculateEtagAsync` hashes its `MemoryStream` without rewinding it. A client holding any earlier ETag gets 304 after the list changed | `S/IpRestrictions/IpRestrictionsRulesTests.cs:144`; `common/ASC.Common/Caching/HttpContextExtension.cs:87-99` (the same unrewound stream in `IPRestrictionsService.CalculateEtagAsync`) | test red [run: FAIL-BUG] |
+
+## Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
+Login history and active connections (`getIsAuthentificated` aside, the operations `getAllActiveConnections`, `logOut*`, `getLastLoginEvents`, `getLoginEventsByFilter`, `*LoginHistoryReport`) stay in `history-and-audit`, as the header of `spec.md` says.
+
+| Claim | Source | Status |
+|---|---|---|
+| `tfaAppGenerateSetupCode` 403 for an ordinary token and `saveMobilePhone` 401 and 403 now documented; the two rows of "Differences between the yaml and the server" are removed | `web/ASC.Web.Api/Api/Settings/TfaappController.cs:376`; `web/ASC.Web.Api/Api/AuthenticationController.cs:537-538`; yaml at `ce37da4` (`c096f23fa9`, `893c80e16c`) | READ |
+| Documented 500 removed from `tfaValidateAuthCode` (empty code) and `saveSsoSettingsV2`: matches AC-1..AC-4, already FIXED | `c096f23fa9` | READ, no verdict change |
+| **Checking whether a request is signed in**: Owner and each member type `true`, anonymous `false` | `web/ASC.Web.Api.Tests/Tests/03_Authentication/AuthCheckTests.cs:46-95` | TEST-CONFIRMED |
+| Unpaid portal still answers | `web/ASC.Web.Api/Api/AuthenticationController.cs:97` (`AllowNotPayment`) | CODE-ONLY |

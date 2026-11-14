@@ -183,7 +183,7 @@ answers 404 (bug 81508).
 ### Requirement: Single-request upload
 
 `uploadFile` (`POST api/2.0/files/{folderId}/upload`), `uploadFileToMy`, `insertFile` (`POST
-api/2.0/files/{folderId}/insert`) and `insertFileToMy` (`POST api/2.0/files/@my/insert`) SHALL store the
+api/2.0/files/{folderId}/insert`) and `insertFileToMyFromBody` (`POST api/2.0/files/@my/insert`) SHALL store the
 uploaded part as a file of the target folder and answer with the file (the upload calls as a list holding
 exactly one file). On a name clash `createNewIfExist` `false` or omitted SHALL add a new version to the
 existing file, `true` SHALL keep both under a numeric suffix.
@@ -1142,6 +1142,11 @@ signed-in account with read access may queue them.
 - **THEN** they come in the sizes of the installation's thumbnail settings (1280×720 and 3840×2160 by default, v2.6)
 - **AND** an image larger than the installation's image limit (30 MB by default) and a video larger than its video limit (1000 MB by default) get none
 
+#### Scenario: HEIC and HEIF images
+
+- **WHEN** a `.heic` or a `.heif` file is stored
+- **THEN** both are treated as images: they open in the image viewer and get thumbnails under the default settings (bug 84707 had left `.heif` out)
+
 #### Scenario: Who may queue
 
 - **WHEN** a Guest with Read, a User with Read, a Room manager or a DocSpace admin queues a room file
@@ -1230,6 +1235,26 @@ and answer `true`; the same id twice, an empty list, a body of `{}` and an id th
 
 - **WHEN** one file, two files, the same file twice, an empty list, `{}` or id 999999999 is sent
 - **THEN** every answer is `true`
+
+#### Scenario: Removing templates
+
+- **WHEN** `deleteTemplates` (`DELETE api/2.0/files/templates`, body a bare JSON array of file ids) is sent with one or two ids, the same id twice, an id never added or an id that names no file
+- **THEN** the answer is `true` and the files themselves stay; a body that is not an array (`{}`) answers 400, a Guest 403, an anonymous caller 401
+
+### Requirement: My documents listing
+
+`getMyFolder` (`GET api/2.0/files/@my`) SHALL answer one page of the caller's My documents, the section's
+root as `current`. A Guest, who has no My documents, SHALL be answered 404.
+
+#### Scenario: Member reads My documents
+
+- **WHEN** a DocSpace admin, a Room admin or a User calls `getMyFolder`
+- **THEN** the answer is 200 and `current.rootFolderType` is the My documents type
+
+#### Scenario: Guest
+
+- **WHEN** a Guest calls `getMyFolder`
+- **THEN** the answer is 404
 
 ### Requirement: Concrete kind of an entry in a mixed answer
 

@@ -438,6 +438,76 @@ The text filter of the people searches SHALL match the stored names and email ad
 - **WHEN** a DocSpace admin who is not in the Owner's room calls the operation
 - **THEN** the answer is 403 "Access denied"
 
+### Requirement: Whom the share search offers a User or a Guest
+
+For a User or a Guest, `getUsersWithRoomShared`, `getUsersWithFoldersShared`, `getUsersWithFilesShared` and the accounts part of the three accounts searches SHALL offer only the accounts it works with: the owners and members of its rooms, directly or through a group, and, when it may see the entry's access list, the accounts with a granting record on the entry or a parent folder. The Owner, DocSpace admins and Room admins SHALL be offered every member.
+
+#### Scenario: Co-member and stranger
+
+- **WHEN** a User searches for a member of one of its rooms and for an account it shares nothing with
+- **THEN** the member is offered and the stranger is not, by name and by email
+
+#### Scenario: Owner of its room
+
+- **WHEN** a User is a member of a room another account owns
+- **THEN** that owner is offered
+
+#### Scenario: Archived room
+
+- **WHEN** the room the User shares with a member is moved to the archive
+- **THEN** that member is still offered
+
+### Requirement: What does not make an account known
+
+A Restrict record SHALL make nobody known in the share search: not a room the caller is restricted from, personally or through its group, not a member or a group restricted from a room, and not an account whose record on the entry denies access. A group's manager who is no member and the recipients of a room template SHALL not count either. A member restricted from one room SHALL still be known through another room.
+
+#### Scenario: Member restricted from the room
+
+- **WHEN** a member of the caller's room is restricted from it, directly or as a member of a group in the room
+- **THEN** the User is not offered that member
+
+#### Scenario: Manager of a group in the room
+
+- **WHEN** a group in the caller's room has a manager who is not its member
+- **THEN** the User is offered the members of the group but not that manager
+
+#### Scenario: Room template
+
+- **WHEN** a User was given a room template together with other recipients
+- **THEN** those recipients are not offered
+
+### Requirement: Access state in the share search
+
+The `shared` flag and the `includeShared` and `excludeShared` filters of the share search SHALL tell who has access only to a caller who may see the entry's access list: any reader of a room, otherwise who may manage access to the entry. For any other caller `shared` SHALL be false, `includeShared` SHALL return nothing with a total of 0 and `excludeShared` SHALL remove nobody. `shared` SHALL also be true for the owner and for an account whose record denies access.
+
+#### Scenario: Reader of a file
+
+- **WHEN** a User with read access to a file, in My documents, in a room or in a public room, searches for accounts the file is shared with
+- **THEN** no other recipient is offered for that record alone, every `shared` is false and `includeShared` returns nothing
+
+### Requirement: Guests and inviters in the share search
+
+A caller who is not a DocSpace admin SHALL be offered only the guests related to it and, with `area` set to All, the guests it sees on the entry's access list; a guest met only in a room SHALL not be offered. An `inviterId` naming another account SHALL be ignored for every caller except a DocSpace admin.
+
+#### Scenario: Guest met in a room
+
+- **WHEN** a User shares a room with a guest it is not related to
+- **THEN** that guest is not offered
+
+#### Scenario: Inviter filter
+
+- **WHEN** a Room admin or a User filters by the `inviterId` of another account
+- **THEN** the filter is ignored, while a DocSpace admin gets only the accounts that account invited
+
+### Requirement: Profiles in the share search
+
+For a User or a Guest, the share search SHALL return another account with only its id, names, email, avatars, type flags, status and `shared`, without contacts, phones, location, notes or groups. The Owner, DocSpace admins and Room admins SHALL get the full profile.
+
+#### Scenario: User searches
+
+- **WHEN** a User finds a member whose profile has a location, notes and contacts
+- **THEN** none of them is in the answer, while a Room admin gets them
+
 ### Requirement: Accounts search needs a text
 
 The accounts-and-groups searches SHALL return an empty list with a zero total when `filterValue` is empty, instead of listing everything.
@@ -558,6 +628,20 @@ The accounts-and-groups searches SHALL return an empty list with a zero total wh
 
 - **WHEN** a member calls the operation six times in a row
 - **THEN** every answer holds the caller's email, and one letter goes out
+
+### Requirement: Closing one's own profile through the confirmation link
+
+`deleteProfile` (`DELETE people/@self`) SHALL be authorised only by the confirmation link `sendInstructionsToDelete` sends. It SHALL set the caller's status to Terminated, end its sessions, notify the DocSpace admins, keep its rooms, files and groups, and return the profile. The Owner and an LDAP or system account SHALL get 403; an invalid or expired link, a repeat with the same link or an account that no longer exists SHALL get 401.
+
+#### Scenario: Confirmed request
+
+- **WHEN** a User signs the request with the confirmation link
+- **THEN** the answer is the profile with status Terminated and the account can no longer sign in
+
+#### Scenario: Repeat
+
+- **WHEN** the same link is used a second time
+- **THEN** the answer is 401
 
 ### Requirement: Deleting a guest's personal folder
 
@@ -913,15 +997,38 @@ The group lists SHALL hide groups already holding access when `excludeShared` is
 
 The group lists SHALL answer to a caller who can manage access to the entry, such as its owner, and SHALL answer 403 otherwise, including a DocSpace admin on the Owner's entry, a User or Guest without access and a User invited with read access to the room.
 
-#### Scenario: Owner of the file
+#### Scenario: Owner of the room
 
-- **WHEN** a User who owns a file shared with a group calls `getGroupsWithFilesShared`
+- **WHEN** a Room admin who owns a room shared with a group calls `getGroupsWithRoomsShared`
 - **THEN** that group has `shared` true
 
 #### Scenario: DocSpace admin and the Owner's room
 
 - **WHEN** a DocSpace admin calls `getGroupsWithRoomsShared` for the Owner's room
 - **THEN** the answer is 403
+
+### Requirement: Groups offered to a User or a Guest
+
+For a User or a Guest, the group lists and the group part of the accounts searches SHALL offer only the group Everyone, with a total that counts nothing else, even when another group already holds access to the entry; that group stays on the entry's access list. A name search for another group SHALL find nothing. A Room admin SHALL be offered every group.
+
+#### Scenario: User owns a file shared with a group
+
+- **WHEN** a User who owns a file shared with a group calls `getGroupsWithFilesShared`
+- **THEN** Everyone is the only entry and the total is 1, while `getFileSecurityInfo` still lists the group
+
+#### Scenario: Searching a group by name
+
+- **WHEN** the same User searches its file's group list, or `getAccountsEntriesWithFilesShared`, by the name of a portal group
+- **THEN** no group is found
+
+### Requirement: Contact details of another account
+
+Wherever a User or a Guest gets the profile of another account, including the access lists `getRoomSecurityInfo`, `getFileSecurityInfo` and `getFolderSecurityInfo`, the group members `getGroupsMembersWithFileSecurity` and `getGroupsMembersWithFolderSecurity`, and form roles, the profile SHALL carry no contacts, mobile phone, location, notes, groups or profile link.
+
+#### Scenario: Room access list
+
+- **WHEN** a User member of a room reads the room's access list
+- **THEN** another member's profile has no location, notes or contacts, while the Owner sees them
 
 ### Requirement: Unknown entries in the group lists
 
@@ -968,3 +1075,17 @@ The group lists SHALL answer 404 for an entry that does not exist, a deleted fol
 
 - **WHEN** the key is older than one hour
 - **THEN** the answer is 403 and nothing is sent
+
+### Requirement: Real-time account and group events
+
+The real-time events add-user, update-user, add-guest, update-guest, add-group and update-group SHALL carry only the id of the account or group, never a name, an email, contacts or the members of a group; clients re-read the rest through the API. change-my-type SHALL still carry the profile of the account whose type changed.
+
+#### Scenario: Profile changed
+
+- **WHEN** an account with a location, notes and contacts is added and then updated
+- **THEN** a listening User receives add-user and update-user events whose data holds the id alone
+
+#### Scenario: Member of a group changed
+
+- **WHEN** a member of a group is updated
+- **THEN** the update-group event holds the id of the group alone

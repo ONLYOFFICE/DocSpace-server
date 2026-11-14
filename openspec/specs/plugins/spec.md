@@ -219,7 +219,7 @@ are prohibited", and SHALL refuse a `name` or `pluginName` the uploading portal 
 
 `updateWebPlugin` SHALL require the portal-settings right (403 "Access denied", anonymous 401), find the
 plugin by `name` without regard to case (404 "Plugin not found") and replace the stored state with the
-body: `enabled` and the required `settings` string of at most 255 characters (400 otherwise). `settings`
+body: `enabled` and the required `settings` string of at most 4096 characters (400 otherwise). `settings`
 SHALL be stored encrypted for the portal and returned verbatim; an empty string SHALL mean no settings.
 The call SHALL answer 200 with no body and record the change in the audit trail.
 
@@ -235,7 +235,7 @@ The call SHALL answer 200 with no body and record the change in the audit trail.
 
 #### Scenario: Settings too long
 
-- **WHEN** `settings` is 256 characters long
+- **WHEN** `settings` is 4097 characters long
 - **THEN** the system answers 400 and the stored state is unchanged
 
 #### Scenario: Room admin tries to change a plugin

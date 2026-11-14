@@ -287,7 +287,7 @@ appear only through room invitations.
 
 ### Requirement: Changing a user's type
 
-The system SHALL restrict user type changes by the caller's type: only the Owner promotes to or demotes
+The system SHALL restrict user type changes (`updateUserType`) by the caller's type: only the Owner promotes to or demotes
 from DocSpace admin; the Owner and DocSpace admins promote to Room admin, demote Room admins and Users, and
 promote any Guest; a Room admin promotes only the Guests they invited themselves. Demotions run as a queued
 job that reports its result.

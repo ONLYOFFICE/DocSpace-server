@@ -619,3 +619,17 @@ With a method on, `authenticateMe` SHALL ask for the second factor instead of is
 
 - **WHEN** a link issued to a different account targets the owner's `userId`
 - **THEN** the answer is 403
+
+### Requirement: Checking whether a request is signed in
+
+`getIsAuthentificated` SHALL answer anyone, without signing in and also on an unpaid portal, with 200 and `true` when the request carries a valid sign-in of an active member, and `false` in every other case, with no reason given.
+
+#### Scenario: Signed-in member
+
+- **WHEN** the Owner or a member of any type calls it
+- **THEN** the answer is `true`
+
+#### Scenario: Anonymous caller
+
+- **WHEN** a caller without a token or cookie calls it
+- **THEN** the answer is 200 with `false`

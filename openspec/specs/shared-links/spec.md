@@ -243,3 +243,17 @@ create, edit or delete links there.
 
 - **WHEN** a DocSpace admin who is not a member creates a link in a Public room
 - **THEN** the system rejects the request (403)
+
+### Requirement: Listing the links of a room
+
+`getRoomLinks` SHALL return the links of a room, invitation and external links together or only those of `type`, each with its address, title, access, expiration and primary flag, and an invitation link with its uses left. Read access to the room SHALL be required: other callers get 403 and an unknown room 404. A member without the right to see links SHALL get an empty list. At most the first 100 links SHALL be returned; paging is ignored.
+
+#### Scenario: Custom room by default
+
+- **WHEN** the links of a new custom room are read
+- **THEN** the list is empty, while a new public room has its primary external link
+
+#### Scenario: Filter by type
+
+- **WHEN** `type` asks for external or for invitation links
+- **THEN** only links of that type are returned

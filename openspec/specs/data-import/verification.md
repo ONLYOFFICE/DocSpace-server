@@ -1,5 +1,7 @@
 # data-import — verification
 
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
@@ -186,3 +188,19 @@ tests.
 | M8 | Progress and end of the import | Progress steps are computed with integer division (`30 / count`, `20 / count`), so with more than 30 users or 20 groups the step is 0 and `progress` does not move during that stage. | `Migrator:143, 200, 279` |
 | M9 | Classifying the users found | A source user whose e-mail belongs to a disabled portal account is dropped from every list without a log line or an `errors` entry, so the caller cannot tell why the user is missing. | `Workspace:282-285`, `Google:182-185`, `Nextcloud:199-202` |
 | M10 | Starting the import | The non-owner admin check inspects only `users`; since `Merge` also reads only `users`, this is consistent — but `migratorName` of the body is trusted as the job's migrator without comparing it with the parsed job, so a body with another `migratorName` makes the import re-parse the upload with the wrong migrator and fail late with its error. | `Controller:248-265`; `Operation:76-82`; `Info:82-98` |
+
+## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)
+
+| Claim | Source | Status |
+|---|---|---|
+| Nextcloud takes `.zip`, `.tar.gz`, `.tgz` in any case; otherwise "Archive must be .zip, .tar.gz or .tgz" (supersedes "Archive must be .zip" in the row above) | `cef7b8b357`; `NextcloudWorkspaceMigrator` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudParseTests.cs:47-71` `Parse_SupportedArchive_ReadsUsersAndFiles`, `:320-331` `Parse_UnsupportedArchive_ReportsAcceptedFormats`) |
+| Broken archive: cut short, no end-of-archive block, entry outside the folder → "Couldn't parse", archive in `failedArchives` | `5e9bcf0184`, `3ff6b37802`, `f55c8884a0` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudUnpackTests.cs:134-151`, `:162-176`; `WorkspaceParseTests.cs:148-160`) |
+| Links and repeated entries: symbolic link skipped, hard link copied or skipped with a log line, later copy of a repeated path kept | `2f5d73b358`, `75591b0f19` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudUnpackTests.cs:54`, `:79`, `:105`; `NextcloudParseTests.cs:134-153`) |
+| Paths from the dump outside the user's folder left out | `f55c8884a0` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudParseTests.cs:80-94`, `:106-122`) |
+| Unpack bound: quota capped by the installation ceiling (100 GB default, 1 MB–1 PB), entries (1,000,000 default); same LargeBackup error; Google names the failing Takeout | `7eef459e01`, `67b50ac0ea`, `ba7ce9581a`, `8ab63e709e`; `MigrationOperation.GetMaxExtractedSize`, `GetMaxExtractedEntries` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/MigrationSizeLimitTests.cs:60-199`, error text "larger than the total size of the portal"; defaults and bounds: `MigrationExtractionLimitsTests.cs:61-150`) |
+| Unpacking progress at most once per percent | `e344a1bf33`, `75591b0f19` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudParseTests.cs:165-186`, `WorkspaceParseTests.cs:86-98`, `GoogleWorkspaceParseTests.cs:80-92`) |
+| A parse leaves the unpacked tree; a later parse or the import reads it, an import without a parse unpacks the archive itself | `5e9bcf0184` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/NextcloudParseTests.cs:200-217`, `:231-261`, `:295-314`); no spec text changed (the uploaded files still stay for the import) |
+| Stopped while unpacking ends with the cancellation | `8a7c2b12a0`, `8ab63e709e` | CODE-ONLY |
+| Oversized profile photo skipped with a log line | `c4951746da`; resource `PhotoTooLarge` | TEST-CONFIRMED (`web/ASC.Web.Api.Tests/Tests/07_Migration/WorkspaceParseTests.cs:111-127` `Migrate_UserPhoto_SkipsPhotoOverPixelLimit`) |
+| M3 | `c096f23fa9` removed the documented 500 of `finishMigration`, but `FinishMigration` (`MigrationController.cs:316-339`) still dereferences `ImportedUsers` unguarded, so the 500 remains, now undeclared | STILL OPEN |
+| M1–M14 (others) | the range changed the migrators and `MigrationOperation` (limits); the controller only in remarks; the upload handler, the queue reads, `Stop`/`Clear`, the user and group stages and the progress arithmetic are untouched | STILL OPEN |

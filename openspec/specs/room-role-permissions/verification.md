@@ -34,6 +34,8 @@ the AI rooms section were added to "Roles available in each room type" (`FileSec
 member reads the rooms linked to the project"; the lines of `FileSharing.cs` after 272 moved by +8 (the
 AI-project guest check at `:275-281`). Nothing in the range changed a right of the existing room types.
 
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the range rewrote the descriptions and documented codes of the room endpoints and changed no right of a role. The new yaml texts of `archiveRoom` and `unarchiveRoom` contradict the tested server (R11); the removed documented 500s (third-party ids beyond 32 bits, logo sizes) touch no row. The share fixes of the range change who sees the share flag of files and folders, not a room's member list.
+
 ## Requirement rows
 
 | Claim | Source | Status |
@@ -69,7 +71,7 @@ AI-project guest check at `:275-281`). Nothing in the range changed a right of t
 | View member list: Owner, Room manager, Viewer; non-members 403 | `RoomShareReadPermissionsTests.cs:46-152` (bugs 81787, 81788) | TEST-CONFIRMED [run: PASS] |
 | View room history: Owner, Room manager, Viewer; non-members 403 | `02_Folders/History/FolderHistoryPermissionsTests.cs:48-144` | TEST-CONFIRMED [run: PASS] |
 | View room info: every role of every type | `RoomReadPermissionsTests.cs:129-147` | TEST-CONFIRMED [run: PASS] |
-| Archive: Owner; Room manager 403 | `03_Rooms/Archive/RoomArchiveTests.cs:47-77`; `yaml` `archiveRoom` (30627) — the Room manager case: `03_Rooms/Permissions/RoomArchiveRoomManagerTests.cs:46` (an invited Room manager: 403, room stays active) | TEST-CONFIRMED [run: PASS] |
+| Archive: Owner; Room manager 403 | `03_Rooms/Archive/RoomArchiveTests.cs:47-77`; `yaml` `archiveRoom` (submodule `ce37da4`, 31505) says the opposite for the Room manager (R11) — the Room manager case: `03_Rooms/Permissions/RoomArchiveRoomManagerTests.cs:46` (an invited Room manager: 403, room stays active) | TEST-CONFIRMED [run: PASS] |
 | Delete: Owner; every invited role including Room manager 403 | `RoomDeletePermissionsTests.cs:49-63, 186-231` | TEST-CONFIRMED [run: PASS] |
 | Room manager demotes another Room manager; lowers own role; cannot restore it; no other member changes own role | `deviations.md` matrix row "Nobody changes own role / A Room manager can lower own role; any member can leave" | LIVE-CONFIRMED |
 | Invitations take effect immediately | `RoomShareSetTests.cs:46-65` | TEST-CONFIRMED [run: PASS] |
@@ -114,7 +116,7 @@ AI-project guest check at `:275-281`). Nothing in the range changed a right of t
 | View file version history in an archived room: Owner yes; Reviewer / Commentator / Viewer 403 | `01_Files/History/EditHistoryTests.cs:131-143`; roles: `ArchivedRoomRolesTests.cs:74` | TEST-CONFIRMED [run: PASS] |
 | Copy out of an archived room to My documents or own rooms, every role | `deviations.md` matrix row "Copy out of an archived room: Owner, Room manager, Content creator / Every role" | LIVE-CONFIRMED |
 | Restore: Owner yes; invited Viewer / Editor 403; non-members 403; removed member 403; non-member DocSpace admin yes | `RoomArchivePermissionsTests.cs:182-306` | TEST-CONFIRMED [run: PASS] |
-| Room manager cannot restore or delete an archived room | `yaml` `unarchiveRoom` (30734), `deleteRoom` (30525): the room's owner or a portal admin; active-room delete by a Room manager 403 (`RoomDeletePermissionsTests.cs:212-231`); archived room: `RoomArchiveRoomManagerTests.cs:62` (restore 403, stays archived), `:78` (delete 403, stays) | TEST-CONFIRMED [run: PASS] |
+| Room manager cannot restore or delete an archived room | `yaml` (submodule `ce37da4`) `unarchiveRoom` (31622) says "requires the room manager role" (R11), `deleteRoom` (31389) "the right to delete the room"; active-room delete by a Room manager 403 (`RoomDeletePermissionsTests.cs:212-231`); archived room: `RoomArchiveRoomManagerTests.cs:62` (restore 403, stays archived), `:78` (delete 403, stays) | TEST-CONFIRMED [run: PASS] |
 | Delete an archived room: Owner | `03_Rooms/Deletion/RoomDeleteTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | Download, print, clipboard, comments in an archived room | derived from the read right | MATRIX-ONLY |
 
@@ -181,3 +183,4 @@ D-numbers are the ones of `openspec/deviations.md`; R-numbers are new.
 |---|-------|----------------------|----------|--------|
 | R4 | File and folder links by role | `POST folder/{id}/link` (primary link create) by a Content creator, a Viewer, a non-member DocSpace admin, a Guest, or on an archived room answers 200 with an empty list instead of 403. | `02_Folders/Links/FolderLinkCreateTests.cs:271-421` (bug 81575, tests red) | STILL OPEN (2026-11-04: nothing in `d58816bece..3533ad8a89` touches the folder-link path; the test keeps its "currently answers 200" remark; the product commits titled "fix Bug 81575" of 2026-05 predate the previous revision) |
 | R5 | Content matrix | `updateFileComment` (the version comment, `PUT file/{id}/comment`) is refused for an Editor (403) although an Editor may edit the file; only the create right passes. | `06_Operations/Comment/CommentPermissionsTests.cs:90-148` | STILL OPEN (2026-11-04: `updateFileComment` untouched in the range; design question, outside the Comment row) |
+| R11 | Archive and restore (documentation) | Since `fcd31cbadf` the yaml says `archiveRoom` and `unarchiveRoom` require the room manager role and refuse a non-invited DocSpace admin; the server refuses an invited Room manager on both (403) and lets a non-member DocSpace admin restore. | `RoomArchiveRoomManagerTests.cs:46, 62`; `03_Rooms/Permissions/RoomArchivePermissionsTests.cs:200` (`UnarchiveRoom_DocSpaceAdminForeignRoom_Unarchived`) | OPEN |

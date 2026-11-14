@@ -1,5 +1,6 @@
 # form-filling-workflow — verification
 
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
@@ -203,9 +204,33 @@ rows above, which stay the primary evidence.
 | F3 | `startFillingFile` outside a Form filling room answered the file's metadata to a caller who could not read it | FIXED (`33f1d746c1`) | A read check now runs before the answer; `StartFillingFilePermissionsTests.cs:142` asserts 403 for a User on the Owner's My documents file. |
 | F4 | Room owner may Duplicate a draft in a per-form "In process" folder | NEW | `FileSecurity.FilterEntryAsync` refuses Duplicate for every file of a 27/28 folder (`FileSecurity.cs:1989-2005`), and the owner is refused Rename, Move and Lock on the same draft, yet `GET file/{id}` answers `security.Duplicate` true for the portal owner (the draft's creator gets false). `FormResultFoldersTests.cs:238` `[Trait("Category", "Bug")]` asserts false. |
 | F5 | A PDF copied into a Form filling room is not started | NEW | The move branch of `FileMoveCopyOperation.MoveOrCopyFilesAsync` (`:890-899`) stores `startFilling` true for a PDF arriving in a Form filling room, the copy branch (`:750-765`) writes no filling state, so the copy stays hidden from the form fillers while a moved, created or uploaded PDF is started. `FormMoveCopyTests.cs:115` `[Trait("Category", "Bug")]` asserts `startFilling` true. |
+| F6 | `manageformfilling` `Resume` on a PDF that was never started answers 500 (null filling properties), and since 09d4de0768..6fb6dfb17a the 500 is no longer documented | NEW | `FileStorageService.ManageFormFilling` Resume case; `FormFillingStateTests.cs:252` `Resume_OfFormThatWasNeverStarted_Returns500` |
 - **Role matrices** (who may start, stop, collect, configure, see what): `form-filling-room-roles` and
   `vdr-room-roles`, referenced rather than restated; the permission tests under `01_Files/FormFilling/*Permissions*`
   and `01_Files/Forms/*Permissions*` are cited here only for the status codes of the lifecycle endpoints.
+
+## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)
+
+| Claim | Source | Status |
+|---|---|---|
+| Start in a Form filling room after an edit makes the started version the one new drafts copy (Start action) | `FileStorageService.cs:6031-6040` (`OriginalFormVersion = form.Version` with `IsVersionChanged`) | CODE-ONLY |
+| Same draft submitted twice: the second submission skips a draft link already removed | `90bd45a4bb`; `LinkDao.cs:147` (`link is null` returns), `EntryManager` source-file null guard | CODE-ONLY |
+| Forwarding a submission after the per-form lock is released; a publish failure does not skip the spreadsheet | `8039a5976b`; `FormFillingReportCreator.PublishSubmissionAsync` (84-110) | CODE-ONLY |
+| Report over several versions: one sheet per group of versions with the same fields, sheet names `v1`, `v1-v2`, `v2, v4`, `v1-v3, v5` | yaml `getFormSubmissions` remarks; `FormFillingReportBuilder.GetSheetName` | TEST-CONFIRMED (names: `01_Files/Forms/Versions/FormVersionReportTests.cs:43-51`, unit); CODE-ONLY (the sheets in a real report) |
+| External database connected, room setting off: the submission goes to no database | `FormFillingReportCreator.PublishSubmissionAsync` (92-99) with `GetBuiltinDb` (251-254) | CODE-ONLY |
+| Sync also completes the built-in database at once | `FormFillingReportCreator.SyncExternalDbAsync` (112-124); `BuiltinDbFormSubmissionIntegrationEventHandler.Handle` (no `FormsDataUrl` branch) | CODE-ONLY |
+| **Built-in forms database** — stored whatever `sendFormToExternalDB` says, only while no external database is connected; one schema per portal; no endpoint exposes the connection (the endpoint added in the range was removed by `5a1cb96f52`) | `FormFillingReportCreator.PublishBuiltinDbSubmissionAsync` (140-162), `GetBuiltinDb`; `FormsDbProvisioningService` (`tenant_{id}` schema); `git show --stat 5a1cb96f52` | CODE-ONLY (the write needs an editor submission) |
+| `security.AnalyzeResponses` = may update the report and the current version has responses (built-in) or the external table exists | `FileDto.cs:630-634`, `FileEntryDtoHelper.FormHasAnalysableResponsesAsync` | TEST-CONFIRMED (the version-table rule: `01_Files/Forms/Versions/FormAnalysisFlagTests.cs:45-81`, unit); CODE-ONLY (the flag on a live answer) |
+| Write fails → completed from the search index; a failed version decision writes with the stored state | `4094bb04ee`; `BuiltinDbFormSubmissionIntegrationEventHandler.Handle` catch; `FormFillingReportCreator.DecideOrFallBackAsync` | TEST-CONFIRMED (fallback: `01_Files/Forms/Versions/FormDbFaultTests.cs:105-116`, unit); CODE-ONLY (the index completion) |
+| Idle tables dropped and restored from the index | `BuiltinFormsDbCleanerService` (idle 30 days by default, minimum 1 day) | CODE-ONLY |
+| Versions with the same or renamed fields share a table; renamed fields keep their answers | `FormFillingReportCreator.MapToTableColumn`, `WithDecidedLinks` | TEST-CONFIRMED (unit: `01_Files/Forms/Versions/FormVersionTablesTests.cs:56-92`, `FormVersionLinksTests.cs:56-81`); CODE-ONLY (a real version change) |
+| **Renamed form fields report** — `setFormFieldChanges` route, body, session/sequence rules, ignored cases with 200 | `FilesController.cs:1167-1193`; `FileStorageService.SetEditorFieldRenamesAsync` (6112); yaml `setFormFieldChanges` | TEST-CONFIRMED (session rules: `01_Files/Forms/Versions/FormEditorSessionsTests.cs:59-130`, unit) |
+| Report refused 403 for a content creator who neither created nor started the form; author, room manager, the starting content creator not refused for access | `FileStorageService.CanReportFormFieldChangesAsync` (6137) | TEST-CONFIRMED (`01_Files/FormFilling/FormFieldChangesPermissionsTests.cs:49-96`) |
+| 403 with Community Edition editors | `SetEditorFieldRenamesAsync` (`IsFreeEditionAsync`) | CODE-ONLY (the test accepts 200 or 403, `FormFieldChangesPermissionsTests.cs:216-224`) |
+| Null `renames` entry → 400 | `SetEditorFieldRenamesAsync` (`ArgumentException`) | TEST-CONFIRMED (`FormFieldChangesPermissionsTests.cs:101-110`) |
+| `trackFormFieldChanges` of `openedit` true exactly when the report is taken | `ConfigurationDto.cs:135` | TEST-CONFIRMED (`FormFieldChangesPermissionsTests.cs:120-150`, five callers) |
+| Resume of a never-started form → 500 | `0ff3031b59` removed the documented 500 of `manageformfilling`; `ManageFormFilling` still dereferences the missing filling properties; `01_Files/FormFilling/FormFillingStateTests.cs:252` still asserts 500 | TEST-CONFIRMED (behaviour); the yaml no longer declares it (F6) |
+| D1 | `ManageFormFilling` hunks in the range change only the stored version on Start and the property writes; the Resume/Edit permission check is untouched | STILL OPEN |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 

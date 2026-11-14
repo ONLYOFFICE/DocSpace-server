@@ -342,6 +342,11 @@ tied to the source installation or transient (short links, account links, tariff
 - **WHEN** an Instructions or Knowledge room linked to an AI project, or a skill file of an Instructions room, is restored
 - **THEN** the link points at the new ids of the project and the room, and the skill row at the new id of its file, its name and description copied as they were
 
+#### Scenario: Document agent settings follow their log folder
+
+- **WHEN** a portal whose document agent settings name a task log folder is restored
+- **THEN** the restored settings name the new id of that folder, or no folder when it was not restored, and every other field is copied as it was
+
 #### Scenario: Earlier backups are not backed up again
 
 - **WHEN** the portal keeps earlier archives in a Documents folder

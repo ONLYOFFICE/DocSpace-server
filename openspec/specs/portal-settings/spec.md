@@ -13,6 +13,19 @@ and the suspected defects are in `verification.md` next to this file.
 
 ## Requirements
 
+### Requirement: Sign-in methods of the portal
+
+`getPortalCapabilities` SHALL answer anyone, signed in or not and also while the portal is not paid, with the
+portal's sign-in methods: `ldapEnabled` with `ldapDomain`, `oauthEnabled` with the switched-on `providers`
+(ordered by the country of the caller's IP; on a self-hosted server Facebook and Apple ID left out for mobile
+apps), `ssoUrl` and `ssoLabel` when single sign-on is on, and `identityServerEnabled`. A method whose settings
+cannot be read SHALL be reported off.
+
+#### Scenario: Anonymous login screen
+
+- **WHEN** an anonymous caller and the owner call `getPortalCapabilities`
+- **THEN** both get 200 with a `providers` list, and no settings of the methods themselves
+
 ### Requirement: Setting the deep link mode
 
 `configureDeepLink` SHALL store how the portal opens its links on a mobile device, `Web`, `App` or

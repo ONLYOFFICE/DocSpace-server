@@ -1,5 +1,7 @@
 # file-sharing — verification
 
+> Revision 2026-11-14 (09d4de0768..6fb6dfb17a): new requirements for the members of a group on an access list and for the access list of a room; `getGroupsMembersWithFileSecurity` is no longer left out.
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
@@ -166,8 +168,8 @@ Spec: 14 requirements, 72 scenarios.
   SharingDefaults test folder but are not sharing behaviour.
 - **Editor mention notifications** (`04_Security/Sharing/SendEditorNotify*Tests.cs`): editor feature, not
   sharing; several of its cases are open bugs (83430).
-- **`getGroupsMembersWithFileSecurity`** and **`changeFileOwner`** (`GroupAndOwnerSharingTests.cs`): both are
-  covered only by bug-trait tests (81023, 66897) whose current state is unknown; not asserted here.
+- **`changeFileOwner`** (`GroupAndOwnerSharingTests.cs`): covered only by a bug-trait test (66897) whose current state is
+  unknown; not asserted here. (`getGroupsMembersWithFileSecurity` is specified since revision 2026-11-14.)
 - **Link-resolution flags `isAuthenticated` / `isRoomMember`** (`ShareResolveLink*Tests.cs`): belong to links.
 - **Deviations D2, D11, D12** in `openspec/deviations.md` concern links and are not restated.
 - **The `entryKind` discriminator** every listing entry carries since v4.1.0 (`7d641bf729`) and the
@@ -210,3 +212,15 @@ Re-check of the items `openspec/deviations.md` assigns to this area, and what th
 
 No new file-sharing defect came out of the range: the only new bug-trait tests of the area (84872, 84873) are
 link bugs and are to be added to the `shared-links` rows of `deviations.md`, not here.
+
+## Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
+| Claim | Source | Status |
+|---|---|---|
+| **Members of a group on an entry's access list**: a reader with read access gets no members, total 0, file and folder; the owner gets them | `04_Security/Sharing/AccessListMembersTests.cs:56-73,82-98` (`bf49b2b96a`) | TEST-CONFIRMED |
+| A group without a record on the file: empty, total 0 (it used to count any portal group) | `04_Security/Sharing/AccessListMembersTests.cs:109-125` | TEST-CONFIRMED |
+| `filterValue` in upper case: list and count agree | `04_Security/Sharing/GroupAndOwnerSharingTests.cs:96-115` (`2410f9d7fb`; on MySQL proves nothing red, the comparison ignores case anyway) | TEST-CONFIRMED |
+| Rule: list shown only when `CanSeeSharesAsync` (room → any reader, otherwise manager) | `products/ASC.Files/Core/Utils/FileSharing.cs:1175-1182,906-916` | CODE-ONLY for the room-reader column |
+| **Reading the access list of a room**: order, `filterType` default, links only with the right to see them, 403/404/400 | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:805-826`; yaml `getRoomSecurityInfo` | CODE-ONLY (many room tests call it as a helper, none asserts the order or the refusals here) |
+| A User member reads the room access list without other members' contact details | `04_Security/Sharing/AccessListMembersTests.cs:165-184` | TEST-CONFIRMED |
+| Documented 500 "An id is a number that is not a 32-bit integer" removed from `getSecurityInfo`, `setSecurityInfo`, `removeSecurityInfo`, `changeFileOwner` | `0ff3031b59` | READ; no requirement cited it |

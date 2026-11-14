@@ -1,5 +1,7 @@
 # history-and-audit — verification
 
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
@@ -145,6 +147,22 @@ Web.Api stack does start Web.Studio, so audit events published through the event
 `AuditSettingsUpdated`) are stored and readable there, and that the Files worker builds the audit and
 login-history CSV reports on that stack too.
 Before the 4.1.0 revision: 88 rows, 58 / 30. Spec: 23 requirements, 85 scenarios (was 81).
+
+## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)
+
+| Claim | Source | Status |
+|---|---|---|
+| operationIds named: `createLoginHistoryReport`, `getLoginHistoryReport`, `terminateLoginHistoryReport`, `getLastLoginEvents`, `getLoginEventsByFilter`, `getAllActiveConnections`, `logOutActiveConnection`, `logOutAllExceptThisConnection`, `logOutAllActiveConnectionsForUser`, `logOutAllActiveConnectionsChangePassword`, `getFolderHistory`, `createReportFolderHistory`, `getReportFolderHistory`, `terminateReportFolderHistory`, `getLastAuditEvents`, `getAuditTrailTypes`, `getAuditTrailMappers`, `createAuditTrailReport`, `getAuditTrailReport`, `terminateAuditTrailReport`, `getAuditSettings`, `setAuditSettings` | yaml `sdk/docspace-api-spec/docspace-backend.yaml` (route and method of each) | CODE-ONLY (wording only; behaviour rows unchanged) |
+| **Retention settings of the two logs** reworded: the audit trail lifetime is a display window for `events/last` and the audit report, deletes nothing, does not bound `events/filter`; the login lifetime deletes | `a7024e2e3a`, `077a5b9838`: `TenantAuditSettings.cs` summary, `SecurityController` remarks of `getAuditSettings`, `setAuditSettings`, `getAuditEventsByFilter`; the 400 text now says "lifetime of the log" | CODE-ONLY |
+| Filter not bounded by the lifetime; Shorter audit trail lifetime deletes nothing | the same remarks; no code path deletes audit events by `auditTrailLifeTime` (the cleanup reads only its own configuration section) | CODE-ONLY |
+| **Audit trail cleanup** — off by default; registered only when enabled; an unreadable switch is off | `265f6b8c33`, `ce084725fc`, `6f874ab0e9`; `AuditTrailRetentionConfiguration` (`Enabled` false) | TEST-CONFIRMED (`common/Tests/ASC.ClearEvents.Tests/Tests/AuditTrail/AuditTrailCleanupSettingsTests.cs:56` `ClearAsync_Disabled_RemovesNothing`, `:73` `Defaults_CleanupIsDisabled`, `:214` `ClearAsync_EnabledUnreadable_RemovesNothing`; `AuditTrailCleanupRegistrationTests.cs:50`, `:90`) |
+| Defaults 1095 / 365 days, grace 7 days; the free life time never below 180 (the longest audit lifetime); free above paid raises paid | `AuditTrailRetentionConfiguration` (`MinLifeTimeDays = TenantAuditSettings.MaxLifeTime`, `Read`) | TEST-CONFIRMED (bounds: `AuditTrailCleanupSettingsTests.cs:79-104`; `AuditTrailRetentionReadTests.cs:101`) |
+| Free and paid portals | `AuditTrailCleaner.ClearAsync` | TEST-CONFIRMED (`common/Tests/ASC.ClearEvents.Tests/Tests/AuditTrail/AuditTrailRetentionTests.cs:43`, `:118`, `:140`, `:168`) |
+| Subscription ended: grace period; never paid: none | `60c430ad74`; `AuditTrailCleaner.IsPaidAsync` | TEST-CONFIRMED (`common/Tests/ASC.ClearEvents.Tests/Tests/AuditTrail/AuditTrailGracePeriodTests.cs:57`, `:107`) |
+| Kept: history events of a room and its files while the room exists; the newest event of every portal | `4dc54b498a`, `8897d5a9a9` | TEST-CONFIRMED (`common/Tests/ASC.ClearEvents.Tests/Tests/AuditTrail/RoomHistoryRetentionTests.cs:48`; `RoomHistoryLifecycleTests.cs:47`, `:73`, `:102`, `:134` (room deleted for good → its history goes); `AuditTrailRetentionTests.cs:189` `ClearAsync_EveryEventExpired_KeepsTheLastActivity`) |
+| One portal fails, the others are cleared | `6139d9aed4`; `AuditTrailCleaner.ClearAsync` per-tenant catch | TEST-CONFIRMED (`common/Tests/ASC.ClearEvents.Tests/Tests/AuditTrail/AuditTrailTenantFailureTests.cs:40`) |
+| `AiDocumentAgentSettingsUpdated` added to the settings actions of the audit trail | `d5d515f748` (`SettingsActionMapper`) | CODE-ONLY (owned by the AI specs; no scenario here) |
+| H1, H4, H5 | `SecurityController.cs` changed only in remarks and one exception text in the range; `ASC.AuditTrail` only in resources and the mapper above | STILL OPEN |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 

@@ -1,5 +1,7 @@
 # storage-and-integrations — verification
 
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
+
 > **Revision 2026-11-09 (bb406b409b..6fb013e745).** The new billing suite `web/ASC.Web.Api.Billing.Tests` (SaaS stack, billing, accounting and Docs Connect answered by a WireMock in the test process) covers the Docs Connect rows marked below; they are TEST-CONFIRMED by reading, without a run mark. `BT/` = `web/ASC.Web.Api.Billing.Tests/Tests/DocsCloud/`.
 
 > **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
@@ -184,7 +186,7 @@ No operation of the owned tags is left out: all 31 are named in a requirement.
 | SI6 | `saveThirdParty` WebDAV `url` | The address is not checked for loopback, link-local or private ranges before the outbound request. Bug 82560; the test is skipped while it is open. | `products/ASC.Files/Tests/Tests/04_Security/Ssrf/ThirdPartySsrfTests.cs:59` | per test comment |
 | SI7 | `updateStorage`, `updateCdnStorage` | `props` is not required, but is read unconditionally: a configured module with no `props` gives a null dereference, 500 instead of 400. | `SC:420`, `SC:556`; `web/ASC.Web.Api/ApiModels/RequestsDto/StorageRequestsDto.cs:60` | red by code reading |
 | SI8 | `saveThirdPartyBackup` second call | The new title is stored without the invalid-character cleaning a new account gets. | `PAD:412-415` vs `FSS:3204` | red by code reading |
-| SI9 | `startStorageEncryption` | A running backup is reported by a bare exception: 500 with no message, though the condition is an expected one. | `SC:225` | red by code reading |
+| SI9 | `startStorageEncryption` | A running backup is reported by a bare exception: 500 with no message, though the condition is an expected one. STILL OPEN after 09d4de0768..6fb6dfb17a: `StorageController.cs:212-216` still throws `new Exception()`; the range only removed the documented 500, so it is now undeclared. | `SC:225` | red by code reading |
 | SI10 | `getStorageEncryptionSettings` | Catches every exception, so missing rights, a hosted portal and real failures all look like 200 with an empty body. The yaml documents this. | `SC:307-334`; `ST/EncryptionAccessTests.cs:49` | red test |
 | SI11 | `getThirdPartyCode` for Docusign, Wordpress, Github | On an installation without their OAuth application the consent URL is not built: a null dereference (Wordpress, Github) or an unparsable address (Docusign) answers 500, where a provider outside the seven answers 200 without a URL. It may depend on configuration, but the failure is unhandled. | `OA/ThirdPartyOAuthProvidersTests.cs:68`; `TPC:83-104` | red test |
 
@@ -196,3 +198,11 @@ No operation of the owned tags is left out: all 31 are named in a requirement.
 - `DocsCloudClient` itself and its cache times; the 400 without a tenant is now asserted by `BT/DocsCloudTenantTests.cs:104-116`.
 - Rows that need a connected account were left out of the 2026-11-10 run on purpose, although the `integration-test` profile starts a Nextcloud container: another member's 403, the room storage flag, the address kept on re-saving, the list filter, the disconnect details and the backup account's update path.
 - The serialized Dev Pack switches, the `refresh=true` cache times and the audit entry of a configuration update.
+
+## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)
+
+| Claim | Source | Status |
+|---|---|---|
+| Documented 500 removed from `saveThirdParty` (`POST files/thirdparty`), `saveThirdPartyBackup` (`POST files/thirdparty/backup`) and `startStorageEncryption`; no other code of these operations changed | `fcd31cbadf`, `0ff3031b59`, `c096f23fa9`; per-action `[SwaggerResponse]` diff | READ; the spec keeps "500 while a portal's backup runs" because the code still answers it (SI9) |
+| No behaviour of third-party storage, storage modules or encryption changed in the range | `git log 09d4de0768..6fb6dfb17a` on the controllers: description commits only | READ |
+

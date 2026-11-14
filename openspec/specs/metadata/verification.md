@@ -47,6 +47,8 @@ assigned to. Commit `7d641bf729` added the `entryKind` discriminator to the list
 `total` of every paginated wrapper, `09cfe2c5ed`/`32ad89fb81` changed the index refresh of the worker (no visible
 rule changed: the tests poll).
 
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and documented codes changed; the missing 403 of `getCascadeProgress` is now documented (difference row closed), yaml line references refreshed. No requirement, scenario or defect changed.
+
 ## Requirement rows
 
 | Claim | Source | Status |
@@ -313,15 +315,16 @@ values, the name over 255 of a custom field, the 403 and 404 of `getCascadeProgr
 
 | Document / client | Server |
 |---|---|
-| yaml `getCascadeProgress` declares 200, 404 and the generic 401 only (20730-20774) | `Service:676-681` demands the read right on the folder, so a folder the caller cannot read answers 403 (`SecurityException`, `T/MetadataEntryPermissionsTests.cs:116-123`); the row is still missing after 4.1.0. |
-| yaml routes `…/customfields` (lower case, 21288, 21384) | The controller publishes `customFields` (`Controller:521, 547`); routing is case-insensitive, both forms work. |
-| yaml `assignFileTemplates` 400 "has no `templateIds`" (20521) | Only a body without the `templateIds` key (required) is refused; an empty list is accepted and answers 200 after writing nothing (`T/MetadataFileAssignmentTests.cs:63-76`; see MD4 for the audit it still writes). |
+| yaml routes `…/customfields` (lower case, 21921, 22015) | The controller publishes `customFields` (`Controller:521, 547`); routing is case-insensitive, both forms work. |
+| yaml `assignFileTemplates` 400 "has no `templateIds`" (21180) | Only a body without the `templateIds` key (required) is refused; an empty list is accepted and answers 200 after writing nothing (`T/MetadataFileAssignmentTests.cs:63-76`; see MD4 for the audit it still writes). |
 | SDK 4.0.0 (the one the tests are pinned to) predates `hasMetadataFields`: `FileDto`, `FolderDto` and `EntryMetadataDto` carry no property for it | The server answers the flag on the listing, the info and the metadata reads (`EntryDto:360-372`, `Dto:299-308`); the tests read it from the raw JSON (`T/MetadataHasFieldsFlagTests.cs:221-270`). |
 | SDK `FolderMetadataSearch.Count` left out of the body when 0; `MetadataFilterConditionRequest.value/from/to` strings only; `SetMetadataValues`/`SetCustomFields` refuse a null list client-side; every value member is serialised, as null at the least; `numberValue` is a `long`, `dateValue` a `DateTime`, an option id a `Guid` | The server refuses a missing `count` with 400, accepts JSON numbers in the conditions, refuses a null list with 400, clears a field whose member is left out, refuses `42.5`, `1e30`, a date-only or offset-bearing string is read as UTC, a text that is no date or no identifier is refused — the tests use raw HTTP for these (`T/MetadataRequestLimitsTests.cs:50-96, 122-149`; `T/MetadataTypedSearchTests.cs:87-124`; `T/MetadataValueBatchTests.cs:65-110`; `T/MetadataDateAcceptedValueTests.cs:75-87`; `T/MetadataDateRefusedValueTests.cs:47-60`; `T/MetadataSingleChoiceValueTests.cs:97-110`). A null custom-field value goes through the SDK (`T/MetadataFolderValuesTests.cs:111`). |
 | Property description of `hasMetadataFields` (`EntryDto:360-372`): "absent in ... the answer of a creation, an upload or a rename" | The answer of a rename (`PUT api/2.0/files/file/{fileId}`) carries the flag with its value (true on a file under a cascading room), the creations of a file and a folder leave it out (`T/MetadataHasFieldsFlagTests.cs:195-220`). |
 | SDK has no method for `@share` and `@templates` | Both aliases exist on the server and take the filter / refuse it (`T/MetadataSectionAliasFiltersTests.cs:133-200`, raw HTTP). |
 | Release notes v1.1 – v4.0 (Privacy rooms included); none for v4.1.0 | No mention of metadata, templates or custom fields: the feature is unreleased at the time of writing, so nothing is NOTES-ONLY. |
 | Test comments "used to…" (default type String on update, position 0, filter dropped on aliases, worker folding requests, un-cascade 500, extension slip, stale documents, an empty template created and assigned) | All describe fixed behaviour; the tests assert the fixed state and the spec describes it. |
+
+Row closed by 2026-11-14 (09d4de0768..6fb6dfb17a): yaml `getCascadeProgress` now declares the 403 "The caller cannot read the folder" (`0ff3031b59`), matching `Service:676-681` and `T/MetadataEntryPermissionsTests.cs:116-123`.
 
 Rows closed by 4.1.0: the yaml text of `setFileValues` / `setFolderValues` 400 now carries "or exceeds the number
 limit" (21150, 21249); `MetadataFilterConditionRequest.fieldId` now says a custom field is addressed by `name`

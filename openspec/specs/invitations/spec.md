@@ -195,8 +195,8 @@ send no second letter.
 ### Requirement: Portal invitation links per user type
 
 The system SHALL keep at most one invitation link per user type (DocSpace admin, Room admin, User) for
-the whole portal, managed through `POST`, `GET .../{employeeType}`, `PUT` and `DELETE` on
-`/api/2.0/portal/users/invitationlink`. The link SHALL be visible to every admin allowed to invite that
+the whole portal, managed through `createInvitationLink`, `getInvitationLinkByEmployeeType`, `updateInvitationLink` and
+`deleteInvitationLink`. The link SHALL be visible to every admin allowed to invite that
 type and MAY carry a use limit and an expiration. A caller MAY act on the link of a type only when they
 may invite that type, and only the DocSpace Owner MAY act on the DocSpace admin link.
 
@@ -568,8 +568,8 @@ the registration is completed, which SHALL set the type the link grants, ignorin
 ### Requirement: Invitation settings
 
 The system SHALL keep two portal-wide switches, `allowInvitingMembers` and `allowInvitingGuests`, both
-on by default, readable by anyone through `GET /api/2.0/settings/invitationsettings` and changeable by
-the DocSpace Owner and DocSpace admins through `PUT /api/2.0/settings/invitationsettings`. Each switch,
+on by default, readable by anyone through `getTenantUserInvitationSettings` and changeable by
+the DocSpace Owner and DocSpace admins through `updateInvitationSettings`. Each switch,
 when off, SHALL block the invitations of its kind. Issued links SHALL stay stored but SHALL NOT be accepted
 while the switch for their type is off.
 

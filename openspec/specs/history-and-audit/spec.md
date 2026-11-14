@@ -22,10 +22,9 @@ events are defined in `form-filling-workflow` and only cross-referenced here.
 ### Requirement: Entry history endpoints and the shape of an entry
 
 The system SHALL expose the activity history of a file through `GET /api/2.0/files/file/{fileId}/log`
-and of a folder or a room through `GET /api/2.0/files/folder/{folderId}/log`. Each entry SHALL carry
-`id`, `action` (with the action identifier in `action.id`), `initiator` (an account with at least
-`displayName`), `date` and, where the action has details, `data`. Entries SHALL be returned newest
-first, and the page length SHALL be reported in the `count` field of the response envelope.
+and of a folder or a room through `GET /api/2.0/files/folder/{folderId}/log` (`getFolderHistory`). Each entry
+SHALL carry `id`, `action` (its identifier in `action.id`), `initiator` (with at least `displayName`), `date`
+and, where the action has details, `data`. Entries SHALL come newest first, the page length in `count`.
 
 #### Scenario: History of a new room has the expected structure
 
@@ -179,9 +178,9 @@ FileRenamed and the form events.
 ### Requirement: Folder history report
 
 The system SHALL export the history of a folder or a room through
-`POST /api/2.0/files/folder/{folderId}/log/report`, which queues a background task and answers 200
-with the task; `GET` on the same path reports the caller's own task for that folder, `DELETE` asks to
-stop it. The file SHALL be saved in the caller's My documents. A running report for the same folder and
+`POST /api/2.0/files/folder/{folderId}/log/report` (`createReportFolderHistory`), which queues a background
+task and answers 200 with the task; `GET` on the same path (`getReportFolderHistory`) reports the caller's own
+task for that folder, `DELETE` (`terminateReportFolderHistory`) asks to stop it. The file SHALL be saved in the caller's My documents. A running report for the same folder and
 caller is joined instead of duplicated.
 
 #### Scenario: Report of a room, an archived room and a subfolder
@@ -345,11 +344,10 @@ rooms. No product or "General" prefix is written.
 
 ### Requirement: Reading the audit trail
 
-The system SHALL expose the audit trail to callers with the portal-settings right (the DocSpace owner
-and DocSpace admins) through `GET /api/2.0/security/audit/events/last` (the 20 most recent events
-within the audit lifetime, action texts shortened to 50 characters), `GET …/events/filter`,
-`GET …/types` (the names accepted by the filters) and `GET …/mappers` (products → modules → actions,
-narrowed by `productType` and `moduleType`).
+The system SHALL expose the audit trail to the owner and DocSpace admins through
+`GET /api/2.0/security/audit/events/last` (`getLastAuditEvents`: the 20 newest events within the audit
+lifetime, texts cut to 50 characters), `GET …/events/filter`, `GET …/types` (`getAuditTrailTypes`: the
+names the filters accept) and `GET …/mappers` (`getAuditTrailMappers`: products → modules → actions).
 
 #### Scenario: Owner and DocSpace admin read events
 
@@ -361,6 +359,11 @@ narrowed by `productType` and `moduleType`).
 - **WHEN** `events/filter` is called with `userId`, `moduleType`, `actionType`, `action`, `entryType`, `target`, `from` / `to` (UTC instants), `count` (1–100, default 100) and `startIndex`
 - **THEN** the events matching every given filter are returned, `startIndex` being applied after the filters
 - **AND** a non-default `action` matches that action only (with `target` exactly) and overrides `moduleType` and `actionType`; `target` narrows only together with `action` or `entryType`
+
+#### Scenario: Filter not bounded by the lifetime
+
+- **WHEN** `events/filter` is called without `from`
+- **THEN** it reaches back to the oldest event the portal still stores, past the audit trail lifetime that bounds `events/last`
 
 #### Scenario: Portal without the audit option
 
@@ -378,6 +381,11 @@ narrowed by `productType` and `moduleType`).
 - **WHEN** any audit endpoint is called without authentication
 - **THEN** the system answers 401
 
+#### Scenario: Mappers narrowed
+
+- **WHEN** `audit/mappers` is called with `productType` and `moduleType`
+- **THEN** the tree is narrowed to that product and module
+
 #### Scenario: Types and mappers catalogues
 
 - **WHEN** the owner reads `audit/types` and `audit/mappers`
@@ -385,11 +393,16 @@ narrowed by `productType` and `moduleType`).
 
 ### Requirement: Audit trail and login history reports
 
-The system SHALL build an audit trail report through `POST /api/2.0/security/audit/events/report` and
-a login history report through `POST /api/2.0/security/audit/login/report`, each answering 200 with
-the queued task; `GET` on the same path returns the caller's own task, `DELETE` cancels
-it. `format` is `Xlsx` (default) or `Csv`; `from` / `to` are UTC instants resolved against the matching
-lifetime. Both require the portal-settings right and the audit option of the plan (402 otherwise on SaaS).
+The system SHALL build an audit trail report through `POST /api/2.0/security/audit/events/report`
+(`createAuditTrailReport`; `GET` `getAuditTrailReport` returns the caller's task, `DELETE`
+`terminateAuditTrailReport` cancels it) and a login history report through `POST …/audit/login/report`, same
+shape (`createLoginHistoryReport`, `getLoginHistoryReport`, `terminateLoginHistoryReport`). Both need
+the portal-settings right and the plan's audit option (402 on SaaS).
+
+#### Scenario: Format and period
+
+- **WHEN** a report is started with or without `format`, `from` and `to`
+- **THEN** `format` is `Xlsx` by default or `Csv`, and `from`/`to` (UTC instants) are resolved against the lifetime of that log
 
 #### Scenario: Owner and DocSpace admin start a report
 
@@ -416,17 +429,22 @@ lifetime. Both require the portal-settings right and the audit option of the pla
 
 ### Requirement: Retention settings of the two logs
 
-The system SHALL keep the lifetime of the login history and of the audit trail in days, readable
-through `GET /api/2.0/security/audit/settings/lifetime` (`loginHistoryLifeTime`, `auditTrailLifeTime`,
-`lastModified`) and replaceable through `POST` on the same path with both values inside `settings`.
-The default of each is 180 days and the accepted range is 1–180. The lifetimes bound `events/last` and
-the default period of the reports. The endpoints outlived the UI settings block removed in v2.6.
+The system SHALL keep two lifetimes in days, readable through `GET /api/2.0/security/audit/settings/lifetime`
+(`getAuditSettings`) and replaceable through `POST` on that path (`setAuditSettings`, both inside `settings`):
+`loginHistoryLifeTime`, how long login events are kept before they are deleted, and `auditTrailLifeTime`, how far
+back `events/last` and the audit trail report reach. Default 180, range 1–180. The audit trail lifetime SHALL
+delete no event.
 
 #### Scenario: Read and update
 
 - **WHEN** the owner or a DocSpace admin reads the settings and then posts `loginHistoryLifeTime: 180, auditTrailLifeTime: 180`
 - **THEN** the read answers 200 with both values greater than 0, and the update answers 200 echoing 180 and 180; both answers carry `lastModified`
 - **AND** saving writes an `AuditSettingsUpdated` audit event
+
+#### Scenario: Shorter audit trail lifetime
+
+- **WHEN** `auditTrailLifeTime` is lowered and later raised again
+- **THEN** no audit event is deleted: the older events stay readable through `events/filter` and come back into `events/last` and the report when the lifetime grows
 
 #### Scenario: Value outside the range
 
@@ -438,6 +456,38 @@ the default period of the reports. The endpoints outlived the UI settings block 
 - **WHEN** a Room admin, a User or a Guest reads or updates the settings
 - **THEN** the system answers 403 with "Access denied"
 - **AND** an unauthenticated caller is answered with 401
+
+### Requirement: Audit trail cleanup
+
+An installation MAY switch on a periodic cleanup of audit events; it SHALL be off by default. When on, it SHALL
+delete the events older than the paid life time (default 3 years) on a portal with a paid tariff, or within a
+grace period (default 7 days) after the paid subscription ended, and older than the free life time (default 1
+year, never below the 180 days the audit trail can show) on the others. No API operation changes these values.
+
+#### Scenario: Cleanup off
+
+- **WHEN** the installation did not enable the cleanup, or its switch cannot be read as on or off
+- **THEN** no audit event is ever deleted by it
+
+#### Scenario: Free and paid portals
+
+- **WHEN** a pass runs over a free portal and a paid one holding events of every age
+- **THEN** the free portal loses the events past the free life time, the paid one keeps them until the paid life time
+
+#### Scenario: Subscription ended
+
+- **WHEN** a portal's paid subscription ended less than the grace period ago
+- **THEN** it keeps the paid life time; a portal that never paid gets no grace period
+
+#### Scenario: What is never deleted
+
+- **WHEN** a pass finds old events
+- **THEN** it keeps the events that make up the entry history of a room or of its files, as long as the room exists, and the newest event of every portal
+
+#### Scenario: One portal fails
+
+- **WHEN** the tariff of one portal cannot be read during a pass
+- **THEN** the other portals are still cleared
 
 ### Requirement: Login actions that are recorded
 
@@ -470,8 +520,8 @@ and the date in the portal time zone. Logging out and closing connections are re
 ### Requirement: Reading the login history
 
 The system SHALL expose the login history to callers with the portal-settings right through
-`GET /api/2.0/security/audit/login/last` (the 20 most recent events, action text shortened) and
-`GET …/login/filter` (`userId`, `action`, `from`, `to`, `count` 1–100 default 100, `startIndex`).
+`GET /api/2.0/security/audit/login/last` (`getLastLoginEvents`: the 20 most recent events, action text shortened) and
+`GET …/login/filter` (`getLoginEventsByFilter`: `userId`, `action`, `from`, `to`, `count` 1–100 default 100, `startIndex`).
 Events of every user type SHALL be visible. Without the audit option the filter endpoint answers like
 `login/last`; on a SaaS portal whose section is hidden, 402.
 
@@ -494,7 +544,7 @@ Events of every user type SHALL be visible. Without the audit option the filter 
 ### Requirement: Listing active connections
 
 The system SHALL list the calling account's own active connections through
-`GET /api/2.0/security/activeconnections`: one item per successful sign-in of the last year that is
+`GET /api/2.0/security/activeconnections` (`getAllActiveConnections`): one item per successful sign-in of the last year that is
 still active, newest first. Any signed-in user of any type may call it; it never shows another account's
 connections.
 
@@ -522,7 +572,7 @@ connections.
 
 ### Requirement: Ending one connection
 
-`PUT /api/2.0/security/activeconnections/logout/{loginEventId}` SHALL close the connection behind the
+`PUT /api/2.0/security/activeconnections/logout/{loginEventId}` (`logOutActiveConnection`) SHALL close the connection behind the
 login event: it is marked inactive, the token and cookie tied to it stop working and the session's
 sockets are disconnected. A user may close their own connections; closing somebody else's requires the
 DocSpace owner or a DocSpace admin. The answer is `true` when an active connection was closed and
@@ -546,7 +596,7 @@ DocSpace owner or a DocSpace admin. The answer is `true` when an active connecti
 
 ### Requirement: Ending every connection except the current one
 
-`PUT /api/2.0/security/activeconnections/logoutallexceptthis` SHALL close every other active
+`PUT /api/2.0/security/activeconnections/logoutallexceptthis` (`logOutAllExceptThisConnection`) SHALL close every other active
 connection of the calling account, answer 200 with the caller's display name and write a
 `UserLogoutActiveConnections` audit event. The connection to keep is the one behind the
 authentication cookie; a bearer-token request has none and then every connection is closed. Any
@@ -565,7 +615,7 @@ signed-in user may call it.
 
 ### Requirement: Ending every connection of an account
 
-`PUT /api/2.0/security/activeconnections/logoutall/{userId}` SHALL close every active connection of
+`PUT /api/2.0/security/activeconnections/logoutall/{userId}` (`logOutAllActiveConnectionsForUser`) SHALL close every active connection of
 the named account, reset its cookies and answer 200 without content. A user may name their own id;
 naming another account requires the DocSpace owner or a DocSpace admin.
 
@@ -582,7 +632,7 @@ naming another account requires the DocSpace owner or a DocSpace admin.
 
 ### Requirement: Logging out everywhere with a password reset
 
-`PUT /api/2.0/security/activeconnections/logoutallchangepassword` SHALL close every connection of the
+`PUT /api/2.0/security/activeconnections/logoutallchangepassword` (`logOutAllActiveConnectionsChangePassword`) SHALL close every connection of the
 calling account, record `UserSentPasswordChangeInstructions` and answer 200 with the confirmation URL
 the caller has to open to set a new password (`/confirm/PasswordChange` with `type=PasswordChange`,
 `key` and `uid`). The password itself is not changed. Any signed-in user may call it for their own

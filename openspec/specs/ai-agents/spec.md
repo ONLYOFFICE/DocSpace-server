@@ -558,6 +558,19 @@ the result and the failures of the operation are in `portal-settings`.
 - **WHEN** a member generates a skill for an Instructions room
 - **THEN** the answer holds the Markdown file and the room's skills are unchanged
 
+### Requirement: Creating a skill from the template
+
+`aiSkillsCreate` SHALL save a new skill file `<title>.md` in the Instructions room `destId` from a fixed
+template, with no model: `name` derived from `title` as for a generated skill, `description` the title, a body
+of sections to fill in. `title` SHALL be 1–165 characters after a trailing `.md` is dropped and hold a letter
+or digit (400). Another kind of folder SHALL answer 400, an unknown one 404, a caller who cannot create files
+there 403, all before anything is written.
+
+#### Scenario: Title already taken
+
+- **WHEN** a member creates a skill whose title a file of the room already has
+- **THEN** the file is saved under a numbered title and the answer carries the id and the title of the new file
+
 ### Requirement: Listing the skills
 
 `getRoomSkills` SHALL answer the skills of an Instructions room (sorted by file title) or of a project's
@@ -1676,6 +1689,41 @@ deletes its prompts (unknown 404).
 
 - **WHEN** a User reads, edits or moves the owner's prompt
 - **THEN** the read answers null, the writes are refused and the prompt is unchanged
+
+#### Scenario: Operations of the library
+
+- **WHEN** a member uses `aiPromptsCreate`, `aiPromptsUpdate`, `aiPromptsMove`, `aiPromptsDelete`, `aiPromptsGetById`, `aiPromptsList`, `aiPromptsCreateFolder`, `aiPromptsRenameFolder`, `aiPromptsDeleteFolder`, `aiPromptsListFolders` and `aiPromptsExport`
+- **THEN** `aiPromptsList` answers the prompts of one folder, the root when `folderId` is left out or empty, newest first; `aiPromptsListFolders` answers every folder in one flat list, newest first; only `aiPromptsExport` answers the whole library at once
+- **AND** `aiPromptsUpdate` writes only the fields sent, `aiPromptsMove` changes only the folder, `aiPromptsRenameFolder` keeps the folder's prompts
+- **AND** `aiPromptsDelete` answers success for an unknown id and on a repeat, `aiPromptsDeleteFolder` answers 404 on a repeat, and `aiPromptsGetById` answers 200 with an empty body for an unknown id
+
+### Requirement: Document agent settings
+
+`aiSettingsGetDocumentAgent` SHALL answer any member but a guest (403; AI off 403) with `enabled`, `profileId`,
+`reasoning`, `maxToolCalls`, `maxFileBytes`, `taskLog`, `taskLogFolderId`: the defaults (on, no profile,
+`default`, 150, 32 MiB, no log) until saved, a deleted profile or a log folder deleted or in the trash as null.
+`aiSettingsSetDocumentAgent` SHALL let a DocSpace admin (403 otherwise) replace the whole object and answer it.
+
+#### Scenario: Refused settings
+
+- **WHEN** a DocSpace admin sends a missing field, an unknown `reasoning`, `maxToolCalls` or `maxFileBytes` below 1 or above 150 and 32 MiB, an unknown `profileId` or a third-party folder id
+- **THEN** the system answers 400 and the stored settings stay as they were
+- **AND** a log folder that does not exist or is in the trash answers 404, and one the admin cannot create files in 403
+
+#### Scenario: Agent switched off
+
+- **WHEN** a DocSpace admin stores `enabled` false
+- **THEN** the chat of every member no longer offers the `document_agent` tool, until the settings are stored with `enabled` true
+
+#### Scenario: Settings cannot be read
+
+- **WHEN** a chat round cannot read the portal's document agent settings
+- **THEN** the agent is off for that round instead of running on the defaults
+
+#### Scenario: Task log
+
+- **WHEN** `taskLog` is true and a task of the agent ends
+- **THEN** the task leaves its full log as a file in `taskLogFolderId`, or next to its results when that is null, and nothing of the log is returned to the chat model
 
 ### Requirement: Prompt names, texts and bundles
 

@@ -102,7 +102,7 @@ client's way into and out of filling mode.
 
 - **WHEN** `Start` is applied to a form of a Form filling room
 - **THEN** `startFilling` becomes true, the caller is recorded as the account that started the filling, the "form started to fill" history entry is written and the form is revealed to the members holding the form-filling right
-- **AND** when the form's version differs from the version it was last started with, the links to the filling drafts of the previous round are dropped (so each member gets a fresh draft) and the version is marked as changed
+- **AND** when the form's version differs from the version it was last started with, the links to the filling drafts of the previous round are dropped (so each member gets a fresh draft), the version is marked as changed and the started version becomes the one new drafts copy, so a draft of another version is refused on submission
 
 #### Scenario: Stop action
 
@@ -333,6 +333,16 @@ replaces the file's content with the posted binary as a new version — a save, 
 - **THEN** they are stored as `1 - …`, `2 - …` and `3 - …` in the form's "Complete" subfolder
 - **AND** the full name is `{N} - {form title} ({dd-MM-yyyy H-mm}).pdf`, where `N` is the submission number kept on the original form and incremented under a per-form lock
 
+#### Scenario: Same draft submitted twice
+
+- **WHEN** two submissions of the same filling draft race and the first one has already removed the draft's link
+- **THEN** the second one goes on without an error at the unlinking step
+
+#### Scenario: Forwarding a submission
+
+- **WHEN** a filled copy has been stored and indexed
+- **THEN** the submission is passed on to the forms database and the results spreadsheet only after the per-form lock is released, and a failure to pass it on does not skip the spreadsheet update
+
 ### Requirement: Results spreadsheet
 
 A Form filling room SHALL carry the setting `saveFormAsXLSX` (release notes v3.7 "Update XLSX data"). With it on,
@@ -356,7 +366,7 @@ SHALL be kept only as the filled copies.
 `POST /api/2.0/files/file/{fileId}/xlsx` (`generateXlsx`) SHALL queue a rebuild of a form's results file,
 answering the task, the original form and `isNewFile`; it takes the id of the original form or of an XLSX or
 CSV results file in its "Complete" subfolder, after reading back the copies the search index lacks.
-`GET …/file/{fileId}/xlsx` reports the caller's run. `generateXlsxByFolder` does the same by folder;
+`GET …/file/{fileId}/xlsx` (`getXlsx`) reports the caller's run. `generateXlsxByFolder` does the same by folder;
 `GET …/file/{fileId}/submissions` (`getFormSubmissions`) lists them.
 
 #### Scenario: Report produced
@@ -391,6 +401,11 @@ CSV results file in its "Complete" subfolder, after reading back the copies the 
 - **WHEN** `GET …/submissions` is called for a started original form by anyone who may read it
 - **THEN** the answer carries the field metadata and one record per submitted copy of the version currently being filled
 
+#### Scenario: Report over several versions
+
+- **WHEN** a form was started, edited and restarted, and copies of several versions were submitted
+- **THEN** the spreadsheet covers every version, with one sheet per group of versions that share their fields, named after the versions it holds (`v1`, `v1-v2`, `v2, v4`, `v1-v3, v5`)
+
 ### Requirement: External database export
 
 A Form filling room SHALL carry the setting `sendFormToExternalDB`. With it on and an external database
@@ -404,6 +419,12 @@ data of every original form of the room and answer the job record; `GET` on the 
 - **WHEN** a copy is submitted while the setting is on and a database is configured (release notes v3.7 "Connect Database")
 - **THEN** the submission goes to a table named after the original form and its version, keyed by the submission number, and the table name is recorded on the form
 - **AND** generating the spreadsheet of a form also re-syncs that form to the database
+- **AND** while an external database is connected, a submission of a room with the setting off goes to no database at all
+
+#### Scenario: Sync also completes the built-in database
+
+- **WHEN** a sync job runs on a host with the built-in forms database (see "Built-in forms database")
+- **THEN** the forms of the room are also completed in the built-in database from the search index at once
 
 #### Scenario: Sync job per room
 
@@ -425,6 +446,56 @@ data of every original form of the room and answer the job record; `GET` on the 
 
 - **WHEN** `GET …/externaldbsync` is called for a Form filling room no export was ever started for
 - **THEN** the answer is 200 with an empty body
+
+### Requirement: Built-in forms database
+
+On a host that runs the built-in forms database, while the portal has no external database connected, every
+submission of a Form filling room SHALL be stored in the portal's own schema of that database, whatever
+`sendFormToExternalDB` says. No API operation SHALL expose the connection of the built-in database. A form's
+responses SHALL be analysable (`security.AnalyzeResponses` of the original form) when the caller may update its
+report and the current version has responses in the forms database.
+
+#### Scenario: Submission stored without an external database
+
+- **WHEN** a copy is submitted in a Form filling room, the host runs the built-in database and no external database is connected
+- **THEN** the answers land in a table of the original form in the portal's schema, and the first submission makes the form's responses analysable
+
+#### Scenario: Write fails
+
+- **WHEN** the write of a submission to the forms database fails
+- **THEN** the table is completed from the search index, which already holds the submission, so the response is not lost
+
+#### Scenario: Idle tables
+
+- **WHEN** nobody submitted to or analysed a form's table for the idle period and the search index can restore it whole
+- **THEN** the table is dropped and is restored from the index on the next submission or analysis
+
+#### Scenario: Versions with the same fields
+
+- **WHEN** a restarted form kept its fields, or only renamed some of them
+- **THEN** its new version writes to the table of the earlier version, a renamed field keeps its earlier answers under its new name, and a version whose fields changed gets a table of its own
+
+### Requirement: Renamed form fields report
+
+`PUT /api/2.0/files/file/{fileId}/fieldchanges` (`setFormFieldChanges`, body `version`, `sequence`, `sessionId`,
+`renames` of `oldKey`/`newKey`) SHALL record which fields of the original form of a Form filling room the editor
+renamed since it opened `version`, so that the next saved version keeps the answers of renamed fields. `openedit`
+SHALL answer `trackFormFieldChanges` true exactly when such a report is accepted.
+
+#### Scenario: Report taken
+
+- **WHEN** a caller who may edit the original form reports renames
+- **THEN** the answer is 200; a report replaces the previous one of the same `sessionId`, one whose `sequence` is not above the last of that session is dropped, and a `version` the form does not have yet is ignored, still with 200
+
+#### Scenario: Report refused
+
+- **WHEN** the file is not the original PDF form of a Form filling room, or the caller may not edit it, or a content creator reports on a started form they neither created nor started, or the editors are the Community Edition
+- **THEN** the answer is 403
+
+#### Scenario: Malformed report
+
+- **WHEN** `renames` holds a null entry, `version` is below 1, `sequence` is negative, or a key or `sessionId` breaks the length and character rules
+- **THEN** the answer is 400, and an unknown file answers 404
 
 ### Requirement: Form fields filter of a results folder
 

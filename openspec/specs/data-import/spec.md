@@ -89,16 +89,35 @@ false with a `Message`, always with HTTP 200. No upload size limit is applied he
 
 ### Requirement: Archive requirements per source
 
-The parse SHALL pick the backup from the upload folder by extension: `Workspace` takes the first `.gz`
-or `.tar` file (a Workspace backup); `Nextcloud` takes the first `.zip`, which must hold a `.bak` or
-`.sql` database dump and the users' `data/` folder; `GoogleWorkspace` takes every `.zip` (one or more
-Takeout archives with a root `Takeout` folder), in name order. An upload without a file of the right
-extension SHALL fail the job and list the uploaded files in `failedArchives`.
+The parse SHALL pick the backup by extension: `Workspace` the first `.gz` or `.tar`; `Nextcloud` the first
+`.zip`, `.tar.gz` or `.tgz` (any case), holding a `.bak` or `.sql` dump and the users' `data/` folder;
+`GoogleWorkspace` every `.zip` (Takeout archives with a root `Takeout` folder), in name order. An upload
+without a file of the right extension SHALL fail the job and list the uploaded files in `failedArchives`.
 
 #### Scenario: Wrong extension for the source
 
 - **WHEN** the owner uploads `backup.zip` and parses it with `migratorName` `Workspace`
 - **THEN** the job ends with `isCompleted` true, `error` "Archive must be .gz or .tar" and `backup.zip` in `parseResult.failedArchives`
+
+#### Scenario: Nextcloud archive of another format
+
+- **WHEN** the upload holds no `.zip`, `.tar.gz` or `.tgz` file and is parsed with `Nextcloud`
+- **THEN** the job ends with `error` "Archive must be .zip, .tar.gz or .tgz"
+
+#### Scenario: Broken archive
+
+- **WHEN** the archive is cut short, a plain `.tar` ends without its end-of-archive block, or an entry points outside the unpack folder
+- **THEN** the parse fails with "Couldn't parse …" and the archive in `failedArchives`, instead of leaving part of the backup out
+
+#### Scenario: Links and repeated entries
+
+- **WHEN** a `.tar.gz` backup holds a symbolic link, a hard link, or the same path twice
+- **THEN** a symbolic link is skipped, a hard link to an unpacked file is unpacked as a copy (otherwise skipped), each skip is written to the log, and of a repeated path the later copy is kept
+
+#### Scenario: Paths taken from the dump
+
+- **WHEN** a user id or a file path read from the Nextcloud dump leads outside the user's folder of the backup
+- **THEN** that user or file is left out and the parse goes on
 
 #### Scenario: Nextcloud archive without a database dump
 
@@ -163,15 +182,21 @@ proposed with `userType` `User` and `shouldImport` false.
 
 ### Requirement: Backup size against the storage quota
 
-When the portal has a total storage quota, the job SHALL compare the size of the uploaded data (for an
-import: the extracted content, without the archive itself) with that quota before parsing or importing
-and SHALL end with `error` "Backup is larger than the total size of the portal" when it is bigger. A
-portal without a storage limit is not checked.
+When the portal has a total storage quota, the job SHALL compare the size of the uploaded data with it
+before parsing or importing. While unpacking, the job SHALL also bound what the backup unpacks to (the
+quota, capped by an installation ceiling of 100 GB by default) and its number of entries (1,000,000 by
+default), also on a portal without a quota. Past either bound the job SHALL end with `error` "Backup is
+larger than the total size of the portal".
 
 #### Scenario: Backup bigger than the quota
 
 - **WHEN** the owner of a portal with a 1 GB storage quota parses a 2 GB upload
 - **THEN** the job ends with `isCompleted` true and `error` "Backup is larger than the total size of the portal", and the upload is deleted
+
+#### Scenario: Small archive that unpacks past the bound
+
+- **WHEN** a compressed Nextcloud, Workspace or Google backup passes the quota check but unpacks to more than the bound, or holds more entries than allowed
+- **THEN** the job ends with the same `error` and the archive (for Google, the failing Takeout) in `failedArchives`
 
 ### Requirement: Reading the job state
 
@@ -247,6 +272,11 @@ with the source names (the last name falls back to the first), a unique user nam
 e-mail, the chosen `userType` and its type group, the source photo and profile data when present. A
 selected user whose e-mail exists SHALL NOT be created again; the existing account receives the
 imported files instead. Every selected user SHALL be counted in `successedUsers`.
+
+#### Scenario: Oversized profile photo
+
+- **WHEN** a source user's photo has more pixels than a profile photo may have
+- **THEN** the account is created without the photo and the log says the photo was skipped
 
 #### Scenario: New account
 
@@ -348,6 +378,11 @@ be deleted, so a new import needs a new upload and parse.
 - **WHEN** the queued import creates a room or a folder, or hands an imported room over to its original owner
 - **THEN** the `room.created`, `folder.created` and `room.updated` webhooks are published for them, as `startMigration` declares
 
+#### Scenario: Unpacking progress
+
+- **WHEN** a parse or an import unpacks a backup
+- **THEN** the unpacking reports its own progress, at most once per percent
+
 ### Requirement: One job per portal
 
 A portal SHALL hold at most one job. `uploadAndInitializeMigration` or `startMigration` called while a
@@ -374,6 +409,11 @@ already imported is undone.
 
 - **WHEN** the owner calls `cancelMigration` during a parse
 - **THEN** the system answers 200, the parse stops, `getMigrationStatus` soon returns an empty result and the upload folder is deleted
+
+#### Scenario: Stopped while unpacking
+
+- **WHEN** the job is stopped while it unpacks the backup
+- **THEN** it ends with the cancellation, not with an archive error, and an import does not go on with a backup unpacked in part
 
 #### Scenario: Nothing running
 

@@ -350,6 +350,13 @@ about their own actions.
 - **AND** `room.created` by creating a room that is not an AI agent, from a template or by an import; `room.updated` by every room update, owner change, quota change, cover and logo change; `room.archived`, `room.deleted` and `room.restored` by room management; `room.copied` by copying or duplicating a room; `agent.created`, `agent.updated` and `agent.deleted` instead of the room events when the room is an AI agent
 - **AND** `form.submit`, `form.filled.out` and `form.stopped` as specified in `form-filling-workflow` ("Webhook events of the workflow"); the published contract lists, for every event, the exact REST operations that raise it and under which condition
 
+#### Scenario: Conditions of the file, room and account events
+
+- **WHEN** `moveBatchItems` merges a listed folder into a folder of the same name, `copyBatchItems` copies folders, `deleteFileVersions` gets an empty `versions`, `createRoomTemplate`, `createRoomFromTemplate` or `updateRoomsQuota` runs, or `updateMember` is called
+- **THEN** the merged folder raises `folder.copied` instead of `folder.moved` and its subfolders and files `folder.moved` and `file.moved`; the contents of a copied folder raise `folder.copied` and `file.copied` only when the copy stays within one storage; the empty `versions` deletes the file and raises `file.deleted`
+- **AND** a new template raises `room.created` (then `room.updated` with `quota`), a template or room built from an AI agent `agent.created` (and `agent.updated` with `quota`) instead; `updateRoomsQuota` raises `room.updated` for every listed room even when its quota stays the same
+- **AND** `updateMember` raises `user.updated` on every call for the caller's own account, and for another account only when `disable` is sent or `isUser` changes the type; an import raises no event for the users, groups and files it brings in
+
 #### Scenario: Deletion payload describes the entity as it was
 
 - **WHEN** a user, a group, a file or a folder is deleted
