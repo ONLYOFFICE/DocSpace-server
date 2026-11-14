@@ -1,6 +1,7 @@
 # portal-settings — verification
 
-> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 
 Revision 2026-11-14 (09d4de0768..6fb6dfb17a): added "Sign-in methods of the portal" for `getPortalCapabilities`, which no spec named. The yaml no longer documents the 500s of `configureDeepLink`, `configureCsp` and `saveDnsSettings` (`c096f23fa9`) and declares the 401/403 of `getPortalTimeZones` and `getPortalHostname` that the spec already stated; the code of this capability did not change, so PS-3, PS-4 and PS-5 stay open. Rows added carry no run mark.
 
@@ -76,7 +77,7 @@ code or the yaml, no test). No row is cited by test name alone. Exception mappin
 | **Reading the banner flag** | `Banners/BannersVisibilityGetTests.cs:56-58,76-77`; `Banners/BannersVisibilityGetPermissionsTests.cs:56` | TEST-CONFIRMED [run: PASS] |
 | **Sign-in methods of the portal** | | |
 | Anonymous, `[AllowNotPayment]`, also at `capabilities.json`; LDAP on standalone or with the visible setting and the `ldap` quota; providers only with `oauthEnabled` (standalone or the `oauth` quota), sorted by the IP country, enabled ones, Facebook / Apple ID dropped for mobile apps on standalone; SSO URL `/sso/login` and label when SSO is on; each block in its own `try` that logs and leaves the method off; identity server by visible setting | `web/ASC.Web.Api/Api/CapabilitiesController.cs:43-140`; `web/ASC.Web.Api/ApiModels/ResponseDto/CapabilitiesDto.cs:47-91`; yaml `getPortalCapabilities` | CODE-ONLY |
-| Scenario "Anonymous login screen": anonymous and owner 200 with `providers` | `web/ASC.Web.Api.Tests/Tests/01_Capabilities/CapabilitiesTests.cs:46,61` | TEST-CONFIRMED |
+| Scenario "Anonymous login screen": anonymous and owner 200 with `providers` | `web/ASC.Web.Api.Tests/Tests/01_Capabilities/CapabilitiesTests.cs:46,61` | TEST-CONFIRMED [run: PASS] |
 | **Setting the banner flag** | | |
 | Anonymous 401 | `SecBanners/BannersVisibilitySetPermissionsTests.cs:74` | TEST-CONFIRMED [run: PASS] |
 | 402 outside Enterprise before the right; 403; save and audit | `SecBanners/BannersVisibilitySetEditionTests.cs:50,66`; `Settings:1480-1493` | TEST-CONFIRMED [run: PASS] for the 402 before the right; the 403, the save and the audit on Enterprise stay CODE-ONLY (the stand has no license file) |

@@ -1,10 +1,12 @@
 # files-settings — verification
 
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
+
 Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
 
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
-> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement of `spec.md` with where it was verified. No test was run for this document: TEST-CONFIRMED means a
 test of this repository asserts the claim (read at the cited lines, or "by name" where only its name was read), not that
@@ -125,7 +127,7 @@ None of those specs was edited.
 | Refusals, 404s | same file 189-200,277-290,339-355,382-398; 361,404,423 by name; `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:260-297`; `FolderLinkPrimaryGetTests.cs:104-114`, 118,132 by name | TEST-CONFIRMED [run: PASS] |
 | **Revoked primary link stays revoked on read** | | |
 | Folder: 404 after revoke | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:195-214` | TEST-CONFIRMED [run: PASS] |
-| Create after revocation: new primary link with a new id, read answers it (file and folder, 62419af921) | `T/01_Files/Links/FileLinkPrimaryTests.cs:238-242`; `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` | TEST-CONFIRMED |
+| Create after revocation: new primary link with a new id, read answers it (file and folder, 62419af921) | `T/01_Files/Links/FileLinkPrimaryTests.cs:238-242`; `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` | TEST-CONFIRMED [run: PASS] |
 | File: same path; `primary` true clears the state; replaced in Public rooms | `T/01_Files/Links/FileLinkPrimaryRevocationTests.cs:46,62,81` | TEST-CONFIRMED [run: PASS] |
 | File: replaced in Form filling rooms | `FSS:6651-6660` | CODE-ONLY (reachable, not done: needs a PDF form in a form-filling room, whose read goes through the room-link path `FSS:4487-4500`) |
 | **Setting an external link of a file** | | |
@@ -169,7 +171,7 @@ None of those specs was edited.
 | Roles | `T/03_Rooms/Permissions/RoomTagDeletePermissionsTests.cs:111-178` | TEST-CONFIRMED [run: PASS] |
 | **Group members with their access** | | |
 | Guest 403 on the file operation | `T/04_Security/Sharing/GroupAndOwnerSharingTests.cs:49-85` | TEST-CONFIRMED [run: PASS] |
-| Fields, paging, folder operation, empty list | `T/04_Security/Sharing/GroupMembersFolderSecurityTests.cs:48,81,98`; `total` of the empty list 120 (FX10) | TEST-CONFIRMED [run: PASS]; 120 [run: FAIL-BUG] |
+| Fields, paging, folder operation, empty list | `T/04_Security/Sharing/GroupMembersFolderSecurityTests.cs:48,81,98`; `total` of the empty list 120 (FX10) | TEST-CONFIRMED [run: PASS]; 120 |
 | **Unlocking a password-protected link** | | |
 | `InvalidPassword`, `Ok` | `T/04_Security/RoomShareTests.cs:434-439` | TEST-CONFIRMED [run: PASS] |
 | Attempt limit 403 | `T/04_Security/ExternalSharePasswordLimitTests.cs:56` (sixth wrong attempt and then the right password 403), 97 (right passwords not counted) | TEST-CONFIRMED [run: PASS] |

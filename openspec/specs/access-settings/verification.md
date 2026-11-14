@@ -1,10 +1,12 @@
 # access-settings — verification
 
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
+
 > Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the yaml now documents 403 for `tfaAppGenerateSetupCode` and 401/403 for `saveMobilePhone`, so both difference rows are gone; `getIsAuthentificated` specified.
 
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
-> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement of `spec.md` with where it was checked. Paths are relative to the repo root (`server/`). `yaml` is
 `sdk/docspace-api-spec/docspace-backend.yaml`. Code: `Sec` = `web/ASC.Web.Api/Api/Settings/SecurityController.cs`,
@@ -64,7 +66,7 @@ and from the method body where a row needed the request; test line numbers point
 | **Reading IP restrictions** | | |
 | Anonymous 401, members 403 for both | `S/IpRestrictions/IpRestrictionsGetPermissionsTests.cs:47,64,79,96` | TEST-CONFIRMED [run: PASS] |
 | Owner, admin 200; `lastModified` present | `S/IpRestrictions/IpRestrictionsGetTests.cs:50,64,79,94` | TEST-CONFIRMED [run: PASS] |
-| 304 on `If-None-Match` (first) and `If-Modified-Since` (second) | `S/IpRestrictions/IpRestrictionsRulesTests.cs:120,165`. The first also answers 304 after the list changed (AC-11): `S/IpRestrictions/IpRestrictionsRulesTests.cs:144` [run: FAIL-BUG] | TEST-CONFIRMED [run: PASS] |
+| 304 on `If-None-Match` (first) and `If-Modified-Since` (second) | `S/IpRestrictions/IpRestrictionsRulesTests.cs:120,165`. The first also answers 304 after the list changed (AC-11): `S/IpRestrictions/IpRestrictionsRulesTests.cs:144` | TEST-CONFIRMED [run: FAIL-BUG] |
 | **Saving IP restrictions** | | |
 | Anonymous 401, members 403 for both | `S/IpRestrictions/IpRestrictionsSavePermissionsTests.cs:47,65,81,99` | TEST-CONFIRMED [run: PASS] |
 | Owner, admin save `enable` false; echo | `S/IpRestrictions/IpRestrictionsSaveTests.cs:50,66` | TEST-CONFIRMED [run: PASS] |
@@ -111,7 +113,7 @@ and from the method body where a row needed the request; test line numbers point
 | **Saving single sign-on settings** | | |
 | Stored and read back; label cut; type normalised (unrecognised to 4, 1 and 3 kept); empty 400; roles | `S/Sso/SsoSaveTests.cs:47,64,75,88,99`; `S/Sso/SsoPermissionsTests.cs:131,145` | TEST-CONFIRMED [run: PASS] |
 | **Required single sign-on fields** | | |
-| 400 for missing entity ID, SSO URL, field mapping, IdP settings, malformed SLO URL, invalid JSON (f3a52c35dd) | `S/Sso/SsoSaveTests.cs:125,143,161,182,196,210,220` | TEST-CONFIRMED |
+| 400 for missing entity ID, SSO URL, field mapping, IdP settings, malformed SLO URL, invalid JSON (f3a52c35dd) | `S/Sso/SsoSaveTests.cs:125,143,161,182,196,210,220` | TEST-CONFIRMED [run: PASS] |
 | Stored settings do not change | `S/Sso/SsoRefusedSaveTests.cs:46,68` | TEST-CONFIRMED [run: PASS] |
 | **Switching single sign-on off** | | |
 | Reset restores defaults; roles | `S/Sso/SsoResetTests.cs:41`; `S/Sso/SsoPermissionsTests.cs:161,175` | TEST-CONFIRMED [run: PASS] |
@@ -131,7 +133,7 @@ and from the method body where a row needed the request; test line numbers point
 | **Resending the SMS code** | | |
 | 401 in the four cases | `A/SendSmsCodeTests.cs:50,68,85,103` | TEST-CONFIRMED [run: PASS] |
 | 200 body with SMS on | `Auth:590-597`. Unreachable: SMS cannot be enabled on a test portal (no provider) | CODE-ONLY |
-| 405 for valid credentials with SMS off (f5f2735e30) | `A/SendSmsCodeTests.cs:146` | TEST-CONFIRMED |
+| 405 for valid credentials with SMS off (f5f2735e30) | `A/SendSmsCodeTests.cs:146` | TEST-CONFIRMED [run: PASS] |
 | **Password reminder for a signed-in caller** | | |
 | Own account and admin for member | `P/PasswordReminderTests.cs:60` with the pairs at :45-55 | TEST-CONFIRMED [run: PASS] |
 | Refused pairs (bug 80157) | `P/PasswordReminderPermissionsTests.cs:57,89` | TEST-CONFIRMED [run: PASS] |
@@ -190,5 +192,5 @@ Login history and active connections (`getIsAuthentificated` aside, the operatio
 |---|---|---|
 | `tfaAppGenerateSetupCode` 403 for an ordinary token and `saveMobilePhone` 401 and 403 now documented; the two rows of "Differences between the yaml and the server" are removed | `web/ASC.Web.Api/Api/Settings/TfaappController.cs:376`; `web/ASC.Web.Api/Api/AuthenticationController.cs:537-538`; yaml at `ce37da4` (`c096f23fa9`, `893c80e16c`) | READ |
 | Documented 500 removed from `tfaValidateAuthCode` (empty code) and `saveSsoSettingsV2`: matches AC-1..AC-4, already FIXED | `c096f23fa9` | READ, no verdict change |
-| **Checking whether a request is signed in**: Owner and each member type `true`, anonymous `false` | `web/ASC.Web.Api.Tests/Tests/03_Authentication/AuthCheckTests.cs:46-95` | TEST-CONFIRMED |
+| **Checking whether a request is signed in**: Owner and each member type `true`, anonymous `false` | `web/ASC.Web.Api.Tests/Tests/03_Authentication/AuthCheckTests.cs:46-95` | TEST-CONFIRMED [run: PASS] |
 | Unpaid portal still answers | `web/ASC.Web.Api/Api/AuthenticationController.cs:97` (`AllowNotPayment`) | CODE-ONLY |

@@ -8,8 +8,8 @@ re-run alone), commit.txt and date.txt. Each TEST-CONFIRMED row gets one mark fr
 citations resolve to; the run legend under the title is replaced. Idempotent.
 
 --ru <dir>: also mark translated copies at <dir>/<spec>/verification.md when they hold the same number of
-TEST-CONFIRMED rows. The legend text comes from <dir>/run-legend.txt ({commit} and {date} are filled in); its
-first 16 characters identify the old legend line to replace.
+TEST-CONFIRMED rows. The legend text comes from <dir>/run-legend.txt ({commit} and {date} are filled in); the
+text before {commit} identifies the old legend line to replace.
 """
 import argparse
 import collections
@@ -103,10 +103,15 @@ def classify(row):
                 if p[0].isdigit():
                     wanted.append((int(p[0]), int(p[-1]) if p[-1].isdigit() else int(p[0])))
             chosen = []
-            for k, t in enumerate(tests):
-                end = tests[k + 1][0] - 1 if k + 1 < len(tests) else 10**9
-                if any(a <= end and b >= t[0] - 12 for a, b in wanted):
-                    chosen.append(t)
+            for a, b in wanted:
+                # a citation may start on the [Fact]/[Trait] lines just above the declaration; a wider window
+                # pulls in the next test when a row cites the last assertion of the previous one
+                hit = [t for k, t in enumerate(tests)
+                       if a <= (tests[k + 1][0] - 1 if k + 1 < len(tests) else 10**9) and b >= t[0] - 3]
+                if not hit:
+                    # a citation of the doc comment above a test: the first test declared within 12 lines after it
+                    hit = [t for t in tests if b < t[0] <= b + 12][:1]
+                chosen += [t for t in hit if t not in chosen]
         for t in chosen:
             r = first.get(fn[:-3], {}).get(t[1])
             if r:
@@ -130,10 +135,9 @@ def classify(row):
     return "pass" if "pass" in states else "skip"
 
 
-def rewrite(path, tags, legend):
+def rewrite(path, tags, legend, prefix):
     raw = open(path, encoding="utf-8", newline="").read()
     nl = "\r\n" if "\r\n" in raw else "\n"
-    prefix = legend[:16]
     lines = [l for l in raw.split(nl) if not l.startswith(prefix)]
     k = 0
     for i, line in enumerate(lines):
@@ -151,13 +155,19 @@ def rewrite(path, tags, legend):
         open(path, "w", encoding="utf-8", newline="").write(nl.join(out))
 
 
+# The old legend line is found by the text before {commit}, which never changes between runs.
 legend_en = LEGEND_EN.format(commit=commit, date=date)
-legend_ru = None
+prefix_en = LEGEND_EN.split("{commit}")[0]
+legend_ru = prefix_ru = None
 if args.ru:
     lf = os.path.join(args.ru, "run-legend.txt")
     if not os.path.exists(lf):
         raise SystemExit(f"--ru given but {lf} is missing")
-    legend_ru = open(lf, encoding="utf-8").read().strip().format(commit=commit, date=date)
+    template_ru = open(lf, encoding="utf-8").read().strip()
+    if "{commit}" not in template_ru or not template_ru.split("{commit}")[0].strip():
+        raise SystemExit(f"{lf} must start with fixed text followed by {{commit}}")
+    legend_ru = template_ru.format(commit=commit, date=date)
+    prefix_ru = template_ru.split("{commit}")[0]
 
 total = collections.Counter()
 print(f"{'spec':<28}" + "".join(f"{v:>14}" for v in TAG.values()) + ("  copy" if args.ru else ""))
@@ -165,7 +175,7 @@ for vf in sorted(glob.glob("openspec/specs/*/verification.md")):
     spec = os.path.basename(os.path.dirname(vf))
     rows = [MARK.sub("", l) for l in open(vf, encoding="utf-8").read().split("\n") if l.startswith("|") and "TEST-CONFIRMED" in l]
     tags = [classify(r) for r in rows]
-    rewrite(vf, tags, legend_en)
+    rewrite(vf, tags, legend_en, prefix_en)
     c = collections.Counter(tags)
     total.update(c)
     note = ""
@@ -176,7 +186,7 @@ for vf in sorted(glob.glob("openspec/specs/*/verification.md")):
         else:
             n = sum(1 for l in open(cf, encoding="utf-8").read().split("\n") if l.startswith("|") and "TEST-CONFIRMED" in l)
             if n == len(tags):
-                rewrite(cf, tags, legend_ru)
+                rewrite(cf, tags, legend_ru, prefix_ru)
                 note = "ok"
             else:
                 note = f"MISMATCH {n}/{len(tags)}"

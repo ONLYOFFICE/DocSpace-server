@@ -1,8 +1,10 @@
 # people-and-groups — verification
 
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
+
 > Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the share search (people, accounts and group lists) now follows the visibility rule of bug 79163; profiles of other accounts reach a User or a Guest without contact details; account and group socket events carry the id alone; `deleteProfile` specified; new defect PG-6.
 
-> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 > Revision 2026-11-09 (bb406b409b..6fb013e745): the repeat check of letters (no letter for a repeat within the period, same answer); the rate limit of the resend and instruction endpoints is gone.
 
@@ -70,12 +72,13 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Roles Activation, EmailActivation; list must be the caller alone, else 400; welcome letter once | `User:2117-2159` | CODE-ONLY (unreachable: the confirmation key arrives only in a letter) |
 | **Who may start an email change** | | |
 | Allowed pairs | `E/EmailChangeInstructionsTests.cs:43-55,100-110` | TEST-CONFIRMED [run: PASS] |
+| DocSpace admin on a Guest: 200 (the web client offers "Change email" too) | live check 2026-11-14 on the `test` stand; `products/ASC.People/Server/Api/UserController.cs:1883-1897` (only an admin target needs the Owner) | LIVE-CONFIRMED |
 | Denied pairs 403 "Access denied" | `E/EmailChangeInstructionsPermissionsTests.cs:42-73` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | `E/EmailChangeInstructionsPermissionsTests.cs:134` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Immediate change versus instructions** | | |
 | Owner on self: 200, sign-in with the new address | `E/EmailChangeInstructionsTests.cs:94-120` | TEST-CONFIRMED [run: PASS] |
 | Non-admin only gets a letter; admin path writes the address | `E/EmailChangeInstructionsRulesTests.cs:44,59` | TEST-CONFIRMED [run: PASS] (stored address unchanged for a non-admin on self; written and `NotActivated` for the Owner on a User; the letter itself not read) |
-| Address switched back and forth by an admin six times: two letters, one per address | `E/EmailChangeInstructionsTests.cs:65-86` | TEST-CONFIRMED |
+| Address switched back and forth by an admin six times: two letters, one per address | `E/EmailChangeInstructionsTests.cs:65-86` | TEST-CONFIRMED [run: PASS] |
 | **Validation of an email change** | | |
 | Malformed 400 naming the Email field; unknown 404 message | `E/EmailChangeInstructionsPermissionsTests.cs:86-115` | TEST-CONFIRMED [run: PASS] |
 | Longer than 255 → 400 | `E/EmailChangeInstructionsPermissionsTests.cs:117` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -152,12 +155,12 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | **Asking to delete one's own profile** | | |
 | Member gets own email in the answer; Owner 403 | `D/SendInstructionsToDeleteTests.cs:52-61, 87-97` | TEST-CONFIRMED [run: PASS] |
 | LDAP 403 | `Remove:102-105` | CODE-ONLY (unreachable: no LDAP on the stand) |
-| Six calls in a row: each answer holds the email, one letter; no 429 (rate limit removed, `eeaf3b6988`) | `D/SendInstructionsToDeleteTests.cs:63-84` | TEST-CONFIRMED |
+| Six calls in a row: each answer holds the email, one letter; no 429 (rate limit removed, `eeaf3b6988`) | `D/SendInstructionsToDeleteTests.cs:63-84` | TEST-CONFIRMED [run: PASS] |
 | **Deleting a guest's personal folder** | | |
 | All five types 403 (a fresh Guest has no folder) | `D/DeletePersonalFolderTests.cs:43-62`; `Remove:219-224`; `Queue:147-154` | TEST-CONFIRMED [run: PASS] |
-| A Guest with a folder gets the job | `D/UserDataRulesTests.cs:182` (a User with a personal file converted to Guest) | TEST-CONFIRMED [run: PASS] (the move of shared entries to the folder's modifier is not asserted) |
+| A Guest with a folder gets the job | `D/UserDataRulesTests.cs:182` (a User with a personal file converted to Guest) | TEST-CONFIRMED [run: PASS-ON-RERUN] (the move of shared entries to the folder's modifier is not asserted) |
 | **Watching the personal folder deletion** | | |
-| Caller only, empty body when nothing queued | `D/UserDataRulesTests.cs:167,182` | TEST-CONFIRMED [run: PASS] |
+| Caller only, empty body when nothing queued | `D/UserDataRulesTests.cs:167,182` | TEST-CONFIRMED [run: PASS-ON-RERUN] |
 | **Watching a type conversion** | | |
 | 100, `isCompleted`, `error` empty | `T/UserTypeChangeTests.cs:153-162` | TEST-CONFIRMED [run: PASS] |
 | Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:44,63,82` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -224,7 +227,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | **Filtering the group lists** | | |
 | All clauses | `R/GroupFileSharedTests.cs:159`; `R/GroupFolderSharedTests.cs:146-219`; `R/GroupRoomSharedTests.cs:162-272` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Who may read the group lists** | | |
-| Room admin owner of a room: group shared; admin on Owner's 403; invited Read 403; rule can edit access | `R/GroupSearchPermissionsTests.cs:43,279-292,326`; `Groups:782-785` | TEST-CONFIRMED (re-cited 2026-11-14: the User file owner of the old scenario now gets only Everyone, see the revision section) |
+| Room admin owner of a room: group shared; admin on Owner's 403; invited Read 403; rule can edit access | `R/GroupSearchPermissionsTests.cs:43,279-292,326`; `Groups:782-785` | TEST-CONFIRMED [run: PASS] (re-cited 2026-11-14: the User file owner of the old scenario now gets only Everyone, see the revision section) |
 | Others | `R/GroupSearchPermissionsTests.cs:75,91,107,119-183,228,244,278` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Unknown entries in the group lists** | | |
 | Non-numeric, empty, negative | `R/GroupFileSharedTests.cs:185-197`; `R/GroupRoomSharedValidationTests.cs:55-78` | TEST-CONFIRMED [run: PASS] |
@@ -270,17 +273,17 @@ Line numbers of the code come from the tree as of 2026-11-06.
 
 | Claim | Source | Status |
 |---|---|---|
-| **Whom the share search offers a User or a Guest**: co-member yes, stranger no, by name and email | `Q/ShareCandidates/ShareCandidateUsersTests.cs:46`; `Q/ShareCandidates/ShareCandidateCallersTests.cs:72`; `Q/ShareCandidates/ShareCandidateAccountsTests.cs:45,67,90` | TEST-CONFIRMED (by name) |
-| Owner of its room; members of a group in its room; in a room through a group; archived room | `Q/ShareCandidates/ShareCandidateUsersTests.cs:66,88,131,147` (`f706d19375`) | TEST-CONFIRMED (by name) |
-| Owner and DocSpace admin offered every member; Room admin every member with full profile | `Q/ShareCandidates/ShareCandidateCallersTests.cs:45,59`; `Q/ShareCandidates/ShareCandidateProfileTests.cs:103` | TEST-CONFIRMED (by name) |
-| Accounts with a granting record on the entry or its parent folder are known | `Q/ShareCandidates/ShareCandidateAccessListTests.cs:46,70`; members of a group the file is shared with are not: `:97` | TEST-CONFIRMED (by name) |
-| **What does not make an account known**: restricted from the room (self, own group), restricted member, restricted group, Restrict record on the room, group manager no member, template recipients; restricted in one room only still known | `Q/ShareCandidates/ShareCandidateUsersTests.cs:108,168,192,215,237,259,282,304`; `Q/ShareCandidates/ShareCandidateRoomUsersTests.cs:46` (`4cce45495e`, `1a215ae902`, `c48dbab686`, `328a620d4a`) | TEST-CONFIRMED (by name) |
-| **Access state in the share search**: a reader learns no other recipient and no `shared`, in My documents, a room and a public room; `includeShared` empty | `Q/ShareCandidates/ShareCandidateAccessListTests.cs:125,154,185,207`; `User:3256-3262` (`CanSeeSharesAsync`: room → any reader, otherwise manager; an entry read without its parent room type counts as outside a public room, `products/ASC.Files/Core/Utils/FileSharing.cs:898-916`) | TEST-CONFIRMED (by name); `excludeShared` removing nobody and `shared` true for a denying record CODE-ONLY (`597660e87b`, `328a620d4a`) |
-| **Guests and inviters**: guest met only in a room not offered, related guest offered; Room admin not related gets only the guest of the room with `area` All; `inviterId` of another ignored except for a DocSpace admin | `Q/ShareCandidates/ShareCandidateCallersTests.cs:92,116,153`; `Q/ShareCandidates/ShareCandidateFiltersTests.cs:79,100` (`575c1e1007`, `2410f9d7fb`) | TEST-CONFIRMED (by name) |
-| **Profiles in the share search**: short profile for a User, people, folder and accounts searches | `Q/ShareCandidates/ShareCandidateProfileTests.cs:46,66,82` (`85fdddac88`) | TEST-CONFIRMED (by name) |
-| **Groups offered to a User or a Guest**: only Everyone with total 1 although a group holds access, the group stays in `getFileSecurityInfo`; name search finds nothing (total 0); Room admin gets portal groups; folder variant | `R/GroupSearchPermissionsTests.cs:66-83,92-110,117-128,197`; `Q/ShareCandidates/ShareCandidateAccountsTests.cs:117`; `products/ASC.Files/Core/Utils/FileSharing.cs:776-780` (`f2cfa73361`, `c48dbab686`) | TEST-CONFIRMED |
-| **Contact details of another account**: room access list and group members on an access list, User member gets no location, notes, contacts | `products/ASC.Files/Tests/Tests/04_Security/Sharing/AccessListMembersTests.cs:135-155,165-184` (`bf49b2b96a`); form roles and file or folder access lists by the same profile builder, `common/ASC.Api.Core/Model/EmployeeFullDto.cs` (`GetFullAsync`) | TEST-CONFIRMED for the two cited lists; the others CODE-ONLY |
+| **Whom the share search offers a User or a Guest**: co-member yes, stranger no, by name and email | `Q/ShareCandidates/ShareCandidateUsersTests.cs:46`; `Q/ShareCandidates/ShareCandidateCallersTests.cs:72`; `Q/ShareCandidates/ShareCandidateAccountsTests.cs:45,67,90` | TEST-CONFIRMED [run: PASS] (by name) |
+| Owner of its room; members of a group in its room; in a room through a group; archived room | `Q/ShareCandidates/ShareCandidateUsersTests.cs:66,88,131,147` (`f706d19375`) | TEST-CONFIRMED [run: PASS] (by name) |
+| Owner and DocSpace admin offered every member; Room admin every member with full profile | `Q/ShareCandidates/ShareCandidateCallersTests.cs:45,59`; `Q/ShareCandidates/ShareCandidateProfileTests.cs:103` | TEST-CONFIRMED [run: PASS] (by name) |
+| Accounts with a granting record on the entry or its parent folder are known | `Q/ShareCandidates/ShareCandidateAccessListTests.cs:46,70`; members of a group the file is shared with are not: `:97` | TEST-CONFIRMED [run: PASS] (by name) |
+| **What does not make an account known**: restricted from the room (self, own group), restricted member, restricted group, Restrict record on the room, group manager no member, template recipients; restricted in one room only still known | `Q/ShareCandidates/ShareCandidateUsersTests.cs:108,168,192,215,237,259,282,304`; `Q/ShareCandidates/ShareCandidateRoomUsersTests.cs:46` (`4cce45495e`, `1a215ae902`, `c48dbab686`, `328a620d4a`) | TEST-CONFIRMED [run: PASS] (by name) |
+| **Access state in the share search**: a reader learns no other recipient and no `shared`, in My documents, a room and a public room; `includeShared` empty | `Q/ShareCandidates/ShareCandidateAccessListTests.cs:125,154,185,207`; `User:3256-3262` (`CanSeeSharesAsync`: room → any reader, otherwise manager; an entry read without its parent room type counts as outside a public room, `products/ASC.Files/Core/Utils/FileSharing.cs:898-916`) | TEST-CONFIRMED [run: PASS] (by name); `excludeShared` removing nobody and `shared` true for a denying record CODE-ONLY (`597660e87b`, `328a620d4a`) |
+| **Guests and inviters**: guest met only in a room not offered, related guest offered; Room admin not related gets only the guest of the room with `area` All; `inviterId` of another ignored except for a DocSpace admin | `Q/ShareCandidates/ShareCandidateCallersTests.cs:92,116,153`; `Q/ShareCandidates/ShareCandidateFiltersTests.cs:79,100` (`575c1e1007`, `2410f9d7fb`) | TEST-CONFIRMED [run: PASS] (by name) |
+| **Profiles in the share search**: short profile for a User, people, folder and accounts searches | `Q/ShareCandidates/ShareCandidateProfileTests.cs:46,66,82` (`85fdddac88`) | TEST-CONFIRMED [run: PASS] (by name) |
+| **Groups offered to a User or a Guest**: only Everyone with total 1 although a group holds access, the group stays in `getFileSecurityInfo`; name search finds nothing (total 0); Room admin gets portal groups; folder variant | `R/GroupSearchPermissionsTests.cs:66-83,92-110,117-128,197`; `Q/ShareCandidates/ShareCandidateAccountsTests.cs:117`; `products/ASC.Files/Core/Utils/FileSharing.cs:776-780` (`f2cfa73361`, `c48dbab686`) | TEST-CONFIRMED [run: PASS] |
+| **Contact details of another account**: room access list and group members on an access list, User member gets no location, notes, contacts | `products/ASC.Files/Tests/Tests/04_Security/Sharing/AccessListMembersTests.cs:135-155,165-184` (`bf49b2b96a`); form roles and file or folder access lists by the same profile builder, `common/ASC.Api.Core/Model/EmployeeFullDto.cs` (`GetFullAsync`) | TEST-CONFIRMED [run: PASS] for the two cited lists; the others CODE-ONLY |
 | **Closing one's own profile through the confirmation link** | `User:812-850`; yaml `deleteProfile` (401 replaces the unreachable 404, `893c80e16c`) | CODE-ONLY (unreachable: the `ProfileRemove` key arrives only by letter) |
-| **Real-time account and group events**: add-user and update-user carry `id` alone; update-group the group id alone; change-my-type reaches that user | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketPortalEventsTests.cs:97-99,135,147` (`10b9a0ad34`, `d4251f038b`) | TEST-CONFIRMED; add-guest, update-guest and add-group CODE-ONLY (`common/ASC.Api.Core/Socket/UserSocketManager.cs`) |
+| **Real-time account and group events**: add-user and update-user carry `id` alone; update-group the group id alone; change-my-type reaches that user | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketPortalEventsTests.cs:97-99,135,147` (`10b9a0ad34`, `d4251f038b`) | TEST-CONFIRMED [run: PASS]; add-guest, update-guest and add-group CODE-ONLY (`common/ASC.Api.Core/Socket/UserSocketManager.cs`) |
 | Share search test classes moved from `16_ShareCandidates` to `08_Search/ShareCandidates` (`2cf612f989`) | git | READ |
 | Documented 500 removed from `addMember`, `deleteMember`, `removeUsers`, `updateMember`, the people searches with `filterBy` group, `linkThirdPartyAccount`, `signupThirdPartyAccount` (which also names a link with no uses left for its 403); `updateUserActivationStatus` now documents 401 and 403. No requirement cited a 500; the activation requirement states only the 400 | `9c6fcec6c5`, `893c80e16c` | READ |

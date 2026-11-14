@@ -207,7 +207,7 @@ A deleted profile SHALL no longer appear in `getAllProfiles`, including when its
 
 ### Requirement: Who may start an email change
 
-`sendEmailChangeInstructions` (`POST people/email`) SHALL allow every user type on their own account, the Owner on anyone else's, and a DocSpace admin on Room admins and Users. All other pairs, including a DocSpace admin on another DocSpace admin or on the Owner, SHALL answer 403.
+`sendEmailChangeInstructions` (`POST people/email`) SHALL allow every user type on their own account, the Owner on anyone else's, and a DocSpace admin on Room admins, Users and Guests. All other pairs, including a DocSpace admin on another DocSpace admin or on the Owner, SHALL answer 403.
 
 #### Scenario: Member on self
 

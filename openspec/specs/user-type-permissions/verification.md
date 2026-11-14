@@ -1,8 +1,10 @@
 # user-type-permissions — verification
 
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
+
 > Revision 2026-11-14 (09d4de0768..6fb6dfb17a): `updateUserType` named; the share search now matches the matrix row on Contacts.
 
-> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
 root (`server/`); Files test paths omit the `products/ASC.Files/Tests/Tests/` prefix, People test paths the
@@ -109,6 +111,7 @@ are unchanged (verdicts below).
 | DocSpace admin promotes to Room admin; Room admin cannot | `UserTypeChangeTests.cs:71-92`; `UserTypeUpdatePermissionsTests.cs:44-58` | TEST-CONFIRMED [run: PASS] |
 | Room admin promotes own Guest (queued job, type becomes User); cannot promote a foreign Guest (403); a User cannot either | `UserTypeUpdatePermissionsTests.cs:162-195` (bug 80669), `94-110`; `UserTest.cs:149-170` (bug 80478) | TEST-CONFIRMED [run: PASS] |
 | Owner demotes DocSpace admin → Room admin / User; DocSpace admin demotes Room admin → User and User → Guest | `UserTypeChangeTests.cs:94-123, 125-185` | TEST-CONFIRMED [run: PASS] |
+| Owner demotes a Room admin and a DocSpace admin to Guest through the job (200, both become Guests); the type dropdown of the web client offers Guest for both | live check 2026-11-14 on the `test` stand (`POST people/type`); `common/ASC.Data.Reassigns/UpdateUserTypeProgressItem.cs:204-226`; DocSpace admin on a DocSpace admin refused at `products/ASC.People/Server/Api/UserController.cs:2607` | LIVE-CONFIRMED (Owner only; a DocSpace admin demoting a Room admin to Guest is CODE-ONLY) |
 | DocSpace admin cannot demote a DocSpace admin; type unchanged | `UserTest.cs:64-126` (bug 79724, profile update path); `UserTypeChangeTests.cs:187-212` (type still admin after the job is terminated) | TEST-CONFIRMED [run: PASS] |
 | Room admin demoting a User → job completes with "You don't have enough permission to perform the operation" | `UserTypeUpdatePermissionsTests.cs:140-160` (type unchanged not asserted) | TEST-CONFIRMED [run: PASS] |
 | Room admin cannot demote a Room admin | `02_UserType/UserTypeUpdatePermissionsTests.cs:162-194` (synchronous endpoint 403; job ends with "You don't have enough permission to perform the operation"; type stays Room admin) | TEST-CONFIRMED [run: PASS] |

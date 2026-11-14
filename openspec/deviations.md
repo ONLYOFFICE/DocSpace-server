@@ -333,6 +333,24 @@ Evidence column:
 | FW6 | form-filling-workflow | `PUT files/file/{id}/manageformfilling` with `Resume` on a form that was never started answers 500 (no filling properties); since `0ff3031b59` the yaml no longer declares that 500. Spec number F6. | test (`FormFillingStateTests.cs:252`) | OPEN |
 | R11 | room-role-permissions | Since `fcd31cbadf` the yaml says `archiveRoom`/`unarchiveRoom` need the room manager role and refuse a non-invited DocSpace admin; the server refuses an invited Room manager on both (403) and lets a non-member DocSpace admin restore. The yaml text is wrong. | tests (`RoomArchiveRoomManagerTests.cs:46,62`, `RoomArchivePermissionsTests.cs:200`) | OPEN (documentation) |
 | A35 | ai-agents | `aiPromptsDelete` answers success for another user's prompt and does not delete it (bug 82809). | red by code reading; `PromptIsolationTests.cs:108` | OPEN |
+| OA4 | oauth2-applications | `DELETE api/2.0/clients` (`deleteUserClients`) by a DocSpace admin answers 500 "Something went wrong"; it passed on 2026-11-10. The release brought Identity migration `V1_9_1__group_replication_keys.sql` (invisible primary keys on the client child tables), the likely cause, not proven. | full run 2026-11-14 and alone (`ClientWriteAccessTests.cs:237`); the other client writes failed in the full run with the same 500 and passed alone | OPEN (regression, cause not established) |
+| FW7 | form-filling-workflow | The release's own unit test `GetTableColumns_DecidedVersionWithoutSubmissions_AddsNoColumns` fails: `FormFillingReportCreator.MatchFields` returns null for a field added in a decided, never-filled version, so the rename into it gets no column. | `FormEditorSessionsTests.cs:325` red in the full run and alone, deterministic (unit test, commit `c330e3222e`) | OPEN (release regression) |
+| F30 | file-operations | `deleteRecent` with a folder id sends `delete` of that folder to the parent folder's socket room, so open clients take the folder off its list although it stays there. | `SocketFolderEventsTests.cs:113` red in the 2026-11-07 and 2026-11-14 runs, also alone; no bug mark yet | OPEN |
+
+## Web client vs server (live check 2026-11-14, report only)
+
+The web client decides these actions by its own rule, not by a server flag. Checked on the `test` stand through the UI (Playwright) and the API. The server side follows the specs; the fix belongs to the client.
+
+| # | Spec | Client | Server | Verdict |
+|---|---|---|---|---|
+| CL1 | invitations | A Room admin is offered "Invite again" for a pending Room admin invited by the Owner. | `resendUserInvites` answers 200 and lists the account, but sends no letter; the same resend by a DocSpace admin sends one. | CLIENT BUG (offers what silently does nothing) |
+| CL2 | invitations | A DocSpace admin is offered "Invite again" for a pending DocSpace admin. | 200, no letter; the Owner's resend sends one. | CLIENT BUG (offers what silently does nothing) |
+| CL3 | shared-links | The link edit panel of a Form filling room always preselects FillForms: setting only a password on a Read link and saving rewrites its access to FillForms. | The API keeps the access it is sent. | CLIENT BUG (changes data) |
+| CL4 | room-types | The room owner's context menu of a Form filling room has no "Archive". | `PUT rooms/{id}/archive` by the same user answers 200 and the room moves to the Archive. | CLIENT BUG (hides what works) |
+| CL5 | shared-links | The link edit panel of a Form filling room has no deny-download toggle. | The API accepts `denyDownload=true` on that link (200, stored). | CLIENT BUG (hides what works) |
+| CL6 | people-and-groups | The Owner's menu of a disabled Guest has no "Reassign data". | `POST people/reassign/start` answers 200 and the job completes with no error. | CLIENT BUG (hides what works) |
+
+Checked and agreeing: a DocSpace admin changes a Guest's email (spec corrected), the Owner demotes a Room admin and a DocSpace admin to Guest (spec corrected), a non-member DocSpace admin gets the share action of an empty Public room from the header only, and a demoted DocSpace admin's settings page leaves for /error/401 within about 6 s while a save answers 403.
 
 ## Closed by v4.1.0
 

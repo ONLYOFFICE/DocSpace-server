@@ -143,7 +143,7 @@ public class MigrationUploadTests(
         // Assert
         init.Success.Should().BeTrue();
         status.Should().NotBeNull();
-        status!.Error.Should().Be("Archive must be .zip");
+        status!.Error.Should().Be("Archive must be .zip, .tar.gz or .tgz");
         status.ParseResult.FailedArchives.Should().BeEmpty();
     }
 }

@@ -288,8 +288,8 @@ appear only through room invitations.
 ### Requirement: Changing a user's type
 
 The system SHALL restrict user type changes (`updateUserType`) by the caller's type: only the Owner promotes to or demotes
-from DocSpace admin; the Owner and DocSpace admins promote to Room admin, demote Room admins and Users, and
-promote any Guest; a Room admin promotes only the Guests they invited themselves. Demotions run as a queued
+from DocSpace admin; the Owner and DocSpace admins promote to Room admin, demote Room admins and Users (to User or Guest), and
+promote any Guest; only the Owner demotes a DocSpace admin to Guest; a Room admin promotes only the Guests they invited themselves. Demotions run as a queued
 job that reports its result.
 
 #### Scenario: Type change matrix by caller type
@@ -307,6 +307,8 @@ job that reports its result.
 | Demote DocSpace admin to User             | ✔ |   |   |
 | Demote Room admin to User                 | ✔ | ✔ |   |
 | Demote User to Guest                      | ✔ | ✔ |   |
+| Demote Room admin to Guest                | ✔ | ✔ |   |
+| Demote DocSpace admin to Guest            | ✔ |   |   |
 
 #### Scenario: Only the owner changes a DocSpace admin's type
 

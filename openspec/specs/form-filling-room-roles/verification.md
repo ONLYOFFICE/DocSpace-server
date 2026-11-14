@@ -1,6 +1,7 @@
 # form-filling-room-roles — verification
 
-> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
 root (`server/`); Files test paths omit the `products/ASC.Files/Tests/Tests/` prefix. `yaml` is
@@ -41,7 +42,7 @@ Revision 2026-11-11: the ten CODE-ONLY rows got Form filling room tests and ran 
 |---|---|---|
 | **Form filling room role set** | | |
 | Form Filler accepted (access echoed); Editor, Viewer → 403; Room manager for a User → 403 (user-type rule) | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:52-59, 104-114` | TEST-CONFIRMED [run: PASS] |
-| Reviewer, Commentator → 403 | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:60-61` (rows of the theory at `:87-115`); `FileSecurity.cs:199-209` | TEST-CONFIRMED [run: PASS] |
+| Reviewer, Commentator → 403 | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:60-61` (rows of the theory at `:87-115`); `FileSecurity.cs:199-209` | TEST-CONFIRMED [run: NOT-IN-RUN] |
 | Content creator and Room manager (Room admin / DocSpace admin) land in the member list | `05_Features/ExternalDbSync/ExternalDbSyncTestBase.cs:61-68`; `ExternalDbSyncPermissionsTests.cs:85, 114`; `03_Rooms/Invitations/RoomInvitationResendTests.cs:243-254` | TEST-CONFIRMED [run: PASS] |
 | **Form filling room management by role** | | |
 | Edit the room: owner switches spreadsheet collection and database sync on / off | `03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:170-200` | TEST-CONFIRMED [run: PASS] (owner) |

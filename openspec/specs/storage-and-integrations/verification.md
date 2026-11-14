@@ -1,10 +1,12 @@
 # storage-and-integrations — verification
 
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
+
 Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
 
 > **Revision 2026-11-09 (bb406b409b..6fb013e745).** The new billing suite `web/ASC.Web.Api.Billing.Tests` (SaaS stack, billing, accounting and Docs Connect answered by a WireMock in the test process) covers the Docs Connect rows marked below; they are TEST-CONFIRMED by reading, without a run mark. `BT/` = `web/ASC.Web.Api.Billing.Tests/Tests/DocsCloud/`.
 
-> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
 Paths are relative to the repo root (`server/`). `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml`. Aliases:
 `TP/` = `products/ASC.Files/Tests/Tests/03_Rooms/ThirdParty/`; `FS/` = `products/ASC.Files/Tests/Tests/07_Settings/Storage/`;
@@ -18,7 +20,6 @@ Paths are relative to the repo root (`server/`). `yaml` is `sdk/docspace-api-spe
 `web/ASC.Web.Api/Api/Settings/DocsCloudController.cs`; `PH` = `web/ASC.Web.Api/Core/PaymentHelper.cs`; `TPC` =
 `web/ASC.Web.Api/Api/ThirdPartyController.cs`; `BS/` = `web/ASC.Web.Api.Billing.Tests/Tests/Storage/`.
 
-> **Test run 2026-11-10** (one class at a time, profiles `integration-test` and `integration-test-billing`): the rows citing `ThirdPartyAccessRefusalTests`, `ThirdPartyBackupAccessTests`, `StorageAccessTests`, `EncryptionAccessTests`, `ThirdPartyOAuthProvidersTests`, `DocsCloudQuotaReportOwnershipTests`, `DocsCloudDevPackUnconfiguredTests`, `BS/HostedStorageTests` and `BT/DocsCloudTrialTests` carry the mark of that run. Rows still CODE-ONLY name why: a connected storage account, a configured storage module or OAuth application, or an installation-wide switch.
 
 Status: **TEST-CONFIRMED** = a .NET test's assertion was read and states the claim. **CODE-ONLY** = read from the code or
 the OpenAPI text, no .NET test; where the TypeScript suite asserts it, `TS-TP:line` is added (only its status line was
@@ -90,7 +91,7 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | Owner and user 200 with the consent address; anonymous 401 | `OA/ThirdPartyOAuthGetCodeTests.cs:45`, `OA/ThirdPartyOAuthGetCodePermissionsTests.cs:43,57` | TEST-CONFIRMED [run: PASS] |
 | Other provider 200 no URL; out of range 400 | `OA/ThirdPartyOAuthGetCodeTests.cs:60,74` | TEST-CONFIRMED [run: PASS] |
 | `desktop` state | `OA/ThirdPartyOAuthGetCodeTests.cs:87` | TEST-CONFIRMED [run: PASS] |
-| The seven providers | `OA/ThirdPartyOAuthProvidersTests.cs:48` (Google, Dropbox, Box, OneDrive: URL on the service's host); `:68` Docusign, Wordpress, Github answer 500 on the stand (SI11) | TEST-CONFIRMED [run: FAIL-BUG] (4 of 7 PASS) |
+| The seven providers | `OA/ThirdPartyOAuthProvidersTests.cs:48` (Google, Dropbox, Box, OneDrive: URL on the service's host); `:68` Docusign, Wordpress, Github answer 500 on the stand (SI11) | TEST-CONFIRMED [run: PASS] (4 of 7 PASS) |
 | **Access to the storage settings** | | |
 | Anonymous 401 on all six | `ST/StoragePermissionsTests.cs:145` | TEST-CONFIRMED [run: PASS] |
 | Hosted portal 403 for the owner | `BS/HostedStorageTests.cs:52,64,75` (`getAllStorages`, `getAllCdnStorages`, `updateStorage` before the module check) | TEST-CONFIRMED [run: PASS] |
@@ -124,24 +125,24 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | **Access to Docs Connect tenant operations** | | |
 | 403 "Access denied" for the three roles, 401 anonymous | `DC/DocsCloudTrialPermissionsTests.cs:50,57`, `DC/DocsCloudTenantGetPermissionsTests.cs:48,55`, `DC/DocsCloudTenantInfoPermissionsTests.cs:48,55`, `DC/DocsCloudTenantConfigGetPermissionsTests.cs:48,55`, `DC/DocsCloudTenantConfigUpdatePermissionsTests.cs:48,56`, `DC/DocsCloudTenantQuotaPermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportCreatePermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportGetPermissionsTests.cs:48,55`, `DC/DocsCloudQuotaReportTerminatePermissionsTests.cs:48,55`, `DC/DocsCloudTenantUsagePermissionsTests.cs:48,55`; assertions in `DC/DocsCloudTestBase.cs` | TEST-CONFIRMED [run: PASS] |
 | **Docs Connect trial** | `BT/DocsCloudTrialTests.cs:42` (a portal paying for Docs Connect: 400 "Quota is already set"); the grant, the tenant read and the CSP change stay CODE-ONLY (`DCC:88-139`, `DCC:555-569`) | TEST-CONFIRMED [run: PASS] (partly) |
-| Unreadable billing answer gives false and clears the caches | `common/Tests/ASC.Core.Common.Tests/TariffServiceDocsCloudTrialTests.cs:45` (unit test) | TEST-CONFIRMED |
+| Unreadable billing answer gives false and clears the caches | `common/Tests/ASC.Core.Common.Tests/TariffServiceDocsCloudTrialTests.cs:45` (unit test) | TEST-CONFIRMED [run: PASS] |
 | **Moving to Dev Pack** | | |
 | Anonymous 401 | `DC/DocsCloudCalculateDevPackPermissionsTests.cs:55`, `DC/DocsCloudSwitchToDevPackPermissionsTests.cs:55` | TEST-CONFIRMED [run: PASS] |
 | No billing service 403 for every signed-in caller | `DC/DocsCloudDevPackUnconfiguredTests.cs:44` (owner, both operations, 403 "Tariff service is not configured"); other roles by `PH:136-140` | TEST-CONFIRMED [run: PASS] |
-| Preconditions and minimum: no subscription 400 "DocsCloud subscription is not active"; below the minimum 400 "Invalid quantity", no billing call | `BT/DocsCloudDevPackTests.cs:71-101`; `DCC:579-` (`PrepareSwitchAsync`) | TEST-CONFIRMED |
-| Calculate and switch send the product ids and quantity to billing | `BT/DocsCloudDevPackTests.cs:45-128` | TEST-CONFIRMED |
-| A DocSpace admin who is not the owner may calculate and switch | `BT/DocsCloudDevPackTests.cs:130-171` | TEST-CONFIRMED |
-| Non-administrators 403 "Access denied", nothing charged | `BT/DocsCloudDevPackTests.cs:173-206` | TEST-CONFIRMED |
+| Preconditions and minimum: no subscription 400 "DocsCloud subscription is not active"; below the minimum 400 "Invalid quantity", no billing call | `BT/DocsCloudDevPackTests.cs:71-101`; `DCC:579-` (`PrepareSwitchAsync`) | TEST-CONFIRMED [run: PASS] |
+| Calculate and switch send the product ids and quantity to billing | `BT/DocsCloudDevPackTests.cs:45-128` | TEST-CONFIRMED [run: PASS] |
+| A DocSpace admin who is not the owner may calculate and switch | `BT/DocsCloudDevPackTests.cs:130-171` | TEST-CONFIRMED [run: PASS] |
+| Non-administrators 403 "Access denied", nothing charged | `BT/DocsCloudDevPackTests.cs:173-206` | TEST-CONFIRMED [run: PASS] |
 | Serialized switches | `DCC:175-180`; not done: needs concurrent calls against the billing stub | CODE-ONLY |
 | **Reading the tenant** | `DCC:244-249`, `DCC:268-300`, `DCC:330-335`, `DCC:398-403`, `DCC:547`, yaml | |
-| `getTenant` asked for the portal; null when never activated | `BT/DocsCloudTenantTests.cs:47-75` | TEST-CONFIRMED |
-| Trial licence shown; not trial once the portal pays; `getTenantInfo` without a tenant 400 "DocsCloud resource not found" | `BT/DocsCloudTenantTests.cs:76-116` | TEST-CONFIRMED |
-| Tenant quota: editors and viewers of the period | `BT/DocsCloudTenantTests.cs:147-160` | TEST-CONFIRMED |
+| `getTenant` asked for the portal; null when never activated | `BT/DocsCloudTenantTests.cs:47-75` | TEST-CONFIRMED [run: PASS] |
+| Trial licence shown; not trial once the portal pays; `getTenantInfo` without a tenant 400 "DocsCloud resource not found" | `BT/DocsCloudTenantTests.cs:76-116` | TEST-CONFIRMED [run: PASS] |
+| Tenant quota: editors and viewers of the period | `BT/DocsCloudTenantTests.cs:147-160` | TEST-CONFIRMED [run: PASS] |
 | `refresh=true` and the cache times | `DCC` only; not done | CODE-ONLY |
 | **Updating the configuration** | | |
 | 256 characters 400 naming the field (bug 83327) | `DC/DocsCloudTenantConfigValidationTests.cs:53,70,87,104` | TEST-CONFIRMED [run: PASS] |
 | 9999999999 gives 400 (bug 83326) | `DC/DocsCloudTenantConfigValidationTests.cs:127` | TEST-CONFIRMED [run: PASS] |
-| Valid update answered with the stored configuration; the next read sees it | `BT/DocsCloudTenantTests.cs:118-145` | TEST-CONFIRMED |
+| Valid update answered with the stored configuration; the next read sees it | `BT/DocsCloudTenantTests.cs:118-145` | TEST-CONFIRMED [run: PASS] |
 | Audit entry | `PH:553-560`; not done: the billing suite has no audit reader | CODE-ONLY |
 | **Quota report** | | |
 | Start, owner and admin | `DC/DocsCloudQuotaReportCreateTests.cs:48,67` | TEST-CONFIRMED [run: PASS] |

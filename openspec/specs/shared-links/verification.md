@@ -1,10 +1,12 @@
 # shared-links — verification
 
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
+
 > Revision 2026-11-14 (09d4de0768..6fb6dfb17a): requirement "Listing the links of a room" (`getRoomLinks`) added; no link behaviour changed in the range.
 
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
-> **Test run 365d87fe60** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-07), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 >
 > **2026-11-11:** the former CODE-ONLY rows are covered by new tests (`01_Files/Links/FileLinkLimitTests.cs`, `02_Folders/Links/FolderLinkLimitTests.cs`, `03_Rooms/Links/RoomLinkLimitTests.cs`, `03_Rooms/Links/AiHubRoomLinkTests.cs`, `03_Rooms/Permissions/RoomLinkMemberRolesTests.cs`, `04_Security/LinkSettingsByRoomTypeTests.cs`, `04_Security/FileLinkScopeTests.cs`, `04_Security/VdrDenyDownloadRolesTests.cs`); each class was run alone (`--filter-class`) and passed; `[run: PASS]` on those rows refers to that run.
 
@@ -113,7 +115,7 @@ and R10; the yaml line numbers were refreshed to submodule `5ea4dc6`. D2, D11, D
 | Viewer, Guest Viewer, non-members → 403; anonymous 401; terminated 401 | `RoomLinkPermissionsTests.cs:250-270, 301-359`; `FolderLinkPrimaryPermissionsTests.cs:119-159` | TEST-CONFIRMED [run: PASS] |
 | Editor, Form Filler, Reviewer, Commentator → 403 | `RoomLinkMemberRolesTests.cs:67-87` (room link, Custom room: Editing / Review / Comment), `:89-110` (file link, same roles), `:112-136` (Form filler in an FFR: room link and form link) | TEST-CONFIRMED [run: PASS] |
 | Primary link of a Custom room: Room manager and Content creator read it; a Viewer (User with Read) → 403; the folder endpoint likewise | `RoomLinkPermissionsTests.cs:98-147`; `03_Rooms/RoomAccessData.cs:88-92`; `FolderLinkPrimaryPermissionsTests.cs:259-276`; `getRoomLinks` for a member without link access → 200 and empty `RoomLinkReadTests.cs:504-520` | TEST-CONFIRMED [run: PASS] |
-| Reading the primary link of a file requires the right to manage links | `FileLinkPrimaryTests.GetPrimaryLink_UserWithoutAccess_AnotherUsersPrivateFile_Returns403` (bug 81572; passes, a no-access caller gets 403) | TEST-CONFIRMED [run: PASS] (`CreatePrimaryLink_AfterThePrimaryLinkWasRevoked_CreatesItAgain` beside it, R10, is fixed by 62419af921) |
+| Reading the primary link of a file requires the right to manage links | `FileLinkPrimaryTests.GetPrimaryLink_UserWithoutAccess_AnotherUsersPrivateFile_Returns403` (bug 81572; passes, a no-access caller gets 403) | TEST-CONFIRMED [run: NO-LINK] (`CreatePrimaryLink_AfterThePrimaryLinkWasRevoked_CreatesItAgain` beside it, R10, is fixed by 62419af921) |
 | Non-member DocSpace admin reads the Public room's primary link (200) and cannot create a link there (403) | `RoomLinkPermissionsTests.cs:62-77, 250-270` | TEST-CONFIRMED [run: PASS] |
 
 Counts: 47 rows — TEST-CONFIRMED 42 (3 of them partly CODE-ONLY: the Knowledge room, folder links in
@@ -184,5 +186,5 @@ D-numbers are the ones of `openspec/deviations.md`; R-numbers are new.
 
 | Claim | Source | Status |
 |---|---|---|
-| Public room: auto-created external link, primary true; custom room empty by default; `type` external / invitation / none | `products/ASC.Files/Tests/Tests/03_Rooms/Links/RoomLinkReadTests.cs:50,67,83,173,193,213` | TEST-CONFIRMED (by name) |
+| Public room: auto-created external link, primary true; custom room empty by default; `type` external / invitation / none | `products/ASC.Files/Tests/Tests/03_Rooms/Links/RoomLinkReadTests.cs:50,67,83,173,193,213` | TEST-CONFIRMED [run: PASS] (by name) |
 | Read access required (403), unknown room 404, member without the link right gets an empty list, at most 100, paging ignored | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:903-924`; yaml `getRoomLinks` | CODE-ONLY |

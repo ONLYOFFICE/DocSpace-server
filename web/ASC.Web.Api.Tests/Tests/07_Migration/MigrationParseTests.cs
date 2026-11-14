@@ -118,7 +118,7 @@ public class MigrationParseTests(
 
         // Assert
         status.Should().NotBeNull();
-        status!.Error.Should().Be("Archive must be .zip");
+        status!.Error.Should().Be("Archive must be .zip, .tar.gz or .tgz");
         status.ParseResult.FailedArchives.Should().ContainSingle(f => f.EndsWith("backup.txt"));
     }
 
@@ -173,7 +173,7 @@ public class MigrationParseTests(
         // Arrange
         await UploadBackup("backup.txt", Encoding.UTF8.GetBytes("not an archive"));
         var failed = await Parse("Nextcloud");
-        failed!.Error.Should().Be("Archive must be .zip");
+        failed!.Error.Should().Be("Archive must be .zip, .tar.gz or .tgz");
 
         // Act
         var status = await Parse("Nextcloud", s => s.Error != failed.Error);
