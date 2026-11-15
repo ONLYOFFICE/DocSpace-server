@@ -13,6 +13,9 @@ context: |
   even to fix it, is a change of behaviour too.
   Role and access rules exist on the server and, partly recomputed, in the web client (../client); the section
   "Web client vs server" of deviations.md lists where they already disagree.
+  The repository is public. A change that fixes or finds a security defect (a caller reads, changes or deletes what their rights do not allow, a secret, key, token or personal data leaks, a check runs for the wrong account or portal, a request reaches an internal address, a payment, licence or second-factor gate is bypassed, an audit event names the wrong actor)
+  must not describe the hole in any artifact before the fixing version is released: no route, request or
+  reproduction in the proposal, delta, design or tasks, and no Bug-marked test; state it to the user in chat.
 
 rules:
   proposal:

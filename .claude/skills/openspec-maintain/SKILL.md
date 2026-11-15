@@ -21,6 +21,19 @@ notes, a TS test) disagree, the spec follows the server. Behaviour that looks in
 behaviour that is clearly wrong stays out of the requirements and goes to "Suspected defects" plus deviations.md.
 A test that asserts the correct behaviour of an open defect carries `[Trait("Category", "Bug")]` and stays red.
 
+**Security defects stay out of the repository until a released version fixes them.** The repository is public
+(GitHub mirror), so a security defect (a caller reads, changes or deletes what their rights do not allow, a secret, key, token or personal data leaks, a check runs for the wrong account or portal, a request reaches an internal address, a payment, licence or second-factor gate is bypassed, an audit event names the wrong actor) goes into none of deviations.md, spec.md, verification.md
+or a committed test. The briefs make agents report such a defect only in their final message, marked SECURITY;
+the coordinator records it in the private register outside the repository, and a Bug-marked
+test for it stays uncommitted. After the release that ships the fix it may enter the repository like any
+fixed defect, with the advisory or changelog entry the user names. The same goes for a security fix that is
+merged but not released: the Closed table does not list it until the release.
+The register's path is the environment variable `OPENSPEC_SECURITY_REGISTER`, set per developer in the ignored
+`.claude/settings.local.json` (`"env": {"OPENSPEC_SECURITY_REGISTER": "<path>"}`). When it is unset, ask the
+user for the path and never fall back to a file inside the repository. At the end of every mode, collect the
+SECURITY items of the agents' reports, check each in the code, append it to the register (id, class, route,
+evidence, test code) and name the new ids to the user, so that the user files them in the bug tracker.
+
 ### verification.md statuses
 
 | Status | Meaning |

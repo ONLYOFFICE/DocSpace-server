@@ -25,4 +25,4 @@ verification.md: rows claim | source (test file:line / yaml operation / code fil
 
 ## Finish
 
-`openspec validate <NAME> --type spec --no-interactive`: valid, zero warnings. Final message: requirement names, scenario count, status counts, operations left out and why, surprising facts, suspected defects, what you did not verify.
+`openspec validate <NAME> --type spec --no-interactive`: valid, zero warnings. Final message: requirement names, scenario count, status counts, operations left out and why, surprising facts, suspected defects, what you did not verify. A suspected security defect (a caller reads, changes or deletes what their rights do not allow, a secret, key, token or personal data leaks, a check runs for the wrong account or portal, a request reaches an internal address, a payment, licence or second-factor gate is bypassed, an audit event names the wrong actor) is written into no spec file, only into the final message, marked SECURITY.
