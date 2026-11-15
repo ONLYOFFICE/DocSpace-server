@@ -1,6 +1,6 @@
 ---
 name: openspec-maintain
-description: "Keeping the OpenSpec capability specs (openspec/specs/*/spec.md + verification.md, openspec/deviations.md) true to the current server: re-sync them after a merge brings product changes, cover CODE-ONLY verification rows with integration tests, run the whole test solution and write the run marks onto the rows, find API operations no spec names. USE FOR: re-sync the specs after a merge, update the specs for the release, which spec rows are only confirmed by code, add tests for code-only rows, apply the test run to the specs, refresh the run marks, which operations have no spec, register a defect found by a spec test. DO NOT USE FOR: OpenSpec change proposals and their workflow (openspec-propose, openspec-apply-change, openspec-archive-change), fixing the defects the specs list (fix-bug), running a suite without touching the specs (run-tests)."
+description: "Keeping the OpenSpec capability specs (openspec/specs/*/spec.md + verification.md, openspec/deviations.md) true to the current server: re-sync them after a merge brings product changes, cover CODE-ONLY verification rows with integration tests, run the whole test solution and write the run marks onto the rows, find API operations no spec names or no test calls, and keep the rules of openspec/config.yaml that guard new features against the current specs. USE FOR: re-sync the specs after a merge, update the specs for the release, which spec rows are only confirmed by code, add tests for code-only rows, apply the test run to the specs, refresh the run marks, which operations have no spec, which API operations have no test, API test coverage, register a defect found by a spec test. DO NOT USE FOR: OpenSpec change proposals and their workflow (openspec-propose, openspec-apply-change, openspec-archive-change), fixing the defects the specs list (fix-bug), running a suite without touching the specs (run-tests)."
 ---
 
 # Maintaining the OpenSpec specs
@@ -78,6 +78,27 @@ Nextcloud container IS on the stand (`Requires=Nextcloud` tests, see `03_Rooms/T
    rewrites the marks and the run legend of every verification.md (and of translated copies with the same row
    count, if `--ru` names their root). It is idempotent.
 5. Judge every FAIL row: a test fault, a flake, or a defect. A defect gets a Bug-marked test and a deviations.md row.
+
+## Mode D: which operations the tests call
+
+`python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py [--out <file.md>] [--spec <name>]`
+maps every operation of the published yaml to the test projects of `ASC.Tests.slnx`: `sdk` (a test calls
+`.<OperationId>Async(` or `.<OperationId>WithHttpInfoAsync(`), `raw` (only a route literal matches; the HTTP
+method is not checked, so read the test), `none`. It prints the counts per spec and, with `--out`, lists every
+`raw` and `none` operation per spec with the files that hit it. It is a text scan: a same-named helper called
+with a receiver counts as a call. Use the `none` list to queue mode B work (an operation no test calls has no
+TEST-CONFIRMED row behind it either) and run it after every batch. This is the "every operation is called"
+level; the "every row is TEST-CONFIRMED" level is the CODE-ONLY count of mode B.
+
+## New features against the specs
+
+The OpenSpec change workflow (`openspec-propose`, `openspec-apply-change`, `openspec-verify-change`,
+`openspec-archive-change`) reads `openspec/config.yaml`. Its `context` tells the agent how to find the governing
+requirements by operationId or route, and its `rules` make every proposal list the touched capabilities and a
+"Breaks current behaviour" section, make every delta quote the requirements it modifies or removes, state
+boundaries for new numeric, length and list inputs, and make the tasks update the tests that cite a modified
+requirement and end with mode D for the touched specs. Keep those rules in step with this skill when either
+changes.
 
 ## Traps
 
