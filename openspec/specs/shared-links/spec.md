@@ -1,0 +1,259 @@
+# shared-links Specification
+
+## Purpose
+
+Defines the rules for shared (external) links: on which entities — a room, a folder, a file — a link can be
+created depending on where the entity lives, how many links an entity may have, which settings a link
+offers in each room type, how a rule that a request violates is applied, and which room roles may manage
+links.
+
+Sources: product matrix "Shared link rules", checked against the integration tests and a live run against
+the server (October 2026). Where the matrix and the server disagree, this specification follows the
+server; the differences are listed in `openspec/deviations.md` and, with the evidence for every row, in
+`verification.md` next to this file. A link to a room and a link to a folder or a file inside it are
+different links with independent limits and settings. A link is either primary (permanent, one per entity
+in rooms) or additional. An invitation link is not a shared link and is not covered here. The matrices
+themselves are stated in the first scenario of each requirement.
+
+## Requirements
+
+### Requirement: Entities that accept a shared link
+
+The system SHALL allow shared links on an entity according to the section or room type holding it: a
+Public or Custom room and the entries of a Public room carry a primary link plus additional links; a Form
+filling room and its entries a primary link only; a Collaboration room and a Virtual Data Room accept no
+link to the room itself, their files and folders, like those of My documents and a Custom room, additional
+links; a room of the AI rooms section (v4.1) and its entries none.
+
+#### Scenario: Link availability matrix by location
+
+- **WHEN** a link is requested on a room, folder or file in the given location
+- **THEN** availability and the maximum follow this table
+
+| Location            | Room | Folder | File |
+|---------------------|:----:|:------:|:----:|
+| My documents        | not applicable — a section cannot be linked | up to 6 additional | up to 6 additional |
+| Public room         | 1 primary + up to 5 additional | 1 primary + up to 5 additional | 1 primary + up to 5 additional |
+| Form filling room   | 1 primary, no additional | 1 primary, no additional | 1 primary, no additional |
+| Collaboration room  | not allowed | up to 6 additional | up to 6 additional |
+| Virtual Data Room   | not allowed | up to 6 additional | up to 6 additional |
+| Custom room         | 1 primary + up to 5 additional | up to 6 additional | up to 6 additional |
+| AI rooms section (Instructions, Knowledge, AI project) | not allowed | not allowed | not allowed |
+
+#### Scenario: Link to a room of the AI rooms section
+
+- **WHEN** an external link is requested on an Instructions, Knowledge or AI project room, or on a file or folder inside one
+- **THEN** the system rejects the request (403, "The role is not available for this user type"); the invitation link of such a room is covered by `invitations`
+
+#### Scenario: Link to a Collaboration room itself
+
+- **WHEN** a Room Owner attempts to create a shared link to a Collaboration room or a Virtual Data Room itself
+- **THEN** the system rejects the request (403, "The role is not available for this user type")
+
+#### Scenario: Link to a file in a Collaboration room
+
+- **WHEN** a Room Owner creates a shared link to a file or a folder inside a Collaboration room or a Virtual Data Room
+- **THEN** the link is created
+
+#### Scenario: Link to a Custom room
+
+- **WHEN** a Room Owner creates a shared link to a Custom room
+- **THEN** the link is created
+
+### Requirement: Link count limits
+
+The system SHALL limit the number of additional links on an entity to 6 for files and folders in My
+documents, Collaboration rooms, Virtual Data Rooms and Custom rooms, and to 5 for a Public room, a Custom
+room and the files and folders inside a Public room, where one more link is the primary link. In a Form
+filling room an entity SHALL have only its primary link. A request beyond the limit SHALL be rejected with
+403 and the message "The maximum number of links may not exceed {N}".
+
+#### Scenario: Seventh additional link on a file
+
+- **WHEN** a file in My documents already has 6 additional links and a seventh is requested
+- **THEN** the system rejects the request (403, "…may not exceed 6")
+
+#### Scenario: Sixth additional link in a Public room
+
+- **WHEN** a Public room already has its primary link and 5 additional links and another additional link is requested
+- **THEN** the system rejects the request (403, "…may not exceed 5")
+
+#### Scenario: Second primary link in a Public room
+
+- **WHEN** a second primary link is requested for a Public room or for a file inside it
+- **THEN** the system rejects the request (403, "…may not exceed 1")
+
+#### Scenario: Additional link in a Form filling room
+
+- **WHEN** an additional link is requested for a Form filling room or for a folder or file inside it
+- **THEN** the system rejects the request (403, "…may not exceed 0")
+
+### Requirement: Room links and item links are independent
+
+A link to a room SHALL NOT be treated as a link to a folder or file inside the room, and a link to a folder
+or a file SHALL NOT be treated as a link to its room: each entity has its own links, its own limit and its
+own settings. A folder link SHALL open the folder and every file in it with the folder link's right; a
+file link SHALL open only that file with its own right. Changing one link SHALL NOT change any other link.
+
+#### Scenario: Room links do not consume the file limit
+
+- **WHEN** a Custom room has its 6 room links and a link to a file inside it is requested
+- **THEN** the file link is created
+
+#### Scenario: File opened through a folder link
+
+- **WHEN** a folder has a view-only link, a file inside it has its own link with the editing right, and the file is opened through the folder link
+- **THEN** the file opens for viewing
+
+#### Scenario: File opened through its own link
+
+- **WHEN** the same file is opened through its own link
+- **THEN** it opens for editing, and the parent folder and sibling files are not accessible with that link (403)
+
+#### Scenario: Folder link rights change
+
+- **WHEN** the access right of a folder link is changed
+- **THEN** the access rights of the links created on files inside the folder stay as they were
+
+### Requirement: Link settings by room type
+
+The system SHALL offer link settings according to the section or room type that contains the entity:
+access rights, the "who has access" choice ("Anyone with the link" or "DocSpace users only"), a password,
+the deny-download flag and a lifetime (expiration). Where a setting is not offered its value is fixed, as
+the matrix scenario and the fixed-value scenarios state.
+
+#### Scenario: Link settings matrix by location
+
+- **WHEN** a link is created or edited on an entity in the given location
+- **THEN** the settings that can be chosen follow this table
+
+| Location            | Access rights | Who has access | Password | Deny download | Lifetime |
+|---------------------|:-------------:|:--------------:|:--------:|:-------------:|:--------:|
+| My documents        | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Public room         | ✔ | ✗ | ✔ | ✔ | additional links only |
+| Form filling room   | ✗ | ✔ | ✔ | ✔ | room link ✗ |
+| Collaboration room  | ✔ | ✔ | ✔ | ✔ | ✔ |
+| Virtual Data Room   | ✔ | ✗ | ✔ | ✔ | ✔ |
+| Custom room         | ✔ | ✔ | ✔ | ✔ | ✔ |
+
+#### Scenario: Fixed audience of Public room and VDR links
+
+- **WHEN** a link exists in a Public room or in a Virtual Data Room
+- **THEN** a Public room link is available to anyone with the link and a VDR link to DocSpace users only, whatever the request asked for
+
+#### Scenario: Form filling room link with the editing right
+
+- **WHEN** a link in a Form filling room is created or edited with the editing, review or comment right
+- **THEN** the system rejects the request (403, "The role is not available for this user type"); the room link grants reading or form filling
+
+#### Scenario: Form link inside a Form filling room with the read right
+
+- **WHEN** a link to a form or folder inside a Form filling room is requested with the read right
+- **THEN** the system rejects the request (403); such a link grants form filling only
+
+#### Scenario: Primary room link does not expire
+
+- **WHEN** an expiration date is set on the primary link of a Public room or a Form filling room
+- **THEN** the request succeeds and the stored link has no expiration
+
+#### Scenario: Additional link of a Public room expires
+
+- **WHEN** an expiration date is set on an additional link of a Public room, or on a link of a file or folder inside a Public or Form filling room
+- **THEN** the expiration date is saved
+
+#### Scenario: Password and download restriction everywhere
+
+- **WHEN** a password or the deny-download flag is set on a link in any section or room type
+- **THEN** the setting is saved
+
+### Requirement: A fixed "who has access" value silently skips the update
+
+When a request for a link in a Public room or a Virtual Data Room carries a "who has access" value that
+differs from the fixed one, the system SHALL answer success and SHALL NOT apply any part of that request —
+title, password, access right and revocation included. A request that omits the value, or sends the fixed
+one, SHALL be applied.
+
+#### Scenario: Public room link restricted to DocSpace users
+
+- **WHEN** a link in a Public room is created or edited with access limited to DocSpace users only
+- **THEN** the request succeeds and the link stays available to anyone with the link
+
+#### Scenario: VDR link opened to anyone
+
+- **WHEN** a link in a Virtual Data Room is edited with access for anyone with the link and a new password in the same request
+- **THEN** the request succeeds, the link stays for DocSpace users only and the password is not changed
+
+#### Scenario: Revoking a VDR link with the wrong audience value
+
+- **WHEN** a VDR link is revoked in a request that also sets access for anyone with the link
+- **THEN** the request succeeds and the link is not revoked
+
+#### Scenario: Anonymous visitor opens a VDR link
+
+- **WHEN** a visitor who is not signed in to the portal opens a link to a file in a Virtual Data Room
+- **THEN** the system requires authentication as a DocSpace user before granting access
+
+### Requirement: Deny-download on links combines with the VDR room setting
+
+The deny-download flag of a link SHALL be stored as requested in every room type. The effective rule for a
+link visitor in a Virtual Data Room SHALL be the stricter of the room-wide restriction on downloading and
+copying content and the link's own flag. The room's owner, Room managers, Content creators and Editors are
+not restricted.
+
+#### Scenario: Room-wide restriction is on
+
+- **WHEN** a VDR has the room-wide restriction turned on and a visitor downloads a file through a link whose deny-download flag is off
+- **THEN** the download is refused (403)
+
+#### Scenario: Room-wide restriction is off
+
+- **WHEN** a VDR has the room-wide restriction turned off, one file link has deny-download on and another has it off
+- **THEN** the download through the first link is refused and through the second succeeds
+
+### Requirement: Roles that manage links
+
+The system SHALL allow only the Room Owner and Room managers to create, edit and delete shared links —
+both links to the room and links to files and folders inside it. No other role SHALL create, edit or
+delete a shared link, not even on files they created. Reading a primary link follows the rules in the
+scenarios: a DocSpace admin who is not a member MAY read the primary link of a Public room but SHALL NOT
+create, edit or delete links there.
+
+#### Scenario: Room manager creates a link
+
+- **WHEN** a Room manager creates, edits or deletes a link to the room or to a file or folder inside it
+- **THEN** the operation succeeds
+
+#### Scenario: Content creator cannot create a file link
+
+- **WHEN** a Content creator attempts to create, edit or delete a link to a file, even one they created
+- **THEN** the system rejects the request (403)
+
+#### Scenario: Editor cannot edit a room link
+
+- **WHEN** an Editor, Form Filler, Reviewer, Commentator or Viewer attempts to create, edit or delete a room link
+- **THEN** the system rejects the request (403)
+
+#### Scenario: Member reads the room's primary link
+
+- **WHEN** a Room manager or a Content creator requests the primary link of a Custom room
+- **THEN** the link is returned
+- **AND** a member with a lower role (Editor, Reviewer, Commentator, Viewer) is refused (403); reading the primary link of a file requires the right to manage links
+
+#### Scenario: Non-member admin cannot create a link
+
+- **WHEN** a DocSpace admin who is not a member creates a link in a Public room
+- **THEN** the system rejects the request (403)
+
+### Requirement: Listing the links of a room
+
+`getRoomLinks` SHALL return the links of a room, invitation and external links together or only those of `type`, each with its address, title, access, expiration and primary flag, and an invitation link with its uses left. Read access to the room SHALL be required: other callers get 403 and an unknown room 404. A member without the right to see links SHALL get an empty list. At most the first 100 links SHALL be returned; paging is ignored.
+
+#### Scenario: Custom room by default
+
+- **WHEN** the links of a new custom room are read
+- **THEN** the list is empty, while a new public room has its primary external link
+
+#### Scenario: Filter by type
+
+- **WHEN** `type` asks for external or for invitation links
+- **THEN** only links of that type are returned

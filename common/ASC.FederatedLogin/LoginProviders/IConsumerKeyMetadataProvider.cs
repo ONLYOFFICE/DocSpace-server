@@ -49,6 +49,12 @@ public class AuthKeyMetadata
     public int Order { get; init; } = int.MaxValue;
 
     /// <summary>
+    /// The key is not offered on this installation (an SQLite file path outside the server version), so it is left out
+    /// of the settings form.
+    /// </summary>
+    public bool Hidden { get; init; }
+
+    /// <summary>
     /// The field type: "text", "password", "select", "toggle".
     /// </summary>
     public string Type { get; init; } = "text";
@@ -64,12 +70,14 @@ public class AuthKeyMetadata
     public string DependsOn { get; init; }
 
     /// <summary>
-    /// The value of <see cref="DependsOn"/> key that makes this field visible.
+    /// One value of <see cref="DependsOn"/> key that makes this field visible, for clients that do not read
+    /// <see cref="DependsOnValues"/>: set it to the first of those values.
     /// </summary>
     public string DependsOnValue { get; init; }
 
     /// <summary>
-    /// All values of <see cref="DependsOn"/> key that make this field visible; when set, it supersedes <see cref="DependsOnValue"/>.
+    /// All values of <see cref="DependsOn"/> key that make this field visible; set it on every field with
+    /// <see cref="DependsOn"/>, it supersedes <see cref="DependsOnValue"/>.
     /// </summary>
     public List<string> DependsOnValues { get; init; }
 }

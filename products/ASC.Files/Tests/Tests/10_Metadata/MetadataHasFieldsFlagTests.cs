@@ -192,6 +192,33 @@ public class MetadataHasFieldsFlagTests(AspireAppFixture fixture) : MetadataApiT
         listed.GetProperty("security").GetProperty("Edit").GetBoolean().Should().BeFalse();
     }
 
+    [Fact]
+    public async Task Flag_IsAbsentFromTheAnswersOfACreation_AndComputedInTheAnswerOfARename()
+    {
+        await _filesClient.Authenticate(Owner);
+        var template = await CreateTemplateAsync();
+        var room = await CreateCustomRoom("Answers " + Suffix());
+        await AssignToFolderAsync(room.Id, template.Id);
+        await SetFolderStringAsync(room.Id, template.Fields.Single().Id, "cascaded");
+        await AssignWithCascadeAsync(room.Id, [template.Id]);
+
+        var raw = new RawApiClient(_filesClient);
+
+        // created under the cascade, so the entries do carry a visible template with a field: the answers of the
+        // creations do not compute the flag at all, absent rather than a false that would contradict the listing. The
+        // answer of a rename does compute it, although the description of the property counts it among the absent ones
+        var file = await ReadAnswerAsync(await raw.PostAsync($"api/2.0/files/{room.Id}/file", new { title = "Answered.docx" }, TestContext.Current.CancellationToken));
+        var folder = await ReadAnswerAsync(await raw.PostAsync($"api/2.0/files/folder/{room.Id}", new { title = "Answered folder" }, TestContext.Current.CancellationToken));
+        var fileId = file.GetProperty("id").GetInt32();
+        var renamed = await ReadAnswerAsync(await raw.PutAsync($"api/2.0/files/file/{fileId}", new { title = "Renamed.docx" }, TestContext.Current.CancellationToken));
+
+        FlagOf(file).Should().BeNull("the answer of a file creation does not carry the flag");
+        FlagOf(folder).Should().BeNull("the answer of a folder creation does not carry the flag");
+        FlagOf(renamed).Should().BeTrue("the answer of a rename carries the flag the listing shows");
+
+        (await ListedFlagAsync(room.Id, fileId, FileEntryType.File)).Should().BeTrue("the listing computes it for the same file");
+    }
+
     #region Raw reads
 
     // raw: the generated SDK (4.0.0) predates hasMetadataFields, so FileDto, FolderDto and EntryMetadataDto carry no
@@ -230,7 +257,12 @@ public class MetadataHasFieldsFlagTests(AspireAppFixture fixture) : MetadataApiT
 
     private async Task<JsonElement> ReadResponseAsync(string path)
     {
-        using var response = await new RawApiClient(_filesClient).GetAsync(path, TestContext.Current.CancellationToken);
+        return await ReadAnswerAsync(await new RawApiClient(_filesClient).GetAsync(path, TestContext.Current.CancellationToken));
+    }
+
+    private static async Task<JsonElement> ReadAnswerAsync(HttpResponseMessage answer)
+    {
+        using var response = answer;
         response.EnsureSuccessStatusCode();
 
         using var json = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync(TestContext.Current.CancellationToken), cancellationToken: TestContext.Current.CancellationToken);

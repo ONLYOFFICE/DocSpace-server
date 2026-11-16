@@ -52,5 +52,6 @@ global using Xunit;
 
 global using PaymentApi = DocSpace.API.SDK.Api.Portal.PaymentApi;
 global using SettingsAuthorizationApi = DocSpace.API.SDK.Api.Settings.AuthorizationApi;
+global using SettingsStorageApi = DocSpace.API.SDK.Api.Settings.StorageApi;
 global using Task = System.Threading.Tasks.Task;
 global using User = ASC.Tests.Common.Data.User;

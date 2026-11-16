@@ -48,19 +48,16 @@ public class ApiKeysController(
     IHttpContextAccessor httpContextAccessor) : ControllerBase
 {
     /// <remarks>
-    /// Creates an API key that authenticates requests as the calling account, and is the only operation that ever
-    /// returns the secret.
-    /// Any portal member except a guest may create one; when the portal limits developer tools to administrators,
-    /// only a DocSpace administrator may call it.
-    /// The call is not idempotent - every call issues a new key - and it is throttled, so a client that retries on a
-    /// timeout can end up with several keys.
-    /// The answer carries the full secret in `key`: it is shown here and never again, later reads expose only the
-    /// last four characters in `keyPostfix`, so store it now.
-    /// Pass the scopes the key may use in `permissions`, taking the values from
-    /// `GET api/2.0/keys/permissions`; pass `*` or omit the field to record a key without scope restrictions, and set
-    /// `expiresInDays` to make it expire, otherwise it stays valid until it is deleted.
-    /// An empty `permissions` array and an unknown scope are both rejected with 400.
-    /// Send the key in the `Authorization` header as `Bearer sk-...` to use it.
+    /// Creates an API key that authenticates requests as the caller.
+    /// Any signed-in user can call it, except a guest. A guest gets 403.
+    /// If the portal limits developer tools to DocSpace admins, other callers also get 403.
+    /// The call changes data. Do not repeat it. Each call creates a new key.
+    /// The response has the full secret in `key`. No other call returns it, so store it now.
+    /// Send it in the `Authorization` header as `Bearer sk-...`.
+    /// Pass `*` or leave out `permissions` to create a key without scope restrictions.
+    /// By default, the limit is 5 calls in 15 minutes per user. More calls return 429.
+    /// The call returns 400 if `name` is missing, empty, or too long, or if `expiresInDays` is out of range.
+    /// It also returns 400 if `permissions` is empty or has an unknown scope.
     /// </remarks>
     /// <summary>
     /// Create a user API key
@@ -110,14 +107,14 @@ public class ApiKeysController(
     }
 
     /// <remarks>
-    /// Returns every scope value the portal accepts in the `permissions` array of an API key.
-    /// Read it before `POST api/2.0/keys` or `PUT api/2.0/keys/{keyId}`, because any other value is rejected with
-    /// 400.
-    /// Any portal member except a guest may call it, and the call is read-only.
-    /// The answer is a flat list sorted alphabetically, holding the per-area scopes such as `accounts:read`,
-    /// `files:write` and `rooms:write`, the portal-wide `*:read` and `*:write`, and `*` which stands for a key
-    /// without scope restrictions.
-    /// The list is fixed for the portal and identical for every caller, so it can be cached by the client.
+    /// Returns every scope that the `permissions` array of an API key accepts.
+    /// Use these values in `POST api/2.0/keys` and `PUT api/2.0/keys/{keyId}`.
+    /// Those calls accept no other value.
+    /// Any signed-in user can call it, except a guest. A guest gets 403.
+    /// The call is read-only.
+    /// The list is in alphabetical order and the same for every caller.
+    /// Besides the scopes of each area, it has `*:read`, `*:write`, and `*`.
+    /// The value `*` means a key without scope restrictions.
     /// </remarks>
     /// <summary>
     /// Get API key permissions
@@ -150,15 +147,12 @@ public class ApiKeysController(
 
 
     /// <remarks>
-    /// Returns the API keys the caller is allowed to see, which is not the same set for everybody: a DocSpace
-    /// administrator gets every key of the portal, while any other member gets only the keys they created
-    /// themselves.
-    /// Any portal member except a guest may call it, and the call is read-only.
-    /// The secrets are not returned - each entry identifies its key by `id` and by the last four characters in
-    /// `keyPostfix`, and a secret can only be read once, at the moment `POST api/2.0/keys` creates it.
-    /// Expired and deactivated keys stay in the list, so check `expiresAt` against the current time and read
-    /// `isActive` before treating an entry as usable.
-    /// An empty list means the caller has created no keys, not that the portal has none.
+    /// Returns the API keys that the caller can see.
+    /// A DocSpace admin gets every key of the portal. Other users get only the keys they created.
+    /// Any signed-in user can call it, except a guest. A guest gets 403.
+    /// The call is read-only.
+    /// The list includes expired and deactivated keys, so check `expiresAt` and `isActive`.
+    /// For a user, an empty list means they created no keys, not that the portal has none.
     /// </remarks>
     /// <summary>
     /// Get the API keys
@@ -200,14 +194,13 @@ public class ApiKeysController(
 
 
     /// <remarks>
-    /// Returns the API key that authenticated this very request, letting the holder of a key find out what it is
-    /// allowed to do without knowing its ID.
-    /// The key is identified by the `Authorization` header of the call itself, so the request has to be sent as
-    /// `Bearer sk-...`; a session authenticated in any other way, by a cookie or by a user token, has no key to
-    /// report and is rejected with 400.
-    /// The call is read-only and returns one entry, with the same fields as `GET api/2.0/keys` and without the
-    /// secret - read `permissions` for the granted scopes, `expiresAt` for the expiry and `isActive` for the state.
-    /// To look at a key other than the one in use, call `GET api/2.0/keys` instead.
+    /// Returns the API key that authenticated this request.
+    /// So a key holder can read its scopes, expiry, and state without knowing its ID.
+    /// Send the key in the `Authorization` header as `Bearer sk-...`.
+    /// Any key can call it, whatever its scopes.
+    /// If the request uses a cookie or a user token, the call returns 400.
+    /// The call is read-only.
+    /// To read other keys, use `GET api/2.0/keys`.
     /// </remarks>
     /// <summary>
     /// Get the current API key
@@ -234,18 +227,18 @@ public class ApiKeysController(
 
 
     /// <remarks>
-    /// Renames an API key, replaces the scopes it may use, or activates and deactivates it, without changing the
-    /// secret.
-    /// The caller may update a key they created themselves, and a DocSpace administrator may update any key of the
-    /// portal.
-    /// Take the values for `permissions` from `GET api/2.0/keys/permissions`; an unknown scope or an empty array is
-    /// rejected with 400, as is a name that is empty or made of whitespace only, and the fields that are left out
-    /// keep their current values.
-    /// The answer is a plain boolean: true when the key was changed, and false when it was not - which is also what
-    /// an already expired key returns, because such a key is left untouched instead of being reported as an error.
-    /// Deactivating a key through `isActive` stops it from authenticating while keeping it in the list, so use it
-    /// when the key may be needed again and `DELETE api/2.0/keys/{keyId}` when it may not.
-    /// An ID that matches no key of the portal, including a key that has already been deleted, is rejected with 404.
+    /// Renames an API key, replaces its scopes, or turns it on or off. The secret stays the same.
+    /// Requires the creator of the key or a DocSpace admin. Other callers get 403.
+    /// The call changes data. You can repeat it with the same body.
+    /// It changes only the fields in the body.
+    /// Pass only `*` in `permissions` to remove all scope restrictions.
+    /// With `isActive` set to false, the key stops authenticating requests but stays in the list.
+    /// The call returns `true` after a change.
+    /// For an expired key, it changes nothing and returns `false`.
+    /// To remove a key for good, use `DELETE api/2.0/keys/{keyId}`.
+    /// If no key has this ID, the call returns 404.
+    /// The call returns 400 if the name is empty, has only spaces, or is too long.
+    /// It also returns 400 if `permissions` is empty or has an unknown scope.
     /// </remarks>
     /// <summary>
     /// Update an API key
@@ -293,14 +286,13 @@ public class ApiKeysController(
     }
 
     /// <remarks>
-    /// Deletes the API key with the ID given in the route, so that it stops authenticating requests immediately.
-    /// The caller may delete a key they created themselves, and a DocSpace administrator may delete any key of the
-    /// portal.
-    /// The removal is permanent and cannot be undone: the secret was only ever readable at creation time, so a
-    /// deleted key cannot be restored and a new one has to be issued through `POST api/2.0/keys`.
-    /// To stop a key temporarily instead, set `isActive` to false through `PUT api/2.0/keys/{keyId}`.
-    /// The answer is a plain boolean reporting whether the key was removed.
-    /// An ID that matches no key of the portal, including a key that has already been deleted, is rejected with 404.
+    /// Deletes an API key. The key stops authenticating requests immediately.
+    /// Requires the creator of the key or a DocSpace admin. Other callers get 403.
+    /// The call cannot be undone, and a repeated call returns 404.
+    /// It always returns `true`.
+    /// To stop a key for a time, set `isActive` to false with `PUT api/2.0/keys/{keyId}`.
+    /// To get a new key, use `POST api/2.0/keys`.
+    /// If no key has this ID, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Delete an API key

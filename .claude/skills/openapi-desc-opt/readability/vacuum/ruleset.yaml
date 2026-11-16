@@ -1,0 +1,28 @@
+# vacuum ruleset for rewritten operation descriptions: the form checks of
+# references/description-rules.md section 4, run by check_texts.py on a document of the checked operations only.
+rules:
+  desc-sentence-length:
+    description: "A sentence has at most 20 words; code in backticks counts as one word."
+    given: "$.paths[*][get,put,post,delete,patch].description"
+    severity: warn
+    then: { function: descriptionForm, functionOptions: { check: sentenceLength, max: 20 } }
+  desc-average-sentence:
+    description: "The average is at most 12 words per sentence."
+    given: "$.paths[*][get,put,post,delete,patch].description"
+    severity: info
+    then: { function: descriptionForm, functionOptions: { check: averageSentence, max: 12 } }
+  desc-min-sentences:
+    description: "At least 3 sentences."
+    given: "$.paths[*][get,put,post,delete,patch].description"
+    severity: warn
+    then: { function: descriptionForm, functionOptions: { check: minSentences, min: 3 } }
+  desc-one-paragraph:
+    description: "One paragraph, no lists."
+    given: "$.paths[*][get,put,post,delete,patch].description"
+    severity: warn
+    then: { function: descriptionForm, functionOptions: { check: oneParagraph } }
+  desc-grade:
+    description: "Flesch-Kincaid grade at most 10."
+    given: "$.paths[*][get,put,post,delete,patch].description"
+    severity: info
+    then: { function: descriptionForm, functionOptions: { check: grade, max: 10 } }

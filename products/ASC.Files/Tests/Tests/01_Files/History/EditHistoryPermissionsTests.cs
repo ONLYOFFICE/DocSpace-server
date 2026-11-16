@@ -137,8 +137,13 @@ public class EditHistoryPermissionsTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// H2: an anonymous caller is answered with 403 instead of 401, because the security failure is
+    /// raised as <c>InvalidOperationException</c> inside <c>FileStorageService.GetEditHistoryAsync</c>.
+    /// </summary>
     [Fact]
-    public async Task GetEditHistory_Unauthenticated_CannotGetEditHistory()
+    [Trait("Category", "Bug")]
+    public async Task GetEditHistory_Unauthenticated_Returns401()
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -150,7 +155,7 @@ public class EditHistoryPermissionsTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.GetEditHistoryAsync(file.Id, TestContext.Current.CancellationToken));
 
-        exception.ErrorCode.Should().Be(403);
+        exception.ErrorCode.Should().Be(401);
     }
 
     [Fact]

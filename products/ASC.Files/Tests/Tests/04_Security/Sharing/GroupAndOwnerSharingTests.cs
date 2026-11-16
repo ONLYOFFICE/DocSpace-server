@@ -85,6 +85,34 @@ public class GroupAndOwnerSharingTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// The list and the count of the members ignore the case of <c>filterValue</c> alike. The list used to compare
+    /// the value as it was sent while the count lowered it first; MySQL compares without regard to case either way,
+    /// so the two could differ only on a database that does not.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79163")]
+    public async Task GetGroupsMembersWithFileSecurity_FilterInUpperCase_ListsWhatItCounts()
+    {
+        var file = await CreateFileInMy("Autotest Sharing File.docx", Owner);
+        var user = await InviteContact(EmployeeType.User);
+
+        await _peopleClient.Authenticate(Owner);
+        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([user.Id], Owner.Id, "Autotest Group"), TestContext.Current.CancellationToken)).Response;
+
+        await ShareFile(file.Id, group.Id, FileShare.Read);
+
+        var members = await _sharingApi.GetGroupsMembersWithFileSecurityAsync(
+            file.Id,
+            group.Id,
+            filterValue: user.Email.ToUpperInvariant(),
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        members.Response.Should().ContainSingle(m => m.User.Id == user.Id);
+        members.Total.Should().Be(1);
+    }
+
     [Fact]
     [Trait("Bug", "66897")]
     public async Task ChangeFileOwner_NewOwnerIsDisabled_Returns403()

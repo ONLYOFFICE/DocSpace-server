@@ -97,8 +97,8 @@ public class UpdateClientPermissionsTests(
         exception.ErrorCode.Should().Be(404);
     }
 
-    // BUG 81670: the server accepts a name outside [3, 256] characters on update (200), while
-    // create rejects the same name with 400 — the two endpoints should enforce the same bound.
+    // BUG 81670: the server accepted a name outside [3, 256] characters on update (200), while
+    // create rejected the same name with 400; the update now enforces the same bound (green 2026-11-10).
     [Trait("Bug", "81670")]
     [Fact]
     public async Task UpdateClient_NameExceeds256Characters_ThrowsValidationError()
@@ -116,7 +116,7 @@ public class UpdateClientPermissionsTests(
         exception.ErrorCode.Should().Be(400);
     }
 
-    // BUG 81670: same defect as above, for the lower bound.
+    // BUG 81670: same defect as above, for the lower bound; fixed the same way.
     [Trait("Bug", "81670")]
     [Fact]
     public async Task UpdateClient_NameShorterThan3Characters_ThrowsValidationError()

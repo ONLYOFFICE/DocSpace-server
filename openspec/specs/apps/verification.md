@@ -1,0 +1,165 @@
+# apps — verification
+
+> **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
+
+**Revision after `release/v4.1.0` (`d58816bece..3533ad8a89`, checked by code and test reading; nothing was run).**
+Two behaviour changes: `setEnabled` now writes an audit-trail event (bug 84747, `250b3a7f03`, tests adjusted in
+`e9cfda8d43`), which reverses the old "no audit event" claim; and `app_settings` entered the WebStudio backup module
+(bug 84721, `9e696831d5`), which closes AP1. `632c2fc262` moved tests from raw HTTP to the typed SDK with the same
+404 and 200 assertions, moved `SetAppEnabledTests` onto `AppsTestBase` and removed
+`SetSettings_AnonymousRawRequest_ReturnsUnauthorized`. Reads, body rules, permissions, storage and the socket event
+are unchanged; `Service` has no diff in the range. Controller, socket hub and yaml line references were refreshed.
+
+Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
+root (`server/`); `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml`; `Controller` is
+`web/ASC.Web.Api/Api/AppsController.cs`, `Service` is `common/ASC.Core.Common/Data/AppSettingsService.cs`,
+`Config` is `common/ASC.Core.Common/Context/Impl/CoreConfiguration.cs` (`CoreBaseSettings.DefaultApps`, line 73,
+reading the `apps` section), `AppItem` is `common/ASC.Core.Common/Configuration/AppItem.cs`, `Entity` is
+`common/ASC.Core.Common/EF/Model/DbAppSettings.cs` (table `app_settings`, key `tenant_id` + `id`), `RequestDto`
+is `web/ASC.Web.Api/ApiModels/RequestsDto/AppRequestsDto.cs` (`SetAppEnabledRequest`, `SetAppSettingsRequest`,
+`GetAppRequestDto`), `AppDto` is `web/ASC.Web.Api/ApiModels/ResponseDto/AppDto.cs`, `Socket` is
+`common/ASC.Core.Common/Data/AppsSocketManager.cs` plus `common/ASC.Core.Common/Notify/Signalr/SocketServiceClient.cs`,
+`appsettings` is `../buildtools/config/appsettings.json` (section `apps`, lines 3-11: `ai-files`, `ai-rooms`,
+`ai-forms`, `ai-agents`, `docs-cloud`, `ai-arbiter`, `e2e-rooms`, all `enabled: true`). Tests: `Tests/` is
+`web/ASC.Web.Api.Tests/Tests/09_Apps/`, `TS` is `../tests/api-tests/src/tests/apps/` (`apps.read.spec.ts`,
+`apps.write.spec.ts`, `apps.permission.spec.ts`, `apps.permission.matrix.spec.ts`, `apps.scenarios.spec.ts`).
+Status: **TEST-CONFIRMED** (an integration test asserts it), **CODE-ONLY** (read from the product code, the
+configuration or the OpenAPI document, no test), **NOTES-ONLY** (only the release notes say it — nothing of that
+kind was written into the spec). Exception → status mapping: `ItemNotFoundException` 404, `ArgumentException`
+400, `SecurityException` 403 "Access denied" (`common/ASC.Api.Core/Middleware/ResponseWrapper.cs:55-74`); 415 and
+400 for an absent or unbindable body come from the MVC pipeline before the action runs.
+
+The .NET suite is 16 files: 14 test classes (`AppsConfiguredDefaultsTests` and `AppsSocketEventsTests` added for the former CODE-ONLY rows, 2026-11-11, run PASS) plus `AppsTestBase` and `AppsTestData` (`SetAppEnabledTests` is the
+bug-84498 regression written before the port, `AppsAuditTrailTests` the bug-84747 one); the TS suite has the same
+cases except the audit trail, which it does not test, plus two that cannot be ported (a fresh-session read and an
+`APPS_REQUIRED_MODULES` pin). The feature itself landed in May 2026 (`f5bf80901c`, "Add app settings
+management with database table and API endpoints"); the controller texts were rewritten for AI consumers in
+`0eae64a955`.
+
+Revision 2026-11-14 (09d4de0768..6fb6dfb17a): `AppsController` got new descriptions only (`7dbf535c19`); no status code, behaviour or defect changed. `Controller` line references shifted by the shorter comments.
+
+## Requirement rows
+
+| Claim | Source | Status |
+|---|---|---|
+| **Catalogue of portal applications** | | |
+| 200, non-empty unique ids, `count` = length | `Tests/AppsGetAllTests.cs` `GetAll_Owner_ReturnsApplications`; `TS apps.read.spec.ts:16` | TEST-CONFIRMED [run: PASS] |
+| Fresh portal: every entry without `settings` | `Tests/AppsGetAllTests.cs` `GetAll_PortalThatNeverSavedSettings_ReportsNone` | TEST-CONFIRMED [run: PASS] |
+| Repeated calls identical, change nothing | `Tests/AppsGetAllTests.cs` `GetAll_RepeatedCalls_ReturnSameListAndChangeNothing` | TEST-CONFIRMED [run: PASS] |
+| Unknown query parameters ignored | `Tests/AppsGetAllTests.cs` `GetAll_UnknownQueryParameters_AreIgnored` | TEST-CONFIRMED [run: PASS] |
+| List shows the new flag and document, same length | `Tests/AppsGetAllTests.cs` `GetAll_AfterChange_ShowsEnabledAndSettings` | TEST-CONFIRMED [run: PASS] |
+| Order of the configuration, no paging/filter, default `enabled` from config, override per portal | `Tests/AppsConfiguredDefaultsTests.cs:48` `GetAll_FreshPortal_ListsTheConfiguredApplicationsInOrderWithTheirDefaultFlags` (reads the `apps` section the stand's services read and compares ids, order and flags), `Tests/AppsConfiguredDefaultsTests.cs:67` `SetEnabled_Overrides_ChangeTheFlagsButNotTheConfiguredOrder`; `Service:41-65`; `Config:73` | TEST-CONFIRMED [run: PASS] |
+| Anonymous 401 | `Tests/AppsAnonymousAccessTests.cs` `GetAll_Anonymous_ReturnsUnauthorized`; yaml 401 row | TEST-CONFIRMED [run: PASS] |
+| **Reading one application** | | |
+| 200, `count` 1, equals the list entry | `Tests/AppGetTests.cs` `Get_Owner_ReturnsApplicationById`; `Tests/AppsGetAllTests.cs` `GetAll_EveryListedApplication_MatchesGetAndGetSettings` | TEST-CONFIRMED [run: PASS] |
+| Reading changes nothing | `Tests/AppGetTests.cs` `Get_Reading_DoesNotChangeEnabledOrSettings` | TEST-CONFIRMED [run: PASS] |
+| Reports the enabled and the disabled state, the saved document | `Tests/AppGetTests.cs` `Get_ReturnsEnabledAndDisabledApplication`, `Get_ReturnsSavedSettingsDocument` | TEST-CONFIRMED [run: PASS] |
+| 404 with the id in the message | `Tests/AppGetTests.cs` `Get_UnknownId_ReturnsNotFound` (asserts the body contains `no-such-app`); `Controller:97-98` (`App '{id}' not found`) | TEST-CONFIRMED [run: PASS] |
+| Blanks, non-ASCII, markup, `a/b`, `../settings`, 2000 chars → 404 | `Tests/AppGetTests.cs` `Get_IdThatCannotBeAnApplication_ReturnsNotFound`, `Get_VeryLongId_ReturnsNotFound` (typed client since `632c2fc262`; `a/b` and `../settings` reach the server as one escaped segment) | TEST-CONFIRMED [run: PASS] |
+| Case-sensitive match | `Tests/AppGetTests.cs` `Get_IdIsCaseSensitive`; `Service:70` (`x.Id == id`, ordinal) | TEST-CONFIRMED [run: PASS] |
+| Empty id routes to the list | `Tests/AppGetTests.cs` `Get_EmptyId_IsRoutedToTheListNotToAnApplication` | TEST-CONFIRMED [run: PASS] |
+| Anonymous 401 | `Tests/AppsAnonymousAccessTests.cs` `Get_Anonymous_ReturnsUnauthorized` | TEST-CONFIRMED [run: PASS] |
+| **Reading the settings document** | | |
+| Never saved → empty `response`, `count` 0 | `Tests/AppSettingsGetTests.cs` `GetSettings_NeverSaved_ComesBackEmpty`; `Controller:119-127, 213-216` (`ParseSettings` → null); yaml `JsonValueWrapper` (100817) | TEST-CONFIRMED [run: PASS] |
+| Falsy documents kept, `count` 1 | `Tests/AppSettingsGetTests.cs` `GetSettings_FalsyDocument_IsKeptNotTreatedAsEmpty` | TEST-CONFIRMED [run: PASS] |
+| Readable while disabled | `Tests/AppSettingsGetTests.cs` `GetSettings_WhileApplicationIsDisabled_StillReadable` | TEST-CONFIRMED [run: PASS] |
+| 404 unknown / unusable id; anonymous 401 | `Tests/AppSettingsGetTests.cs` `GetSettings_UnknownId_ReturnsNotFound`, `GetSettings_IdThatCannotBeAnApplication_ReturnsNotFound`; `Tests/AppsAnonymousAccessTests.cs` `GetSettings_Anonymous_ReturnsUnauthorized` | TEST-CONFIRMED [run: PASS] |
+| **Who may read and who may write** | | |
+| Owner reads and writes through all five operations | `Tests/AppsRolePermissionsTests.cs` `Owner_ReadsAndWritesThroughAllFiveMethods` | TEST-CONFIRMED [run: PASS] |
+| DocSpace admin writes; Room admin, User, Guest read but get 403 on both writes and on the reset, enabled and disabled application alike | `Tests/AppsRolePermissionsTests.cs` `Member_ReadsEnabledApplication_AndWritesOnlyWithPortalSettingsRight`, `Member_ReadsDisabledApplication_AndWritesOnlyWithPortalSettingsRight`, `User_WriteIsDenied_ForEnabledAndDisabledApplicationAlike`; `Controller:150, 186` (`EditPortalSettings`), no demand on the three reads | TEST-CONFIRMED [run: PASS] |
+| Anonymous write 401 and nothing changes | `Tests/AppsAnonymousAccessTests.cs` `SetEnabled_Anonymous_ReturnsUnauthorizedAndChangesNothing`, `SetSettings_Anonymous_ReturnsUnauthorizedAndChangesNothing` | TEST-CONFIRMED [run: PASS] |
+| **Order of checks on a write** | | |
+| 403 for an unknown id, same message as for a real one | `Tests/AppsRolePermissionsTests.cs` `Member_WithoutRight_GetsForbiddenBeforeTheIdIsLookedUp` (compares `error.message`) | TEST-CONFIRMED [run: PASS] |
+| Unbindable bodies → 400 for a caller without the right; bindable-but-empty → 403 | same test, the two body loops | TEST-CONFIRMED [run: NO-LINK] |
+| 415 first (no body), then binding, then permission, then lookup | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndChangesNothing`; `Controller:150-153, 186-195` (demand before the service call; the service throws 404) | TEST-CONFIRMED [run: PASS] |
+| **Switching an application on or off** | | |
+| 200 with `id` and new `enabled`; `get` and `getAll` agree | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_Owner_FlipsTheFlagAndItIsReadBack` | TEST-CONFIRMED [run: PASS] |
+| Idempotent; last request decides | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RepeatedRequest_IsIdempotent`, `SetEnabled_Sequence_LastRequestDecidesTheFinalState` | TEST-CONFIRMED [run: PASS] |
+| Document untouched by a switch | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_Switching_DoesNotTouchTheSettingsDocument`; `Service:89-106` (mutates `Enabled` only) | TEST-CONFIRMED [run: PASS] |
+| Other applications and the count untouched | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_OneApplication_LeavesTheOthersAndTheCountAlone` | TEST-CONFIRMED [run: PASS] |
+| Unknown id 404, nothing created | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_UnknownId_ReturnsNotFoundAndCreatesNothing`; `Service:91-93` | TEST-CONFIRMED [run: PASS] |
+| **Body rules of the switch** | | |
+| `{}` → 400, state kept (bug 84498) | `Tests/SetAppEnabledTests.cs` `SetAppEnabled_BodyWithoutEnabled_ReturnsBadRequestAndKeepsState` (`[Trait("Bug","84498")]`); `RequestDto:52` (`required bool`), fix commit `c8e3cb2543`; `TS apps.write.spec.ts:201` | TEST-CONFIRMED [run: PASS] |
+| `null`, strings, numbers, array, object, malformed, bare `null` → 400 | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_UnusableBody_ReturnsBadRequestAndChangesNothing` | TEST-CONFIRMED [run: PASS] |
+| No body → 415 | `Tests/SetAppEnabledStateTests.cs` `SetEnabled_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndChangesNothing` | TEST-CONFIRMED [run: PASS] |
+| **Saving the settings document** | | |
+| 200 with the document; `getSettings`, `get`, `getAll` agree | `Tests/SetAppSettingsTests.cs` `SetSettings_Owner_ResponseCarriesTheStoredDocumentAndEveryReaderAgrees` | TEST-CONFIRMED [run: PASS] |
+| Every JSON kind round-trips (20 documents incl. Unicode, control characters, nested null, odd keys) | `Tests/AppSettingsRoundTripTests.cs` + `Tests/AppsTestData.cs` `JsonValues`; `Controller:190-193` (`GetRawText`), `Entity:46-48, 70-71` (`json` / `jsonb` column) | TEST-CONFIRMED [run: PASS] |
+| Idempotent save; deep nesting stored whole | `Tests/SetAppSettingsTests.cs` `SetSettings_SameDocumentTwice_IsIdempotent`, `SetSettings_DeeplyNestedDocument_IsStoredWhole` | TEST-CONFIRMED [run: PASS] |
+| Saving does not change `enabled`; saved while disabled applies after enabling | `Tests/SetAppSettingsTests.cs` `SetSettings_Saving_DoesNotChangeEnabled`, `SetSettings_SavedWhileDisabled_ApplyAfterEnabling` | TEST-CONFIRMED [run: PASS] |
+| Replace, never merge (object→object, object→array, array→object, →`{}`) | `Tests/SetAppSettingsTests.cs` `SetSettings_NewDocument_ReplacesTheOldOneNeverMerges` | TEST-CONFIRMED [run: PASS] |
+| Two applications independent | `Tests/SetAppSettingsTests.cs` `SetSettings_OneApplication_LeavesAnothersAlone` | TEST-CONFIRMED [run: PASS] |
+| Unknown id 404, nothing created | `Tests/SetAppSettingsTests.cs` `SetSettings_UnknownId_ReturnsNotFoundAndCreatesNothing`; `Service:110-111` | TEST-CONFIRMED [run: PASS] |
+| **Dropping the settings document** | | |
+| `null` drops, repeatable, `count` 0, `enabled` kept, re-save works | `Tests/SetAppSettingsTests.cs` `SetSettings_Null_DropsTheDocumentAndIsRepeatable`; `Controller:190-193` (Undefined/Null → null) | TEST-CONFIRMED [run: PASS] |
+| Body without the member resets like null | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_BodyWithoutSettingsMember_ResetsTheDocumentLikeNull` | TEST-CONFIRMED [run: PASS] |
+| **Body rules of the settings write** | | |
+| Nine malformed bodies → 400, document survives | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_UnusableBody_ReturnsBadRequestAndTheSavedDocumentSurvives` | TEST-CONFIRMED [run: PASS] |
+| No body → 415 | `Tests/SetAppSettingsInvalidBodyTests.cs` `SetSettings_RequestWithoutBody_ReturnsUnsupportedMediaTypeAndTheSavedDocumentSurvives` | TEST-CONFIRMED [run: PASS] |
+| **Consistency of the three readers** | | |
+| Lifecycle save → off → on → restore → drop returns to the original snapshot | `Tests/AppsScenariosTests.cs` `Lifecycle_SettingsThenDisableThenEnableThenRestore`, `GetGetSettingsAndGetAll_StayConsistentAfterEveryChange` | TEST-CONFIRMED [run: PASS] |
+| Unknown application rejected by all four id operations, never appears | `Tests/AppsScenariosTests.cs` `UnknownApplication_IsRejectedEverywhereAndNeverAppears` | TEST-CONFIRMED [run: PASS] |
+| Every configured application reachable, switchable, configurable | `Tests/AppsScenariosTests.cs` `EveryModule_IsReachableAndCanBeSwitchedAndConfigured` | TEST-CONFIRMED [run: PASS] |
+| **Per-portal storage and configured defaults** | | |
+| Set and defaults from the `apps` section, read once, not writable through the API | `Tests/AppsConfiguredDefaultsTests.cs:48` (the set and defaults equal the section), `Tests/AppsConfiguredDefaultsTests.cs:105` `TwoPortals_WritesInOne_DoNotReachTheOther` (a portal's writes leave the defaults another portal reads untouched); "read once" stays CODE-ONLY (`Config:73`): the stand cannot change its configuration while running | TEST-CONFIRMED [run: PASS] (partly) |
+| No row until the first write; the first write copies the configured `enabled` into the new row; rows keyed by portal + id; a drop keeps the row | `Tests/AppsConfiguredDefaultsTests.cs:87` `SetSettings_FirstWrite_KeepsTheConfiguredFlag_AndADropKeepsAnOverriddenFlag` (a first write that is a document reports the configured flag; an overridden flag survives a drop), `Tests/AppsConfiguredDefaultsTests.cs:105` (keyed by portal); the row itself is not visible through the API, so "no row until the first write" stays CODE-ONLY (`Service:138-169`, `Entity:40-44`) | TEST-CONFIRMED [run: PASS] (partly) |
+| Default flag visible before any write (tests toggle "the opposite of the current value", so the default is only read, never asserted to a value) | `Tests/AppsConfiguredDefaultsTests.cs:48` (asserts every application's flag on a fresh portal equals the configured value, through `getAll` and `get`) | TEST-CONFIRMED [run: PASS] |
+| Two portals independent | `Tests/AppsConfiguredDefaultsTests.cs:105` `TwoPortals_WritesInOne_DoNotReachTheOther` (flag and document of one portal invisible to a second one, and back) | TEST-CONFIRMED [run: PASS] |
+| A restored portal keeps id, flag, document and last-modified under the new tenant | `common/ASC.Data.Backup.Core/Tasks/Modules/WebStudioModuleSpecifics.cs:49`; `common/Tests/ASC.Data.Backup.Core.Tests/WebStudioModuleSpecificsTests.cs:393-429` `TryPrepareRow_AppSettings_RemapsTenantAndKeepsState` (row preparation only, no full backup and restore cycle); `BackupCoverageTests` no longer lists the table as a gap; `openspec/specs/backup-and-restore/spec.md` "Application settings are restored" | TEST-CONFIRMED [run: PASS] |
+| **Clients are told when an application is switched** | | |
+| `change-app-enabled` with `{room: "<tenant>-apps", id, enabled}` queued after the save; delivered as `s:change-app-enabled` `{id, enabled}` to that room; nothing on `setSettings` | `Tests/AppsSocketEventsTests.cs:50` `SetEnabled_ReachesTheAppsRoomWithIdAndFlag_AndSetSettingsSendsNothing` (a real Socket.IO client in room `apps`: both switches arrive with exactly `{id, enabled}`, a save and a drop add no event); `Controller:157`; `AppsSocketManager:46-57`; `hubs/files.js:452-455` | TEST-CONFIRMED [run: PASS] |
+| Delivery failure does not fail the call | `SocketServiceClient:132-180` (`SocketService` background loop catches and logs); not testable on the stand: the socket service cannot be stopped from a test | CODE-ONLY |
+| **Audit-trail record of a switch** | | |
+| One event per call, `AppDisabled` / `AppEnabled` by the new flag, id in the event text, polled for up to 30 s | `Tests/AppsAuditTrailTests.cs` `SetEnabled_Owner_IsRecordedInTheAuditTrail` (`ContainSingle` on action and id); `Controller:155`; `common/ASC.Core.Common/Messaging/MessageAction.cs`; `common/services/ASC.AuditTrail/Mappers/SettingsActionMapper.cs` | TEST-CONFIRMED [run: PASS] |
+| Off then on: both events, newest first, once the two fall into different seconds (the stored date has second precision, so same-second order is undefined) | `Tests/AppsAuditTrailTests.cs` `SetEnabled_OffThenOn_RecordsBothSwitchesInOrder` | TEST-CONFIRMED [run: PASS] |
+| The event is asynchronous: published to the event bus and persisted by the Web.Studio subscriber | `web/ASC.Web.Api.Tests/ApiFactories/AspireAppFixture.cs` (adds Web.Studio for this suite, its comment names the subscriber); the polling in `Tests/AppsAuditTrailTests.cs` | TEST-CONFIRMED [run: PASS] |
+| A repeated value is recorded too | `Tests/AppsAuditTrailTests.cs:91` `SetEnabled_SameValueTwice_IsRecordedBothTimes` (two `AppDisabled` events for two identical calls); `Controller:155` | TEST-CONFIRMED [run: PASS] |
+| No event for a refused call or an unknown id | `Tests/AppsAuditTrailTests.cs:106` `SetEnabled_RefusedCallAndUnknownId_LeaveNoEvent` (403 for a User, 404 for an unknown id; after a later accepted switch reaches the trail plus 3 s, no event names either id) | TEST-CONFIRMED [run: PASS] |
+| No event for `setSettings` | `Tests/AppsAuditTrailTests.cs:131` `SetSettings_SaveAndDrop_LeaveNoEvent` (same marker technique) | TEST-CONFIRMED [run: PASS] |
+| **Scope of the flag and the document** | | |
+| Nothing server-side reads the flag or the document: `DefaultApps` is referenced only by the service, the service only by the controller | LSP `findReferences` on `CoreBaseSettings.DefaultApps` (7 refs, `Config` + `Service`) and on `AppSettingsService` (13 refs, `Service` + `Controller:47`; counts from the earlier pass, not re-run, the range added no reference); `AppItem` used by `Config`, `Service`, `Controller` only; a claim about the code base, no API call can show it | CODE-ONLY |
+| Validation beyond "valid JSON" is absent | `Tests/SetAppSettingsTests.cs:217` `SetSettings_AnyValidJson_IsAcceptedByEveryApplicationWithoutSchemaOrSizeChecks` (a ~170 KB document of no application's shape accepted and read back by every configured application); `Tests/AppSettingsRoundTripTests.cs` (20 JSON kinds); `Service:113-123` | TEST-CONFIRMED [run: PASS] |
+
+## Where the server differs from the release notes or the OpenAPI document (spec follows the server)
+
+| Release note / document | Server |
+|---|---|
+| v3.3 / v3.5 notes: "hide applications in the Article through a config on the server" | That v3.x switch predates this feature (`f5bf80901c`, May 2026) and is a client-side read of a static config; the per-portal flag with `PUT /api/2.0/apps/{id}/enabled` and the `app_settings` table exist only since v4.0. The notes do not mention the API; the spec is written from the server. |
+| v4.0 notes: rebranding "ONLYOFFICE DocSpace → ONLYOFFICE Apps", Article split by modules, Overview section, promo modals and tours per module | Client behaviour; the server side of "modules" is exactly the catalogue described here (`ai-files`, `ai-rooms`, `ai-forms`, `ai-agents`, `docs-cloud`, `ai-arbiter`, `e2e-rooms` in the dev config). The server ships no title, icon or description for an id (`AppDto:24-30` says so). |
+| yaml operationIds are the generic `get`, `getAll`, `getSettings`, `setEnabled`, `setSettings` | The SDK exposes them as `AppsApi.GetAsync` etc.; there is no `getApp`/`getApps` naming. Agrees, but the ids collide in a flat namespace and the TS/C# clients disambiguate only by the `Apps` class. |
+| yaml `get` and `getSettings` declare a generic `400 Bad Request` | No path of the two GETs produces 400 (an unusable id is 404, see tests); the row is the document-wide default. |
+| yaml `AppDto.id` is `["null","string"]` | The server always fills `id` from the configuration (`Controller:204`); never null. |
+| yaml `SetAppSettingsRequest.settings` has no `type` and is not `required` | Matches the server: any JSON value, and an absent member means "drop" exactly like `null` (`Controller:190-192`, tests `SetSettings_BodyWithoutSettingsMember_ResetsTheDocumentLikeNull`). |
+| Controller text: "a body that is not valid JSON fails with 400 and stores nothing" | The 400 comes from model binding (`JsonElement` cannot be built from malformed input), not from the service's own `JsonDocument.Parse` guard, which is unreachable through HTTP (see AP4). Observable behaviour agrees. |
+| TS `apps.scenarios.spec.ts:168` "A fresh owner session sees the stored state" and `:233` `APPS_REQUIRED_MODULES` | Not ported: the .NET harness has no second session, and the module set is the installation's (`AppsTestBase` takes "whatever the list reports"). |
+| yaml `setEnabled` and `setSettings` declare no 415 | The server answers 415 to a request without a body, from the MVC pipeline (tests in the "Body rules" rows); the spec follows the server. |
+| Comment in `Tests/AppsAuditTrailTests.cs`: neither action "is in the pinned SDK enum yet" | The yaml (`MessageAction`, submodule `baf28cf`, the two names at 85380-85381) and the C# SDK working copy (`984eddb2`) both have them; the comment is stale, the numeric comparison still holds. |
+| TS helper restores every application after a test (`withAppRestored`) | The .NET suite needs none of it (one portal per test); so a residual-state bug would show only in TS. |
+
+## Left out of the spec, and why
+
+- **Client behaviour**: which module an id stands for, titles, icons, the Article/Overview layout, promo modals,
+  tours, hiding a disabled module (`../client/packages/shared/api/apps/index.ts` consumes the five operations;
+  the socket event is handled in the client bundle).
+- **The AI product behind `ai-*`**: `ai-agents`; the apps catalogue does not gate it (see "Scope of the flag").
+- **How `app_settings` is backed up and restored**: the mechanics are `backup-and-restore`; this spec only states
+  that the flag and the document survive (AP1 is fixed).
+- **Rate-limit headers and 429/500/502/503 rows** of the yaml: generic policy.
+- **The `last_modified` column** (`Entity:49-51, 72-74`): written on every upsert, never exposed by any operation.
+- **The 64-character limit of an identifier** (`AppItem:37`, `Entity:38-41`): a configuration constraint, see AP2.
+- **The migration** that created the table (`migrations/mysql/SaaS/MigrationContext/20260622084927_MigrationContext_Upgrade85.cs:210`):
+  schema history.
+
+## Suspected defects
+
+Verdicts are by code reading at the end of the range; no test was run.
+
+| # | Where | What the server does | Evidence | Verdict |
+|---|-------|----------------------|----------|---------|
+| AP1 | Per-portal storage | `app_settings` is in no backup module: a portal backup silently drops every application flag and settings document; after a restore the portal reads the configured defaults and `getSettings` answers empty. Declared as coverage debt "T6", no ticket landed. | Before the range: `BackupCoverageTests.cs:99`; no `TableInfo("app_settings", …)` in `common/ASC.Data.Backup.Core/Tasks/Modules/`. Now: `WebStudioModuleSpecifics.cs:49`, gap entry removed. | FIXED (`9e696831d5`, bug 84721): the table is declared in the module with `last_modified` as a date column and a test prepares its row. Backups taken before the fix still hold no rows; the full cycle has no test. |
+| AP2 | Configuration | An `apps` entry whose `id` is longer than 64 characters is listed and read normally but every write fails at the database (`varchar(64)` / `MaxLength(64)`), surfacing as 500; nothing validates the configuration at start-up. | `AppItem:37`; `Entity:38-41`; `Config:73` (no validation) | STILL OPEN: none of the three files changed in the range. |
+| AP3 | Per-portal storage | The first write of a portal copies the configured `enabled` of that moment into the row (`Enabled = defaults…?.Enabled`). A portal that only ever saved a settings document therefore freezes the default: a later change of the installation's `enabled` default no longer reaches it, while a portal that never wrote anything follows the new default. The two portals report different flags for the same configuration. | `Service:138-169` (`UpsertAsync`); `Service:41-65` (`o?.Enabled ?? d.Enabled`) | STILL OPEN: `Service` is unchanged. |
+| AP4 | Saving the settings document | `SetSettingsAsync` re-parses the JSON and throws `ArgumentException` ("Settings must be valid JSON", 400) — unreachable, because the controller hands it `JsonElement.GetRawText()`, which is always valid; the documented 400 comes from model binding instead. Dead code that describes a different contract. | `Service:113-123`; `Controller:190-193` | STILL OPEN: the guard and the `GetRawText` call are both still there. |
+| AP5 | Dropping the settings document | A body that binds but has no `settings` member (`{}`, `{"setting":{…}}` — a typo) drops the stored document with 200, exactly like an explicit `null`. The client cannot distinguish "reset" from "I mistyped the field"; the tests pin the behaviour (`SetSettings_BodyWithoutSettingsMember_ResetsTheDocumentLikeNull`). A design smell rather than a crash. | `Controller:190-193` (`ValueKind is Undefined or Null`) | STILL OPEN: same branch, the test still pins it. |
+| AP6 | Clients are told when an application is switched | The socket event is queued only after `setEnabled`; a switch and a settings save in a row leave clients with the new flag and the old document until they re-read, which the controller text documents as intended ("clients pick the new settings up on their next read"). Noted here so the asymmetry is visible; no spec change. | `Controller:157, 184-198` | STILL OPEN: unchanged, and intended by the controller text. |
+| AP7 | Audit-trail record of a switch | Since bug 84747 a switch leaves an audit event, but `setSettings`, which needs the same right and changes the same application, leaves none. A save or a drop of the document, including the accidental drop of AP5, has no trace. A gap in the fix's coverage rather than a crash. | `Controller:155` against `Controller:184-198` | NEW, by code reading |

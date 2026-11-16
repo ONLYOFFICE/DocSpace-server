@@ -1,6 +1,6 @@
 ---
 name: fix-bug
-description: "Reproduce and fix a DocSpace bug by its tracker number, test-first: find or port the covering test, prove it is red, fix the product, prove it is green. USE FOR: fix bug 12345, check bug 12345, is bug 12345 still reproducible, this bug came back. DO NOT USE FOR: writing new feature tests (tests rule), running a test suite without a bug number (run-tests skill)."
+description: "Reproduce and fix a DocSpace bug by its tracker number, test-first: find or port the covering test, prove it is red, fix the product, prove it is green, then close the defect in the OpenSpec specs. USE FOR: fix bug 12345, check bug 12345, is bug 12345 still reproducible, this bug came back. DO NOT USE FOR: writing new feature tests (tests rule), running a test suite without a bug number (run-tests skill)."
 ---
 
 # Fix a bug, test first
@@ -81,6 +81,29 @@ dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj -- --filter-namespac
 **Keep the `[Trait("Bug", ...)]`.** It is the permanent link to the bug record, so a regression
 points straight back at the number. Update only the `<summary>`: describe the old behaviour in
 the past tense and how it was fixed.
+
+## 6. Update the specs
+
+Only when `openspec/` exists. Find the bug in the OpenSpec files: search `openspec/deviations.md` and
+`openspec/specs/*/verification.md` for the bug number, the test's file name and the operationId (grep is right
+here: these are Markdown files).
+
+- **A row of `deviations.md`**: move it to the "Closed" table with `FIXED <commit>`, or `FIXED (uncommitted)`
+  when the user has not committed yet, and a one-line note of what the server does now.
+- **The spec's own `verification.md`**: set the same row of its "Suspected defects" section to FIXED, and turn
+  the claim rows the test cites into `TEST-CONFIRMED` with the test's `file:line` (no run mark: the next full
+  run writes it).
+- **The requirement**: the spec described the server without the defect, so add the behaviour that is now
+  true to the governing requirement or scenario of `spec.md`, in the API terms that file uses. Run
+  `openspec validate --specs --no-interactive`.
+- **The test**: remove `[Trait("Category", "Bug")]` once it is green; keep `[Trait("Bug", ...)]` (step 5).
+
+A security defect (an access bypass, a leak of data or secrets, a check for the wrong account or portal) is not
+in the repository: it lives in the private register named by the `OPENSPEC_SECURITY_REGISTER` environment
+variable (ask the user when it is unset). Mark it fixed there and add nothing about it to `openspec/` until a
+released version carries the fix; tell the user so. Its test follows the rule of the `openspec-maintain` skill:
+a test already in the repository stays and turns green with the fix; a test for a hole not yet published is
+committed with the release, not before.
 
 ## Build notes
 

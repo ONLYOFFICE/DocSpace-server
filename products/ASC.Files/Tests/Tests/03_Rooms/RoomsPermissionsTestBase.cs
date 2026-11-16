@@ -135,6 +135,14 @@ public abstract class RoomsPermissionsTestBase(
         };
     }
 
+    /// <summary>The room's access entry of the account, or null when the account is not a member.</summary>
+    protected async Task<FileShareDto?> MemberOfRoomAsync(int roomId, Guid userId)
+    {
+        var shares = await _roomsApi.GetRoomSecurityInfoAsync(roomId, cancellationToken: TestContext.Current.CancellationToken);
+
+        return shares.Response.FirstOrDefault(s => s.SharedToUser?.Id == userId);
+    }
+
     /// <summary>
     /// Sends a raw DELETE /api/2.0/files/tags with an arbitrary JSON body, bypassing the typed SDK
     /// so that malformed payloads can be tested.

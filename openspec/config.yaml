@@ -1,0 +1,65 @@
+schema: spec-driven
+
+# Constraints an agent cannot infer from the code. They are shown with every artifact's instructions.
+context: |
+  The specs in openspec/specs/<capability>/spec.md describe the CURRENT behaviour of the DocSpace server,
+  defects included where they look intended; clearly wrong behaviour is listed in openspec/deviations.md
+  instead. A change must not silently contradict them.
+  Find the capabilities a change touches by the operationIds, routes and request fields it uses: every
+  operation of sdk/docspace-api-spec/docspace-backend.yaml is named in at least one spec.md, so a text search
+  for the operationId or the route in openspec/specs/*/spec.md finds the requirement that governs it. Read only
+  the spec.md files you found; read their verification.md only to see how a requirement is proven.
+  openspec/deviations.md lists known defects with their spec prefix numbers. Changing behaviour listed there,
+  even to fix it, is a change of behaviour too.
+  Role and access rules exist on the server and, partly recomputed, in the web client (../client); the section
+  "Web client vs server" of deviations.md lists where they already disagree.
+  The repository is public. A change that fixes or finds a security defect (a caller reads, changes or deletes what their rights do not allow, a secret, key, token or personal data leaks, a check runs for the wrong account or portal, a request reaches an internal address, a payment, licence or second-factor gate is bypassed, an audit event names the wrong actor)
+  must not describe the hole in any artifact before the fixing version is released: no route, request or
+  reproduction in the proposal, delta, design or tasks, and no new Bug-marked test for a hole not yet
+  published (an existing one stays); state it to the user in chat.
+
+rules:
+  proposal:
+    - >-
+      List the capabilities the change touches, each with the operationIds or routes that led you to it.
+    - >-
+      Add a section "Breaks current behaviour". For every requirement the change modifies or removes, name it,
+      say what a caller sees differently (status code, field, access, order, side effect), and who is affected,
+      checking each of these: the web client (../client), the published SDKs and the OpenAPI document,
+      webhooks, socket events, backup and restore, the portal migration and existing stored data. If nothing
+      changes for existing callers, write "None" and say why.
+    - >-
+      If the change touches a row of openspec/deviations.md, name its id and say whether the change fixes it,
+      keeps it, or makes it worse.
+  specs:
+    - >-
+      Every requirement you modify or remove must be quoted from the current openspec/specs/<capability>/spec.md
+      exactly as it is there, so the delta can be checked against it.
+    - >-
+      Write requirements against the API contract: operationIds, routes, request fields, status codes. No class
+      names, file names, enum numbers, resource keys or configuration keys.
+    - >-
+      Keep each requirement body under 500 characters, with SHALL or MUST, and at least one scenario using
+      WHEN / THEN (/ AND).
+    - >-
+      State boundaries explicitly for every new numeric, length or list input (minimum, maximum, what 0, a
+      negative value and an empty value answer) and give each boundary its own scenario.
+  design:
+    - >-
+      Name the existing behaviour the design relies on by its capability and requirement, and say how the
+      design keeps the requirements listed under "Breaks current behaviour" consistent for existing data.
+  tasks:
+    - >-
+      For every requirement the change modifies, add a task to update the integration tests that cite it in
+      the verification.md of its capability (the `File.cs:line` citations of its TEST-CONFIRMED rows).
+    - >-
+      For every new or modified requirement, add a task for an integration test, including the boundary
+      scenarios, following .claude/rules/tests.md.
+    - >-
+      Add a final task to re-check the touched specs with `openspec validate --specs --no-interactive` and to
+      run `python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec <capability>`
+      for each touched capability: no operation of the change may be left uncalled by a test. The script reads
+      the published sdk/docspace-api-spec/docspace-backend.yaml, which does not hold an operation the change
+      adds until the documents and SDKs are regenerated; so the same task lists every new operationId with the
+      test that calls it (raw HTTP until the SDK has the method), and is checked against that list, not the
+      script.

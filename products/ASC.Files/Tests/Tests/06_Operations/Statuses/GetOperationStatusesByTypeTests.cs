@@ -115,4 +115,20 @@ public class GetOperationStatusesByTypeTests(
         // Assert
         exception.ErrorCode.Should().Be(400);
     }
+
+    /// <summary>
+    /// <c>GET fileops/move</c> is the literal route of <c>checkMoveOrCopyBatchItems</c>, which wins over the
+    /// <c>{operationType}</c> template: the Move statuses cannot be read by name, and the request is answered by the
+    /// check endpoint, which refuses it for the missing <c>destFolderId</c>.
+    /// </summary>
+    [Fact]
+    public async Task GetOperationStatusesByType_Move_IsAnsweredByTheCheckEndpointWithBadRequest()
+    {
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await GetStatusesByType(FileOperationType.Move));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
 }

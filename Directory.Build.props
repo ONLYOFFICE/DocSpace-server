@@ -8,6 +8,21 @@
     they bloat bin/, AV-scan time and incremental copies.
     Our own .pdb (managed, from ASC.* projects) are untouched.
   -->
+  <!--
+    SDK 11 adds a Blazor Hot Reload browser-tools JS module to every Microsoft.NET.Sdk.Web
+    project in Debug builds. Our web projects are API hosts without Blazor; the module gets no
+    endpoint there and GenerateJSModuleManifestBuildStaticWebAssets fails with "scoped css bundles
+    do not have matching endpoints". Turn the browser tools off; C# hot reload is not affected.
+    The SDK sets the opt-in properties after Directory.Build.targets is imported, so this has to be
+    a target: it runs after ResolveWebAssemblyProjectReferences, the step that precedes
+    _DefineHotReloadBrowserToolsAssetsCore, whose condition is evaluated only then. A BeforeTargets
+    hook on the Core target itself runs too late. A no-op on SDK 10.
+  -->
+  <Target Name="DisableHotReloadBrowserTools" AfterTargets="ResolveWebAssemblyProjectReferences">
+    <PropertyGroup>
+      <_HotReloadBrowserToolsEnabled>false</_HotReloadBrowserToolsEnabled>
+    </PropertyGroup>
+  </Target>
   <Target Name="RemoveNativePackagePdbs" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
       <RuntimeTargetsCopyLocalItems Remove="@(RuntimeTargetsCopyLocalItems)"
