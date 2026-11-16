@@ -655,6 +655,53 @@ internal class FolderDao(
         return folderId;
     }
 
+    public async Task<int> SaveThreadFolderAsync(Folder<int> folder, Guid threadId, ThreadFolderKind kind)
+    {
+        ArgumentNullException.ThrowIfNull(folder);
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var folderId = 0;
+        var metadataInherited = false;
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+
+            (folderId, metadataInherited) = await InternalSaveFolderToDbAsync(filesDbContext, folder);
+
+            var attached = kind == ThreadFolderKind.Artifacts
+                ? await filesDbContext.SetThreadArtifactsFolderAsync(tenantId, threadId, folderId)
+                : await filesDbContext.SetThreadAttachmentsFolderAsync(tenantId, threadId, folderId);
+
+            if (attached == 0)
+            {
+                await tx.RollbackAsync();
+                folderId = 0;
+
+                return;
+            }
+
+            await tx.CommitAsync();
+        });
+
+        if (folderId == 0)
+        {
+            return 0;
+        }
+
+        if (metadataInherited)
+        {
+            await IndexInheritedMetadataAsync([folderId]);
+        }
+
+        await PublishFolderIndexEventAsync(folder);
+
+        return folderId;
+    }
+
     private async Task PublishFolderIndexEventAsync(Folder<int> folder)
     {
         if (folder.FolderType is FolderType.DEFAULT or FolderType.Ai or FolderType.BUNCH || folder.IsRoom)

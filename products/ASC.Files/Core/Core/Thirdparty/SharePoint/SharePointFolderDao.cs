@@ -217,6 +217,11 @@ internal class SharePointFolderDao(
         throw new NotSupportedException();
     }
 
+    public Task<string> SaveThreadFolderAsync(Folder<string> folder, Guid threadId, ThreadFolderKind kind)
+    {
+        throw new NotSupportedException();
+    }
+
     public async Task<string> SaveFolderAsync(Folder<string> folder)
     {
         if (folder.Id != null)

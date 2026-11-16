@@ -150,6 +150,8 @@ public interface IFolderDao<T>
 
     Task<T> SaveFolderAsync(Folder<T> folder, IEnumerable<Folder<T>> children);
 
+    Task<T> SaveThreadFolderAsync(Folder<T> folder, Guid threadId, ThreadFolderKind kind);
+
     /// <summary>
     ///     delete folder
     /// </summary>

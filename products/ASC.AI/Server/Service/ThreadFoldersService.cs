@@ -72,23 +72,19 @@ public class ThreadFoldersService(
 
     public Task<int> GetOrCreateArtifactsFolderAsync(Thread thread)
     {
-        return GetOrCreateAsync(thread, ArtifactsSuffix, x => x.ArtifactsFolderId, storage.SetArtifactsFolderAsync);
+        return GetOrCreateAsync(thread, ThreadFolderKind.Artifacts);
     }
 
     public Task<int> GetOrCreateAttachmentsFolderAsync(Thread thread)
     {
-        return GetOrCreateAsync(thread, AttachmentsSuffix, x => x.AttachmentsFolderId, storage.SetAttachmentsFolderAsync);
+        return GetOrCreateAsync(thread, ThreadFolderKind.Attachments);
     }
 
-    private async Task<int> GetOrCreateAsync(
-        Thread thread,
-        string suffix,
-        Func<Thread, int?> getFolderId,
-        Func<int, Guid, int, Task<int>> setFolderIdAsync)
+    private async Task<int> GetOrCreateAsync(Thread thread, ThreadFolderKind kind)
     {
         var project = await GetProjectAsync(thread);
 
-        var folderId = getFolderId(thread);
+        var folderId = GetFolderId(thread);
         if (folderId.HasValue)
         {
             return folderId.Value;
@@ -100,42 +96,31 @@ public class ThreadFoldersService(
         {
             var current = await storage.ReadByIdAsync(tenantId, thread.Id) ?? throw new ItemNotFoundException();
 
-            folderId = getFolderId(current);
+            folderId = GetFolderId(current);
             if (folderId.HasValue)
             {
                 return folderId.Value;
             }
 
-            var folderDao = daoFactory.GetFolderDao<int>();
-
             var folder = serviceProvider.GetRequiredService<Folder<int>>();
-            folder.Title = $"{current.Id}-{suffix}";
+            folder.Title = $"{current.Id}-{(kind == ThreadFolderKind.Artifacts ? ArtifactsSuffix : AttachmentsSuffix)}";
             folder.ParentId = project.Id;
             folder.CreateBy = current.CreatedBy;
 
-            var createdId = await folderDao.SaveFolderAsync(folder);
-            var attached = false;
-
-            try
-            {
-                attached = await setFolderIdAsync(tenantId, current.Id, createdId) > 0;
-            }
-            finally
-            {
-                if (!attached)
-                {
-                    await folderDao.DeleteFolderAsync(createdId);
-                }
-            }
-
-            if (attached)
+            var createdId = await daoFactory.GetFolderDao<int>().SaveThreadFolderAsync(folder, current.Id, kind);
+            if (createdId != 0)
             {
                 return createdId;
             }
 
             current = await storage.ReadByIdAsync(tenantId, thread.Id) ?? throw new ItemNotFoundException();
 
-            return getFolderId(current) ?? throw new ItemNotFoundException();
+            return GetFolderId(current) ?? throw new ItemNotFoundException();
+        }
+
+        int? GetFolderId(Thread x)
+        {
+            return kind == ThreadFolderKind.Artifacts ? x.ArtifactsFolderId : x.AttachmentsFolderId;
         }
     }
 }

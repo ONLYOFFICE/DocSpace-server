@@ -66,6 +66,18 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<int> SetThreadArtifactsFolderAsync(int tenantId, Guid threadId, int folderId)
+    {
+        return AiIntegrationQueries.SetThreadArtifactsFolderAsync(this, tenantId, threadId, folderId);
+    }
+
+    [PreCompileQuery]
+    public Task<int> SetThreadAttachmentsFolderAsync(int tenantId, Guid threadId, int folderId)
+    {
+        return AiIntegrationQueries.SetThreadAttachmentsFolderAsync(this, tenantId, threadId, folderId);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<AiAgentChatBinding> AiAgentChatBindingsAsync(int tenantId)
     {
         return AiIntegrationQueries.AiAgentChatBindingsAsync(this, tenantId);
@@ -103,6 +115,20 @@ static file class AiIntegrationQueries
             ctx.Attachments
                 .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
+
+    // Not precompiled on purpose: ExecuteUpdate fails to translate inside EF.CompileAsyncQuery.
+    public static readonly Func<FilesDbContext, int, Guid, int, Task<int>> SetThreadArtifactsFolderAsync =
+        (FilesDbContext ctx, int tenantId, Guid threadId, int folderId) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == threadId && x.ArtifactsFolderId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.ArtifactsFolderId, folderId));
+
+    // Not precompiled on purpose: ExecuteUpdate fails to translate inside EF.CompileAsyncQuery.
+    public static readonly Func<FilesDbContext, int, Guid, int, Task<int>> SetThreadAttachmentsFolderAsync =
+        (FilesDbContext ctx, int tenantId, Guid threadId, int folderId) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == threadId && x.AttachmentsFolderId == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.AttachmentsFolderId, folderId));
 
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<AiAgentChatBinding>> AiAgentChatBindingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId) =>
