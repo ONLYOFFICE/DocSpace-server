@@ -39,8 +39,8 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class DeleteFolderRequest
 {
     /// <summary>
-    /// Whether the deletion waits for the editing sessions on the contents to end: with true a folder somebody is
-    /// working in is removed once they are done, with false the deletion starts at once.
+    /// Whether `GET api/2.0/files/fileops` keeps the finished deletion: `true` removes it from that list, so its
+    /// result cannot be read; `false` keeps it there.
     /// </summary>
     /// <example>false</example>
     public bool DeleteAfter { get; set; }

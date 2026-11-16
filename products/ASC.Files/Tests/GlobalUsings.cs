@@ -36,6 +36,7 @@ extern alias ASCFilesService;
 extern alias ASCPeople;
 extern alias ASCWebApi;
 
+global using System.Data.Common;
 global using System.Diagnostics;
 global using System.Globalization;
 global using System.IO.Compression;
@@ -70,22 +71,39 @@ global using FluentAssertions;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 
+
 global using Xunit;
 
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
+global using BuiltinFormsDbOptions = ASC.Files.Core.ExternalDatabase.BuiltinFormsDbOptions;
 global using CoreConstants = ASC.Core.Users.Constants;
+global using CoreExternalDatabaseType = ASC.FederatedLogin.DatabaseProviders.ExternalDatabaseType;
 global using CoreMetadataFieldType = ASC.Files.Core.MetadataFieldType;
 global using CreateFolder = DocSpace.API.SDK.Model.CreateFolderRequest;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
+global using DbColumnDefinition = ASC.Files.Core.ExternalDatabase.DbColumnDefinition;
+global using DbColumnType = ASC.Files.Core.ExternalDatabase.DbColumnType;
 global using DbFilesMetadataValue = ASC.Files.Core.EF.DbFilesMetadataValue;
+global using DbFormsMetadataSearch = ASC.Files.Core.DbFormsMetadataSearch;
+global using DistributedLockException = ASC.Common.Threading.DistributedLock.Common.DistributedLockException;
+global using ExternalDatabaseClient = ASC.Files.Core.ExternalDatabase.ExternalDatabaseClient;
 global using ExternalShareRequestParam = DocSpace.API.SDK.Model.ExternalShareRequestParam;
 global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
 global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FolderType = DocSpace.API.SDK.Model.FolderType;
+global using FormEditorFieldRenames = ASC.Files.Core.FormEditorFieldRenames;
+global using FormFieldMatcher = ASC.Files.Core.Helpers.FormFieldMatcher;
+global using FormFieldRename = ASC.Files.Core.FormFieldRename;
+global using FormFillingProperties = ASC.Files.Core.FormFillingProperties<int>;
+global using FormFillingReportBuilder = ASC.Files.Core.Services.DocumentBuilderService.FormFillingReportBuilder;
+global using FormFillingReportCreator = ASC.Files.Core.Helpers.FormFillingReportCreator;
+global using FormMetadata = ASC.Files.Core.Services.OFormService.FormMetadata;
+global using FormVersionLink = ASC.Files.Core.FormVersionLink;
 global using HashHelper = ASC.FederatedLogin.Helpers.HashHelper;
 global using InstanceCrypto = ASC.Security.Cryptography.InstanceCrypto;
 global using LinkType = DocSpace.API.SDK.Model.LinkType;
+global using LockStatus = ASC.Common.Threading.DistributedLock.Common.LockStatus;
 global using MachinePseudoKeys = ASC.Security.Cryptography.MachinePseudoKeys;
 global using MetadataCascadeResolver = ASC.Files.Core.MetadataCascadeResolver;
 global using MetadataField = ASC.Files.Core.MetadataField;

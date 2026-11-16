@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+// (c) Copyright Ascensio System SIA 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,35 +31,31 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.Tests._02_UserType;
+namespace ASC.Files.Tests.Tests._01_Files.Forms.Versions;
 
 /// <summary>
-/// A user type change (<c>startUserTypeUpdate</c>) runs as a background task - the outcome, and
-/// sometimes even the permission check, only becomes visible through the progress endpoint some
-/// time after the start call returns. Every test that starts one polls through here instead of
-/// reading the progress once, so the assertion never races the background task.
+/// The names of the spreadsheet report sheets, one per group of linked form versions. Pure logic, no portal.
 /// </summary>
-internal static class UserTypeUpdatePolling
+[Trait("Category", "Unit")]
+[Trait("Feature", "Forms")]
+public class FormVersionReportTests
 {
-    /// <summary>
-    /// Polls <c>GET /people/type/progress/{userid}</c> on a deadline and returns the last observed
-    /// progress - completed or not - so a timing-out assertion still shows what was actually there.
-    /// </summary>
-    public static async Task<TaskProgressResponseDto> WaitForCompletionAsync(UserTypeApi userTypeApi, Guid userId, TimeSpan? timeout = null)
+    [Theory]
+    [InlineData(new[] { 1 }, "v1")]
+    [InlineData(new[] { 1, 2 }, "v1-v2")]
+    [InlineData(new[] { 2, 4 }, "v2, v4")]
+    [InlineData(new[] { 1, 2, 3, 5 }, "v1-v3, v5")]
+    public void GetSheetName_WritesConsecutiveVersionsAsRange(int[] versions, string expected)
     {
-        var deadline = DateTime.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(30));
-        TaskProgressResponseDto last;
+        FormFillingReportBuilder.GetSheetName(versions).Should().Be(expected);
+    }
 
-        while (true)
-        {
-            last = (await userTypeApi.GetUserTypeUpdateProgressAsync(userId, TestContext.Current.CancellationToken)).Response;
+    [Fact]
+    public void GetSheetName_LongerThanExcelAllows_IsCut()
+    {
+        // An Excel sheet name holds at most 31 characters.
+        var result = FormFillingReportBuilder.GetSheetName([1, 3, 5, 7, 9, 11, 13, 15, 17, 19]);
 
-            if (last.IsCompleted || DateTime.UtcNow >= deadline)
-            {
-                return last;
-            }
-
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
+        result.Should().HaveLength(31).And.StartWith("v1, v3, v5").And.EndWith("...");
     }
 }

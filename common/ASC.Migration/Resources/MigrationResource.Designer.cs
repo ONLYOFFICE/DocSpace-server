@@ -61,6 +61,15 @@ namespace ASC.Migration.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Skipped {0}: entries of type {1} are not unpacked.
+        /// </summary>
+        public static string ArchiveEntrySkipped {
+            get {
+                return ResourceManager.GetString("ArchiveEntrySkipped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Couldn&apos;t add user {0} to group {1}.
         /// </summary>
         public static string CanNotAddUserInGroup {
@@ -300,6 +309,15 @@ namespace ASC.Migration.Core.Resources {
         public static string MigrationProjectFiles {
             get {
                 return ResourceManager.GetString("MigrationProjectFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Skipped the photo of {0}: {1}x{2} pixels is more than a profile photo may have.
+        /// </summary>
+        public static string PhotoTooLarge {
+            get {
+                return ResourceManager.GetString("PhotoTooLarge", resourceCulture);
             }
         }
         

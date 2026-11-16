@@ -151,6 +151,22 @@ public class DocumentServiceLicense(ICache cache,
         return response ?? new LicenseValidationResult(false, $"Failure after several attempts. {errorMsg}");
     }
 
+    // The free Community Edition of the editors: they take no connector commands. SaaS editors are always licensed, and
+    // editors that do not answer are taken for licensed.
+    public async Task<bool> IsFreeEditionAsync()
+    {
+        try
+        {
+            var commandResponse = await GetDocumentServiceLicenseAsync(true);
+            return commandResponse?.Server?.PackageType == CommandResponse.ServerInfo.PackageTypes.OpenSource;
+        }
+        catch (Exception e)
+        {
+            logger.ErrorDocServiceCommandError(e);
+            return false;
+        }
+    }
+
     public async Task<(Dictionary<string, DateTime>, License)> GetLicenseQuotaAsync(bool useCache = true)
     {
         var commandResponse = await GetDocumentServiceLicenseAsync(useCache);

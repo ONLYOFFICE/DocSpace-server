@@ -42,17 +42,13 @@ public class NotificationController(
 : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Reports whether one kind of notification is switched on for the calling user, taking the kind as the integer
-    /// `type` in the route: 0 the new-item badges the Files responses carry, 1 the room activity letters, 2 the daily
-    /// feed digest, 3 the periodic tips letters. The answer describes the caller's own account only - there is no way
-    /// to read another member's settings - and the call is read-only and safe to repeat. Every signed-in member reads
-    /// its own settings: the portal owner, a DocSpace administrator, a room administrator, a user and a guest are all
-    /// accepted, and no permission is demanded. Badges come back switched on for an account that has not changed
-    /// them, while the kinds 1, 2 and 3 come back switched off until they are switched on with
-    /// `POST api/2.0/settings/notification`. What comes back is the kind that was asked for together with
-    /// `isEnabled`. A `type` outside 0-3 is not recognised and the call fails instead of falling back to a default.
-    /// The rooms silenced one by one are listed by `GET api/2.0/settings/notification/rooms`, and the delivery
-    /// channels of the installation by `GET api/2.0/settings/notification/channels`.
+    /// Returns whether one kind of notification is turned on for the calling user. Set the kind in the route `type`.
+    /// Kinds 0 and 1 are the new-item badges and the room activity letters. Kinds 2 and 3 are the daily feed digest
+    /// and the tips letters. Any signed-in user can call it, including a guest. The call is read-only and reads only
+    /// the caller's own settings. Badges are on by default. Kinds 1, 2, and 3 are off until
+    /// `POST api/2.0/settings/notification` turns them on. The call returns 400 if `type` is not one of these kinds.
+    /// To list the muted rooms, use `GET api/2.0/settings/notification/rooms`. To list the delivery channels, use
+    /// `GET api/2.0/settings/notification/channels`.
     /// </remarks>
     /// <summary>Check notification availability</summary>
     /// <path>api/2.0/settings/notification/{type}</path>
@@ -68,17 +64,15 @@ public class NotificationController(
     }
 
     /// <remarks>
-    /// Switches one kind of notification on or off for the calling user: send the kind as `type` - 0 the new-item
-    /// badges, 1 the room activity letters, 2 the daily feed digest, 3 the periodic tips letters - together with
-    /// `isEnabled`. The change touches the caller's own account only, and repeating the call with the same pair
-    /// leaves the account as it is. Every signed-in member configures its own settings: the portal owner, a DocSpace
-    /// administrator, a room administrator, a user and a guest are all accepted, and no permission is demanded. With
-    /// 0 switched off the Files responses report `new` as 0 and mark files as muted; with 1 switched off both the
-    /// hourly room digest and the letters a room sends at once, such as an editor mention, stop; with 2 switched off
-    /// the daily digest stops; with 3 switched off the tips letters stop. What comes back is an echo of the request
-    /// rather than a re-read of the stored state, and a `type` outside 0-3 is echoed as well while nothing is stored,
-    /// so confirm the result with `GET api/2.0/settings/notification/{type}`. To silence a single room instead of a
-    /// whole kind use `POST api/2.0/settings/notification/rooms`.
+    /// Turns one kind of notification on or off for the calling user. Kinds 0 and 1 of `type` are the new-item badges
+    /// and the room activity letters. Kinds 2 and 3 are the daily feed digest and the tips letters. Any signed-in
+    /// user can call it, including a guest. It changes data only in the caller's own settings. You can repeat it
+    /// with the same body. With badges off, the Files responses show `new` as 0 and mark files as muted. With room
+    /// activity off, the hourly room digest and immediate room letters, such as mentions, stop. Turning off
+    /// kind 2 or 3 stops the daily digest or the tips letters. The call returns the request as sent, not the stored
+    /// state. If `type` is not one of these kinds, the call stores nothing but still returns it. So check the result
+    /// with `GET api/2.0/settings/notification/{type}`. The call returns 400 if the body cannot be read or has no
+    /// `type`. To mute a single room, use `POST api/2.0/settings/notification/rooms`.
     /// </remarks>
     /// <summary>Set notification status</summary>
     /// <path>api/2.0/settings/notification</path>
@@ -94,17 +88,14 @@ public class NotificationController(
     }
 
     /// <remarks>
-    /// Returns the rooms the calling user has silenced, as the `disabledRooms` list of their identifiers. The list
-    /// describes the caller's own account only, the call is read-only, and an empty list means nothing is silenced.
-    /// Every signed-in member reads its own list, whatever its role - owner, administrator, user or guest - and no
-    /// permission is demanded. The identifiers come back the way `POST api/2.0/settings/notification/rooms` stored
-    /// them, in the order they were added and without paging; they are kept as opaque values, so both the numeric
-    /// identifier of a portal room and the string identifier of a room on a connected third-party account appear
-    /// here, and an identifier stays in the list after the room itself is deleted. While a room is on this list its
-    /// activity is left out of the hourly room digest and of the daily feed, the letters that room would send at once
-    /// are not sent, and its new-item counters are hidden from the Files responses. Silencing a room changes nothing
-    /// for its other members. The kinds of notification this list is applied to are switched with
-    /// `POST api/2.0/settings/notification`.
+    /// Returns the IDs of the rooms the calling user has muted, as `disabledRooms`. Any signed-in user can call it,
+    /// including a guest. The call is read-only and reads only the caller's own list. An empty list means no room is
+    /// muted. The list is in the order the rooms were added, without paging. It holds the IDs as
+    /// `POST api/2.0/settings/notification/rooms` stored them. So it can hold numeric portal room IDs and string IDs
+    /// of third-party rooms. An ID stays in the list after its room is deleted. For a muted room, the portal leaves
+    /// its activity out of the hourly room digest and the daily feed. It also skips that room's immediate letters.
+    /// The Files responses hide its new-item counters. Muting a room changes nothing for its other members. To turn
+    /// whole kinds of notification on or off, use `POST api/2.0/settings/notification`.
     /// </remarks>
     /// <summary>Get muted rooms</summary>
     /// <path>api/2.0/settings/notification/rooms</path>
@@ -118,17 +109,15 @@ public class NotificationController(
     }
 
     /// <remarks>
-    /// Adds one room to the calling user's silenced list or takes it off again: `mute` true silences the room, false
-    /// lets its notifications through. One call carries one room, so several rooms take several calls, and repeating
-    /// a call with the same pair changes nothing. The room is named by `roomsId` and kept as an opaque value: the
-    /// numeric identifier of a portal room and the string identifier of a room on a connected third-party account are
-    /// both accepted, and neither the room's existence nor the caller's access to it is checked, so a mistyped
-    /// identifier is stored as sent. Every signed-in member manages its own list, whatever its role, and the list of
-    /// another member cannot be touched. While a room is silenced its activity is left out of the hourly room digest
-    /// and of the daily feed, the letters it would send at once are not sent, and its new-item counters are hidden.
-    /// The Files responses stop offering the `mute` action on a room once badges, room activity and the daily feed
-    /// are all switched off, while this call keeps working. What comes back is the whole updated list, the same shape
-    /// `GET api/2.0/settings/notification/rooms` returns.
+    /// Mutes or unmutes one room for the calling user. Set `mute` to true to mute the room, or to false to unmute it.
+    /// Any signed-in user can call it, including a guest. It changes data only in the caller's own list. One call
+    /// changes one room. A repeated call with the same body changes nothing. Name the room in `roomsId`, as a numeric
+    /// portal room ID or a string ID of a third-party room. The call checks neither that the room exists nor that the
+    /// caller can access it. So it stores a mistyped ID as sent. For a muted room, the portal leaves its activity out
+    /// of the hourly room digest and the daily feed. It also skips that room's immediate letters. The Files responses
+    /// hide its new-item counters. They stop offering the `mute` action on rooms when badges, room activity, and the
+    /// daily feed are all off. This call still works then. It returns the whole updated list, like
+    /// `GET api/2.0/settings/notification/rooms`.
     /// </remarks>
     /// <summary>Mute or unmute a room</summary>
     /// <path>api/2.0/settings/notification/rooms</path>
@@ -142,18 +131,17 @@ public class NotificationController(
     }
 
     /// <remarks>
-    /// Lists the ways this installation can deliver a notification, each as the internal name of the channel together
-    /// with `isEnabled`: `email.sender` for letters and `telegram.sender` for Telegram messages. The list describes
-    /// the installation and the portal rather than the calling user, so every member gets the same answer, and the
-    /// call is read-only. Any signed-in member may ask for it, whatever its role, and no permission is demanded. A
-    /// channel appears only when the notification service of the running installation is configured with a sender of
-    /// that name, so the list can be shorter than the two names above, and an empty list means that configuration
-    /// names no channel this build implements. `email.sender` is reported as enabled whenever it is listed, while
-    /// `telegram.sender` is reported as enabled only while the portal has a Telegram bot name and token stored, which
-    /// is what `POST api/2.0/settings/authservice` writes. An enabled channel says nothing about the caller: a member
-    /// also has to connect their own Telegram account, for which `GET api/2.0/settings/telegram/link` hands out the
-    /// link and `GET api/2.0/settings/telegram/check` reports the outcome. Which kinds of notification a member
-    /// receives is a separate setting, read with `GET api/2.0/settings/notification/{type}`.
+    /// Returns the channels this installation can use to deliver notifications, each with `isEnabled`. The channel
+    /// names are `email.sender` for letters and `telegram.sender` for Telegram messages. The list describes the
+    /// installation and the portal, so every user gets the same answer. Any signed-in user can call it, including a
+    /// guest. The call is read-only. A channel appears only if the notification service configures a sender with that
+    /// name. An empty list means the configuration names no channel this build supports. The call always reports
+    /// `email.sender` as enabled when it is listed. It reports `telegram.sender` as enabled only while the portal
+    /// stores a Telegram bot name and token. To store them, use `POST api/2.0/settings/authservice`. An enabled
+    /// channel says nothing about the caller. To get Telegram messages, a user also connects their own Telegram
+    /// account. To get the link, use `GET api/2.0/settings/telegram/link`. To check the result, use
+    /// `GET api/2.0/settings/telegram/check`. To read which kinds of notification a user receives, use
+    /// `GET api/2.0/settings/notification/{type}`.
     /// </remarks>
     /// <summary>Get notification channels</summary>
     /// <path>api/2.0/settings/notification/channels</path>

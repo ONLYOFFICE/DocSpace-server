@@ -99,8 +99,9 @@ public class GoogleWorkspaceMigrator : Migrator
             await ReportProgressAsync(5, MigrationResource.StartOfDataProcessing);
         }
 
-        var progressStep = 90 / _takeouts.Length;
-        var i = 1;
+        // each takeout has an equal share of 5-95%, filled while it unpacks
+        var progressStep = 90d / _takeouts.Length;
+        var i = 0;
         MigrationUser lastUser = null;
         foreach (var takeout in _takeouts)
         {
@@ -109,9 +110,11 @@ public class GoogleWorkspaceMigrator : Migrator
                 return null;
             }
 
+            var takeoutProgress = 5 + progressStep * i;
+            var takeoutStatus = MigrationResource.DataProcessing + $" {takeout} ({++i}/{_takeouts.Length})";
             if (reportProgress)
             {
-                await ReportProgressAsync(_lastProgressUpdate + progressStep, MigrationResource.DataProcessing + $" {takeout} ({i++}/{_takeouts.Length})");
+                await ReportProgressAsync(takeoutProgress, takeoutStatus);
             }
 
             var tmpFolder = Path.Combine(TmpFolder, Path.GetFileNameWithoutExtension(takeout));
@@ -120,26 +123,22 @@ public class GoogleWorkspaceMigrator : Migrator
             {
                 await using (var archive = await ZipFile.OpenReadAsync(takeout, _cancellationToken))
                 {
-                    foreach (var entry in archive.Entries)
+                    var extracted = await ExtractZipAsync(archive, tmpFolder, async (number, count) =>
                     {
-                        var destPath = GetSafeExtractPath(tmpFolder, entry.FullName);
-                        if (string.IsNullOrEmpty(entry.Name))
+                        if (reportProgress)
                         {
-                            Directory.CreateDirectory(destPath);
+                            await ReportUnzippingAsync(takeoutProgress + progressStep * number / count, takeoutStatus);
                         }
-                        else
-                        {
-                            var dir = Path.GetDirectoryName(destPath);
-                            if (!Directory.Exists(dir))
-                            {
-                                Directory.CreateDirectory(dir);
-                            }
-                            await entry.ExtractToFileAsync(destPath, _cancellationToken);
-                        }
-                        if (_cancellationToken.IsCancellationRequested && reportProgress)
+                    }, _cancellationToken);
+                    if (!extracted)
+                    {
+                        if (reportProgress)
                         {
                             return null;
                         }
+
+                        // the import must not go on with a takeout unpacked in part
+                        throw new OperationCanceledException(_cancellationToken);
                     }
                 }
                 var rootFolder = Path.Combine(tmpFolder, "Takeout");
@@ -201,6 +200,24 @@ public class GoogleWorkspaceMigrator : Migrator
 
                     lastUser = user;
                 }
+            }
+            catch (LargeBackupException ex)
+            {
+                // the limit counts every takeout unpacked so far, so the remaining ones cannot fit either: the parse stops here
+                MigrationInfo.FailedArchives.Add(key);
+                await ReportProgressAsync(100, ex.Message);
+                throw;
+            }
+            catch (Exception ex) when (IsStopped(ex, _cancellationToken))
+            {
+                // a stop is not a broken takeout: the parse returns quietly, as it does between entries, and a stopped
+                // import ends here instead of going on with the takeouts unpacked so far
+                if (reportProgress)
+                {
+                    return null;
+                }
+
+                throw;
             }
             catch (Exception ex)
             {
@@ -285,9 +302,10 @@ public class GoogleWorkspaceMigrator : Migrator
 
     private string GetLocalizedFolderPath(string parentFolder, string folderName)
     {
-        if (_folderNameMappings.TryGetValue(folderName.ToLowerInvariant(), out var localizedFolderName))
+        // the localized name is read from the takeout's own html: a rooted or ".." value must not lead outside the backup
+        if (_folderNameMappings.TryGetValue(folderName.ToLowerInvariant(), out var localizedFolderName)
+            && TryGetSafeExtractPath(parentFolder, localizedFolderName, out var localizedPath))
         {
-            var localizedPath = Path.Combine(parentFolder, localizedFolderName);
             if (Directory.Exists(localizedPath))
             {
                 return localizedPath;

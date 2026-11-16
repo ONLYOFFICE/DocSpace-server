@@ -35,7 +35,6 @@
 
 const config = require("../../config"),
     logger = require("../log.js");
-    URL = require("url");
 
 // ReSharper disable once InconsistentNaming
 module.exports = function () {
