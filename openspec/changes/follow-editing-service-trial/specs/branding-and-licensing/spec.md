@@ -1,0 +1,138 @@
+# Spec Delta
+
+## ADDED Requirements
+
+### Requirement: Following the editing service's trial
+
+While no license file exists at the configured path and no license from a file is in force, an Enterprise or
+Developer installation SHALL end its own trial tariff no later than the day the editing service's trial ends, as the
+editing service reports it, never moving the end later; an expired trial of the editing service SHALL end it
+yesterday. It SHALL apply this when the setup wizard is completed and on the daily background re-read. A license from
+a file SHALL never be replaced by it.
+
+#### Scenario: Wizard completed on the editing service's trial
+
+- **WHEN** `completeWizard` is called on an Enterprise installation without a license file whose editing service reports an active trial ending on day D
+- **THEN** the answer is 200 with `completed` true and `getPortalTariff` reports a `dueDate` on or before day D
+- **AND** the license counts as accepted and no audit event is written
+
+#### Scenario: Editing service silent at completion
+
+- **WHEN** `completeWizard` is called on such an installation and the editing service does not answer
+- **THEN** the answer is 200 with `completed` true and the installation keeps its own 30-day trial tariff
+
+#### Scenario: Editing service trial ends later
+
+- **WHEN** the editing service reports a trial ending later than the installation's trial, for example after the editing service was reinstalled
+- **THEN** `getPortalTariff` keeps the earlier `dueDate`
+
+#### Scenario: Same day
+
+- **WHEN** the installation's trial ends later on the same day the editing service's trial ends
+- **THEN** `getPortalTariff` keeps the installation's `dueDate`
+
+#### Scenario: Editing service trial expired
+
+- **WHEN** the daily background re-read runs and the editing service reports its trial as expired
+- **THEN** `getPortalTariff` reports yesterday as `dueDate` and the installation is not paid
+
+#### Scenario: Editing service does not answer the re-read
+
+- **WHEN** the daily background re-read runs and the editing service does not answer or its answer cannot be read
+- **THEN** the tariff is unchanged
+
+#### Scenario: License from a file in force
+
+- **WHEN** a license file was accepted and the editing service reports a trial
+- **THEN** `getPortalTariff` keeps the license's `dueDate` and `customerId`
+
+## MODIFIED Requirements
+
+### Requirement: Whether a license is still required
+
+`getIsLicenseRequired` SHALL need no authentication and answer true only when the installation is Enterprise
+or Developer, its tariff page is enabled (not an anyone-access portal, not an image-based deployment), no
+license file exists at the configured path and the editing service reports no active trial of its own; false in
+every other case, including a hosted portal. The editing service's answer MAY be up to 15 minutes old.
+
+#### Scenario: Fresh Enterprise installation
+
+- **WHEN** the wizard page of a new Enterprise installation whose editing service runs no trial calls `getIsLicenseRequired`
+- **THEN** the system answers 200 true until a license has been accepted
+
+#### Scenario: Fresh Enterprise installation on the editing service's trial
+
+- **WHEN** the wizard page of a new Enterprise installation without a license file calls `getIsLicenseRequired` while the editing service reports an active trial
+- **THEN** the system answers 200 false
+
+#### Scenario: Editing service does not answer
+
+- **WHEN** `getIsLicenseRequired` is called on such an installation and the editing service does not answer
+- **THEN** the system answers from the editing service's last answer of the past hour, and with none 200 true
+
+#### Scenario: Hosted portal
+
+- **WHEN** `getIsLicenseRequired` is called on a hosted portal
+- **THEN** the system answers 200 false
+
+### Requirement: Activating a license
+
+`acceptLicense` SHALL, on an Enterprise or Developer installation, record the acceptance, write an audit event and
+apply the staged license: the current file is backed up, the staged one moved into place, confirmed by the editing
+service when reachable and written as the installation's quota and tariff; on any failure the previous file is
+restored. The answer is 200 with an empty string on success, else a sentence naming the failure. Completing the setup
+wizard SHALL do the same when a license file is given, and otherwise follow "Following the editing service's trial".
+
+#### Scenario: Accepted after upload
+
+- **WHEN** a license was uploaded and `acceptLicense` is called
+- **THEN** the answer is "" and `getPortalTariff` reports the license's end date as `dueDate`, its customer as `customerId` and `state` Paid
+
+#### Scenario: Accepted during the editing service's trial
+
+- **WHEN** the installation runs the trial of "Following the editing service's trial", and a license is uploaded and `acceptLicense` is called
+- **THEN** the answer is "" and `getPortalTariff` reports the license's end date as `dueDate`, which later background re-reads keep
+
+#### Scenario: Other edition
+
+- **WHEN** `acceptLicense` is called on a hosted portal or an open-source installation
+- **THEN** the answer is 200 "Your pricing plan does not support this option"
+
+#### Scenario: Nothing staged
+
+- **WHEN** `acceptLicense` is called with no license file on disk
+- **THEN** the answer is 200 "You must enter a license key"
+
+#### Scenario: Editing service rejects the license
+
+- **WHEN** the editing service reports a different customer id or an error for the license
+- **THEN** the answer is 200 "License key is not correct" and the previous license file is back in place
+
+### Requirement: Refreshing the license
+
+`refreshLicense` SHALL answer 200 false on an installation that is not Enterprise or Developer and otherwise re-read
+the license file and rewrite the quota and tariff from it, answering true; a missing or unreadable file or an
+editing-service refusal SHALL answer 402, a start date in the future 400. After acceptance a background re-read of the
+license in force SHALL run daily by default, so a replaced file takes effect without a call; it SHALL NOT apply an
+uploaded license. Without a license file the re-read SHALL follow "Following the editing service's trial", accepted or
+not.
+
+#### Scenario: Open-source installation
+
+- **WHEN** `refreshLicense` is called on an installation without a license path
+- **THEN** the system answers 200 false
+
+#### Scenario: File replaced on disk
+
+- **WHEN** the license file is replaced by one with a later end date and the periodic re-read runs
+- **THEN** `getPortalTariff` reports the new `dueDate`
+
+#### Scenario: Uploaded license not accepted
+
+- **WHEN** a license was uploaded with `uploadLicense` and not accepted, and the periodic re-read runs
+- **THEN** the uploaded license stays staged and does not change the tariff; only `acceptLicense` or `refreshLicense` puts it in force
+
+#### Scenario: No license file, before acceptance
+
+- **WHEN** the periodic re-read runs on an Enterprise installation without a license file, before the wizard is completed, and the editing service reports a trial ending before the installation's trial
+- **THEN** `getPortalTariff` reports the editing service's trial end day as `dueDate`
