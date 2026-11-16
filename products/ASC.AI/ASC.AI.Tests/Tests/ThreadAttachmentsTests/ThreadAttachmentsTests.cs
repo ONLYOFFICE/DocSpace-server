@@ -38,16 +38,13 @@ namespace ASC.AI.Tests.Tests.ThreadAttachmentsTests;
 public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestBase(fixture)
 {
     private const string AttachmentsPath = "/internal/ai/attachments";
-    private const string Text = "Autotest attachment. Line two.";
 
     private static readonly byte[] _png =
         Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==");
 
     private sealed record Attachment(Guid Id, string Kind, string Title, string? Content, string? EntryId);
 
-    private sealed record AttachedFile(int Id, string Title, int FolderId);
-
-    private sealed record AttachedFilesPage(List<AttachedFile> Files, long Total);
+    private sealed record ThreadFilesPage(List<ThreadFile> Files, long Total);
 
     [Fact]
     public async Task Upload_ToTheProject_StoresTheFileInItsRoot()
@@ -111,7 +108,7 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         var projectId = await CreateProjectAsync();
 
         using var form = new MultipartFormDataContent();
-        using var content = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(Text));
+        using var content = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(FileText));
         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
         form.Add(content, "file", "notes.txt");
 
@@ -379,64 +376,11 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     {
         return OperationsApi.CreateUploadSessionInFolderAsync(
             folderId,
-            new SessionRequest(name, Text.Length, relativePath!, createNewIfExist: true),
+            new SessionRequest(name, FileText.Length, relativePath!, createNewIfExist: true),
             TestContext.Current.CancellationToken);
     }
 
-    private async Task<AttachedFile> UploadAsync(int folderId, string name, byte[]? bytes = null)
-    {
-        bytes ??= System.Text.Encoding.UTF8.GetBytes(Text);
-
-        var session = (await OperationsApi.CreateUploadSessionInFolderAsync(
-            folderId,
-            new SessionRequest(name, bytes.Length, createNewIfExist: true),
-            TestContext.Current.CancellationToken)).Response;
-
-        var uploaded = (await OperationsApi.UploadSessionAsync(
-            folderId,
-            session.Id,
-            new FileParameter(name, "application/octet-stream", new MemoryStream(bytes)),
-            TestContext.Current.CancellationToken)).Response.File;
-
-        return new AttachedFile(uploaded.Id, uploaded.Title, uploaded.FolderId);
-    }
-
-    private async Task<int> MyDocumentsIdAsync()
-    {
-        return (await FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
-    }
-
-    private static BatchRequestDto BuildBatch(
-        int destFolderId,
-        IEnumerable<int>? fileIds = null,
-        IEnumerable<int>? folderIds = null,
-        FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
-    {
-        return new BatchRequestDto
-        {
-            DestFolderId = new BatchRequestDtoAllOfDestFolderId(destFolderId),
-            ConflictResolveType = conflictResolveType,
-            FileIds = (fileIds ?? []).Select(id => new BatchRequestDtoAllOfFileIds(id)).ToList(),
-            FolderIds = (folderIds ?? []).Select(id => new BatchRequestDtoAllOfFolderIds(id)).ToList(),
-            ReturnSingleOperation = true
-        };
-    }
-
-    private async Task<FileOperationDto> CompleteAsync(List<FileOperationDto> started)
-    {
-        var operation = started.Should().ContainSingle().Subject;
-
-        if (!operation.Finished)
-        {
-            operation = (await WaitForOperationAsync(operation.Id)).Should().ContainSingle().Subject;
-        }
-
-        operation.Error.Should().BeNullOrEmpty();
-
-        return operation;
-    }
-
-    private async Task<AttachedFile> CopyAsync(int projectId, int fileId, FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
+    private async Task<ThreadFile> CopyAsync(int projectId, int fileId, FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
     {
         var operation = await CompleteAsync((await OperationsApi.CopyBatchItemsAsync(
             BuildBatch(projectId, fileIds: [fileId], conflictResolveType: conflictResolveType),
@@ -444,7 +388,7 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
 
         var copy = operation.Files.OfType<FileDto>().Should().ContainSingle().Subject;
 
-        return new AttachedFile(copy.Id, copy.Title, copy.FolderId);
+        return new ThreadFile(copy.Id, copy.Title, copy.FolderId);
     }
 
     private async Task<Attachment> AttachAsync(int fileId)
@@ -461,7 +405,7 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         return _ai.PutAsync(AttachmentsPath, new { ids, messageId }, TestContext.Current.CancellationToken);
     }
 
-    private async Task<AttachedFile> SendAsync(int projectId, Guid threadId, string name)
+    private async Task<ThreadFile> SendAsync(int projectId, Guid threadId, string name)
     {
         var file = await UploadAsync(projectId, name);
         var attachment = await AttachAsync(file.Id);
@@ -478,12 +422,12 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/attachments", TestContext.Current.CancellationToken);
     }
 
-    private async Task<AttachedFilesPage> ListAttachmentsAsync(int projectId, Guid threadId)
+    private async Task<ThreadFilesPage> ListAttachmentsAsync(int projectId, Guid threadId)
     {
         using var response = await GetAttachmentsAsync(projectId, threadId);
 
-        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<AttachedFile>>(response, TestContext.Current.CancellationToken);
+        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ThreadFile>>(response, TestContext.Current.CancellationToken);
 
-        return new AttachedFilesPage(envelope.Response ?? [], envelope.Total ?? 0);
+        return new ThreadFilesPage(envelope.Response ?? [], envelope.Total ?? 0);
     }
 }

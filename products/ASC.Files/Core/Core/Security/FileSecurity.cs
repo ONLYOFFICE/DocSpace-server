@@ -1253,6 +1253,14 @@ public class FileSecurity(
             return false;
         }
 
+        if (e.RootFolderType == FolderType.AiHub &&
+            parentFolders.Exists(f => f.FolderType == FolderType.AiProjectRoom) &&
+            (e.CreateBy != userId ||
+             action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy)))
+        {
+            return false;
+        }
+
         if (action == FilesSecurityActions.HistoryExport)
         {
             if (isGuest)
