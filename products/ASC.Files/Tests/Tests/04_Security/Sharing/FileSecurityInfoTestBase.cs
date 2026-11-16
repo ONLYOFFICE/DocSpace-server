@@ -53,7 +53,7 @@ public abstract class FileSecurityInfoTestBase(AspireAppFixture fixture) : Shari
     }
 
     /// <summary>Finds the entry whose <c>sharedToUser</c> matches the given user id.</summary>
-    protected static FileShareDto FindUserEntry(IEnumerable<FileShareDto> entries, Guid userId)
+    protected static FileShareDto? FindUserEntry(IEnumerable<FileShareDto> entries, Guid userId)
     {
         return entries.FirstOrDefault(e => e.SharedToUser != null && e.SharedToUser.Id == userId);
     }

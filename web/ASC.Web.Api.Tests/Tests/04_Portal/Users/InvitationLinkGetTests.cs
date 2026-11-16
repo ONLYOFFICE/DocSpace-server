@@ -180,6 +180,6 @@ public class InvitationLinkGetTests(
 
         manager.Should().NotBeNull("the paid-user feature is part of every plan");
 
-        return (Convert.ToInt32(manager.Value), Convert.ToInt32(manager.Used?.Value ?? 0));
+        return (Convert.ToInt32(manager!.Value), Convert.ToInt32(manager.Used?.Value ?? 0));
     }
 }
