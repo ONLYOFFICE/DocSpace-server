@@ -121,6 +121,103 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     }
 
     [Fact]
+    public async Task Copy_APortalFile_StoresTheCopyInTheProjectRoot()
+    {
+        var projectId = await CreateProjectAsync();
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+
+        var copy = await CopyAsync(projectId, source.Id);
+
+        copy.Id.Should().NotBe(source.Id);
+        copy.FolderId.Should().Be(projectId);
+    }
+
+    [Fact]
+    public async Task Copy_ByAProjectMember_StoresTheCopyInTheProjectRoot()
+    {
+        var projectId = await CreateProjectAsync();
+        var member = await InviteMemberAsync(projectId);
+
+        await FilesHttpClient.Authenticate(member);
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+        var copy = await CopyAsync(projectId, source.Id);
+        await FilesHttpClient.Authenticate(Owner);
+
+        copy.FolderId.Should().Be(projectId);
+    }
+
+    [Fact]
+    public async Task Copy_ByAUserOutsideTheProject_Returns403()
+    {
+        var projectId = await CreateProjectAsync();
+        var outsider = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
+
+        await FilesHttpClient.Authenticate(outsider);
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await OperationsApi.CopyBatchItemsAsync(
+            BuildBatch(projectId, fileIds: [source.Id]),
+            TestContext.Current.CancellationToken));
+        await FilesHttpClient.Authenticate(Owner);
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task Copy_OfAFolder_Returns403()
+    {
+        var projectId = await CreateProjectAsync();
+        var folder = (await FoldersApi.CreateFolderAsync(
+            await MyDocumentsIdAsync(),
+            new CreateFolderRequest("Autotest Attachments Folder"),
+            TestContext.Current.CancellationToken)).Response;
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await OperationsApi.CopyBatchItemsAsync(
+            BuildBatch(projectId, folderIds: [folder.Id]),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task Copy_OfAnUnsupportedFormat_Returns415()
+    {
+        var projectId = await CreateProjectAsync();
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "data.bin");
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await OperationsApi.CopyBatchItemsAsync(
+            BuildBatch(projectId, fileIds: [source.Id]),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(415);
+    }
+
+    [Fact]
+    public async Task Copy_TheSameFileTwice_KeepsBothCopies()
+    {
+        var projectId = await CreateProjectAsync();
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+
+        var first = await CopyAsync(projectId, source.Id, FileConflictResolveType.Overwrite);
+        var second = await CopyAsync(projectId, source.Id, FileConflictResolveType.Overwrite);
+
+        second.Id.Should().NotBe(first.Id);
+        second.Title.Should().NotBe(first.Title);
+    }
+
+    [Fact]
+    public async Task Move_APortalFile_ToTheProject_Returns403()
+    {
+        var projectId = await CreateProjectAsync();
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await OperationsApi.MoveBatchItemsAsync(
+            BuildBatch(projectId, fileIds: [source.Id]),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
     public async Task Attach_AnUploadedFile_ReturnsOneAttachmentWithItsText()
     {
         var projectId = await CreateProjectAsync();
@@ -170,6 +267,31 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     }
 
     [Fact]
+    public async Task Bind_ACopiedFile_KeepsItInTheThreadAfterTheOriginalIsDeleted()
+    {
+        var projectId = await CreateProjectAsync();
+        var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+        var copy = await CopyAsync(projectId, source.Id);
+        var attachment = await AttachAsync(copy.Id);
+        var message = await CreateMessageInternalAsync(thread.Id);
+
+        using var response = await BindAsync(message.Id, attachment.Id);
+        await CompleteAsync((await FilesApi.DeleteFileAsync(
+            source.Id,
+            new DeleteFileRequest(deleteAfter: false, immediately: true),
+            returnSingleOperation: true,
+            TestContext.Current.CancellationToken)).Response);
+
+        var page = await ListAttachmentsAsync(projectId, thread.Id);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        attachment.Content.Should().Contain("Autotest attachment");
+        page.Files.Should().ContainSingle().Which.Id.Should().Be(copy.Id);
+        page.Files[0].FolderId.Should().NotBe(projectId);
+    }
+
+    [Fact]
     public async Task Bind_FilesOfTwoMessages_KeepsThemInOneFolder()
     {
         var projectId = await CreateProjectAsync();
@@ -205,7 +327,7 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     public async Task Bind_InAThreadOutsideAProject_LeavesTheFileWhereItWas()
     {
         await FilesHttpClient.Authenticate(Owner);
-        var myDocumentsId = (await FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
+        var myDocumentsId = await MyDocumentsIdAsync();
         var thread = await CreateThreadInternalAsync();
         var file = await UploadAsync(myDocumentsId, "notes.txt");
         var attachment = await AttachAsync(file.Id);
@@ -277,6 +399,52 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
             TestContext.Current.CancellationToken)).Response.File;
 
         return new AttachedFile(uploaded.Id, uploaded.Title, uploaded.FolderId);
+    }
+
+    private async Task<int> MyDocumentsIdAsync()
+    {
+        return (await FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
+    }
+
+    private static BatchRequestDto BuildBatch(
+        int destFolderId,
+        IEnumerable<int>? fileIds = null,
+        IEnumerable<int>? folderIds = null,
+        FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
+    {
+        return new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(destFolderId),
+            ConflictResolveType = conflictResolveType,
+            FileIds = (fileIds ?? []).Select(id => new BatchRequestDtoAllOfFileIds(id)).ToList(),
+            FolderIds = (folderIds ?? []).Select(id => new BatchRequestDtoAllOfFolderIds(id)).ToList(),
+            ReturnSingleOperation = true
+        };
+    }
+
+    private async Task<FileOperationDto> CompleteAsync(List<FileOperationDto> started)
+    {
+        var operation = started.Should().ContainSingle().Subject;
+
+        if (!operation.Finished)
+        {
+            operation = (await WaitForOperationAsync(operation.Id)).Should().ContainSingle().Subject;
+        }
+
+        operation.Error.Should().BeNullOrEmpty();
+
+        return operation;
+    }
+
+    private async Task<AttachedFile> CopyAsync(int projectId, int fileId, FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
+    {
+        var operation = await CompleteAsync((await OperationsApi.CopyBatchItemsAsync(
+            BuildBatch(projectId, fileIds: [fileId], conflictResolveType: conflictResolveType),
+            TestContext.Current.CancellationToken)).Response);
+
+        var copy = operation.Files.OfType<FileDto>().Should().ContainSingle().Subject;
+
+        return new AttachedFile(copy.Id, copy.Title, copy.FolderId);
     }
 
     private async Task<Attachment> AttachAsync(int fileId)
