@@ -281,6 +281,8 @@ global using static ASC.Web.Files.Services.DocumentService.DocumentServiceTracke
 global using static ASC.Web.Files.Utils.FileTracker;
 
 global using ActionType = ASC.AI.Integration.Assignments.ActionType;
+global using AiThread = ASC.AI.Integration.Threads.Thread;
+global using AttachmentKind = ASC.AI.Integration.Attachments.AttachmentKind;
 global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.AuditReportFormat;
 global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;

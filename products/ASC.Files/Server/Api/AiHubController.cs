@@ -183,6 +183,31 @@ public class AiHubController(
     public async Task<IEnumerable<FileDto<int>>> GetThreadArtifacts(GetAiThreadFilesRequestDto inDto)
     {
         var folderId = await aiHubService.GetThreadArtifactsFolderIdAsync(inDto.Id, inDto.ThreadId);
+
+        return await GetThreadFilesAsync(folderId, inDto);
+    }
+
+    /// <remarks>
+    /// Returns the attachments of a thread in an AI project: the files the user sent with its messages. Only the author of the thread can read them.
+    /// </remarks>
+    /// <summary>Get the AI thread attachments</summary>
+    /// <path>api/2.0/files/rooms/{id}/threads/{threadId}/attachments</path>
+    /// <collection>list</collection>
+    [Tags("Rooms / AI")]
+    [SwaggerResponse(200, "The attachments of the thread", typeof(IEnumerable<FileDto<int>>))]
+    [SwaggerResponse(400, "`count` is outside its allowed range or `startIndex` is negative")]
+    [SwaggerResponse(403, "The caller may not read the project, or the AI features are turned off on the portal")]
+    [SwaggerResponse(404, "No AI project has this id, or it has no such thread of the caller")]
+    [HttpGet("{id}/threads/{threadId:guid}/attachments")]
+    public async Task<IEnumerable<FileDto<int>>> GetThreadAttachments(GetAiThreadFilesRequestDto inDto)
+    {
+        var folderId = await aiHubService.GetThreadAttachmentsFolderIdAsync(inDto.Id, inDto.ThreadId);
+
+        return await GetThreadFilesAsync(folderId, inDto);
+    }
+
+    private async Task<IEnumerable<FileDto<int>>> GetThreadFilesAsync(int? folderId, GetAiThreadFilesRequestDto inDto)
+    {
         if (folderId is null)
         {
             apiContext.SetCount(0).SetTotalCount(0);

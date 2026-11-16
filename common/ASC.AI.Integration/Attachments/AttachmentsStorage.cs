@@ -87,6 +87,27 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
             .ToListAsync();
     }
 
+    public async Task<List<Attachment>> ReadUnboundByEntryIdsAsync(int tenantId, Guid createdBy, IReadOnlyCollection<int> entryIds)
+    {
+        if (entryIds.Count == 0)
+        {
+            return [];
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.GetUnboundAttachmentsByEntryIdsAsync(tenantId, createdBy, entryIds)
+            .Select(ToDomainEntity)
+            .ToListAsync();
+    }
+
+    public async Task SetContentAsync(int tenantId, Guid createdBy, Guid id, string content)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        await context.SetAttachmentContentAsync(tenantId, createdBy, id, content);
+    }
+
     public async Task UpdateManyAsync(int tenantId, Guid createdBy, HashSet<Guid> ids, Guid messageId)
     {
         if (ids.Count == 0)

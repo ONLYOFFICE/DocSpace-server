@@ -228,15 +228,12 @@ public class AiHubService(
 
     public async Task<int?> GetThreadArtifactsFolderIdAsync(int projectId, Guid threadId)
     {
-        await GetProjectAsync(projectId);
+        return (await GetThreadAsync(projectId, threadId)).ArtifactsFolderId;
+    }
 
-        var thread = await threadsStorage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), threadId);
-        if (thread is null || thread.EntryId != projectId || thread.CreatedBy != authContext.CurrentAccount.ID)
-        {
-            throw new ItemNotFoundException();
-        }
-
-        return thread.ArtifactsFolderId;
+    public async Task<int?> GetThreadAttachmentsFolderIdAsync(int projectId, Guid threadId)
+    {
+        return (await GetThreadAsync(projectId, threadId)).AttachmentsFolderId;
     }
 
     private async Task<List<RoomSkills>> BuildRoomSkillsAsync(int tenantId, List<Folder<int>> rooms)
@@ -255,6 +252,19 @@ public class AiHubService(
                 .ThenBy(r => r.Id)
                 .Select(r => new RoomSkills(r, skills.GetValueOrDefault(r.Id) ?? []))
         ];
+    }
+
+    private async Task<AiThread> GetThreadAsync(int projectId, Guid threadId)
+    {
+        await GetProjectAsync(projectId);
+
+        var thread = await threadsStorage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), threadId);
+        if (thread is null || thread.EntryId != projectId || thread.CreatedBy != authContext.CurrentAccount.ID)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        return thread;
     }
 
     private async Task<Folder<int>> GetProjectAsync(int projectId)

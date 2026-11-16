@@ -724,6 +724,20 @@ internal class FileDao(
                             await filesDbContext.AddOrUpdateAsync(r => r.Files, toInsert);
                         }
 
+                        if (isNew && currentFolder.FolderType == FolderType.AiProjectRoom)
+                        {
+                            await filesDbContext.Attachments.AddAsync(new DbAttachment
+                            {
+                                Id = Guid.CreateVersion7(),
+                                TenantId = tenantId,
+                                Kind = fileType == FileType.Image ? AttachmentKind.Image : AttachmentKind.File,
+                                Title = file.Title,
+                                EntryId = file.Id,
+                                CreatedBy = file.CreateBy,
+                                CreatedAt = DateTime.UtcNow
+                            });
+                        }
+
                         if (file.VectorizationStatus.HasValue)
                         {
                             await filesDbContext.AddOrUpdateAsync(

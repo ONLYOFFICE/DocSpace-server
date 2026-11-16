@@ -48,6 +48,18 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<DbAttachment> GetUnboundAttachmentsByEntryIdsAsync(int tenantId, Guid createdBy, IEnumerable<int> entryIds)
+    {
+        return AttachmentQueriesContainer.GetUnboundAttachmentsByEntryIdsAsync(this, tenantId, createdBy, entryIds);
+    }
+
+    [PreCompileQuery]
+    public Task<int> SetAttachmentContentAsync(int tenantId, Guid createdBy, Guid id, string content)
+    {
+        return AttachmentQueriesContainer.SetAttachmentContentAsync(this, tenantId, createdBy, id, content);
+    }
+
+    [PreCompileQuery]
     public Task<int> UpdateAttachmentBindingsByIdsAsync(int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId)
     {
         return AttachmentQueriesContainer.UpdateAttachmentBindingsByIdsAsync(this, tenantId, createdBy, ids, messageId);
@@ -90,6 +102,19 @@ static file class AttachmentQueriesContainer
             (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids) =>
                 ctx.Attachments
                     .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && ids.Contains(x.Id)));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<int>, IAsyncEnumerable<DbAttachment>> GetUnboundAttachmentsByEntryIdsAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<int> entryIds) =>
+                ctx.Attachments
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.MessageId == null &&
+                                x.EntryId != null && entryIds.Contains(x.EntryId.Value)));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, Guid, string, Task<int>> SetAttachmentContentAsync =
+        (AiIntegrationContext ctx, int tenantId, Guid createdBy, Guid id, string content) =>
+            ctx.Attachments
+                .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.Id == id && x.MessageId == null && x.Content == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.Content, content));
 
     public static readonly Func<AiIntegrationContext, int, Guid, IEnumerable<Guid>, Guid, Task<int>> UpdateAttachmentBindingsByIdsAsync =
         (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids, Guid messageId) =>

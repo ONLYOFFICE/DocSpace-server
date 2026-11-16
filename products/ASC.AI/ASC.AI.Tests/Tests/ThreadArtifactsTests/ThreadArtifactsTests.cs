@@ -35,7 +35,7 @@ namespace ASC.AI.Tests.Tests.ThreadArtifactsTests;
 
 [Trait("Category", "Storage")]
 [Trait("Feature", "AI/ThreadArtifacts")]
-public class ThreadArtifactsTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBase(fixture)
 {
     private sealed record ArtifactFile(int Id, string Title, int FolderId);
 
@@ -244,26 +244,6 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : BaseTest(fixture)
         await FilesHttpClient.Authenticate(Owner);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    private async Task<int> CreateProjectAsync()
-    {
-        await FilesHttpClient.Authenticate(Owner);
-
-        return await AgentsTests.AiProjects.CreateAsync(RoomsApi);
-    }
-
-    private async Task<User> InviteMemberAsync(int projectId)
-    {
-        var member = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
-
-        await FilesHttpClient.Authenticate(Owner);
-        await RoomsApi.SetRoomSecurityAsync(
-            projectId,
-            new RoomInvitationRequest([new RoomInvitation(member.Id, FileShare.Read)], notify: false),
-            TestContext.Current.CancellationToken);
-
-        return member;
     }
 
     private async Task<HttpResponseMessage> PostArtifactAsync(Guid threadId, string name)
