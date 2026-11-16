@@ -100,8 +100,10 @@ here: these are Markdown files).
 
 A security defect (an access bypass, a leak of data or secrets, a check for the wrong account or portal) is not
 in the repository: it lives in the private register named by the `OPENSPEC_SECURITY_REGISTER` environment
-variable (ask the user when it is unset). Mark it fixed there, and add nothing about it to `openspec/` or
-commit its test until a released version carries the fix; tell the user so.
+variable (ask the user when it is unset). Mark it fixed there and add nothing about it to `openspec/` until a
+released version carries the fix; tell the user so. Its test follows the rule of the `openspec-maintain` skill:
+a test already in the repository stays and turns green with the fix; a test for a hole not yet published is
+committed with the release, not before.
 
 ## Build notes
 

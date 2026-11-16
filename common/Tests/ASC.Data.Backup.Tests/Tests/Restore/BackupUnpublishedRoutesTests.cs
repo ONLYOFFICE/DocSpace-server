@@ -44,6 +44,17 @@ public class BackupUnpublishedRoutesTests(
     : BackupPermissionsTests(fixture)
 {
     [Fact]
+    public async Task GetBackupTmp_Owner_ReturnsTheTemporaryFolder()
+    {
+        // Act
+        using var response = await _backup.GetAsync("api/2.0/backup/backuptmp", TestContext.Current.CancellationToken);
+        var folder = await _backup.ReadAsync<string>(response, TestContext.Current.CancellationToken);
+
+        // Assert
+        folder.Should().NotBeNullOrWhiteSpace();
+    }
+
+    [Fact]
     public async Task GetBackupTmp_Anonymous_ReturnsUnauthorized()
     {
         // Arrange

@@ -122,8 +122,9 @@ public class CreateWebhookTests(
 
     /// <summary>
     /// A request that leaves <c>ssl</c> out gets the check for the target's scheme: off for an http one, which it would
-    /// otherwise refuse. Sent raw, because the generated client cannot leave the field out (tests.md, raw
-    /// carve-outs). The https half (on by default) needs an https target with a valid
+    /// otherwise refuse. Sent raw, because the SDK model's <c>Ssl</c> is a non-nullable bool written with
+    /// <c>EmitDefaultValue = true</c>, so the generated client always sends <c>"ssl": false</c> and cannot leave the
+    /// field out (tests.md, raw carve-outs). The https half (on by default) needs an https target with a valid
     /// certificate, which this suite does not have: against the plain-http receiver both settings fail alike.
     /// </summary>
     [Fact]

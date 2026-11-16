@@ -61,6 +61,25 @@ public class ChatProjectAccessTests(AspireAppFixture fixture) : ChatProjectTestB
         (await _aiThreads.AiThreadsListAsync(cancellationToken: TestContext.Current.CancellationToken)).Should().BeEmpty("the refused call left no thread");
     }
 
+    /// <summary>
+    /// An administrator reads every room but is not in the project (<c>inRoom</c> is false), and the chat service's own
+    /// rule is that only members chat there. Measured: the thread is created, so the administrator gets into a project
+    /// they were never invited to.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    public async Task Create_DocSpaceAdminNotInTheProject_Returns403()
+    {
+        var (_, model) = await NewChatModelAsync();
+        var projectId = await CreateProjectOnAsync(model);
+        var admin = await InviteContact(EmployeeType.DocSpaceAdmin, TestContext.Current.CancellationToken);
+        await _aiChatClient.Authenticate(admin);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateProjectThreadAsync(projectId));
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
     [Fact]
     public async Task Send_NotAMemberOfTheProject_Returns403AndTheModelIsNotAsked()
     {
@@ -78,5 +97,29 @@ public class ChatProjectAccessTests(AspireAppFixture fixture) : ChatProjectTestB
         // Assert
         round.StatusCode.Should().Be(HttpStatusCode.Forbidden, round.ToString());
         StreamedRequestsCarrying(provider, question).Should().BeEmpty(provider.Describe());
+    }
+
+    /// <summary>
+    /// Inside a project a missing model is the project's own refusal, 409 (<c>assertThreadCreatable</c>,
+    /// threadsController.ts). Measured on 2026-11-03: 404 "no AI profile is available for this thread", the answer for a
+    /// thread outside any project - the service did not recognise the room as a project on this path, which would also
+    /// explain why an administrator outside the project creates threads in it (the test above). The cause is not
+    /// investigated.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    public async Task Create_ProjectOnAPortalWithNoModelAnywhere_IsRefusedForWantOfAModel()
+    {
+        // Arrange: no profile on the portal, so neither the project nor the Chat binding names a model.
+        var projectId = await CreateProjectAsync();
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await CreateProjectThreadAsync(projectId));
+
+        // Assert
+        // The owner may chat in the project, so assertThreadCreatable (threadsController.ts) reaches the project's model:
+        // with neither its own nor a portal Chat binding there is none, which is the project's 409, not the generic 404 of
+        // a thread outside any project.
+        exception.ErrorCode.Should().Be(409, $"the portal has no model to run the project on: {exception.ErrorContent}");
     }
 }

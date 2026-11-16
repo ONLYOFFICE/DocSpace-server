@@ -56,6 +56,47 @@ public class UserStatusUpdatePermissionsTests(AspireAppFixture fixture) : BaseTe
         exception.ErrorCode.Should().Be(401);
     }
 
+    // The product should never let a DocSpace admin deactivate a peer DocSpace admin; today it does,
+    // which is the bug. This test asserts the correct behaviour, so it stays red until the bug is fixed.
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79900")]
+    public async Task UpdateUserStatus_DocSpaceAdminDeactivatesPeerDocSpaceAdmin_ReturnsAccessDenied()
+    {
+        await _peopleClient.Authenticate(Owner);
+        var target = await InviteContact(EmployeeType.DocSpaceAdmin);
+        var actor = await InviteContact(EmployeeType.DocSpaceAdmin);
+
+        var request = new UpdateMembersRequestDto([target.Id], false);
+
+        await _peopleClient.Authenticate(actor);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _userStatusApi.UpdateUserStatusAsync(EmployeeStatus.Terminated, request, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent?.ToString().Should().Contain("Access denied");
+    }
+
+    // Same bug as above: a DocSpace admin should never be able to deactivate the portal owner.
+    [Fact]
+    [Trait("Category", "Bug")]
+    [Trait("Bug", "79900")]
+    public async Task UpdateUserStatus_DocSpaceAdminDeactivatesOwner_ReturnsAccessDenied()
+    {
+        await _peopleClient.Authenticate(Owner);
+        var ownerProfile = await _profilesApi.GetSelfProfileAsync(TestContext.Current.CancellationToken);
+        var actor = await InviteContact(EmployeeType.DocSpaceAdmin);
+
+        var request = new UpdateMembersRequestDto([ownerProfile.Response.Id], false);
+
+        await _peopleClient.Authenticate(actor);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _userStatusApi.UpdateUserStatusAsync(EmployeeStatus.Terminated, request, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent?.ToString().Should().Contain("Access denied");
+    }
+
     /// <summary>
     /// Every row is an actor without permission to call this endpoint at all: a RoomAdmin, a User
     /// and a Guest are each denied regardless of who the target is (a peer, an admin, the owner) or

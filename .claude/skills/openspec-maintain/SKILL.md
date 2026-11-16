@@ -24,11 +24,14 @@ A test that asserts the correct behaviour of an open defect carries `[Trait("Cat
 ### Security defects
 
 Security defects stay out of the repository until a released version fixes them. The repository is public
-(GitHub mirror), so a security defect (a caller reads, changes or deletes what their rights do not allow, a secret, key, token or personal data leaks, a check runs for the wrong account or portal, a request reaches an internal address, a payment, licence or second-factor gate is bypassed, an audit event names the wrong actor) goes into none of deviations.md, spec.md, verification.md
-or a committed test. The briefs make agents report such a defect only in their final message, marked SECURITY;
-the coordinator records it in the private register outside the repository, and a Bug-marked
-test for it stays uncommitted. After the release that ships the fix it may enter the repository like any
-fixed defect, with the advisory or changelog entry the user names. The same goes for a security fix that is
+(GitHub mirror), so a security defect (a caller reads, changes or deletes what their rights do not allow, a secret, key, token or personal data leaks, a check runs for the wrong account or portal, a request reaches an internal address, a payment, licence or second-factor gate is bypassed, an audit event names the wrong actor) is described in none of deviations.md, spec.md or
+verification.md. The briefs make agents report such a defect only in their final message, marked SECURITY;
+the coordinator records it in the private register outside the repository. Its Bug-marked test depends on
+whether the hole is public already: a test that is already in the repository (its history is public) stays in
+the test project with its `Category=Bug` trait, because it is the check that the fix works and nothing is gained
+by hiding it; a test for a hole nobody has published yet stays uncommitted, kept with the register entry, until
+the release that ships the fix. After that release the defect may enter the repository like any fixed defect,
+with the advisory or changelog entry the user names. The same goes for a security fix that is
 merged but not released: the Closed table does not list it until the release.
 The register's path is the environment variable `OPENSPEC_SECURITY_REGISTER`, set per developer in the ignored
 `.claude/settings.local.json` (`"env": {"OPENSPEC_SECURITY_REGISTER": "<path>"}`). When it is unset, ask the
@@ -94,8 +97,8 @@ Nextcloud container IS on the stand (`Requires=Nextcloud` tests, see `03_Rooms/T
    rewrites the marks and the run legend of every verification.md (and of translated copies with the same row
    count, if `--ru` names their root). It is idempotent.
 5. Judge every FAIL row: a test fault, a flake, or a defect. A defect gets a Bug-marked test and a deviations.md row;
-   a security defect gets neither: its test leaves the test project and it goes to the private register (see
-   "Security defects" above).
+   a security defect gets no row: it goes to the private register, and its test, already in the repository,
+   stays where it is (see "Security defects" above).
 
 ## Mode D: which operations the tests call
 

@@ -34,11 +34,11 @@
 namespace ASC.Files.Tests.Tests._06_Operations.MarkAsRead;
 
 /// <summary>
-/// <c>PUT /api/2.0/files/fileops/markasread</c> — access control.
-/// Every authenticated role can call the endpoint
-/// with an empty body;
-/// the only case actually denied
-/// is an unauthenticated caller.
+/// <c>PUT /api/2.0/files/fileops/markasread</c> — access control. Every authenticated role can
+/// call the endpoint with an empty body; the only case actually denied is an unauthenticated
+/// caller. A caller with no access to the room holding the target file is silently accepted too
+/// (see <see cref="MarkAsRead_UserWithoutRoomAccess_Returns200"/>) - the endpoint does not check
+/// per-item access before marking as read.
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "Files")]
@@ -84,5 +84,20 @@ public class MarkAsReadPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(member);
         await _filesOperationsApi.MarkAsReadAsync(new BaseBatchRequestDto(folderIds: [], fileIds: []) { ReturnSingleOperation = true }, TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task MarkAsRead_UserWithoutRoomAccess_Returns200()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest MarkAsRead No Access");
+        var file = await CreateFile("Autotest MarkAsRead No Access File.docx", room.Id);
+
+        var user = await InviteMember(EmployeeType.User);
+
+        // Act & Assert - the user is never invited into the room, yet the request still succeeds.
+        await _filesClient.Authenticate(user);
+        await _filesOperationsApi.MarkAsReadAsync(MarkAsReadFiles(file.Id), TestContext.Current.CancellationToken);
     }
 }

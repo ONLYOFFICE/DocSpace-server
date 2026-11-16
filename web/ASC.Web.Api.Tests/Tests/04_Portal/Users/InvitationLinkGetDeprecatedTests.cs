@@ -36,7 +36,8 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Users;
 /// <summary>
 /// GET /api/2.0/portal/users/invite/{employeeType} — the deprecated invitation-link endpoint.
 /// Superseded by <see cref="InvitationLinkGetTests"/>; it returns a plain URL string instead of an
-/// <see cref="InvitationLinkDto"/>.
+/// <see cref="InvitationLinkDto"/> and, unlike the current endpoint, does not enforce role-based
+/// access control at all — every authenticated caller gets 200, just with an empty body when denied.
 /// </summary>
 [Trait("Category", "Portal")]
 public class InvitationLinkGetDeprecatedTests(
@@ -66,6 +67,20 @@ public class InvitationLinkGetDeprecatedTests(
     }
 
     [Fact]
+    public async Task GetInvitationLink_Owner_ForGuestType_ReturnsLink()
+    {
+        // Act
+#pragma warning disable CS0612
+        var result = await _portalUsersApi.GetInvitationLinkAsync(EmployeeType.Guest, TestContext.Current.CancellationToken);
+#pragma warning restore CS0612
+
+        // Assert
+        // The TS test's title says "empty response", but its body asserts toBeTruthy — the
+        // endpoint does return a link for the Guest type, and that is what it verifies.
+        result.Response.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
     public async Task GetInvitationLink_Anonymous_ReturnsUnauthorized()
     {
         // Arrange
@@ -79,5 +94,27 @@ public class InvitationLinkGetDeprecatedTests(
 
         // Assert
         exception.ErrorCode.Should().Be(401);
+    }
+
+    [Theory]
+    [InlineData(EmployeeType.DocSpaceAdmin, EmployeeType.DocSpaceAdmin)]
+    [InlineData(EmployeeType.RoomAdmin, EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.RoomAdmin, EmployeeType.DocSpaceAdmin)]
+    [InlineData(EmployeeType.User, EmployeeType.User)]
+    [InlineData(EmployeeType.Guest, EmployeeType.User)]
+    public async Task GetInvitationLink_ByRole_WithoutAccess_ReturnsEmptyResponse(EmployeeType actingRole, EmployeeType targetType)
+    {
+        // Arrange
+        await CreateLinkAsOwnerAsync(targetType);
+        await ActAsAsync(actingRole);
+
+        // Act
+#pragma warning disable CS0612
+        var result = await _portalUsersApi.GetInvitationLinkAsync(targetType, TestContext.Current.CancellationToken);
+#pragma warning restore CS0612
+
+        // Assert — the deprecated endpoint does not enforce role-based access control: it returns
+        // 200 (no ApiException) with an empty response instead of 403.
+        result.Response.Should().BeNullOrEmpty();
     }
 }

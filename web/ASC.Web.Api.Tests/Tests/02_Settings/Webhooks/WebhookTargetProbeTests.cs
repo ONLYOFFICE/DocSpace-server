@@ -37,7 +37,8 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 /// The checks of the target address on <c>POST</c> and <c>PUT api/2.0/settings/webhook</c>: http or https only, no
 /// address in a blacklisted network, and a HEAD probe that has to answer with a success code itself — a redirect is
 /// not followed, and a target that gives no answer is a 500. On an update the probe is sent only after the
-// subscription has been found and its owner checked. Every address here is the local receiver or is refused before any request.
+/// subscription has been found and its owner checked (S5), so nobody can make the portal call an address by naming
+/// another member's subscription. Every address here is the local receiver or is refused before any request.
 /// </summary>
 [Trait("Category", "Settings")]
 public class WebhookTargetProbeTests(
@@ -129,8 +130,8 @@ public class WebhookTargetProbeTests(
     }
 
     /// <summary>
-    /// The lookup and the owner check come before the probe: a member naming another member's subscription is refused
-    /// and the target gets no request.
+    /// S5: the probe used to go out before the ownership check, so a member could make the portal call any public
+    /// address by naming another member's subscription; the lookup and the owner check now come first.
     /// </summary>
     [Theory]
     [InlineData(EmployeeType.RoomAdmin)]

@@ -115,6 +115,23 @@ public class ProfileAccessReadTests(AspireAppFixture fixture) : ProfileTestBase(
         listed.Key.Should().Be(StubModelProvider.Key);
     }
 
+    /// <summary>
+    /// Open, no bug number: the Node service asks the AI service for the list with <c>forClient=true</c> so that it
+    /// strips <c>key</c> and <c>headers</c> for everyone but an administrator, but ASC.AI's ProfileStorageController
+    /// does not implement that flag - the provider secret reaches every member through the public list.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    public async Task List_MemberDoesNotSeeTheKey()
+    {
+        await CreateProfileAsync();
+        await ActAsAsync(EmployeeType.User);
+
+        var listed = (await _aiProfiles.AiProfilesListAsync(TestContext.Current.CancellationToken)).Single();
+
+        listed.Key.Should().BeNullOrEmpty("a member sees the catalogue but not a credential in it");
+    }
+
     [Theory]
     [InlineData(EmployeeType.DocSpaceAdmin)]
     [InlineData(EmployeeType.RoomAdmin)]

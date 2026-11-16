@@ -110,6 +110,30 @@ public class GroupMembersFolderSecurityTests(
         answer.Response.Should().BeEmpty();
     }
 
+    /// <summary>
+    /// The list of a group the folder is not shared with is empty, but <c>total</c> (and <c>count</c>) report the
+    /// group's size: the count query counts the group members without checking that the group has a share on the
+    /// entry, while the list query stops when it has none. A paging client sees pages that never fill.
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    public async Task GetGroupsMembersWithFolderSecurity_GroupNotSharedWithFolder_ReportsZeroTotal()
+    {
+        // Arrange
+        var folder = await CreateFolderInMy("Autotest Group Members Unshared Total", Owner);
+        var member = await InviteContact(EmployeeType.User);
+        await _peopleClient.Authenticate(Owner);
+        var group = (await _groupApi.AddGroupAsync(new GroupRequestDto([member.Id], Owner.Id, "Autotest Unshared Total Group"), TestContext.Current.CancellationToken)).Response;
+
+        // Act
+        var answer = await _sharingApi.GetGroupsMembersWithFolderSecurityAsync(folder.Id, group.Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        answer.Response.Should().BeEmpty();
+        answer.Total.Should().Be(0);
+        answer.Count.Should().Be(0);
+    }
+
     private async Task<(FolderDto Folder, Guid Group, User Overridden, User Plain)> FolderSharedWithGroup()
     {
         var folder = await CreateFolderInMy("Autotest Group Members Folder", Owner);

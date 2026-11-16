@@ -113,9 +113,9 @@ public class UploadSessionIsolationTests(
     }
 
     /// <remarks>
-    /// The folder segment of the path is the thing the abort call checks access on (documented).
-    /// Not the same as BUG 82276, where the caller does have access to the folder
-    /// but not to the session.
+    /// The folder segment of the path is the thing the abort call checks access on (documented), unlike the
+    /// chunk and finalize calls, which find the session by its id alone. Not the same as BUG 82276, where the
+    /// caller does have access to the folder but not to the session.
     /// </remarks>
     [Fact]
     public async Task AbortUploadSession_UserWithoutAccessToFolder_ReturnsForbiddenAndUploadStillCompletes()
@@ -215,5 +215,50 @@ public class UploadSessionIsolationTests(
         (await FilesIn(ownerFolder, "Autotest Upload Isolation")).Should().HaveCount(1);
         memberStored.Should().HaveCount(1);
         await ExpectContent(ownerDone.File.Id, ownerPayload);
+    }
+
+    /// <remarks>
+    /// SECURITY DIAGNOSTIC, not a regression test (ported as such from the TypeScript suite). The contract
+    /// documents that chunk and finalize calls find the session "by the id alone", so whoever holds the id can
+    /// write into the owner's folder, while abort does check access. The test does not pin that as wanted: it
+    /// records what happens in the test output and fails only if its own premises break.
+    /// </remarks>
+    [Fact]
+    public async Task UploadSession_UserWithoutFolderAccessPresentsOwnersSessionId_RecordsObservation()
+    {
+        // Arrange
+        var myDocs = await GetUserFolderIdAsync(Owner);
+        var folder = await CreateFolder("Autotest Upload Security Diag Folder", myDocs);
+        var ownerBytes = MakeBytes(300, 81);
+        var foreignBytes = MakeBytes(300, 82);
+        var sessionId = await OpenSession(folder.Id, "Autotest Upload Diag Owner.bin", ownerBytes.Length);
+
+        var intruder = await InviteMember(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(intruder);
+
+        var sanity = await Assert.ThrowsAsync<ApiException>(
+            async () => await _foldersApi.GetFolderByFolderIdAsync(folder.Id, cancellationToken: TestContext.Current.CancellationToken));
+        sanity.ErrorCode.Should().Be(403);
+
+        // Act
+        var chunk = await ChunkStatus(folder.Id, sessionId, 1, foreignBytes);
+        var finalize = await FinalizeStatus(folder.Id, sessionId);
+
+        await _filesClient.Authenticate(Owner);
+        var landed = await FilesIn(folder.Id, "Autotest Upload Diag");
+        bool? landedIsIntruderBytes = landed.Count > 0
+            ? Sha256(await ReadContent(landed[0].Id)) == Sha256(foreignBytes)
+            : null;
+
+        // Assert: observation only
+        TestContext.Current.SendDiagnosticMessage(
+            "foreign-session-observation: " + JsonSerializer.Serialize(new
+            {
+                intruderChunkStatus = chunk,
+                intruderFinalizeStatus = finalize,
+                fileLandedInOwnersFolder = landed.Count > 0,
+                landedFileTitle = landed.Count > 0 ? landed[0].Title : null,
+                landedContentIsIntruderBytes = landedIsIntruderBytes
+            }));
     }
 }

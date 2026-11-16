@@ -74,17 +74,17 @@ and from the method body where a row needed the request; test line numbers point
 | **Enforcing IP restrictions** | `S/IpRestrictions/IpRestrictionsEnforcementTests.cs:56,73,89,103,127` (caller address set with `X-Forwarded-For`, trusted from 127.0.0.1) | TEST-CONFIRMED [run: PASS] |
 | **Listing two-factor methods** | `S/Tfa/TfaGetSettingsTests.cs:46`; `S/Tfa/TfaSettingsPermissionsTests.cs:83`; fields `Tfa:91-116` | TEST-CONFIRMED [run: PASS] |
 | **Changing the two-factor policy** | | |
-| Owner, admin enable and disable | `S/Tfa/TfaSettingsUpdateTests.cs:46,57,164,179` | TEST-CONFIRMED [run: PASS] |
+| Owner, admin enable and disable | `S/Tfa/TfaSettingsUpdateTests.cs:46,57,178,193` | TEST-CONFIRMED [run: PASS] |
 | SMS without provider 405 (bug 82970) | `S/Tfa/TfaSettingsUpdateTests.cs:71` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401, roles below admin 403 | `S/Tfa/TfaSettingsPermissionsTests.cs:48,66` | TEST-CONFIRMED [run: PASS] |
 | Enabling one method switches the other off | `Tfa:271-274,293-296`. Unreachable: SMS cannot be switched on without a provider, so neither direction can be observed | CODE-ONLY |
 | **Validation of the two-factor policy** | | |
-| Malformed `mandatoryUsers` 400 | `S/Tfa/TfaSettingsUpdateTests.cs:107` | TEST-CONFIRMED [run: PASS] |
-| Malformed `trustedIps` 400, sign-in keeps working (bug 82994) | `S/Tfa/TfaSettingsUpdateTests.cs:128` | TEST-CONFIRMED [run: PASS] |
-| Nonexistent user and group ids accepted | `S/Tfa/TfaSettingsUpdateTests.cs:83,94` | TEST-CONFIRMED [run: PASS] |
+| Malformed `mandatoryUsers` 400 | `S/Tfa/TfaSettingsUpdateTests.cs:121` | TEST-CONFIRMED [run: PASS] |
+| Malformed `trustedIps` 400, sign-in keeps working (bug 82994) | `S/Tfa/TfaSettingsUpdateTests.cs:142` | TEST-CONFIRMED [run: PASS] |
+| Nonexistent user and group ids accepted | `S/Tfa/TfaSettingsUpdateTests.cs:97,108` | TEST-CONFIRMED [run: PASS] |
 | Owner named while `id` is not the caller's: 403 | `S/Tfa/TfaOwnerGuardTests.cs:55,71,89,101` (the owner listing themselves without `id` is refused too, AC-8) | TEST-CONFIRMED [run: PASS] |
-| **Switching a two-factor method on ends sessions** | `S/Tfa/TfaSettingsUpdateTests.cs:194,211`; `Tfa:318-321` | TEST-CONFIRMED [run: PASS] |
-| **Who must pass the second factor** | `S/Tfa/TfaSettingsUpdateTests.cs:147`; `S/Tfa/TfaTrustedIpsOverrideTests.cs:70,98`; `web/ASC.Web.Core/Sms/TfaSettingsBase.cs:64-105` | TEST-CONFIRMED [run: PASS] |
+| **Switching a two-factor method on ends sessions** | `S/Tfa/TfaSettingsUpdateTests.cs:208,225`; `Tfa:318-321` | TEST-CONFIRMED [run: PASS] |
+| **Who must pass the second factor** | `S/Tfa/TfaSettingsUpdateTests.cs:161`; `S/Tfa/TfaTrustedIpsOverrideTests.cs:70,98`; `web/ASC.Web.Core/Sms/TfaSettingsBase.cs:64-105` | TEST-CONFIRMED [run: PASS] |
 | **Policy change with a confirmation link** | | |
 | Link returned; 405; refused callers | `S/Tfa/TfaSettingsLinkTests.cs:49,63`; `S/Tfa/TfaSettingsPermissionsTests.cs:97,115` | TEST-CONFIRMED [run: PASS] |
 | Empty string when off or exempt | `S/Tfa/TfaOwnerGuardTests.cs:112,123` | TEST-CONFIRMED [run: PASS] |

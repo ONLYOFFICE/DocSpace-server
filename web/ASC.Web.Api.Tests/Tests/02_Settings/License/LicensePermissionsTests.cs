@@ -34,8 +34,11 @@
 namespace ASC.Web.Api.Tests.Tests._02_Settings.License;
 
 /// <summary>
-// Access control of the license endpoints: an anonymous caller is refused activation and refresh, and upload and the
-/// trial activation are limited to DocSpace administrators.
+/// Access control of the license endpoints. Upload and the trial activation are limited to DocSpace administrators;
+/// activation (<c>settings/license/accept</c>) and refresh (<c>settings/license/refresh</c>) rewrite the
+/// installation's license, quota and tariff and must be limited the same way, but demand no right at all (L8 of
+/// the branding-and-licensing spec). On this open-source host both return before touching anything, so a member
+/// calling them changes nothing.
 /// </summary>
 [Trait("Category", "Settings")]
 public class LicensePermissionsTests(AspireAppFixture fixture) : LicenseTestBase(fixture)
@@ -66,6 +69,50 @@ public class LicensePermissionsTests(AspireAppFixture fixture) : LicenseTestBase
 
         // Assert
         exception.ErrorCode.Should().Be(401);
+    }
+
+    /// <summary>
+    /// L8: activation demands no right, so any member could put a staged license in force for the whole
+    /// installation and write the "license key uploaded" audit event. Red while the defect is open.
+    /// </summary>
+    [Theory]
+    [Trait("Category", "Bug")]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task AcceptLicense_NonAdminMember_ThrowsAccessDenied(EmployeeType employeeType)
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteMember(employeeType));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await LicenseClient.AcceptLicenseAsync(TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    /// <summary>
+    /// L8: refresh demands no right, so any member could force a re-read of the installation's license and a
+    /// rewrite of its quota and tariff. Red while the defect is open.
+    /// </summary>
+    [Theory]
+    [Trait("Category", "Bug")]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task RefreshLicense_NonAdminMember_ThrowsAccessDenied(EmployeeType employeeType)
+    {
+        // Arrange
+        await _webApiClient.Authenticate(await InviteMember(employeeType));
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await LicenseClient.RefreshLicenseAsync(TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Theory]

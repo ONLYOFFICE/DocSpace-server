@@ -77,7 +77,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | List carries the key to an administrator (scenario) | `T/ProfileTests/ProfileAccessReadTests.cs:108` | TEST-CONFIRMED [run: PASS] |
 | Hosted catalogue: gateway list, no embedding, restricted leaves (scenario "Restricted model leaves") | `TS/profiles/profiles.spec.ts:1477,1513`; `AI/Server/Service/ProfileStorageService.cs` | TS-ONLY |
 | **Models offered by a stored profile's provider** | | |
-| Missing / malformed 400, unknown 404, every reading role, lists models | `T/ProfileTests/ProfileIdBoundaryTests.cs:85,93,113,128`; `ProfileAccessReadTests.cs:136` | TEST-CONFIRMED [run: PASS] |
+| Missing / malformed 400, unknown 404, every reading role, lists models | `T/ProfileTests/ProfileIdBoundaryTests.cs:85,93,113,128`; `ProfileAccessReadTests.cs:153` | TEST-CONFIRMED [run: PASS] |
 | Guest and AI off refused before the dial (scenario) | `T/ProfileTests/ProfileAccessGuestTests.cs:82`; `ProfileAiDisabledTests.cs:73` | TEST-CONFIRMED [run: PASS] |
 | Key rejected 400, no answer 502 | yaml `aiProfilesListModels`; `T/ProfileTests/ProfileProviderReachabilityTests.cs:45` (discovery sibling); `T/ProfileTests/ProfileListModelsFailureTests.cs:45,67` | TEST-CONFIRMED [run: FAIL-BUG] for the 400 (`ProfileListModelsFailureTests.cs:45`); for the 502 (`:67`): a provider that drops the connection is answered 200 with an empty list (A32). A refused connection on a saved profile stays CODE-ONLY |
 | **Managing profiles** | | |
@@ -93,7 +93,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Local types (scenario "Local provider"), every model named; Guest and AI off | `T/ProfileTests/ProfileProviderReachabilityTests.cs:60,72`; `ProfileProviderModelsTests.cs:104`; `ProfileAccessGuestTests.cs:103`; `ProfileAiDisabledTests.cs:90` | TEST-CONFIRMED [run: PASS] |
 | **Connection check of a stored profile** | | |
 | Bare id or wrapper; missing / malformed 400; unknown 404; flat verdict (scenario) | `T/ProfileTests/ProfileTestConnectionTests.cs:47,58,74,107,118,128` | TEST-CONFIRMED [run: PASS] |
-| Same verdict per role; Guest 403, malformed id before the role check | `T/ProfileTests/ProfileAccessReadTests.cs:136`; `ProfileAccessGuestTests.cs:69,119,136` | TEST-CONFIRMED [run: PASS] |
+| Same verdict per role; Guest 403, malformed id before the role check | `T/ProfileTests/ProfileAccessReadTests.cs:153`; `ProfileAccessGuestTests.cs:69,119,136` | TEST-CONFIRMED [run: PASS] |
 | **Model restrictions and prices of a hosted portal** | | |
 | Null entry 400 before the action (scenario "Null entry"); valid body reaches the 403 of the test portal | `Web/04_Portal/Payments/PaymentAiModelRestrictionsValidationTests.cs:55,73,89,107` | TEST-CONFIRMED [run: PASS] |
 | `getAiPrices`, `getRestrictedAiModels`, the rest of `setRestrictedAiModels` | `Payments` (three actions); yaml 53405-53546 at `baf28cf`, `getAiPrices` etc. at 5ea4dc6 | CODE-ONLY |
@@ -104,7 +104,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Unknown task 400 | `T/AssignmentTests/AssignmentReadTests.cs:85`; `AssignmentRemoveTests.cs:61` | TEST-CONFIRMED [run: PASS] |
 | **Who may read and write assignments** | | |
 | Reads for three roles, Guest 403, anonymous 401, AI off 403 (scenario "Guest cannot read") | `T/AssignmentTests/AssignmentPermissionTests.cs:46,80`; `AssignmentAiDisabledTests.cs:46` | TEST-CONFIRMED [run: PASS] |
-| Writes DocSpace-admin only; refused writes nothing (scenario "Room admin cannot bind") | `T/AssignmentTests/AssignmentPermissionTests.cs:114`; `AssignmentAiDisabledTests.cs:73` | TEST-CONFIRMED [run: PASS] |
+| Writes DocSpace-admin only; refused writes nothing (scenario "Room admin cannot bind") | `T/AssignmentTests/AssignmentPermissionTests.cs:134`; `AssignmentAiDisabledTests.cs:73` | TEST-CONFIRMED [run: PASS] |
 | **Resolving the model of a task** | | |
 | Own binding, then Default; FormAnalysis independent (scenario "Unassigned falls back") | `T/AssignmentTests/AssignmentReadTests.cs:68`; `AssignmentResolutionTests.cs:51,72,87,109` | TEST-CONFIRMED [run: PASS] |
 | 404 not 500; try-resolve 200 null; image default (scenarios "Default holds an image model", "Chat and a profile that cannot chat") | `T/AssignmentTests/AssignmentResolutionTests.cs:121,139,153,175` (84450 asserts not-500; the 404 is Chat `assignmentsController.ts:80-100`) | TEST-CONFIRMED [run: PASS] |
@@ -151,7 +151,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | `getRoomSkills` | `Hub/AiRoomSkillsTests.cs:46,62,82,95,108,118,134` | TEST-CONFIRMED [run: PASS] |
 | `getRoomsSkills` (scenario "Unreadable room left out") | `Hub/RoomsSkillsTests.cs:41,61,76,94,107,120,137,147` | TEST-CONFIRMED [run: PASS] |
 | `getRoomAiFolder` (scenario "Room without a skill") | `T/SkillTests/SkillFolderListingTests.cs:48,58,69` | TEST-CONFIRMED [run: PASS] |
-| `getRoomAiFolder` non-reader 403; `withAiFolder` (scenario) | `products/ASC.Files/Server/Api/VirtualRoomsController.cs`; yaml 30261; `Hub/AiRoomOutsiderAccessTests.cs:45,61,77,99` | TEST-CONFIRMED [run: FAIL-BUG] for the 403 and the reader's 200 (`AiRoomOutsiderAccessTests.cs:45,61`) and for `withAiFolder` with `searchArea=AiHub` (`:77`); for `withAiFolder` alone as the operation's description advises (`:99`, A34) |
+| `getRoomAiFolder` non-reader 403; `withAiFolder` (scenario) | `products/ASC.Files/Server/Api/VirtualRoomsController.cs`; yaml 30261; `Hub/AiRoomOutsiderAccessTests.cs:75,91,107,129` | TEST-CONFIRMED [run: FAIL-BUG] for the 403 and the reader's 200 (`AiRoomOutsiderAccessTests.cs:75,91`) and for `withAiFolder` with `searchArea=AiHub` (`:77`); for `withAiFolder` alone as the operation's description advises (`:99`, A34) |
 | **Using the skills in a chat** | | |
 | Index and `read_skill`; body only on request (scenario "Model reads one skill") | `T/SkillTests/SkillChatTests.cs:46,73,93` | TEST-CONFIRMED [run: PASS] |
 | Member yes, outsider, Guest, revoked no (scenario "Outsider") | `T/SkillTests/SkillPermissionTests.cs:80,98,138,153,183,209` | TEST-CONFIRMED [run: PASS] |
@@ -219,7 +219,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Refusals of a send** | | |
 | Empty, unknown thread, foreign, Guest, AI off | `T/ChatTests/ChatPermissionValidationTests.cs:81,98`; `ChatPermissionIsolationSendTests.cs:51`; `ChatPermissionGuestTests.cs:118`; `ChatAiDisabledTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | Unknown profile (scenario), malformed | `T/ChatTests/ChatThreadModelRulesTests.cs:168`; `ChatHiddenFailureTests.cs:46` | TEST-CONFIRMED [run: PASS] |
-| Non-member of project; oversized (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:65`; `ChatHiddenFailureTests.cs:77` | TEST-CONFIRMED [run: PASS] |
+| Non-member of project; oversized (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:84`; `ChatHiddenFailureTests.cs:77` | TEST-CONFIRMED [run: PASS] |
 | Unpaid 402 | `TS/chat/chat.ai-disabled.spec.ts:352` | TS-ONLY (TS block skipped) |
 | Project without a usable model 409 (scenario) | `Chat/storage/aiProjectChatContext.ts:216-250`; `Chat/storage/__tests__/aiProjectChatContext.test.ts`; yaml 743 ff. | TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] at unit level - `Chat/storage/__tests__/aiProjectChatContext.test.ts:240,259,275`; no .NET test drives it |
 | **The model of a chat** | | |
@@ -262,14 +262,14 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Non-boolean, empty, bad depth | `T/PreferenceTests/PreferenceDeepModeValidationTests.cs:49,62,84`; `PreferenceReasoningLevelTests.cs:89`; `PreferenceClearTests.cs:52` | TEST-CONFIRMED [run: PASS] |
 | Guest, anonymous, AI off | `T/PreferenceTests/PreferencePermissionTests.cs:47,78`; `PreferenceAiDisabledTests.cs:57` | TEST-CONFIRMED [run: PASS] |
 | **Custom MCP servers** | | |
-| Roles (scenario "Member cannot register") | `T/McpTests/McpToolsManagePermissionsTests.cs:46`; `McpToolsMemberPermissionsTests.cs:46`; `McpToolsAccessTests.cs:105`; `McpToolsAnonymousTests.cs:58` | TEST-CONFIRMED [run: PASS] |
+| Roles (scenario "Member cannot register") | `T/McpTests/McpToolsManagePermissionsTests.cs:46`; `McpToolsMemberPermissionsTests.cs:46`; `McpToolsAccessTests.cs:138`; `McpToolsAnonymousTests.cs:58` | TEST-CONFIRMED [run: PASS] |
 | Round trip (scenario), no dial, verbatim, flag (scenario) | `T/McpTests/McpServerRegistryTests.cs:50,93,135,349,366` | TEST-CONFIRMED [run: PASS] |
 | Unregistered name (scenario) | `T/McpTests/McpServerRegistryTests.cs:260` | TEST-CONFIRMED [run: PASS] |
-| AI off (scenario), off period (scenario) | `T/McpTests/McpToolsAiDisabledTests.cs:58,82`; `McpToolsAccessTests.cs:253` | TEST-CONFIRMED [run: PASS] |
+| AI off (scenario), off period (scenario) | `T/McpTests/McpToolsAiDisabledTests.cs:58,82`; `McpToolsAccessTests.cs:286` | TEST-CONFIRMED [run: PASS] |
 | Audited | `AI/Server/Service/McpServerStorageService.cs` (`ServerCreated/Updated/Deleted`) | CODE-ONLY |
 | **One registry per portal** | | |
 | Registered from a room (scenario); folder | `T/McpTests/McpServerEntityScopeTests.cs:49,66,77,97`; `T/ThirdPartyTests/ThirdPartyToolsTests.cs:68,80` (skips on the stand) | TEST-CONFIRMED [run: PASS] |
-| Unknown room (scenario), deleted, unopenable | `T/McpTests/McpServerEntityScopeTests.cs:160,190`; `McpToolsAccessTests.cs:175` | TEST-CONFIRMED [run: PASS] |
+| Unknown room (scenario), deleted, unopenable | `T/McpTests/McpServerEntityScopeTests.cs:160,190`; `McpToolsAccessTests.cs:208` | TEST-CONFIRMED [run: PASS] |
 | Reads ignore the entity (scenario) | `T/McpTests/McpServerEntityScopeTests.cs:146` | TEST-CONFIRMED [run: PASS] |
 | Name without config | `T/McpTests/McpServerRegistryTests.cs:236,247` | TEST-CONFIRMED [run: PASS] |
 | **Server names** | | |
@@ -286,7 +286,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Server type and list refusals (scenario "Refused list") | `T/McpTests/McpDisabledToolsTests.cs:164,186,201,217,233` | TEST-CONFIRMED [run: PASS] |
 | Per user | `T/McpTests/McpToolPrefsLifecycleTests.cs:146`; `McpToolsSettingsPermissionsTests.cs:46` | TEST-CONFIRMED [run: PASS] |
 | Dropped server (scenario) | `T/McpTests/McpToolPrefsLifecycleTests.cs:45,81`; `T/McpServerStorageTests/McpServerReplaceTests.cs:139` | TEST-CONFIRMED [run: PASS] |
-| Guest, AI off naming a server (scenario) | `T/McpTests/McpToolsAccessTests.cs:285,305` | TEST-CONFIRMED [run: PASS] |
+| Guest, AI off naming a server (scenario) | `T/McpTests/McpToolsAccessTests.cs:318,338` | TEST-CONFIRMED [run: PASS] |
 | Portal-wide list for everyone (`scope` `tenant`) | `Chat/controllers/toolsController.ts` (`parseToolPrefsScope`, bug 84381); `T/McpTests/McpToolPrefsTenantScopeTests.cs:63,81,96` | TEST-CONFIRMED [run: PASS] - read by every member and folded into each member's own list, written by an administrator only (403 otherwise), emptied by an empty list (`McpToolPrefsTenantScopeTests.cs:63,81,96`) |
 | **Pre-approving tools** | | |
 | Flat tokens, idempotent, revoke, falsy, string, missing | `T/McpTests/McpAllowAlwaysTests.cs:46,57,67,127,144,158,173,186` | TEST-CONFIRMED [run: PASS] |
@@ -508,5 +508,5 @@ A32 and A34 come from new tests of that run.
 | A28 | Attachment cap | More attachments than the composer allows are answered 200 and stored whole on `aiThreadsAppendUserMessage` and the send (11 stored). | `AttachmentComposerRuleTests`, the two `MoreAttachmentsThanTheClientAllows` tests (82894) | OPEN — red test, run 365d87fe60 |
 | A30 | Attachment to the model | A round with a draft by id, an inline record, a device file or an image ends healthy but no streamed request to the stub carries the text. Whether the stand's file reading plays a part was not traced. | `AttachmentSendTests`, four tests (82773) | OPEN — red test, run 365d87fe60 |
 | A32 | Dropped provider connection | `aiProfilesListModels` on a saved profile whose provider accepts the connection and closes it without an answer is answered 200 with an empty model list instead of 502, so the form shows no models instead of the failure. | `T/ProfileTests/ProfileListModelsFailureTests.cs:67` (Category=Bug); `Chat/controllers/profilesController.ts` (`listModels`) | NEW 2026-11-10, red by run |
-| A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:77,99` (Category=Bug on 99); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run |
+| A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 99); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run |
 | A35 | `aiPromptsDelete` | Deleting another user's prompt answers `success` true although nothing is deleted (bug 82809): the route never reports whether a prompt of the caller was removed. The yaml describes it as intended. | `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` (Trait Bug 82809) | NEW 2026-11-14, red by code reading |
