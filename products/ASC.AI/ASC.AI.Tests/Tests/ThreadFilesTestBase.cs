@@ -53,7 +53,7 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         await FilesHttpClient.Authenticate(Owner);
         await RoomsApi.SetRoomSecurityAsync(
             projectId,
-            new RoomInvitationRequest([new RoomInvitation(member.Id, FileShare.Read)], notify: false),
+            new RoomInvitationRequest([new RoomInvitation(member.Id, FileShare.ContentCreator)], notify: false),
             TestContext.Current.CancellationToken);
 
         return member;

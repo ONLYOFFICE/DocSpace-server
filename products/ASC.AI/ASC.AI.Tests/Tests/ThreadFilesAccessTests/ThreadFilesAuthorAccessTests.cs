@@ -169,7 +169,7 @@ public class ThreadFilesAuthorAccessTests(AspireAppFixture fixture) : ThreadFile
             artifact.File.Id,
             cancellationToken: TestContext.Current.CancellationToken));
 
-        await SetProjectAccessAsync(artifact, FileShare.Read);
+        await SetProjectAccessAsync(artifact, FileShare.ContentCreator);
         await FilesHttpClient.Authenticate(artifact.Author);
         var file = (await FilesApi.GetFileInfoAsync(artifact.File.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
 

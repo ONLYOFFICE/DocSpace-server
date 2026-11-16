@@ -206,6 +206,7 @@ that table fails in Arrange and the test is simply wrong. For `SubjectType.User`
 | EditingRoom | RoomManager, ContentCreator, Editing, Read |
 | VirtualDataRoom | RoomManager, ContentCreator, Editing, Read, FillForms |
 | AiRoom | RoomManager, ContentCreator, Read |
+| AiProjectRoom | RoomManager, ContentCreator — no Read; never a Guest |
 
 Plus one rule that is not in that table: **`RoomManager` can only be granted to a
 `RoomAdmin`** — the API rejects it for a `User` or a `Guest`.
