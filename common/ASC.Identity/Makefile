@@ -11,7 +11,7 @@ AUTHORIZATION_JAR = authorization-container.jar
 TEMP_BUILDER_REG = temp-jar-builder-reg:latest
 TEMP_BUILDER_AUTH = temp-jar-builder-auth:latest
 
-.PHONY: all test integration-tests minified-tests test-all docs check-profile base registration authorization minified native-binary native-binary-registration native-binary-authorization clean prune summary sizes help
+.PHONY: all test integration-tests minified-tests smoke-tests test-all docs check-profile base registration authorization minified native-binary native-binary-registration native-binary-authorization clean prune summary sizes help
 
 all: base registration authorization sizes
 
@@ -28,6 +28,12 @@ minified-tests:
 	@mvn $(MAVEN_BATCH) install -pl minified -am -P minified $(MAVEN_FMT_SKIP) -DskipTests -q
 	@echo "Running minified integration tests..."
 	cd minified && mvn $(MAVEN_BATCH) test $(MAVEN_FMT_SKIP) -DRUN_INTEGRATION_TESTS=true
+
+smoke-tests:
+	@echo "Building dependencies..."
+	@mvn $(MAVEN_BATCH) clean install -pl minified -am -P minified $(MAVEN_FMT_SKIP) -DskipTests -q
+	@echo "Running OAuth smoke tests..."
+	cd minified && mvn $(MAVEN_BATCH) clean test $(MAVEN_FMT_SKIP) -DRUN_INTEGRATION_TESTS=true -Dtest=OAuthSmokeIT -Dsurefire.failIfNoSpecifiedTests=false
 
 test-all: test integration-tests minified-tests
 	@echo "All tests completed."

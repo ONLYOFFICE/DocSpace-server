@@ -47,6 +47,7 @@ import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import java.net.http.HttpClient;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +74,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -208,15 +210,25 @@ public class AuthorizationServiceIT {
         .thenAnswer(invocation -> invocation.getArgument(0));
   }
 
+  /**
+   * Builds a client that does not follow redirects. The authorization request answers with a 302
+   * that sets the client_state cookie; following it to the consent page drops the cookie and ends
+   * on the DocSpace login URL, which does not exist in tests.
+   */
+  private RestClient.Builder nonRedirectingClient() {
+    return RestClient.builder()
+        .requestFactory(
+            new JdkClientHttpRequestFactory(
+                HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NEVER).build()))
+        .baseUrl("http://localhost:" + randomServerPort);
+  }
+
   private RestClient createClient() {
-    return RestClient.builder().baseUrl("http://localhost:" + randomServerPort).build();
+    return nonRedirectingClient().build();
   }
 
   private RestClient createClientIgnoringErrors() {
-    return RestClient.builder()
-        .baseUrl("http://localhost:" + randomServerPort)
-        .defaultStatusHandler(status -> true, (req, res) -> {})
-        .build();
+    return nonRedirectingClient().defaultStatusHandler(status -> true, (req, res) -> {}).build();
   }
 
   private void setupMockClient(String clientId) {
