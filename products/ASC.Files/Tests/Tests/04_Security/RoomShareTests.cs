@@ -637,7 +637,7 @@ public class RoomShareTests(
             openedRoom.Should().NotBeNull();
             var roomFile = openedRoom.Files.Find(f => f.Title == file.Title);
             roomFile.Should().NotBeNull();
-            roomFile.Access.Should().Be(access);
+            roomFile!.Access.Should().Be(access);
 
             // Ensure the room appears in virtual rooms list
             var roomsList = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;

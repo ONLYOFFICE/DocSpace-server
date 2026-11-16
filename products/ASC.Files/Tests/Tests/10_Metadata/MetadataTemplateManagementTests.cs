@@ -51,7 +51,7 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
 
         // a template is a set of fields: an empty one used to be created and could then be assigned, with nothing to fill in
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await CreateTemplateAsync(name, fieldsOmitted ? null : []));
+            async () => await CreateTemplateAsync(name, fieldsOmitted ? null! : []));
 
         exception.ErrorCode.Should().Be(400);
 

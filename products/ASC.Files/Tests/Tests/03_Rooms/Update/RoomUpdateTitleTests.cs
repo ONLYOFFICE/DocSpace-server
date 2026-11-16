@@ -207,7 +207,7 @@ public class RoomUpdateTitleTests(
         // Act
         var updated = (await _roomsApi.UpdateRoomAsync(
             room.Id,
-            new UpdateRoomRequest(title: null),
+            new UpdateRoomRequest(title: null!),
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
