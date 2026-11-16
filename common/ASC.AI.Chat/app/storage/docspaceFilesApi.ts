@@ -48,6 +48,12 @@ import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 // `GET /api/2.0/files/folder/{folderId}` (FoldersController.GetFolderInfo).
 /** `FolderType.AiProjectRoom` on the C# side — an AI project. */
 const AI_PROJECT_FOLDER_TYPE = 40;
+/**
+ * `RoomType.AiProjectRoom` on the C# side. `FolderDto.Type` is filled for a
+ * few system folders only and not for an AI project, so the DTO of
+ * `GET files/folder/{id}` names a project by its `roomType` alone.
+ */
+const AI_PROJECT_ROOM_TYPE = 12;
 
 export interface DocspaceFolderInfo {
   /** The folder's display name (`FolderDto.Title`). */
@@ -494,7 +500,12 @@ export async function resolveAiProjectEntityId(
     return undefined;
   }
   const folderInfo = await getFolderInfoOnce(entityId);
-  return folderInfo?.folderType === AI_PROJECT_FOLDER_TYPE ? entityId : undefined;
+  // The chat-context snapshot carries the folder type, the Files DTO only
+  // the room type (see AI_PROJECT_ROOM_TYPE): either one names a project.
+  return folderInfo?.folderType === AI_PROJECT_FOLDER_TYPE ||
+    folderInfo?.roomType === AI_PROJECT_ROOM_TYPE
+    ? entityId
+    : undefined;
 }
 
 /**
