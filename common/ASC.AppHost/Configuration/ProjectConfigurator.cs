@@ -147,6 +147,9 @@ public class ProjectConfigurator(
                 .WithEnvironment("migration:maxExtractedSize", Constants.MigrationTestMaxExtractedSize.ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment("migration:maxExtractedEntries", Constants.MigrationTestMaxExtractedEntries.ToString(CultureInfo.InvariantCulture))
 
+                // A short wait between failed moves into a portal's own database, see Constants.BuiltinFormsDbTestMoveRetryDelay.
+                .WithEnvironment("files:builtinFormsDb:moveRetryDelay", Constants.BuiltinFormsDbTestMoveRetryDelay.ToString("c", CultureInfo.InvariantCulture))
+
                 // Without an absolute authority IdentityClient calls {ServerRootPath}/api/2.0/oauth2/, the
                 // portal's own host on the calling service's port: <alias>.docspace.localhost, which Windows
                 // does not resolve, so deleting a user failed. Before the tests had a base domain that host was

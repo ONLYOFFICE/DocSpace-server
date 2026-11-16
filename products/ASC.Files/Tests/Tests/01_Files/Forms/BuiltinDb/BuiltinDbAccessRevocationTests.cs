@@ -94,8 +94,8 @@ public class BuiltinDbAccessRevocationTests(AspireAppFixture fixture) : BaseTest
 
     // A move holds the portal's advisory lock on the shared database exclusively for as long as it copies, also past a
     // lapsed Redis lease of its provision lock. Held here by another session, it stands for a move of another node: the
-    // portal is neither provisioned into the shared schema nor moved a second time, and every call is answered without
-    // waiting for the provision lock, which waits 30 seconds by default (RedisLockOptionsBuilder).
+    // portal is neither provisioned into the shared schema nor moved a second time. That a write skips the wait for the
+    // Redis provision lock while the move holds it is not covered: no test can hold that lock.
     [Fact]
     public async Task MoveRunningElsewhere_NothingIsProvisioned_UntilItEnds()
     {
@@ -106,11 +106,9 @@ public class BuiltinDbAccessRevocationTests(AspireAppFixture fixture) : BaseTest
             await _filesClient.Authenticate(Owner);
             for (var call = 0; call < 3; call++)
             {
-                var started = Stopwatch.StartNew();
                 using var response = await BuiltinDbApi.GetConnectionAsync(_filesClient);
 
                 response.StatusCode.Should().Be(HttpStatusCode.Accepted);
-                started.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(20));
             }
 
             (await BuiltinDbApi.ScalarAsync(move, $"SELECT count(*)::text FROM pg_namespace WHERE nspname = 'tenant_{TenantId}'")).Should().Be("0");
@@ -121,8 +119,8 @@ public class BuiltinDbAccessRevocationTests(AspireAppFixture fixture) : BaseTest
         (await BuiltinDbApi.GetReadyAsync(_filesClient)).Database.Should().Be($"forms_t{TenantId}");
     }
 
-    // DELETE api/2.0/portal/delete with the link the removal letter carries, signed by the services' machine key. Raw: the
-    // confirmation travels in a header the SDK method does not take.
+    // DELETE api/2.0/portal/delete with the link the removal letter carries, signed by the services' machine key: the
+    // confirmation travels in the "confirm" header, set on the client the SDK call goes through.
     private async Task RemovePortalAsync()
     {
         var builder = new ConfigurationBuilder();
@@ -138,10 +136,14 @@ public class BuiltinDbAccessRevocationTests(AspireAppFixture fixture) : BaseTest
         var key = provider.GetEmailKey(Owner.Email + "PortalRemove", TenantId);
 
         await _webApiClient.Authenticate(null);
-        using var request = new HttpRequestMessage(HttpMethod.Delete, "api/2.0/portal/delete");
-        request.Headers.Add("confirm", $"type=PortalRemove&email={Uri.EscapeDataString(Owner.Email)}&key={Uri.EscapeDataString(key)}");
-        using var response = await _webApiClient.SendAsync(request, TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        _webApiClient.DefaultRequestHeaders.Add("confirm", $"type=PortalRemove&email={Uri.EscapeDataString(Owner.Email)}&key={Uri.EscapeDataString(key)}");
+        try
+        {
+            await _portalSettingsApi.DeletePortalAsync(TestContext.Current.CancellationToken);
+        }
+        finally
+        {
+            _webApiClient.DefaultRequestHeaders.Remove("confirm");
+        }
     }
 }

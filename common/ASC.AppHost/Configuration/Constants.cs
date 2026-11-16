@@ -92,6 +92,10 @@ public static class Constants
     public const int FormsPostgresPort = 35432;
     public const string FormsDatabase = "forms";
     public const string FormsAdminUser = "forms_admin";
+
+    // files:builtinFormsDb:moveRetryDelay of the integration-test profile (ProjectConfigurator): the wait after a failed
+    // move into a portal's own database, so a test sees failures in a row reach the day-long wait (BuiltinDbMoveFailureTests).
+    public static TimeSpan BuiltinFormsDbTestMoveRetryDelay { get; } = TimeSpan.FromSeconds(2);
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
     public const string DocumentAgentContainer = "onlyoffice-document-agent";

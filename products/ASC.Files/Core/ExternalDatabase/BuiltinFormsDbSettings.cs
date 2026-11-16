@@ -44,7 +44,7 @@ public class BuiltinFormsDbSettings : ISettings<BuiltinFormsDbSettings>
     /// <remarks>
     /// Nodes older than this property still write into the shared schema, which a moved portal no longer has: during a
     /// rolling update their writes of moved portals fail (the rows stay in the search index) until the last old node is
-    /// replaced. The release notes say so.
+    /// replaced.
     /// </remarks>
     public string? DatabaseName { get; set; }
     public string? RwUser { get; set; }

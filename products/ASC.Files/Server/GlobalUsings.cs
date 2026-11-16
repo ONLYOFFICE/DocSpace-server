@@ -48,7 +48,6 @@ global using ASC.Api.Core;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Routing;
-global using ASC.Api.Core.Socket;
 global using ASC.Api.Utils;
 global using ASC.Common;
 global using ASC.Common.Threading;

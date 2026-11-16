@@ -729,18 +729,19 @@ module.exports = (io) => {
       .forEach((userId) => filesIO.to(`${tenantId}-private-${userId}`).emit(`s:${name}`, data));
   }
 
-  // The read-only password of a portal's built-in forms database was reset (UserSocketManager): the DocSpace admins and
-  // the owner, who may read it, re-read it with GET files/builtinDb/connectionString. The event carries no password.
-  function resetBuiltinDbPassword({ tenantId, userIds } = {}) {
+  // The connection details of a portal's built-in forms database changed (UserSocketManager): a password was set again,
+  // or the portal's own database became ready. The DocSpace admins and the owner, who may read them, re-read them with
+  // GET files/builtinDb/connectionString. The event carries no password.
+  function changeBuiltinDbConnection({ tenantId, userIds } = {}) {
     if (!Number.isInteger(tenantId) || tenantId <= 0 || !Array.isArray(userIds)) {
-      logger.warn(`reset-builtin-db-password skipped: tenantId=${tenantId}`);
+      logger.warn(`change-builtin-db-connection skipped: tenantId=${tenantId}`);
       return;
     }
 
-    logger.info(`reset-builtin-db-password in tenant ${tenantId} for ${userIds.length} users`);
+    logger.info(`change-builtin-db-connection in tenant ${tenantId} for ${userIds.length} users`);
     userIds
       .filter((userId) => guid.test(userId))
-      .forEach((userId) => filesIO.to(`${tenantId}-private-${userId}`).emit("s:reset-builtin-db-password", {}));
+      .forEach((userId) => filesIO.to(`${tenantId}-private-${userId}`).emit("s:change-builtin-db-connection", {}));
   }
 
   const addWebhook = (body) => webhookEvent("add-webhook", body);
@@ -801,7 +802,7 @@ module.exports = (io) => {
     changeAiAccessSettings,
     changeExternalSharingSettings,
     externalDbSettings,
-    resetBuiltinDbPassword,
+    changeBuiltinDbConnection,
     formSuggestedQuestions,
     pluginEvent,
     addWebhook,

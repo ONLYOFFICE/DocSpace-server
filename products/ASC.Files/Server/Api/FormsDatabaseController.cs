@@ -38,8 +38,6 @@ public class FormsDatabaseController(
     TenantManager tenantManager,
     PermissionContext permissionContext,
     MessageService messageService,
-    UserSocketManager socketManager,
-    ILogger<FormsDatabaseController> logger,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
@@ -92,7 +90,8 @@ public class FormsDatabaseController(
     /// The call also ends the open sessions of the account. So an app signed in with the old password loses its
     /// connection. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
     /// callers get 403. An API key or OAuth token also needs the `files:write` scope. The call changes data. You can
-    /// repeat it, and each call sets another password. It returns the connection details of
+    /// repeat it, and each call sets another password. If the sessions cannot be ended, the call returns 500 although the
+    /// new password is set. Then repeat the call. It returns the connection details of
     /// `GET api/2.0/files/builtinDb/connectionString` with the new password. If the portal is not yet in its own
     /// database, the call starts the move and returns 202. Then no password changes, and the body has no `response`
     /// field.
@@ -105,6 +104,7 @@ public class FormsDatabaseController(
     [SwaggerResponse(200, "Read-only connection details for the portal's tables with the new password", typeof(BuiltinDbConnectionDto))]
     [SwaggerResponse(202, "The portal's own database is being prepared and no password was changed; repeat the call later")]
     [SwaggerResponse(403, "The caller cannot change portal settings, the token has no `files:write` scope, or the server has no built-in forms database configured")]
+    [SwaggerResponse(500, "The new password is set, but the open sessions of the account could not be ended; repeat the call")]
     [SwaggerResponse(503, "Moving the portal into its own database failed; repeat the call after the `Retry-After` seconds")]
     [HttpPut("builtinDb/password")]
     public async Task<ActionResult<BuiltinDbConnectionDto>> ResetBuiltinDbPasswordAsync()
@@ -118,16 +118,6 @@ public class FormsDatabaseController(
         }
 
         messageService.Send(MessageAction.BuiltinFormsDbPasswordReset);
-
-        // A screen still showing the old password re-reads it; the reset itself is done, so a failed notice is logged.
-        try
-        {
-            await socketManager.ResetBuiltinDbPasswordAsync();
-        }
-        catch (Exception e)
-        {
-            logger.WarnBuiltinDbPasswordResetNotNotified(e);
-        }
 
         return isolation.Credentials.Map();
     }
@@ -153,10 +143,4 @@ public class FormsDatabaseController(
 
         return Accepted();
     }
-}
-
-internal static partial class FormsDatabaseControllerLogger
-{
-    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the open clients were not told that the read-only password was reset")]
-    public static partial void WarnBuiltinDbPasswordResetNotNotified(this ILogger<FormsDatabaseController> logger, Exception exception);
 }

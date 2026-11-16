@@ -74,8 +74,8 @@ public class FormsDbProvisioningService(
 
     // A move that failed is not restarted by every poll; the mark is shared by all nodes, so none of them starts one
     // before the Retry-After the caller was given (without Redis it is this node's only). Every move fences the portal's
-    // writes while it copies, so one that keeps failing is tried a few times and then once a day.
-    private static readonly TimeSpan _isolationRetryDelay = TimeSpan.FromMinutes(5);
+    // writes while it copies, so one that keeps failing is tried a few times (BuiltinFormsDbOptions.MoveRetryDelay apart)
+    // and then once a day.
     private static readonly TimeSpan _isolationGiveUpDelay = TimeSpan.FromDays(1);
     internal const int IsolationAttempts = 3;
 
@@ -84,6 +84,13 @@ public class FormsDbProvisioningService(
     // the move's session.
     internal const int MoveLockClass = 0x666F726D;
 
+    // The first key of the advisory lock provisioning and the reconciliation hold exclusively ("forp"), and how long one
+    // waits for another; past the wait, 55P03 fails the call and the next one tries again.
+    internal const int ProvisionLockClass = 0x666F7270;
+    private static readonly TimeSpan _provisionLockWait = TimeSpan.FromSeconds(30);
+
+    // The PostgreSQL server of the built-in forms database is the installation's own, prepared by its init script and
+    // never shared with another installation: the reconciliation takes every portal database and role on it for its own.
     private const string LiveDatabaseComment = "docspace forms: live";
 
     // Every portal gets its own pools on the shared server, so keep them short-lived; their size is configured.
@@ -224,17 +231,11 @@ public class FormsDbProvisioningService(
             }
 
             await _cache.RemoveAndNotifyAsync(GetCacheKey(tenantId));
+            await NotifyConnectionChangedAsync(tenantId);
 
-            // The new password is in effect and stored: sessions signed in with the old one that cannot be ended now are
-            // logged, and the reset is reported as done.
-            try
-            {
-                await EndSessionsAsync(admin, current.RoUser);
-            }
-            catch (Exception e)
-            {
-                logger.WarnFormsDbSessionsNotEnded(e, tenantId, current.RoUser);
-            }
+            // Ending the sessions of the old password is part of the reset: if it fails, the call fails. The new password
+            // is in effect and stored by now, so a repeated call sets another one and tries the sessions again.
+            await EndSessionsAsync(admin, current.RoUser);
 
             var rwPassword = new NpgsqlConnectionStringBuilder(current.RwConnectionString).Password!;
             return new FormsDbIsolation(
@@ -263,10 +264,10 @@ public class FormsDbProvisioningService(
     /// row, a day after each one from then on, so a move that keeps failing does not fence the portal's writes every few
     /// minutes.
     /// </summary>
-    internal static FormsDbIsolationFailure NextIsolationFailure(FormsDbIsolationFailure? previous, DateTime now)
+    internal static FormsDbIsolationFailure NextIsolationFailure(FormsDbIsolationFailure? previous, DateTime now, TimeSpan retryDelay)
     {
         var attempts = (previous?.Attempts ?? 0) + 1;
-        return new FormsDbIsolationFailure(now + (attempts < IsolationAttempts ? _isolationRetryDelay : _isolationGiveUpDelay), attempts);
+        return new FormsDbIsolationFailure(now + (attempts < IsolationAttempts ? retryDelay : _isolationGiveUpDelay), attempts);
     }
 
     // The portal's account has no use of its shared schema: a move is copying it, or one was broken off, which the next
@@ -309,12 +310,19 @@ public class FormsDbProvisioningService(
     /// A session of its own on the shared database that holds the move's advisory lock of the portal, or null when
     /// another session holds it in a way that excludes this one. A move holds it exclusively; provisioning and the
     /// reconciliation share it (<paramref name="shared"/>), so they shut a move out and a move shuts them out, but they
-    /// never pass for a move to a writer. The lock ends with the session, also when the node dies, so it is never left
-    /// behind.
+    /// never pass for a move to a writer. Sharing it, they also take <see cref="ProvisionLockClass"/> exclusively,
+    /// waiting for each other up to <see cref="_provisionLockWait"/>, so two of them never set the passwords at once even
+    /// past a lapsed Redis lease. The locks end with the session, also when the node dies, so they are never left behind;
+    /// the server's idle timeouts are off for the session, which waits idle while the work goes on on other connections.
     /// </summary>
     private async Task<NpgsqlConnection?> TryLockMoveAsync(int tenantId, bool shared = false)
     {
-        var builder = new NpgsqlConnectionStringBuilder(AdminConnectionString) { Pooling = false, KeepAlive = 30 };
+        var builder = new NpgsqlConnectionStringBuilder(AdminConnectionString)
+        {
+            Pooling = false,
+            KeepAlive = 30,
+            Options = "-c idle_session_timeout=0 -c idle_in_transaction_session_timeout=0"
+        };
         var connection = new NpgsqlConnection(builder.ConnectionString);
         try
         {
@@ -326,6 +334,15 @@ public class FormsDbProvisioningService(
             cmd.Parameters.Add(new NpgsqlParameter("@tenant", tenantId));
             if (await cmd.ExecuteScalarAsync() is true)
             {
+                if (shared)
+                {
+                    await using var provision = connection.CreateCommand();
+                    provision.CommandText = $"SET lock_timeout = '{(int)_provisionLockWait.TotalSeconds}s'; SELECT pg_advisory_lock(@class, @tenant)";
+                    provision.Parameters.Add(new NpgsqlParameter("@class", ProvisionLockClass));
+                    provision.Parameters.Add(new NpgsqlParameter("@tenant", tenantId));
+                    await provision.ExecuteNonQueryAsync();
+                }
+
                 return connection;
             }
         }
@@ -384,7 +401,7 @@ public class FormsDbProvisioningService(
     {
         try
         {
-            var failure = NextIsolationFailure(previous, DateTime.UtcNow);
+            var failure = NextIsolationFailure(previous, DateTime.UtcNow, options.MoveRetryDelay);
 
             // Kept a day past the retry, so the next failure in a row still counts this one.
             await distributedCache.SetAsync(GetIsolationFailureKey(tenantId), failure, failure.RetryAt - DateTime.UtcNow + _isolationGiveUpDelay);
@@ -526,15 +543,17 @@ public class FormsDbProvisioningService(
 
             // Idle sessions that the pools of every node still hold on the shared database count against the connection
             // limit of the account, which the portal's own database now needs. The switch is done by now: sessions that
-            // cannot be ended are logged and close as their pools prune them.
-            try
+            // cannot be ended are logged, each role on its own, and close as their pools prune them.
+            foreach (var role in new[] { GetRwUser(tenantId), GetRoUser(tenantId) })
             {
-                await EndSessionsAsync(admin, GetRwUser(tenantId), admin.Database);
-                await EndSessionsAsync(admin, GetRoUser(tenantId), admin.Database);
-            }
-            catch (Exception e)
-            {
-                logger.WarnFormsDbSessionsNotEnded(e, tenantId, GetRwUser(tenantId));
+                try
+                {
+                    await EndSessionsAsync(admin, role, admin.Database);
+                }
+                catch (Exception e)
+                {
+                    logger.WarnFormsDbSessionsNotEnded(e, tenantId, role);
+                }
             }
         }
 
@@ -545,6 +564,28 @@ public class FormsDbProvisioningService(
             var shared = CreateConnectionStringBuilder(GetSchemaName(tenantId), null, GetRwUser(tenantId), rwPassword);
             await using var stale = new NpgsqlConnection(shared.ConnectionString);
             NpgsqlConnection.ClearPool(stale);
+        }
+
+        // The details of the portal's own database are ready for whoever waits for them.
+        await NotifyConnectionChangedAsync(tenantId);
+    }
+
+    /// <summary>
+    /// Tells the open clients of those who may read the connection details (the DocSpace admins and the owner) that
+    /// they changed: a password was set again, or the portal's own database became ready. Best effort, in a scope of
+    /// the portal, since the reconciliation runs outside any; a failure is logged.
+    /// </summary>
+    private async Task NotifyConnectionChangedAsync(int tenantId)
+    {
+        try
+        {
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenantAsync(tenantId);
+            await scope.ServiceProvider.GetRequiredService<UserSocketManager>().ChangeBuiltinDbConnectionAsync();
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormsDbConnectionChangeNotNotified(e, tenantId);
         }
     }
 
@@ -614,9 +655,10 @@ public class FormsDbProvisioningService(
     }
 
     /// <summary>
-    /// What the portal has on the server: its accounts first lose their sign-in and their open sessions, so an outside
-    /// client (a BI tool on the read-only account) stops reading even when dropping the rest fails; then the schema, the
-    /// portal's own database and the accounts go. Run as the administrator of the forms database, never a superuser.
+    /// What the portal has on the server: its accounts first lose their sign-in, so an outside client (a BI tool on the
+    /// read-only account) cannot come back even when dropping the rest fails; their open sessions are ended next, and a
+    /// failure there is logged, the sessions then ending with the database or the role. Then the schema, the portal's
+    /// own database and the accounts go. Run as the administrator of the forms database, never a superuser.
     /// </summary>
     internal static async Task DropServerObjectsAsync(NpgsqlConnection admin, int tenantId, ILogger<FormsDbProvisioningService> logger)
     {
@@ -760,8 +802,9 @@ public class FormsDbProvisioningService(
         }
 
         // A move that completed, the usual case, is seen without the locks and the session they take: a live database
-        // the settings name, and no shared schema. Settings read from a stale cache can only miss the switch, and then
-        // the check below runs.
+        // the settings name, and no shared schema. Settings that do not name it (a stale cache, or a backup from before
+        // the move restored) lead to the check below; settings that name it while the account cannot use them are
+        // provisioned again on the portal's next use.
         var databaseName = GetDatabaseName(tenantId);
         if (!hasSchema && await IsLiveAsync(databaseName) &&
             (await settingsManager.LoadAsync<BuiltinFormsDbSettings>(tenantId)).DatabaseName == databaseName)
@@ -1096,14 +1139,19 @@ public class FormsDbProvisioningService(
         }
         catch (PostgresException e) when (e.SqlState == PostgresErrorCodes.DuplicateDatabase)
         {
+            return;
         }
+
+        // Every role may connect to a new database until its schema is set up; the other portals' accounts must not.
+        await ExecuteAsync(connection, $"REVOKE CONNECT ON DATABASE \"{databaseName}\" FROM PUBLIC");
     }
 
     // A portal that moved into its own database is provisioned there again while that database is live, also when the
     // settings do not name it: a move broken off before they were saved, or a backup taken before the move restored.
     // Back in the shared schema, its submissions would be dropped with that schema when the switch is completed.
     // The grants on the shared schema would lift the fence of a running move, so they are given only under the move's
-    // advisory lock: the caller's own (a move provisioning first), or one taken here, which a running move refuses.
+    // advisory lock: the caller's own (a move provisioning first), or one taken here, which a running move refuses and
+    // which keeps two provisionings from setting the passwords at once.
     private async Task<FormsDbCredentials> ProvisionAsync(int tenantId, NpgsqlConnection? moveLock)
     {
         var schemaName = GetSchemaName(tenantId);
@@ -1112,12 +1160,26 @@ public class FormsDbProvisioningService(
         var rwPassword = UserManagerWrapper.GeneratePassword();
         var roPassword = UserManagerWrapper.GeneratePassword();
 
-        var databaseName = await IsLiveAsync(GetDatabaseName(tenantId)) ? GetDatabaseName(tenantId) : null;
-
         NpgsqlConnection? ownLock = null;
-        if (databaseName == null && moveLock == null)
+        if (moveLock == null)
         {
             ownLock = await TryLockMoveAsync(tenantId, shared: true) ?? throw new FormsDbMovingException(tenantId);
+        }
+
+        // Decided under the lock: a move marks its database live while it holds the lock exclusively.
+        string? databaseName;
+        try
+        {
+            databaseName = await IsLiveAsync(GetDatabaseName(tenantId)) ? GetDatabaseName(tenantId) : null;
+        }
+        catch
+        {
+            if (ownLock != null)
+            {
+                await ownLock.DisposeAsync();
+            }
+
+            throw;
         }
 
         await using (ownLock)
@@ -1137,6 +1199,12 @@ public class FormsDbProvisioningService(
 
         // Other nodes may still cache the passwords that were just reset.
         await _cache.RemoveAndNotifyAsync(GetCacheKey(tenantId));
+
+        // In the portal's own database the read-only account was handed out, and its password has just changed.
+        if (databaseName != null)
+        {
+            await NotifyConnectionChangedAsync(tenantId);
+        }
 
         logger.InfoFormsDbProvisioned(tenantId, schemaName);
         return BuildCredentials(schemaName, databaseName, rwUser, rwPassword, roUser, roPassword);
@@ -1374,6 +1442,7 @@ public class FormsDbProvisioningService(
             $"CREATE ROLE \"{role}\" LOGIN PASSWORD '{escapedPassword}'; END IF; END $$");
         // LOGIN too: a role that could not be dropped was left NOLOGIN and would never sign in again.
         await ExecuteAsync(connection, $"ALTER ROLE \"{role}\" WITH LOGIN PASSWORD '{escapedPassword}'");
+
     }
 
     private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
@@ -1427,6 +1496,9 @@ internal static partial class FormsDbProvisioningServiceLogger
 
     [LoggerMessage(LogLevel.Error, "Built-in forms DB: the read-only password of tenant {tenantId} was changed but neither saved nor set back; the account signs in with no stored password until the next reset")]
     public static partial void ErrorFormsDbPasswordNotRestored(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the open clients of tenant {tenantId} were not told that its connection details changed")]
+    public static partial void WarnFormsDbConnectionChangeNotNotified(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId);
 
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the open sessions of role {role} of tenant {tenantId} were not ended")]
     public static partial void WarnFormsDbSessionsNotEnded(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId, string role);

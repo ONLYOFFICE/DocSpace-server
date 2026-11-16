@@ -57,9 +57,16 @@ public class BuiltinFormsDbOptions
         // of Files, Files.Worker and AI with pools of 5. By default one replica of each, and at least 50.
         var defaultLimit = Math.Max(MinDefaultRwConnectionLimit, PoolsOfOneReplicaSet * MaxPoolSize);
         RwConnectionLimit = configuration.ReadInt("files:builtinFormsDb:rwConnectionLimit", defaultLimit, 2 * MaxPoolSize, 1000, logger);
+
+        // The wait after a failed move into a portal's own database before the next one, while it still has short waits
+        // left (the later ones are a day): every move fences the portal's writes while it copies, so not below a second,
+        // and not above a day, e.g. "0.00:05:00".
+        MoveRetryDelay = configuration.ReadInterval("files:builtinFormsDb:moveRetryDelay", TimeSpan.FromMinutes(5), TimeSpan.FromSeconds(1), TimeSpan.FromDays(1), logger);
     }
 
     public int MaxPoolSize { get; }
 
     public int RwConnectionLimit { get; }
+
+    public TimeSpan MoveRetryDelay { get; }
 }

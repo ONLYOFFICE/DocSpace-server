@@ -74,6 +74,7 @@ public sealed class PortalClients : PortalClientsBase
     public CommonSettingsApi CommonSettingsApi { get; }
     public UsersApi PortalUsersApi { get; }
     public DocSpace.API.SDK.Api.Settings.QuotaApi SettingsQuotaApi { get; }
+    public DocSpace.API.SDK.Api.Portal.SettingsApi PortalSettingsApi { get; }
     public PaymentApi PaymentApi { get; }
     public DocSpace.API.SDK.Api.Security.AuditTrailDataApi AuditTrailDataApi { get; }
 
@@ -109,6 +110,7 @@ public sealed class PortalClients : PortalClientsBase
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
         PortalUsersApi = new UsersApi(WebApiHttpClient, webApiConfig);
         SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(WebApiHttpClient, webApiConfig);
+        PortalSettingsApi = new DocSpace.API.SDK.Api.Portal.SettingsApi(WebApiHttpClient, webApiConfig);
         PaymentApi = new PaymentApi(WebApiHttpClient, webApiConfig);
         AuditTrailDataApi = new DocSpace.API.SDK.Api.Security.AuditTrailDataApi(WebApiHttpClient, webApiConfig);
     }

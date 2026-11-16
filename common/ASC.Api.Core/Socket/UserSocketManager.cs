@@ -58,12 +58,13 @@ public class UserSocketManager(ITariffService tariffService,
     }
 
     /// <summary>
-    /// The read-only password of the portal's built-in forms database was reset, so a screen showing the old one re-reads
-    /// it through <c>GET api/2.0/files/builtinDb/connectionString</c>. Sent to those who may read it under the rule of that
+    /// The connection details of the portal's built-in forms database changed - a password was set again, or the
+    /// portal's own database became ready - so a screen showing them re-reads them through
+    /// <c>GET api/2.0/files/builtinDb/connectionString</c>. Sent to those who may read them under the rule of that
     /// endpoint, the DocSpace admins and the owner, each in the private room only the socket service puts them in; the
     /// payload carries no secret.
     /// </summary>
-    public async Task ResetBuiltinDbPasswordAsync()
+    public async Task ChangeBuiltinDbConnectionAsync()
     {
         var tenant = _tenantManager.GetCurrentTenant();
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
@@ -71,7 +72,7 @@ public class UserSocketManager(ITariffService tariffService,
 
         foreach (var batch in userIds.Chunk(1000))
         {
-            await MakeRequest("reset-builtin-db-password", new { tenantId = tenant.Id, userIds = batch });
+            await MakeRequest("change-builtin-db-connection", new { tenantId = tenant.Id, userIds = batch });
         }
     }
 

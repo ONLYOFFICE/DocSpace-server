@@ -35,7 +35,8 @@ namespace ASC.Files.Tests.Tests._01_Files.Forms.BuiltinDb;
 
 /// <summary>
 /// A move into the portal's own database that fails is reported with 503 and the wait before the next attempt, and the
-/// portal goes on in the shared schema meanwhile.
+/// portal goes on in the shared schema meanwhile. Failures in a row are counted, and after the last short wait the next
+/// move waits a day.
 /// </summary>
 [Trait("Category", "Forms")]
 [Trait("Feature", "Forms")]
@@ -66,25 +67,10 @@ public class BuiltinDbMoveFailureTests(AspireAppFixture fixture) : BaseTest(fixt
             await BuiltinDbApi.ExecuteAsync(server, $"CREATE TABLE \"{schema}\".form_1_v1 (answer \"{schema}\".shared_only)");
         }
 
-        var deadline = DateTime.UtcNow.AddSeconds(60);
-        HttpStatusCode status;
-        TimeSpan? retryAfter;
-        while (true)
-        {
-            using var response = await BuiltinDbApi.GetConnectionAsync(_filesClient);
-            status = response.StatusCode;
-            retryAfter = response.Headers.RetryAfter?.Delta;
-            if (status != HttpStatusCode.Accepted || DateTime.UtcNow >= deadline)
-            {
-                break;
-            }
+        var retryAfter = await WaitForFailedMoveAsync();
 
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
-
-        status.Should().Be(HttpStatusCode.ServiceUnavailable);
-        retryAfter.Should().NotBeNull();
-        retryAfter.Should().BeGreaterThan(TimeSpan.Zero).And.BeLessThanOrEqualTo(TimeSpan.FromMinutes(5));
+        // The integration-test profile waits a couple of seconds between the first failures, not five minutes.
+        retryAfter.Should().BeGreaterThan(TimeSpan.Zero).And.BeLessThanOrEqualTo(ASC.AppHost.Configuration.Constants.BuiltinFormsDbTestMoveRetryDelay);
 
         // The move failed after the fence: the shared schema is given back, and the half-built database is not live.
         (await BuiltinDbApi.ScalarAsync(server, $"SELECT has_schema_privilege('forms_t{TenantId}_rw', '{schema}', 'USAGE')::text"))
@@ -92,5 +78,35 @@ public class BuiltinDbMoveFailureTests(AspireAppFixture fixture) : BaseTest(fixt
         (await BuiltinDbApi.ScalarAsync(server,
                 $"SELECT coalesce(shobj_description(oid, 'pg_database'), '') FROM pg_database WHERE datname = 'forms_t{TenantId}'"))
             .Should().NotBe("docspace forms: live");
+
+        // The failures in a row are counted from one attempt to the next: after the last short wait comes a day.
+        for (var failure = 2; failure <= FormsDbProvisioningService.IsolationAttempts; failure++)
+        {
+            await Task.Delay(retryAfter + TimeSpan.FromSeconds(1), cancellationToken);
+            retryAfter = await WaitForFailedMoveAsync();
+        }
+
+        retryAfter.Should().BeGreaterThan(TimeSpan.FromHours(1));
+    }
+
+    // Repeats the call, which starts a move and answers 202 while it runs, until the failed move answers 503; the wait it
+    // gives.
+    private async Task<TimeSpan> WaitForFailedMoveAsync()
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+        while (true)
+        {
+            using var response = await BuiltinDbApi.GetConnectionAsync(_filesClient);
+            if (response.StatusCode != HttpStatusCode.Accepted || DateTime.UtcNow >= deadline)
+            {
+                response.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+                response.Headers.RetryAfter.Should().NotBeNull();
+                response.Headers.RetryAfter!.Delta.Should().NotBeNull();
+
+                return response.Headers.RetryAfter!.Delta!.Value;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 }

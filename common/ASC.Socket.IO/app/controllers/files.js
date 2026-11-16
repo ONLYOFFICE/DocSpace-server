@@ -289,8 +289,8 @@ module.exports = (files) => {
     res.end();
   });
 
-  router.post("/reset-builtin-db-password", (req, res) => {
-    files.resetBuiltinDbPassword(req.body);
+  router.post("/change-builtin-db-connection", (req, res) => {
+    files.changeBuiltinDbConnection(req.body);
     res.end();
   });
 

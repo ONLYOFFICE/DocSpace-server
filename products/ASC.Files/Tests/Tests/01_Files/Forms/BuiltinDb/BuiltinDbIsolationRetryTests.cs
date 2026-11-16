@@ -51,7 +51,7 @@ public class BuiltinDbIsolationRetryTests
         FormsDbIsolationFailure? failure = null;
         for (var attempt = 1; attempt <= FormsDbProvisioningService.IsolationAttempts + 2; attempt++)
         {
-            failure = FormsDbProvisioningService.NextIsolationFailure(failure, _now);
+            failure = FormsDbProvisioningService.NextIsolationFailure(failure, _now, TimeSpan.FromMinutes(5));
 
             failure.Attempts.Should().Be(attempt);
             waits.Add(failure.RetryAt - _now);

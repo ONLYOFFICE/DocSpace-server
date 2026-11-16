@@ -83,6 +83,7 @@ public class BaseTest(
 
     protected CommonSettingsApi _commonSettingsApi = null!;
     protected DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = null!;
+    protected DocSpace.API.SDK.Api.Portal.SettingsApi _portalSettingsApi = null!;
     protected AuthenticationApi _authenticationApi = null!;
 
     //   FileShare.None
@@ -146,6 +147,7 @@ public class BaseTest(
 
         _commonSettingsApi = _clients.CommonSettingsApi;
         _settingsQuotaApi = _clients.SettingsQuotaApi;
+        _portalSettingsApi = _clients.PortalSettingsApi;
         _authenticationApi = _clients.AuthenticationApi;
 
         await _filesClient.Authenticate(Owner);
