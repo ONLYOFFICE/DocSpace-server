@@ -35,13 +35,14 @@ namespace ASC.Core.Common.Tests;
 
 /// <summary>
 /// The named clients of the document service: each one carries a single resilience pipeline, however many of a
-/// process's service extensions register them.
+/// process's service extensions register them, and the clients behind the "SSL verification off" switch accept any
+/// certificate.
 /// </summary>
 /// <remarks>
 /// The Monolith runs the services of every host in one process, so it calls <c>AddDocumentServiceHttpClient</c> once
 /// for each host extension that registers the clients. Every call used to add another resilience handler to the same
-/// named client, and the handlers nest: the outer one retries the inner one, so the retries multiply and the timeouts
-/// stack.
+/// named client, and the handlers nest: the outer one retries the inner one, so a request that fails fast was tried
+/// many more times than configured, within the client's 100-second timeout.
 /// </remarks>
 public sealed class DocumentServiceHttpClientTests : IDisposable
 {
@@ -69,13 +70,23 @@ public sealed class DocumentServiceHttpClientTests : IDisposable
         handlers.Count(h => h.GetType().Name == "ResilienceHandler").Should().Be(1);
     }
 
-    [Fact]
-    public void RegisteredThreeTimes_SslIgnoringClientStillIgnoresCertificates()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SslIgnoringClients_AcceptAnUntrustedCertificate(bool customClient)
     {
-        var primary = HandlerChain(DocumentService.GetHttpClientName(sslVerification: false)).Last();
+        var name = customClient ? DocumentService.CustomSslVerificationClient : DocumentService.GetHttpClientName(sslVerification: false);
+        var primary = HandlerChain(name).Last().Should().BeOfType<SocketsHttpHandler>().Subject;
 
-        primary.Should().BeOfType<SocketsHttpHandler>()
-            .Which.SslOptions.RemoteCertificateValidationCallback.Should().NotBeNull();
+        AcceptsUntrustedCertificate(primary).Should().BeTrue();
+    }
+
+    [Fact]
+    public void VerifyingClient_KeepsTheDefaultCertificateValidation()
+    {
+        var primary = HandlerChain(DocumentService.GetHttpClientName(sslVerification: true)).Last();
+
+        AcceptsUntrustedCertificate(primary as SocketsHttpHandler).Should().BeFalse();
     }
 
     public void Dispose()
@@ -95,5 +106,27 @@ public sealed class DocumentServiceHttpClientTests : IDisposable
         }
 
         return chain;
+    }
+
+    /// <summary>
+    /// Whether the handler would go on with a self-signed certificate whose chain does not validate. A handler that is
+    /// not a <see cref="SocketsHttpHandler"/> with a callback of its own applies the default validation, which refuses
+    /// it.
+    /// </summary>
+    private static bool AcceptsUntrustedCertificate(SocketsHttpHandler? handler)
+    {
+        var callback = handler?.SslOptions.RemoteCertificateValidationCallback;
+
+        if (callback is null)
+        {
+            return false;
+        }
+
+        using var key = RSA.Create(2048);
+        var request = new CertificateRequest("CN=untrusted.test", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
+        using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
+        using var chain = new X509Chain();
+
+        return callback(handler!, certificate, chain, SslPolicyErrors.RemoteCertificateChainErrors);
     }
 }

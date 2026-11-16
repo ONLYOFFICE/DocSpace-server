@@ -1367,15 +1367,18 @@ public static class DocumentServiceHttpClientExtension
 {
     /// <summary>
     /// Registers the named clients of the document service, with their resilience pipeline, and the pipeline that
-    /// validates the document server's license. Every host that runs code sending requests to the document server
-    /// calls it; a host that does not gets the default handler for these names, without the pipeline and without the
-    /// switch that turns certificate validation off.
+    /// validates the document server's license. Files.Server, Files.Worker, Web.Api, People and AI.Worker call it:
+    /// each of them sends requests to the document server. A host that does not call it gets the default handler for
+    /// these names, without the pipeline and without the switch that turns certificate validation off. Web.Studio is
+    /// one: its portal migration reaches the editor drop check only for files imported moments earlier, which nobody
+    /// has open, so it sends no request in practice.
     /// </summary>
     /// <remarks>
-    /// A second call in the same process does nothing. The Monolith runs the services of every host in one process,
-    /// so several of its service extensions call this. Each call used to add another resilience handler to the same
-    /// named clients, and the handlers nest: the outer one retries the inner one, so the retries multiply and the
-    /// timeouts stack.
+    /// A second call on the same service collection does nothing, whatever configuration it passes. The Monolith runs
+    /// the services of every host in one process, so several of its service extensions call this. Each call used to
+    /// add another resilience handler to the same named clients, and the handlers nest: the outer one retries the
+    /// inner one, so a request that fails fast was tried many more times than configured, within the client's
+    /// 100-second timeout.
     /// </remarks>
     public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
@@ -1383,8 +1386,6 @@ public static class DocumentServiceHttpClientExtension
         {
             return;
         }
-
-        services.AddSingleton<Registered>();
 
         var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
         var policyTimeout = TimeSpan.FromSeconds(httpClientTimeout / 1000);
@@ -1444,6 +1445,9 @@ public static class DocumentServiceHttpClientExtension
                 ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
             });
         });
+
+        // marked last, so that a registration that threw half way is not taken for a finished one
+        services.AddSingleton<Registered>();
     }
 
     /// <summary>
