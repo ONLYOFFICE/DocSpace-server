@@ -188,6 +188,5 @@ global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 
 global using AuthenticationException = System.Security.Authentication.AuthenticationException;
 global using DataAnnotationsValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
-global using FilesCommonResource = ASC.Files.Core.Resources.FilesCommonResource;
 global using SecurityContext = ASC.Core.SecurityContext;
 global using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;

@@ -191,14 +191,13 @@ public class FirstTimeTenantSettings(
     /// completed without one.
     /// </summary>
     /// <returns>
-    /// <c>true</c> when the trial is in force; <c>false</c> when a license file is on disk, the editing service runs
+    /// <c>true</c> when a trial is in force; <c>false</c> when a license file is on disk, the editing service runs
     /// no active trial, or a license from a file is already in force — then the license file is required as before.
     /// </returns>
     /// <remarks>
     /// No upload is recorded in the audit trail: no file was given, and a file uploaded later is activated the usual
     /// way, replacing the trial.
     /// </remarks>
-    /// <exception cref="Exception">The editing service cannot be asked.</exception>
     private async Task<bool> ApplyDocsTrialAsync()
     {
         if (licenseReader.HasLicenseFile())
@@ -208,13 +207,21 @@ public class FirstTimeTenantSettings(
 
         var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: false);
 
-        // The wizard skips the license upload only after it was told the editing service runs its trial; an editing
-        // service that cannot be asked now is not read as "no trial", which would ask for a file the wizard never
-        // offered. The fresh question also dropped the cached answer on every node, so the wizard page asks again next
-        // time whether a file is needed.
+        // The wizard skips the license upload only after it was told the editing service runs its trial, so an
+        // editing service that cannot be asked now is not read as "no trial", which would ask for a file the wizard
+        // never offered. The installation keeps its own 30-day trial, created on the first read of the tariff; the
+        // background refresh brings its end closer once the editing service answers.
         if (docsTrial.State == DocsTrialState.Unknown)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_DocServiceException);
+            await tenantExtra.GetCurrentTariffAsync();
+
+            if (!await licenseReader.IsStartTrialInForceAsync())
+            {
+                return false;
+            }
+
+            logger.WarningWizardOnOwnTrial();
+            return true;
         }
 
         if (docsTrial.State != DocsTrialState.Active)

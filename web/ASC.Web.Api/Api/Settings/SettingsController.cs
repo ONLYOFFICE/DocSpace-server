@@ -803,12 +803,12 @@ public partial class SettingsController(
     /// the time zone. It also applies the license if the installation needs one. An Enterprise installation may have no
     /// license file while its editing service runs a trial. Then the call puts the portal's trial in force instead.
     /// That trial ends by the day the editing service's trial ends. The license then counts as accepted. A license file
-    /// activated later replaces the trial. If the editing service does not answer at that moment, the call fails. Retry
-    /// the failed call later. Sign the request with the confirmation token of the setup wizard. Its account also needs
-    /// the EditPortalSettings permission. Otherwise, the call returns 403. Take the token from `wizardToken` of `GET
-    /// api/2.0/settings` before setup is complete. The call changes data. Do not repeat it. If the email changes, the
-    /// owner must confirm the new address. It returns the wizard settings with `completed` set. The call returns 400 if
-    /// `email` or `passwordHash` is missing, the email is malformed, or the license starts later.
+    /// activated later replaces the trial. If the editing service does not answer at that moment, the portal stays on
+    /// its own 30-day trial. Sign the request with the confirmation token of the setup wizard. Its account also needs
+    /// the EditPortalSettings permission. Otherwise, the call returns 403. Take the token from `wizardToken` of
+    /// `GET api/2.0/settings` before setup is complete. The call changes data. Do not repeat it. If the email changes,
+    /// the owner must confirm the new address. It returns the wizard settings with `completed` set. The call returns
+    /// 400 if `email` or `passwordHash` is missing, the email is malformed, or the license starts later.
     /// </remarks>
     /// <summary>Complete the Wizard settings</summary>
     /// <path>api/2.0/settings/wizard/complete</path>

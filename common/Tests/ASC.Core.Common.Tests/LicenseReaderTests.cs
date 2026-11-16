@@ -110,6 +110,21 @@ public sealed class LicenseReaderTests : IDisposable
     }
 
     [Fact]
+    public async Task RefreshLicenseAsync_ActiveAndStagedFiles_RestoresActiveOnAnyFailure()
+    {
+        // Not only a refused license puts the files back: an editing service that cannot be asked or the lock of the
+        // license writers fail the same way, and the staged file must not stay on the license path unapplied.
+        await File.WriteAllTextAsync(_licensePath, LicenseJson(ActiveCustomer), TestContext.Current.CancellationToken);
+        await File.WriteAllTextAsync(_stagedPath, LicenseJson(StagedCustomer), TestContext.Current.CancellationToken);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => CreateReader().RefreshLicenseAsync(FailAsync));
+
+        (await ReadCustomerAsync(_licensePath)).Should().Be(ActiveCustomer);
+        (await ReadCustomerAsync(_stagedPath)).Should().Be(StagedCustomer);
+        File.Exists(_backupPath).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task DocsTrialToDBAsync_LicenseFileOnDisk_WritesNothing()
     {
         // A license put in force from a file is never replaced by the editing service's trial. The reader has no
@@ -165,6 +180,12 @@ public sealed class LicenseReaderTests : IDisposable
             licenseReaderConfig: new LicenseReaderConfig(configuration),
             distributedLockProvider: new InMemoryLockProvider(),
             logger: NullLogger<LicenseReader>.Instance);
+    }
+
+    private Task<LicenseValidationResult> FailAsync(License license)
+    {
+        _validated.Add(license);
+        throw new InvalidOperationException("failed by the test");
     }
 
     private Task<LicenseValidationResult> RefuseAsync(License license)

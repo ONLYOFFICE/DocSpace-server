@@ -103,6 +103,8 @@ global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 global using static ASC.Core.Common.Tests.PaymentStubs;
 
 global using DbQuota = ASC.Core.Common.EF.DbQuota;
+global using DocsTrialCache = ASC.Files.Core.Helpers.DocsTrialCache;
+global using DocsTrialCacheOptions = ASC.Files.Core.Helpers.DocsTrialCacheOptions;
 global using DocsTrialCheck = ASC.Files.Core.Helpers.DocsTrialCheck;
 global using DocsTrialState = ASC.Files.Core.Helpers.DocsTrialState;
 global using DocumentService = ASC.Files.Core.Helpers.DocumentService;

@@ -173,6 +173,12 @@ public class LicenseReader(
         var temp = applyStaged && File.Exists(_licensePathTemp);
         var bcp = temp && File.Exists(LicensePath);
 
+        // What has been done to the files so far: any failure before the license is applied puts them back, whatever
+        // it is (a refused license, an editing service that cannot be asked, the lock of the license writers)
+        var backedUp = false;
+        var written = false;
+        var applied = false;
+
         try
         {
             await using (var licenseStream = GetLicenseStream(temp))
@@ -184,10 +190,12 @@ public class LicenseReader(
                 if (bcp)
                 {
                     File.Move(LicensePath, _licensePathBcp, true);
+                    backedUp = true;
                 }
 
                 if (temp)
                 {
+                    written = true;
                     await SaveLicenseAsync(licenseStream, LicensePath);
                 }
 
@@ -198,6 +206,7 @@ public class LicenseReader(
                 }
 
                 await LicenseToDBAsync(license);
+                applied = true;
             }
 
             if (temp)
@@ -210,24 +219,35 @@ public class LicenseReader(
                 File.Delete(_licensePathBcp);
             }
         }
-        catch (BillingException ex) when (ex is BillingNotConfiguredException or BillingLicenseTypeException)
+        catch (Exception ex)
         {
-            if (bcp)
+            if (!applied)
             {
-                File.Move(_licensePathBcp, LicensePath, true);
-            }
-            else if (temp)
-            {
-                File.Delete(LicensePath);
+                RestoreLicenseFiles(backedUp, written);
             }
 
             LogError(ex);
             throw;
         }
+    }
+
+    private void RestoreLicenseFiles(bool backedUp, bool written)
+    {
+        try
+        {
+            if (backedUp)
+            {
+                File.Move(_licensePathBcp, LicensePath, true);
+            }
+            else if (written)
+            {
+                File.Delete(LicensePath);
+            }
+        }
         catch (Exception ex)
         {
-            LogError(ex);
-            throw;
+            // The failure that led here is the one the caller gets; this one is only logged
+            logger.ErrorWithException(ex);
         }
     }
 

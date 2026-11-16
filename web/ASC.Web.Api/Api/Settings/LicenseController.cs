@@ -217,15 +217,15 @@ public class LicenseController(
     /// Returns whether this installation still needs a license file. The setup wizard asks this before it offers to
     /// upload a license. Anyone can call it without signing in. The call is read-only. It returns `true` only for an
     /// Enterprise installation whose license file is not on disk yet. The editing service must also run no trial of its
-    /// own. While that trial runs, the wizard completes without a file. The portal's trial then ends by the day the
-    /// editing service's trial ends. The call reuses the answer of the editing service for up to 15 minutes. While the
-    /// service does not answer, the call uses its last answer for up to an hour. With no answer known yet, a service
-    /// that does not answer counts as no trial. It returns `false` on a SaaS or open-source installation, which needs
-    /// no license. It also returns `false` if the portal lets anyone in without an account, or hides the pricing
-    /// section. The same applies to an installation set up from cloud image metadata. So `false` does not mean that the
-    /// portal has a license. The call does not describe the active license or check it with the editing service. The
-    /// answer becomes `false` only after a staged file is activated, not after the upload. To activate it, use `POST
-    /// api/2.0/settings/license/accept`. The call works while the portal is unpaid.
+    /// own. While that trial runs, the call returns `false`. The wizard then completes without a file. The portal's
+    /// trial then ends by the day the editing service's trial ends. The call asks the editing service only about its
+    /// trial, not about the active license. It reuses the answer of the editing service for up to 15 minutes. While the
+    /// service does not answer, the call uses its last answer for up to an hour. With no answer known yet, a silent
+    /// service counts as no trial. It returns `false` on a SaaS or open-source installation, which needs no license. It
+    /// also returns `false` if the portal lets anyone in without an account, or hides the pricing section. The same
+    /// applies to an installation set up from cloud image metadata. So `false` does not mean that the portal has a
+    /// license. For a license file, the answer becomes `false` only after the staged file is activated, not after the
+    /// upload. To activate it, use `POST api/2.0/settings/license/accept`. The call works while the portal is unpaid.
     /// </remarks>
     /// <summary>Check if a license is required</summary>
     /// <path>api/2.0/settings/license/required</path>

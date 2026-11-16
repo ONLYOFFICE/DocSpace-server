@@ -45,15 +45,6 @@ public class DocumentServiceLicense(ICache cache,
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
     private const string CacheKey = "DocumentServiceLicense";
 
-    // The trial is asked about anonymously (does the setup wizard need a license file), so its answer is kept in the
-    // memory cache: one request to the editing service at a time per process, at most 10 seconds of waiting for it, an
-    // answer kept for 15 minutes. While the service fails, the last answer known stays in use for up to an hour and is
-    // asked about again once a minute; with none known, the failure itself is kept for a minute
-    private static readonly TimeSpan _trialCacheDuration = TimeSpan.FromMinutes(15);
-    private static readonly TimeSpan _trialFailSafeMaxDuration = TimeSpan.FromHours(1);
-    private static readonly TimeSpan _trialFailureCacheDuration = TimeSpan.FromMinutes(1);
-    private static readonly TimeSpan _trialRequestHardTimeout = TimeSpan.FromSeconds(10);
-    private static readonly string _trialCacheKey = $"{Tenant.DefaultTenant}docstrial";
 
     private async Task<CommandResponse> GetDocumentServiceLicenseAsync(bool useCache)
     {
@@ -179,67 +170,45 @@ public class DocumentServiceLicense(ICache cache,
     /// Asks the editing service whether it runs its own trial, the state it is in while it has no license file.
     /// </summary>
     /// <param name="useCache">
-    /// Whether an answer of the last 15 minutes may be reused; the service is then waited for at most 10 seconds, and
-    /// while it fails the last answer known is used for up to an hour (a failure with none known, for a minute). A
-    /// fresh question drops the cached answer on every node, so the cached readers ask again next time.
+    /// Whether a cached answer may be used; <see cref="DocsTrialCache"/> says how long answers and failures are kept.
+    /// A fresh question with a known answer replaces the cached one on every node; one with an unknown answer leaves
+    /// the cache alone.
     /// </param>
     /// <returns>
     /// <see cref="DocsTrialState.NotTrial"/> on an installation that has no editing service to ask;
     /// <see cref="DocsTrialState.Unknown"/> when the service cannot be reached or its answer cannot be read.
     /// </returns>
-    public async Task<DocsTrialCheck> GetTrialAsync(bool useCache)
+    public Task<DocsTrialCheck> GetTrialAsync(bool useCache)
     {
-        var memoryCache = cacheProvider.GetMemoryCache();
-
-        if (!useCache)
-        {
-            var check = await RequestTrialAsync();
-            await memoryCache.RemoveAndNotifyAsync(_trialCacheKey);
-
-            return check;
-        }
-
-        try
-        {
-            return await memoryCache.GetOrSetAsync<DocsTrialCheck>(_trialCacheKey, async (_, _) =>
-            {
-                var check = await RequestTrialAsync();
-
-                // An unknown answer is a failure, not an answer: it must not replace the last answer known
-                return check.State == DocsTrialState.Unknown
-                    ? throw new InvalidOperationException("The editing service did not say whether it runs its trial")
-                    : check;
-            }, options => options
-                .SetDuration(_trialCacheDuration)
-                .SetFailSafe(true, _trialFailSafeMaxDuration, _trialFailureCacheDuration)
-                .SetFactoryTimeouts(hardTimeout: _trialRequestHardTimeout));
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            // No answer known to fall back on: the service failed, or the hard timeout ran out and the request goes on
-            // in the background, replacing this answer when it ends
-            logger.WarningDocsTrialRequest(ex);
-            await memoryCache.SetAsync(_trialCacheKey, DocsTrialCheck.Unknown, _trialFailureCacheDuration);
-
-            return DocsTrialCheck.Unknown;
-        }
+        return new DocsTrialCache(cacheProvider.GetMemoryCache(), logger, DocsTrialCacheOptions.Default)
+            .GetAsync(RequestTrialAsync, useCache);
     }
 
     private async Task<DocsTrialCheck> RequestTrialAsync()
     {
+        CommandResponse commandResponse;
         try
         {
-            var commandResponse = await GetDocumentServiceLicenseAsync(false);
-
-            return commandResponse == null
-                ? DocsTrialCheck.NotTrial
-                : ClassifyTrial(commandResponse, DateTime.UtcNow);
+            commandResponse = await GetDocumentServiceLicenseAsync(false);
         }
         catch (Exception ex)
         {
             logger.WarningDocsTrialRequest(ex);
             return DocsTrialCheck.Unknown;
         }
+
+        if (commandResponse == null)
+        {
+            return DocsTrialCheck.NotTrial;
+        }
+
+        var check = ClassifyTrial(commandResponse, DateTime.UtcNow);
+        if (check.State == DocsTrialState.Unknown)
+        {
+            logger.WarningDocsTrialUnreadable(commandResponse.Error, commandResponse.ErrorString);
+        }
+
+        return check;
     }
 
     /// <summary>
