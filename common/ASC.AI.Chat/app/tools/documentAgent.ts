@@ -46,6 +46,7 @@
 // whose work happens elsewhere; unlike it, the work lives in another
 // process, reached over A2A (see documentAgentClient).
 
+import { readChatContext } from "../storage/chatContextSnapshot.js";
 import { ActionType } from "@onlyoffice/ai-chat/core";
 import type {
   Profile,
@@ -84,6 +85,7 @@ import {
   DOCUMENT_AGENT_FILES_PATH,
   DOCUMENT_AGENT_FILES_SERVER,
   DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM,
+  DOCUMENT_AGENT_OUTPUTS_THREAD_PARAM,
   DOCUMENT_AGENT_OUTPUTS_PATH,
   DOCUMENT_AGENT_TOKEN_HEADER,
   GET_FILE_LINK_TOOL,
@@ -258,7 +260,12 @@ async function run(
   const settings: DocumentAgentSettings = {
     model: modelSettings(profile, config, reasoningFor(profile, tenant.reasoning)),
     mcpServers,
-    outputs: { url: outputsUrl(config, targetFolderId), headers: ownServerHeaders(config) },
+    // The round's conversation is named too: one of an AI project keeps the
+    // results among its artifacts, and the folder is where they go otherwise.
+    outputs: {
+      url: outputsUrl(config, targetFolderId, readChatContext("thread")?.requested.threadId),
+      headers: ownServerHeaders(config),
+    },
     // The task's log goes the same way as its results, into the folder the
     // portal chose for logs (or the results' own), as task-log.md.
     ...(logFolderId === undefined
@@ -337,10 +344,13 @@ function savedFileId(url: string): string | undefined {
   return id ? id : undefined;
 }
 
-/** The outputs endpoint of this service with the folder the files go into. */
-function outputsUrl(config: DocumentAgentConfig, folderId: string): string {
+/** The outputs endpoint of this service with the folder the files go into and, for results, their conversation. */
+function outputsUrl(config: DocumentAgentConfig, folderId: string, threadId?: string | null): string {
   const url = new URL(`${config.filesUrl}${DOCUMENT_AGENT_OUTPUTS_PATH}`);
   url.searchParams.set(DOCUMENT_AGENT_OUTPUTS_FOLDER_PARAM, folderId);
+  if (threadId) {
+    url.searchParams.set(DOCUMENT_AGENT_OUTPUTS_THREAD_PARAM, threadId);
+  }
   return url.href;
 }
 
