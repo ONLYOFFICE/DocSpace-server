@@ -173,6 +173,14 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return Invitations.InviteGuestAsync(_clients.PeopleHttpClient, Owner, cancellationToken);
     }
 
+    /// <summary>Connects a Socket.IO client to this test's portal as the given user. The test disposes it.</summary>
+    protected async Task<PortalSocket> ConnectSocket(User user)
+    {
+        await fixture.WaitForRouterAsync().WaitAsync(TestContext.Current.CancellationToken);
+
+        return await _clients.ConnectSocketAsync(user, TestContext.Current.CancellationToken);
+    }
+
     /// <summary>
     /// The status and error body an SDK call ended with: 200 and an empty body when it succeeded, the <see cref="ApiException"/>
     /// code and content otherwise.

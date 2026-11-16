@@ -5110,10 +5110,14 @@ public class FileStorageService //: IFileStorageService
     private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
         var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
-        whoCanReadTask.AddRange((await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
-            .Select(x => x.Id));
 
-        whoCanReadTask.Add(tenantManager.GetCurrentTenant().OwnerId);
+        if (!await DocSpaceHelper.InAiProjectAsync(entry, daoFactory.GetCacheFolderDao<T>()))
+        {
+            whoCanReadTask.AddRange((await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+                .Select(x => x.Id));
+
+            whoCanReadTask.Add(tenantManager.GetCurrentTenant().OwnerId);
+        }
 
         var userIds = whoCanReadTask
             .Concat([entry.CreateBy])
