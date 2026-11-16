@@ -65,6 +65,13 @@ public class RenewSubscriptionService(
     // twice. Fixed times rather than a number of runs, which would shrink with renewperiod.
     private static readonly TimeSpan _renewNotExtendedGrace = TimeSpan.FromMinutes(10);
 
+    // How long after it was claimed a renewal may still start a money step. Another instance takes a started entry
+    // up once _renewNotExtendedGrace has passed, whether the process that claimed it is still at work or not, and the
+    // work has no bound of its own: a top-up polls the balance, several times over when accounting is slow. Past
+    // this limit, kept below that grace by more than a payment change can take, the renewal pays nothing more and
+    // leaves its entry to be resumed.
+    private static readonly TimeSpan _claimWorkLimit = TimeSpan.FromMinutes(8);
+
     // How long after the timeout a renewal is re-checked while billing gives no answer at all, before the
     // customer is told it failed.
     private static readonly TimeSpan _renewVerifyPeriod = TimeSpan.FromMinutes(30);
@@ -128,9 +135,9 @@ public class RenewSubscriptionService(
 
     // The changes of the pending list this process could not write, the list being out of reach at that moment:
     // the renewals to add and the settled ones to take out. The next run makes them before it reads the list. Only
-    // this process's memory holds them: a process that stops here, or an instance that turns passive and does not
-    // run again, loses a renewal to add - nobody re-checks it, as when the list itself is lost - and leaves a
-    // settled one to be settled once more.
+    // this process's memory holds them. A process that stops here, or an instance that turns passive and does not
+    // run again, loses a renewal to add - which is why such a renewal keeps its claim in the journal and is resumed
+    // from there - and leaves a settled one to be settled once more.
     private readonly List<PendingRenewal> _pendingToAdd = [];
     private readonly List<PendingRenewal> _pendingToRemove = [];
 
@@ -253,26 +260,29 @@ public class RenewSubscriptionService(
             return;
         }
 
-        var waitsForBilling = false;
+        var outcome = RenewalOutcome.Settled;
 
         try
         {
-            waitsForBilling = await TryRenewSubscriptionAsync(data, interrupted);
+            outcome = await TryRenewSubscriptionAsync(data, interrupted, claimed.StageSince);
         }
         finally
         {
-            // However the renewal ended in this process, it is over: only a process that stops half-way leaves its
-            // claim behind. An interrupted one billing could not tell anything about goes back as it was read, with
-            // the time and the attempts its limits are counted from - not as it was claimed: a wait has not got to the
-            // money, so it is no attempt, and the claim's fresh time would start the wait for billing anew on every
-            // run, which would then never end.
-            await ReleaseInJournalAsync(claimed, waitsForBilling ? data : null);
+            // A renewal that is over in this process gives up its claim. An interrupted one billing could not tell
+            // anything about goes back as it was read, with the time and the attempts its limits are counted from -
+            // not as it was claimed: a wait has not got to the money, so it is no attempt, and the claim's fresh time
+            // would start the wait for billing anew on every run, which would then never end. One whose outcome
+            // nothing else has on record keeps its claim, as if the process had stopped there: the entry is resumed
+            // through billing.
+            if (outcome != RenewalOutcome.ClaimKept)
+            {
+                await ReleaseInJournalAsync(claimed, outcome == RenewalOutcome.WaitsForBilling ? data : null);
+            }
         }
     }
 
-    // Returns true when the renewal has to wait in the journal for the next run: it was interrupted earlier and billing
-    // has not said yet what became of the subscription meanwhile.
-    private async Task<bool> TryRenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted)
+    // Makes the renewal claimed at the given moment and says what is to become of its journal entry.
+    private async Task<RenewalOutcome> TryRenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted, DateTime claimedAt)
     {
         UserInfo payer = null;
         UserInfo owner = null;
@@ -320,7 +330,7 @@ public class RenewSubscriptionService(
 
             if (tenant.Status != TenantStatus.Active)
             {
-                return false;
+                return RenewalOutcome.Settled;
             }
 
             if (interrupted)
@@ -344,7 +354,7 @@ public class RenewSubscriptionService(
                 {
                     logger.WarningRenewSubscriptionServiceOutdated(data.TenantId, Describe(renewedQuota, renewedQuantity));
 
-                    return false;
+                    return RenewalOutcome.Settled;
                 }
             }
 
@@ -352,7 +362,7 @@ public class RenewSubscriptionService(
             {
                 if (!resumed)
                 {
-                    return false;
+                    return RenewalOutcome.Settled;
                 }
 
                 notToRenew = true;
@@ -366,7 +376,7 @@ public class RenewSubscriptionService(
             {
                 if (!resumed)
                 {
-                    return false;
+                    return RenewalOutcome.Settled;
                 }
 
                 notToRenew = true;
@@ -383,7 +393,7 @@ public class RenewSubscriptionService(
 
                 if (!resumed)
                 {
-                    return false;
+                    return RenewalOutcome.Settled;
                 }
 
                 // billing is asked about the quota the row holds, the only one the stopped process could have paid for
@@ -417,7 +427,7 @@ public class RenewSubscriptionService(
                     // not the doing of this service, which had not got to the money: whoever paid has put it on record
                     logger.WarningRenewSubscriptionServiceOutdated(data.TenantId, Describe(targetQuota, renewedQuantity));
 
-                    return false;
+                    return RenewalOutcome.Settled;
                 }
 
                 if (extended)
@@ -434,19 +444,19 @@ public class RenewSubscriptionService(
                         logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
                     }
 
-                    return false;
+                    return RenewalOutcome.Settled;
                 }
 
                 if (outdated)
                 {
                     logger.WarningRenewSubscriptionServiceOutdated(data.TenantId, Describe(targetQuota, renewedQuantity));
 
-                    return false;
+                    return RenewalOutcome.Settled;
                 }
 
                 if (notToRenew)
                 {
-                    return false;
+                    return RenewalOutcome.Settled;
                 }
 
                 if (data.Attempt >= MaxRenewalAttempts)
@@ -460,7 +470,7 @@ public class RenewSubscriptionService(
                     // it does, rather than reported as failed over a request that did not get through
                     logger.WarningRenewSubscriptionServiceWaits(data.TenantId, Describe(targetQuota, renewedQuantity), null);
 
-                    return true;
+                    return RenewalOutcome.WaitsForBilling;
                 }
             }
 
@@ -538,6 +548,13 @@ public class RenewSubscriptionService(
             // past this point leaves a renewal whose outcome only billing can tell - which is what the entry, marked
             // as started when it was claimed, has the next runs ask.
 
+            if (ClaimIsTooOld(claimedAt))
+            {
+                logger.ErrorRenewSubscriptionServiceClaimTooOld(data.TenantId, description);
+
+                return RenewalOutcome.ClaimKept;
+            }
+
             if (!targetQuota.Additional)
             {
                 // The user subscription is paid from the wallet, so make sure the wallet balance
@@ -557,6 +574,14 @@ public class RenewSubscriptionService(
                 }
             }
 
+            // the top-up may have taken long enough for another instance to have taken the renewal up
+            if (ClaimIsTooOld(claimedAt))
+            {
+                logger.ErrorRenewSubscriptionServiceClaimTooOld(data.TenantId, description);
+
+                return RenewalOutcome.ClaimKept;
+            }
+
             bool result;
 
             try
@@ -573,7 +598,7 @@ public class RenewSubscriptionService(
                 // unreadable body - is in the inner exception.
                 logger.ErrorRenewSubscriptionServiceOutcomeUnknown(data.TenantId, description, ex);
 
-                await AddPendingRenewalAsync(new PendingRenewal(
+                var handedOver = await AddPendingRenewalAsync(new PendingRenewal(
                     data.TenantId,
                     data.Quota,
                     renewedQuota.ProductId,
@@ -585,14 +610,17 @@ public class RenewSubscriptionService(
                     payer?.Id,
                     DateTime.UtcNow));
 
-                return false;
+                // The re-checks have it on record: the claim is given up. They do not - the list was out of reach:
+                // the claim stays, so that a process that stops before the next run leaves the renewal to be resumed
+                // rather than to nobody.
+                return handedOver ? RenewalOutcome.Settled : RenewalOutcome.ClaimKept;
             }
 
             if (result)
             {
                 await ReportRenewedAsync(scope.ServiceProvider, data.TenantId, description);
 
-                return false;
+                return RenewalOutcome.Settled;
             }
         }
         catch (Exception ex) when (!billingAnswered && CanWaitForBilling(data))
@@ -609,7 +637,7 @@ public class RenewSubscriptionService(
                 logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
             }
 
-            return true;
+            return RenewalOutcome.WaitsForBilling;
         }
         catch (Exception ex)
         {
@@ -620,12 +648,12 @@ public class RenewSubscriptionService(
         {
             // billing never said whether the stopped process had paid, but no renewal is wanted any more: a letter
             // asking to renew manually would be wrong
-            return false;
+            return RenewalOutcome.Settled;
         }
 
         await SendRenewSubscriptionErrorAsync(data.TenantId, Describe(renewedQuota, renewedQuantity), renewedQuota.ServiceName, renewedQuantity, payer, owner);
 
-        return false;
+        return RenewalOutcome.Settled;
     }
 
     // the quota name and quantity the logs and the audit trail show for a renewal, e.g. "adminwallet 2"
@@ -775,9 +803,10 @@ public class RenewSubscriptionService(
         return null;
     }
 
-    // Hands the renewal to the re-checks. Never throws: a failure here must not end the renewal as failed, with
-    // the letter asking to renew manually, when its payment change may have been applied.
-    private async Task AddPendingRenewalAsync(PendingRenewal renewal)
+    // Hands the renewal to the re-checks; false when it could not be written to their list and is kept for the next
+    // run to write. Never throws: a failure here must not end the renewal as failed, with the letter asking to renew
+    // manually, when its payment change may have been applied.
+    private async Task<bool> AddPendingRenewalAsync(PendingRenewal renewal)
     {
         try
         {
@@ -789,6 +818,8 @@ public class RenewSubscriptionService(
 
                 await SavePendingAsync(pending);
             }
+
+            return true;
         }
         catch (Exception ex)
         {
@@ -796,6 +827,8 @@ public class RenewSubscriptionService(
             _pendingToAdd.Add(renewal);
 
             logger.ErrorRenewSubscriptionServiceTenant(renewal.TenantId, ex);
+
+            return false;
         }
     }
 
@@ -846,6 +879,11 @@ public class RenewSubscriptionService(
     // Whether an interrupted renewal billing gives no answer about may wait for the next run: for as long as a renewal
     // whose payment change timed out is re-checked, counted from when it was queued or last started. After that the
     // customer is told it failed, so an entry is not asked about for ever, nor dropped unnoticed when the journal expires.
+    private static bool ClaimIsTooOld(DateTime claimedAt)
+    {
+        return DateTime.UtcNow - claimedAt > _claimWorkLimit;
+    }
+
     private static bool CanWaitForBilling(RenewalJournalEntry entry)
     {
         return DateTime.UtcNow < entry.StageSince + _renewVerifyPeriod;
@@ -1120,6 +1158,18 @@ public class RenewSubscriptionService(
         {
             return other.TenantId == TenantId && other.ProductId == ProductId && other.PreviousDueDate == PreviousDueDate && other.TimedOutAt == TimedOutAt;
         }
+    }
+
+    private enum RenewalOutcome
+    {
+        // over in this process, whichever way: the claim is given up and the entry leaves the journal
+        Settled,
+
+        // interrupted earlier, and billing has not said yet what became of it: the entry goes back as it was read
+        WaitsForBilling,
+
+        // money may have moved and nothing but the claim says so: the entry stays as it was claimed
+        ClaimKept
     }
 
     private enum RenewalStage

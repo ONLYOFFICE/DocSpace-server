@@ -74,6 +74,10 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Warning, "Subscription renewal is taken out of the journal, its quota is not a wallet quota any more: tenant {tenantId}, quota {quota}")]
     public static partial void WarningRenewSubscriptionServiceUnknownQuota(this ILogger<RenewSubscriptionService> logger, int tenantId, int quota);
 
+    // an error: a renewal is left unfinished, with a top-up possibly made
+    [LoggerMessage(LogLevel.Error, "Subscription renewal has been under its claim too long to pay safely and is left to be resumed through billing: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceClaimTooOld(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
     [LoggerMessage(LogLevel.Error, "RenewSubscriptionService: error processing tenant {tenantId}")]
     public static partial void ErrorRenewSubscriptionServiceTenant(this ILogger<RenewSubscriptionService> logger, int tenantId, Exception exception);
 
