@@ -1365,8 +1365,27 @@ public static class DocumentService
 
 public static class DocumentServiceHttpClientExtension
 {
+    /// <summary>
+    /// Registers the named clients of the document service, with their resilience pipeline, and the pipeline that
+    /// validates the document server's license. Every host that runs code sending requests to the document server
+    /// calls it; a host that does not gets the default handler for these names, without the pipeline and without the
+    /// switch that turns certificate validation off.
+    /// </summary>
+    /// <remarks>
+    /// A second call in the same process does nothing. The Monolith runs the services of every host in one process,
+    /// so several of its service extensions call this. Each call used to add another resilience handler to the same
+    /// named clients, and the handlers nest: the outer one retries the inner one, so the retries multiply and the
+    /// timeouts stack.
+    /// </remarks>
     public static void AddDocumentServiceHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
+        if (services.Any(descriptor => descriptor.ServiceType == typeof(Registered)))
+        {
+            return;
+        }
+
+        services.AddSingleton<Registered>();
+
         var httpClientTimeout = Convert.ToInt32(configuration["files:docservice:timeout"] ?? "100000");
         var policyTimeout = TimeSpan.FromSeconds(httpClientTimeout / 1000);
         var retryCount = Convert.ToInt32(configuration["files:docservice:try"] ?? "6");
@@ -1425,5 +1444,12 @@ public static class DocumentServiceHttpClientExtension
                 ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
             });
         });
+    }
+
+    /// <summary>
+    /// Marks a service collection in which the document service clients are already registered.
+    /// </summary>
+    private sealed class Registered
+    {
     }
 }
