@@ -248,8 +248,7 @@ The call SHALL answer 200 with no body and record the change in the audit trail.
 The portal SHALL keep one state row per plugin name only while the plugin is on or has settings; a plugin
 switched off with no settings SHALL have its row removed. A plugin with no stored row SHALL be reported
 with the `enabled` and `settings` values of its manifest (normally off and empty). A stored `settings`
-value that cannot be decrypted SHALL make the read report the plugin as off with empty settings and store
-that state.
+value that cannot be decrypted SHALL make the read report the plugin as off with empty settings.
 
 #### Scenario: Installation-wide plugin never touched
 
@@ -259,7 +258,7 @@ that state.
 #### Scenario: Undecryptable settings
 
 - **WHEN** the stored settings of a plugin were encrypted by another installation key
-- **THEN** the plugin is listed with `enabled` false and empty `settings`, and that state replaces the broken one
+- **THEN** the plugin is listed with `enabled` false and empty `settings`
 
 ### Requirement: Content Security Policy domains of a plugin
 
@@ -354,7 +353,7 @@ interface reloads or unloads the plugin without a page reload. A failure to send
 
 An upload, an update and a deletion SHALL each write one audit event — "Webplugin uploaded", "Webplugin
 updated", "Webplugin deleted" — naming the plugin and carrying its `pluginName` and `version` as the
-target. Reads, the refresh and the stored-state repair of undecryptable settings SHALL write none.
+target. Reads and the refresh SHALL write none.
 
 #### Scenario: Upload audited
 

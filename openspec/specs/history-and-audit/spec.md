@@ -258,8 +258,8 @@ hidden (402).
 
 The system SHALL expose the version list of a file through `GET /api/2.0/files/file/{fileId}/history`
 and its editing revisions through `GET /api/2.0/files/file/{fileId}/edit/history`. Both require the
-read-history right: editing access and above grant it, Read and Comment do not, a Guest never has it,
-and a third-party file has no revisions.
+read-history right: Read and Comment do not grant it, a Guest never has it, and a third-party file has
+no revisions; the editing revisions are open to editing access and above.
 
 #### Scenario: Version list and revisions of a new file
 

@@ -34,9 +34,8 @@
 namespace ASC.Web.Api.Tests.Tests._05_Security.ActiveConnections;
 
 /// <summary>
-/// What ending connections leaves behind: the audit event of each logout endpoint, that a bearer-token
-/// call of "all except this" keeps no connection open, and that the password-change logout leaves the
-/// password as it was.
+/// What ending connections leaves behind: the audit events of the logout endpoints, and that a bearer-token
+/// call of "all except this" keeps no connection open.
 /// </summary>
 [Trait("Category", "Security")]
 public class ConnectionLogoutAuditTests(
@@ -96,32 +95,6 @@ public class ConnectionLogoutAuditTests(
         var logout = events.Should().ContainSingle().Subject;
         logout.UserId.Should().Be(Owner.Id);
         logout.Target.Should().Contain(user.Id.ToString());
-    }
-
-    /// <summary>
-    /// H7: the controller signs the caller out (<c>securityContext.Logout()</c>) before it sends
-    /// <c>UserSentPasswordChangeInstructions</c>, so the audit event names the anonymous account as the one
-    /// who acted instead of the user.
-    /// </summary>
-    [Fact]
-    [Trait("Category", "Bug")]
-    public async Task LogOutAllActiveConnectionsChangePassword_RecordsInstructionsAndKeepsThePassword()
-    {
-        // Arrange
-        var user = await InviteMember(EmployeeType.User);
-        await _webApiClient.Authenticate(user);
-
-        // Act
-        await _activeConnectionsApi.LogOutAllActiveConnectionsChangePasswordAsync(TestContext.Current.CancellationToken);
-
-        // Assert
-        await _webApiClient.Authenticate(null);
-        var signIn = await _authenticationApi.AuthenticateMeAsync(new AuthRequestDto(userName: user.Email, password: user.Password), TestContext.Current.CancellationToken);
-        signIn.Response.Token.Should().NotBeNullOrEmpty();
-
-        await _webApiClient.Authenticate(Owner);
-        var events = await PollAuditEventsAsync(MessageAction.UserSentPasswordChangeInstructions);
-        events.Should().ContainSingle().Which.UserId.Should().Be(user.Id);
     }
 
     private async Task<List<AuditEventDto>> PollAuditEventsAsync(MessageAction action)

@@ -35,7 +35,7 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Lifecycle;
 
 /// <summary>
 /// DELETE api/2.0/portal/deleteportalimmediately — hidden from the API document (raw HTTP): the owner of a
-/// portal whose address matches the installation's test-address pattern deletes it with an ordinary sign-in.
+/// test portal (its owner address matches the installation's test-address pattern) deletes it.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PortalImmediateDeletionTests(AspireAppFixture fixture) : PortalLifecycleTestBase(fixture)
@@ -49,8 +49,7 @@ public class PortalImmediateDeletionTests(AspireAppFixture fixture) : PortalLife
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
 
-        // Not through Web.Api: the alias is renamed at once, and a server installation answers an address it does
-        // not know as its default portal. The system API tells it: the old name is free to register again.
+        // Checked through the system API: the old name is free to register again.
         var (status, body) = await ApiSystemAsync(HttpMethod.Post, "portal/validateportalname", new { portalName = Clients.PortalName });
 
         status.Should().Be(HttpStatusCode.OK, "the old name can be registered again");

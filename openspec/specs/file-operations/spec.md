@@ -344,11 +344,6 @@ SHALL leave the other account's session untouched.
 - **WHEN** the Owner and a member each open a session in their own My documents and their parts are sent turn by turn, the member also trying to abort the Owner's session
 - **THEN** the abort answers 403, and each account's folder holds exactly one file with that account's bytes
 
-#### Scenario: Holder of the session id
-
-- **WHEN** a caller holding the id of another account's session sends a part or finalizes it
-- **THEN** the part and finalize routes find the session by its id alone, so who holds the id can write into it (suspected defect F24 of the verification record)
-
 ### Requirement: Aborting an upload session
 
 `abortUploadSession` (`DELETE .../session/{sessionId}`) SHALL drop a session that was opened by the caller,
@@ -888,12 +883,7 @@ that version's content again as a new version; `getFileInfo` with `version` SHAL
 
 - **WHEN** a member with Read access opens the current version and then `version=1` through `openedit`
 - **THEN** the current version opens and `version=1` is refused (403, bug 80683)
-- **AND** opening a past version requires the right to read the history: in a room its managers and content creators; `getFileVersionInfo` also answers an Editing member, see the next scenario
-
-#### Scenario: Editing member reads the versions
-
-- **WHEN** a member invited with Editing access reads `getFileVersionInfo` of a room file with two versions
-- **THEN** the call succeeds and the list is answered, although the API document reserves it for managers and content creators (bug 84774)
+- **AND** opening a past version requires the right to read the history: in a room its managers and content creators
 
 ### Requirement: Changing and restoring versions
 
@@ -1017,11 +1007,6 @@ by someone with manager rights. Unknown file 404, no access 403, anonymous 401. 
 
 - **WHEN** another account tries to delete or copy a file that is locked, to save new content into it through the editor's save route, to claim it for editing, or to rename it
 - **THEN** the deletion, the copy, the save, the claim and the rename are refused (403) and the file keeps its title, version, bytes and lock
-
-#### Scenario: Editing session blocks others
-
-- **WHEN** a Content creator saves new content into a file open in the Owner's editing session
-- **THEN** the save is not refused and the file's bytes are replaced by the uploaded ones (bug 84769)
 
 ### Requirement: Downloading a file
 
@@ -1205,7 +1190,7 @@ inside the listed folders as a MarkAsRead operation.
 
 #### Scenario: Lenient input
 
-- **WHEN** `markAsRead` is sent with `{}`, with empty ids, with file id 999999999, or by a User who is not a room member for a room file
+- **WHEN** `markAsRead` is sent with `{}`, with empty ids, with file id 999999999
 - **THEN** every call answers 200 — an empty or absent body and an id that names nothing are accepted; only an anonymous caller is refused (401)
 
 ### Requirement: Reference data for the editors

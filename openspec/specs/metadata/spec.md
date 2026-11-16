@@ -726,7 +726,7 @@ folder changes the folder only until a cascade is requested again.
 to read the folder (404 for a missing one) and report the running cascade of the folder, else the most recent
 one: `id`, `progress`, `isCompleted`, `error` and the `templateIds` it propagates. A folder that never cascaded
 SHALL get a completed operation with no `id`, progress 100 and empty `templateIds`. A pass that fails SHALL
-complete with its message in `error`.
+complete with `error` set.
 
 #### Scenario: Idle folder
 

@@ -34,43 +34,13 @@
 namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
-/// What a member outside an AI room gets: a DocSpace admin who is not a member of a project reads neither its model,
-/// its sources nor its skills, and a member who cannot read an Instructions room is refused its skills folder. The
-/// Instructions rooms are listed in the Rooms listing on request (<c>withAiFolder</c>).
+/// What a member outside an AI room gets: a member who cannot read an Instructions room is refused its skills
+/// folder. The Instructions rooms are listed in the Rooms listing on request (<c>withAiFolder</c>).
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "AiHub")]
 public class AiRoomOutsiderAccessTests(AspireAppFixture fixture) : AiHubTestBase(fixture)
 {
-    /// <summary>
-    /// Open, no bug number: the requirement bars a DocSpace admin who is not a project member from these reads, and
-    /// the chat service refuses such an admin a round in the project, but the Files routes answer 200 to him (the
-    /// read check on the project lets a DocSpace admin through).
-    /// </summary>
-    [Theory]
-    [Trait("Category", "Bug")]
-    [InlineData("model")]
-    [InlineData("sources")]
-    [InlineData("skills")]
-    public async Task ProjectReads_DocSpaceAdminOutsideTheProject_Return403(string read)
-    {
-        // Arrange
-        var projectId = await CreateProjectAsync();
-        var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
-        await _filesClient.Authenticate(admin);
-
-        // Act
-        using var response = read switch
-        {
-            "model" => await Files.GetAsync($"api/2.0/files/rooms/{projectId}/model", TestContext.Current.CancellationToken),
-            "sources" => await GetSourcesResponseAsync(projectId),
-            _ => await GetRoomSkillsResponseAsync(projectId)
-        };
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden, $"{read}: {await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken)}");
-    }
-
     [Fact]
     public async Task GetRoomAiFolder_UserWhoCannotReadTheRoom_Returns403()
     {

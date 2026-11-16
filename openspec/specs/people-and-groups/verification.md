@@ -2,7 +2,7 @@
 
 > **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
-> Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the share search (people, accounts and group lists) now follows the visibility rule of bug 79163; profiles of other accounts reach a User or a Guest without contact details; account and group socket events carry the id alone; `deleteProfile` specified; new defect PG-6.
+> Revision 2026-11-14 (09d4de0768..6fb6dfb17a): the share search (people, accounts and group lists) now follows the visibility rule of bug 79163; profiles of other accounts reach a User or a Guest without contact details; account and group socket events carry the id alone; `deleteProfile` specified.
 
 
 > Revision 2026-11-09 (bb406b409b..6fb013e745): the repeat check of letters (no letter for a repeat within the period, same answer); the rate limit of the resend and instruction endpoints is gone.
@@ -236,7 +236,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | **Marking the gift message as read** | | |
 | Per-account flag; error only logged | `web/ASC.Web.Api.Tests/Tests/04_Portal/Users/GiftMessageMarkTests.cs:52,61` | TEST-CONFIRMED [run: PASS] for 200 for every role (repeated) and anonymous 401; the stored flag stays CODE-ONLY (no operation reads it) |
 | **Letters after portal registration** | | |
-| One-hour key; letters; not idempotent; also switches on the configured second factor for the portal (see PG-4) | `Portal:1278-1307`, yaml `sendCongratulations` | CODE-ONLY (unreachable: the key arrives only through the registration letter flow) |
+| One-hour key; letters; not idempotent; also switches on the configured second factor for the portal | `Portal:1278-1307`, yaml `sendCongratulations` | CODE-ONLY (unreachable: the key arrives only through the registration letter flow) |
 
 ## Differences between the yaml and the server
 
@@ -263,10 +263,6 @@ Line numbers of the code come from the tree as of 2026-11-06.
 |---|---|---|---|---|
 | PG-1 | `displayName` of a profile | Comes back HTML-encoded (`O&#39;Hara`) while `firstName`, `lastName` and the stored columns are not, so feeding it back to a search finds nothing | `common/ASC.Core.Common/Users/DisplayUserSettings.cs:63,102` (encodes by default), `common/ASC.Api.Core/Model/EmployeeDto.cs:173`; `P/UpdateMemberTests.cs` comment at the name generation; `Q/SearchTestBase.cs:42-46` decodes | per test comment |
 | PG-2 | `updateGroup` | Takes any non-null `groupName`, so an empty or blank name would be stored, while `addGroup` refuses a blank name with 400. `SaveGroupInfoAsync` itself was not read | `Groups:185` versus `Groups:262` (`?? group.Name`); yaml lists only the length as a 400 | red by code reading |
-| PG-3 | `getRemoveProgress`, `terminateRemove` | Demand only the edit-user permission, so a DocSpace admin can read or cancel a removal of another DocSpace admin. The same gap was closed for reassignment by bugs 78957 and 79320. `startRemove` does refuse that pair | `Remove:64-73,185-191` versus `Reassign:66-76,157-175`; `Remove:155-160`; no test covers the pair | red by code reading |
-| PG-4 | `sendCongratulations` | Accepts the key of any account, not only the portal Owner's, and on such a call switches the configured second factor on for the whole portal. Whether a non-owner can hold such a key was not checked | `Portal:1282-1302` | red by code reading |
-| PG-5 | `signupThirdPartyAccount` | Downloads the provider's avatar URL with a plain client, without the URL validation `updateMemberPhoto` and `addMember` apply (bug 81491). The URL comes from a transported provider profile | `Third:458-470`; `Photo:242` | red by code reading |
-| PG-6 | `searchUsersByExtendedFilter` (`GET people/filter`), `getSimpleByFilter` | A Room admin may call both and filter by the `inviterId` of any account, so it learns whom another account invited, which the share search now tells only a DocSpace admin. The commit that closed this for the share search names it as left open | `User:1311-1330,2900-2989` (only User and Guest refused; `inviterId` passed through); `common/ASC.Core.Common/Data/DbUserService.cs:903` (filter applied for every caller); `0d980ecb35` message | red by code reading |
 
 ## Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
 

@@ -26,8 +26,8 @@ no requirement or scenario renamed).
 Revision 2026-11-04 (release/v4.1.0, `d58816bece..3533ad8a89`): no VDR rule changed and no new VDR test
 appeared; the range touches `FileSecurity.cs` only for the AI rooms section (the role tables moved to
 `:159-263` / `:265-281`) and for the Form filling room PDF branch (`:1305-1318`, the owner exemption of bug
-84849, which applies to Form filling rooms only). `manageFormFilling` (`FileStorageService.cs:5861-5960`) is
-untouched, so D1 and D5 stand. Line references below were refreshed; the spec text is unchanged.
+84849, which applies to Form filling rooms only).
+Line references below were refreshed; the spec text is unchanged.
 
 ## Requirement rows
 
@@ -44,7 +44,7 @@ untouched, so D1 and D5 stand. Line references below were refreshed; the spec te
 | Archive / delete: owner only | `03_Rooms/Permissions/VdrRoomReadArchiveRolesTests.cs:78-121` (all five member roles incl. Room manager 403 for archive and delete, room stays active; the owner archives, then deletes) | TEST-CONFIRMED [run: PASS] |
 | **VDR files and folders by role** | | |
 | Form Filler sees folders and no file before a form role is assigned, the form after | `04_Security/RoomShareTests.cs:1039-1097` (bug 80322) | TEST-CONFIRMED [run: PASS] |
-| Form Filler requesting a non-form file → 403 | `deviations.md` matrix row "A Form Filler views only forms they take part in / Non-form files are refused; see D5 for PDFs" | LIVE-CONFIRMED |
+| Form Filler requesting a non-form file → 403 | `deviations.md` matrix row "A Form Filler views only forms they take part in / Non-form files are refused" | LIVE-CONFIRMED |
 | Download by every role; deny-download restriction on a Viewer (download, view URL, copy to My documents → 403); Editor not restricted | `deviations.md` shared-links row "VDR: deny-download … the room setting still blocks the download"; the room flag itself `RoomUpdateVdrFieldsTests.cs:79-93`; `room-types` ("Room settings", `denyDownload`: members without editing rights cannot download or print) | LIVE-CONFIRMED |
 | Comment: Viewer 403 | `01_Files/EditSession/VdrFileEditRolesTests.cs:66-82` (the file's Comment flag: false for a Viewer, true for Room manager, Content creator, Editor) | TEST-CONFIRMED [run: PASS] (right) / CODE-ONLY (the comment itself is written in a document server session the stand does not drive) |
 | Review / Edit: Editor yes, Form Filler and Viewer no | `01_Files/EditSession/VdrFileEditRolesTests.cs:66-108` (Review / Edit flags; edit session: Room manager, Content creator, Editor 200, Form Filler and Viewer 403) | TEST-CONFIRMED [run: PASS] (rights, edit session) / CODE-ONLY (saving an edit through the document server) |
@@ -66,7 +66,7 @@ untouched, so D1 and D5 stand. Line references below were refreshed; the spec te
 | Content creator configures the owner's form; Editor / Viewer / Form Filler cannot configure or stop | `01_Files/FormFilling/VdrFormRolesTests.cs:90-163` (`saveFormRoleMapping` by a Content creator on the owner's form saved; Editor, Viewer, Form Filler 403 for configure, form stays unconfigured, and 403 for `manageFormFilling` Stop) | TEST-CONFIRMED [run: PASS] |
 | Stop filling of own forms: Content creator; cannot stop the owner's form even if they configured it | `deviations.md` matrix row "A Content creator stops filling of own forms and forms they organized / Only forms they created"; FFR analogue `01_Files/FormFilling/ManageFormFillingPermissionsTests.cs:88-145` | LIVE-CONFIRMED |
 | Form Filler sees a configured form they take part in | `RoomShareTests.cs:1088-1096` | TEST-CONFIRMED [run: PASS] |
-| Form Filler does not see a configured form they do not take part in; sees only own complete forms | `deviations.md` D5 evidence (`FileSecurity` PDF branch) and matrix row "A Form Filler sees a configured form only when their turn has come / Visible as soon as assigned" | LIVE-CONFIRMED |
+| Form Filler does not see a configured form they do not take part in; sees only own complete forms | `FileSecurity` PDF branch; `deviations.md` matrix row "A Form Filler sees a configured form only when their turn has come / Visible as soon as assigned" | LIVE-CONFIRMED |
 | Form Filler before their turn: visible, filling not available | `deviations.md` matrix row above | LIVE-CONFIRMED |
 | Viewer sees configured forms regardless of participation | `01_Files/FormFilling/VdrFormRolesTests.cs:70-88` | TEST-CONFIRMED [run: PASS] |
 | Complete form is immutable (no role edits) | `form-filling-workflow` ("Completed forms") | CODE-ONLY (cross-reference) |
@@ -95,7 +95,7 @@ spec text is unchanged.
 |---|---|---|
 | A Form Filler sees a configured form only when their turn has come | Visible as soon as assigned; the turn governs filling | `deviations.md`, matrix table |
 | A Content creator stops filling of own forms and forms they organized | Only forms they created | same |
-| A Form Filler views only forms they take part in | Non-form files are refused; PDFs: see D5 | same |
+| A Form Filler views only forms they take part in | Non-form files are refused | same |
 | Rename: Owner and Room manager only | A Content creator renames own entries | same |
 | Copy of other members' files: Owner and Room manager; copy out: Owner, Room manager, Content creator | Copy does not depend on authorship; every role copies out | same |
 | Test titles in `01_Files/Editing` say "VDR Room" | The rooms are Custom rooms (`EditingTestBase.CreateRoomWithFile`); not VDR evidence | `01_Files/Editing/*` |
@@ -115,9 +115,4 @@ spec text is unchanged.
 
 ## Suspected defects
 
-D-numbers are the ones of `openspec/deviations.md`; no new ones.
-
-| # | Where | What the server does | Evidence | Status |
-|---|-------|----------------------|----------|--------|
-| D1 | PDF form filling (stop / resume) | `manageFormFilling` checks permissions only for Start and Stop; Resume on a stopped form and Edit on a started form answer 200 for a Viewer, a Form Filler without a role, and a non-member User or Guest. | `deviations.md` D1 (live run); `FileStorageService.cs:5861-5960` (Resume and Edit branches still without a permission demand) | STILL OPEN (2026-11-04: the method is untouched in the range) |
-| D5 | Form Filler visibility | A Form Filler who holds no role on a form, or in a room where the form is not configured, cannot see it in the listing but reads it by id (`GET files/file/{id}` 200, presigned URI 200, open-edit 200). | `deviations.md` D5 (live run; `FileSecurity` PDF branch) | STILL OPEN (2026-11-04: the VDR PDF branch is untouched; the range changed only the Form filling room branch `FileSecurity.cs:1305-1318`) |
+None open.

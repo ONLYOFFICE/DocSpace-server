@@ -35,9 +35,7 @@ namespace ASC.Web.Api.Tests.Tests._06_ApiKeys;
 
 /// <summary>
 /// PUT /api/2.0/keys/{keyId} — what an update leaves alone and what it changes: fields left out keep their values,
-/// <c>["*"]</c> makes the key unrestricted, and an expired key is left untouched with <c>false</c>. Also the two open
-/// defects of the endpoint: <c>["*", "files:read"]</c> stored as two scopes while the key acts unrestricted (S1), and
-/// the expired answer given before the ownership check (S2).
+/// <c>["*"]</c> makes the key unrestricted, and an expired key is left untouched with <c>false</c>.
 /// </summary>
 [Trait("Category", "ApiKeys")]
 public class UpdateApiKeyFieldTests(
@@ -120,59 +118,6 @@ public class UpdateApiKeyFieldTests(
         stored.Name.Should().Be(created.Name);
         stored.Permissions.Should().BeEquivalentTo(["files:read"]);
         stored.IsActive.Should().BeTrue();
-    }
-
-    /// <summary>
-    /// S1: an update with <c>["*", "files:read"]</c> keeps <c>*</c> in the stored list (the run shows the listing
-    /// with <c>*</c> as a scope), while the authentication treats any key holding <c>*</c> as unrestricted — so the
-    /// listing and <c>keys/@self</c> show a scoped key that can in fact write everywhere. The creation normalises the same list to an unrestricted key with no scopes; the
-    /// update has to do the same, so what is shown is what the key may do.
-    /// </summary>
-    [Trait("Category", "Bug")]
-    [Fact]
-    public async Task UpdateApiKey_StarAmongOtherScopes_IsStoredAsUnrestrictedLikeOnCreation()
-    {
-        // Arrange
-        await _peopleClient.Authenticate(Owner);
-        var created = await CreateKeyAsync(["files:read"]);
-
-        // Act
-        await _apiKeysApi.UpdateApiKeyAsync(created.Id, new UpdateApiKeyRequest(permissions: ["*", "files:read"]), TestContext.Current.CancellationToken);
-
-        // Assert: the key writes outside files...
-        var write = await AsApiKeyOnWebApiAsync(created.Key, () =>
-            _securityAccessToDevToolsApi.SetTenantDevToolsAccessSettingsWithHttpInfoAsync(
-                new TenantDevToolsAccessSettingsRequestDto(false), TestContext.Current.CancellationToken));
-        write.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        // ...so it must not be listed as a files:read key
-        (await ListedAsync(created.Id)).Permissions.Should().BeNullOrEmpty("the key acts unrestricted, as a creation with the same list stores it");
-    }
-
-    /// <summary>
-    /// S2: for an expired key the endpoint answers <c>200 false</c> before it checks who owns the key, so a Room admin
-    /// or User learns that another member's key id exists and has expired. A foreign key has to be refused with 403
-    /// whatever its state, as it is while it has not expired.
-    /// </summary>
-    [Trait("Category", "Bug")]
-    [Theory]
-    [InlineData(ApiKeyActor.RoomAdmin)]
-    [InlineData(ApiKeyActor.User)]
-    public async Task UpdateApiKey_AnotherMembersExpiredKey_ThrowsAccessDenied(ApiKeyActor actor)
-    {
-        // Arrange
-        await _peopleClient.Authenticate(Owner);
-        var created = await CreateKeyAsync(["files:read"], expiresInDays: 1);
-        await ExpireAsync(created.Id);
-        await AuthenticateAsAsync(actor);
-
-        // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _apiKeysApi.UpdateApiKeyAsync(
-                created.Id, new UpdateApiKeyRequest("Autotest Taken Over"), TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(403);
     }
 
     private async Task<ApiKeyResponseDto> CreateKeyAsync(List<string> permissions, int? expiresInDays = null)

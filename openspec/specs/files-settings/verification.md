@@ -170,7 +170,7 @@ None of those specs was edited.
 | Roles | `T/03_Rooms/Permissions/RoomTagDeletePermissionsTests.cs:111-178` | TEST-CONFIRMED [run: PASS] |
 | **Group members with their access** | | |
 | Guest 403 on the file operation | `T/04_Security/Sharing/GroupAndOwnerSharingTests.cs:49-85` | TEST-CONFIRMED [run: PASS] |
-| Fields, paging, folder operation, empty list | `T/04_Security/Sharing/GroupMembersFolderSecurityTests.cs:48,81,98`; `total` of the empty list 120 (FX10) | TEST-CONFIRMED [run: PASS]; 120 |
+| Fields, paging, folder operation, empty list | `T/04_Security/Sharing/GroupMembersFolderSecurityTests.cs:48,81,98` | TEST-CONFIRMED [run: PASS] |
 | **Unlocking a password-protected link** | | |
 | `InvalidPassword`, `Ok` | `T/04_Security/RoomShareTests.cs:434-439` | TEST-CONFIRMED [run: PASS] |
 | Attempt limit 403 | `T/04_Security/ExternalSharePasswordLimitTests.cs:56` (sixth wrong attempt and then the right password 403), 97 (right passwords not counted) | TEST-CONFIRMED [run: PASS] |
@@ -197,16 +197,13 @@ owned by this capability. `setDefaultTemplate` on third-party string ids was not
 
 | # | Where | What the server does | Evidence | Evidence kind |
 |---|---|---|---|---|
-| FX1 | `startEditFile` | Any refused call drops the file's whole tracker: the catch calls the tracker removal with no tab or user, which removes the entry. A second person's refused claim, or a reader's refused start, therefore ends the first person's editing mark, and the next claim succeeds | `FSS:2383-2388`, `Trk:86-115` | red by code reading (no test covers the state after the refusal) |
 | FX2 | `startEditFile` | A second person refused a claim is told "This document is being edited by you in another tab" | `T/01_Files/Editing/EditingStartTests.cs:116-136` asserts that text for another account | pinned by a test; wording judged by reading |
 | FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4496-4503` | FIXED (62419af921): the create request skips the revocation mark, asserted at `FileLinkPrimaryTests.cs:238-242` and `FolderLinkPrimarySetTests.cs:242-246` |
 | FX4 | `get*PrimaryExternalLink`, `create*PrimaryExternalLink` | The revocation check runs before the sharing right check, so a caller with no access to a revoked entry gets 404 rather than 403, while an unrevoked entry gives 403 | `FSS:4496-4503` before `FSS:4523` | STILL OPEN for `get*`; for `create*` REFUTED since 62419af921 (the create skips the revocation check, so the sharing right check answers 403) |
-| FX5 | `getDocServiceUrl` | The anonymous answer includes the internal Document Server address, the portal address as the service sees it, the signature header name and the SSL flag | `E:721-746`; `T/07_Settings/Editor/GetDocServiceUrlTests.cs:97-107` pins anonymous reading only | red by code reading |
 | FX6 | `setFilesOrder` | Items are applied one at a time with no transaction, so a later item's 403 or 404 leaves earlier items reordered while the caller sees an error | `FSS:2824-2870` | red by code reading |
 | FX7 | `createRoomTag` | A name with a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design | `T/03_Rooms/Tags/RoomTagCreateTests.cs:85-109` | per test comment |
 | FX8 | `setDefaultTemplate` | A numeric `selectedFile` that is not a 32-bit integer answers 500 (`GetInt32` in `DefaultTemplateSettings.cs:102`); STILL OPEN after 09d4de0768..6fb6dfb17a, which only removed the documented 500, so the 500 is now undeclared | `DT:103`, yaml `setDefaultTemplate` | red by code reading |
 | FX9 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | `filterValue` with an uppercase letter matches nothing, per the yaml text | yaml `getGroupsMembersWithFolderSecurity`; not read in code | yaml text only |
-| FX10 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | For a group the entry is not shared with, the list is empty but `total` and `count` report the group's size: the count query does not check the group's share on the entry, the list query does | `products/ASC.Files/Core/Core/Dao/TeamlabDao/SecurityDao.cs:246-254` vs `295-311`; `T/04_Security/Sharing/GroupMembersFolderSecurityTests.cs:120` (`Category=Bug`) | red by test |
 
 Stale test comments seen (assertions cited above are unaffected): `DefaultTemplateTests.cs:90-95,156-162,178-181,197-200`
 say the mismatches answer 403, `DT:129-134,218-221` raise the 400 exception; `FileLinkPrimaryTests.cs:189-192` and

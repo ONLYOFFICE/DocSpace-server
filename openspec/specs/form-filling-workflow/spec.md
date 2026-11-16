@@ -17,8 +17,8 @@ OpenAPI document (`sdk/docspace-api-spec/docspace-backend.yaml`), the product re
 v3.7.1, v4.0) and the product code where the tests stop (the file service, the file security check, the entry
 manager, the editor configuration builder, the editor controller, the move/copy operation and the results
 report builder; the files are named per row in `verification.md`). Where the release notes and the server
-disagree, this specification follows the server; the behaviours listed as suspected defects D1, D5, D6 and D13
-in `openspec/deviations.md` are deliberately not written here as requirements. Since release/v4.1.0 the
+disagree, this specification follows the server; the behaviour listed as suspected defect D13
+in `openspec/deviations.md` is deliberately not written here as a requirement. Since release/v4.1.0 the
 integration host reaches a document server, so conversions and the results report are covered by tests;
 nothing that needs a real editor submission (a filled copy produced by the editors, a database export, a VDR
 step submission) is, and those requirements rest on the code and the API document, as recorded in

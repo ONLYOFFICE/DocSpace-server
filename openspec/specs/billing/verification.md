@@ -42,8 +42,7 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a). The wallet services run as the own
 Revision 2026-11-09 (bb406b409b..6fb013e745). The billing suite `BT/` runs the payment operations against stubbed payment services, so the role checks of every payment operation (payer, DocSpace admin, the owner who does not pay) and much of what was CODE-ONLY or TS-ONLY now cite a test; the SaaS quota and wallet-service cases moved there (`cbf6e874d9`). New in the range: unreadable payment answers are contract failures (`11ba3e1f76`, `075414cdb2`, `a4c952dda4`), BYOK AI services in the movements and usage (`dc10f758a8`), the balance text (`c2f48e709e`, W10). The rows added or changed carry no run mark; line references of `Controller`, `Helper` and `Tariff` in unchanged rows were not refreshed.
 
 Revision 2026-11-04: re-checked against the merge of `release/v4.1.0` (`d58816bece..3533ad8a89`, commit `3533ad8a89`).
-The range added the top-up history and invoice links (`b1430cbfb2` and its review fixes), removed the `Payment-Info`
-bypass of the payment gate (`dbb446ada2`), made `scope` required on the service-limit create (bug 84839,
+The range added the top-up history and invoice links (`b1430cbfb2` and its review fixes), made `scope` required on the service-limit create (bug 84839,
 `d64d3396f5`), turned the accounting service's "customer not found" on a service-limit write into a 404 (bug 84837,
 `2f1efe5bd3`), and reads the default start of every accounting period as the portal creation moment in UTC. Line
 references of `Controller`, `Tariff`, `Accounting`, `AccountingRequests`, `Filter` and `Settings` were refreshed;
@@ -76,7 +75,7 @@ deposit operations and the texts that the previous revision listed as stale.
 | Portal-settings right; overdue skipped; unpriced skipped; `nextQuota`/`nextQuantity` applied; `amount` = price × quantity | `Portal:648-711`; yaml `getUpcomingPayments` (53181); `BT/Tariff/UpcomingPaymentsTests.cs:53-87` (paid plan listed with its id, quantity, due date and a positive amount; Room admin / User / Guest 403) | TEST-CONFIRMED [run: PASS] (portal-settings right, priced plan listed), CODE-ONLY (overdue, `nextQuota`/`nextQuantity`, `amount` = price × quantity) |
 | Empty list on the free plan | `Portal:669-673` (`definition.Price <= 0` → skipped); `BT/Tariff/UpcomingPaymentsTests.cs:43-51` | TEST-CONFIRMED [run: PASS] |
 | **Payment gate while the portal is not paid** | | |
-| 402 without a reason (the body is a bare problem document, `status` and `traceId`; corrected 2026-11-10 from "no body") unless the action carries the allow-without-payment marker; no request header opens the gate (the `Payment-Info` bypass was removed in `dbb446ada2`) | `Filter:38-56`; `common/ASC.Api.Core/Routing/FormatRoute.cs:37` (the attribute); `BT/Tariff/PaymentGateTests.cs:43-84` (NotPaid: `GET settings/logo` 402 with no `error`, the marked `GET settings/cultures` and the tariff answer; the same unmarked call answers on a paid portal) | TEST-CONFIRMED [run: PASS] (gate, marker), CODE-ONLY (no header opens it) |
+| 402 without a reason (the body is a bare problem document, `status` and `traceId`; corrected 2026-11-10 from "no body") unless the action carries the allow-without-payment marker; no request header opens the gate | `Filter:38-56`; `common/ASC.Api.Core/Routing/FormatRoute.cs:37` (the attribute); `BT/Tariff/PaymentGateTests.cs:43-84` (NotPaid: `GET settings/logo` 402 with no `error`, the marked `GET settings/cultures` and the tariff answer; the same unmarked call answers on a paid portal) | TEST-CONFIRMED [run: PASS] (gate, marker), CODE-ONLY (no header opens it) |
 | Allowed: portal record, tariff, upcoming, quota, tenantextra, suspend/delete, every payment operation, authentication, licence, version, capabilities | `Portal:116, 487, 591, 646, 713, 1024, 1064, 1138, 1220`; `Controller:56` (class level); `web/ASC.Web.Api/Api/AuthenticationController.cs:99-574`; `Settings:102, 661, 684, 723, 828, 1366`; `LicenseController.cs:78-264`; `VersionController.cs:55`; `CapabilitiesController.cs:80` (LSP references of the attribute, 63 sites) | CODE-ONLY |
 | Gate only where tariff settings are enabled (hosted, or standalone with a licence path); `NotPaid` or Enterprise unpaid | `Extra:48-55, 96-106` | CODE-ONLY |
 | Grace period: 402 "Your pricing plan does not support this option" from the count checkers | `quotas` spec, "Count limits of the tariff"; `web/ASC.Web.Core/Quota/CountRoomAdminFeature.cs` | CODE-ONLY |
@@ -286,16 +285,14 @@ deposit operations and the texts that the previous revision listed as stale.
 - **The wallet dashboard, banners, dialogs and letters' wording** (release notes v3.2, v3.7, v4.0): client and
   `notifications`.
 - **Rate-limit headers and 429/5xx rows** of the yaml beyond the one 429 the spec mentions: generic policy.
-- **`Payment-Info` header semantics** of the gate: see W1.
 
 ## Suspected defects
 
-Re-checked 2026-11-04 against `d58816bece..3533ad8a89`: W1 and W3 are fixed, W2 and W4–W10 are still open (none of
+Re-checked 2026-11-04 against `d58816bece..3533ad8a89`: W3 is fixed, W2 and W4–W10 are still open (none of
 their code moved except by line shifts), W11 and W12 are new. Re-checked 2026-11-09 against `bb406b409b..6fb013e745`: W10 still open (documented only), W13 is new; the others did not move.
 
 | # | Where | What the server does | Evidence | 2026-11-04 |
 |---|-------|----------------------|----------|------------|
-| W1 | Payment gate | The 402 gate was skipped whenever the request carried a `Payment-Info` header that is not `true`, so any client of a NotPaid portal could keep using every API by adding one header. | `Filter:38-56` (the header branch is gone) | FIXED (`dbb446ada2`, hotfix/v4.0.1 merged into the release) |
 | W2 | `getCustomerInfo`, `getRestrictedAiModels` | Both return 200 with an empty result to every signed-in member, Guests included, before any role check when billing (or AI tools) is not configured, and 403 for the same roles once it is. The access rule depends on the installation rather than on the caller. | `Controller:839-849, 2342-2351`; red tests `Tests/PaymentCustomerInfoAccessTests.cs:66-82`, `BT/AiModels/RestrictedAiModelsAccessTests.cs:57-73` (Category=Bug, 2026-11-10) | STILL OPEN |
 | W3 | Contract | Nine `servicelimit` operations and the `aiServicesLimit` profile field were missing from the published OpenAPI document and the SDKs although the controller and DTO publish them. | yaml 51685-52443, 77759; `Tests/PaymentServiceLimitValidationTests.cs` | FIXED (contract regenerated, submodule `5ea4dc6`) |
 | W4 | `moveSubscriptionToWallet` | `quota.Price` is the price resolved for the *request region's* currency (`Quota:838-878`) while the wallet is ensured in the first supported accounting currency (USD); on a portal whose request region prices in EUR the required amount is an EUR figure compared with a USD balance. | `Controller:490-508`; `Tariff:1522-1563` | STILL OPEN |

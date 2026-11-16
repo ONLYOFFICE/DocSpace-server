@@ -87,7 +87,7 @@ public class WebhookPrivateRoomAccessTests(
     [Fact]
     public async Task FolderCreated_AdminWalkedAfterAMember_GetsNothing()
     {
-        // Arrange: the member goes first, so a share record kept from their check would answer for the administrator
+        // Arrange: the member goes first, so the administrator is checked right after another account
         var creator = await InviteWithKeysAsync();
         var member = await InviteWithKeysAsync();
         var roomId = await CreatePrivateRoomAsync(creator, $"room-{Guid.NewGuid():N}");

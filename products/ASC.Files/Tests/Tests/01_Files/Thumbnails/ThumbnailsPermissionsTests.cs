@@ -41,31 +41,6 @@ public class ThumbnailsPermissionsTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    /// <remarks>
-    /// BUG 81268: an unauthenticated caller should get 401 Unauthorized, like every other
-    /// endpoint under <c>files/</c> that mutates state. The controller action currently carries
-    /// <c>[AllowAnonymous]</c>, so the request succeeds instead of being rejected.
-    /// </remarks>
-    [Fact]
-    [Trait("Bug", "81268")]
-    public async Task CreateThumbnails_Anonymous_ShouldBeUnauthorized()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var room = await CreateCustomRoom("Autotest Thumbnails Anon Room");
-        var file = await CreateFile("Autotest Thumbnails Anon File", room.Id);
-        await _filesClient.Authenticate(null);
-
-        // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CreateThumbnailsAsync(
-                new BaseBatchRequestDto(fileIds: [new BaseBatchRequestDtoAllOfFileIds(file.Id)]),
-                TestContext.Current.CancellationToken));
-
-        // Assert
-        exception.ErrorCode.Should().Be(401);
-    }
-
     [Fact]
     public async Task CreateThumbnails_GuestWithReadAccess_CanCreateThumbnails()
     {

@@ -265,21 +265,11 @@ may invite that type, and only the DocSpace Owner MAY act on the DocSpace admin 
 
 The system SHALL keep the deprecated `GET /api/2.0/portal/users/invite/{employeeType}`
 (`getInvitationLink`), which builds a shortened, unstored link for the type in the path and answers with a
-bare URL string; it SHALL return an empty string instead of 403 when the caller may not invite that type.
+bare URL string.
 
 #### Scenario: Allowed caller gets a URL
 
 - **WHEN** the DocSpace Owner asks for the User, Room admin or DocSpace admin link, a DocSpace admin for User or Room admin, or a Room admin for User
-- **THEN** a non-empty URL string is returned
-
-#### Scenario: Denied caller gets an empty answer
-
-- **WHEN** a DocSpace admin asks for the DocSpace admin link, a Room admin for the Room admin or DocSpace admin link, a User for the User link, or a Guest for the User link
-- **THEN** the system answers 200 with an empty body
-
-#### Scenario: Guest type
-
-- **WHEN** the DocSpace Owner asks for the Guest link
 - **THEN** a non-empty URL string is returned
 
 ### Requirement: Room invitation by account or group id

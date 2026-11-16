@@ -70,7 +70,7 @@ The backup SHALL be uploaded to `migrationFileUpload.ashx` of the portal: a POST
 SHALL open a fresh upload folder, remove the previous one and answer `Success` true with the
 configured `ChunkSize` (10 MB by default); every later POST SHALL append the form file to the file
 named by the `Name` query (base name only) in that folder. Errors SHALL be reported as `Success`
-false with a `Message`, always with HTTP 200. No upload size limit is applied here.
+false with a `Message`.
 
 #### Scenario: Administrator starts an upload
 

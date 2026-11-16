@@ -228,8 +228,7 @@ right (403 "Access denied", anonymous 401) and are specified in `quotas`.
 `PUT portal/portalrename` with `alias` SHALL require the portal-settings right (403), a server
 installation or a tariff with customization (else 402), and a non-empty `alias` without whitespace
 (400). The trimmed, lower-cased name SHALL pass the portal-name rules (400 with the rule's message);
-then the alias changes, every other active member is signed out, the caller's session ends and a
-sign-in link to the new address is returned.
+then the alias changes, every other active member is signed out and the caller's session ends.
 
 #### Scenario: What follows a rename
 
@@ -240,7 +239,7 @@ sign-in link to the new address is returned.
 #### Scenario: Owner renames the portal
 
 - **WHEN** the owner calls `PUT portal/portalrename` with `alias` "New-Name" and the name is free
-- **THEN** the answer is 200 with a confirmation sign-in link under `new-name.<base domain>`, `getPortalInformation` on the new address reports `tenantAlias` "new-name" and every other member has been signed out
+- **THEN** the answer is 200, `getPortalInformation` on the new address reports `tenantAlias` "new-name" and every other member has been signed out
 
 #### Scenario: Name taken
 
@@ -397,7 +396,6 @@ SHALL answer 200 with the address of the "registration cancelled" feedback page.
 
 - **WHEN** the owner opens the PortalRemove link
 - **THEN** the answer is 200 with the feedback address, the portal stops being served under its old address at once and its name is free to register again, and shortly afterwards the portal's files, database rows and search entries are gone
-- **AND** on a server installation, which resolves an address it does not know to its default portal, a request to the old address is answered by the default portal rather than with 404
 
 #### Scenario: Letter failure does not stop the removal
 

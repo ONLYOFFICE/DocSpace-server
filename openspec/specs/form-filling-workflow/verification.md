@@ -65,7 +65,7 @@ commits `cdf59c1bf7` … `90dff55cf5`) and in `FileStorageService.cs:6327, 6404`
 | **Start filling endpoint** — writes properties for an FFR PDF, no-op otherwise, 403 for FillForms-only member and for non-members who cannot manage the room | `FileStorageService.StartFillingAsync` (2216); `EditorController.StartFillingFile` (185); yaml `startFillingFile` | TEST-CONFIRMED [run: PASS] (properties written for an FFR PDF: `01_Files/FormFilling/FormFillingStateTests.cs:268`; FillForms member 403: `:284`; no-op in a Custom room: `:299`; non-members: `StartFillingFilePermissionsTests.cs`) |
 | FFR PDF → 200 with the form | `01_Files/FormFilling/StartFillingFileTests.cs` `StartFillingFile_FormInFillingFormsRoom_ReturnsForm` | TEST-CONFIRMED [run: PASS] |
 | DOCX in My documents / PDF in My documents → 200 unchanged | `StartFillingFileTests.cs` `StartFillingFile_RegularDocxFile_ReturnsFile`, `StartFillingFile_FormOutsideFillingFormsRoom_ReturnsForm` | TEST-CONFIRMED [run: PASS] |
-| Caller who cannot read the file → 403 outside a form room; a reader of a Custom-room `.docx` → 200 with the file (33f1d746c1) | `01_Files/FormFilling/StartFillingFilePermissionsTests.cs:142,160` | TEST-CONFIRMED [run: PASS] |
+| Caller who cannot read the file → 403 outside a form room; a reader of a Custom-room `.docx` → 200 with the file | `01_Files/FormFilling/StartFillingFilePermissionsTests.cs:142,160` | TEST-CONFIRMED [run: PASS] |
 | 404 unknown, 401 anonymous, 403 non-member User/Guest (bug 81400), admin 200 | `StartFillingFileTests.cs` `StartFillingFile_NonExistentFileId_ReturnsNotFound`; `StartFillingFilePermissionsTests.cs` (four tests) | TEST-CONFIRMED [run: PASS] |
 | **Move/copy** — PDF arriving in an FFR is started; leaving an FFR/VDR drops properties, draft links, roles; `toFillOut` sets `copyToFillOut` | `products/ASC.Files/Core/Services/WCFService/FileOperations/FileMoveCopyOperation.cs` `MoveOrCopyFilesAsync` (656): the `file.IsPdf` block with `toRoom`/`fromRoom`, the `_toFillOut` blocks | TEST-CONFIRMED [run: PASS] (move in starts: `01_Files/FormFilling/FormMoveCopyTests.cs:88`; move out of an FFR drops the state: `:131`; out of a VDR drops the roles: `:150`) / TEST-CONFIRMED (copy in is not started: `:115`, F5) / CODE-ONLY (draft links, `copyToFillOut` — not on the file) |
 | Move from My documents into an FFR starts filling and shows it to form fillers | `openspec/specs/form-filling-room-roles` "Moving a PDF into the room starts collecting" (live run); `FileMoveCopyOperation` as above | TEST-CONFIRMED [run: PASS] (`01_Files/FormFilling/FormMoveCopyTests.cs:88` `MoveBatchItems_PdfFromMyDocumentsIntoFillingRoom_StartsFillingAndShowsItToFormFillers`) |
@@ -181,10 +181,8 @@ rows above, which stay the primary evidence.
   `SendFormSubmittedAsync`): named in passing as "notified" in the VDR and submission requirements; their
   wording belongs to the notify-letters area, not to this capability.
 - **AI form generation / forms as AI agent attachments** (v3.7, v4.0): a different capability.
-- **Deviations D1, D5, D6, D13** (`openspec/deviations.md`): the unchecked `Resume`/`Edit` actions, the
-  by-id read of a hidden form by a Form Filler, the copy-out of a hidden form, and the extension-only PDF check
-  are defects, not requirements. The spec words the `Edit`/`Resume` effects without asserting a permission
-  check, and the "Only PDFs enter the room" rule is referenced to `form-filling-room-roles`, which carries D13.
+- **Deviation D13** (`openspec/deviations.md`): the extension-only PDF check is a defect, not a requirement; the
+  "Only PDFs enter the room" rule is referenced to `form-filling-room-roles`, which carries D13.
 - **The recovery of form responses from the PDFs** beyond the one sentence in "Results report generation": its
   queue, locks, heartbeat, attempt limits and the report's "skipped or cut short" notes are implementation of a
   best-effort repair; no API operation exposes it.
@@ -195,13 +193,9 @@ rows above, which stay the primary evidence.
 
 | # | Where | Verdict | Reason |
 |---|-------|---------|--------|
-| D1 | `manageformfilling` Resume/Edit without a permission check | STILL OPEN | `FileStorageService.ManageFormFilling` did not change in the range (no hunk of the `FileStorageService.cs` diff touches it). |
-| D5 | Form Filler without a role reads a hidden VDR form by id | STILL OPEN | The only change to the PDF branch of `FileSecurity.FilterEntryAsync` is the owner exemption of bug 84849 (`FileSecurity.cs:1303-1307`); the VDR role branch is untouched. |
-| D6 | Form Filler copies a hidden form out through `fileops/copy` | STILL OPEN | `FileMoveCopyOperation.cs` changed only for the AI rooms and the duplicate-title rule; `CopyPermissionsCheck.cs` changed only for the AI rooms. |
 | D13 | Only-PDF rule by extension; an ordinary PDF enters and is auto-started | STILL OPEN | `FileDao.cs:774-779` and `CopyPermissionsCheck.cs` unchanged for form rooms: `1a1d539775` changed what a non-PDF is answered (F1), not how a PDF is recognised. |
 | F1 | Non-PDF created in a Form filling room (bug 84840) | FIXED (`1a1d539775`) | `POST files/{folderId}/file`, `…/text` and `…/html` now answer 403 and store nothing. The earlier text said these calls answer 200; the test's remark and `file-operations` F19 say 500, which is what the fix replaced. Evidence: `FileDao.cs:826-828`, `ResponseWrapper.cs:86-88`, `01_Files/Create/FormsRoomNonPdfCreateTests.cs:63-95` (asserts 400-499). |
-| F2 | By-id read of a hidden form: 403, the roles spec says 404 | NEW (documentation) | `FileStorageService.GetFileAsync` (1848-1864) throws `InvalidOperationException` (403) when `CanReadAsync` is false, and `FormFillingRoomOwnerAccessTests.cs:119-137` asserts 403; `form-filling-room-roles` "Form Filler does not see a form that is not started" and D6 record 404 from a live run. One of the two is stale; this spec follows the test and the code. |
-| F3 | `startFillingFile` outside a Form filling room answered the file's metadata to a caller who could not read it | FIXED (`33f1d746c1`) | A read check now runs before the answer; `StartFillingFilePermissionsTests.cs:142` asserts 403 for a User on the Owner's My documents file. |
+| F2 | By-id read of a hidden form: 403, the roles spec says 404 | NEW (documentation) | `FileStorageService.GetFileAsync` (1848-1864) throws `InvalidOperationException` (403) when `CanReadAsync` is false, and `FormFillingRoomOwnerAccessTests.cs:119-137` asserts 403; a live run behind `form-filling-room-roles` "Form Filler does not see a form that is not started" recorded 404. One of the two is stale; this spec follows the test and the code. |
 | F4 | Room owner may Duplicate a draft in a per-form "In process" folder | NEW | `FileSecurity.FilterEntryAsync` refuses Duplicate for every file of a 27/28 folder (`FileSecurity.cs:1989-2005`), and the owner is refused Rename, Move and Lock on the same draft, yet `GET file/{id}` answers `security.Duplicate` true for the portal owner (the draft's creator gets false). `FormResultFoldersTests.cs:238` `[Trait("Category", "Bug")]` asserts false. |
 | F5 | A PDF copied into a Form filling room is not started | NEW | The move branch of `FileMoveCopyOperation.MoveOrCopyFilesAsync` (`:890-899`) stores `startFilling` true for a PDF arriving in a Form filling room, the copy branch (`:750-765`) writes no filling state, so the copy stays hidden from the form fillers while a moved, created or uploaded PDF is started. `FormMoveCopyTests.cs:115` `[Trait("Category", "Bug")]` asserts `startFilling` true. |
 | F6 | `manageformfilling` `Resume` on a PDF that was never started answers 500 (null filling properties), and since 09d4de0768..6fb6dfb17a the 500 is no longer documented | NEW | `FileStorageService.ManageFormFilling` Resume case; `FormFillingStateTests.cs:252` `Resume_OfFormThatWasNeverStarted_Returns500` |
@@ -230,7 +224,6 @@ rows above, which stay the primary evidence.
 | Null `renames` entry → 400 | `SetEditorFieldRenamesAsync` (`ArgumentException`) | TEST-CONFIRMED [run: PASS] (`FormFieldChangesPermissionsTests.cs:101-110`) |
 | `trackFormFieldChanges` of `openedit` true exactly when the report is taken | `ConfigurationDto.cs:135` | TEST-CONFIRMED [run: PASS] (`FormFieldChangesPermissionsTests.cs:120-150`, five callers) |
 | Resume of a never-started form → 500 | `0ff3031b59` removed the documented 500 of `manageformfilling`; `ManageFormFilling` still dereferences the missing filling properties; `01_Files/FormFilling/FormFillingStateTests.cs:252` still asserts 500 | TEST-CONFIRMED [run: PASS] (behaviour); the yaml no longer declares it (F6) |
-| D1 | `ManageFormFilling` hunks in the range change only the stored version on Start and the property writes; the Resume/Edit permission check is untouched | STILL OPEN |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 

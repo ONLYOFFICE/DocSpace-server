@@ -792,8 +792,7 @@ member.
 temporary storage (`DataStore`: a pre-signed link valid for one day, carrying the archive name) or a
 connected third-party storage (`ThirdPartyConsumer`: an internal link). For `Documents`,
 `ThridpartyDocuments` and `Local` the archive is reached through the file or the path and `link`
-SHALL be an empty string. The hidden `backup/backuptmp` read SHALL return the temporary folder of
-the worker.
+SHALL be an empty string.
 
 #### Scenario: Backup into the temporary storage
 

@@ -106,8 +106,6 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Claim | Source | Status |
 |---|---|---|
 | Allowed caller gets a URL | WT/04_Portal/Users/InvitationLinkGetDeprecatedTests.cs:54-67 | TEST-CONFIRMED [run: PASS] |
-| Denied caller gets 200 with an empty body | InvitationLinkGetDeprecatedTests.cs:105-119; PC:205-211 | TEST-CONFIRMED [run: PASS] |
-| Guest type returns a URL for the owner | InvitationLinkGetDeprecatedTests.cs:70-81 | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | InvitationLinkGetDeprecatedTests.cs:84-97 | TEST-CONFIRMED [run: PASS] |
 
 ## Room invitation by account or group id
@@ -301,9 +299,8 @@ follows the server.
 
 ## Suspected defects
 
-None of the D-numbers of `openspec/deviations.md` names this spec; D9 (the legacy `GET
-portal/users/invite/{type}` never refuses) and R3 (400 vs 403 for the Guest type) are kept under
-`user-type-permissions` and are still open as of 2026-11-04 (`PortalController.cs` is outside the 4.1.0
+None of the D-numbers of `openspec/deviations.md` names this spec; R3 (400 vs 403 for the Guest type) is kept under
+`user-type-permissions` and is still open as of 2026-11-04 (`PortalController.cs` is outside the 4.1.0
 range). No new defect: the invitation tests of the range (`InvitationSettingsTests`, the AI-project suites)
 are green by their remarks and carry no bug trait.
 

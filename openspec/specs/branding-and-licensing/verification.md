@@ -47,14 +47,13 @@ ran on a hosted portal and hit the installation gate (403) instead. Both are rec
 and additional settings are deliberately not ported: on a standalone host they would reset installation-wide settings
 shared by every portal (`T/02_Settings/Rebranding/RebrandingSaveTests.cs:42-49`). The licence operations have .NET
 tests only for what the open-source integration host (no license path) can do without replacing the installation's
-licence: `T/02_Settings/License/` (access checks incl. L8, the not-Enterprise answers of accept/refresh/upload/required,
+licence: `T/02_Settings/License/` (access checks, the not-Enterprise answers of accept/refresh/upload/required,
 the edition flags; 2026-11-10); everything past the edition check needs an Enterprise license path and stays CODE-ONLY
 (the TS licence file states the same for the hosted environment, `TS/license/license.spec.ts:1-10`). The greeting save/restore tests exist but are commented out (see L10).
 
 Revision 2026-11-04: re-checked against the merge of `release/v4.1.0` (`d58816bece..3533ad8a89`). Of the files behind
 this specification only `TenantLogoManager.cs` (the letter-logo fetch got a ten-second timeout and a five-minute
-failure memory, `559b4c1309`), `PaymentFilter.cs` (the `Payment-Info` bypass of the payment gate is gone,
-`dbb446ada2`) and `SettingsController.cs` (two lines of AI remarks) changed; `WL`, `TWLS`, `Lic`, `Reader`, `Greet`,
+failure memory, `559b4c1309`), `PaymentFilter.cs` (the payment gate, see the `billing` specification) and `SettingsController.cs` (two lines of AI remarks) changed; `WL`, `TWLS`, `Lic`, `Reader`, `Greet`,
 `Company`, `Additional`, `Themes` and the DTOs did not. Line references of `LogoMgr`, `TariffSvc`, `Settings` and
 `PayFilter` were refreshed. The yaml was regenerated (`5ea4dc6`); its line references were refreshed, and it still has
 no `settings/license/trial` path (L12).
@@ -135,25 +134,24 @@ no `settings/license/trial` path (L12).
 | Any signed-in member; `notifications/logo.png` when default; 304; reset by the logo restore | `Settings:802-806`; `InfoSettings:213-222`; `WL:408-410`; `T/02_Settings/Common/PortalLogoTests.cs:44-77` (owner and DocSpace admin/RoomAdmin/User/Guest → 200 with a URL) | TEST-CONFIRMED [run: PASS] (signed-in member), CODE-ONLY (`logo.png` path, 304, reset by the restore) |
 | Every role 200 with a value | `T/02_Settings/Common/PortalLogoTests.cs:45-76` | TEST-CONFIRMED [run: PASS] |
 | **Uploading a license file** | | |
-| `[Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]`; 403 when unauthenticated and wizard completed; not Enterprise → `NotSupportedException` 415; no file → `ArgumentException` 400; staged to `<path>.tmp`; customer id/signature missing → `BillingNotConfiguredException` → generic → 500 "License is not correct"; future start → `ArgumentOutOfRangeException` 400; overdue message with `Update` flag variant | `Lic:264-341`; `Reader:176-240`; `License:419-451`; `Resource:834-836, 1107-1127`; `T/02_Settings/License/LicensePermissionsTests.cs:117-130` (RoomAdmin/User/Guest 403); `T/02_Settings/License/LicenseOpenSourceTests.cs:64-75` (owner, no license path → 415 before the file is read) | TEST-CONFIRMED [run: FAIL-BUG] (role, edition), CODE-ONLY (the rest: needs an Enterprise license path, unreachable) |
+| `[Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]`; 403 when unauthenticated and wizard completed; not Enterprise → `NotSupportedException` 415; no file → `ArgumentException` 400; staged to `<path>.tmp`; customer id/signature missing → `BillingNotConfiguredException` → generic → 500 "License is not correct"; future start → `ArgumentOutOfRangeException` 400; overdue message with `Update` flag variant | `Lic:264-341`; `Reader:176-240`; `License:419-451`; `Resource:834-836, 1107-1127`; `T/02_Settings/License/LicensePermissionsTests.cs:70-83` (RoomAdmin/User/Guest 403); `T/02_Settings/License/LicenseOpenSourceTests.cs:64-75` (owner, no license path → 415 before the file is read) | TEST-CONFIRMED [run: FAIL-BUG] (role, edition), CODE-ONLY (the rest: needs an Enterprise license path, unreachable) |
 | Edition check (`docspace_dev` vs `license:type`) is disabled since bug 84212 | `Reader:229-237` (commented out) | CODE-ONLY |
 | **Activating a license** | | |
 | No edition → "Your pricing plan does not support this option" with 200; records `LicenseAccept` for tenant −1; audit `LicenseKeyUploaded`; refresh: backup → move temp → parse → editing-service validation → quota/tariff; failure restores the backup; messages per exception | `Lic:105-147`; `TariffSettings:201-214`; `Reader:108-174`; `DocsLic:83-140`; `UCResource:120-131`; `T/02_Settings/License/LicenseOpenSourceTests.cs:42-52` (owner → 200 with the message, nothing written) | TEST-CONFIRMED [run: PASS] (no edition), CODE-ONLY (the rest: needs an Enterprise license path, unreachable) |
 | Wizard completion refreshes the license and records acceptance | `FirstTime:98-104, 139-156`; `Settings` wizard action (`CompleteWizard`) | CODE-ONLY |
-| No permission check on `acceptLicense` and `refreshLicense` (L8) | `Lic:73-88, 105-147`; `T/02_Settings/License/LicensePermissionsTests.cs:72-109` (RoomAdmin/User/Guest are expected to get 403; they get 200) | TEST-CONFIRMED [run: FAIL-BUG] (L8) |
 | **What the license grants** | | |
 | Quota `-1000` "license": `Audit, Ldap, Sso, ThirdParty, Restore, Oauth, ContentSearch, DocsEdition, Statistic` true, `Branding`/`Customization`/`AutomationApi`/`Trial` from the file, `Lifetime = !Trial && !TimeLimited`, `MaxFileSize` from the default quota; tariff `DueDate = license.DueDate`; one tariff for all portals | `Reader:242-279`; `License:332-417`; `TariffSvc:100-106` | CODE-ONLY |
 | **Refreshing the license** | | |
 | Not Enterprise → false; `BillingNotFoundException`/`BillingNotConfiguredException` → 402, future start → 400; periodic re-read in the Files worker, period `files:refreshLicense:period` (default "1" = one day) | `Lic:77-88`; `RefreshSvc:36-61`; release notes v3.0.1 line 15; `T/02_Settings/License/LicenseOpenSourceTests.cs:53-63` (owner → false) | TEST-CONFIRMED [run: PASS] (not Enterprise), CODE-ONLY (402/400, worker period: Enterprise, unreachable) |
-| Periodic re-read only after acceptance, of the license in force only; a staged upload is left in place and not validated (2c268c3041) | `common/Tests/ASC.Core.Common.Tests/LicenseReaderTests.cs:79-82,92-94` (re-read of the active file leaves the staged one); the acceptance gate: `RefreshSvc` | TEST-CONFIRMED [run: PASS] (re-read) / CODE-ONLY (acceptance gate) |
+| Periodic re-read only after acceptance, of the license in force only; a staged upload is left in place and not validated | `common/Tests/ASC.Core.Common.Tests/LicenseReaderTests.cs:79-82,92-94` (re-read of the active file leaves the staged one); the acceptance gate: `RefreshSvc` | TEST-CONFIRMED [run: PASS] (re-read) / CODE-ONLY (acceptance gate) |
 | `refreshLicense` still puts a staged file in force first, and restores the active one when the staged one is refused | `LicenseReaderTests.cs:106-109`; `Lic:77-88` | TEST-CONFIRMED [run: PASS] |
 | **Whether a license is still required** | | |
 | `[AllowAnonymous]`; `GetEnableTariffSettings` (tariff settings visible, not `TenantAccessSettings.Anyone`, standalone with license path, no AMI) AND Enterprise AND `!File.Exists(LicensePath)` | `Lic:234-240`; `FirstTime:164-169`; `Extra:48-55`; `T/02_Settings/License/LicenseOpenSourceTests.cs:76-88` (anonymous → false without a license path) | TEST-CONFIRMED [run: PASS] (anonymous, false branch), CODE-ONLY (true branch: Enterprise, unreachable) |
 | **Trial license of a self-hosted installation** | | |
-| `[ApiExplorerSettings(IgnoreApi = true)]`; not standalone → 415; not DocSpace admin → 403; false when quota tenant ≠ −1, already trial, or due date not max; quota `-1000` "apirequest" trial, 30 days; audit | `Lic:156-215`; `T/02_Settings/License/LicensePermissionsTests.cs:134-150` (raw HTTP, RoomAdmin/User/Guest 403) | TEST-CONFIRMED [run: PASS] (admin check), CODE-ONLY (the rest: an admin call writes the installation quota; 415 needs SaaS) |
+| `[ApiExplorerSettings(IgnoreApi = true)]`; not standalone → 415; not DocSpace admin → 403; false when quota tenant ≠ −1, already trial, or due date not max; quota `-1000` "apirequest" trial, 30 days; audit | `Lic:156-215`; `T/02_Settings/License/LicensePermissionsTests.cs:87-103` (raw HTTP, RoomAdmin/User/Guest 403) | TEST-CONFIRMED [run: PASS] (admin check), CODE-ONLY (the rest: an admin call writes the installation quota; 415 needs SaaS) |
 | **Tariff state of a licensed installation and the payment gate** | | |
 | Standalone → tenant −1; `Paid`; `Delay` + `DelayDueDate = DueDate + core:payment:delay` (10) when past and not lifetime/trial; `NotPaid` after the delay; lifetime stays `Paid`; trial → `Trial` | `TariffSvc:100-106, 1160-1238`; `appsettings:19-20`; `common/ASC.Core.Common/Billing/TariffState.cs:39-52`; `T/02_Settings/License/LicenseOpenSourceTests.cs:103-117` (owner: `Paid`) | TEST-CONFIRMED [run: PASS] (`Paid`), CODE-ONLY (delay, not paid, trial: installation tariff dates, unreachable) |
-| `PaymentFilter`: 402 unless `[AllowNotPayment]` — no request header opens the gate since `dbb446ada2`; `IsNotPaidAsync` = tariff settings enabled AND state ≥ NotPaid (the Enterprise clause is subsumed) | `PayFilter:37-56`; `Extra:96-106` | CODE-ONLY |
+| `PaymentFilter`: 402 unless `[AllowNotPayment]` — no request header opens the gate; `IsNotPaidAsync` = tariff settings enabled AND state ≥ NotPaid (the Enterprise clause is subsumed) | `PayFilter:37-56`; `Extra:96-106` | CODE-ONLY |
 | Grace period blocks adding rooms/users, after it the portal is blocked (v3.7) | release notes v3.7 lines 59-62; the 402 of the count checks is `openspec/specs/quotas/spec.md` "Count limits of the tariff" | NOTES-ONLY (blocking), CODE-ONLY (402) |
 | **Payment settings** | | |
 | Portal-settings right; `[AllowNotPayment]`; `buyUrl` = site entry `buy<license:type or enterprise>`; `max` = `core:payment:max-quantity` or 999 | `Settings:1360-1385`; `web/ASC.Web.Api/ApiModels/ResponseDto/PaymentSettingsDto.cs:48-110`; `T/02_Settings/License/LicenseOpenSourceTests.cs:133-160` (owner: `buyUrl` of `buyenterprise`, `max` 999, `standalone`; RoomAdmin/User 403) | TEST-CONFIRMED [run: PASS], CODE-ONLY (`AllowNotPayment`) |
@@ -200,20 +198,20 @@ no `settings/license/trial` path (L12).
 - **The client-side rebranding through translations and the v4.0 product rename** (v2.6, v4.0 notes): client texts.
 - **`LicenseExpiredException` / `LicenseQuotaException` / `LicensePortalException` catch blocks** (`Lic:315-329`): nothing
   in the reader throws them; the messages "The license is not valid for this portal version" etc. are unreachable.
-- **The rate-limit rows** of the yaml: generic policy. (The `Payment-Info` header no longer exists in the gate.)
+- **The rate-limit rows** of the yaml: generic policy.
 
 ## Suspected defects
 
 Re-checked 2026-10-24 against the hotfix v4.0.1 commits (`183da52625..HEAD`): none of the files behind L1–L12
 (`WL`, `TWLS`, `Lic`, `Reader`, `Settings`, `PaymentSettingsDto`, the greeting tests) changed in that range, so all
-twelve are **STILL OPEN**. The range touched only `common/ASC.Core.Common/Billing` (accounting service limits —
+of them are **STILL OPEN**. The range touched only `common/ASC.Core.Common/Billing` (accounting service limits —
 the `billing` specification) and added the `02_Settings/Rebranding` tests, which confirm the two gates but exercise
 none of the defective paths (no logo is ever saved; the company/additional deletes are not ported).
 
 Re-checked 2026-11-04 against `d58816bece..3533ad8a89`: still none of the files behind L1–L12 changed (the only
 branding file in the range, `TenantLogoManager.cs`, touched the letter-logo fetch, not the defective paths), the
 `PaymentSettingsDto` still never fills `feedbackAndSupportUrl` (L7), and the regenerated yaml (`5ea4dc6`) still has no
-`settings/license/trial` path (L12). All twelve are **STILL OPEN**; the new tests of the range exercise none of them.
+`settings/license/trial` path (L12). All of them are **STILL OPEN**; the new tests of the range exercise none of them.
 
 | # | Where | What the server does | Evidence |
 |---|-------|----------------------|----------|
@@ -224,9 +222,7 @@ branding file in the range, `TenantLogoManager.cs`, touched the letter-logo fetc
 | L5 | Saving logos from image data | A staged file name is resolved with `Path.GetFileName` and deleted from the temp store after use; a `data:` URI with a format other than the three supported ones is treated as a file name, so the call fails with the temp-store error (500), not 400. | `TWLS:733-748` |
 | L6 | Adding a colour theme | A new theme beyond `core:themelimit` is dropped and the call answers 200 with the unchanged list; the client cannot tell the refusal from a success. The limit counts the six built-in themes, so `themelimit` 9 allows three custom themes. | `Settings:943-955`; red test `T/02_Settings/Common/ColorThemeRulesTests.cs:133-149` |
 | L7 | Payment settings | `feedbackAndSupportUrl` is declared in the response but never filled: it is always null. | `web/ASC.Web.Api/ApiModels/ResponseDto/PaymentSettingsDto.cs:62`; `Settings:1377-1384` |
-| L8 | Activating and refreshing the license | `acceptLicense` and `refreshLicense` demand no right at all: any signed-in member of any portal of the installation (a Guest included) can move a staged license file into place, rewrite the installation's quota and tariff and write the "license key uploaded" audit event under their name, or force a re-read; only `uploadLicense` is limited to administrators. | `Lic:73-88, 105-147`; red tests `T/02_Settings/License/LicensePermissionsTests.cs:72-109` |
 | L9 | Uploading a license file | A license that is unparsable, lacks a customer id or a signature, or cannot be written is reported as 500 "License is not correct" (generic exception) rather than a client error, while a future start date is 400; the same file is accepted by the upload and refused only on accept when the editing service disagrees. Since `f19675d4f7` the yaml no longer documents the 500; the code is unchanged. | `Lic:336-340`; `Reader:217-227` |
 | L10 | Changing the greeting title | On an installation whose base domain is `localhost` with more than one portal, saving the title fails with 500: saving the tenant rewrites the alias to `localhost` and hits the unique alias index. The .NET save/restore tests were commented out for this reason. | `T/02_Settings/Greeting/GreetingSaveTests.cs:45-47`; `T/02_Settings/Greeting/GreetingRestoreTests.cs:45-47` |
 | L11 | Company details | The licensor flag of the request is accepted for compatibility and always stored as `false`, so an installation that is itself the vendor cannot restore `isLicensor` true through the API after a change except by `deleteCompanyWhiteLabelSettings`. | `WL:683`; `api-models` rule §2 |
 | L12 | Contract | `POST settings/license/trial` is published by the controller but hidden from the OpenAPI document and the SDKs; agents and generated clients cannot start a trial. | `Lic:156-161` |
-| L13 | Refreshing the license | The Files worker's periodic re-read put an uploaded, not yet accepted license in force, bypassing `acceptLicense`. FIXED (2c268c3041): the worker re-reads only the active file and only after acceptance (`LicenseReaderTests.cs:86-94`). | `RefreshSvc`; `LicenseReader` |

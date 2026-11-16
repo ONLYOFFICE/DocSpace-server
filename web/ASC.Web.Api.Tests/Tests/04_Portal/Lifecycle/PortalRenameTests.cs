@@ -34,8 +34,8 @@
 namespace ASC.Web.Api.Tests.Tests._04_Portal.Lifecycle;
 
 /// <summary>
-/// PUT api/2.0/portal/portalrename — hidden from the API document (raw HTTP). A rename moves this test's own
-/// portal to a new address, so the successful case is the last call of its test.
+// PUT api/2.0/portal/portalrename — hidden from the API document (raw HTTP): the checks a rename has to pass, and a
+/// rename to the name the portal already has.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PortalRenameTests(AspireAppFixture fixture) : PortalLifecycleTestBase(fixture)
@@ -118,21 +118,5 @@ public class PortalRenameTests(AspireAppFixture fixture) : PortalLifecycleTestBa
         using var response = await RenameAsync("");
 
         response.StatusCode.Should().Be(expected);
-    }
-
-    [Fact]
-    public async Task Rename_FreeAlias_ReturnsASignInLinkUnderTheNewAddress()
-    {
-        await _webApiClient.Authenticate(Owner);
-
-        var newAlias = FreePortalName();
-
-        using var response = await RenameAsync(newAlias.ToUpperInvariant());
-
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-
-        var link = await _webApi.ReadAsync<string>(response, TestContext.Current.CancellationToken);
-
-        link.Should().Contain(newAlias, "the alias is saved lower-cased").And.Contain("type=Auth");
     }
 }

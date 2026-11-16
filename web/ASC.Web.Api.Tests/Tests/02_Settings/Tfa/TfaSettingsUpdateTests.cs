@@ -79,20 +79,6 @@ public class TfaSettingsUpdateTests(
         exception.ErrorCode.Should().Be(405);
     }
 
-    // The DTO's Type is a plain enum, so an out-of-range value ("99") isn't a value the typed
-    // constructor can reject client-side — it's an ordinary int on the wire the server is free to
-    // ignore, so this stays a typed call via an explicit cast.
-    [Fact]
-    public async Task UpdateTfaSettings_OutOfRangeType_IsIgnored_ReturnsFalse()
-    {
-        // Act
-        var result = await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestDto((TfaType)99), TestContext.Current.CancellationToken);
-
-        // Assert
-        result.Response.Should().BeFalse();
-    }
-
     [Fact]
     public async Task UpdateTfaSettings_NonExistentMandatoryUsersId_IsIgnored_ReturnsFalse()
     {

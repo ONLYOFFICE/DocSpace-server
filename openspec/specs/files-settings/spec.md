@@ -144,7 +144,7 @@ anonymous or terminated caller gets 401.
 
 ### Requirement: Document Server address is readable without signing in
 
-`getDocServiceUrl` SHALL answer any caller, anonymous included, with the Document Server addresses and `isDefault`.
+`getDocServiceUrl` SHALL answer any caller, anonymous included, with the Document Server API address and `isDefault`.
 `version` true SHALL add the editor version; otherwise `version` is empty.
 
 #### Scenario: Fresh portal

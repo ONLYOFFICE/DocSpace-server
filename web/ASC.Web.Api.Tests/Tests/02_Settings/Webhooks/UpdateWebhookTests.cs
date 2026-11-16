@@ -104,9 +104,8 @@ public class UpdateWebhookTests(
     /// <summary>
     /// A request that leaves <c>ssl</c> out keeps the stored setting rather than resetting it. The stored value on is
     /// planted, since the API refuses it for the plain-http receiver, and the kept value is what refuses the update:
-    /// reset to off, the same request would pass. Sent raw, because the SDK model's <c>Ssl</c> is a non-nullable bool
-    /// written with <c>EmitDefaultValue = true</c>, so the generated client always sends <c>"ssl": false</c> and cannot
-    /// leave the field out (tests.md, raw carve-outs).
+    /// reset to off, the same request would pass. Sent raw, because the generated client cannot leave
+    /// the field out (tests.md, raw carve-outs).
     /// </summary>
     [Fact]
     public async Task UpdateWebhook_WithoutSsl_KeepsTheStoredSslOn()

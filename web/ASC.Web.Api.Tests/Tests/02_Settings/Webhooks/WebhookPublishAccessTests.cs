@@ -105,7 +105,7 @@ public class WebhookPublishAccessTests(
     [Fact]
     public async Task FolderCreated_RoomAdminWalkedAfterAMember_GetsNothing()
     {
-        // Arrange: the member goes first, so a share record kept from their check would answer for the other creator
+        // Arrange: the member goes first, so the other creator is checked right after another account
         var member = await InviteContact(EmployeeType.RoomAdmin);
         var outsider = await InviteContact(EmployeeType.RoomAdmin);
         var roomId = await CreateRoomAsync(member);

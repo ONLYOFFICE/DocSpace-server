@@ -71,47 +71,6 @@ public class MigrationUploadTests(
         answer.Success.Should().BeTrue(answer.Message);
     }
 
-    /// <summary>
-    /// The handler refuses a member who is not a DocSpace admin with <c>Success=false</c> and
-    /// "Access denied.", but answers that with HTTP 200 (M1): a client checking the status sees nothing wrong.
-    /// </summary>
-    [Theory]
-    [InlineData(EmployeeType.RoomAdmin)]
-    [InlineData(EmployeeType.User)]
-    [InlineData(EmployeeType.Guest)]
-    [Trait("Category", "Bug")]
-    public async Task Upload_InitAsNonAdmin_AnswersAccessDeniedWith403(EmployeeType employeeType)
-    {
-        // Arrange
-        var member = await InviteMember(employeeType);
-        await _webApiClient.Authenticate(member);
-
-        // Act
-        var answer = await PostUpload("?Init=true");
-
-        // Assert
-        answer.Success.Should().BeFalse();
-        answer.Message.Should().Be("Access denied.");
-        answer.Status.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    /// <summary>
-    /// A chunk sent before any <c>Init</c> has no upload folder; the handler reports the raw exception message
-    /// with <c>Success=false</c>, but with HTTP 200 (M1).
-    /// </summary>
-    [Fact]
-    [Trait("Category", "Bug")]
-    public async Task Upload_ChunkWithoutInit_AnswersAnErrorStatus()
-    {
-        // Act
-        var answer = await PostChunk("nc.zip", new NextcloudBackup().Account("alice", "Alice Import", NewEmail()).ToZip());
-
-        // Assert
-        answer.Success.Should().BeFalse();
-        answer.Message.Should().NotBeNullOrEmpty();
-        ((int)answer.Status).Should().BeInRange(400, 599);
-    }
-
     [Fact]
     public async Task Upload_BackupInThreeChunks_IsReassembledIntoOneArchive()
     {

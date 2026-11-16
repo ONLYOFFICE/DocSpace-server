@@ -236,7 +236,7 @@ While `enable` is true and at least one address is stored, the server SHALL answ
 
 ### Requirement: Listing two-factor methods
 
-`getTfaSettings` SHALL answer 200 to a signed-in caller with the methods the portal offers, each with `id`, `title`, `enabled`, `available`, `trustedIps`, `mandatoryUsers` and `mandatoryGroups`. An anonymous caller SHALL get 401.
+`getTfaSettings` SHALL answer 200 to the owner with the methods the portal offers, each with `id`, `title`, `enabled`, `available`, `trustedIps`, `mandatoryUsers` and `mandatoryGroups`. An anonymous caller SHALL get 401.
 
 #### Scenario: Methods listed
 

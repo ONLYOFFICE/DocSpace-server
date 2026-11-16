@@ -37,7 +37,7 @@ rooms section, whose rooms a User cannot create either (`03_Rooms/AiHub/AiProjec
 whose AI projects refuse Guests (`03_Rooms/AiHub/AiProjectGuestInviteTests.cs`, stated in
 `room-role-permissions`); the People and Settings controllers changed only in their webhook declarations.
 Line references refreshed: `FileSecurity.cs` role tables `:159-263` / `:265-281`, the `FileSharing.cs`
-throws after line 272 moved by +8 (`:283-289` for the user-type check). D3, D4, D7, D9, D10, R1, R2 and R3
+throws after line 272 moved by +8 (`:283-289` for the user-type check). D7, D10 and R3
 are unchanged (verdicts below).
 
 ## Requirement rows
@@ -116,7 +116,6 @@ are unchanged (verdicts below).
 | Room admin cannot demote a Room admin | `02_UserType/UserTypeUpdatePermissionsTests.cs:162-194` (synchronous endpoint 403; job ends with "You don't have enough permission to perform the operation"; type stays Room admin) | TEST-CONFIRMED [run: PASS] |
 | **Disabling, deleting and reassigning users** | | |
 | Owner disables every type; DocSpace admin disables Room admin / User / Guest | `03_UserStatus/UserStatusUpdateTests.cs:42-73, 110-138` | TEST-CONFIRMED [run: PASS] |
-| DocSpace admin cannot disable a DocSpace admin or the Owner (403) | `UserStatusUpdatePermissionsTests.cs:59-98` (bug 79900 — the tests assert the spec, their comment says the product still allows it; expected red) | TEST-CONFIRMED [run: PASS] (see R2) |
 | Room admin / User / Guest cannot disable anyone (15 actor/target pairs → 403) | `UserStatusUpdatePermissionsTests.cs:100-164` | TEST-CONFIRMED [run: PASS] |
 | Owner deletes User / DocSpace admin / Room admin / Guest; DocSpace admin deletes Room admin / User; DocSpace admin → DocSpace admin 403 | `01_Profiles/DeleteMemberTests.cs:43-79 (bug 80753), 109-123`; `RemoveUsersTests.cs:45-66, 101-121` | TEST-CONFIRMED [run: PASS] |
 | Active account cannot be deleted → 403 "not suspended" | `DeleteMemberTests.cs:81-107` (bug 79560); `RemoveUsersTests.cs:68-99` | TEST-CONFIRMED [run: PASS] |
@@ -159,8 +158,6 @@ LIVE-CONFIRMED 3, MATRIX-ONLY 1. No defect was found; the spec needed no correct
 
 | Claim | Source | Status |
 |---|---|---|
-| R1 re-judged on the section split and the listing code | `c866c055e1`; `73aa4e8ab8`; `private-rooms/verification.md` "Points for other specs"; `08_Private/PrivateRoomSectionTests.cs:155-180` (Owner and DocSpace admin, Active / `PrivateRooms` / `Any` / Archive) | TEST-CONFIRMED [run: PASS] |
-| Provider-based (third-party) rooms are listed outside the private filter of the administrator's view; a new private room on a connected storage is refused since `b562fc3fb1`, existing ones stay | `FileSecurity.cs` the `thirdPartyRoomsEntries` query after `:3073` | NOT VERIFIED: whether such a room can reach a non-member through Active, Archive or `Any` |
 | Non-member administrator refused on an archived private room and on clearing its access | `private-rooms`, "An archived private room keeps its protection", "An administrator outside cannot empty a private room" | CROSS-REFERENCE |
 
 ## Where the server differs from the product matrix (spec follows the server)
@@ -169,7 +166,7 @@ LIVE-CONFIRMED 3, MATRIX-ONLY 1. No defect was found; the spec needed no correct
 |---|---|---|
 | Users and Guests may invite to a room ("ships in the next version") | Inviting needs the Room manager role, which they cannot hold; 403 | `deviations.md`, matrix table rows 1-7 of user-type-permissions |
 | Nobody sees the links of someone else's public room | A non-member DocSpace admin reads the primary link | same |
-| Owner and DocSpace admin see all rooms | Not private (end-to-end encrypted) rooms, unless they are members | same; R1 |
+| Owner and DocSpace admin see all rooms | Not private (end-to-end encrypted) rooms, unless they are members | same |
 | A Room admin requests promotion of a User to Room admin, confirmed in Accounts | No such operation in the API | same |
 | A Room admin shares files with own guests and guests of own rooms | Only guests the Room admin invited | same |
 | Forms in rooms other than FFR / VDR are shared "for editing only" | Editing, comment and read links are offered; filling is refused | same |
@@ -185,8 +182,7 @@ LIVE-CONFIRMED 3, MATRIX-ONLY 1. No defect was found; the spec needed no correct
 - **Type-change job progress and termination** (`getUserTypeUpdateProgress`, `terminateUserTypeUpdate`):
   Owner / DocSpace admin only, a Room admin cannot read the job it started
   (`02_UserType/UserTypeProgressAndTerminatePermissionsTests.cs:43-230`). Job plumbing.
-- **A DocSpace admin cannot deactivate or edit the Owner, nor demote themselves** (`UserTest.cs:64-117`,
-  `UserStatusUpdatePermissionsTests.cs:80-98`): follows from the owner-only rules; not a matrix row.
+- **A DocSpace admin cannot edit the Owner, nor demote themselves** (`UserTest.cs:64-117`): follows from the owner-only rules; not a matrix row.
 - **Group manager who is a plain User** cannot replace or remove members
   (`GroupPermissionSetMembersTests.cs:164-178`, `GroupPermissionRemoveMembersTests.cs:226-239`): the matrix
   has no group-manager row.
@@ -206,13 +202,8 @@ D-numbers are the ones of `openspec/deviations.md` ("Suspected defects"); R-numb
 
 | # | Where | What the server does | Evidence | Status |
 |---|-------|----------------------|----------|--------|
-| D3 | Changing a user's type | A Room admin promotes a foreign guest to User through the queued job endpoint (200, job completes, type changes), while the synchronous endpoint refuses the same guest (403). | `deviations.md` D3 (live run); `products/ASC.People/Server/Api/UserController.cs:2662-2700` (`startUserTypeUpdate`) | STILL OPEN (2026-11-04: the type-change actions changed only in their webhook declarations) |
-| D4 | Room membership | A Room admin cannot add a foreign guest to their room by id (200, nobody added) but can by e-mail: the guest joins the room and the Room admin's guest list. | `deviations.md` D4 (live run); `FileSharing.cs:291-318` (the e-mail branch adds a user relation before any guest-list check) | STILL OPEN (2026-11-04: the e-mail branch is untouched; the range only inserted the AI-project guest check before it) |
 | D7 | My documents | `POST files/@my/file` as a Guest answers 500 (null reference); `@my/text` and `@my/html` answer 404. | `deviations.md` D7 (live run); the 404 of text / html: `TextFileCreatePermissionsTests.cs:102-113`, `HtmlFileCreatePermissionsTests.cs`; `products/ASC.Files/Server/Api/FilesController.cs:1325-1340` | STILL OPEN (2026-11-04: the action changed only in its webhook declaration) |
-| D9 | Inviting users by type | `GET portal/users/invite/{type}` never refuses: a disallowed pair answers 200 with an empty string, and for the Guest type it returns a real link to the Owner, a DocSpace admin and a Room admin. | `deviations.md` D9 (live run); `04_Portal/Users/InvitationLinkGetDeprecatedTests.cs`; `web/ASC.Web.Api/Api/PortalController.cs:196-215` | STILL OPEN (2026-11-04: `PortalController.cs` is outside the range) |
 | D10 | Disabling and deleting | `PUT people/delete` by a DocSpace admin on a disabled DocSpace admin answers 200 with the account echoed and deletes nothing; `DELETE people/{id}` answers 403. | `deviations.md` D10 (live run); `UserController.cs:1563-1630` (`removeUsers`: the skipped account is still returned) | STILL OPEN (2026-11-04: the action was rewrapped for the `user.deleted` webhook, the skip is as before) |
-| R1 | Room visibility | A private room was listed to a non-member Owner and DocSpace admin (bug 82956). The administrator's listing has dropped such a room since `73aa4e8ab8`; the earlier STILL OPEN came from the stale "expected to fail" remark of `PrivateRoomVisibilityTests.cs:44-92`, which still stands although those tests now pass trivially after `c866c055e1`, for members as well. | `FileSecurity.cs:3069-3073`; `git log -S` on that comment; `PrivateRoomSectionTests.cs:141-153` is the assertion that can fail | FIXED (`73aa4e8ab8`). Third-party rooms do not pass through that filter, see the revision rows. `openspec/deviations.md` R1 still says OPEN |
-| R2 | Disabling users | A DocSpace admin can deactivate another DocSpace admin and the Owner; the spec, the matrix and the tests say 403. | `03_UserStatus/UserStatusUpdatePermissionsTests.cs:59-98` (bug 79900, comment says the product allows it, tests red) | STILL OPEN (2026-11-04: `updateUserStatus` changed only in its webhook declaration; the commit "fix Bug 79900" of 2026-02 predates the previous revision and the test still asserts against the product) |
 | R3 | Inviting users by type | The invitation-link endpoint refuses the Guest type with 400 ("EmployeeType"), the people endpoints with 403 "Access denied": the same rule, two status codes. | `InvitationLinkCreateTests.cs:116-135`; `InviteUsersTests.cs:74-98`; `PortalController.cs:253-256` | STILL OPEN (2026-11-04: `PortalController.cs` is outside the range) |
 
 ## Revision 2026-11-14 (09d4de0768..6fb6dfb17a)

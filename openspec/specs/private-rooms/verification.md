@@ -116,19 +116,15 @@ All seven operations of `Rooms / Privacy room` are in requirements. These facts 
 |---|---|---|---|---|
 | PR1 | Deleting a subfolder of a private room | It still goes to Trash | Commit c866c055e1 "Not addressed here" | per commit message |
 | PR2 | Favorites | A private room or its subfolder can be added to Favorites | Commit c866c055e1 "Not addressed here" | per commit message |
-| PR3 | Audit trail | Events written before b562fc3fb1 keep showing a private room's titles, because the list of titles to hide is stored with new events only | Commit b562fc3fb1; `common/services/ASC.AuditTrail/Models/Mappings/PrivateTitleMask.cs` | per commit message, code reading of the mask |
 | PR4 | Backup and restore | Key pairs and file keys are skipped, and a module restore assigns new user and file ids, so a restored private room's content cannot be opened. Nothing in what was read warns about this | BackupCoverageTests.cs:68, :101; notes of 2026-11-05 from code reading, no live restore | red by code reading |
-| PR5 | Per-user security check | A check on one entry instance reuses the share record of the previous user. Callers in the private-room paths reset it, and the core is unchanged, so another caller checking several users on one instance answers for the wrong one | Commits 1259577f63, 20262fdcb5 | per commit message |
 | PR6 | Letters | The neutral title exists in the default culture only, so a letter in another language names the room in that default language | Commit 1259577f63 | per commit message |
 
 ## Not verified
 
 - Whether a group can be invited to a private room. `Sharing:270-276` checks keys through a user lookup of the subject id, which suggests a refusal, and `Helper:269` and the revocation skip group subjects. If a group can be a member, its people would get 403 on `getUserKeysForRoom` and keep their file keys on removal. No test covers it.
-- `searchArea=Any` for a non-member administrator: the split accepts any room for that area (`products/ASC.Files/Core/Core/VirtualRooms/SearchArea.cs:90-98`), and no test asserts the listing. The same goes for the Archive area listing to a non-member administrator.
 - `getUserKeysForRoom` with a subfolder id: the code has no room check there, unlike `candidates` and `missing` (`Helper:260` against `Helper:381`). No test.
 - `setEncryptionInfo` refusals (403 for missing rights and for a file outside a private room): read in the yaml only.
 
 ## Points for other specs
 
 - `room-types` says room groups take `Active` or `Forms` and that a private room can be grouped: the area `PrivateRooms` now exists, and a private room in an `Active` group answers 400 (T/PrivateRoomSectionTests.cs:217-238).
-- `openspec/deviations.md` R1 (bug 82956, private room listed to a non-member) is marked OPEN. T/PrivateRoomVisibilityTests.cs now reads as satisfied by the section split, but that test calls the default Active area, which leaves every private room out for anyone.

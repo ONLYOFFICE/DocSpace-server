@@ -162,7 +162,7 @@ public class SystemApiPortalStatusTests(AspireAppFixture fixture) : PortalLifecy
         status.Should().Be(HttpStatusCode.OK);
         body.GetProperty("removed").GetBoolean().Should().BeTrue("a portal whose wizard was never completed goes without confirmation");
 
-        // Not through Web.Api: a server installation answers an unknown address as its default portal.
+        // Checked through the system API.
         (status, body) = await ApiSystemAsync(HttpMethod.Get, $"portal/get?tenantId={wizardPortal.TenantId}", signedIn: true);
 
         status.Should().Be(HttpStatusCode.OK);

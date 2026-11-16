@@ -54,7 +54,7 @@ Revision 2026-11-04 (release/v4.1.0, `d58816bece..3533ad8a89`): the rooms of the
 no shared link (row and scenario "Link to a room of the AI rooms section", CODE-ONLY); no limit, audience or
 role rule of the existing room types changed (the `FileSharing.cs` lines after 272 moved by +8, the limit
 tables of `FileSecurity.cs` by -1..+1). Two new red bug tests on revoked primary links are recorded as R9
-and R10; the yaml line numbers were refreshed to submodule `5ea4dc6`. D2, D11, D12, R6, R7 and R8 stand.
+and R10; the yaml line numbers were refreshed to submodule `5ea4dc6`. D11, D12, R6, R7 and R8 stand.
 
 ## Requirement rows
 
@@ -172,7 +172,6 @@ D-numbers are the ones of `openspec/deviations.md`; R-numbers are new.
 
 | # | Where | What the server does | Evidence | Status |
 |---|-------|----------------------|----------|--------|
-| D2 | Roles that manage links | In a Public room a non-member User or Guest gets 200 on the folder-links PUT with `primary:true` and the read right, and a primary read link is created on a folder they cannot read; the token is not returned to them. The same request on a Custom room is refused. | `deviations.md` D2 (live run); `FileSharing.cs:87-99` (the Public-room primary read link bypasses the manage check) | STILL OPEN (2026-11-04: lines 85-101 untouched in the range) |
 | D11 | Link count limits | Entries in My documents, Custom, Collaboration and VDR rooms accept up to 6 *primary* links in addition to 6 additional ones; rooms and Public-room entries keep one primary link. | `deviations.md` D11 (live run); `FileSharing.cs:361-366` (an entry without a primary-link limit inherits the additional-link limit) | STILL OPEN (2026-11-04: the fallback is as before) |
 | D12 | Link settings (FFR) | A primary link of a folder inside an FFR stores an expiration on create; later updates and the revocation are skipped unless the stored date is echoed. | `deviations.md` D12 (live run); `FileSharing.cs:207-221` | STILL OPEN (2026-11-04: untouched) |
 | R6 | Entities that accept a link (FFR folder) | `getFolderPrimaryExternalLink` on a folder inside a Form filling room throws (the test asserts the exception without a status) although the limits table allows one primary link on it and the live run created one through the PUT. GET and PUT disagree. | `FolderShareTests.cs:363-374`; `FileSecurity.cs:155`; D12 | STILL OPEN (2026-11-04: test and table unchanged) |

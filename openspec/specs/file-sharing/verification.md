@@ -172,7 +172,7 @@ Spec: 14 requirements, 72 scenarios.
 - **`changeFileOwner`** (`GroupAndOwnerSharingTests.cs`): covered only by a bug-trait test (66897) whose current state is
   unknown; not asserted here. (`getGroupsMembersWithFileSecurity` is specified since revision 2026-11-14.)
 - **Link-resolution flags `isAuthenticated` / `isRoomMember`** (`ShareResolveLink*Tests.cs`): belong to links.
-- **Deviations D2, D11, D12** in `openspec/deviations.md` concern links and are not restated.
+- **Deviations D11, D12** in `openspec/deviations.md` concern links and are not restated.
 - **The `entryKind` discriminator** every listing entry carries since v4.1.0 (`7d641bf729`) and the
   `hasMetadataFields` flag (`857b062058`): shape of the listing, specified in `file-operations` and `metadata`;
   here they only changed how the favorites and Shared with me tests read an entry's id.
@@ -207,7 +207,7 @@ Re-check of the items `openspec/deviations.md` assigns to this area, and what th
 | # | Where | Verdict / what the server does | Evidence |
 |---|---|---|---|
 | R7 | `getFilePrimaryExternalLink` (shared-links, cross-referenced here under "Sharing a PDF form from My documents") | NOT REPRODUCED in run 365d87fe60 — the test asserting 403 for a User without access to a file in the owner's My documents passes; its summary recording 200 with an empty list is stale; no fixing commit identified. | `01_Files/Links/FileLinkPrimaryTests.cs:189-210` (bug 81572) |
-| D2, D11, D12 | links on folders and entries in My documents / rooms | STILL OPEN — unchanged by the range: no commit touched the link limits, the primary-link creation of a non-member or the folder-link expiration in a Form filling room, and no test on them was added or changed. | `deviations.md` rows; `git log d58816bece..3533ad8a89` on `FileSharing.cs` (AI-room guest refusal only) |
+| D11, D12 | links on folders and entries in My documents / rooms | STILL OPEN — unchanged by the range: no commit touched the link limits or the folder-link expiration in a Form filling room, and no test on them was added or changed. | `deviations.md` rows; `git log d58816bece..3533ad8a89` on `FileSharing.cs` (AI-room guest refusal only) |
 | FS1 | `addFavorites` / `deleteFavoritesFromBody` | Not a defect, recorded so nobody files it as one: a file the caller cannot read is skipped silently with `true`, the same answer as for a readable one; a client cannot tell from the answer which marks were set. The spec states the skip. | `FavoritesPersonalTests.cs:97-124`; yaml `addFavorites` (l. 23410) |
 | FS2 | `changeDefaultAccessRights` | Not a defect: bug 82641 is fixed by the request model's own validation (an out-of-range number → 400); the test asserts 400 and is green, only its inline comment still says "currently accepts". Would close nothing in `deviations.md` (the bug was never listed there). | `DefaultAccessRightsTests.cs:150-160`; `DefaultAccessRightsrequestDto.cs:51-59` |
 
