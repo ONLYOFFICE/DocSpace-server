@@ -18,8 +18,13 @@ a file SHALL never be replaced by it.
 
 #### Scenario: Editing service silent at completion
 
-- **WHEN** `completeWizard` is called on such an installation and the editing service does not answer
+- **WHEN** `completeWizard` is called on such an installation, the editing service does not answer, the installation runs its own trial and the last known answer of the editing service was an active trial or none is known
 - **THEN** the answer is 200 with `completed` true and the installation keeps its own 30-day trial tariff
+
+#### Scenario: Editing service silent, a license file still required
+
+- **WHEN** `completeWizard` is called without a license file, the editing service does not answer, and either no trial of the installation is in force or its last known answer was no trial or an ended one
+- **THEN** the answer is 500 "You must enter a license key" and the wizard stays open
 
 #### Scenario: Editing service trial ends later
 

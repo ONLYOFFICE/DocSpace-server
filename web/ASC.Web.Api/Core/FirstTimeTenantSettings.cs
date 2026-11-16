@@ -210,12 +210,21 @@ public class FirstTimeTenantSettings(
         // The wizard skips the license upload only after it was told the editing service runs its trial, so an
         // editing service that cannot be asked now is not read as "no trial", which would ask for a file the wizard
         // never offered. The installation keeps its own 30-day trial, created on the first read of the tariff; the
-        // background refresh brings its end closer once the editing service answers.
+        // background refresh brings its end closer once the editing service answers. A file is still required when no
+        // trial of the installation is in force (a license from a file, or no license quota at all), or when the last
+        // answer this node knows said the editing service runs no trial or its trial has ended: then the wizard asked
+        // for a file, and the silence changes nothing.
         if (docsTrial.State == DocsTrialState.Unknown)
         {
             await tenantExtra.GetCurrentTariffAsync();
 
-            if (!await licenseReader.IsStartTrialInForceAsync())
+            if (!await licenseReader.IsOwnTrialInForceAsync())
+            {
+                return false;
+            }
+
+            var lastKnown = await documentServiceLicense.GetLastKnownTrialAsync();
+            if (lastKnown is { State: DocsTrialState.NotTrial or DocsTrialState.Expired })
             {
                 return false;
             }

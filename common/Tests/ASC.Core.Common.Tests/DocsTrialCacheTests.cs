@@ -117,6 +117,44 @@ public sealed class DocsTrialCacheTests : IDisposable
         _requests.Should().Be(1);
     }
 
+    [Fact]
+    public async Task GetLastKnownAsync_NothingAsked_IsNull()
+    {
+        (await CreateCache(DocsTrialCacheOptions.Default).GetLastKnownAsync()).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_AnswerExpiredButKeptByFailSafe_ReturnsItWithoutAsking()
+    {
+        // The setup wizard reads the last answer when the editing service is silent at completion; an answer past its
+        // duration still tells whether the wizard asked for a file.
+        var trialCache = CreateCache(new DocsTrialCacheOptions(
+            Duration: TimeSpan.FromMilliseconds(100),
+            FailSafeMaxDuration: TimeSpan.FromHours(1),
+            FailureDuration: TimeSpan.FromMinutes(1),
+            HardTimeout: TimeSpan.FromSeconds(10)));
+        _answers.Enqueue(_expired);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_expired);
+
+        // Let the answer expire; it is a duration running out, not an asynchronous write to wait for
+        await Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+
+        (await trialCache.GetLastKnownAsync()).Should().Be(_expired);
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_OnlyAFailureKnown_IsNull()
+    {
+        var trialCache = CreateCache(DocsTrialCacheOptions.Default);
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetLastKnownAsync()).Should().BeNull();
+    }
+
     private DocsTrialCache CreateCache(DocsTrialCacheOptions options)
     {
         return new DocsTrialCache(_cache, NullLogger<DocumentServiceLicense>.Instance, options);

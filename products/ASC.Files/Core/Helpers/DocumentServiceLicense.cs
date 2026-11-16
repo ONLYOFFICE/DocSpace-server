@@ -171,8 +171,8 @@ public class DocumentServiceLicense(ICache cache,
     /// </summary>
     /// <param name="useCache">
     /// Whether a cached answer may be used; <see cref="DocsTrialCache"/> says how long answers and failures are kept.
-    /// A fresh question with a known answer replaces the cached one on every node; one with an unknown answer leaves
-    /// the cache alone.
+    /// A fresh question with a known answer replaces the cached one on this node and makes the other nodes ask again;
+    /// one with an unknown answer leaves the cache alone.
     /// </param>
     /// <returns>
     /// <see cref="DocsTrialState.NotTrial"/> on an installation that has no editing service to ask;
@@ -180,8 +180,21 @@ public class DocumentServiceLicense(ICache cache,
     /// </returns>
     public Task<DocsTrialCheck> GetTrialAsync(bool useCache)
     {
-        return new DocsTrialCache(cacheProvider.GetMemoryCache(), logger, DocsTrialCacheOptions.Default)
-            .GetAsync(RequestTrialAsync, useCache);
+        return CreateTrialCache().GetAsync(RequestTrialAsync, useCache);
+    }
+
+    /// <summary>
+    /// Returns the last answer of the editing service about its trial that this node knows, without asking the
+    /// service; <c>null</c> when none is known.
+    /// </summary>
+    public Task<DocsTrialCheck> GetLastKnownTrialAsync()
+    {
+        return CreateTrialCache().GetLastKnownAsync();
+    }
+
+    private DocsTrialCache CreateTrialCache()
+    {
+        return new DocsTrialCache(cacheProvider.GetMemoryCache(), logger, DocsTrialCacheOptions.Default);
     }
 
     private async Task<DocsTrialCheck> RequestTrialAsync()
@@ -205,7 +218,11 @@ public class DocumentServiceLicense(ICache cache,
         var check = ClassifyTrial(commandResponse, DateTime.UtcNow);
         if (check.State == DocsTrialState.Unknown)
         {
-            logger.WarningDocsTrialUnreadable(commandResponse.Error, commandResponse.ErrorString);
+            logger.WarningDocsTrialUnreadable(
+                commandResponse.Error,
+                commandResponse.ErrorString,
+                commandResponse.Server?.ResultType,
+                commandResponse.License?.DueDate);
         }
 
         return check;

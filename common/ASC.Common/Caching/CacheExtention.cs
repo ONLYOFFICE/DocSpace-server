@@ -52,6 +52,22 @@ public static class CacheExtention
     }
 
     /// <summary>
+    /// Writes a value to the "memory" cache on this node AND tells the other nodes that the key changed. The
+    /// notification carries no value: an L1-only cache on another node cannot read it from anywhere, so that node
+    /// expires its own entry and fills it again on its next read. As with <see cref="RemoveAndNotifyAsync"/>, the
+    /// "memory" cache skips backplane notifications by default, so a write the other processes must see opts back in
+    /// here instead of at the call site.
+    /// </summary>
+    public static ValueTask SetAndNotifyAsync<T>(this IFusionCache cache, string key, T value, Action<FusionCacheEntryOptions> setupAction, CancellationToken token = default)
+    {
+        return cache.SetAsync(key, value, options =>
+        {
+            setupAction(options);
+            options.SetSkipBackplaneNotifications(false);
+        }, token);
+    }
+
+    /// <summary>
     /// Expires every "memory" cache entry carrying <paramref name="tag"/> on this node AND on the other nodes.
     /// Tag invalidation is a tag-timestamp entry, and with <c>options == null</c> FusionCache writes it with
     /// <c>TagsDefaultEntryOptions</c> — which, unlike the memory cache's <c>DefaultEntryOptions</c>, neither skips

@@ -19,7 +19,7 @@ language and time zone, mark the wizard completed, sign the owner in and answer 
 
 #### Scenario: Enterprise installation without a licence file
 
-- **WHEN** `completeWizard` is called on an Enterprise installation without a licence file whose editing service runs a trial or does not answer
+- **WHEN** `completeWizard` is called on an Enterprise installation without a licence file whose editing service runs a trial, or does not answer after it last reported a trial or never answered
 - **THEN** the answer is 200 with `completed` true, the licence is accepted and the trial of `branding-and-licensing` "Following the editing service's trial" stays in force
 
 #### Scenario: Wizard completed

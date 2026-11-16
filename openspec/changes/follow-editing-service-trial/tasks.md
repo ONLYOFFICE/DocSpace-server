@@ -6,7 +6,7 @@ checks that proved it, and leave open what the specs, the documents and the test
 ## 1. Reading the editing service's trial
 
 - [x] 1.1 Classify the answer of the `license` command as active, expired, not a trial or unknown, taking a trial only with `trial` set and the end as a UTC day; verified by `DocsTrialClassificationTests` in `common/Tests/ASC.Core.Common.Tests` on real answers of the editing service 10.0.1, proven red with `.claude/scripts/prove-red.sh`
-- [x] 1.2 Cache the answer for the anonymous question with fail-safe, a known fresh answer replacing the cached one on every node and an unknown one leaving it alone; verified by `DocsTrialCacheTests` (real in-memory cache), proven red for the fresh-answer and fail-safe rules
+- [x] 1.2 Cache the answer for the anonymous question with fail-safe, a known fresh answer replacing the cached one on this node and making the other nodes ask again, an unknown one leaving it alone, and the last answer known readable without a request; verified by `DocsTrialCacheTests` (real in-memory cache), proven red for the fresh-answer and fail-safe rules
 
 ## 2. Writing the trial
 
@@ -17,7 +17,7 @@ checks that proved it, and leave open what the specs, the documents and the test
 ## 3. Wizard and `getIsLicenseRequired`
 
 - [x] 3.1 Answer `getIsLicenseRequired` false while the editing service reports an active trial and no license file exists; checked on a local Enterprise stand, including a frozen editing service
-- [x] 3.2 Complete the wizard without a license file on the trial, record the acceptance, write no audit event, and keep the installation's own 30-day trial when the editing service does not answer; checked on a local Enterprise stand on a clean database (acceptance recorded, own trial kept); the silent-service path is checked in 3.3
+- [x] 3.2 Complete the wizard without a license file on the trial, record the acceptance, write no audit event, and keep the installation's own 30-day trial when the editing service does not answer, unless no own trial is in force or the last answer known said no trial or an ended one; checked on a local Enterprise stand on a clean database (acceptance recorded, own trial kept); the silent-service path is checked in 3.3
 - [x] 3.3 Check the silent-service path of 3.2 on a local Enterprise stand with the editing service frozen at completion; done when `completeWizard` answers 200 and `getPortalTariff` reports the installation's own 30-day `dueDate`
 
 ## 4. Documents and contract texts

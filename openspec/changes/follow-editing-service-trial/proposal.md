@@ -13,8 +13,7 @@ trial for no longer than the editing service's, and switch to the license as soo
   trial of its own. **BREAKING** for a caller that read false as "a license file was accepted".
 - `completeWizard` on such an installation completes without a license file: the installation's own trial tariff
   stays in force, its end brought to the day the editing service's trial ends (never later), and the license
-  counts as accepted. No audit event is written: no license key was uploaded. If the editing service does not
-  answer at that moment, the wizard completes on the installation's own 30-day trial.
+  counts as accepted. No audit event is written: no license key was uploaded. If the editing service does not answer at that moment, the wizard completes on the installation's own 30-day trial, unless no own trial is in force or the last answer known said the editing service runs no trial or its trial ended; then a license file is required as before.
 - The daily background re-read follows the editing service's trial while no license file is on disk, also before
   the license is accepted and before the wizard is completed: it brings the trial's end closer, never later, and an
   expired trial of the editing service ends the installation's trial yesterday. **BREAKING** for existing

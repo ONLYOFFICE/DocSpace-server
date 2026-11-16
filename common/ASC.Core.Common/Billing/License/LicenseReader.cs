@@ -321,8 +321,6 @@ public class LicenseReader(
     {
         Validate(license);
 
-        await SetCustomerIdAsync(license.CustomerId);
-
         var defaultQuota = await tenantManager.GetTenantQuotaAsync(Tenant.DefaultTenant);
 
         var quota = new TenantQuota(LicenseQuotaId)
@@ -345,6 +343,9 @@ public class LicenseReader(
             Statistic = true
         };
 
+        // The quota and the tariff are two writes: if the tariff write fails after the quota one, the quota describes the
+        // new license and the tariff the previous one until the next refresh rewrites both from the file in force. The
+        // customer id is written last, so it never names a license whose tariff is not in force.
         await using (await distributedLockProvider.TryAcquireLockAsync(_licenseLockKey))
         {
             await tenantManager.SaveTenantQuotaAsync(quota);
@@ -356,6 +357,8 @@ public class LicenseReader(
             };
 
             await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
+
+            await SetCustomerIdAsync(license.CustomerId);
         }
     }
 
@@ -452,6 +455,16 @@ public class LicenseReader(
     public async Task<bool> IsStartTrialInForceAsync()
     {
         return (await GetLicenseQuotaAsync())?.Name == StartTrialQuotaName;
+    }
+
+    /// <summary>
+    /// Returns whether a trial of the installation itself is in force: a license quota that was not written from a
+    /// license file and is a trial (the 30-day one of an installation without a license, or the one activated on
+    /// request).
+    /// </summary>
+    public async Task<bool> IsOwnTrialInForceAsync()
+    {
+        return await GetLicenseQuotaAsync() is { Trial: true } quota && quota.Name != LicenseQuotaName;
     }
 
     private async Task<TenantQuota> GetLicenseQuotaAsync()

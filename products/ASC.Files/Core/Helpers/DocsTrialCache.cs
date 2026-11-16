@@ -62,8 +62,10 @@ public record DocsTrialCacheOptions(TimeSpan Duration, TimeSpan FailSafeMaxDurat
 /// A cached reader gets one request to the editing service at a time per process. While the service fails, the last
 /// answer known stays in use and the service is asked again after <see cref="DocsTrialCacheOptions.FailureDuration"/>;
 /// with none known, the failure itself is kept for that long. A fresh question with a known answer replaces the cached
-/// one here and drops it on the other nodes; a fresh question with an unknown answer leaves the cache alone, so a
-/// failure seen by the setup wizard or the background refresh never removes the last answer known.
+/// one on this node and makes the other nodes ask again on their next read; until then, and while the service fails
+/// for them, another node can still answer from the answer it knew before. A fresh question with an unknown answer
+/// leaves the cache alone, so a failure seen by the setup wizard or the background refresh never removes the last
+/// answer known.
 /// </remarks>
 public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLicense> logger, DocsTrialCacheOptions options)
 {
@@ -78,7 +80,7 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
             var fresh = await request();
             if (fresh.State != DocsTrialState.Unknown)
             {
-                await cache.SetAsync(_cacheKey, fresh, entry => SetupEntry(entry).SetSkipBackplaneNotifications(false));
+                await cache.SetAndNotifyAsync(_cacheKey, fresh, entry => SetupEntry(entry));
             }
 
             return fresh;
@@ -105,6 +107,17 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
 
             return DocsTrialCheck.Unknown;
         }
+    }
+
+    /// <summary>
+    /// Returns the last answer of the editing service this node knows, also one past its duration that the fail-safe
+    /// still keeps, without asking the service; <c>null</c> when none is known.
+    /// </summary>
+    public async Task<DocsTrialCheck> GetLastKnownAsync()
+    {
+        var known = await cache.TryGetAsync<DocsTrialCheck>(_cacheKey, entry => entry.SetAllowStaleOnReadOnly());
+
+        return known.HasValue && known.Value is { State: not DocsTrialState.Unknown } ? known.Value : null;
     }
 
     private FusionCacheEntryOptions SetupEntry(FusionCacheEntryOptions entry)
