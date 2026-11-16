@@ -4,6 +4,18 @@
 # Runs once, on an empty data directory, after the image created $POSTGRES_DB.
 set -e
 
+# Step 2: no large objects. Function privileges are kept per database: the forms database already exists, and a
+# portal's own database is created later from template1 and inherits what is revoked there.
+for database in "$POSTGRES_DB" template1; do
+    psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$database" -c 'REVOKE EXECUTE ON FUNCTION
+        lo_create(oid),
+        lo_creat(integer),
+        lo_from_bytea(oid, bytea),
+        lo_put(oid, bigint, bytea),
+        lowrite(integer, bytea)
+    FROM PUBLIC;'
+done
+
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
     -v db="$POSTGRES_DB" \
     -v admin_user="$FORMS_ADMIN_USER" \
@@ -16,15 +28,6 @@ ALTER DATABASE :"db" OWNER TO :"admin_user";
 
 -- Step 3: the read-only roles connect to the forms database only.
 REVOKE CONNECT ON DATABASE postgres, template1 FROM PUBLIC;
-
--- Step 2: no large objects.
-REVOKE EXECUTE ON FUNCTION
-    lo_create(oid),
-    lo_creat(integer),
-    lo_from_bytea(oid, bytea),
-    lo_put(oid, bigint, bytea),
-    lowrite(integer, bytea)
-FROM PUBLIC;
 
 -- Step 4: a read-only role lifts its own statement_timeout, so its long queries are ended from outside.
 CREATE EXTENSION IF NOT EXISTS pg_cron;

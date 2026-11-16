@@ -35,6 +35,12 @@ namespace ASC.Api.Core.Auth;
 
 public static class AuthorizationExtension
 {
+    // Reads that hand out a secret giving access past the caller's own rights (the password of the portal's built-in
+    // forms database reads every submission, whatever room it came from): a token that may only read is refused.
+    private const string BuiltinDbCredentialsPattern = "GET api/[^/]+/files/builtinDb";
+
+    private static readonly HashSet<string> _readsNeedingWriteScope = [BuiltinDbCredentialsPattern];
+
 
     public static readonly Dictionary<string, string[]> ScopesMap = new()
     {
@@ -42,6 +48,7 @@ public static class AuthorizationExtension
         { "(POST|PUT|DELETE|UPDATE) api/[^/]+/files/rooms", [ "rooms:write" ] },
         { "GET api/[^/]+/docs", [ "files:read", "files:write" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[^/]+/docs", [ "files:write" ] },
+        { BuiltinDbCredentialsPattern, [ "files:write" ] },
         { "GET api/[^/]+/files", [ "files:read", "files:write" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[^/]+/files", [ "files:write" ] },
         { "GET api/[^/]+/people/@self", [ "accounts.self:read", "accounts.self:write" ] },
@@ -82,6 +89,11 @@ public static class AuthorizationExtension
             if (localScopes.Length == 1 && localScopes[0] == "*")
             {
                 return null;
+            }
+
+            if (_readsNeedingWriteScope.Contains(regexPattern))
+            {
+                globalScopes = [AuthConstants.Claim_ScopeGlobalWrite.Value];
             }
 
             break;

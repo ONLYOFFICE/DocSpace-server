@@ -342,6 +342,31 @@ public class FormFillingReportCreator(
         }
     }
 
+    /// <summary>
+    /// <see cref="SyncBuiltinDbTableAsync(int, int, int)"/> for a built-in table named by its name, the table its versions
+    /// write to: after the portal moved into a database of its own, for the submissions refused while the tables were
+    /// copied. A table of a form that no longer exists, or one whose versions now write elsewhere, is left alone.
+    /// </summary>
+    public async Task SyncBuiltinDbTableAsync(string tableName)
+    {
+        var name = _builtinTableNameRegex.Match(tableName);
+        if (!name.Success
+            || !int.TryParse(name.Groups[1].Value, CultureInfo.InvariantCulture, out var originalFormId)
+            || !int.TryParse(name.Groups[2].Value, CultureInfo.InvariantCulture, out var tableVersion)
+            || await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId) == null)
+        {
+            return;
+        }
+
+        var formFilling = await GetFormFillingAsync(originalFormId);
+        if (formFilling is not { RoomId: > 0 } || GetTableVersion(formFilling, tableVersion) != tableVersion)
+        {
+            return;
+        }
+
+        await SyncBuiltinDbTableAsync(originalFormId, tableVersion, formFilling.RoomId);
+    }
+
     // Submissions whose export failed are added from the index, at most once in a few minutes per table. Best effort.
     private async Task FillBuiltinDbTableGapsAsync(int originalFormId, int originalFormVersion, int tableVersion, string tableName, int roomId, FormFillingProperties<int> formFilling)
     {

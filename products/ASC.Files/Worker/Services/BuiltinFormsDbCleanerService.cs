@@ -82,8 +82,16 @@ public class BuiltinFormsDbCleanerService(
                     return;
                 }
 
-                // Removes what a failed portal removal or an interrupted move into a portal's own database left behind.
-                await provisioner.ReconcileAsync(stoppingToken);
+                // Removes what a failed portal removal or an interrupted move into a portal's own database left behind;
+                // the cleanup goes on without.
+                try
+                {
+                    await provisioner.ReconcileAsync(stoppingToken);
+                }
+                catch (Exception e) when (e is not OperationCanceledException)
+                {
+                    logger.WarnFormsDbNotReconciled(e);
+                }
 
                 // A changed connection limit reaches the portals provisioned before it here; the cleanup goes on without.
                 try
@@ -190,6 +198,9 @@ internal static partial class BuiltinFormsDbCleanerServiceLogger
 
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the configured connection limit could not be applied to the existing portal accounts")]
     public static partial void WarnConnectionLimitNotApplied(this ILogger<BuiltinFormsDbCleanerService> logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the leftovers of removed portals and interrupted moves could not be checked, the next pass tries again")]
+    public static partial void WarnFormsDbNotReconciled(this ILogger<BuiltinFormsDbCleanerService> logger, Exception exception);
 
     [LoggerMessage(LogLevel.Information, "Built-in forms DB: dropped {count} idle tables of tenant {tenantId}")]
     public static partial void InfoIdleTablesDropped(this ILogger<BuiltinFormsDbCleanerService> logger, int tenantId, int count);

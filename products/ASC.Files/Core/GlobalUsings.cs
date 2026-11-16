@@ -299,6 +299,7 @@ global using FormFieldsExtractor = ASC.Files.Core.Services.DocumentBuilderServic
 global using FormFillingReportTask = ASC.Files.Core.Services.DocumentBuilderService.FormFillingReportTask;
 global using FormRecoveryTask = ASC.Files.Core.Services.DocumentBuilderService.FormRecoveryTask;
 global using HttpException = ASC.Common.Web.HttpException;
+global using IHostApplicationLifetime = Microsoft.Extensions.Hosting.IHostApplicationLifetime;
 global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using JsonSerializer = System.Text.Json.JsonSerializer;

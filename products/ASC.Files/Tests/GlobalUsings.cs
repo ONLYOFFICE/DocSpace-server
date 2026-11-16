@@ -57,6 +57,7 @@ global using ASC.Files.Tests.Tests._06_Operations.Statuses;
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 
+global using DocSpace.API.SDK.Api.ApiKeys;
 global using DocSpace.API.SDK.Api.Authentication;
 global using DocSpace.API.SDK.Api.Files;
 global using DocSpace.API.SDK.Api.People;

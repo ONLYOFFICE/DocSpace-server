@@ -334,6 +334,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings", "Operations for working with settings" },
         { "Backup", "Operations for working with backup" },
         { "Docs", "Operations carried out by the document service on behalf of the portal." },
+        { "Files / Built-in Database", "Operations for direct read-only access to the portal's form submissions in the built-in forms database." },
         { "Files / Files", "Operations for working with files." },
         { "Files / Folders", "Operations for working with folders." },
         { "Files / Metadata", "Operations for working with metadata templates and the metadata of files and folders." },

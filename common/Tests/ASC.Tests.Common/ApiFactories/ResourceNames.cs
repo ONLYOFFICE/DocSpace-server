@@ -46,6 +46,12 @@ public static class ResourceNames
     public const string WebApi = "onlyoffice-web-api";
 
     public const string Files = "onlyoffice-files";
+
+    /// <summary>
+    /// The PostgreSQL server of the built-in forms database. Its connection string signs in as the superuser, for a test
+    /// that plants a state of the server no API call leaves behind.
+    /// </summary>
+    public const string FormsPostgres = "forms-postgres";
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
 

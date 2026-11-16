@@ -44,6 +44,31 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
     protected override IEnumerable<string> Resources =>
         [ResourceNames.Files, ResourceNames.People, ResourceNames.WebStudio, ResourceNames.Nextcloud];
 
+    /// <summary>
+    /// An open superuser connection to a database of the built-in forms server, for a test that plants a state of a
+    /// portal's move no API call leaves behind (a move broken off between two of its steps).
+    /// </summary>
+    public async Task<NpgsqlConnection> OpenFormsServerAsync(string database, CancellationToken cancellationToken)
+    {
+        var builder = new NpgsqlConnectionStringBuilder(await GetConnectionStringAsync(ResourceNames.FormsPostgres, cancellationToken))
+        {
+            Database = database,
+            Pooling = false
+        };
+
+        var connection = new NpgsqlConnection(builder.ConnectionString);
+        try
+        {
+            await connection.OpenAsync(cancellationToken);
+            return connection;
+        }
+        catch
+        {
+            await connection.DisposeAsync();
+            throw;
+        }
+    }
+
     protected override PortalClients CreateClients(PortalContext context)
     {
         return new PortalClients(context);

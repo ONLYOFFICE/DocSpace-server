@@ -57,9 +57,10 @@ public class FormsDbProvisioningService(
     IDistributedLockProvider distributedLockProvider,
     InstanceCrypto instanceCrypto,
     IFusionCacheProvider cacheProvider,
+    IFusionCache distributedCache,
     TenantManager tenantManager,
     IServiceScopeFactory serviceScopeFactory,
-    Microsoft.Extensions.Hosting.IHostApplicationLifetime applicationLifetime,
+    IHostApplicationLifetime applicationLifetime,
     BuiltinFormsDbOptions options,
     ILogger<FormsDbProvisioningService> logger)
 {
@@ -68,9 +69,9 @@ public class FormsDbProvisioningService(
     // Portals whose move into their own database runs on this node.
     private static readonly ConcurrentDictionary<int, byte> _isolating = new();
 
-    // When the last move of a portal failed on this node; one that keeps failing is not restarted by every poll.
-    private static readonly ConcurrentDictionary<int, DateTime> _isolationFailures = new();
-    internal static readonly TimeSpan IsolationRetryDelay = TimeSpan.FromMinutes(5);
+    // A move that failed is not restarted by every poll; the mark is shared by all nodes, so none of them starts one
+    // before the Retry-After the caller was given (without Redis it is this node's only).
+    private static readonly TimeSpan _isolationRetryDelay = TimeSpan.FromMinutes(5);
 
     private const string LiveDatabaseComment = "docspace forms: live";
 
@@ -93,6 +94,8 @@ public class FormsDbProvisioningService(
     public static string GetTableLockKey(int tenantId, string tableName) => $"forms_db_table_{tenantId}_{tableName}";
 
     private static string GetProvisionLockKey(int tenantId) => $"forms_db_provision_{tenantId}";
+
+    private static string GetIsolationFailureKey(int tenantId) => tenantId + "formsdbisolationfailed";
 
     private static string GetSchemaName(int tenantId) => $"tenant_{tenantId}";
 
@@ -127,19 +130,54 @@ public class FormsDbProvisioningService(
     /// </summary>
     public async Task<FormsDbIsolation> GetIsolatedAsync(int tenantId)
     {
+        var databaseName = GetDatabaseName(tenantId);
+
+        // While a move copies the tables, the portal's account has lost the shared schema and new credentials wait for
+        // the lock the move holds for the whole copy: the caller is answered at once instead.
+        var settings = await settingsManager.LoadAsync<BuiltinFormsDbSettings>(tenantId);
+        if (settings.DatabaseName != databaseName && await IsSharedSchemaFencedAsync(tenantId))
+        {
+            return await StartIsolationUnlessFailedAsync(tenantId);
+        }
+
         var credentials = await GetOrProvisionAsync(tenantId);
-        if (credentials.Database == GetDatabaseName(tenantId))
+        if (credentials.Database == databaseName)
         {
             return new FormsDbIsolation(credentials, null);
         }
 
-        if (_isolationFailures.TryGetValue(tenantId, out var failedAt) && DateTime.UtcNow - failedAt < IsolationRetryDelay)
+        return await StartIsolationUnlessFailedAsync(tenantId);
+    }
+
+    private async Task<FormsDbIsolation> StartIsolationUnlessFailedAsync(int tenantId)
+    {
+        var failedAt = await distributedCache.TryGetAsync<DateTime>(GetIsolationFailureKey(tenantId));
+        if (failedAt.HasValue)
         {
-            return new FormsDbIsolation(null, failedAt + IsolationRetryDelay - DateTime.UtcNow);
+            var retryAfter = failedAt.Value + _isolationRetryDelay - DateTime.UtcNow;
+            if (retryAfter > TimeSpan.Zero)
+            {
+                return new FormsDbIsolation(null, retryAfter);
+            }
         }
 
         StartIsolation(tenantId);
         return new FormsDbIsolation(null, null);
+    }
+
+    // The portal's account has no use of its shared schema: a move is copying it, or one was broken off, which the next
+    // attempt or the reconciliation completes.
+    private async Task<bool> IsSharedSchemaFencedAsync(int tenantId)
+    {
+        await using var admin = await OpenAdminAsync(null);
+        await using var cmd = admin.CreateCommand();
+        cmd.CommandText =
+            "SELECT NOT has_schema_privilege(r.oid, n.oid, 'USAGE') FROM pg_roles r, pg_namespace n " +
+            "WHERE r.rolname = @role AND n.nspname = @schema";
+        cmd.Parameters.Add(new NpgsqlParameter("@role", GetRwUser(tenantId)));
+        cmd.Parameters.Add(new NpgsqlParameter("@schema", GetSchemaName(tenantId)));
+
+        return await cmd.ExecuteScalarAsync() is true;
     }
 
     private void StartIsolation(int tenantId)
@@ -157,15 +195,17 @@ public class FormsDbProvisioningService(
                 await using var scope = serviceScopeFactory.CreateAsyncScope();
                 await scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenantAsync(tenantId);
                 await scope.ServiceProvider.GetRequiredService<FormsDbProvisioningService>().IsolateAsync(tenantId, stopping);
-                _isolationFailures.TryRemove(tenantId, out _);
+                await distributedCache.RemoveAsync(GetIsolationFailureKey(tenantId));
             }
             catch (OperationCanceledException) when (stopping.IsCancellationRequested)
             {
+                // The host stops: the shared schema was given back (or is, by the next provisioning or the
+                // reconciliation), and the next call starts the move again.
             }
             catch (Exception e)
             {
-                _isolationFailures[tenantId] = DateTime.UtcNow;
                 logger.ErrorFormsDbIsolation(e, tenantId);
+                await distributedCache.SetAsync(GetIsolationFailureKey(tenantId), DateTime.UtcNow, _isolationRetryDelay);
             }
             finally
             {
@@ -178,26 +218,43 @@ public class FormsDbProvisioningService(
     /// Moves the portal from its schema in the shared database into a database of its own. The portal's accounts lose
     /// the shared schema first, so nothing is written there any more, even over a connection a pool still holds; then
     /// every table is copied whole under the lock its writers take, the new database is marked live, and only then are
-    /// the settings switched and the shared schema dropped. A failure before the mark gives the shared schema back, and
-    /// a move interrupted after it is completed by the next call or by the reconciliation. A submission refused while
-    /// the tables are copied is added from the search index on the next use of its form.
+    /// the settings switched and the shared schema dropped. A failure before the mark gives the shared schema back (or
+    /// leaves that to the next provisioning or the reconciliation), and a move interrupted after it is completed by the
+    /// next call or by the reconciliation. A submission refused while the tables are copied is added from the search index once the move
+    /// completes when its table was copied, otherwise when the table is created on the next use of the form. Null when
+    /// another node holds the portal's lock past the wait, moving or provisioning it.
     /// </summary>
-    public async Task<FormsDbCredentials> IsolateAsync(int tenantId, CancellationToken cancellationToken = default)
+    public async Task<FormsDbCredentials?> IsolateAsync(int tenantId, CancellationToken cancellationToken = default)
     {
-        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProvisionLockKey(tenantId)))
+        IDistributedLockHandle handle;
+        try
         {
-            var current = await TryGetProvisionedAsync(tenantId) ?? await ProvisionAsync(tenantId);
+            handle = await distributedLockProvider.TryAcquireFairLockAsync(GetProvisionLockKey(tenantId));
+        }
+        catch (DistributedLockException)
+        {
+            // Not a failure of the move: the node holding the lock finishes it, and the caller asks again.
+            return null;
+        }
+
+        FormsDbCredentials target;
+        await using (handle)
+        {
             var databaseName = GetDatabaseName(tenantId);
-            if (current.Database == databaseName)
+            var current = await TryGetProvisionedAsync(tenantId);
+            if (current?.Database == databaseName)
             {
                 return current;
             }
 
+            // Provisioned again in a live database of its own: a move broken off after the mark, completed below.
+            current ??= await ProvisionAsync(tenantId);
+
             // The roles belong to the whole server, so the new database is reached with the same passwords.
             var rwPassword = new NpgsqlConnectionStringBuilder(current.RwConnectionString).Password!;
-            var target = BuildCredentials(current.SchemaName, databaseName, GetRwUser(tenantId), rwPassword, current.RoUser, current.RoPassword);
+            target = BuildCredentials(current.SchemaName, databaseName, GetRwUser(tenantId), rwPassword, current.RoUser, current.RoPassword);
 
-            if (!await IsLiveAsync(databaseName))
+            if (current.Database != databaseName && !await IsLiveAsync(databaseName))
             {
                 await using (var admin = await OpenAdminAsync(null))
                 {
@@ -215,17 +272,28 @@ public class FormsDbProvisioningService(
                 catch
                 {
                     // Not live yet: the portal goes on in the shared schema, and the half-built database is rebuilt
-                    // on the next call or dropped by the reconciliation.
-                    await UnfenceSharedSchemaAsync(tenantId);
+                    // on the next call or dropped by the reconciliation. If giving the schema back fails, the next
+                    // provisioning or the reconciliation gives it back.
+                    try
+                    {
+                        await UnfenceSharedSchemaAsync(tenantId);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.WarnFormsDbNotUnfenced(e, tenantId);
+                    }
+
                     throw;
                 }
             }
 
             await CompleteSwitchAsync(tenantId);
             logger.InfoFormsDbIsolated(tenantId, databaseName);
-
-            return target;
         }
+
+        await SyncMovedTablesAsync(tenantId);
+
+        return target;
     }
 
     // Under the provision lock, once the portal's database is live: the settings name it, and the shared schema goes.
@@ -236,7 +304,13 @@ public class FormsDbProvisioningService(
         if (settings.DatabaseName != databaseName)
         {
             settings.DatabaseName = databaseName;
-            await settingsManager.SaveAsync(settings, tenantId);
+
+            // The save logs and swallows its own failure; the shared schema is dropped only once the settings name the new
+            // database, otherwise a node reading them would provision the shared schema again and lose what it takes.
+            if (!await settingsManager.SaveAsync(settings, tenantId))
+            {
+                throw new InvalidOperationException($"The built-in forms database settings of tenant {tenantId} could not be saved.");
+            }
         }
 
         await _cache.RemoveAndNotifyAsync(GetCacheKey(tenantId));
@@ -265,7 +339,13 @@ public class FormsDbProvisioningService(
         var ro = Quote(GetRoUser(tenantId));
 
         await using var admin = await OpenAdminAsync(null);
-        await ExecuteAsync(admin, $"GRANT {rw} TO CURRENT_USER");
+
+        // The copy reads the tables through this membership. Since PostgreSQL 16 a repeated GRANT by the same grantor
+        // keeps the options of the existing one, so a membership granted earlier WITH INHERIT FALSE (an administrator
+        // looking at the data) would stay without inheritance and the copy would fail with 42501.
+        await ExecuteAsync(admin, admin.PostgreSqlVersion.Major >= 16
+            ? $"GRANT {rw} TO CURRENT_USER WITH INHERIT TRUE"
+            : $"GRANT {rw} TO CURRENT_USER");
         await ExecuteAsync(admin, $"REVOKE ALL ON SCHEMA {schema} FROM {rw}, {ro}");
         await ExecuteAsync(admin, $"REVOKE CONNECT ON DATABASE {Quote(admin.Database)} FROM {rw}, {ro}");
     }
@@ -367,6 +447,7 @@ public class FormsDbProvisioningService(
 
         // A move in progress holds this lock, so its database is not taken for a leftover. What to drop is decided by the
         // mark on the database, never by the settings, which this process may read from a stale cache.
+        var switched = false;
         await using (await distributedLockProvider.TryAcquireFairLockAsync(GetProvisionLockKey(tenantId)))
         {
             var databaseName = GetDatabaseName(tenantId);
@@ -378,23 +459,86 @@ public class FormsDbProvisioningService(
                 {
                     await CompleteSwitchAsync(tenantId);
                     logger.InfoFormsDbOrphanRemoved(tenantId, GetSchemaName(tenantId));
+                    switched = true;
                 }
+            }
+            else
+            {
+                await DropLeftoverDatabaseAsync(tenantId, databaseName, hasSchema);
+            }
+        }
 
+        if (switched)
+        {
+            await SyncMovedTablesAsync(tenantId);
+        }
+    }
+
+    // Under the provision lock: a database never marked live is a broken-off copy.
+    private async Task DropLeftoverDatabaseAsync(int tenantId, string databaseName, bool hasSchema)
+    {
+        await using (var admin = await OpenAdminAsync(null))
+        {
+            await ExecuteAsync(admin, $"DROP DATABASE IF EXISTS {Quote(databaseName)} WITH (FORCE)");
+        }
+
+        logger.InfoFormsDbOrphanRemoved(tenantId, databaseName);
+
+        // A move interrupted during the copy left the shared schema closed to the portal.
+        if (hasSchema)
+        {
+            await UnfenceSharedSchemaAsync(tenantId);
+        }
+    }
+
+    // Best effort, after the switch: a submission refused while the tables were copied is in the search index, and the
+    // copied table lacks it. Tables that were not copied are filled from the index when they are created on first use.
+    private async Task SyncMovedTablesAsync(int tenantId)
+    {
+        try
+        {
+            List<string> tables;
+            await using (var admin = await OpenAdminAsync(GetDatabaseName(tenantId)))
+            await using (var cmd = admin.CreateCommand())
+            {
+                cmd.CommandText = "SELECT tablename FROM pg_tables WHERE schemaname = @schema AND tablename ~ '^form_[0-9]+_v[0-9]+$'";
+                cmd.Parameters.Add(new NpgsqlParameter("@schema", GetSchemaName(tenantId)));
+
+                tables = [];
+                await using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    tables.Add(reader.GetString(0));
+                }
+            }
+
+            await using var scope = serviceScopeFactory.CreateAsyncScope();
+            await scope.ServiceProvider.GetRequiredService<TenantManager>().SetCurrentTenantAsync(tenantId);
+
+            // Runs in the background too, which must never provision: the report creator shares this client in the scope.
+            if (!await scope.ServiceProvider.GetRequiredService<BuiltinFormsDatabaseClient>().UseProvisionedOnlyAsync())
+            {
+                logger.WarnFormsDbMovedTablesSkipped(tenantId);
                 return;
             }
 
-            await using (var admin = await OpenAdminAsync(null))
-            {
-                await ExecuteAsync(admin, $"DROP DATABASE IF EXISTS {Quote(databaseName)} WITH (FORCE)");
-            }
+            var reportCreator = scope.ServiceProvider.GetRequiredService<FormFillingReportCreator>();
 
-            logger.InfoFormsDbOrphanRemoved(tenantId, databaseName);
-
-            // A move interrupted during the copy left the shared schema closed to the portal.
-            if (hasSchema)
+            foreach (var table in tables)
             {
-                await UnfenceSharedSchemaAsync(tenantId);
+                try
+                {
+                    await reportCreator.SyncBuiltinDbTableAsync(table);
+                }
+                catch (Exception e)
+                {
+                    logger.WarnFormsDbTableNotSynced(e, tenantId, table);
+                }
             }
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormsDbMovedTablesNotSynced(e, tenantId);
         }
     }
 
@@ -541,6 +685,13 @@ public class FormsDbProvisioningService(
                     "EXECUTE format('GRANT CONNECT ON DATABASE %I TO %I', current_database(), r.rolname); END LOOP; END $$");
                 await ExecuteAsync(connection, $"GRANT CONNECT ON DATABASE \"{database}\" TO CURRENT_USER");
                 await ExecuteAsync(connection, $"REVOKE CONNECT ON DATABASE \"{database}\" FROM PUBLIC");
+
+                // A database of the administrator's server, not one this service made for a portal: roles that reached it
+                // through PUBLIC (monitoring, backups, replication) are now refused until granted CONNECT themselves.
+                if (database == new NpgsqlConnectionStringBuilder(AdminConnectionString).Database)
+                {
+                    logger.WarnFormsDbPublicConnectRevoked(database);
+                }
             }
         }
     }
@@ -613,7 +764,9 @@ public class FormsDbProvisioningService(
         }
     }
 
-    // A portal that moved into its own database is provisioned there again while that database is still there.
+    // A portal that moved into its own database is provisioned there again while that database is live, also when the
+    // settings do not name it: a move broken off before they were saved, or a backup taken before the move restored.
+    // Back in the shared schema, its submissions would be dropped with that schema when the switch is completed.
     private async Task<FormsDbCredentials> ProvisionAsync(int tenantId)
     {
         var schemaName = GetSchemaName(tenantId);
@@ -622,16 +775,7 @@ public class FormsDbProvisioningService(
         var rwPassword = UserManagerWrapper.GeneratePassword();
         var roPassword = UserManagerWrapper.GeneratePassword();
 
-        string? databaseName = null;
-        var stored = await settingsManager.LoadAsync<BuiltinFormsDbSettings>(tenantId);
-        if (stored.DatabaseName == GetDatabaseName(tenantId))
-        {
-            await using var admin = await OpenAdminAsync(null);
-            if (await DatabaseExistsAsync(admin, stored.DatabaseName))
-            {
-                databaseName = stored.DatabaseName;
-            }
-        }
+        var databaseName = await IsLiveAsync(GetDatabaseName(tenantId)) ? GetDatabaseName(tenantId) : null;
 
         await SetUpSchemaAsync(tenantId, databaseName, rwPassword, roPassword);
 
@@ -814,7 +958,7 @@ public class FormsDbProvisioningService(
     private FormsDbCredentials BuildCredentials(string schemaName, string? databaseName, string rwUser, string rwPassword, string roUser, string roPassword)
     {
         var rwBuilder = CreateConnectionStringBuilder(schemaName, databaseName, rwUser, rwPassword);
-        var roBuilder = CreateConnectionStringBuilder(schemaName, databaseName, roUser, roPassword);
+        var roBuilder = CreateRoConnectionStringBuilder(rwBuilder, roUser, roPassword);
 
         return new FormsDbCredentials(
             SchemaName: schemaName,
@@ -845,6 +989,22 @@ public class FormsDbProvisioningService(
         }
 
         return builder;
+    }
+
+    // What a portal administrator gets, so only what reaching the portal's tables needs: nothing of the server's own
+    // connection (certificate trust, timeouts, error details) is handed out. TLS is kept as the server requires it.
+    private static NpgsqlConnectionStringBuilder CreateRoConnectionStringBuilder(NpgsqlConnectionStringBuilder rwBuilder, string user, string password)
+    {
+        return new NpgsqlConnectionStringBuilder
+        {
+            Host = rwBuilder.Host,
+            Port = rwBuilder.Port,
+            Database = rwBuilder.Database,
+            Username = user,
+            Password = password,
+            SearchPath = rwBuilder.SearchPath,
+            SslMode = rwBuilder.SslMode
+        };
     }
 
     // Settings encrypted with another machine key (restored elsewhere) cannot be read: re-provision instead.
@@ -901,9 +1061,24 @@ internal static partial class FormsDbProvisioningServiceLogger
     [LoggerMessage(LogLevel.Information, "Built-in forms DB: leftover {objectName} of tenant {tenantId} removed")]
     public static partial void InfoFormsDbOrphanRemoved(this ILogger<FormsDbProvisioningService> logger, int tenantId, string objectName);
 
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: table {tableName} of tenant {tenantId} was not completed from the search index after the move")]
+    public static partial void WarnFormsDbTableNotSynced(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId, string tableName);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the tables of tenant {tenantId} were not completed from the search index after the move")]
+    public static partial void WarnFormsDbMovedTablesNotSynced(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId);
+
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: leftovers of tenant {tenantId} could not be checked")]
     public static partial void WarnFormsDbNotReconciled(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId);
 
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the connection limit of role {role} was not changed, the next cleanup pass tries again")]
     public static partial void WarnFormsDbConnectionLimitNotSet(this ILogger<FormsDbProvisioningService> logger, Exception exception, string role);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the shared schema of tenant {tenantId} was not given back after a failed move, the next provisioning or the reconciliation gives it back")]
+    public static partial void WarnFormsDbNotUnfenced(this ILogger<FormsDbProvisioningService> logger, Exception exception, int tenantId);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the tables of tenant {tenantId} were not completed from the search index after the move, the portal has no usable credentials; missing rows are added when each table is next used")]
+    public static partial void WarnFormsDbMovedTablesSkipped(this ILogger<FormsDbProvisioningService> logger, int tenantId);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: CONNECT on database {databaseName} was revoked from PUBLIC so that portal accounts reach only their own data; grant CONNECT to the server's own roles (monitoring, backups, replication) that used it")]
+    public static partial void WarnFormsDbPublicConnectRevoked(this ILogger<FormsDbProvisioningService> logger, string databaseName);
 }

@@ -133,6 +133,33 @@ public class BuiltinDbReadOnlyAccountTests(AspireAppFixture fixture) : BaseTest(
             .Should().Be("0");
     }
 
+    // A move broken off after its database was marked live and before the settings named it (a crash, a failed save, or
+    // a backup taken before the move restored): the portal must be provisioned in that database, never again in the
+    // shared schema, which completing the move drops together with what was written there meanwhile.
+    [Fact]
+    public async Task MoveBrokenOffAfterMarkedLive_PortalIsProvisionedInItsOwnDatabase()
+    {
+        var databaseName = $"forms_t{TenantId}";
+
+        // The state the move leaves after its mark, planted directly: no call can stop a move between two steps. The
+        // comment is the mark FormsDbProvisioningService writes on a database that holds every row of the portal.
+        await using (var server = await Fixture.OpenFormsServerAsync("forms", TestContext.Current.CancellationToken))
+        {
+            await ExecuteAsync(server, $"CREATE DATABASE \"{databaseName}\" OWNER forms_admin");
+            await ExecuteAsync(server, $"COMMENT ON DATABASE \"{databaseName}\" IS 'docspace forms: live'");
+        }
+
+        await _filesClient.Authenticate(Owner);
+        var files = new RawApiClient(_filesClient);
+        using var response = await files.GetAsync("api/2.0/files/builtinDb/connectionString", TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        (await files.ReadAsync<BuiltinDbCredentials>(response, TestContext.Current.CancellationToken)).Database.Should().Be(databaseName);
+
+        await using var shared = await Fixture.OpenFormsServerAsync("forms", TestContext.Current.CancellationToken);
+        (await ScalarAsync(shared, $"SELECT count(*)::text FROM pg_namespace WHERE nspname = 'tenant_{TenantId}'")).Should().Be("0");
+    }
+
     private Task<BuiltinDbCredentials> GetCredentialsAsync() => GetCredentialsAsync(_filesClient, Owner);
 
     private async Task<BuiltinDbCredentials> GetCredentialsAsync(HttpClient client, User? owner = null)

@@ -73,9 +73,9 @@ public class BuiltinDbConnectionDto
 
     /// <summary>
     /// The same details as an Npgsql connection string, with the portal's schema as the search path so that tables are
-    /// found by their names alone.
+    /// found by their names alone, and the SSL mode the server requires; pool and timeout settings are left to the client.
     /// </summary>
-    /// <example>Host=db.example.com;Port=5432;Database=forms_t42;Username=forms_t42_ro;Password=Qp7vT2k9LmXa;Search Path=tenant_42;Timezone=UTC;Maximum Pool Size=5;Connection Idle Lifetime=60</example>
+    /// <example>Host=db.example.com;Port=5432;Database=forms_t42;Username=forms_t42_ro;Password=Qp7vT2k9LmXa;Search Path=tenant_42;SSL Mode=Require</example>
     public string ConnectionString { get; set; }
 }
 

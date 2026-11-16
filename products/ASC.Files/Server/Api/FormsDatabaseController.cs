@@ -43,28 +43,25 @@ public class FormsDatabaseController(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Returns read-only PostgreSQL connection details for the current portal's tables in the built-in forms database,
-    /// which stores the submissions of every form filling room while the portal has no external database configured,
-    /// whatever the room's send-to-database setting. The server must have the built-in forms database configured,
-    /// otherwise the call is refused with 403. Only a portal administrator who can change portal settings may call it.
-    /// The portal gets a PostgreSQL database of its own, so the read-only account sees no
-    /// table, column or row of another portal: the first call starts moving the portal's tables there and answers 202
-    /// with no body; repeat the call until it answers 200. The move copies the existing submissions and does not stop
-    /// form filling; a response submitted while the tables are copied reaches the portal's database on the next use of
-    /// its form. When the move failed, the call answers 503 with a `Retry-After` header until a new attempt may start.
-    /// A later call returns the same database and credentials while they still sign in, and sets new
-    /// passwords when they do not, so the call is safe to repeat. The read-only account can only read the portal's
-    /// tables, with one row per completed form: a table named `form_{formId}_v{version}` after the first version it
-    /// holds, shared by later versions that only renamed fields. Tables appear as forms are used; a table nobody
-    /// submitted to or analysed for a long time may be dropped and is restored from the search index on its next use.
-    /// The operation does not configure an external database; that is done in the portal settings.
+    /// Returns read-only PostgreSQL connection details for the current portal's form submissions in the built-in forms
+    /// database, used while the portal has no external database configured. Only a portal administrator who can change
+    /// portal settings may call it, and a token scoped to reading files is not enough: it needs `files:write`. When the
+    /// server has no built-in forms database the call is refused with 403. The
+    /// read-only account works in a database of the portal's own, so it sees nothing of other portals: the first call
+    /// starts moving the portal's tables there and answers 202 without a `response` field; repeat the call until it
+    /// answers 200. Form filling goes on during the move, and a row that could not be written meanwhile is added to the
+    /// new database from the search index. A failed move answers 503 with a `Retry-After` header until a new attempt may start. Repeated calls
+    /// return the same database and credentials; new passwords are set only when the stored ones no longer sign in, as
+    /// after a restored backup. The account only reads: one row per completed form, in tables named
+    /// `form_{formId}_v{version}` after the first version they hold. Tables appear as forms are used; one unused for long
+    /// may be dropped and is restored on its next use. An external database is configured in the portal settings instead.
     /// </remarks>
     /// <summary>Get built-in forms database connection</summary>
     /// <path>api/2.0/files/builtinDb/connectionString</path>
     [Tags("Files / Built-in Database")]
     [SwaggerResponse(200, "Read-only connection details for the portal's tables in the built-in forms database", typeof(BuiltinDbConnectionDto))]
     [SwaggerResponse(202, "The portal's own database is being prepared; repeat the call later")]
-    [SwaggerResponse(403, "The caller cannot change portal settings, or the server has no built-in forms database configured")]
+    [SwaggerResponse(403, "The caller cannot change portal settings, the token has no `files:write` scope, or the server has no built-in forms database configured")]
     [SwaggerResponse(503, "Moving the portal into its own database failed; repeat the call after the `Retry-After` seconds")]
     [HttpGet("builtinDb/connectionString")]
     public async Task<ActionResult<BuiltinDbConnectionDto>> GetBuiltinDbConnectionAsync()
