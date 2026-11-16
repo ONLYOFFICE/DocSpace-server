@@ -36,34 +36,62 @@ namespace ASC.Files.Tests.Tests._01_Files.Forms.BuiltinDb;
 /// <summary>
 /// <c>GET /files/builtinDb/connectionString</c> hands out the password of an account that reads every form submission
 /// of the portal, past the rights the caller has on the rooms, so a token that may only read is refused even when it
-/// belongs to the owner. The DocSpace.API.SDK 4.1.0 does not carry the endpoint yet, so it is called over raw HTTP.
+/// belongs to the owner; so is one that may write only rooms or accounts. The DocSpace.API.SDK 4.1.0 does not carry the
+/// endpoint yet, so it is called over raw HTTP (<see cref="BuiltinDbApi"/>).
 /// </summary>
 [Trait("Category", "Security")]
 [Trait("Feature", "Forms")]
 public class BuiltinDbConnectionScopeTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    public static TheoryData<string> ReadOnlyScopes => ["files:read", "*:read"];
+    // Scopes that read files, read everything, or write something other than files; each with a read its scope allows.
+    public static TheoryData<string, string> ScopesWithoutFilesWrite => new()
+    {
+        { "files:read", MyDocuments },
+        { "*:read", MyDocuments },
+        { "rooms:write", Rooms },
+        { "accounts:write", People }
+    };
+
+    public static TheoryData<string> ScopesWithFilesWrite => ["files:write", "*:write"];
+
+    private const string MyDocuments = "my documents";
+    private const string Rooms = "rooms";
+    private const string People = "people";
 
     [Theory]
-    [MemberData(nameof(ReadOnlyScopes))]
-    public async Task ApiKeyThatMayOnlyRead_IsRefused(string scope)
+    [MemberData(nameof(ScopesWithoutFilesWrite))]
+    public async Task ApiKeyThatCannotWriteFiles_IsRefused(string scope, string allowedRead)
     {
         var key = await CreateApiKeyAsync(scope);
+        _filesClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", key);
+        _peopleClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", key);
+        var cancellationToken = TestContext.Current.CancellationToken;
 
-        using var response = await GetConnectionAsync(key);
+        // The key works where its scope allows (the SDK throws on anything but 2xx)...
+        Task read = allowedRead switch
+        {
+            MyDocuments => _foldersApi.GetMyFolderAsync(cancellationToken: cancellationToken),
+            Rooms => _roomsApi.GetRoomsFolderAsync(cancellationToken: cancellationToken),
+            _ => _profilesApi.GetAllProfilesAsync(cancellationToken: cancellationToken)
+        };
+        await read;
 
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        // ...so the refusal here is the scope's, not the right's: the owner has the right, whose refusal says "Access denied".
+        using var refused = await BuiltinDbApi.GetConnectionAsync(_filesClient);
+        refused.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await refused.Content.ReadAsStringAsync(cancellationToken)).Should().NotContain("Access denied");
     }
 
-    [Fact]
-    public async Task ApiKeyThatMayWriteFiles_GetsThrough()
+    [Theory]
+    [MemberData(nameof(ScopesWithFilesWrite))]
+    public async Task ApiKeyThatMayWriteFiles_GetsTheConnection(string scope)
     {
-        var key = await CreateApiKeyAsync("files:write");
+        var key = await CreateApiKeyAsync(scope);
+        _filesClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", key);
 
-        using var response = await GetConnectionAsync(key);
+        var connection = await BuiltinDbApi.GetReadyAsync(_filesClient);
 
-        // 202 while the portal's own database is being prepared, 200 once it is ready.
-        response.StatusCode.Should().BeOneOf(HttpStatusCode.OK, HttpStatusCode.Accepted);
+        connection.Database.Should().Be($"forms_t{TenantId}");
     }
 
     private async Task<string> CreateApiKeyAsync(string scope)
@@ -73,12 +101,5 @@ public class BuiltinDbConnectionScopeTests(AspireAppFixture fixture) : BaseTest(
             new CreateApiKeyRequestDto($"forms db {scope}", [scope]), TestContext.Current.CancellationToken);
 
         return created.Response.Key;
-    }
-
-    private async Task<HttpResponseMessage> GetConnectionAsync(string apiKey)
-    {
-        _filesClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-
-        return await new RawApiClient(_filesClient).GetAsync("api/2.0/files/builtinDb/connectionString", TestContext.Current.CancellationToken);
     }
 }

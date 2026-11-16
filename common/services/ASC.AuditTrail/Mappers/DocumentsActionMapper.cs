@@ -268,7 +268,13 @@ internal class SettingsActionMapper : ILocationActionMapper
                 ActionType.Update, [
                     MessageAction.DocumentsThirdPartySettingsUpdated, MessageAction.DocumentsOverwritingSettingsUpdated,
                     MessageAction.DocumentsForcesave, MessageAction.DocumentsStoreForcesave, MessageAction.DocumentsUploadingFormatsSettingsUpdated,
-                    MessageAction.DocumentsExternalShareSettingsUpdated, MessageAction.DocumentsDefaultTemplatesSettingsUpdated
+                    MessageAction.DocumentsExternalShareSettingsUpdated, MessageAction.DocumentsDefaultTemplatesSettingsUpdated,
+                    MessageAction.BuiltinFormsDbPasswordReset
+                ]
+            },
+            {
+                ActionType.UpdateAccess, [
+                    MessageAction.BuiltinFormsDbAccessIssued
                 ]
             }
         };
@@ -315,8 +321,7 @@ internal class PrivacyRoomActionMapper : ILocationActionMapper
             {
                 ActionType.Create, [
                     MessageAction.PrivacyRoomKeyCreated,
-                    MessageAction.FileKeysSet,
-                    MessageAction.BuiltinFormsDbAccessIssued
+                    MessageAction.FileKeysSet
                 ]
             },
             {

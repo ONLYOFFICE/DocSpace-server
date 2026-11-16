@@ -664,6 +664,9 @@ public enum MessageAction
     [Description("Built-in forms database read access issued")]
     BuiltinFormsDbAccessIssued = 5166,
 
+    [Description("Built-in forms database read-only password reset")]
+    BuiltinFormsDbPasswordReset = 5167,
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 

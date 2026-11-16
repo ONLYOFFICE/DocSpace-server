@@ -819,6 +819,9 @@
   <data name="BuiltinFormsDbAccessIssued" xml:space="preserve">
     <value>Read access to the built-in forms database issued</value>
   </data>
+  <data name="BuiltinFormsDbPasswordReset" xml:space="preserve">
+    <value>Password of the read access to the built-in forms database reset</value>
+  </data>
   <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
     <value>Private room encryption key {0} updated</value>
   </data>

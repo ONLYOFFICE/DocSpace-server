@@ -52,21 +52,20 @@ public class BuiltinDbConnectionDto
     public int Port { get; set; }
 
     /// <summary>
-    /// The PostgreSQL database of this portal alone; no other portal's tables are in it or visible from it. The
-    /// portal's tables are in its own schema there.
+    /// The PostgreSQL database of this portal alone: it holds no tables of other portals. The portal's tables are in
+    /// its own schema there. The catalog of the server still lists the names of the other databases and roles.
     /// </summary>
     /// <example>forms_t42</example>
     public string Database { get; set; }
 
     /// <summary>
-    /// The read-only account for this portal's schema; it can read the form tables but not change them.
+    /// The read-only PostgreSQL role for this portal's schema; it can read the form tables but not change them.
     /// </summary>
     /// <example>forms_t42_ro</example>
-    public string User { get; set; }
+    public string UserName { get; set; }
 
     /// <summary>
-    /// Password of the read-only account. It changes when the account has to be set up again; ask for the details again
-    /// when it stops signing in.
+    /// Password of the read-only PostgreSQL role.
     /// </summary>
     /// <example>Qp7vT2k9LmXa</example>
     public string Password { get; set; }
@@ -82,7 +81,7 @@ public class BuiltinDbConnectionDto
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
 public static partial class BuiltinDbConnectionDtoMapper
 {
-    [MapProperty(nameof(FormsDbCredentials.RoUser), nameof(BuiltinDbConnectionDto.User))]
+    [MapProperty(nameof(FormsDbCredentials.RoUser), nameof(BuiltinDbConnectionDto.UserName))]
     [MapProperty(nameof(FormsDbCredentials.RoPassword), nameof(BuiltinDbConnectionDto.Password))]
     [MapProperty(nameof(FormsDbCredentials.RoConnectionString), nameof(BuiltinDbConnectionDto.ConnectionString))]
     public static partial BuiltinDbConnectionDto Map(this FormsDbCredentials source);

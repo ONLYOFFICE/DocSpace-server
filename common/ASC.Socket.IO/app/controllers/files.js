@@ -289,6 +289,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/reset-builtin-db-password", (req, res) => {
+    files.resetBuiltinDbPassword(req.body);
+    res.end();
+  });
+
   router.post("/form-suggested-questions", (req, res) => {
     files.formSuggestedQuestions(req.body);
     res.end();

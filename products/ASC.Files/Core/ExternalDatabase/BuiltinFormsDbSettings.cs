@@ -41,6 +41,11 @@ public class BuiltinFormsDbSettings : ISettings<BuiltinFormsDbSettings>
     public string? SchemaName { get; set; }
 
     /// <summary>The portal's own database once direct access was asked for; empty while it lives in the shared one.</summary>
+    /// <remarks>
+    /// Nodes older than this property still write into the shared schema, which a moved portal no longer has: during a
+    /// rolling update their writes of moved portals fail (the rows stay in the search index) until the last old node is
+    /// replaced. The release notes say so.
+    /// </remarks>
     public string? DatabaseName { get; set; }
     public string? RwUser { get; set; }
     public string? RwPassword { get; set; }

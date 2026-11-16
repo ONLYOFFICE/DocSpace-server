@@ -74,6 +74,12 @@ public class BuiltinDbFormSubmissionIntegrationEventHandler(
                             @event.RoomId,
                             @event.FormsDataUrl);
                     }
+                    catch (FormsDbMovingException)
+                    {
+                        // The tables are being copied into the portal's own database and refuse every write until the
+                        // move ends; then the copied tables are completed from the search index, which holds this row.
+                        logger.InfoSubmissionDeferredByMove(@event.TenantId, @event.OriginalFormId, @event.OriginalFormVersion);
+                    }
                     catch (Exception ex)
                     {
                         // The search index already holds the submission, so the table is completed from it at once.
@@ -88,4 +94,10 @@ public class BuiltinDbFormSubmissionIntegrationEventHandler(
             }
         }
     }
+}
+
+internal static partial class BuiltinDbFormSubmissionIntegrationEventHandlerLogger
+{
+    [LoggerMessage(LogLevel.Information, "Built-in forms DB: a submission of form {formId} v{formVersion} of tenant {tenantId} waits for the move into the portal's own database and is added from the search index after it")]
+    public static partial void InfoSubmissionDeferredByMove(this ILogger<BuiltinDbFormSubmissionIntegrationEventHandler> logger, int tenantId, int formId, int formVersion);
 }

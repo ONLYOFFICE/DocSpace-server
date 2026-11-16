@@ -1767,7 +1767,7 @@ public class FormFillingReportCreator(
 
     // A fault that may pass if the step is repeated later.
     internal static bool IsTransient(Exception exception) =>
-        exception is DistributedLockException or TimeoutException || exception is DbException { IsTransient: true };
+        exception is DistributedLockException or TimeoutException or FormsDbMovingException || exception is DbException { IsTransient: true };
 
     // Under the version lock. The table of the version and of the versions continuing it are moved into the shared table:
     // rows are copied first and the links saved next. A built-in table is dropped last, only with all its rows in the

@@ -1285,7 +1285,10 @@
     <value>Ключ шифрования приватной комнаты {0} удалён</value>
   </data>
   <data name="BuiltinFormsDbAccessIssued" xml:space="preserve">
-    <value>Выдан доступ на чтение к встроенной базе форм</value>
+    <value>Доступ на чтение к встроенной базе данных форм выдан</value>
+  </data>
+  <data name="BuiltinFormsDbPasswordReset" xml:space="preserve">
+    <value>Пароль доступа на чтение к встроенной базе данных форм сброшен</value>
   </data>
   <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
     <value>Ключ шифрования приватной комнаты {0} обновлён</value>

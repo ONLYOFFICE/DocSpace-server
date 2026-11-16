@@ -48,20 +48,20 @@ public class BuiltinDbReadOnlyAccountTests(AspireAppFixture fixture) : BaseTest(
     [Fact]
     public async Task ReadOnlyAccount_ReadsItsSchema_AndCannotWrite()
     {
-        await using var connection = await OpenAsync((await GetCredentialsAsync()).ConnectionString);
+        await using var connection = await BuiltinDbApi.OpenAsync((await GetCredentialsAsync()).ConnectionString);
 
-        (await ScalarAsync(connection, "SELECT current_schema()")).Should().StartWith("tenant_");
+        (await BuiltinDbApi.ScalarAsync(connection, "SELECT current_schema()")).Should().StartWith("tenant_");
 
-        var exception = await Assert.ThrowsAsync<PostgresException>(() => ExecuteAsync(connection, "CREATE TABLE ro_probe (id int)"));
+        var exception = await Assert.ThrowsAsync<PostgresException>(() => BuiltinDbApi.ExecuteAsync(connection, "CREATE TABLE ro_probe (id int)"));
         exception.SqlState.Should().Be(PostgresErrorCodes.InsufficientPrivilege);
     }
 
     [Fact]
     public async Task ReadOnlyAccount_CannotWriteLargeObjects()
     {
-        await using var connection = await OpenAsync((await GetCredentialsAsync()).ConnectionString);
+        await using var connection = await BuiltinDbApi.OpenAsync((await GetCredentialsAsync()).ConnectionString);
 
-        var exception = await Assert.ThrowsAsync<PostgresException>(() => ExecuteAsync(connection, "SELECT lo_from_bytea(0, 'x')"));
+        var exception = await Assert.ThrowsAsync<PostgresException>(() => BuiltinDbApi.ExecuteAsync(connection, "SELECT lo_from_bytea(0, 'x')"));
         exception.SqlState.Should().Be(PostgresErrorCodes.InsufficientPrivilege);
     }
 
@@ -71,20 +71,20 @@ public class BuiltinDbReadOnlyAccountTests(AspireAppFixture fixture) : BaseTest(
         var credentials = await GetCredentialsAsync();
         var other = new NpgsqlConnectionStringBuilder(credentials.ConnectionString) { Database = "postgres" };
 
-        var exception = await Assert.ThrowsAsync<PostgresException>(() => OpenAsync(other.ConnectionString));
+        var exception = await Assert.ThrowsAsync<PostgresException>(() => BuiltinDbApi.OpenAsync(other.ConnectionString));
         exception.SqlState.Should().Be(PostgresErrorCodes.InsufficientPrivilege);
     }
 
     [Fact]
     public async Task ReadOnlyAccount_LongQuery_IsEndedFromOutside()
     {
-        await using var connection = await OpenAsync((await GetCredentialsAsync()).ConnectionString);
+        await using var connection = await BuiltinDbApi.OpenAsync((await GetCredentialsAsync()).ConnectionString);
 
         // The role lifts its own timeout; pg_cron still ends the query once it runs past the limit.
-        await ExecuteAsync(connection, "SET statement_timeout = 0");
+        await BuiltinDbApi.ExecuteAsync(connection, "SET statement_timeout = 0");
         var started = Stopwatch.StartNew();
 
-        var exception = await Assert.ThrowsAnyAsync<NpgsqlException>(() => ExecuteAsync(connection, "SELECT pg_sleep(120)"));
+        var exception = await Assert.ThrowsAnyAsync<NpgsqlException>(() => BuiltinDbApi.ExecuteAsync(connection, "SELECT pg_sleep(120)"));
 
         // pg_terminate_backend ends the session: the server reports it, or the connection drops before it can.
         if (exception is PostgresException postgres)
@@ -114,105 +114,56 @@ public class BuiltinDbReadOnlyAccountTests(AspireAppFixture fixture) : BaseTest(
 
         using var other = await Fixture.CreatePortalAsync(TestContext.Current.CancellationToken);
         await other.FilesHttpClient.Authenticate(other.Owner);
-        var foreign = await GetCredentialsAsync(other.FilesHttpClient);
+        var foreign = await BuiltinDbApi.GetReadyAsync(other.FilesHttpClient);
 
         // Its database cannot be entered...
         var toForeign = new NpgsqlConnectionStringBuilder(own.ConnectionString) { Database = foreign.Database };
-        var exception = await Assert.ThrowsAsync<PostgresException>(() => OpenAsync(toForeign.ConnectionString));
+        var exception = await Assert.ThrowsAsync<PostgresException>(() => BuiltinDbApi.OpenAsync(toForeign.ConnectionString));
         exception.SqlState.Should().Be(PostgresErrorCodes.InsufficientPrivilege);
 
         // ...nor the shared one, whose catalog lists the tables of the portals still living there.
-        var toShared = new NpgsqlConnectionStringBuilder(own.ConnectionString) { Database = "forms" };
-        exception = await Assert.ThrowsAsync<PostgresException>(() => OpenAsync(toShared.ConnectionString));
-        exception.SqlState.Should().BeOneOf(PostgresErrorCodes.InsufficientPrivilege, PostgresErrorCodes.InvalidCatalogName);
+        var toShared = new NpgsqlConnectionStringBuilder(own.ConnectionString) { Database = BuiltinDbApi.SharedDatabase };
+        exception = await Assert.ThrowsAsync<PostgresException>(() => BuiltinDbApi.OpenAsync(toShared.ConnectionString));
+        exception.SqlState.Should().Be(PostgresErrorCodes.InsufficientPrivilege);
 
         // The catalog of its own database holds no other portal's schema.
-        await using var connection = await OpenAsync(own.ConnectionString);
-        (await ScalarAsync(connection,
+        await using var connection = await BuiltinDbApi.OpenAsync(own.ConnectionString);
+        (await BuiltinDbApi.ScalarAsync(connection,
                 "SELECT count(*)::text FROM pg_namespace WHERE nspname LIKE 'tenant_%' AND nspname <> current_schema()"))
             .Should().Be("0");
     }
 
-    // A move broken off after its database was marked live and before the settings named it (a crash, a failed save, or
-    // a backup taken before the move restored): the portal must be provisioned in that database, never again in the
-    // shared schema, which completing the move drops together with what was written there meanwhile.
+    // A live database of the portal that its settings do not name, as a backup taken before the move and restored
+    // leaves it: the portal must be provisioned in that database, never in the shared schema, which completing a move
+    // drops together with what was written there meanwhile. The rest of a move broken off after its mark (rows in the
+    // shared schema, the fence) is not planted here.
     [Fact]
-    public async Task MoveBrokenOffAfterMarkedLive_PortalIsProvisionedInItsOwnDatabase()
+    public async Task LiveDatabaseTheSettingsDoNotName_PortalIsProvisionedThere()
     {
         var databaseName = $"forms_t{TenantId}";
 
         // The state the move leaves after its mark, planted directly: no call can stop a move between two steps. The
         // comment is the mark FormsDbProvisioningService writes on a database that holds every row of the portal.
-        await using (var server = await Fixture.OpenFormsServerAsync("forms", TestContext.Current.CancellationToken))
+        await using (var server = await Fixture.OpenFormsServerAsync(BuiltinDbApi.SharedDatabase, TestContext.Current.CancellationToken))
         {
-            await ExecuteAsync(server, $"CREATE DATABASE \"{databaseName}\" OWNER forms_admin");
-            await ExecuteAsync(server, $"COMMENT ON DATABASE \"{databaseName}\" IS 'docspace forms: live'");
+            await BuiltinDbApi.ExecuteAsync(server, $"CREATE DATABASE \"{databaseName}\" OWNER {BuiltinDbApi.AdminRole}");
+            await BuiltinDbApi.ExecuteAsync(server, $"COMMENT ON DATABASE \"{databaseName}\" IS 'docspace forms: live'");
         }
 
         await _filesClient.Authenticate(Owner);
-        var files = new RawApiClient(_filesClient);
-        using var response = await files.GetAsync("api/2.0/files/builtinDb/connectionString", TestContext.Current.CancellationToken);
+        using var response = await BuiltinDbApi.GetConnectionAsync(_filesClient);
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        (await files.ReadAsync<BuiltinDbCredentials>(response, TestContext.Current.CancellationToken)).Database.Should().Be(databaseName);
+        (await BuiltinDbApi.ReadAsync(_filesClient, response)).Database.Should().Be(databaseName);
 
-        await using var shared = await Fixture.OpenFormsServerAsync("forms", TestContext.Current.CancellationToken);
-        (await ScalarAsync(shared, $"SELECT count(*)::text FROM pg_namespace WHERE nspname = 'tenant_{TenantId}'")).Should().Be("0");
+        await using var shared = await Fixture.OpenFormsServerAsync(BuiltinDbApi.SharedDatabase, TestContext.Current.CancellationToken);
+        (await BuiltinDbApi.ScalarAsync(shared, $"SELECT count(*)::text FROM pg_namespace WHERE nspname = 'tenant_{TenantId}'")).Should().Be("0");
     }
 
-    private Task<BuiltinDbCredentials> GetCredentialsAsync() => GetCredentialsAsync(_filesClient, Owner);
-
-    private async Task<BuiltinDbCredentials> GetCredentialsAsync(HttpClient client, User? owner = null)
+    private async Task<BuiltinDbConnection> GetCredentialsAsync()
     {
-        if (owner != null)
-        {
-            await client.Authenticate(owner);
-        }
+        await _filesClient.Authenticate(Owner);
 
-        // The first call answers 202 while the portal's own database is being prepared.
-        var files = new RawApiClient(client);
-        var deadline = DateTime.UtcNow.AddSeconds(60);
-        while (true)
-        {
-            using var response = await files.GetAsync("api/2.0/files/builtinDb/connectionString", TestContext.Current.CancellationToken);
-            if (response.StatusCode != HttpStatusCode.Accepted)
-            {
-                return await files.ReadAsync<BuiltinDbCredentials>(response, TestContext.Current.CancellationToken);
-            }
-
-            DateTime.UtcNow.Should().BeBefore(deadline, "the portal's own database must be ready within a minute");
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
+        return await BuiltinDbApi.GetReadyAsync(_filesClient);
     }
-
-    private static async Task<NpgsqlConnection> OpenAsync(string connectionString)
-    {
-        var connection = new NpgsqlConnection(connectionString);
-        try
-        {
-            await connection.OpenAsync(TestContext.Current.CancellationToken);
-
-            return connection;
-        }
-        catch
-        {
-            await connection.DisposeAsync();
-            throw;
-        }
-    }
-
-    private static async Task ExecuteAsync(NpgsqlConnection connection, string sql)
-    {
-        await using var command = new NpgsqlCommand(sql, connection) { CommandTimeout = 0 };
-        await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken);
-    }
-
-    private static async Task<string> ScalarAsync(NpgsqlConnection connection, string sql)
-    {
-        await using var command = new NpgsqlCommand(sql, connection);
-
-        return (string)(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken))!;
-    }
-
-    private sealed record BuiltinDbCredentials(string Host, int Port, string Database, string User, string Password, string ConnectionString);
 }

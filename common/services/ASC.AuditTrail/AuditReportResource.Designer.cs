@@ -2390,6 +2390,15 @@ namespace ASC.AuditTrail {
                 return ResourceManager.GetString("BuiltinFormsDbAccessIssued", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Password of the read access to the built-in forms database reset.
+        /// </summary>
+        public static string BuiltinFormsDbPasswordReset {
+            get {
+                return ResourceManager.GetString("BuiltinFormsDbPasswordReset", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Private room encryption key {0} updated.

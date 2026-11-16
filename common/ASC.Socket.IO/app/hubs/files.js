@@ -729,6 +729,20 @@ module.exports = (io) => {
       .forEach((userId) => filesIO.to(`${tenantId}-private-${userId}`).emit(`s:${name}`, data));
   }
 
+  // The read-only password of a portal's built-in forms database was reset (UserSocketManager): the DocSpace admins and
+  // the owner, who may read it, re-read it with GET files/builtinDb/connectionString. The event carries no password.
+  function resetBuiltinDbPassword({ tenantId, userIds } = {}) {
+    if (!Number.isInteger(tenantId) || tenantId <= 0 || !Array.isArray(userIds)) {
+      logger.warn(`reset-builtin-db-password skipped: tenantId=${tenantId}`);
+      return;
+    }
+
+    logger.info(`reset-builtin-db-password in tenant ${tenantId} for ${userIds.length} users`);
+    userIds
+      .filter((userId) => guid.test(userId))
+      .forEach((userId) => filesIO.to(`${tenantId}-private-${userId}`).emit("s:reset-builtin-db-password", {}));
+  }
+
   const addWebhook = (body) => webhookEvent("add-webhook", body);
   const updateWebhook = (body) => webhookEvent("update-webhook", body);
   const deleteWebhook = (body) => webhookEvent("delete-webhook", body);
@@ -787,6 +801,7 @@ module.exports = (io) => {
     changeAiAccessSettings,
     changeExternalSharingSettings,
     externalDbSettings,
+    resetBuiltinDbPassword,
     formSuggestedQuestions,
     pluginEvent,
     addWebhook,

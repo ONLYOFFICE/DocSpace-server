@@ -82,11 +82,16 @@ public class BuiltinFormsDbCleanerService(
                     return;
                 }
 
+                await using (var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(stoppingToken))
+                {
+                    tenantIds = await dbContext.ActiveTenantsWithSettingsAsync(BuiltinFormsDbSettings.ID).ToListAsync(stoppingToken);
+                }
+
                 // Removes what a failed portal removal or an interrupted move into a portal's own database left behind;
                 // the cleanup goes on without.
                 try
                 {
-                    await provisioner.ReconcileAsync(stoppingToken);
+                    await provisioner.ReconcileAsync(tenantIds.ToHashSet(), stoppingToken);
                 }
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
@@ -106,9 +111,6 @@ public class BuiltinFormsDbCleanerService(
                 {
                     logger.WarnConnectionLimitNotApplied(e);
                 }
-
-                await using var dbContext = await scope.ServiceProvider.GetRequiredService<IDbContextFactory<WebstudioDbContext>>().CreateDbContextAsync(stoppingToken);
-                tenantIds = await dbContext.ActiveTenantsWithSettingsAsync(BuiltinFormsDbSettings.ID).ToListAsync(stoppingToken);
             }
 
             var cutoff = DateTime.UtcNow - IdleInterval;

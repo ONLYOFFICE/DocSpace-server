@@ -38,27 +38,34 @@ public class FormsDatabaseController(
     TenantManager tenantManager,
     PermissionContext permissionContext,
     MessageService messageService,
+    UserSocketManager socketManager,
+    ILogger<FormsDatabaseController> logger,
     FolderDtoHelper folderDtoHelper,
     FileDtoHelper fileDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
     /// Returns read-only PostgreSQL connection details for the current portal's form submissions in the built-in forms
-    /// database, used while the portal has no external database configured. Only a portal administrator who can change
-    /// portal settings may call it, and a token scoped to reading files is not enough: it needs `files:write`. When the
-    /// server has no built-in forms database the call is refused with 403. The
-    /// read-only account works in a database of the portal's own, so it sees nothing of other portals: the first call
-    /// starts moving the portal's tables there and answers 202 without a `response` field; repeat the call until it
-    /// answers 200. Form filling goes on during the move, and a row that could not be written meanwhile is added to the
-    /// new database from the search index. A failed move answers 503 with a `Retry-After` header until a new attempt may start. Repeated calls
-    /// return the same database and credentials; new passwords are set only when the stored ones no longer sign in, as
-    /// after a restored backup. The account only reads: one row per completed form, in tables named
-    /// `form_{formId}_v{version}` after the first version they hold. Tables appear as forms are used; one unused for long
-    /// may be dropped and is restored on its next use. An external database is configured in the portal settings instead.
+    /// database. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. An API key or OAuth token also needs the `files:write` scope. The account reads the
+    /// submissions of every room of the portal, including rooms the caller cannot open. The details lead to a database
+    /// that holds the tables of this portal only. The first call starts moving the tables there and returns 202 without
+    /// a `response` field. Repeat the call until it returns 200. Forms can be filled during the move. A submission made
+    /// during the move may appear in the new database later. If the move fails, the call returns 503 with a
+    /// `Retry-After` header in seconds. After three failed moves in a row, the next move starts a day later. A repeated
+    /// call returns the same database and credentials. The password changes whenever the account has to be set up
+    /// again, for example after a restored backup. If the password stops working, or to end the open sessions of the
+    /// account, use `PUT api/2.0/files/builtinDb/password`. It sets a new password. The account cannot change data.
+    /// Each table holds one row per completed form. A table is named `form_{formId}_v{version}` after the first form
+    /// version it holds. A table appears when its form is first used. A table unused for the idle period of the
+    /// server may be deleted. The period is 30 days unless the administrator of the installation changed it. Its form
+    /// creates the table again on next use. If
+    /// the server has no built-in forms database, the call returns 403. To send the submissions to a database of your
+    /// own, use `POST api/2.0/settings/authservice`.
     /// </remarks>
     /// <summary>Get built-in forms database connection</summary>
     /// <path>api/2.0/files/builtinDb/connectionString</path>
-    [Tags("Files / Built-in Database")]
+    [Tags("Files / Built-in database")]
     [SwaggerResponse(200, "Read-only connection details for the portal's tables in the built-in forms database", typeof(BuiltinDbConnectionDto))]
     [SwaggerResponse(202, "The portal's own database is being prepared; repeat the call later")]
     [SwaggerResponse(403, "The caller cannot change portal settings, the token has no `files:write` scope, or the server has no built-in forms database configured")]
@@ -66,29 +73,90 @@ public class FormsDatabaseController(
     [HttpGet("builtinDb/connectionString")]
     public async Task<ActionResult<BuiltinDbConnectionDto>> GetBuiltinDbConnectionAsync()
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
-
-        if (!provisioner.IsEnabled())
-        {
-            throw new InvalidOperationException("Built-in forms database is not configured.");
-        }
+        await DemandAccessAsync();
 
         // A standalone server may hold several portals too, so every portal reads from a database of its own.
         var isolation = await provisioner.GetIsolatedAsync(tenantManager.GetCurrentTenantId());
-
-        if (isolation.RetryAfter is { } retryAfter)
-        {
-            Response.Headers.RetryAfter = Math.Ceiling(retryAfter.TotalSeconds).ToString(CultureInfo.InvariantCulture);
-            return StatusCode(StatusCodes.Status503ServiceUnavailable);
-        }
-
         if (isolation.Credentials == null)
         {
-            return Accepted();
+            return NotReady(isolation);
         }
 
         messageService.Send(MessageAction.BuiltinFormsDbAccessIssued);
 
         return isolation.Credentials.Map();
     }
+
+    /// <remarks>
+    /// Sets a new password for the read-only PostgreSQL account of the current portal in the built-in forms database.
+    /// The call also ends the open sessions of the account. So an app signed in with the old password loses its
+    /// connection. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
+    /// callers get 403. An API key or OAuth token also needs the `files:write` scope. The call changes data. You can
+    /// repeat it, and each call sets another password. It returns the connection details of
+    /// `GET api/2.0/files/builtinDb/connectionString` with the new password. If the portal is not yet in its own
+    /// database, the call starts the move and returns 202. Then no password changes, and the body has no `response`
+    /// field.
+    /// Repeat the call until it returns 200. If the move fails, the call returns 503 with a `Retry-After` header in
+    /// seconds. If the server has no built-in forms database, the call returns 403.
+    /// </remarks>
+    /// <summary>Reset built-in forms database password</summary>
+    /// <path>api/2.0/files/builtinDb/password</path>
+    [Tags("Files / Built-in database")]
+    [SwaggerResponse(200, "Read-only connection details for the portal's tables with the new password", typeof(BuiltinDbConnectionDto))]
+    [SwaggerResponse(202, "The portal's own database is being prepared and no password was changed; repeat the call later")]
+    [SwaggerResponse(403, "The caller cannot change portal settings, the token has no `files:write` scope, or the server has no built-in forms database configured")]
+    [SwaggerResponse(503, "Moving the portal into its own database failed; repeat the call after the `Retry-After` seconds")]
+    [HttpPut("builtinDb/password")]
+    public async Task<ActionResult<BuiltinDbConnectionDto>> ResetBuiltinDbPasswordAsync()
+    {
+        await DemandAccessAsync();
+
+        var isolation = await provisioner.ResetReadOnlyPasswordAsync(tenantManager.GetCurrentTenantId());
+        if (isolation.Credentials == null)
+        {
+            return NotReady(isolation);
+        }
+
+        messageService.Send(MessageAction.BuiltinFormsDbPasswordReset);
+
+        // A screen still showing the old password re-reads it; the reset itself is done, so a failed notice is logged.
+        try
+        {
+            await socketManager.ResetBuiltinDbPasswordAsync();
+        }
+        catch (Exception e)
+        {
+            logger.WarnBuiltinDbPasswordResetNotNotified(e);
+        }
+
+        return isolation.Credentials.Map();
+    }
+
+    private async Task DemandAccessAsync()
+    {
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        if (!provisioner.IsEnabled())
+        {
+            throw new InvalidOperationException("Built-in forms database is not configured.");
+        }
+    }
+
+    // The portal's own database is not ready: 503 with the wait after a failed move, otherwise 202.
+    private ActionResult NotReady(FormsDbIsolation isolation)
+    {
+        if (isolation.RetryAfter is { } retryAfter)
+        {
+            Response.Headers.RetryAfter = Math.Ceiling(retryAfter.TotalSeconds).ToString(CultureInfo.InvariantCulture);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+        }
+
+        return Accepted();
+    }
+}
+
+internal static partial class FormsDatabaseControllerLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: the open clients were not told that the read-only password was reset")]
+    public static partial void WarnBuiltinDbPasswordResetNotNotified(this ILogger<FormsDatabaseController> logger, Exception exception);
 }

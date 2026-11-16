@@ -57,6 +57,24 @@ public class UserSocketManager(ITariffService tariffService,
         await MakeRequest("change-my-type", new { tenantId, user = dto, admin = name, hasPersonalFolder });
     }
 
+    /// <summary>
+    /// The read-only password of the portal's built-in forms database was reset, so a screen showing the old one re-reads
+    /// it through <c>GET api/2.0/files/builtinDb/connectionString</c>. Sent to those who may read it under the rule of that
+    /// endpoint, the DocSpace admins and the owner, each in the private room only the socket service puts them in; the
+    /// payload carries no secret.
+    /// </summary>
+    public async Task ResetBuiltinDbPasswordAsync()
+    {
+        var tenant = _tenantManager.GetCurrentTenant();
+        var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
+        var userIds = admins.Select(u => u.Id).Append(tenant.OwnerId).Distinct().ToList();
+
+        foreach (var batch in userIds.Chunk(1000))
+        {
+            await MakeRequest("reset-builtin-db-password", new { tenantId = tenant.Id, userIds = batch });
+        }
+    }
+
     public async Task AddUserAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
