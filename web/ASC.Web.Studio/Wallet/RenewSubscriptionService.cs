@@ -74,7 +74,8 @@ public class RenewSubscriptionService(
     // of the balance, without looking at the claim again. With a slow accounting it can outlast the grace, and the
     // instance that takes the entry up then tops the wallet up as well: the card is charged twice, the money of both
     // deposits stays in the wallet. The payment change has no such gap: it is sent only by the process the journal
-    // still names, see TryMarkPaymentSentAsync.
+    // still names, see TryMarkPaymentRequestedAsync - except while a process of a version that does not know the mark
+    // rewrites the journal, see RenewalJournalEntry.
     private static readonly TimeSpan _claimWorkLimit = TimeSpan.FromMinutes(8);
 
     // How long after the timeout a renewal is re-checked while billing gives no answer at all, before the
@@ -469,12 +470,13 @@ public class RenewSubscriptionService(
                     return RenewalOutcome.Settled;
                 }
 
-                if (data.PaymentSentAt != null)
+                if (data.PaymentRequestedAt != null)
                 {
-                    // The stopped process had sent the payment change, and billing has had as long to apply it as a
-                    // re-check gives it. "Not extended" is final now, as it is for a pending renewal: the customer is
-                    // told, and the change is not sent a second time - billing may yet apply the first.
-                    throw new BillingException("The payment change was sent and billing does not report the subscription as extended");
+                    // The stopped process had requested the payment change - it may or may not have left - and billing
+                    // has had about as long to apply it as a re-check gives it: the wait is counted from the request,
+                    // the re-check's from the timeout, up to a client timeout later. "Not extended" is final now: the
+                    // customer is told, and the change is not sent a second time - billing may yet apply the first.
+                    throw new BillingException("The payment change was requested and billing does not report the subscription as extended");
                 }
 
                 if (data.Attempt >= MaxRenewalAttempts)
@@ -600,10 +602,12 @@ public class RenewSubscriptionService(
                 return RenewalOutcome.ClaimKept;
             }
 
-            // The record comes before the step it describes: from the moment the payment change is sent, whoever
-            // takes the entry up only asks billing about it. It is also the last look at the journal - an entry
-            // another instance has taken up meanwhile is not this process's to pay any more.
-            if (!await TryMarkPaymentSentAsync(claim))
+            // The record comes before the step it describes, so it says the payment change was requested, not that
+            // it was sent: from that moment whoever takes the entry up only asks billing about it - also when the
+            // process stopped before the change left, which then ends with the failure letter rather than a second
+            // attempt. It is also the last look at the journal - an entry another instance has taken up meanwhile is
+            // not this process's to pay any more.
+            if (!await TryMarkPaymentRequestedAsync(claim))
             {
                 logger.ErrorRenewSubscriptionServiceNotMarked(data.TenantId, description);
 
@@ -646,7 +650,15 @@ public class RenewSubscriptionService(
 
             if (result)
             {
-                await ReportRenewedAsync(scope.ServiceProvider, data.TenantId, description);
+                try
+                {
+                    await ReportRenewedAsync(scope.ServiceProvider, data.TenantId, description);
+                }
+                catch (Exception ex)
+                {
+                    // the renewal is paid, only its audit entry is missing - no failure letter for it
+                    logger.ErrorRenewSubscriptionServiceTenant(data.TenantId, ex);
+                }
 
                 return RenewalOutcome.Settled;
             }
@@ -912,19 +924,19 @@ public class RenewSubscriptionService(
 
     // Whether an interrupted renewal billing gives no answer about may wait for the next run: for as long as a renewal
     // whose payment change timed out is re-checked, counted from when it was queued or last started - or from when
-    // its payment change was sent. After that the customer is told it failed, so an entry is not asked about for
-    // ever, nor dropped unnoticed when the journal expires.
+    // its payment change was requested. After that the customer is told it failed, so an entry is not asked about
+    // for ever, nor dropped unnoticed when the journal expires.
     private static bool CanWaitForBilling(RenewalJournalEntry entry)
     {
-        return DateTime.UtcNow < (entry.PaymentSentAt ?? entry.StageSince) + _renewVerifyPeriod;
+        return DateTime.UtcNow < (entry.PaymentRequestedAt ?? entry.StageSince) + _renewVerifyPeriod;
     }
 
     // The entries an earlier run left in the journal that are now taken up again. One run ends before the next one
     // starts, so whatever is there was left by a process that stopped half-way - or by another instance that is still
     // finishing it after the active one changed. A started renewal is therefore left alone for a while first: billing
-    // may still be applying its payment change, so the while is counted from the moment that change was sent when
-    // the entry records one, from the claim otherwise - whichever is later. A queued one has paid nothing, and every process claims an entry
-    // before starting it, so it only waits out one period: the queue of a stopped process is renewed by the next run
+    // may still be applying its payment change. The while is counted from the later of the claim and the request of
+    // the payment change, when the entry records one. A queued one has paid nothing, and every process claims an
+    // entry before starting it, so it only waits out one period: the queue of a stopped process is renewed by the next run
     // rather than long after the due date. An entry of a quota this process does not know is left to one that does.
     // An entry a pending renewal without a quota may re-check, though it could not be matched to it, is held back
     // for as long as that pending renewal is there, as it was before the quota was recorded.
@@ -932,16 +944,16 @@ public class RenewSubscriptionService(
     {
         return journal
             .Where(entry => entry.Stage == RenewalStage.Started
-                ? now - LastStartedOrSent(entry) >= _renewNotExtendedGrace
+                ? now - LastStartedOrRequested(entry) >= _renewNotExtendedGrace
                 : now - entry.StageSince >= ExecuteTaskPeriod)
             .Where(entry => _walletQuotas.ContainsKey(entry.Quota))
             .Where(entry => !pending.Exists(renewal => MayCover(renewal, entry)))
             .ToList();
     }
 
-    private static DateTime LastStartedOrSent(RenewalJournalEntry entry)
+    private static DateTime LastStartedOrRequested(RenewalJournalEntry entry)
     {
-        return entry.PaymentSentAt is { } sentAt && sentAt > entry.StageSince ? sentAt : entry.StageSince;
+        return entry.PaymentRequestedAt is { } requestedAt && requestedAt > entry.StageSince ? requestedAt : entry.StageSince;
     }
 
     // Takes out of the journal the entries no run is to renew. True when the journal has changed.
@@ -1067,10 +1079,10 @@ public class RenewSubscriptionService(
         }
     }
 
-    // Records in the claimed entry that its payment change is being sent. False when the journal no longer holds the
+    // Records in the claimed entry that its payment change is requested. False when the journal no longer holds the
     // entry as this process claimed it - another instance has taken it up - or could not be changed: the payment
     // change is then not sent.
-    private async Task<bool> TryMarkPaymentSentAsync(Claim claim)
+    private async Task<bool> TryMarkPaymentRequestedAsync(Claim claim)
     {
         try
         {
@@ -1084,7 +1096,7 @@ public class RenewSubscriptionService(
                     return false;
                 }
 
-                var marked = claim.Entry with { PaymentSentAt = DateTime.UtcNow };
+                var marked = claim.Entry with { PaymentRequestedAt = DateTime.UtcNow };
 
                 journal[at] = marked;
 
@@ -1242,7 +1254,7 @@ public class RenewSubscriptionService(
         // interrupted earlier, and billing has not said yet what became of it: the entry goes back as it was read
         WaitsForBilling,
 
-        // money may have moved and nothing but the claim says so: the entry stays as it was claimed
+        // money may have moved, or another instance has the entry: it stays as this process last wrote it
         ClaimKept
     }
 
@@ -1252,7 +1264,7 @@ public class RenewSubscriptionService(
         Queued,
 
         // claimed by a process, so money may have moved: its checks, the wallet top-up and the payment change all come
-        // after this mark; whether the payment change was sent, the entry says itself (PaymentSentAt)
+        // after this mark; whether the payment change was requested, the entry says itself (PaymentRequestedAt)
         Started
     }
 
@@ -1260,9 +1272,11 @@ public class RenewSubscriptionService(
     /// A renewal of one tariff row this service has taken on: the row as it was when its due date came into the window
     /// (<see cref="DueDate"/> is the date being renewed from), the <see cref="Stage"/> it got to and since when, and how
     /// many times it has been <see cref="RenewalStage.Started"/>. A renewal is told apart from the others by its tenant,
-    /// quota and due date. <see cref="PaymentSentAt"/> is when its payment change was sent, null while it has not
-    /// been - and in an entry written before that was recorded: from then on the renewal is only asked about, never
-    /// paid again.
+    /// quota and due date. <see cref="PaymentRequestedAt"/> is when its payment change was requested - recorded just
+    /// before it is sent, so it may not have left - and null while it has not been: from then on the renewal is only
+    /// asked about, never paid again. It is null also in an entry written before it was recorded, and in one that a
+    /// process of such a version rewrote, as it rewrites the whole journal without it: during a rollout an entry can
+    /// lose its mark, and one that loses it while its payment change is on its way may be paid a second time.
     /// </summary>
     private sealed record RenewalJournalEntry(
         int TenantId,
@@ -1274,7 +1288,7 @@ public class RenewSubscriptionService(
         RenewalStage Stage,
         DateTime StageSince,
         int Attempt,
-        DateTime? PaymentSentAt = null)
+        DateTime? PaymentRequestedAt = null)
     {
         public bool IsSameRenewal(RenewalJournalEntry other)
         {

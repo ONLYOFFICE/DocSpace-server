@@ -194,7 +194,7 @@ public sealed class RenewalJournal : IAsyncDisposable
 /// <summary>
 /// A renewal in the journal, as <c>RenewSubscriptionService</c> stores it: the tariff row it renews, the stage it got
 /// to (<see cref="Queued"/> or <see cref="Started"/>) and since when, how many times it has been started, and when
-/// its payment change was sent, if it was.
+/// its payment change was requested, if it was.
 /// </summary>
 public sealed record RenewalJournalEntry(
     int TenantId,
@@ -206,7 +206,7 @@ public sealed record RenewalJournalEntry(
     int Stage,
     DateTime StageSince,
     int Attempt,
-    DateTime? PaymentSentAt = null)
+    DateTime? PaymentRequestedAt = null)
 {
     public const int Queued = 0;
     public const int Started = 1;
