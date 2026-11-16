@@ -49,14 +49,13 @@ public class ReassignController(
     : ApiControllerBase
 {
     /// <remarks>
-    /// Returns the current state of the data reassignment queued for the user with the ID specified in the request.
-    /// A reassignment must have been queued by `POST api/2.0/people/reassign/start` first: when nothing is queued for
-    /// that user the operation answers 200 with an empty body.
-    /// The caller needs the permission to edit users, and only the portal owner may track a reassignment whose source
-    /// user is a DocSpace administrator.
-    /// The call is read-only and is the polling operation of the reassignment flow - repeat it until `isCompleted` is
-    /// true, reading `percentage` for the 0 to 100 progress and `error` for the message left by a failed job.
-    /// Use `PUT api/2.0/people/reassign/terminate` to cancel a job that is still running.
+    /// Returns the progress of the job that moves the data of a user to another user.
+    /// To start the job, use `POST api/2.0/people/reassign/start`. Requires a DocSpace admin. Other callers get 403.
+    /// Only the portal owner can read the job of a source user who is a DocSpace admin.
+    /// Other DocSpace admins get 403 for it. The call is read-only. This is the call to poll.
+    /// Repeat it until `isCompleted` is true. If no job exists for the user, the response has no progress object.
+    /// If the job fails, `error` holds the reason.
+    /// To cancel a running job, use `PUT api/2.0/people/reassign/terminate`.
     /// </remarks>
     /// <summary>Get the reassignment progress</summary>
     /// <path>api/2.0/people/reassign/progress/{userId}</path>
@@ -82,23 +81,27 @@ public class ReassignController(
     }
 
     /// <remarks>
-    /// Queues an asynchronous job that transfers the rooms and the shared files owned by one portal user to another.
-    /// The source user must already have the `Terminated` status - disable the account through
-    /// `PUT api/2.0/people/status/{status}` before calling this - and the destination user must be an active room
-    /// admin or DocSpace admin, so a guest, a system account or a disabled account is rejected.
-    /// The caller needs the permission to edit users, cannot reassign their own data, and must be the portal owner to
-    /// reassign the data of another DocSpace administrator or of a People module administrator.
-    /// The transfer does not finish within this call: poll `GET api/2.0/people/reassign/progress/{userId}` with the
-    /// source user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/reassign/terminate`.
-    /// Pass `deleteProfile` as true to delete the source profile once the transfer succeeds, otherwise the emptied
-    /// profile is kept.
-    /// Use `GET api/2.0/people/reassign/necessary` first to find out whether the user owns anything that has to be
-    /// reassigned at all.
+    /// Starts a job that moves the data of a disabled user to another user.
+    /// The job moves the rooms, third-party storage accounts, and files of the source.
+    /// Files and folders that the source shared from the personal section move to a new folder of the recipient.
+    /// First, disable the source account through `PUT api/2.0/people/status/{status}`.
+    /// To check whether any data needs to move, use `GET api/2.0/people/reassign/necessary`.
+    /// Requires a DocSpace admin. Other callers get 403.
+    /// Only the portal owner can move the data of a DocSpace admin or an admin of the People section.
+    /// Other callers get 400 for such a source. The call queues work.
+    /// Repeat `GET api/2.0/people/reassign/progress/{userId}` with the source ID until `isCompleted` is true.
+    /// While a job for the source runs, a repeated call returns that job and starts nothing new. After the job ends, a
+    /// repeated call starts a new job. The portal then emails the caller again. If the job deleted the source profile,
+    /// a repeated call returns 400. If `deleteProfile` is true, the job also deletes the other personal files of the
+    /// source, then the profile. This cannot be undone. Otherwise, the source keeps the personal files that it did not
+    /// share. The portal emails the caller when the job succeeds or fails. The call returns 400 if the recipient is
+    /// unknown or is not an active room admin or DocSpace admin. It also returns 400 if the source is unknown, a system
+    /// account, the portal owner, the caller, or not disabled.
     /// </remarks>
     /// <summary>Start the data reassignment</summary>
     /// <path>api/2.0/people/reassign/start</path>
-    [RaisesWebhook(WebhookTrigger.UserDeleted, When = "for the source account when `deleteProfile` is true, once the reassignment finishes successfully")]
-    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "once the queued reassignment creates the folder in the recipient's personal section that takes over the files and folders the source account shared from its own; not when it shared none")]
+    [RaisesWebhook(WebhookTrigger.UserDeleted, When = "when `deleteProfile` is true and the job succeeds")]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "when the job creates a folder for shared files, but not `room.updated` for moved rooms")]
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued reassignment", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `fromUserId` or `toUserId`, the destination user does not exist or is not an active room or DocSpace admin, or the source user does not exist, is a system account, the portal owner, the caller, is not disabled, or is a DocSpace or People administrator while the caller is not the portal owner")]
@@ -139,14 +142,15 @@ public class ReassignController(
     }
 
     /// <remarks>
-    /// Cancels the data reassignment queued for the user with the ID specified in the request.
-    /// The caller needs the permission to edit users, and only the portal owner may cancel a reassignment whose
-    /// source user is a DocSpace administrator.
-    /// The operation is idempotent: when nothing is queued for that user it answers 200 with an empty body, and
-    /// repeating it on an already cancelled job changes nothing.
-    /// Cancelling removes the job from the queue and does not undo the transfers it has already made, and a cancelled
-    /// job cannot be resumed - start a new one through `POST api/2.0/people/reassign/start`.
-    /// The returned progress reports `status` as `Canceled` and `isCompleted` as true.
+    /// Cancels the job that moves the data of a user to another user.
+    /// Requires a DocSpace admin. Other callers get 403.
+    /// Only the portal owner can cancel the job of a source user who is a DocSpace admin.
+    /// Other DocSpace admins get 403 for it. The call changes data. It removes the job from the queue.
+    /// It does not undo the moves that the job already made. You cannot resume the job.
+    /// To start again, use `POST api/2.0/people/reassign/start`.
+    /// The returned progress has `status` `Canceled` and `isCompleted` true, even for a job that already finished.
+    /// If no job exists for the user, the response has no progress object. So you can repeat the call.
+    /// The call returns 400 if the body has no `userId`.
     /// </remarks>
     /// <summary>Terminate the data reassignment</summary>
     /// <path>api/2.0/people/reassign/terminate</path>
@@ -181,15 +185,13 @@ public class ReassignController(
     }
 
     /// <remarks>
-    /// Reports whether the rooms and the shared files of a user have to be reassigned before that user can be removed
-    /// or changed to the type passed in `type`.
-    /// Call it before `DELETE api/2.0/people/{userId}` or before a type change to find out whether
-    /// `POST api/2.0/people/reassign/start` has to run first.
-    /// The caller needs the permission to add and remove users of the requested type, and must be the portal owner
-    /// when the checked user is a DocSpace administrator.
-    /// The call is read-only and answers true when the user owns at least one room, or - when `type` is `Guest` -
-    /// when the user still has shared files.
-    /// A false answer means the user can be removed or converted without a reassignment.
+    /// Returns whether a user's data must move to another user before you delete the user or change its type.
+    /// Call it before `DELETE api/2.0/people/{userId}` or a type change.
+    /// If it returns true, first move the data through `POST api/2.0/people/reassign/start`.
+    /// Requires the right to add and remove users of the type in `type`. Other callers get 403.
+    /// Only the portal owner can check a DocSpace admin. Other callers get 403 for one. The call is read-only.
+    /// It returns true if the user owns a room. If `type` is `Guest`, it also returns true for shared files.
+    /// False means that you can delete the user or change the type without moving data.
     /// </remarks>
     /// <summary>Check data for reassignment need</summary>
     /// <path>api/2.0/people/reassign/necessary</path>

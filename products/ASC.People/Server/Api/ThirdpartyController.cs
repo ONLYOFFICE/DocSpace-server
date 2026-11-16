@@ -72,18 +72,16 @@ public class ThirdpartyController(
 
 
     /// <remarks>
-    /// Returns the third-party identity providers this portal has enabled, each with the URL that starts the login
-    /// with it, so a client can render the social sign-in buttons.
-    /// It needs no authentication and is the operation to call before showing a login or an invitation page; an
-    /// empty list means the portal has no provider configured, not that the call failed.
-    /// The call is read-only, and `linked` says whether the provider is already connected to the calling profile -
-    /// for an anonymous caller there is nothing to compare against, so every entry comes back with false.
-    /// The order is fixed by the portal, except that a caller located in China gets `weixin` first.
-    /// Pass `fromOnly` to keep a single provider, `inviteView` to leave out the providers that cannot be used on an
-    /// invitation page, and `settingsView` or `clientCallback` to get URLs that open in a popup instead of
-    /// redirecting the desktop application.
-    /// Use `PUT api/2.0/people/thirdparty/linkaccount` to connect one of these providers to an existing profile and
-    /// `POST api/2.0/people/thirdparty/signup` to create a profile through one.
+    /// Returns the third-party identity providers that the portal has turned on. Each item has the URL that starts
+    /// sign-in with that provider. Anyone can call it without signing in. The call is read-only. An empty list means
+    /// that the portal has no provider turned on. The `linked` field shows if the provider is linked to the account
+    /// of the caller. For an anonymous caller, `linked` is always false. The portal sets the order, but a caller in
+    /// China gets `weixin` first. If `fromOnly` is set, the call keeps only that provider. The value `openid`
+    /// selects `google`. With `inviteView`, the call leaves out the providers that cannot accept an invitation. With
+    /// `settingsView` or `inviteView`, the URLs always open in a popup. Otherwise, a URL redirects only for a mobile
+    /// browser or the desktop app. To link a provider to your account, use
+    /// `PUT api/2.0/people/thirdparty/linkaccount`. To create an account through a provider, use
+    /// `POST api/2.0/people/thirdparty/signup`.
     /// </remarks>
     /// <summary>Get third-party providers</summary>
     /// <path>api/2.0/people/thirdparty/providers</path>
@@ -135,18 +133,15 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Connects a third-party identity to the calling profile, so that the account can afterwards sign in through
-    /// that provider.
-    /// The profile has to come from a completed provider authorization: pass the serialized `LoginProfile` the login
-    /// flow started from `GET api/2.0/people/thirdparty/providers` handed back, not a hand-written object.
-    /// It acts on the authenticated account only, and the portal has to be a standalone installation or have a
-    /// tariff that includes third-party authorization, otherwise the operation answers 403.
-    /// The call returns no body and is not idempotent: one third-party identity can be linked to a single portal
-    /// profile, so repeating it, or linking an identity somebody else already uses, answers 400.
-    /// A profile whose authorization was cancelled by the user is accepted and ignored, so a cancelled login also
-    /// answers 200 and links nothing - read `GET api/2.0/people/thirdparty/providers` afterwards and check `linked`
-    /// to find out whether the link exists.
-    /// Use `DELETE api/2.0/people/thirdparty/unlinkaccount` to remove a link.
+    /// Links a third-party identity to the account of the caller. After this call, the account can sign in through
+    /// that provider. First, complete the sign-in that a URL of `GET api/2.0/people/thirdparty/providers` starts.
+    /// Then pass the `serializedProfile` that this sign-in returns. Any signed-in user can call it. If the portal
+    /// tariff does not include third-party sign-in, the call returns 403. A standalone installation always includes
+    /// it. The call changes data and returns no body. The call returns 400 if `serializedProfile` is empty, comes
+    /// from another portal, or is already linked to an account. So a repeated call returns 400. If the user
+    /// cancelled the sign-in at the provider, the call returns 200 and links nothing. To check the link, read
+    /// `linked` in `GET api/2.0/people/thirdparty/providers`. To delete a link, use
+    /// `DELETE api/2.0/people/thirdparty/unlinkaccount`.
     /// </remarks>
     /// <summary>
     /// Link a third-party account
@@ -156,7 +151,6 @@ public class ThirdpartyController(
     [SwaggerResponse(200, "The third-party identity is linked to the calling profile. No content is returned")]
     [SwaggerResponse(400, "The third-party identity is already linked to a portal profile, or `serializedProfile` is missing, empty or was issued by another portal")]
     [SwaggerResponse(403, "The portal tariff does not include third-party authorization")]
-    [SwaggerResponse(500, "The `serializedProfile` value is not one the login flow produced, or the provider authorization ended with an error other than a cancellation")]
     [HttpPut("linkaccount")]
     public async Task LinkThirdPartyAccount(LinkAccountRequestDto inDto)
     {
@@ -183,31 +177,31 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Creates a portal profile from a third-party identity and joins the invitation the `key` belongs to, which is
-    /// how a person accepts an invitation by signing in with a provider instead of setting a password.
-    /// It needs no authentication, but it does need a valid invitation: `key` has to be the key of a live invitation
-    /// link, and `serializedProfile` has to be the profile a completed provider authorization produced.
-    /// The resulting type comes from the invitation link itself, and `employeeType` only says which type to look the
-    /// link up as, defaulting to `RoomAdmin`.
-    /// When the identity or its email already belongs to a portal profile, that existing profile is returned and the
-    /// provider is linked to it instead of a second account being created, so the call can be repeated safely.
-    /// The answer is the profile the caller ends up with - and it is empty, still with status 200, when the provider
-    /// authorization was cancelled or when the profile could not be created, so check for an empty body instead of
-    /// relying on the status alone.
-    /// A `weixin` or `nextcloud` identity carries no email address, so the portal generates one and the profile stays
-    /// in the `AutoGenerated` activation state; every other provider has to supply an email.
+    /// Creates an account from a third-party identity and accepts the invitation of `key`. So a person can join by
+    /// signing in with a provider instead of a password. Pass the `serializedProfile` that the provider sign-in
+    /// returns. Anyone can call it without signing in. Instead, the call needs the key of a valid invitation link. If
+    /// the link is invalid or expired, the call returns 403. The invitation link sets the user type of the new
+    /// account. The value of `employeeType` only selects the kind of link to check. The call changes data. If an
+    /// account already has this identity or its email, the call links the provider to that account. It then returns that
+    /// account and creates no second one. So a repeated call with a valid key returns the same profile and sends no
+    /// emails. If that account is not activated yet, the call returns 403. For a room invitation link, the call also
+    /// adds the account to the room. A repeat gives the account the room role of the link again. Each call with a room
+    /// link counts as one use of the link. So after the last allowed use of the link, a repeat returns 403. The call
+    /// returns 200 with an empty body if the user cancelled the sign-in. The body is also empty if the portal fails to
+    /// create the account. So check the body, not only the status. A `weixin` or `nextcloud` identity has no email. For
+    /// it, the portal generates an email, and the account stays in the `AutoGenerated` activation state. The call
+    /// returns 400 if `key` or `serializedProfile` is missing, or `serializedProfile` is from another portal.
     /// </remarks>
     /// <summary>
     /// Sign up with a provider
     /// </summary>
     /// <path>api/2.0/people/thirdparty/signup</path>
     /// <requiresAuthorization>false</requiresAuthorization>
-    [RaisesWebhook(WebhookTrigger.UserCreated, When = "when the third-party account is not linked to a profile yet and a new profile is created")]
+    [RaisesWebhook(WebhookTrigger.UserCreated, When = "only when the call creates a new account")]
     [Tags("People / Third-party accounts")]
     [SwaggerResponse(200, "The profile linked to the third-party identity, or an empty body when the authorization was cancelled or the profile could not be created", typeof(EmployeeDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `key` or `serializedProfile`, or `serializedProfile` is empty or was issued by another portal")]
-    [SwaggerResponse(403, "The invitation link is invalid or has expired, or the email already belongs to a profile that has not been activated yet")]
-    [SwaggerResponse(500, "The `serializedProfile` value is not one the login flow produced, the provider authorization ended with an error other than a cancellation, or the identity has no email and the provider cannot generate one")]
+    [SwaggerResponse(403, "The invitation link is invalid, has expired or has no uses left, or the email already belongs to a profile that has not been activated yet")]
     [AllowAnonymous]
     [HttpPost("signup")]
     public async Task<EmployeeDto> SignupThirdPartyAccount(SignupAccountRequestDto inDto)
@@ -363,15 +357,11 @@ public class ThirdpartyController(
     }
 
     /// <remarks>
-    /// Removes the link between the calling profile and the named third-party provider, so that the account can no
-    /// longer sign in through it.
-    /// It acts on the authenticated account only and takes the provider name in the query, using the same lowercase
-    /// values `GET api/2.0/people/thirdparty/providers` returns, such as `google` or `microsoft`.
-    /// The call returns no body and is idempotent: unlinking a provider that is not linked answers 200 and changes
-    /// nothing.
-    /// The portal profile itself is kept, together with its password, so the account stays usable through the
-    /// ordinary sign-in; only the third-party route is removed.
-    /// Link the provider again through `PUT api/2.0/people/thirdparty/linkaccount`.
+    /// Deletes the link between the account of the caller and a third-party provider. A later sign-in through that
+    /// provider links the account again if the provider returns its email. The account itself stays, with its password.
+    /// Any signed-in user can call it. The call changes data and returns no body. If the provider is not linked, the
+    /// call changes nothing and returns 200. So you can repeat it. To link the provider again, use `PUT
+    /// api/2.0/people/thirdparty/linkaccount`.
     /// </remarks>
     /// <summary>
     /// Unlink a third-party account
