@@ -55,6 +55,7 @@ public class AttachmentsStorageService(
     MessageStorageService messageStorageService,
     ThreadsStorage threadsStorage,
     ThreadFoldersService threadFoldersService,
+    AiThreadFoldersService aiThreadFoldersService,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
@@ -232,7 +233,8 @@ public class AttachmentsStorageService(
 
             if (uploaded.Count > 0)
             {
-                var folderId = await threadFoldersService.GetOrCreateAttachmentsFolderAsync(thread);
+                var project = await threadFoldersService.GetProjectAsync(thread);
+                var folderId = await aiThreadFoldersService.GetOrCreateAttachmentsFolderAsync(thread, project.Id);
 
                 foreach (var file in uploaded)
                 {
