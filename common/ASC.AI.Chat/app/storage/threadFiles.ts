@@ -35,18 +35,14 @@
 // inside the project, served by the AI service:
 // `POST internal/ai/threads/{id}/artifacts` stores one, and the Files service
 // lists them (`GET api/2.0/files/rooms/{id}/threads/{threadId}/artifacts`).
-// The files the user attached are not copied anywhere: a message carries
-// references to attachment records, each naming a DocSpace file where it
-// already is, so their list is put together here from the messages.
+// The files the user attached have a folder beside it, filled by the Files
+// service when they are bound to a message (see projectAttachments.ts) and
+// listed by `GET api/2.0/files/rooms/{id}/threads/{threadId}/attachments`.
 
 import { aiServiceBaseUrl, AiServiceHttpError, withTimeout } from "./httpClient.js";
-import { DocspaceApiHttpError, filesApiGet } from "./docspaceFilesApi.js";
 import { getForwardedHeaders } from "../requestContext.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
-
-/** Attachment records one `attachments/read` call takes. */
-const ATTACHMENTS_BATCH = 50;
 
 export interface ThreadArtifact {
   /** The ID of the new DocSpace file. */
@@ -102,79 +98,4 @@ export async function uploadThreadArtifact(
   } finally {
     cancel();
   }
-}
-
-export interface ThreadFilesSources {
-  /** The attachment references a message carries (`extractAttachmentRefIds`). */
-  extractRefs: (message: unknown) => string[];
-  messages: { readByThread(threadId: string): Promise<unknown[]> };
-  attachments: { readManyByIds(ids: string[]): Promise<({ path?: string } | null)[]> };
-}
-
-/** The attachment references of the user's messages, oldest message first, each once. */
-export function collectUserAttachmentRefs(
-  messages: unknown[],
-  extractRefs: (message: unknown) => string[],
-): string[] {
-  const refs: string[] = [];
-  for (const message of messages) {
-    // A reply's references are images its tools made: those are artifacts.
-    if (!isObject(message) || message["role"] !== "user") {
-      continue;
-    }
-    for (const ref of extractRefs(message)) {
-      if (!refs.includes(ref)) {
-        refs.push(ref);
-      }
-    }
-  }
-  return refs;
-}
-
-/** The DocSpace file id of an attachment record: the head of its `<entryId>/<title>` path. */
-export function entryIdOf(attachment: { path?: string } | null): string | undefined {
-  const entryId = attachment?.path?.split("/")[0];
-  return entryId ? entryId : undefined;
-}
-
-/**
- * The files the user attached in a conversation, as the Files service
- * describes them now (`GET api/2.0/files/file/{id}`), in the order they were
- * first attached. A file that is gone, or that the caller can no longer
- * read, is left out. A conversation that is not the caller's answers the AI
- * service's own 404.
- */
-export async function listThreadAttachments(
-  threadId: string,
-  sources: ThreadFilesSources,
-): Promise<unknown[]> {
-  const refs = collectUserAttachmentRefs(
-    await sources.messages.readByThread(threadId),
-    sources.extractRefs,
-  );
-  const entryIds: string[] = [];
-  for (let start = 0; start < refs.length; start += ATTACHMENTS_BATCH) {
-    const records = await sources.attachments.readManyByIds(
-      refs.slice(start, start + ATTACHMENTS_BATCH),
-    );
-    for (const record of records) {
-      const entryId = entryIdOf(record);
-      if (entryId !== undefined && !entryIds.includes(entryId)) {
-        entryIds.push(entryId);
-      }
-    }
-  }
-  const files = await Promise.all(
-    entryIds.map(async (entryId) => {
-      try {
-        return await filesApiGet(`file/${encodeURIComponent(entryId)}`);
-      } catch (err) {
-        if (err instanceof DocspaceApiHttpError && (err.status === 403 || err.status === 404)) {
-          return undefined;
-        }
-        throw err;
-      }
-    }),
-  );
-  return files.filter((file) => isObject(file));
 }

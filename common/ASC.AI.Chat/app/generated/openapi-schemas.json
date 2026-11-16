@@ -4829,57 +4829,6 @@
         "additionalProperties": false
       }
     },
-    "aiThreadsListAttachments": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "threadId": {
-            "type": "string",
-            "description": "The id of the thread."
-          }
-        },
-        "required": [
-          "threadId"
-        ],
-        "additionalProperties": false
-      },
-      "response": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "number"
-            },
-            "title": {
-              "type": "string"
-            },
-            "fileExst": {
-              "type": "string"
-            },
-            "folderId": {
-              "type": "number"
-            },
-            "pureContentLength": {
-              "type": "number",
-              "description": "The size in bytes."
-            },
-            "viewUrl": {
-              "type": "string"
-            },
-            "webUrl": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id",
-            "title"
-          ],
-          "additionalProperties": false
-        },
-        "description": "A file as the Files service describes it; the fields a list row needs are named here."
-      }
-    },
     "aiTemplatesList": {
       "response": {
         "type": "object",

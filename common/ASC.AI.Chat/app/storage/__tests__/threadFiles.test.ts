@@ -50,25 +50,11 @@ vi.mock("../httpClient.js", () => {
     withTimeout: () => ({ signal: undefined, cancel: () => {} }),
   };
 });
-vi.mock("../docspaceFilesApi.js", () => {
-  class DocspaceApiHttpError extends Error {
-    constructor(public readonly status: number) {
-      super(`DocSpace API ${status}`);
-    }
-  }
-  return { DocspaceApiHttpError, filesApiGet: vi.fn() };
-});
-
-const { DocspaceApiHttpError, filesApiGet } = await import("../docspaceFilesApi.js");
-const { collectUserAttachmentRefs, entryIdOf, listThreadAttachments, uploadThreadArtifact } =
-  await import("../threadFiles.js");
-
-const extractRefs = (message: unknown) => (message as { refs?: string[] }).refs ?? [];
+const { uploadThreadArtifact } = await import("../threadFiles.js");
 
 const fetchMock = vi.fn();
 
 beforeEach(() => {
-  vi.mocked(filesApiGet).mockReset();
   fetchMock.mockReset();
   vi.stubGlobal("fetch", fetchMock);
 });
@@ -118,65 +104,5 @@ describe("uploadThreadArtifact", () => {
     ).rejects.toMatchObject({
       status: 500,
     });
-  });
-});
-
-describe("the attachments of a thread", () => {
-  it("collects the references of the user's messages, each once, in order", () => {
-    expect(
-      collectUserAttachmentRefs(
-        [
-          { role: "user", refs: ["a", "b"] },
-          { role: "assistant", refs: ["tool-image"] },
-          { role: "user", refs: ["b", "c"] },
-        ],
-        extractRefs,
-      ),
-    ).toEqual(["a", "b", "c"]);
-  });
-
-  it("reads the file id from the head of an attachment's path", () => {
-    expect(entryIdOf({ path: "12/Report.docx" })).toBe("12");
-    expect(entryIdOf({ path: "12" })).toBe("12");
-    expect(entryIdOf({})).toBeUndefined();
-    expect(entryIdOf(null)).toBeUndefined();
-  });
-
-  it("answers the files as DocSpace describes them, without the gone and the unreadable", async () => {
-    vi.mocked(filesApiGet).mockImplementation(async (path) => {
-      if (path === "file/2") {
-        throw new DocspaceApiHttpError(404, "Not Found", "url");
-      }
-      if (path === "file/3") {
-        throw new DocspaceApiHttpError(403, "Forbidden", "url");
-      }
-      return { id: Number(path.split("/")[1]), title: "File" };
-    });
-    const files = await listThreadAttachments("t-1", {
-      extractRefs,
-      messages: { readByThread: async () => [{ role: "user", refs: ["a", "b", "c", "d", "e"] }] },
-      attachments: {
-        readManyByIds: async () => [
-          { path: "1/One.docx" },
-          { path: "2/Gone.docx" },
-          { path: "3/Closed.docx" },
-          { path: "1/One.docx" },
-          null,
-        ],
-      },
-    });
-    expect(files).toEqual([{ id: 1, title: "File" }]);
-    expect(filesApiGet).toHaveBeenCalledTimes(3);
-  });
-
-  it("fails on a Files error that is not about the one file", async () => {
-    vi.mocked(filesApiGet).mockRejectedValue(new DocspaceApiHttpError(500, "Error", "url"));
-    await expect(
-      listThreadAttachments("t-1", {
-        extractRefs,
-        messages: { readByThread: async () => [{ role: "user", refs: ["a"] }] },
-        attachments: { readManyByIds: async () => [{ path: "1/One.docx" }] },
-      }),
-    ).rejects.toMatchObject({ status: 500 });
   });
 });

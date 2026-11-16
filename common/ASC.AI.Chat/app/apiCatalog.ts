@@ -190,13 +190,6 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
   },
   {
     method: "GET",
-    path: "/threads/attachments",
-    tag: "Threads",
-    operationId: "aiThreadsListAttachments",
-    summary: "Get the files attached in a thread",
-  },
-  {
-    method: "GET",
     path: "/templates",
     tag: "Templates",
     operationId: "aiTemplatesList",

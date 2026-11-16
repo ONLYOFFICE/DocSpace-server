@@ -1,0 +1,164 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU AGPL version 3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("../../log.js", () => ({
+  default: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+}));
+vi.mock("../../requestContext.js", () => ({
+  getForwardedHeaders: () => ({ cookie: "asc_auth_key=1" }),
+}));
+vi.mock("../httpClient.js", () => {
+  class AiServiceHttpError extends Error {
+    constructor(public readonly status: number) {
+      super(`HTTP ${status}`);
+    }
+  }
+  return {
+    AiServiceHttpError,
+    proxyBaseUrl: "http://portal",
+    withTimeout: () => ({ signal: undefined, cancel: () => {} }),
+  };
+});
+vi.mock("../docspaceFilesApi.js", () => {
+  class DocspaceApiHttpError extends Error {
+    constructor(public readonly status: number) {
+      super(`DocSpace API ${status}`);
+    }
+  }
+  return { DocspaceApiHttpError, filesApiGet: vi.fn() };
+});
+vi.mock("../docspaceFileTransfer.js", () => ({ mediaTypeOf: () => "application/docx" }));
+vi.mock("../roomSkills.js", () => {
+  class FileTooLargeError extends Error {}
+  return { FileTooLargeError, readFileBytes: vi.fn() };
+});
+
+const { filesApiGet } = await import("../docspaceFilesApi.js");
+const { FileTooLargeError, readFileBytes } = await import("../roomSkills.js");
+const { copyIntoProject, MAX_COPY_BYTES, uploadInChunks } =
+  await import("../projectAttachments.js");
+
+const fetchMock = vi.fn();
+
+const answer = (status: number, response: unknown = {}) => ({
+  ok: status >= 200 && status < 300,
+  status,
+  statusText: String(status),
+  json: async () => ({ response }),
+  text: async () => "",
+});
+
+/** The portal: its settings, the file's description, and the upload session. */
+function portal(file: Record<string, unknown>, chunkUploadSize = 4): void {
+  vi.mocked(filesApiGet).mockImplementation(async (path) =>
+    path === "settings" ? { chunkUploadSize } : file,
+  );
+  fetchMock.mockImplementation(async (url: string) =>
+    url.endsWith("/session")
+      ? answer(200, { id: "s1" })
+      : answer(200, { file: { id: 77, title: "Report.docx" } }),
+  );
+}
+
+beforeEach(() => {
+  vi.mocked(filesApiGet).mockReset();
+  vi.mocked(readFileBytes)
+    .mockReset()
+    .mockResolvedValue(new Uint8Array([1, 2, 3, 4, 5, 6]));
+  fetchMock.mockReset();
+  vi.stubGlobal("fetch", fetchMock);
+});
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe("uploadInChunks", () => {
+  it("opens a session in the folder and sends the chunks in order", async () => {
+    portal({});
+    const id = await uploadInChunks(
+      "12",
+      "Report.docx",
+      new Uint8Array([1, 2, 3, 4, 5, 6]),
+      "application/docx",
+    );
+    expect(id).toBe("77");
+    const [session, first, second] = fetchMock.mock.calls;
+    expect(session![0]).toBe("http://portal/api/2.0/files/12/session");
+    expect(JSON.parse(session![1].body)).toEqual({
+      fileName: "Report.docx",
+      fileSize: 6,
+      relativePath: "",
+      createNewIfExist: true,
+    });
+    expect(first![0]).toBe("http://portal/api/2.0/files/12/session/s1");
+    expect(((first![1].body as FormData).get("file") as Blob).size).toBe(4);
+    expect(((second![1].body as FormData).get("file") as Blob).size).toBe(2);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("copyIntoProject", () => {
+  it("copies a file of the portal into the project room and answers the copy", async () => {
+    portal({ title: "Report.docx", folderId: 5, pureContentLength: 6 });
+    expect(await copyIntoProject("12", "40")).toBe("77");
+    expect(readFileBytes).toHaveBeenCalledWith("40", MAX_COPY_BYTES);
+  });
+
+  it("leaves a file that already lies in the project room", async () => {
+    portal({ title: "Report.docx", folderId: 12 });
+    expect(await copyIntoProject("12", "40")).toBe("40");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("leaves a third-party file and a file over the limit", async () => {
+    portal({ title: "Big.docx", folderId: 5, pureContentLength: MAX_COPY_BYTES + 1 });
+    expect(await copyIntoProject("12", "sbox-1-abc")).toBe("sbox-1-abc");
+    expect(await copyIntoProject("12", "40")).toBe("40");
+    expect(readFileBytes).not.toHaveBeenCalled();
+  });
+
+  it("attaches the file where it is when the room refuses it or it grows over the limit", async () => {
+    portal({ title: "Movie.mp4", folderId: 5 });
+    fetchMock.mockResolvedValue(answer(400));
+    expect(await copyIntoProject("12", "40")).toBe("40");
+
+    vi.mocked(readFileBytes).mockRejectedValue(new FileTooLargeError("40", MAX_COPY_BYTES));
+    expect(await copyIntoProject("12", "40")).toBe("40");
+  });
+
+  it("fails on an error that is not a refusal", async () => {
+    portal({ title: "Report.docx", folderId: 5 });
+    vi.mocked(readFileBytes).mockRejectedValue(new Error("boom"));
+    await expect(copyIntoProject("12", "40")).rejects.toThrow("boom");
+  });
+});

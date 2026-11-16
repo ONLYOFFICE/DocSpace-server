@@ -39,6 +39,7 @@ import {
   getFolderInfo,
   getMyDocumentsFolderId,
   canTakeUpload,
+  resolveAiProjectEntityId,
 } from "./docspaceFilesApi.js";
 import { getForwardedHeaders, getAnalyzeEntryIds } from "../requestContext.js";
 import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
@@ -46,6 +47,7 @@ import type { JsonObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
 import { uploadThreadArtifact } from "./threadFiles.js";
+import { copyIntoProject } from "./projectAttachments.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/attachments";
@@ -398,12 +400,24 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     });
 
     const docspaceIndices: number[] = [];
-    const entryIds: string[] = [];
+    const sourceIds: string[] = [];
     inputs.forEach((input, i) => {
       if (result[i]) return;
       docspaceIndices.push(i);
-      entryIds.push(input.path ?? "");
+      sourceIds.push(input.path ?? "");
     });
+
+    // In a chat of an AI project a file of the portal is attached as its
+    // copy in the project room, which the Files service then keeps with the
+    // conversation (see projectAttachments.ts). Anywhere else, and for a file
+    // that cannot be copied, the file itself is attached.
+    const projectId = await resolveAiProjectEntityId(
+      inputs.find((input, i) => !result[i] && input.entityId)?.entityId,
+    );
+    const entryIds =
+      projectId === undefined
+        ? sourceIds
+        : await Promise.all(sourceIds.map((id) => copyIntoProject(projectId, id)));
 
     if (entryIds.length === 0) {
       // No DocSpace-entry inputs — everything was handled above.
@@ -416,7 +430,10 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     }
 
     // From the request context (the engine's createMany signature can't carry them).
-    const analyzeEntryIds = getAnalyzeEntryIds();
+    // The ids to analyze name the files as they were attached: a copied one
+    // is analyzed as its copy.
+    const copies = new Map(sourceIds.map((id, i) => [id, entryIds[i] ?? id]));
+    const analyzeEntryIds = getAnalyzeEntryIds()?.map((id) => copies.get(String(id)) ?? id);
     const raw = await aiService.post(PATH, { entryIds, analyzeEntryIds });
     logger.debug(
       `HttpAttachmentsStorage.createMany: POST ${PATH} entryIds=${JSON.stringify(entryIds)} ` +
