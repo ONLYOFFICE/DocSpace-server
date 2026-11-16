@@ -1,6 +1,6 @@
 ---
 name: review-branch
-description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new, and the author's self-review of a finished branch before it goes to review. USE FOR: review the branch, check my branch before review, self-review, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request, except after a self-review), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
+description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) and its OpenSpec specs for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation/OpenSpec reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new, and the author's self-review of a finished branch before it goes to review. USE FOR: review the branch, check my branch before review, self-review, look at the changes in a branch, does the branch follow the rules, does the branch break the specs, the fixes were merged - check them, re-check once more, check the fixes against the review file, find all the findings, why does every run find something new - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request, except after a self-review), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
 ---
 
 # Review a branch against the repo rules
@@ -109,6 +109,7 @@ is read in context. What each section is for:
 | Localized resources (.resx) | §3 F. `!! placeholder mismatch` is a finding once you have looked at the value (a tag lost or renamed in a translation renders as literal `$Tag` or as nothing); "neutral changed, translation untouched" is one only if the commits do not declare it ("English only for now") |
 | Tests | §3 A3 and §6 |
 | Changed endpoints | not a finding by itself: the rows of the cross-cutting matrix (§3 A0) |
+| OpenSpec | the requirements reviewer S reads (§3 S). `!! ... openspec/ untouched` is not a finding by itself: it becomes one when a listed requirement no longer holds on the branch |
 | Stateful / background processing | the files reviewer G walks (§3 G) |
 | Size | how many chunks reviewers B, D, E and G are split into (§3 Coverage) |
 | New projects | an `!!` line: a project in neither `ASC.Web.slnx` nor `ASC.Tests.slnx` (a tool with a solution of its own is the exception), or a test project outside `products/` that `CLAUDE.md` does not name |
@@ -161,7 +162,8 @@ endpoint/write path, one column per cross-cutting check from CLAUDE.md that appl
 (`socket-events.md`), `[RaisesWebhook]` and its condition (`openapi-endpoint-docs.md` §2.1), audit
 `MessageAction`, every status code it can return has a `[SwaggerResponse]`, backup/restore of any
 table it writes (`backup-tables.md`), DTO through Mapperly (`dto-mapping.md`), section coverage
-(`files-sections.md`), search index (`full-text-search.md`). Every cell is filled: `yes (path:line)`,
+(`files-sections.md`), search index (`full-text-search.md`), OpenSpec requirement (§3 S: the requirement
+that governs the row, and whether it still holds). Every cell is filled: `yes (path:line)`,
 `n/a (why)` or `missing` — a `missing` is a finding. The matrix is mechanical on purpose: a
 free-form rules reviewer does not visit every endpoint, and a cross-cutting check it skips stays
 missed however many times the review runs. Include
@@ -375,13 +377,44 @@ over time, across instances and across failures. For each loop, job and state tr
 - **mixed versions**: rows, messages and archives produced by the previous version during a
   rolling update or before a restore — read, ignored or refused, never mis-sent.
 
+**S. OpenSpec** — whenever `openspec/specs/` exists and the scan's "OpenSpec" section lists a requirement
+or a capability. `CLAUDE.md` ("Specs (OpenSpec)") makes the specs the statement of what the API does today:
+a branch that changes a status code, a field, an access rule or a side effect is checked against the
+requirements that govern it, and one that contradicts a requirement goes through `openspec-propose` with
+its "Breaks current behaviour" section instead of straight into code. The other lenses judge the code
+against the rules; this one judges it against the promised behaviour, and neither covers the other.
+
+- **Which requirements**: the scan lists the requirements that name the operationId of a changed action,
+  and the capabilities whose `verification.md` cites a changed file. That is a start, not the whole set:
+  a service or worker change reaches operations the diff does not touch (a background job changes what
+  `getPortalTariff` reports). For each changed behaviour, also search `openspec/specs/*/spec.md` for the
+  operations it reaches (LSP `incomingCalls` up to the controllers, then their operationIds) and for the
+  table, setting or state it writes (`start_trial`, `LicenseAccept`).
+- **Per requirement**, read the `SHALL` text and every scenario, and classify it on the branch:
+  **holds**, **broken** (a sentence or a scenario is false on the branch), or **extended** (the branch
+  adds behaviour in the requirement's area that no sentence covers: a new outcome, a new failure, a new
+  writer of the same state). Quote the sentence for a broken one.
+- **Where the branch should say so**: a change under `openspec/changes/<name>/` with a "Breaks current
+  behaviour" section that names the requirement, or the spec text changed in the same branch.
+  `openspec/deviations.md` is for defects, not for intended changes; an intended change listed there
+  is itself a finding.
+- **verification.md**: a row whose cited lines or stated behaviour the branch changed is stale — name it,
+  so `openspec-maintain` is not left to rediscover it.
+- **Severity**: a broken requirement that the branch neither changes in the spec nor proposes is a
+  **blocker** (an undeclared contract change: the next spec run records the new behaviour as a defect,
+  or a reviewer trusting the spec misreads the code). An extended requirement with no spec text is a
+  **remark**; a stale `verification.md` row is a **remark**. When the code contradicts the spec and the
+  commits do not say the change is intended, it may be the code that is wrong: report it as broken and
+  let the author decide which side moves (a question, not a fix of the spec).
+- Cite as `[openspec <capability> "<requirement>"]` with the `spec.md:line` of the requirement.
+
 **Return format for every reviewer** (ask for exactly this):
 
 ```
 - severity: blocker | rule | remark | question
-  category: correctness | rule | performance | security | contract | translation
+  category: correctness | rule | performance | security | contract | translation | spec
   where: path:line
-  rule: <rule file §section>  (or "—" for a correctness finding)
+  rule: <rule file §section>, or [openspec <capability> "<requirement>"] (or "—" for a correctness finding)
   what: one sentence
   pattern: the class this instance belongs to, in one line
   siblings: every other place in the diff with the same pattern — path:line affected | fine (why)
@@ -413,7 +446,9 @@ Reviewers over-report. For every finding, open the code at `where` yourself and 
   "not from this branch" only when the branch makes it worse (moved it onto a hot path, widened its reach);
 - `siblings` checked: open the places listed as `fine` too, and look for the pattern in the chunks
   of other reviewers. All affected places go into **one** finding, so the fix covers the class;
-- a rule finding cites a rule that really says that (open the rule, check the section);
+- a rule finding cites a rule that really says that (open the rule, check the section); a spec finding
+  quotes the `SHALL` sentence or scenario it breaks, read in the spec on the reviewed sha, and shows the
+  branch's code path that makes it false;
 - a doubt whether the code keeps a rule the branch itself states ("Restricted access is no
   membership") is checked like a finding and reported as one. It goes to "Questions" only when the
   branch states no rule for that case. A question the author can wave away is a finding the next
@@ -485,7 +520,9 @@ conversation). Re-scan (§1) and then:
 5. If an earlier finding turns out to be wrong, say so plainly and withdraw it. Withdrawing needs the
    evidence a fix needs: the code read for every caller, entry kind and path the finding names
    (`fixing-findings.md` §7).
-6. Re-read the texts the fixes may have made stale (§3 B "texts made untrue", "claims"): the claims in
+6. Run §3 S on the fix commits: a fix can break a requirement the first version kept, and a finding of
+   S closed by changing the spec is checked like a code fix — the new spec text describes the branch.
+7. Re-read the texts the fixes may have made stale (§3 B "texts made untrue", "claims"): the claims in
    the earlier rounds' commits and comments, the remarks of the actions the fixed behaviour reaches,
    and the PR description — does it still describe the branch after the rounds of fixes.
 
@@ -509,7 +546,7 @@ Then, omitting empty sections:
 ## Not verified       — what stays unverified and what would verify it (a suite, a profile)
 ```
 
-Per finding: a `[security]` / `[performance]` / `[translation]` tag when that is its category, the `[path:line](path:line)` link, what is wrong, the concrete scenario, the fix. Code
+Per finding: a `[security]` / `[performance]` / `[translation]` / `[spec]` tag when that is its category, the `[path:line](path:line)` link, what is wrong, the concrete scenario, the fix. Code
 snippets only when the line itself is the point (broken indentation, a wrong condition). No scan
 tables, no "what was done well" section — at most one line if something deserves it.
 
