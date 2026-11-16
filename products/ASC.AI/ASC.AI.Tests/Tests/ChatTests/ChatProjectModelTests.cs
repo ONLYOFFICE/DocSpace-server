@@ -301,44 +301,4 @@ public class ChatProjectModelTests(AspireAppFixture fixture) : ChatProjectTestBa
         StreamedRequestsCarrying(secondProvider, question).Should().BeEmpty($"the model named in the send was not asked\n{secondProvider.Describe()}");
         (await StoredModelOfAsync(thread.ThreadId)).Should().NotBe(second.Id, "the conversation does not move onto a model the project was not built on");
     }
-
-    /// <summary>
-    /// The same hole one step earlier: the override does not need a send, it can be baked in when the conversation is
-    /// created. A thread in a project has no model of its own to choose — the project's is the model — so the create
-    /// either refuses profile B or stores the project's A.
-    /// </summary>
-    [Theory]
-    [Trait("Bug", "82915")]
-    [InlineData(false)]
-    [InlineData(true)]
-    public async Task Create_ThreadInProjectOnAnotherModel_DoesNotStoreIt(bool asMember)
-    {
-        // Arrange
-        var (_, first) = await NewChatModelAsync();
-        var (_, second) = await NewChatModelAsync();
-        var projectId = await CreateProjectOnAsync(first);
-
-        if (asMember)
-        {
-            var member = await InviteToProjectAsync(projectId, EmployeeType.User);
-            await _aiChatClient.Authenticate(member);
-        }
-
-        // Act: a refusal leaves no thread to read, and that is one of the two shapes a fix can take, so the read is
-        // conditional rather than asserted.
-        string? stored = null;
-
-        try
-        {
-            var created = await CreateProjectThreadAsync(projectId, second.Id);
-            stored = await StoredModelOfAsync(created.ThreadId);
-        }
-        catch (ApiException exception) when (exception.ErrorCode is >= 400 and < 500)
-        {
-            // refused: nothing stored
-        }
-
-        // Assert
-        stored.Should().NotBe(second.Id, "a thread in a project cannot be created on another model");
-    }
 }

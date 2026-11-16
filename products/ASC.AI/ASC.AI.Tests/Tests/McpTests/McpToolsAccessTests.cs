@@ -98,39 +98,6 @@ public class McpToolsAccessTests(AspireAppFixture fixture) : McpToolsPermissionT
     }
 
     /// <summary>
-    /// An administrator can put a credential into a server config (an Authorization header), and the read routes hand
-    /// the config back whole to whoever reads. A plain User must not be handed it.
-    /// </summary>
-    [Theory]
-    [Trait("Bug", "84399")]
-    [InlineData(McpRole.User)]
-    [InlineData(McpRole.RoomAdmin)]
-    public async Task Read_ANonAdministrator_IsNotHandedTheAuthorizationHeaderAnAdminStored(McpRole role)
-    {
-        await RegisterAsync("secret-srv", SecretConfig());
-        var member = await InviteRoleAsync(role);
-        await ActAsAsync(member);
-
-        var exposed = new List<string>();
-        var get = await GetToolsAsync("get-custom-server", "?name=secret-srv");
-        var list = await GetToolsAsync("list-custom-servers");
-
-        get.Code.Should().Be(200, get.ToString());
-        list.Code.Should().Be(200, list.ToString());
-        if (get.Text.Contains(Secret, StringComparison.Ordinal))
-        {
-            exposed.Add("get-custom-server");
-        }
-
-        if (list.Text.Contains(Secret, StringComparison.Ordinal))
-        {
-            exposed.Add("list-custom-servers");
-        }
-
-        exposed.Should().BeEmpty("reads that returned the stored credential");
-    }
-
-    /// <summary>
     /// A Guest is refused on twelve routes and answered on the catalogue, which asks for no membership. Nothing the
     /// owner stored moves, and no refusal carries the config.
     /// </summary>

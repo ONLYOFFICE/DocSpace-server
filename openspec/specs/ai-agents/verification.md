@@ -2,7 +2,6 @@
 
 > **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
-
 Every requirement and scenario group of `spec.md`, with where it was verified. Paths are relative to the repo root
 (`server/`); `yaml` is `sdk/docspace-api-spec/docspace-backend.yaml` at submodule commit `5ea4dc6` (line numbers are
 of that commit; the working tree of the submodule is at `baf28cf`, which adds private-room and skills-generation
@@ -37,7 +36,7 @@ Revision 2026-11-06: re-checked against the merge of `release/v4.1.0` (`d58816be
 agent routes (`ecf76402b3`), added Instructions and Knowledge rooms (`8fe15a629c`), AI projects, sources and their model
 (`1c4190d327`, `ee2f480944`, `96a4fdefca`, `e10a553243`, `64c79db1dc`), the skills catalogue (`69e51f8e97`) and the
 multi-room knowledge search (`10d18364af`, `3878ba506a`). The TS AI suite was ported to .NET (2300 cases). How rows were
-checked: the assertion was read for the Category=Bug tests, the tests behind A1–A14 and the suspicious rows (about 40
+checked: the assertion was read for the Category=Bug tests, the tests behind the defects of that revision and the suspicious rows (about 40
 tests); the other `file:line` citations come from the test index and its summaries, by test name. The spot checks found
 two rows of the previous draft wrong (`0` as a preference scope, `ask` and a saved approval) and the name of
 `Add_NameOfARegisteredServerWithoutConfig` read against the draft's "re-save"; a name may still mislead elsewhere.
@@ -75,10 +74,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Profile catalogue** | | |
 | Identical description to reading roles, get-by-id has no key or headers | `T/ProfileTests/ProfileCatalogueTests.cs:56,96,133,178`; `ProfileAccessReadTests.cs:91` | TEST-CONFIRMED [run: PASS] |
 | Guest 403, anonymous 401, malformed / empty 400, unknown 404 (scenarios "Guest cannot read", "Unknown id") | `T/ProfileTests/ProfileAccessGuestTests.cs:47,58`; `ProfileAccessReadTests.cs:52`; `ProfileIdBoundaryTests.cs:46,54,73` | TEST-CONFIRMED [run: PASS] |
-| List carries the key to an administrator (scenario) | `T/ProfileTests/ProfileAccessReadTests.cs:108`; every member too, see A15 | TEST-CONFIRMED [run: PASS] |
+| List carries the key to an administrator (scenario) | `T/ProfileTests/ProfileAccessReadTests.cs:108` | TEST-CONFIRMED [run: PASS] |
 | Hosted catalogue: gateway list, no embedding, restricted leaves (scenario "Restricted model leaves") | `TS/profiles/profiles.spec.ts:1477,1513`; `AI/Server/Service/ProfileStorageService.cs` | TS-ONLY |
 | **Models offered by a stored profile's provider** | | |
-| Missing / malformed 400, unknown 404, every reading role, lists models | `T/ProfileTests/ProfileIdBoundaryTests.cs:85,93,113,128`; `ProfileAccessReadTests.cs:153` | TEST-CONFIRMED [run: PASS] |
+| Missing / malformed 400, unknown 404, every reading role, lists models | `T/ProfileTests/ProfileIdBoundaryTests.cs:85,93,113,128`; `ProfileAccessReadTests.cs:136` | TEST-CONFIRMED [run: PASS] |
 | Guest and AI off refused before the dial (scenario) | `T/ProfileTests/ProfileAccessGuestTests.cs:82`; `ProfileAiDisabledTests.cs:73` | TEST-CONFIRMED [run: PASS] |
 | Key rejected 400, no answer 502 | yaml `aiProfilesListModels`; `T/ProfileTests/ProfileProviderReachabilityTests.cs:45` (discovery sibling); `T/ProfileTests/ProfileListModelsFailureTests.cs:45,67` | TEST-CONFIRMED [run: FAIL-BUG] for the 400 (`ProfileListModelsFailureTests.cs:45`); for the 502 (`:67`): a provider that drops the connection is answered 200 with an empty list (A32). A refused connection on a saved profile stays CODE-ONLY |
 | **Managing profiles** | | |
@@ -94,7 +93,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Local types (scenario "Local provider"), every model named; Guest and AI off | `T/ProfileTests/ProfileProviderReachabilityTests.cs:60,72`; `ProfileProviderModelsTests.cs:104`; `ProfileAccessGuestTests.cs:103`; `ProfileAiDisabledTests.cs:90` | TEST-CONFIRMED [run: PASS] |
 | **Connection check of a stored profile** | | |
 | Bare id or wrapper; missing / malformed 400; unknown 404; flat verdict (scenario) | `T/ProfileTests/ProfileTestConnectionTests.cs:47,58,74,107,118,128` | TEST-CONFIRMED [run: PASS] |
-| Same verdict per role; Guest 403, malformed id before the role check | `T/ProfileTests/ProfileAccessReadTests.cs:153`; `ProfileAccessGuestTests.cs:69,119,136` | TEST-CONFIRMED [run: PASS] |
+| Same verdict per role; Guest 403, malformed id before the role check | `T/ProfileTests/ProfileAccessReadTests.cs:136`; `ProfileAccessGuestTests.cs:69,119,136` | TEST-CONFIRMED [run: PASS] |
 | **Model restrictions and prices of a hosted portal** | | |
 | Null entry 400 before the action (scenario "Null entry"); valid body reaches the 403 of the test portal | `Web/04_Portal/Payments/PaymentAiModelRestrictionsValidationTests.cs:55,73,89,107` | TEST-CONFIRMED [run: PASS] |
 | `getAiPrices`, `getRestrictedAiModels`, the rest of `setRestrictedAiModels` | `Payments` (three actions); yaml 53405-53546 at `baf28cf`, `getAiPrices` etc. at 5ea4dc6 | CODE-ONLY |
@@ -105,7 +104,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Unknown task 400 | `T/AssignmentTests/AssignmentReadTests.cs:85`; `AssignmentRemoveTests.cs:61` | TEST-CONFIRMED [run: PASS] |
 | **Who may read and write assignments** | | |
 | Reads for three roles, Guest 403, anonymous 401, AI off 403 (scenario "Guest cannot read") | `T/AssignmentTests/AssignmentPermissionTests.cs:46,80`; `AssignmentAiDisabledTests.cs:46` | TEST-CONFIRMED [run: PASS] |
-| Writes DocSpace-admin only; refused writes nothing (scenario "Room admin cannot bind") | `T/AssignmentTests/AssignmentPermissionTests.cs:134`; `AssignmentAiDisabledTests.cs:73` | TEST-CONFIRMED [run: PASS] |
+| Writes DocSpace-admin only; refused writes nothing (scenario "Room admin cannot bind") | `T/AssignmentTests/AssignmentPermissionTests.cs:114`; `AssignmentAiDisabledTests.cs:73` | TEST-CONFIRMED [run: PASS] |
 | **Resolving the model of a task** | | |
 | Own binding, then Default; FormAnalysis independent (scenario "Unassigned falls back") | `T/AssignmentTests/AssignmentReadTests.cs:68`; `AssignmentResolutionTests.cs:51,72,87,109` | TEST-CONFIRMED [run: PASS] |
 | 404 not 500; try-resolve 200 null; image default (scenarios "Default holds an image model", "Chat and a profile that cannot chat") | `T/AssignmentTests/AssignmentResolutionTests.cs:121,139,153,175` (84450 asserts not-500; the 404 is Chat `assignmentsController.ts:80-100`) | TEST-CONFIRMED [run: PASS] |
@@ -125,7 +124,6 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Guest not in a project (scenario); User joins through a link as Member | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
 | Member reads, manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,95,124`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
-| DocSpace admin outside a project cannot read model, sources or skills | `Hub/AiProjectSourcesLinkTests.cs:248`, `Hub/AiRoomSkillsTests.cs:118` cover a User; admin by `Security`; `Hub/AiRoomOutsiderAccessTests.cs:55` | TEST-CONFIRMED [run: FAIL-BUG] - a DocSpace admin who is no member gets 200 on all three (A33), `Hub/AiRoomOutsiderAccessTests.cs:55` |
 | **The model of an AI project** | | |
 | Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,111,185` | TEST-CONFIRMED [run: PASS] |
 | Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:124,141,155,168` | TEST-CONFIRMED [run: PASS] |
@@ -221,13 +219,12 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Refusals of a send** | | |
 | Empty, unknown thread, foreign, Guest, AI off | `T/ChatTests/ChatPermissionValidationTests.cs:81,98`; `ChatPermissionIsolationSendTests.cs:51`; `ChatPermissionGuestTests.cs:118`; `ChatAiDisabledTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | Unknown profile (scenario), malformed | `T/ChatTests/ChatThreadModelRulesTests.cs:168`; `ChatHiddenFailureTests.cs:46` | TEST-CONFIRMED [run: PASS] |
-| Non-member of project; oversized (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:84`; `ChatHiddenFailureTests.cs:77` | TEST-CONFIRMED [run: PASS] |
+| Non-member of project; oversized (scenario) | `T/ChatTests/ChatProjectAccessTests.cs:65`; `ChatHiddenFailureTests.cs:77` | TEST-CONFIRMED [run: PASS] |
 | Unpaid 402 | `TS/chat/chat.ai-disabled.spec.ts:352` | TS-ONLY (TS block skipped) |
 | Project without a usable model 409 (scenario) | `Chat/storage/aiProjectChatContext.ts:216-250`; `Chat/storage/__tests__/aiProjectChatContext.test.ts`; yaml 743 ff. | TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] at unit level - `Chat/storage/__tests__/aiProjectChatContext.test.ts:240,259,275`; no .NET test drives it |
 | **The model of a chat** | | |
 | Project answers on its model, for a manager (scenario); blank, unknown | `T/ChatTests/ChatProjectModelTests.cs:47,74,186,212`; `Send_OtherProfileInProject_CannotOverrideTheFixedModel(asMember: False)` | TEST-CONFIRMED [run: PASS] |
 | The same send by a read member misses the project's model | failure text of `Send_OtherProfileInProject_CannotOverrideTheFixedModel(asMember: True)` in run 365d87fe60 (bug 82914, A16); run 2026-11-10: red again | TEST-CONFIRMED [run: FAIL-BUG] - `T/ChatTests/ChatProjectModelTests.cs:278` (A16) |
-| Thread created in a project on another profile: stored (scenario) | failure text of `Create_ThreadInProjectOnAnotherModel_DoesNotStoreIt` (both cases) in run 365d87fe60 (bug 82915, A29); `OpenOrCreate_ProjectThreadWithAnotherProfile_DoesNotStampIt` at line 157 passes and covers the other route; run 2026-11-10: both cases red again | TEST-CONFIRMED [run: FAIL-BUG] - `T/ChatTests/ChatProjectModelTests.cs:314` (A29) |
 | Thread's own, Chat, Default; rebinding moves nothing | `T/ChatTests/ChatThreadModelTests.cs:50,99,198`; `ChatThreadModelRulesTests.cs:49,113,183`; `ChatOtherActorTests.cs:45`; `ChatRoomModelTests.cs:87` | TEST-CONFIRMED [run: PASS-ON-RERUN] |
 | Picker switches (scenario) | `T/ChatTests/ChatThreadModelTests.cs:129,165` | TEST-CONFIRMED [run: PASS] |
 | Image-only (scenario) | `T/ChatTests/ChatImageTests.cs:84` | TEST-CONFIRMED [run: PASS] |
@@ -265,14 +262,14 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Non-boolean, empty, bad depth | `T/PreferenceTests/PreferenceDeepModeValidationTests.cs:49,62,84`; `PreferenceReasoningLevelTests.cs:89`; `PreferenceClearTests.cs:52` | TEST-CONFIRMED [run: PASS] |
 | Guest, anonymous, AI off | `T/PreferenceTests/PreferencePermissionTests.cs:47,78`; `PreferenceAiDisabledTests.cs:57` | TEST-CONFIRMED [run: PASS] |
 | **Custom MCP servers** | | |
-| Roles (scenario "Member cannot register") | `T/McpTests/McpToolsManagePermissionsTests.cs:46`; `McpToolsMemberPermissionsTests.cs:46`; `McpToolsAccessTests.cs:138`; `McpToolsAnonymousTests.cs:58` | TEST-CONFIRMED [run: PASS] |
+| Roles (scenario "Member cannot register") | `T/McpTests/McpToolsManagePermissionsTests.cs:46`; `McpToolsMemberPermissionsTests.cs:46`; `McpToolsAccessTests.cs:105`; `McpToolsAnonymousTests.cs:58` | TEST-CONFIRMED [run: PASS] |
 | Round trip (scenario), no dial, verbatim, flag (scenario) | `T/McpTests/McpServerRegistryTests.cs:50,93,135,349,366` | TEST-CONFIRMED [run: PASS] |
 | Unregistered name (scenario) | `T/McpTests/McpServerRegistryTests.cs:260` | TEST-CONFIRMED [run: PASS] |
-| AI off (scenario), off period (scenario) | `T/McpTests/McpToolsAiDisabledTests.cs:58,82`; `McpToolsAccessTests.cs:286` | TEST-CONFIRMED [run: PASS] |
+| AI off (scenario), off period (scenario) | `T/McpTests/McpToolsAiDisabledTests.cs:58,82`; `McpToolsAccessTests.cs:253` | TEST-CONFIRMED [run: PASS] |
 | Audited | `AI/Server/Service/McpServerStorageService.cs` (`ServerCreated/Updated/Deleted`) | CODE-ONLY |
 | **One registry per portal** | | |
 | Registered from a room (scenario); folder | `T/McpTests/McpServerEntityScopeTests.cs:49,66,77,97`; `T/ThirdPartyTests/ThirdPartyToolsTests.cs:68,80` (skips on the stand) | TEST-CONFIRMED [run: PASS] |
-| Unknown room (scenario), deleted, unopenable | `T/McpTests/McpServerEntityScopeTests.cs:160,190`; `McpToolsAccessTests.cs:208` | TEST-CONFIRMED [run: PASS] |
+| Unknown room (scenario), deleted, unopenable | `T/McpTests/McpServerEntityScopeTests.cs:160,190`; `McpToolsAccessTests.cs:175` | TEST-CONFIRMED [run: PASS] |
 | Reads ignore the entity (scenario) | `T/McpTests/McpServerEntityScopeTests.cs:146` | TEST-CONFIRMED [run: PASS] |
 | Name without config | `T/McpTests/McpServerRegistryTests.cs:236,247` | TEST-CONFIRMED [run: PASS] |
 | **Server names** | | |
@@ -289,7 +286,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Server type and list refusals (scenario "Refused list") | `T/McpTests/McpDisabledToolsTests.cs:164,186,201,217,233` | TEST-CONFIRMED [run: PASS] |
 | Per user | `T/McpTests/McpToolPrefsLifecycleTests.cs:146`; `McpToolsSettingsPermissionsTests.cs:46` | TEST-CONFIRMED [run: PASS] |
 | Dropped server (scenario) | `T/McpTests/McpToolPrefsLifecycleTests.cs:45,81`; `T/McpServerStorageTests/McpServerReplaceTests.cs:139` | TEST-CONFIRMED [run: PASS] |
-| Guest, AI off naming a server (scenario) | `T/McpTests/McpToolsAccessTests.cs:318,338` | TEST-CONFIRMED [run: PASS] |
+| Guest, AI off naming a server (scenario) | `T/McpTests/McpToolsAccessTests.cs:285,305` | TEST-CONFIRMED [run: PASS] |
 | Portal-wide list for everyone (`scope` `tenant`) | `Chat/controllers/toolsController.ts` (`parseToolPrefsScope`, bug 84381); `T/McpTests/McpToolPrefsTenantScopeTests.cs:63,81,96` | TEST-CONFIRMED [run: PASS] - read by every member and folded into each member's own list, written by an administrator only (403 otherwise), emptied by an empty list (`McpToolPrefsTenantScopeTests.cs:63,81,96`) |
 | **Pre-approving tools** | | |
 | Flat tokens, idempotent, revoke, falsy, string, missing | `T/McpTests/McpAllowAlwaysTests.cs:46,57,67,127,144,158,173,186` | TEST-CONFIRMED [run: PASS] |
@@ -415,7 +412,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Claim | Source | Status |
 |---|---|---|
 | `aiSkillsGenerate` returns the skill for review and saves nothing | `770819a4fc`, `7efeb43643`; `portal-settings`, "Result of generating a skill" | CROSS-REFERENCE; `app/skills/__tests__/generateSkill.test.ts` asserts it (unit test, not run) |
-| The provider's text on that route only for spending limit, rate limit, lack of credit; a description reaches the model as written | `72adbfaa14`; `skillsController.ts:72-83`; `portal-settings`, "Failures of generating a skill" | partly: "a description reaches the model as written" TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] (`app/skills/__tests__/generateSkill.test.ts:126`); the relay of the provider's text stays CODE-ONLY; the metadata routes keep the old relay, see A26 |
+| The provider's text on that route only for spending limit, rate limit, lack of credit; a description reaches the model as written | `72adbfaa14`; `skillsController.ts:72-83`; `portal-settings`, "Failures of generating a skill" | partly: "a description reaches the model as written" TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] (`app/skills/__tests__/generateSkill.test.ts:126`); the relay of the provider's text stays CODE-ONLY |
 | Long threads compacted, on by default, summary stored as an ordinary message; off without a restart | `6fbbf9ecf3`; `aiController.ts` (`compaction`); `common/ASC.AI.Chat/README.md:33-50`; `app/__tests__/compactionConfig.test.ts` (settings only) | partly: the settings (on by default, off from the file or the environment) TEST-CONFIRMED [run: NO-LINK] [run: PASS, vitest 2026-11-10] (`app/__tests__/compactionConfig.test.ts:43,47,60,70`); the compaction itself stays CODE-ONLY - no .NET test drives one, and the folding is in the library |
 | `context_length` becomes `contextWindow` in the gateway's model list; fallback to the id table, then a default; a saved profile keeps nothing | `303ac12711`; `profilesStorage.ts` (`mapGatewayModel`, `dtoToProfile`); README | CODE-ONLY |
 | Cache breakpoints (`396266ebe9`, `cd37150ab8`) and library bumps | Internal to a round, no contract change | LEFT OUT |
@@ -427,7 +424,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 |---|---|
 | `T/McpTests/McpToolPermissionModeChatTests.cs:111` (BUG 84298, TS claim) expects a saved allow-always to win in `ask` | `Lib` `types.d.ts:503`: "under ask never". The previous draft said "unless pre-approved"; corrected. The test is red by code reading and its comment says the expectation is the TS claim. |
 | Previous draft: `0` as a preference `entityId` answers 400 | `T/PreferenceTests/PreferenceEntityIdTests.cs:146`: empty and `0` are the user's own scope; corrected. |
-| Previous draft: a thread in a project answers 403 for an outsider of any role, 409 without a model; a Member's round runs on the project's model | Two project checks do not fire on thread create and a Read member's round is not bound (A16, A17); the spec now states only Room admin and User outsiders, the 409 on a round of a manager, and a manager's round. |
+| Previous draft: a thread in a project answers 403 for an outsider of any role, 409 without a model; a Member's round runs on the project's model | A Read member's round is not bound to the project (A16); the spec now states the outsiders a project refuses, the 409 on a round of a manager, and a manager's round. |
 | `TS/chat/chat.permission.spec.ts:1567` (BUG 82719) expects 403 / 400 for a file id, the Trash, 0 and −1 | Reopen decision: any accessible folder is valid (`T/ChatTests/ChatPermissionValidationTests.cs:58-64`). |
 | `TS/preferences/*` BUG 82900, 84306, 84418-84420 wanted a scope per room | Preferences have no scope; the .NET tests were rewritten to the one user value (`T/PreferenceTests/PreferenceScopeTests.cs`). |
 | TS catalogue test title "publishes nothing", agent scopes for MCP | The registry is one map per portal (bug 82975); registered tools reach the model (`8b54d43b11`). |
@@ -486,31 +483,22 @@ No test was run. `Integration` is `common/ASC.AI.Integration/Profiles/`; `Gw` is
 ## Suspected defects
 
 Re-checked 2026-11-06. No test was run; "red by code reading" means the assertion was compared with the code.
-On 2026-11-10 the tests of A15, A16, A18, A19, A20, A27-A30 were run (class by class) and are red as described;
-A32-A34 come from new tests of that run.
+On 2026-11-10 the tests of A16, A27, A28 and A30 were run (class by class) and are red as described;
+A32 and A34 come from new tests of that run.
 
 | # | Where | What the server does | Evidence | 2026-11-06 |
 |---|-------|----------------------|----------|------------|
-| A1 | Vectorization access | The old text (a manager of agent A queues a file of agent B) is narrower than thought: `GetVectorizationAvailabilityAsync` answers `AlreadyProcessed` before any right check, so an already processed file answers 200 to anyone, nothing queued, and shows the file exists (404 otherwise). A pending file is refused: the right needs Room manager. | `Security:681-691,2693-2706`; `VectorizationTaskPublisher.cs:68-76`; `TS/vectorization/vectorization.access.spec.ts:35` (now skipped) | STILL OPEN, narrowed; by code reading, no .NET test |
-| A2 | Tool mode via preferences | Read was served from the ungated `/config` snapshot. | `Chat/storage/preferencesStorage.ts:51`; `T/PreferenceTests/PreferencePermissionTests.cs:198`, `PreferenceAiDisabledTests.cs:76` | FIXED (`4b380e5ee7`, `2a4975b142`) |
 | A3 | Agent create | Room left behind when the binding failed. | route gone | FIXED by removal (`ecf76402b3`) |
 | A4 | Default slot | Image-only Default handed to Chat. Default still takes it, resolve answers 404 and try-resolve null. | `T/AssignmentTests/AssignmentResolutionTests.cs:153,175`; `Chat/controllers/assignmentsController.ts:80-100,207-210` | FIXED (`d59923d4a0`) |
 | A5 | Title regeneration | 500 on a real conversation. | `T/ThreadStorageTests/ThreadsRegenerateTitleTests.cs:102`; `T/ChatTests/ChatRegenerateTitleTests.cs:51` | FIXED (`876875d79d`, test comment), TS `test.fail` stale |
 | A6 | Thread scope validation | File id, Trash accepted. | `T/ChatTests/ChatPermissionValidationTests.cs:58-64` | REFUTED: by design, reopen decision on bug 82719 |
-| A7 | Web-search gates | Validation and probe before Guest and switch checks. | `Chat/controllers/webSearchController.ts:162-190`; `T/WebSearchTests/WebSearchConfigureTests.cs:154,170`, `WebSearchPermissionsTests.cs:181` | FIXED (`0dc046cacd`, `857671bb6d`) |
 | A8 | MCP replace-all | Case twins stored. | `T/McpTests/McpServerReplaceAllTests.cs:227` (comment "used to") | FIXED (`b6d11f1999`, the library update) |
 | A9 | Export drops the file | A form-filling room or a room out of quota answers 202 and writes nothing: the publisher checks the folder and the right only; the quota and the room rule meet the job later. | `AI/Core/MdTextToDocx/MdTextToDocxTaskQueue.cs:48-90`; `T/TextToDocxTests/TextToDocxQuotaTests.cs:51`, `TextToDocxRoomTypesTests.cs:73` | STILL OPEN, red by code reading |
 | A10 | OpenAI passthrough bodies | 500 with a stack trace on a large body and malformed image requests. | commit message; `TS/openai-passthrough/openai-passthrough.spec.ts:404,497` keep old titles; no .NET test | FIXED (`9768f0a6f3`, `e84932692d`), by commit and code |
 | A11 | Foreign prompt delete | `promptsStorage.delete` swallows the 404 and the controller answers success; the prompt survives. | `Chat/storage/promptsStorage.ts:148-157`; `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` | STILL OPEN, red by code reading of those two files; the library engine between them was not read, and the test comment says "used to" |
-| A12 | Server-executed tools | Foreign tenant answer: a client-supplied `Mcp-Session-Id` reached the shared container. | commit message | FIXED (`916074e486`) |
 | A13 | Metadata gate | `assertAiAccess` borrows the gate through a throwaway tool-prefs read, now on four routes. | `Chat/controllers/aiAccess.ts:51`; `metaController.ts:148,161`; `profilesController.ts:253`; `editorToolsController.ts:130` | STILL OPEN |
 | A14 | Contract drift | See the contract table. | yaml `5ea4dc6` | FIXED except the `aiTools` build field and its route (STILL OPEN) |
-| A15 | Provider key leak | `aiProfilesList` hands the key to every member: Chat sends `forClient=true`, the storage controller reads no such flag and the service does not strip. | `Chat/storage/profilesStorage.ts:225,321`; `AI/Server/Api/ProfileStorageController.cs` (`ReadAllAsync`); `T/ProfileTests/ProfileAccessReadTests.cs:125` | NEW, red by code reading; 2026-11-09: STILL OPEN for stored provider profiles; a BYOK gateway profile carries only the placeholder key, never the portal's provider key (`ProfileReader.MapGatewayProfile`); 2026-11-10: CONFIRMED by run - `List_MemberDoesNotSeeTheKey` red, a User reads `sk-stub` (`T/ProfileTests/ProfileAccessReadTests.cs:125`, Category=Bug) |
 | A16 | Read member of a project | A round is not bound to the project: chat context drops a folder without `CanUseAi` (Room manager or Content creator), and the fallback reads `type` from the folder DTO, null for a room. The round runs on what the composer sent, without the project's model and sources. | `Security:2723-2735`; `AI/Server/Service/ChatContextService.cs:157-172`; `Chat/storage/docspaceFilesApi.ts:166,450-458`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:158,406-416`; `T/ChatTests/ChatProjectModelTests.cs:129` | OPEN — red test, run 365d87fe60: `GetModel_ProjectMember_…` and `Send_OtherProfileInProject_…(asMember: True)`; the manager's case passes |
-| A17 | Thread create in a project | Same null `type`: `aiThreadsCreate` never sees a project, so a DocSpace admin outside it creates a thread, and no model answers the generic 404, not 409. | `Chat/controllers/threadsController.ts:125-147`; `T/ChatTests/ChatProjectAccessTests.cs:71,111` | NEW, red by code reading |
-| A18 | Web-search key | `aiWebSearchGetActiveConfig` returns the stored key to a User. | `Chat/controllers/webSearchController.ts:144-152`; `T/WebSearchTests/WebSearchStateTests.cs:194` | NEW, red by code reading; 2026-11-09: STILL OPEN, not touched (the web-search BYOK of `e105ab1a4e` was reverted in `bdde563b02`); 2026-11-10: CONFIRMED by run - `GetActiveConfig_AsAUser_DoesNotReturnTheKey` red, the User's answer carries `"key"` in clear (`T/WebSearchTests/WebSearchStateTests.cs:194`, Category=Bug) |
-| A19 | Resolve key | `aiAssignmentsResolveForAction` echoes the profile with its key. | `T/AssignmentTests/AssignmentPermissionTests.cs:116` (controller read only up to the resolve call) | NEW, per the test's comment, not fully traced; 2026-11-09: STILL OPEN for stored provider profiles; a BYOK model resolves with the placeholder key only; 2026-11-10: CONFIRMED by run - `Resolve_AsAUser_DoesNotCarryTheProviderKey` red, `profile.key` is `sk-stub` (`T/AssignmentTests/AssignmentPermissionTests.cs:116`, Category=Bug) |
-| A20 | MCP credentials | The read routes redact only system servers, so a custom server's Authorization header reaches a User and a Room admin. | `Chat/controllers/toolsController.ts:126-130,227,239`; `T/McpTests/McpToolsAccessTests.cs:108` | NEW, red by code reading; 2026-11-09: STILL OPEN, not touched; no new BYOK route returns a stored key (`AiByokKey` has no key field, the gateway BYOK route sends the key only to the gateway inside its token); 2026-11-10: CONFIRMED by run for `get-custom-server` only - `Read_ANonAdministrator_IsNotHandedTheAuthorizationHeaderAnAdminStored` red for User and Room admin, `list-custom-servers` did not carry the header (`T/McpTests/McpToolsAccessTests.cs:108`, Bug 84399) |
 | A21 | Export names | `/` in a title is a path separator (`Notes 12/31` → `31.docx`); two simultaneous exports with one title get one name. | `T/TextToDocxTests/TextToDocxNamingTests.cs:118`, `TextToDocxConcurrencyTests.cs:68` (bugs 82711, 84459, "measured" in the comments) | NEW, per the tests, code not read |
 | A22 | Export of formulas; failure language | TeX source lands in the document; a stored provider failure stays English under any culture. | `T/MessageStorageTests/MessageMarkdownDocxTests.cs:99` (83038); `T/ChatTests/ChatFailureLanguageTests.cs:81` (83046) | NEW, per the tests, code not read |
 | A23 | `aiThreadsOpenOrCreate` without a message | No `threadId`, no `firstMessage`: 500 from the engine. | `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:156` (82826) | NEW, per the test comment |
@@ -518,11 +506,7 @@ A32-A34 come from new tests of that run.
 | A25 | Profile `createdAt` | The create answer has milliseconds no later read reproduces. | `T/ProfileStorageTests/ProfileReadTests.cs:47` | NEW, per the test comment |
 | A27 | Tool mode gates | An invalid value to the write route from a Guest or while AI is off answers 400: validation comes before the Guest and switch checks. | `ToolPermissionMode_Guest_CannotReadOrChangeIt` (84303), `ToolPermissionMode_AiDisabled_ReadAndWriteReturn403` (84302) | OPEN — red test, run 365d87fe60 |
 | A28 | Attachment cap | More attachments than the composer allows are answered 200 and stored whole on `aiThreadsAppendUserMessage` and the send (11 stored). | `AttachmentComposerRuleTests`, the two `MoreAttachmentsThanTheClientAllows` tests (82894) | OPEN — red test, run 365d87fe60 |
-| A29 | Thread create in a project | `aiThreadsCreate` naming another profile stores it on a project thread, for a manager and a member. | `Create_ThreadInProjectOnAnotherModel_DoesNotStoreIt` (82915) | OPEN — red test, run 365d87fe60 |
 | A30 | Attachment to the model | A round with a draft by id, an inline record, a device file or an image ends healthy but no streamed request to the stub carries the text. Whether the stand's file reading plays a part was not traced. | `AttachmentSendTests`, four tests (82773) | OPEN — red test, run 365d87fe60 |
-| A26 | Metadata routes | A failed model call relays the provider's text for every failure, while `aiSkillsGenerate` was narrowed to a rate limit, a lack of credit and the portal's spending limit because an authentication failure quotes the masked API key. | `common/ASC.AI.Chat/app/controllers/metaController.ts:137` against `skillsController.ts:72-83`; `72adbfaa14` | NEW, red by code reading; whether a provider's auth text reaches a caller without provider rights not traced |
-| A31 | BYOK on a restricted model | A model restricted through `setRestrictedAiModels` leaves the gateway's customer list; a BYOK key for it adds it back from the full catalogue, and the AI service applies no restriction of its own. | `Integration/PortalModelsService.cs` (`ReadAsync`); no restriction check in `ProfileReader`, `ProfileStorageService` | NEW, by code reading; the gateway's customer list not seen; 2026-11-10: not reachable here - needs the SaaS AI gateway and its customer list, which neither the integration-test nor the billing stub stack runs |
 | A32 | Dropped provider connection | `aiProfilesListModels` on a saved profile whose provider accepts the connection and closes it without an answer is answered 200 with an empty model list instead of 502, so the form shows no models instead of the failure. | `T/ProfileTests/ProfileListModelsFailureTests.cs:67` (Category=Bug); `Chat/controllers/profilesController.ts` (`listModels`) | NEW 2026-11-10, red by run |
-| A33 | DocSpace admin in a project | A DocSpace admin who is not a member of an AI project reads its model, sources and skills (200), while the requirement bars him and the chat service refuses him a round in the project; the project read check (`AiHubService.GetProjectAsync` -> `FileSecurity.CanReadAsync`) lets him through. Either the Files check or the requirement is wrong. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:55` (Category=Bug); `Chat/storage/__tests__/aiProjectChatContext.test.ts:240` | NEW 2026-11-10, red by run |
 | A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 129); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run |
 | A35 | `aiPromptsDelete` | Deleting another user's prompt answers `success` true although nothing is deleted (bug 82809): the route never reports whether a prompt of the caller was removed. The yaml describes it as intended. | `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` (Trait Bug 82809) | NEW 2026-11-14, red by code reading |

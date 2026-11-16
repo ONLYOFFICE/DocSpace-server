@@ -12,8 +12,8 @@ description: "Keeping the OpenSpec capability specs (openspec/specs/*/spec.md + 
   operations (operationId), routes, request fields and status codes only: no class names, file names, enum
   numbers, resource keys or configuration keys. Those belong in verification.md.
 - `openspec/specs/<capability>/verification.md`: one row per claim, `claim | source | status`.
-- `openspec/deviations.md`: the defect register, coordinator-owned. Every suspected defect from any spec is
-  listed there with its spec prefix number, evidence and status (OPEN, OPEN (product decision), FIXED <commit>,
+- `openspec/deviations.md`: the defect register, coordinator-owned. Every suspected defect from any spec, except a
+  security defect (next section), is listed there with its spec prefix number, evidence and status (OPEN, OPEN (product decision), FIXED <commit>,
   REFUTED). Rows that leave OPEN move to the "Closed" table.
 
 **Specs describe the current server.** When the code and an older document (role matrix, yaml text, release
@@ -21,7 +21,9 @@ notes, a TS test) disagree, the spec follows the server. Behaviour that looks in
 behaviour that is clearly wrong stays out of the requirements and goes to "Suspected defects" plus deviations.md.
 A test that asserts the correct behaviour of an open defect carries `[Trait("Category", "Bug")]` and stays red.
 
-**Security defects stay out of the repository until a released version fixes them.** The repository is public
+### Security defects
+
+Security defects stay out of the repository until a released version fixes them. The repository is public
 (GitHub mirror), so a security defect (a caller reads, changes or deletes what their rights do not allow, a secret, key, token or personal data leaks, a check runs for the wrong account or portal, a request reaches an internal address, a payment, licence or second-factor gate is bypassed, an audit event names the wrong actor) goes into none of deviations.md, spec.md, verification.md
 or a committed test. The briefs make agents report such a defect only in their final message, marked SECURITY;
 the coordinator records it in the private register outside the repository, and a Bug-marked
@@ -58,7 +60,8 @@ last full run (mode C). Rows added or changed by hand carry no run mark until th
 3. Fill `references/resync-brief.md` (range, date) and start one general-purpose agent per group, at most two at a
    time: these agents run no tests, but parallel batches still drain the 5-hour usage window fast.
 4. When they report: check every claimed new defect in the code yourself (codegraph/LSP), then add it to
-   deviations.md; apply FIXED/REFUTED verdicts there too. Agents never edit deviations.md.
+   deviations.md; apply FIXED/REFUTED verdicts there too. Agents never edit deviations.md. A defect marked
+   SECURITY goes to the private register instead (see "Security defects" above), never to deviations.md.
 5. `python -I -X utf8 .claude/skills/openspec-maintain/scripts/op_coverage.py` lists operations of the published
    yaml that no spec.md names. Each one goes into an existing spec (an agent with the resync brief) or a new
    capability (`references/new-spec-brief.md`).
@@ -90,7 +93,9 @@ Nextcloud container IS on the stand (`Requires=Nextcloud` tests, see `03_Rooms/T
 4. `python -I -X utf8 .claude/skills/openspec-maintain/scripts/apply_run_marks.py <out-dir> [--ru <dir>]`
    rewrites the marks and the run legend of every verification.md (and of translated copies with the same row
    count, if `--ru` names their root). It is idempotent.
-5. Judge every FAIL row: a test fault, a flake, or a defect. A defect gets a Bug-marked test and a deviations.md row.
+5. Judge every FAIL row: a test fault, a flake, or a defect. A defect gets a Bug-marked test and a deviations.md row;
+   a security defect gets neither: its test leaves the test project and it goes to the private register (see
+   "Security defects" above).
 
 ## Mode D: which operations the tests call
 
@@ -99,7 +104,8 @@ maps every operation of the published yaml to the test projects of `ASC.Tests.sl
 `.<OperationId>Async(` or `.<OperationId>WithHttpInfoAsync(`), `raw` (only a route literal matches; the HTTP
 method is not checked, so read the test), `none`. It prints the counts per spec and, with `--out`, lists every
 `raw` and `none` operation per spec with the files that hit it. It is a text scan: a same-named helper called
-with a receiver counts as a call. Use the `none` list to queue mode B work (an operation no test calls has no
+with a receiver counts as a call, and an operation not yet in the published yaml (one a change adds before the
+documents are regenerated) is invisible to it. Use the `none` list to queue mode B work (an operation no test calls has no
 TEST-CONFIRMED row behind it either) and run it after every batch. This is the "every operation is called"
 level; the "every row is TEST-CONFIRMED" level is the CODE-ONLY count of mode B.
 

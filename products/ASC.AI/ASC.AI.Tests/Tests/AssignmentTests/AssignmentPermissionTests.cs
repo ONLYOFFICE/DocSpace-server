@@ -106,26 +106,6 @@ public class AssignmentPermissionTests(AspireAppFixture fixture) : AssignmentTes
         (await GetAssignmentAsync(AiActionType.Summarization)).Should().Be(text.Id);
     }
 
-    /// <summary>
-    /// Resolution is what the chat surface actually calls and it hands back the whole profile; an ordinary member must
-    /// still not get a credential out of it. (The profile list and get-by-id strip the key for a non-administrator; the
-    /// resolve route echoes the profile the engine read, which on a plain provider profile still carries it.)
-    /// </summary>
-    [Fact]
-    [Trait("Category", "Bug")]
-    public async Task Resolve_AsAUser_DoesNotCarryTheProviderKey()
-    {
-        await CreateProfileWithAsync(TextCapabilities);
-
-        var user = await InviteMemberAsync(EmployeeType.User);
-        await _aiChatClient.Authenticate(user);
-
-        var resolved = await ResolveAsync(nameof(AiActionType.Chat));
-
-        resolved.Profile.Key.Should().BeNullOrEmpty("a member never sees the provider credential");
-        JsonSerializer.Serialize(resolved).Should().NotContain(StubModelProvider.Key);
-    }
-
     [Theory]
     [InlineData(EmployeeType.DocSpaceAdmin, true)]
     [InlineData(EmployeeType.RoomAdmin, false)]

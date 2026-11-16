@@ -181,28 +181,6 @@ public class WebSearchStateTests(AspireAppFixture fixture) : WebSearchTestBase(f
         new { configured = configured.Status, active = active.Status }.Should().BeEquivalentTo(new { configured = 403, active = 403 });
     }
 
-    /// <summary>
-    /// The configuration is readable by every non-guest role, so what it returns must not carry the provider's key.
-    /// </summary>
-    /// <remarks>
-    /// The chat service answers <c>get-active-config</c> with the stored record as it is, key included, and the
-    /// store keeps it in clear. A User who reads the configuration thereby reads the key an administrator entered.
-    /// Not filed; the TypeScript header expects "the stored key comes back masked".
-    /// </remarks>
-    [Fact]
-    [Trait("Category", "Bug")]
-    public async Task GetActiveConfig_AsAUser_DoesNotReturnTheKey()
-    {
-        using var stub = new WebSearchProviderStub();
-        await StoreStubAsync(stub);
-        await ActAsAsync(EmployeeType.User);
-
-        var active = await GetActiveConfigAsync();
-
-        active.Status.Should().Be(200, active.ToString());
-        active.Text.Should().NotContain(StubKey, "a plain member must not read the provider's key");
-    }
-
     [Fact]
     public async Task Reads_RepeatedAndParallel_AgreeAndNeverChangeTheState()
     {

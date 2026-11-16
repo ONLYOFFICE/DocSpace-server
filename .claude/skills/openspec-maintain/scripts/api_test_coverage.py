@@ -24,13 +24,17 @@ import collections
 import glob
 import os
 import re
+import sys
+
+sys.dont_write_bytecode = True  # no __pycache__ in the skill folder
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # -I leaves the script folder off the path
+from openapi_ops import YAML, read_operations  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--out", help="write the per-spec report as Markdown to this file")
 parser.add_argument("--spec", help="report only the operations this spec names")
 args = parser.parse_args()
 
-YAML = "sdk/docspace-api-spec/docspace-backend.yaml"
 SDK = "sdk/docspace-api-sdk-csharp/src/DocSpace.API.SDK/Api"
 SLNX = "ASC.Tests.slnx"
 for p in (YAML, SDK, SLNX):
@@ -38,35 +42,7 @@ for p in (YAML, SDK, SLNX):
         raise SystemExit(f"{p} not found: run from the repository root with the submodules initialised")
 
 # --- operations of the published document: (operationId, METHOD, path, tag)
-lines = open(YAML, encoding="utf-8").read().split("\n")
-ops = []
-in_paths, path = False, None
-for i, line in enumerate(lines):
-    if line.startswith("paths:"):
-        in_paths = True
-        continue
-    if in_paths and re.match(r"^[a-zA-Z]", line):
-        in_paths = False
-    if not in_paths:
-        continue
-    m = re.match(r"^  (/\S*):\s*$", line)
-    if m:
-        path = m.group(1)
-        continue
-    m = re.match(r"^    (get|post|put|delete|patch):\s*$", line)
-    if not m:
-        continue
-    op = tag = None
-    j = i + 1
-    while j < len(lines) and not re.match(r"^ {0,4}\S", lines[j]):
-        mo = re.match(r"^      operationId:\s*(\S+)", lines[j])
-        if mo:
-            op = mo.group(1)
-        if re.match(r"^      tags:\s*$", lines[j]) and j + 1 < len(lines):
-            tag = lines[j + 1].strip().lstrip("- ").strip("'\"")
-        j += 1
-    if op:
-        ops.append((op, m.group(1).upper(), path, tag or "?"))
+ops = read_operations()
 
 
 def pascal(name):
@@ -128,7 +104,8 @@ rows = []
 for op, method, path, tag in ops:
     name = pascal(op)
     in_sdk = name in sdk_methods
-    sdk_files = calls.get(name, set()) if in_sdk else set()
+    # a call in the tests is evidence on its own; in_sdk only tells whether a missing call can be made typed
+    sdk_files = calls.get(name, set())
     raw_files = set()
     if not sdk_files:
         rx = route_regex(path)

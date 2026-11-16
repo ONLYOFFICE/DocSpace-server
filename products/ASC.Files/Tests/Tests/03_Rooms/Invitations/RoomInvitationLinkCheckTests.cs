@@ -62,13 +62,6 @@ public class RoomInvitationLinkCheckTests(
             new CheckConfirmRequestDto(key, uiD: Owner.Id, type: ConfirmType.LinkInvite),
             TestContext.Current.CancellationToken)).Response.Result;
 
-    private async Task<FileShareDto?> MemberOfRoomAsync(int roomId, Guid userId)
-    {
-        var shares = await _roomsApi.GetRoomSecurityInfoAsync(roomId, cancellationToken: TestContext.Current.CancellationToken);
-
-        return shares.Response.FirstOrDefault(s => s.SharedToUser?.Id == userId);
-    }
-
     [Fact]
     public async Task CheckConfirm_ExistingAccountNotInRoom_AnswersUserExistedAndAddsIt()
     {

@@ -48,13 +48,6 @@ public class RoomInvitationByEmailTests(
         Notify = false
     };
 
-    private async Task<FileShareDto?> MemberOfRoomAsync(int roomId, Guid userId)
-    {
-        var shares = await _roomsApi.GetRoomSecurityInfoAsync(roomId, cancellationToken: TestContext.Current.CancellationToken);
-
-        return shares.Response.FirstOrDefault(s => s.SharedToUser?.Id == userId);
-    }
-
     [Fact]
     public async Task SetRoomSecurity_UnknownAddress_CreatesPendingGuestWithAccess()
     {

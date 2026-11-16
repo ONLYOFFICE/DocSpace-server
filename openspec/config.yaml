@@ -57,4 +57,8 @@ rules:
     - >-
       Add a final task to re-check the touched specs with `openspec validate --specs --no-interactive` and to
       run `python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec <capability>`
-      for each touched capability: no operation of the change may be left uncalled by a test.
+      for each touched capability: no operation of the change may be left uncalled by a test. The script reads
+      the published sdk/docspace-api-spec/docspace-backend.yaml, which does not hold an operation the change
+      adds until the documents and SDKs are regenerated; so the same task lists every new operationId with the
+      test that calls it (raw HTTP until the SDK has the method), and is checked against that list, not the
+      script.

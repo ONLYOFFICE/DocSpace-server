@@ -146,6 +146,11 @@ def rewrite(path, tags, legend, prefix):
             k += 1
     title = next(i for i, l in enumerate(lines) if l.startswith("#"))
     lines[title + 1 : title + 1] = ["", legend]
+    # exactly one blank line after the legend, whatever the old file had there
+    after = title + 3
+    while after < len(lines) and lines[after] == "":
+        del lines[after]
+    lines.insert(after, "")
     out = []
     for l in lines:
         if l == "" and len(out) >= 2 and out[-1] == "" and out[-2] == "":

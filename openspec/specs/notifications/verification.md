@@ -2,7 +2,6 @@
 
 > **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
-
 > Revision 2026-11-09 (bb406b409b..6fb013e745): the repeat check of letters (no letter for a repeat within the period, same answer); the rate limit of the resend and instruction endpoints is gone.
 
 > Tests 2026-11-10: `common/Tests/ASC.Notify.Tests/Rooms/RoomLetterRecipientsTests.cs` drives the Files notify client on the letter host and reads the requests it queues for the engine (`Infrastructure/NotifyQueue.cs`), so the room letters' recipients are now tested; N1, N2 and N8 are red tests there. `NotificationSettingsScopeTests.cs` and `SmtpStoredSettingsTests.cs` in `web/ASC.Web.Api.Tests` close the default-on, per-member and SMTP storage rows.

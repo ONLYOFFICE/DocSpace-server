@@ -2,7 +2,6 @@
 
 > **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
-
 Status values: **TEST-CONFIRMED** — an integration test asserts it; **CODE-ONLY** — settled from the product
 code or the OpenAPI contract (`sdk/docspace-api-spec/docspace-backend.yaml`, cited by `operationId`), no
 test; **NOTES-ONLY** — taken from the release notes without server evidence.

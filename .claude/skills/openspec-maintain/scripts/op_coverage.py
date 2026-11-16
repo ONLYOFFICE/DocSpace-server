@@ -8,45 +8,17 @@ import collections
 import glob
 import os
 import re
+import sys
+
+sys.dont_write_bytecode = True  # no __pycache__ in the skill folder
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # -I leaves the script folder off the path
+from openapi_ops import read_operations  # noqa: E402
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--out", help="write the missing operations grouped by tag to this file")
 args = parser.parse_args()
 
-yaml_path = "sdk/docspace-api-spec/docspace-backend.yaml"
-if not os.path.exists(yaml_path):
-    raise SystemExit(f"{yaml_path} not found: run from the repository root with the submodules initialised")
-
-lines = open(yaml_path, encoding="utf-8").read().split("\n")
-ops = []  # (operationId, method, path, tag)
-in_paths = False
-path = None
-for i, line in enumerate(lines):
-    if line.startswith("paths:"):
-        in_paths = True
-        continue
-    if in_paths and re.match(r"^[a-zA-Z]", line):
-        in_paths = False
-    if not in_paths:
-        continue
-    m = re.match(r"^  (/\S*):\s*$", line)
-    if m:
-        path = m.group(1)
-        continue
-    m = re.match(r"^    (get|post|put|delete|patch):\s*$", line)
-    if not m:
-        continue
-    op = tag = None
-    j = i + 1
-    while j < len(lines) and not re.match(r"^ {0,4}\S", lines[j]):
-        mo = re.match(r"^      operationId:\s*(\S+)", lines[j])
-        if mo:
-            op = mo.group(1)
-        if re.match(r"^      tags:\s*$", lines[j]) and j + 1 < len(lines):
-            tag = lines[j + 1].strip().lstrip("- ").strip("'\"")
-        j += 1
-    if op:
-        ops.append((op, m.group(1).upper(), path, tag or "?"))
+ops = read_operations()  # (operationId, method, path, tag)
 
 text = "\n".join(open(f, encoding="utf-8").read() for f in glob.glob("openspec/specs/*/spec.md"))
 missing = [o for o in ops if not re.search(r"\b" + re.escape(o[0]) + r"\b", text)]

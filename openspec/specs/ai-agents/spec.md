@@ -940,11 +940,6 @@ thread.
 - **WHEN** the owner sends with profile A, then with profile B into the same room thread
 - **THEN** the thread reports profile B afterwards and the second reply still knows the first exchange
 
-#### Scenario: Thread created in a project on another profile
-
-- **WHEN** a thread is created with a project as `entityId` naming another profile
-- **THEN** that profile is stored on the thread, whether a manager or a member creates it (bug 82915)
-
 #### Scenario: Image-only chat model
 
 - **WHEN** the thread's model can only draw images
@@ -1786,8 +1781,8 @@ the call fails only when nothing was written. It SHALL answer 403 while AI is of
 ### Requirement: The model and the failures of the metadata routes
 
 The metadata routes SHALL run once, without tools, on the profile bound to GenerateMeta, else on Default
-(503 when neither is bound). A provider failure SHALL be relayed with its classification in `code` and the
-provider's own words in `providerMessage`: no credit 402, rate limiting 429, any other failure 502; a round
+(503 when neither is bound). A provider failure SHALL be relayed with its classification in `code`: no
+credit 402, rate limiting 429, any other failure 502; a round
 that does not finish in time 504; a text the model cannot read 4xx naming the skipped documents.
 
 #### Scenario: Provider out of credit
