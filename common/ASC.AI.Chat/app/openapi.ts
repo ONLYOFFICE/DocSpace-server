@@ -378,6 +378,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiSkillsCreate:
     "Creates a new skill in an Instructions room from the skill template and saves it as `<title>.md`; no model is involved. `destId` is the integer id of the Instructions room, checked before anything is written: the caller has to be able to create files in it, and any other folder answers 400. `title` is the file's title, at most 165 characters, without the extension (a trailing `.md` is dropped), and has to hold a letter or a digit: the skill's `name` is derived from it as in `POST api/2.0/ai/skills/generate`, and its `description` starts as the title itself. The body is a skeleton of the sections a skill is made of, for the user to fill in. The file is saved through `POST api/2.0/files/{folderId}/insert`, so the Files service validates the frontmatter and the room's limits, and a title already taken in the room gets a numbered one. The answer carries the ID and the title of the new file.",
 
+  // Thread files.
+  aiThreadsListAttachments:
+    "Returns the files the caller attached to the messages of one thread, as the Files service describes them now (`GET api/2.0/files/file/{id}`), in the order they were first attached, each file once. The files are not copied when they are attached: a message keeps references to attachment records and each record names a DocSpace file where it already is, so this list is put together from the thread's messages. A file that was deleted since, or that the caller can no longer read, is left out. The images and documents the replies produced are not here: a thread of an AI project keeps them in its own folder, listed by `GET api/2.0/files/rooms/{id}/threads/{threadId}/artifacts`. This is a read-only operation.",
+
   // Templates.
   aiTemplatesList:
     "Returns the templates shipped with the service, in three lists: `agents`, `skillSets` and `knowledgeBases`. Every template has an `id` (its path in the catalog), a `name`, a `description` and a `category`. A skill set and a knowledge base list the names of their `files`; an agent carries its `instructions` and, in `skills` and `knowledges`, the ids of the skill set and knowledge base templates it is linked to, each of which is a template of its own in the other two lists. The catalog is the same for every portal and every caller. This is a read-only operation.",
@@ -772,6 +776,10 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
       "`destId` is not an integer id, `title` is missing, too long or has no letter or digit, or the folder is not an Instructions room.",
     "403": "The caller cannot create files in the room.",
     "404": "The room does not exist.",
+  },
+  aiThreadsListAttachments: {
+    "400": "`threadId` is missing or is not a thread id.",
+    "404": "The caller has no such thread.",
   },
   aiTemplatesInstall: {
     "400": "`id` is missing or is not a string.",
@@ -1447,6 +1455,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiSkillsGenerate:
     "The skill's name and the whole Markdown file, frontmatter included; nothing is saved.",
   aiSkillsCreate: "The ID and the title of the new skill file.",
+  aiThreadsListAttachments: "The attached files, as `FileDto` objects of the Files service.",
   aiTemplatesList: "The agents, skill sets and knowledge bases of the catalog.",
   aiTemplatesInstall:
     "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",

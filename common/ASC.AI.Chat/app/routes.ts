@@ -50,6 +50,7 @@ import { textToDocxController } from "./controllers/textToDocxController.js";
 import { metaController } from "./controllers/metaController.js";
 import { skillsController } from "./controllers/skillsController.js";
 import { templatesController } from "./controllers/templatesController.js";
+import { threadFilesController } from "./controllers/threadFilesController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
@@ -214,6 +215,8 @@ export default function registerRoutes(app: Application): void {
   // bases, and their installation into the portal through the Files API.
   router.get("/templates", templatesController.list);
   router.post("/templates/install", templatesController.install);
+  // The files the user attached in one conversation, as DocSpace files.
+  router.get("/threads/attachments", threadFilesController.attachments);
 
   router.get("/config", settingsController.getAiSettings);
   router.get("/config/vectorization", settingsController.getVectorizationSettings);

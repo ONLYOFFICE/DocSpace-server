@@ -790,6 +790,22 @@ export type Res_aiSkillsCreate = {
   title: string;
 };
 
+export type Req_aiThreadsListAttachments = {
+  /** The id of the thread. */
+  threadId: string;
+};
+/** A file as the Files service describes it; the fields a list row needs are named here. */
+export type Res_aiThreadsListAttachments = {
+  id: number;
+  title: string;
+  fileExst?: string;
+  folderId?: number;
+  /** The size in bytes. */
+  pureContentLength?: number;
+  viewUrl?: string;
+  webUrl?: string;
+}[];
+
 /** A skill set or a knowledge base of the catalog. */
 type TemplateSource = {
   /** The template's id: its path in the catalog. */

@@ -45,6 +45,7 @@ import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
+import { uploadThreadArtifact } from "./threadFiles.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
 
 const PATH = "/attachments";
@@ -128,6 +129,19 @@ function extensionForMime(mime: string): string {
   }
 }
 
+/** The name a generated image is saved under: the engine passes only the tool's name as a title. */
+function generatedImageName(mime: string): string {
+  const stamp = date.format(new Date(), "YYYY-MM-DD_HH-mm-ss");
+  return `generated_image_${stamp}${extensionForMime(mime)}`;
+}
+
+/** The generated image as an artifact of its conversation; `undefined` when the conversation takes none. */
+async function insertThreadArtifactImage(threadId: string, base64: string): Promise<string | undefined> {
+  const { bytes, mime } = decodeImagePayload(base64);
+  const artifact = await uploadThreadArtifact(threadId, generatedImageName(mime), bytes, mime);
+  return artifact?.id;
+}
+
 // Upload a tool-generated image into the round's folder using the
 // public DocSpace Files API (`POST api/2.0/files/{folderId}/insert`), acting on
 // behalf of the current user (forwarded auth cookies). Returns the new entry id
@@ -137,8 +151,7 @@ async function insertGeneratedImage(folderId: string, base64: string): Promise<s
   // The engine only ever passes the tool name ("generate_image") as the
   // title, so a timestamp is the most meaningful name we can produce here.
   // `createNewIfExist` still dedupes same-second collisions server-side.
-  const stamp = date.format(new Date(), "YYYY-MM-DD_HH-mm-ss");
-  const fileName = `generated_image_${stamp}${extensionForMime(mime)}`;
+  const fileName = generatedImageName(mime);
 
   const form = new FormData();
   form.append("title", fileName);
@@ -516,8 +529,28 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
     // below: the engine swallows persist failures into its console-only
     // logger, so without this the file log shows nothing when an upload dies,
     // and a 404 from the folder read reads exactly like a 404 from the insert.
-    let stage = "folder-info";
+    let stage = "thread-artifact";
     try {
+      // A conversation of an AI project keeps what its replies produce in
+      // its own folder of artifacts; any other conversation has none, and
+      // the image goes to the round's folder as before.
+      const artifact = input.threadId
+        ? await insertThreadArtifactImage(input.threadId, input.base64)
+        : undefined;
+      if (artifact !== undefined) {
+        stage = "attachment-record";
+        const [record] = await this.createMany([{ kind: "image", title: input.title, path: artifact }]);
+        if (!record) {
+          throw new Error("failed to create attachment for the thread artifact");
+        }
+        record.source = "tool";
+        logger.info(
+          `uploadToolImage: ok threadId=${input.threadId} artifact entryId=${artifact} ref=${record.id}`,
+        );
+        return record;
+      }
+
+      stage = "folder-info";
       let targetFolderId = input.entityId;
       const folderInfo = input.entityId ? await getFolderInfo(input.entityId) : undefined;
       if (input.entityId) {
