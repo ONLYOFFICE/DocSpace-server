@@ -378,6 +378,11 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
+        if (parent.FolderType == FolderType.AiProjectRoom)
+        {
+            return ([], 0);
+        }
+
         var entries = new List<FileEntry>();
         var filterType = filterTypes?.FirstOrDefault() ?? FilterType.None;
 
