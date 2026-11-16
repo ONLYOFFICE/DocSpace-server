@@ -86,6 +86,19 @@ C# naming, style, and API conventions live in `.claude/rules/csharp-style.md` (l
 Cross-cutting checks a change must not forget: DTO conversion through Riok.Mapperly (`.claude/rules/dto-mapping.md`), backup/restore declarations for every schema change (`.claude/rules/backup-tables.md`), socket events for every change the API exposes, sent ahead of the frontend and landed in the C# notifier and the Node socket service together (`.claude/rules/socket-events.md`), the Files/Rooms/Forms/AI Agents sections and their subsections (`.claude/rules/files-sections.md`), the OpenSearch index and its SQL fallback (`.claude/rules/full-text-search.md`), every source and every output channel of a filter that decides what a caller may see, checked per caller and entry kind (`.claude/rules/visibility-filters.md`), `[RaisesWebhook]` on every API action that causes a webhook — including one a new publish call in a service starts reaching (`.claude/rules/openapi-endpoint-docs.md` §2.1), zero new build and analyzer warnings (`.claude/rules/build-warnings.md`), what a failed step or a race leaves behind — order of audit and marks, marks released on failure, best-effort publishes in their own catch, an unknown answer never read as a refusal (`.claude/rules/failure-paths.md`), configuration values read through `ConfigurationValueExtensions` with both bounds, a safe default in the code and no way for an optional value to stop the host (`.claude/rules/configuration.md`). Commit messages and PRs carry no AI attribution: `.claude/rules/git-commits.md`. Fixing review findings — the whole class, the other paths of the changed code, a test that fails without the fix: `.claude/rules/fixing-findings.md`.
 Endpoint documentation for AI consumers — how `<summary>`/`<remarks>`, DTO property texts and `[SwaggerResponse]` have to read once the OpenAPI documents are used as agent tool definitions: `.claude/rules/openapi-endpoint-docs.md` for the operation (loaded with controllers) and `.claude/rules/openapi-dto-docs.md` for properties and enum members (loaded with DTOs, `ApiModels` and enums). The campaign that works through the backlog of those texts is the `openapi-desc-opt` skill.
 Which types may cross the HTTP boundary — only `ApiModels` DTOs, never settings, EF entities, core or foreign classes; separate request/response classes; Mapperly/`*DtoHelper` mapping; moving an old endpoint without changing its JSON: `.claude/rules/api-models.md` (loaded with controllers and `ApiModels`).
+## Specs (OpenSpec)
+
+`openspec/specs/<capability>/spec.md` describe what the API does today; `openspec/deviations.md` lists known
+defects (security defects are kept out of the repository until a release fixes them). When `openspec/` exists:
+
+- **Before changing what an endpoint does** (a status code, a field, an access rule, a side effect), search
+  `openspec/specs/*/spec.md` for its operationId or route and read the requirements that govern it. A change that
+  contradicts one goes through the `openspec-propose` skill (its "Breaks current behaviour" section), not
+  straight into code; tell the user which requirement it breaks before writing it. A change no requirement
+  covers, and a pure refactoring, needs no proposal.
+- **Fixing a listed defect**: the `fix-bug` skill updates the register and the spec (its step 6).
+- **Keeping the specs current** after a merge, coverage, run marks: the `openspec-maintain` skill.
+
 ## Testing
 
 Conventions for writing integration tests (per-test portal, roles, `ApiException` assertions, access-level matrices, class size vs parallelism): `.claude/rules/tests.md`.

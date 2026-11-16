@@ -117,5 +117,12 @@ global using WireMock.Util;
 
 global using ZiggyCreatures.Caching.Fusion;
 
+global using AceWrapper = ASC.Web.Files.Services.WCFService.AceWrapper;
+global using AuditReportResource = ASC.AuditTrail.AuditReportResource;
+global using ConfigurationConstants = ASC.Core.Configuration.Constants;
+global using FileShare = ASC.Files.Core.Security.FileShare;
+global using FilesNotifyClient = ASC.Files.Core.Services.NotifyService.NotifyClient;
 global using NotifyItemIntegrationEvent = ASC.Common.IntegrationEvents.Events.NotifyItemIntegrationEvent;
+global using PortalSettingsApi = DocSpace.API.SDK.Api.Portal.SettingsApi;
+global using RoomsNotificationSettings = ASC.Web.Core.Notify.RoomsNotificationSettings;
 global using StudioNotifyServiceHelper = ASC.Web.Core.Notify.StudioNotifyServiceHelper;

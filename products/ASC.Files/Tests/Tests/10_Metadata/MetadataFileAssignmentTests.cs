@@ -98,6 +98,19 @@ public class MetadataFileAssignmentTests(AspireAppFixture fixture) : MetadataApi
     }
 
     [Fact]
+    public async Task AssignFileTemplates_WithoutTheTemplateIdsMember_ReturnsBadRequestAndAssignsNothing()
+    {
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy($"doc-{Suffix()}.docx", Owner);
+
+        // raw: AssignMetadataTemplates throws ArgumentNullException client-side without templateIds, so the SDK cannot send it
+        using var response = await new RawApiClient(_filesClient).PutRawAsync($"api/2.0/files/metadata/file/{file.Id}/templates", """{"cascade":false}""", TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await GetFileMetadataAsync(file.Id)).Templates.Should().BeNullOrEmpty();
+    }
+
+    [Fact]
     public async Task UnassignFileTemplate_RemovesTheTemplateAndItsValues_AndKeepsTheOthers()
     {
         var file = await CreateFileInMy($"doc-{Suffix()}.docx", Owner);

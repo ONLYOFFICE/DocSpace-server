@@ -202,4 +202,27 @@ public class PaymentUrlValidationTests(
         // without a billing service refuses.
         exception.ErrorCode.Should().Be(403);
     }
+
+    /// <summary>
+    /// A quantity of 0 is refused with 400 "Invalid quantity" on a billing portal
+    /// (<c>ASC.Web.Api.Billing.Tests</c>, <c>PaymentQuantityTests</c>), but the check sits in the action after the
+    /// configuration check, so here the same body answers 403. A body is either valid or not wherever it is sent
+    /// (suspected defect W9 of the billing spec).
+    /// </summary>
+    [Fact]
+    [Trait("Category", "Bug")]
+    public async Task GetPaymentUrl_ZeroQuantity_ReturnsBadRequestAsOnABillingPortal()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var request = new PaymentUrlRequestDto(ValidUrl, ValidUrl, new Dictionary<string, int> { ["admin"] = 0 });
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _paymentApi.GetPaymentUrlAsync(request, TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("Invalid quantity");
+    }
 }
