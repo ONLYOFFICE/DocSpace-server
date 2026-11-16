@@ -225,6 +225,35 @@ public class RecentTests(
             { RoomType.VirtualDataRoom, FolderType.VirtualDataRoom }
         };
 
+    [Fact]
+    public async Task Recent_FilesOnly_NewestFirst_AndPersonal()
+    {
+        // Arrange
+        var other = await InviteContact(EmployeeType.User);
+        await _filesClient.Authenticate(Owner);
+        var folder = await CreateFolderInMy("recent_order_folder", Owner);
+        var first = await CreateFile("recent_order_first.docx", folder.Id);
+        var second = await CreateFileInMy("recent_order_second.docx", Owner);
+        await _sharingApi.SetFileSecurityInfoAsync(
+            first.Id,
+            new DocSpace.API.SDK.Model.SecurityInfoSimpleRequestDto { Share = [new() { ShareTo = other.Id, Access = FileShare.Read }] },
+            TestContext.Current.CancellationToken);
+
+        // Act - the second mark is written a moment after the first
+        await AddToRecent(first.Id);
+        await Task.Delay(TimeSpan.FromSeconds(1.5), TestContext.Current.CancellationToken);
+        await AddToRecent(second.Id);
+
+        // Assert
+        var recent = await GetRecentAsync(Owner);
+        recent.Folders.Should().BeEmpty();
+        recent.Files.Select(f => f.Title).Should().Equal(second.Title, first.Title);
+
+        // The account the file was shared with has an empty Recent of its own.
+        var othersRecent = await GetRecentAsync(other);
+        othersRecent.Files.Should().BeEmpty();
+    }
+
     private async Task<FolderContentDto> GetRecentAsync(User user, List<FolderType>? folderType = null)
     {
         var recentId = await GetFolderIdAsync(FolderType.Recent, user);

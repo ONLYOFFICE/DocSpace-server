@@ -37,9 +37,9 @@ namespace ASC.Files.Tests.Tests._07_Settings.Editor;
 /// <c>PUT /files/docservice</c> — validation and access control only. A successful PUT is not
 /// reachable in this harness: even with an empty <c>docServiceUrl</c> the setting falls back to the
 /// configured default, so <c>DocumentServiceConnector.CheckDocServiceUrlAsync</c> always issues a
-/// live request to the document server. The integration-test host runs one that reaches the portals,
-/// and the addresses are stored per portal, so the positive-path tests of the TypeScript suite can be
-/// ported; they are not yet.
+/// live request to the document server. On a standalone stack (the integration-test one) the addresses
+/// are stored for the default tenant, so a call that gets past validation changes them for every portal
+/// of the run: only refusals that happen before anything is stored belong here.
 /// </summary>
 [Trait("Category", "Settings")]
 public class CheckDocServiceUrlTests(
@@ -110,5 +110,30 @@ public class CheckDocServiceUrlTests(
 
         // Assert
         exception.ErrorCode.Should().Be(401);
+    }
+
+    public static TheoryData<string, string?, string?> InvalidRequests => new()
+    {
+        { "http://autotest-docs.invalid/?x=1", null, null },
+        { "http://autotest-docs.invalid/", Guid.NewGuid().ToString("N"), null }
+    };
+
+    [Theory]
+    [MemberData(nameof(InvalidRequests))]
+    public async Task CheckDocServiceUrl_QueryStringOrSecretWithoutHeader_BadRequestAndNothingChanged(string url, string? secret, string? header)
+    {
+        // Arrange
+        var before = (await _filesSettingsApi.GetDocServiceUrlAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.CheckDocServiceUrlAsync(
+                new CheckDocServiceUrlRequestDto(docServiceUrl: url, docServiceSignatureSecret: secret!, docServiceSignatureHeader: header!),
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+        var after = (await _filesSettingsApi.GetDocServiceUrlAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        after.Should().BeEquivalentTo(before);
     }
 }

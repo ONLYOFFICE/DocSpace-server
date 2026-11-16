@@ -266,9 +266,9 @@ public class FoldersMoveTests(
 
         // Assert
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
-        var newFolder = results.OfType<FileOperationDto>().FirstOrDefault();
+        var newFolder = results!.OfType<FileOperationDto>().FirstOrDefault();
         newFolder.Should().NotBeNull();
-        newFolder.Folders.Should().Contain(r=> Path.GetFileNameWithoutExtension(r.Title) == Path.GetFileNameWithoutExtension(sourceFolder.Title) + " (1)");
+        newFolder!.Folders.Should().Contain(r=> Path.GetFileNameWithoutExtension(r.Title) == Path.GetFileNameWithoutExtension(sourceFolder.Title) + " (1)");
     }
 
     [Fact]

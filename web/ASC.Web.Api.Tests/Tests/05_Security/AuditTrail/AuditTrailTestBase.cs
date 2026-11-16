@@ -43,10 +43,10 @@ public abstract class AuditTrailTestBase(
     : BaseTest(fixture)
 {
     /// <summary>
-    /// Generates an audit event that is guaranteed to reach the database in this environment.
-    /// Ordinary audit actions (member invited, settings changed, ...) are published to the event
-    /// bus and persisted by Web.Studio's consumer — a service this suite does not start — so they
-    /// never appear here. A password reminder is on MessagesRepository's force-save list
+    /// Generates an audit event that reaches the database without the event bus. Ordinary audit
+    /// actions (member invited, settings changed, ...) are published to the event bus and persisted
+    /// by Web.Studio's consumer; the stack starts Web.Studio, so they do appear, only later and less
+    /// predictably (<see cref="AuditEventsFilterParametersTests"/> relies on them). A password reminder is on MessagesRepository's force-save list
     /// (UserSentPasswordChangeInstructions, 4015) and is written synchronously by the People
     /// service itself, which is why the TS suite's room-creation trigger (RoomCreated, also
     /// force-saved, but needing the Files service) is replaced with it.

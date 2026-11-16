@@ -427,4 +427,49 @@ public class WebStudioModuleSpecificsTests
         preparedRow["settings"].Should().Be(settings);
         preparedRow["last_modified"].Should().Be(lastModified);
     }
+
+    // A webhooks_logs row as an archive of the previous version holds it: no attempts, no schedule columns.
+    private static DataRowInfo PreviousVersionRow(string? requestHeaders, string? responsePayload)
+    {
+        var row = new DataRowInfo("webhooks_logs");
+        row.SetValue("id", OldOriginalLogId);
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("config_id", OldConfigId);
+        row.SetValue("uid", _oldUser);
+        row.SetValue("request_headers", requestHeaders);
+        row.SetValue("response_payload", responsePayload);
+
+        return row;
+    }
+
+    [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_UnsentRowOfAPreviousVersionArchive_GetsThePreviousVersionNote()
+    {
+        // Arrange — never sent: no request headers and no answer
+        var specifics = CreateSpecifics();
+        var row = PreviousVersionRow(requestHeaders: null, responsePayload: null);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert — its payload is in the old format and must never be sent: the note says so
+        prepared.Should().BeTrue();
+        preparedRow!["response_payload"].Should().Be(DbWorker.PreviousVersionNote);
+    }
+
+    [Fact]
+    public async Task TryPrepareRow_WebhooksLogs_SentRowOfAPreviousVersionArchive_KeepsItsAnswer()
+    {
+        // Arrange — a delivery of the previous version that got an answer
+        const string answer = """{"ok":true}""";
+        var specifics = CreateSpecifics();
+        var row = PreviousVersionRow(requestHeaders: "{}", responsePayload: answer);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(CreateColumnMapper(), DeclaredTable(specifics, "webhooks_logs"), row);
+
+        // Assert
+        prepared.Should().BeTrue();
+        preparedRow!["response_payload"].Should().Be(answer);
+    }
 }
