@@ -78,6 +78,10 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Error, "Subscription renewal has been under its claim too long to pay safely and is left to be resumed through billing: tenant {tenantId}, {description}")]
     public static partial void ErrorRenewSubscriptionServiceClaimTooOld(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
 
+    // an error: a renewal is left unfinished, with a top-up possibly made
+    [LoggerMessage(LogLevel.Error, "Subscription renewal sends no payment change, its journal entry is another instance's by now or could not be marked; left to be resumed through billing: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceNotMarked(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
     [LoggerMessage(LogLevel.Error, "RenewSubscriptionService: error processing tenant {tenantId}")]
     public static partial void ErrorRenewSubscriptionServiceTenant(this ILogger<RenewSubscriptionService> logger, int tenantId, Exception exception);
 

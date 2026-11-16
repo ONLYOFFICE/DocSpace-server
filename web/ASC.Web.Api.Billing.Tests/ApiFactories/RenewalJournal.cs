@@ -119,6 +119,14 @@ public sealed class RenewalJournal : IAsyncDisposable
         return (await ReadAsync(JournalKey, cancellationToken)).FirstOrDefault(node => IsOf(node, tenantId)).Deserialize<RenewalJournalEntry>();
     }
 
+    /// <summary>The renewal of the portal's quota the journal holds, null when it holds none.</summary>
+    public async Task<RenewalJournalEntry?> FindEntryAsync(int tenantId, int quota, CancellationToken cancellationToken)
+    {
+        return (await ReadAsync(JournalKey, cancellationToken))
+            .FirstOrDefault(node => IsOf(node, tenantId) && node?["Quota"]?.GetValue<int>() == quota)
+            .Deserialize<RenewalJournalEntry>();
+    }
+
     /// <summary>Whether the pending list holds a renewal of the portal.</summary>
     public async Task<bool> HoldsPendingAsync(int tenantId, CancellationToken cancellationToken)
     {
@@ -185,7 +193,8 @@ public sealed class RenewalJournal : IAsyncDisposable
 
 /// <summary>
 /// A renewal in the journal, as <c>RenewSubscriptionService</c> stores it: the tariff row it renews, the stage it got
-/// to (<see cref="Queued"/> or <see cref="Started"/>) and since when, and how many times it has been started.
+/// to (<see cref="Queued"/> or <see cref="Started"/>) and since when, how many times it has been started, and when
+/// its payment change was sent, if it was.
 /// </summary>
 public sealed record RenewalJournalEntry(
     int TenantId,
@@ -196,7 +205,8 @@ public sealed record RenewalJournalEntry(
     DateTime DueDate,
     int Stage,
     DateTime StageSince,
-    int Attempt)
+    int Attempt,
+    DateTime? PaymentSentAt = null)
 {
     public const int Queued = 0;
     public const int Started = 1;

@@ -511,6 +511,54 @@ refused with 402 and nothing charged.
 - **WHEN** the owner switches `AITools` off and sends a chat message
 - **THEN** the send answers 402 and no `ai-tools` movement is added
 
+### Requirement: Automatic renewal of a wallet subscription
+
+A subscription paid from the wallet SHALL be renewed shortly before its due date: the wallet is topped up
+for what it lacks, then the next period is paid. A renewal a stopped service left unfinished SHALL be resumed
+by asking billing first and SHALL NOT be paid again once its payment was sent or billing reports the
+subscription extended. A renewal that fails, or is interrupted on each of three starts, SHALL send the
+failure letter to the payer and the owner.
+
+#### Scenario: Wallet covers the next period
+
+- **WHEN** the due date of a wallet subscription comes near and the wallet holds its price
+- **THEN** the next period is paid with the same quantity and the wallet is not topped up
+
+#### Scenario: Wallet short of the price
+
+- **WHEN** the due date comes near and the wallet holds less than the price
+- **THEN** the wallet is topped up once for the shortfall and the next period is then paid from it
+
+#### Scenario: Interrupted and already extended
+
+- **WHEN** the service stopped during a renewal and billing reports the subscription extended
+- **THEN** nothing is paid again and the renewal is closed
+
+#### Scenario: Interrupted after the payment was sent
+
+- **WHEN** the service stopped after sending the payment and billing still reports the subscription not extended ten minutes after it was sent
+- **THEN** the failure letter is sent and the payment is not sent a second time
+
+#### Scenario: Interrupted and billing gives no answer
+
+- **WHEN** the service stopped during a renewal and billing does not answer about the subscription
+- **THEN** the renewal is asked about again on the following runs for up to thirty minutes, nothing is paid and no letter is sent meanwhile
+
+#### Scenario: Interrupted three times
+
+- **WHEN** a renewal that never got to send its payment was interrupted on each of three starts
+- **THEN** it is not started a fourth time and the failure letter is sent
+
+#### Scenario: Renewal no longer wanted
+
+- **WHEN** the automatic renewal was switched off while an interrupted renewal waited
+- **THEN** the subscription is not renewed and no failure letter is sent
+
+#### Scenario: Run interval and renewal advance
+
+- **WHEN** the installation sets how often due subscriptions are looked for and how long before the due date one is renewed
+- **THEN** the interval is kept between one second and one hour, one minute when not set, and the advance is never shorter than the interval nor longer than one day
+
 ### Requirement: Spending limits on the AI services
 
 A portal with a billing customer SHALL carry spending limits on the AI services (AI tools and AI search
@@ -796,7 +844,7 @@ never retried as if refused. Error messages SHALL name the call, never the servi
 #### Scenario: Renewal answer unreadable
 
 - **WHEN** the answer to a subscription renewal cannot be read
-- **THEN** the renewal is checked again later and no failure letter is sent
+- **THEN** the renewal is checked again on the following runs and its payment is not sent again; the failure letter is sent only if billing still reports the subscription not extended ten minutes later, or gives no answer for thirty minutes
 
 ### Requirement: Paid seats and tariff limits
 
@@ -835,12 +883,17 @@ A subscription change, a wallet top-up (by the payer or by the automatic job), a
 settings, a switch of a wallet service, a change of the restricted AI models, a subscription balance moved
 to the wallet, a sales request, and the creation, update, bulk set, bulk disable and deletion of an AI
 spending limit SHALL each write one audit event; reads, price calculations and the checkout URLs SHALL
-write none.
+write none. A resumed automatic renewal SHALL write at least one.
 
 #### Scenario: Top-up audited
 
 - **WHEN** the payer tops the wallet up by 10 USD
 - **THEN** the audit trail of `history-and-audit` shows the top-up with "10 USD"
+
+#### Scenario: Renewal interrupted after its audit event
+
+- **WHEN** the service stops after writing the audit event of an automatic renewal and before closing that renewal
+- **THEN** the resumed renewal finds the subscription extended and writes the event again: two events for one renewal
 
 #### Scenario: Personal limit audited with its user
 

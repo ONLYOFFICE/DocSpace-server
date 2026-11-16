@@ -43,7 +43,8 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Renewal;
 /// became of the subscription. Their subscription ends days from now, so the service never renews it by itself:
 /// whatever billing is asked or told about it comes from the planted entry, which is marked as started longer ago
 /// than the service leaves a started renewal alone. The last test goes the whole way through the service: it is the
-/// one that shows the service itself writes the pending renewal the planted one stands for.
+/// one that shows the service itself writes the pending renewal the planted one stands for. Nothing here shows the
+/// service recording that a payment change was sent: that entry lives only while the change is on its way.
 /// </remarks>
 public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -129,6 +130,73 @@ public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixtu
 
             PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "the payment change may have been applied already");
             PaymentCalls.Should().NotContain(call => call.Route == Deposit, "nothing is paid before billing has answered");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // The stopped process had sent the payment change, and billing has had as long to apply it as a re-check gives:
+    // "not extended" is final, the customer is told, and the change is not sent a second time.
+    [Fact]
+    public async Task ResumedRenewal_PaymentWasSentAndIsNotExtended_IsNotPaidAgain()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var askedBefore = AskedAboutSubscription();
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(StartedEntry(row) with { PaymentSentAt = DateTime.UtcNow - _timedOutAgo }, pending: null, TestContext.Current.CancellationToken);
+
+            var left = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            left.Should().BeTrue("billing has answered, so the renewal is settled and leaves the journal");
+            AskedAboutSubscription().Should().BeGreaterThan(askedBefore, "billing is asked what became of the payment change");
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "a payment change that was sent is never sent again");
+            PaymentCalls.Should().NotContain(call => call.Route == Deposit, "nothing more is paid for it");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // The payment change was sent a moment ago: billing may still be applying it, so the entry is not taken up yet,
+    // however long ago it was claimed. A second entry of the portal, which a run does take up and close, shows that
+    // a run has been over the journal.
+    [Fact]
+    public async Task ResumedRenewal_PaymentWasSentLately_IsLeftAlone()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var sentLately = StartedEntry(row) with { PaymentSentAt = DateTime.UtcNow - TimeSpan.FromMinutes(1) };
+        var takenUp = StartedEntry(row) with { Quota = Plans.DocsCloudQuotaId };
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(sentLately, pending: null, TestContext.Current.CancellationToken);
+            await journal.PlantAsync(takenUp, pending: null, TestContext.Current.CancellationToken);
+
+            var runPassed = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, takenUp.Quota, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            runPassed.Should().BeTrue("a run takes up the entry that is due for it");
+
+            (await journal.FindEntryAsync(TenantId, row.Quota, TestContext.Current.CancellationToken))
+                .Should().Be(sentLately, "an entry whose payment change was sent a moment ago is left as it is");
+
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "billing may still be applying the change that was sent");
         }
         finally
         {
