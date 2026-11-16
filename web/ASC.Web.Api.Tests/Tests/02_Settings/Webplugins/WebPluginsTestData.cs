@@ -34,14 +34,100 @@
 namespace ASC.Web.Api.Tests.Tests._02_Settings.Webplugins;
 
 /// <summary>
-/// Builds and uploads a minimal, valid web plugin package — shared by every suite in this
-/// folder. <c>POST /api/2.0/settings/webplugins</c> is a multipart file upload, and the
-/// generated <c>AddWebPluginFromFileAsync</c> exposes no way to attach the file (it only takes
-/// the <c>system</c> query flag), so the upload has to go over raw HTTP through the already
+/// Builds and uploads web plugin packages — shared by every suite in this folder.
+/// <c>POST /api/2.0/settings/webplugins</c> is a multipart file upload, and the generated
+/// <c>AddWebPluginFromFileAsync</c> exposes no way to attach the file (it only takes the
+/// <c>system</c> query flag), so the upload has to go over raw HTTP through the already
 /// authenticated <see cref="BaseTest._webApiClient"/> — the DTO gap, not a preference.
 /// </summary>
 internal static class WebPluginsTestData
 {
+    public const string UploadPath = "api/2.0/settings/webplugins";
+
+    /// <summary>The <c>pluginName</c> the default manifest derives from a manifest <c>name</c>.</summary>
+    public static string JsName(string pluginName)
+    {
+        return new string(pluginName.Where(char.IsLetterOrDigit).ToArray());
+    }
+
+    /// <summary>
+    /// A valid <c>config.json</c> manifest; a test changes or removes keys before packing it.
+    /// </summary>
+    public static Dictionary<string, object?> Manifest(string pluginName, string version = "1.0.0")
+    {
+        return new Dictionary<string, object?>
+        {
+            ["name"] = pluginName,
+            ["version"] = version,
+            ["description"] = "Autotest plugin",
+            ["scopes"] = "rooms",
+            ["pluginName"] = JsName(pluginName),
+            ["author"] = "Autotest",
+            ["license"] = "MIT",
+            ["homePage"] = ""
+        };
+    }
+
+    /// <summary>The bytes of a text entry.</summary>
+    public static byte[] Text(string content)
+    {
+        return new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(content);
+    }
+
+    /// <summary>
+    /// Packs the given entries into a zip archive. A <c>null</c> content creates a directory entry.
+    /// </summary>
+    public static byte[] CreateZip(IEnumerable<(string Name, byte[]? Content)> entries)
+    {
+        using var memoryStream = new MemoryStream();
+
+        using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, leaveOpen: true))
+        {
+            foreach (var (name, content) in entries)
+            {
+                var entry = archive.CreateEntry(name, System.IO.Compression.CompressionLevel.Optimal);
+
+                if (content is null)
+                {
+                    continue;
+                }
+
+                using var entryStream = entry.Open();
+                entryStream.Write(content);
+            }
+        }
+
+        return memoryStream.ToArray();
+    }
+
+    /// <summary>
+    /// A package from a manifest: <c>config.json</c> and <c>plugin.js</c> (each left out when its
+    /// flag is off) plus the extra entries.
+    /// </summary>
+    public static byte[] CreatePluginZip(
+        Dictionary<string, object?> manifest,
+        bool withConfig = true,
+        bool withScript = true,
+        params (string Name, byte[]? Content)[] extraEntries)
+    {
+        var entries = new List<(string Name, byte[]? Content)>();
+
+        if (withConfig)
+        {
+            entries.Add(("config.json", Text(JsonSerializer.Serialize(manifest))));
+        }
+
+        if (withScript)
+        {
+            var jsName = manifest.TryGetValue("pluginName", out var value) ? value?.ToString() : "plugin";
+            entries.Add(("plugin.js", Text($"window.Plugins = window.Plugins || {{}}; window.Plugins.{jsName} = {{}};")));
+        }
+
+        entries.AddRange(extraEntries);
+
+        return CreateZip(entries);
+    }
+
     /// <summary>
     /// Builds a zip archive containing a <c>config.json</c> plugin manifest and the
     /// <c>plugin.js</c> entry the extractor requires — the minimum a plugin package needs to pass
@@ -49,52 +135,46 @@ internal static class WebPluginsTestData
     /// </summary>
     public static byte[] CreatePluginZip(string pluginName)
     {
-        var sanitizedPluginName = new string(pluginName.Where(char.IsLetterOrDigit).ToArray());
-
-        var configJson = JsonSerializer.Serialize(new
-        {
-            name = pluginName,
-            version = "1.0.0",
-            description = "Autotest plugin",
-            scopes = "rooms",
-            pluginName = sanitizedPluginName,
-            author = "Autotest",
-            license = "MIT",
-            homePage = ""
-        });
-
-        using var memoryStream = new MemoryStream();
-
-        using (var archive = new System.IO.Compression.ZipArchive(memoryStream, System.IO.Compression.ZipArchiveMode.Create, leaveOpen: true))
-        {
-            AddEntry(archive, "config.json", configJson);
-            AddEntry(archive, "plugin.js", $"window.Plugins = window.Plugins || {{}}; window.Plugins.{sanitizedPluginName} = {{}};");
-        }
-
-        return memoryStream.ToArray();
+        return CreatePluginZip(Manifest(pluginName));
     }
 
-    private static void AddEntry(System.IO.Compression.ZipArchive archive, string name, string content)
+    /// <summary>
+    /// Uploads the given bytes as one file of a multipart form, as the currently authenticated caller.
+    /// </summary>
+    public static async Task<HttpResponseMessage> UploadAsync(HttpClient webApiClient, byte[] fileBytes, string fileName, CancellationToken cancellationToken)
     {
-        var entry = archive.CreateEntry(name);
-        using var entryStream = entry.Open();
-        using var writer = new StreamWriter(entryStream, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
-        writer.Write(content);
+        using var content = new MultipartFormDataContent();
+        var fileContent = new ByteArrayContent(fileBytes);
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
+        content.Add(fileContent, "file", fileName);
+
+        return await webApiClient.PostAsync(UploadPath, content, cancellationToken);
     }
 
     /// <summary>
     /// Uploads a freshly built plugin package as the currently authenticated <paramref name="webApiClient"/>
     /// caller, returning the raw HTTP response so the test can assert on its status.
     /// </summary>
-    public static async Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, string pluginName, CancellationToken cancellationToken)
+    public static Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, string pluginName, CancellationToken cancellationToken)
     {
-        var zipBytes = CreatePluginZip(pluginName);
+        return UploadAsync(webApiClient, CreatePluginZip(pluginName), "plugin.zip", cancellationToken);
+    }
 
-        using var content = new MultipartFormDataContent();
-        var fileContent = new ByteArrayContent(zipBytes);
-        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
-        content.Add(fileContent, "file", "plugin.zip");
+    /// <summary>
+    /// Uploads a package built from <paramref name="manifest"/> and fails the test unless the upload succeeds.
+    /// </summary>
+    public static async Task UploadOkAsync(HttpClient webApiClient, Dictionary<string, object?> manifest, CancellationToken cancellationToken, params (string Name, byte[]? Content)[] extraEntries)
+    {
+        using var response = await UploadAsync(webApiClient, CreatePluginZip(manifest, true, true, extraEntries), "plugin.zip", cancellationToken);
 
-        return await webApiClient.PostAsync("api/2.0/settings/webplugins", content, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        response.IsSuccessStatusCode.Should().BeTrue($"the upload of {manifest["name"]} must succeed, the server answered {(int)response.StatusCode}: {body}");
+    }
+
+    /// <summary>The status and the body text of a response, for the assertions on a refused upload.</summary>
+    public static async Task<(int Status, string Body)> ReadAsync(HttpResponseMessage response, CancellationToken cancellationToken)
+    {
+        return ((int)response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
     }
 }

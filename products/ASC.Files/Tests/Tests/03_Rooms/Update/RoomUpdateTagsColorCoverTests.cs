@@ -127,7 +127,7 @@ public class RoomUpdateTagsColorCoverTests(
         reset.Should().NotBe("00AA00");
 
         // Act & Assert - null is a no-op
-        await _roomsApi.UpdateRoomAsync(room.Id, new UpdateRoomRequest(color: null), TestContext.Current.CancellationToken);
+        await _roomsApi.UpdateRoomAsync(room.Id, new UpdateRoomRequest(color: null!), TestContext.Current.CancellationToken);
         (await ColorOf(room.Id)).Should().Be(reset);
     }
 
