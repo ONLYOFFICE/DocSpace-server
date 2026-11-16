@@ -78,15 +78,12 @@ public class BackupController(
     private Guid CurrentUserId => authContext.CurrentAccount.ID;
 
     /// <remarks>
-    /// Returns the backup schedule of the current portal. A portal keeps at most one schedule, so no ID is
-    /// passed in, and when none is set the call still answers 200 with a body that carries no `response`
-    /// member at all. `dump` asks for the schedule of the whole server instead of the one of this portal and
-    /// requires the space access permission.
-    /// The answer cannot be sent back unchanged: `storageParams` is returned as an object keyed by parameter
-    /// name, while `POST api/2.0/backup/createbackupschedule` expects an array of key and value pairs. For
-    /// every storage type except `ThirdPartyConsumer` the `folderId` key of the answer is built from the
-    /// stored base path rather than read back from the saved parameters, and a schedule that keeps an
-    /// unlimited number of copies reports `backupsStored` as null instead of 0.
+    /// Returns the backup schedule of the portal. A portal has at most one schedule. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403.
+    /// With `dump`, a caller without the space access permission also gets 403. The call is read-only. If no
+    /// schedule is set, the call returns 200 without the `response` field. If the portal subscription has
+    /// expired or is not paid, the call returns 402. To set the schedule, use
+    /// `POST api/2.0/backup/createbackupschedule`.
     /// </remarks>
     /// <summary>Get the backup schedule</summary>
     /// <path>api/2.0/backup/getbackupschedule</path>
@@ -126,24 +123,18 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Sets the backup schedule of the current portal. A portal keeps at most one schedule, so this replaces
-    /// the existing one rather than adding a second, and `dump` writes the schedule of the whole server
-    /// instead, which requires the space access permission and works on a standalone installation only.
-    /// Scheduled backups have to be allowed by the pricing plan of a portal that is not a standalone
-    /// installation.
-    /// `cronParams` is a period plus a time rather than a cron string: `hour` is the hour of the day from 0
-    /// to 23, and `day` has to be given for `EveryWeek`, where it is the day of the week from 1 to 7 with
-    /// Sunday as 1, and for `EveryMonth`, where it is the day of the month from 1 to 31. It is left out for
-    /// `EveryDay`, and a weekly or monthly schedule sent without it is rejected with 400 instead of falling
-    /// back to a default.
-    /// `backupsStored` is the number of scheduled copies to keep, from 1 to 30, and it defaults to 1. Older
-    /// copies are removed by a background cleaner, and only the ones this schedule created: archives made by
-    /// `POST api/2.0/backup/startbackup` are not counted and not removed. A portal whose subscription stops
-    /// covering backups has its schedule deleted by the scheduler, not suspended, and its administrators are
-    /// notified that the scheduled backup failed.
-    /// The keys expected in `storageParams` are the same as for `POST api/2.0/backup/startbackup`, except
-    /// that they are sent as an array of key and value pairs here and returned as an object by
-    /// `GET api/2.0/backup/getbackupschedule`.
+    /// Creates the backup schedule of the portal, or replaces the current one. A portal has at most one
+    /// schedule. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. With `dump`, a caller without the space access permission also gets 403. The call
+    /// changes data. You can repeat it with the same body. It returns `true`. If the free backups of the month
+    /// are spent and the paid service is off, the scheduler deletes the schedule. It then sends a notice that
+    /// the scheduled backup failed. The call returns 400 if `cronParams` is missing or a value is out of range.
+    /// A weekly or monthly schedule without `day` also returns 400. It also returns 400 if `storageParams` has
+    /// no key that the storage needs, or repeats a key. It also returns 400 for an unknown `module` or a
+    /// `Documents` folder ID that is not a number. If the target folder does not exist, the call returns 404.
+    /// It returns 403 if you cannot create files in the folder. The root folders of rooms, the archive, and
+    /// room templates also return 403. If the plan has no free backups and the paid backup service is off, the
+    /// call returns 402. It also returns 402 if the portal subscription has expired or is not paid.
     /// </remarks>
     /// <summary>Create the backup schedule</summary>
     /// <path>api/2.0/backup/createbackupschedule</path>
@@ -153,7 +144,6 @@ public class BackupController(
     [SwaggerResponse(402, "The portal subscription does not cover scheduled backups, has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder was not found")]
-    [SwaggerResponse(500, "A key or value of `storageParams` is null, or `Local` storage was requested on a portal that is not a standalone installation")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(CreateBackupScheduleRequestDto inDto)
     {
@@ -201,14 +191,12 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Deletes the backup schedule of the current portal, which stops the scheduled backups; `dump` deletes
-    /// the schedule of the whole server instead and requires the space access permission. The archives the
-    /// schedule has already produced are kept and stay listed by
-    /// `GET api/2.0/backup/getbackuphistory` - delete them through
-    /// `DELETE api/2.0/backup/deletebackup/{id}` if they are no longer wanted.
-    /// The result is always true, including when there was no schedule to delete, so it confirms that the
-    /// portal now has none rather than that anything was removed. The deletion is written to the audit trail
-    /// either way.
+    /// Deletes the backup schedule of the portal, so scheduled backups stop. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. With `dump`, a
+    /// caller without the space access permission also gets 403. The call changes data. It always returns
+    /// `true`, even if there was no schedule, so you can repeat it. The call keeps the backups that the
+    /// schedule created. To delete them, use `DELETE api/2.0/backup/deletebackup/{id}`. If the portal
+    /// subscription has expired or is not paid, the call returns 402.
     /// </remarks>
     /// <summary>Delete the backup schedule</summary>
     /// <path>api/2.0/backup/deletebackupschedule</path>
@@ -234,19 +222,18 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Queues a backup of the current portal and returns straight away: the archive itself is written by the
-    /// separate backup worker service, which picks the job up from an integration event, so the response
-    /// reports a progress of 0 and the `Created` status, and its `taskId` is the handle to poll with
-    /// `GET api/2.0/backup/getbackupprogress`. The caller needs the portal settings permission, and
-    /// `dump` - a backup of the whole server instead of this one portal - additionally requires the space
-    /// access permission and is rejected outside a standalone installation.
-    /// The keys expected in `storageParams` depend on `storageType`: `Documents` takes an integer `folderId`,
-    /// `ThridpartyDocuments` takes a provider-specific non-integer `folderId`, `Local` takes `filePath` and
-    /// works on a standalone installation only, `ThirdPartyConsumer` takes `module` together with the settings
-    /// of that consumer, and `DataStore` takes no keys at all; the `subdir` key is added by the operation
-    /// itself and must not be sent.
-    /// A portal that has already used up the free backups of the current calendar month is charged through the
-    /// paid backup service instead, and the call is rejected with 402 when that service is not available to it.
+    /// Starts a backup of the portal and returns the queued job. Requires the EditPortalSettings permission, which the
+    /// portal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller without the space access
+    /// permission also gets 403. The call queues work. To follow the job, poll `GET api/2.0/backup/getbackupprogress`
+    /// until `isCompleted` is true. Do not repeat it while a backup runs. A repeat returns the running job. But after
+    /// the free backups of the month, it opens another payment session in the wallet. Once the job ends, a repeated
+    /// call makes another backup. After the portal spends its free backups of the month, the call charges each backup
+    /// to the portal wallet. It then also turns on the paid backup service. If the wallet cannot pay for the backup,
+    /// the call returns 402. It also returns 402 for a `Documents` backup if the portal is over its storage quota. The
+    /// call returns 400 if `folderId` is missing or does not match `storageType`. It also returns 400 if an item of
+    /// `storageParams` has no key or value, or repeats a key. If the target folder does not exist, the call returns
+    /// 404. It returns 403 if you cannot create files in the folder. The root folders of rooms, the archive, and room
+    /// templates also return 403.
     /// </remarks>
     /// <summary>Start the backup</summary>
     /// <path>api/2.0/backup/startbackup</path>
@@ -256,7 +243,6 @@ public class BackupController(
     [SwaggerResponse(402, "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder or the backup quota was not found")]
-    [SwaggerResponse(500, "`Local` storage has no `filePath` or was requested on a portal that is not a standalone installation")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgressDto> StartBackup(StartBackupRequestDto inDto, [FromServices] TenantQuotaController quotaController)
@@ -387,13 +373,11 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Drops the backup job of the current portal from the queue, which cancels it if it is still running.
-    /// The caller needs the portal settings permission. It answers false, not an error, when there is nothing
-    /// to cancel, so the result says whether a job was actually dropped rather than whether the call
-    /// succeeded.
-    /// This affects backup jobs only: a restoring job cannot be cancelled through the API. The cancelled job
-    /// leaves the queue, so a following `GET api/2.0/backup/getbackupprogress` reports no job at all rather
-    /// than a job with the `Canceled` status.
+    /// Cancels the backup job of the portal and removes it from the queue. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. The call changes
+    /// data. It returns `true` if it removed a job and `false` if there was none. A repeated call returns
+    /// `false`. After this call, `GET api/2.0/backup/getbackupprogress` returns no job, not a job with the
+    /// `Canceled` status. The call cannot cancel a restore.
     /// </remarks>
     /// <summary>Cancel the running backup</summary>
     /// <path>api/2.0/backup/cancelbackup</path>
@@ -441,17 +425,11 @@ public class BackupController(
     // }
 
     /// <remarks>
-    /// Reports the state of the backup job of the current portal, and is the operation to poll after
-    /// `POST api/2.0/backup/startbackup`. The queue holds one job per portal, so no job ID is passed in;
-    /// `dump` asks for the state of the server-wide job instead and requires the space access permission.
-    /// When there is no such job - none was ever started, or the finished one has already been dropped from
-    /// the queue - the call still answers 200, but the body carries no `response` member at all, so a client
-    /// has to treat the payload as optional rather than expect an empty object.
-    /// While the job runs, `isCompleted` is false, `error` and `link` are empty strings and `progress` grows
-    /// from 0 to 100. Once it stops, `isCompleted` turns true and `status` says how it ended: a non-empty
-    /// `error` is the only report of a failure, `warning` is set when the archive was written but some files
-    /// could not be read or when the job was cancelled, and `link` becomes the download link to the stored
-    /// archive.
+    /// Returns the state of the backup job of the portal. A portal has at most one backup job. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403.
+    /// With `dump`, a caller without the space access permission also gets 403. The call is read-only. This is
+    /// the call to poll after `POST api/2.0/backup/startbackup`. Repeat it until `isCompleted` is true. If
+    /// there is no job, the call returns 200 without the `response` field.
     /// </remarks>
     /// <summary>Get the backup progress</summary>
     /// <path>api/2.0/backup/getbackupprogress</path>
@@ -470,19 +448,12 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Lists the backups of the current portal whose archive is still present in the storage it was written
-    /// to. The records come back in no particular order, so sort them by `createdOn` if the newest one is
-    /// wanted. `dump` lists the backups of the whole server instead and requires the space access
-    /// permission.
-    /// Despite being a read operation, this prunes the history as it goes: a record whose archive is no
-    /// longer in its storage is deleted outright, so the list can shrink between two calls without anybody
-    /// deleting anything. A record whose storage can no longer be reached at all - a disconnected
-    /// third-party account, for instance - is neither returned nor deleted, so it stays invisible while
-    /// still occupying the history.
-    /// The `id` of a record is the same value as the `taskId` that
-    /// `POST api/2.0/backup/startbackup` returned for it, and it is what
-    /// `DELETE api/2.0/backup/deletebackup/{id}` and the `backupId` of
-    /// `POST api/2.0/backup/startrestore` expect.
+    /// Returns the backups of the portal whose archive is still in its storage. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. With `dump`, a caller
+    /// without the space access permission also gets 403. The call changes data. It deletes the record of each backup
+    /// whose archive is gone, in the Trash, or unreadable. It skips a backup only when its storage cannot be opened,
+    /// and keeps its record. You can repeat the call. The list has no set order, so sort it by `createdOn`. If the
+    /// portal subscription has expired or is not paid, the call returns 402.
     /// </remarks>
     /// <summary>Get the backup history</summary>
     /// <path>api/2.0/backup/getbackuphistory</path>
@@ -502,15 +473,14 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Deletes one backup: first its history record, then the archive in the storage the record points at.
-    /// The ID is the one listed by `GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the
-    /// backup was started with.
-    /// Deleting a backup of the whole server rather than of one portal additionally requires the space
-    /// access permission. A record that belongs to another portal is left untouched and the call still
-    /// answers true, so the result confirms that the request was accepted rather than that anything was
-    /// deleted - check with `GET api/2.0/backup/getbackuphistory` if it matters.
-    /// The record is removed before the archive, so when the storage can no longer be reached the archive
-    /// stays behind with nothing pointing at it. An ID that no backup has ever had is answered with 404.
+    /// Deletes a backup. The call first deletes its history record, then its archive in the storage. Requires
+    /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. For a server-wide backup, a caller without the space access permission also gets 403. The call
+    /// changes data and cannot be undone. It returns `true` even if it deletes nothing, for example for a
+    /// backup of another portal or a repeated call. If the call cannot reach the storage, the archive stays
+    /// there without a record. To check what is left, use `GET api/2.0/backup/getbackuphistory`. If no backup
+    /// ever had this ID, the call returns 404. If the portal subscription has expired or is not paid, the call
+    /// returns 402.
     /// </remarks>
     /// <summary>Delete the backup</summary>
     /// <path>api/2.0/backup/deletebackup/{id}</path>
@@ -527,14 +497,13 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Deletes every backup of the current portal, both the history records and the archives themselves, and
-    /// leaves the backup schedule alone. `dump` clears the backups of the whole server instead and requires
-    /// the space access permission.
-    /// The records are walked one by one and a failure on any of them is swallowed, so the result is always
-    /// true even when some archives could not be deleted: it does not mean the history is now empty. Call
-    /// `GET api/2.0/backup/getbackuphistory` afterwards to see what is left.
-    /// Each record is removed before its archive, so an archive whose deletion fails stays in the storage
-    /// with nothing pointing at it.
+    /// Deletes all backups of the portal, both the history records and the archives. The call keeps the backup
+    /// schedule. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. With `dump`, a caller without the space access permission also gets 403. The call
+    /// changes data and cannot be undone. If an archive fails to delete, the call goes on, and the archive
+    /// stays in the storage without a record. It always returns `true`, so you can repeat it. To check what is
+    /// left, use `GET api/2.0/backup/getbackuphistory`. If the portal subscription has expired or is not paid,
+    /// the call returns 402.
     /// </remarks>
     /// <summary>Delete the backup history</summary>
     /// <path>api/2.0/backup/deletebackuphistory</path>
@@ -554,18 +523,19 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Queues the restoring of the current portal from a backup and returns straight away: the work itself is
-    /// done by the separate backup worker service, which picks the job up from an integration event, so the
-    /// response reports a progress of 0 and the `Created` status, and the returned `taskId` is the handle to
-    /// poll with `GET api/2.0/backup/getrestoreprogress` - the one operation of this service that stays
-    /// reachable while the portal is being restored, because every other one answers 403 in that state.
-    /// The source is given either by `backupId`, which is the ID of a record from
-    /// `GET api/2.0/backup/getbackuphistory`, or, when `backupId` is not a GUID, by the `filePath` key of
-    /// `storageParams` together with the matching `storageType`; an all-zero GUID is parsed as a GUID and
-    /// therefore reaches neither branch.
-    /// The caller needs the portal settings permission, restoring has to be allowed by the pricing plan of a
-    /// portal that is not a standalone installation, and `dump` - restoring the whole server rather than this
-    /// one portal - additionally requires the space access permission.
+    /// Starts restoring the portal from a backup and returns the queued job. The restore replaces the current
+    /// data of the portal. The source is a backup from the history, or a file in `storageParams` if `backupId`
+    /// is not a GUID. An all-zero `backupId` selects no backup, so the job fails. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403.
+    /// With `dump`, a caller without the space access permission also gets 403. The call queues work and
+    /// cannot be undone. While the restore runs, most API calls return 403. To follow the job, poll
+    /// `GET api/2.0/backup/getrestoreprogress` until `isCompleted` is true. You cannot cancel a restore
+    /// through the API. A repeated call during the restore returns 403 or the running job. After the restore ends, a
+    /// repeated call restores the portal again. If the plan does not allow restoring, the call returns 402. The call
+    /// returns 400 if `backupId` is missing, or it is not a GUID and `storageParams` has no `filePath`. It also returns
+    /// 400 if an item of `storageParams` has no key or value, or repeats a key. The call returns 404 if the backup, the
+    /// file, or its folder does not exist. For `Local` storage, a missing uploaded archive also returns 404. It returns
+    /// 403 if you cannot create files in the folder of the backup file.
     /// </remarks>
     /// <summary>Start the restoring process</summary>
     /// <path>api/2.0/backup/startrestore</path>
@@ -633,17 +603,11 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Reports the state of the restoring job, and is the operation to poll after
-    /// `POST api/2.0/backup/startrestore`. It is the only operation of this service that needs no
-    /// authorization and the only one that stays reachable while the portal is being restored, which is
-    /// exactly the state a client polls it in - every other operation of the service answers 403 then.
-    /// `dump` is read as three states rather than as a flag: omit it to get whichever restoring job concerns
-    /// this portal, including a server-wide one, pass false to get the job of this portal only, and pass true
-    /// to get the server-wide job; on a portal that is not a standalone installation the value is forced to
-    /// false. When there is no matching job the call still answers 200, but the body carries no `response`
-    /// member at all.
-    /// `isCompleted` is the field to poll, a non-empty `error` is the only report of a failure, and neither
-    /// `link` nor `warning` is ever filled in for a restoring job.
+    /// Returns the state of the restore job of the portal. Anyone can call it without signing in. It also works
+    /// while the portal is being restored and other calls are refused. The call is read-only. This is the call
+    /// to poll after `POST api/2.0/backup/startrestore`. Repeat it until `isCompleted` is true. Without `dump`,
+    /// the call returns any restore job of the portal, including a server-wide one. If there is no job, the
+    /// call returns 200 without the `response` field.
     /// </remarks>
     /// <summary>Get the restoring progress</summary>
     /// <path>api/2.0/backup/getrestoreprogress</path>
@@ -673,15 +637,12 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Counts the backups of the current portal that were created within a period, and `paid` chooses which
-    /// kind is counted: false, the default, counts the ones covered by the free monthly allowance, and true
-    /// counts the ones charged to the portal wallet.
-    /// The period defaults to the current calendar month - `from` becomes the first day of the month at
-    /// 00:00 UTC and `to` becomes the moment of the call. Both bounds are UTC and inclusive, and a `from`
-    /// later than `to` is rejected. Called with no parameters at all, this returns exactly the figure the
-    /// free monthly allowance is measured against.
-    /// The count is over history records rather than over stored archives, so it includes backups that have
-    /// already been deleted; use `GET api/2.0/backup/getbackuphistory` to see what can still be restored.
+    /// Returns how many free backups the portal created in a period, or paid ones if `paid` is true. Requires
+    /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. The call is read-only. With no parameters, it returns the count that the free monthly allowance
+    /// is checked against. The count includes deleted backups. To list the stored backups, use
+    /// `GET api/2.0/backup/getbackuphistory`. The call returns 400 if `from` is later than `to` or a value
+    /// cannot be parsed.
     /// </remarks>
     /// <summary>Get the number of backups</summary>
     /// <path>api/2.0/backup/getbackupscount</path>
@@ -709,14 +670,10 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Counts the backups of the current portal created within a period and splits the result into the ones
-    /// covered by the free monthly allowance and the ones charged to the portal wallet, which saves calling
-    /// `GET api/2.0/backup/getbackupscount` twice.
-    /// The `paid` query parameter is accepted but not read here: the answer always carries both figures. The
-    /// period behaves as it does for `GET api/2.0/backup/getbackupscount` - it defaults to the current
-    /// calendar month, both bounds are UTC and inclusive, and a `from` later than `to` is rejected.
-    /// The counts are over history records rather than over stored archives, so they include backups that
-    /// have already been deleted.
+    /// Returns the number of free and of paid backups that the portal created in a period. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403.
+    /// The call is read-only. It ignores `paid` and always returns both numbers. The counts include deleted
+    /// backups. The call returns 400 if `from` is later than `to` or a value cannot be parsed.
     /// </remarks>
     /// <summary>Get free and paid backup counts</summary>
     /// <path>api/2.0/backup/getbackupscountbypaid</path>
@@ -745,15 +702,13 @@ public class BackupController(
     }
 
     /// <remarks>
-    /// Reports whether the paid backup service is switched on for the current portal. This is a wallet
-    /// setting of the portal, not the health of the backup service or of the worker that runs the jobs, so a
-    /// false answer does not mean backups are unavailable and a true one does not mean they are working.
-    /// While it is on, backups beyond the free monthly allowance are charged to the portal wallet. While it
-    /// is off and that allowance is used up, `POST api/2.0/backup/startbackup` and
-    /// `POST api/2.0/backup/createbackupschedule` answer 402.
-    /// Starting a backup once the allowance is used up switches the service on by itself, as soon as a
-    /// billing session opens for the portal, so this flag can change without anybody editing the portal
-    /// settings.
+    /// Returns whether the paid backup service is on for the portal. While it is on, the portal wallet pays for
+    /// backups beyond the free monthly allowance. This is a wallet setting, not whether the backup service
+    /// works. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. The call is read-only. When `POST api/2.0/backup/startbackup` charges a backup to
+    /// the wallet, the portal turns the service on. While the service is off,
+    /// `POST api/2.0/backup/createbackupschedule` returns 402 on a plan without free backups. The scheduler
+    /// then also deletes the schedule after the free backups of the month are spent.
     /// </remarks>
     /// <summary>Check whether backups are enabled</summary>
     /// <path>api/2.0/backup/getservicestate</path>

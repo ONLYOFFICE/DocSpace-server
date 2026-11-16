@@ -139,6 +139,9 @@ previous one counted as covered. So:
   with its worker, the payload DTOs with their helpers — so a chunk holds the code that interacts.
   A chunk over the limit is split further, never handed over whole. One agent per chunk carries
   all four lenses for it (six chunks = six agents, not twenty-four); a small branch is one chunk.
+  A small branch still gets that agent and its matrices: reviewing it alone, from the main context,
+  is a degradation the report header names. On bug 79163 a 340-line branch was reviewed that way,
+  the class matrices were skipped, and four review rounds each found the sibling of the last fix.
 - **Every reviewer returns its coverage**: the files it read in full, and the ones it only skimmed
   or did not open. A skimmed file of its chunk goes to a follow-up agent, or to "Not verified" in
   the report — never silently counted as reviewed.
@@ -180,6 +183,7 @@ count with the search it used, so a short matrix is visible as short.
 | M5 catch blocks | `catch` added or changed in the diff | is the exception logged, rethrown or deliberately dropped with a comment; can a second fault replace the first |
 | M6 stored columns | column added or written by the branch | backup declaration (`UserIDColumns`, `DateColumns`, `RelationInfo`), length vs column (MySQL only, §3 C) |
 | M7 out-of-band sources | call site of a cross-cutting publish outside controllers (jobs, handlers, editor callbacks) | is it declared where the contract lists such sources (`_otherSources` for webhooks, `socket-events.md` recipients) |
+| M8 visibility | for each filter or endpoint that decides what a caller may learn: every source of its result (each `Union` branch, each list passed in) x every invariant, and every output channel (list, total, per-row flags, filters by hidden data, search fields, profile fields) x caller (manager vs reader of the entry, each user type) x entry kind (personal file, personal folder, room, entry in a room, public room) | what that caller learns there and whether the rule the branch states allows it; cite `[visibility-filters.md §N]`. The reader column of an endpoint that needs only read access is never empty |
 
 M2, M4 and M5 are the reviewer side of `.claude/rules/failure-paths.md` (§3, §8, §7); a finding in
 them, or one of B or G that matches a section of that rule, cites it as `[failure-paths.md §N]`, so
@@ -410,6 +414,10 @@ Reviewers over-report. For every finding, open the code at `where` yourself and 
 - `siblings` checked: open the places listed as `fine` too, and look for the pattern in the chunks
   of other reviewers. All affected places go into **one** finding, so the fix covers the class;
 - a rule finding cites a rule that really says that (open the rule, check the section);
+- a doubt whether the code keeps a rule the branch itself states ("Restricted access is no
+  membership") is checked like a finding and reported as one. It goes to "Questions" only when the
+  branch states no rule for that case. A question the author can wave away is a finding the next
+  reviewer reports;
 - duplicates across reviewers merged; a finding that needs a product decision moved to "Questions";
 - **origin**: `git blame` the line (`git log -S` when blame lands on a normalization commit) and
   record the commit that introduced it. When an earlier review of this branch exists, each finding
@@ -474,7 +482,9 @@ conversation). Re-scan (§1) and then:
    the list did not name.
 4. Re-evaluate findings that were dropped or accepted earlier ("acceptable", "not from this
    branch") when a fix changed the code around them.
-5. If an earlier finding turns out to be wrong, say so plainly and withdraw it.
+5. If an earlier finding turns out to be wrong, say so plainly and withdraw it. Withdrawing needs the
+   evidence a fix needs: the code read for every caller, entry kind and path the finding names
+   (`fixing-findings.md` §7).
 6. Re-read the texts the fixes may have made stale (§3 B "texts made untrue", "claims"): the claims in
    the earlier rounds' commits and comments, the remarks of the actions the fixed behaviour reaches,
    and the PR description — does it still describe the branch after the rounds of fixes.

@@ -43,7 +43,6 @@ public class UserSocketManager(ITariffService tariffService,
     EmployeeFullDtoHelper employeeFullDtoHelper,
     SecurityContext securityContext,
     UserManager userManager,
-    GroupFullDtoHelper groupFullDtoHelper,
     DisplayUserSettingsHelper displayUserSettingsHelper) : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
     protected override string Hub => "files";
@@ -61,24 +60,20 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task AddUserAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await GetUserDtoAsync(userInfo);
-        await MakeRequest("add-user", new { tenantId, user = dto });
+        await MakeRequest("add-user", new { tenantId, user = IdOnly(userInfo.Id) });
     }
 
     public async Task UpdateUserAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await GetUserDtoAsync(userInfo);
-        if (dto.Groups != null)
+
+        // The groups of the account show it among their members, so they are refreshed too.
+        foreach (var group in await userManager.GetUserGroupsAsync(userInfo.Id))
         {
-            foreach (var group in dto.Groups)
-            {
-                var groupInfo = await userManager.GetGroupInfoAsync(group.Id);
-                var groupDto = await groupFullDtoHelper.Get(groupInfo, true);
-                await UpdateGroupAsync(groupDto);
-            }
+            await UpdateGroupAsync(group.ID);
         }
-        await MakeRequest("update-user", new { tenantId, user = dto });
+
+        await MakeRequest("update-user", new { tenantId, user = IdOnly(userInfo.Id) });
     }
 
     public async Task DeleteUserAsync(Guid userId)
@@ -90,13 +85,18 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task AddGroupAsync(GroupDto dto)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("add-group", new { tenantId, group = dto });
+        await MakeRequest("add-group", new { tenantId, group = IdOnly(dto.Id) });
     }
 
-    public async Task UpdateGroupAsync(GroupDto dto)
+    public Task UpdateGroupAsync(GroupDto dto)
+    {
+        return UpdateGroupAsync(dto.Id);
+    }
+
+    public async Task UpdateGroupAsync(Guid groupId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        await MakeRequest("update-group", new { tenantId, group = dto });
+        await MakeRequest("update-group", new { tenantId, group = IdOnly(groupId) });
     }
 
     public async Task DeleteGroupAsync(Guid groupId)
@@ -108,7 +108,7 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task AddGuestAsync(UserInfo userInfo, bool notifyAdmins = true)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await GetUserDtoAsync(userInfo);
+        var dto = IdOnly(userInfo.Id);
         var currentUser = securityContext.CurrentAccount.ID;
         await MakeRequest("add-guest", new { tenantId, room = currentUser, guest = dto });
         if (notifyAdmins)
@@ -124,7 +124,7 @@ public class UserSocketManager(ITariffService tariffService,
     public async Task UpdateGuestAsync(UserInfo userInfo)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var dto = await GetUserDtoAsync(userInfo);
+        var dto = IdOnly(userInfo.Id);
         var relations = await userManager.GetUserRelationsByTargetAsync(userInfo.Id);
         var admins = await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID);
         foreach (var relation in relations)
@@ -176,14 +176,25 @@ public class UserSocketManager(ITariffService tariffService,
         await MakeRequest("update-telegram", new { tenantId, userId, username });
     }
 
-    // Joining a socket room is not access-checked, and these events reach every user subscribed to the users of the
-    // portal, so the DTO leaves out the AI services limit, which only an administrator or the user may read. Clients
-    // re-read it on "change-service-limits".
+    // The profile of the account whose type was changed, for its own client, which takes the whole profile from the
+    // event. The AI services limit is left out: clients re-read it on "change-service-limits".
     private async Task<EmployeeFullDto> GetUserDtoAsync(UserInfo userInfo)
     {
         var dto = await employeeFullDtoHelper.GetFullAsync(userInfo);
         dto.AiServicesLimit = null;
 
         return dto;
+    }
+
+    /// <summary>
+    /// What an event about an account or a group of a list carries: the id alone. Joining a socket room is not
+    /// access-checked, so the event reaches everybody who listens, a user or a guest among them, while a profile or
+    /// the members of a group would be built with the rights of whoever made the change. The clients take the id and
+    /// re-read through the API, which applies their own rights. The event about the caller's own type is not one of
+    /// these: it goes to that account alone, and its client takes the whole profile from it.
+    /// </summary>
+    private static object IdOnly(Guid id)
+    {
+        return new { id };
     }
 }

@@ -43,16 +43,13 @@ public class TelegramController(
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
-    /// Reports whether the current user's account is linked to the portal's Telegram bot, and under which Telegram
-    /// username. The bot keys must be configured for the portal beforehand with `POST api/2.0/settings/authservice`;
-    /// until a bot is configured, linking cannot be completed and the status never reaches the linked state. Any
-    /// authenticated user may call it, and only for their own account: there is no way to read another member's
-    /// Telegram status. This is a read-only, idempotent call. The returned `status` is published as a number, where
-    /// `0` means the account is not linked, `1` means it is linked, and `2` means a registration link has been issued
-    /// and the portal is still waiting for the user to open it in Telegram. The `username` field is filled in only in
-    /// state `1` and comes back empty in the other two. Start or resume linking with
-    /// `GET api/2.0/settings/telegram/link`, and drop an established link with
-    /// `DELETE api/2.0/settings/telegram/link`.
+    /// Returns whether the current user's account is linked to the portal's Telegram bot. Linking needs a bot that
+    /// `POST api/2.0/settings/authservice` configures for the portal. Any signed-in user can call it, including a
+    /// guest. The call is read-only and covers only the caller's own account. The `status` field is `unlinked`,
+    /// `linked`, or `linking`. The value `linking` means the user got a registration link but has not opened it in
+    /// Telegram yet. This state ends when the user opens the link or the link expires. The `username` field is
+    /// filled only when `status` is `linked`. To start linking, use `GET api/2.0/settings/telegram/link`. To remove
+    /// a link, use `DELETE api/2.0/settings/telegram/link`.
     /// </remarks>
     /// <summary>Check the Telegram connection</summary>
     /// <path>api/2.0/settings/telegram/check</path>
@@ -70,15 +67,13 @@ public class TelegramController(
     }
 
     /// <remarks>
-    /// Returns the personal `t.me` deep link that connects the current user's account to the portal's Telegram bot,
-    /// so that notifications can be delivered to that user in Telegram. The bot keys must be configured for the
-    /// portal beforehand with `POST api/2.0/settings/authservice`; without a configured bot name the response comes
-    /// back empty. Any authenticated user may call it, and the link always belongs to the caller's own account. The
-    /// call mutates state: unless the user still has an outstanding registration token it issues a fresh one, so
-    /// calling it twice in a row hands back the same link instead of invalidating the first. That token is
-    /// short-lived (20 minutes with the default configuration), and once it has expired the operation has to be
-    /// called again for a new link. Linking itself is completed in Telegram, not here, so poll
-    /// `GET api/2.0/settings/telegram/check` until its `status` becomes `1`. Remove an established link with
+    /// Returns the personal `t.me` link that connects the current user's account to the portal's Telegram bot. After
+    /// linking, the portal can send the user notifications in Telegram. Linking needs a bot that
+    /// `POST api/2.0/settings/authservice` configures for the portal. Without a bot name, the call returns an empty
+    /// link. Any signed-in user can call it, including a guest. The call changes data. If the user has no valid registration token, it issues a new one. A repeated call
+    /// returns the same link while the token is valid. The token expires in 20 minutes by default. After that, call
+    /// this operation again for a new link. The user completes linking by opening the link in Telegram. Then poll
+    /// `GET api/2.0/settings/telegram/check` until `status` is `linked`. To remove a link, use
     /// `DELETE api/2.0/settings/telegram/link`.
     /// </remarks>
     /// <summary>Get the Telegram link</summary>
@@ -96,15 +91,12 @@ public class TelegramController(
     }
 
     /// <remarks>
-    /// Removes the link between the current user's account and the portal's Telegram bot, so that this user stops
-    /// receiving notifications in Telegram. Any authenticated user may call it, and only for their own account: one
-    /// member cannot unlink another. Nothing has to be linked beforehand, and the call is destructive but idempotent,
-    /// returning `true` both when a link was removed and when there was none to remove, so a retry after a timeout is
-    /// safe. Only the portal-side link is dropped: the chat itself stays in the user's Telegram, and the portal's bot
-    /// configuration is untouched, so the other members keep their own links. Re-linking is not automatic, request a
-    /// new link with `GET api/2.0/settings/telegram/link` and confirm the result with
-    /// `GET api/2.0/settings/telegram/check`. Delivery over the other notification channels is unaffected; the
-    /// channels enabled for the portal are listed by `GET api/2.0/settings/notification/channels`.
+    /// Deletes the link between the current user's account and the portal's Telegram bot. After this call, the
+    /// portal no longer sends the user notifications in Telegram. Any signed-in user can call it, including a guest.
+    /// The call deletes only the caller's own link, and other members keep theirs. The call changes data, and you can
+    /// repeat it. It returns `true` both when it deleted a link and when there was none. The chat stays in the user's
+    /// Telegram. The bot settings of the portal and the other notification channels do not change. To list the channels of the portal, use `GET api/2.0/settings/notification/channels`. To link the
+    /// account again, use `GET api/2.0/settings/telegram/link`.
     /// </remarks>
     /// <summary>Unlink Telegram</summary>
     /// <path>api/2.0/settings/telegram/link</path>
