@@ -364,9 +364,10 @@ def method_end(lines: list[str], start: int) -> int:
     return len(lines)
 
 
-def print_endpoints_section(files, added, read_head) -> None:
+def print_endpoints_section(files, added, read_head) -> list[str]:
+    """Prints the changed actions and returns their names, for the OpenSpec section."""
     print("## Changed endpoints (one row each in the cross-cutting matrix, SKILL.md §3 A0)")
-    rows = []
+    rows, names = [], []
     for st, p in files:
         if not p.endswith("Controller.cs") or not is_cs(p) or is_test(p) or st.startswith("D"):
             continue
@@ -394,7 +395,72 @@ def print_endpoints_section(files, added, read_head) -> None:
             if n:
                 mark = "new" if attr in changed else f"{n} changed line(s)"
                 rows.append(f"  {verb:6} {prefix}/{route}".rstrip("/") + f"  {name}  [{p}:{attr}]  ({mark})")
+                names.append(name)
     print("\n".join(rows) if rows else "  none")
+    print()
+    return names
+
+
+# --- OpenSpec -------------------------------------------------------------------------------------
+# CLAUDE.md "Specs (OpenSpec)": a change to what an endpoint does is checked against the requirements that
+# govern it, and one that contradicts a requirement goes through openspec-propose. The specs name operations
+# by operationId (the action name, camelCase), and each verification.md names the product files it was
+# checked against, so both point from the diff to the requirements to read (SKILL.md §3 S).
+
+REQUIREMENT = re.compile(r"^###\s+Requirement:\s*(.+)$")
+
+
+def print_openspec_section(files, endpoint_names, head: str | None) -> None:
+    print("## OpenSpec (requirements that govern the changed code, SKILL.md §3 S)")
+    if head is None:
+        spec_paths = sorted(str(p).replace("\\", "/") for p in Path("openspec/specs").glob("*/*.md"))
+        read = lambda p: Path(p).read_bytes() if Path(p).exists() else None
+    else:
+        spec_paths = sorted(p for p in git("ls-tree", "-r", "--name-only", head, "openspec/specs", check=False).splitlines()
+                            if p.endswith(".md"))
+        read = lambda p: git_bytes("show", f"{head}:{p}")
+    if not spec_paths:
+        print("  no openspec/specs in the reviewed tree - skip")
+        print()
+        return
+
+    texts = {p: (read(p) or b"").decode("utf-8", "replace").splitlines() for p in spec_paths}
+    hits = []
+    for name in dict.fromkeys(endpoint_names):
+        op = name[:1].lower() + name[1:]
+        word = re.compile(rf"\b{re.escape(op)}\b")
+        for p in spec_paths:
+            if not p.endswith("/spec.md"):
+                continue
+            req, req_line, seen = None, 0, set()
+            for i, line in enumerate(texts[p], 1):
+                if m := REQUIREMENT.match(line):
+                    req, req_line = m.group(1).strip(), i
+                elif req and req not in seen and word.search(line):
+                    seen.add(req)
+                    hits.append(f"  {op}: {p}:{req_line}  \"{req}\"")
+    print("  operations of the changed endpoints named by a requirement:")
+    print("\n".join(hits) if hits else "    none")
+
+    product = [p for st, p in files if not st.startswith("D") and not is_test(p) and not p.startswith(("openspec/", "sdk/"))
+               and p.endswith((".cs", ".js", ".ts", ".json", ".conf"))]
+    named = []
+    for p in spec_paths:
+        if not p.endswith("/verification.md"):
+            continue
+        text = "\n".join(texts[p])
+        found = [f for f in product if f in text]
+        if found:
+            named.append(f"  {p.split('/')[-2]}: {', '.join(found[:6])}" + (f" (+{len(found) - 6})" if len(found) > 6 else ""))
+    print("  capabilities whose verification.md was checked against a changed file:")
+    print("\n".join(named) if named else "    none")
+
+    touched = [p for _, p in files if p.startswith("openspec/")]
+    print(f"  openspec/ files changed by the branch: {len(touched)}")
+    for p in touched[:10]:
+        print(f"    {p}")
+    if (hits or named) and not touched:
+        print("  !! the branch changes specified behaviour and leaves openspec/ untouched - check each requirement above")
     print()
 
 
@@ -653,7 +719,8 @@ def main() -> None:
 
     read_head = (lambda p: Path(p).read_bytes() if Path(p).exists() else None) if a.worktree \
         else (lambda p: git_bytes("show", f"{a.head}:{p}"))
-    print_endpoints_section(files, added, read_head)
+    endpoint_names = print_endpoints_section(files, added, read_head)
+    print_openspec_section(files, endpoint_names, None if a.worktree else a.head)
     print_stateful_section(added)
     print_size_section(added)
 
