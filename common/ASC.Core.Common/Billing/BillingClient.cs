@@ -484,7 +484,7 @@ public class DepositRequestDto : BillingPortalRequestDto
 /// <summary>Request to redeem a promo code for the portal.</summary>
 public class PromoCodeRequestDto : BillingPortalRequestDto
 {
-    /// <summary>The promo code; the billing service ignores its letter case, spaces and dashes.</summary>
+    /// <summary>The promo code as the user entered it, without surrounding spaces.</summary>
     public List<string> Code { get; set; }
 
     /// <summary>The e-mail of the user who redeems the code, kept in the billing audit.</summary>

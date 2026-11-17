@@ -103,6 +103,22 @@ public class TariffServiceWalletCoverageTests
         DepositAmounts(billing).Should().Equal("40");
     }
 
+    // A credit that has ended is not spent by accounting, even while it still sits on the sub-account.
+    [Fact]
+    public async Task EnsureWalletBalance_BonusEndedAnHourAgo_TopsUpAsIfThereWereNone()
+    {
+        var ended = DateTime.UtcNow.AddHours(-1).ToString("o", CultureInfo.InvariantCulture);
+        var (tariffService, billing) = CreateService(walletAmount: 10, goodwill: Reply(HttpStatusCode.OK, $$"""
+            {"accountNumber":42,"subAccountNumber":53,"accountName":"goodwill","accountCurrency":"USD",
+             "subAccounts":[{"currency":"USD","amount":15}],
+             "lots":[{"operationId":1,"amount":15,"remaining":15,"currency":"USD","date":"2026-11-01T09:00:00Z","expiresAt":"{{ended}}"}]}
+            """));
+
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+
+        DepositAmounts(billing).Should().Equal("40");
+    }
+
     [Fact]
     public async Task EnsureWalletBalance_NegativeBonus_CountsAsNone()
     {
@@ -156,7 +172,8 @@ public class TariffServiceWalletCoverageTests
     {
         return Reply(HttpStatusCode.OK, $$"""
             {"accountNumber":42,"subAccountNumber":53,"accountName":"goodwill","accountCurrency":"{{currency}}",
-             "subAccounts":[{"currency":"{{currency}}","amount":{{amount.ToString(CultureInfo.InvariantCulture)}}}],"lots":[]}
+             "subAccounts":[{"currency":"{{currency}}","amount":{{amount.ToString(CultureInfo.InvariantCulture)}}}],
+             "lots":[{"operationId":1,"amount":{{amount.ToString(CultureInfo.InvariantCulture)}},"remaining":{{amount.ToString(CultureInfo.InvariantCulture)}},"currency":"{{currency}}","date":"2026-11-01T09:00:00Z","expiresAt":null}]}
             """);
     }
 

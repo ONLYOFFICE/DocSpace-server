@@ -492,7 +492,7 @@ public class PaymentHelper(
         messageService.Send(MessageAction.CustomerPromoCodeApplied, $"{result.Amount} {result.Currency?.ToUpperInvariant()}");
 
         // A pending bonus is not on the balance yet, so there is nothing new for the clients to read.
-        if (result.Status == PromoCodeStatus.Completed)
+        if (result.IsCredited)
         {
             await NotifyWalletChangedAsync(tenantId);
         }

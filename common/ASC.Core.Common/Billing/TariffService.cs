@@ -1629,10 +1629,9 @@ public class TariffService(
             return null;
         }
 
-        var amount = goodwill.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0;
-
-        // A negative bonus is no money to pay with; it must not raise the top-up above the shortfall of the wallet.
-        return Math.Max(amount, 0);
+        // Only credits that have not ended pay: the accounting service may write an ended one off later. A negative
+        // amount is no money to pay with, so it never raises the top-up above the shortfall of the wallet.
+        return goodwill.SpendableAmount(currency, DateTime.UtcNow);
     }
 
     private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)

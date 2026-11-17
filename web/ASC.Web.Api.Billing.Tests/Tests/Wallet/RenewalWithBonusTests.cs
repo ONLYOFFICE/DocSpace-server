@@ -65,7 +65,11 @@ public class RenewalWithBonusTests(AspireAppFixture fixture) : BaseTest(fixture)
                 ["accountName"] = "goodwill",
                 ["accountCurrency"] = "USD",
                 ["subAccounts"] = new JsonArray(new JsonObject { ["currency"] = "USD", ["amount"] = (decimal)bonus }),
-                ["lots"] = new JsonArray()
+                ["lots"] = new JsonArray(new JsonObject
+                {
+                    ["operationId"] = 1, ["amount"] = (decimal)bonus, ["remaining"] = (decimal)bonus, ["currency"] = "USD",
+                    ["date"] = "2026-11-01T09:00:00Z", ["expiresAt"] = null
+                })
             }.ToJsonString());
 
         // reading the tariff stores the due date the renewal job looks for

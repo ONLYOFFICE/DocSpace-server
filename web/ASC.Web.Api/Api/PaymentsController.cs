@@ -942,16 +942,16 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Redeems a promo code for the portal and credits the bonus money it carries. Only a DocSpace administrator may
-    /// call it, and an installation without a billing service answers 403. The call is not idempotent: whether a
-    /// code may be redeemed twice is up to the billing service, and a code it refuses fails with 400 without crediting
-    /// anything, the error message being the billing reason code such as `promo_not_found` or `promo_expired`. The letter case, spaces and dashes of the code do not
-    /// matter. It is limited to ten requests a minute per user by default. The answer says whether the bonus is
-    /// credited already (`status` Completed) or later (Pending), its amount, currency and expiry. The money lands on
-    /// the bonus balance, read with `GET api/2.0/portal/payment/customer/goodwill`; the portal clients are told over
-    /// their socket connection only of a completed credit, so read that balance again to see a pending one arrive.
-    /// When the billing service cannot be reached, fails, or does not know the portal yet, the call fails with 402;
-    /// the bonus may have been credited all the same, so read the bonus balance before trying the same code again.
+    /// Redeems a promo code for the portal and credits its bonus money to the bonus balance. Requires a DocSpace admin.
+    /// Other callers get 403. The call also returns 403 if the installation has no billing service. The call changes
+    /// data. A repeated call returns 400 if the billing service does not accept the same code twice. If the billing
+    /// service refuses the code, the call returns 400 and credits nothing. The error message is then the billing reason
+    /// code, such as `promo_not_found` or `promo_expired`. The call removes spaces around `promoCode`, then returns 400 if it is empty or too long. The answer
+    /// says whether the bonus is credited already (`status` Completed) or later (Pending). To see the bonus, use `GET
+    /// api/2.0/portal/payment/customer/goodwill`. A pending bonus appears there later. If the billing service cannot be
+    /// reached, fails, or does not know the portal, the call returns 402. After 402 or another server error, the bonus
+    /// may be credited all the same. So read the bonus balance before you try the same code again. By default, the limit
+    /// is 10 calls a minute per user. More calls return 429.
     /// </remarks>
     /// <summary>
     /// Redeem a promo code
@@ -1016,22 +1016,22 @@ public class PaymentController(
     }
 
     /// <remarks>
-    /// Returns the goodwill balance of the portal: the bonus money credited to it, which the accounting service holds
-    /// on an account of its own rather than on the wallet, together with every bonus credit that can still be spent.
-    /// Only a DocSpace administrator may read it, an installation without a billing service answers 403, and a portal
-    /// that has never been a customer gets an empty result. The call is read-only and is answered by the accounting
-    /// service on every request, so a bonus shows up as soon as it is credited. The account part has the same shape as
-    /// the wallet balance, while `lots` lists the individual credits that have neither expired nor been spent in full,
-    /// in the order they are spent, with times in UTC. An empty `lots` means no bonus is left. The money paid into the wallet is read with
-    /// `GET api/2.0/portal/payment/customer/balance` instead. An empty result is also what the portal gets when the
-    /// accounting service cannot be reached, so a client should treat it as "nothing to show" rather than as zero.
+    /// Returns the bonus balance of the portal, which the accounting service keeps apart from the wallet. Requires a
+    /// DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service. The
+    /// call is read-only. Each call reads the balance from the accounting service, so a new bonus shows up immediately.
+    /// The account part has a sub-account with its amount for each currency. The list `lots` holds the bonus credits
+    /// not spent in full, in the order they are spent. A credit may stay there after its `expiresAt` until the
+    /// accounting service writes it off. It is no longer spent then. If the portal has no billing customer, the call
+    /// returns an empty result. It also returns
+    /// an empty result if the accounting service cannot be read. So treat an empty result as nothing to show, not as
+    /// zero. To read the money paid into the wallet, use `GET api/2.0/portal/payment/customer/balance`.
     /// </remarks>
     /// <summary>
     /// Get the goodwill balance
     /// </summary>
     /// <path>api/2.0/portal/payment/customer/goodwill</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The goodwill account with its sub-account per currency and the bonus credits left to spend, or an empty result when the portal has no billing customer or the accounting service could not be read", typeof(GoodwillBalanceDto))]
+    [SwaggerResponse(200, "The goodwill account with its sub-account per currency and the bonus credits not spent in full, or an empty result when the portal has no billing customer or the accounting service could not be read", typeof(GoodwillBalanceDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpGet("customer/goodwill")]
     public async Task<GoodwillBalanceDto> GetCustomerGoodwill()

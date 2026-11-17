@@ -19,7 +19,7 @@ when it pays from the wallet, so customers were charged on their card for what t
   movement kinds with their own descriptions; the operations and usage report files get bonus columns.
 - The `type` filter of `getCustomerOperations` and its report now reaches the accounting service; before it was
   sent under a name the service ignores, so every kind came back.
-- **BREAKING** `moveSubscriptionToWallet` counts the bonus: it tops the wallet up only for the part the wallet
+- **BREAKING** `moveSubscriptionToWallet` counts the bonus credits that have not ended: it tops the wallet up only for the part the wallet
   money and the bonus do not cover, and answers 402 only when both together fall short after the top-up. An
   unreadable bonus counts as none.
 - **BREAKING** The automatic renewal of a wallet subscription counts the bonus the same way.
@@ -42,7 +42,7 @@ None.
 
 - **Moving the subscription balance to the wallet** (`moveSubscriptionToWallet`). With a bonus in the
   wallet currency, the card is charged only for the price minus the wallet money and the bonus, possibly
-  nothing; the bonus is spent on the administrators first. The 402 after the top-up now means that the wallet
+  nothing; the accounting service spends the bonus on the administrators first. The 402 after the top-up now means that the wallet
   and the bonus together fall short. Affected:
   - web client (`../client`): a dialog that computes the amount to top up from the wallet balance alone shows
     more than is charged; the client was not checked from this repository;
@@ -68,5 +68,5 @@ unreadable answer as false) is kept.
 - Core: billing and accounting clients (promo code, goodwill balance, bonus credit, `operationTypes`),
   `TariffService` (goodwill read, top-up with the bonus counted), operation sources.
 - Reports: operations and service usage report builders.
-- Audit: a new payment action, translated in every culture.
+- Audit: a new payment action; its text is in English only for now (`AuditReportResource`, neutral culture).
 - SDK: regenerated C# package; the SDK submodules are regenerated but not committed.

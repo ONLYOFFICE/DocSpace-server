@@ -237,7 +237,7 @@ public class TopUpDepositRequestDto
 public class ApplyPromoCodeRequestDto
 {
     /// <summary>
-    /// The promo code as it was handed out; its letter case, spaces and dashes do not matter.
+    /// The promo code as it was handed out.
     /// </summary>
     /// <example>K7QX-M42P-9TRB</example>
     [Required]

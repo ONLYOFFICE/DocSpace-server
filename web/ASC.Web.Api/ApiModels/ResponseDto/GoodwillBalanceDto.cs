@@ -35,7 +35,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// The goodwill balance of the portal - the bonus money credited to it, held on an account of its own rather than on the
-/// wallet - with the bonus credits that can still be spent.
+/// wallet - with the bonus credits not spent in full.
 /// </summary>
 /// <example>
 /// {
@@ -51,15 +51,15 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class GoodwillBalanceDto : BalanceDto
 {
     /// <summary>
-    /// The bonus credits that have neither expired nor been spent in full, in the order they are spent. An empty list
-    /// means no bonus is left to spend.
+    /// The bonus credits not spent in full, in the order they are spent. A credit may stay here after its `expiresAt`
+    /// until the accounting service writes it off, and is no longer spent then. An empty list means no bonus is left.
     /// </summary>
     /// <example>[{"operationId": 987654, "amount": 50, "remaining": 35.5, "currency": "USD", "date": "2026-11-01T09:00:00Z", "expiresAt": "2026-12-01T09:00:00Z"}]</example>
     public List<GoodwillLotDto> Lots { get; init; }
 }
 
 /// <summary>
-/// One bonus credit of the portal that can still be spent: how much was credited, how much is left, and until when.
+/// One bonus credit of the portal not spent in full: how much was credited, how much is left, and until when.
 /// </summary>
 public class GoodwillLotDto
 {

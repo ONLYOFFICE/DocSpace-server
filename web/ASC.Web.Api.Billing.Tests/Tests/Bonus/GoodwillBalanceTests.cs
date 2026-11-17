@@ -35,7 +35,7 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Bonus;
 
 /// <summary>
 /// The portal's bonus balance (<c>GET payment/customer/goodwill</c>): read from accounting for a billing customer on
-/// every request, with the bonus credits that can still be spent.
+/// every request, with the bonus credits not spent in full.
 /// </summary>
 public class GoodwillBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
 {

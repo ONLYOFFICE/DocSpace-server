@@ -220,7 +220,7 @@ public class OperationDto
     /// <summary>
     /// Which sub-accounts of the portal the amount was taken from or put on, and how much fell on each - one charge
     /// may be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a movement
-    /// the billing service reported without the split.
+    /// the accounting service reported without the split.
     /// </summary>
     /// <example>[{"subAccount": 53, "isBonus": true, "amount": 4.5}, {"subAccount": 0, "isBonus": false, "amount": 9.5}]</example>
     public List<OperationSourceDto> Sources { get; set; }
@@ -410,7 +410,7 @@ public class CustomerServiceUsageDto
     /// <summary>
     /// Which sub-accounts of the portal `totalAmount` was taken from, and how much fell on each - the consumption may
     /// be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a total the
-    /// billing service reported without the split.
+    /// accounting service reported without the split, or on a total merged from several when one of them had none.
     /// </summary>
     /// <example>[{"subAccount": 53, "isBonus": true, "amount": 20.0}, {"subAccount": 0, "isBonus": false, "amount": 29.99}]</example>
     public List<OperationSourceDto> Sources { get; set; }

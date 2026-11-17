@@ -815,19 +815,50 @@ public class SubAccount : CurrencyAmount
 }
 
 /// <summary>
-/// The goodwill balance of a customer: the goodwill account with its sub-accounts, and the goodwill credits on it that
-/// can still be spent.
+/// The goodwill balance of a customer: the goodwill account with its sub-accounts, and the goodwill credits on it not
+/// spent in full.
 /// </summary>
 public class GoodwillBalance : Balance
 {
     /// <summary>
-    /// The goodwill credits that have not expired and are not fully spent, in the order they are spent.
+    /// The goodwill credits not spent in full, in the order they are spent. One whose end has passed may stay here until
+    /// the accounting service writes it off.
     /// </summary>
     public List<GoodwillLot> Lots { get; init; }
+
+    /// <summary>
+    /// The bonus the portal can pay with in <paramref name="currency"/> at <paramref name="utcNow"/>: the rest of the
+    /// credits in that currency whose end is later than <paramref name="utcNow"/> or that never end, at most the
+    /// sub-account amount, and never below zero. The accounting service may write an ended credit off only later, so
+    /// the sub-account alone can still hold money it will not spend. Without <see cref="Lots"/> in the answer there is
+    /// no end to compare, and the sub-account amount counts. An end without an offset is read as UTC, as the accounting
+    /// service gives its times.
+    /// </summary>
+    public decimal SpendableAmount(string currency, DateTime utcNow)
+    {
+        var account = Math.Max(SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0, 0);
+
+        if (Lots == null)
+        {
+            return account;
+        }
+
+        var lots = Lots
+            .Where(lot => lot.Currency == currency && (lot.ExpiresAt == null || AsUtc(lot.ExpiresAt.Value) > utcNow))
+            .Sum(lot => Math.Max(lot.Remaining, 0));
+
+        return Math.Min(account, lots);
+    }
+
+    // ToUniversalTime would read a time without an offset as the host's local time and move the end by its offset.
+    private static DateTime AsUtc(DateTime value)
+    {
+        return value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Utc) : value.ToUniversalTime();
+    }
 }
 
 /// <summary>
-/// A goodwill credit that can still be spent. <see cref="CurrencyAmount.Amount"/> is the credited amount and
+/// A goodwill credit not spent in full. <see cref="CurrencyAmount.Amount"/> is the credited amount and
 /// <see cref="TransactionInfo.Date"/> the date of the credit.
 /// </summary>
 public class GoodwillLot : TransactionInfo
@@ -1461,6 +1492,17 @@ public class OperationSource
     public static decimal BonusAmountOf(IEnumerable<OperationSource> sources)
     {
         return Math.Abs(sources?.Where(x => x.IsBonus).Sum(x => x.Amount) ?? 0);
+    }
+
+    /// <summary>
+    /// The bonus part of a movement split by its direction, as the operations report shows it next to the credit and
+    /// the debit: the bonus part goes to each side above 0, and a side of 0 gets 0.
+    /// </summary>
+    public static (decimal Credit, decimal Debit) BonusPartsOf(decimal credit, decimal debit, IEnumerable<OperationSource> sources)
+    {
+        var bonusAmount = BonusAmountOf(sources);
+
+        return (credit > 0 ? bonusAmount : 0, debit > 0 ? bonusAmount : 0);
     }
 }
 

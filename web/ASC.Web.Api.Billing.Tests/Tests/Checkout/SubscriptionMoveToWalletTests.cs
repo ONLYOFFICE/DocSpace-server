@@ -114,7 +114,11 @@ public class SubscriptionMoveToWalletTests(AspireAppFixture fixture) : BaseTest(
             ["accountName"] = "goodwill",
             ["accountCurrency"] = currency,
             ["subAccounts"] = new JsonArray(new JsonObject { ["currency"] = currency, ["amount"] = amount }),
-            ["lots"] = new JsonArray()
+            ["lots"] = new JsonArray(new JsonObject
+                {
+                    ["operationId"] = 1, ["amount"] = amount, ["remaining"] = amount, ["currency"] = currency,
+                    ["date"] = "2026-11-01T09:00:00Z", ["expiresAt"] = null
+                })
         }.ToJsonString();
     }
 }

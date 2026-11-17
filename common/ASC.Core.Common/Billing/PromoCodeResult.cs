@@ -59,6 +59,13 @@ public class PromoCodeResult
     /// The moment the bonus expires, in UTC, or <c>null</c> for a bonus that never expires.
     /// </summary>
     public DateTime? ExpiresAt { get; set; }
+
+    /// <summary>
+    /// Whether the bonus is on the bonus balance already, so the clients of the portal have a new balance to read; a
+    /// pending one is not.
+    /// </summary>
+    [JsonIgnore]
+    public bool IsCredited => Status == PromoCodeStatus.Completed;
 }
 
 /// <summary>

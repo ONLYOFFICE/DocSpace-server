@@ -383,7 +383,7 @@ An AI charge SHALL reduce the balance by the debit of its movement.
 
 `getCustomerGoodwill` SHALL return to a DocSpace admin (403 otherwise and without billing, 401 anonymous) the
 portal's goodwill account, read from the accounting service on every call: the account with one sub-account
-per currency, and `lots`, the bonus credits neither expired nor spent in full, in spending order, each with
+per currency, and `lots`, the bonus credits not spent in full, in spending order, each with
 `operationId`, `amount`, `remaining`, `currency`, `date` and `expiresAt` in UTC. A portal without a customer,
 or an unreadable accounting service, SHALL get an empty result.
 
@@ -412,9 +412,19 @@ answer 400 with its reason code and credit nothing.
 
 #### Scenario: Bonus credited at once
 
-- **WHEN** a DocSpace admin redeems ` K7QX-M42P ` and the billing service credits 25 usd that expire in a month
-- **THEN** the system answers 200 with `status` `Completed`, `amount` 25, `currency` `USD` and that `expiresAt`
-- **AND** the billing service received the code trimmed, with the caller's e-mail as initiator
+- **WHEN** a DocSpace admin redeems `K7QX-M42P-9TRB` and the billing service credits 10 USD that expire at 2027-02-07T12:00:00Z
+- **THEN** the system answers 200 with `status` `Completed`, `amount` 10, `currency` `USD` and that `expiresAt`
+- **AND** the billing service received the code with the caller's e-mail as initiator
+
+#### Scenario: Code with surrounding spaces
+
+- **WHEN** a DocSpace admin redeems the code with two spaces before and after it
+- **THEN** the billing service receives the code without them
+
+#### Scenario: Currency in lower case
+
+- **WHEN** the billing service answers the currency as `usd`
+- **THEN** the system answers `currency` `USD`
 
 #### Scenario: Bonus credited later
 
@@ -423,13 +433,13 @@ answer 400 with its reason code and credit nothing.
 
 #### Scenario: Code refused
 
-- **WHEN** the billing service refuses the code as unknown or expired
+- **WHEN** the billing service refuses the code as `promo_not_found` or `promo_already_used`
 - **THEN** the system answers 400 with the reason code, such as `promo_not_found`, and no bonus is credited
 
 #### Scenario: Billing service fails or does not know the portal
 
-- **WHEN** the billing service cannot be reached, fails on its side, or does not know the portal
-- **THEN** the system answers 402, not 400, since the bonus may have been credited all the same
+- **WHEN** the billing service answers `promo_failed` in the shape of a refusal, or does not know the portal
+- **THEN** the system answers 402, not 400
 
 #### Scenario: Empty code
 
@@ -453,14 +463,20 @@ answer 400 with its reason code and credit nothing.
 
 ### Requirement: Redeeming a promo code is audited and announced
 
-Every promo code the billing service accepts SHALL write one audit event naming the amount and the currency,
-never the code itself. A bonus credited at once SHALL be pushed to the portal's clients as a wallet change,
-like a top-up; a pending one SHALL push nothing. A failure to push SHALL NOT fail the redemption.
+Every promo code the billing service accepts, in an answer the server can read, SHALL write one audit event
+naming the amount and the currency, never the code itself. A bonus the answer reports `Completed` SHALL be
+pushed to the portal's clients as a wallet change, like a top-up; a pending one SHALL push nothing. A failure
+to push SHALL NOT fail the redemption.
 
 #### Scenario: Audit record of a redeemed code
 
-- **WHEN** a DocSpace admin redeems a code worth 25 USD
-- **THEN** the audit trail of `history-and-audit` shows "Promo code applied: 25 USD" and not the code
+- **WHEN** a DocSpace admin redeems a code and the billing service answers 25 `usd`, `Completed` or `Pending`
+- **THEN** the audit trail of `history-and-audit` shows one "Promo code applied: 25 USD" and not the code
+
+#### Scenario: Refused code
+
+- **WHEN** the billing service refuses the code
+- **THEN** no audit event is written
 
 #### Scenario: Pending bonus
 
@@ -868,15 +884,15 @@ move the balance, pay price times count from the wallet (402 when short) and buy
 #### Scenario: Bonus covers part of the price
 
 - **WHEN** the administrators cost 40 USD, the moved balance leaves 0 in the wallet and the bonus holds 15 USD
-- **THEN** the wallet is topped up by 25 USD and the administrators are bought, paid first from the bonus
+- **THEN** the wallet is topped up by 25 USD and the administrators are bought
 
 ### Requirement: Paying from the wallet with the bonus counted
 
-When `moveSubscriptionToWallet` or the automatic renewal of the administrators subscription pays from the
-wallet, the server SHALL top it up from the payment method only for what the wallet money and the bonus in
-the wallet currency do not cover, both read again after each top-up. A bonus in another currency SHALL count
-as none, as SHALL one unreadable before the first top-up; a later failed read keeps the last. Neither a
-delayed payment method nor an add-on renewal gets a top-up.
+When `moveSubscriptionToWallet` or the administrators renewal pays from the wallet, the server SHALL top it up
+only for what the wallet money and the bonus do not cover, both read again after each top-up. The bonus SHALL
+be the rest of the credits in the wallet currency not ended at the read, capped by the sub-account (the
+sub-account without `lots`); one unreadable before the first top-up counts as none, a later failed read keeps
+the last. A delayed method or an add-on renewal gets no top-up.
 
 #### Scenario: Bonus covers the price
 
@@ -885,32 +901,37 @@ delayed payment method nor an add-on renewal gets a top-up.
 
 #### Scenario: Bonus covers part of the price
 
-- **WHEN** a renewal costs 40 USD and the bonus holds 15 USD
+- **WHEN** a renewal costs 40 USD, the wallet holds 0 and the bonus 15 USD
 - **THEN** the wallet is topped up by 25 USD
 
 #### Scenario: Bonus spent during the top-up
 
-- **WHEN** a payment costs 40 USD, the bonus holds 15 USD, and a charge spends 10 USD of it while the wallet is topped up by 25 USD
+- **WHEN** a payment costs 40 USD, the wallet holds 0, the bonus 15 USD, and a charge spends 10 USD of it while the wallet is topped up by 25 USD
 - **THEN** the wallet is topped up again by 10 USD
 
 #### Scenario: Bonus in another currency
 
-- **WHEN** the price is in USD and the bonus is in EUR
-- **THEN** the bonus is not counted and the wallet is topped up by the whole price
+- **WHEN** the administrators cost 40 USD, the wallet holds 0 and the bonus 40 EUR
+- **THEN** the bonus is not counted and the wallet is topped up by 40 USD
+
+#### Scenario: Bonus credit that has ended
+
+- **WHEN** a payment costs 50 USD, the wallet holds 10 USD, and the only bonus credit, 15 USD, ended an hour ago but is still on the sub-account
+- **THEN** the wallet is topped up by 40 USD
 
 #### Scenario: Bonus that cannot be read
 
-- **WHEN** the accounting service does not answer the bonus balance, or answers with something it cannot read
-- **THEN** the wallet is topped up as if there were no bonus
+- **WHEN** a payment costs 50 USD, the wallet holds 10 USD, and the accounting service answers the bonus read with 400 or with a page that is not JSON
+- **THEN** the wallet is topped up by 40 USD, as if there were no bonus
 
 #### Scenario: Bonus unreadable after a top-up
 
-- **WHEN** a payment costs 40 USD, the bonus holds 15 USD, the wallet is topped up by 25 USD and the bonus then cannot be read
+- **WHEN** a payment costs 40 USD, the wallet holds 0, the bonus 15 USD, the wallet is topped up by 25 USD and the bonus then cannot be read
 - **THEN** the 15 USD read before still count and no second top-up is made
 
 #### Scenario: Delayed payment method
 
-- **WHEN** the payment method is delayed and the wallet and the bonus together cover the price
+- **WHEN** the payment method is delayed, the payment costs 30 USD, the wallet holds 5 USD and the bonus 25 USD
 - **THEN** no top-up is made and the payment goes on
 
 ### Requirement: Active services
