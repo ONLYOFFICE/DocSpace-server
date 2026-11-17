@@ -49,6 +49,12 @@ vi.mock("../chatContextSnapshot.js", () => ({
   reportChatContextMiss: vi.fn(),
 }));
 
+// Folder 12 is an AI project, any other folder is not.
+const resolveAiProjectEntityId = vi.fn(async (id: string | undefined) =>
+  id === "12" ? id : undefined,
+);
+vi.mock("../docspaceFilesApi.js", () => ({ resolveAiProjectEntityId }));
+
 const { aiService } = await import("../httpClient.js");
 const { HttpThreadsStorage } = await import("../threadsStorage.js");
 
@@ -79,6 +85,18 @@ describe("the project of a thread", () => {
       profileId: null,
       entityId: null,
     });
+  });
+
+  it("is none for a folder that is not an AI project", async () => {
+    await storage.create("Chat", undefined, "30");
+    expect(aiService.post).toHaveBeenCalledWith("/threads", {
+      title: "Chat",
+      profileId: null,
+      entityId: null,
+    });
+
+    await storage.readAll("30", 20);
+    expect(aiService.get).toHaveBeenCalledWith("/threads", { query: { count: 20 } });
   });
 
   it("narrows the list to the threads of that project", async () => {
