@@ -46,6 +46,11 @@ product decision.
 - A portal setting, on by default, switches external links of private rooms; only the portal owner and DocSpace admins
   change it.
 - **BREAKING** The key material of links is left out of backups like the other key material.
+- The server builds the address of such a link and its short address without the secret, and shortens no address a
+  caller sends, so the short-link store and Bitly never hold the part after `#`. An unknown short address, which
+  redirects to the portal root as today, gets an empty fragment, so the browser does not carry a secret there.
+- The page that opens such a link gets a Content-Security-Policy without the portal's extra domains, plugins, support
+  chat and tag manager, so no third-party script can read the secret from the address.
 - Creating, changing, revoking and opening such a link are recorded in the audit trail, with the room named as other
   private-room events name it.
 
@@ -112,4 +117,7 @@ None of the rows of `openspec/deviations.md` is touched.
   `products/ASC.Files/Core/Core/Entries/EncryptionKeyPairDto.cs`, the file-key store and its DAO, the files settings.
 - A database migration for the link key material (MySQL and PostgreSQL, SaaS and Standalone) and its backup
   declaration.
+- `web/ASC.Web.Core/UrlShortRewriter.cs` (the redirect of an unknown short address).
+- `products/ASC.Files/Core/Helpers/CspSettingsHelper.cs` (a restricted policy for the visitor's page); outside this
+  repository, the CSP handling of the proxy in `buildtools` and the route of that page in the client.
 - The OpenAPI documents and the SDKs; the web client after this lands.

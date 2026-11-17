@@ -91,6 +91,25 @@ section follows the app".
    for private items, with the room named as "Titles in the audit trail" requires; one new action records an opening,
    once per link session. Socket events and webhooks of links are sent as for ordinary links and fall under "Titles in
    webhooks".
+10. **The address is built by the server, the secret is appended by the browser.** `shareLink` and its short address
+    come from the link data, as for every link today (`FileSharing.cs`, `FileStorageService.cs`, through
+    `IUrlShortener`); no operation shortens an address the caller sends. The short-link store (`OnlyoShortener`) and
+    Bitly therefore never see the part after `#`. The change keeps it so and pins it with a test. One gap is closed:
+    for an unknown code `UrlShortRewriter` redirects to the portal root (`UrlShortRewriter.cs:63`), and the browser
+    carries the secret there, onto a page under the full policy of decision 11. The redirect gets an empty fragment
+    (`Location: https://portal/#`): a fragment in `Location`, even an empty one, replaces the one of the request.
+    Alternative: answer 404. Rejected: it changes every short link of the portal, not only private ones. Alternative:
+    let the client shorten the full address. Rejected: the store would hold the secret, and Bitly would receive it.
+11. **The page of a link visitor gets its own Content-Security-Policy.** Today one policy per host is built by
+    `CspSettingsHelper.CreateHeaderAsync`: the defaults, the Document Server and storage, plus the domains of the CSP
+    settings, plugins (`WebPluginsController`), Docs Cloud, the support chat and the tag manager. A script from any of
+    them could read `location.hash`. `CspSettingsHelper` also builds a restricted value (the defaults, the Document
+    Server and storage only) and caches it beside the full one; the proxy sends the restricted value on the route of
+    the visitor's page. Alternative: only a `<meta>` policy in the page, which the browser enforces together with the
+    header. Kept as the client's second line, not instead: it covers only what the page loads after it, and the
+    server's tests cannot see it.
+    The proxy is `buildtools/config/nginx` with the CSP Lua of the docker entrypoint, outside this repository, and the
+    route of the visitor's page is the client's; both are dependencies of this decision.
 
 ## Risks / Trade-offs
 
@@ -103,6 +122,11 @@ section follows the app".
 - [A wrap for a link stays after a revoke if the delete fails] → Revocation deletes the share record and the key material
   in one transaction (decision 5); a failure leaves the link working, never half revoked.
 - [The proof is guessed] → 256 random bits plus the counter of wrong attempts; the hash comparison is constant-time.
+- [A script on the visitor's page reads the secret from the address] → The restricted policy of decision 11; the
+  client keeps third-party scripts off that page. The server delivers the page's own code, the same trust as for the
+  page where a member types a passphrase.
+- [A later change shortens an address that carries the secret] → The test of decision 10 fails if a stored short
+  address of a private link holds a `#`.
 - [Many links multiply the wraps of each upload] → Bounded by `shared-links` "Link count limits".
 
 ## Migration Plan
@@ -115,6 +139,8 @@ section follows the app".
   of private items (a one-off query on the share records whose item is in a private room), then drops the two tables.
 
 ## Open Questions
+
+- The route of the visitor's page (client) and who changes the proxy (`buildtools`) for decision 11.
 
 - Final names of the request and response fields and of the setting's route, agreed with the client change before
   implementation starts; the specs name the proposals.

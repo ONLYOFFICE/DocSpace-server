@@ -344,6 +344,45 @@ such a session MUST be refused as an unencrypted save is.
 - **WHEN** a visitor of a link starts an upload into the folder the link covers
 - **THEN** the answer is 403
 
+### Requirement: The address of a link of a private item carries no secret
+
+The server SHALL build `shareLink` of a link of a private item, and its short address, without a fragment. It SHALL NOT
+shorten, store or pass to an external shortener an address a caller sends. The short address MUST redirect to the stored
+address with no fragment, so that the browser keeps the secret the creator's page appended after `#`. An unknown short
+address MUST redirect to the portal root with an empty fragment, so that the browser drops it.
+
+#### Scenario: Link with key material created
+
+- **WHEN** a manager sets a link with key material on a private file
+- **THEN** `shareLink` in the answer and in `getFileLinks` has no `#`, and the stored short address holds that same address
+
+#### Scenario: Short address opened
+
+- **WHEN** a visitor requests the short address of such a link
+- **THEN** the answer redirects to the stored address, and its `Location` has no fragment
+
+#### Scenario: Unknown short address
+
+- **WHEN** a request names a short address that `short_links` does not hold, such as a mistyped or cut one
+- **THEN** the answer redirects to the portal root with `Location` ending in `/#`, and the secret appended by the sender
+  does not reach the portal's page
+
+### Requirement: The page of a link visitor admits no third-party script
+
+The page that opens a link of a private item SHALL be served with a Content-Security-Policy whose script and connect sources
+are only the portal, its storage and its Document Server. The domains of the portal's CSP settings, of plugins, of the
+support chat and of the tag manager MUST NOT be in it. Every other page SHALL keep the portal's policy.
+
+#### Scenario: Portal with extra domains
+
+- **WHEN** the portal's CSP settings list a domain and a visitor loads the page of a link of a private item
+- **THEN** the Content-Security-Policy of that answer does not list the domain
+
+#### Scenario: Other pages
+
+- **WHEN** the same portal serves any other page
+- **THEN** its Content-Security-Policy lists the domain as before
+
 ### Requirement: The secret of a link is wrapped for those who manage links
 
 The link operations SHALL accept `linkSecretWraps` for the room owner and room managers only, store them, and answer a wrap

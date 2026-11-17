@@ -64,6 +64,17 @@ fields, they call the operations through `RawApiClient`.
 - [ ] 3.5 Make a link session of a private item read-only in `FileSecurity`, view mode in `openEditFile`, and refuse its
   save callback; tests for "A visitor of a link reads only": view mode with the public document address, upload 403,
   delete, move, rename and sharing 403.
+- [ ] 3.6 Test for "The address of a link of a private item carries no secret": `shareLink` of a link with key material
+  from `setFileExternalLink` and `getFileLinks` has no `#`; the `short_links` row of it holds the same address; the short
+  address answers a redirect whose `Location` has no fragment (design decision 10). Change the redirect of an unknown code
+  in `UrlShortRewriter` to the portal root with an empty fragment, and test that `Location` of an unknown code ends in
+  `/#`.
+- [ ] 3.7 Build the restricted Content-Security-Policy value in `CspSettingsHelper` (the defaults, the Document Server and
+  storage only), cache it beside the full one and refresh both wherever the full one is rebuilt; agree the route of the
+  visitor's page with the client and the proxy change with `buildtools` (design decision 11). Tests for "The page of a
+  link visitor admits no third-party script": with a domain set through `POST security/csp`, the restricted value lacks it and the
+  full value keeps it; through the proxy of the test stand, the answer for the visitor's page carries the restricted
+  value.
 
 ## 4. Links as recipients of file keys
 
