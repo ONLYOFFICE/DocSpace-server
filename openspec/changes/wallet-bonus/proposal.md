@@ -36,7 +36,7 @@ None.
   `createCustomerOperationsReport`, `createCustomerServiceUsageReport` and the routes
   `api/2.0/portal/payment/*`, where the new `applyPromoCode` and `getCustomerGoodwill` belong.
   Requirement modified: "Moving the subscription balance to the wallet". Requirements added: redeeming a
-  promo code, the bonus balance, the bonus part of movements and usage, renewal with the bonus counted.
+  promo code, the bonus balance, the bonus part of movements and usage, paying from the wallet with the bonus counted.
 
 ## Breaks current behaviour
 

@@ -220,7 +220,8 @@ public class PaymentController(
     /// the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
     /// installation has no billing service. An `Add` call spends money. Do not repeat an `Add` call. Each call buys
     /// the units again. You can repeat a `Set` call with the same body. With `Add`, the wallet needs a sub-account in
-    /// the accounting currency with enough money. If the wallet has no such sub-account, the call returns 404. If the
+    /// the accounting currency. If it has none, the call returns 404. Its money and the bonus balance together must
+    /// cover the price. The bonus is spent first. If the
     /// billing service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402
     /// for an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400
     /// if the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and
@@ -462,7 +463,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the balance was moved to the wallet and the administrators were bought; `false` when the subscription has ended and the balance was moved, but the purchase of the administrators failed", typeof(bool))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or does not name the administrators wallet product, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
-    [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet is still short of the price after the top-up")]
+    [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet and the bonus are still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
     [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or after the move its wallet has no balance or no sub-account in the accounting currency")]
     [HttpPost("subscription/movetowallet")]
@@ -515,8 +516,8 @@ public class PaymentController(
         // Move the unused subscription balance to the wallet.
         await paymentHelper.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
 
-        // Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
-        // A delayed payment method cannot be topped up on the fly, so its wallet has to cover the cost already.
+        // Make sure the wallet and the bonus cover the cost, topping the wallet up for the missing amount if necessary.
+        // A delayed payment method cannot be topped up on the fly, so the wallet and the bonus have to cover it already.
         var siteName = tenant.GetTenantDomain(coreSettings);
         var allowTopUp = !customerInfo.IsDelayedPaymentMethod;
 

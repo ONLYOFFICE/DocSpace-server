@@ -55,8 +55,8 @@ public class OperationSourceDto
 
     /// <summary>
     /// The part of the amount on that sub-account, in the `currency` of the movement or of the usage total it belongs
-    /// to. Always zero or more: whether the money came in or went out is told by the `credit` and `debit` of the
-    /// movement.
+    /// to. Always zero or more. On a movement, its `credit` and `debit` tell whether the money came in or went out. A
+    /// usage total is always money spent.
     /// </summary>
     /// <example>4.5</example>
     public decimal Amount { get; init; }

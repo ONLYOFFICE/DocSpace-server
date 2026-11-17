@@ -86,6 +86,7 @@ global using Microsoft.Extensions.Logging.Abstractions;
 global using Microsoft.Extensions.Options;
 
 global using Polly;
+global using Polly.Registry;
 global using Polly.Retry;
 
 global using WireMock;

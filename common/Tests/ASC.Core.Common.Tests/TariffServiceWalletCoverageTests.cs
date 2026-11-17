@@ -36,11 +36,13 @@ namespace ASC.Core.Common.Tests;
 /// <summary>
 /// What <see cref="TariffService.EnsureWalletBalanceAsync"/> counts as money the portal can pay with: the wallet and
 /// the bonus credits, which the accounting service spends first. Only the shortfall of both is topped up from the
-/// payment method, and a bonus that cannot be read counts as none.
+/// payment method, and a bonus that cannot be read before the first top-up counts as none.
 /// </summary>
 /// <remarks>
-/// A deposit is answered with a page that is not billing's "ok", so the top-up stops after the first deposit and its
-/// amount can be read from the request without waiting for the balance to change.
+/// In the services <c>CreateService</c> builds, a deposit is answered with a page that is not billing's "ok", so the
+/// top-up stops after the first deposit and its amount can be read from the request without waiting for the balance to
+/// change. <c>CreateConfirmingService</c> confirms deposits through the real balance poll, for the tests of what the
+/// loop does after a top-up.
 /// </remarks>
 public class TariffServiceWalletCoverageTests
 {
@@ -92,6 +94,53 @@ public class TariffServiceWalletCoverageTests
     }
 
     [Fact]
+    public async Task EnsureWalletBalance_BonusAnswerUnreadable_TopsUpAsIfThereWereNone()
+    {
+        var (tariffService, billing) = CreateService(walletAmount: 10, goodwill: Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
+
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+
+        DepositAmounts(billing).Should().Equal("40");
+    }
+
+    [Fact]
+    public async Task EnsureWalletBalance_NegativeBonus_CountsAsNone()
+    {
+        var (tariffService, billing) = CreateService(walletAmount: 10, goodwill: Goodwill(-20));
+
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+
+        DepositAmounts(billing).Should().Equal("40");
+    }
+
+    // Charges running meanwhile spend the bonus before the wallet, so a bonus read before the top-up can be gone after
+    // it: the wallet is topped up again for what the bonus no longer covers.
+    [Fact]
+    public async Task EnsureWalletBalance_BonusSpentDuringTheTopUp_TopsUpAgainForTheRest()
+    {
+        var (tariffService, billing) = CreateConfirmingService(Goodwill(15), Goodwill(5));
+
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 40, "USD", null, "portal.example.com", auto: true);
+
+        covered.Should().BeTrue();
+        DepositAmounts(billing).Should().Equal("25", "10");
+    }
+
+    // A bonus that cannot be read after a confirmed deposit is not taken for none: that would fire a second deposit for
+    // money the first one already covered.
+    [Fact]
+    public async Task EnsureWalletBalance_BonusUnreadableAfterTheTopUp_KeepsTheBonusReadBefore()
+    {
+        var (tariffService, billing) = CreateConfirmingService(Goodwill(15),
+            Reply(HttpStatusCode.InternalServerError, """{"title":"Internal Server Error","status":500}"""));
+
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 40, "USD", null, "portal.example.com", auto: true);
+
+        covered.Should().BeTrue();
+        DepositAmounts(billing).Should().Equal("25");
+    }
+
+    [Fact]
     public async Task EnsureWalletBalance_NoTopUpAllowed_CountsTheBonus()
     {
         // A delayed payment method is never topped up on the fly: what the portal already has decides alone.
@@ -124,19 +173,58 @@ public class TariffServiceWalletCoverageTests
         var billing = new HttpStub(_ => Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
         var (billingClient, _) = CreateBillingClient(billing);
 
-        var wallet = $$"""{"accountNumber":42,"accountCurrency":"USD","subAccounts":[{"currency":"USD","amount":{{walletAmount.ToString(CultureInfo.InvariantCulture)}}}]}""";
         var (accountingClient, _) = CreateAccountingClient(request => request.Path switch
         {
-            BalancePath => Reply(HttpStatusCode.OK, wallet),
+            BalancePath => Reply(HttpStatusCode.OK, WalletJson(walletAmount)),
             GoodwillPath => goodwill,
             _ => Reply(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""")
         });
 
-        var tariffService = PaymentStubs.CreateTariffService(accountingClient, billingClient,
-            hybridCache: new FusionCache(new FusionCacheOptions()),
-            coreSettings: CreateCoreSettings(PaymentRegion),
-            distributedLockProvider: new InMemoryLockProvider());
+        return (CreateTariffService(accountingClient, billingClient), billing);
+    }
+
+    // A wallet that starts empty and shows every deposit billing accepts, the real balance poll of the accounting
+    // client, which confirms a deposit once the wallet shows it, and the bonus answered in turn by goodwillAnswers,
+    // the last one for every later read.
+    private static (TariffService tariffService, HttpStub billing) CreateConfirmingService(params StubResponse[] goodwillAnswers)
+    {
+        var wallet = 0m;
+        var goodwill = new Queue<StubResponse>(goodwillAnswers);
+        var billing = new HttpStub(request =>
+        {
+            if (request.Path == "/billing/Deposit")
+            {
+                wallet += decimal.Parse(JsonDocument.Parse(request.Body!).RootElement.GetProperty("Amount")[0].GetString()!, CultureInfo.InvariantCulture);
+            }
+
+            return Reply(HttpStatusCode.OK, "\"ok\"");
+        });
+        var accounting = new HttpStub(request => request.Path switch
+        {
+            BalancePath => Reply(HttpStatusCode.OK, WalletJson(wallet)),
+            GoodwillPath => goodwill.Count > 1 ? goodwill.Dequeue() : goodwill.Peek(),
+            _ => Reply(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""")
+        });
+
+        var provider = BuildProvider(billing: billing, accounting: accounting);
+        var tariffService = CreateTariffService(provider.GetRequiredService<AccountingClient>(), provider.GetRequiredService<BillingClient>(),
+            provider.GetRequiredService<ResiliencePipelineProvider<string>>());
 
         return (tariffService, billing);
+    }
+
+    private static TariffService CreateTariffService(AccountingClient accountingClient, BillingClient billingClient,
+        ResiliencePipelineProvider<string>? resiliencePipelineProvider = null)
+    {
+        return PaymentStubs.CreateTariffService(accountingClient, billingClient,
+            hybridCache: new FusionCache(new FusionCacheOptions()),
+            coreSettings: CreateCoreSettings(PaymentRegion),
+            distributedLockProvider: new InMemoryLockProvider(),
+            resiliencePipelineProvider: resiliencePipelineProvider);
+    }
+
+    private static string WalletJson(decimal amount)
+    {
+        return $$"""{"accountNumber":42,"accountCurrency":"USD","subAccounts":[{"currency":"USD","amount":{{amount.ToString(CultureInfo.InvariantCulture)}}}]}""";
     }
 }

@@ -123,12 +123,13 @@ reach the accounting service.
 - **WHEN** the operations report or the service usage report is built
 - **THEN** the operations file has "Credit (bonuses)" and "Debit (bonuses)" columns and the usage file a "Debit (bonuses)" column, each the bonus part of the amount next to it
 
-### Requirement: Paying a renewal from the wallet with the bonus counted
+### Requirement: Paying from the wallet with the bonus counted
 
-The automatic renewal of a wallet subscription SHALL top the wallet up from the payment method only for the
-part of the price that the wallet money and the bonus in the wallet currency do not cover. A bonus in another
-currency, or one that cannot be read, SHALL count as none. With a delayed payment method no top-up SHALL be
-made, and the wallet and the bonus together SHALL cover the price.
+When `moveSubscriptionToWallet` or the automatic renewal of the administrators subscription pays from the
+wallet, the server SHALL top it up from the payment method only for what the wallet money and the bonus in
+the wallet currency do not cover, both read again after each top-up. A bonus in another currency SHALL count
+as none, as SHALL one unreadable before the first top-up; a later failed read keeps the last. Neither a
+delayed payment method nor an add-on renewal gets a top-up.
 
 #### Scenario: Bonus covers the price
 
@@ -140,6 +141,11 @@ made, and the wallet and the bonus together SHALL cover the price.
 - **WHEN** a renewal costs 40 USD and the bonus holds 15 USD
 - **THEN** the wallet is topped up by 25 USD
 
+#### Scenario: Bonus spent during the top-up
+
+- **WHEN** a payment costs 40 USD, the bonus holds 15 USD, and a charge spends 10 USD of it while the wallet is topped up by 25 USD
+- **THEN** the wallet is topped up again by 10 USD
+
 #### Scenario: Bonus in another currency
 
 - **WHEN** the price is in USD and the bonus is in EUR
@@ -147,13 +153,18 @@ made, and the wallet and the bonus together SHALL cover the price.
 
 #### Scenario: Bonus that cannot be read
 
-- **WHEN** the accounting service does not answer the bonus balance
-- **THEN** the wallet is topped up as if there were no bonus, never by less than it needs
+- **WHEN** the accounting service does not answer the bonus balance, or answers with something it cannot read
+- **THEN** the wallet is topped up as if there were no bonus
+
+#### Scenario: Bonus unreadable after a top-up
+
+- **WHEN** a payment costs 40 USD, the bonus holds 15 USD, the wallet is topped up by 25 USD and the bonus then cannot be read
+- **THEN** the 15 USD read before still count and no second top-up is made
 
 #### Scenario: Delayed payment method
 
 - **WHEN** the payment method is delayed and the wallet and the bonus together cover the price
-- **THEN** no top-up is made and the renewal goes on
+- **THEN** no top-up is made and the payment goes on
 
 ## MODIFIED Requirements
 
@@ -163,9 +174,7 @@ made, and the wallet and the bonus together SHALL cover the price.
 (402 when the plan is not paid, 404 without a subscription, 400 for a wallet plan).
 `moveSubscriptionToWallet` SHALL, for the payer with a payment method set (403), take the administrators
 product only (400 "Invalid product") in a count above 0 and not below the portal's administrators (400),
-move the balance, top the wallet up for the part of price times count that the wallet money and the bonus
-in the wallet currency do not cover (402 when they still fall short) and buy the administrators, the bonus
-being spent first.
+move the balance, pay price times count from the wallet (402 when short) and buy the administrators.
 
 #### Scenario: Fewer administrators than the portal has
 

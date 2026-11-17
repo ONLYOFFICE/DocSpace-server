@@ -30,12 +30,17 @@ decisions behind it. It relies on these requirements of `billing`:
 
 ## Decisions
 
-- **The bonus is read once per payment, past every cache.** The decision how much to charge must use fresh
-  data, as the wallet read already does. A top-up does not change the bonus, so the top-up loop re-reads only
-  the wallet. Alternative: cache the bonus like a failed wallet read - rejected, a stale bonus would top up
-  too little and fail the purchase with 402.
-- **An unreadable bonus counts as none.** The wallet is then topped up by the whole shortfall, the safe
-  direction: never by less than it needs. Alternative: fail the payment - rejected, the bonus is an extra.
+- **The bonus is read past every cache, and again with the wallet after each top-up.** The decision how much
+  to charge must use fresh data, as the wallet read already does. Charges running during the top-up spend the
+  bonus before the wallet, so a bonus read only once could make the check pass while the purchase that follows
+  is short. Alternative: read it once, or cache it like a failed wallet read - rejected for that reason.
+- **The accounting service spends the bonus before the wallet money, also on a wallet purchase.** This order
+  belongs to the accounting service; the product owner confirmed it for this change. The payment stubs do not
+  model it: they answer the purchase without checking funds, so the tests prove the top-up amounts only.
+- **A bonus that cannot be read before the first top-up counts as none; a later failed read keeps the last
+  one.** Before any deposit, counting none tops the wallet up by the whole shortfall, the safe direction. After a
+  confirmed deposit, counting none would fire a second deposit for money the first already covered
+  (`failure-paths.md` §4), so the bonus read before stays. Alternative: fail the payment - rejected, the bonus is an extra.
 - **Only the bonus in the wallet currency counts.** The accounting service spends a bonus only in its own
   currency, so a bonus in another currency would leave the purchase short.
 - **Sources are passed on unsigned.** The accounting service may give the parts of a movement with a minus;
@@ -57,8 +62,11 @@ have `sources` null, and the report files show 0 in the bonus columns for them.
   `getCustomerGoodwill` too.
 - [An unknown bonus credit is not announced: a pending credit arrives without a socket event] → The
   description of `applyPromoCode` tells the client to read the bonus balance again.
-- [The bonus read adds one accounting call to each payment from the wallet] → The callers are a user action
-  and the renewal job, not a hot path.
+- [The bonus read adds one accounting call before the top-up and one after each attempt, at most six] → The
+  callers are a user action and the renewal job, not a hot path.
+- [The goodwill sub-account may still hold a bonus whose expiry has passed but which is not written off yet] →
+  The server counts the sub-account amount as the accounting service reports it; whether that amount excludes
+  expired credits is the accounting service's contract, to be confirmed.
 
 ## Migration Plan
 

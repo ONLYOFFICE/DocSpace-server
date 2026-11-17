@@ -228,15 +228,15 @@ public class RenewSubscriptionService(
 
             if (!targetQuota.Additional)
             {
-                // The user subscription is paid from the wallet, so make sure the wallet balance
-                // covers the renewal cost (priced off the target quota), topping it up for the missing amount if necessary.
+                // The user subscription is paid from the wallet, so make sure the wallet and the bonus cover the
+                // renewal cost (priced off the target quota), topping the wallet up for the missing amount if necessary.
                 var requiredAmount = targetQuota.Price * nextQuantity;
 
                 var coreSettings = scope.ServiceProvider.GetRequiredService<CoreSettings>();
                 var siteName = tenant.GetTenantDomain(coreSettings);
 
                 // A delayed payment method is topped up manually, so the renewal is paid from whatever the
-                // wallet already holds; if that is not enough the customer is notified instead.
+                // wallet and the bonus already hold; if that is not enough the customer is notified instead.
                 var allowTopUp = !customerInfo.IsDelayedPaymentMethod;
 
                 if (!await tariffService.EnsureWalletBalanceAsync(data.TenantId, requiredAmount, defaultCurrency, null, siteName, true, metadata, allowTopUp))

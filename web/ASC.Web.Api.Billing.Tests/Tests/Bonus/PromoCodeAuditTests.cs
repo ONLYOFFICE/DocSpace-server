@@ -52,46 +52,49 @@ public class PromoCodeAuditTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         // Act
         await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken);
+        var events = await AuditWithSentinelAsync(events => events.Any(e => e.Action != SentinelAction));
 
         // Assert
-        var events = await PollAuditAsync(MessageAction.CustomerPromoCodeApplied);
-        var audit = events.Should().ContainSingle().Subject;
-        audit.Action.Should().Contain("25 USD");
-        audit.Action.Should().NotContain(PromoCode, "anyone who reads the trail could redeem a reusable code");
+        var audit = events.Should().ContainSingle(e => e.Action != SentinelAction).Subject;
+        audit.Action.Should().Be("Promo code applied: 25 USD", "the code stays out: anyone who reads the trail could redeem a reusable one");
         (audit.Target ?? []).Should().NotContain(t => t.Contains(PromoCode));
     }
 
     [Fact]
     public async Task ApplyPromoCode_BillingRefusesTheCode_WritesNoAuditEvent()
     {
-        // Arrange: a refused code next to an accepted one, so the trail is known to be written for this portal.
+        // Arrange
         Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute, """{"Message":"error: promo_not_found"}""");
-        await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken));
-
-        Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
-            """{"Status":"completed","Amount":10,"Currency":"USD","ExpiresAt":null}""");
-        await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken);
 
         // Act
-        var events = await PollAuditAsync(MessageAction.CustomerPromoCodeApplied);
+        await Assert.ThrowsAsync<ApiException>(
+            async () => await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken));
+        var events = await AuditWithSentinelAsync(_ => true);
 
         // Assert
-        events.Should().ContainSingle().Which.Action.Should().Contain("10 USD");
+        events.Should().ContainSingle().Which.Action.Should().Be(SentinelAction);
     }
 
-    // The trail is written after the request returns, so it is polled until the event shows up or 30 s pass.
-    private async Task<List<AuditEventDto>> PollAuditAsync(MessageAction action)
+    private const string SentinelAction = "Promo code applied: 7 USD";
+
+    // The trail is written after the request returns, by writers that run in parallel, so its order is not that of the
+    // requests. A code redeemed after the one under test is a marker: the trail is polled until the marker and what
+    // `expected` waits for are both there, or 30 s pass. A copy written later than both is not caught.
+    private async Task<List<AuditEventDto>> AuditWithSentinelAsync(Func<List<AuditEventDto>, bool> expected)
     {
+        Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
+            """{"Status":"completed","Amount":7,"Currency":"USD","ExpiresAt":null}""");
+        await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto("SENTINEL"), TestContext.Current.CancellationToken);
+
         var deadline = DateTime.UtcNow.AddSeconds(30);
 
         while (true)
         {
-            var events = ((await _auditTrailDataApi.GetAuditEventsByFilterAsync(action: action, cancellationToken: TestContext.Current.CancellationToken)).Response ?? [])
-                .Where(e => e.ActionId == action)
+            var events = ((await _auditTrailDataApi.GetAuditEventsByFilterAsync(action: MessageAction.CustomerPromoCodeApplied, cancellationToken: TestContext.Current.CancellationToken)).Response ?? [])
+                .Where(e => e.ActionId == MessageAction.CustomerPromoCodeApplied)
                 .ToList();
 
-            if (events.Count > 0 || DateTime.UtcNow >= deadline)
+            if ((events.Any(e => e.Action == SentinelAction) && expected(events)) || DateTime.UtcNow >= deadline)
             {
                 return events;
             }

@@ -1557,10 +1557,11 @@ public class TariffService(
     public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true)
     {
         // The accounting service spends the bonus credits before the wallet money, a payment from the wallet for the
-        // subscription included, so the portal can pay with both. A top-up does not change the bonus, so it is read
-        // once. A bonus that cannot be read counts as none: the wallet is then topped up as if there were no bonus,
-        // never by less than it needs.
-        var goodwillAmount = await GetGoodwillAmountAsync(tenantId, currency);
+        // subscription included, so the portal can pay with both. Charges running meanwhile spend the bonus first, so
+        // it is read again with the wallet after every top-up. A bonus that cannot be read before the first top-up
+        // counts as none: the wallet is then topped up as if there were no bonus. A later read that fails keeps the
+        // bonus read before, so a failed read never fires a deposit of its own after a confirmed one.
+        var goodwillAmount = await GetGoodwillAmountAsync(tenantId, currency) ?? 0;
         var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency) + goodwillAmount;
 
         // A delayed payment method accepts the deposit right away, but the money is credited only
@@ -1595,6 +1596,7 @@ public class TariffService(
                 }
             }
 
+            goodwillAmount = await GetGoodwillAmountAsync(tenantId, currency) ?? goodwillAmount;
             balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency) + goodwillAmount;
 
             if (outcome == TopUpOutcome.Unknown)
@@ -1618,11 +1620,18 @@ public class TariffService(
         Unknown
     }
 
-    private async Task<decimal> GetGoodwillAmountAsync(int tenantId, string currency)
+    // The bonus in the given currency, or null when the goodwill account could not be read.
+    private async Task<decimal?> GetGoodwillAmountAsync(int tenantId, string currency)
     {
         var goodwill = await GetCustomerGoodwillAsync(tenantId);
-        var amount = goodwill?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0;
+        if (goodwill == null)
+        {
+            return null;
+        }
 
+        var amount = goodwill.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0;
+
+        // A negative bonus is no money to pay with; it must not raise the top-up above the shortfall of the wallet.
         return Math.Max(amount, 0);
     }
 
