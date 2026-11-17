@@ -166,6 +166,34 @@ public class AccountingClientOperationsTests
         paths.Should().Equal("/api/customer/portal-1/usage?offset=0", "/api/customer/portal-1/usage?offset=2");
     }
 
+    // The usage report builds this filter from a JSON body, where an empty or blank value is not turned into null
+    // the way query binding does it.
+    [Fact]
+    public async Task GetCustomerServiceUsagePages_BlankMetadataValues_AreNotSent()
+    {
+        var queries = new List<Dictionary<string, string>>();
+        var (client, _) = CreateAccountingClient(request =>
+        {
+            queries.Add(ParseQuery(request.Uri));
+
+            return Reply(HttpStatusCode.OK, """{"collection":[],"totalQuantity":0}""");
+        });
+
+        var filter = new UsageFilter
+        {
+            Limit = 1000,
+            Metadata = new Dictionary<string, string> { ["source_id"] = "agent-1", ["empty"] = "", ["blank"] = " " }
+        };
+
+        await foreach (var _ in client.GetCustomerServiceUsagePages("portal-1", filter).AsPages())
+        {
+        }
+
+        var query = queries.Should().ContainSingle().Subject;
+        query["metadata.source_id"].Should().Be("agent-1");
+        query.Keys.Should().NotContain(["metadata.empty", "metadata.blank"], "a pair with an empty or blank value is not sent");
+    }
+
     [Fact]
     public async Task GetCustomerOperationPages_ServerCapsPageSize_AdvancesByItemsReceived()
     {
