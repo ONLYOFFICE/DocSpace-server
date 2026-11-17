@@ -39,12 +39,11 @@ public class DocumentServiceLicense(ICache cache,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory,
-    IFusionCacheProvider cacheProvider,
+    IFusionCache fusionCache,
     ILogger<DocumentServiceLicense> logger)
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
     private const string CacheKey = "DocumentServiceLicense";
-
 
     private async Task<CommandResponse> GetDocumentServiceLicenseAsync(bool useCache)
     {
@@ -171,8 +170,8 @@ public class DocumentServiceLicense(ICache cache,
     /// </summary>
     /// <param name="useCache">
     /// Whether a cached answer may be used; <see cref="DocsTrialCache"/> says how long answers and failures are kept.
-    /// A fresh question with a known answer replaces the cached one on this node and makes the other nodes ask again;
-    /// one with an unknown answer leaves the cache alone.
+    /// A fresh question with a known answer replaces the cached one for every process; one with an unknown answer
+    /// leaves the cache alone.
     /// </param>
     /// <returns>
     /// <see cref="DocsTrialState.NotTrial"/> on an installation that has no editing service to ask;
@@ -184,7 +183,7 @@ public class DocumentServiceLicense(ICache cache,
     }
 
     /// <summary>
-    /// Returns the last answer of the editing service about its trial that this node knows, without asking the
+    /// Returns the last answer of the editing service about its trial that the installation knows, without asking the
     /// service; <c>null</c> when none is known.
     /// </summary>
     public Task<DocsTrialCheck> GetLastKnownTrialAsync()
@@ -194,7 +193,7 @@ public class DocumentServiceLicense(ICache cache,
 
     private DocsTrialCache CreateTrialCache()
     {
-        return new DocsTrialCache(cacheProvider.GetMemoryCache(), logger, DocsTrialCacheOptions.Default);
+        return new DocsTrialCache(fusionCache, logger, DocsTrialCacheOptions.Default);
     }
 
     private async Task<DocsTrialCheck> RequestTrialAsync()

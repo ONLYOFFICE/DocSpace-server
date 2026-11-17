@@ -34,25 +34,60 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// How the answer of the editing service about its own trial is kept in the memory cache: what a cached reader gets
-/// while the service fails, and what a fresh question does to the cached answer.
+/// How the answer of the editing service about its own trial is kept in the distributed cache: what a cached reader
+/// gets while the service fails, what a fresh question does to the cached answer, and what another process sees.
 /// </summary>
 /// <remarks>
-/// A real in-memory FusionCache with no backplane; the request to the editing service is a function that answers from
-/// a queue and counts the calls.
+/// A real FusionCache with a distributed cache in memory and the System.Text.Json serializer the services use, so the
+/// answers go through serialization; a second FusionCache over the same distributed cache plays another process. The
+/// request to the editing service is a function that answers from a queue and counts the calls.
 /// </remarks>
 public sealed class DocsTrialCacheTests : IDisposable
 {
     private static readonly DocsTrialCheck _active = new(DocsTrialState.Active, new DocsTrialLicense(new DateTime(2026, 12, 11, 0, 0, 0, DateTimeKind.Utc)));
     private static readonly DocsTrialCheck _expired = new(DocsTrialState.Expired, new DocsTrialLicense(new DateTime(2026, 11, 10, 0, 0, 0, DateTimeKind.Utc)));
 
-    private readonly FusionCache _cache = new(new FusionCacheOptions());
+    private readonly MemoryDistributedCache _distributedCache = new(Options.Create(new MemoryDistributedCacheOptions()));
+    private readonly List<FusionCache> _caches = [];
+    private readonly FusionCache _cache;
     private readonly Queue<DocsTrialCheck> _answers = new();
     private int _requests;
 
+    public DocsTrialCacheTests()
+    {
+        _cache = CreateProcessCache();
+    }
+
     public void Dispose()
     {
-        _cache.Dispose();
+        foreach (var cache in _caches)
+        {
+            cache.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task GetAsync_FreshAnswerOfAnotherProcess_IsWhatThisProcessReads()
+    {
+        // The background refresh of the worker asks the editing service; the wizard page of the API reads the answer.
+        _answers.Enqueue(_expired);
+
+        (await new DocsTrialCache(CreateProcessCache(), NullLogger<DocumentServiceLicense>.Instance, DocsTrialCacheOptions.Default)
+            .GetAsync(RequestAsync, useCache: false)).Should().Be(_expired);
+
+        (await CreateCache(DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: true)).Should().Be(_expired);
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_AfterTheProcessRestarts_ReadsTheDistributedCopy()
+    {
+        _answers.Enqueue(_active);
+        (await CreateCache(DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+
+        var restarted = new DocsTrialCache(CreateProcessCache(), NullLogger<DocumentServiceLicense>.Instance, DocsTrialCacheOptions.Default);
+
+        (await restarted.GetLastKnownAsync()).Should().Be(_active);
     }
 
     [Fact]
@@ -153,6 +188,15 @@ public sealed class DocsTrialCacheTests : IDisposable
         (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
 
         (await trialCache.GetLastKnownAsync()).Should().BeNull();
+    }
+
+    private FusionCache CreateProcessCache()
+    {
+        var cache = new FusionCache(new FusionCacheOptions());
+        cache.SetupDistributedCache(_distributedCache, new FusionCacheSystemTextJsonSerializer());
+        _caches.Add(cache);
+
+        return cache;
     }
 
     private DocsTrialCache CreateCache(DocsTrialCacheOptions options)

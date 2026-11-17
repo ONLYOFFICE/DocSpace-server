@@ -1069,6 +1069,8 @@ public class TariffService(
             await ClearCacheAsync(tenant);
 
             await NotifyWebSocketAsync(currentTariff, tariffInfo);
+
+            await NotifyTariffChangedAsync(tenant);
         }
 
         return inserted;
@@ -1356,6 +1358,39 @@ public class TariffService(
                 // timeout, DNS or TLS failure behind it is in the inner exception.
                 logger.ErrorBilling(tenantId, string.Join(" <- ", MessagesOf(error)));
             }
+        }
+    }
+
+    /// <summary>
+    /// Tells the open clients that the tariff changed, so a payment page or a trial banner reads it again. The tariff
+    /// of the default tenant is the one tariff of a self-hosted installation, shared by all its portals, so each of them
+    /// is told. Best effort: the tariff is already written, and a failure here is only logged.
+    /// </summary>
+    private async Task NotifyTariffChangedAsync(int tenant)
+    {
+        try
+        {
+            var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+
+            if (tenant != Tenant.DefaultTenant)
+            {
+                await quotaSocketManager.ChangeTariffAsync(tenant);
+                return;
+            }
+
+            if (!coreBaseSettings.Standalone)
+            {
+                return;
+            }
+
+            foreach (var portal in await tenantService.GetTenantsAsync(default(DateTime)))
+            {
+                await quotaSocketManager.ChangeTariffAsync(portal.Id);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.WarningTariffChangedNotification(tenant, ex);
         }
     }
 

@@ -77,6 +77,15 @@ public class QuotaSocketManager(
         await MakeRequest("change-web-plugin", new { room, webPluginName, enabled });
     }
 
+    /// <summary>
+    /// Tells the clients of a portal that its tariff changed (its end, its quotas), so they read it again. The event
+    /// carries no data. The tenant is passed explicitly, because a background job that writes the tariff has none.
+    /// </summary>
+    public async Task ChangeTariffAsync(int tenantId)
+    {
+        await MakeRequest("change-tariff", new { room = $"{tenantId}-quota" }, tenantId);
+    }
+
     public async Task TopUpWallet(bool auto)
     {
         var room = GetQuotaRoom();

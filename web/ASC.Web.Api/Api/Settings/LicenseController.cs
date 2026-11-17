@@ -186,7 +186,7 @@ public class LicenseController(
             return false;
         }
 
-        var quota = new TenantQuota(-1000)
+        var quota = new TenantQuota(LicenseReader.LicenseQuotaId)
         {
             Name = "apirequest",
             CountUser = curQuota.CountUser,

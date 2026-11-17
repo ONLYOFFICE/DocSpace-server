@@ -167,6 +167,22 @@ public sealed class LicenseReaderTests : IDisposable
             .Should().Be(new DateTime(2026, 12, 11, 10, 0, 0));
     }
 
+    [Theory]
+    [InlineData(-1, 20, false)]
+    [InlineData(10, 20, true)]
+    [InlineData(0, 20, true)]
+    [InlineData(null, 5, true)]
+    [InlineData(null, -1, false)]
+    public void WillTrialBeInForce_ChosenEnd_IsInForceThroughItsDay(int? currentDays, int docsDays, bool expected)
+    {
+        // A trial that already ended is not revived by an editing service reinstalled with a fresh trial: the end is
+        // only brought closer, so the wizard must ask for a license file again.
+        var now = new DateTime(2026, 11, 17, 15, 0, 0, DateTimeKind.Utc);
+
+        LicenseReader.WillTrialBeInForce(currentDays.HasValue ? now.AddDays(currentDays.Value) : null, now.AddDays(docsDays), now)
+            .Should().Be(expected);
+    }
+
     private LicenseReader CreateReader()
     {
         var configuration = new ConfigurationBuilder()

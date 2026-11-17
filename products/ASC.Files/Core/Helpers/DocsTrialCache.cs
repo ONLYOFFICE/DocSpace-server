@@ -37,7 +37,10 @@ namespace ASC.Files.Core.Helpers;
 /// How long the answers of the editing service about its trial are kept.
 /// </summary>
 /// <param name="Duration">How long an answer is reused.</param>
-/// <param name="FailSafeMaxDuration">How long the last answer known stays in use while the service fails.</param>
+/// <param name="FailSafeMaxDuration">
+/// How long the last answer known stays in use while the service fails. Longer than the period of the background
+/// refresh, which asks the service once a day, so a known answer is always there.
+/// </param>
 /// <param name="FailureDuration">
 /// How long a failure is kept: the pause before the service is asked again while the last answer known is in use, and
 /// how long an unknown answer is reused when no answer is known.
@@ -49,27 +52,34 @@ public record DocsTrialCacheOptions(TimeSpan Duration, TimeSpan FailSafeMaxDurat
 {
     public static readonly DocsTrialCacheOptions Default = new(
         TimeSpan.FromMinutes(15),
-        TimeSpan.FromHours(1),
+        TimeSpan.FromDays(2),
         TimeSpan.FromMinutes(1),
         TimeSpan.FromSeconds(10));
 }
 
 /// <summary>
-/// The answer of the editing service about its own trial, kept in the memory cache because it is asked for
-/// anonymously (does the setup wizard need a license file).
+/// The answer of the editing service about its own trial, kept in the distributed cache: it is one value for the whole
+/// installation, asked for anonymously by the setup wizard page (does it need a license file) and refreshed by the
+/// background job of another process.
 /// </summary>
 /// <remarks>
-/// A cached reader gets one request to the editing service at a time per process. While the service fails, the last
-/// answer known stays in use and the service is asked again after <see cref="DocsTrialCacheOptions.FailureDuration"/>;
-/// with none known, the failure itself is kept for that long. A fresh question with a known answer replaces the cached
-/// one on this node and makes the other nodes ask again on their next read; until then, and while the service fails
-/// for them, another node can still answer from the answer it knew before. A fresh question with an unknown answer
-/// leaves the cache alone, so a failure seen by the setup wizard or the background refresh never removes the last
-/// answer known.
+/// A reader gets one request to the editing service at a time per process. While the service fails, the last answer
+/// known stays in use for <see cref="DocsTrialCacheOptions.FailSafeMaxDuration"/> and the service is asked again after
+/// <see cref="DocsTrialCacheOptions.FailureDuration"/>; with none known, the failure itself is kept for that long. A
+/// fresh question with a known answer replaces the cached one for every process; a fresh question with an unknown
+/// answer leaves the cache alone, so a failure seen by the setup wizard or the background refresh never removes the
+/// last answer known. The answer survives a restart of the processes as long as the distributed cache keeps it; with no
+/// distributed cache configured, it is kept per process.
 /// </remarks>
 public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLicense> logger, DocsTrialCacheOptions options)
 {
-    private static readonly string _cacheKey = $"{Tenant.DefaultTenant}docstrial";
+    /// <summary>
+    /// The key of the answer: one per installation, so it carries the installation's own tenant.
+    /// </summary>
+    public static string GetCacheKey()
+    {
+        return Tenant.DefaultTenant + "docstrial";
+    }
 
     /// <param name="request">Asks the editing service; never throws, an answer it cannot read is Unknown.</param>
     /// <param name="useCache">Whether a cached answer may be used instead of a fresh question.</param>
@@ -80,7 +90,7 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
             var fresh = await request();
             if (fresh.State != DocsTrialState.Unknown)
             {
-                await cache.SetAndNotifyAsync(_cacheKey, fresh, entry => SetupEntry(entry));
+                await cache.SetAsync(GetCacheKey(), fresh, entry => SetupEntry(entry));
             }
 
             return fresh;
@@ -88,7 +98,7 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
 
         try
         {
-            return await cache.GetOrSetAsync<DocsTrialCheck>(_cacheKey, async (_, _) =>
+            return await cache.GetOrSetAsync<DocsTrialCheck>(GetCacheKey(), async (_, _) =>
             {
                 var check = await request();
 
@@ -103,19 +113,19 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
             // No answer known to fall back on. The cause is logged where the service was asked; a request cut by the
             // hard timeout goes on in the background and replaces this answer when it ends
             logger.DebugDocsTrialNoAnswerKnown(ex.Message);
-            await cache.SetAsync(_cacheKey, DocsTrialCheck.Unknown, options.FailureDuration);
+            await cache.SetAsync(GetCacheKey(), DocsTrialCheck.Unknown, options.FailureDuration);
 
             return DocsTrialCheck.Unknown;
         }
     }
 
     /// <summary>
-    /// Returns the last answer of the editing service this node knows, also one past its duration that the fail-safe
-    /// still keeps, without asking the service; <c>null</c> when none is known.
+    /// Returns the last answer of the editing service the installation knows, also one past its duration that the
+    /// fail-safe still keeps, without asking the service; <c>null</c> when none is known.
     /// </summary>
     public async Task<DocsTrialCheck> GetLastKnownAsync()
     {
-        var known = await cache.TryGetAsync<DocsTrialCheck>(_cacheKey, entry => entry.SetAllowStaleOnReadOnly());
+        var known = await cache.TryGetAsync<DocsTrialCheck>(GetCacheKey(), entry => entry.SetAllowStaleOnReadOnly());
 
         return known.HasValue && known.Value is { State: not DocsTrialState.Unknown } ? known.Value : null;
     }

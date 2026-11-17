@@ -83,7 +83,9 @@ public class LicenseReader(
     public const string CustomerIdKey = "CustomerId";
 
     // The license quota and the tariff are written by the accept call and the setup wizard (Web.Api) and by the
-    // background refresh (Files.Worker): one writer at a time, so a trial never overwrites a license just accepted
+    // background refresh (Files.Worker): one writer at a time, so a trial never overwrites a license just accepted.
+    // The trial activated on request (an endpoint outside the published contract) writes them outside this lock; it
+    // refuses once any tariff end is set, so it can only run before the writers above have written
     private static readonly string _licenseLockKey = $"{Tenant.DefaultTenant}_license";
 
     /// <summary>The id of the quota that carries the license of a self-hosted Enterprise installation.</summary>
@@ -372,9 +374,13 @@ public class LicenseReader(
     /// editing service reinstalled with a fresh trial does not extend the portal's. Never replaces a license put in
     /// force from a file: nothing is written while the license file is on disk or while the license quota was written
     /// from a file, and the check runs under the lock the writers of a license from a file take too. Nothing is
-    /// written when the trial in force already ends on the chosen date.
+    /// written when the trial in force already ends on the chosen date. The chosen date is written even when it has
+    /// passed, so the background refresh ends a trial the editing service ended.
     /// </remarks>
-    /// <returns><c>true</c> when the trial is in force, <c>false</c> when a license from a file prevented it.</returns>
+    /// <returns>
+    /// <c>true</c> when the trial is in force after the call; <c>false</c> when a license from a file prevented it, or
+    /// the chosen end has already passed.
+    /// </returns>
     public async Task<bool> DocsTrialToDBAsync(DocsTrialLicense trial)
     {
         ArgumentNullException.ThrowIfNull(trial);
@@ -403,14 +409,13 @@ public class LicenseReader(
                 return false;
             }
 
-            var current = quota == null ? null : await tariffService.GetBillingInfoAsync(Tenant.DefaultTenant);
-            DateTime? currentDueDate = current != null && current.Quotas.Exists(q => q.Id == LicenseQuotaId) ? current.DueDate : null;
+            var (current, currentDueDate) = await GetTrialTariffAsync(quota);
 
             dueDate = ChooseTrialDueDate(currentDueDate, trial.DueDate);
 
             if (quota?.Name == StartTrialQuotaName && currentDueDate == dueDate)
             {
-                return true;
+                return IsInForce(dueDate);
             }
 
             if (quota?.Name != StartTrialQuotaName)
@@ -431,7 +436,44 @@ public class LicenseReader(
         }
 
         logger.InfoDocsTrialSaved(dueDate);
-        return true;
+        return IsInForce(dueDate);
+    }
+
+    /// <summary>
+    /// Returns whether the installation's trial would be in force if the editing service's trial were applied now:
+    /// no license file is on disk, no license from a file is in force, and the end <see cref="ChooseTrialDueDate"/>
+    /// would choose has not passed. Writes nothing.
+    /// </summary>
+    public async Task<bool> WillDocsTrialBeInForceAsync(DocsTrialLicense trial)
+    {
+        ArgumentNullException.ThrowIfNull(trial);
+
+        if (string.IsNullOrEmpty(LicensePath) || File.Exists(LicensePath))
+        {
+            return false;
+        }
+
+        var quota = await GetLicenseQuotaAsync();
+        if (quota?.Name == LicenseQuotaName)
+        {
+            return false;
+        }
+
+        var (_, currentDueDate) = await GetTrialTariffAsync(quota);
+
+        return WillTrialBeInForce(currentDueDate, trial.DueDate, DateTime.UtcNow);
+    }
+
+    /// <summary>
+    /// Returns whether a trial ending on the date <see cref="ChooseTrialDueDate"/> chooses is still in force on
+    /// <paramref name="utcNow"/>: a trial is in force through the whole day it ends on.
+    /// </summary>
+    /// <param name="currentDueDate">The end of the trial in force, or <c>null</c> when none is.</param>
+    /// <param name="docsDueDate">The end of the editing service's trial.</param>
+    /// <param name="utcNow">The current UTC time.</param>
+    public static bool WillTrialBeInForce(DateTime? currentDueDate, DateTime docsDueDate, DateTime utcNow)
+    {
+        return ChooseTrialDueDate(currentDueDate, docsDueDate).Date >= utcNow.Date;
     }
 
     /// <summary>
@@ -459,12 +501,40 @@ public class LicenseReader(
 
     /// <summary>
     /// Returns whether a trial of the installation itself is in force: a license quota that was not written from a
-    /// license file and is a trial (the 30-day one of an installation without a license, or the one activated on
-    /// request).
+    /// license file and is a trial (the one of an installation without a license, or the one activated on request),
+    /// with a tariff end that has not passed.
     /// </summary>
     public async Task<bool> IsOwnTrialInForceAsync()
     {
-        return await GetLicenseQuotaAsync() is { Trial: true } quota && quota.Name != LicenseQuotaName;
+        if (await GetLicenseQuotaAsync() is not { Trial: true } quota || quota.Name == LicenseQuotaName)
+        {
+            return false;
+        }
+
+        var (_, dueDate) = await GetTrialTariffAsync(quota);
+
+        return dueDate.HasValue && IsInForce(dueDate.Value);
+    }
+
+    /// <summary>
+    /// Reads the tariff of the installation and the end of the license quota's trial in it, if the license quota is
+    /// in the tariff.
+    /// </summary>
+    private async Task<(Tariff Tariff, DateTime? DueDate)> GetTrialTariffAsync(TenantQuota quota)
+    {
+        if (quota == null)
+        {
+            return (null, null);
+        }
+
+        var current = await tariffService.GetBillingInfoAsync(Tenant.DefaultTenant);
+
+        return (current, current != null && current.Quotas.Exists(q => q.Id == LicenseQuotaId) ? current.DueDate : null);
+    }
+
+    private static bool IsInForce(DateTime dueDate)
+    {
+        return dueDate.Date >= DateTime.UtcNow.Date;
     }
 
     private async Task<TenantQuota> GetLicenseQuotaAsync()

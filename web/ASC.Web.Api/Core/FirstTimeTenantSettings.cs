@@ -180,10 +180,12 @@ public class FirstTimeTenantSettings(
             return false;
         }
 
-        // The editing service's own trial stands in for the license file until the trial ends. The question is asked
-        // without authentication, so a successful answer of the editing service is reused for a while.
+        // The editing service's own trial stands in for the license file until the trial ends, and only while the
+        // installation's trial would still be in force once it is applied: a trial that already ended needs the file
+        // the wizard asked for before. The question is asked without authentication, so a successful answer of the
+        // editing service is reused for a while.
         var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: true);
-        return docsTrial.State != DocsTrialState.Active;
+        return docsTrial.State != DocsTrialState.Active || !await licenseReader.WillDocsTrialBeInForceAsync(docsTrial.Trial);
     }
 
     /// <summary>
@@ -192,7 +194,8 @@ public class FirstTimeTenantSettings(
     /// </summary>
     /// <returns>
     /// <c>true</c> when a trial is in force; <c>false</c> when a license file is on disk, the editing service runs
-    /// no active trial, or a license from a file is already in force — then the license file is required as before.
+    /// no active trial, a license from a file is already in force, or the installation's trial has already ended —
+    /// then the license file is required as before.
     /// </returns>
     /// <remarks>
     /// No upload is recorded in the audit trail: no file was given, and a file uploaded later is activated the usual
