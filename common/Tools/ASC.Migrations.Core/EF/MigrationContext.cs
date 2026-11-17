@@ -116,6 +116,8 @@ public class MigrationContext : DbContext
     public DbSet<DbFilesGroup> FilesGroup { get; set; }
     public DbSet<DbFilesRoomGroup> FilesRoomGroup { get; set; }
     public DbSet<DbFileKeys> FileKeys { get; set; }
+    public DbSet<DbFilesShareLinkKey> ShareLinkKeys { get; set; }
+    public DbSet<DbFilesShareLinkSecretWrap> ShareLinkSecretWraps { get; set; }
     public DbSet<DbFilesMetadataTemplate> MetadataTemplates { get; set; }
     public DbSet<DbFilesMetadataField> MetadataFields { get; set; }
     public DbSet<DbFilesMetadataLink> MetadataLinks { get; set; }
@@ -266,6 +268,7 @@ public class MigrationContext : DbContext
             .AddDbAiModelSettings()
             .AddDbChatMessageAttachment()
             .AddDbFileKeys()
+            .AddDbFilesShareLinkKeys()
             .AddDbUserChatSettings()
             .AddAppSettings()
             .AddDbProfiles()

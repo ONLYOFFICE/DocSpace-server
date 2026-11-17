@@ -167,6 +167,13 @@ public class FileShareLink
     public string Password { get; set; }
 
     /// <summary>
+    /// For an external link of an item in a private room, whether its visitor has to type a password. Such a link
+    /// never has `password`: the password stays in the browser of whoever set it. Null on every other link.
+    /// </summary>
+    /// <example>true</example>
+    public bool? PasswordRequired { get; set; }
+
+    /// <summary>
     /// Whether visitors coming through this link may only read the entry in the editor and not download or print it.
     /// </summary>
     /// <example>false</example>
@@ -265,6 +272,7 @@ public class FileShareDtoHelper(
                     ShareLink = aceWrapper.Link,
                     ExpirationDate = date.HasValue && date.Value != default ? apiDateTimeHelper.Get(date) : null,
                     Password = aceWrapper.FileShareOptions?.Password,
+                    PasswordRequired = aceWrapper.FileShareOptions?.PasswordRequired,
                     DenyDownload = aceWrapper.FileShareOptions?.DenyDownload,
                     LinkType = aceWrapper.SubjectType switch
                     {

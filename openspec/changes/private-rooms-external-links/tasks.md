@@ -10,12 +10,15 @@ fields, they call the operations through `RawApiClient`.
 
 ## 1. Storage of link key material
 
-- [ ] 1.1 Add the link key table (tenant, link id, `linkPublicKey`, `linkPrivateKeyEnc`, `linkProofHash`) and the link secret
-  wrap table (tenant, link id, user id, public key id, wrap) through the `db-migrations` skill for MySQL and PostgreSQL, SaaS
-  and Standalone, with precompiled queries (`.claude/rules/ef-compiled-queries.md`); verify the migrations apply with
-  `ASC.Migration.Runner` on both databases.
-- [ ] 1.2 Declare both tables skipped in the backup (`.claude/rules/backup-tables.md`) and extend
-  `common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs` (`:68`, `:101`, cited by "Keys and file keys are not
+- [x] 1.1 Add the link key table (tenant, link id, `linkPublicKey`, `linkPrivateKeyEnc`, `linkProofHash`) and the link secret
+  wrap table (tenant, link id, user id, public key id, wrap) through the `db-migrations` skill for MySQL SaaS (decided
+  2026-11-17: the PostgreSQL and Standalone snapshots do not follow the schema, see design.md, Migration Plan), with
+  precompiled queries (`.claude/rules/ef-compiled-queries.md`); verify the migration applies with `ASC.Migration.Runner`
+  on an empty MySQL database.
+  - 2026-11-17: `files_share_link_keys`, `files_share_link_secret_wraps`, `ShareLinkKeyQueries.cs`,
+    `MigrationContext_Upgrade108`; all migrations applied to an empty MySQL 8.4 database.
+- [x] 1.2 Declare both tables skipped in the backup (`.claude/rules/backup-tables.md`) and extend
+  `common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs` (`:68`, `:108`, cited by "Keys and file keys are not
   backed up") so it fails if either table is backed up; verify the test passes.
 - [ ] 1.3 Add `passwordRequired` to `FileShareOptions` and its DTOs (Mapperly, `.claude/rules/dto-mapping.md`); verify an
   ordinary link round-trips unchanged in the existing `shared-links` tests.

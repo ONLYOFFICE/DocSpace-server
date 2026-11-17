@@ -52,7 +52,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Owner keeps the room and keys | T/PrivateRoomLeaveTests.cs:102-160 | TEST-CONFIRMED [run: PASS] |
 | Non-member admin cannot clear; ordinary room can | T/PrivateRoomLeaveTests.cs:176-194 | TEST-CONFIRMED [run: PASS] |
 | Deleting a user deletes file keys | T/PrivateRoomFileKeysTests.cs:220-234 | TEST-CONFIRMED [run: PASS] |
-| Keys and file keys not backed up | common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:68, :101 | TEST-CONFIRMED [run: NOT-IN-RUN] |
+| Keys and file keys not backed up | common/Tests/ASC.Data.Backup.Core.Tests/BackupCoverageTests.cs:68, :108 | TEST-CONFIRMED [run: NOT-IN-RUN] |
 | Room types that can be private; 403 otherwise | T/PrivateRoomCreateTests.cs:47-60, :67-102 | TEST-CONFIRMED [run: PASS] |
 | Empty key set counts as no key | T/PrivateRoomContentRulesTests.cs:129-139; Login:97-105 | TEST-CONFIRMED [run: PASS] |
 | Editors without the library: 403 create, 415 open | Storage:DemandPrivateRoomCanBeCreatedAsync; DocumentServiceHelper hunk of b562fc3fb1; yaml openEditFile 415 | CODE-ONLY (unreachable: the test stack's document server serves the library, `docServiceEncryptionSupported` is true, and the stack cannot switch it off) |
@@ -116,7 +116,7 @@ All seven operations of `Rooms / Privacy room` are in requirements. These facts 
 |---|---|---|---|---|
 | PR1 | Deleting a subfolder of a private room | It still goes to Trash | Commit c866c055e1 "Not addressed here" | per commit message |
 | PR2 | Favorites | A private room or its subfolder can be added to Favorites | Commit c866c055e1 "Not addressed here" | per commit message |
-| PR4 | Backup and restore | Key pairs and file keys are skipped, and a module restore assigns new user and file ids, so a restored private room's content cannot be opened. Nothing in what was read warns about this | BackupCoverageTests.cs:68, :101; notes of 2026-11-05 from code reading, no live restore | red by code reading |
+| PR4 | Backup and restore | Key pairs and file keys are skipped, and a module restore assigns new user and file ids, so a restored private room's content cannot be opened. Nothing in what was read warns about this | BackupCoverageTests.cs:68, :108; notes of 2026-11-05 from code reading, no live restore | red by code reading |
 | PR6 | Letters | The neutral title exists in the default culture only, so a letter in another language names the room in that default language | Commit 1259577f63 | per commit message |
 
 ## Not verified

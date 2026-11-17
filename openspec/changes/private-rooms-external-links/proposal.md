@@ -115,8 +115,8 @@ None of the rows of `openspec/deviations.md` is touched.
   `products/ASC.Files/Core/Core/Security/ExternalShare.cs` and `products/ASC.Files/Core/Helpers/ExternalLinkHelper.cs`
   (proof instead of password, serving), `products/ASC.Files/Server/Api/SecurityController.cs`, the link and key DTOs,
   `products/ASC.Files/Core/Core/Entries/EncryptionKeyPairDto.cs`, the file-key store and its DAO, the files settings.
-- A database migration for the link key material (MySQL and PostgreSQL, SaaS and Standalone) and its backup
-  declaration.
+- A database migration for the link key material (MySQL SaaS, where the repository keeps its schema changes) and its
+  backup declaration.
 - `web/ASC.Web.Core/UrlShortRewriter.cs` (the redirect of an unknown short address).
 - `products/ASC.Files/Core/Helpers/CspSettingsHelper.cs` (a restricted policy for the visitor's page); outside this
   repository, the CSP handling of the proxy in `buildtools` and the route of that page in the client.

@@ -79,6 +79,11 @@ public class BackupCoverageTests
         ["identity_shedlock"] = "Distributed lock state.",
         ["dbip_lookup"] = "GeoIP reference data, rebuilt from its own source.",
         ["webstudio_index"] = "Search index bookkeeping, rebuilt on demand.",
+        ["files_share_link_keys"] = "Key material of external links of private rooms (sealed private key, proof hash). " +
+                                    "Kept out of every backup like the other key material, so a restored link " +
+                                    "opens nothing.",
+        ["files_share_link_secret_wraps"] = "Link secrets of private rooms wrapped for room managers. Kept out of " +
+                                            "every backup like the other key material.",
         ["files_properties"] = "Data is an EntryProperties JSON blob carrying room, folder and file ids " +
                                "inside it, which relations cannot remap; restoring it would point form " +
                                "filling at the source portal's entries."

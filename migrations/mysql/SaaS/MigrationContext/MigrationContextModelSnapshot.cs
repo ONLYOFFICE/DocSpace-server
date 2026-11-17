@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.AI.Core.Database.Legacy.DbMcpServer", b =>
@@ -5181,6 +5181,97 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasAnnotation("MySql:CharSet", "utf8");
                 });
 
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesShareLinkKey", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("LinkId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("link_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("create_on");
+
+                    b.Property<string>("PrivateKeyEnc")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("private_key_enc")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("ProofHash")
+                        .IsRequired()
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("proof_hash")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("PublicKey")
+                        .IsRequired()
+                        .HasColumnType("varchar(64)")
+                        .HasColumnName("public_key")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("TenantId", "LinkId")
+                        .HasName("PRIMARY");
+
+                    b.ToTable("files_share_link_keys", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesShareLinkSecretWrap", b =>
+                {
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int")
+                        .HasColumnName("tenant_id");
+
+                    b.Property<Guid>("LinkId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("link_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("user_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("create_on");
+
+                    b.Property<Guid>("PublicKeyId")
+                        .HasColumnType("char(36)")
+                        .HasColumnName("public_key_id")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.Property<string>("Wrap")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("wrap")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
+
+                    b.HasKey("TenantId", "LinkId", "UserId")
+                        .HasName("PRIMARY");
+
+                    b.HasIndex("TenantId", "UserId")
+                        .HasDatabaseName("tenant_id_user_id");
+
+                    b.ToTable("files_share_link_secret_wraps", (string)null);
+
+                    b.HasAnnotation("MySql:CharSet", "utf8");
+                });
+
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesSkill", b =>
                 {
                     b.Property<int>("TenantId")
@@ -7647,6 +7738,28 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                 });
 
             modelBuilder.Entity("ASC.Files.Core.EF.DbFilesSecurity", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesShareLinkKey", b =>
+                {
+                    b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("ASC.Files.Core.EF.DbFilesShareLinkSecretWrap", b =>
                 {
                     b.HasOne("ASC.Core.Common.EF.Model.DbTenant", "Tenant")
                         .WithMany()

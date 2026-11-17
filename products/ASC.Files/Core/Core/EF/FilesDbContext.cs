@@ -62,6 +62,8 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbFilesRoomGroup> RoomGroupRef { get; set; }
     public DbSet<DbFileVectorization> FileVectorization { get; set; }
     public DbSet<DbFileKeys> DbFileKeys { get; set; }
+    public DbSet<DbFilesShareLinkKey> ShareLinkKeys { get; set; }
+    public DbSet<DbFilesShareLinkSecretWrap> ShareLinkSecretWraps { get; set; }
     public DbSet<DbThread> Threads { get; set; }
     public DbSet<DbAssignment> Assignments { get; set; }
     public DbSet<DbMcpServer> McpServers { get; set; }
@@ -103,6 +105,7 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddUserRelation()
             .AddDbFileVectorization()
             .AddDbFileKeys()
+            .AddDbFilesShareLinkKeys()
             .AddDbThreads()
             .AddDbProfiles()
             .AddDbAssignments()

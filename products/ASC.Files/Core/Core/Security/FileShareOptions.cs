@@ -54,6 +54,14 @@ public class FileShareOptions
     public string Password { get; set; }
 
     /// <summary>
+    /// For an external link of an item in a private room: whether the visitor has to type a password. The password
+    /// itself never reaches the server; it is mixed into the link's sealed key and proof in the creator's browser.
+    /// Null for every other link, and then left out of the stored options.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public bool? PasswordRequired { get; set; }
+
+    /// <summary>
     /// Specifies if the file can be downloaded via the shared link or not.
     /// </summary>
     public bool DenyDownload { get; set; }

@@ -131,8 +131,10 @@ section follows the app".
 
 ## Migration Plan
 
-- One migration adds the two tables for MySQL and PostgreSQL, SaaS and Standalone, and both are declared skipped in the
-  backup. No existing data changes: no private item holds a link today.
+- One migration adds the two tables, and both are declared skipped in the backup. No existing data changes: no private
+  item holds a link today. It is generated for MySQL SaaS only (`MigrationContext_Upgrade108`), as the other schema
+  changes of the repository are: the PostgreSQL SaaS and the Standalone model snapshots have not followed the schema
+  for months (they hold neither `files_file_keys` nor the `ai_` tables), and a migration on them would carry all of that.
 - The portal setting defaults to on; a portal that never makes such a link sees no difference.
 - Rollback: the release before this one refuses links of private items only when they are set, not when they are
   opened, and knows no proof, so it would serve a stored link without one. A rollback therefore first revokes the links
