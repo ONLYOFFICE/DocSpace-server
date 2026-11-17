@@ -142,6 +142,7 @@ public class ProjectConfigurator(
                 // Nothing here needs a graceful stop — the portals and their storage are thrown away —
                 // and an honest shutdown takes ~0.5 s, so this only trims the hang.
                 .WithEnvironment("shutdownTimeoutSeconds", "3")
+                .WithEnvironment("ai:deletedThreadsCleaner:period", "00:00:05")
 
                 // Without an absolute authority IdentityClient calls {ServerRootPath}/api/2.0/oauth2/, the
                 // portal's own host on the calling service's port: <alias>.docspace.localhost, which Windows

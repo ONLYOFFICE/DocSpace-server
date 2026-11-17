@@ -36,8 +36,13 @@ namespace ASC.AI.Tests.Tests;
 public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
     protected const string FileText = "Autotest attachment. Line two.";
+    protected const string AttachmentsPath = "/internal/ai/attachments";
 
     protected sealed record ThreadFile(int Id, string Title, int FolderId);
+
+    protected sealed record ThreadFilesPage(List<ThreadFile> Files, long Total);
+
+    protected sealed record Attachment(Guid Id, string Kind, string Title, string? Content, string? EntryId);
 
     protected async Task<int> CreateProjectAsync()
     {
@@ -74,6 +79,56 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         using var response = await PostArtifactAsync(threadId, name);
 
         return await _ai.ReadAsync<ThreadFile>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected Task<HttpResponseMessage> GetArtifactsAsync(int projectId, Guid threadId, string query = "")
+    {
+        return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/artifacts{query}", TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<ThreadFilesPage> ListArtifactsAsync(int projectId, Guid threadId, string query = "")
+    {
+        using var response = await GetArtifactsAsync(projectId, threadId, query);
+
+        return await ReadPageAsync(response);
+    }
+
+    protected Task<HttpResponseMessage> GetAttachmentsAsync(int projectId, Guid threadId)
+    {
+        return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/attachments", TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<ThreadFilesPage> ListAttachmentsAsync(int projectId, Guid threadId)
+    {
+        using var response = await GetAttachmentsAsync(projectId, threadId);
+
+        return await ReadPageAsync(response);
+    }
+
+    protected async Task<Attachment> AttachAsync(int fileId)
+    {
+        using var response = await _ai.PostAsync(AttachmentsPath, new { entryIds = new[] { fileId.ToString() } }, TestContext.Current.CancellationToken);
+
+        var attachments = await _ai.ReadAsync<List<Attachment>>(response, TestContext.Current.CancellationToken);
+
+        return attachments.Should().ContainSingle().Subject;
+    }
+
+    protected Task<HttpResponseMessage> BindAsync(Guid messageId, params Guid[] ids)
+    {
+        return _ai.PutAsync(AttachmentsPath, new { ids, messageId }, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<ThreadFile> SendAsync(int projectId, Guid threadId, string name)
+    {
+        var file = await UploadAsync(projectId, name);
+        var attachment = await AttachAsync(file.Id);
+        var message = await CreateMessageInternalAsync(threadId);
+
+        using var response = await BindAsync(message.Id, attachment.Id);
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        return file;
     }
 
     protected async Task<ThreadFile> UploadAsync(int folderId, string name, byte[]? bytes = null)
@@ -127,5 +182,12 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         operation.Error.Should().BeNullOrEmpty();
 
         return operation;
+    }
+
+    private async Task<ThreadFilesPage> ReadPageAsync(HttpResponseMessage response)
+    {
+        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ThreadFile>>(response, TestContext.Current.CancellationToken);
+
+        return new ThreadFilesPage(envelope.Response ?? [], envelope.Total ?? 0);
     }
 }

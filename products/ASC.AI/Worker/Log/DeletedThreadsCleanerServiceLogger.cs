@@ -31,35 +31,16 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using Thread = ASC.AI.Integration.Threads.Thread;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
-namespace ASC.AI.Service;
+namespace ASC.AI.Worker.Log;
 
-[Scope]
-public class ThreadFoldersService(
-    IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+internal static partial class DeletedThreadsCleanerServiceLogger
 {
-    public async Task<Folder<int>> GetProjectAsync(Thread thread)
-    {
-        if (!thread.EntryId.HasValue)
-        {
-            throw new ArgumentException("The thread does not belong to an AI project");
-        }
+    [LoggerMessage(LogLevel.Information, "Deleted {Count} threads marked as deleted")]
+    public static partial void InformationDeletedThreads(this ILogger logger, int count);
 
-        var project = await daoFactory.GetFolderDao<int>().GetFolderAsync(thread.EntryId.Value)
-                      ?? throw new ItemNotFoundException();
-
-        if (project.FolderType != FolderType.AiProjectRoom)
-        {
-            throw new ArgumentException("The thread does not belong to an AI project");
-        }
-
-        if (!await fileSecurity.CanUseAiAsync(project))
-        {
-            throw new SecurityException();
-        }
-
-        return project;
-    }
+    [LoggerMessage(LogLevel.Error, "Failed to delete thread {ThreadId} of tenant {TenantId}")]
+    public static partial void ErrorDeleteThread(this ILogger logger, int tenantId, Guid threadId, Exception exception);
 }

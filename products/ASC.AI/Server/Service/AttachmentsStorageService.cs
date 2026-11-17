@@ -54,8 +54,7 @@ public class AttachmentsStorageService(
     AttachmentsStorage storage,
     MessageStorageService messageStorageService,
     ThreadsStorage threadsStorage,
-    ThreadFoldersService threadFoldersService,
-    AiThreadFoldersService aiThreadFoldersService,
+    AiProjectThreadsService projectThreadsService,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
@@ -233,12 +232,11 @@ public class AttachmentsStorageService(
 
             if (uploaded.Count > 0)
             {
-                var project = await threadFoldersService.GetProjectAsync(thread);
-                var folderId = await aiThreadFoldersService.GetOrCreateAttachmentsFolderAsync(thread, project.Id);
+                var folderId = await projectThreadsService.GetOrCreateAttachmentsFolderAsync(thread);
 
                 foreach (var file in uploaded)
                 {
-                    await fileDao.MoveFileAsync(file.Id, folderId);
+                    await fileDao.MoveThreadFileAsync(file.Id, folderId, thread.Id);
                 }
             }
         }

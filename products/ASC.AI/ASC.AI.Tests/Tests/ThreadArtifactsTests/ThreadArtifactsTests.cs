@@ -37,8 +37,6 @@ namespace ASC.AI.Tests.Tests.ThreadArtifactsTests;
 [Trait("Feature", "AI/ThreadArtifacts")]
 public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBase(fixture)
 {
-    private sealed record ArtifactsPage(List<ThreadFile> Files, long Total);
-
     [Fact]
     public async Task Upload_ByAuthor_AppearsInTheThreadList()
     {
@@ -242,19 +240,5 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
         await FilesHttpClient.Authenticate(Owner);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
-    }
-
-    private Task<HttpResponseMessage> GetArtifactsAsync(int projectId, Guid threadId, string query = "")
-    {
-        return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/artifacts{query}", TestContext.Current.CancellationToken);
-    }
-
-    private async Task<ArtifactsPage> ListArtifactsAsync(int projectId, Guid threadId, string query = "")
-    {
-        using var response = await GetArtifactsAsync(projectId, threadId, query);
-
-        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ThreadFile>>(response, TestContext.Current.CancellationToken);
-
-        return new ArtifactsPage(envelope.Response ?? [], envelope.Total ?? 0);
     }
 }

@@ -655,6 +655,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("deleted_on");
+
                     b.Property<int?>("EntryId")
                         .HasColumnType("int")
                         .HasColumnName("entry_id");
@@ -679,6 +683,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
+
+                    b.HasIndex("DeletedOn", "Id")
+                        .HasDatabaseName("IX_deleted_on_id");
 
                     b.HasIndex("TenantId", "LastEditDate")
                         .HasDatabaseName("IX_tenant_id_last_edit_date");

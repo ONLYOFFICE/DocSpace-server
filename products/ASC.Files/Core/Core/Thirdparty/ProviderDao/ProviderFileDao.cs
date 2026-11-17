@@ -483,6 +483,16 @@ internal class ProviderFileDao(
         return movedFile.Id;
     }
 
+    public Task<File<string>> SaveThreadFileAsync(File<string> file, Stream fileStream, Guid threadId)
+    {
+        throw new NotSupportedException();
+    }
+
+    public Task<string> MoveThreadFileAsync(string fileId, string toFolderId, Guid threadId)
+    {
+        throw new NotSupportedException();
+    }
+
     public async Task<string> MoveFileAsync(string fileId, string toFolderId, bool deleteLinks = false)
     {
         var selector = _selectorFactory.GetSelector(fileId);

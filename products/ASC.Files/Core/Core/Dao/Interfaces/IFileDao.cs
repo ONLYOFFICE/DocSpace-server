@@ -190,6 +190,8 @@ public interface IFileDao<T>
     /// </remarks>
     Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, bool allowQuotaGrace = false);
 
+    Task<File<T>> SaveThreadFileAsync(File<T> file, Stream fileStream, Guid threadId);
+
     /// <summary>
     ///  Saves / updates the version of the file
     ///  and save stream of file, for use in form-filling flows where the
@@ -288,6 +290,7 @@ public interface IFileDao<T>
     Task<TTo> MoveFileAsync<TTo>(T fileId, TTo toFolderId, bool deleteLinks, string newTitle);
     Task<string> MoveFileAsync(T fileId, string toFolderId, bool deleteLinks = false);
     Task<int> MoveFileAsync(T fileId, int toFolderId, bool deleteLinks = false);
+    Task<T> MoveThreadFileAsync(T fileId, T toFolderId, Guid threadId);
 
     /// <summary>
     ///   Moves a batch of files into the given folder and returns the ids that were

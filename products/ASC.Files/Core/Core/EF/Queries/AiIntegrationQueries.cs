@@ -72,6 +72,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<int> TouchLiveThreadAsync(int tenantId, Guid threadId, DateTime lastEditDate)
+    {
+        return AiIntegrationQueries.TouchLiveThreadAsync(this, tenantId, threadId, lastEditDate);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<AiAgentChatBinding> AiAgentChatBindingsAsync(int tenantId)
     {
         return AiIntegrationQueries.AiAgentChatBindingsAsync(this, tenantId);
@@ -104,19 +110,23 @@ static file class AiIntegrationQueries
                 .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
 
-    // Not precompiled on purpose: ExecuteUpdate fails to translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, Guid, int, Task<int>> SetThreadArtifactsFolderAsync =
         (FilesDbContext ctx, int tenantId, Guid threadId, int folderId) =>
             ctx.Threads
-                .Where(x => x.TenantId == tenantId && x.Id == threadId && x.ArtifactsFolderId == null)
+                .Where(x => x.TenantId == tenantId && x.Id == threadId && x.ArtifactsFolderId == null && x.DeletedOn == null)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.ArtifactsFolderId, folderId));
 
-    // Not precompiled on purpose: ExecuteUpdate fails to translate inside EF.CompileAsyncQuery.
     public static readonly Func<FilesDbContext, int, Guid, int, Task<int>> SetThreadAttachmentsFolderAsync =
         (FilesDbContext ctx, int tenantId, Guid threadId, int folderId) =>
             ctx.Threads
-                .Where(x => x.TenantId == tenantId && x.Id == threadId && x.AttachmentsFolderId == null)
+                .Where(x => x.TenantId == tenantId && x.Id == threadId && x.AttachmentsFolderId == null && x.DeletedOn == null)
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.AttachmentsFolderId, folderId));
+
+    public static readonly Func<FilesDbContext, int, Guid, DateTime, Task<int>> TouchLiveThreadAsync =
+        (FilesDbContext ctx, int tenantId, Guid threadId, DateTime lastEditDate) =>
+            ctx.Threads
+                .Where(x => x.TenantId == tenantId && x.Id == threadId && x.DeletedOn == null)
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.LastEditDate, lastEditDate));
 
     public static readonly Func<FilesDbContext, int, IAsyncEnumerable<AiAgentChatBinding>> AiAgentChatBindingsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId) =>
