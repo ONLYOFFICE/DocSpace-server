@@ -3,6 +3,7 @@
 
 The queue keeps no state: it is the set of actions whose evidence codes minus declared codes is not empty,
 computed from the sources on every run, so an action added or changed since the last run is in it automatically.
+A 500 (an exception no case of the host's handler maps) is never part of the gap: it is printed apart, marked `*`.
 The only file it writes is rejected.json, next to this script: "this finding was analysed and is not a response".
 Each rejection is keyed on a fingerprint of the code it was decided on and expires by itself when that code changes.
 
@@ -1083,9 +1084,17 @@ def save_rejected(entries):
     REJECTED.write_text(json.dumps(entries, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+SERVER_ERROR = 500  # an exception no handler case maps: a server defect, reported to the user, never documented
+
+
 def gaps(a):
     strong = sorted({e.code for e in a.evs if e.strong})
-    return [c for c in strong if c not in a.declared and not (200 <= c < 300)]
+    return [c for c in strong if c not in a.declared and not (200 <= c < 300) and c != SERVER_ERROR]
+
+
+def server_errors(a):
+    """Counted evidence of a 500. Kept out of the gap: the skill neither documents nor fixes it, it reports it."""
+    return [e for e in a.evs if e.code == SERVER_ERROR and e.strong]
 
 
 def unbacked_codes(a):
@@ -1139,6 +1148,8 @@ def print_action(a, valid, expired, dirty, detail):
             print(f"    ! {c} was rejected on {r['date']} ({r['reason']}), but the code behind it changed since")
         for e in [e for e in a.evs if e.code == c and e.strong][:6 if detail else 3]:
             print(fmt_ev(e, "+"))
+    for e in server_errors(a)[:6 if detail else 3]:
+        print(fmt_ev(e, "*"))
     rej = [c for c in gaps(a) if (a.id, c) in valid]
     if rej:
         print(f"    rejected (still valid): {' '.join(map(str, rej))}")
@@ -1149,7 +1160,7 @@ def print_action(a, valid, expired, dirty, detail):
     if detail:
         for e in [e for e in a.evs if not e.strong and e.code not in a.declared][:10]:
             print(fmt_ev(e, "?"))
-        for e in [e for e in a.evs if e.code in a.declared][:12]:
+        for e in [e for e in a.evs if e.code in a.declared and e.code != SERVER_ERROR][:12]:
             print(fmt_ev(e, "="))
         for c in unbacked:
             print(f"    - {c} declared, nothing found behind it in the action's own code: \"{a.declared[c][:120]}\"")
@@ -1311,7 +1322,8 @@ def cmd_audit_catches(ix, actions, refs):
         with_catches = honoured[key].deep_evidence(a.m)
         without = ignored[key].deep_evidence(a.m)
         own = {e.code for e in a.evs}
-        hidden = [c for c in sorted(a.declared) if c >= 400 and c in without and c not in with_catches and c not in own]
+        hidden = [c for c in sorted(a.declared) if c >= 400 and c != SERVER_ERROR
+                  and c in without and c not in with_catches and c not in own]
         if not hidden:
             continue
         flagged += 1
@@ -1369,6 +1381,8 @@ def main():
         if len(hits) != 1:
             sys.exit(f"{len(hits)} actions match {ref}; pass the exact id")
         a = hits[0]
+        if code == SERVER_ERROR:
+            sys.exit("500 is never in the gap: report it to the user, do not reject it")
         if code not in gaps(a):
             sys.exit(f"{code} is not in the gap of {a.id} (gap: {gaps(a)})")
         rejected = [r for r in rejected if not (r["id"] == a.id and r["code"] == code)]
@@ -1417,11 +1431,18 @@ def main():
           f"(public: {', '.join(public_docs())})")
     print(f"Queue: {len(queue)} actions with an undeclared code; rejections valid {len(valid)}, "
           f"expired by a code change {len(expired)}, orphaned {n_orphaned}")
+    errors = [a for a in actions if server_errors(a)]
+    print(f"Reachable 500: {len(errors)} actions - not documented, not fixed, reported to the user (--all lists them)")
     if args.all:
         for a in queue:
             open_codes = [c for c in gaps(a) if (a.id, c) not in valid]
             print(f"  {a.id}  {a.verb}  gap {' '.join(map(str, open_codes))}  declared "
                   f"{' '.join(map(str, sorted(a.declared)))}{'  [dirty]' if a.m.f.rel in dirty else ''}")
+        if errors:
+            print("Reachable 500:")
+        for a in errors:
+            for e in server_errors(a)[:3]:
+                print(f"  {a.id}  {a.verb}  {e.exc or e.kind}  {e.where()}{'  [dirty]' if a.m.f.rel in dirty else ''}")
         return
     if args.batch <= 0:
         return

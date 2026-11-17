@@ -1,6 +1,6 @@
 ---
 name: openapi-missing-responses
-description: "Documenting the status codes DocSpace API endpoints really return but do not declare: a queue of actions whose own code (throw, Demand*, controller helpers, DTO validation, 304) produces a code with no [SwaggerResponse], and declared codes no request can get; a run settles a batch of N, adds or removes attributes or records rejections, verifies, reports and stops. USE FOR: find undocumented / missing responses or error codes, which codes does this endpoint really return, add SwaggerResponse for the codes an action throws, remove a documented code the endpoint cannot return, continue the missing-responses campaign, take the next N endpoints, how many endpoints are left, check the last batch, show or undo rejected findings — use it whenever the user means the set of status codes an endpoint declares versus what its code returns, even without naming the campaign. DO NOT USE FOR: pipeline-wide responses that belong to a document filter (global MVC filters, the rate limiter), rewriting summaries/remarks (openapi-desc-opt), Spectral findings (openapi-lint-fix), changing server behaviour."
+description: "Documenting the status codes DocSpace API endpoints really return but do not declare: a queue of actions whose own code (throw, Demand*, controller helpers, DTO validation, 304) produces a code with no [SwaggerResponse], and declared codes no request can get; a run settles a batch of N, adds or removes attributes or records rejections, verifies, reports and stops. A reachable 500 is only reported, never documented or fixed. USE FOR: find undocumented / missing responses or error codes, which codes does this endpoint really return, add SwaggerResponse for the codes an action throws, remove a documented code the endpoint cannot return, continue the missing-responses campaign, take the next N endpoints, how many endpoints are left, check the last batch, show or undo rejected findings — use it whenever the user means the set of status codes an endpoint declares versus what its code returns, even without naming the campaign. DO NOT USE FOR: pipeline-wide responses that belong to a document filter (global MVC filters, the rate limiter), rewriting summaries/remarks (openapi-desc-opt), Spectral findings (openapi-lint-fix), changing server behaviour, fixing the cause of a 500."
 ---
 
 # Undocumented responses: one batch of endpoints per run
@@ -9,6 +9,10 @@ This skill adds `[SwaggerResponse(code, "text")]` for the status codes an action
 does not declare, and removes the declared ones no request can get — `.claude/rules/openapi-endpoint-docs.md`
 §3.6 counts a documented code the handler cannot reach as a defect. It documents what the code does — it never
 changes what the code does.
+
+**500 is the exception.** A 500 is an exception no case of the host's handler maps — a server defect, never a
+response to document. The skill neither documents it nor fixes its cause: it reports it to the user, who decides.
+No `[SwaggerResponse(500)]` is added, extended or removed, and no 500 is rejected.
 
 A run takes **a batch of up to N actions** from the queue (N from the user's request, 5 if none was given),
 settles every gap code of each, verifies, reports, and stops. The user reviews each batch before the next one.
@@ -32,7 +36,8 @@ rejection expires by itself and the code is back in the queue, flagged `! … wa
 it changed since`. Only `scan.py` writes that file.
 
 What the scanner sees (`+` counted, `?` shown as hints only, `=` behind a declared code, `-` a declared code it
-found nothing behind):
+found nothing behind, `*` a 500 — kept out of the gap, so it never puts an action in the queue; the summary
+counts such actions and `--all` lists them):
 
 - `throw new X(...)` in the action, mapped to a status through the exception handler of the action's host;
   subclasses resolve through the repository's class hierarchy;
@@ -104,7 +109,7 @@ For each `+` line open the code at the reported location and follow the `via` pa
 
 1. **Can a real caller reach it?** Follow the conditions. The usual false positives are in
    `references/conventions.md` (below: conventions) §4. Reachable is the only test — a code that exists because
-   of a bug or a library quirk is documented as it is.
+   of a bug or a library quirk is documented as it is, unless it is a 500.
 2. **Is it the method's or the pipeline's?** Conventions §1. Pipeline responses are left to a document filter,
    even when the scanner reports them.
 3. **What exactly triggers it?** That sentence becomes the attribute text: which input, which state, which right.
@@ -118,13 +123,15 @@ python .claude/skills/openapi-missing-responses/scan.py --reject "<id>" <code> -
 
 If an action needs a decision only the user can make, stop on it and ask rather than rejecting or guessing.
 
+For each `*` line, note what triggers it — which input or state — for the report; nothing else is done with it.
+
 ## 3. Walk one level deeper
 
 For each action you are going to edit, go one level into every service it calls (each call in the action body,
 by `goToDefinition` or by the declared type — step 0) and collect what those methods throw or demand, with the conditions. Go further only through
 thin wrappers that just forward the call. Map each exception through the table the scanner printed for this
 action's host. Add the codes found there as well — the action is being documented now, and coming back for it
-later costs a second review. Also extend the text of an already declared code when the callee adds another reason
+later costs a second review. An exception the table maps to 500 goes into the report, like a `*` line. Also extend the text of an already declared code when the callee adds another reason
 for it.
 
 Settle the declared codes on the same walk. Every declared error code needs a path that produces it; a `-` line
@@ -152,7 +159,8 @@ Before the first edit of a file, `scan.py --snapshot <files>`: the pre-edit copy
 is what step 5.2 compares with.
 
 A server bug noticed on the way (wrong exception type, missing null check) is not fixed: changing what the
-server answers breaks the frontend, SDKs and external clients, and is not this skill's call.
+server answers breaks the frontend, SDKs and external clients, and is not this skill's call. The same holds for
+the cause of a 500.
 
 ## 5. Verify
 
@@ -193,11 +201,14 @@ Reply in the user's language. Only the batch and its verification:
   triggers — like rejections, these are decisions the user reviews;
 - declared codes kept although no path was found for them: not traced to the end, or named by the remarks
   (a contradiction for `openapi-desc-opt`);
+- reachable 500s of the batch: per action the exception, its `file:line` and what triggers it, plus any
+  `[SwaggerResponse(500)]` the action declares — left as it is; the user decides what to do with them;
 - verification: gap, diff-check, build, document, behaviour;
 - navigation: how the call paths were followed (LSP, CodeGraph or reading by declared types);
 - limitations: what could not be checked.
 
-Leave out anything unrelated to the statuses of this batch: server bugs, inaccurate remarks, style elsewhere.
+Leave out anything unrelated to the statuses of this batch: server bugs other than a 500, inaccurate remarks,
+style elsewhere.
 The defects of the edit stay apart from findings for later. The regenerated `json/*.json` documents are part of
 the diff; say so. Do not commit — git is the user's. Stop and wait for the next command.
 
@@ -206,6 +217,8 @@ the diff; say so. Do not commit — git is the user's. Stop and wait for the nex
 - Check the last batch — redo steps 2 and 5 on it, report problems found in the edit and the limits of the
   check, and stop. Checking is not a licence to take the next batch.
 - Progress, how much is left — `scan.py --batch 0` (counts only) or `scan.py --all` (the whole queue).
+- Which endpoints return 500 — `scan.py --all`, its `Reachable 500` block. List them for the user; do not
+  document, reject or fix them. The block shows only what the scanner sees (step 3 limits).
 - Declared codes a `catch` may make unreachable, typed or catch-all, in the action or in a service it calls —
   `scan.py --audit-catches` (all actions, ~5 s) or with ids/files; settle every line it prints by conventions §7
   and report it like a batch: removed, kept with the path that produces the code, or not traced to the end.

@@ -45,8 +45,8 @@ nothing), while inside `ASC.Monolith` the table of `ASC.Api.Core` applies — `A
 - document only the codes the action sets explicitly — `BadRequest(…)`, `StatusCode(…)`, a status returned by a
   service and passed on, a `catch` that answers with a code: they are the same in both hosts;
 - an exception that reaches the handler is documented only after checking what it becomes in **both** tables; if
-  they differ, name both, with the host each one belongs to ("500 on the standalone ApiSystem, 403 in the
-  monolith"), rather than picking one;
+  they differ, name both, with the host each one belongs to, rather than picking one. If either table gives 500,
+  it is not documented at all: report it with both codes (SKILL.md, "500 is the exception");
 - the other host's global filters are pipeline responses there, as in the list above.
 
 Binding is split on purpose: what the DTO **declares** for this endpoint (validation attributes, `required`
@@ -101,7 +101,7 @@ relying on this list.
   belongs to this endpoint alone ("longer than 170 characters") is still written out.
 - A check with several conditions (for example a plan option and a visibility setting) names each condition that
   leads to the code.
-- A bare `Exception` → 500 is documented, with what triggers it.
+- No 500 text is written or rewritten: a 500 is reported, not documented (SKILL.md, "500 is the exception").
 - An existing attribute whose code disagrees with what the host's table gives for the exception behind it is
   corrected to the table's code; a code the action sets explicitly (`CustomHttpException`, `StatusCode(…)`) is
   genuine as it is.
@@ -126,7 +126,7 @@ relying on this list.
 | a check that an earlier step of the same request already enforced | the earlier step answers first, with its own code | follow the action from its first line and see which check fails first |
 
 A code that is reachable but exists by accident (a library failing on an edge input, a missing null check, an
-exception type nobody chose on purpose) is still a response: document it as it is.
+exception type nobody chose on purpose) is still a response: document it as it is. A 500 is not: report it.
 
 ## 5. Checking behaviour
 
@@ -179,6 +179,6 @@ Not removed:
 - a code the remarks of the action name: the remarks are not this skill's to change (`openapi-desc-opt`), and
   the rule requires every code named in the prose to be declared. Keep the attribute and report the contradiction.
 
-When the removed code's triggers do happen under another code, make sure that code's text names them (the DNS
-checks that once claimed 402 belong in the 500 text). Each removal goes into the report with the deciding check
+When the removed code's triggers do happen under another code, make sure that code's text names them; when that
+other code is 500, they go into the report instead. A declared 500 is never removed here — it is reported. Each removal goes into the report with the deciding check
 and its `file:line`, so the user can undo it with one revert of that line.
