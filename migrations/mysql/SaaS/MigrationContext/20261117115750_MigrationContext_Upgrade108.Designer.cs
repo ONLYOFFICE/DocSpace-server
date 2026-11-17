@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20261117093136_MigrationContext_Upgrade107")]
-    partial class MigrationContext_Upgrade107
+    [Migration("20261117115750_MigrationContext_Upgrade108")]
+    partial class MigrationContext_Upgrade108
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "10.0.13")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.AI.Core.Database.Legacy.DbMcpServer", b =>
@@ -3956,6 +3956,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 
                     b.HasIndex("LastModified")
                         .HasDatabaseName("last_modified");
+
+                    b.HasIndex("TenantId", "UserGroupId", "Removed")
+                        .HasDatabaseName("tenant_groupid");
 
                     b.ToTable("core_usergroup", (string)null);
 
