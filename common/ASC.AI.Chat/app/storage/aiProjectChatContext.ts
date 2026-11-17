@@ -120,14 +120,21 @@ async function readProjectProfileId(projectId: string): Promise<string | null> {
 }
 
 // The model a project round runs on: the project's own, else the portal's
-// Chat model, and whether it names a profile that exists and can chat. The
-// availability is that of the effective profile: a project model that is
-// gone is not replaced by the portal default.
+// - the profile bound to the Chat action, or to the Default slot when that
+// action has none (the slot the portal fills by itself) - and whether it
+// names a profile that exists and can chat. The availability is that of the
+// effective profile: a project model that is gone is not replaced by the
+// portal default.
+async function portalChatProfileId(): Promise<string | null> {
+  const read = (type: ActionType) => storage.assignments.readByType(type).catch(() => null);
+  return (await read(ActionType.Chat)) ?? (await read(ActionType.Default));
+}
+
 async function effectiveProfile(
   projectId: string,
 ): Promise<{ own: string | null; id: string | null; available: boolean }> {
   const own = await readProjectProfileId(projectId);
-  const id = own ?? (await storage.assignments.readByType(ActionType.Chat).catch(() => null));
+  const id = own ?? (await portalChatProfileId());
   if (!id) {
     return { own, id: null, available: false };
   }

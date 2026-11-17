@@ -267,8 +267,20 @@ describe("applyAiProjectChatContext inside a project", () => {
   it("refuses the round when the portal's Chat model cannot chat or none is assigned", async () => {
     readById.mockResolvedValueOnce({ id: "p1", capabilities: 2 });
     expect(await applyAiProjectChatContext({ entityId: "42" })).toMatchObject({ status: 409 });
-    readByType.mockResolvedValueOnce(null);
+    // Neither the Chat action nor the Default slot is bound.
+    readByType.mockResolvedValue(null);
     expect(await applyAiProjectChatContext({ entityId: "42" })).toMatchObject({ status: 409 });
+    expect(readByType.mock.calls.map(([type]) => type)).toEqual(["Chat", "Chat", "Default"]);
+  });
+
+  // A portal nobody picked a Chat model on still has the model it fills the
+  // Default slot with: a project without a model of its own runs on that.
+  it("runs on the portal's Default model when the Chat action has none", async () => {
+    readByType.mockImplementation(async (type: string) => (type === "Default" ? "d1" : null));
+    readById.mockImplementation(async (id: string) => ({ id, capabilities: 1 }));
+    const body: Record<string, unknown> = { entityId: "42", profileId: "composer", actionArgs: {} };
+    expect(await applyAiProjectChatContext(body)).toBeNull();
+    expect(body["profileId"]).toBe("d1");
   });
 
   it("runs on the project's own model ahead of the portal's", async () => {
