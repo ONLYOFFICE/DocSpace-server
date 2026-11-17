@@ -401,7 +401,10 @@ async function resolveProfile(pickedProfileId: string | null): Promise<DocspaceP
       return profile;
     }
   }
-  const profileId = await storage.assignments.readByType(ActionType.Chat ?? ActionType.Default);
+  // The portal's chat model: the Chat action, else the Default slot.
+  const profileId =
+    (await storage.assignments.readByType(ActionType.Chat)) ??
+    (await storage.assignments.readByType(ActionType.Default));
   return profileId ? storage.profiles.readByIdRaw(profileId) : undefined;
 }
 
