@@ -4,27 +4,37 @@
 
 ### Requirement: Following the editing service's trial
 
-While no license file exists at the configured path and no license from a file is in force, an Enterprise or
-Developer installation SHALL end its own trial tariff no later than the day the editing service's trial ends, as the
-editing service reports it, never moving the end later; an expired trial of the editing service SHALL end it
-yesterday. It SHALL apply this when the setup wizard is completed and on the daily background re-read. A license from
+Without a license file at the configured path or a license from a file in force, an Enterprise or Developer
+installation SHALL end its own trial tariff no later than the day the editing service's trial ends, never moving the
+end later, and no later than yesterday once that trial expired. It SHALL apply this on the daily background re-read
+and on completing the setup wizard while the editing service answers, which SHALL count as acceptance. A license from
 a file SHALL never be replaced by it.
 
 #### Scenario: Wizard completed on the editing service's trial
 
-- **WHEN** `completeWizard` is called on an Enterprise installation without a license file whose editing service reports an active trial ending on day D
+- **WHEN** `completeWizard` is called on an Enterprise installation without a license file whose editing service reports an active trial ending on day D, and the earlier of day D and the installation's own trial end is today or later
 - **THEN** the answer is 200 with `completed` true and `getPortalTariff` reports a `dueDate` on or before day D
 - **AND** the license counts as accepted and no audit event is written
 
+#### Scenario: Installation trial already ended
+
+- **WHEN** `completeWizard` is called on such an installation whose own trial ended before today, for example after the editing service was reinstalled with a fresh trial
+- **THEN** the call fails as without the editing service's trial, and the wizard stays open until a license file is given
+
 #### Scenario: Editing service silent at completion
 
-- **WHEN** `completeWizard` is called on such an installation, the editing service does not answer, the installation runs its own trial and the last known answer of the editing service was an active trial or none is known
-- **THEN** the answer is 200 with `completed` true and the installation keeps its own 30-day trial tariff
+- **WHEN** `completeWizard` is called on such an installation, the editing service does not answer, the installation's own trial is in force and has not ended, and the last known answer of the editing service was an active trial or none is known
+- **THEN** the answer is 200 with `completed` true and the installation keeps its own trial tariff with its current end
 
 #### Scenario: Editing service silent, a license file still required
 
-- **WHEN** `completeWizard` is called without a license file, the editing service does not answer, and either no trial of the installation is in force or its last known answer was no trial or an ended one
-- **THEN** the answer is 500 "You must enter a license key" and the wizard stays open
+- **WHEN** `completeWizard` is called without a license file, the editing service does not answer, and either no trial of the installation is in force, it has ended, or the last known answer was no trial or an ended one
+- **THEN** the call fails as without the editing service's trial, and the wizard stays open until a license file is given
+
+#### Scenario: Before the first re-read
+
+- **WHEN** an Enterprise installation without a license file runs its own trial, the wizard was not completed while the editing service answered, and the daily background re-read has not run yet
+- **THEN** `getPortalTariff` reports the installation's own trial end, which may be later than the editing service's
 
 #### Scenario: Editing service trial ends later
 
@@ -39,7 +49,7 @@ a file SHALL never be replaced by it.
 #### Scenario: Editing service trial expired
 
 - **WHEN** the daily background re-read runs and the editing service reports its trial as expired
-- **THEN** `getPortalTariff` reports yesterday as `dueDate` and the installation is not paid
+- **THEN** `getPortalTariff` reports as `dueDate` the earliest of the installation's trial end, the day the editing service's trial ended and yesterday, and the installation is not paid
 
 #### Scenario: Editing service does not answer the re-read
 
@@ -57,8 +67,9 @@ a file SHALL never be replaced by it.
 
 `getIsLicenseRequired` SHALL need no authentication and answer true only when the installation is Enterprise
 or Developer, its tariff page is enabled (not an anyone-access portal, not an image-based deployment), no
-license file exists at the configured path and the editing service reports no active trial of its own; false in
-every other case, including a hosted portal. The editing service's answer MAY be up to 15 minutes old.
+license file exists at the configured path and no trial of "Following the editing service's trial" would be in force
+today; false in every other case, including a hosted portal. The editing service's answer MAY be 15 minutes old, or 2
+days while it does not answer.
 
 #### Scenario: Fresh Enterprise installation
 
@@ -70,10 +81,15 @@ every other case, including a hosted portal. The editing service's answer MAY be
 - **WHEN** the wizard page of a new Enterprise installation without a license file calls `getIsLicenseRequired` while the editing service reports an active trial
 - **THEN** the system answers 200 false
 
+#### Scenario: Installation trial already ended
+
+- **WHEN** `getIsLicenseRequired` is called on such an installation while the editing service reports an active trial, but the installation's own trial ended before today
+- **THEN** the system answers 200 true
+
 #### Scenario: Editing service does not answer
 
 - **WHEN** `getIsLicenseRequired` is called on such an installation and the editing service does not answer
-- **THEN** the system answers from the editing service's last answer of the past hour, and with none 200 true
+- **THEN** the system answers from the editing service's last answer of the past 2 days, and with none 200 true
 
 #### Scenario: Hosted portal
 
@@ -84,9 +100,9 @@ every other case, including a hosted portal. The editing service's answer MAY be
 
 `acceptLicense` SHALL, on an Enterprise or Developer installation, record the acceptance, write an audit event and
 apply the staged license: the current file is backed up, the staged one moved into place, confirmed by the editing
-service when reachable and written as the installation's quota and tariff; on any failure the previous file is
-restored. The answer is 200 with an empty string on success, else a sentence naming the failure. Completing the setup
-wizard SHALL do the same when a license file is given, and otherwise follow "Following the editing service's trial".
+service when reachable and written as the installation's quota and tariff; on failure the previous file is restored.
+The answer is 200 with an empty string on success, else a sentence naming the failure. The setup wizard SHALL do the
+same with a license file.
 
 #### Scenario: Accepted after upload
 
@@ -119,8 +135,7 @@ wizard SHALL do the same when a license file is given, and otherwise follow "Fol
 the license file and rewrite the quota and tariff from it, answering true; a missing or unreadable file or an
 editing-service refusal SHALL answer 402, a start date in the future 400. After acceptance a background re-read of the
 license in force SHALL run daily by default, so a replaced file takes effect without a call; it SHALL NOT apply an
-uploaded license. Without a license file the re-read SHALL follow "Following the editing service's trial", accepted or
-not.
+uploaded license.
 
 #### Scenario: Open-source installation
 

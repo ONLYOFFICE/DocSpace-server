@@ -17,8 +17,8 @@ checks that proved it, and leave open what the specs, the documents and the test
 ## 3. Wizard and `getIsLicenseRequired`
 
 - [x] 3.1 Answer `getIsLicenseRequired` false while the editing service reports an active trial and no license file exists; checked on a local Enterprise stand, including a frozen editing service
-- [x] 3.2 Complete the wizard without a license file on the trial, record the acceptance, write no audit event, and keep the installation's own 30-day trial when the editing service does not answer, unless no own trial is in force or the last answer known said no trial or an ended one; checked on a local Enterprise stand on a clean database (acceptance recorded, own trial kept); the silent-service path is checked in 3.3
-- [x] 3.3 Check the silent-service path of 3.2 on a local Enterprise stand with the editing service frozen at completion; done when `completeWizard` answers 200 and `getPortalTariff` reports the installation's own 30-day `dueDate`
+- [x] 3.2 Complete the wizard without a license file on the trial, record the acceptance, write no audit event, and keep the installation's own trial with its current end when the editing service does not answer, unless that trial is not in force or has ended, or the last answer known said no trial or an ended one; checked on a local Enterprise stand on a clean database (acceptance recorded, own trial kept); the silent-service path is checked in 3.3
+- [x] 3.3 Check the silent-service path of 3.2 on a local Enterprise stand with the editing service frozen at completion; done when `completeWizard` answers 200 and `getPortalTariff` reports the installation's own `dueDate` unchanged
 
 ## 4. Documents and contract texts
 

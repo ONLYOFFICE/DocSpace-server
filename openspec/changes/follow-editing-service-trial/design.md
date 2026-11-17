@@ -43,12 +43,26 @@ See proposal.md - Why. The design relies on these existing requirements:
 - **Only an answer that says `trial` is a trial.** The editing service answers "expired trial" also for a license
   file it refuses, without the `trial` flag; such an answer, an error, an unreadable body or a missing date are
   "not a trial" or "unknown", never "expired".
-- **Unknown changes nothing.** The background re-read leaves the tariff as it is; the wizard keeps the installation's own 30-day trial and records the acceptance, but still requires a file when no own trial is in force or the last answer known said the editing service runs no trial or its trial ended; the anonymous question uses the last answer of the past hour, or
-  answers true with none.
-- **The anonymous question uses the memory cache with fail-safe.** One request per process, the license command's
-  own 5-second limit, an answer reused for 15 minutes, the last answer kept for an hour while the editing service
-  fails and asked again once a minute. A fresh question (wizard, re-read) with a known answer replaces the cached one on its node and makes the other nodes ask again; with an unknown answer it leaves the cache alone. Alternative: no cache. Rejected: an anonymous
-  endpoint would send one request to the editing service per call.
+- **Unknown changes nothing.** The background re-read leaves the tariff as it is. The wizard keeps the
+  installation's own trial with its current end and records the acceptance, but still requires a file when that
+  trial is not in force or has ended, or the last answer known said the editing service runs no trial or its trial
+  ended. The anonymous question uses the last answer of the past 2 days, or answers true with none.
+- **A trial that would already be over is no trial.** The wizard and the anonymous question take the editing
+  service's trial only when the end it leads to (the earlier of the installation's end and the editing service's)
+  is today or later; otherwise a file is required, as before the change. The re-read still writes that end.
+- **The answer lives in the distributed cache with fail-safe.** It is one value per installation: the background
+  re-read in the worker refreshes it, the API nodes read it. The default `IFusionCache` (memory, Redis and the
+  backplane) shares it with every node and keeps it over a restart; the `"memory"` cache would keep it in one
+  process. An answer is reused for 15 minutes, the last one kept for 2 days (longer than the daily re-read) while
+  the editing service fails, and asked again once a minute; the license command keeps its own 5-second limit. A
+  fresh question with a known answer replaces the cached value for every node; an unknown one leaves it alone.
+  Alternative: no cache. Rejected: an anonymous endpoint would send one request to the editing service per call.
+  Alternative: a setting in the database. Rejected for now: the cache with a 2-day fail-safe covers the restart,
+  and a lost answer only makes the wizard fall back to the installation's own trial.
+- **A tariff write tells the open clients.** A write that changed the tariff sends `s:change-tariff` to the quota
+  room of the portal, or of every active portal for the shared tariff of tenant -1, so the trial banner and the
+  payment page read the new end. A failed send is logged and does not fail the write. A tariff that becomes not
+  paid only because its day passed is not a write and sends nothing.
 - **One lock for the license writers.** The trial write and the license-file write take the same distributed lock,
   and the trial checks the license file and the license quota under it.
 - **Completing the wizard counts as acceptance.** The user agrees to the license terms in the wizard, so a license
@@ -62,7 +76,13 @@ See proposal.md - Why. The design relies on these existing requirements:
 - [An installation restored from a backup loses its license file and, next to an editing service whose trial has
   expired, becomes not paid at once instead of after 30 days] → Accepted by decision; the license page lets the
   admin upload the file immediately.
-- [The editing service's answer can be up to 15 minutes old on another node after a change there] → A fresh question by the wizard or the re-read makes every other node ask again on its next read; while the editing service fails there, that node keeps its older answer.
+- [The editing service's answer can be up to 15 minutes old after a change there] → A fresh question by the wizard
+  or the re-read replaces it for every node; while the editing service fails, its last answer of the past 2 days is
+  used.
+- [Until the wizard is completed while the editing service answers, or the first re-read runs, the installation's
+  trial keeps its 30-day end, later than the editing service's] → Accepted: the next daily re-read brings it closer.
+- [Without Redis there is no shared cache] → Each process then keeps its own copy, as the rest of the server's
+  caches do; the re-read and the wizard still ask the editing service themselves.
 - [A trial write that started before an accept finishes after it] → The shared lock orders them; the accept always
   ends with the license in force.
 
