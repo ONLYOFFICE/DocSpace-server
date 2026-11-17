@@ -218,7 +218,7 @@ public class MetadataValidationTests
     [InlineData(null, null, "2026-01-15", false)]
     [InlineData(null, null, null, true)]
     [InlineData("", null, null, true)]
-    public void IsEmpty_ShouldDetectEmptyValues(string stringValue, long? numberValue, string dateValue, bool expected)
+    public void IsEmpty_ShouldDetectEmptyValues(string? stringValue, long? numberValue, string? dateValue, bool expected)
     {
         var value = new MetadataValue
         {

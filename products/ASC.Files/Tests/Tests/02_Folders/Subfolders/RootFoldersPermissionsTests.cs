@@ -86,6 +86,33 @@ public class RootFoldersPermissionsTests(
         titles.Should().Contain(["Rooms", "Trash"]);
     }
 
+    /// <summary>
+    /// <c>GET files/@my</c>: every type but Guest opens its own My documents root; a Guest has none, and the
+    /// request answers that the folder does not exist.
+    /// </summary>
+    [Theory]
+    [InlineData(EmployeeType.DocSpaceAdmin)]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task GetMyFolder_ByUserType_GuestGetsNotFound(EmployeeType employeeType)
+    {
+        var member = employeeType == EmployeeType.Guest ? await InviteGuest() : await InviteContact(employeeType);
+        await _filesClient.Authenticate(member);
+
+        if (employeeType == EmployeeType.Guest)
+        {
+            var exception = await Assert.ThrowsAsync<ApiException>(
+                async () => await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken));
+
+            exception.ErrorCode.Should().Be(404);
+            return;
+        }
+
+        var my = (await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+        my.Current.RootFolderType.Should().Be(FolderType.USER);
+    }
+
     [Fact]
     public async Task GetRootFolders_DocSpaceAdmin_ReturnsOwnSections()
     {

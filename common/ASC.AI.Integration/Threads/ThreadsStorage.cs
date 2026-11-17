@@ -94,7 +94,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        var query = context.Threads.Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy);
+        var query = context.Threads.Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.DeletedOn == null);
 
         query = entryId.HasValue
             ? query.Where(x => x.EntryId == entryId)
@@ -149,6 +149,29 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         await context.DeleteThreadAsync(tenantId, threadId);
+    }
+
+    public async Task MarkDeletedAsync(int tenantId, Guid threadId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        await context.MarkThreadDeletedAsync(tenantId, threadId, TruncateToMilliseconds(DateTime.UtcNow));
+    }
+
+    public async Task<List<DeletedThread>> ReadDeletedAsync(DateTime deletedOn, Guid id, int count)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.GetDeletedThreadsAsync(deletedOn, id, count)
+            .Select(x => new DeletedThread(x.TenantId, x.Id, x.DeletedOn!.Value, x.ArtifactsFolderId, x.AttachmentsFolderId))
+            .ToListAsync();
+    }
+
+    public async Task DeleteMarkedAsync(int tenantId, Guid threadId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        await context.DeleteMarkedThreadAsync(tenantId, threadId);
     }
 
     private static List<string> BuildSearchTokens(string text)

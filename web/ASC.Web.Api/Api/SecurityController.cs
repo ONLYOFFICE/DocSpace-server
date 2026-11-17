@@ -43,10 +43,10 @@ namespace ASC.Web.Api.Controllers;
 
 /// <remarks>
 /// Portal security: the audit trail and the login history the portal records, the reports built out of them and the
-/// retention that bounds both, the Content Security Policy the portal serves to browsers, and the JWT that identifies
-/// the caller to the identity service. Every audit operation needs the portal-settings right of a DocSpace
+/// lifetimes that bound the reports and the recent events, the Content Security Policy the portal serves to browsers,
+/// and the JWT that identifies the caller to the identity service. Every audit operation needs the portal-settings right of a DocSpace
 /// administrator, and in a cloud installation the matching section has to be enabled for the portal as well: the two
-/// operations ending in `last` need nothing more, while filtering, reports and retention changes also need the audit
+/// operations ending in `last` need nothing more, while filtering, reports and lifetime changes also need the audit
 /// option of the portal's pricing plan, and the filtering operations quietly fall back to the twenty most recent
 /// events when that option is missing. Reports are built in the background, one per caller and kind, and land in the
 /// caller's My documents section. The connections a user currently has open live under
@@ -75,16 +75,12 @@ public class SecurityController(
     : ControllerBase
 {
     /// <remarks>
-    /// Returns the twenty most recent login events of the whole portal - successful sign-ins, sign-outs and failed
-    /// attempts alike - as the short summary a settings page shows before anyone asks for the full history. The
-    /// caller needs the portal-settings right of a DocSpace administrator, and in a cloud installation the login
-    /// history and audit trail section must be enabled for the portal, otherwise the call is answered with 402. The
-    /// operation is read-only and takes no parameters: the number of events is fixed at twenty, nothing can be
-    /// filtered, and events are ordered newest first. `date` is given in the portal time zone, `actionText` is the
-    /// readable sentence describing the event with every substituted value shortened to fifty characters here, and
-    /// `country` and `city` are resolved from the IP address and stay empty when it cannot be located. An empty list
-    /// means the portal has recorded no login events yet. Use `GET api/2.0/security/audit/login/filter` to filter by
-    /// user, action or period and to page through the whole history.
+    /// Returns the 20 most recent login events of the portal, newest first. The list includes successful sign-ins,
+    /// sign-outs, and failed attempts. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. In a cloud installation, the call returns 402 if the login
+    /// history and audit trail section is turned off. The call is read-only. In `actionText`, the call cuts every
+    /// inserted value to 50 characters. An empty list means the portal has recorded no login events. To filter by
+    /// user, action, or period, or to page through the history, use `GET api/2.0/security/audit/login/filter`.
     /// </remarks>
     /// <summary>
     /// Get recent login events
@@ -107,16 +103,13 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the twenty most recent audit events of the portal - the creations, changes, deletions, sharing and
-    /// settings updates its members made - as the short summary a settings page shows before anyone asks for the full
-    /// trail. The caller needs the portal-settings right of a DocSpace administrator, and in a cloud installation the
-    /// login history and audit trail section must be enabled for the portal, otherwise the call is answered with 402.
-    /// The operation is read-only and takes no parameters: it looks back exactly as far as the audit trail lifetime
-    /// that `GET api/2.0/security/audit/settings/lifetime` reports, returns at most twenty events ordered newest
-    /// first, and cannot be filtered. `date` is given in the portal time zone, `actionText` is the readable sentence
-    /// describing the event with every substituted value shortened to fifty characters here, and `target` names the
-    /// entity the action was applied to. An empty list means nothing was recorded inside that period. Use
-    /// `GET api/2.0/security/audit/events/filter` to filter by user, module, action or period.
+    /// Returns the 20 most recent audit events of the portal, newest first. Audit events record what members created,
+    /// changed, deleted, shared, or set. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. In a cloud installation, the call returns 402 if the login
+    /// history and audit trail section is turned off. The call is read-only. It looks back
+    /// only as far as the audit trail lifetime of `GET api/2.0/security/audit/settings/lifetime`. In `actionText`,
+    /// the call cuts every inserted value to 50 characters. An empty list means the portal recorded no audit events
+    /// in that period. To filter by user, module, action, or period, use `GET api/2.0/security/audit/events/filter`.
     /// </remarks>
     /// <summary>
     /// Get recent audit events
@@ -144,16 +137,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the portal's login events that match the filters in the query - by user, by login action and by period
-    /// - and is the operation behind the login history page. The caller needs the portal-settings right of a DocSpace
-    /// administrator plus the audit option of the portal's pricing plan; when that option is missing the filters are
-    /// silently ignored and the answer is the same twenty most recent events that
-    /// `GET api/2.0/security/audit/login/last` returns, and when the login history and audit trail section is
-    /// disabled altogether the call is answered with 402. Omit a filter to match everything. `from` and `to` are read
-    /// as UTC instants while `date` comes back in the portal time zone, `count` defaults to 100 and cannot exceed it,
-    /// `startIndex` skips matching events from the newest end, and the filters are applied before the page window, so
-    /// a full page means there may be more matching events beyond it. The operation is read-only; take the values
-    /// accepted by `action` from `GET api/2.0/security/audit/types`.
+    /// Returns the login events of the portal that match the query filters, newest first. You can filter by user,
+    /// login action, and period. An omitted filter matches everything. Requires the EditPortalSettings permission,
+    /// which the portal owner and DocSpace admins have. Other callers get 403. Without the audit option of the
+    /// pricing plan, the call ignores the filters. It then returns the 20 most recent events. In a cloud installation,
+    /// the call returns 402 if the login history and audit trail section is turned off. The call is read-only. It applies the filters first and the
+    /// page window of `startIndex` and `count` after them. So a full page means more matching events may exist, and
+    /// there is no total count. To get the values of `action`, use `GET api/2.0/security/audit/types`. The call
+    /// returns 400 for a parameter of the wrong type, a `count` out of range, or an invalid date.
     /// </remarks>
     /// <summary>
     /// Get filtered login events
@@ -183,20 +174,19 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the portal's audit events that match the filters in the query - by the user who acted, the module the
-    /// action belongs to, the action and its type, the entity type and target, and the period - and is the operation
-    /// behind the audit trail page. The caller needs the portal-settings right of a DocSpace administrator plus the
-    /// audit option of the portal's pricing plan; when that option is missing the filters are silently ignored and
-    /// the answer is the same twenty most recent events that `GET api/2.0/security/audit/events/last` returns, and
-    /// when the login history and audit trail section is disabled altogether the call is answered with 402. Take the
-    /// values accepted by `action`, `actionType`, `moduleType` and `entryType` from
-    /// `GET api/2.0/security/audit/types`, and the tree they belong to from `GET api/2.0/security/audit/mappers`. A
-    /// non-default `action` matches only that action and, combined with `target`, only its exact value; it also
-    /// stops `moduleType` and `actionType` from narrowing the result, so combine `target` with `entryType` instead of
-    /// `action` when filtering by target without pinning a single action. `from` and `to` are read as UTC instants
-    /// while `date` comes back in the portal time zone, `count` defaults to 100 and cannot exceed it, and the filters
-    /// are applied before the page window, so a full page means there may be more matching events beyond it. The
-    /// operation is read-only.
+    /// Returns the audit events of the portal that match the query filters, newest first. You can filter by user,
+    /// module, action, action type, entry type, target, and period. An omitted filter matches everything. Requires
+    /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403.
+    /// Without the audit option of the pricing plan, the call ignores the filters. It then returns the 20 most
+    /// recent events. In a cloud installation, the call returns 402 if the login history and audit trail section is turned
+    /// off. The call is read-only. To get the filter values, use `GET api/2.0/security/audit/types` and
+    /// `GET api/2.0/security/audit/mappers`. If `action` is set, the call matches only that action and ignores
+    /// `moduleType` and `actionType`. With `action`, the call matches `target` exactly. With `entryType`, it keeps
+    /// the events whose `target` contains the value. It ignores `entryType` without `target`, and `target` without
+    /// `action` or `entryType`. The call applies the filters first and the page
+    /// window after them. So a full page means more matching events may exist, and there is no total count. The audit
+    /// trail lifetime does not limit this call. Without `from`, it returns events back to the oldest one the portal
+    /// stores. The call returns 400 for a parameter of the wrong type, a `count` out of range, or an invalid date.
     /// </remarks>
     /// <summary>
     /// Get filtered audit events
@@ -226,17 +216,13 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the vocabularies the audit filters are built from: `actions` lists every action the portal can record,
-    /// `actionTypes` the kinds of change they stand for, `productTypes` the products they belong to, `moduleTypes`
-    /// the locations inside those products, and `entryTypes` the kinds of entity an action can be applied to. The
-    /// caller needs the portal-settings right of a DocSpace administrator; the audit option of the pricing plan is
-    /// not required, so the lists can be read on any portal. The operation is read-only, takes no parameters and
-    /// depends on nothing else. Every value is the name to send in the matching query parameter of
-    /// `GET api/2.0/security/audit/events/filter` or `GET api/2.0/security/audit/login/filter`, so read this
-    /// operation once and reuse the answer instead of guessing spellings. The response is an untyped object holding
-    /// those five arrays of names, and it changes only with the portal version. Use
-    /// `GET api/2.0/security/audit/mappers` when the relations between products, modules and actions are needed
-    /// rather than the flat lists.
+    /// Returns the names that the audit filters accept, as five flat lists. The lists are `actions`, `actionTypes`,
+    /// `productTypes`, `moduleTypes`, and `entryTypes`. Requires the EditPortalSettings permission, which the portal
+    /// owner and DocSpace admins have. Other callers get 403. The call needs neither the audit option of the pricing
+    /// plan nor the login history and audit trail section. The call is read-only and takes no parameters. The names
+    /// change only with the portal version, so you can read them once and reuse them. Send them as the filter values
+    /// of `GET api/2.0/security/audit/events/filter` and `GET api/2.0/security/audit/login/filter`. To see which
+    /// module records which action, use `GET api/2.0/security/audit/mappers`.
     /// </remarks>
     /// <summary>
     /// Get audit trail types
@@ -261,16 +247,15 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the audit vocabulary as the tree it really is: every product, the modules inside it, and for each
-    /// module the actions it can record together with the type of change and the entity each of them applies to. Pass
-    /// `productType` to keep a single product and `moduleType` to keep a single module inside the products that
-    /// remain; omit both to get the whole tree. The caller needs the portal-settings right of a DocSpace
-    /// administrator; the audit option of the pricing plan is not required, and the call is read-only and safe to
-    /// repeat. Each action carries `messageAction`, the name to send as the `action` filter of
-    /// `GET api/2.0/security/audit/events/filter`, next to `actionType` and `entity`, the values its `actionType` and
-    /// `entryType` filters accept - this is where a caller learns which action belongs to which module instead of
-    /// guessing. A filter that matches nothing yields an empty list rather than an error. Use
-    /// `GET api/2.0/security/audit/types` for the flat lists of the same names.
+    /// Returns the audit actions as a tree of products, their modules, and the actions each module records. Pass
+    /// `productType` to keep one product, and `moduleType` to keep one module in each product. Omit both to get the
+    /// whole tree. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other
+    /// callers get 403. The call needs neither the audit option of the pricing plan nor the login history and audit
+    /// trail section. The call is read-only. Each action has `messageAction`, the value of the `action` filter of
+    /// `GET api/2.0/security/audit/events/filter`. Its `actionType` and `entity` are the values of the `actionType`
+    /// and `entryType` filters there. If no product matches `productType`, the call returns an empty list, not an
+    /// error. If no module matches `moduleType`, the call returns the products with empty module lists. For flat
+    /// lists of the same names, use `GET api/2.0/security/audit/types`.
     /// </remarks>
     /// <summary>
     /// Get audit trail mappers
@@ -306,21 +291,21 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Queues a report of the portal's login history and returns the state of the background job that builds it. By
-    /// default the report covers the period reaching from now back by the login history lifetime that
-    /// `GET api/2.0/security/audit/settings/lifetime` reports; `from` and `to` narrow it, a `from` older than that
-    /// window is moved up to its start, a `to` in the future is moved back to now, and a period that ends before it
-    /// starts is answered with 400. No other filter of `GET api/2.0/security/audit/login/filter` applies here. The
-    /// caller needs the portal-settings right of a DocSpace administrator plus the audit option of the portal's pricing
-    /// plan, otherwise the call is answered with 402. The file is not ready when the response arrives - poll
-    /// `GET api/2.0/security/audit/login/report` until `isCompleted` is true, then take `resultFileUrl`, and treat a
-    /// non-empty `error` as a failed build. The finished file is saved to the caller's My documents section, as an XLSX
-    /// workbook by default or as CSV when `format=Csv`, and `resultFileId` identifies it in either format;
-    /// `resultFileUrl` opens it in the editor, except for a CSV file too large for the editor, which it downloads
-    /// instead. An XLSX report keeps only the most recent events, at most 200,000 by default and fewer when the events
-    /// are long, and its header says how many were left out; `format=Csv` exports every event of the period. One job
-    /// runs per caller and kind: calling again while the previous one is still building returns that job instead of
-    /// starting a second, and `DELETE api/2.0/security/audit/login/report` cancels it.
+    /// Starts a background job that builds a login history report of the portal, and returns the job state. Requires
+    /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. In
+    /// a cloud installation, the call returns 402 if the pricing plan has no audit option. It also returns 402 if the
+    /// login history and audit trail section is turned off. Without `from` and `to`, the report covers the login
+    /// history lifetime of `GET api/2.0/security/audit/settings/lifetime`, up to now.
+    /// The call moves an earlier `from` to the start of the lifetime and a future `to` to now. It ignores the other
+    /// filters of `GET api/2.0/security/audit/login/filter`. The call queues work. Repeat
+    /// `GET api/2.0/security/audit/login/report` until `isCompleted` is true. The portal saves the file in the
+    /// caller's My documents section. An XLSX report keeps at most 200,000 of the most recent events by default, and
+    /// fewer for long events. Its header says how many events it left out. A CSV report has every event of the
+    /// period. If a CSV file is too large for the editor, `resultFileUrl` downloads it instead of opening it. Each
+    /// caller has one job per report kind. While the job runs, a repeated call returns that job and starts no second
+    /// one. After the job ends, a repeated call builds a new file. To cancel the job, use
+    /// `DELETE api/2.0/security/audit/login/report`. The call returns 400 if the period ends before it starts or lies
+    /// entirely outside the lifetime.
     /// </remarks>
     /// <summary>
     /// Start login history report
@@ -348,16 +333,16 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the state of the login history report the calling user has started, and is the operation to poll after
-    /// `POST api/2.0/security/audit/login/report`. The caller needs the portal-settings right of a DocSpace
-    /// administrator plus the audit option of the portal's pricing plan, otherwise the call is answered with 402. Jobs
-    /// are kept per user and per report kind: this operation never shows another administrator's report, nor the audit
-    /// trail report, which has its own status at `GET api/2.0/security/audit/events/report`. The answer is empty when
-    /// no report of this kind is known for the caller; otherwise `percentage` grows towards 100, `isCompleted` turns
-    /// true when the build has ended, `error` carries the failure message when it ended badly, and `resultFileId`,
-    /// `resultFileName` and `resultFileUrl` point at the file saved to the caller's My documents section. The operation
-    /// is read-only and safe to poll every few seconds; a finished job is dropped as soon as the next report of this
-    /// kind is started.
+    /// Returns the state of the caller's login history report job. This is the call to poll after
+    /// `POST api/2.0/security/audit/login/report`. Repeat it until `isCompleted` is true. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. In a
+    /// cloud installation, the call returns 402 if the pricing plan has no audit option. It also returns 402 if the
+    /// login history and audit trail section is turned off. The call is read-only and shows only the caller's own
+    /// job, never the report of another admin. The audit trail report has its own status call,
+    /// `GET api/2.0/security/audit/events/report`. An empty answer means the caller has no login history report job.
+    /// After a failed build, `error` holds the failure message. After a successful build, `resultFileId`,
+    /// `resultFileName`, and `resultFileUrl` describe the file. The portal saves the file in the caller's My
+    /// documents section. After the next report of this kind starts, the call no longer shows the finished job.
     /// </remarks>
     /// <summary>
     /// Get login history report status
@@ -378,15 +363,15 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Cancels the login history report the calling user has running and drops it from the build queue. The caller
-    /// needs the portal-settings right of a DocSpace administrator plus the audit option of the portal's pricing
-    /// plan, otherwise the call is answered with 402. Cancellation is handed to the same background service that
-    /// builds the report, so a successful answer means the request was accepted rather than that the job has already
-    /// stopped: poll `GET api/2.0/security/audit/login/report` to watch it disappear. The operation returns no
-    /// content and touches only the caller's own login history report - the audit trail report is cancelled by
-    /// `DELETE api/2.0/security/audit/events/report`, and no report of another user can be reached from here. It is
-    /// idempotent: cancelling when nothing is running is not an error. A job stopped before it finished writing
-    /// leaves nothing in My documents, and a report cancelled by mistake has to be built again with
+    /// Cancels the caller's login history report job and removes it from the queue. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. In a cloud installation,
+    /// the call returns 402 if the pricing plan has no audit option. It also returns 402 if the login history and
+    /// audit trail section is turned off. The call queues the cancellation for the service that builds reports. So a
+    /// 200 response means that the service got the request, not that the job has stopped. To check, repeat
+    /// `GET api/2.0/security/audit/login/report` until it returns an empty answer. The call affects only the caller's
+    /// own login history report. To cancel the audit trail report, use `DELETE api/2.0/security/audit/events/report`.
+    /// You can repeat the call, and a call with no running job is not an error. A job cancelled before it saved the
+    /// file leaves nothing in My documents. To build the report again, use
     /// `POST api/2.0/security/audit/login/report`.
     /// </remarks>
     /// <summary>
@@ -408,21 +393,21 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Queues a report of the portal's audit trail and returns the state of the background job that builds it. By
-    /// default the report covers the period reaching from now back by the audit trail lifetime that
-    /// `GET api/2.0/security/audit/settings/lifetime` reports; `from` and `to` narrow it, a `from` older than that
-    /// window is moved up to its start, a `to` in the future is moved back to now, and a period that ends before it
-    /// starts is answered with 400. No other filter of `GET api/2.0/security/audit/events/filter` applies here. The
-    /// caller needs the portal-settings right of a DocSpace administrator plus the audit option of the portal's pricing
-    /// plan, otherwise the call is answered with 402. The file is not ready when the response arrives - poll
-    /// `GET api/2.0/security/audit/events/report` until `isCompleted` is true, then take `resultFileUrl`, and treat a
-    /// non-empty `error` as a failed build. The finished file is saved to the caller's My documents section, as an XLSX
-    /// workbook by default or as CSV when `format=Csv`, and `resultFileId` identifies it in either format;
-    /// `resultFileUrl` opens it in the editor, except for a CSV file too large for the editor, which it downloads
-    /// instead. An XLSX report keeps only the most recent events, at most 200,000 by default and fewer when the events
-    /// are long, and its header says how many were left out; `format=Csv` exports every event of the period. One job
-    /// runs per caller and kind: calling again while the previous one is still building returns that job instead of
-    /// starting a second, and `DELETE api/2.0/security/audit/events/report` cancels it.
+    /// Starts a background job that builds an audit trail report of the portal, and returns the job state. Requires
+    /// the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. In
+    /// a cloud installation, the call returns 402 if the pricing plan has no audit option. It also returns 402 if the
+    /// login history and audit trail section is turned off. Without `from` and `to`, the report covers the audit trail
+    /// lifetime of `GET api/2.0/security/audit/settings/lifetime`, up to now. The
+    /// call moves an earlier `from` to the start of the lifetime and a future `to` to now. It ignores the other
+    /// filters of `GET api/2.0/security/audit/events/filter`. The call queues work. Repeat
+    /// `GET api/2.0/security/audit/events/report` until `isCompleted` is true. The portal saves the file in the
+    /// caller's My documents section. An XLSX report keeps at most 200,000 of the most recent events by default, and
+    /// fewer for long events. Its header says how many events it left out. A CSV report has every event of the
+    /// period. If a CSV file is too large for the editor, `resultFileUrl` downloads it instead of opening it. Each
+    /// caller has one job per report kind. While the job runs, a repeated call returns that job and starts no second
+    /// one. After the job ends, a repeated call builds a new file. To cancel the job, use
+    /// `DELETE api/2.0/security/audit/events/report`. The call returns 400 if the period ends before it starts or
+    /// lies entirely outside the lifetime.
     /// </remarks>
     /// <summary>
     /// Start audit trail report
@@ -450,16 +435,16 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the state of the audit trail report the calling user has started, and is the operation to poll after
-    /// `POST api/2.0/security/audit/events/report`. The caller needs the portal-settings right of a DocSpace
-    /// administrator plus the audit option of the portal's pricing plan, otherwise the call is answered with 402. Jobs
-    /// are kept per user and per report kind: this operation never shows another administrator's report, nor the login
-    /// history report, which has its own status at `GET api/2.0/security/audit/login/report`. The answer is empty when
-    /// no report of this kind is known for the caller; otherwise `percentage` grows towards 100, `isCompleted` turns
-    /// true when the build has ended, `error` carries the failure message when it ended badly, and `resultFileId`,
-    /// `resultFileName` and `resultFileUrl` point at the file saved to the caller's My documents section. The operation
-    /// is read-only and safe to poll every few seconds; a finished job is dropped as soon as the next report of this
-    /// kind is started.
+    /// Returns the state of the caller's audit trail report job. This is the call to poll after
+    /// `POST api/2.0/security/audit/events/report`. Repeat it until `isCompleted` is true. Requires the
+    /// EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers get 403. In a
+    /// cloud installation, the call returns 402 if the pricing plan has no audit option. It also returns 402 if the
+    /// login history and audit trail section is turned off. The call is read-only and shows only the caller's own
+    /// job, never the report of another admin. The login history report has its own status call,
+    /// `GET api/2.0/security/audit/login/report`. An empty answer means the caller has no audit trail report job.
+    /// After a failed build, `error` holds the failure message. After a successful build, `resultFileId`,
+    /// `resultFileName`, and `resultFileUrl` describe the file. The portal saves the file in the caller's My
+    /// documents section. After the next report of this kind starts, the call no longer shows the finished job.
     /// </remarks>
     /// <summary>
     /// Get audit trail report status
@@ -480,16 +465,16 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Cancels the audit trail report the calling user has running and drops it from the build queue. The caller
-    /// needs the portal-settings right of a DocSpace administrator plus the audit option of the portal's pricing
-    /// plan, otherwise the call is answered with 402. Cancellation is handed to the same background service that
-    /// builds the report, so a successful answer means the request was accepted rather than that the job has already
-    /// stopped: poll `GET api/2.0/security/audit/events/report` to watch it disappear. The operation returns no
-    /// content and touches only the caller's own audit trail report - the login history report is cancelled by
-    /// `DELETE api/2.0/security/audit/login/report`, and no report of another user can be reached from here. It is
-    /// idempotent: cancelling when nothing is running is not an error. A job stopped before it finished writing
-    /// leaves nothing in My documents, and a report cancelled by mistake has to be built again with
-    /// `POST api/2.0/security/audit/events/report`.
+    /// Cancels the caller's audit trail report job and removes it from the queue. Requires the EditPortalSettings
+    /// permission, which the portal owner and DocSpace admins have. Other callers get 403. In a cloud installation,
+    /// the call returns 402 if the pricing plan has no audit option. It also returns 402 if the login history and
+    /// audit trail section is turned off. The call queues the cancellation for the service that builds reports. So a
+    /// 200 response means that the service got the request, not that the job has stopped. To check, repeat
+    /// `GET api/2.0/security/audit/events/report` until it returns an empty answer. The call affects only the
+    /// caller's own audit trail report. To cancel the login history report, use
+    /// `DELETE api/2.0/security/audit/login/report`. You can repeat the call, and a call with no running job is not
+    /// an error. A job cancelled before it saved the file leaves nothing in My documents. To build the report again,
+    /// use `POST api/2.0/security/audit/events/report`.
     /// </remarks>
     /// <summary>
     /// Terminate audit trail report
@@ -509,8 +494,9 @@ public class SecurityController(
         await TerminateAuditReportAsync(AuditReportKind.AuditTrail);
     }
 
-    // A report never reaches past the retention window: older events are purged anyway, and the
-    // window is what keeps an unbounded request from exporting everything the portal still holds.
+    // A report never reaches past the lifetime of its log. Login events older than that are purged anyway; audit
+    // events are not, they stay as long as the installation's retention keeps them. For both, the window is what
+    // keeps an unbounded request from exporting everything the portal still holds.
     private static (DateTime From, DateTime To) ResolveReportPeriod(DateTime? from, DateTime? to, int lifeTimeDays)
     {
         var now = DateTime.UtcNow;
@@ -521,7 +507,7 @@ public class SecurityController(
 
         if (resolvedFrom > resolvedTo)
         {
-            throw new ArgumentException("The report period ends before it starts or lies outside the retention window");
+            throw new ArgumentException("The report period ends before it starts or lies outside the lifetime of the log");
         }
 
         return (resolvedFrom, resolvedTo);
@@ -568,16 +554,15 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns how long this portal keeps its two security logs: `loginHistoryLifeTime` for login events and
-    /// `auditTrailLifeTime` for audit events, both counted in days, together with `lastModified`, the moment the pair
-    /// was last saved. The caller needs the portal-settings right of a DocSpace administrator, and in a cloud
-    /// installation the login history and audit trail section must be enabled for the portal, otherwise the call is
-    /// answered with 402; the audit option of the pricing plan is not required to read the values. Both numbers lie
-    /// between 1 and 180 days, and a portal that never changed them reports the default of 180. They define the
-    /// window the rest of the audit operations work in: `GET api/2.0/security/audit/events/last` looks exactly this
-    /// far back, and the reports started by `POST api/2.0/security/audit/login/report` and
-    /// `POST api/2.0/security/audit/events/report` cover exactly this period. The operation is read-only; change the
-    /// values with `POST api/2.0/security/audit/settings/lifetime`.
+    /// Returns the lifetimes of the login history and the audit trail, in days. The portal deletes login events older
+    /// than the login history lifetime. Requires the EditPortalSettings permission, which the portal owner and
+    /// DocSpace admins have. Other callers get 403. In a cloud installation, the call returns 402 if the login history
+    /// and audit trail section is turned off. The call does not need the audit option of the pricing plan. The call
+    /// is read-only. The audit trail lifetime sets how far `GET api/2.0/security/audit/events/last` and the audit
+    /// trail report look back. The login history lifetime does the same for the login history report. The audit
+    /// trail lifetime deletes no events and does not limit `GET api/2.0/security/audit/events/filter`. The
+    /// installation decides how long it stores audit events. To change the lifetimes, use
+    /// `POST api/2.0/security/audit/settings/lifetime`.
     /// </remarks>
     /// <summary>
     /// Get audit lifetime settings
@@ -600,15 +585,17 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Sets how long this portal keeps its login history and its audit trail, in days, and returns the pair as it was
-    /// stored. The caller needs the portal-settings right of a DocSpace administrator plus the audit option of the
-    /// portal's pricing plan, otherwise the call is answered with 402. Send both numbers inside `settings`: each has
-    /// to be between 1 and 180 days, and a value outside that range is refused with 400 without either number being
-    /// saved, so read the current pair from `GET api/2.0/security/audit/settings/lifetime` and resend the one that
-    /// should stay as it is. The call replaces the stored settings rather than merging them, is idempotent, and takes
-    /// effect at once: the period covered by `GET api/2.0/security/audit/events/last` and by both audit reports
-    /// shrinks or grows with it, and events older than the new lifetime stop being reported. The change is itself
-    /// recorded in the audit trail.
+    /// Sets the lifetimes of the login history and the audit trail, in days, and returns the stored values.
+    /// Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have. Other callers
+    /// get 403. In a cloud installation, the call returns 402 if the pricing plan has no audit option. It also
+    /// returns 402 if the login history and audit trail section is turned off. The call changes data and replaces
+    /// both values. So send both in `settings`, with the current value for the one that stays. To read the current
+    /// values, use `GET api/2.0/security/audit/settings/lifetime`. You can repeat the call with the same body. The
+    /// change takes effect immediately for `GET api/2.0/security/audit/events/last` and for both reports. A shorter
+    /// login history lifetime lets the daily cleanup permanently delete older login events. A shorter audit trail
+    /// lifetime deletes nothing. Older audit events stay in `GET api/2.0/security/audit/events/filter`. They return
+    /// to the recent events and the report when the lifetime grows. The call
+    /// returns 400 if the body has no `settings` or a lifetime is outside 1 to 180 days. It then saves neither value.
     /// </remarks>
     /// <summary>
     /// Set audit lifetime settings
@@ -649,16 +636,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Replaces the list of external domains the portal's Content Security Policy trusts and returns the policy
-    /// header the portal serves to browsers from that moment on. The list in `domains` replaces the stored one, so an
-    /// omitted or empty list falls back to the portal's built-in policy, and every entry that is sent becomes an
-    /// allowed source for scripts, styles, images, fonts, frames, media and connections at once. An entry may be a
-    /// host, a host with a scheme, or a wildcard host such as `*.example.com`; it has to form a valid absolute
-    /// address and may contain ASCII characters only, and an entry that does not is refused with 400 before anything
-    /// is saved. The caller needs the portal-settings right of a DocSpace administrator, and the request is also
-    /// refused with 403 when the header built from the list grows past the size configured for the installation, 15
-    /// KB by default. The change applies to the whole portal at once and is idempotent. Read the current state with
-    /// `GET api/2.0/security/csp`.
+    /// Replaces the list of external domains that the Content Security Policy of the portal trusts. It returns the
+    /// stored list and the policy header that browsers now get. Send the complete list in `domains`. An empty or
+    /// omitted list restores the built-in policy of the portal. Every domain becomes an allowed source for scripts,
+    /// styles, images, fonts, frames, media, and connections. Requires the EditPortalSettings permission, which the
+    /// portal owner and DocSpace admins have. Other callers get 403. The call changes data for the whole portal, and
+    /// you can repeat it with the same body. The call returns 400 for an unreadable body, an invalid address, or an
+    /// entry with non-ASCII characters. It then saves nothing. It also returns 403 if the built header is larger than
+    /// the installation allows, 15 KB by default. To read the current policy, use `GET api/2.0/security/csp`.
     /// </remarks>
     /// <summary>
     /// Configure CSP settings
@@ -668,7 +653,6 @@ public class SecurityController(
     [SwaggerResponse(200, "The stored domains and the policy header the portal now serves", typeof(CspDto))]
     [SwaggerResponse(400, "The request body cannot be read, or an entry of `domains` is not a valid address or holds non-ASCII characters")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator, or the built policy header exceeds the size allowed for the installation")]
-    [SwaggerResponse(500, "An entry of `domains` is `null`")]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpPost("csp")]
     public async Task<CspDto> ConfigureCsp(CspRequestsDto request)
@@ -706,15 +690,11 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Returns the Content Security Policy this portal serves: `domains`, the external hosts an administrator has
-    /// allowed, and `header`, the whole policy value built from them together with the portal's own defaults and the
-    /// integrations it has switched on. The operation is anonymous and reachable cross-origin - no token is needed -
-    /// because the login and editor front-ends read it before anyone has signed in. It is read-only for the caller,
-    /// but it does repair the portal's cached policy when the cache has lost it, so a call can rebuild the header
-    /// instead of only reading it. The answer honours `If-Modified-Since`: send back the `Last-Modified` value of an
-    /// earlier answer and an unchanged policy comes back as an empty not-modified response rather than a body.
-    /// `domains` is an empty list on a portal nobody has configured, while `header` is filled from the defaults even
-    /// then. Change the allowed domains with `POST api/2.0/security/csp`, which does need a DocSpace administrator.
+    /// Returns the Content Security Policy of the portal, with the allowed external domains and the full header
+    /// value. Anyone can call it without signing in, from any origin. The call is read-only. To skip an unchanged
+    /// policy, send the `Last-Modified` value of an earlier answer in `If-Modified-Since`. Send the value exactly as
+    /// you got it. If the policy has not changed since then, the call returns 304 with an empty body. To change the
+    /// allowed domains, use `POST api/2.0/security/csp`, which requires the EditPortalSettings permission.
     /// </remarks>
     /// <summary>
     /// Get CSP settings
@@ -751,16 +731,14 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Issues a short-lived JWT that identifies the calling user to the identity service, the component that stores
-    /// the OAuth2 applications of this installation and their consents. Any signed-in user may call it, nothing has
-    /// to be prepared first, and the token always describes the caller - it cannot be issued on behalf of somebody
-    /// else. The token is signed with the installation's own key and carries the user ID, name and e-mail, the portal
-    /// ID and address, whether the caller is an administrator or a guest, and whether the portal's developer tools
-    /// setting leaves OAuth2 applications open to ordinary users. It expires five minutes after it was issued and is
-    /// meant to be presented to the identity service in the `x-signature` header, not to this API: requests to the
-    /// portal are authorized with the token that `POST api/2.0/authentication` returns, and this JWT is not accepted
-    /// in its place. The call is read-only and gives the token back as a plain string; ask for a fresh one per
-    /// exchange instead of storing it.
+    /// Issues a JWT that identifies the caller to the identity service. That service stores the OAuth2 apps of the
+    /// installation. Any signed-in user can call it, including a guest. The token always describes the caller, never
+    /// another user. The installation signs it with its own key, and it expires after five minutes. The token
+    /// carries the user ID, name, and email, and the portal ID and address. It also says if the caller is a DocSpace
+    /// admin or a guest. Last, it says if the developer tools setting opens OAuth2 apps to all users. Send the token
+    /// to the identity service in the `x-signature` header. This API does not accept it instead of the token of
+    /// `POST api/2.0/authentication`. The call is read-only and returns the token as a plain string. Request a new
+    /// token before each exchange instead of storing it.
     /// </remarks>
     /// <summary>
     /// Generate JWT token

@@ -37,7 +37,10 @@ namespace ASC.AI.Api;
 [ApiEndpoint("ai", Internal = true)]
 [AiFeature]
 [ApiExplorerSettings(IgnoreApi = true)]
-public class ThreadArtifactsController(ThreadArtifactsService threadArtifactsService, FileDtoHelper fileDtoHelper) : ControllerBase
+public class ThreadArtifactsController(
+    ThreadStorageService threadStorageService,
+    AiProjectThreadsService projectThreadsService,
+    FileDtoHelper fileDtoHelper) : ControllerBase
 {
     private const long MaxArtifactSize = 100 * 1024 * 1024;
 
@@ -50,7 +53,8 @@ public class ThreadArtifactsController(ThreadArtifactsService threadArtifactsSer
         await using var content = inDto.File.OpenReadStream();
 
         var title = string.IsNullOrWhiteSpace(inDto.Title) ? inDto.File.FileName : inDto.Title;
-        var file = await threadArtifactsService.UploadAsync(inDto.Id, title, inDto.File.Length, content);
+        var thread = await threadStorageService.ReadByIdAsync(inDto.Id);
+        var file = await projectThreadsService.SaveArtifactAsync(thread, title, inDto.File.Length, content);
 
         return await fileDtoHelper.GetAsync(file);
     }

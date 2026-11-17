@@ -71,7 +71,7 @@ public class FileDeletePermissionsTests(
 
         // Assert
         results.Should().NotBeNullOrEmpty();
-        results[0].Operation.Should().Be(FileOperationType.Delete);
+        results![0].Operation.Should().Be(FileOperationType.Delete);
         results[0].Finished.Should().BeTrue();
         results[0].Error.Should().BeNullOrEmpty();
     }
@@ -102,7 +102,7 @@ public class FileDeletePermissionsTests(
 
         // Assert
         results.Should().NotBeNullOrEmpty();
-        results[0].Operation.Should().Be(FileOperationType.Delete);
+        results![0].Operation.Should().Be(FileOperationType.Delete);
         results[0].Finished.Should().BeTrue();
         results[0].Error.Should().BeNullOrEmpty();
     }
@@ -133,7 +133,7 @@ public class FileDeletePermissionsTests(
 
         // Assert
         results.Should().NotBeNullOrEmpty();
-        results[0].Operation.Should().Be(FileOperationType.Delete);
+        results![0].Operation.Should().Be(FileOperationType.Delete);
         results[0].Finished.Should().BeTrue();
         results[0].Error.Should().BeNullOrEmpty();
     }

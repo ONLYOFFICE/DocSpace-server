@@ -1,0 +1,703 @@
+# history-and-audit Specification
+
+## Purpose
+
+Defines the records a DocSpace portal keeps about what happened and who may read them: the activity
+history of files, folders and rooms (the `log` endpoints and their export), the document version list
+and the editing revisions of a file, the portal audit trail, the login history, the active connections
+of an account and the ways of ending them, the forwarding of audit and login events to an external
+syslog collector, and the suspicious-login check that runs after every sign-in.
+
+Sources: the integration tests of `products/ASC.Files/Tests` (`01_Files/History`, `01_Files/Log`,
+`02_Folders/History`) and `web/ASC.Web.Api.Tests` (`05_Security/AuditTrail`, `LoginHistory`,
+`ActiveConnections`), the OpenAPI document `sdk/docspace-api-spec/docspace-backend.yaml`, the product
+code where the tests stop (cited in `verification.md`) and the release notes v2.6 – v4.0 (October 2026),
+revised after the merge of release/v4.1.0. Where the notes and the server disagree, this specification follows the server; the
+differences and the suspected defects are listed in `verification.md`. The "view history" right of a
+user type or a room role is defined in `user-type-permissions` and `room-role-permissions`; form-filling
+events are defined in `form-filling-workflow` and only cross-referenced here.
+
+## Requirements
+
+### Requirement: Entry history endpoints and the shape of an entry
+
+The system SHALL expose the activity history of a file through `GET /api/2.0/files/file/{fileId}/log`
+and of a folder or a room through `GET /api/2.0/files/folder/{folderId}/log` (`getFolderHistory`). Each entry
+SHALL carry `id`, `action` (its identifier in `action.id`), `initiator` (with at least `displayName`), `date`
+and, where the action has details, `data`. Entries SHALL come newest first, the page length in `count`.
+
+#### Scenario: History of a new room has the expected structure
+
+- **WHEN** the owner reads the history of a room they have just created
+- **THEN** the list is not empty, the first entry has a non-null `action.id`, an initiator with a display name and a date
+
+#### Scenario: Third-party file has no history
+
+- **WHEN** the history of a file stored in a connected third-party storage is read
+- **THEN** no entries are returned, because only entries stored in the portal itself have a history
+
+#### Scenario: Unknown folder
+
+- **WHEN** a caller reads the history of folder id 0 or of an id that does not exist
+- **THEN** the system answers 404
+
+#### Scenario: Count field matches the page
+
+- **WHEN** the history of a room is read without paging parameters
+- **THEN** the `count` of the envelope equals the number of entries in `response`
+
+### Requirement: Entry history paging and date filter
+
+The history endpoints SHALL accept `count` (1–100) and `startIndex` to page from the newest entry
+backwards, and `fromDate` / `toDate`, read in the time zone of the portal, to narrow the period.
+
+#### Scenario: Count limits the page
+
+- **WHEN** a room with three entries is read with `count=1`
+- **THEN** exactly one entry is returned
+
+#### Scenario: Start index shifts the page
+
+- **WHEN** a room with at least two entries is read with `startIndex=0,count=1` and then `startIndex=1,count=1`
+- **THEN** the two pages hold different entries
+
+#### Scenario: Start index beyond the total
+
+- **WHEN** the history is read with `startIndex=99999`
+- **THEN** the system answers 200 with an empty list
+
+#### Scenario: Date range keeps the entries inside it
+
+- **WHEN** a room created a moment ago is read with `fromDate` one minute before and `toDate` one minute after the creation
+- **THEN** the list contains the `RoomCreated` entry
+
+### Requirement: Who may read an entry history
+
+The system SHALL return the history of an entry to every caller who can read the entry (the Read right
+on the entry), regardless of user type and room role, and SHALL refuse everyone else. The
+initiator of an entry is rendered as an account DTO: a caller without access to Contacts (a User or a
+Guest) SHALL receive it without a `profileUrl`.
+
+#### Scenario: Owner, DocSpace admin, Room manager and a Read member read a file log
+
+- **WHEN** the portal owner, a DocSpace admin who is not a member, a Room admin invited as Room manager or a User invited with Read reads `file/{id}/log` or `folder/{id}/log` of an entry in a Custom room
+- **THEN** the system answers 200
+
+#### Scenario: Non-member is refused
+
+- **WHEN** a User or a Guest who is not a member of the room reads the history of the room or of a file in it
+- **THEN** the system answers 403
+
+#### Scenario: Anonymous caller is refused
+
+- **WHEN** the history of a room or of a file is read without authentication
+- **THEN** the system answers 401
+
+#### Scenario: Initiator without profile link for User and Guest
+
+- **WHEN** a User or a Guest invited to the room with Read reads the log of a file in it
+- **THEN** every entry's `initiator.profileUrl` is empty
+
+### Requirement: Actions that produce a history entry
+
+The system SHALL write a history entry for a fixed set of tracked actions and for no others; an audit
+event whose action is not tracked SHALL never appear in an entry history even when it references the
+entry. The entry is written by the initiator of the action. The tracked set covers files, folders, room
+lifecycle and settings, room links, room members, forms (see `form-filling-workflow`) and AI agents.
+
+#### Scenario: The complete tracked set
+
+- **WHEN** an action of the tracked set is performed on an entry
+- **THEN** a history entry is written for the file actions `FileCreated`, `FileUploaded`, `FileUploadedWithOverwriting`, `UserFileUpdated`, `FileRenamed`, `FileMoved`, `FileMovedWithOverwriting`, `FileMovedToTrash`, `FileCopied`, `FileCopiedWithOverwriting`, `FileVersionRemoved`, `FileDeleted`, `FileConverted`, `FileRestoreVersion`, `FileIndexChanged`, `FileLocked`, `FileUnlocked`, `FileCustomFilterEnabled`, `FileCustomFilterDisabled`, `FileSavedButUserQuotaExceeded`, `FileNotSavedDueToUserQuota`, `FileSavedButRoomQuotaExceeded`, `FileNotSavedDueToRoomQuota` and `FileKeysSet`
+- **AND** an entry of `FileRestoreVersion` or `FileUploadedWithOverwriting` is shown with `action.id` `UserFileUpdated`, the action it is presented as
+- **AND** for the folder actions `FolderCreated`, `FolderRenamed`, `FolderMoved`, `FolderMovedWithOverwriting`, `FolderCopied`, `FolderCopiedWithOverwriting`, `FolderMovedToTrash`, `FolderDeleted`, `FolderIndexChanged` and `FolderIndexReordered`
+- **AND** for the room actions `RoomCreated`, `RoomCopied`, `RoomRenamed`, `RoomArchived`, `RoomUnarchived`, `AddedRoomTags`, `DeletedRoomTags`, `RoomLogoCreated`, `RoomLogoDeleted`, `RoomColorChanged`, `RoomCoverChanged`, `RoomIndexingEnabled`, `RoomIndexingDisabled`, `RoomLifeTimeSet`, `RoomLifeTimeDisabled`, `RoomDenyDownloadEnabled`, `RoomDenyDownloadDisabled`, `RoomWatermarkSet`, `RoomWatermarkDisabled` and `RoomIndexExportSaved`
+- **AND** for the link actions `RoomExternalLinkCreated`, `RoomExternalLinkRenamed`, `RoomExternalLinkDeleted` and `RoomExternalLinkRevoked`
+- **AND** for the member actions `RoomCreateUser`, `RoomUpdateAccessForUser`, `RoomRemoveUser`, `RoomChangeOwner`, `RoomGroupAdded`, `RoomUpdateAccessForGroup`, `RoomGroupRemove` and `RoomInviteResend`
+- **AND** for the form actions `FormSubmit`, `FormOpenedForFilling`, `FormStartedToFill`, `FormPartiallyFilled`, `FormCompletelyFilled` and `FormStopped`, and the agent actions `AgentCreated` and `AgentRenamed`
+
+#### Scenario: Room creation, rename, archive and restore
+
+- **WHEN** a room is created, renamed through `PUT rooms/{id}`, archived and then restored from the archive
+- **THEN** the room history contains `RoomCreated`, `RoomRenamed`, `RoomArchived` and `RoomUnarchived`, each with the owner as initiator
+
+#### Scenario: Files inside a room
+
+- **WHEN** a file is created, uploaded through `POST files/{folderId}/upload` or through a chunked upload session, renamed, moved or copied to another room, moved to trash, deleted permanently, locked and unlocked, or its index is changed in an indexed room
+- **THEN** the room history contains `FileCreated`, `FileUploaded`, `FileRenamed`, `FileMoved` / `FileCopied` (in the source room), `FileMovedToTrash`, `FileDeleted`, `FileLocked`, `FileUnlocked` and `FileIndexChanged`
+
+#### Scenario: Folders inside a room and in My documents
+
+- **WHEN** a subfolder is created, renamed, moved or copied to another room, moved to trash or deleted permanently, or a folder is created inside My documents
+- **THEN** the history of the room (or of the My documents subfolder) contains `FolderCreated`, `FolderRenamed`, `FolderMoved` / `FolderCopied`, `FolderMovedToTrash` and `FolderDeleted`
+- **AND** `SetFolderOrder` on a subfolder of an indexed room writes `FolderIndexChanged` into the subfolder's own history
+
+#### Scenario: Room settings
+
+- **WHEN** tags are added and removed, a logo is set and deleted, the icon colour or the cover is changed, a lifetime is set and disabled, indexing is enabled and disabled, an indexed room is reordered, a watermark is set and disabled, download is restricted and allowed again
+- **THEN** the room history contains `AddedRoomTags`, `DeletedRoomTags`, `RoomLogoCreated`, `RoomLogoDeleted`, `RoomColorChanged`, `RoomCoverChanged`, `RoomLifeTimeSet`, `RoomLifeTimeDisabled`, `RoomIndexingEnabled`, `RoomIndexingDisabled`, `FolderIndexReordered`, `RoomWatermarkSet`, `RoomWatermarkDisabled`, `RoomDenyDownloadEnabled`, `RoomDenyDownloadDisabled`
+
+#### Scenario: Room links
+
+- **WHEN** a Public room is created, an additional link is created and renamed, the primary link is revoked (`access: None`) and an additional link is deleted (`access: None`)
+- **THEN** the room history contains `RoomExternalLinkCreated` (written at room creation for the primary link), `RoomExternalLinkRenamed`, `RoomExternalLinkRevoked` and `RoomExternalLinkDeleted`
+
+#### Scenario: Members, groups, owner and invitations
+
+- **WHEN** a user is invited with Read, changed to Content creator and removed (`access: None`); a group is invited, changed to Editing and removed; the room owner is changed through `changeFileOwner`; invitations are resent
+- **THEN** the room history contains `RoomCreateUser`, `RoomUpdateAccessForUser`, `RoomRemoveUser`, `RoomGroupAdded`, `RoomUpdateAccessForGroup`, `RoomGroupRemove`, `RoomChangeOwner` and `RoomInviteResend`
+
+#### Scenario: User type change is not room history
+
+- **WHEN** a member of the room is promoted to DocSpace admin through `people/type`
+- **THEN** the room history does not contain `UsersUpdatedType`
+
+### Requirement: Entries of one action are grouped
+
+The system SHALL fold the events that belong to one action into a single history entry: the newest
+event of the group is the entry and the others are listed in its `related` field, and the resulting
+list is ordered by date descending.
+
+#### Scenario: Batch operation on several entries
+
+- **WHEN** several files are moved in one operation and the history of the room is read
+- **THEN** one entry carries the move and its `related` list holds the other files of the same operation
+
+### Requirement: History of a form-filling folder for a Form filler
+
+When the caller reached a form-filling folder with the `FillForms` right, the system SHALL narrow the
+history to the folders and files inside it that the caller may see, and to the actions FolderCreated,
+FolderMovedWithOverwriting, FolderMovedToTrash, FolderRenamed, FileCopied, FileUploaded, FileMoved,
+FileRenamed and the form events.
+
+#### Scenario: Form filler reads the history of a form-filling folder
+
+- **WHEN** a member whose right on a form-filling folder is `FillForms` reads its history
+- **THEN** only entries about entries visible to that member and about the listed actions are returned
+
+### Requirement: Folder history report
+
+The system SHALL export the history of a folder or a room through
+`POST /api/2.0/files/folder/{folderId}/log/report` (`createReportFolderHistory`), which queues a background
+task and answers 200 with the task; `GET` on the same path (`getReportFolderHistory`) reports the caller's own
+task for that folder, `DELETE` (`terminateReportFolderHistory`) asks to stop it. The file SHALL be saved in the caller's My documents. A running report for the same folder and
+caller is joined instead of duplicated.
+
+#### Scenario: Report of a room, an archived room and a subfolder
+
+- **WHEN** the owner starts a report for a Custom room, for an archived room or for a subfolder of a room
+- **THEN** the system answers 200 with a task whose `id` is set and whose status is Created or Running
+- **AND** the task carries `id`, `status`, `isCompleted`, `percentage`, `error`, `resultFileId`, `resultFileName` and `resultFileUrl`
+
+#### Scenario: Format and period of the report
+
+- **WHEN** a report is started with `format` `Xlsx` (the default) or `Csv`, with or without `from` / `to`
+- **THEN** the period is read in the portal time zone and, when left out, the whole history is exported
+
+#### Scenario: Contents and columns of the report
+
+- **WHEN** the report file is produced
+- **THEN** the CSV report holds a header row and one row per event, and the XLSX report keeps at most 200,000 events and says in its header how many were left out
+- **AND** the folder report has no Country, City, Page, Action-text and Context columns, and the IP, Browser and Platform columns are included only when the caller is a DocSpace admin
+
+#### Scenario: CSV report holds the events
+
+- **WHEN** a CSV report is started for a room that contains a created file and polled until `isCompleted`
+- **THEN** `error` is empty, `resultFileId` points at a file whose rows are unique, number more than one and mention the file name
+
+#### Scenario: Completed report is in My documents
+
+- **WHEN** a CSV report is started and polled until it has stopped
+- **THEN** the task is Completed with `percentage` 100, no `error`, a `resultFileName`, a `resultFileUrl` and a `resultFileId` whose file carries that title, is listed in the caller's My documents and downloads with content
+- **AND** a second report of the same folder completes with a result file of its own
+
+#### Scenario: Status without a report
+
+- **WHEN** the status of a folder nobody has reported yet is read
+- **THEN** the system answers 200 with an empty response, not an error; the task of a report that was started is reported under the same `id` with `percentage` between 0 and 100
+
+#### Scenario: Report is bound to its folder
+
+- **WHEN** a report of room A has completed and the status of room B is read
+- **THEN** room B reports nothing until its own report is started, and room A still reports its task afterwards
+
+#### Scenario: Stopping a report
+
+- **WHEN** the report is stopped right after it was started
+- **THEN** the task ends either Canceled — `isCompleted` true, no result file, name or link — or Completed with a downloadable file, depending on which came first
+- **AND** stopping a completed report keeps its result file unchanged, and stopping a folder with no report is accepted, also repeatedly, and leaves no task
+
+#### Scenario: Unknown folder
+
+- **WHEN** a report is started, read or stopped for folder id 0, -1 or an id that does not exist
+- **THEN** the system answers 404
+
+### Requirement: Who may export a folder history
+
+The system SHALL allow the report to every caller who can read the folder except a Guest, and SHALL
+refuse the report when the portal is a SaaS portal whose login history and audit trail section is
+hidden (402).
+
+#### Scenario: Readers of the room may export
+
+- **WHEN** the owner, a non-member DocSpace admin, a Room admin invited as Room manager or with Editing, or a User invited with Read or Comment starts the report
+- **THEN** the system answers 200 with a task
+
+#### Scenario: Guest cannot export even with access
+
+- **WHEN** a Guest invited to the room with Read, or a Guest without access, starts the report
+- **THEN** the system answers 403
+
+#### Scenario: Non-member and anonymous
+
+- **WHEN** a User who is not a member starts the report
+- **THEN** the system answers 403
+- **AND** an unauthenticated caller is answered with 401 on starting, reading and stopping a report
+
+### Requirement: Version list and editing revisions of a file
+
+The system SHALL expose the version list of a file through `GET /api/2.0/files/file/{fileId}/history`
+and its editing revisions through `GET /api/2.0/files/file/{fileId}/edit/history`. Both require the
+read-history right: Read and Comment do not grant it, a Guest never has it, and a third-party file has
+no revisions; the editing revisions are open to editing access and above.
+
+#### Scenario: Version list and revisions of a new file
+
+- **WHEN** the owner creates a file in My documents and reads its version list and its editing revisions
+- **THEN** both answers hold exactly one item with `version` 1 and `versionGroup` 1, the comment "Created" and `fileStatus` None, and the envelope `count` is 1
+- **AND** a revision carries the file id, the document key, the version, the version group, the author and the creation date
+
+#### Scenario: Specific version by number
+
+- **WHEN** a file has two versions and `GET files/file/{id}?version=1` is called
+- **THEN** the file with `version` 1 is returned
+
+#### Scenario: Who may read revisions
+
+- **WHEN** the owner of a file in My documents, a DocSpace admin or a Room admin in their own room, or a User invited to the room with Editing reads the editing revisions
+- **THEN** the system answers 200
+- **AND** a User invited with Read or Comment, a Guest invited with Read and a User who is not a member are answered with 403
+
+#### Scenario: Who may read the version list
+
+- **WHEN** a DocSpace admin, a Room admin or a User reads the version list of a file in their own My documents
+- **THEN** the system answers 200
+- **AND** a User reading another account's private file and a DocSpace admin who is not a member reading a file created by someone else in a room are answered with 403
+
+#### Scenario: Anonymous and unknown file
+
+- **WHEN** the version list or the revisions are read without authentication
+- **THEN** the system answers 403
+- **AND** the revisions of a file that does not exist are answered with 404 ("The required file was not found"), the version list of one with 403
+
+#### Scenario: Archived room keeps revisions readable
+
+- **WHEN** the owner reads the revisions of a file in a room they archived
+- **THEN** the system answers 200
+
+#### Scenario: Viewer cannot open an old version
+
+- **WHEN** a User invited with Read opens the current version of a file in view mode and then the same file with `version=1`
+- **THEN** the current version opens and the explicit version is refused with 403
+
+### Requirement: What the audit trail records
+
+The system SHALL record every action whose identifier (`actionId`) is 2000 or more as an audit event and
+every action below 2000 as a login event. An audit event SHALL carry the account, the action, where it
+came from and what it touched, with the date in the portal time zone. How the titles of a private room read
+in these events is in `private-rooms`.
+
+#### Scenario: Audit event shape
+
+- **WHEN** the owner sends password-change instructions to a member and reads the audit events
+- **THEN** an event appears with a non-zero id, a user id and name, an action text and `actionId`, a non-null `ip`, a date and a non-null `context`
+- **AND** an event carries the event id, the account (`user`, `userId`), the readable action text and its `actionId`, the IP address with any port removed, the country and city resolved from the IP (empty when unknown), browser, platform, page, the mapped `actionType`, `product`, `location`, the `target` items, the `entries` types and the `context`
+
+#### Scenario: File key events of a private room
+
+- **WHEN** file keys are issued for a file of a private room, or a member leaves such a room and loses them
+- **THEN** the audit trail records `FileKeysSet` with its recipients, or `RoomFileKeysRevoked` with the members concerned
+- **AND** the file's history shows `FileKeysSet` without the recipients, and `RoomFileKeysRevoked` is not in the tracked set
+
+#### Scenario: Special accounts are named
+
+- **WHEN** an event was performed by the shared guest account, by the system account, or by an account without a name
+- **THEN** its account is named "Anonymous", "System Account" or "Unknown Account" respectively
+
+### Requirement: Location (`context`) of an audit event
+
+The system SHALL set the `context` of an audit event from the module of its action — Files, Folders,
+Rooms, Settings, Contacts, AI agents — and, for Documents events that carry room information, SHALL
+replace it with `Rooms: <room title>` (for `RoomRenamed`, the title before the rename), `AI agents:
+<agent title>` for agent entries, and the root folder title (My documents or Trash) for entries outside
+rooms. No product or "General" prefix is written.
+
+#### Scenario: Action inside a room
+
+- **WHEN** a file is created in a room and the audit trail is read
+- **THEN** the event's `context` is `Rooms: <room title>`
+
+#### Scenario: Action in a personal section
+
+- **WHEN** a file is created in My documents
+- **THEN** the event's `context` is the title of the My documents root
+
+### Requirement: Reading the audit trail
+
+The system SHALL expose the audit trail to the owner and DocSpace admins through
+`GET /api/2.0/security/audit/events/last` (`getLastAuditEvents`: the 20 newest events within the audit
+lifetime, texts cut to 50 characters), `GET …/events/filter`, `GET …/types` (`getAuditTrailTypes`: the
+names the filters accept) and `GET …/mappers` (`getAuditTrailMappers`: products → modules → actions).
+
+#### Scenario: Owner and DocSpace admin read events
+
+- **WHEN** the owner or a DocSpace admin reads `events/last` or `events/filter`
+- **THEN** the system answers 200 with the events
+
+#### Scenario: Filter parameters
+
+- **WHEN** `events/filter` is called with `userId`, `moduleType`, `actionType`, `action`, `entryType`, `target`, `from` / `to` (UTC instants), `count` (1–100, default 100) and `startIndex`
+- **THEN** the events matching every given filter are returned, `startIndex` being applied after the filters
+- **AND** a non-default `action` matches that action only (with `target` exactly) and overrides `moduleType` and `actionType`; `target` narrows only together with `action` or `entryType`
+
+#### Scenario: Filter not bounded by the lifetime
+
+- **WHEN** `events/filter` is called without `from`
+- **THEN** it reaches back to the oldest event the portal still stores, past the audit trail lifetime that bounds `events/last`
+
+#### Scenario: Portal without the audit option
+
+- **WHEN** the portal's pricing plan has no audit option and `events/filter` is called
+- **THEN** the filters are ignored and the answer is that of `events/last`
+- **AND** on a SaaS portal whose login history section is hidden the event endpoints answer 402
+
+#### Scenario: Other members are refused
+
+- **WHEN** a Room admin, a User or a Guest reads `events/last`, `events/filter`, `types` or `mappers`
+- **THEN** the system answers 403 with "Access denied"
+
+#### Scenario: Anonymous caller
+
+- **WHEN** any audit endpoint is called without authentication
+- **THEN** the system answers 401
+
+#### Scenario: Mappers narrowed
+
+- **WHEN** `audit/mappers` is called with `productType` and `moduleType`
+- **THEN** the tree is narrowed to that product and module
+
+#### Scenario: Types and mappers catalogues
+
+- **WHEN** the owner reads `audit/types` and `audit/mappers`
+- **THEN** `actions` contains `FileCreated`, `productTypes` contains `Documents`, and the mappers list is not empty
+
+### Requirement: Audit trail and login history reports
+
+The system SHALL build an audit trail report through `POST /api/2.0/security/audit/events/report`
+(`createAuditTrailReport`; `GET` `getAuditTrailReport` returns the caller's task, `DELETE`
+`terminateAuditTrailReport` cancels it) and a login history report through `POST …/audit/login/report`, same
+shape (`createLoginHistoryReport`, `getLoginHistoryReport`, `terminateLoginHistoryReport`). Both need
+the portal-settings right and the plan's audit option (402 on SaaS).
+
+#### Scenario: Format and period
+
+- **WHEN** a report is started with or without `format`, `from` and `to`
+- **THEN** `format` is `Xlsx` by default or `Csv`, and `from`/`to` (UTC instants) are resolved against the lifetime of that log
+
+#### Scenario: Owner and DocSpace admin start a report
+
+- **WHEN** the owner or a DocSpace admin starts the audit trail report or the login history report, with no period, with the last seven days, or with a `from` ten years ago
+- **THEN** the system answers 200 with a task whose `id` is set
+
+#### Scenario: Invalid period
+
+- **WHEN** a report is started with `from` yesterday and `to` two days ago, or with `to` ten years ago
+- **THEN** the system answers 400, because a period that ends before it starts after resolution is refused
+- **AND** a `from` older than the lifetime window is moved up to its start and a `to` in the future is moved back to now
+
+#### Scenario: Report file and audit event
+
+- **WHEN** a report finishes
+- **THEN** the file is saved in the caller's My documents, the XLSX report keeping at most 200,000 events and the CSV report every event
+- **AND** an `AuditTrailReportDownloaded` or `LoginHistoryReportDownloaded` audit event is written
+
+#### Scenario: Other members and anonymous
+
+- **WHEN** a Room admin, a User or a Guest starts either report
+- **THEN** the system answers 403 with "Access denied"
+- **AND** an unauthenticated caller is answered with 401
+
+### Requirement: Retention settings of the two logs
+
+The system SHALL keep two lifetimes in days, readable through `GET /api/2.0/security/audit/settings/lifetime`
+(`getAuditSettings`) and replaceable through `POST` on that path (`setAuditSettings`, both inside `settings`):
+`loginHistoryLifeTime`, how long login events are kept before they are deleted, and `auditTrailLifeTime`, how far
+back `events/last` and the audit trail report reach. Default 180, range 1–180. The audit trail lifetime SHALL
+delete no event.
+
+#### Scenario: Read and update
+
+- **WHEN** the owner or a DocSpace admin reads the settings and then posts `loginHistoryLifeTime: 180, auditTrailLifeTime: 180`
+- **THEN** the read answers 200 with both values greater than 0, and the update answers 200 echoing 180 and 180; both answers carry `lastModified`
+- **AND** saving writes an `AuditSettingsUpdated` audit event
+
+#### Scenario: Shorter audit trail lifetime
+
+- **WHEN** `auditTrailLifeTime` is lowered and later raised again
+- **THEN** no audit event is deleted: the older events stay readable through `events/filter` and come back into `events/last` and the report when the lifetime grows
+
+#### Scenario: Value outside the range
+
+- **WHEN** either lifetime is posted below 1 or above 180
+- **THEN** the system answers 400 and neither value is saved
+
+#### Scenario: Other members and anonymous
+
+- **WHEN** a Room admin, a User or a Guest reads or updates the settings
+- **THEN** the system answers 403 with "Access denied"
+- **AND** an unauthenticated caller is answered with 401
+
+### Requirement: Audit trail cleanup
+
+An installation MAY switch on a periodic cleanup of audit events; it SHALL be off by default. When on, it SHALL
+delete the events older than the paid life time (default 3 years) on a portal with a paid tariff, or within a
+grace period (default 7 days) after the paid subscription ended, and older than the free life time (default 1
+year, never below the 180 days the audit trail can show) on the others. No API operation changes these values.
+
+#### Scenario: Cleanup off
+
+- **WHEN** the installation did not enable the cleanup, or its switch cannot be read as on or off
+- **THEN** no audit event is ever deleted by it
+
+#### Scenario: Free and paid portals
+
+- **WHEN** a pass runs over a free portal and a paid one holding events of every age
+- **THEN** the free portal loses the events past the free life time, the paid one keeps them until the paid life time
+
+#### Scenario: Subscription ended
+
+- **WHEN** a portal's paid subscription ended less than the grace period ago
+- **THEN** it keeps the paid life time; a portal that never paid gets no grace period
+
+#### Scenario: What is never deleted
+
+- **WHEN** a pass finds old events
+- **THEN** it keeps the events that make up the entry history of a room or of its files, as long as the room exists, and the newest event of every portal
+
+#### Scenario: One portal fails
+
+- **WHEN** the tariff of one portal cannot be read during a pass
+- **THEN** the other portals are still cleared
+
+### Requirement: Login actions that are recorded
+
+The system SHALL record a login event for every sign-in attempt with the action that names the way in,
+successful or failed. A login event SHALL carry the account, the login, the action, where it came from
+and the date in the portal time zone. Logging out and closing connections are recorded as well.
+
+#### Scenario: Ways in and their actions
+
+- **WHEN** a sign-in succeeds
+- **THEN** the action is `LoginSuccessViaPassword` when the password hash was sent from the login page, `LoginSuccessViaApi` when a plain password was sent, `LoginSuccessViaApiSocialAccount` with the provider name in the description when a social account was used, `AuthLinkActivated` (initiator = the e-mail, description = the key) when a confirmation link completed the sign-in, and `LoginSuccessViaOAuth` when the identity service signed the user in
+- **AND** a failed attempt records the matching `LoginFail*` action
+
+#### Scenario: Logout and closed connections are recorded
+
+- **WHEN** a session is logged out, or connections are closed through the active-connections endpoints
+- **THEN** `Logout` is recorded as a login event, and `UserLogoutActiveConnection`, `UserLogoutActiveConnections` or `UserLogoutActiveConnectionsForUser` as an audit event
+
+#### Scenario: Successful password sign-in appears in the history
+
+- **WHEN** the owner signs in and reads `audit/login/filter` with `action=LoginSuccessViaPassword`
+- **THEN** the list is not empty
+
+#### Scenario: Login event shape
+
+- **WHEN** the owner reads `audit/login/last`
+- **THEN** each event has a positive id, a user id and name, an action text and `actionId`, a non-null `ip` and a date
+- **AND** an event carries the account, the login as it was typed (filled for a failed attempt; a successful password sign-in leaves it empty), the action text, the IP with its port removed, the country and city resolved from the IP (empty when unknown), browser, platform and page
+
+### Requirement: Reading the login history
+
+The system SHALL expose the login history to callers with the portal-settings right through
+`GET /api/2.0/security/audit/login/last` (`getLastLoginEvents`: the 20 most recent events, action text shortened) and
+`GET …/login/filter` (`getLoginEventsByFilter`: `userId`, `action`, `from`, `to`, `count` 1–100 default 100, `startIndex`).
+Events of every user type SHALL be visible. Without the audit option the filter endpoint answers like
+`login/last`; on a SaaS portal whose section is hidden, 402.
+
+#### Scenario: Owner and DocSpace admin see every member's sign-ins
+
+- **WHEN** a DocSpace admin, a Room admin and a User sign in and the owner or a DocSpace admin reads `login/last`
+- **THEN** the events of all three accounts are listed
+
+#### Scenario: Filter by user and page size
+
+- **WHEN** the owner reads `login/filter` with `userId` of a member, with `count=1`, or with both after another member signed in later
+- **THEN** only that member's events come back, exactly one event comes back, and with both parameters the single event belongs to the named member
+
+#### Scenario: Other members and anonymous
+
+- **WHEN** a Room admin, a User or a Guest reads `login/last` or `login/filter`
+- **THEN** the system answers 403 with "Access denied"
+- **AND** an unauthenticated caller is answered with 401
+
+### Requirement: Listing active connections
+
+The system SHALL list the calling account's own active connections through
+`GET /api/2.0/security/activeconnections` (`getAllActiveConnections`): one item per successful sign-in of the last year that is
+still active, newest first. Any signed-in user of any type may call it; it never shows another account's
+connections.
+
+#### Scenario: Every user type lists own connections
+
+- **WHEN** the owner, a DocSpace admin, a Room admin, a User or a Guest calls the endpoint
+- **THEN** the system answers 200 with a non-empty `items` list whose first item has an id, a positive `tenantId`, a non-default date and, when present, non-empty browser, platform and page
+- **AND** each item carries `id`, `tenantId`, `userId`, `browser`, `platform`, `page`, `ip`, `country`, `city`, `mobile` and `date`
+
+#### Scenario: Current connection is marked and refreshed
+
+- **WHEN** the request is made with an authentication cookie
+- **THEN** `loginEvent` names the connection behind the cookie (0 for a bearer-token request), and that connection is moved to the top with its browser, platform, IP and location refreshed from the request
+- **AND** an account with no stored connection and no cookie gets a single item describing the current request
+
+#### Scenario: DocSpace admin does not see the owner
+
+- **WHEN** a DocSpace admin lists active connections
+- **THEN** no item carries the owner's user id
+
+#### Scenario: Anonymous caller
+
+- **WHEN** the endpoint is called without authentication
+- **THEN** the system answers 401
+
+### Requirement: Ending one connection
+
+`PUT /api/2.0/security/activeconnections/logout/{loginEventId}` (`logOutActiveConnection`) SHALL close the connection behind the
+login event: it is marked inactive, the token and cookie tied to it stop working and the session's
+sockets are disconnected. A user may close their own connections; closing somebody else's requires the
+DocSpace owner or a DocSpace admin. The answer is `true` when an active connection was closed and
+`false` when no active connection with that id exists.
+
+#### Scenario: Own connection
+
+- **WHEN** a DocSpace admin, a Room admin, a Guest or a User closes the connection their own request was made with
+- **THEN** the system answers 200 with `true`, and the User's next request with the same token is answered with 401
+
+#### Scenario: Administrator closes another account's connection
+
+- **WHEN** the owner closes a User's connection, or a DocSpace admin closes the owner's connection
+- **THEN** the system answers 200 with `true`
+
+#### Scenario: Member cannot close the owner's connection
+
+- **WHEN** a Room admin, a User or a Guest closes the owner's connection
+- **THEN** the system answers 403 with "Access denied"
+- **AND** an unauthenticated caller is answered with 401
+
+### Requirement: Ending every connection except the current one
+
+`PUT /api/2.0/security/activeconnections/logoutallexceptthis` (`logOutAllExceptThisConnection`) SHALL close every other active
+connection of the calling account, answer 200 with the caller's display name and write a
+`UserLogoutActiveConnections` audit event. The connection to keep is the one behind the
+authentication cookie; a bearer-token request has none and then every connection is closed. Any
+signed-in user may call it.
+
+#### Scenario: Other session is invalidated
+
+- **WHEN** a User holds two tokens and calls the endpoint with the second one
+- **THEN** the system answers 200 with a non-empty name and `count` 1, and the first token is answered with 401 afterwards
+
+#### Scenario: Every user type may call it
+
+- **WHEN** the owner, a DocSpace admin, a Room admin, a User or a Guest calls the endpoint
+- **THEN** the system answers 200 with a non-empty name
+- **AND** an unauthenticated caller is answered with 401
+
+### Requirement: Ending every connection of an account
+
+`PUT /api/2.0/security/activeconnections/logoutall/{userId}` (`logOutAllActiveConnectionsForUser`) SHALL close every active connection of
+the named account, reset its cookies and answer 200 without content. A user may name their own id;
+naming another account requires the DocSpace owner or a DocSpace admin.
+
+#### Scenario: Owner and DocSpace admin log a user out everywhere
+
+- **WHEN** the owner or a DocSpace admin calls the endpoint with a User's id
+- **THEN** the system answers 200, and the User's existing token is answered with 401 afterwards
+
+#### Scenario: Member cannot log out the owner
+
+- **WHEN** a Room admin, a User or a Guest calls the endpoint with the owner's id
+- **THEN** the system answers 403 with "Access denied"
+- **AND** an unauthenticated caller is answered with 401
+
+### Requirement: Logging out everywhere with a password reset
+
+`PUT /api/2.0/security/activeconnections/logoutallchangepassword` (`logOutAllActiveConnectionsChangePassword`) SHALL close every connection of the
+calling account, record `UserSentPasswordChangeInstructions` and answer 200 with the confirmation URL
+the caller has to open to set a new password (`/confirm/PasswordChange` with `type=PasswordChange`,
+`key` and `uid`). The password itself is not changed. Any signed-in user may call it for their own
+account.
+
+#### Scenario: Owner logs out and gets the link
+
+- **WHEN** the owner calls the endpoint
+- **THEN** the system answers 200 with a URL containing `/confirm/PasswordChange`, `type=PasswordChange`, `key=` and `uid=`, and the owner's token is answered with 401 afterwards
+
+#### Scenario: Every user type gets the link
+
+- **WHEN** a DocSpace admin, a Room admin, a User or a Guest calls the endpoint
+- **THEN** the system answers 200 with such a URL
+- **AND** an unauthenticated caller is answered with 401
+
+### Requirement: Forwarding audit and login events to syslog
+
+Before an event is stored, the system SHALL hand every audit and login event to a dedicated audit
+logger, which the logging configuration forwards to an external syslog collector as an RFC 5424 message
+whose MSG part is a JSON object. Nothing is sent unless a collector address is configured for the
+installation; the default transport is UDP port 514, TCP with TLS being a configuration change.
+
+#### Scenario: Collector configured
+
+- **WHEN** a collector address is configured and a member signs in or renames a file
+- **THEN** a syslog message with `eventType` `login` and one with `eventType` `audit` reach the collector
+- **AND** each message carries `date`, `eventType` (`login` for actions below 2000, `audit` otherwise), `action`, `actionId`, `tenantId`, `userId`, `initiator`, `ip`, `page`, `userAgent`, `target`, `description` (the serialized description list), `instanceId`, `applicationContext` and `traceId`
+
+#### Scenario: Long values are truncated
+
+- **WHEN** a field of the message exceeds its limit
+- **THEN** it is truncated to 50 (ip), 200 (initiator), 256 (target), 512 (user agent, page) or 2048 (description) characters with a `...` marker, and control characters and `|` are replaced by a space
+
+#### Scenario: Collector not configured
+
+- **WHEN** no collector address is configured
+- **THEN** no syslog message is sent and the events are stored as usual
+
+### Requirement: Suspicious-login notification
+
+After every successful sign-in that set the authentication cookie, the system SHALL compare the new
+login event with the account's previous successful sign-ins (the last 30) and score three signs: a new
+device, a new country and recent failed attempts. When at least two signs hold, the system SHALL write a
+`SuspiciousLoginDetected` login event (IP, browser, platform, reasons) and send the account the
+"Suspicious login" e-mail (IP, device, location, browser). The thresholds are configurable.
+
+#### Scenario: The three signs
+
+- **WHEN** the new login event is compared with the previous successful sign-ins
+- **THEN** a new device holds when the browser + platform pair, version numbers removed, differs from every previous one
+- **AND** a new country holds when the IP resolves to a country that none of the previous IPs resolved to, counted only when at least one previous country resolved
+- **AND** failed attempts hold when at least 3 failed sign-ins for the account or its e-mail happened in the last 24 hours since the previous success
+
+#### Scenario: New device and new country
+
+- **WHEN** a member who has signed in before signs in from a browser/OS pair and a country never seen in their history
+- **THEN** a `SuspiciousLoginDetected` event is recorded and the member receives the e-mail
+
+#### Scenario: Only one sign
+
+- **WHEN** a member signs in from a new device but from a known country with no recent failures
+- **THEN** nothing is recorded and no e-mail is sent
+
+#### Scenario: First sign-in
+
+- **WHEN** an account signs in for the first time, or the login event is older than 5 minutes when the check runs
+- **THEN** no check is made

@@ -79,4 +79,6 @@ global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json.Linq;
 
+global using Npgsql;
+
 global using JsonSerializer = System.Text.Json.JsonSerializer;

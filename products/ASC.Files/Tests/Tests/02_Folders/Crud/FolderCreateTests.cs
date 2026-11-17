@@ -155,6 +155,24 @@ public class FolderCreateTests(
         content.Folders.Should().BeEmpty();
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task CreateFolder_BlankTitle_Returns400AndCreatesNothing(string title)
+    {
+        await _filesClient.Authenticate(Owner);
+        var parent = await CreateFolder("Autotest Blank Title Parent", FolderType.USER, Owner);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _foldersApi.CreateFolderAsync(parent.Id, new CreateFolderRequest(title), TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
+
+        var content = (await _foldersApi.GetFolderByFolderIdAsync(parent.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        content.Folders.Should().BeEmpty();
+    }
+
     [Fact]
     public async Task CreateFolder_NameLongerThan165Chars_Returns400()
     {

@@ -83,7 +83,7 @@ public class CommentTests(
 
         // Act
         var comment = (await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateCommentRequest(version: 1, comment: null), TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateCommentRequest(version: 1, comment: null!), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         comment.Should().BeEmpty();

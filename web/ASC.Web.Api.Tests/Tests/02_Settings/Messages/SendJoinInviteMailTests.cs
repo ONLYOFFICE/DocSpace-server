@@ -74,7 +74,7 @@ public class SendJoinInviteMailTests(
     /// <summary>Every kind of caller the endpoint can see; <c>null</c> is the anonymous visitor.</summary>
     public static TheoryData<EmployeeType?> Callers =>
     [
-        null,
+        (EmployeeType?)null,
         EmployeeType.DocSpaceAdmin,
         EmployeeType.RoomAdmin,
         EmployeeType.User,

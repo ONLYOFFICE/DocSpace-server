@@ -54,14 +54,12 @@ public class MigrationController(
     MigrationLogger migrationLogger) : ControllerBase
 {
     /// <remarks>
-    /// Lists the source products this installation can import a portal from, as the migrator names every other
-    /// operation in this group expects. Nothing has to be called first, a DocSpace administrator is required as
-    /// everywhere here, and the call is read-only and idempotent. The answer is a plain list of names such as
-    /// `GoogleWorkspace`, `Nextcloud` or `Workspace`, never localized and ordered as the migrators are registered;
-    /// pass one of them as `migratorName` to `POST api/2.0/migration/init/{migratorName}`, where the match ignores
-    /// case. The list depends on the installation rather than on the portal, so it does not change while the portal
-    /// runs, and a name that is not in it is not rejected by the operation that takes it - the queued job ends with
-    /// the failure reported in `error` of `GET api/2.0/migration/status`.
+    /// Returns the names of the source products this installation can import a portal from. Pass a name as
+    /// `migratorName` to `POST api/2.0/migration/init/{migratorName}`, which ignores case. Requires a DocSpace admin.
+    /// Other callers get 403. The call is read-only. The names are not localized, for example `GoogleWorkspace` or
+    /// `Nextcloud`. The list keeps the order in which the installation registers its migrators. It depends on the
+    /// installation, not on the portal. The parse call does not reject a name outside this list. Instead, its job
+    /// ends with an error in `GET api/2.0/migration/status`.
     /// </remarks>
     /// <summary>
     /// Get available migrators
@@ -79,18 +77,17 @@ public class MigrationController(
     }
 
     /// <remarks>
-    /// Queues a pass that reads the backup already uploaded for this portal with the migrator named in the path and
-    /// reports what it holds - the users, the users that carry no email address, the users that exist on this portal
-    /// already, the groups and the archives it could not open - so that the caller can choose what to import. Upload
-    /// the backup first: `migrationFileUpload.ashx?Init=true` opens a new upload folder and drops the previous one,
-    /// then every part of the archive is posted to the same handler with `Name` set to its file name; take
-    /// `migratorName` from `GET api/2.0/migration/list`. A DocSpace administrator is required. The call only queues
-    /// the job and answers at once with an empty body: poll `GET api/2.0/migration/status` until `isCompleted` is
-    /// true, then read what was found from `parseResult` and any failure from `error`. Nothing is imported here and
-    /// the portal is not changed - the parse result is the body to edit and send to
-    /// `POST api/2.0/migration/migrate`. A portal runs one job at a time, so a call made while another parse or
-    /// import is still running is ignored instead of reported, and a backup bigger than the portal's total storage
-    /// quota ends the job with an error rather than failing this call.
+    /// Starts a job that reads the uploaded backup of the portal with the migrator named in the path. The job lists
+    /// the users, the groups, and the archives it cannot open. Users without an email and users that already exist
+    /// come in lists of their own. First, call `migrationFileUpload.ashx` with `Init=true`. This opens a new upload
+    /// folder and deletes the previous one. Then post each part of the archive to it with `Name` set to the file
+    /// name. Take `migratorName` from `GET api/2.0/migration/list`. Requires a DocSpace admin. Other callers get 403.
+    /// The call only queues the job and returns an empty body immediately. Repeat `GET api/2.0/migration/status`
+    /// until `isCompleted` is true. Then read the result from `parseResult` and any failure from `error`. The job
+    /// changes nothing on the portal. To import, edit `parseResult` and send it to `POST api/2.0/migration/migrate`.
+    /// A portal runs one job at a time. While a parse or an import runs, the call does nothing and reports nothing.
+    /// After the job ends, a repeated call starts a new parse. A failed parse deletes the backup, so upload it again
+    /// first. If the backup is larger than the storage quota of the portal, the job ends with an error.
     /// </remarks>
     /// <summary>
     /// Parse migration archive
@@ -108,18 +105,12 @@ public class MigrationController(
     }
 
     /// <remarks>
-    /// Returns how far the parse or the import queued for this portal has got and, once it stopped, what it produced
-    /// - the one place where every other operation in this group reports what it did. Any of them may be polled from
-    /// here as soon as it returns; a DocSpace administrator is required and the call is read-only and idempotent.
-    /// `progress` is the share of the job that is done, from 0 to 100, and `isCompleted` turns true when the job
-    /// stopped whether it succeeded or not, so read `error` as well: it stays empty while nothing went wrong and
-    /// otherwise holds the message that ended the job. `parseResult` carries what the migrator has read so far -
-    /// after a parse pass the users, groups and unreadable archives to edit and post to
-    /// `POST api/2.0/migration/migrate`, and during an import also `successedUsers` and `failedUsers` - and its
-    /// `operation` field, `parse` or `migration`, tells the two stages apart. The result is empty with status 200
-    /// when the portal has no job at all, because none was ever started or because
-    /// `POST api/2.0/migration/clear` or `POST api/2.0/migration/finish` has removed the last one; an empty answer is
-    /// therefore not an error. Line-by-line detail behind the numbers is in `GET api/2.0/migration/logs`.
+    /// Returns the progress and the result of the parse or import job of the portal. The other operations of this
+    /// group only queue work, so their outcome appears here. Requires a DocSpace admin. Other callers get 403. The
+    /// call is read-only. This is the call to poll. Repeat it until `isCompleted` is true. A failed job also sets
+    /// `isCompleted` to true, so then check `error`. If the portal has no job, the call returns 200 with an empty
+    /// result. This happens before the first parse and after `POST api/2.0/migration/finish`. To read each step of
+    /// the job, use `GET api/2.0/migration/logs`.
     /// </remarks>
     /// <summary>
     /// Get migration status
@@ -155,15 +146,12 @@ public class MigrationController(
     }
 
     /// <remarks>
-    /// Stops the parse pass queued for this portal and deletes the backup uploaded for it - the way back from a wrong
-    /// archive or a wrong migrator name. Nothing has to be called first and a DocSpace administrator is required; the
-    /// request is only queued, so the parse ends shortly after the call returns and
-    /// `GET api/2.0/migration/status` stops reporting it. The call is destructive for the uploaded data: the whole
-    /// upload folder is removed and the backup has to be sent to `migrationFileUpload.ashx` again before a new parse.
-    /// It is idempotent - cancelling when nothing is running still answers 200 - and it undoes nothing that was
-    /// already written to the portal. Only the parse stage is stopped, the job whose `parseResult.operation` is
-    /// `parse`: an import started by `POST api/2.0/migration/migrate` keeps running, and a finished import is
-    /// discarded with `POST api/2.0/migration/clear` instead.
+    /// Stops the parse job of the portal and deletes the uploaded backup. Use it after a wrong archive or a wrong
+    /// migrator name. Requires a DocSpace admin. Other callers get 403. The call only queues the request and returns
+    /// an empty body. Soon after, `GET api/2.0/migration/status` no longer shows the parse. You cannot restore the
+    /// deleted backup. Before a new parse, upload it to `migrationFileUpload.ashx` again. You can repeat the call. With
+    /// no parse job, it still returns 200 and deletes the upload folder. The call does not stop an import. It still
+    /// deletes the backup that the import reads. To delete a finished import, use `POST api/2.0/migration/clear`.
     /// </remarks>
     /// <summary>
     /// Cancel migration
@@ -181,15 +169,14 @@ public class MigrationController(
     }
 
     /// <remarks>
-    /// Discards a finished import and deletes the data uploaded for it, freeing the portal for the next one. Call it
-    /// once `GET api/2.0/migration/status` reports `isCompleted` for a job whose `parseResult.operation` is
-    /// `migration`; a DocSpace administrator is required. Only the queued job and the temporary upload folder go -
-    /// the users, groups and files already imported stay in the portal - so the call destroys migration data alone,
-    /// and it is idempotent: clearing twice, or with nothing to clear, still answers 200. Like the other write
-    /// operations here it is only queued, and once it has run `GET api/2.0/migration/status` returns an empty result
-    /// and `GET api/2.0/migration/logs` answers 404, so download the log before calling it. A parse that is still
-    /// running is not affected - stop that with `POST api/2.0/migration/cancel` - and
-    /// `POST api/2.0/migration/finish` performs the same clean-up itself, which makes this call unnecessary after it.
+    /// Deletes the finished import job of the portal and the backup uploaded for it. Call it after
+    /// `GET api/2.0/migration/status` reports `isCompleted` for a job whose `parseResult.operation` is `migration`.
+    /// Requires a DocSpace admin. Other callers get 403. The users, groups, and files already imported stay on the
+    /// portal. The call only queues the request and returns an empty body. You can repeat it. With nothing to clear,
+    /// it still returns 200. After it runs, `GET api/2.0/migration/status` returns an empty result. Also,
+    /// `GET api/2.0/migration/logs` returns 404, so download the log first. The call does not stop a running parse or
+    /// import. It still deletes the backup they read. To stop a parse, use `POST api/2.0/migration/cancel`. You do
+    /// not need this call after `POST api/2.0/migration/finish`, which does the same clean-up.
     /// </remarks>
     /// <summary>
     /// Clear migration
@@ -207,27 +194,28 @@ public class MigrationController(
     }
 
     /// <remarks>
-    /// Starts the import itself: the users, the groups and the files selected in the request body are created on this
-    /// portal from the backup that the parse pass has read. Run `POST api/2.0/migration/init/{migratorName}` first
-    /// and wait for `isCompleted` in `GET api/2.0/migration/status`, then send `parseResult` from that answer back
-    /// here with `shouldImport` set on the users and groups to take and the `import...Files` flags set for the
-    /// content to copy. A DocSpace administrator is required, and importing a user as `DocSpaceAdmin` additionally
-    /// requires the caller to be the portal owner unless a user with that email is an administrator of this portal
-    /// already, otherwise the whole call is rejected with 403 before anything is imported. The job is queued and the
-    /// call answers with an empty body at once: watch `progress`, `successedUsers`, `failedUsers` and `error` in
-    /// `GET api/2.0/migration/status` and read what each step did from `GET api/2.0/migration/logs`. The import
-    /// writes to the portal and cannot be undone, and a repeat is no help: a call made while the job runs is ignored,
-    /// and once the job has ended the uploaded backup is deleted, so a new call has nothing to read until the archive
-    /// is uploaded and parsed again. When the import is done, close it with `POST api/2.0/migration/finish`, which can
-    /// also mail the imported users their activation link.
+    /// Starts the import of the users, groups, and files selected in the body from the parsed backup. First, call
+    /// `POST api/2.0/migration/init/{migratorName}` and wait until `isCompleted` is true. Then send `parseResult`
+    /// from `GET api/2.0/migration/status` back here. Mark the users and groups to import with `shouldImport`, and
+    /// the content with the `import` flags. Requires a DocSpace admin. Other callers get 403. Only the portal owner
+    /// can import a user as `DocSpaceAdmin` who is not a DocSpace admin of this portal yet. If another admin tries
+    /// this, the call returns 403 and imports nothing. The call only queues the job and returns an empty body
+    /// immediately. Repeat `GET api/2.0/migration/status` until `isCompleted` is true. There, `successedUsers`,
+    /// `failedUsers`, and `error` show the result. The log in `GET api/2.0/migration/logs` has a line for each step.
+    /// The import changes the portal and cannot be undone. Do not repeat the call. While the job runs, a repeated
+    /// call does nothing. After the job ends, the portal deletes the backup. A repeated call then starts a job that
+    /// fails and replaces the result and the log of the import. So read them first, and upload and parse the backup
+    /// before a new import. The call returns 400 for a missing or unreadable body, an unknown `userType`, or an empty
+    /// or invalid `email`. When the import ends, close it with `POST api/2.0/migration/finish`. That call can also
+    /// email the imported users their activation links.
     /// </remarks>
     /// <summary>
     /// Start migration
     /// </summary>
     /// <path>api/2.0/migration/migrate</path>
-    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "for every room the queued import creates")]
-    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "for every folder the queued import creates, including the one in the personal section of each imported user that receives that user's files")]
-    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every imported room the queued import hands over to its original owner, when that owner is imported as a room admin or a DocSpace admin")]
+    [RaisesWebhook(WebhookTrigger.RoomCreated, When = "for every room the queued import creates, but no webhooks for imported users, groups, and files")]
+    [RaisesWebhook(WebhookTrigger.FolderCreated, When = "for every folder the queued import creates, including one per imported user for their files")]
+    [RaisesWebhook(WebhookTrigger.RoomUpdated, When = "for every room the queued import moves to its owner, a room admin or DocSpace admin")]
     [Tags("Migration")]
     [SwaggerResponse(200, "The import has been queued; the response carries no content and the progress is read from `GET api/2.0/migration/status`")]
     [SwaggerResponse(400, "The request body is missing or could not be read as a parse result, including an unknown `userType` name, or a user in `users`, `withoutEmailUsers` or `existUsers` has an `email` that is empty or not a valid address")]
@@ -269,16 +257,13 @@ public class MigrationController(
     }
 
     /// <remarks>
-    /// Downloads the log of the parse or import the portal currently holds - the step-by-step record behind the
-    /// numbers and the single error message of `GET api/2.0/migration/status`, and the place where the reason for a
-    /// skipped user or file is written. The portal has to hold such a job, started by
-    /// `POST api/2.0/migration/init/{migratorName}` or `POST api/2.0/migration/migrate` and not yet removed by
-    /// `POST api/2.0/migration/clear` or `POST api/2.0/migration/finish`, otherwise the call answers 404; a DocSpace
-    /// administrator is required and the call is read-only and idempotent. The body is not JSON: it is
-    /// `text/plain; charset=UTF-8` sent as an attachment named `migration.log`, one line per step with the progress
-    /// it reported. Each job writes its own log, so this always returns the log of the job that
-    /// `GET api/2.0/migration/status` describes, and while that job runs the file keeps growing - a call made early
-    /// returns only the part written so far and may be repeated later for the rest.
+    /// Returns the log of the parse or import job of the portal as a file. The log has a timestamped line for each
+    /// step, including why the job skipped a user or file. Requires a DocSpace admin. Other callers get 403. The
+    /// call is read-only. The body is not JSON. It is `text/plain; charset=UTF-8`, sent as the attachment
+    /// `migration.log`. Each job has its own log, and the call returns the log of the job that
+    /// `GET api/2.0/migration/status` shows. The portal saves the log only when the job ends. So wait until
+    /// `isCompleted` is true, since the call fails while the job runs. If the portal has no job, the call
+    /// returns 404. This happens after `POST api/2.0/migration/clear` or `POST api/2.0/migration/finish`.
     /// </remarks>
     /// <summary>
     /// Get migration logs
@@ -309,17 +294,15 @@ public class MigrationController(
     }
 
     /// <remarks>
-    /// Closes a completed import: it can send every user the import created the activation email they need before
-    /// they can sign in, and it then discards the job and the data uploaded for it. Call it once
-    /// `GET api/2.0/migration/status` reports `isCompleted` for the import; a DocSpace administrator is required, and
-    /// with `isSendWelcomeEmail` set to true the job must still be in the queue, so do not clear it first. That flag
-    /// decides what happens to the imported people: true mails the activation link to each of them who has not
-    /// activated their account yet and skips the ones that are already active, false ends the import quietly and
-    /// leaves inviting them for later. The call writes to the portal and is not idempotent - the emails go out again
-    /// on every call - while its second half repeats what `POST api/2.0/migration/clear` does, removing the finished
-    /// job and the uploaded backup and leaving everything already imported in place. It answers with an empty body,
-    /// after which `GET api/2.0/migration/status` returns an empty result and `GET api/2.0/migration/logs` answers
-    /// 404, so download the log first.
+    /// Closes a finished import and can email the imported users their activation links. Call it after
+    /// `GET api/2.0/migration/status` reports `isCompleted` for the import. Requires a DocSpace admin. Other callers
+    /// get 403. If `isSendWelcomeEmail` is true, the call emails each imported user who is not active yet. With
+    /// `false`, it sends nothing, and you can invite these users later. Then it queues the same clean-up as
+    /// `POST api/2.0/migration/clear`. The clean-up deletes the job and the uploaded backup, and the imported data
+    /// stays. The call returns an empty body. After it, `GET api/2.0/migration/status` returns an empty result. Also,
+    /// `GET api/2.0/migration/logs` returns 404, so download the log first. You can repeat the call with `false`.
+    /// With `true`, do not repeat it. A repeat can send the emails again. It returns 400 if the body has no
+    /// `isSendWelcomeEmail`.
     /// </remarks>
     /// <summary>
     /// Finish migration
@@ -329,7 +312,6 @@ public class MigrationController(
     [SwaggerResponse(200, "The activation emails have been sent if they were asked for and the clean-up has been queued. The response carries no content")]
     [SwaggerResponse(400, "The request body cannot be read or has no `isSendWelcomeEmail`")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
-    [SwaggerResponse(500, "`isSendWelcomeEmail` is true and the portal holds no import that has reached the user step: no job at all, only a parse pass, or an import still running or stopped before that step")]
     [HttpPost("finish")]
     public async Task FinishMigration(FinishDto inDto)
     {

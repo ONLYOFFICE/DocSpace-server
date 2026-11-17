@@ -256,6 +256,10 @@ global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json.Linq;
 
+global using Npgsql;
+
+global using NpgsqlTypes;
+
 global using OpenAI;
 
 global using OpenSearch.Client;
@@ -287,6 +291,7 @@ global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.
 global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
 global using Constants = ASC.Core.Users.Constants;
+global using DeletedThread = ASC.AI.Integration.Threads.DeletedThread;
 global using DocumentBuilderFailedException = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderFailedException;
 global using DocumentBuilderScriptRunner = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderScriptRunner;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;

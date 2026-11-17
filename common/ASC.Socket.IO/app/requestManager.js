@@ -43,7 +43,7 @@ module.exports = (options) => {
   const url = `${basePath}${apiPrefixURL}${options.url}`;
 
   const axiosOptions = {
-    baseURL: url,
+    url,
     responseType: "json",
     timeout: apiTimeout,
     headers: options.headers,
@@ -55,18 +55,13 @@ module.exports = (options) => {
     if (res.data && res.data.error) {
       return res.data.error.message;
     }
-
-    if (res.isAxiosError && res.message) {
-      return res.message;
-    }
   };
 
   const onSuccess = (response) => {
     const error = getResponseError(response);
     if (error) throw new Error(error);
 
-    if (!response || !response.data || response.isAxiosError) return null;
-    if (response.request.responseType === "text") return response.data;
+    if (!response || !response.data) return null;
 
     return response.data.response;
   };
@@ -78,6 +73,5 @@ module.exports = (options) => {
     return Promise.reject(errorText || error);
   };
 
-  const request = axios.create(axiosOptions);
-  return request().then(onSuccess).catch(onError);
+  return axios.request(axiosOptions).then(onSuccess).catch(onError);
 };

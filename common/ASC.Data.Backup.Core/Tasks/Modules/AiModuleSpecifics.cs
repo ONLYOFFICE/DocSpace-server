@@ -113,7 +113,7 @@ public class AiIntegrationModuleSpecifics(ILogger<ModuleProvider> logger, Helper
         new("ai_integration_threads", "tenant_id", "id", IdType.GuidV7)
         {
             UserIDColumns = ["created_by"],
-            DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "last_edit_date", false } }
+            DateColumns = new Dictionary<string, bool> { { "created_at", false }, { "last_edit_date", false }, { "deleted_on", false } }
         },
         new("ai_integration_messages", "tenant_id", "id", IdType.GuidV7)
         {

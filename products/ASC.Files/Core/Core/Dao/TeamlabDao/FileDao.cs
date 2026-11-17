@@ -479,6 +479,11 @@ internal class FileDao(
         return await SaveFileAsync(file, fileStream, true, true, null, allowQuotaGrace);
     }
 
+    public Task<File<int>> SaveThreadFileAsync(File<int> file, Stream fileStream, Guid threadId)
+    {
+        return SaveFileAsync(file, fileStream, true, true, null, false, threadId);
+    }
+
     /// <summary>
     /// A private room holds nothing but ciphertext, whichever way a file gets there. This sits on the write path
     /// itself so that a new way of creating a file cannot walk around it.
@@ -496,13 +501,25 @@ internal class FileDao(
         return await SaveFileAsync(file, fileStream, true, checkFolder);
     }
 
-    public async Task<File<int>> SaveFileAsync(
+    public Task<File<int>> SaveFileAsync(
         File<int> file,
         Stream fileStream,
         bool checkQuota,
         bool checkFolder,
         ChunkedUploadSession<int> uploadSession = null,
         bool allowQuotaGrace = false)
+    {
+        return SaveFileAsync(file, fileStream, checkQuota, checkFolder, uploadSession, allowQuotaGrace, null);
+    }
+
+    private async Task<File<int>> SaveFileAsync(
+        File<int> file,
+        Stream fileStream,
+        bool checkQuota,
+        bool checkFolder,
+        ChunkedUploadSession<int> uploadSession,
+        bool allowQuotaGrace,
+        Guid? threadId)
     {
         ArgumentNullException.ThrowIfNull(file);
 
@@ -631,6 +648,12 @@ internal class FileDao(
                     await strategy.ExecuteAsync(async () =>
                     {
                         await using var tx = await filesDbContext.Database.BeginTransactionAsync();
+
+                        // Locks the thread row until the transaction ends, so a soft delete cannot slip in between.
+                        if (threadId.HasValue && await filesDbContext.TouchLiveThreadAsync(tenantId, threadId.Value, DateTime.UtcNow) == 0)
+                        {
+                            throw new ItemNotFoundException();
+                        }
 
                         if (file.Id == 0)
                         {
@@ -1340,7 +1363,7 @@ internal class FileDao(
     {
         if (toFolderId is int tId)
         {
-            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks, newTitle));
+            return IdConverter.Convert<TTo>(await MoveFileAsync(fileId, tId, deleteLinks, newTitle, null));
         }
 
         if (toFolderId is string tsId)
@@ -1353,14 +1376,19 @@ internal class FileDao(
 
     public Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks = false)
     {
-        return MoveFileAsync(fileId, toFolderId, deleteLinks, null);
+        return MoveFileAsync(fileId, toFolderId, deleteLinks, null, null);
+    }
+
+    public Task<int> MoveThreadFileAsync(int fileId, int toFolderId, Guid threadId)
+    {
+        return MoveFileAsync(fileId, toFolderId, false, null, threadId);
     }
 
     /// <summary>
     /// Moves the file; a non-null <paramref name="newTitle"/> is stored on the current version in the same
     /// update, so the file arrives under it instead of being renamed afterwards.
     /// </summary>
-    private async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks, string newTitle)
+    private async Task<int> MoveFileAsync(int fileId, int toFolderId, bool deleteLinks, string newTitle, Guid? threadId)
     {
         var title = newTitle == null ? null : Global.ReplaceInvalidCharsAndTruncate(newTitle);
 
@@ -1485,6 +1513,12 @@ internal class FileDao(
 
             await using (var tx = await context.Database.BeginTransactionAsync())
             {
+                // Locks the thread row until the transaction ends, so a soft delete cannot slip in between.
+                if (threadId.HasValue && await context.TouchLiveThreadAsync(tenantId, threadId.Value, DateTime.UtcNow) == 0)
+                {
+                    throw new ItemNotFoundException();
+                }
+
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
 
                 if (skill != null && fromRoomId != toRoomId)

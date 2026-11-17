@@ -365,7 +365,7 @@ public static class DocumentService
 
         var commandTimeout = Timeout;
 
-        if (method == CommandMethod.Version)
+        if (method is CommandMethod.Version or CommandMethod.License)
         {
             commandTimeout = 5000;
         }
@@ -435,8 +435,26 @@ public static class DocumentService
             return new CommandResponse
             {
                 Error = ErrorTypes.ParseError,
-                ErrorString = $"{ex.Message} Content: {dataResponse}"
+                ErrorString = $"{ex.Message} Content: {dataResponse}",
+                Server = TryReadServerInfo(dataResponse)
             };
+        }
+    }
+
+    // The editors without a license answer the license command with an end date of null, which the license cannot take;
+    // their server characteristics are still read.
+    private static CommandResponse.ServerInfo TryReadServerInfo(string dataResponse)
+    {
+        try
+        {
+            using var document = JsonDocument.Parse(dataResponse);
+            return document.RootElement.TryGetProperty("server", out var server) && server.ValueKind == JsonValueKind.Object
+                ? server.Deserialize<CommandResponse.ServerInfo>(_commonSettings)
+                : null;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 

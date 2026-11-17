@@ -7,6 +7,9 @@
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
   </PropertyGroup>
   <ItemGroup>
+    <InternalsVisibleTo Include="ASC.Files.Tests" />
+  </ItemGroup>
+  <ItemGroup>
 
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
 

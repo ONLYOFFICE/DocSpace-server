@@ -108,8 +108,7 @@ public class HistoryFolderRequestDto
     public ApiDateTime ToDate { get; set; }
 
     /// <summary>
-    /// How many entries one page holds. The number of entries that match the query is reported in the response
-    /// headers, not in the body.
+    /// How many history records one page covers.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -117,8 +116,8 @@ public class HistoryFolderRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// How many entries to skip before the page begins, counted from the newest one, so pages are taken by adding the
-    /// page size to it.
+    /// How many history records to skip before the page begins, counted from the newest one. To take the next page,
+    /// add the page size to it.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]

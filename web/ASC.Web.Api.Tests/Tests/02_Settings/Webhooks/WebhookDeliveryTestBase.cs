@@ -338,6 +338,25 @@ public abstract class WebhookDeliveryTestBase(
     }
 
     /// <summary>
+    /// Reads one number from the stack's database, for what no API call reports: the delivery records left of a
+    /// removed subscription. MySQL only, like <see cref="ExecuteSqlAsync"/>.
+    /// </summary>
+    protected async Task<long> QueryCountAsync(string sql, params (string Name, object Value)[] parameters)
+    {
+        await using var connection = await _fixture.OpenDatabaseAsync(TestContext.Current.CancellationToken);
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = sql;
+
+        foreach (var (name, value) in parameters)
+        {
+            command.Parameters.AddWithValue(name, value);
+        }
+
+        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken), CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
     /// Polls a subscription as the owner reads it until <paramref name="until"/> holds, and returns the last observed
     /// state either way; null once the subscription is gone.
     /// </summary>

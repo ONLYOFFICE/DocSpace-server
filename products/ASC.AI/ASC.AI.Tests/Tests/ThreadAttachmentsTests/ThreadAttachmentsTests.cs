@@ -37,14 +37,8 @@ namespace ASC.AI.Tests.Tests.ThreadAttachmentsTests;
 [Trait("Feature", "AI/ThreadAttachments")]
 public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestBase(fixture)
 {
-    private const string AttachmentsPath = "/internal/ai/attachments";
-
     private static readonly byte[] _png =
         Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==");
-
-    private sealed record Attachment(Guid Id, string Kind, string Title, string? Content, string? EntryId);
-
-    private sealed record ThreadFilesPage(List<ThreadFile> Files, long Total);
 
     [Fact]
     public async Task Upload_ToTheProject_StoresTheFileInItsRoot()
@@ -391,43 +385,4 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         return new ThreadFile(copy.Id, copy.Title, copy.FolderId);
     }
 
-    private async Task<Attachment> AttachAsync(int fileId)
-    {
-        using var response = await _ai.PostAsync(AttachmentsPath, new { entryIds = new[] { fileId.ToString() } }, TestContext.Current.CancellationToken);
-
-        var attachments = await _ai.ReadAsync<List<Attachment>>(response, TestContext.Current.CancellationToken);
-
-        return attachments.Should().ContainSingle().Subject;
-    }
-
-    private Task<HttpResponseMessage> BindAsync(Guid messageId, params Guid[] ids)
-    {
-        return _ai.PutAsync(AttachmentsPath, new { ids, messageId }, TestContext.Current.CancellationToken);
-    }
-
-    private async Task<ThreadFile> SendAsync(int projectId, Guid threadId, string name)
-    {
-        var file = await UploadAsync(projectId, name);
-        var attachment = await AttachAsync(file.Id);
-        var message = await CreateMessageInternalAsync(threadId);
-
-        using var response = await BindAsync(message.Id, attachment.Id);
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        return file;
-    }
-
-    private Task<HttpResponseMessage> GetAttachmentsAsync(int projectId, Guid threadId)
-    {
-        return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/attachments", TestContext.Current.CancellationToken);
-    }
-
-    private async Task<ThreadFilesPage> ListAttachmentsAsync(int projectId, Guid threadId)
-    {
-        using var response = await GetAttachmentsAsync(projectId, threadId);
-
-        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ThreadFile>>(response, TestContext.Current.CancellationToken);
-
-        return new ThreadFilesPage(envelope.Response ?? [], envelope.Total ?? 0);
-    }
 }

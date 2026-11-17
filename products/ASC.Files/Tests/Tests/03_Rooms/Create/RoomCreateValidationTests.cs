@@ -226,7 +226,7 @@ public class RoomCreateValidationTests(AspireAppFixture fixture) : BaseTest(fixt
     {
         // Act
         var room = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto("Autotest NullTags", roomType: RoomType.CustomRoom, tags: null),
+            new CreateRoomRequestDto("Autotest NullTags", roomType: RoomType.CustomRoom, tags: null!),
             TestContext.Current.CancellationToken)).Response;
 
         // Assert

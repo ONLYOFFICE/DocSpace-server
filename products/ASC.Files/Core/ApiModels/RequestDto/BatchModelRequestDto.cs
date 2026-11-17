@@ -193,15 +193,14 @@ public class DeleteVersionBatchRequestDto : FileOperationRequestBaseDto
 public class DeleteFileRequest
 {
     /// <summary>
-    /// When to delete: `true` waits until the editing session on the file has ended, `false` deletes at once, pulling
-    /// the file away from whoever is working on it.
+    /// Whether `GET api/2.0/files/fileops` keeps the finished deletion: `true` removes it from that list, so its
+    /// result cannot be read; `false` keeps it there.
     /// </summary>
     /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Where the file goes: `false` moves it to Trash, from where it can be restored, `true` deletes it for good.
-    /// Inside a room, where there is no Trash, deletion is always final.
+    /// Where the file goes: `false` moves it to the trash, from where it can be restored, `true` deletes it for good.
     /// </summary>
     /// <example>false</example>
     public bool Immediately { get; set; }

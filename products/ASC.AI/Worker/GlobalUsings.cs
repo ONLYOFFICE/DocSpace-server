@@ -58,6 +58,7 @@ global using ASC.EventBus.Log;
 
 global using ASC.Files.Core;
 global using ASC.Files.Core.Core;
+global using ASC.Files.Core.Core.AI;
 global using ASC.Files.Core.EF;
 global using ASC.Files.Core.Vectorization;
 global using ASC.Files.Core.Vectorization.Events;
@@ -76,3 +77,6 @@ global using System.Text;
 global using System.Threading.Channels;
 
 global using ASC.Web.Files.Utils;
+
+global using DeletedThread = ASC.AI.Integration.Threads.DeletedThread;
+global using ThreadsStorage = ASC.AI.Integration.Threads.ThreadsStorage;

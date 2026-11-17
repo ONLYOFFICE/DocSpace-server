@@ -131,6 +131,34 @@ public class RoomDeleteFileOpsTests(
         info.FilesCount.Should().Be(1);
     }
 
+    /// <summary>
+    /// A Room admin who is not a member of a room has no read access to it, so duplicating it is refused
+    /// and no copy appears.
+    /// </summary>
+    [Fact]
+    public async Task DuplicateBatchItems_RoomAdminDuplicatesForeignRoom_RefusedAndNoCopy()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Owner Room For RoomAdmin Duplicate");
+
+        var roomAdmin = await InviteMember(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.DuplicateBatchItemsAsync(
+                new DuplicateRequestDto { ReturnSingleOperation = true, FolderIds = [new(room.Id)] },
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("Access denied");
+
+        await _filesClient.Authenticate(Owner);
+        (await FindRoomId("Autotest Owner Room For RoomAdmin Duplicate", room.Id)).Should().BeNull();
+    }
+
     /// <summary>The id of the first room whose title contains <paramref name="titlePart"/> and whose id differs
     /// from <paramref name="excludeId"/>.</summary>
     private async Task<int?> FindRoomId(string titlePart, int excludeId)

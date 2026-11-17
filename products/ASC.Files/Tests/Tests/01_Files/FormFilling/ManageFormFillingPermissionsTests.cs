@@ -143,4 +143,54 @@ public class ManageFormFillingPermissionsTests(
 
         exception.ErrorCode.Should().Be(403);
     }
+
+    [Fact]
+    public async Task ManageFormFilling_RoomAdminWithRoomManagerAccess_StopsFormFillingStartedByOwner()
+    {
+        // Arrange
+        var (roomId, formId) = await CreateRoomWithOwnerUploadedForm("Autotest ManageFormFilling RoomManager Stops Owner Room");
+
+        var roomManager = await InviteMember(EmployeeType.RoomAdmin);
+        await InviteToRoom(roomId, roomManager, FileShare.RoomManager);
+
+        await _filesClient.Authenticate(Owner);
+        await StartFormFilling(formId);
+
+        // Act
+        await _filesClient.Authenticate(roomManager);
+        await StopFormFilling(formId);
+
+        // Assert - a stopped form is no longer visible to a Form Filler, it is back to "not started"
+        await _filesClient.Authenticate(Owner);
+        var form = (await _filesApi.GetFileInfoAsync(formId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        form.StartFilling.Should().NotBe(true);
+    }
+
+    [Fact]
+    public async Task ManageFormFilling_FormFiller_CannotStartOrStopReturns403()
+    {
+        // Arrange
+        var (roomId, formId) = await CreateRoomWithOwnerUploadedForm("Autotest ManageFormFilling FormFiller Room");
+
+        var filler = await InviteMember(EmployeeType.User);
+        await InviteToRoom(roomId, filler, FileShare.FillForms);
+
+        // Act - start the owner's not-started form
+        await _filesClient.Authenticate(filler);
+        var start = await Assert.ThrowsAsync<ApiException>(async () => await StartFormFilling(formId));
+
+        // Act - stop the form once the owner has started it
+        await _filesClient.Authenticate(Owner);
+        await StartFormFilling(formId);
+        await _filesClient.Authenticate(filler);
+        var stop = await Assert.ThrowsAsync<ApiException>(async () => await StopFormFilling(formId));
+
+        // Assert
+        start.ErrorCode.Should().Be(403);
+        stop.ErrorCode.Should().Be(403);
+
+        await _filesClient.Authenticate(Owner);
+        var form = (await _filesApi.GetFileInfoAsync(formId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        form.StartFilling.Should().BeTrue();
+    }
 }
