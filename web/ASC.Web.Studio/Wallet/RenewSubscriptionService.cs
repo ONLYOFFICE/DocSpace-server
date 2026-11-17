@@ -65,17 +65,14 @@ public class RenewSubscriptionService(
     // twice. Fixed times rather than a number of runs, which would shrink with renewperiod.
     private static readonly TimeSpan _renewNotExtendedGrace = TimeSpan.FromMinutes(10);
 
-    // How long after it was claimed a renewal may still begin its top-up or its payment change. Another instance takes
-    // a started entry up once _renewNotExtendedGrace has passed, whether the process that claimed it is still at work
-    // or not, and the work has no bound of its own. Past this limit the renewal begins neither and leaves its entry to
-    // be resumed. The two minutes between the limit and the grace are measured by the clocks of two instances - one
-    // stamps the claim, the other compares it - so they also have to cover the difference of those clocks.
-    // What the limit does not bound is a top-up already begun: it makes up to five deposits, each followed by a poll
-    // of the balance, without looking at the claim again. With a slow accounting it can outlast the grace, and the
-    // instance that takes the entry up then tops the wallet up as well: the card is charged twice, the money of both
-    // deposits stays in the wallet. The payment change has no such gap: it is sent only by the process the journal
-    // still names, see TryMarkPaymentRequestedAsync - except while a process of a version that does not know the mark
-    // rewrites the journal, see RenewalJournalEntry.
+    // How long after it was claimed a renewal may still begin a money step. Another instance takes a started entry up
+    // once _renewNotExtendedGrace has passed, whether the process that claimed it is still at work or not. Past this
+    // limit the renewal begins neither its top-up nor its payment change, and a top-up under way stops: no further
+    // deposit is begun and the poll of the balance after one is cut short. What the limit cannot cut is the one request
+    // in flight, a deposit bounded by the 60 s client timeout, so the two minutes up to the grace cover that request and
+    // the difference of the clocks of two instances: one stamps the claim, the other compares it. The payment change
+    // is sent only by the process the journal still names, see TryMarkPaymentRequestedAsync - except while a process
+    // of a version that does not know the mark rewrites the journal, see RenewalJournalEntry.
     private static readonly TimeSpan _claimWorkLimit = TimeSpan.FromMinutes(8);
 
     // How long after the timeout a renewal is re-checked while billing gives no answer at all, before the
@@ -243,7 +240,7 @@ public class RenewSubscriptionService(
                         break;
                     }
 
-                    await RenewSubscriptionAsync(entry, wasInterrupted);
+                    await RenewSubscriptionAsync(entry, wasInterrupted, stoppingToken);
                 }
             }
         }
@@ -253,15 +250,19 @@ public class RenewSubscriptionService(
         }
     }
 
-    private async ValueTask RenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted)
+    private async ValueTask RenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted, CancellationToken stoppingToken)
     {
         // The claim comes before anything else, the checks that can end the renewal with a failure letter included:
         // an entry that is gone or changed since this run read it belongs to another instance, which alone settles
         // it and tells the customer how it ended.
-        var claimed = await TryClaimInJournalAsync(data);
+        var (claimed, claimFailed) = await TryClaimInJournalAsync(data);
         if (claimed == null)
         {
-            logger.WarningRenewSubscriptionServiceNotClaimed(data.TenantId, Describe(_walletQuotas[data.Quota], data.NextQuantity ?? data.Quantity));
+            // a journal out of reach is on record already, with its cause
+            if (!claimFailed)
+            {
+                logger.WarningRenewSubscriptionServiceNotClaimed(data.TenantId, Describe(_walletQuotas[data.Quota], data.NextQuantity ?? data.Quantity));
+            }
 
             return;
         }
@@ -273,7 +274,7 @@ public class RenewSubscriptionService(
 
         try
         {
-            outcome = await TryRenewSubscriptionAsync(data, interrupted, claim);
+            outcome = await TryRenewSubscriptionAsync(data, interrupted, claim, stoppingToken);
         }
         finally
         {
@@ -285,13 +286,13 @@ public class RenewSubscriptionService(
             // through billing.
             if (outcome != RenewalOutcome.ClaimKept)
             {
-                await ReleaseInJournalAsync(claim.Entry, outcome == RenewalOutcome.WaitsForBilling ? data : null);
+                await ReleaseInJournalAsync(claim.Entry, outcome is RenewalOutcome.WaitsForBilling or RenewalOutcome.Untouched ? data : null);
             }
         }
     }
 
     // Makes the renewal under the given claim and says what is to become of its journal entry.
-    private async Task<RenewalOutcome> TryRenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted, Claim claim)
+    private async Task<RenewalOutcome> TryRenewSubscriptionAsync(RenewalJournalEntry data, bool interrupted, Claim claim, CancellationToken stoppingToken)
     {
         var claimedAt = claim.Entry.StageSince;
 
@@ -575,6 +576,15 @@ public class RenewSubscriptionService(
                 return RenewalOutcome.ClaimKept;
             }
 
+            // A stopping process begins no money step: nothing was paid in this process, so the entry goes back as it
+            // was read, for the next process.
+            if (stoppingToken.IsCancellationRequested)
+            {
+                logger.WarningRenewSubscriptionServiceStopping(data.TenantId, description);
+
+                return RenewalOutcome.Untouched;
+            }
+
             if (!targetQuota.Additional)
             {
                 // The user subscription is paid from the wallet, so make sure the wallet balance
@@ -588,7 +598,27 @@ public class RenewSubscriptionService(
                 // wallet already holds; if that is not enough the customer is notified instead.
                 var allowTopUp = !customerInfo.IsDelayedPaymentMethod;
 
-                if (!await tariffService.EnsureWalletBalanceAsync(data.TenantId, requiredAmount, defaultCurrency, null, siteName, true, metadata, allowTopUp))
+                // The top-up is held to the limit of the claim and stops with the service: a deposit already sent is let
+                // finish, no further one is begun, and the poll of the balance after it is cut short.
+                using var topUpLimit = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                topUpLimit.CancelAfter(TimeLeftUnderClaim(claimedAt));
+
+                bool covered;
+
+                try
+                {
+                    covered = await tariffService.EnsureWalletBalanceAsync(data.TenantId, requiredAmount, defaultCurrency, null, siteName, true, metadata, allowTopUp, topUpLimit.Token);
+                }
+                catch (OperationCanceledException) when (topUpLimit.IsCancellationRequested)
+                {
+                    // A deposit may have been made. Whoever takes the entry up asks billing first, and tops up only
+                    // what the wallet still lacks.
+                    logger.ErrorRenewSubscriptionServiceTopUpStopped(data.TenantId, description);
+
+                    return RenewalOutcome.ClaimKept;
+                }
+
+                if (!covered)
                 {
                     throw new BillingException("Insufficient balance");
                 }
@@ -602,14 +632,31 @@ public class RenewSubscriptionService(
                 return RenewalOutcome.ClaimKept;
             }
 
+            // A stopping process sends no payment change: a top-up, if one was made, stays in the wallet, and the next
+            // process resumes the renewal through billing.
+            if (stoppingToken.IsCancellationRequested)
+            {
+                logger.WarningRenewSubscriptionServiceStopping(data.TenantId, description);
+
+                return RenewalOutcome.ClaimKept;
+            }
+
             // The record comes before the step it describes, so it says the payment change was requested, not that
             // it was sent: from that moment whoever takes the entry up only asks billing about it - also when the
             // process stopped before the change left, which then ends with the failure letter rather than a second
             // attempt. It is also the last look at the journal - an entry another instance has taken up meanwhile is
             // not this process's to pay any more.
-            if (!await TryMarkPaymentRequestedAsync(claim))
+            var (marked, markFailed) = await TryMarkPaymentRequestedAsync(claim);
+            if (!marked)
             {
-                logger.ErrorRenewSubscriptionServiceNotMarked(data.TenantId, description);
+                if (markFailed)
+                {
+                    logger.ErrorRenewSubscriptionServiceNotMarked(data.TenantId, description);
+                }
+                else
+                {
+                    logger.WarningRenewSubscriptionServiceTakenOver(data.TenantId, description);
+                }
 
                 return RenewalOutcome.ClaimKept;
             }
@@ -916,6 +963,14 @@ public class RenewSubscriptionService(
         await hybridCache.SetAsync(PendingCacheKey, pending, _pendingWriteOptions);
     }
 
+    // How long a money step may still run under the claim made at the given moment, see _claimWorkLimit.
+    private static TimeSpan TimeLeftUnderClaim(DateTime claimedAt)
+    {
+        var left = claimedAt + _claimWorkLimit - DateTime.UtcNow;
+
+        return left > TimeSpan.Zero ? left : TimeSpan.Zero;
+    }
+
     // Whether the claim made at the given moment is too old to begin a money step under, see _claimWorkLimit.
     private static bool ClaimIsTooOld(DateTime claimedAt)
     {
@@ -1046,9 +1101,9 @@ public class RenewSubscriptionService(
 
     // Claims the entry for this process: marks it as started, with one more attempt, and returns it as the journal
     // now holds it. Null when the journal no longer holds the entry as this run read it - another instance has settled
-    // it or taken it up - or when the journal could not be changed: the entry is then left as it is, for the run that
-    // owns it or for the next one.
-    private async Task<RenewalJournalEntry> TryClaimInJournalAsync(RenewalJournalEntry entry)
+    // it or taken it up - or, with Failed set, when the journal could not be changed: the entry is then left as it
+    // is, for the run that owns it or for the next one.
+    private async Task<(RenewalJournalEntry Claimed, bool Failed)> TryClaimInJournalAsync(RenewalJournalEntry entry)
     {
         try
         {
@@ -1059,7 +1114,7 @@ public class RenewSubscriptionService(
                 var at = journal.FindIndex(entry.IsSameRenewal);
                 if (at < 0 || journal[at] != entry)
                 {
-                    return null;
+                    return (null, false);
                 }
 
                 var claimed = entry with { Stage = RenewalStage.Started, StageSince = DateTime.UtcNow, Attempt = entry.Attempt + 1 };
@@ -1068,21 +1123,21 @@ public class RenewSubscriptionService(
 
                 await SaveJournalAsync(journal);
 
-                return claimed;
+                return (claimed, false);
             }
         }
         catch (Exception ex)
         {
             logger.ErrorRenewSubscriptionServiceTenant(entry.TenantId, ex);
 
-            return null;
+            return (null, true);
         }
     }
 
-    // Records in the claimed entry that its payment change is requested. False when the journal no longer holds the
-    // entry as this process claimed it - another instance has taken it up - or could not be changed: the payment
-    // change is then not sent.
-    private async Task<bool> TryMarkPaymentRequestedAsync(Claim claim)
+    // Records in the claimed entry that its payment change is requested. Not marked when the journal no longer holds
+    // the entry as this process claimed it - another instance has taken it up - or, with Failed set, when it could
+    // not be changed: the payment change is then not sent.
+    private async Task<(bool Marked, bool Failed)> TryMarkPaymentRequestedAsync(Claim claim)
     {
         try
         {
@@ -1093,7 +1148,7 @@ public class RenewSubscriptionService(
                 var at = journal.FindIndex(claim.Entry.IsSameRenewal);
                 if (at < 0 || journal[at] != claim.Entry)
                 {
-                    return false;
+                    return (false, false);
                 }
 
                 var marked = claim.Entry with { PaymentRequestedAt = DateTime.UtcNow };
@@ -1104,14 +1159,14 @@ public class RenewSubscriptionService(
 
                 claim.Entry = marked;
 
-                return true;
+                return (true, false);
             }
         }
         catch (Exception ex)
         {
             logger.ErrorRenewSubscriptionServiceTenant(claim.Entry.TenantId, ex);
 
-            return false;
+            return (false, true);
         }
     }
 
@@ -1253,6 +1308,9 @@ public class RenewSubscriptionService(
 
         // interrupted earlier, and billing has not said yet what became of it: the entry goes back as it was read
         WaitsForBilling,
+
+        // nothing was paid in this process - it is stopping: the entry goes back as it was read
+        Untouched,
 
         // money may have moved, or another instance has the entry: it stays as this process last wrote it
         ClaimKept

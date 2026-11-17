@@ -1488,7 +1488,7 @@ public class TariffService(
     /// balance did not reflect the change in time - the deposit may or may not have been applied on the
     /// billing side, so callers must not blindly retry with a recomputed amount, or they risk depositing twice.
     /// </summary>
-    private async Task<(TopUpOutcome Outcome, bool Result)> TopUpDepositInternalAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata, bool waitForChanges)
+    private async Task<(TopUpOutcome Outcome, bool Result)> TopUpDepositInternalAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata, bool waitForChanges, CancellationToken cancellationToken = default)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1503,6 +1503,9 @@ public class TariffService(
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
         var result = false;
         TopUpOutcome outcome;
+
+        // the last moment a cancelled caller sends nothing
+        cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
@@ -1521,6 +1524,9 @@ public class TariffService(
             return (outcome, result);
         }
 
+        // The deposit is sent; a cancelled caller does not wait to learn whether it was applied.
+        cancellationToken.ThrowIfCancellationRequested();
+
         var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
 
         var updated = await pipeline.ExecuteAsync(async _ =>
@@ -1529,7 +1535,7 @@ public class TariffService(
             var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
 
             return oldBalanceAmount != newBalanceAmount;
-        });
+        }, cancellationToken);
 
         if (!updated)
         {
@@ -1544,7 +1550,14 @@ public class TariffService(
         return (outcome, result);
     }
 
-    public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true)
+    /// <summary>
+    /// Tops the wallet up for what it lacks of <paramref name="requiredAmount"/>, in up to five deposits, and reports
+    /// whether it covers the amount then. The token is checked before each deposit and before each poll of the
+    /// balance that follows one: once it is cancelled, no further deposit is begun and the method throws
+    /// <see cref="OperationCanceledException"/>. A deposit already sent is let finish, so a caller that stops it by a
+    /// deadline does not know whether that deposit was applied.
+    /// </summary>
+    public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true, CancellationToken cancellationToken = default)
     {
         var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
 
@@ -1560,11 +1573,13 @@ public class TariffService(
         // The balance may be consumed concurrently, so the top-up is retried several times.
         for (var attempt = 0; attempt < MaxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
 
             // waitForChanges must stay true: TopUpOutcome.Unknown is the only early exit that stops this loop
             // from firing a second real deposit, and it can only be reported when the balance is polled.
-            var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
+            var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true, cancellationToken);
             if (toppedUp)
             {
                 var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();

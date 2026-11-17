@@ -513,8 +513,8 @@ refused with 402 and nothing charged.
 
 ### Requirement: Automatic renewal of a wallet subscription
 
-A subscription paid from the wallet SHALL be renewed shortly before its due date, the wallet topped up first
-for what it lacks unless its payment method is delayed. A renewal a stopped service left unfinished SHALL be
+A wallet subscription SHALL be renewed shortly before its due date; for the main plan the wallet
+is topped up first for what it lacks, unless its payment method is delayed. A renewal a stopped service left unfinished SHALL be
 resumed by asking billing first and SHALL NOT be paid again once its payment was requested or billing
 reports the subscription extended. A renewal that fails SHALL send the failure letter to the payer and the
 owner, unless it is no longer wanted or its due date moved.
@@ -522,17 +522,32 @@ owner, unless it is no longer wanted or its due date moved.
 #### Scenario: Wallet covers the next period
 
 - **WHEN** the due date of a wallet subscription comes near and the wallet holds its price
-- **THEN** the next period is paid with the same quantity and the wallet is not topped up
+- **THEN** the next period is paid for the quantity scheduled for it, raised to the seats or the storage in use, and the wallet is not topped up
+
+#### Scenario: Switch to another plan scheduled
+
+- **WHEN** a switch to another wallet plan is scheduled for the due date
+- **THEN** that plan is bought for the next period instead of renewing the current one
 
 #### Scenario: Wallet short of the price
 
-- **WHEN** the due date comes near, the wallet holds less than the price and the payment method is not a delayed one
+- **WHEN** the due date of the main plan comes near, the wallet holds less than the price and the payment method is not a delayed one
 - **THEN** the wallet is topped up once for the shortfall and the next period is then paid from it
 
 #### Scenario: Wallet short of the price with a delayed payment method
 
-- **WHEN** the due date comes near, the wallet holds less than the price and the payment method is a delayed one
+- **WHEN** the due date of the main plan comes near, the wallet holds less than the price and the payment method is a delayed one
 - **THEN** the wallet is not topped up, nothing is paid and the failure letter is sent
+
+#### Scenario: Additional wallet service
+
+- **WHEN** the due date of an additional wallet service, not the main plan, comes near
+- **THEN** its next period is requested without topping the wallet up first
+
+#### Scenario: Additional wallet service while the tariff is overdue
+
+- **WHEN** the due date of an additional wallet service comes near while the portal's tariff is overdue
+- **THEN** it is not renewed and no failure letter is sent
 
 #### Scenario: Interrupted and already extended
 

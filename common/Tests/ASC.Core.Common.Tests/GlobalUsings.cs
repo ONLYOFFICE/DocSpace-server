@@ -33,6 +33,7 @@
 
 global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
+global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.NetworkInformation;
@@ -86,6 +87,7 @@ global using Microsoft.Extensions.Logging.Abstractions;
 global using Microsoft.Extensions.Options;
 
 global using Polly;
+global using Polly.Registry;
 global using Polly.Retry;
 
 global using WireMock;
