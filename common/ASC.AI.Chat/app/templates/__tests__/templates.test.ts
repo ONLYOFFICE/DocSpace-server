@@ -184,7 +184,7 @@ describe("installTemplate", () => {
     expect(result.kind).toBe("knowledgeBase");
   });
 
-  it("installs an agent with its sources, links them and writes its model and instructions", async () => {
+  it("installs an agent tagged with its category, links its sources and writes its model and instructions", async () => {
     const template = catalog.agents[0]!;
     const result = await installTemplate(catalog, template.id);
     expect(vi.mocked(filesApiSend).mock.calls).toEqual([
@@ -194,7 +194,7 @@ describe("installTemplate", () => {
         "rooms",
         { title: findTemplate(catalog, template.knowledges[0]!)!.name, roomType: 11 },
       ],
-      ["POST", "rooms", { title: template.name, roomType: 12 }],
+      ["POST", "rooms", { title: template.name, roomType: 12, tags: [template.category] }],
       ["POST", "rooms/103/sources", { roomIds: [101, 102] }],
       ["PUT", "rooms/103/model", { profileId: "p1" }],
       ["PUT", "rooms/103/instructions", { instructions: template.instructions }],
