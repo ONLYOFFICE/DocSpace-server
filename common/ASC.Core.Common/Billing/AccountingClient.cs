@@ -529,6 +529,16 @@ public class PagedFilter : DateRangeFilter
     /// <remarks>For the paged methods this is the page size of every request.</remarks>
     public int? Limit { get; set; }
 
+    // The API documents a metadata pair with an empty or blank value as ignored. Query binding turns such a value
+    // into null, which the request leaves out, but a JSON body (the usage report) keeps it, so it is dropped here
+    // for every caller.
+    protected static Dictionary<string, string> WithoutBlankValues(Dictionary<string, string> metadata)
+    {
+        return metadata?
+            .Where(pair => !string.IsNullOrWhiteSpace(pair.Value))
+            .ToDictionary(pair => pair.Key, pair => pair.Value, metadata.Comparer);
+    }
+
     /// <summary>
     /// The field to order by.
     /// </summary>
@@ -621,9 +631,13 @@ public class UsageFilter : PagedFilter
     /// </summary>
     public OperationStatus? Status { get; init; }
     /// <summary>
-    /// Metadata key-value pairs to filter by.
+    /// Metadata key-value pairs to filter by. A pair with an empty or blank value is dropped.
     /// </summary>
-    public Dictionary<string, string> Metadata { get; init; }
+    public Dictionary<string, string> Metadata
+    {
+        get;
+        init => field = WithoutBlankValues(value);
+    }
 }
 
 /// <summary>
@@ -642,9 +656,14 @@ public class DepositFilter : PagedFilter
     public DepositInitiator? Initiator { get; init; }
 
     /// <summary>
-    /// Metadata key-value pairs to filter by: a top-up matches when its metadata contains all of them.
+    /// Metadata key-value pairs to filter by: a top-up matches when its metadata contains all of them. A pair with
+    /// an empty or blank value is dropped.
     /// </summary>
-    public Dictionary<string, string> Metadata { get; init; }
+    public Dictionary<string, string> Metadata
+    {
+        get;
+        init => field = WithoutBlankValues(value);
+    }
 }
 
 /// <summary>
