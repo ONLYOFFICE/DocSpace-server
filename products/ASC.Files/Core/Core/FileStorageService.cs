@@ -4714,15 +4714,23 @@ public class FileStorageService //: IFileStorageService
                 // The entry owner's record stays: revoking it would delete the entry from its owner's list.
                 var ownerId = entry.RootFolderType == FolderType.USER ? entry.RootCreateBy : entry.CreateBy;
 
-                var subjects = await fileSecurity
+                var records = await fileSecurity
                     .GetPureSharesAsync(entry, ShareFilterType.UserOrGroup, null, null)
                     .Where(r => r.Subject != ownerId)
-                    .Select(r => r.Subject)
                     .ToListAsync();
 
-                foreach (var subject in subjects)
+                var subjects = records.Select(r => r.Subject).ToList();
+
+                foreach (var record in records)
                 {
-                    await fileSecurity.ShareAsync(entry.Id, entry.FileEntryType, subject, FileShare.None);
+                    if (record.SubjectType == SubjectType.User && entry is Folder<T> { FolderType: FolderType.AiProjectRoom, Id: int projectId })
+                    {
+                        await fileSecurity.RemoveAiProjectMemberAsync(record.Subject, projectId);
+                    }
+                    else
+                    {
+                        await fileSecurity.ShareAsync(entry.Id, entry.FileEntryType, record.Subject, FileShare.None);
+                    }
                 }
 
                 if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)

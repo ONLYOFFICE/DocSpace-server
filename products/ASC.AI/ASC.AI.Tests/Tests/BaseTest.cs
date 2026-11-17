@@ -216,6 +216,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     // The People service: member profiles (culture, type). Starts unsigned: authenticate it before the first call.
     protected HttpClient PeopleHttpClient => _clients.PeopleHttpClient;
     protected ProfilesApi ProfilesApi => _clients.ProfilesApi;
+    protected UserStatusApi UserStatusApi => _clients.UserStatusApi;
 
     // Web.Api, for portal settings and quotas. Starts unsigned: authenticate it before the first call.
     protected HttpClient WebApiHttpClient => _clients.WebApiHttpClient;

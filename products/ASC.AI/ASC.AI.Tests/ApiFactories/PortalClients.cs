@@ -80,6 +80,7 @@ public sealed class PortalClients : PortalClientsBase
 
     // People service
     public ProfilesApi ProfilesApi { get; }
+    public UserStatusApi UserStatusApi { get; }
 
     // Web.Api: the portal-wide AI switch (settings/ai-access)
     public CommonSettingsApi CommonSettingsApi { get; }
@@ -123,7 +124,9 @@ public sealed class PortalClients : PortalClientsBase
         ThirdPartyIntegrationApi = new DocSpace.API.SDK.Api.Files.ThirdPartyIntegrationApi(FilesHttpClient, filesConfig);
         RoomsAiApi = new DocSpace.API.SDK.Api.Rooms.AIApi(FilesHttpClient, filesConfig);
 
-        ProfilesApi = new ProfilesApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
+        var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };
+        ProfilesApi = new ProfilesApi(PeopleHttpClient, peopleConfig);
+        UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);

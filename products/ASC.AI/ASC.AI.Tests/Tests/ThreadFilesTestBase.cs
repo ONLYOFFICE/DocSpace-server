@@ -42,6 +42,8 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
 
     protected sealed record ThreadFilesPage(List<ThreadFile> Files, long Total);
 
+    protected sealed record CleanupState(int ArtifactStatus, int AttachmentStatus, long UsedSpace);
+
     protected sealed record Attachment(Guid Id, string Kind, string Title, string? Content, string? EntryId);
 
     protected async Task<int> CreateProjectAsync()
@@ -182,6 +184,33 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         operation.Error.Should().BeNullOrEmpty();
 
         return operation;
+    }
+
+    protected async Task<long> UsedSpaceAsync(int projectId)
+    {
+        var room = (await RoomsApi.GetRoomInfoAsync(projectId, TestContext.Current.CancellationToken)).Response;
+
+        return room.UsedSpace ?? 0;
+    }
+
+    protected async Task<CleanupState> WaitForCleanupAsync(int projectId, int artifactId, int attachmentId, long expectedSpace)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            var state = new CleanupState(
+                await StatusOfAsync(() => FilesApi.GetFileInfoAsync(artifactId, cancellationToken: TestContext.Current.CancellationToken)),
+                await StatusOfAsync(() => FilesApi.GetFileInfoAsync(attachmentId, cancellationToken: TestContext.Current.CancellationToken)),
+                await UsedSpaceAsync(projectId));
+
+            if ((state.ArtifactStatus == 404 && state.AttachmentStatus == 404 && state.UsedSpace == expectedSpace) || DateTime.UtcNow >= deadline)
+            {
+                return state;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
     }
 
     private async Task<ThreadFilesPage> ReadPageAsync(HttpResponseMessage response)
