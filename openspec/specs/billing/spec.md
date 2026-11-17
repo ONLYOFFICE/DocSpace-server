@@ -532,7 +532,12 @@ owner, unless it is no longer wanted or its due date moved.
 #### Scenario: Wallet short of the price
 
 - **WHEN** the due date of the main plan comes near, the wallet holds less than the price and the payment method is not a delayed one
-- **THEN** the wallet is topped up once for the shortfall and the next period is then paid from it
+- **THEN** the wallet is topped up for the shortfall and the next period is then paid from it; while other spending keeps the wallet short, it is topped up again, five deposits at most
+
+#### Scenario: Top-up cut short
+
+- **WHEN** the top-up of a renewal is still running eight minutes after the renewal was started, or the service stops during it
+- **THEN** a deposit already sent is let finish, no further deposit is begun, the payment is not requested, and the renewal is resumed later by asking billing first
 
 #### Scenario: Wallet short of the price with a delayed payment method
 
@@ -556,17 +561,18 @@ owner, unless it is no longer wanted or its due date moved.
 
 #### Scenario: Interrupted after the payment was requested
 
-- **WHEN** the service stopped after requesting the payment, whether or not the request left, and billing still reports the subscription not extended ten minutes after the request
+- **WHEN** the service stopped after requesting the payment, whether or not the request left, billing still reports the subscription not extended ten minutes after the request, and the renewal is still wanted with its due date unchanged
 - **THEN** the failure letter is sent and the payment is not requested a second time
 
 #### Scenario: Interrupted and billing gives no answer
 
 - **WHEN** the service stopped during a renewal and billing does not answer about the subscription
-- **THEN** the renewal is asked about again on the following runs for up to thirty minutes, nothing is paid and no letter is sent meanwhile
+- **THEN** the renewal is asked about again on the following runs, nothing is paid and no letter is sent meanwhile
+- **AND** thirty minutes after the payment was requested, or after the renewal was last started or queued when it was not, the failure letter is sent, unless the renewal is no longer wanted or its due date moved
 
 #### Scenario: Interrupted three times
 
-- **WHEN** a renewal that never got to request its payment was interrupted on each of three starts
+- **WHEN** a renewal that never got to request its payment was interrupted on each of three starts, billing does not report it extended, and it is still wanted with its due date unchanged
 - **THEN** its payment is not attempted a fourth time and the failure letter is sent
 
 #### Scenario: Renewal no longer wanted
@@ -584,15 +590,30 @@ owner, unless it is no longer wanted or its due date moved.
 - **WHEN** the installation sets neither how often due subscriptions are looked for nor how long before the due date one is renewed
 - **THEN** both are one minute
 
-#### Scenario: Run interval out of bounds
+#### Scenario: Run interval and renewal advance set empty
 
-- **WHEN** the run interval is set to zero, to a negative value, below one second or above one hour
-- **THEN** it is kept at one second or at one hour, the nearer bound, and a warning is logged
+- **WHEN** the run interval or the renewal advance is set to an empty value
+- **THEN** it is taken as not set, without a warning
 
-#### Scenario: Renewal advance out of bounds
+#### Scenario: Run interval below its minimum
 
-- **WHEN** the renewal advance is set to zero, to a negative value, shorter than the run interval or longer than one day
-- **THEN** it is kept at the run interval or at one day, the nearer bound, and a warning is logged
+- **WHEN** the run interval is set to zero, to a negative value or to less than one second
+- **THEN** it is kept at one second and a warning is logged
+
+#### Scenario: Run interval above its maximum
+
+- **WHEN** the run interval is set to more than one hour
+- **THEN** it is kept at one hour and a warning is logged
+
+#### Scenario: Renewal advance shorter than the run interval
+
+- **WHEN** the renewal advance is set to zero, to a negative value or to less than the run interval
+- **THEN** it is kept at the run interval and a warning is logged
+
+#### Scenario: Renewal advance above its maximum
+
+- **WHEN** the renewal advance is set to more than one day
+- **THEN** it is kept at one day and a warning is logged
 
 #### Scenario: Interval value that cannot be read
 
@@ -922,11 +943,11 @@ limit, the administrators and the user concerned otherwise.
 
 ### Requirement: Audit trail of payment changes
 
-A subscription change, a wallet top-up (by the payer or by the automatic job), a change of the top-up
+A subscription change, a wallet top-up (manual or automatic), a change of the top-up
 settings, a switch of a wallet service, a change of the restricted AI models, a subscription balance moved
 to the wallet, a sales request, and the creation, update, bulk set, bulk disable and deletion of an AI
 spending limit SHALL each write one audit event; reads, price calculations and the checkout URLs SHALL
-write none. A resumed renewal reported extended SHALL write one, two after a stop.
+write none. A renewal resumed after it was started SHALL write one when billing reports it extended.
 
 #### Scenario: Top-up audited
 

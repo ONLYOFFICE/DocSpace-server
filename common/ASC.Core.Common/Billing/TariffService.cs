@@ -1595,8 +1595,16 @@ public class TariffService(
             var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true, cancellationToken);
             if (toppedUp)
             {
-                var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
-                await quotaSocketManager.TopUpWallet(auto);
+                try
+                {
+                    var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+                    await quotaSocketManager.TopUpWallet(auto);
+                }
+                catch (Exception ex)
+                {
+                    // best effort: the deposit is made, a client that misses the event reads the balance on its next request
+                    logger.WarningWithException(ex);
+                }
             }
 
             // A cancelled caller learns of it only now, once the deposit it may have made is announced: no further

@@ -52,6 +52,9 @@ public class WalletRenewalTimingTests
         { "00:10:00", "00:30:00", TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(30), false, false },
         { null, "00:05:00", TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(5), false, false },
 
+        // set empty: as if not set, without a warning
+        { "", "", TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1), false, false },
+
         // an advance below the period is raised to it
         { "00:10:00", "00:00:30", TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10), false, true },
         { "00:10:00", "0", TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(10), false, true },
@@ -63,6 +66,7 @@ public class WalletRenewalTimingTests
 
         // a period out of its bounds or unreadable, and the advance still follows what the period became
         { "0", null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), true, false },
+        { "00:00:00.5", null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), true, false },
         { "-00:01:00", null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1), true, false },
         { "02:00:00", null, TimeSpan.FromHours(1), TimeSpan.FromHours(1), true, false },
         { "every minute", null, TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(1), true, false },

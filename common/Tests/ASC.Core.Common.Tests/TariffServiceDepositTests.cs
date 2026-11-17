@@ -185,15 +185,15 @@ public class TariffServiceDepositTests
         socket.TopUps.Should().BeEmpty("there is no deposit to announce");
     }
 
-    // The deposit is accepted and the balance does not move yet, so the top-up polls it - for up to 16 reads a second
-    // apart. The deadline falls during the poll: the top-up stops there, after the one deposit, without waiting for
-    // the poll to end - and the clients are still told of the deposit the customer was charged for.
+    // The deposit is accepted and the balance does not move, so the top-up polls it - 16 reads a second apart, at
+    // least 15 s. The deadline falls on the poll's first read: the top-up stops there, after the one deposit, without
+    // waiting the poll out - and the clients are still told of the deposit the customer was charged for.
     [Fact]
     public async Task EnsureWalletBalance_TokenCancelledDuringThePoll_StopsAfterTheOneDeposit()
     {
-        var (tariffService, billing, socket) = CreateWalletService(balance: 10);
+        using var deadline = new CancellationTokenSource();
+        var (tariffService, billing, socket) = CreateWalletService(balance: 10, onReadAfterDeposit: deadline.Cancel);
 
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         var started = Stopwatch.StartNew();
 
         var act = async () => await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: deadline.Token);
@@ -204,17 +204,73 @@ public class TariffServiceDepositTests
         socket.TopUps.Should().Equal([true], "the automatic deposit is announced to the clients before the top-up stops");
     }
 
-    // A wallet that holds the given amount and never shows a deposit, with billing accepting every deposit, the real
-    // balance poll of the accounting client, and the top-up events the clients would receive.
-    private static (TariffService tariffService, HttpStub billing, RecordingQuotaSocketManager socket) CreateWalletService(decimal balance)
+    // The deadline falls as billing accepts the deposit, so the balance is not polled at all; the deposit is still
+    // announced and no second one is sent.
+    [Fact]
+    public async Task EnsureWalletBalance_TokenCancelledAtTheDeposit_SkipsThePoll()
     {
-        var billing = new HttpStub(_ => Reply(HttpStatusCode.OK, "\"ok\""));
-        var accounting = new HttpStub(_ => Reply(HttpStatusCode.OK,
-            $$"""{"accountNumber":42,"accountCurrency":"USD","subAccounts":[{"currency":"USD","amount":{{balance.ToString(CultureInfo.InvariantCulture)}}}]}"""));
+        using var deadline = new CancellationTokenSource();
+        var readsAfterDeposit = 0;
+        var (tariffService, billing, socket) = CreateWalletService(balance: 10, onDeposit: deadline.Cancel, onReadAfterDeposit: () => readsAfterDeposit++);
+
+        var act = async () => await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: deadline.Token);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        billing.Requests.Where(request => request.Path == "/billing/Deposit").Should().ContainSingle("the deposit sent before the deadline is the only one");
+        readsAfterDeposit.Should().Be(0, "a cancelled top-up reads the balance no more");
+        socket.TopUps.Should().Equal([true], "the automatic deposit is announced to the clients before the top-up stops");
+    }
+
+    // The socket event after a deposit is best effort: a socket client that throws does not fail the top-up, whose
+    // deposit is made and whose balance now covers the cost.
+    [Fact]
+    public async Task EnsureWalletBalance_TopUpEventFails_StillReportsTheBalanceCovered()
+    {
+        var (tariffService, billing, socket) = CreateWalletService(balance: 10, balanceAfterDeposit: 60, socketFails: true);
+
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
+
+        covered.Should().BeTrue("the deposit reached the wallet");
+        billing.Requests.Where(request => request.Path == "/billing/Deposit").Should().ContainSingle();
+        socket.TopUps.Should().Equal([true], "the event was attempted");
+    }
+
+    // A wallet that holds the given amount - and once a deposit is accepted, balanceAfterDeposit if given - with billing
+    // accepting every deposit (onDeposit runs as it does), the real balance poll of the accounting client
+    // (onReadAfterDeposit runs on each read after a deposit), and the top-up events the clients would receive, or a
+    // socket client that throws on them.
+    private static (TariffService tariffService, HttpStub billing, RecordingQuotaSocketManager socket) CreateWalletService(decimal balance,
+        Action? onDeposit = null, decimal? balanceAfterDeposit = null, bool socketFails = false, Action? onReadAfterDeposit = null)
+    {
+        var deposited = false;
+
+        var billing = new HttpStub(request =>
+        {
+            if (request.Path == "/billing/Deposit")
+            {
+                deposited = true;
+                onDeposit?.Invoke();
+            }
+
+            return Reply(HttpStatusCode.OK, "\"ok\"");
+        });
+
+        var accounting = new HttpStub(_ =>
+        {
+            if (deposited)
+            {
+                onReadAfterDeposit?.Invoke();
+            }
+
+            var amount = deposited && balanceAfterDeposit is { } after ? after : balance;
+
+            return Reply(HttpStatusCode.OK,
+                $$"""{"accountNumber":42,"accountCurrency":"USD","subAccounts":[{"currency":"USD","amount":{{amount.ToString(CultureInfo.InvariantCulture)}}}]}""");
+        });
 
         var provider = BuildProvider(billing: billing, accounting: accounting);
 
-        var socket = new RecordingQuotaSocketManager();
+        var socket = new RecordingQuotaSocketManager(socketFails);
         var services = new ServiceCollection().AddSingleton<QuotaSocketManager>(socket).BuildServiceProvider();
 
         var tariffService = PaymentStubs.CreateTariffService(provider.GetRequiredService<AccountingClient>(), provider.GetRequiredService<BillingClient>(),
@@ -227,8 +283,9 @@ public class TariffServiceDepositTests
         return (tariffService, billing, socket);
     }
 
-    // The top-up events of a portal, recorded instead of sent; nothing else of the socket client is used.
-    private sealed class RecordingQuotaSocketManager() : QuotaSocketManager(null!, null!, null!, null!, null!)
+    // The top-up events of a portal, recorded instead of sent, then failed when asked to; nothing else of the socket
+    // client is used.
+    private sealed class RecordingQuotaSocketManager(bool fails) : QuotaSocketManager(null!, null!, null!, null!, null!)
     {
         public List<bool> TopUps { get; } = [];
 
@@ -236,7 +293,7 @@ public class TariffServiceDepositTests
         {
             TopUps.Add(auto);
 
-            return Task.CompletedTask;
+            return fails ? Task.FromException(new HttpRequestException("socket service unreachable")) : Task.CompletedTask;
         }
     }
 

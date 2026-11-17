@@ -38,13 +38,13 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Renewal;
 /// process left in its journal, and one whose payment change got an answer that cannot be read.
 /// </summary>
 /// <remarks>
-/// A test cannot stop a process half-way, so all but the last plant the entry such a process leaves
+/// A test cannot stop a process half-way, so all but the last two plant the entry such a process leaves
 /// (<see cref="RenewalJournal"/>); the service finds it on its next run, a few seconds later, and asks billing what
 /// became of the subscription. Their subscription ends days from now, so the service never renews it by itself:
 /// whatever billing is asked or told about it comes from the planted entry, which is marked as started longer ago
-/// than the service leaves a started renewal alone. The last test goes the whole way through the service: it is the
-/// one that shows the service itself writes the pending renewal the planted one stands for; the one before it shows
-/// that the service records the request of a payment change before it sends it.
+/// than the service leaves a started renewal alone. The last two tests go the whole way through the service: the last
+/// one shows that the service itself writes the pending renewal the planted one stands for, the one before it that the
+/// service records the request of a payment change before it sends it.
 /// </remarks>
 public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -207,6 +207,69 @@ public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixtu
         }
     }
 
+    // Billing says "not extended" and nothing else stands in the way, so the renewal is made - once, and as the tariff
+    // row says now: the customer has gone down to one administrator since the entry was written with three.
+    [Fact]
+    public async Task ResumedRenewal_NotExtended_IsPaidOnceAsTheRowSaysNow()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(StartedEntry(row) with { Quantity = row.Quantity + 2 }, pending: null, TestContext.Current.CancellationToken);
+
+            var left = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            left.Should().BeTrue("billing accepted the payment change, so the renewal leaves the journal");
+
+            var changes = PaymentCalls.Where(call => call.Route == ChangeSubscription).ToList();
+            changes.Should().ContainSingle("the renewal billing does not report as extended is made once");
+            BillingValue(changes[0], "ProductId").Should().Be(Plans.AdminWalletProductId.ToString(CultureInfo.InvariantCulture));
+            BillingValue(changes[0], "ProductQty").Should().Be(row.Quantity.ToString(CultureInfo.InvariantCulture), "the quantity is read from the row again");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
+    // The entry renews from a due date the row no longer has - the subscription was renewed and the row moved on -
+    // while billing does not report the subscription as running past it. A renewal of the row as it is now is another
+    // one, which a later window brings: this one is closed without a payment.
+    [Fact]
+    public async Task ResumedRenewal_RowDueDateMoved_IsNotPaid()
+    {
+        // Arrange
+        var row = await SubscribeAsync(DateTime.UtcNow + _dueIn);
+
+        await using var journal = await _fixture.OpenRenewalJournalAsync(TestContext.Current.CancellationToken);
+
+        var askedBefore = AskedAboutSubscription();
+
+        try
+        {
+            // Act
+            await journal.PlantAsync(StartedEntry(row) with { DueDate = row.DueDate.AddDays(1) }, pending: null, TestContext.Current.CancellationToken);
+
+            var left = await WaitAsync(async () => await journal.FindEntryAsync(TenantId, TestContext.Current.CancellationToken) == null, _settleDeadline);
+
+            // Assert
+            left.Should().BeTrue("the renewal is settled and leaves the journal");
+            AskedAboutSubscription().Should().BeGreaterThan(askedBefore, "a started renewal is asked about before it is closed");
+            PaymentCalls.Should().NotContain(call => call.Route == ChangeSubscription, "the row the entry was written for is not there any more");
+            PaymentCalls.Should().NotContain(call => call.Route == Deposit, "nothing is paid for it");
+        }
+        finally
+        {
+            await journal.RemoveAsync(TenantId, TestContext.Current.CancellationToken);
+        }
+    }
+
     [Fact]
     public async Task InterruptedRenewal_PendingListSettlesIt_IsNotRenewedAgain()
     {
@@ -215,7 +278,7 @@ public class WalletRenewalResumeTests(AspireAppFixture fixture) : BaseTest(fixtu
         await AssertPendingListSettlesAloneAsync(row, row.Quota);
     }
 
-    // A pending renewal written before the quota was recorded - by the previous version, during a rollout - names
+    // A pending renewal written before the quota was recorded - by the release before this one - names
     // the renewal by the tenant, the due date and what it bought: the product and the service of the wallet plan.
     [Fact]
     public async Task InterruptedRenewal_PendingWithoutQuotaSettlesIt_IsNotRenewedAgain()
