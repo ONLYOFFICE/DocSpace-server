@@ -519,7 +519,9 @@ need a project manager (403) and are audited.
 ### Requirement: Access through a project
 
 A member of a project SHALL read every room linked to it and the files inside, through a membership of the
-project or of a group in it, without the room being listed in the project's member section; a non-member
+project, without the room being listed in the project's member section. A project's members are users only:
+a group SHALL NOT be invited to a project with any role (403, "The role is not available for this user
+type"), so a membership never comes through a group; a non-member
 SHALL NOT (403). Unlinking the room or removing the member from the project SHALL end that access, while a
 member's own role in the room is never lowered by the project. `getRoomSkills` for a project SHALL answer
 the skills of its linked Instructions rooms to any member.

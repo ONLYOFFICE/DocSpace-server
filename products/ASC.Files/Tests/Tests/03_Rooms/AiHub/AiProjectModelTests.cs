@@ -74,24 +74,6 @@ public class AiProjectModelTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
     }
 
     [Fact]
-    public async Task GetModel_ProjectMemberThroughGroup_Returns200()
-    {
-        // Arrange
-        var projectId = await CreateProjectAsync();
-        var member = await InviteContact(EmployeeType.User);
-        var groupId = await CreateGroupAsync(member);
-        await ShareRoomAsync(projectId, groupId, FileShare.ContentCreator);
-
-        await _filesClient.Authenticate(member);
-
-        // Act
-        using var response = await GetModelResponseAsync(projectId);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact]
     public async Task GetModel_NotAProjectMember_Returns403()
     {
         // Arrange
