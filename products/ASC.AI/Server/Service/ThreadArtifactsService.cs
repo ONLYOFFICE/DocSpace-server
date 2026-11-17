@@ -37,6 +37,7 @@ namespace ASC.AI.Service;
 public class ThreadArtifactsService(
     ThreadStorageService threadStorageService,
     ThreadFoldersService threadFoldersService,
+    AiThreadFoldersService aiThreadFoldersService,
     IDaoFactory daoFactory,
     IServiceProvider serviceProvider)
 {
@@ -46,7 +47,8 @@ public class ThreadArtifactsService(
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(contentLength);
 
         var thread = await threadStorageService.ReadByIdAsync(threadId);
-        var folderId = await threadFoldersService.GetOrCreateArtifactsFolderAsync(thread);
+        var project = await threadFoldersService.GetProjectAsync(thread);
+        var folderId = await aiThreadFoldersService.GetOrCreateArtifactsFolderAsync(thread, project.Id);
 
         var maxUploadSize = await daoFactory.GetFolderDao<int>().GetMaxUploadSizeAsync(folderId);
         if (contentLength > maxUploadSize)

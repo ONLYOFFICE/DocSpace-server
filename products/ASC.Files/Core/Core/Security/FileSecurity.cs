@@ -256,8 +256,8 @@ public class FileSecurity(
                 FolderType.AiProjectRoom,
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
-                    { SubjectType.User, [FileShare.RoomManager, FileShare.Read, FileShare.None] },
-                    { SubjectType.Group, [FileShare.Read, FileShare.None] },
+                    { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
+                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomManager, FileShare.None] }
                 }.ToFrozenDictionary()
             }
@@ -1159,7 +1159,7 @@ public class FileSecurity(
             FolderType.AiRoom => FileShare.ContentCreator,
             FolderType.InstructionsRoom => FileShare.ContentCreator,
             FolderType.KnowledgeRoom => FileShare.ContentCreator,
-            FolderType.AiProjectRoom => FileShare.Read,
+            FolderType.AiProjectRoom => FileShare.ContentCreator,
             _ => FileShare.None
         };
     }
@@ -1249,6 +1249,14 @@ public class FileSecurity(
         var isRoom = folder is { IsRoom: true };
 
         if ((e.RootFolderType == FolderType.AiHub || folder is { FolderType: FolderType.AiHub }) && !await aiAccessibility.IsAccessEnabledAsync())
+        {
+            return false;
+        }
+
+        if (e.RootFolderType == FolderType.AiHub &&
+            parentFolders.Exists(f => f.FolderType == FolderType.AiProjectRoom) &&
+            (e.CreateBy != userId ||
+             action is not (FilesSecurityActions.Read or FilesSecurityActions.Download or FilesSecurityActions.Copy)))
         {
             return false;
         }

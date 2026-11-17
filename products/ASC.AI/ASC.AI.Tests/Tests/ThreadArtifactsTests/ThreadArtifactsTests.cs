@@ -37,9 +37,7 @@ namespace ASC.AI.Tests.Tests.ThreadArtifactsTests;
 [Trait("Feature", "AI/ThreadArtifacts")]
 public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBase(fixture)
 {
-    private sealed record ArtifactFile(int Id, string Title, int FolderId);
-
-    private sealed record ArtifactsPage(List<ArtifactFile> Files, long Total);
+    private sealed record ArtifactsPage(List<ThreadFile> Files, long Total);
 
     [Fact]
     public async Task Upload_ByAuthor_AppearsInTheThreadList()
@@ -246,23 +244,6 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
-    private async Task<HttpResponseMessage> PostArtifactAsync(Guid threadId, string name)
-    {
-        using var form = new MultipartFormDataContent();
-        using var file = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes($"Autotest artifact {name}"));
-        file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
-        form.Add(file, "file", name);
-
-        return await _aiClient.PostAsync($"{ThreadsPath}/{threadId}/artifacts", form, TestContext.Current.CancellationToken);
-    }
-
-    private async Task<ArtifactFile> UploadArtifactAsync(Guid threadId, string name)
-    {
-        using var response = await PostArtifactAsync(threadId, name);
-
-        return await _ai.ReadAsync<ArtifactFile>(response, TestContext.Current.CancellationToken);
-    }
-
     private Task<HttpResponseMessage> GetArtifactsAsync(int projectId, Guid threadId, string query = "")
     {
         return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/artifacts{query}", TestContext.Current.CancellationToken);
@@ -272,7 +253,7 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
     {
         using var response = await GetArtifactsAsync(projectId, threadId, query);
 
-        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ArtifactFile>>(response, TestContext.Current.CancellationToken);
+        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ThreadFile>>(response, TestContext.Current.CancellationToken);
 
         return new ArtifactsPage(envelope.Response ?? [], envelope.Total ?? 0);
     }

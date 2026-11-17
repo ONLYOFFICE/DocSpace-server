@@ -3806,13 +3806,11 @@ public class FileStorageService //: IFileStorageService
         entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiAgentsAsync()));
         entries.AddRange(await GetEntriesAsync(await globalFolderHelper.GetFolderAiHubAsync()));
 
-        var ids = entries.OfType<Folder<int>>().Where(f => f.FolderType != FolderType.AiProjectRoom).Select(f => f.Id);
+        var ids = entries.OfType<Folder<int>>().Select(f => f.Id);
         var thirdIds = entries.OfType<Folder<string>>().Select(f => f.Id);
-        var projectIds = entries.OfType<Folder<int>>().Where(f => f.FolderType == FolderType.AiProjectRoom).Select(f => f.Id);
 
         await ChangeOwnerAsync(ids, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
         await ChangeOwnerAsync(thirdIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.ContentCreator).ToListAsync();
-        await ChangeOwnerAsync(projectIds, [], reassign ?? securityContext.CurrentAccount.ID, FileShare.Read).ToListAsync();
 
         return;
 
@@ -3842,31 +3840,19 @@ public class FileStorageService //: IFileStorageService
             .Where(r => r.EntryType == FileEntryType.Folder && r.Share == FileShare.RoomManager)
             .ToListAsync();
 
-        var intEntryIds = shareRercords
-            .Select(r => int.TryParse(r.EntryId, out var id) ? id : (int?)null)
-            .OfType<int>()
-            .ToList();
-
-        var projectIds = intEntryIds.Count == 0
-            ? []
-            : await daoFactory.GetFolderDao<int>()
-                .GetRoomsAsync(intEntryIds, [FilterType.AiProjectRooms], null, Guid.Empty, null, false, false, false, ProviderFilter.None, Guid.Empty, null, parentsIds: null)
-                .Select(f => f.Id)
-                .ToHashSetAsync();
-
         foreach (var shareRercord in shareRercords)
         {
             if (int.TryParse(shareRercord.EntryId, out var intEntryId))
             {
-                await SetAccessAsync(intEntryId, projectIds.Contains(intEntryId) ? FileShare.Read : FileShare.ContentCreator);
+                await SetAccessAsync(intEntryId);
             }
             else
             {
-                await SetAccessAsync(shareRercord.EntryId, FileShare.ContentCreator);
+                await SetAccessAsync(shareRercord.EntryId);
             }
         }
 
-        async Task SetAccessAsync<T>(T entryId, FileShare access)
+        async Task SetAccessAsync<T>(T entryId)
         {
             await SetAceObjectAsync(new AceCollection<T>
             {
@@ -3874,7 +3860,7 @@ public class FileStorageService //: IFileStorageService
                 Folders = [entryId],
                 Aces =
                 [
-                    new AceWrapper { Access = access, Id = user }
+                    new AceWrapper { Access = FileShare.ContentCreator, Id = user }
                 ]
             }, false, socket: false, beforeOwnerChange: true);
         }
@@ -5110,10 +5096,14 @@ public class FileStorageService //: IFileStorageService
     private async Task<List<Guid>> WhoCanRead<T>(FileEntry<T> entry)
     {
         var whoCanReadTask = (await fileSecurity.WhoCanReadAsync(entry, true)).ToList();
-        whoCanReadTask.AddRange((await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
-            .Select(x => x.Id));
 
-        whoCanReadTask.Add(tenantManager.GetCurrentTenant().OwnerId);
+        if (!await DocSpaceHelper.InAiProjectAsync(entry, daoFactory.GetCacheFolderDao<T>()))
+        {
+            whoCanReadTask.AddRange((await userManager.GetUsersByGroupAsync(Constants.GroupAdmin.ID))
+                .Select(x => x.Id));
+
+            whoCanReadTask.Add(tenantManager.GetCurrentTenant().OwnerId);
+        }
 
         var userIds = whoCanReadTask
             .Concat([entry.CreateBy])

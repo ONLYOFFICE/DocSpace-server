@@ -38,16 +38,13 @@ namespace ASC.AI.Tests.Tests.ThreadAttachmentsTests;
 public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestBase(fixture)
 {
     private const string AttachmentsPath = "/internal/ai/attachments";
-    private const string Text = "Autotest attachment. Line two.";
 
     private static readonly byte[] _png =
         Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFAAH/q842iQAAAABJRU5ErkJggg==");
 
     private sealed record Attachment(Guid Id, string Kind, string Title, string? Content, string? EntryId);
 
-    private sealed record AttachedFile(int Id, string Title, int FolderId);
-
-    private sealed record AttachedFilesPage(List<AttachedFile> Files, long Total);
+    private sealed record ThreadFilesPage(List<ThreadFile> Files, long Total);
 
     [Fact]
     public async Task Upload_ToTheProject_StoresTheFileInItsRoot()
@@ -111,13 +108,110 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         var projectId = await CreateProjectAsync();
 
         using var form = new MultipartFormDataContent();
-        using var content = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(Text));
+        using var content = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(FileText));
         content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
         form.Add(content, "file", "notes.txt");
 
         using var response = await FilesHttpClient.PostAsync($"/api/2.0/files/{projectId}/upload", form, TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task Copy_APortalFile_StoresTheCopyInTheProjectRoot()
+    {
+        var projectId = await CreateProjectAsync();
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+
+        var copy = await CopyAsync(projectId, source.Id);
+
+        copy.Id.Should().NotBe(source.Id);
+        copy.FolderId.Should().Be(projectId);
+    }
+
+    [Fact]
+    public async Task Copy_ByAProjectMember_StoresTheCopyInTheProjectRoot()
+    {
+        var projectId = await CreateProjectAsync();
+        var member = await InviteMemberAsync(projectId);
+
+        await FilesHttpClient.Authenticate(member);
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+        var copy = await CopyAsync(projectId, source.Id);
+        await FilesHttpClient.Authenticate(Owner);
+
+        copy.FolderId.Should().Be(projectId);
+    }
+
+    [Fact]
+    public async Task Copy_ByAUserOutsideTheProject_Returns403()
+    {
+        var projectId = await CreateProjectAsync();
+        var outsider = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
+
+        await FilesHttpClient.Authenticate(outsider);
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await OperationsApi.CopyBatchItemsAsync(
+            BuildBatch(projectId, fileIds: [source.Id]),
+            TestContext.Current.CancellationToken));
+        await FilesHttpClient.Authenticate(Owner);
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task Copy_OfAFolder_Returns403()
+    {
+        var projectId = await CreateProjectAsync();
+        var folder = (await FoldersApi.CreateFolderAsync(
+            await MyDocumentsIdAsync(),
+            new CreateFolderRequest("Autotest Attachments Folder"),
+            TestContext.Current.CancellationToken)).Response;
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await OperationsApi.CopyBatchItemsAsync(
+            BuildBatch(projectId, folderIds: [folder.Id]),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task Copy_OfAnUnsupportedFormat_Returns415()
+    {
+        var projectId = await CreateProjectAsync();
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "data.bin");
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await OperationsApi.CopyBatchItemsAsync(
+            BuildBatch(projectId, fileIds: [source.Id]),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(415);
+    }
+
+    [Fact]
+    public async Task Copy_TheSameFileTwice_KeepsBothCopies()
+    {
+        var projectId = await CreateProjectAsync();
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+
+        var first = await CopyAsync(projectId, source.Id, FileConflictResolveType.Overwrite);
+        var second = await CopyAsync(projectId, source.Id, FileConflictResolveType.Overwrite);
+
+        second.Id.Should().NotBe(first.Id);
+        second.Title.Should().NotBe(first.Title);
+    }
+
+    [Fact]
+    public async Task Move_APortalFile_ToTheProject_Returns403()
+    {
+        var projectId = await CreateProjectAsync();
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await OperationsApi.MoveBatchItemsAsync(
+            BuildBatch(projectId, fileIds: [source.Id]),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
     }
 
     [Fact]
@@ -170,6 +264,31 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     }
 
     [Fact]
+    public async Task Bind_ACopiedFile_KeepsItInTheThreadAfterTheOriginalIsDeleted()
+    {
+        var projectId = await CreateProjectAsync();
+        var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
+        var source = await UploadAsync(await MyDocumentsIdAsync(), "notes.txt");
+        var copy = await CopyAsync(projectId, source.Id);
+        var attachment = await AttachAsync(copy.Id);
+        var message = await CreateMessageInternalAsync(thread.Id);
+
+        using var response = await BindAsync(message.Id, attachment.Id);
+        await CompleteAsync((await FilesApi.DeleteFileAsync(
+            source.Id,
+            new DeleteFileRequest(deleteAfter: false, immediately: true),
+            returnSingleOperation: true,
+            TestContext.Current.CancellationToken)).Response);
+
+        var page = await ListAttachmentsAsync(projectId, thread.Id);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        attachment.Content.Should().Contain("Autotest attachment");
+        page.Files.Should().ContainSingle().Which.Id.Should().Be(copy.Id);
+        page.Files[0].FolderId.Should().NotBe(projectId);
+    }
+
+    [Fact]
     public async Task Bind_FilesOfTwoMessages_KeepsThemInOneFolder()
     {
         var projectId = await CreateProjectAsync();
@@ -205,7 +324,7 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     public async Task Bind_InAThreadOutsideAProject_LeavesTheFileWhereItWas()
     {
         await FilesHttpClient.Authenticate(Owner);
-        var myDocumentsId = (await FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
+        var myDocumentsId = await MyDocumentsIdAsync();
         var thread = await CreateThreadInternalAsync();
         var file = await UploadAsync(myDocumentsId, "notes.txt");
         var attachment = await AttachAsync(file.Id);
@@ -257,26 +376,19 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     {
         return OperationsApi.CreateUploadSessionInFolderAsync(
             folderId,
-            new SessionRequest(name, Text.Length, relativePath!, createNewIfExist: true),
+            new SessionRequest(name, FileText.Length, relativePath!, createNewIfExist: true),
             TestContext.Current.CancellationToken);
     }
 
-    private async Task<AttachedFile> UploadAsync(int folderId, string name, byte[]? bytes = null)
+    private async Task<ThreadFile> CopyAsync(int projectId, int fileId, FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
     {
-        bytes ??= System.Text.Encoding.UTF8.GetBytes(Text);
+        var operation = await CompleteAsync((await OperationsApi.CopyBatchItemsAsync(
+            BuildBatch(projectId, fileIds: [fileId], conflictResolveType: conflictResolveType),
+            TestContext.Current.CancellationToken)).Response);
 
-        var session = (await OperationsApi.CreateUploadSessionInFolderAsync(
-            folderId,
-            new SessionRequest(name, bytes.Length, createNewIfExist: true),
-            TestContext.Current.CancellationToken)).Response;
+        var copy = operation.Files.OfType<FileDto>().Should().ContainSingle().Subject;
 
-        var uploaded = (await OperationsApi.UploadSessionAsync(
-            folderId,
-            session.Id,
-            new FileParameter(name, "application/octet-stream", new MemoryStream(bytes)),
-            TestContext.Current.CancellationToken)).Response.File;
-
-        return new AttachedFile(uploaded.Id, uploaded.Title, uploaded.FolderId);
+        return new ThreadFile(copy.Id, copy.Title, copy.FolderId);
     }
 
     private async Task<Attachment> AttachAsync(int fileId)
@@ -293,7 +405,7 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         return _ai.PutAsync(AttachmentsPath, new { ids, messageId }, TestContext.Current.CancellationToken);
     }
 
-    private async Task<AttachedFile> SendAsync(int projectId, Guid threadId, string name)
+    private async Task<ThreadFile> SendAsync(int projectId, Guid threadId, string name)
     {
         var file = await UploadAsync(projectId, name);
         var attachment = await AttachAsync(file.Id);
@@ -310,12 +422,12 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/attachments", TestContext.Current.CancellationToken);
     }
 
-    private async Task<AttachedFilesPage> ListAttachmentsAsync(int projectId, Guid threadId)
+    private async Task<ThreadFilesPage> ListAttachmentsAsync(int projectId, Guid threadId)
     {
         using var response = await GetAttachmentsAsync(projectId, threadId);
 
-        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<AttachedFile>>(response, TestContext.Current.CancellationToken);
+        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ThreadFile>>(response, TestContext.Current.CancellationToken);
 
-        return new AttachedFilesPage(envelope.Response ?? [], envelope.Total ?? 0);
+        return new ThreadFilesPage(envelope.Response ?? [], envelope.Total ?? 0);
     }
 }

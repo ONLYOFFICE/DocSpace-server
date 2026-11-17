@@ -35,6 +35,10 @@ namespace ASC.AI.Tests.Tests;
 
 public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
+    protected const string FileText = "Autotest attachment. Line two.";
+
+    protected sealed record ThreadFile(int Id, string Title, int FolderId);
+
     protected async Task<int> CreateProjectAsync()
     {
         await FilesHttpClient.Authenticate(Owner);
@@ -49,9 +53,79 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         await FilesHttpClient.Authenticate(Owner);
         await RoomsApi.SetRoomSecurityAsync(
             projectId,
-            new RoomInvitationRequest([new RoomInvitation(member.Id, FileShare.Read)], notify: false),
+            new RoomInvitationRequest([new RoomInvitation(member.Id, FileShare.ContentCreator)], notify: false),
             TestContext.Current.CancellationToken);
 
         return member;
+    }
+
+    protected async Task<HttpResponseMessage> PostArtifactAsync(Guid threadId, string name)
+    {
+        using var form = new MultipartFormDataContent();
+        using var file = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes($"Autotest artifact {name}"));
+        file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
+        form.Add(file, "file", name);
+
+        return await _aiClient.PostAsync($"{ThreadsPath}/{threadId}/artifacts", form, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<ThreadFile> UploadArtifactAsync(Guid threadId, string name)
+    {
+        using var response = await PostArtifactAsync(threadId, name);
+
+        return await _ai.ReadAsync<ThreadFile>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<ThreadFile> UploadAsync(int folderId, string name, byte[]? bytes = null)
+    {
+        bytes ??= System.Text.Encoding.UTF8.GetBytes(FileText);
+
+        var session = (await OperationsApi.CreateUploadSessionInFolderAsync(
+            folderId,
+            new SessionRequest(name, bytes.Length, createNewIfExist: true),
+            TestContext.Current.CancellationToken)).Response;
+
+        var uploaded = (await OperationsApi.UploadSessionAsync(
+            folderId,
+            session.Id,
+            new FileParameter(name, "application/octet-stream", new MemoryStream(bytes)),
+            TestContext.Current.CancellationToken)).Response.File;
+
+        return new ThreadFile(uploaded.Id, uploaded.Title, uploaded.FolderId);
+    }
+
+    protected async Task<int> MyDocumentsIdAsync()
+    {
+        return (await FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
+    }
+
+    protected static BatchRequestDto BuildBatch(
+        int destFolderId,
+        IEnumerable<int>? fileIds = null,
+        IEnumerable<int>? folderIds = null,
+        FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
+    {
+        return new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(destFolderId),
+            ConflictResolveType = conflictResolveType,
+            FileIds = (fileIds ?? []).Select(id => new BatchRequestDtoAllOfFileIds(id)).ToList(),
+            FolderIds = (folderIds ?? []).Select(id => new BatchRequestDtoAllOfFolderIds(id)).ToList(),
+            ReturnSingleOperation = true
+        };
+    }
+
+    protected async Task<FileOperationDto> CompleteAsync(List<FileOperationDto> started)
+    {
+        var operation = started.Should().ContainSingle().Subject;
+
+        if (!operation.Finished)
+        {
+            operation = (await WaitForOperationAsync(operation.Id)).Should().ContainSingle().Subject;
+        }
+
+        operation.Error.Should().BeNullOrEmpty();
+
+        return operation;
     }
 }
