@@ -87,7 +87,7 @@ describe("uploadThreadArtifact", () => {
     expect((init.body as FormData).get("file")).toBeInstanceOf(Blob);
   });
 
-  it.each([400, 404])(
+  it.each([400, 403, 404])(
     "answers nothing for a thread that takes no artifacts (%s)",
     async (status) => {
       fetchMock.mockResolvedValue(answer(status));

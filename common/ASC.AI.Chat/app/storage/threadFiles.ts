@@ -53,9 +53,9 @@ export interface ThreadArtifact {
 /**
  * Stores a file a reply produced among the conversation's artifacts, with
  * the caller's credentials. Answers `undefined` when the conversation takes
- * none - it belongs to no AI project (400), or is not the caller's (404) -
- * so the caller can keep the file where it kept it before. Other failures
- * throw.
+ * none - it belongs to no AI project (400), is not the caller's or lies in
+ * a project the caller may not use AI in (403), or is gone (404) - so the
+ * caller can keep the file where it kept it before. Other failures throw.
  */
 export async function uploadThreadArtifact(
   threadId: string,
@@ -77,7 +77,7 @@ export async function uploadThreadArtifact(
       body: form,
       signal,
     });
-    if (res.status === 400 || res.status === 404) {
+    if (res.status === 400 || res.status === 403 || res.status === 404) {
       logger.info(`uploadThreadArtifact: thread ${threadId} takes no artifacts (${res.status})`);
       return undefined;
     }
