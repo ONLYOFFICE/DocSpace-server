@@ -49,7 +49,8 @@ vi.mock("../../requestContext.js", () => ({
 const lookupChatContextFolder = vi.fn();
 vi.mock("../chatContextSnapshot.js", () => ({ lookupChatContextFolder }));
 
-const { resolveAiProjectEntityId } = await import("../docspaceFilesApi.js");
+const { canTakeUpload, getFolderInfo, resolveAiProjectEntityId } =
+  await import("../docspaceFilesApi.js");
 
 const fetchMock = vi.fn();
 const folderDto = (response: Record<string, unknown>) => ({
@@ -99,5 +100,62 @@ describe("resolveAiProjectEntityId", () => {
     expect(await resolveAiProjectEntityId(undefined)).toBeUndefined();
     expect(await resolveAiProjectEntityId("abc")).toBeUndefined();
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("canTakeUpload", () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  // The root of "AI rooms" as the Files API answers it to an admin: no `type`,
+  // and `Create: true`, although an upload into it is refused.
+  it("refuses the root of a section that holds rooms", async () => {
+    fetchMock.mockResolvedValue(
+      folderDto({
+        id: 3,
+        title: "AI rooms",
+        parentId: 0,
+        rootFolderType: 41,
+        security: { Create: true },
+      }),
+    );
+
+    expect(canTakeUpload(await getFolderInfo("3"))).toBe(false);
+  });
+
+  it("takes a room of that section and My documents", async () => {
+    fetchMock.mockResolvedValueOnce(
+      folderDto({
+        id: 30,
+        title: "Room",
+        parentId: 6,
+        rootFolderType: 14,
+        roomType: 5,
+        security: { Create: true },
+      }),
+    );
+    expect(canTakeUpload(await getFolderInfo("30"))).toBe(true);
+
+    fetchMock.mockResolvedValueOnce(
+      folderDto({
+        id: 4,
+        title: "My documents",
+        parentId: 0,
+        rootFolderType: 5,
+        security: { Create: true },
+      }),
+    );
+    expect(canTakeUpload(await getFolderInfo("4"))).toBe(true);
+  });
+
+  it("refuses a folder the caller cannot create in, and one that is gone", () => {
+    expect(canTakeUpload({ canCreate: false })).toBe(false);
+    expect(canTakeUpload(undefined)).toBe(false);
   });
 });

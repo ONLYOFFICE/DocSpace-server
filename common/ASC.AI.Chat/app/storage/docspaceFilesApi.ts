@@ -68,6 +68,13 @@ export interface DocspaceFolderInfo {
    * security block at all, which callers must not read as a denial.
    */
   canCreate?: boolean;
+  /**
+   * The folder is the root of a section that holds rooms (see
+   * `SECTION_ROOT_FOLDER_TYPES`): a file is never placed in it directly.
+   * `FolderDto` names no `type` for such a root, so it is told by having no
+   * parent and a root type of that kind.
+   */
+  sectionRoot?: boolean;
 }
 
 // The form-filling room — the one room kind the "Forms" section shows. That
@@ -83,14 +90,20 @@ const ROOM_TYPE_FORM_ROOM = 1;
 const FOLDER_TYPES_ROOM = new Set<number>([16, 19, 22, 29]);
 const ROOM_TYPES_ROOM = new Set<number>([2, 5, 6, 8]);
 
-// Folder types the Files API refuses an upload into outright, whatever the
-// caller's rights — see `FileUploader.GetFolderIdAsync` in
+// The roots of the sections that hold rooms (`DocSpaceHelper.IsRoomsSectionRoot`
+// on the C# side). The Files API refuses an upload into one outright,
+// whatever the caller's rights — see `FileUploader.GetFolderIdAsync` in
 // products/ASC.Files/Core/Utils/FileUploader.cs, which throws
-// `SecurityException` for these before it ever looks at `CanCreate`.
-const UPLOAD_REFUSING_FOLDER_TYPES = new Set<number>([
+// `SecurityException` for these before it ever looks at `CanCreate`, and an
+// admin reads `Create: true` on them all the same.
+const SECTION_ROOT_FOLDER_TYPES = new Set<number>([
   14, // FolderType.VirtualRooms — the "Rooms" root
   20, // FolderType.Archive
   30, // FolderType.RoomTemplates
+  34, // FolderType.AiAgents
+  36, // FolderType.Forms
+  41, // FolderType.AiHub — the "AI rooms" root
+  42, // FolderType.PrivateRooms
 ]);
 
 /**
@@ -103,7 +116,10 @@ export function canTakeUpload(info: DocspaceFolderInfo | undefined): boolean {
   if (!info) {
     return false;
   }
-  if (info.folderType !== undefined && UPLOAD_REFUSING_FOLDER_TYPES.has(info.folderType)) {
+  if (info.sectionRoot) {
+    return false;
+  }
+  if (info.folderType !== undefined && SECTION_ROOT_FOLDER_TYPES.has(info.folderType)) {
     return false;
   }
   return info.canCreate !== false;
@@ -210,6 +226,14 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   }
   if (roomType !== undefined) {
     result.roomType = roomType;
+  }
+  const rootFolderType = getNumber(envelope, "rootFolderType");
+  if (
+    getNumber(envelope, "parentId") === 0 &&
+    rootFolderType !== undefined &&
+    SECTION_ROOT_FOLDER_TYPES.has(rootFolderType)
+  ) {
+    result.sectionRoot = true;
   }
   // `FolderDto.Security` is a dictionary keyed by the `FilesSecurityActions`
   // enum name; the JSON casing has changed before, so match case-insensitively
