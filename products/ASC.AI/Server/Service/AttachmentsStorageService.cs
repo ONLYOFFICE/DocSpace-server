@@ -59,7 +59,6 @@ public class AttachmentsStorageService(
     FileSecurity fileSecurity,
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    ExternalDatabaseClient externalDatabaseClient,
     FormSchemaProvider formSchemaProvider,
     FormAnalyzeIntent formAnalyzeIntent,
     IFusionCache fusionCache,
@@ -264,7 +263,7 @@ public class AttachmentsStorageService(
     /// </summary>
     private async Task<Dictionary<int, FormAnalysis>> AnalyzeFormsAsync(List<File<int>> files)
     {
-        if (!externalDatabaseClient.IsEnabled() || !files.Exists(f => f.IsPdf))
+        if (!formSchemaProvider.IsEnabled() || !files.Exists(f => f.IsPdf))
         {
             return [];
         }
@@ -280,9 +279,9 @@ public class AttachmentsStorageService(
     {
         try
         {
-            return await formSchemaProvider.TryGetTableNameAsync(file) is null
-                ? FormAnalysis.None
-                : new FormAnalysis(true);
+            return await formSchemaProvider.CanAnalyzeAsync(file)
+                ? new FormAnalysis(true)
+                : FormAnalysis.None;
         }
         catch (Exception e)
         {
@@ -298,7 +297,7 @@ public class AttachmentsStorageService(
     /// </summary>
     public async Task<FormAnalysisDto> GetFormAnalysisAsync(Guid attachmentId)
     {
-        if (!externalDatabaseClient.IsEnabled() || !await formAnalyzeIntent.GetAsync(attachmentId))
+        if (!formSchemaProvider.IsEnabled() || !await formAnalyzeIntent.GetAsync(attachmentId))
         {
             return _unavailableFormAnalysis;
         }
@@ -405,13 +404,13 @@ public class AttachmentsStorageService(
     }
 
     /// <summary>
-    /// The analysable flag for a single read, from whether the form has a submission table. Batch reads
+    /// The analysable flag for a single read, from whether the form has analysable responses. Batch reads
     /// skip it: they hydrate whole threads, and a file lookup per attachment would not pay for itself.
     /// The starter questions are fetched separately from the long-poll endpoint.
     /// </summary>
     private async Task<FormAnalysis?> ReadFormAnalysisAsync(Attachment attachment)
     {
-        if (attachment.EntryId is not { } entryId || !externalDatabaseClient.IsEnabled())
+        if (attachment.EntryId is not { } entryId || !formSchemaProvider.IsEnabled())
         {
             return null;
         }
@@ -424,7 +423,7 @@ public class AttachmentsStorageService(
                 return null;
             }
 
-            return await formSchemaProvider.TryGetTableNameAsync(file) is null ? null : new FormAnalysis(true);
+            return await formSchemaProvider.CanAnalyzeAsync(file) ? new FormAnalysis(true) : null;
         }
         catch (Exception e)
         {

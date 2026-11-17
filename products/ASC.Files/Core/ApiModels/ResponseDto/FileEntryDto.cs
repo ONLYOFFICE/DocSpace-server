@@ -406,6 +406,7 @@ public class FileEntryDtoHelper(
     FileSharing fileSharing,
     IUrlShortener urlShortener,
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IFusionCache fusionCache,
     TenantManager tenantManager,
     MetadataTemplatesCache metadataTemplatesCache,
@@ -508,7 +509,18 @@ public class FileEntryDtoHelper(
         }
     }
 
-    protected async Task<bool> FormHasExternalDbTableAsync(string tableName)
+    protected async Task<bool> FormHasAnalysableResponsesAsync<T>(FormFillingProperties<T> formFilling, int currentVersion)
+    {
+        if (externalDatabaseClient.IsEnabled())
+        {
+            return await FormHasExternalDbTableAsync(formFilling?.ExternalDbTableName);
+        }
+
+        // No table check: an idle built-in table may be dropped, and it is restored from the search index when analysis starts.
+        return builtinFormsDatabaseClient.IsEnabled() && FormFillingReportCreator.HasResponsesInVersionTable(formFilling, currentVersion);
+    }
+
+    private async Task<bool> FormHasExternalDbTableAsync(string tableName)
     {
         if (string.IsNullOrEmpty(tableName) || !externalDatabaseClient.IsEnabled())
         {

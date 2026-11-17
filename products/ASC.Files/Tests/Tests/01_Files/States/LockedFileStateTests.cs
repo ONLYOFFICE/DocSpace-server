@@ -169,4 +169,27 @@ public class LockedFileStateTests(
         status.Should().Be(403);
         (await ReadState(fileId)).Should().BeEquivalentTo(before);
     }
+
+    [Fact]
+    public async Task RestoreVersion_LockedByOwner_ForbiddenAndNothingChanges()
+    {
+        // Arrange
+        var (roomId, fileId) = await CreateRoomWithHtml();
+        var manager = await InviteContact(EmployeeType.RoomAdmin);
+
+        await _filesClient.Authenticate(Owner);
+        await InviteToRoom(roomId, manager, FileShare.RoomManager);
+        await _filesApi.UpdateFileAsync(fileId, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(fileId, new LockFileRequest(true), TestContext.Current.CancellationToken);
+        var before = await ReadState(fileId);
+        await _filesClient.Authenticate(manager);
+
+        // Act
+        var status = await StatusOf(async () => await _filesApi.RestoreFileVersionAsync(
+            fileId, version: 1, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        status.Should().Be(403);
+        (await ReadState(fileId)).Should().BeEquivalentTo(before);
+    }
 }

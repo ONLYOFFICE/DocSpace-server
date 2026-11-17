@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+    <OutputType>exe</OutputType>
+
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="coverlet.collector">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="DocSpace.API.SDK" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit.runner.visualstudio">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The shared integration-test harness (see .claude/rules/tests.md). -->
+    <ProjectReference Include="..\ASC.Tests.Common\ASC.Tests.Common.csproj" />
+    <!-- Not an Aspire resource declaration, but what makes Rider recognise this project as an Aspire
+         test host; see the same reference in ASC.Notify.Tests. -->
+    <ProjectReference Include="..\..\ASC.AppHost\ASC.AppHost.csproj" IsAspireProjectResource="false" />
+    <!-- The in-process host (CleanerHost) is the ASC.ClearEvents service's own service graph: its Startup
+         and the AuditTrailCleaner a test runs a pass of. -->
+    <ProjectReference Include="..\..\services\ASC.ClearEvents\ASC.ClearEvents.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

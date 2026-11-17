@@ -41,7 +41,7 @@ public class GetFilesModuleTests(
 {
     public static TheoryData<EmployeeType?> AllowedRoles =>
     [
-        null, // the portal owner
+        (EmployeeType?)null, // the portal owner
         EmployeeType.DocSpaceAdmin,
         EmployeeType.RoomAdmin,
         EmployeeType.User,

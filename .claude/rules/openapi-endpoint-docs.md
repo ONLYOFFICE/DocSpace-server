@@ -3,20 +3,12 @@ paths:
   - "**/*Controller.cs"
 ---
 
-# Endpoint documentation for AI consumers (OpenAPI summary & description)
+# Endpoint documentation (OpenAPI summary, description, responses)
 
-The published OpenAPI documents are no longer read only by humans. They are turned into MCP tools,
-loaded into agent context as tool definitions, and used by coding assistants to write client code.
-For that audience the operation's `summary` + `description` **is** the tool definition: an agent picks
-the operation, fills the parameters and interprets the answer from that text alone, with none of the
-organizational context a human colleague has.
-
-Structural validity is not agent-readiness: a document can pass every schema check and still be
-unusable, because what is missing is *semantics*, not *syntax*.
-
-This file covers the **operation**: its title, its description, its response codes. The text of a
-parameter, a DTO property or an enum member is the sibling rule
-`.claude/rules/openapi-dto-docs.md`, which loads when you open the file that holds it.
+The published documents become MCP tools and SDK doc comments: an agent picks the operation, fills the
+parameters and reads the answer from this text alone. Goal: the fewest words with no lost fact, in English
+that a reader with basic English can follow. Parameters, DTO properties and enum members are
+`.claude/rules/openapi-dto-docs.md`.
 
 ## 0. Where the text comes from
 
@@ -24,193 +16,217 @@ parameter, a DTO property or an enum member is the sibling rule
 |---|---|
 | `summary` | `<summary>` on the action — the **short title** |
 | `description` | `<remarks>` on the action — the **long explanation** |
-| parameter `description` | `<summary>` on the bound DTO property, or `[SwaggerPathParameter(name, description)]` for an unbindable route placeholder |
+| parameter `description` | `<summary>` on the bound DTO property, or `[SwaggerPathParameter(name, description)]` |
 | response descriptions | `[SwaggerResponse(code, "text", typeof(T))]` |
 | `tags` | `[Tags("Files / Operations")]` |
 
-The `<summary>`/`<remarks>` split is **inverted relative to ordinary C# habit** and the convention is
-to write the `<remarks>` block first. Never swap them: the swap silently exchanges every operation's
-title and description across the contract and all eight SDKs.
+The `<summary>`/`<remarks>` split is inverted relative to ordinary C# habit. Write `<remarks>` first and never
+swap them: a swap exchanges every title and description across the contract and all the SDKs.
 
-`<path>`, `<collection>`, `<requiresAuthorization>` are structured facts, not prose. Keep them true
-(`requiresAuthorization=false` only with `[AllowAnonymous]`); an agent that trusts a stale value
-builds a request it cannot authorize.
+`<path>`, `<collection>`, `<requiresAuthorization>` are facts: keep them true (`requiresAuthorization=false`
+only with `[AllowAnonymous]`).
 
-An action or controller carrying `[ApiExplorerSettings(IgnoreApi = true)]` is kept out of the
-published documents and out of the SDKs, so nothing it says reaches an agent today. Document it to
-the same standard anyway: that attribute is a publication switch, flipped by someone who will not
-reread the doc comments underneath it, and until then the text is what the next person to touch the
-handler reads.
+An action or controller carrying `[ApiExplorerSettings(IgnoreApi = true)]` is for internal use only:
+it is kept out of the published documents and out of the SDKs, and this rule does not apply to it —
+no `<summary>`/`<remarks>` standard, no `[SwaggerResponse]` set, no `[RaisesWebhook]` (§2.1). The
+same holds for a DTO that only such actions bind or return; a DTO that a published operation also
+uses keeps the full standard of `openapi-dto-docs.md`. Two things still apply:
+
+* **The analyzer skips only a controller hidden as a whole.** An action hidden by its own attribute
+  inside a published controller still gets API002–API006 (`build-warnings.md`), and "zero new
+  warnings" still holds there: give it a short, true `<summary>` and `<remarks>` (what it is for,
+  who calls it) and its DTO properties a `<summary>` and `<example>`. Nothing more is required.
+* **Removing `IgnoreApi` publishes the action.** The change that removes it brings the action, its
+  DTOs and its response codes up to this rule and `openapi-dto-docs.md`, and adds `[RaisesWebhook]`
+  for what it raises — moving the `_otherSources` entry that described it, if there is one (§2.1).
 
 ## 1. `summary` — the title
 
-* A noun phrase or verb+object, 2–6 words, sentence case, no trailing period: `Bulk download`,
-  `Copy to the folder`.
-* It must be **unique within the document**. It becomes the sidebar entry, the Postman request name
-  and the first line of the doc comment on the generated SDK method in eight languages; duplicates
-  make two different operations indistinguishable in a tool list.
-* Never a restatement of the HTTP verb and path (`Post fileops copy`), never the C# method name, never
-  "API" / "method" / "endpoint" as filler.
-* It is a title, not a sentence: no preconditions, no permissions, no error talk. That is `description`.
+* A noun phrase or verb+object, 2–6 words, sentence case, no trailing period: `Bulk download`.
+* **Unique within the document**: it is the sidebar entry, the Postman request name and the SDK method's
+  doc comment.
+* Never the HTTP verb and path (`Post fileops copy`), the C# method name, or "API" / "method" / "endpoint".
+* A title, not a sentence: no preconditions, permissions or errors.
 
 ## 2. `description` — the contract in prose
 
-Minimum three sentences; typically six to nine; 150–200 words for a normal operation, with a hard
-ceiling of about 200. Go under ~100 words only when most of the concerns below genuinely do not
-apply — a read-only lookup with no preconditions, no asynchrony, no quota and no near-neighbour
-operation. State the concerns below **in this order**, one concern per sentence, and omit a line
-only when it genuinely does not apply. Fixed order matters: descriptions are truncated in
-tool-search listings, so the first sentence has to carry the operation's identity on its own.
+Before writing:
 
-1. **What it does, in domain terms** — the intent, not the mechanics. "Creates a refund" is weak;
-   "Creates a refund for a paid order" is the shape. Name the resource it acts on and the scope
-   (whole portal, current room, current user).
-2. **Preconditions** — what must be true before the call, and which operation to call first to make it
-   true. Reference it as `GET api/2.0/files/fileops`, so an agent can find it in the same document.
-3. **Access** — the role, permission or share level the caller needs, in words. An agent cannot derive
-   "room admin or above" from a `security` block.
-4. **Effects** — is the call read-only, mutating, or destructive; is it idempotent (may a retry be
-   repeated safely?); is it **asynchronous** (does it return a queued operation the caller must poll,
-   and where does it poll?). Never leave this one out: an agent that takes an asynchronous call for a
-   finished one acts on a result that does not exist yet.
-5. **What comes back** — the shape and the meaning of it, beyond the schema: what a returned list is
-   ordered by, whether it is paginated and how to get the next page, what an empty result means,
-   which fields are only populated in some states, units and time zones (`bytes`, `UTC`).
-6. **Limits and boundaries** — quotas, size and count caps, rate limits, and explicitly **what the
-   operation does not do**, including *when to use a different operation instead*
-   ("for a single file use `.../file/{fileId}/copyas`; this operation is for batches").
-7. **Failure and recovery** — the meaningful error cases and what the caller should do about them
-   ("a single item the caller cannot read fails the whole operation with 403 — filter the list first").
-   Every code named here must also exist as a `[SwaggerResponse]`.
-8. **Deprecation** — if `[Obsolete]`/`deprecated`, say so in the first sentence and name the
-   replacement operation. An agent will otherwise keep choosing it.
+* **Start from the code of the branch**: the action and the services it calls. The current text and the
+  published JSON can be wrong. Verify every fact you keep, and check each item of the list below against the
+  code and the declared responses, even when the current text never had it.
+* **Know what reaches the agent**: the description, the parameters and body properties with their texts,
+  sometimes the schema of the 200 response. Response descriptions and headers never do. Look for each fact
+  in the parameters, the body properties, their nested schemas and array items, and the 200 response:
+  * a fact about the **value** — its meaning, where a valid one comes from, format, default, length, range —
+    stays on the property only;
+  * a fact about **behaviour** — what the call does with the value, how it compares it, which parameter
+    wins, what an empty or zero value means, what a flag switches, what a repeat does — is in the
+    description, even when a property states it too;
+  * a fact that only a response text or a header carries goes into the description.
+* **The text makes sense without the parameter texts.** State the fact or name the parameter ("the minimums
+  of `quantity`"), never "minimums apply".
 
-Make implicit knowledge explicit: specialized formats, niche internal terminology, the relationship
-between two resources. Write it the way you would brief a new hire who has never seen this product.
+What stays, in this order; leave an item out only when it does not apply:
+
+1. **What it does**, in the first sentence: a present-tense verb (GET → Returns, POST → Creates/Starts,
+   PUT → Changes/Updates, DELETE → Deletes), the resource and the scope. An effect that depends on the caller
+   or a mode is said here: `Changes the email address of an account, or sends a link that confirms the
+   change.` Modes that define the call stay here even when a parameter describes them. A second sentence
+   may explain the first. A deprecated operation says so here and names the replacement. If an older
+   description is correct, start from it.
+2. **Preconditions**, with the operation that satisfies them.
+3. **Access**: a phrase of §2.3, then the refusal code in its own sentence: `Other callers get 403.` Check
+   in the code which code a refusal really returns.
+4. **Effect**: read-only, changes data, spends money, cannot be undone, or queues work. Then:
+   * a change says whether it can be repeated: `You can repeat it with the same body.` / `Do not repeat it.
+     Each call sends the emails again.` / `A repeated call returns 404.`;
+   * queued work names the call to poll and the field that signals the end: "Repeat
+     `GET api/2.0/files/fileops` until `finished` is true."; the status call itself says "This is the call to
+     poll. Repeat it until `isCompleted` is true.";
+   * no `idempotent` next to `read-only`.
+5. **What comes back**, only what the schema does not make clear: a body that is not JSON, what `true` and
+   `false` mean, the order of a list, paging and whether there is a total, what an empty result means,
+   fields filled only in some states, skipped items in a list, the meaning of a field that its schema text
+   does not give. When the body DTO is shared and this call reads only some fields, name them: "The call
+   reads only `userId` and `email` from the body."
+6. **Limits and related operations**: a limit that only a response publishes, with its code (`More calls
+   return 429.`); what the operation does not do and what to use instead: "To <task>, use
+   `METHOD api/2.0/…`."
+7. **Errors the caller can act on**, in the forms of §2.3.
+
+What goes: facts about the value that a property already states; reasons (`because …`), restatements and
+the schema retold; side effects the caller cannot see — socket pushes, audit records, internal caches (a
+cache that makes the answer stale stays); internal names — service classes, exception types, DB columns,
+tracker numbers; the webhook sentence (§2.1).
 
 ### 2.1 Webhooks the operation raises
 
-**An action that causes a webhook to be published carries `[RaisesWebhook]`** (`ASC.Webhooks.Core`) — whether
-it publishes directly, through a service it calls, or through a queued operation it starts. The attribute is the
-only record of that fact: an OpenAPI filter turns it into the closing sentence of this operation's `description`
-and into `x-docspace-webhooks`, and the webhooks contract (`docspace-webhooks.yaml`) lists the operation under
-each trigger from there. An action without it is missing from both, even though the receiver gets the delivery.
+An action that causes a webhook — directly, through a service, or through a queued operation it starts —
+carries `[RaisesWebhook]` (`ASC.Webhooks.Core`). A filter turns it into the closing sentence of the
+description and into `x-docspace-webhooks`, and `docspace-webhooks.yaml` lists the operation from there.
 
-* Name the triggers by the enum (`WebhookTrigger.FileCreated`), never by string.
-* One attribute per condition. Leave `When` out when the action always raises the trigger; otherwise write it to
-  follow "Raises the `x` webhook": ``When = "only when `autosave` is true"``, `"for every listed file, once the
-  queued operation processes it"`, `"instead when the room is an AI agent"`. Triggers raised together under the
-  same condition share one attribute.
-* State the cases a receiver cannot guess: per item of a list, per nested entry or not, on completion of a
-  queued operation, when nothing actually changed, when the webhook is *not* raised although the data changed.
-* Do **not** mention the webhook in `<remarks>`. The filter writes the sentence; a second copy in prose
-  duplicates it and drifts.
-* An action hidden with `[ApiExplorerSettings(IgnoreApi = true)]` gets the attribute too, for the same reason
-  it gets its documentation (§0).
-* A new `WebhookManager.PublishAsync` / `UserWebhookManager.PublishAsync` call in a service: find every action
-  that reaches it (LSP `incomingCalls`) and annotate each. A publish no API action reaches — an editor callback,
-  a download handler, a background job of its own — belongs in `_otherSources` in
-  `common/Tools/ASC.Webhooks.Contract/ContractHeader.cs` instead.
-* After adding or changing an attribute, re-emit the API documents (stage A of the `generate-sdk` skill) and then
-  the contract (`dotnet run --project common/Tools/ASC.Webhooks.Contract`): the contract reads the operations from
-  the documents on disk, and its check compares against the same files, so it does not notice a stale document.
+* Triggers by the enum (`WebhookTrigger.FileCreated`), never by string.
+* One attribute per condition; triggers raised under the same condition share one. Leave `When` out when
+  the action always raises it. The whole sentence "Raises the `x` webhook <When>." has at most 20 words and
+  an active verb: ``When = "only when `autosave` is true"``.
+* State what a receiver cannot guess: per item of a list, per nested entry or not, on completion of a queued
+  operation, when nothing changed, when the webhook is *not* raised although the data changed.
+* No mention of the webhook in `<remarks>`.
+* An `IgnoreApi` action needs no attribute: the filter never sees it. Describe a webhook it raises in
+  `_otherSources` (next point), as what the web client does.
+* A new `WebhookManager.PublishAsync` / `UserWebhookManager.PublishAsync` call: annotate every action that
+  reaches it (LSP `incomingCalls`). A publish no action reaches goes into `_otherSources` in
+  `common/Tools/ASC.Webhooks.Contract/ContractHeader.cs`.
+* After a change, re-emit the API documents (stage A of the `generate-sdk` skill), then the contract
+  (`dotnet run --project common/Tools/ASC.Webhooks.Contract`): it reads the documents on disk.
 
-## 3. Parameters, DTO properties and responses
+### 2.2 Form
 
-Same audience, different unit — and the division of labour between the two is load-bearing. A
-parameter's *behavioural* role is documented at the operation level (§2); the property carries the
-contract of the value itself — what it means, where a valid one comes from, what format it must have.
+* **One paragraph**: no labels, lists, tables or HTML. Escape or avoid `<`, `>`, `&`.
+* **At least 3 sentences, each at most 20 words**; aim for 8–12, and keep the average at most 12. Code in
+  backticks is one word, a hyphenated word is two. Count with a tool (`check_texts.py` of the
+  `openapi-desc-opt` skill), not by eye.
+* **No word limit**: the facts set the length. The text is at its minimum when each sentence states a fact
+  no other states, and one more shortening pass removes less than 5% of the words. Over ~250 words, move the
+  details of a mode to its enum member and keep one sentence per mode.
+* **Shortening pass** — never at the cost of a fact, a status code, the refusal code or the repeat
+  statement: several cases of one code in one sentence after the verb (`The call returns 404 for an unknown
+  top-up, a top-up without an invoice, or no billing customer.`); a precondition written only as its error;
+  each fact once; a limit inside its error sentence, as `too long` when the schema publishes `maxLength`; two
+  sentences with one subject merged when together they stay within 20 words; a shorter wording with the same
+  meaning (`A deleted account returns 404.`).
+* **One link between facts per sentence, and the link is a word.** A colon only before a list. An
+  instruction and how to do it, a fact and its result, a condition and its error are two sentences. Name a
+  link that is not obvious: `First`, `Then`, `So`, `After this call`.
+* **Active voice** for an action: `The call skips LDAP accounts`. A state may be passive: `is turned off`.
+* **Lists**: a comma before `and`/`or` from three items; the list follows the verb, never as its subject.
+* **Conditions**: a short one before the action (`If no tag has the old name, the call returns 404.`), a
+  list of them after the verb.
+* **Avoid**: `…, or the call returns 403` meaning "otherwise" → `If …, the call returns 403.`; `unless` with
+  a negation → `Only Y can delete X.`; inversion (`So does a blank name`) → `A blank name also returns
+  400.`; a sentence that starts with code or a path → "To start a job, use `POST api/2.0/…`."
+* **Plain words** with one direct meaning. Instead of → write: `turns true` → `becomes true`; `at once` →
+  `immediately`; `goes to` (a file, a letter) → `the portal saves … in`, `sends … to`; `drops` → `deletes`
+  or `no longer shows`, say which; `hand over` → `move … to another user`; `used up` → `after the portal
+  spends …`; `by itself` → the doer (`the portal turns it on`); `comes back again` → what happens;
+  `in place` → `has`; `after a while`, `a normal session` → the number or the exact thing, else an
+  instruction; `afterwards` → `After this call`; `also the skipped ones` → `including the skipped ones`;
+  `erasure` → `deletion`; `ready-to-show`, `free-form` → `a text you can show to the user`, `any`;
+  `health` of a service → `if the service works`; `client` (a program) → `app`; a chain of nouns → a verb.
+* **Notation**: operations in backticks, `` `GET api/2.0/files/tags` ``, and so one word; status codes as
+  numbers; fields and values in backticks.
 
-**The property half of this rule lives in `.claude/rules/openapi-dto-docs.md`** (§3.1–§3.5, keeping
-these numbers), which loads with the DTO, the enum or the `ApiModels` file you open to type it. Two
-things from it decide what may be written here:
+### 2.3 Phrases and terms
 
-* a **cross-parameter or behavioural** fact — an unknown id skipped, a parameter that silently
-  disables another, a blank string treated as a reset — belongs in this operation's `description`,
-  never on the property, because the same DTO is bound by other operations (§3.3 there);
-* editing a **shared** property changes text in every operation that binds it, and in other documents
-  when the type comes from `ASC.Core.Common` and friends (§3.5 there).
+Access, then the refusal code (`Other callers get 403.`, or `A guest gets 403.` after "except a guest"):
 
-What stays here is §3.6 below: the response codes of this operation.
+* `Requires a DocSpace admin.`
+* `Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.`
+* `Any signed-in user can call it, except a guest.` / `Any signed-in user can call it.`
+* `Anyone can call it without signing in.`
+* `Sign the request with the confirmation token from the emailed link.`
+* `Requires editing access to the file.` / `Requires the right to create content in the room.`
+* a role that seems enough but is not: `A room admin can create tags but also gets 403 here.`
+
+Errors, with `returns` as the only verb for a code (a caller `gets` one): `If <short condition>, the call
+returns N.` / `The call returns N if <a>, <b>, or <c>.` / `It also returns N if <condition>.` / `A repeated
+call returns N.`
+
+One term per concept, in every text and as the DTOs use it:
+
+* user types: `DocSpace admin`, `room admin`, `user`, `guest` (`[Description]` of `EmployeeType`); room
+  roles: `room manager`, `content creator`, `editor`, … (`[Description]` of `FileShare`). The user type room
+  admin is not the room role room manager: qualify them when both appear;
+* `the portal owner`; `portal` for one DocSpace, `installation` for the server with all its portals;
+* `account` for a person's record, `profile` for the returned object; `storage account`, `wallet
+  sub-account` — never a bare `account` for these.
+
+## 3. Parameters and DTO properties
+
+Their texts are `.claude/rules/openapi-dto-docs.md`. A behavioural fact belongs to this description, never
+to the property (§3.3 there); editing a shared property changes every operation that binds it (§3.5 there).
 
 ### 3.6 Responses
 
-* One `[SwaggerResponse]` per code the operation can actually return, and its text says what that code
-  *means here* — not "Bad request" but "The destination folder is a room the caller cannot write to".
-* Every code named in the prose must exist as a `[SwaggerResponse]`, and a documented code the handler
-  cannot reach is a defect rather than thoroughness: it buys an agent a recovery branch for a case
-  that never happens.
+* One `[SwaggerResponse]` per code the operation can return, its text saying what the code *means here*:
+  not "Bad request" but "The destination folder is a room the caller cannot write to".
+* A declared code is a candidate, not proof: check that the code can return it. A documented code the
+  handler cannot reach is a defect. Every code named in the prose has a `[SwaggerResponse]`.
+* Every 4xx and 5xx code of the old text and of the declared responses is in the new text, or has a reason
+  to be out: 401 for a missing sign-in, 500, 502 and 503 of the pipeline, a code a parameter's type rules
+  out.
 
-## 4. Consistency across the document
+## 4. Consistency
 
-* **One canonical term per concept.** If the same thing is called "room" in one operation and
-  "workspace" in the next, agents treat them as two concepts. Match the term the DTOs use.
-* Tags are the namespace (`Files / Operations`, `People / Contacts`). Related operations live under the
-  same tag, and the description of a multi-step flow names the other steps in order.
-* A description must be **self-contained**. No "see above", no reliance on a neighbouring operation's
-  text, no links to UI pages or internal wikis.
-* Escape or avoid `<`, `>`, `&` — this is XML doc. Plain sentences and `backticks` only: no HTML, no
-  tables, no multi-paragraph essays. The text is re-emitted as doc comments in eight languages.
+* Tags are the namespace (`Files / Operations`); a multi-step flow names the other steps in order.
+* Self-contained: no "see above", no neighbour's text, no links to UI pages or wikis.
+* Not lazy (`Gets the file.` on `GET .../file/{id}`, an "Ok" response text), not a tautology of the method
+  name, not untrue (a stale `<requiresAuthorization>`, an unreachable 404, the previous handler's
+  behaviour): an agent trusts wrong text.
 
-## 5. Anti-patterns
+## 5. Example: `PUT api/2.0/files/tags`
 
-| Smell | What it looks like here |
-|---|---|
-| **Lazy** | `<remarks>Gets the file.</remarks>` on `GET .../file/{id}` — a paraphrase of the path that adds zero information; undocumented parameters; a generic "Ok" response text. |
-| **Bloated** | The schema retyped field by field in prose; boilerplate repeated in all 40 operations of a controller; hedging and marketing language. |
-| **Tangled** | Business logic, auth, error handling and pagination fused into one 60-word sentence. Split by concern, in the order of §2. |
-| **Fragmented** | Half the contract in the summary, half in a response text, the precondition in another operation's remarks. |
-| **Untrue** | `requiresAuthorization=false` on an authorized action; a documented 404 the code never returns; a description describing the previous version of the handler. Wrong text is worse than none — an agent trusts it. |
-| **Tautology** | The description restates the method name (`BulkDownload` → "Bulk downloads."). If it can be derived from the signature, it is not documentation. |
-| **Internal leakage** | `FileStorageService`, exception type names, DB column names, task-tracker numbers. Callers cannot see any of it. |
+> Renames a custom room tag of the portal. Every room with this tag then shows the new name. Use the old
+> name exactly as `GET api/2.0/files/tags` returns it. Requires a DocSpace admin. Other callers get 403. A
+> room admin can create tags but also gets 403 here. The call changes data, and a repeated call returns
+> 404. It returns the new name. After the rename, a `tags` filter of `GET api/2.0/files/rooms` with the old
+> name finds no rooms. If no tag has the old name, the call returns 404. The call returns 400 if a name is
+> empty, has only spaces, or is too long. It also returns 400 if any tag already has the new name, even
+> this tag. So you cannot merge two tags.
 
-## 6. Worked example
+## 6. Definition of done
 
-Before — passes every presence check and still leaves an agent guessing:
-
-```csharp
-/// <remarks>
-/// Starts the download process of files and folders with the IDs specified in the request.
-/// </remarks>
-/// <summary>Bulk download</summary>
-```
-
-After — same length class, but the asynchrony, the polling target, the two ID lists, the access rule
-and the flag's effect are all now stated:
-
-```csharp
-/// <remarks>
-/// Queues an asynchronous job that packs the specified files and folders into a single archive, and
-/// returns the caller's current file operations including the one just created. The archive is not
-/// ready when the response arrives: poll `GET api/2.0/files/fileops` until the operation's `finished`
-/// is true, then take the archive link from its `url`. Items listed in `fileConvertIds` are converted
-/// to the requested format before being packed, while `fileIds` are packed as they are. The caller
-/// needs read access to every listed item — one unreadable item fails the whole operation with 403,
-/// so filter the list beforehand. Pass `returnSingleOperation=true` to get back only the operation
-/// started by this call instead of all active ones.
-/// </remarks>
-/// <summary>Bulk download</summary>
-```
-
-That example is 114 words — the **short end** of the band: this operation has no quota, no deprecation
-and no near-neighbour operation to redirect to, so three of the §2 concerns are simply absent. An
-operation where they do apply lands at 150–200.
-
-## 7. Definition of done
-
-Before committing a new or changed endpoint, check that:
-
-- [ ] `<summary>` is a unique 2–6 word title; `<remarks>` holds the explanation (not swapped).
-- [ ] The first sentence identifies the operation on its own, out of context.
-- [ ] Preconditions, required access, and effects (mutating / destructive / idempotent / async) are stated.
-- [ ] Async operations name the operation to poll and the field that signals completion.
-- [ ] Every webhook the action raises, under every condition, is declared with `[RaisesWebhook]` (§2.1), and
-      `<remarks>` does not repeat it.
-- [ ] Cross-parameter and behavioural facts sit in this operation's `description` rather than on a
-      DTO property, shared or single-use (`openapi-dto-docs.md` §3.3).
-- [ ] Every reachable status code has a `[SwaggerResponse]` whose text is specific to this operation.
-- [ ] "When to use something else" is stated wherever a near-neighbour operation exists.
-- [ ] Terminology matches the DTOs and the rest of the tag; no internal type names.
-- [ ] Nothing in the text is false, including `<path>`, `<collection>` and `<requiresAuthorization>`.
-- [ ] Tags are XML-well-formed and spelled correctly — a doubly-misspelled tag (`<ssummary>`) is
-      silent in the whole C# toolchain and only surfaces at the document level.
+- [ ] `<summary>` is a unique 2–6 word title; `<remarks>` holds the description (not swapped).
+- [ ] Every fact is checked in the code of the branch; the items of §2 that apply are there, in order.
+- [ ] Access is followed by the refusal code; a change says whether it can be repeated; queued work names
+      the call to poll and the field that signals the end.
+- [ ] Behavioural facts are in the description; facts about a value are not repeated there.
+- [ ] One paragraph, at least 3 sentences, none over 20 words by a tool's count, average at most 12.
+- [ ] The shortening pass of §2.2 was run on the finished text. If it removed 5% of the words or more, the
+      shorter text was kept and the pass and the counts were run again.
+- [ ] Every reachable code has a `[SwaggerResponse]` with a specific text; no code was lost without a reason.
+- [ ] Every webhook, under every condition, has `[RaisesWebhook]` (§2.1), and `<remarks>` does not repeat it.
+- [ ] Terms of §2.3; no internal names; `<path>`, `<collection>`, `<requiresAuthorization>` are true.
+- [ ] Tags are XML-well-formed and spelled correctly: a misspelled tag (`<ssummary>`) is silent in the whole
+      C# toolchain.

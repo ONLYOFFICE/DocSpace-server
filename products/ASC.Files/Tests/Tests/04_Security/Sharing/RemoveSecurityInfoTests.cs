@@ -224,4 +224,82 @@ public class RemoveSecurityInfoTests(
 
         result.Should().BeTrue();
     }
+
+    /// <summary>
+    /// Recipient's "Remove from list": the file leaves the recipient's favorites, recent and new marks, while the
+    /// owner's record and the external link stay as they were.
+    /// </summary>
+    [Fact]
+    public async Task RemoveSecurityInfo_ByRecipient_ClearsOwnFavoritesRecentAndNew_KeepsOwnerRecordAndLink()
+    {
+        var recipient = await InviteContact(EmployeeType.User);
+
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("Autotest Remove Marks.docx", Owner);
+        var link = (await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest(access: FileShare.Read), TestContext.Current.CancellationToken)).Response;
+        await ShareFile(file.Id, recipient.Id, FileShare.Read);
+
+        var sharedId = await GetShareFolderIdAsync(recipient);
+        await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        await _filesOperationsApi.AddFavoritesAsync(new BaseBatchRequestDto { FileIds = [new(file.Id)] }, TestContext.Current.CancellationToken);
+        var before = (await _foldersApi.GetFolderByFolderIdAsync(sharedId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        before.New.Should().BeGreaterThan(0);
+
+        var result = (await _sharingApi.RemoveSecurityInfoAsync(
+            new BaseBatchRequestDto { FileIds = [new(file.Id)] }, TestContext.Current.CancellationToken)).Response;
+        result.Should().BeTrue();
+
+        var favoritesId = await GetFolderIdAsync(FolderType.Favorites, recipient);
+        var favorites = (await _foldersApi.GetFolderByFolderIdAsync(favoritesId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        favorites.Files.Should().NotContain(f => f.Title == file.Title);
+
+        var recentId = await GetFolderIdAsync(FolderType.Recent, recipient);
+        var recent = (await _foldersApi.GetFolderByFolderIdAsync(recentId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        recent.Files.Should().NotContain(f => f.Title == file.Title);
+
+        var after = (await _foldersApi.GetFolderByFolderIdAsync(sharedId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        after.New.Should().Be(0);
+        after.Files.Should().NotContain(f => f.Title == file.Title);
+
+        await _filesClient.Authenticate(Owner);
+        var rights = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        rights.Should().Contain(r => r.IsOwner && r.SharedToUser != null && r.SharedToUser.Id == Owner.Id);
+        var links = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        links.Should().Contain(l => l.SharedLink != null && l.SharedLink.Id == link.SharedLink.Id);
+    }
+
+    /// <summary>
+    /// The owner's own call on an entry of their own My documents revokes the account shares and keeps the owner
+    /// record and the external link. The list clean-up is for entries reached through a share, so the owner's own
+    /// favorites and recent marks of the entry stay (<c>FileSharingAceHelper.RemoveAceAsync</c> returns early for an
+    /// entry under the caller's My documents).
+    /// </summary>
+    [Fact]
+    public async Task RemoveSecurityInfo_ByOwner_RevokesShares_KeepsOwnMarksOwnerRecordAndLink()
+    {
+        var user = await InviteContact(EmployeeType.User);
+
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileInMy("Autotest Owner Remove Marks.docx", Owner);
+        var link = (await _filesApi.SetFileExternalLinkAsync(file.Id, new FileLinkRequest(access: FileShare.Read), TestContext.Current.CancellationToken)).Response;
+        await ShareFile(file.Id, user.Id, FileShare.Read);
+        await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+        await _filesOperationsApi.AddFavoritesAsync(new BaseBatchRequestDto { FileIds = [new(file.Id)] }, TestContext.Current.CancellationToken);
+
+        (await _sharingApi.RemoveSecurityInfoAsync(
+            new BaseBatchRequestDto { FileIds = [new(file.Id)] }, TestContext.Current.CancellationToken)).Response.Should().BeTrue();
+
+        var favoritesId = await GetFolderIdAsync(FolderType.Favorites, Owner);
+        (await _foldersApi.GetFolderByFolderIdAsync(favoritesId, cancellationToken: TestContext.Current.CancellationToken)).Response
+            .Files.Should().Contain(f => f.Title == file.Title);
+        var recentId = await GetFolderIdAsync(FolderType.Recent, Owner);
+        (await _foldersApi.GetFolderByFolderIdAsync(recentId, cancellationToken: TestContext.Current.CancellationToken)).Response
+            .Files.Should().Contain(f => f.Title == file.Title);
+
+        var rights = (await _sharingApi.GetFileSecurityInfoAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        rights.Should().Contain(r => r.IsOwner);
+        rights.Should().NotContain(r => r.SharedToUser != null && r.SharedToUser.Id == user.Id);
+        var links = (await _filesApi.GetFileLinksAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        links.Should().Contain(l => l.SharedLink != null && l.SharedLink.Id == link.SharedLink.Id);
+    }
 }

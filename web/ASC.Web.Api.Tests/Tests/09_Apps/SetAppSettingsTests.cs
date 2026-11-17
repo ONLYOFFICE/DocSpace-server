@@ -212,4 +212,22 @@ public class SetAppSettingsTests(
         exception.ErrorCode.Should().Be(404);
         (await ListStatesAsync()).Should().Equal(before);
     }
+
+    [Fact]
+    public async Task SetSettings_AnyValidJson_IsAcceptedByEveryApplicationWithoutSchemaOrSizeChecks()
+    {
+        // Arrange — one large document of no particular shape, with keys no application defines
+        var ids = (await AppsApi.GetAllAsync(Ct)).Response.Select(app => app.Id).ToList();
+        var items = string.Join(',', Enumerable.Range(0, 2000).Select(i => $$"""{"unexpected-{{i}}":"{{new string('x', 50)}}","n":{{i}}}"""));
+        var document = $$"""{"notASchema":true,"$ref":"#/nowhere","items":[{{items}}]}""";
+
+        foreach (var id in ids)
+        {
+            // Act
+            await SaveSettingsAsync(id, document);
+
+            // Assert
+            (await ReadSettingsAsync(id)).Should().Be(Canonical(document), id);
+        }
+    }
 }

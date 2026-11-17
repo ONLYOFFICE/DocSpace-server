@@ -87,7 +87,7 @@ public class FileDeleteTests(
 
         // Assert
         results.Should().NotBeNullOrEmpty();
-        var operation = results[0];
+        var operation = results![0];
         operation.Finished.Should().BeTrue();
         operation.Progress.Should().Be(100);
         operation.Processed.Should().Be("1");
@@ -115,7 +115,7 @@ public class FileDeleteTests(
 
         // Assert
         results.Should().NotBeNullOrEmpty();
-        var operation = results[0];
+        var operation = results![0];
         operation.Finished.Should().BeTrue();
         operation.Progress.Should().Be(100);
         operation.Processed.Should().Be("1");

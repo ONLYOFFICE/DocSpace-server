@@ -85,8 +85,9 @@ public sealed record PeriodicLetterContext
 }
 
 /// <summary>
-/// The last signs of life of a portal, by day. Both are kept apart because only the login history is
-/// purged by the portal's audit settings, so only the last login can go missing later.
+/// The last signs of life of a portal, by day. Both are kept apart because only the last login can go
+/// missing later: the login history is purged by the portal's audit settings, while the audit trail
+/// cleanup (clearEvents:auditTrail) removes old events but always keeps the newest event of a portal.
 /// </summary>
 public readonly record struct PortalActivity(DateTime LastEventOn, DateTime LastLoginOn)
 {

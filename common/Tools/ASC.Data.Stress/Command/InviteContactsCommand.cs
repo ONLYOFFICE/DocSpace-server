@@ -114,10 +114,18 @@ public class InviteContactsCommand : AsyncCommand<InviteContactsCommand.Settings
 
         foreach (var empl in employeeTypes)
         {
-            var shortLink = (await usersApi.GetInvitationLinkAsync(empl, token)).Response;
+            // the portal keeps one stored link per role; a role without one answers with an empty body
+            var link = (await usersApi.GetInvitationLinkByEmployeeTypeAsync(empl, token)).Response
+                ?? (await usersApi.CreateInvitationLinkAsync(new InvitationLinkCreateRequestDto(empl), token)).Response;
+
+            if (link.IsExpired)
+            {
+                throw new HttpRequestException($"The invitation link for {empl} has expired");
+            }
+
             using var client = factory.CreateClient();
 
-            var fullLink = await client.GetAsync(shortLink, token);
+            var fullLink = await client.GetAsync(link.Url, token);
             var confirmHeader = fullLink.RequestMessage?.RequestUri?.Query.Substring(1);
             if (confirmHeader == null)
             {

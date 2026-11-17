@@ -740,11 +740,43 @@ public class FileSharing(
     FileSharingHelper fileSharingHelper,
     InvitationService invitationService,
     ExternalShare externalShare,
-    IUrlShortener urlShortener)
+    IUrlShortener urlShortener,
+    PermissionContext permissionContext)
 {
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
         return await fileSharingHelper.CanSetAccessAsync(entry);
+    }
+
+    /// <summary>
+    /// Returns the subjects whose rooms decide which users the current user may pick when sharing - its own id and
+    /// the ids of its groups - or <c>null</c> when it may pick from every user of the portal.
+    /// A user or a guest has no access to the contacts of the portal, so it only gets the users it already works with.
+    /// </summary>
+    public async Task<IReadOnlyCollection<Guid>> GetKnownToSubjectsAsync()
+    {
+        var currentUserId = authContext.CurrentAccount.ID;
+
+        if (!await userManager.IsWithoutContactsAccessAsync(currentUserId))
+        {
+            return null;
+        }
+
+        var groups = await userManager.GetUserGroupsAsync(currentUserId);
+
+        return [currentUserId, .. groups.Select(g => g.ID)];
+    }
+
+    /// <summary>
+    /// Whether the current user may pick any group of the portal when sharing; otherwise only the Everyone group is offered.
+    /// A user or a guest never may, by the same test that limits its users in <see cref="GetKnownToSubjectsAsync"/>, so
+    /// the two lists cannot drift apart. The permission to read the group list is checked as well, so the picker never
+    /// offers groups the group list itself refuses.
+    /// </summary>
+    public async Task<bool> CanPickAnyGroupAsync()
+    {
+        return !await userManager.IsWithoutContactsAccessAsync(authContext.CurrentAccount.ID)
+               && await permissionContext.CheckPermissionsAsync(Constants.Action_ReadGroups);
     }
 
     public async Task<bool> IsPublicAsync<T>(FileEntry<T> entry)
@@ -800,11 +832,7 @@ public class FileSharing(
             fileSecurity.CanEditExpirationAsync(entry)
         ).ContinueWith(t => (t.Result[0], t.Result[1], t.Result[2]));
 
-        var canAccess = entry is Folder<T> { IsRoom: true } || entry.ParentRoomType is FolderType.PublicRoom
-            ? await CheckAccessAsync(entry, filterType)
-            : canEditAccess;
-
-        if (!canAccess)
+        if (!await CanSeeSharesAsync(entry, filterType, canEditAccess))
         {
             logger.InfoUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!, filterType.ToString());
 
@@ -828,6 +856,63 @@ public class FileSharing(
         {
             yield return await ToAceAsync(entry, record, canEditAccess, canEditInternal, canEditExpiration);
         }
+    }
+
+    /// <summary>
+    /// The subjects of the entry's access list with the access of each, as the current user sees that list: the same
+    /// records as <see cref="GetPureSharesAsync{T}(FileEntry{T}, ShareFilterType, EmployeeActivationStatus?, string, int, int)"/>
+    /// returns without a search text, and nothing for a caller that may not see the list. For a caller that needs
+    /// the list as a set of ids: the full entries cost a user or a group lookup per record.
+    /// </summary>
+    public async Task<List<(Guid Id, FileShare Access)>> GetPureShareSubjectsAsync<T>(FileEntry<T> entry, ShareFilterType filterType, EmployeeActivationStatus? status)
+    {
+        if (entry == null)
+        {
+            throw new ArgumentNullException(FilesCommonResource.ErrorMessage_BadRequest);
+        }
+
+        _ = await fileSecurity.SetSecurity(new[] { entry }.ToAsyncEnumerable()).ToListAsync();
+
+        if (!await CanSeeSharesAsync(entry, filterType))
+        {
+            logger.InfoUserCanTGetSharedInfo(authContext.CurrentAccount.ID, entry.FileEntryType, entry.Id.ToString()!, filterType.ToString());
+
+            return [];
+        }
+
+        var subjects = new List<(Guid Id, FileShare Access)>();
+
+        await foreach (var ace in GetDefaultAcesAsync(entry, filterType, status, null))
+        {
+            subjects.Add((ace.Id, ace.Access));
+        }
+
+        await foreach (var record in fileSecurity.GetPureSharesAsync(entry, filterType, status, null, 0, int.MaxValue))
+        {
+            subjects.Add((record.Subject, record.Share));
+        }
+
+        return subjects;
+    }
+
+    /// <summary>
+    /// Whether the current user may see the access list of the entry (<see cref="GetPureSharesAsync{T}(FileEntry{T}, ShareFilterType, EmployeeActivationStatus?, string, int, int)"/>):
+    /// for a room, or an entry of a public room, whoever may read it; otherwise only who may manage its access.
+    /// Who has access to the entry, and who has not, is told only to those who may see that list.
+    /// The room type of an entry is taken from <see cref="FileEntry.ParentRoomType"/> as the caller left it: an entry
+    /// read from the DAO without it - as the account searches and the members of a group read theirs - counts as
+    /// outside a public room, so there only who may manage the access is told.
+    /// </summary>
+    public async Task<bool> CanSeeSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
+    {
+        return await CanSeeSharesAsync(entry, filterType, await fileSecurity.CanEditAccessAsync(entry));
+    }
+
+    private async Task<bool> CanSeeSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, bool canEditAccess)
+    {
+        return entry is Folder<T> { IsRoom: true } || entry.ParentRoomType is FolderType.PublicRoom
+            ? await CheckAccessAsync(entry, filterType)
+            : canEditAccess;
     }
 
     public async Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, string text)
@@ -1089,7 +1174,9 @@ public class FileSharing(
 
     public async IAsyncEnumerable<GroupMemberSecurity> GetGroupMembersAsync<T>(FileEntry<T> entry, Guid groupId, string text, int offset, int count)
     {
-        if (entry == null || !await fileSecurity.CanReadAsync(entry))
+        // The members of a group given access, each with its own access, are part of the entry's access list, so they
+        // are shown only to who may see that list.
+        if (entry == null || !await fileSecurity.CanReadAsync(entry) || !await CanSeeSharesAsync(entry, ShareFilterType.User))
         {
             yield break;
         }
@@ -1115,7 +1202,7 @@ public class FileSharing(
 
     public async Task<int> GetGroupMembersCountAsync<T>(FileEntry<T> entry, Guid groupId, string text)
     {
-        if (entry == null || !await fileSecurity.CanReadAsync(entry))
+        if (entry == null || !await fileSecurity.CanReadAsync(entry) || !await CanSeeSharesAsync(entry, ShareFilterType.User))
         {
             return 0;
         }

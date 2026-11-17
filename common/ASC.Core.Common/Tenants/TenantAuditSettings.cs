@@ -47,7 +47,9 @@ public class TenantAuditSettings : ISettings<TenantAuditSettings>
     public int LoginHistoryLifeTime { get; init; }
 
     /// <summary>
-    /// The audit trail lifetime.
+    /// How many days back the recent audit events and the audit trail report reach. Unlike
+    /// <see cref="LoginHistoryLifeTime"/> it deletes nothing, and the filtered audit trail is not bounded by it: how
+    /// long audit events are stored is the installation's retention policy (clearEvents:auditTrail).
     /// </summary>
     /// <example>180</example>
     public int AuditTrailLifeTime { get; init; }
