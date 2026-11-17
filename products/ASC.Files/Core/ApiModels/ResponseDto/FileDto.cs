@@ -378,9 +378,10 @@ public class FileDtoHelper(
 
         if (contextFolder is { FolderType: FolderType.Recent } or { FolderType: FolderType.Favorites })
         {
+            // FillForms is left as FileSecurity computed it: filling does not change the form, so a form opened
+            // from Recent or Favorites can be filled as from its own folder.
             var forbiddenActions = new List<FileSecurity.FilesSecurityActions>
             {
-                FileSecurity.FilesSecurityActions.FillForms,
                 FileSecurity.FilesSecurityActions.Edit,
                 FileSecurity.FilesSecurityActions.SubmitToFormGallery,
                 FileSecurity.FilesSecurityActions.CreateRoomFrom,

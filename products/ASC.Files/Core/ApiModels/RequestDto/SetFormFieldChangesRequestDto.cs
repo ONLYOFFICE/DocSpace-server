@@ -80,7 +80,8 @@ public class SetFormFieldChangesRequest
     /// milliseconds.
     /// </summary>
     /// <example>1762250000000</example>
-    [Range(0, long.MaxValue)]
+    // 2^53 - 1: long.MaxValue is published as the double 9223372036854776000, which overflows long in the generated SDKs
+    [Range(0, 9007199254740991)]
     public long Sequence { get; set; }
 
     /// <summary>

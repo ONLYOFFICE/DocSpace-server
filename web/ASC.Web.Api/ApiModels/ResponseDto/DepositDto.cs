@@ -131,6 +131,14 @@ public class DepositDto
     public OperationStatus Status { get; init; }
 
     /// <summary>
+    /// Who started the top-up: a portal user, or the portal itself, by the automatic top-up or to renew a
+    /// subscription. It is `null` if the accounting service did not report the initiator or sent a kind the portal
+    /// does not know.
+    /// </summary>
+    /// <example>Manual</example>
+    public DepositInitiator? Initiator { get; init; }
+
+    /// <summary>
     /// Whether the billing provider holds an invoice for the payment behind the top-up, which is when
     /// `GET api/2.0/portal/payment/customer/deposits/{id}/invoice` can open it. It is `false` for a top-up whose
     /// payment came without one, and asking for its invoice then fails with 404.
