@@ -856,16 +856,21 @@ public abstract class VirtualRoomsController<T>(
     /// link, and a second one returns 403. While an admin restricts external links, the call makes each external link
     /// it sets internal. Then, setting an external link in a public room or deleting its primary link returns 403. Deleting the
     /// primary link of a form-filling room also returns 403 if that link is not internal. The call also returns 403
-    /// for a private room, a room template, or too many links. It also returns 403 for a link type or access level
+    /// for an invitation link of a private room, a room template, or too many links. It also returns 403 for a link type or access level
     /// the room does not take. The call returns 400 for a too long title or password, a weak password, or an invalid
     /// `maxUseCount` or `expirationDate`. If the room does not exist, the call returns 404.
+    /// On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a
+    /// link reads only and takes `passwordRequired` instead of `password`. Only a file link with `expirationDate` may
+    /// set `passwordRequired` to false. Only the room owner and room managers set such links. The call returns 403 for
+    /// such a link without key fields, with other access, or with `denyDownload`. It returns 400 if a key field has the
+    /// wrong size, or `password` is sent.
     /// </remarks>
     /// <summary>Set the room external or invitation link</summary>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The link as it is after the call, the new primary link that replaced a deleted one, or an empty body after any other deletion", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected")]
-    [SwaggerResponse(403, "The caller may not manage the links of this room, the room is private or a room template, the room does not take this kind of link or this access level, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change in a public or form-filling room")]
+    [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected, a key field of a link of a private item has the wrong size, or such a link carries `password`")]
+    [SwaggerResponse(403, "The caller may not manage the links of this room, the room is a room template, an invitation link is requested on a private room, the room does not take this kind of link or this access level, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change in a public or form-filling room, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [HttpPut("{id}/links")]
     public async Task<FileShareDto> SetRoomLink(RoomLinkRequestDto<T> inDto)
@@ -882,7 +887,9 @@ public abstract class VirtualRoomsController<T>(
                 inDto.RoomLink.ExpirationDate,
                 inDto.RoomLink.Password?.Trim(),
                 inDto.RoomLink.DenyDownload,
-                inDto.RoomLink.Internal),
+                inDto.RoomLink.Internal,
+                keyMaterial: LinkKeyMaterial.From(inDto.RoomLink.LinkPublicKey, inDto.RoomLink.LinkPrivateKeyEnc, inDto.RoomLink.LinkProofHash),
+                passwordRequired: inDto.RoomLink.PasswordRequired),
             _ => throw new InvalidOperationException()
         };
 

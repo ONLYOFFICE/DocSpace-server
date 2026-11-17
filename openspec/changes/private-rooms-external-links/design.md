@@ -70,9 +70,16 @@ section follows the app".
    download restriction of a private Virtual Data Room are checked in `ExternalShare.ValidateRecordAsync`, which answers
    Invalid, and in the link-setting path, which answers 403. Records are never deleted by a gate, so turning a gate off
    brings the links back as they were.
-5. **Refusals come before the first write.** `SetAceObjectAsync` validates the access, `denyDownload`, `password`,
-   `passwordRequired`, the expiration and the sizes of the key material for all link aces of the request before it
-   stores any of them, and writes the share record and the key material in one transaction.
+5. **Refusals come before the first write; the key material is written before the record.** `SetAceObjectAsync`
+   validates the access, `denyDownload`, `password`, `passwordRequired`, the expiration, the managing role and the sizes
+   of the key material for all link aces of the request before it stores any of them (`ValidatePrivateLinksAsync`). The
+   share record and the key material live in two DAOs with contexts of their own, so they are not one transaction:
+   the key material is written first, and a link resolves only through its share record, so a key row alone opens
+   nothing. If the share record then fails, the key material is put back as it was (`SetPrivateLinkAsync`). A
+   revocation deletes the share record first, then the key material, the wraps made for the link and the wraps of its
+   secret in one transaction (`ShareLinkKeyDao.DeleteAsync`); a repeated revocation deletes what a failed one left.
+   Alternative: one transaction over both DAOs. Rejected: `SecurityDao.SetShareAsync` opens its own context and
+   execution strategy, and the order above leaves no state that opens anything.
 6. **What a visitor gets is read-only by construction.** The link's access is fixed to `FileShare.Read`;
    `FileSecurity` grants a link session of a private item reading and downloading of the stored file and nothing else.
    The file handler serves the stored bytes with no conversion. `openEditFile` answers the view mode with the public
@@ -110,6 +117,11 @@ section follows the app".
     server's tests cannot see it.
     The proxy is `buildtools/config/nginx` with the CSP Lua of the docker entrypoint, outside this repository, and the
     route of the visitor's page is the client's; both are dependencies of this decision.
+12. **An entry of a private room still reports no link settings.** `FileSecurity.GetLinksSettings` answers 0 for an item
+    of a private room, and `FileEntryDto` shows no link counts there, so today's client offers no link it could not
+    create. Only the link-setting path asks for the limit of a link with key material (`privateLink: true`), which is the
+    limit of a room of the same type. The counts are reported once the client change lands, in that change or behind
+    the portal setting of decision 8.
 
 ## Risks / Trade-offs
 
@@ -119,8 +131,8 @@ section follows the app".
   proof hash (decision 3), so changing or deleting the hash ends it; a test covers both.
 - [An ordinary link changes behaviour] → The new validation runs only when the item is in a private room; the existing
   `shared-links` tests run unchanged.
-- [A wrap for a link stays after a revoke if the delete fails] → Revocation deletes the share record and the key material
-  in one transaction (decision 5); a failure leaves the link working, never half revoked.
+- [Key material or wraps stay after a revoke if the delete fails] → The share record goes first, so what stays opens
+  nothing, and repeating the revocation deletes it (decision 5).
 - [The proof is guessed] → 256 random bits plus the counter of wrong attempts; the hash comparison is constant-time.
 - [A script on the visitor's page reads the secret from the address] → The restricted policy of decision 11; the
   client keeps third-party scripts off that page. The server delivers the page's own code, the same trust as for the

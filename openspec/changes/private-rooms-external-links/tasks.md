@@ -25,26 +25,32 @@ fields, they call the operations through `RawApiClient`.
 
 ## 2. Setting a link on a private item
 
-- [ ] 2.1 Accept `linkPublicKey`, `linkPrivateKeyEnc`, `linkProofHash`, `passwordRequired` and `linkSecretWraps` on
+- [x] 2.1 Accept `linkPublicKey`, `linkPrivateKeyEnc`, `linkProofHash` and `passwordRequired` (`linkSecretWraps` comes with
+  5.1, which stores and checks it) on
   `setRoomLink`, `setFileExternalLink`, `setFolderPrimaryExternalLink`, `createFilePrimaryExternalLink` and
   `createFolderPrimaryExternalLink`, with the OpenAPI texts (`.claude/rules/openapi-endpoint-docs.md`,
   `.claude/rules/openapi-dto-docs.md`).
-- [ ] 2.2 Replace the refusal in `FileSharingAceHelper.SetAceObjectAsync` (`FileSharing.cs:107-113`): validate every link
+- [x] 2.2 Replace the refusal in `FileSharingAceHelper.SetAceObjectAsync` (`FileSharing.cs:107-113`): validate every link
   ace of the request (read access only, no `denyDownload`, no `password`, the `passwordRequired` rule, the sizes) before the
-  first write, and store the share record and the key material in one transaction (design decisions 1 and 5).
-- [ ] 2.3 Update `T/PrivateRoomContentBoundaryTests.cs:93-102` and `:105-142` (cited by "No links to a private room"):
+  first write, and write the key material before the share record, putting it back if the record fails (design
+  decisions 1 and 5).
+- [ ] 2.3 Update `T/PrivateRoomContentBoundaryTests.cs:90-137` and `:139-175` (cited by "No links to a private room"):
   invitation link and external link without key material still 403 on the room, a folder and a file; revocation still
   passes; verify they pass.
+  - 2026-11-17: written, not run yet: the Aspire fixture does not start in a git worktree; run from the main checkout.
 - [ ] 2.4 Tests in `T/` for "External link of a private item": link with key material stored on a Custom room, and on a
   folder and a file of Custom, Collaboration and Virtual Data rooms; the Custom room limit (6th additional link 403); VDR
   audience forced to DocSpace users; editing, review, comment and form filling 403; `denyDownload:true` 403; Content
   creator 403; nothing stored after each refusal.
+  - 2026-11-17: written, not run yet: the Aspire fixture does not start in a git worktree; run from the main checkout.
 - [ ] 2.5 Tests for "Key material of a link has fixed sizes", one per boundary: `linkPublicKey` of 31, 32 and 33 bytes and
   not base64; `linkProofHash` of 31, 32, 33 bytes and empty; `linkPrivateKeyEnc` empty, 4096 and 4097 characters; each
   field missing.
+  - 2026-11-17: written, not run yet: the Aspire fixture does not start in a git worktree; run from the main checkout.
 - [ ] 2.6 Tests for "A link of a private item without a password is limited": file link with an expiration and
   `passwordRequired:false` stored; the same on a folder, on the room, and on a file without an expiration 403; removing the
   expiration later 403; `password` sent 400.
+  - 2026-11-17: written, not run yet: the Aspire fixture does not start in a git worktree; run from the main checkout.
 - [ ] 2.7 Update the `shared-links` tests that cite "Link settings by room type" and "Deny-download on links combines with
   the VDR room setting" (`04_Security/LinkSettingsByRoomTypeTests.cs`, `RoomLinkUpdateTests.cs:193-214`,
   `RoomLinkReadTests.cs:96-115`, `FolderLinkPrimarySetTests.cs:295-312`, `FileLinkSetTests.cs:116-130`,
@@ -104,6 +110,8 @@ fields, they call the operations through `RawApiClient`.
   another `linkPublicKey` 400 with nothing changed.
 - [ ] 5.3 Delete the key material, the link wraps and the secret wraps on revocation; test for "Revoking a link deletes
   its key material": the store holds nothing of the link and a running session gets Invalid.
+  - 2026-11-17: the deletion is in place (`ShareLinkKeyDao.DeleteAsync`, called by `SetAceObjectAsync` after the
+    share record goes); its test is still to be written.
 
 ## 6. Gates
 

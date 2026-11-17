@@ -3806,7 +3806,12 @@ public class FileSecurity(
 
     }
 
-    public async Task<int> GetLinksSettings<T>(FileEntry<T> fileEntry, SubjectType subjectType)
+    /// <summary>
+    /// The number of links of a kind the entry may have. An item of a private room reports none, so that a client
+    /// offers no ordinary link there; <paramref name="privateLink"/> asks for the limit of a link with key material
+    /// instead, which is the limit of a room of the same type.
+    /// </summary>
+    public async Task<int> GetLinksSettings<T>(FileEntry<T> fileEntry, SubjectType subjectType, bool privateLink = false)
     {
         FrozenDictionary<FolderType, FrozenDictionary<SubjectType, int>> linkSettings;
 
@@ -3843,7 +3848,7 @@ public class FileSecurity(
             linkSettings = _linkCountRoomFileSettingsAccesses;
         }
 
-        if (room is { SettingsPrivate: true })
+        if (room is { SettingsPrivate: true } && !privateLink)
         {
             return 0;
         }

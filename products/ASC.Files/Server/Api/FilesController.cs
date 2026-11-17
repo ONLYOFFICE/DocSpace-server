@@ -856,6 +856,11 @@ public abstract class FilesController<T>(
     /// external links only in public rooms. It returns 400 if the password does not meet the password policy or
     /// `expirationDate` is over 10 years ahead. If no file has this id, the call returns 404. The address is in
     /// `sharedTo.shareLink`. To change the link, use `PUT api/2.0/files/file/{id}/links`.
+    /// On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a
+    /// link reads only and takes `passwordRequired` instead of `password`. Only a file link with `expirationDate` may
+    /// set `passwordRequired` to false. Only the room owner and room managers set such links. The call returns 403 for
+    /// such a link without key fields, with other access, or with `denyDownload`. It returns 400 if a key field has the
+    /// wrong size, or `password` is sent.
     /// </remarks>
     /// <summary>
     /// Create the file primary external link
@@ -863,8 +868,8 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
-    [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item has the wrong size, or such a link carries `password`")]
+    [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
@@ -878,7 +883,9 @@ public abstract class FilesController<T>(
             allowUnlimitedDate: true,
             denyDownload: inDto.File.DenyDownload,
             password: inDto.File.Password,
-            recreateRevoked: true);
+            recreateRevoked: true,
+            keyMaterial: LinkKeyMaterial.From(inDto.File.LinkPublicKey, inDto.File.LinkPrivateKeyEnc, inDto.File.LinkProofHash),
+            passwordRequired: inDto.File.PasswordRequired);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -959,6 +966,11 @@ public abstract class FilesController<T>(
     /// 403 if links to this file cannot have this access level, or the link limit is reached. It also returns 403 if
     /// the portal settings for external links forbid the change. It returns 400 if the password does not meet the
     /// password policy or `expirationDate` is over 10 years ahead. If no file has this id, the call returns 404.
+    /// On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a
+    /// link reads only and takes `passwordRequired` instead of `password`. Only a file link with `expirationDate` may
+    /// set `passwordRequired` to false. Only the room owner and room managers set such links. The call returns 403 for
+    /// such a link without key fields, with other access, or with `denyDownload`. It returns 400 if a key field has the
+    /// wrong size, or `password` is sent.
     /// </remarks>
     /// <summary>
     /// Set a file external link
@@ -966,8 +978,8 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/links</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The link as it now stands, or nothing when it was revoked", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
-    [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin's restriction on external links forbids the change")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item has the wrong size, or such a link carries `password`")]
+    [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin's restriction on external links forbids the change, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{id}/links")]
     public async Task<FileShareDto> SetFileExternalLink(FileLinkRequestDto<T> inDto)
@@ -982,7 +994,9 @@ public abstract class FilesController<T>(
             inDto.File.Password,
             inDto.File.DenyDownload,
             inDto.File.Internal,
-            inDto.File.Primary);
+            inDto.File.Primary,
+            LinkKeyMaterial.From(inDto.File.LinkPublicKey, inDto.File.LinkPrivateKeyEnc, inDto.File.LinkProofHash),
+            inDto.File.PasswordRequired);
 
         return linkAce is not null ? await fileShareDtoHelper.Get(linkAce) : null;
     }

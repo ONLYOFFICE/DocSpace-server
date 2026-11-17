@@ -4472,7 +4472,9 @@ public class FileStorageService //: IFileStorageService
         bool? requiredAuth = null,
         string password = null,
         bool allowUnlimitedDate = false,
-        bool recreateRevoked = false)
+        bool recreateRevoked = false,
+        LinkKeyMaterial keyMaterial = null,
+        bool? passwordRequired = null)
     {
         await DemandAuthenticatedOrLinkAsync();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -4520,7 +4522,8 @@ public class FileStorageService //: IFileStorageService
 
             await DetermineParentRoomType(entry);
 
-            share = entry switch
+            // A link of a private item brings key material and reads only, so the PDF defaults below do not apply to it.
+            share = keyMaterial != null ? share : entry switch
             {
                 // Any PDF is fillable, so fill-oriented rooms start the link at FillForms.
                 File<T> { IsPdf: true, RootFolderType: FolderType.VirtualRooms, ParentRoomType: FolderType.FillingFormsRoom or FolderType.VirtualDataRoom } => FileShare.FillForms,
@@ -4551,7 +4554,9 @@ public class FileStorageService //: IFileStorageService
                         : default,
                 denyDownload: denyDownload,
                 requiredAuth: requiredAuthResolved,
-                password: password);
+                password: password,
+                keyMaterial: keyMaterial,
+                passwordRequired: passwordRequired);
         }
 
         return link;
@@ -4912,7 +4917,7 @@ public class FileStorageService //: IFileStorageService
     }
 
     public async Task<AceWrapper> SetExternalLinkAsync<T>(T entryId, FileEntryType entryType, Guid linkId, string title, FileShare share, DateTime expirationDate = default,
-        string password = null, bool denyDownload = false, bool requiredAuth = false, bool primary = false)
+        string password = null, bool denyDownload = false, bool requiredAuth = false, bool primary = false, LinkKeyMaterial keyMaterial = null, bool? passwordRequired = null)
     {
         FileEntry<T> entry = entryType == FileEntryType.File
             ? await daoFactory.GetFileDao<T>().GetFileAsync(entryId)
@@ -4936,14 +4941,14 @@ public class FileStorageService //: IFileStorageService
             var parentRoom = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
             if (parentRoom?.FolderType == FolderType.FillingFormsRoom && share is FileShare.FillForms or FileShare.None)
             {
-                var roomExternalLink = await SetExternalLinkAsync(parentRoom.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
+                var roomExternalLink = await SetExternalLinkAsync(parentRoom.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth, keyMaterial, passwordRequired);
                 var linkData = await externalShare.GetLinkDataAsync(entry, roomExternalLink.Id);
                 roomExternalLink.Link = await urlShortener.GetShortenLinkAsync(QueryHelpers.AddQueryString(linkData.Url, FilesLinkUtility.IsFile, "true"));
                 return roomExternalLink;
             }
         }
 
-        return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
+        return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth, keyMaterial, passwordRequired);
     }
 
     public async Task<FileReferenceDto> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
@@ -6660,9 +6665,15 @@ public class FileStorageService //: IFileStorageService
     }
 
     private async Task<AceWrapper> SetExternalLinkAsync<T>(FileEntry<T> entry, Guid linkId, FileShare share, string title, DateTime expirationDate = default,
-        string password = null, bool denyDownload = false, bool primary = false, bool requiredAuth = false)
+        string password = null, bool denyDownload = false, bool primary = false, bool requiredAuth = false, LinkKeyMaterial keyMaterial = null, bool? passwordRequired = null)
     {
-        var options = new FileShareOptions { Title = !string.IsNullOrEmpty(title) ? title : FilesCommonResource.DefaultExternalLinkTitle, DenyDownload = denyDownload, Internal = requiredAuth };
+        var options = new FileShareOptions
+        {
+            Title = !string.IsNullOrEmpty(title) ? title : FilesCommonResource.DefaultExternalLinkTitle,
+            DenyDownload = denyDownload,
+            Internal = requiredAuth,
+            PasswordRequired = passwordRequired
+        };
 
         var expirationDateUtc = tenantUtil.DateTimeToUtc(expirationDate);
         if (expirationDateUtc != DateTime.MinValue && expirationDateUtc > DateTime.UtcNow)
@@ -6680,7 +6691,7 @@ public class FileStorageService //: IFileStorageService
             options.Password = password;
         }
 
-        var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options);
+        var result = await SetAceLinkAsync(entry, primary ? SubjectType.PrimaryExternalLink : SubjectType.ExternalLink, linkId, share, options, keyMaterial);
         if (result == null)
         {
             return await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync();
@@ -6793,14 +6804,15 @@ public class FileStorageService //: IFileStorageService
         return await fileSharing.GetPureSharesAsync(entry, [linkId]).FirstOrDefaultAsync();
     }
 
-    private async Task<ProcessedItem<T>> SetAceLinkAsync<T>(FileEntry<T> entry, SubjectType subjectType, Guid linkId, FileShare share, FileShareOptions options)
+    private async Task<ProcessedItem<T>> SetAceLinkAsync<T>(FileEntry<T> entry, SubjectType subjectType, Guid linkId, FileShare share, FileShareOptions options,
+        LinkKeyMaterial keyMaterial = null)
     {
         if (linkId == Guid.Empty)
         {
             linkId = Guid.NewGuid();
         }
 
-        var aces = new List<AceWrapper> { new() { Access = share, Id = linkId, SubjectType = subjectType, FileShareOptions = options } };
+        var aces = new List<AceWrapper> { new() { Access = share, Id = linkId, SubjectType = subjectType, FileShareOptions = options, KeyMaterial = keyMaterial } };
 
         try
         {

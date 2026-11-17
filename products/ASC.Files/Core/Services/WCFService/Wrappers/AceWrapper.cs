@@ -85,6 +85,13 @@ public class AceWrapper
     public FileShareOptions FileShareOptions { get; init; }
 
     /// <summary>
+    /// The key material sent with an external link of an item in a private room; null for every other ace, and never
+    /// filled when shares are read.
+    /// </summary>
+    [JsonIgnore]
+    public LinkKeyMaterial KeyMaterial { get; init; }
+
+    /// <summary>
     /// Specifies whether a user with the access rights to a file can edit it or not.
     /// </summary>
     public bool CanEditAccess { get; set; }

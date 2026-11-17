@@ -689,6 +689,11 @@ public abstract class FoldersController<T>(
     /// access level. The link limit and a ban on external links outside public rooms also return 403. If the folder
     /// does not exist, the call returns 404. If the primary link was revoked, the call creates a new one with a new
     /// ID. Until then, `GET api/2.0/files/folder/{id}/link` returns 404.
+    /// On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a
+    /// link reads only and takes `passwordRequired` instead of `password`. Only a file link with `expirationDate` may
+    /// set `passwordRequired` to false. Only the room owner and room managers set such links. The call returns 403 for
+    /// such a link without key fields, with other access, or with `denyDownload`. It returns 400 if a key field has the
+    /// wrong size, or `password` is sent.
     /// </remarks>
     /// <summary>
     /// Create the folder primary external link
@@ -696,8 +701,8 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/link</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
-    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item has the wrong size, or such a link carries `password`")]
+    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{id}/link")]
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
@@ -712,7 +717,9 @@ public abstract class FoldersController<T>(
             allowUnlimitedDate: true,
             denyDownload: inDto.FolderLink.DenyDownload,
             password: inDto.FolderLink.Password,
-            recreateRevoked: true);
+            recreateRevoked: true,
+            keyMaterial: LinkKeyMaterial.From(inDto.FolderLink.LinkPublicKey, inDto.FolderLink.LinkPrivateKeyEnc, inDto.FolderLink.LinkProofHash),
+            passwordRequired: inDto.FolderLink.PasswordRequired);
 
         return await fileShareDtoHelper.Get(linkAce);
     }
@@ -760,6 +767,11 @@ public abstract class FoldersController<T>(
     /// password breaks the portal policy. It also returns 400 if `expirationDate` is more than 10 years ahead. It also
     /// returns 403 if folder links cannot have this access level or the link limit is reached. The admin's restriction
     /// on external links can also return 403. If the folder does not exist, the call returns 404.
+    /// On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a
+    /// link reads only and takes `passwordRequired` instead of `password`. Only a file link with `expirationDate` may
+    /// set `passwordRequired` to false. Only the room owner and room managers set such links. The call returns 403 for
+    /// such a link without key fields, with other access, or with `denyDownload`. It returns 400 if a key field has the
+    /// wrong size, or `password` is sent.
     /// </remarks>
     /// <summary>
     /// Set the folder external link
@@ -767,8 +779,8 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/links</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The link as it now stands, or nothing when it was revoked", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
-    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin's restriction on external links forbids the change")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item has the wrong size, or such a link carries `password`")]
+    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin's restriction on external links forbids the change, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPut("folder/{id}/links")]
     public async Task<FileShareDto> SetFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
@@ -783,7 +795,9 @@ public abstract class FoldersController<T>(
             inDto.FolderLink.Password?.Trim(),
             inDto.FolderLink.DenyDownload,
             inDto.FolderLink.Internal,
-            inDto.FolderLink.Primary);
+            inDto.FolderLink.Primary,
+            LinkKeyMaterial.From(inDto.FolderLink.LinkPublicKey, inDto.FolderLink.LinkPrivateKeyEnc, inDto.FolderLink.LinkProofHash),
+            inDto.FolderLink.PasswordRequired);
 
         if (linkAce == null)
         {

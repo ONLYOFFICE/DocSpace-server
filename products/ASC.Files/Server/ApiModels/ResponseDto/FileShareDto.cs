@@ -174,6 +174,13 @@ public class FileShareLink
     public bool? PasswordRequired { get; set; }
 
     /// <summary>
+    /// For an external link of an item in a private room, the public X25519 key of the link as base64 of 32 bytes: the
+    /// key that file keys are wrapped for when they are issued to the link. Null on every other link.
+    /// </summary>
+    /// <example>q83vEjRWeJq8vN7wEjRWeJq8vN7wEjRWeJq8vN7wEjQ=</example>
+    public string LinkPublicKey { get; set; }
+
+    /// <summary>
     /// Whether visitors coming through this link may only read the entry in the editor and not download or print it.
     /// </summary>
     /// <example>false</example>
@@ -237,7 +244,8 @@ public class FileShareDtoHelper(
     GroupSummaryDtoHelper groupSummaryDtoHelper,
     UserManager userManager,
     EmployeeFullDtoHelper employeeWrapperFullHelper,
-    ApiDateTimeHelper apiDateTimeHelper)
+    ApiDateTimeHelper apiDateTimeHelper,
+    ASC.Files.Core.Data.ShareLinkKeyDao shareLinkKeyDao)
 {
     public async Task<FileShareDto> Get(AceWrapper aceWrapper)
     {
@@ -286,6 +294,13 @@ public class FileShareDtoHelper(
                     Internal = aceWrapper.FileShareOptions?.Internal,
                     RequestToken = aceWrapper.RequestToken
                 };
+
+                // Only a link of a private item has key material; it is told to whoever may read the link itself.
+                if (aceWrapper.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink &&
+                    aceWrapper.FileShareOptions?.PasswordRequired != null)
+                {
+                    result.SharedLink.LinkPublicKey = (await shareLinkKeyDao.GetAsync(aceWrapper.Id))?.PublicKey;
+                }
 
                 if (result.SharedLink.LinkType == LinkType.Invitation)
                 {

@@ -93,6 +93,38 @@ public class FileLinkRequest
     /// <example>p@ssw0rd</example>
     [StringLength(255)]
     public string Password { get; set; }
+
+    /// <summary>
+    /// For an item of a private room: the public X25519 key of the link, made by the creator's browser, as base64 of
+    /// 32 bytes. With `linkPrivateKeyEnc` and `linkProofHash` it is what a link of such an item has to bring; an ordinary
+    /// link does not use it.
+    /// </summary>
+    /// <example>q83vEjRWeJq8vN7wEjRWeJq8vN7wEjRWeJq8vN7wEjQ=</example>
+    public string LinkPublicKey { get; set; }
+
+    /// <summary>
+    /// For an item of a private room: the private key of the link, sealed by the creator's browser under the secret that
+    /// stays after `#` in the link's address, and with the password when the link has one. The server keeps it as it is
+    /// and hands it only to a visitor who proves the secret.
+    /// </summary>
+    /// <example>AgEAAAAgAAAAyQ0bP8m1rKx3Zt2pS0mQx0J6r8u3aT1oV1cE9lK4n2w=</example>
+    [StringLength(4096)]
+    public string LinkPrivateKeyEnc { get; set; }
+
+    /// <summary>
+    /// For an item of a private room: SHA-256 of the proof value derived from the link's secret, as base64 of 32 bytes.
+    /// A visitor is served the link only after sending the value that hashes to it.
+    /// </summary>
+    /// <example>3q2+7wEjRWeJq8vN7wEjRWeJq8vN7wEjRWeJq8vN7wE=</example>
+    public string LinkProofHash { get; set; }
+
+    /// <summary>
+    /// For an item of a private room: whether a visitor has to type a password, which never reaches the server. `false`
+    /// is allowed only for a link to one file with an expiration date. Left out, a new link asks for a password and a
+    /// changed one keeps what it had. An ordinary link uses `password` instead.
+    /// </summary>
+    /// <example>true</example>
+    public bool? PasswordRequired { get; set; }
 }
 
 

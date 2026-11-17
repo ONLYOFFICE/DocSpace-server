@@ -87,10 +87,14 @@ public class PrivateRoomContentBoundaryTests(AspireAppFixture fixture) : Privacy
     private Task TryMoveFolder(int folderId, int destinationId) =>
         TryRun(() => _filesOperationsApi.MoveBatchItemsAsync(FolderBatch(folderId, destinationId), TestContext.Current.CancellationToken));
 
+    /// <summary>
+    /// An invitation link, and an external link without key material, give access to somebody who holds no key: both
+    /// are refused. A link with key material is accepted (<c>ExternalLinks/PrivateLinkSetTests</c>).
+    /// </summary>
     [Theory]
     [InlineData(LinkType.External)]
     [InlineData(LinkType.Invitation)]
-    public async Task SetRoomLink_IsRefused(LinkType linkType)
+    public async Task SetRoomLink_WithoutKeyMaterial_IsRefused(LinkType linkType)
     {
         var room = await CreateRoomAsOwner();
 
@@ -100,6 +104,36 @@ public class PrivateRoomContentBoundaryTests(AspireAppFixture fixture) : Privacy
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task SetFolderLink_WithoutKeyMaterial_IsRefused()
+    {
+        var room = await CreateRoomAsOwner();
+        var folder = await CreateFolder(room.Id, "No key");
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _foldersApi.SetFolderPrimaryExternalLinkAsync(
+            folder.Id,
+            new FolderLinkRequest(access: FileShare.Read, title: "Link"),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        (await _foldersApi.GetFolderLinksAsync(folder.Id, TestContext.Current.CancellationToken)).Response.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task SetFileLink_WithoutKeyMaterial_IsRefused()
+    {
+        var room = await CreateRoomAsOwner();
+        var fileId = await UploadEncryptedFile(room.Id, "no-key.docx");
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.SetFileExternalLinkAsync(
+            fileId,
+            new FileLinkRequest(access: FileShare.Read, title: "Link"),
+            TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        (await _filesApi.GetFileLinksAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response.Should().BeEmpty();
     }
 
     /// <summary>
@@ -123,21 +157,20 @@ public class PrivateRoomContentBoundaryTests(AspireAppFixture fixture) : Privacy
     }
 
     /// <summary>
-    /// An external revocation passes the private-room check too. The link id is unknown, so the server
-    /// treats it as a new link and the room's link limit (none for a private room) answers instead, with
-    /// its own message rather than the access-denied refusal of a link that would give access.
+    /// An external revocation passes the private-room check too. The link id is unknown, so the server treats it as a
+    /// new link; a private Custom room has the link limit of an ordinary one, so the request goes through and leaves
+    /// no link.
     /// </summary>
     [Fact]
     public async Task SetRoomLink_RevokingAnExternalLink_PassesThePrivateRoomCheck()
     {
         var room = await CreateRoomAsOwner();
 
-        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _roomsApi.SetRoomLinkAsync(
+        await _roomsApi.SetRoomLinkAsync(
             room.Id,
             new RoomLinkRequest(linkId: Guid.NewGuid(), access: FileShare.None, linkType: LinkType.External, title: "Link", denyDownload: false),
-            TestContext.Current.CancellationToken));
+            TestContext.Current.CancellationToken);
 
-        exception.ErrorContent!.ToString().Should().Contain("maximum number of links").And.NotContain("SecurityException");
         (await _roomsApi.GetRoomLinksAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.Should().BeEmpty();
     }
 

@@ -43,7 +43,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Missing keys: answer shape | T/PrivateRoomFileKeysTests.cs:261-305 | TEST-CONFIRMED [run: PASS] |
 | Missing keys: refusals | T/PrivateRoomFileKeysTests.cs:309-375 | TEST-CONFIRMED [run: PASS] |
 | Issuing file keys: skipped, history | T/PrivateRoomFileKeysTests.cs:381-422 | TEST-CONFIRMED [run: PASS] |
-| File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:279-291 | TEST-CONFIRMED [run: PASS] |
+| File keys of an archived room | T/PrivateRoomContentBoundaryTests.cs:312-324 | TEST-CONFIRMED [run: PASS] |
 | New owner must hold keys | T/PrivateRoomFileKeysTests.cs:74-123, :157-168; Storage:5529-5537 | TEST-CONFIRMED [run: PASS] |
 | Reassign of a deleted user | T/PrivateRoomFileKeysTests.cs:127-153 | TEST-CONFIRMED [run: PASS] |
 | Leaving revokes file keys; audit record; access change keeps | T/PrivateRoomFileKeysTests.cs:172-216 | TEST-CONFIRMED [run: PASS] |
@@ -60,12 +60,12 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Connected storage refused 400 (test skipped unless Nextcloud is configured) | products/ASC.Files/Tests/Tests/03_Rooms/ThirdParty/ThirdPartyPrivateRoomTests.cs:49 | TEST-CONFIRMED [run: PASS] |
 | Settings refused, off and rename allowed, template fails | T/PrivateRoomSettingsTests.cs:51-143 | TEST-CONFIRMED [run: PASS] |
 | Inviting needs a key; guest always refused | T/PrivacyRoomIntegrationTests.cs:137-165; T/RoomAccessKeysPermissionsTests.cs:172-186; T/PrivacyRoomTest.cs:179-221 | TEST-CONFIRMED [run: PASS] |
-| No links | T/PrivateRoomContentBoundaryTests.cs:93-102 | TEST-CONFIRMED [run: PASS] |
-| Revoking an existing link stays possible: a revocation (`access: None`) passes the private-room check, invitation and external (run 2026-11-11) | T/PrivateRoomContentBoundaryTests.cs:105-142; Sharing hunk of bd89a24dcd (`Access != None`) | TEST-CONFIRMED [run: PASS]; revoking a link that really exists stays CODE-ONLY: the API cannot put a link on a private room, so the tests name an unknown id (an external one then meets the link limit of 0) |
-| No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:144-179 | TEST-CONFIRMED [run: PASS] |
+| No links | T/PrivateRoomContentBoundaryTests.cs:90-137 | TEST-CONFIRMED [run: PASS] |
+| Revoking an existing link stays possible: a revocation (`access: None`) passes the private-room check, invitation and external (run 2026-11-11) | T/PrivateRoomContentBoundaryTests.cs:139-175; Sharing hunk of bd89a24dcd (`Access != None`) | TEST-CONFIRMED [run: PASS]; revoking a link that really exists stays CODE-ONLY: the tests name an unknown id (an external one goes through and leaves no link) |
+| No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:177-212 | TEST-CONFIRMED [run: PASS] |
 | Copy across the border 403 | T/PrivacyRoomTest.cs:225-277 | TEST-CONFIRMED [run: PASS] |
-| Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:182-215 | TEST-CONFIRMED [run: PASS] |
-| Copy-as refused | T/PrivateRoomContentBoundaryTests.cs:232-277 | TEST-CONFIRMED [run: PASS] |
+| Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:215-248 | TEST-CONFIRMED [run: PASS] |
+| Copy-as refused | T/PrivateRoomContentBoundaryTests.cs:265-310 | TEST-CONFIRMED [run: PASS] |
 | Plaintext: createFile and session 403; ordinary room accepts | T/PrivateRoomContentRulesTests.cs:62-91, :119-125 | TEST-CONFIRMED [run: PASS] |
 | Generated names | T/PrivateRoomContentRulesTests.cs:99-115; products/ASC.Files/Core/Utils/FileUploader.cs regex of cc60512acd | TEST-CONFIRMED [run: PASS] |
 | Abort bound to folder | T/PrivateRoomContentRulesTests.cs:143-157 | TEST-CONFIRMED [run: PASS] |
@@ -73,7 +73,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Restore, reference data, start filling, form flag | T/PrivateRoomEditorTests.cs:191-237 | TEST-CONFIRMED [run: PASS] |
 | Public document address | T/PrivateRoomEditorTests.cs:241-251 | TEST-CONFIRMED [run: PASS] |
 | Archived: non-member refused; ordinary unchanged | T/ArchivedPrivateRoomSecurityTests.cs:66-113, :177-193 | TEST-CONFIRMED [run: PASS] |
-| Archived: no copy; creator and member rights | T/ArchivedPrivateRoomSecurityTests.cs:117-173; T/PrivateRoomContentBoundaryTests.cs:218-228 | TEST-CONFIRMED [run: PASS] |
+| Archived: no copy; creator and member rights | T/ArchivedPrivateRoomSecurityTests.cs:117-173; T/PrivateRoomContentBoundaryTests.cs:251-261 | TEST-CONFIRMED [run: PASS] |
 | Section split by area and filter | T/PrivateRoomSectionTests.cs:64-85 | TEST-CONFIRMED [run: PASS] |
 | Section endpoint, root, browse by id | T/PrivateRoomSectionTests.cs:89-120 | TEST-CONFIRMED [run: PASS] |
 | App off | T/PrivateRoomSectionTests.cs:124-137 | TEST-CONFIRMED [run: PASS] |
