@@ -35,7 +35,8 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Customer;
 
 /// <summary>
 /// The consumption of the wallet services added up per service (<c>GET payment/customer/usage</c>): each total with the
-/// split of its amount between the money paid into the wallet and the bonuses, as accounting reports it.
+/// split of its amount between the money paid into the wallet and the bonuses, as accounting reports it, and the
+/// filters that reach accounting.
 /// </summary>
 public class CustomerServiceUsageTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -109,5 +110,27 @@ public class CustomerServiceUsageTests(AspireAppFixture fixture) : BaseTest(fixt
         var aiTools = report.Collection.Should().ContainSingle().Subject;
         aiTools.TotalAmount.Should().Be(18);
         aiTools.Sources.Should().BeNull();
+    }
+
+    // The stub answers the same page whatever the filters say, so the test checks the filter on the request that
+    // reached accounting, not on the answer.
+    [Fact]
+    public async Task GetCustomerServiceUsage_Metadata_IsPassedToAccounting()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Balance(10m)
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/usage",
+                """{"collection":[],"offset":0,"limit":25,"totalQuantity":0,"totalPage":0,"currentPage":1}""");
+
+        var metadata = new Dictionary<string, string> { ["agent_id"] = "42", ["provider"] = "OpenAI" };
+
+        // Act
+        await _paymentApi.GetCustomerServiceUsageAsync(metadata: metadata, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/{portalId}/usage").Subject;
+        var query = HttpUtility.ParseQueryString(request.Query);
+        query["metadata.agent_id"].Should().Be("42");
+        query["metadata.provider"].Should().Be("OpenAI");
     }
 }
