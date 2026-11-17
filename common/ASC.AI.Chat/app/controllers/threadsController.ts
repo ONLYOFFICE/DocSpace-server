@@ -51,6 +51,7 @@ import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
 import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
+import { resolveStoredProfile } from "./storedProfile.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -224,7 +225,9 @@ export const threadsController = {
     // under the caller's credentials, so a client cannot claim someone else's
     // entry.
     await primeSourceMeta(getString(body, "entityId"));
-    const result = await engine.openOrCreate(body as OpenOrCreateInput);
+    // Only the id of the sent profile is trusted (see storedProfile.ts).
+    const profile = await resolveStoredProfile(body.profile);
+    const result = await engine.openOrCreate({ ...(body as OpenOrCreateInput), profile });
     res.json(result);
   }),
 
@@ -342,7 +345,9 @@ export const threadsController = {
       ? getString(args.entityMeta, "entityId")
       : undefined;
     await primeSourceMeta(entityIdHint);
-    const title = await engine.regenerateTitle(args.threadId, args.profile as Profile);
+    // Only the id of the sent profile is trusted (see storedProfile.ts).
+    const profile = await resolveStoredProfile(args.profile);
+    const title = await engine.regenerateTitle(args.threadId, profile);
     res.json({ title });
   }),
 
