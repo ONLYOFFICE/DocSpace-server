@@ -77,6 +77,50 @@ public class AccountingClientDepositTests
         deposit.PaymentRef.Should().Be("pi_3QabcDEF");
         deposit.Metadata.Should().Equal(new Dictionary<string, string> { ["details"] = "Top-up" });
         deposit.HasInvoice.Should().BeTrue();
+        deposit.Initiator.Should().BeNull();
+    }
+
+    // The metadata filter goes out as the usage filter's does: one metadata.key=value pair per entry.
+    [Fact]
+    public async Task GetCustomerDeposits_SendsInitiatorAndMetadataFilters()
+    {
+        var (client, handler) = CreateAccountingClient(_ => DepositsPage([], totalQuantity: 0));
+
+        var filter = new DepositFilter
+        {
+            Initiator = DepositInitiator.Automatic,
+            Metadata = new Dictionary<string, string> { ["details"] = "Automatic top up", ["SourceId"] = "promo", ["empty"] = null!, ["blank"] = " " }
+        };
+
+        await client.GetCustomerDepositsAsync("portal-1", filter);
+
+        var query = ParseQuery(handler.LastUri!);
+        query["initiator"].Should().Be("Automatic");
+        query["metadata.details"].Should().Be("Automatic top up");
+        query["metadata.SourceId"].Should().Be("promo");
+        query.Keys.Should().NotContain(key => key.Contains("empty"), "a pair without a value is not sent");
+        query.Should().ContainKey("metadata.blank", "the client still sends a blank value; the endpoint drops it before");
+    }
+
+    // The initiator is for display only: a value this version does not know reads as null, and the page still loads.
+    [Theory]
+    [InlineData("\"Manual\"", DepositInitiator.Manual)]
+    [InlineData("\"automatic\"", DepositInitiator.Automatic)]
+    [InlineData("null", null)]
+    [InlineData("\"System\"", null)]
+    [InlineData("\"7\"", null)]
+    [InlineData("\"Manual,Automatic\"", null)]
+    [InlineData("\" Manual\"", null)]
+    [InlineData("1", null)]
+    [InlineData("{\"kind\":\"Manual\"}", null)]
+    public async Task GetCustomerDeposits_ReadsTheInitiator(string json, DepositInitiator? expected)
+    {
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
+            $$"""{"collection":[{"id":1,"sum":40.0,"currency":"USD","status":"Completed","initiator":{{json}}}],"totalQuantity":1}"""));
+
+        var report = await client.GetCustomerDepositsAsync("portal-1", new DepositFilter());
+
+        report.Collection.Should().ContainSingle().Which.Initiator.Should().Be(expected);
     }
 
     [Fact]

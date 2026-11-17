@@ -1049,11 +1049,12 @@ public class PaymentController(
     /// Returns a page of the top-ups of the portal wallet. Requires a DocSpace admin. Other callers get 403. The call
     /// also returns 403 if the installation has no billing service. The caller does not have to be the payer. The
     /// call is read-only. The call returns an empty result if the portal has no billing customer or no wallet yet. It
-    /// also returns an empty result if the accounting service cannot be read. A period without top-ups returns an
-    /// empty `collection`. By default, `offset` is 0 and `limit` is 25. The answer repeats them next to
-    /// `totalQuantity`, `totalPage`, and `currentPage`. The call returns 400 if `offset` or `limit` is out of range.
-    /// A top-up with `hasInvoice` true has an invoice. To open it, use
-    /// `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`. To get the full history with charges and refunds,
+    /// also returns an empty result if the accounting service cannot be read. The filters `status`, `initiator`, and
+    /// `metadata` are optional. A top-up must match all of them and the period. The call skips a `metadata` pair
+    /// whose value is empty or blank. If nothing matches, `collection` is empty. By default, `offset` is 0 and
+    /// `limit` is 25. The answer repeats them next to `totalQuantity`, `totalPage`, and `currentPage`. The call
+    /// returns 400 if `offset` or `limit` is out of range. A top-up with `hasInvoice` true has an invoice. To open
+    /// it, use `GET api/2.0/portal/payment/customer/deposits/{id}/invoice`. To get the full history with charges and refunds,
     /// use `GET api/2.0/portal/payment/customer/operations`.
     /// </remarks>
     /// <summary>
@@ -1062,7 +1063,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/customer/deposits</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "A page of wallet top-ups with its paging information, or an empty result when the portal is not a billing customer, has no wallet at the accounting service yet, or that service could not be read", typeof(DepositReportDto))]
-    [SwaggerResponse(400, "`offset` is negative, `limit` is outside 1 to 100, or a parameter cannot be read, such as a `status` that is not one of its values or a date that is not ISO 8601")]
+    [SwaggerResponse(400, "`offset` is negative, `limit` is outside 1 to 100, or a parameter cannot be read, such as a `status` or an `initiator` that is not one of its values or a date that is not ISO 8601")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpGet("customer/deposits")]
     public async Task<DepositReportDto> GetCustomerDeposits(GetCustomerDepositsRequestDto inDto)
@@ -1087,6 +1088,8 @@ public class PaymentController(
             UtcStartDate = GetUtcStartDate(inDto.StartDate, tenant),
             UtcEndDate = tenantUtil.DateTimeToUtc(inDto.EndDate ?? DateTime.UtcNow),
             Status = inDto.Status,
+            Initiator = inDto.Initiator,
+            Metadata = inDto.Metadata,
             Offset = offset,
             Limit = limit
         };
@@ -1224,8 +1227,9 @@ public class PaymentController(
     /// Returns the consumption and the cost of each wallet service of the portal, added up per service. Requires a
     /// DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service.
     /// If the portal has no billing customer, the call returns an empty result. The call is read-only. All filters
-    /// are optional. If `serviceName` has a name that the installation does not sell, the call returns 404. The
-    /// amounts use the unit of each service. For AI tools, the unit is tokens, not AI credits. AI usage paid with the
+    /// are optional. The call skips a `metadata` pair whose value is empty or blank. If `serviceName` has a name that
+    /// the installation does not sell, the call returns 404. The amounts use the unit of each service. For AI tools,
+    /// the unit is tokens, not AI credits. AI usage paid with the
     /// portal's own provider keys has totals of its own, `ai-tools-byok` and `ai-search-byok`. They have the title of
     /// their AI service and `byok` set, and `serviceName` accepts these names. With `mergeByok=true`, the call adds
     /// them to the totals of their AI services. To list the charges behind the totals, use

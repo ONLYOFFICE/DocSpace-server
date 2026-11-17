@@ -437,6 +437,64 @@ public enum OperationStatus
     Canceled
 }
 
+// The accounting service decides the initiator by whether the top-up names a customer participant, and sends and
+// filters it by name.
+/// <summary>
+/// Who started a wallet top-up: a portal user or the portal itself.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum DepositInitiator
+{
+    /// <summary>
+    /// A portal user started the top-up, including one made to pay for a purchase.
+    /// </summary>
+    [Description("Manual")]
+    Manual,
+
+    /// <summary>
+    /// The portal topped up the wallet on its own, by the automatic top-up or to renew a subscription.
+    /// </summary>
+    [Description("Automatic")]
+    Automatic
+}
+
+/// <summary>
+/// Reads <see cref="DepositInitiator"/> from the accounting answer. The field is for display only, so anything but
+/// the exact name of a member (in any case) reads as null instead of failing the whole page. The silence is
+/// deliberate: a kind the accounting service adds later shows as no initiator until this enum learns it.
+/// </summary>
+internal sealed class TolerantDepositInitiatorConverter : JsonConverter<DepositInitiator?>
+{
+    public override DepositInitiator? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.String)
+        {
+            // Enum.TryParse would also take numbers and comma lists ("Manual,Automatic"), so only a name matches.
+            var text = reader.GetString();
+
+            foreach (var name in Enum.GetNames<DepositInitiator>())
+            {
+                if (string.Equals(name, text, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Enum.Parse<DepositInitiator>(name);
+                }
+            }
+
+            return null;
+        }
+
+        reader.Skip();
+
+        return null;
+    }
+
+    // Deposit is only ever read from the accounting answer; the serializer writes a null itself.
+    public override void Write(Utf8JsonWriter writer, DepositInitiator? value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value!.Value.ToString());
+    }
+}
+
 public class DateRangeFilter
 {
     /// <summary>
@@ -577,6 +635,16 @@ public class DepositFilter : PagedFilter
     /// The operation status to filter by.
     /// </summary>
     public OperationStatus? Status { get; init; }
+
+    /// <summary>
+    /// Who started the top-up, to filter by.
+    /// </summary>
+    public DepositInitiator? Initiator { get; init; }
+
+    /// <summary>
+    /// Metadata key-value pairs to filter by: a top-up matches when its metadata contains all of them.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; init; }
 }
 
 /// <summary>
@@ -1136,6 +1204,12 @@ public class Deposit
     /// </summary>
     /// <remarks>A Stripe payment intent (<c>pi_…</c>) or invoice (<c>in_…</c>) has an invoice behind it.</remarks>
     public string PaymentRef { get; init; }
+
+    /// <summary>
+    /// Who started the top-up; null when the accounting service did not say or sent a value this version does not know.
+    /// </summary>
+    [JsonConverter(typeof(TolerantDepositInitiatorConverter))]
+    public DepositInitiator? Initiator { get; init; }
 
     /// <summary>
     /// The additional metadata of the top-up.
