@@ -62,9 +62,11 @@ source, not a finding by itself, and a claim worded otherwise is still the write
 - "Claims with numbers": numbers with units, worded durations ("an hour", "two minutes"), limits
   ("at most 100") and date words in the branch's commit messages, its spec texts and its C# comments
   (whole-line ones and a trailing `//` or `/* */`); the first 200 lines and a count, all with `--full`;
-- in the OpenSpec section: the requirements the branch adds or changes at 500 characters or more
-  (compared by name with the same requirement at the merge-base; a delta, active or archived, with
-  its capability's spec), ticked tasks that say they are
-  blocked or not done (untracked files included with `--worktree`), and the `verification.md` rows
-  that cite a changed file by its path, an alias, its file name (marked when several files share it)
-  or a folder alias; the first 100 such entries and 8 line numbers each, all with `--full`.
+- in the OpenSpec section: the requirements the branch adds at 500 characters or more, brings to 500 or
+  more, or makes longer while over (compared with the bodies the requirement had at the merge-base
+  under its name or its RENAMED old name, in the same file, its old path and, for a delta, the
+  capability's spec; a requirement moved to another spec file counts as new), ticked tasks that say
+  they are blocked or not done (untracked files included with
+  `--worktree`), and the `verification.md` rows that cite a changed file by its path, an alias, its
+  file name (marked when several files share it) or a folder alias. Only that last list is capped: its
+  first 100 entries and 8 line numbers each, all with `--full`.

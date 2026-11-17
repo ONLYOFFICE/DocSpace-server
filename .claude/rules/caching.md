@@ -22,7 +22,7 @@ Do NOT suggest or implement caching via `Interlocked`, static `ConcurrentDiction
 - **Always pass an explicit duration** to `GetOrSet`/`Set` — the configured default is `TimeSpan.MaxValue` (never expires).
 - **Tenant scoping is manual**: every cache key and tag must embed `tenantId`. There is no ambient prefix; omitting it leaks data across tenants.
 - **Tags come from `CacheExtention`** (`common/ASC.Common/Caching/CacheExtention.cs`) — the central tag registry (`user-{tenant}-{id}`, `settings-{tenant}-{name}`, ...). Never build tag strings inline; add new helpers there.
-- **Keys** are built by static `Get*CacheKey` methods on the owning service (concatenation without separators: `tenant + "users" + userId`) — a fixed key of one value per installation (tenant `-1`) too, never a private key field.
+- **Keys** are built by static `Get*CacheKey` methods on the owning service (concatenation without separators: `tenant + "users" + userId`) — a fixed key of one value per installation (tenant `-1`) too, not a key field. A format string that such a method fills is fine. Older code keeps several fixed keys in fields (`*CacheKey` constants and static fields) and fills some key formats inline; this rule does not ask for them to be rewritten, but a key you add or change goes through a method.
 - **Canonical pattern** — cache-aside wrapper: `Cached*Service` wraps the EF service; reads use `GetOrSetAsync(key, factory, duration, [tags])`, writes call the inner service then `RemoveByTagAsync(tag)`. Reference examples: `CachedUserService.cs`, `CachedTenantService.cs`, `CachedQuotaService.cs` in `common/ASC.Core.Common/Caching/`.
 
 ## Cross-node invalidation: `ICacheNotify<T>`

@@ -37,9 +37,10 @@ paths around it. Before a fix is handed back:
    self-reviews, hand-over checks and re-checks; `CLAUDE.md` (Git Workflow) and `review-branch` (§0,
    §8 "Self-review", "Hand-over block") point here. Each run costs passes of the skill with its
    reviewer agents, so it is offered and the user decides; the reviewer uses the same skill, so what
-   the run finds would otherwise cost a review round. The reviewer reads the branch only when it
-   comes with a Hand-over block for the tree handed over (`review-branch` §1); a declined check is
-   written into the block as declined, and the reviewer then reads the branch only when the user asks.
+   the run finds would otherwise cost a review round. The reviewer checks the Hand-over block first:
+   a block whose checks fail sends the branch back unread, and a branch without a block, or with a
+   declined check, is reviewed with "no hand-over check" in the report header (`review-branch` §1
+   lists the checks).
    "§7" below is `review-branch` §7, the re-check with its fresh reviewer (its point 3).
    - **While working (on request):** a self-review (`review-branch` §0) is a one-pass check, cheaper
      than the hand-over check, run when the user asks for it; it is not offered. Its fix batch gets §7

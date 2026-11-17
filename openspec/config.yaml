@@ -41,7 +41,8 @@ rules:
     - >-
       Keep each requirement body under 500 characters, with SHALL or MUST, and at least one scenario using
       WHEN / THEN (/ AND). Measure it: `python .claude/skills/review-branch/scan.py --worktree` lists every
-      requirement the change adds or modifies (untracked files included) at 500 characters or more.
+      requirement the change adds at 500 characters or more, brings to 500 or more, or makes longer while
+      over (untracked files included); one that was already that long and did not grow is a reminder.
     - >-
       Take every value of a scenario (a date, a status code, a count, a duration) from the code or from the
       test that pins it, and write in the WHEN every condition the code checks. A SHALL that does not hold in

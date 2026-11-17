@@ -79,35 +79,49 @@ fails, and do not rerun the reviewer because of it.
 ```bash
 git fetch origin --quiet
 python .claude/skills/review-branch/scan.py            # add --base origin/develop, --worktree as needed
+python .claude/skills/review-branch/scan.py --head <branch>   # a branch that is not checked out (a remote ref, a PR head)
 ```
 
-`scan.py` picks the base as the remote branch with the fewest commits ahead of it (newest
+`--worktree` scans the checked-out working tree only; with a `--head` that names another ref (another
+branch, even at the same commit) the scan refuses it (exit 2). `scan.py` picks the base as the remote branch with the fewest commits ahead of it (newest
 `origin/release/*`, then `origin/develop`, `origin/master`) and diffs from the **merge-base**, so
 merges of the base into the branch do not show up as branch changes. Read its header and check:
 
 - **The Hand-over block, first.** Reviewing someone else's branch (a first review or a re-check),
   read the Hand-over block (§8) of the PR description, or of the message that handed the branch
   over, before anything else. When the description cannot be reached (no CLI for the git host at
-  hand), ask the user for the block. Then check it yourself, it takes a minute:
-  - there is a block, and its check was not declined;
-  - `git rev-parse "HEAD^{tree}"` (quoted: PowerShell reads an unquoted `{tree}` as a script block)
-    equals the block's final tree — a commit of exactly the checked tree
-    is the checked state, a different tree means changes landed after the check;
-  - `scan.py --gate` (the base's copy, see "The rules are the base's" below) prints its "## Gate"
-    section and lists no gate line except "the base changed rules or review tooling": that one is a
-    note for the report header, since the base may have moved after the hand-over. A run without the
-    section did not run the scan (an empty copy, a wrong path), whatever its exit code;
-  - the block reports no open blocker or rule violation.
+  hand), ask the user for the block.
+  - **No block** (none given, or its check declined): review the branch as usual. The report header
+    says "no hand-over check", and the report has no "Missed by the hand-over check" section. A
+    colleague who does not run this skill hands branches over this way.
+  - **A block**: check it yourself, it takes a minute, on the reviewed branch `<branch>` (the remote
+    ref or the PR head, not necessarily the checked-out `HEAD`):
+    - `git rev-parse "<branch>^{tree}"` (quoted: PowerShell reads an unquoted `{tree}` as a script
+      block) equals the block's final tree — a commit of exactly the checked tree is the checked
+      state, a different tree means changes landed after the check;
+    - `scan.py --gate --head <branch>` (the base's copy, see "The rules are the base's" below) prints
+      its "## Gate" section and lists no gate line except "the base changed rules or review tooling":
+      that one is a note for the report header, since the base may have moved after the hand-over. A
+      run without the section did not run the scan (an empty copy, a wrong path), whatever its exit
+      code;
+    - the block reports no open blocker or rule violation.
 
-  When one fails — a missing block included, also one the user cannot give: say so in one line and
-  stop; the branch goes back to the author without a review, unless the user asks to review it
-  anyway, and then the report header names the gap. The block holds counts and coverage, and no
-  finding except the accepted ones under Known limitations (§4).
+    When one of these fails, the block promises a state the branch is not in: say so in one line and
+    stop; the branch goes back to the author without a review, unless the user asks to review it
+    anyway, and then the report header names the gap. This is stricter than for a branch with no
+    block on purpose: a block that fails these checks claims a state the branch is not in, while a
+    missing one claims nothing. What the author does depends on which check failed: for another tree,
+    renew the block (§8 "Hand-over block": the re-check of the change since the final tree, then the
+    gate); for a failing gate or an open blocker or rule violation, fix it (`fixing-findings.md` §11)
+    and write a new block. Removing the block instead is open only when nothing in it was open.
+
+  The block holds counts and coverage, and no finding except the accepted ones under Known
+  limitations (§4).
 
 - **The base is right.** A `feature/*` cut from `develop` but scanned against `release/*` drags in
   half of develop. If the commit list contains commits that are obviously not this branch's work,
   re-run with an explicit `--base`. **0 commits** — wrong branch or already merged: stop and say so.
-- **The tree is clean**, or the user asked for `--worktree`. Uncommitted changes are not in the
+- **The tree is clean** (for the checked-out branch), or the user asked for `--worktree`. Uncommitted changes are not in the
   scan otherwise — say which one you reviewed.
 - **No new file is left out.** `--worktree` sees tracked files only, and so does `git diff HEAD`: a
   file the branch created but nobody added is reviewed by no one. The scan lists the untracked
@@ -120,7 +134,8 @@ merges of the base into the branch do not show up as branch changes. Read its he
 - **The rules are the base's.** The scan reports `!! the base changed rules or review tooling that
   apply to this branch` (and lists the files) when, since the merge-base, the base changed a rule whose
   `paths:` match a file of the branch or that has none (and `fixing-findings.md` always: `CLAUDE.md`
-  applies its schedule to every branch), this skill or its scan, `prove-red.sh`, or
+  applies its schedule to every branch; not `csharp-lsp.md`, which governs navigation, not what a
+  branch holds), this skill or its scan, `prove-red.sh`, or
   `openspec/config.yaml` for a branch that touches `openspec/` — and the branch does not already hold
   the base's version of that file (a cherry-pick, the same edit). An author brings the base in first: a
   check on an older copy cannot see what the newer one checks (seen in review: a branch carried a copy
@@ -135,9 +150,9 @@ merges of the base into the branch do not show up as branch changes. Read its he
   `<base>:<path>` argument with a `/` on both sides of the colon is rewritten into a Windows path list,
   `git show` fails and the redirect leaves an empty file. Name the gap in the report header — for
   someone else's branch it is a note, not a finding.
-- **Remember `HEAD`'s sha.** Branches here move during a review (a merge of the base, a rename of
-  a migration). Check it again before the report; if it moved, re-scan and say what the new commits
-  changed.
+- **Remember the reviewed sha** — of `HEAD`, or of `<branch>` when it is not checked out. Branches
+  here move during a review (a merge of the base, a rename of a migration). Check it again before the
+  report; if it moved, re-scan and say what the new commits changed.
 
 Then read the commit messages: they are the branch's **declared intent**, the yardstick for scope
 creep in §3, and claims to verify like code (§3 B "claims the branch writes"). Read the PR
@@ -159,13 +174,13 @@ is read in context. What each section is for:
 | Localized resources (.resx) | §3 F. `!! placeholder mismatch` is a finding once you have looked at the value (a tag lost or renamed in a translation renders as literal `$Tag` or as nothing); "neutral changed, translation untouched" is one only if the commits do not declare it ("English only for now") |
 | Tests | §3 A3 and §6 |
 | Changed endpoints | not a finding by itself: the rows of the cross-cutting matrix (§3 A0) |
-| OpenSpec | the requirements reviewer S reads (§3 S). `!! ... openspec/ untouched` is not a finding by itself: it becomes one when a listed requirement no longer holds on the branch. The format lines are findings once read: a requirement the branch adds or changes at 500 characters or more (compared by name with the same requirement at the merge-base, a delta — active or archived — with its capability's spec; REMOVED sections are not measured; `openspec/config.yaml` asks for under 500), a ticked task that says it is blocked or not done (`claims.md` §4); with `--worktree` they cover untracked spec files too. `verification.md rows citing changed files` is a list to check: each row whose lines moved or whose behaviour changed is stale. It finds citations by path (a `.claude/` one and a spec file included), alias, file name (marked when several files share it, so the row may cite another one) and folder alias; a row citing a changed file in another form is the reviewer's to find. The first 100 entries (a changed file in one `verification.md`) and 8 line numbers each are printed, all with `--full` |
+| OpenSpec | the requirements reviewer S reads (§3 S). `!! ... openspec/ untouched` is not a finding by itself: it becomes one when a listed requirement no longer holds on the branch. The `!!` format lines are findings once read: a requirement the branch adds at 500 characters or more, one it brings to 500 or more, or one it makes longer while it is already over (`openspec/config.yaml` asks for under 500), and a ticked task that says it is blocked or not done (`claims.md` §4); with `--worktree` they cover untracked spec files too. A requirement is compared with every body it had at the merge-base under its name or the name a RENAMED pair gives — in the same file, its old path and, for a delta (active or archived), its capability's spec; REMOVED sections are not measured. A requirement with no such old body whose body equals that of a requirement gone from the same file is a rename without a pair, so unchanged; a requirement moved to another spec file is measured as new. An edit of a requirement that was already that long and did not grow is a reminder line without `!!`: not a finding, a note the author may act on. `verification.md rows citing changed files` is a list to check: each row whose lines moved or whose behaviour changed is stale. It finds citations by path (a `.claude/` one and a spec file included), alias, file name (marked when several files share it, so the row may cite another one) and folder alias; a row citing a changed file in another form is the reviewer's to find. The first 100 entries (a changed file in one `verification.md`) and 8 line numbers each are printed, all with `--full` |
 | Claims with numbers | §3 B "claims the branch writes": each number with a unit, worded duration, limit and date word the scan finds in the branch's commit messages, C# comments and spec texts is checked against the constant, the timeout or the test that makes it true (`claims.md` §1). A hit whose source says otherwise is a finding; a claim worded in a form the scan does not list is still read. The first 200 lines are printed, all with `--full` |
 | Stateful / background processing | the files reviewer G walks (§3 G) |
 | Size | how many chunks reviewers B, D, E and G are split into (§3 Coverage) |
 | New projects | an `!!` line: a project in neither `ASC.Web.slnx` nor `ASC.Tests.slnx` (a tool with a solution of its own is the exception), or a test project outside `products/` that `CLAUDE.md` does not name |
 | Possibly committed by accident | a review `.md`, a `.binlog`, `.env` committed by accident |
-| Gate | what stops a hand-over whatever the branch is: AI attribution in a commit; a base change, since the merge-base, to rules or review tooling that apply to the branch; an untracked file (`--worktree`; the branch's own saved review at the root excepted, §1); a requirement the branch adds or changes at 500 characters or more; a whole-file line-ending flip of what git would commit; a conflict marker; a new source file without a license header (generated files and `thirdparty/` excepted). `--gate` exits with 1 on any, 2 when the scan cannot run. In a review of someone else's branch, a gate line is reported as a finding only when it is a defect of the branch: newer base rules are a header note (§1) |
+| Gate | what stops a hand-over whatever the branch is: AI attribution in a commit; a base change, since the merge-base, to rules or review tooling that apply to the branch; an untracked file (`--worktree`; the branch's own saved review at the root excepted, §1); a requirement the branch adds at 500 characters or more, brings to 500 or more, or makes longer while over; a whole-file line-ending flip of what git would commit; a conflict marker; a new source file without a license header (generated files and `thirdparty/` excepted). `--gate` exits with 1 on any, 2 when the scan cannot run. In a review of someone else's branch, a gate line is reported as a finding only when it is a defect of the branch: newer base rules are a header note (§1) |
 
 Things `scan.py` cannot see and you must look for yourself: broken indentation left by a merge,
 `<summary>`/`<remarks>` swapped, a list in `CLAUDE.md` the branch leaves incomplete (services, launch

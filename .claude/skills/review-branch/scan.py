@@ -10,14 +10,16 @@ Usage (from the repo root, server/):
 --base      ref to compare against; default: the candidate with the fewest commits ahead of it
             (origin/release/* newest first, origin/develop, origin/master)
 --head      default HEAD
---worktree  compare the base against the working tree (uncommitted changes included)
+--worktree  compare the base against the working tree (uncommitted changes included); only for the
+            checked-out branch, so with a --head that names another ref (another branch, even at the same
+            commit) it exits 2; with a detached HEAD a --head at that commit is accepted
 --full      print the long hint lists (claims with numbers, stale verification.md rows) whole instead of
             their first rows and a count
 --gate      exit with 1 when the "Gate" section lists a hard failure: AI attribution in a commit; a
             change of the base, since the merge-base, to rules or review tooling that apply to the
             branch; an untracked file (--worktree; the branch's own saved review at the root
-            excepted); a requirement the branch adds or changes at 500
-            characters or more; a whole-file line-ending flip; a conflict marker; a new source file
+            excepted); a requirement the branch adds at 500 characters or more, brings to 500 or
+            more, or makes longer while over; a whole-file line-ending flip; a conflict marker; a new source file
             without a license header (generated files and thirdparty/ excepted). Exit 0 otherwise; 2
             when the scan itself cannot run (git, the arguments, an error of the script)
 
@@ -52,6 +54,9 @@ REVIEW_TOOLING = (".claude/rules", ".claude/skills/review-branch", ".claude/scri
 # Rules whose `paths:` say less than where they apply: CLAUDE.md (Git Workflow) has every branch follow
 # fixing-findings.md §6 and §9-§11, whatever files the branch changes.
 ALWAYS_APPLIES = {".claude/rules/fixing-findings.md"}
+# Rules with no `paths:` that govern how the agent works, not what a branch must hold (SKILL.md §3 A): a base change
+# to them leaves nothing for a branch to bring in.
+NOT_A_REVIEW_CRITERION = {".claude/rules/csharp-lsp.md"}
 # The header forms in use: the full AGPL header, the short "(c) Copyright" one, and the SPDX line.
 LICENSE_MARKS = ("Copyright (C) Ascensio System SIA", "(c) Copyright Ascensio System SIA", "SPDX-License-Identifier: AGPL")
 
@@ -74,7 +79,6 @@ def worktree_snapshot() -> str:
     entries and moved submodule pointers, with git's clean filters applied. It is built in a temporary copy of
     the index, so the real index, its lock and the stash are never touched; it leaves only unreachable objects,
     which `git gc` prunes."""
-    import os
     import shutil
     import tempfile
 
@@ -142,13 +146,16 @@ def glob_to_regex(glob: str) -> re.Pattern[str]:
     return re.compile("^" + "".join(out) + "$")
 
 
-def load_rules() -> dict[str, list[re.Pattern[str]]]:
+def load_rules(ref: str) -> dict[str, list[re.Pattern[str]]]:
+    """The rules of the reviewed tree `ref` (not of the checkout on disk) with their `paths:` globs."""
     rules: dict[str, list[re.Pattern[str]]] = {}
-    for f in sorted(RULES_DIR.glob("*.md")):
-        text = f.read_text(encoding="utf-8")
+    for path in sorted(git("ls-tree", "--name-only", f"{ref}", f"{RULES_DIR.as_posix()}/", check=False).splitlines()):
+        if not path.endswith(".md"):
+            continue
+        text = (git_bytes("show", f"{ref}:{path}") or b"").decode("utf-8", "replace").replace("\r\n", "\n")
         m = re.match(r"---\s*\n(.*?)\n---", text, re.S)
         globs = re.findall(r'-\s*"([^"]+)"', m.group(1)) if m else []
-        rules[f.name] = [glob_to_regex(g) for g in globs]  # [] = always-on rule
+        rules[path.rsplit("/", 1)[-1]] = [glob_to_regex(g) for g in globs]  # [] = always-on rule
     return rules
 
 
@@ -225,8 +232,10 @@ LINE_CHECKS = [
      re.compile(r"\.(GetOrSet|Set)Async\s*[<(]"), is_cs),
     ("caching.md", "cache tag built inline (tags come from CacheExtention only)",
      re.compile(r'[Tt]ags?\s*[:=].*\$"'), is_cs),
+    # a field named *Format holds a format string, not a key (caching.md "Keys")
     ("caching.md", "cache key in a field (keys come from a static Get*CacheKey method)",
-     re.compile(r"\b(?:private|protected|internal|public)\s+(?:static\s+)?(?:readonly\s+)?(?:const\s+)?string\s+_?\w*[Cc]ache[Kk]ey\w*\s*=(?!=)"),
+     re.compile(r"\b(?:private|protected|internal|public)\s+(?:static\s+)?(?:readonly\s+)?(?:const\s+)?string\s+"
+                r"_?(?!\w*Format\s*=)\w*[Cc]ache[Kk]ey\w*\s*=(?!=)"),
      lambda p: is_cs(p) and not is_test(p)),
     ("caching.md", "* memory cache - obtained and read by the same process, no decision falls back on it? (\"Which instance\")",
      re.compile(r"\bGetMemoryCache\s*\("), lambda p: is_cs(p) and not is_test(p)),
@@ -591,15 +600,42 @@ def print_openspec_section(files, endpoint_names, head: str, merge_base: str, ol
         lines = (read_any(p) or b"").decode("utf-8", "replace").splitlines()
         if p.endswith("/spec.md"):
             delta = re.match(r"openspec/changes/(?:archive/)?[^/]+/specs/([^/]+)/spec\.md$", p)
-            sources = {p, (renames or {}).get(p, p)} | ({f"openspec/specs/{delta.group(1)}/spec.md"} if delta else set())
-            before = {(name, body) for q in sources for _, name, body, _ in requirement_bodies(
-                (git_bytes("show", f"{merge_base}:{q}") or b"").decode("utf-8", "replace").splitlines())}
-            for n, name, body, section in requirement_bodies(lines):
-                if section.startswith("REMOVED"):
+            # Every body each requirement had at the merge-base, by name, read in a fixed order - the same file, its
+            # old path, the capability's spec - with REMOVED entries left out, so that the verdict never depends on
+            # which source comes first. A requirement the branch renamed is also looked up by its old name (a
+            # RENAMED FROM/TO pair). A requirement with no old body at all whose body equals that of a requirement
+            # gone from the same file (or its old path) is a rename without a pair, so unchanged. A requirement moved
+            # to another spec file is measured as new.
+            own = [p] + ([renames[p]] if renames and p in renames else [])
+            ordered = own + ([f"openspec/specs/{delta.group(1)}/spec.md"] if delta else [])
+            old_bodies: dict[str, list[str]] = defaultdict(list)
+            own_names: set[str] = set()
+            for q in dict.fromkeys(ordered):
+                for _, name, body, section in requirement_bodies(
+                        (git_bytes("show", f"{merge_base}:{q}") or b"").decode("utf-8", "replace").splitlines()):
+                    if not section.startswith("REMOVED"):
+                        old_bodies[name].append(body)
+                        if q in own:
+                            own_names.add(name)
+            current = requirement_bodies(lines)
+            renamed_from = renamed_requirements(lines)
+            names_now = {name for _, name, _, _ in current}
+            gone = {b for name in own_names - names_now for b in old_bodies[name]}
+            for n, name, body, section in current:
+                if section.startswith("REMOVED") or len(body) < REQUIREMENT_LIMIT:
                     continue
-                if len(body) >= REQUIREMENT_LIMIT and (name, body) not in before:
-                    format_hits.append(f"  !! {p}:{n}  requirement \"{name}\" is {len(body)} characters (under {REQUIREMENT_LIMIT} required, openspec/config.yaml)")
-                    GATE.append(f"{p}:{n} requirement \"{name}\" is {len(body)} characters (openspec/config.yaml: under {REQUIREMENT_LIMIT})")
+                olds = old_bodies.get(name, []) + old_bodies.get(renamed_from.get(name, ""), [])
+                if body in olds or (not olds and body in gone):
+                    continue
+                long_olds = [len(o) for o in olds if len(o) >= REQUIREMENT_LIMIT]
+                if long_olds and len(body) <= max(long_olds):
+                    # already over the limit at the merge-base and not made longer: an edit of such a requirement
+                    # must not be blocked, only reminded
+                    format_hits.append(f"  {p}:{n}  requirement \"{name}\" is {len(body)} characters; it was "
+                                       f"{max(long_olds)} before the branch and did not grow - shorten it when you can")
+                    continue
+                format_hits.append(f"  !! {p}:{n}  requirement \"{name}\" is {len(body)} characters (under {REQUIREMENT_LIMIT} required, openspec/config.yaml)")
+                GATE.append(f"{p}:{n} requirement \"{name}\" is {len(body)} characters (openspec/config.yaml: under {REQUIREMENT_LIMIT})")
         if p.endswith("/tasks.md"):
             for i, line in enumerate(lines, 1):
                 if says_not_done(line):
@@ -693,9 +729,25 @@ def says_not_done(line: str) -> bool:
 CITATION = re.compile(r"(?<![\w/.-])(\.?\w[\w./-]*):\d")
 
 
-def requirement_sizes(lines: list[str]) -> list[tuple[int, str, int]]:
-    """(line, name, characters of the body) per requirement: its text up to the first scenario or heading."""
-    return [(n, name, len(body)) for n, name, body, _ in requirement_bodies(lines)]
+def renamed_requirements(lines: list[str]) -> dict[str, str]:
+    """New name -> old name for each pair of a delta's `## RENAMED Requirements` section (`- FROM: ...`, `- TO: ...`,
+    with or without the backticks and the `### Requirement:` prefix)."""
+    pairs, section, old = {}, "", None
+    for line in lines:
+        if line.startswith("## "):
+            section, old = line[3:].strip().upper(), None
+            continue
+        if not section.startswith("RENAMED"):
+            continue
+        m = re.match(r"\s*[-*+]?\s*(FROM|TO)\s*:\s*`?(?:###\s*Requirement:\s*)?(.+?)`?\s*$", line, re.I)
+        if not m:
+            continue
+        if m.group(1).upper() == "FROM":
+            old = m.group(2).strip()
+        elif old is not None:
+            pairs[m.group(2).strip()] = old
+            old = None
+    return pairs
 
 
 def requirement_bodies(lines: list[str]) -> list[tuple[int, str, str, str]]:
@@ -824,6 +876,21 @@ def main() -> None:
     ap.add_argument("--gate", action="store_true")
     a = ap.parse_args()
 
+    head_sha = git("rev-parse", "--verify", f"{a.head}^{{commit}}").strip()
+    # "Checked out" is decided by the ref, not the commit: another branch at the same commit is not the branch the
+    # working tree belongs to. A detached HEAD matches by commit (a sha, a tag).
+    head_ref = git("symbolic-ref", "-q", "HEAD", check=False).strip()
+    if a.head == "HEAD":
+        checked_out = True
+    elif head_ref:
+        checked_out = git("rev-parse", "--symbolic-full-name", a.head, check=False).strip() == head_ref
+    else:
+        checked_out = head_sha == git("rev-parse", "--verify", "HEAD^{commit}", check=False).strip()
+    current_branch = git("rev-parse", "--abbrev-ref", "HEAD", check=False).strip()
+    if a.worktree and not checked_out:
+        # the working tree belongs to the checked-out branch; mixing it with another head's history scans neither
+        fail(f"--worktree scans the checked-out working tree, but --head {a.head} is not checked out: "
+             "check it out, or leave --worktree out")
     base = a.base or pick_base(a.head)
     merge_base = git("merge-base", base, a.head).strip()
     # With --worktree the scan reads what `git commit -a` would record, not the bytes on disk (clean filters
@@ -833,10 +900,11 @@ def main() -> None:
     head_label = "working tree" if a.worktree else a.head
     tree = git("rev-parse", f"{view}^{{tree}}").strip()
 
-    branch = git("rev-parse", "--abbrev-ref", "HEAD").strip()
+    branch = current_branch if a.head == "HEAD" else a.head
     commits = git("log", "--oneline", "--no-merges", f"{merge_base}..{a.head}").splitlines()
     merges = git("log", "--oneline", "--merges", f"{merge_base}..{a.head}").splitlines()
-    status = git("status", "--porcelain", "--untracked-files=no").splitlines()
+    # the state of the working tree matters only for the checked-out branch
+    status = git("status", "--porcelain", "--untracked-files=no").splitlines() if checked_out else []
 
     print(f"# Branch scan: {branch}")
     print(f"base: {base}  merge-base: {merge_base[:10]}  head: {head_label}  tree: {tree}")
@@ -871,7 +939,7 @@ def main() -> None:
                 print(f"  ... and {len(untracked) - 20} more")
             # A hand-over records the tree git would commit: a file left out of it is reviewed by no one. The review
             # of this branch that the skill saved at the repo root stays untracked by design (SKILL.md §8).
-            saved = {f"{branch.replace('/', '-')}-review.md", f"{branch.replace('/', '-')}-self-review.md"}
+            saved = {f"{current_branch.replace('/', '-')}-review.md", f"{current_branch.replace('/', '-')}-self-review.md"}
             left_out = [p for p in untracked if p not in saved]
             if left_out:
                 GATE.append(f"{len(left_out)} untracked file(s): `git add` the branch's own, remove or ignore the rest")
@@ -896,7 +964,7 @@ def main() -> None:
     print()
 
     # --- applicable rules ------------------------------------------------------------------------
-    rules = load_rules()
+    rules = load_rules(view)
     applies: dict[str, int] = defaultdict(int)
     for _, p in files:
         for name, pats in rules.items():
@@ -919,6 +987,8 @@ def main() -> None:
         # The branch already has the base's version (a cherry-pick, the same edit): nothing is missing.
         if git("rev-parse", "-q", "--verify", f"{base}:{t}", check=False).strip() == \
                 git("rev-parse", "-q", "--verify", f"{view}:{t}", check=False).strip():
+            continue
+        if t in NOT_A_REVIEW_CRITERION:
             continue
         if t in ALWAYS_APPLIES:
             relevant.append(t)
@@ -1079,7 +1149,8 @@ def main() -> None:
     print("## API contract and SDK")
     print(f"  contract files (controllers/DTOs/ApiModels): {len(contract)}")
     print(f"  sdk/ submodule pointers in the branch: {', '.join(sdk_touched) or 'unchanged'}")
-    sub = [l for l in git("submodule", "status").splitlines() if l[:1] in "+-U"]
+    # the submodule checkouts belong to the checked-out branch: for another --head they say nothing about it
+    sub = [l for l in git("submodule", "status").splitlines() if l[:1] in "+-U"] if checked_out else []
     for l in sub:
         print(f"  !! submodule checkout differs from the recorded pointer: {l.strip()}")
     print()
