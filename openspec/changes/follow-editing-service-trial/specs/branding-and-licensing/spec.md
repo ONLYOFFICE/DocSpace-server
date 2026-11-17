@@ -73,7 +73,7 @@ from a file SHALL never be replaced by it.
 `getIsLicenseRequired` SHALL need no authentication and answer true only when the installation is Enterprise
 or Developer, its tariff page is enabled (not an anyone-access portal, not an image-based deployment), no
 license file exists at the configured path and no trial of "Following the editing service's trial" would be in force
-today; false in every other case, including a hosted portal. The editing service's answer MAY be 15 minutes old, or 2
+today; false in every other case, including a hosted portal. The editing service's answer MAY be 15 minutes old, or 3
 days while it does not answer.
 
 #### Scenario: Fresh Enterprise installation
@@ -94,7 +94,7 @@ days while it does not answer.
 #### Scenario: Editing service does not answer
 
 - **WHEN** `getIsLicenseRequired` is called on such an installation and the editing service does not answer
-- **THEN** the system answers from the editing service's last answer of the past 2 days, and with none 200 true
+- **THEN** the system answers from the editing service's last answer of the past 3 days, and with none 200 true
 
 #### Scenario: Hosted portal
 

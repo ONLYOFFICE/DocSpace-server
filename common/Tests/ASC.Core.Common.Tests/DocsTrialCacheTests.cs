@@ -141,6 +141,49 @@ public sealed class DocsTrialCacheTests : IDisposable
     }
 
     [Fact]
+    public async Task GetAsync_FailureWithNoAnswerKnown_IsKeptOnlyForTheFailureDuration()
+    {
+        // The failure is kept for the failure duration, not for the duration of an answer: once it expires, the
+        // editing service is asked again.
+        var trialCache = CreateCache(new DocsTrialCacheOptions(
+            Duration: TimeSpan.FromMinutes(15),
+            FailSafeMaxDuration: TimeSpan.FromDays(3),
+            FailureDuration: TimeSpan.FromMilliseconds(100),
+            HardTimeout: TimeSpan.FromSeconds(10)));
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+        _answers.Enqueue(_active);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
+
+        // Let the failure expire; it is a duration running out, not an asynchronous write to wait for
+        await Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+        _requests.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetAsync_FailureWithNoAnswerKnown_LeavesNoCopyOnceExpired()
+    {
+        // A failure is no answer to fall back on: once it expires, nothing of it stays in the cache, not even a
+        // fail-safe copy that a later failure would serve.
+        var trialCache = CreateCache(new DocsTrialCacheOptions(
+            Duration: TimeSpan.FromMinutes(15),
+            FailSafeMaxDuration: TimeSpan.FromDays(3),
+            FailureDuration: TimeSpan.FromMilliseconds(100),
+            HardTimeout: TimeSpan.FromSeconds(10)));
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
+
+        // Let the failure expire; it is a duration running out, not an asynchronous write to wait for
+        await Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+
+        (await _cache.TryGetAsync<DocsTrialCheck>(DocsTrialCache.GetCacheKey(), entry => entry.SetAllowStaleOnReadOnly(),
+            TestContext.Current.CancellationToken)).HasValue.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task GetAsync_NoAnswerKnownAndServiceFails_KeepsTheFailureForAWhile()
     {
         var trialCache = CreateCache(DocsTrialCacheOptions.Default);
@@ -169,6 +212,23 @@ public sealed class DocsTrialCacheTests : IDisposable
     }
 
     [Fact]
+    public async Task GetAsync_TwoReadersWhileTheServiceFailsWithNoAnswerKnown_AskItOnce()
+    {
+        // With no answer known, the failure of the first request is kept before the waiting reader goes on, so the
+        // second reader takes it instead of asking a service that does not answer once more. Between the failure and
+        // its record the reader logs it; the logger here takes its time, as a write to Redis does in the services, so a
+        // record made only after the lock is released comes too late for the waiting reader.
+        var trialCache = new DocsTrialCache(_cache, new SlowLogger(TimeSpan.FromMilliseconds(500)), DocsTrialCacheOptions.Default);
+
+        var answers = await Task.WhenAll(
+            trialCache.GetAsync(SlowFailingRequestAsync, useCache: true),
+            trialCache.GetAsync(SlowFailingRequestAsync, useCache: true));
+
+        answers.Should().AllBeEquivalentTo(DocsTrialCheck.Unknown);
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
     public async Task GetAsync_FailsWhileAnotherProcessStoresAnAnswer_KeepsThatAnswer()
     {
         // The background refresh of another process stores a known answer while this process asks and gets none: the
@@ -190,11 +250,12 @@ public sealed class DocsTrialCacheTests : IDisposable
     [InlineData(null, "1.00:00:00")]
     [InlineData("12:00:00", "12:00:00")]
     [InlineData("00:00:10", "00:01:00")]
-    [InlineData("3.00:00:00", "2.00:00:00")]
+    [InlineData("2.00:00:00", "1.00:00:00")]
+    [InlineData("3.00:00:00", "1.00:00:00")]
     public void ReadRefreshPeriod_Configured_StaysWithinTheLastAnswerKept(string? configured, string expected)
     {
-        // A refresh period longer than the fail-safe would leave the installation without a last answer known
-        // between two refreshes.
+        // The last answer known has to outlive one refresh that finds the editing service silent, with a period to
+        // spare for the time the refreshes take, so the period is at most a third of the fail-safe.
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?> { [DocsTrialCacheOptions.RefreshPeriodKey] = configured })
             .Build();
@@ -269,10 +330,38 @@ public sealed class DocsTrialCacheTests : IDisposable
         return new DocsTrialCache(_cache, NullLogger<DocumentServiceLicense>.Instance, options);
     }
 
+    /// <summary>A logger that blocks for <paramref name="pause"/> on every entry it writes.</summary>
+    private sealed class SlowLogger(TimeSpan pause) : ILogger<DocumentServiceLicense>
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+        {
+            return null;
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            Thread.Sleep(pause);
+        }
+    }
+
     private Task<DocsTrialCheck> RequestAsync()
     {
         _requests++;
         return Task.FromResult(_answers.Dequeue());
+    }
+
+    /// <summary>An editing service that gives no readable answer after half a second.</summary>
+    private async Task<DocsTrialCheck> SlowFailingRequestAsync()
+    {
+        Interlocked.Increment(ref _requests);
+        await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
+
+        return DocsTrialCheck.Unknown;
     }
 
     /// <summary>An editing service that answers an active trial after half a second.</summary>

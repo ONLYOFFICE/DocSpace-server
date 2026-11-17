@@ -63,6 +63,19 @@ public class QuotaSocketManager(
         await MakeRequest("change-quota-feature-value", new { room, featureId, value });
     }
 
+    /// <summary>
+    /// Sends a quota value of a portal whose tariff was just written. The tariff and the current tenant are not read
+    /// here: the caller writes the tariff, possibly under the lock of the tariff read, or from a background job.
+    /// </summary>
+    /// <param name="tenantId">The portal whose clients are told.</param>
+    /// <param name="featureId">The name of the quota feature.</param>
+    /// <param name="value">Its new value.</param>
+    /// <param name="tariffState">The state of the tariff just written.</param>
+    public async Task ChangeQuotaFeatureValueAsync<T>(int tenantId, string featureId, T value, TariffState tariffState)
+    {
+        await MakeRequest("change-quota-feature-value", new { room = $"{tenantId}-quota", featureId, value }, tariffState);
+    }
+
     public async Task ChangeInvitationLimitValue(int value)
     {
         var room = GetQuotaRoom();

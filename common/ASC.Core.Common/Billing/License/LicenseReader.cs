@@ -442,8 +442,16 @@ public class LicenseReader(
     /// <summary>
     /// Returns whether the installation's trial would be in force if the editing service's trial were applied now:
     /// no license file is on disk, no license from a file is in force, and the end <see cref="ChooseTrialDueDate"/>
-    /// would choose has not passed. Writes nothing.
+    /// would choose has not passed. Writes nothing of its own.
     /// </summary>
+    /// <remarks>
+    /// The setup wizard page asks this without authentication, so the tariff is read through the cache of the tariff
+    /// service, as any page of the portal reads it. On a miss that read goes to the database, and on an Enterprise
+    /// installation without a tariff it creates the 30-day trial, as the first read of any page does. A write of the
+    /// tariff clears the cache, but the cached end can lag behind the stored one: until the cache expires when the
+    /// write comes from another process and there is no Redis, and when a read that started before the write fills
+    /// the cache after it. The wizard checks the stored tariff again before it writes.
+    /// </remarks>
     public async Task<bool> WillDocsTrialBeInForceAsync(DocsTrialLicense trial)
     {
         ArgumentNullException.ThrowIfNull(trial);
@@ -459,7 +467,7 @@ public class LicenseReader(
             return false;
         }
 
-        var (_, currentDueDate) = await GetTrialTariffAsync(quota);
+        var (_, currentDueDate) = await GetTrialTariffAsync(quota, cached: true);
 
         return WillTrialBeInForce(currentDueDate, trial.DueDate, DateTime.UtcNow);
     }
@@ -520,14 +528,20 @@ public class LicenseReader(
     /// Reads the tariff of the installation and the end of the license quota's trial in it, if the license quota is
     /// in the tariff.
     /// </summary>
-    private async Task<(Tariff Tariff, DateTime? DueDate)> GetTrialTariffAsync(TenantQuota quota)
+    /// <param name="quota">The license quota; with none, nothing is read.</param>
+    /// <param name="cached">
+    /// Whether the cached tariff will do; otherwise the stored one is read, as a writer of the tariff needs it.
+    /// </param>
+    private async Task<(Tariff Tariff, DateTime? DueDate)> GetTrialTariffAsync(TenantQuota quota, bool cached = false)
     {
         if (quota == null)
         {
             return (null, null);
         }
 
-        var current = await tariffService.GetBillingInfoAsync(Tenant.DefaultTenant);
+        var current = cached
+            ? await tariffService.GetTariffAsync(Tenant.DefaultTenant, withRequestToPaymentSystem: false)
+            : await tariffService.GetBillingInfoAsync(Tenant.DefaultTenant);
 
         return (current, current != null && current.Quotas.Exists(q => q.Id == LicenseQuotaId) ? current.DueDate : null);
     }

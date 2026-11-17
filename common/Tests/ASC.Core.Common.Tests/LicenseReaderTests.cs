@@ -184,39 +184,52 @@ public sealed class LicenseReaderTests : IDisposable
             .Should().Be(expected);
     }
 
+    // The ends of the own trial below stay a day or more away from today: the code reads the clock again, and a run
+    // across midnight must not move an end to the other side of today.
+
     [Fact]
-    public async Task IsOwnTrialInForceAsync_OwnTrialEndedYesterday_IsFalse()
+    public async Task IsOwnTrialInForceAsync_OwnTrialEnded_IsFalse()
     {
         // The wizard falls back on the installation's own trial when the editing service is silent; one that ended
         // must ask for a license file instead.
-        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-1));
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-2));
 
         (await reader.IsOwnTrialInForceAsync()).Should().BeFalse();
     }
 
     [Fact]
-    public async Task IsOwnTrialInForceAsync_OwnTrialEndsToday_IsTrue()
+    public async Task IsOwnTrialInForceAsync_OwnTrialNotEnded_IsTrue()
     {
-        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date);
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(1));
 
         (await reader.IsOwnTrialInForceAsync()).Should().BeTrue();
     }
 
     [Fact]
-    public async Task WillDocsTrialBeInForceAsync_OwnTrialEndedYesterday_IsFalse()
+    public async Task WillDocsTrialBeInForceAsync_OwnTrialEnded_IsFalse()
     {
         // What the wizard page and the wizard ask before they skip the license file: a fresh trial of the editing
         // service does not revive the installation's ended trial.
-        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-1));
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-2));
 
         (await reader.WillDocsTrialBeInForceAsync(new DocsTrialLicense(DateTime.UtcNow.Date.AddDays(20)))).Should().BeFalse();
     }
 
     [Fact]
-    public async Task DocsTrialToDBAsync_OwnTrialEndedYesterday_IsNotInForceAndWritesNothing()
+    public async Task WillDocsTrialBeInForceAsync_ReadsTheCachedTariffOnly()
     {
-        // The end stays yesterday, so nothing is written (the stub fails a tariff write) and the trial is not in force.
-        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-1));
+        // The wizard page asks this without authentication: the stored tariff is not read for it (the stub fails such a
+        // read), the cached one is.
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(10), storedTariffReadable: false);
+
+        (await reader.WillDocsTrialBeInForceAsync(new DocsTrialLicense(DateTime.UtcNow.Date.AddDays(20)))).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task DocsTrialToDBAsync_OwnTrialEnded_IsNotInForceAndWritesNothing()
+    {
+        // The end stays where it was, so nothing is written (the stub fails a tariff write) and the trial is not in force.
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-2));
 
         (await reader.DocsTrialToDBAsync(new DocsTrialLicense(DateTime.UtcNow.Date.AddDays(20)))).Should().BeFalse();
     }
@@ -237,7 +250,11 @@ public sealed class LicenseReaderTests : IDisposable
     /// <paramref name="trialDueDate"/>. The stored quotas and tariff are stubs that answer only the reads; a write of
     /// the tariff fails the test.
     /// </summary>
-    private LicenseReader CreateReaderOnOwnTrial(DateTime trialDueDate)
+    /// <param name="trialDueDate">The end of the own trial.</param>
+    /// <param name="storedTariffReadable">
+    /// Whether the stored tariff may be read; otherwise only the cached one answers and a read of the stored one fails.
+    /// </param>
+    private LicenseReader CreateReaderOnOwnTrial(DateTime trialDueDate, bool storedTariffReadable = true)
     {
         var quota = new TenantQuota(LicenseReader.LicenseQuotaId) { Name = LicenseReader.StartTrialQuotaName, Trial = true };
         var tariff = new Tariff { Quotas = [new ASC.Core.Billing.Quota(LicenseReader.LicenseQuotaId, 1)], DueDate = trialDueDate, CustomerId = "" };
@@ -246,10 +263,20 @@ public sealed class LicenseReaderTests : IDisposable
         {
             [nameof(IQuotaService.GetTenantQuotasAsync)] = _ => Task.FromResult<IEnumerable<TenantQuota>>([quota])
         });
-        var tariffService = StubProxy<ITariffService>.Create(new()
+        var answers = new Dictionary<string, Func<object?[]?, object?>>
         {
-            [nameof(ITariffService.GetBillingInfoAsync)] = _ => Task.FromResult(tariff)
-        });
+            // The cached tariff of the installation, as the anonymous question must read it: no request to a payment
+            // system and no refresh, either of which would read past the cache
+            [nameof(ITariffService.GetTariffAsync)] = args => args is [Tenant.DefaultTenant, false, false]
+                ? Task.FromResult(tariff)
+                : throw new NotSupportedException($"GetTariffAsync({string.Join(", ", args ?? [])}) reads past the cache")
+        };
+        if (storedTariffReadable)
+        {
+            answers[nameof(ITariffService.GetBillingInfoAsync)] = _ => Task.FromResult(tariff);
+        }
+
+        var tariffService = StubProxy<ITariffService>.Create(answers);
 
         return new LicenseReader(
             tenantManager: new TenantManager(null!, quotaService, null!, tariffService, null!, null!, new InMemoryLockProvider()),

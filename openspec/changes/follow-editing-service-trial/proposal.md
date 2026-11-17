@@ -29,14 +29,16 @@ trial for no longer than the editing service's, and switch to the license as soo
 - `acceptLicense` and `completeWizard` put the previous license file back on any failure before the license is
   applied, as the requirement already says; the server restored it only for a refused license.
 - The answer of the editing service about its trial is kept in the distributed cache, one value per installation.
-  With Redis, the background re-read refreshes it for every API node, and the last answer survives a restart for 2
+  With Redis, the background re-read refreshes it for every API node, and the last answer survives a restart for 3
   days; without Redis, each process keeps its own copy. The period of the re-read is read as `d.hh:mm:ss`, one day by
-  default, between a minute and those 2 days.
+  default, between a minute and a day (a third of the 3 days, so the last answer outlives one re-read that fails); a
+  longer period configured before is cut to a day.
 - Every write of the tariff (a saved change, a scheduled quantity, a deleted tariff) sends the new socket event
   `s:change-tariff` to the quota room `{tenant}-quota` of the portal, and of every active portal for the shared
   tariff of a self-hosted installation. It carries no data: the client reads the tariff again. A page loaded later
   needs no client change; a page that is already open reads the new tariff only once the frontend subscribes to the
-  event in the `quota` room.
+  event in the `quota` room. The quota values a tariff write already sent (`change-quota-feature-value`) now go to
+  the same portals the same way, instead of the portal of the current request only.
 
 ## Capabilities
 
@@ -60,7 +62,7 @@ None.
 - **branding-and-licensing "Whether a license is still required"**: `getIsLicenseRequired` answers 200 false
   instead of true on an Enterprise or Developer installation without a license file whose editing service runs an
   active trial, unless the installation's own trial already ended. The answer of the editing service may be up to 15
-  minutes old; while the service does not answer, its last answer of the past 2 days is used (with Redis; without
+  minutes old; while the service does not answer, its last answer of the past 3 days is used (with Redis; without
   it, the last answer this process knows). Affected: the web client wizard (it skips the license upload step; no
   client change is needed), agents reading the published text. The OpenAPI document and the SDKs carry the new
   description after regeneration; no field, status code or route changes. Webhooks, socket events, backup and
@@ -102,7 +104,7 @@ service that does not answer at completion leads to the installation's own trial
   `FirstTimeTenantSettings`, `LicenseController`, `SettingsController` (Web.Api), `RefreshLicenseService`
   (Files.Worker), the `change-tariff` route and hub function of the socket service (`common/ASC.Socket.IO`).
 - Configuration: `files:refreshLicense:period` is read as an interval, `d.hh:mm:ss`, one day by default, at least a
-  minute and at most 2 days; no configuration in the repository or in `buildtools/config` sets it.
+  minute and at most a day; no configuration in the repository or in `buildtools/config` sets it.
 - Socket events: new `s:change-tariff` in the `{tenant}-quota` room, no payload; the web client does not subscribe
   to it yet.
 - API: no contract change; the descriptions of `getIsLicenseRequired`, `acceptLicense` and `completeWizard` change,

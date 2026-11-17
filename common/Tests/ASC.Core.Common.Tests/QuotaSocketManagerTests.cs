@@ -47,6 +47,40 @@ public sealed class QuotaSocketManagerTests
     [Fact]
     public async Task ChangeTariffAsync_GivenTheState_QueuesTheEventWithoutReadingTheTariff()
     {
+        var (manager, channel) = CreateManager();
+
+        await manager.ChangeTariffAsync(5, TariffState.Trial);
+
+        channel.Reader.TryRead(out var queued).Should().BeTrue();
+        using var request = queued!.RequestMessage;
+        request.RequestUri!.AbsolutePath.Should().Be("/controller/files/change-tariff");
+        (await request.Content!.ReadAsStringAsync(TestContext.Current.CancellationToken)).Should().Be("""{"room":"5-quota"}""");
+        queued.TariffState.Should().Be(TariffState.Trial);
+    }
+
+    [Theory]
+    [InlineData(1024L, """{"room":"7-quota","featureId":"total_size","value":1024}""")]
+    [InlineData(true, """{"room":"7-quota","featureId":"total_size","value":true}""")]
+    public async Task ChangeQuotaFeatureValueAsync_GivenThePortalAndTheState_QueuesTheEventWithoutReadingTheTariff(object value, string body)
+    {
+        // The quota values of a tariff write go to the portal the write names, with no current tenant (a background
+        // job has none) and without reading the tariff. The tariff service hands the values over boxed, as objects.
+        var (manager, channel) = CreateManager();
+
+        await manager.ChangeQuotaFeatureValueAsync(7, "total_size", value, TariffState.Paid);
+
+        channel.Reader.TryRead(out var queued).Should().BeTrue();
+        using var request = queued!.RequestMessage;
+        request.RequestUri!.AbsolutePath.Should().Be("/controller/files/change-quota-feature-value");
+        (await request.Content!.ReadAsStringAsync(TestContext.Current.CancellationToken)).Should().Be(body);
+        queued.TariffState.Should().Be(TariffState.Paid);
+    }
+
+    /// <summary>
+    /// A notifier with no current tenant (the tenant manager is absent) and a tariff service that fails any call.
+    /// </summary>
+    private static (QuotaSocketManager Manager, System.Threading.Channels.Channel<SocketData> Channel) CreateManager()
+    {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -62,12 +96,6 @@ public sealed class QuotaSocketManagerTests
             new MachinePseudoKeys(configuration),
             configuration);
 
-        await manager.ChangeTariffAsync(5, TariffState.Trial);
-
-        channel.Reader.TryRead(out var queued).Should().BeTrue();
-        using var request = queued!.RequestMessage;
-        request.RequestUri!.AbsolutePath.Should().Be("/controller/files/change-tariff");
-        (await request.Content!.ReadAsStringAsync(TestContext.Current.CancellationToken)).Should().Be("""{"room":"5-quota"}""");
-        queued.TariffState.Should().Be(TariffState.Trial);
+        return (manager, channel);
     }
 }
