@@ -173,7 +173,7 @@ public class TariffServiceDepositTests
     [Fact]
     public async Task EnsureWalletBalance_TokenCancelledBeforeTheTopUp_SendsNoDeposit()
     {
-        var (tariffService, billing) = CreateWalletService(balance: 10);
+        var (tariffService, billing, socket) = CreateWalletService(balance: 10);
 
         using var deadline = new CancellationTokenSource();
         await deadline.CancelAsync();
@@ -182,15 +182,16 @@ public class TariffServiceDepositTests
 
         await act.Should().ThrowAsync<OperationCanceledException>();
         billing.Requests.Should().NotContain(request => request.Path == "/billing/Deposit", "no deposit is begun after the deadline");
+        socket.TopUps.Should().BeEmpty("there is no deposit to announce");
     }
 
     // The deposit is accepted and the balance does not move yet, so the top-up polls it - for up to 16 reads a second
     // apart. The deadline falls during the poll: the top-up stops there, after the one deposit, without waiting for
-    // the poll to end.
+    // the poll to end - and the clients are still told of the deposit the customer was charged for.
     [Fact]
     public async Task EnsureWalletBalance_TokenCancelledDuringThePoll_StopsAfterTheOneDeposit()
     {
-        var (tariffService, billing) = CreateWalletService(balance: 10);
+        var (tariffService, billing, socket) = CreateWalletService(balance: 10);
 
         using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(2));
         var started = Stopwatch.StartNew();
@@ -200,11 +201,12 @@ public class TariffServiceDepositTests
         await act.Should().ThrowAsync<OperationCanceledException>();
         billing.Requests.Where(request => request.Path == "/billing/Deposit").Should().ContainSingle("the deposit sent before the deadline is the only one");
         started.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(12), "the poll of 16 reads a second apart is cut short, not waited out");
+        socket.TopUps.Should().Equal([true], "the automatic deposit is announced to the clients before the top-up stops");
     }
 
-    // A wallet that holds the given amount and never shows a deposit, with billing accepting every deposit and the
-    // real balance poll of the accounting client.
-    private static (TariffService tariffService, HttpStub billing) CreateWalletService(decimal balance)
+    // A wallet that holds the given amount and never shows a deposit, with billing accepting every deposit, the real
+    // balance poll of the accounting client, and the top-up events the clients would receive.
+    private static (TariffService tariffService, HttpStub billing, RecordingQuotaSocketManager socket) CreateWalletService(decimal balance)
     {
         var billing = new HttpStub(_ => Reply(HttpStatusCode.OK, "\"ok\""));
         var accounting = new HttpStub(_ => Reply(HttpStatusCode.OK,
@@ -212,13 +214,30 @@ public class TariffServiceDepositTests
 
         var provider = BuildProvider(billing: billing, accounting: accounting);
 
+        var socket = new RecordingQuotaSocketManager();
+        var services = new ServiceCollection().AddSingleton<QuotaSocketManager>(socket).BuildServiceProvider();
+
         var tariffService = PaymentStubs.CreateTariffService(provider.GetRequiredService<AccountingClient>(), provider.GetRequiredService<BillingClient>(),
             hybridCache: new FusionCache(new FusionCacheOptions()),
             coreSettings: CreateCoreSettings(PaymentRegion),
             distributedLockProvider: new InMemoryLockProvider(),
+            serviceProvider: services,
             resiliencePipelineProvider: provider.GetRequiredService<ResiliencePipelineProvider<string>>());
 
-        return (tariffService, billing);
+        return (tariffService, billing, socket);
+    }
+
+    // The top-up events of a portal, recorded instead of sent; nothing else of the socket client is used.
+    private sealed class RecordingQuotaSocketManager() : QuotaSocketManager(null!, null!, null!, null!, null!)
+    {
+        public List<bool> TopUps { get; } = [];
+
+        public override Task TopUpWallet(bool auto)
+        {
+            TopUps.Add(auto);
+
+            return Task.CompletedTask;
+        }
     }
 
     private static (TariffService tariffService, HttpStub handler) CreateService(

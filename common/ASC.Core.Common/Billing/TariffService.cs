@@ -1524,18 +1524,30 @@ public class TariffService(
             return (outcome, result);
         }
 
-        // The deposit is sent; a cancelled caller does not wait to learn whether it was applied.
-        cancellationToken.ThrowIfCancellationRequested();
+        // The deposit is sent. A cancelled caller does not wait to learn whether it was applied: the poll is skipped or
+        // cut short and the outcome is unknown. The deposit is reported all the same, so that the caller announces
+        // it before it acts on the cancellation.
+        var updated = false;
 
-        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
-
-        var updated = await pipeline.ExecuteAsync(async _ =>
+        if (!cancellationToken.IsCancellationRequested)
         {
-            var newBalance = await GetCustomerBalanceAsync(tenantId, true);
-            var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+            var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
 
-            return oldBalanceAmount != newBalanceAmount;
-        }, cancellationToken);
+            try
+            {
+                updated = await pipeline.ExecuteAsync(async _ =>
+                {
+                    var newBalance = await GetCustomerBalanceAsync(tenantId, true);
+                    var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+
+                    return oldBalanceAmount != newBalanceAmount;
+                }, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // the caller's deadline fell during the poll: the deposit stays unconfirmed
+            }
+        }
 
         if (!updated)
         {
@@ -1552,10 +1564,11 @@ public class TariffService(
 
     /// <summary>
     /// Tops the wallet up for what it lacks of <paramref name="requiredAmount"/>, in up to five deposits, and reports
-    /// whether it covers the amount then. The token is checked before each deposit and before each poll of the
-    /// balance that follows one: once it is cancelled, no further deposit is begun and the method throws
-    /// <see cref="OperationCanceledException"/>. A deposit already sent is let finish, so a caller that stops it by a
-    /// deadline does not know whether that deposit was applied.
+    /// whether it covers the amount then. The token is checked before each deposit and ends the poll of the balance
+    /// that follows one: once it is cancelled, no further deposit is begun and the method throws
+    /// <see cref="OperationCanceledException"/>. A deposit already sent is let finish and announced to the clients
+    /// first, so a caller that stops it by a deadline does not know whether that deposit was applied, but the clients
+    /// are told of it.
     /// </summary>
     public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true, CancellationToken cancellationToken = default)
     {
@@ -1585,6 +1598,10 @@ public class TariffService(
                 var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
                 await quotaSocketManager.TopUpWallet(auto);
             }
+
+            // A cancelled caller learns of it only now, once the deposit it may have made is announced: no further
+            // read of the balance and no further deposit.
+            cancellationToken.ThrowIfCancellationRequested();
 
             balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
 

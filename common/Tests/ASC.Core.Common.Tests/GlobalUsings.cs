@@ -54,6 +54,7 @@ global using ASC.Common.Threading.DistributedLock.InMemoryLock;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core.Billing;
+global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Data;
 global using ASC.Core.Tenants;
