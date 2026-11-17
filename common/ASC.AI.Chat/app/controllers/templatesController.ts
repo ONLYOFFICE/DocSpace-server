@@ -36,6 +36,7 @@
 import { asyncHandler } from "./_helpers.js";
 import { assertAiAccess } from "./aiAccess.js";
 import { getString, isObject } from "../narrow.js";
+import { mayCreateAiRooms } from "../storage/docspacePeopleApi.js";
 import { getTemplateCatalog } from "../templates/catalog.js";
 import { installTemplate } from "../templates/installTemplate.js";
 
@@ -51,10 +52,18 @@ export const templatesController = {
     await assertAiAccess();
     res.json(await getTemplateCatalog());
   }),
-  // The rooms are created with the caller's credentials, so the Files
-  // service decides whether the caller may create them.
+  // Installing creates rooms, an agent above all, which only the portal
+  // owner, DocSpace admins and room admins may do: anyone else is refused
+  // before the first room is made. The rooms are then created with the
+  // caller's credentials, so the Files service still decides on each one.
   install: asyncHandler(async (req, res) => {
     await assertAiAccess();
+    if (!(await mayCreateAiRooms())) {
+      throw Object.assign(
+        new Error("Only the portal owner, portal admins and room admins may install a template"),
+        { status: 403, expose: true },
+      );
+    }
     const id = isObject(req.body) ? getString(req.body, "id")?.trim() : undefined;
     if (!id || id.length > MAX_ID_LENGTH) {
       badRequest("id must be the id of a template");
