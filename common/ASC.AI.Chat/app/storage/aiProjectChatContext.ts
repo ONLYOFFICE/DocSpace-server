@@ -103,11 +103,21 @@ export interface AiProjectRoundRefusal {
   body: { error: string; code?: string };
 }
 
-/** Whether a profile can serve a chat round (no capability mask = it can). */
+/**
+ * Whether a profile can serve a chat round. A profile that names no
+ * capabilities - no mask, or an empty one, as a model of an unknown kind
+ * has - can: the Files service accepts such a profile as a project's model
+ * (`AiHubService.SetModelAsync`), and the chat engine runs it.
+ */
 function canChat(profile: Pick<Profile, "capabilities"> | null | undefined): boolean {
+  if (!profile) {
+    return false;
+  }
+  const { capabilities } = profile;
   return (
-    !!profile &&
-    (typeof profile.capabilities !== "number" || (profile.capabilities & CapabilitiesUI.Chat) !== 0)
+    typeof capabilities !== "number" ||
+    capabilities === 0 ||
+    (capabilities & CapabilitiesUI.Chat) !== 0
   );
 }
 
@@ -119,17 +129,22 @@ async function readProjectProfileId(projectId: string): Promise<string | null> {
   return profileId || null;
 }
 
-// The model a project round runs on: the project's own, else the portal's
-// - the profile bound to the Chat action, or to the Default slot when that
-// action has none (the slot the portal fills by itself) - and whether it
-// names a profile that exists and can chat. The availability is that of the
-// effective profile: a project model that is gone is not replaced by the
-// portal default.
+// The model the portal chats on: the profile bound to the Chat action, or to
+// the Default slot when that action has none (the slot the portal fills by
+// itself). `null` when neither is bound. A failed read is not "no model": it
+// throws, so an outage of the AI service is not reported as a project whose
+// model is unavailable.
 export async function portalChatProfileId(): Promise<string | null> {
-  const read = (type: ActionType) => storage.assignments.readByType(type).catch(() => null);
-  return (await read(ActionType.Chat)) ?? (await read(ActionType.Default));
+  return (
+    (await storage.assignments.readByType(ActionType.Chat)) ??
+    (await storage.assignments.readByType(ActionType.Default))
+  );
 }
 
+// The model a project round runs on: the project's own, else the portal's,
+// and whether it names a profile that exists and can chat. The Files service
+// answers no model both for a project that never chose one and for one
+// whose profile was removed, so either runs on the portal's model.
 async function effectiveProfile(
   projectId: string,
 ): Promise<{ own: string | null; id: string | null; available: boolean }> {

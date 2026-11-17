@@ -218,6 +218,12 @@ describe("installTemplate", () => {
     ).toBe(false);
   });
 
+  it("keeps the agent when the portal's chat model cannot be read, and says so", async () => {
+    portalChatProfileId.mockRejectedValue(new Error("AI service down"));
+    const result = await installTemplate(catalog, catalog.agents[0]!.id);
+    expect(result.warnings).toEqual(["modelNotSaved"]);
+  });
+
   it("keeps the agent when its model is refused, and says so", async () => {
     vi.mocked(filesApiSend).mockImplementation(async (_method, apiPath, body) => {
       if (apiPath.endsWith("/model")) {

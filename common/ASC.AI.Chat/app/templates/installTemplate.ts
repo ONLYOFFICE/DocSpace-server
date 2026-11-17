@@ -135,8 +135,15 @@ async function installAgent(
   const warnings: string[] = [];
   // A template names no model, so the agent is given the one the portal
   // chats on now and keeps it when the portal's choice changes later.
-  const profileId = await portalChatProfileId();
   try {
+    const profileId = await portalChatProfileId().catch((err: unknown) => {
+      logger.warn(
+        `installTemplate: ${template.id}: the portal's chat model not read: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      return null;
+    });
     if (!profileId) {
       throw new DocspaceApiHttpError(404, "Not Found", "the portal has no chat model");
     }
