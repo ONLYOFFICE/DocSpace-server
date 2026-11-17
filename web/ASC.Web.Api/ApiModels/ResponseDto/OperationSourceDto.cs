@@ -55,8 +55,8 @@ public class OperationSourceDto
 
     /// <summary>
     /// The part of the amount on that sub-account, in the `currency` of the movement or of the usage total it belongs
-    /// to. It carries the sign the accounting service gives it, so whether money came in or went out is told by the
-    /// movement's own credit and debit, not by this sign.
+    /// to. Always zero or more: whether the money came in or went out is told by the `credit` and `debit` of the
+    /// movement.
     /// </summary>
     /// <example>4.5</example>
     public decimal Amount { get; init; }
@@ -66,4 +66,14 @@ public class OperationSourceDto
 public static partial class OperationSourceDtoMapper
 {
     public static partial List<OperationSourceDto> Map(this List<OperationSource> source);
+
+    [MapProperty(nameof(OperationSource.Amount), nameof(OperationSourceDto.Amount), Use = nameof(Unsigned))]
+    private static partial OperationSourceDto MapSource(OperationSource source);
+
+    // The accounting service may give the part of a charge with a minus: the direction is the movement's, so the part
+    // is passed on without its sign.
+    private static decimal Unsigned(decimal amount)
+    {
+        return Math.Abs(amount);
+    }
 }

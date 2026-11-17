@@ -439,23 +439,21 @@ public class PaymentController(
 
     /// <remarks>
     /// Ends the paid subscription of the portal and moves the portal to the wallet. First, the call adds the unused
-    /// balance of the period to the wallet. Then it tops up the wallet from the payment method if that credit does
-    /// not cover the price. Then it buys the requested number of admins as a wallet service. To read the credit
-    /// first, use `GET api/2.0/portal/payment/subscription/balance`. If the portal has no billing customer, the call
-    /// returns 404. If the customer has no payment method, the call returns 403. The payer is the portal user whose
-    /// email is the email of the billing customer. Only the payer can call it. Other callers get 403. The call also
-    /// returns 403 if the installation has no billing service. The call spends money and cannot be undone. Do not
-    /// repeat it. The call ends the subscription before it buys the admins. If the purchase fails, the call returns
-    /// `false` with 200. The portal is then on the wallet, with the credit and any top-up in it. To buy the admins
-    /// after that, use `Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the call
-    /// does not top up the wallet. Then the wallet must already cover the price. The call returns `true` if the
-    /// admins were bought. The product in `quantity` must be the admins wallet service. The call returns 400 for
-    /// another product or a quantity of zero or less. It also returns 400 for fewer admins than the portal already
-    /// has. If the paid plan is a wallet product, the call returns 400. If the plan is not paid, the call returns
-    /// 402. It also returns 402 if the balance cannot be moved. The next two errors come after the subscription has
-    /// ended. If the wallet still lacks money after the top-up, the call returns 402. If the wallet has no
-    /// sub-account in the accounting currency, the call returns 404. If the paid plan has no subscription, the call
-    /// returns 404. By default, the limit is 10 calls a minute per user. More calls return 429.
+    /// balance of the period to the wallet. If the wallet and the bonus balance fall short, it tops up the wallet from
+    /// the payment method. Then it buys the requested admins as a wallet service and spends the bonus first. To read
+    /// the credit beforehand, use `GET api/2.0/portal/payment/subscription/balance`. The payer is the user with the
+    /// email of the billing customer. Only the payer can call it. Other callers get 403. The call spends money and
+    /// cannot be undone. Do not repeat it. It returns `true` if it bought the admins. If the purchase fails, it returns
+    /// `false` with 200. The portal then stays on the wallet with the moved money. To buy the admins after that, use
+    /// `Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the wallet and the bonus must
+    /// already cover the price. By default, the limit is 10 calls a minute per user. More calls return 429. The call
+    /// returns 403 if the installation has no billing service or the customer has no payment method. It returns 404 if
+    /// the portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`
+    /// names a product other than the admins wallet service. It also returns 400 for zero admins or fewer than the
+    /// portal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan
+    /// is not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and
+    /// the bonus still fall short after the top-up, the call returns 402. If the wallet has no balance or no
+    /// sub-account in the accounting currency, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Move the subscription to the wallet

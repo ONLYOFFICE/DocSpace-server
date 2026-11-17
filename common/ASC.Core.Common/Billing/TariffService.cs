@@ -1556,7 +1556,12 @@ public class TariffService(
 
     public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true)
     {
-        var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+        // The accounting service spends the bonus credits before the wallet money, a payment from the wallet for the
+        // subscription included, so the portal can pay with both. A top-up does not change the bonus, so it is read
+        // once. A bonus that cannot be read counts as none: the wallet is then topped up as if there were no bonus,
+        // never by less than it needs.
+        var goodwillAmount = await GetGoodwillAmountAsync(tenantId, currency);
+        var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency) + goodwillAmount;
 
         // A delayed payment method accepts the deposit right away, but the money is credited only
         // once the transfer settles, so the balance cannot reflect it within this call and the loop below would
@@ -1590,7 +1595,7 @@ public class TariffService(
                 }
             }
 
-            balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+            balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency) + goodwillAmount;
 
             if (outcome == TopUpOutcome.Unknown)
             {
@@ -1611,6 +1616,14 @@ public class TariffService(
         Confirmed,
         Rejected,
         Unknown
+    }
+
+    private async Task<decimal> GetGoodwillAmountAsync(int tenantId, string currency)
+    {
+        var goodwill = await GetCustomerGoodwillAsync(tenantId);
+        var amount = goodwill?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0;
+
+        return Math.Max(amount, 0);
     }
 
     private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)

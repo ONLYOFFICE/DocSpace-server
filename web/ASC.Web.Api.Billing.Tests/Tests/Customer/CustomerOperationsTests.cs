@@ -67,7 +67,8 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
     [Fact]
     public async Task GetCustomerOperations_ExpiredBonus_IsDescribedAndSplitByItsSources()
     {
-        // Arrange: the rest of an expired bonus written off the bonus sub-account, and a charge paid partly by bonuses.
+        // Arrange: the rest of an expired bonus written off the bonus sub-account, and a charge paid partly by bonuses,
+        // both with the parts given with a minus.
         Payments.Customer(Owner.Email).Balance(10m)
             .On(PaymentService.Accounting, "GET", "/customer/{portalId}/operations",
                 """
@@ -86,10 +87,14 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
         var expiration = report.Collection[0];
         expiration.Type.Should().Be(OperationType.GoodwillExpiration);
         expiration.Description.Should().Be("Bonus expiration");
-        expiration.Sources.Should().ContainSingle().Which.IsBonus.Should().BeTrue();
+        var expired = expiration.Sources.Should().ContainSingle().Subject;
+        expired.IsBonus.Should().BeTrue();
+        expired.Amount.Should().Be(4.5);
 
+        // Accounting may give the parts of a charge with a minus; the direction is the movement's debit, so the parts
+        // are passed on without their sign.
         var charge = report.Collection[1];
-        charge.Sources.Select(s => (s.SubAccount, s.IsBonus, s.Amount)).Should().Equal((53, true, -1.0), (51, false, -0.5));
+        charge.Sources.Select(s => (s.SubAccount, s.IsBonus, s.Amount)).Should().Equal((53, true, 1.0), (51, false, 0.5));
     }
 
     [Fact]
