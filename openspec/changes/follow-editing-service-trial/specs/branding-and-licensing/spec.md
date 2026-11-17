@@ -6,9 +6,9 @@
 
 Without a license file at the configured path or a license from a file in force, an Enterprise or Developer
 installation SHALL end its own trial tariff no later than the day the editing service's trial ends, never moving the
-end later, and no later than yesterday once that trial expired. It SHALL apply this on the daily background re-read
-and on completing the setup wizard while the editing service answers, which SHALL count as acceptance. A license from
-a file SHALL never be replaced by it.
+end later, and no later than yesterday once that trial expired. The daily background re-read SHALL apply this,
+accepted or not; so SHALL completing the setup wizard while that trial is active, which counts as acceptance. A license
+from a file SHALL never be replaced by it.
 
 #### Scenario: Wizard completed on the editing service's trial
 
@@ -19,7 +19,7 @@ a file SHALL never be replaced by it.
 #### Scenario: Installation trial already ended
 
 - **WHEN** `completeWizard` is called on such an installation whose own trial ended before today, for example after the editing service was reinstalled with a fresh trial
-- **THEN** the call fails as without the editing service's trial, and the wizard stays open until a license file is given
+- **THEN** nothing is written, the call fails as without the editing service's trial, and the wizard stays open until a license file is given
 
 #### Scenario: Editing service silent at completion
 
@@ -33,8 +33,13 @@ a file SHALL never be replaced by it.
 
 #### Scenario: Before the first re-read
 
-- **WHEN** an Enterprise installation without a license file runs its own trial, the wizard was not completed while the editing service answered, and the daily background re-read has not run yet
+- **WHEN** an Enterprise installation without a license file runs its own trial, the wizard was not completed during an active trial of the editing service, and the daily background re-read has not run yet
 - **THEN** `getPortalTariff` reports the installation's own trial end, which may be later than the editing service's
+
+#### Scenario: No license file, before acceptance
+
+- **WHEN** the periodic re-read runs on an Enterprise installation without a license file, before the wizard is completed, and the editing service reports a trial ending before the installation's trial
+- **THEN** `getPortalTariff` reports the editing service's trial end day as `dueDate`
 
 #### Scenario: Editing service trial ends later
 
@@ -128,31 +133,3 @@ same with a license file.
 
 - **WHEN** the editing service reports a different customer id or an error for the license
 - **THEN** the answer is 200 "License key is not correct" and the previous license file is back in place
-
-### Requirement: Refreshing the license
-
-`refreshLicense` SHALL answer 200 false on an installation that is not Enterprise or Developer and otherwise re-read
-the license file and rewrite the quota and tariff from it, answering true; a missing or unreadable file or an
-editing-service refusal SHALL answer 402, a start date in the future 400. After acceptance a background re-read of the
-license in force SHALL run daily by default, so a replaced file takes effect without a call; it SHALL NOT apply an
-uploaded license.
-
-#### Scenario: Open-source installation
-
-- **WHEN** `refreshLicense` is called on an installation without a license path
-- **THEN** the system answers 200 false
-
-#### Scenario: File replaced on disk
-
-- **WHEN** the license file is replaced by one with a later end date and the periodic re-read runs
-- **THEN** `getPortalTariff` reports the new `dueDate`
-
-#### Scenario: Uploaded license not accepted
-
-- **WHEN** a license was uploaded with `uploadLicense` and not accepted, and the periodic re-read runs
-- **THEN** the uploaded license stays staged and does not change the tariff; only `acceptLicense` or `refreshLicense` puts it in force
-
-#### Scenario: No license file, before acceptance
-
-- **WHEN** the periodic re-read runs on an Enterprise installation without a license file, before the wizard is completed, and the editing service reports a trial ending before the installation's trial
-- **THEN** `getPortalTariff` reports the editing service's trial end day as `dueDate`

@@ -1068,9 +1068,9 @@ public class TariffService(
 
             await ClearCacheAsync(tenant);
 
-            await NotifyWebSocketAsync(currentTariff, tariffInfo);
+            await NotifyTariffChangedAsync(tenant, tariffInfo);
 
-            await NotifyTariffChangedAsync(tenant);
+            await NotifyWebSocketAsync(currentTariff, tariffInfo);
         }
 
         return inserted;
@@ -1152,6 +1152,8 @@ public class TariffService(
 
             await ClearCacheAsync(tenant);
 
+            await NotifyTariffChangedAsync(tenant, tariffInfo);
+
             await NotifyWebSocketAsync(currentTariff, tariffInfo);
 
             return true;
@@ -1170,6 +1172,8 @@ public class TariffService(
         await coreDbContext.DeleteTariffs(tenant);
 
         await ClearCacheAsync(tenant);
+
+        await NotifyTariffChangedAsync(tenant, null);
     }
 
 
@@ -1364,33 +1368,69 @@ public class TariffService(
     /// <summary>
     /// Tells the open clients that the tariff changed, so a payment page or a trial banner reads it again. The tariff
     /// of the default tenant is the one tariff of a self-hosted installation, shared by all its portals, so each of them
-    /// is told. Best effort: the tariff is already written, and a failure here is only logged.
+    /// is told. Best effort: the tariff is already written, and a failure here is only logged; a portal that cannot be
+    /// told does not keep the others from being told.
     /// </summary>
-    private async Task NotifyTariffChangedAsync(int tenant)
+    /// <param name="tenant">The tenant whose tariff was written.</param>
+    /// <param name="tariff">The tariff as it is stored now; <c>null</c> when it was deleted.</param>
+    private async Task NotifyTariffChangedAsync(int tenant, Tariff tariff)
     {
+        QuotaSocketManager quotaSocketManager;
+        TariffState state;
+        List<int> portals;
+
         try
         {
-            var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+            quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+
+            // The state only picks the queue of the socket service. It is calculated on a copy, which leaves the
+            // caller's tariff as it is, and the tariff is not read: the write may run under the lock of the tariff
+            // read, which a read here would wait on. A deleted tariff has no state until the next read creates one,
+            // so the state of the default tariff is used
+            state = tariff == null ? TariffState.Paid : (await CalculateTariffAsync(tenant, CopyForState(tariff))).State;
 
             if (tenant != Tenant.DefaultTenant)
             {
-                await quotaSocketManager.ChangeTariffAsync(tenant);
-                return;
+                portals = [tenant];
             }
-
-            if (!coreBaseSettings.Standalone)
+            else if (coreBaseSettings.Standalone)
+            {
+                portals = (await tenantService.GetTenantsAsync(default(DateTime))).Select(t => t.Id).ToList();
+            }
+            else
             {
                 return;
-            }
-
-            foreach (var portal in await tenantService.GetTenantsAsync(default(DateTime)))
-            {
-                await quotaSocketManager.ChangeTariffAsync(portal.Id);
             }
         }
         catch (Exception ex)
         {
             logger.WarningTariffChangedNotification(tenant, ex);
+            return;
+        }
+
+        foreach (var portal in portals)
+        {
+            try
+            {
+                await quotaSocketManager.ChangeTariffAsync(portal, state);
+            }
+            catch (Exception ex)
+            {
+                logger.WarningTariffChangedNotification(portal, ex);
+            }
+        }
+
+        static Tariff CopyForState(Tariff tariff)
+        {
+            return new Tariff
+            {
+                Id = tariff.Id,
+                DueDate = tariff.DueDate,
+                DelayDueDate = tariff.DelayDueDate,
+                LicenseDate = tariff.LicenseDate,
+                CustomerId = tariff.CustomerId,
+                Quotas = [.. tariff.Quotas]
+            };
         }
     }
 

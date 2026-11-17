@@ -109,4 +109,7 @@ global using DocsTrialCheck = ASC.Files.Core.Helpers.DocsTrialCheck;
 global using DocsTrialState = ASC.Files.Core.Helpers.DocsTrialState;
 global using DocumentService = ASC.Files.Core.Helpers.DocumentService;
 global using DocumentServiceLicense = ASC.Files.Core.Helpers.DocumentServiceLicense;
+global using MachinePseudoKeys = ASC.Security.Cryptography.MachinePseudoKeys;
 global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;
+global using QuotaSocketManager = ASC.Core.Common.Quota.QuotaSocketManager;
+global using SocketData = ASC.Core.Notify.Socket.SocketData;

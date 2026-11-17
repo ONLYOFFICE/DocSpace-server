@@ -27,8 +27,9 @@ See proposal.md - Why. The design relies on these existing requirements:
 
 - Carrying a paid license of the editing service over without a file: only its trial is followed.
 - A new audit event for a wizard completed on the trial.
-- Changing the client: it already hides the upload step when `getIsLicenseRequired` is false and shows the trial
-  banner from the tariff.
+- Changing the client for the trial itself: it already hides the upload step when `getIsLicenseRequired` is false
+  and shows the trial banner from the tariff when a page loads. A page that is already open reads a changed tariff
+  only after the frontend subscribes to `s:change-tariff`, which is left to the frontend.
 
 ## Decisions
 
@@ -49,20 +50,28 @@ See proposal.md - Why. The design relies on these existing requirements:
   ended. The anonymous question uses the last answer of the past 2 days, or answers true with none.
 - **A trial that would already be over is no trial.** The wizard and the anonymous question take the editing
   service's trial only when the end it leads to (the earlier of the installation's end and the editing service's)
-  is today or later; otherwise a file is required, as before the change. The re-read still writes that end.
+  is today or later; otherwise a file is required, as before the change, and the wizard writes nothing. The re-read
+  still writes that end.
 - **The answer lives in the distributed cache with fail-safe.** It is one value per installation: the background
-  re-read in the worker refreshes it, the API nodes read it. The default `IFusionCache` (memory, Redis and the
-  backplane) shares it with every node and keeps it over a restart; the `"memory"` cache would keep it in one
-  process. An answer is reused for 15 minutes, the last one kept for 2 days (longer than the daily re-read) while
-  the editing service fails, and asked again once a minute; the license command keeps its own 5-second limit. A
-  fresh question with a known answer replaces the cached value for every node; an unknown one leaves it alone.
+  re-read in the worker refreshes it, the API nodes read it. With Redis, the default `IFusionCache` (memory, Redis
+  and the backplane) shares it with every node and keeps it over a restart; the `"memory"` cache would keep it in
+  one process. An answer is reused for 15 minutes, the last one kept for 2 days while the editing service fails, and
+  asked again once a minute; the license command keeps its own 5-second limit. The period of the re-read is bounded
+  by those 2 days (a minute to 2 days, one day by default), so the last answer outlives it. The readers of one
+  process wait for the one request in flight as long as it may run (10 seconds), not the 5-second lock default of
+  the cache, so a silent service gets one request per process at a time. A fresh question with a known answer
+  replaces the cached value for every node; an unknown one leaves it alone, and so does a failure of a reader with
+  no answer to fall back on when another process has stored one meanwhile.
   Alternative: no cache. Rejected: an anonymous endpoint would send one request to the editing service per call.
   Alternative: a setting in the database. Rejected for now: the cache with a 2-day fail-safe covers the restart,
   and a lost answer only makes the wizard fall back to the installation's own trial.
-- **A tariff write tells the open clients.** A write that changed the tariff sends `s:change-tariff` to the quota
-  room of the portal, or of every active portal for the shared tariff of tenant -1, so the trial banner and the
-  payment page read the new end. A failed send is logged and does not fail the write. A tariff that becomes not
-  paid only because its day passed is not a write and sends nothing.
+- **A tariff write tells the open clients.** Every write of the tariff (a saved change, a scheduled quantity, a
+  deleted tariff) sends `s:change-tariff` to the quota room of the portal, or of every active portal for the shared
+  tariff of tenant -1, so the trial banner and the payment page read the new end. The event never reads the tariff:
+  a write may run inside the read of the tariff, under its lock, and a read there would wait on that lock. It takes
+  the state of the tariff just written, calculated on a copy, which only picks the queue of the socket service. A
+  failed send is logged and does not fail the write, and a portal that cannot be told does not keep the others from
+  being told. A tariff that becomes not paid only because its day passed is not a write and sends nothing.
 - **One lock for the license writers.** The trial write and the license-file write take the same distributed lock,
   and the trial checks the license file and the license quota under it.
 - **Completing the wizard counts as acceptance.** The user agrees to the license terms in the wizard, so a license
@@ -79,10 +88,12 @@ See proposal.md - Why. The design relies on these existing requirements:
 - [The editing service's answer can be up to 15 minutes old after a change there] → A fresh question by the wizard
   or the re-read replaces it for every node; while the editing service fails, its last answer of the past 2 days is
   used.
-- [Until the wizard is completed while the editing service answers, or the first re-read runs, the installation's
-  trial keeps its 30-day end, later than the editing service's] → Accepted: the next daily re-read brings it closer.
+- [Until the wizard is completed during the editing service's active trial, or the first re-read runs, the
+  installation's trial keeps its 30-day end, later than the editing service's] → Accepted: the next daily re-read
+  brings it closer.
 - [Without Redis there is no shared cache] → Each process then keeps its own copy, as the rest of the server's
-  caches do; the re-read and the wizard still ask the editing service themselves.
+  caches do: the answer of the worker does not reach the API, and a restart loses the last answer. The re-read and
+  the wizard still ask the editing service themselves.
 - [A trial write that started before an accept finishes after it] → The shared lock orders them; the accept always
   ends with the license in force.
 

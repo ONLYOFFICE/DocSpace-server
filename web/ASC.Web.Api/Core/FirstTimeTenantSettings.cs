@@ -212,11 +212,11 @@ public class FirstTimeTenantSettings(
 
         // The wizard skips the license upload only after it was told the editing service runs its trial, so an
         // editing service that cannot be asked now is not read as "no trial", which would ask for a file the wizard
-        // never offered. The installation keeps its own 30-day trial, created on the first read of the tariff; the
-        // background refresh brings its end closer once the editing service answers. A file is still required when no
-        // trial of the installation is in force (a license from a file, or no license quota at all), or when the last
-        // answer this node knows said the editing service runs no trial or its trial has ended: then the wizard asked
-        // for a file, and the silence changes nothing.
+        // never offered. The installation keeps its own trial (created on the first read of the tariff) with its
+        // current end; the background refresh brings that end closer once the editing service answers. A file is
+        // still required when no trial of the installation is in force (a license from a file, no license quota at
+        // all, or a trial that has ended), or when the last answer the installation knows said the editing service
+        // runs no trial or its trial has ended: then the wizard asked for a file, and the silence changes nothing.
         if (docsTrial.State == DocsTrialState.Unknown)
         {
             await tenantExtra.GetCurrentTariffAsync();
@@ -236,7 +236,9 @@ public class FirstTimeTenantSettings(
             return true;
         }
 
-        if (docsTrial.State != DocsTrialState.Active)
+        // A trial that would already be over is not taken, and nothing is written for it: the call then fails as it did
+        // before the editing service's trial was followed. The write checks again under the lock of the license writers
+        if (docsTrial.State != DocsTrialState.Active || !await licenseReader.WillDocsTrialBeInForceAsync(docsTrial.Trial))
         {
             return false;
         }

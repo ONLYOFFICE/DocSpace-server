@@ -153,6 +153,57 @@ public sealed class DocsTrialCacheTests : IDisposable
     }
 
     [Fact]
+    public async Task GetAsync_TwoReadersWhileTheServiceIsSlow_AskItOnce()
+    {
+        // Anonymous callers of the wizard page arrive together; while the editing service is slow, the second must
+        // wait for the first answer rather than send a request of its own once the cache's lock timeout passes. The
+        // lock timeout of the services (5 seconds) is shortened here; the service takes longer than it.
+        var trialCache = new DocsTrialCache(CreateProcessCache(lockTimeout: TimeSpan.FromMilliseconds(100)), NullLogger<DocumentServiceLicense>.Instance, DocsTrialCacheOptions.Default);
+
+        var answers = await Task.WhenAll(
+            trialCache.GetAsync(SlowRequestAsync, useCache: true),
+            trialCache.GetAsync(SlowRequestAsync, useCache: true));
+
+        answers.Should().AllBeEquivalentTo(_active);
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetAsync_FailsWhileAnotherProcessStoresAnAnswer_KeepsThatAnswer()
+    {
+        // The background refresh of another process stores a known answer while this process asks and gets none: the
+        // failure must not replace that answer, which the wizard falls back on when the editing service is silent.
+        var otherProcess = new DocsTrialCache(CreateProcessCache(), NullLogger<DocumentServiceLicense>.Instance, DocsTrialCacheOptions.Default);
+        var trialCache = CreateCache(DocsTrialCacheOptions.Default);
+
+        var answer = await trialCache.GetAsync(async () =>
+        {
+            await otherProcess.GetAsync(() => Task.FromResult(_active), useCache: false);
+            return DocsTrialCheck.Unknown;
+        }, useCache: true);
+
+        answer.Should().Be(_active);
+        (await trialCache.GetLastKnownAsync()).Should().Be(_active);
+    }
+
+    [Theory]
+    [InlineData(null, "1.00:00:00")]
+    [InlineData("12:00:00", "12:00:00")]
+    [InlineData("00:00:10", "00:01:00")]
+    [InlineData("3.00:00:00", "2.00:00:00")]
+    public void ReadRefreshPeriod_Configured_StaysWithinTheLastAnswerKept(string? configured, string expected)
+    {
+        // A refresh period longer than the fail-safe would leave the installation without a last answer known
+        // between two refreshes.
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { [DocsTrialCacheOptions.RefreshPeriodKey] = configured })
+            .Build();
+
+        DocsTrialCacheOptions.ReadRefreshPeriod(configuration, NullLogger.Instance)
+            .Should().Be(TimeSpan.Parse(expected, CultureInfo.InvariantCulture));
+    }
+
+    [Fact]
     public async Task GetLastKnownAsync_NothingAsked_IsNull()
     {
         (await CreateCache(DocsTrialCacheOptions.Default).GetLastKnownAsync()).Should().BeNull();
@@ -190,9 +241,23 @@ public sealed class DocsTrialCacheTests : IDisposable
         (await trialCache.GetLastKnownAsync()).Should().BeNull();
     }
 
-    private FusionCache CreateProcessCache()
+    /// <summary>
+    /// A FusionCache with the default entry options the services register (common/ASC.Api.Core
+    /// ServiceCollectionExtension: a 5-second lock timeout and factory hard timeout) over the shared distributed cache.
+    /// </summary>
+    /// <param name="lockTimeout">Replaces the 5-second lock timeout, so a test of it does not wait that long.</param>
+    private FusionCache CreateProcessCache(TimeSpan? lockTimeout = null)
     {
-        var cache = new FusionCache(new FusionCacheOptions());
+        var cache = new FusionCache(new FusionCacheOptions
+        {
+            DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
+            DefaultEntryOptions = new FusionCacheEntryOptions
+            {
+                Duration = TimeSpan.MaxValue,
+                LockTimeout = lockTimeout ?? TimeSpan.FromSeconds(5),
+                FactoryHardTimeout = TimeSpan.FromSeconds(5)
+            }
+        });
         cache.SetupDistributedCache(_distributedCache, new FusionCacheSystemTextJsonSerializer());
         _caches.Add(cache);
 
@@ -208,5 +273,14 @@ public sealed class DocsTrialCacheTests : IDisposable
     {
         _requests++;
         return Task.FromResult(_answers.Dequeue());
+    }
+
+    /// <summary>An editing service that answers an active trial after half a second.</summary>
+    private async Task<DocsTrialCheck> SlowRequestAsync()
+    {
+        Interlocked.Increment(ref _requests);
+        await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
+
+        return _active;
     }
 }

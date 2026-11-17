@@ -802,11 +802,13 @@ public partial class SettingsController(
     /// Completes the first setup of the portal. It sets the email and password of the portal owner, the language, and
     /// the time zone. It also applies the license if the installation needs one. An Enterprise installation may have no
     /// license file while its editing service runs a trial. Then the call puts the portal's trial in force instead.
-    /// That trial ends by the day the editing service's trial ends. The license then counts as accepted. A license file
-    /// activated later replaces the trial. If the editing service does not answer at that moment, the portal keeps its
-    /// own trial and its end. A license file is still required if the portal's own trial is not in force or already
-    /// ended. It is also required if the editing service last said it has no trial, or that its trial ended. Without a
-    /// required file, the call fails and does not complete the wizard. Sign the request with the confirmation token
+    /// That trial ends by the day the editing service's trial ends. The license then counts as accepted. If the
+    /// portal's own trial already ended, a license file is still required. A license file activated later replaces the
+    /// trial.
+    /// If the editing service does not answer at that moment, the portal keeps its own trial and its end. Then a
+    /// license file is still required if that trial is not in force or already ended. It is also required if the
+    /// editing service last said it has no trial, or that its trial ended. Without a required file, the call fails and
+    /// does not complete the wizard. Sign the request with the confirmation token
     /// of the setup wizard, whose account also needs the EditPortalSettings permission. Other callers get 403. Take the
     /// token from `wizardToken` of `GET api/2.0/settings` before setup is complete. The call changes data. Do
     /// not repeat it. If the email changes, the owner must confirm the new address. It returns the wizard settings with

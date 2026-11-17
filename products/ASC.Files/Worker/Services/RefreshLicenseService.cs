@@ -53,7 +53,7 @@ public class RefreshLicenseService(
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = scopeFactory;
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:refreshLicense:period"] ?? "1", CultureInfo.InvariantCulture);
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = DocsTrialCacheOptions.ReadRefreshPeriod(configuration, logger);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {

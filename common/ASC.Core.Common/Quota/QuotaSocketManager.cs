@@ -81,9 +81,14 @@ public class QuotaSocketManager(
     /// Tells the clients of a portal that its tariff changed (its end, its quotas), so they read it again. The event
     /// carries no data. The tenant is passed explicitly, because a background job that writes the tariff has none.
     /// </summary>
-    public async Task ChangeTariffAsync(int tenantId)
+    /// <param name="tenantId">The portal whose clients are told.</param>
+    /// <param name="tariffState">
+    /// The state of the tariff just written. The tariff is not read here: the caller writes it, possibly under the lock
+    /// of the tariff read.
+    /// </param>
+    public async Task ChangeTariffAsync(int tenantId, TariffState tariffState)
     {
-        await MakeRequest("change-tariff", new { room = $"{tenantId}-quota" }, tenantId);
+        await MakeRequest("change-tariff", new { room = $"{tenantId}-quota" }, tariffState);
     }
 
     public async Task TopUpWallet(bool auto)

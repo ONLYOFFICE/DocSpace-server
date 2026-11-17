@@ -42,7 +42,8 @@ namespace ASC.Core.Common.Tests;
 /// put in force within a period without the user accepting it. It now calls
 /// <see cref="LicenseReader.RefreshActiveLicenseAsync"/>, which never touches the staged file.
 /// The validation callback refuses every license, so the reader stops before the database and needs none of its
-/// database dependencies; the callback records which license it was given.
+/// database dependencies; the callback records which license it was given. The tests of the installation's own trial
+/// read the stored quotas and tariff from stubs instead (<see cref="StubProxy{T}"/>), which fail on a write.
 /// </remarks>
 public sealed class LicenseReaderTests : IDisposable
 {
@@ -183,19 +184,87 @@ public sealed class LicenseReaderTests : IDisposable
             .Should().Be(expected);
     }
 
+    [Fact]
+    public async Task IsOwnTrialInForceAsync_OwnTrialEndedYesterday_IsFalse()
+    {
+        // The wizard falls back on the installation's own trial when the editing service is silent; one that ended
+        // must ask for a license file instead.
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-1));
+
+        (await reader.IsOwnTrialInForceAsync()).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task IsOwnTrialInForceAsync_OwnTrialEndsToday_IsTrue()
+    {
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date);
+
+        (await reader.IsOwnTrialInForceAsync()).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task WillDocsTrialBeInForceAsync_OwnTrialEndedYesterday_IsFalse()
+    {
+        // What the wizard page and the wizard ask before they skip the license file: a fresh trial of the editing
+        // service does not revive the installation's ended trial.
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-1));
+
+        (await reader.WillDocsTrialBeInForceAsync(new DocsTrialLicense(DateTime.UtcNow.Date.AddDays(20)))).Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task DocsTrialToDBAsync_OwnTrialEndedYesterday_IsNotInForceAndWritesNothing()
+    {
+        // The end stays yesterday, so nothing is written (the stub fails a tariff write) and the trial is not in force.
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-1));
+
+        (await reader.DocsTrialToDBAsync(new DocsTrialLicense(DateTime.UtcNow.Date.AddDays(20)))).Should().BeFalse();
+    }
+
     private LicenseReader CreateReader()
     {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> { ["license:file:path"] = _licensePath })
-            .Build();
-
         return new LicenseReader(
             tenantManager: null!,
             tariffService: null!,
             coreSettings: null!,
-            licenseReaderConfig: new LicenseReaderConfig(configuration),
+            licenseReaderConfig: new LicenseReaderConfig(CreateConfiguration()),
             distributedLockProvider: new InMemoryLockProvider(),
             logger: NullLogger<LicenseReader>.Instance);
+    }
+
+    /// <summary>
+    /// A reader of an installation without a license file that runs its own trial ending on
+    /// <paramref name="trialDueDate"/>. The stored quotas and tariff are stubs that answer only the reads; a write of
+    /// the tariff fails the test.
+    /// </summary>
+    private LicenseReader CreateReaderOnOwnTrial(DateTime trialDueDate)
+    {
+        var quota = new TenantQuota(LicenseReader.LicenseQuotaId) { Name = LicenseReader.StartTrialQuotaName, Trial = true };
+        var tariff = new Tariff { Quotas = [new ASC.Core.Billing.Quota(LicenseReader.LicenseQuotaId, 1)], DueDate = trialDueDate, CustomerId = "" };
+
+        var quotaService = StubProxy<IQuotaService>.Create(new()
+        {
+            [nameof(IQuotaService.GetTenantQuotasAsync)] = _ => Task.FromResult<IEnumerable<TenantQuota>>([quota])
+        });
+        var tariffService = StubProxy<ITariffService>.Create(new()
+        {
+            [nameof(ITariffService.GetBillingInfoAsync)] = _ => Task.FromResult(tariff)
+        });
+
+        return new LicenseReader(
+            tenantManager: new TenantManager(null!, quotaService, null!, tariffService, null!, null!, new InMemoryLockProvider()),
+            tariffService: tariffService,
+            coreSettings: null!,
+            licenseReaderConfig: new LicenseReaderConfig(CreateConfiguration()),
+            distributedLockProvider: new InMemoryLockProvider(),
+            logger: NullLogger<LicenseReader>.Instance);
+    }
+
+    private IConfiguration CreateConfiguration()
+    {
+        return new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { ["license:file:path"] = _licensePath })
+            .Build();
     }
 
     private Task<LicenseValidationResult> FailAsync(License license)

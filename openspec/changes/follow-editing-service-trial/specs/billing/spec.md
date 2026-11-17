@@ -22,10 +22,10 @@ answer 403 "Tariff service is not configured" there.
 
 #### Scenario: Enterprise installation next to an editing service on trial
 
-- **WHEN** the owner reads `getPortalTariff` on an Enterprise installation without a licence file whose editing service reports a trial ending on day D, earlier than 30 days after the first read, once the wizard is completed while the editing service answered or the daily re-read has run
+- **WHEN** the owner reads `getPortalTariff` on an Enterprise installation without a licence file whose editing service reports a trial ending on day D, earlier than 30 days after the first read, once the wizard was completed during the editing service's active trial or the daily re-read has run
 - **THEN** `dueDate` is day D
 
 #### Scenario: Enterprise installation before the editing service is read
 
-- **WHEN** the owner reads `getPortalTariff` on such an installation before the wizard was completed while the editing service answered and before the daily re-read
+- **WHEN** the owner reads `getPortalTariff` on such an installation before the wizard was completed during the editing service's active trial and before the daily re-read
 - **THEN** `dueDate` is still 30 days after the first read

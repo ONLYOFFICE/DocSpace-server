@@ -221,11 +221,12 @@ public class LicenseController(
     /// portal's trial ends by the day the editing service's trial ends. If the portal's own trial already ended, the
     /// call still returns `true`. The call asks the editing service only about its trial, not about the active license.
     /// It reuses the answer of the editing service for up to 15 minutes. While the service does not answer, the call
-    /// uses its last answer for up to 2 days. With no answer known yet, a silent service counts as no trial. It returns `false` on a SaaS or open-source installation, which needs no license. It
-    /// also returns `false` if the portal lets anyone in without an account, or hides the pricing section. The same
-    /// applies to an installation set up from cloud image metadata. So `false` does not mean that the portal has a
-    /// license. For a license file, the answer becomes `false` only after the staged file is activated, not after the
-    /// upload. To activate it, use `POST api/2.0/settings/license/accept`. The call works while the portal is unpaid.
+    /// uses its last answer for up to 2 days. With no answer known yet, a silent service counts as no trial. It returns
+    /// `false` on a SaaS or open-source installation, which needs no license. It also returns `false` if the portal lets
+    /// anyone in without an account, or hides the pricing section. The same applies to an installation set up from
+    /// cloud image metadata. So `false` does not mean that the portal has a license. For a license file, the answer
+    /// becomes `false` only after the staged file is activated, not after the upload. To activate it, use
+    /// `POST api/2.0/settings/license/accept`. The call works while the portal is unpaid.
     /// </remarks>
     /// <summary>Check if a license is required</summary>
     /// <path>api/2.0/settings/license/required</path>

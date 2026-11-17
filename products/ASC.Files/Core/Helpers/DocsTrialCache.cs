@@ -38,23 +38,39 @@ namespace ASC.Files.Core.Helpers;
 /// </summary>
 /// <param name="Duration">How long an answer is reused.</param>
 /// <param name="FailSafeMaxDuration">
-/// How long the last answer known stays in use while the service fails. Longer than the period of the background
-/// refresh, which asks the service once a day, so a known answer is always there.
+/// How long the last answer known stays in use while the service fails. At least the period of the background refresh
+/// (<see cref="ReadRefreshPeriod"/> keeps the period within it), so a known answer is always there.
 /// </param>
 /// <param name="FailureDuration">
 /// How long a failure is kept: the pause before the service is asked again while the last answer known is in use, and
 /// how long an unknown answer is reused when no answer is known.
 /// </param>
 /// <param name="HardTimeout">
-/// How long a cached reader waits; the license command itself gives up after 5 seconds, so this only bounds the rest.
+/// How long a cached reader waits, and how long the other readers of the same process wait for it rather than ask the
+/// service themselves; the license command itself gives up after 5 seconds, so this only bounds the rest.
 /// </param>
 public record DocsTrialCacheOptions(TimeSpan Duration, TimeSpan FailSafeMaxDuration, TimeSpan FailureDuration, TimeSpan HardTimeout)
 {
+    /// <summary>
+    /// The configuration key of the period of the background refresh that asks the editing service again.
+    /// </summary>
+    public const string RefreshPeriodKey = "files:refreshLicense:period";
+
     public static readonly DocsTrialCacheOptions Default = new(
         TimeSpan.FromMinutes(15),
         TimeSpan.FromDays(2),
         TimeSpan.FromMinutes(1),
         TimeSpan.FromSeconds(10));
+
+    /// <summary>
+    /// Reads the period of the background refresh, <c>d.hh:mm:ss</c>: one day (<c>"1.00:00:00"</c>) by default, at
+    /// least a minute, so the loop does not run hot, and at most <see cref="FailSafeMaxDuration"/> of
+    /// <see cref="Default"/>, so the last answer known outlives the period and is there between two refreshes.
+    /// </summary>
+    public static TimeSpan ReadRefreshPeriod(IConfiguration configuration, ILogger logger)
+    {
+        return configuration.ReadInterval(RefreshPeriodKey, TimeSpan.FromDays(1), TimeSpan.FromMinutes(1), Default.FailSafeMaxDuration, logger);
+    }
 }
 
 /// <summary>
@@ -63,9 +79,11 @@ public record DocsTrialCacheOptions(TimeSpan Duration, TimeSpan FailSafeMaxDurat
 /// background job of another process.
 /// </summary>
 /// <remarks>
-/// A reader gets one request to the editing service at a time per process. While the service fails, the last answer
-/// known stays in use for <see cref="DocsTrialCacheOptions.FailSafeMaxDuration"/> and the service is asked again after
-/// <see cref="DocsTrialCacheOptions.FailureDuration"/>; with none known, the failure itself is kept for that long. A
+/// A reader gets one request to the editing service at a time per process: the others wait for it up to
+/// <see cref="DocsTrialCacheOptions.HardTimeout"/>. While the service fails, the last answer known stays in use for
+/// <see cref="DocsTrialCacheOptions.FailSafeMaxDuration"/> and the service is asked again after
+/// <see cref="DocsTrialCacheOptions.FailureDuration"/>; with none known, the failure itself is kept for that long,
+/// unless another process stored a known answer meanwhile. A
 /// fresh question with a known answer replaces the cached one for every process; a fresh question with an unknown
 /// answer leaves the cache alone, so a failure seen by the setup wizard or the background refresh never removes the
 /// last answer known. The answer survives a restart of the processes as long as the distributed cache keeps it; with no
@@ -106,13 +124,30 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
                 return check.State == DocsTrialState.Unknown
                     ? throw new InvalidOperationException("The editing service did not say whether it runs its trial")
                     : check;
-            }, entry => SetupEntry(entry).SetFactoryTimeouts(hardTimeout: options.HardTimeout));
+            }, entry =>
+            {
+                SetupEntry(entry).SetFactoryTimeouts(hardTimeout: options.HardTimeout);
+
+                // The default of the distributed cache lets a waiting reader run the factory itself after 5 seconds,
+                // which would send one more request to an editing service that already does not answer
+                entry.LockTimeout = options.HardTimeout;
+            });
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            // No answer known to fall back on. The cause is logged where the service was asked; a request cut by the
-            // hard timeout goes on in the background and replaces this answer when it ends
+            // No answer known to fall back on when the question was asked. The cause is logged where the service was
+            // asked; a request cut by the hard timeout goes on in the background and replaces this answer when it ends
             logger.DebugDocsTrialNoAnswerKnown(ex.Message);
+
+            // Another process (the background refresh) may have stored a known answer in the meantime: the failure of
+            // this one must not replace it. A known answer stored between this read and the write below is still
+            // replaced for the failure duration; the next fresh question stores it again
+            var known = await GetLastKnownAsync();
+            if (known != null)
+            {
+                return known;
+            }
+
             await cache.SetAsync(GetCacheKey(), DocsTrialCheck.Unknown, options.FailureDuration);
 
             return DocsTrialCheck.Unknown;
