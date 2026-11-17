@@ -61,7 +61,7 @@ answers 200 (bugs 82544, 82545, 82546, 82551, 82552, 82553, 82554, 82800, 82802,
 | Settings refused, off and rename allowed, template fails | T/PrivateRoomSettingsTests.cs:51-143 | TEST-CONFIRMED [run: PASS] |
 | Inviting needs a key; guest always refused | T/PrivacyRoomIntegrationTests.cs:137-165; T/RoomAccessKeysPermissionsTests.cs:172-186; T/PrivacyRoomTest.cs:179-221 | TEST-CONFIRMED [run: PASS] |
 | No links | T/PrivateRoomContentBoundaryTests.cs:90-137 | TEST-CONFIRMED [run: PASS] |
-| Revoking an existing link stays possible: a revocation (`access: None`) passes the private-room check, invitation and external (run 2026-11-11) | T/PrivateRoomContentBoundaryTests.cs:139-175; Sharing hunk of bd89a24dcd (`Access != None`) | TEST-CONFIRMED [run: PASS]; revoking a link that really exists stays CODE-ONLY: the tests name an unknown id (an external one goes through and leaves no link) |
+| Revoking an existing link stays possible: a revocation (`access: None`) passes the private-room check, invitation and external (run 2026-11-11) | T/PrivateRoomContentBoundaryTests.cs:139-175; Sharing hunk of bd89a24dcd (`Access != None`) | TEST-CONFIRMED [run: PASS]; on a room a revocation names an unknown id; revoking an existing link of a file or a folder of a private room is tested by T/ExternalLinks/PrivateItemSharingGuardTests.cs (change private-rooms-external-links, 2026-11-17) |
 | No duplicate, no template, `security` flags | T/PrivateRoomContentBoundaryTests.cs:177-212 | TEST-CONFIRMED [run: PASS] |
 | Copy across the border 403 | T/PrivacyRoomTest.cs:225-277 | TEST-CONFIRMED [run: PASS] |
 | Move across the border and inside | T/PrivateRoomContentBoundaryTests.cs:215-248 | TEST-CONFIRMED [run: PASS] |

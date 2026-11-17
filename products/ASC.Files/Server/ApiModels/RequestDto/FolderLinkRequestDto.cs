@@ -86,8 +86,7 @@ public class FolderLinkRequest
 
     /// <summary>
     /// For an item of a private room: the private key of the link, sealed by the creator's browser under the secret that
-    /// stays after `#` in the link's address, and with the password when the link has one. The server keeps it as it is
-    /// and hands it only to a visitor who proves the secret.
+    /// stays after `#` in the link's address, and with the password when the link has one.
     /// </summary>
     /// <example>AgEAAAAgAAAAyQ0bP8m1rKx3Zt2pS0mQx0J6r8u3aT1oV1cE9lK4n2w=</example>
     [StringLength(4096)]
@@ -102,8 +101,7 @@ public class FolderLinkRequest
 
     /// <summary>
     /// For an item of a private room: whether a visitor has to type a password, which never reaches the server. `false`
-    /// is allowed only for a link to one file with an expiration date. Left out, a new link asks for a password and a
-    /// changed one keeps what it had. An ordinary link uses `password` instead.
+    /// is allowed only for a link to one file with an expiration date. An ordinary link uses `password` instead.
     /// </summary>
     /// <example>true</example>
     public bool? PasswordRequired { get; set; }

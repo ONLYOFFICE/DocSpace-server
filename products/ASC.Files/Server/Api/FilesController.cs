@@ -849,18 +849,21 @@ public abstract class FilesController<T>(
     /// its rights, lifetime, password, download restriction, and sign-in requirement. In a personal section, a link
     /// without `expirationDate` never expires. A new link to a PDF allows filling, except in a public room, where it is
     /// read-only. For a form in a form-filling room, the call returns the link of the room. Requires the right to share
-    /// the file. Other callers get 403. The call changes data only when it creates the link. You can repeat it. Later
-    /// calls return the existing link and ignore the body. If the primary link was revoked, the call creates a new one
-    /// with a new ID. Until then, `GET api/2.0/files/file/{id}/link` returns 404. The call returns 403 if links to this
-    /// file cannot have this access level, or the link limit is reached. It also returns 403 if the portal allows
-    /// external links only in public rooms. It returns 400 if the password does not meet the password policy or
-    /// `expirationDate` is over 10 years ahead. If no file has this id, the call returns 404. The address is in
-    /// `sharedTo.shareLink`. To change the link, use `PUT api/2.0/files/file/{id}/links`.
-    /// On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a
-    /// link reads only and takes `passwordRequired` instead of `password`. Only a file link with `expirationDate` may
-    /// set `passwordRequired` to false. Only the room owner and room managers set such links. The call returns 403 for
-    /// such a link without key fields, with other access, or with `denyDownload`. It returns 400 if a key field has the
-    /// wrong size, or `password` is sent.
+    /// the file, except in a private room. Other callers get 403. The call changes data only when it creates the link.
+    /// You can repeat it. Later calls return the existing link and ignore the body. If the primary link was revoked,
+    /// the call creates a new one with a new ID. Until then, `GET api/2.0/files/file/{id}/link` returns 404. The call
+    /// returns 403 if links to this file cannot have this access level, or the link limit is reached. It also returns
+    /// 403 if the portal allows external links only in public rooms. It returns 400 if the password does not meet the
+    /// password policy or `expirationDate` is over 10 years ahead. If no file has this id, the call returns 404. The
+    /// address is in `sharedTo.shareLink`. To change the link, use `PUT api/2.0/files/file/{id}/links`. On an item of a
+    /// private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and
+    /// takes `passwordRequired` instead of `password`. A new link without `passwordRequired` asks for a password. Only
+    /// a file link with `expirationDate` may set `passwordRequired` to false. On other items, the call ignores
+    /// `passwordRequired` and the key fields. In a private room, only the room owner and room managers create links.
+    /// Other callers get 403. The call also returns 403 for such a link without key fields, with other access, or with
+    /// `denyDownload`. It also returns 403 if `passwordRequired` is false on any other link. It returns 400 if
+    /// `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc` is
+    /// empty or too long, or `password` is sent.
     /// </remarks>
     /// <summary>
     /// Create the file primary external link
@@ -868,8 +871,8 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item has the wrong size, or such a link carries `password`")]
-    [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, or such a link carries `password`")]
+    [SwaggerResponse(403, "The caller may not share the file or, in a private room, manage its links, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
@@ -891,13 +894,14 @@ public abstract class FilesController<T>(
     }
 
     /// <remarks>
-    /// Returns the primary external link of a file, and creates it on the first call if the file has none. The new
-    /// link has read rights, no password, and no expiration date. For a PDF form in a form-filling room, the call
-    /// returns the link of the room. Requires the right to share the file, which its author and a room manager have.
-    /// Other callers get 403. An anonymous caller gets 401. The call changes data only on the first call, and later
-    /// calls return the same link. If the primary link was revoked, the call returns 404 and does not create it
-    /// again. The address is in `sharedTo.shareLink`. If `count` is outside its allowed range, the call returns 400.
-    /// To list all links of the file, use `GET api/2.0/files/file/{id}/links`.
+    /// Returns the primary external link of a file, and creates it on the first call if the file has none. The new link
+    /// has read rights, no password, and no expiration date. For a PDF form in a form-filling room, the call returns
+    /// the link of the room. Requires the right to share the file, which its author and a room manager have. Other
+    /// callers get 403. In a private room, only the room owner and room managers get the link. There the call never
+    /// creates one. If the file has no link, it returns 403. An anonymous caller gets 401. The call changes data only
+    /// on the first call, and later calls return the same link. If the primary link was revoked, the call returns 404
+    /// and does not create it again. The address is in `sharedTo.shareLink`. If `count` is outside its allowed range,
+    /// the call returns 400. To list all links of the file, use `GET api/2.0/files/file/{id}/links`.
     /// </remarks>
     /// <summary>
     /// Get the file primary external link
@@ -921,12 +925,13 @@ public abstract class FilesController<T>(
 
     /// <remarks>
     /// Returns the external links of a file. Requires read access to the file. Other callers get 403. A caller who
-    /// cannot share the file gets no links, except in a public room, where reading links is enough. The call is
-    /// read-only. The response headers carry the total number of links, not the body. A file without links returns an
-    /// empty list. The list includes the primary link after `GET api/2.0/files/file/{id}/link` creates it. For a PDF
-    /// form in a form-filling room, the call adds the link of the room at the end. If no file has this id, the call
-    /// returns 404. If `count` is outside its allowed range, the call returns 400. To change or revoke a link, use `PUT
-    /// api/2.0/files/file/{id}/links` with its id.
+    /// cannot share the file gets no links, except in a public room, where reading links is enough. In a private room,
+    /// the room owner and room managers see the links of its files. The call is read-only. The response headers carry
+    /// the total number of links, not the body. A file without links returns an empty list. The list includes the
+    /// primary link after `GET api/2.0/files/file/{id}/link` creates it. For a PDF form in a form-filling room, the
+    /// call adds the link of the room at the end. If no file has this id, the call returns 404. If `count` is outside
+    /// its allowed range, the call returns 400. To change or revoke a link, use `PUT api/2.0/files/file/{id}/links`
+    /// with its id.
     /// </remarks>
     /// <summary>
     /// Get file external links
@@ -958,19 +963,24 @@ public abstract class FilesController<T>(
     /// Creates an external link of a file, or changes or revokes one, and returns the link. The value of `linkId`
     /// decides the action. An unused id, including the empty one, creates a link. The id of an existing link changes
     /// that link. The call applies every field each time, so a field that you leave out goes back to its default. An
-    /// `access` of `None` revokes the link, and the call returns an empty body. A later read does not create a
-    /// revoked primary link again. With `primary=true`, the link becomes the primary link of the file. For a PDF form
-    /// in a form-filling room, `FillForms` and `None` change the link of the room. Requires the right to share the
-    /// file. Other callers get 403. The call changes data. Do not repeat a call with an empty `linkId`. Each such
-    /// call creates another link. With any other `linkId`, you can repeat it with the same body. The call returns
-    /// 403 if links to this file cannot have this access level, or the link limit is reached. It also returns 403 if
-    /// the portal settings for external links forbid the change. It returns 400 if the password does not meet the
-    /// password policy or `expirationDate` is over 10 years ahead. If no file has this id, the call returns 404.
-    /// On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a
-    /// link reads only and takes `passwordRequired` instead of `password`. Only a file link with `expirationDate` may
-    /// set `passwordRequired` to false. Only the room owner and room managers set such links. The call returns 403 for
-    /// such a link without key fields, with other access, or with `denyDownload`. It returns 400 if a key field has the
-    /// wrong size, or `password` is sent.
+    /// `access` of `None` revokes the link, and the call returns an empty body. A later read does not create a revoked
+    /// primary link again. With `primary=true`, the link becomes the primary link of the file. For a PDF form in a
+    /// form-filling room, `FillForms` and `None` change the link of the room. Requires the right to share the file,
+    /// except in a private room. Other callers get 403. The call changes data. Do not repeat a call with an empty
+    /// `linkId`. Each such call creates another link. With any other `linkId`, you can repeat it with the same body.
+    /// The call returns 403 if links to this file cannot have this access level, or the link limit is reached. It also
+    /// returns 403 if the portal settings for external links forbid the change. It returns 400 if the password does not
+    /// meet the password policy or `expirationDate` is over 10 years ahead. If no file has this id, the call returns
+    /// 404. On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such
+    /// a link reads only and takes `passwordRequired` instead of `password`. A new link without `passwordRequired` asks
+    /// for a password. A changed link keeps its value. Only a file link with `expirationDate` may set
+    /// `passwordRequired` to false. On other items, the call ignores `passwordRequired` and the key fields. In a
+    /// private room, only the room owner and room managers set and revoke links. Other callers get 403. The call also
+    /// returns 403 for such a link without key fields, with other access, or with `denyDownload`. It also returns 403
+    /// if `passwordRequired` is false on any other link. It returns 400 if `linkPublicKey` or `linkProofHash` is not
+    /// base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc` is empty or too long, or `password` is sent. A
+    /// new `linkId` that belongs to a user, a group, or another link also returns 400. A changed link with another
+    /// `linkPublicKey` also returns 400.
     /// </remarks>
     /// <summary>
     /// Set a file external link
@@ -978,8 +988,8 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/links</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The link as it now stands, or nothing when it was revoked", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item has the wrong size, or such a link carries `password`")]
-    [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin's restriction on external links forbids the change, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead, a key field of a link of a private item is not of its size or not canonical base64, such a link carries `password`, or a new `linkId` belongs to a user, a group, or another link")]
+    [SwaggerResponse(403, "The caller may not share the file or, in a private room, manage its links, the access level is not available for links to this file, the link limit is reached, or the admin's restriction on external links forbids the change, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{id}/links")]
     public async Task<FileShareDto> SetFileExternalLink(FileLinkRequestDto<T> inDto)

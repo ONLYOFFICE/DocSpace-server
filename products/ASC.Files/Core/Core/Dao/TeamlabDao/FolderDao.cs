@@ -1112,6 +1112,9 @@ internal class FolderDao(
 
             await filesDbContext.DeleteTagOriginAsync(tenantId, folderId.ToString(), subfoldersStrings);
 
+            // The key material of the links of these folders goes first: their share records tell which links they are.
+            await filesDbContext.DeleteShareLinkSecretWrapsOfEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
+            await filesDbContext.DeleteShareLinkKeysOfEntriesAsync(tenantId, subfolders, FileEntryType.Folder);
             await filesDbContext.DeleteFilesSecurityAsync(tenantId, subfolders.Select(r => r));
 
             // subtree-wide cleanups: the cascade removes every subfolder row,

@@ -48,6 +48,7 @@ public abstract class PrivateLinkTestBase(AspireAppFixture fixture) : PrivacyRoo
         public string? Title { get; set; } = "Private link";
         public string? ExpirationDate { get; set; }
         public bool? DenyDownload { get; set; }
+        public bool? Internal { get; set; }
         public bool? Primary { get; set; }
         public string? Password { get; set; }
         public int? LinkType { get; set; }
@@ -98,6 +99,44 @@ public abstract class PrivateLinkTestBase(AspireAppFixture fixture) : PrivacyRoo
 
         return answer.GetProperty("sharedTo");
     }
+
+    /// <summary>Sets a link with key material on a file and returns its id.</summary>
+    protected async Task<Guid> StoreFileLink(int fileId, LinkBody? body = null)
+    {
+        using var response = await PutFileLink(fileId, body ?? new LinkBody());
+        ((int)response.StatusCode).Should().Be(200);
+
+        return Guid.Parse((await SharedLinkOf(response)).GetProperty("id").GetString()!);
+    }
+
+    /// <summary>Sets a link with key material on a folder and returns its id.</summary>
+    protected async Task<Guid> StoreFolderLink(int folderId, LinkBody? body = null)
+    {
+        using var response = await PutFolderLink(folderId, body ?? new LinkBody());
+        ((int)response.StatusCode).Should().Be(200);
+
+        return Guid.Parse((await SharedLinkOf(response)).GetProperty("id").GetString()!);
+    }
+
+    /// <summary>A revocation needs no key field, so it goes through the SDK.</summary>
+    protected Task RevokeFileLink(int fileId, Guid linkId) =>
+        _filesApi.SetFileExternalLinkAsync(fileId, new FileLinkRequest(linkId, FileShare.None), TestContext.Current.CancellationToken);
+
+    /// <summary>A revocation needs no key field, so it goes through the SDK.</summary>
+    protected Task RevokeFolderLink(int folderId, Guid linkId) =>
+        _foldersApi.SetFolderPrimaryExternalLinkAsync(folderId, new FolderLinkRequest(linkId, FileShare.None), TestContext.Current.CancellationToken);
+
+    /// <summary>The links of a file as JSON: the SDK model of a link has no key fields yet.</summary>
+    protected async Task<JsonElement> FileLinksJson(int fileId)
+    {
+        using var response = await Raw.GetAsync($"api/2.0/files/file/{fileId}/links", TestContext.Current.CancellationToken);
+
+        return await Raw.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+    }
+
+    /// <summary>The total the listing of a file's links reports, which the list itself does not carry.</summary>
+    protected async Task<long> FileLinkTotal(int fileId) =>
+        (await _filesApi.GetFileLinksAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Total;
 
     protected async Task<int> FileLinkCount(int fileId) =>
         (await _filesApi.GetFileLinksAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response.Count;

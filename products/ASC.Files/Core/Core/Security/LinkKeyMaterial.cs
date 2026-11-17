@@ -86,13 +86,18 @@ public record LinkKeyMaterial(string PublicKey, string PrivateKeyEnc, string Pro
 
     private static bool HasLength(string base64, int bytes)
     {
-        if (string.IsNullOrEmpty(base64))
+        // Only the canonical form, with padding and nothing else: the value is stored and compared as sent, and
+        // Convert skips the white space that would otherwise pass here.
+        if (string.IsNullOrEmpty(base64) || base64.Length != (bytes + 2) / 3 * 4)
         {
             return false;
         }
 
         Span<byte> buffer = stackalloc byte[bytes + 1];
 
-        return Convert.TryFromBase64String(base64, buffer, out var written) && written == bytes;
+        // Convert ignores the unused bits of the last character, so the decoded bytes are encoded again and compared.
+        return Convert.TryFromBase64String(base64, buffer, out var written)
+               && written == bytes
+               && Convert.ToBase64String(buffer[..written]) == base64;
     }
 }

@@ -66,6 +66,30 @@ public class PrivateLinkKeySizeTests(AspireAppFixture fixture) : PrivateLinkTest
         await AssertRefused(new LinkBody { LinkPublicKey = "not base64 at all, yet 44 characters long..." });
     }
 
+    // Convert.FromBase64String skips white space, so a padded value decodes to 32 bytes; it is still not the value stored.
+    [Fact]
+    public async Task PublicKey_PaddedWithWhiteSpace_IsRefused()
+    {
+        await AssertRefused(new LinkBody { LinkPublicKey = RandomBase64(32) + "  " });
+    }
+
+    [Fact]
+    public async Task ProofHash_PaddedWithWhiteSpace_IsRefused()
+    {
+        await AssertRefused(new LinkBody { LinkProofHash = " " + RandomBase64(32) });
+    }
+
+    // The last character before `=` carries two unused bits; a value with them set decodes to the same 32 bytes.
+    [Fact]
+    public async Task PublicKey_WithUnusedBitsSet_IsRefused()
+    {
+        const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        var canonical = RandomBase64(32);
+        var last = alphabet.IndexOf(canonical[42]);
+
+        await AssertRefused(new LinkBody { LinkPublicKey = canonical[..42] + alphabet[last ^ 1] + "=" });
+    }
+
     [Theory]
     [InlineData(31)]
     [InlineData(33)]

@@ -1194,6 +1194,9 @@ internal class FileDao(
             }
 
             await context.DeleteTagsAsync(tenantId);
+            // The key material of the links of these files goes first: their share records tell which links they are.
+            await context.DeleteShareLinkSecretWrapsOfEntriesAsync(tenantId, fileIds, FileEntryType.File);
+            await context.DeleteShareLinkKeysOfEntriesAsync(tenantId, fileIds, FileEntryType.File);
             await context.DeleteSecurityByFileIdsAsync(tenantId, fileIds);
             await context.DeleteOrderByFileIdsAsync(tenantId, fileIds);
 

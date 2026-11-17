@@ -76,6 +76,25 @@ public partial class FilesDbContext
     {
         return ShareLinkKeyQueries.DeleteShareLinkSecretWrapsOfUserAsync(this, tenantId, linkIds, userId);
     }
+
+    /// <summary>
+    /// Deletes the key material of the external links of the given entries. Call it before their share records go: the
+    /// share records are what tells which links belong to the entries.
+    /// </summary>
+    [PreCompileQuery]
+    public Task<int> DeleteShareLinkKeysOfEntriesAsync(int tenantId, IEnumerable<int> entryIds, FileEntryType entryType)
+    {
+        return ShareLinkKeyQueries.DeleteShareLinkKeysOfEntriesAsync(this, tenantId, entryIds, entryType);
+    }
+
+    /// <summary>
+    /// Deletes the wraps of the secrets of the external links of the given entries, before their share records go.
+    /// </summary>
+    [PreCompileQuery]
+    public Task<int> DeleteShareLinkSecretWrapsOfEntriesAsync(int tenantId, IEnumerable<int> entryIds, FileEntryType entryType)
+    {
+        return ShareLinkKeyQueries.DeleteShareLinkSecretWrapsOfEntriesAsync(this, tenantId, entryIds, entryType);
+    }
 }
 
 static file class ShareLinkKeyQueries
@@ -120,6 +139,32 @@ static file class ShareLinkKeyQueries
             (FilesDbContext ctx, int tenantId, Guid linkId) =>
                 ctx.ShareLinkSecretWraps
                     .Where(r => r.TenantId == tenantId && r.LinkId == linkId)
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, FileEntryType, Task<int>> DeleteShareLinkKeysOfEntriesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> entryIds, FileEntryType entryType) =>
+                ctx.ShareLinkKeys
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => ctx.Security.Any(s =>
+                        s.TenantId == tenantId &&
+                        s.EntryType == entryType &&
+                        entryIds.Contains(s.InternalEntryId) &&
+                        s.Subject == r.LinkId &&
+                        (s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink)))
+                    .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, FileEntryType, Task<int>> DeleteShareLinkSecretWrapsOfEntriesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> entryIds, FileEntryType entryType) =>
+                ctx.ShareLinkSecretWraps
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => ctx.Security.Any(s =>
+                        s.TenantId == tenantId &&
+                        s.EntryType == entryType &&
+                        entryIds.Contains(s.InternalEntryId) &&
+                        s.Subject == r.LinkId &&
+                        (s.SubjectType == SubjectType.ExternalLink || s.SubjectType == SubjectType.PrimaryExternalLink)))
                     .ExecuteDelete());
 
     public static readonly Func<FilesDbContext, int, IEnumerable<Guid>, Guid, Task<int>> DeleteShareLinkSecretWrapsOfUserAsync =

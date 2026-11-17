@@ -34,7 +34,7 @@
 namespace ASC.Files.Tests.Tests._08_Privacy.ExternalLinks;
 
 /// <summary>
-/// "External link of a private item" and "No links to a private room": a link with key material is stored on a
+/// "External link of a private item" and "Links of a private item need key material": a link with key material is stored on a
 /// private room, folder or file, for reading only and by those who manage the room's links; every refusal stores
 /// nothing.
 /// </summary>

@@ -4536,7 +4536,8 @@ public class FileStorageService //: IFileStorageService
                 _ => share
             };
 
-            if (!await fileSharingHelper.CanSetAccessAsync(entry))
+            // An item of a private room takes its links from those who manage the room's links.
+            if (!await fileSharingHelper.CanSetLinkAsync(entry))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }

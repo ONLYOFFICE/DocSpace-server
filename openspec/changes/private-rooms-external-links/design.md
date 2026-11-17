@@ -75,9 +75,13 @@ section follows the app".
    of the key material for all link aces of the request before it stores any of them (`ValidatePrivateLinksAsync`). The
    share record and the key material live in two DAOs with contexts of their own, so they are not one transaction:
    the key material is written first, and a link resolves only through its share record, so a key row alone opens
-   nothing. If the share record then fails, the key material is put back as it was (`SetPrivateLinkAsync`). A
-   revocation deletes the share record first, then the key material, the wraps made for the link and the wraps of its
-   secret in one transaction (`ShareLinkKeyDao.DeleteAsync`); a repeated revocation deletes what a failed one left.
+   nothing. If the share record then fails, the key material is put back as it was right before the request wrote it,
+   read again under a lock of the link (`SetPrivateLinkAsync`), so a concurrent change of the same link is not undone.
+   A revocation deletes the key material, the wraps made for the link and the wraps of its secret in one transaction
+   (`ShareLinkKeyDao.DeleteAsync`) first, then the share record; a failure in between leaves a link that opens nothing
+   and that a repeated revocation removes. Key material is touched only for an id that a link record of the item proves
+   to be its link, and a new link takes only an id that no user, no group and no other link holds: the store keeps the
+   file-key wraps of users under their own ids, so a foreign id would delete or overwrite them.
    Alternative: one transaction over both DAOs. Rejected: `SecurityDao.SetShareAsync` opens its own context and
    execution strategy, and the order above leaves no state that opens anything.
 6. **What a visitor gets is read-only by construction.** The link's access is fixed to `FileShare.Read`;
@@ -131,8 +135,12 @@ section follows the app".
   proof hash (decision 3), so changing or deleting the hash ends it; a test covers both.
 - [An ordinary link changes behaviour] → The new validation runs only when the item is in a private room; the existing
   `shared-links` tests run unchanged.
-- [Key material or wraps stay after a revoke if the delete fails] → The share record goes first, so what stays opens
-  nothing, and repeating the revocation deletes it (decision 5).
+- [A revoke fails halfway] → The key material goes first, so what stays is a share record that opens nothing, and
+  repeating the revocation removes it (decision 5).
+- [Key material of an item stays after the item is deleted] → `FileDao.DeleteFilesAsync` and
+  `FolderDao.DeleteFolderAsync` delete the key material and the secret wraps of the links of the removed entries right
+  before their share records, in the same transaction, since the share records are what names those links. Moving an
+  item to Trash keeps both: the item and its links come back with a restore.
 - [The proof is guessed] → 256 random bits plus the counter of wrong attempts; the hash comparison is constant-time.
 - [A script on the visitor's page reads the secret from the address] → The restricted policy of decision 11; the
   client keeps third-party scripts off that page. The server delivers the page's own code, the same trust as for the

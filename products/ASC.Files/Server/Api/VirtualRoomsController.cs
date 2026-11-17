@@ -841,35 +841,39 @@ public abstract class VirtualRoomsController<T>(
     /// <remarks>
     /// Sets one link of a room and returns it. The call creates, changes, or deletes the link. The `linkType` field
     /// selects the type. An invitation link makes each person who opens it a member with `access`. An external link
-    /// opens the room without an account. Without `linkId`, the call creates a link. With the ID of a link, it
-    /// changes that link. An unknown ID creates a link with this ID. A change replaces all settings, so send every
-    /// field to keep. A change keeps the link type. An `access` of `None` deletes the link. Deleting the primary
-    /// external link of a public or form-filling room creates and returns a new one. After any other deletion, the
-    /// body is empty. Requires the right to manage the links of the room. Other callers get 403. The call changes
-    /// data. You can repeat a call with `linkId`, but each call without it creates another link. The `password`,
-    /// `denyDownload`, and `internal` fields apply only to external links, and `maxUseCount` only to invitation
-    /// links. Without `linkId`, an `internal` of false gives the portal default. In a public room, external links
-    /// are never internal. There, a change with `internal` true saves nothing. The call reads a past
-    /// `expirationDate` of an external link as none. It ignores the date for the primary link of a public or
-    /// form-filling room. For an invitation link, a past date returns 400. Only custom, public, and form-filling
-    /// rooms take external links, and a form-filling room only its primary one. A room has at most one invitation
-    /// link, and a second one returns 403. While an admin restricts external links, the call makes each external link
-    /// it sets internal. Then, setting an external link in a public room or deleting its primary link returns 403. Deleting the
-    /// primary link of a form-filling room also returns 403 if that link is not internal. The call also returns 403
-    /// for an invitation link of a private room, a room template, or too many links. It also returns 403 for a link type or access level
-    /// the room does not take. The call returns 400 for a too long title or password, a weak password, or an invalid
-    /// `maxUseCount` or `expirationDate`. If the room does not exist, the call returns 404.
-    /// On an item of a private room, a link needs `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a
-    /// link reads only and takes `passwordRequired` instead of `password`. Only a file link with `expirationDate` may
-    /// set `passwordRequired` to false. Only the room owner and room managers set such links. The call returns 403 for
-    /// such a link without key fields, with other access, or with `denyDownload`. It returns 400 if a key field has the
-    /// wrong size, or `password` is sent.
+    /// opens the room without an account. Without `linkId`, the call creates a link. With the ID of a link, it changes
+    /// that link. An unknown ID creates a link with this ID. A change replaces all settings, so send every field to
+    /// keep. A change keeps the link type. An `access` of `None` deletes the link. Deleting the primary external link
+    /// of a public or form-filling room creates and returns a new one. After any other deletion, the body is empty.
+    /// Requires the right to manage the links of the room. Other callers get 403. The call changes data. You can repeat
+    /// a call with `linkId`, but each call without it creates another link. The `password`, `denyDownload`, and
+    /// `internal` fields apply only to external links, and `maxUseCount` only to invitation links. Without `linkId`, an
+    /// `internal` of false gives the portal default. In a public room, external links are never internal. There, a
+    /// change with `internal` true saves nothing. The call reads a past `expirationDate` of an external link as none.
+    /// It ignores the date for the primary link of a public or form-filling room. For an invitation link, a past date
+    /// returns 400. Only custom, public, and form-filling rooms take external links, and a form-filling room only its
+    /// primary one. A room has at most one invitation link, and a second one returns 403. While an admin restricts
+    /// external links, the call makes each external link it sets internal. Then, setting an external link in a public
+    /// room or deleting its primary link returns 403. Deleting the primary link of a form-filling room also returns 403
+    /// if that link is not internal. The call also returns 403 for an invitation link of a private room, a room
+    /// template, or too many links. It also returns 403 for a link type or access level the room does not take. The
+    /// call returns 400 for a too long title or password, a weak password, or an invalid `maxUseCount` or
+    /// `expirationDate`. If the room does not exist, the call returns 404. On an item of a private room, a link needs
+    /// `linkPublicKey`, `linkPrivateKeyEnc`, and `linkProofHash`. Such a link reads only and takes `passwordRequired`
+    /// instead of `password`. A new link without `passwordRequired` asks for a password. A changed link keeps its
+    /// value. Only a file link with `expirationDate` may set `passwordRequired` to false. On other items, the call
+    /// ignores `passwordRequired` and the key fields. In a private room, only the room owner and room managers set and
+    /// revoke links. Other callers get 403. The call also returns 403 for such a link without key fields, with other
+    /// access, or with `denyDownload`. It also returns 403 if `passwordRequired` is false on any other link. It returns
+    /// 400 if `linkPublicKey` or `linkProofHash` is not base64 of 32 bytes. It also returns 400 if `linkPrivateKeyEnc`
+    /// is empty or too long, or `password` is sent. A new `linkId` that belongs to a user, a group, or another link
+    /// also returns 400. A changed link with another `linkPublicKey` also returns 400.
     /// </remarks>
     /// <summary>Set the room external or invitation link</summary>
     /// <path>api/2.0/files/rooms/{id}/links</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The link as it is after the call, the new primary link that replaced a deleted one, or an empty body after any other deletion", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected, a key field of a link of a private item has the wrong size, or such a link carries `password`")]
+    [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected, a key field of a link of a private item is not of its size or not canonical base64, such a link carries `password`, or a new `linkId` belongs to a user, a group, or another link")]
     [SwaggerResponse(403, "The caller may not manage the links of this room, the room is a room template, an invitation link is requested on a private room, the room does not take this kind of link or this access level, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change in a public or form-filling room, or a link of a private item lacks key fields, asks for more than reading or for `denyDownload`, or breaks the `passwordRequired` rule")]
     [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [HttpPut("{id}/links")]

@@ -4,6 +4,13 @@ Field names (`linkPublicKey`, `linkPrivateKeyEnc`, `linkProofHash`, `passwordReq
 `linkSecretWraps`) are proposals from the client's draft; they may be renamed before the change is applied, together
 with the client change.
 
+## RENAMED Requirements
+
+- FROM: `### Requirement: No links to a private room`
+- TO: `### Requirement: Links of a private item need key material`
+
+The old name says no link exists; after this change a link with key material does.
+
 ## MODIFIED Requirements
 
 Current texts, quoted from `openspec/specs/private-rooms/spec.md` at `2029af1663`:
@@ -80,7 +87,7 @@ Current texts, quoted from `openspec/specs/private-rooms/spec.md` at `2029af1663
 > - **WHEN** the backed-up tables are compared with the schema
 > - **THEN** both stores are on the list of intentionally skipped tables
 
-### Requirement: No links to a private room
+### Requirement: Links of a private item need key material
 
 `setRoomLink`, `setFileExternalLink`, `setFolderPrimaryExternalLink`, `createFilePrimaryExternalLink` and
 `createFolderPrimaryExternalLink` MUST answer 403 for an invitation link on a private item and for an external link without
@@ -206,7 +213,7 @@ type. Its access MUST be read; any other access and `denyDownload:true` MUST be 
 
 #### Scenario: Limits of the room type
 
-- **WHEN** a private Custom room already has its primary and five additional links and another is requested
+- **WHEN** a private Custom room already has five additional links and another is requested
 - **THEN** the answer is 403, as for an ordinary Custom room
 
 #### Scenario: Private Virtual Data Room
@@ -229,9 +236,72 @@ type. Its access MUST be read; any other access and `denyDownload:true` MUST be 
 - **WHEN** a Content creator of the private room sets a link on a file they created
 - **THEN** the answer is 403
 
+### Requirement: Links of an item of a private room belong to those who manage the room's links
+
+The links of a folder or a file of a private room SHALL be set, revoked and listed by whoever manages the links of the
+room (its owner and room managers), since nobody manages the access of such an item itself. Sharing the item with a user
+or a group MUST stay refused with 403, also when the request carries a link as well.
+
+#### Scenario: Sharing an item of a private room with a member
+
+- **WHEN** the room owner shares a file or a folder of a private room with a user
+- **THEN** the answer is 403 and nothing is stored
+
+#### Scenario: Revoking a link of an item
+
+- **WHEN** the room owner revokes a link of a file or a folder of a private room, and a Content creator revokes another
+- **THEN** the owner's revocation removes the link, and the Content creator's is refused with 403, leaving the link
+
+#### Scenario: Links of an item listed to those who manage the room's links
+
+- **WHEN** the room owner, a reader and a Content creator of a private room list the links of a file or a folder that
+  has a link
+- **THEN** the owner gets the link, and the reader and the Content creator get an empty list
+
+### Requirement: A link of a private item takes an id of its own
+
+A new link of a private item SHALL take a `linkId` that no user, no group and no other link holds; any other id MUST be
+refused with 400, storing nothing and changing nothing of its holder. A revocation SHALL touch the key material of an id
+only when that id is a link of the item it names.
+
+#### Scenario: New link with the id of a user
+
+- **WHEN** the room owner sets a new link on a file of a private room with `linkId` set to a member's id
+- **THEN** the answer is 400, no link is stored and the member keeps every key of the room's files
+
+#### Scenario: New link with the id of another item's link
+
+- **WHEN** the room owner sets a new link on a file with `linkId` set to the id of a link of another file
+- **THEN** the answer is 400 and the other link keeps its key material
+
+#### Scenario: Revoking an id that is not a link of the item
+
+- **WHEN** the room owner revokes, on a folder or a file of a private room, the id of a member or of another item's link
+- **THEN** the member keeps every key of the room's files and the other link keeps its key material
+
+### Requirement: Deleting an item deletes the key material of its links
+
+Deleting a file, a folder or a private room for good SHALL delete the key material and the wraps of the secrets of the
+links of every file and folder it removes, the room itself included, together with their share records.
+
+#### Scenario: File deleted
+
+- **WHEN** a file of a private room that has a link is deleted for good
+- **THEN** the store holds no material of that link, and its id is free for a new link
+
+#### Scenario: Folder deleted
+
+- **WHEN** a folder of a private room that has a link, and holds a file that has another, is deleted for good
+- **THEN** the store holds no material of either link
+
+#### Scenario: Room deleted
+
+- **WHEN** a private room that has a link, and holds a file that has another, is deleted
+- **THEN** the store holds no material of either link
+
 ### Requirement: Key material of a link has fixed sizes
 
-`linkPublicKey` and `linkProofHash` SHALL each decode from base64 to exactly 32 bytes; `linkPrivateKeyEnc` SHALL be a
+`linkPublicKey` and `linkProofHash` SHALL each be canonical base64 of exactly 32 bytes; `linkPrivateKeyEnc` SHALL be a
 non-empty string of at most 4096 characters. A missing, empty, malformed or oversized value MUST be refused with 400, storing
 nothing.
 
@@ -243,6 +313,11 @@ nothing.
 #### Scenario: Public key that is not base64
 
 - **WHEN** `linkPublicKey` is not valid base64
+- **THEN** the answer is 400
+
+#### Scenario: Value padded with white space
+
+- **WHEN** `linkPublicKey` or `linkProofHash` is base64 of 32 bytes with spaces before or after it
 - **THEN** the answer is 400
 
 #### Scenario: Empty sealed key

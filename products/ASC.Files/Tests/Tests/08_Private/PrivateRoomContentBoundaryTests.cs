@@ -138,8 +138,8 @@ public class PrivateRoomContentBoundaryTests(AspireAppFixture fixture) : Privacy
 
     /// <summary>
     /// The link refusal applies only to a link that would give access: a request that revokes one
-    /// (<c>access: None</c>) passes the private-room check. No link can be created on a private room
-    /// through the API, so the revocation names a link id the room does not have.
+    /// (<c>access: None</c>) passes the private-room check. The revocation names a link id the room does
+    /// not have; revoking an existing link is covered by <c>PrivateItemSharingGuardTests</c>.
     /// </summary>
     [Fact]
     public async Task SetRoomLink_RevokingAnInvitationLink_IsNotRefused()

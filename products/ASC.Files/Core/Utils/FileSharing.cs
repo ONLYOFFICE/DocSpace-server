@@ -83,6 +83,22 @@ public class FileSharingAceHelper(
         var file = entry as File<T>;
         var room = folder is { IsRoom: true } ? folder : null;
 
+        // The private room the entry lies in, or the entry itself when it is one.
+        var privateRoom = room != null
+            ? DocSpaceHelper.LocatedInPrivateRoom(room) ? room : null
+            : await fileSharingHelper.GetPrivateRoomOfItemAsync(entry);
+        var isPrivate = privateRoom != null;
+        var shares = await fileSecurity.GetPureSharesAsync(entry, aceWrappers.Select(a => a.Id)).ToDictionaryAsync(r => r.Subject);
+
+        // Nobody shares a file or a folder of a private room with members (FileSecurity refuses EditAccess there), but
+        // its external links belong to whoever manages the room's links. A request made of external links only is
+        // checked against the room; one member ace keeps the check of the entry, which refuses it. The stored record
+        // decides what a subject is, so a member cannot be passed off as a link.
+        var accessEntry = privateRoom != null && room == null && aceWrappers.Count > 0
+            && aceWrappers.TrueForAll(r => (shares.Get(r.Id)?.SubjectType ?? r.SubjectType) is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink)
+                ? (FileEntry<T>)privateRoom
+                : entry;
+
         // TrueForAll is vacuously true on an empty list, which would skip the CanSetAccess guard for
         // callers whose requested shares were all filtered out upstream (e.g. a guest sharing to users).
         var selfLeave = aceWrappers.Count > 0 && aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None);
@@ -101,12 +117,10 @@ public class FileSharingAceHelper(
                 return roomType == FolderType.PublicRoom && r.SubjectType == SubjectType.PrimaryExternalLink && r.Access == FileShare.Read;
             }) &&
             !beforeOwnerChange &&
-            !await fileSharingHelper.CanSetAccessAsync(entry))
+            !await fileSharingHelper.CanSetAccessAsync(accessEntry))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
-
-        var isPrivate = room is { SettingsPrivate: true } || (room == null && await DocSpaceHelper.LocatedInPrivateRoomAsync(entry, cachedFolderDao));
 
         var handledAces = new List<ProcessedItem<T>>(aceWrappers.Count);
         var usersLeavingPrivateRoom = new List<Guid>();
@@ -122,12 +136,16 @@ public class FileSharingAceHelper(
         var usersWithoutRight = new List<Guid>();
         var changed = false;
         string warning = null;
-        var shares = await fileSecurity.GetPureSharesAsync(entry, aceWrappers.Select(a => a.Id)).ToDictionaryAsync(r => r.Subject);
 
         // Every refusal of a link of a private item comes before the first write of the request.
-        var privateLinkKeys = isPrivate
-            ? await ValidatePrivateLinksAsync(aceWrappers, entry, room, shares)
-            : ClearPrivateLinkOptions(aceWrappers);
+        if (isPrivate)
+        {
+            await ValidatePrivateLinksAsync(aceWrappers, entry, privateRoom, shares);
+        }
+        else
+        {
+            ClearPrivateLinkOptions(aceWrappers);
+        }
 
         foreach (var w in aceWrappers.OrderByDescending(ace => ace.SubjectGroup))
         {
@@ -211,8 +229,11 @@ public class FileSharingAceHelper(
             }
             else if (folder != null)
             {
-                var folderAccesses = await fileSecurity.GetAccesses(folder);
-                if (folderAccesses == null || !folderAccesses.TryGetValue(w.SubjectType, out var access) || !access.Contains(w.Access))
+                // The access table lets only the folder's author revoke; a link of a private item is revoked by whoever
+                // manages the room's links, which the guard above has checked against the room.
+                var revokesPrivateLink = isPrivate && w.Access == FileShare.None && w.SubjectType is SubjectType.ExternalLink or SubjectType.PrimaryExternalLink;
+                var folderAccesses = revokesPrivateLink ? null : await fileSecurity.GetAccesses(folder);
+                if (!revokesPrivateLink && (folderAccesses == null || !folderAccesses.TryGetValue(w.SubjectType, out var access) || !access.Contains(w.Access)))
                 {
                     throw new InvalidOperationException(FilesCommonResource.ErrorMessage_RoleNotAvailable);
                 }
@@ -411,19 +432,19 @@ public class FileSharingAceHelper(
                     }
                 }
 
-                if (privateLinkKeys != null && w.IsLink && share != FileShare.None)
+                if (isPrivate && share == FileShare.None && existedShare is { SubjectType: SubjectType.ExternalLink or SubjectType.PrimaryExternalLink })
                 {
-                    await SetPrivateLinkAsync(entry, entryType, w, share, existedShare, privateLinkKeys);
+                    // Only a link record of this entry proves the id is its link: the store also holds the file keys of
+                    // users under their own ids.
+                    await RevokePrivateLinkAsync(entry, entryType, w, existedShare);
+                }
+                else if (isPrivate && w.IsLink && share != FileShare.None)
+                {
+                    await SetPrivateLinkAsync(entry, entryType, w, share, existedShare);
                 }
                 else
                 {
                     await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions, owner: existedShare?.Owner);
-                }
-
-                if (isPrivate && w.IsLink && share == FileShare.None)
-                {
-                    // The record is gone, so the link resolves to nothing; what it was given goes with it.
-                    await shareLinkKeyDao.DeleteAsync(w.Id);
                 }
             }
             finally
@@ -578,10 +599,10 @@ public class FileSharingAceHelper(
         {
             await documentServiceHelper.CheckUsersForDropAsync((File<T>)entry);
         }
-        else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } privateRoom)
+        else if (entry is Folder<T> { IsRoom: true, SettingsPrivate: true } sharedRoom)
         {
-            await RevokeFileKeysAsync(privateRoom, usersLeavingPrivateRoom);
-            await documentServiceHelper.CheckRoomUsersForDropAsync(privateRoom);
+            await RevokeFileKeysAsync(sharedRoom, usersLeavingPrivateRoom);
+            await documentServiceHelper.CheckRoomUsersForDropAsync(sharedRoom);
         }
 
         if (recipients.Count > 0 && entry.RootFolderType is FolderType.USER or FolderType.Privacy)
@@ -702,27 +723,25 @@ public class FileSharingAceHelper(
     /// Checks every external link of the request on an item of a private room, before anything of the request is
     /// written. Somebody who enters through a link holds no key of their own, so a link is accepted only with key
     /// material made for it by the creator's browser, for reading only, and by those who manage the room's links.
-    /// Revoking a link is always possible. Returns the key material already stored for the links the request changes.
+    /// Revoking a link is always possible.
     /// </summary>
-    private async Task<Dictionary<Guid, DbFilesShareLinkKey>> ValidatePrivateLinksAsync<T>(
+    private async Task ValidatePrivateLinksAsync<T>(
         List<AceWrapper> aceWrappers,
         FileEntry<T> entry,
-        Folder<T> room,
+        Folder<T> privateRoom,
         Dictionary<Guid, FileShareRecord<T>> shares)
     {
-        var storedKeys = new Dictionary<Guid, DbFilesShareLinkKey>();
         var links = aceWrappers.Where(r => r.IsLink && r.Access != FileShare.None).ToList();
 
         if (links.Count == 0)
         {
-            return storedKeys;
+            return;
         }
-
-        var privateRoom = room ?? await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
 
         // A content creator may share what they created elsewhere, but the links of a private room belong to whoever
         // manages its members: those are the people the link's secret is wrapped for.
-        if (privateRoom == null || !await fileSharingHelper.CanSetAccessAsync(privateRoom))
+        // Checked here too: a change of owner skips the guard of SetAceObjectAsync.
+        if (!await fileSharingHelper.CanSetAccessAsync(privateRoom))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -738,8 +757,14 @@ public class FileSharingAceHelper(
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
 
-            var storedKey = existedShare != null ? await shareLinkKeyDao.GetAsync(w.Id) : null;
-            storedKeys[w.Id] = storedKey;
+            var storedKey = await shareLinkKeyDao.GetAsync(w.Id);
+
+            // A new link takes an id nobody holds: another link would lose its key material or its record to this one,
+            // and a user or a group would have their file keys deleted with the link.
+            if (existedShare == null && (storedKey != null || await IsUserOrGroupAsync(w.Id) || await IsShareSubjectAsync<T>(w.Id)))
+            {
+                throw new ArgumentException(null, "linkId");
+            }
 
             if (w.KeyMaterial == null)
             {
@@ -780,67 +805,126 @@ public class FileSharingAceHelper(
             }
         }
 
-        return storedKeys;
+    }
+
+    private async Task<bool> IsShareSubjectAsync<T>(Guid id)
+    {
+        return await daoFactory.GetSecurityDao<T>().GetSharesAsync([id]).AnyAsync();
+    }
+
+    private async Task<bool> IsUserOrGroupAsync(Guid id)
+    {
+        return !Equals(await userManager.GetUsersAsync(id, false), Constants.LostUser)
+               || (await userManager.GetGroupInfoAsync(id)).ID != Constants.LostGroupInfo.ID;
     }
 
     /// <summary>
     /// An ordinary link keeps no key material and no <see cref="FileShareOptions.PasswordRequired"/>, whatever the
     /// request sent.
     /// </summary>
-    private static Dictionary<Guid, DbFilesShareLinkKey> ClearPrivateLinkOptions(List<AceWrapper> aceWrappers)
+    private static void ClearPrivateLinkOptions(List<AceWrapper> aceWrappers)
     {
         foreach (var w in aceWrappers.Where(r => r.IsLink && r.FileShareOptions != null))
         {
             w.FileShareOptions.PasswordRequired = null;
         }
-
-        return null;
     }
 
     /// <summary>
     /// Writes a link of a private item. The key material goes first: until the share record exists the link resolves
     /// to nothing, so a key row alone opens nothing. If the record cannot be written, the key material is put back as
-    /// it was before the call.
+    /// it was right before this request wrote it. Every write of a private link - set, change and revoke - holds the
+    /// lock of the link, so no other write of it falls between the two steps.
     /// </summary>
     private async Task SetPrivateLinkAsync<T>(
         FileEntry<T> entry,
         FileEntryType entryType,
         AceWrapper w,
         FileShare share,
-        FileShareRecord<T> existedShare,
-        Dictionary<Guid, DbFilesShareLinkKey> storedKeys)
+        FileShareRecord<T> existedShare)
     {
-        if (w.KeyMaterial != null)
-        {
-            await shareLinkKeyDao.SaveAsync(w.Id, w.KeyMaterial);
-        }
+        var handle = await distributedLockProvider.TryAcquireFairLockAsync(PrivateLinkLockKey(w.Id));
 
         try
         {
-            await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions, owner: existedShare?.Owner);
-        }
-        catch when (w.KeyMaterial != null)
-        {
+            var storedKey = await shareLinkKeyDao.GetAsync(w.Id);
+
+            // ValidatePrivateLinksAsync checked the id before the lock: a concurrent request may have taken it since.
+            if (existedShare == null && storedKey != null)
+            {
+                throw new ArgumentException(null, "linkId");
+            }
+
+            if (w.KeyMaterial == null)
+            {
+                await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions, owner: existedShare?.Owner);
+
+                return;
+            }
+
+            await shareLinkKeyDao.SaveAsync(w.Id, w.KeyMaterial);
+
             try
             {
-                var storedKey = storedKeys.GetValueOrDefault(w.Id);
-
-                if (storedKey == null)
-                {
-                    await shareLinkKeyDao.DeleteAsync(w.Id);
-                }
-                else
-                {
-                    await shareLinkKeyDao.SaveAsync(w.Id, new LinkKeyMaterial(storedKey.PublicKey, storedKey.PrivateKeyEnc, storedKey.ProofHash));
-                }
+                await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, share, w.SubjectType, w.FileShareOptions, owner: existedShare?.Owner);
             }
-            catch (Exception rollback)
+            catch
             {
-                // The share record failure is what the caller has to see; a key row left behind opens nothing.
-                logger.WarningPrivateLinkKeyRollbackFailed(w.Id, rollback);
-            }
+                await PutBackLinkKeyAsync(w.Id, storedKey);
 
-            throw;
+                throw;
+            }
+        }
+        finally
+        {
+            if (handle != null)
+            {
+                await handle.ReleaseAsync();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Revokes a link of a private item under the lock of the link. The key material goes before the share record, so
+    /// a failure in between leaves a link that opens nothing and that a repeated revocation removes.
+    /// </summary>
+    private async Task RevokePrivateLinkAsync<T>(FileEntry<T> entry, FileEntryType entryType, AceWrapper w, FileShareRecord<T> existedShare)
+    {
+        var handle = await distributedLockProvider.TryAcquireFairLockAsync(PrivateLinkLockKey(w.Id));
+
+        try
+        {
+            await shareLinkKeyDao.DeleteAsync(w.Id);
+            await fileSecurity.ShareAsync(entry.Id, entryType, w.Id, FileShare.None, w.SubjectType, w.FileShareOptions, owner: existedShare.Owner);
+        }
+        finally
+        {
+            if (handle != null)
+            {
+                await handle.ReleaseAsync();
+            }
+        }
+    }
+
+    private static string PrivateLinkLockKey(Guid linkId) => $"{linkId}_private_link";
+
+    private async Task PutBackLinkKeyAsync(Guid linkId, DbFilesShareLinkKey storedKey)
+    {
+        try
+        {
+            if (storedKey == null)
+            {
+                await shareLinkKeyDao.DeleteAsync(linkId);
+            }
+            else
+            {
+                await shareLinkKeyDao.SaveAsync(linkId, new LinkKeyMaterial(storedKey.PublicKey, storedKey.PrivateKeyEnc, storedKey.ProofHash));
+            }
+        }
+        catch (Exception rollback)
+        {
+            // The share record failure is what the caller has to see; a key row left behind opens nothing.
+            logger.WarningPrivateLinkKeyRollbackFailed(linkId, rollback);
         }
     }
 }
@@ -851,8 +935,35 @@ public class FileSharingHelper(
     GlobalFolderHelper globalFolderHelper,
     FileSecurity fileSecurity,
     AuthContext authContext,
-    UserManager userManager)
+    UserManager userManager,
+    IDaoFactory daoFactory)
 {
+    /// <summary>
+    /// Whether the current user may set or revoke an external link of the entry. Nobody manages the access of a file
+    /// or a folder of a private room (<see cref="FileSecurity"/> refuses EditAccess there), so its links belong to
+    /// whoever manages the room's links; anywhere else this is <see cref="CanSetAccessAsync{T}"/> of the entry.
+    /// </summary>
+    public async Task<bool> CanSetLinkAsync<T>(FileEntry<T> entry)
+    {
+        return await CanSetAccessAsync(await GetPrivateRoomOfItemAsync(entry) ?? entry);
+    }
+
+    /// <summary>
+    /// The private room a file or a folder lies in; null for a room itself and for an entry outside private rooms.
+    /// </summary>
+    public async Task<Folder<T>> GetPrivateRoomOfItemAsync<T>(FileEntry<T> entry)
+    {
+        // Private rooms live under the rooms root, or the archive once archived: anything else is outside them.
+        if (entry is null or Folder<T> { IsRoom: true } || entry.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))
+        {
+            return null;
+        }
+
+        var room = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
+
+        return DocSpaceHelper.LocatedInPrivateRoom(room) ? room : null;
+    }
+
     public async Task<bool> CanSetAccessAsync<T>(FileEntry<T> entry)
     {
         if (entry == null)
@@ -1070,9 +1181,25 @@ public class FileSharing(
 
     private async Task<bool> CanSeeSharesAsync<T>(FileEntry<T> entry, ShareFilterType filterType, bool canEditAccess)
     {
-        return entry is Folder<T> { IsRoom: true } || entry.ParentRoomType is FolderType.PublicRoom
-            ? await CheckAccessAsync(entry, filterType)
-            : canEditAccess;
+        if (entry is Folder<T> { IsRoom: true } || entry.ParentRoomType is FolderType.PublicRoom)
+        {
+            return await CheckAccessAsync(entry, filterType);
+        }
+
+        if (canEditAccess)
+        {
+            return true;
+        }
+
+        // Nobody manages the access of a file or a folder of a private room, but its links belong to whoever manages
+        // the room's links (FileSharingAceHelper.SetAceObjectAsync): they see those links, and only the links.
+        if (filterType == ShareFilterType.UserOrGroup || (filterType & ~ShareFilterType.Link) != 0)
+        {
+            return false;
+        }
+
+        return await fileSharingHelper.GetPrivateRoomOfItemAsync(entry) is { } privateRoom
+               && await fileSharingHelper.CanSetAccessAsync(privateRoom);
     }
 
     public async Task<int> GetPureSharesCountAsync<T>(FileEntry<T> entry, ShareFilterType filterType, string text)

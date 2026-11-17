@@ -70,10 +70,13 @@ None.
 - `shared-links`: found by `setRoomLink`, `setFileExternalLink`, `setFolderPrimaryExternalLink`, `getRoomLinks` and the
   deny-download flag ("Link settings by room type", "Deny-download on links combines with the VDR room setting"). The
   matrices of where a link is allowed and how many apply to a private room of the same type unchanged.
+- `files-settings`: found by `setFileExternalLink`, `setFolderPrimaryExternalLink`, `createFilePrimaryExternalLink`,
+  `createFolderPrimaryExternalLink` and the primary-link reads. Who sets the links of a private item and which `linkId` it
+  takes are stated in the `private-rooms` requirements of this change (see "Breaks current behaviour").
 
 ## Breaks current behaviour
 
-- `private-rooms`, "No links to a private room". Today every external link on a private item answers 403. After the
+- `private-rooms`, "No links to a private room", renamed to "Links of a private item need key material". Today every external link on a private item answers 403. After the
   change an external link with key material is stored; a request without it, and every invitation link, still answers
   403.
   - Web client (`../client`): offers no link for private items today, so no existing call changes; the client change
@@ -84,6 +87,12 @@ None.
     webhooks" (no delivery to subscribers outside the room).
   - Backup and restore: see the backup item below.
   - Portal migration and stored data: none, since no private item holds a link today.
+- `files-settings`, "Setting an external link of a file", "Setting an external link of a folder or room", "Primary
+  external link of a file" and "Primary external link of a folder or room". On an item of a private room, the room owner
+  and room managers set and revoke its links, although nobody may share the item itself; a new `linkId` held by a user,
+  a group or another link answers 400; the primary-link reads never create a link there. Ordinary items are unchanged.
+  The requirements of `private-rooms` added by this change state the private case; `files-settings` is updated when the
+  change is archived.
 - `private-rooms`, "Access keys of a room", "Missing file keys of a room" and "Issuing file keys". The answers gain
   entries for links, each marked as a link and named by the link id. A client that counts entries as members must skip
   them. Only rooms with a link are affected, and none exists today.

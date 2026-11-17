@@ -245,7 +245,7 @@ public class FileShareDtoHelper(
     UserManager userManager,
     EmployeeFullDtoHelper employeeWrapperFullHelper,
     ApiDateTimeHelper apiDateTimeHelper,
-    ASC.Files.Core.Data.ShareLinkKeyDao shareLinkKeyDao)
+    ShareLinkKeyDao shareLinkKeyDao)
 {
     public async Task<FileShareDto> Get(AceWrapper aceWrapper)
     {
