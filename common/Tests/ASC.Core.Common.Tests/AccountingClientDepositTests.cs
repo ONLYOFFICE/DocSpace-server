@@ -89,7 +89,10 @@ public class AccountingClientDepositTests
         var filter = new DepositFilter
         {
             Initiator = DepositInitiator.Automatic,
-            Metadata = new Dictionary<string, string> { ["details"] = "Automatic top up", ["SourceId"] = "promo", ["empty"] = null!, ["blank"] = " " }
+            Metadata = new Dictionary<string, string>
+            {
+                ["details"] = "Automatic top up", ["SourceId"] = "promo", ["null"] = null!, ["empty"] = "", ["blank"] = " "
+            }
         };
 
         await client.GetCustomerDepositsAsync("portal-1", filter);
@@ -98,8 +101,7 @@ public class AccountingClientDepositTests
         query["initiator"].Should().Be("Automatic");
         query["metadata.details"].Should().Be("Automatic top up");
         query["metadata.SourceId"].Should().Be("promo");
-        query.Keys.Should().NotContain(key => key.Contains("empty"), "a pair without a value is not sent");
-        query.Should().ContainKey("metadata.blank", "the client still sends a blank value; the endpoint drops it before");
+        query.Keys.Should().NotContain(["metadata.null", "metadata.empty", "metadata.blank"], "a pair without a value or with a blank one is not sent");
     }
 
     // The initiator is for display only: a value this version does not know reads as null, and the page still loads.
