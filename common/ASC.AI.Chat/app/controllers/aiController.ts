@@ -50,6 +50,7 @@ import {
   setKnowledgeRoomIds,
   setRoundAttachmentIds,
   setRoundProfileId,
+  setRoundThreadId,
 } from "../requestContext.js";
 import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { applyAiProjectChatContext } from "../storage/aiProjectChatContext.js";
@@ -951,6 +952,7 @@ export const aiController = {
     // The effective profile, for the document agent tool: it runs the agent
     // on the chat's own model, and `callTool` carries no profile.
     setRoundProfileId(req.body.profileId);
+    setRoundThreadId(req.body.threadId);
     // The effective profileId must reference an existing profile BEFORE the
     // stream opens: a malformed or unknown id otherwise surfaces only as an
     // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
@@ -1009,6 +1011,7 @@ export const aiController = {
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
     setRoundProfileId(req.body.profileId);
+    setRoundThreadId(req.body.threadId);
     // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
     {
       const profileError = await unknownProfileIdError(req.body.profileId);

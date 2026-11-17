@@ -90,6 +90,11 @@ export interface RequestContext {
   // finalized it (thread prefill and AI-project binding applied). Read by
   // the document agent tool, whose `callTool` carries no profile.
   roundProfileId?: string;
+  // The thread the current chat round runs in: the one the request names,
+  // or the one the round created. Read by the document agent tool, so its
+  // results are kept among the thread's artifacts; the thread slice of the
+  // chat-context snapshot cannot say it once the round has touched the thread.
+  roundThreadId?: string;
   // Attachment ref ids of the current user message, captured before the
   // engine runs so an in-round tool call can hand the attached files on.
   roundAttachmentIds?: string[];

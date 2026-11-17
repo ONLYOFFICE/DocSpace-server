@@ -55,6 +55,9 @@ const resolveAiProjectEntityId = vi.fn(async (id: string | undefined) =>
 );
 vi.mock("../docspaceFilesApi.js", () => ({ resolveAiProjectEntityId }));
 
+const setRoundThreadId = vi.fn();
+vi.mock("../../requestContext.js", () => ({ setRoundThreadId }));
+
 const { aiService } = await import("../httpClient.js");
 const { HttpThreadsStorage } = await import("../threadsStorage.js");
 
@@ -62,6 +65,7 @@ const thread = { id: "t-1", title: "Chat", lastEditDate: 1 };
 const storage = new HttpThreadsStorage();
 
 beforeEach(() => {
+  setRoundThreadId.mockReset();
   vi.mocked(aiService.post).mockReset().mockResolvedValue(thread);
   vi.mocked(aiService.get)
     .mockReset()
@@ -85,6 +89,13 @@ describe("the project of a thread", () => {
       profileId: null,
       entityId: null,
     });
+  });
+
+  // The document agent keeps its results with the thread of the round, and a
+  // round that starts without one learns it here.
+  it("names the thread it created as the thread of the round", async () => {
+    await storage.create("Chat");
+    expect(setRoundThreadId).toHaveBeenCalledExactlyOnceWith("t-1");
   });
 
   it("is none for a folder that is not an AI project", async () => {

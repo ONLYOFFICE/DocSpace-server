@@ -76,6 +76,7 @@ import {
   getForwardedHeaders,
   getRoundAttachmentIds,
   getRoundProfileId,
+  getRoundThreadId,
   getSourceMeta,
 } from "../requestContext.js";
 import { resolveCustomServers } from "./customTools.js";
@@ -263,7 +264,11 @@ async function run(
     // The round's conversation is named too: one of an AI project keeps the
     // results among its artifacts, and the folder is where they go otherwise.
     outputs: {
-      url: outputsUrl(config, targetFolderId, readChatContext("thread")?.requested.threadId),
+      url: outputsUrl(
+        config,
+        targetFolderId,
+        getRoundThreadId() ?? readChatContext("thread")?.requested.threadId,
+      ),
       headers: ownServerHeaders(config),
     },
     // The task's log goes the same way as its results, into the folder the

@@ -176,6 +176,25 @@ export function getRoundProfileId(): string | undefined {
   return als.getStore()?.roundProfileId;
 }
 
+// The thread the current chat round runs in (see RequestContext.roundThreadId).
+// Set by the send handlers for an existing thread and by the threads storage
+// when the round creates one; the first value stays.
+export function setRoundThreadId(threadId: string | undefined): void {
+  const store = als.getStore();
+  if (
+    store &&
+    store.roundThreadId === undefined &&
+    typeof threadId === "string" &&
+    threadId.length > 0
+  ) {
+    store.roundThreadId = threadId;
+  }
+}
+
+export function getRoundThreadId(): string | undefined {
+  return als.getStore()?.roundThreadId;
+}
+
 // Attachment ref ids of the current user message (see RequestContext.roundAttachmentIds).
 export function setRoundAttachmentIds(ids: string[]): void {
   const store = als.getStore();

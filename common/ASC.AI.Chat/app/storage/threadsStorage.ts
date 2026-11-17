@@ -34,6 +34,7 @@
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject, getString, getNumber, getObject, getArray } from "../narrow.js";
 import { resolveAiProjectEntityId } from "./docspaceFilesApi.js";
+import { setRoundThreadId } from "../requestContext.js";
 import { PAGE_SIZE } from "@onlyoffice/ai-chat/core";
 import type { ThreadsStorage, ThreadsCursor } from "@onlyoffice/ai-chat/core";
 import type { Thread } from "@onlyoffice/ai-chat/core";
@@ -125,6 +126,8 @@ export class HttpThreadsStorage implements ThreadsStorage {
     if (!thread) {
       throw new Error("ai service returned invalid thread");
     }
+    // A round that started without a thread runs in this one from here on.
+    setRoundThreadId(thread.threadId);
     return thread;
   }
 
