@@ -94,7 +94,7 @@ import {
 } from "./documentAgentFiles.js";
 import { fileEditorUrl } from "./httpToolsAdapter.js";
 import { runDocumentTask, DocumentAgentError } from "./documentAgentClient.js";
-import type { DocumentAgentSettings } from "./documentAgentClient.js";
+import type { DocumentAgentSettings, DocumentTaskOutput } from "./documentAgentClient.js";
 import { getArray, getString, isObject } from "../narrow.js";
 import { aiServiceBaseUrl } from "../storage/httpClient.js";
 import { onlyofficeGatewayPath } from "../storage/profilesStorage.js";
@@ -309,12 +309,53 @@ async function run(
       : undefined,
   });
 
-  // Every artifact is a file the outputs endpoint took: its url is the editor
-  // link the endpoint answered, resolved by the agent against the endpoint's
-  // address, so only the file id in it is ours. The title is read back: a
-  // same-named file was saved under a numbered one.
-  const saved: { id: string; title: string; url: string }[] = [];
-  for (const artifact of result.artifacts) {
+  const saved = await savedFilesOf(result.artifacts);
+
+  if (result.state !== "completed") {
+    return {
+      error: `The document agent did not finish the task (${result.state}): ${result.text || "no details"}`,
+      ...(saved.length > 0 ? { data: { files: saved } } : {}),
+    };
+  }
+  return { data: { summary: result.text, files: saved } };
+}
+
+/**
+ * A file the task saved, as the tool's result lists it in `data.files`, also
+ * when the task did not finish. The chat model links it by `title` and
+ * `url`; a host draws the document card of the reply from the whole entry,
+ * also when the conversation is opened again, so fields are only ever added.
+ */
+export interface DocumentAgentFile {
+  /** The file's id in the Files API. */
+  id: string;
+  /** The title it was saved under, extension included: a same-named file gets a numbered one. */
+  title: string;
+  /** The relative editor link, `/doceditor?fileId=<id>`. */
+  url: string;
+  /**
+   * The folder it lies in: the conversation's artifacts, else the round's
+   * folder. Absent when the file could not be read back.
+   */
+  folderId?: string;
+  /** The extension, with its dot (`.docx`), for the file's type icon. */
+  fileExst?: string;
+  /** The absolute link the portal opens the file by; absent when the file could not be read back. */
+  webUrl?: string;
+}
+
+/**
+ * The result files of a task. Every artifact is a file the outputs endpoint
+ * took: its url is the editor link the endpoint answered, resolved by the
+ * agent against the endpoint's address, so only the file id in it is ours.
+ * The file is read back for its title, as a same-named file was saved under
+ * a numbered one, and for where it lies.
+ */
+export async function savedFilesOf(
+  artifacts: DocumentTaskOutput["artifacts"],
+): Promise<DocumentAgentFile[]> {
+  const saved: DocumentAgentFile[] = [];
+  for (const artifact of artifacts) {
     // The task's log is not a result and is none of the chat model's
     // business: it is a file for whoever looks into a task afterwards, so
     // nothing of it goes back with the tool's answer.
@@ -327,16 +368,24 @@ async function run(
       continue;
     }
     const info = await getFileInfo(id).catch(() => undefined);
-    saved.push({ id, title: info?.title ?? artifact.name, url: fileEditorUrl(id) });
+    const title = info?.title ?? artifact.name;
+    const fileExst = info?.fileExst ?? extensionOf(title);
+    saved.push({
+      id,
+      title,
+      url: fileEditorUrl(id),
+      ...(info?.folderId === undefined ? {} : { folderId: info.folderId }),
+      ...(fileExst === undefined ? {} : { fileExst }),
+      ...(info?.webUrl === undefined ? {} : { webUrl: info.webUrl }),
+    });
   }
+  return saved;
+}
 
-  if (result.state !== "completed") {
-    return {
-      error: `The document agent did not finish the task (${result.state}): ${result.text || "no details"}`,
-      ...(saved.length > 0 ? { data: { files: saved } } : {}),
-    };
-  }
-  return { data: { summary: result.text, files: saved } };
+/** The extension of a file name, with its dot, as the Files API writes `fileExst`. */
+function extensionOf(title: string): string | undefined {
+  const dot = title.lastIndexOf(".");
+  return dot > 0 && dot < title.length - 1 ? title.slice(dot).toLowerCase() : undefined;
 }
 
 /** The file id of an editor link as `fileEditorUrl` builds it, whatever host the agent put in front. */

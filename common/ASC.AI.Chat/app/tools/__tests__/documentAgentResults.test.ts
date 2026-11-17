@@ -40,10 +40,16 @@ vi.mock("../../storage/docspaceFileTransfer.js", () => ({
   mediaTypeOf: () => "application/octet-stream",
 }));
 vi.mock("../../storage/threadFiles.js", () => ({ uploadThreadArtifact: vi.fn() }));
+const getFileInfo = vi.fn();
+vi.mock("../../storage/docspaceFilesApi.js", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("../../storage/docspaceFilesApi.js")>()),
+  getFileInfo,
+}));
 
 const { uploadFile } = await import("../../storage/docspaceFileTransfer.js");
 const { uploadThreadArtifact } = await import("../../storage/threadFiles.js");
 const { saveResult } = await import("../documentAgentFiles.js");
+const { savedFilesOf } = await import("../documentAgent.js");
 
 const bytes = new Uint8Array([1, 2, 3]);
 const THREAD = "0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90";
@@ -90,5 +96,60 @@ describe("a result file of the document agent", () => {
       status: 500,
     });
     expect(uploadFile).not.toHaveBeenCalled();
+  });
+});
+
+describe("the files a document task names in its result", () => {
+  const editorLink = (id: string) => `https://agent.local/doceditor?fileId=${id}`;
+
+  beforeEach(() => {
+    getFileInfo.mockReset();
+  });
+
+  it("describes each saved file for the model and for the document card", async () => {
+    getFileInfo.mockResolvedValue({
+      title: "Proposal (1).docx",
+      folderId: "77",
+      fileExst: ".docx",
+      webUrl: "https://portal/doceditor?fileid=30",
+    });
+    expect(
+      await savedFilesOf([
+        {
+          name: "Proposal.docx",
+          mediaType: "application/docx",
+          url: editorLink("30"),
+        },
+      ]),
+    ).toEqual([
+      {
+        id: "30",
+        title: "Proposal (1).docx",
+        url: "/doceditor?fileId=30",
+        folderId: "77",
+        fileExst: ".docx",
+        webUrl: "https://portal/doceditor?fileid=30",
+      },
+    ]);
+    expect(getFileInfo).toHaveBeenCalledWith("30");
+  });
+
+  it("names a file it cannot read back by the artifact's name and extension", async () => {
+    getFileInfo.mockRejectedValue(new Error("403"));
+    expect(
+      await savedFilesOf([
+        { name: "Budget.XLSX", mediaType: "application/xlsx", url: editorLink("31") },
+      ]),
+    ).toEqual([{ id: "31", title: "Budget.XLSX", url: "/doceditor?fileId=31", fileExst: ".xlsx" }]);
+  });
+
+  it("leaves out the task's log and an artifact that names no file of ours", async () => {
+    getFileInfo.mockResolvedValue({ title: "Report.docx" });
+    const files = await savedFilesOf([
+      { name: "task-log.md", mediaType: "text/markdown", url: editorLink("40"), kind: "log" },
+      { name: "elsewhere.docx", mediaType: "application/docx", url: "https://example.com/x" },
+      { name: "Report.docx", mediaType: "application/docx", url: editorLink("41") },
+    ]);
+    expect(files.map((file) => file.id)).toEqual(["41"]);
   });
 });

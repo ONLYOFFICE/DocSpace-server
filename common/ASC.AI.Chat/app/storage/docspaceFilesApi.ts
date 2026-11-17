@@ -366,10 +366,17 @@ export function folderSourceType(info: DocspaceFolderInfo): SourceType {
 
 // Derived from the DocSpace `FileDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FileDto.cs) returned by
-// `GET /api/2.0/files/file/{fileId}` (FilesController.GetFileInfo). Only the
-// title is read: a file is always a `File` source, whatever its format.
+// `GET /api/2.0/files/file/{fileId}` (FilesController.GetFileInfo). A file is
+// always a `File` source, whatever its format, so the source needs only the
+// title; the rest describes a file a tool created (see documentAgent.ts).
 export interface DocspaceFileInfo {
   title?: string;
+  /** `FileDto.FolderId`: the folder the file lies in. */
+  folderId?: string;
+  /** `FileDto.FileExst`: the extension, with its dot. */
+  fileExst?: string;
+  /** `FileDto.WebUrl`: the absolute link the portal opens the file by. */
+  webUrl?: string;
 }
 
 function parseFileInfo(raw: unknown): DocspaceFileInfo | undefined {
@@ -377,7 +384,20 @@ function parseFileInfo(raw: unknown): DocspaceFileInfo | undefined {
   if (!envelope || getEntityId(envelope, "id") === undefined) {
     return undefined;
   }
-  return { title: getString(envelope, "title") };
+  const info: DocspaceFileInfo = { title: getString(envelope, "title") };
+  const folderId = getEntityId(envelope, "folderId");
+  const fileExst = getString(envelope, "fileExst");
+  const webUrl = getString(envelope, "webUrl");
+  if (folderId !== undefined) {
+    info.folderId = folderId;
+  }
+  if (fileExst) {
+    info.fileExst = fileExst;
+  }
+  if (webUrl) {
+    info.webUrl = webUrl;
+  }
+  return info;
 }
 
 /**
