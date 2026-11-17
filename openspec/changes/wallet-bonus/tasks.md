@@ -28,9 +28,10 @@
 
 ## 5. Specs and checks
 
-- [ ] 5.1 Add verification rows to `openspec/specs/billing/verification.md` for the new requirements, citing the tests of groups 1–4; verify each cited range opens on its test method
-- [ ] 5.2 Run `openspec validate --specs --no-interactive` and `python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec billing`; the published document does not hold the new operations until the SDKs are regenerated, so check them against this list instead: `applyPromoCode` → `BT/Bonus/PromoCodeTests.cs` (SDK), `getCustomerGoodwill` → `BT/Bonus/GoodwillBalanceTests.cs` (SDK)
+- [x] 5.1 Add verification rows to `openspec/specs/billing/verification.md` for the new requirements, citing the tests of groups 1–4; verify each cited range opens on its test method
+- [x] 5.2 Run `openspec validate --specs --no-interactive` and `python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec billing`; the published document does not hold the new operations until the SDKs are regenerated, so check them against this list instead: `applyPromoCode` → `BT/Bonus/PromoCodeTests.cs` (SDK), `getCustomerGoodwill` → `BT/Bonus/GoodwillBalanceTests.cs` (SDK)
 
 ## Workflow follow-up
 
-- Sync the delta into `openspec/specs/billing/spec.md` (apply) once the branch is reviewed, then archive the change.
+- The delta is synced into `openspec/specs/billing/spec.md`; archive the change once the branch is merged.
+- Tasks 2.5 and 3.3 need a stack with the socket service or a document builder next to the payment stubs.
