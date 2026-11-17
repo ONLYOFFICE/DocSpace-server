@@ -60,6 +60,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected DocSpace.API.SDK.Api.People.QuotaApi _peopleQuotaApi = null!;
     protected DocSpace.API.SDK.Api.Settings.QuotaApi _settingsQuotaApi = null!;
     protected UserStatusApi _userStatusApi = null!;
+    protected AuditTrailDataApi _auditTrailDataApi = null!;
 
     /// <summary>The payment services of the whole run, for what belongs to no single portal.</summary>
     protected PaymentServiceStub PaymentServices => fixture.Payments;
@@ -109,6 +110,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         _userStatusApi = _clients.UserStatusApi;
         _peopleQuotaApi = _clients.PeopleQuotaApi;
         _settingsQuotaApi = _clients.SettingsQuotaApi;
+        _auditTrailDataApi = _clients.AuditTrailDataApi;
 
         await _webApiClient.Authenticate(Owner);
     }

@@ -155,16 +155,34 @@ public class PromoCodeTests(AspireAppFixture fixture) : BaseTest(fixture)
         PaymentCalls.Count(c => c.Route == ApplyPromoCodeRoute).Should().Be(1);
     }
 
-    [Fact]
-    public async Task ApplyPromoCode_EmptyCode_ThrowsBadRequestWithoutAskingBilling()
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public async Task ApplyPromoCode_EmptyCode_ThrowsBadRequestWithoutAskingBilling(string code)
     {
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(""), TestContext.Current.CancellationToken));
+            async () => await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(code), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
         PaymentCalls.Should().NotContain(c => c.Route == ApplyPromoCodeRoute);
+    }
+
+    [Fact]
+    public async Task ApplyPromoCode_CodeOfHundredCharacters_IsPassedToBilling()
+    {
+        // Arrange
+        var code = new string('A', 100);
+        Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
+            """{"Status":"completed","Amount":10,"Currency":"USD","ExpiresAt":null}""");
+
+        // Act
+        await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(code), TestContext.Current.CancellationToken);
+
+        // Assert
+        var call = PaymentCalls.Should().ContainSingle(c => c.Route == ApplyPromoCodeRoute).Subject;
+        BillingValue(call, "Code").Should().Be(code);
     }
 
     [Fact]
