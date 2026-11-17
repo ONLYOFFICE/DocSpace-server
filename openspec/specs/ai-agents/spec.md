@@ -445,19 +445,25 @@ take no folder in the section root (403) and are deleted outright.
 ### Requirement: Members of the AI rooms
 
 An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
-the same without Editor, an AI project only Project manager (Room manager) and Member (Read). A Guest SHALL
-NOT hold any role in a project (403, nobody added) while a User joins through a link as Member. Every member
-reads the project; only a manager edits it; a non-member of any role, a DocSpace admin included, SHALL NOT
-read its model, sources or skills (403).
+the same without Editor, an AI project only Room manager and Content creator. The members of a project are
+users only: a group SHALL NOT be invited to a project with any role (403, "The role is not available for this
+user type"). A Guest SHALL NOT hold any role in a project (403, nobody added) while a User joins through a
+link as Content creator. Every member reads the project; only a Room manager edits it; a non-member of any
+role, a DocSpace admin included, SHALL NOT read its model, sources or skills (403).
 
 #### Scenario: Guest invited to a project
 
-- **WHEN** the owner invites a Guest to a project as Member by id, by email or through an invitation link
+- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
 - **THEN** the system answers 403 and the Guest is not a member
 
-#### Scenario: Member reads, manager writes
+#### Scenario: Group invited to a project
 
-- **WHEN** a Member reads the project model and then sets it
+- **WHEN** the owner invites a group to a project with any role
+- **THEN** the system answers 403 and the group is not a member
+
+#### Scenario: Content creator reads, Room manager writes
+
+- **WHEN** a Content creator of the project reads the project model and then sets it
 - **THEN** the read answers 200 and the write 403
 
 ### Requirement: The model of an AI project
@@ -470,17 +476,17 @@ Instructions room or an unknown id answers 404 on either route.
 
 #### Scenario: Image profile refused
 
-- **WHEN** a manager sets an image-only profile on a project that runs on a chat profile
+- **WHEN** a Room manager of the project sets an image-only profile on a project that runs on a chat profile
 - **THEN** the system answers 400 and the project keeps its model
 
-#### Scenario: Member reads the fixed model
+#### Scenario: Content creator reads the fixed model
 
-- **WHEN** a Member reads the model of a project bound to profile A while the portal's Chat binding is B
+- **WHEN** a Content creator of the project reads the model of a project bound to profile A while the portal's Chat binding is B
 - **THEN** A is returned
 
 #### Scenario: Model moved
 
-- **WHEN** a manager sets another chat profile on a project with an open thread
+- **WHEN** a Room manager of the project sets another chat profile on a project with an open thread
 - **THEN** new rounds run on the new profile and the existing thread keeps its model
 
 #### Scenario: Selection cannot be cleared
@@ -494,7 +500,7 @@ Instructions room or an unknown id answers 404 on either route.
 `linkProjectSources` SHALL link active rooms of those two types that the caller manages and refuse the whole
 call (400, linking nothing) for any other room id, an empty list, over 40 ids or more than 20 rooms of one
 kind; `unlinkProjectSources` SHALL remove the listed links without checking rights on the rooms. Both writes
-need a project manager (403) and are audited.
+need a Room manager of the project (403) and are audited.
 
 #### Scenario: Over the limit
 
@@ -519,16 +525,14 @@ need a project manager (403) and are audited.
 ### Requirement: Access through a project
 
 A member of a project SHALL read every room linked to it and the files inside, through a membership of the
-project, without the room being listed in the project's member section. A project's members are users only:
-a group SHALL NOT be invited to a project with any role (403, "The role is not available for this user
-type"), so a membership never comes through a group; a non-member
-SHALL NOT (403). Unlinking the room or removing the member from the project SHALL end that access, while a
+project, without the room being listed in the project's member section; a non-member SHALL NOT (403).
+Unlinking the room or removing the member from the project SHALL end that access, while a
 member's own role in the room is never lowered by the project. `getRoomSkills` for a project SHALL answer
 the skills of its linked Instructions rooms to any member.
 
 #### Scenario: Access ends with the link
 
-- **WHEN** a Member reads a file of a linked Knowledge room and the manager then unlinks the room
+- **WHEN** a Content creator of the project reads a file of a linked Knowledge room and a Room manager of the project then unlinks the room
 - **THEN** the read answers 200 before and 403 after
 
 ### Requirement: Skills of an Instructions room
@@ -933,7 +937,7 @@ thread.
 
 #### Scenario: Project answers on its model
 
-- **WHEN** a project manager sends into a project thread naming another profile
+- **WHEN** a Room manager of the project sends into a project thread naming another profile
 - **THEN** the reply runs on the project's model and the thread still reports that model
 - **AND** when a read member sends the same, the request does not reach the project's model (bug 82914)
 

@@ -121,14 +121,15 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
 | Knowledge room needs vectorization 403 | `Security:1422,1441`; `AI/Core/Settings` | CODE-ONLY |
 | **Members of the AI rooms** | | |
-| Guest not in a project (scenario); User joins through a link as Member | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
-| Member reads, manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
+| Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
+| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
+| Content creator reads, Room manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
 | **The model of an AI project** | | |
 | Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,167` | TEST-CONFIRMED [run: PASS] |
 | Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:106,123,137,150` | TEST-CONFIRMED [run: PASS] |
 | Image profile refused (scenario) | `T/ChatTests/ChatProjectModelTests.cs:238,255` | TEST-CONFIRMED [run: PASS] |
-| Member reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60` | TEST-CONFIRMED [run: PASS] (`ChatProjectModelTests.GetModel_ProjectMember_…` fails later, at the round on the project's model: A16, not this claim) |
+| Content creator reads the fixed model (scenario) | `Hub/AiProjectModelTests.cs:60` | TEST-CONFIRMED [run: PASS] (`ChatProjectModelTests.GetModel_ProjectMember_…` fails later, at the round on the project's model: A16, not this claim) |
 | Model moved (scenario) | `T/ChatTests/ChatProjectModelTests.cs:94` | TEST-CONFIRMED [run: PASS] |
 | Audited, pushed | `products/ASC.Files/Server/Api/VirtualRoomsController.cs` (`setProjectModel`) | CODE-ONLY |
 | **Sources of an AI project** | | |
@@ -138,8 +139,8 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Manager only | `Hub/AiProjectSourcesLinkTests.cs:231`; `Hub/AiProjectSourcesUnlinkTests.cs:73,91` | TEST-CONFIRMED [run: PASS] |
 | Audited and pushed | `products/ASC.Files/Core` (share and socket calls in the link service) | CODE-ONLY |
 | **Access through a project** | | |
-| Member reads linked room; non-member 403; not listed in members; a group cannot be invited to a project (403) | `Hub/AiProjectMemberAccessTests.cs:45,67,142`; `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED [run: PASS] (the group refusal: not run yet) |
-| Unlink / removal ends it (scenario); own role not lowered | `Hub/AiProjectMemberAccessTests.cs:103,122,140` | TEST-CONFIRMED [run: PASS] |
+| Member reads linked room; non-member 403; not listed in members | `Hub/AiProjectMemberAccessTests.cs:45,67,142` | TEST-CONFIRMED [run: PASS] |
+| Unlink / removal ends it (scenario); own role not lowered | `Hub/AiProjectMemberAccessTests.cs:85,104,122` | TEST-CONFIRMED [run: PASS] |
 | Skills for a member | `Hub/AiProjectMemberAccessTests.cs:177`; `Hub/AiRoomSkillsTests.cs:62` | TEST-CONFIRMED [run: PASS] |
 | **Skills of an Instructions room** | | |
 | Front matter rules, upload, chunked, new version (scenario "Invalid name") | `Instr/SkillUploadTests.cs:41-221` | TEST-CONFIRMED [run: PASS] |

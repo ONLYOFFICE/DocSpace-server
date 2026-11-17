@@ -537,7 +537,7 @@ the registration is completed, which SHALL set the type the link grants, ignorin
 #### Scenario: Joining an AI project through its link
 
 - **WHEN** a signed-in User who is not a member follows the invitation link of an AI project, which grants Room manager
-- **THEN** `result` is `UserExisted` and the User is a member with the Read access, the highest free role of a project
+- **THEN** `result` is `UserExisted` and the User is a member with the Content creator access, the highest free role of a project
 - **AND** a signed-in Guest following the same link gets `QuotaFailed` and is not added
 
 #### Scenario: Individual email link already accepted
