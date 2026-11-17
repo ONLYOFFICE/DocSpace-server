@@ -69,7 +69,7 @@ const { DocspaceApiHttpError } = await import("../docspaceFilesApi.js");
 const projectRoom = (overrides: Record<string, unknown> = {}) => ({
   id: 42,
   title: "Sales",
-  access: 2,
+  access: 11,
   inRoom: true,
   ...overrides,
 });

@@ -83,7 +83,7 @@ async function readProjectSources(projectId: string): Promise<AiProjectSources> 
 export interface AiProjectChatContext {
   projectId: number;
   title: string;
-  /** The caller's `access` on the room: 1 project owner, 9 Project manager, 2 Member, 0 none (an admin outside the project). */
+  /** The caller's `access` on the room: 1 project owner, 9 Project manager, 11 Member (the room's Content creator), 0 none (an admin outside the project). */
   myRole: number;
   /** Members only: owner, Project manager, Member (the room's `inRoom`). */
   canChat: boolean;
