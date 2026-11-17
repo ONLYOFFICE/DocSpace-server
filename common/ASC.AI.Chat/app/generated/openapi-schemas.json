@@ -5077,7 +5077,7 @@
             "items": {
               "type": "string"
             },
-            "description": "What was skipped: `instructionsNotSaved` when the agent's instructions could not be stored."
+            "description": "What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` when its instructions could not be stored."
           },
           "templateId": {
             "type": "string",

@@ -36,16 +36,19 @@
  * client would by hand. A skill set becomes an Instructions room holding its
  * skills, a knowledge base a Knowledge room holding its files, and an agent
  * an AI project room linked to the rooms of its skill sets and knowledge
- * bases, which are installed with it, and given its instructions.
+ * bases, which are installed with it, and given the portal's chat model and
+ * its instructions.
  *
  * Every install makes new rooms: nothing is matched against what the portal
  * already holds. A step the Files service refuses fails the install with its
- * status, and the rooms made before it stay. The agent's instructions are the
- * one exception: a portal that does not store them still gets the agent, and
- * the answer says so in `warnings`. A template's description and category
- * have nowhere to go in a room and are not installed.
+ * status, and the rooms made before it stay. The agent's model and its
+ * instructions are the exceptions: a portal that has no chat model, or does
+ * not store one of the two, still gets the agent, and the answer says so in
+ * `warnings`. A template's description and category have nowhere to go in a
+ * room and are not installed.
  */
 
+import { portalChatProfileId } from "../storage/aiProjectChatContext.js";
 import { mediaTypeOf, uploadFile } from "../storage/docspaceFileTransfer.js";
 import { DocspaceApiHttpError, filesApiSend } from "../storage/docspaceFilesApi.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
@@ -70,7 +73,7 @@ export interface InstalledTemplate extends InstalledRoom {
   skillSets: InstalledRoom[];
   /** The Knowledge rooms made for an agent's knowledge bases; empty otherwise. */
   knowledgeBases: InstalledRoom[];
-  /** What was skipped: `instructionsNotSaved`. */
+  /** What was skipped: `modelNotSaved`, `instructionsNotSaved`. */
   warnings: string[];
 }
 
@@ -130,6 +133,21 @@ async function installAgent(
   }
 
   const warnings: string[] = [];
+  // A template names no model, so the agent is given the one the portal
+  // chats on now and keeps it when the portal's choice changes later.
+  const profileId = await portalChatProfileId();
+  try {
+    if (!profileId) {
+      throw new DocspaceApiHttpError(404, "Not Found", "the portal has no chat model");
+    }
+    await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/model`, { profileId });
+  } catch (err) {
+    if (!(err instanceof DocspaceApiHttpError)) {
+      throw err;
+    }
+    logger.warn(`installTemplate: ${template.id}: model not saved (${err.status})`);
+    warnings.push("modelNotSaved");
+  }
   try {
     await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/instructions`, {
       instructions: template.instructions,

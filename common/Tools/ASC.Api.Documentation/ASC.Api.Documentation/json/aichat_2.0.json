@@ -9519,7 +9519,7 @@
         ],
         "operationId": "aiTemplatesInstall",
         "summary": "Install a template",
-        "description": "Installs one template into the portal through the Files API with the caller's own credentials, so the Files service decides whether the caller may create the rooms. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`) linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given its instructions. Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The instructions are the exception: when they cannot be stored the agent is still returned, with `instructionsNotSaved` in `warnings`. The template's description and category are not written anywhere.",
+        "description": "Installs one template into the portal through the Files API with the caller's own credentials, so the Files service decides whether the caller may create the rooms. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`) linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`) and its instructions. Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model and the instructions are the exceptions: when the portal has no chat model, or either of the two cannot be stored, the agent is still returned, with `modelNotSaved` or `instructionsNotSaved` in `warnings`. The template's description and category are not written anywhere.",
         "responses": {
           "200": {
             "description": "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
@@ -9598,7 +9598,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "description": "What was skipped: `instructionsNotSaved` when the agent's instructions could not be stored."
+                      "description": "What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` when its instructions could not be stored."
                     },
                     "templateId": {
                       "type": "string",

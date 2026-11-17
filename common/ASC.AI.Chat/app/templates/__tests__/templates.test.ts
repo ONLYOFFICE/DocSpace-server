@@ -51,6 +51,9 @@ vi.mock("../../storage/docspaceFilesApi.js", () => {
   return { DocspaceApiHttpError, filesApiSend: vi.fn() };
 });
 
+const portalChatProfileId = vi.fn();
+vi.mock("../../storage/aiProjectChatContext.js", () => ({ portalChatProfileId }));
+
 const { uploadFile } = await import("../../storage/docspaceFileTransfer.js");
 const { DocspaceApiHttpError, filesApiSend } = await import("../../storage/docspaceFilesApi.js");
 const { findTemplate, readTemplateCatalog, readTemplateFile } = await import("../catalog.js");
@@ -69,6 +72,7 @@ function answerRooms(): void {
 beforeEach(() => {
   vi.mocked(uploadFile).mockReset().mockResolvedValue({ id: "1", title: "file" });
   vi.mocked(filesApiSend).mockReset();
+  portalChatProfileId.mockReset().mockResolvedValue("p1");
   answerRooms();
 });
 
@@ -180,7 +184,7 @@ describe("installTemplate", () => {
     expect(result.kind).toBe("knowledgeBase");
   });
 
-  it("installs an agent with its sources, links them and writes its instructions", async () => {
+  it("installs an agent with its sources, links them and writes its model and instructions", async () => {
     const template = catalog.agents[0]!;
     const result = await installTemplate(catalog, template.id);
     expect(vi.mocked(filesApiSend).mock.calls).toEqual([
@@ -192,6 +196,7 @@ describe("installTemplate", () => {
       ],
       ["POST", "rooms", { title: template.name, roomType: 12 }],
       ["POST", "rooms/103/sources", { roomIds: [101, 102] }],
+      ["PUT", "rooms/103/model", { profileId: "p1" }],
       ["PUT", "rooms/103/instructions", { instructions: template.instructions }],
     ]);
     expect(result).toMatchObject({
@@ -204,9 +209,29 @@ describe("installTemplate", () => {
     });
   });
 
+  it("keeps the agent when the portal has no chat model, and says so", async () => {
+    portalChatProfileId.mockResolvedValue(null);
+    const result = await installTemplate(catalog, catalog.agents[0]!.id);
+    expect(result.warnings).toEqual(["modelNotSaved"]);
+    expect(
+      vi.mocked(filesApiSend).mock.calls.some(([, apiPath]) => apiPath.endsWith("/model")),
+    ).toBe(false);
+  });
+
+  it("keeps the agent when its model is refused, and says so", async () => {
+    vi.mocked(filesApiSend).mockImplementation(async (_method, apiPath, body) => {
+      if (apiPath.endsWith("/model")) {
+        throw new DocspaceApiHttpError(400, "Bad Request", "url");
+      }
+      return apiPath === "rooms" ? { id: 7, title: (body as { title: string }).title } : undefined;
+    });
+    const result = await installTemplate(catalog, catalog.agents[0]!.id);
+    expect(result.warnings).toEqual(["modelNotSaved"]);
+  });
+
   it("keeps the agent when its instructions are refused, and says so", async () => {
     vi.mocked(filesApiSend).mockImplementation(async (method, apiPath, body) => {
-      if (method === "PUT") {
+      if (method === "PUT" && apiPath.endsWith("/instructions")) {
         throw new DocspaceApiHttpError(404, "Not Found", "url");
       }
       return apiPath === "rooms" ? { id: 7, title: (body as { title: string }).title } : undefined;

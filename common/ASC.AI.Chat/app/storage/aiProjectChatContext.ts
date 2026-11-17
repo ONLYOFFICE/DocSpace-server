@@ -125,7 +125,7 @@ async function readProjectProfileId(projectId: string): Promise<string | null> {
 // names a profile that exists and can chat. The availability is that of the
 // effective profile: a project model that is gone is not replaced by the
 // portal default.
-async function portalChatProfileId(): Promise<string | null> {
+export async function portalChatProfileId(): Promise<string | null> {
   const read = (type: ActionType) => storage.assignments.readByType(type).catch(() => null);
   return (await read(ActionType.Chat)) ?? (await read(ActionType.Default));
 }
