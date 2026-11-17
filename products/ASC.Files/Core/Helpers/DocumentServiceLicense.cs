@@ -209,22 +209,41 @@ public class DocumentServiceLicense(ICache cache,
             return DocsTrialCheck.Unknown;
         }
 
-        if (commandResponse == null)
+        var serviceConfigured = coreBaseSettings.Standalone && !string.IsNullOrEmpty(filesLinkUtility.DocServiceCommandUrl);
+        var check = ClassifyAnswer(serviceConfigured, commandResponse, DateTime.UtcNow);
+        if (check.State == DocsTrialState.Unknown)
+        {
+            logger.WarningDocsTrialUnreadable(
+                commandResponse?.Error,
+                commandResponse?.ErrorString,
+                commandResponse?.Server?.ResultType,
+                commandResponse?.License?.DueDate);
+        }
+
+        return check;
+    }
+
+    /// <summary>
+    /// Reads the trial state from the answer to the license command, or from its absence.
+    /// </summary>
+    /// <param name="serviceConfigured">
+    /// Whether there is an editing service to ask: a self-hosted installation with the address of its command service.
+    /// </param>
+    /// <param name="commandResponse">The answer read; <c>null</c> when nothing was asked or the body was <c>null</c>.</param>
+    /// <param name="utcNow">The current UTC time.</param>
+    /// <remarks>
+    /// With no service to ask there is no trial to follow. With a service, a missing answer (a body of <c>null</c>)
+    /// says nothing about its trial and is <see cref="DocsTrialState.Unknown"/>: read as "no trial", it would be kept as
+    /// a known answer and make the wizard ask for a file the service never refused.
+    /// </remarks>
+    public static DocsTrialCheck ClassifyAnswer(bool serviceConfigured, CommandResponse commandResponse, DateTime utcNow)
+    {
+        if (!serviceConfigured)
         {
             return DocsTrialCheck.NotTrial;
         }
 
-        var check = ClassifyTrial(commandResponse, DateTime.UtcNow);
-        if (check.State == DocsTrialState.Unknown)
-        {
-            logger.WarningDocsTrialUnreadable(
-                commandResponse.Error,
-                commandResponse.ErrorString,
-                commandResponse.Server?.ResultType,
-                commandResponse.License?.DueDate);
-        }
-
-        return check;
+        return commandResponse == null ? DocsTrialCheck.Unknown : ClassifyTrial(commandResponse, utcNow);
     }
 
     /// <summary>

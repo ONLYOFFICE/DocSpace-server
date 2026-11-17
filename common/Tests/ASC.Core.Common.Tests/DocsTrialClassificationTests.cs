@@ -141,6 +141,22 @@ public sealed class DocsTrialClassificationTests
         Classify(answer).Should().Be(DocsTrialCheck.Unknown);
     }
 
+    [Fact]
+    public void ClassifyAnswer_NoServiceToAsk_IsNotATrial()
+    {
+        // A hosted portal or an installation without the address of the editing service has no trial to follow.
+        DocumentServiceLicense.ClassifyAnswer(serviceConfigured: false, null, _now).Should().Be(DocsTrialCheck.NotTrial);
+    }
+
+    [Fact]
+    public void ClassifyAnswer_BodyOfNull_IsUnknown()
+    {
+        // The service answered with the JSON literal null: no answer about its trial. Read as "no trial", it would be
+        // kept as a known answer and make a wizard with a silent service ask for a file.
+        DocumentServiceLicense.ClassifyAnswer(serviceConfigured: true, DocumentService.ReadCommandResponse("null"), _now)
+            .Should().Be(DocsTrialCheck.Unknown);
+    }
+
     private static DocsTrialCheck Classify(string answer)
     {
         return DocumentServiceLicense.ClassifyTrial(DocumentService.ReadCommandResponse(answer), _now);

@@ -46,8 +46,17 @@ See proposal.md - Why. The design relies on these existing requirements:
   "not a trial" or "unknown", never "expired".
 - **Unknown changes nothing.** The background re-read leaves the tariff as it is. The wizard keeps the
   installation's own trial with its current end and records the acceptance, but still requires a file when that
-  trial is not in force or has ended, or the last answer known said the editing service runs no trial or its trial
-  ended. The anonymous question uses the last answer of the past 3 days, or answers true with none.
+  trial is not in force or has ended, or the last answer known said the editing service runs no trial, that its
+  trial ended, or that it runs a trial that would leave no trial in force today once applied: the same answers make
+  the anonymous question ask for a file. The anonymous question uses the last answer of the past 3 days, or answers
+  true with none; with none known the wizard still completes on the own trial, by decision, since an editing
+  service that never answered is not read as one without a trial.
+- **The decisions are functions of what was read.** Whether the wizard page asks for a file, whether the wizard
+  completes on its own trial while the editing service is silent, how an answer or its absence is read, and how a
+  tariff write fans out to its portals are functions without I/O (`DocsTrialDecision`,
+  `DocumentServiceLicense.ClassifyAnswer`, `TariffChangeNotification`), unit-tested, because no test profile starts
+  an Enterprise installation next to an editing service on its trial. What stays untested is the wiring that reads
+  their inputs.
 - **A trial that would already be over is no trial.** The wizard and the anonymous question take the editing
   service's trial only when the end it leads to (the earlier of the installation's end and the editing service's)
   is today or later; otherwise a file is required, as before the change, and the wizard writes nothing. The re-read
@@ -81,7 +90,13 @@ See proposal.md - Why. The design relies on these existing requirements:
   write, and a portal that cannot be told does not keep the others from being told. A tariff that becomes not paid
   only because its day passed is not a write and sends nothing.
 - **One lock for the license writers.** The trial write and the license-file write take the same distributed lock,
-  and the trial checks the license file and the license quota under it.
+  and the trial checks the license file and the license quota under it. Across processes this holds only with a
+  distributed lock provider (Redis or ZooKeeper); without one the lock is per process, and the check under it only
+  narrows the race between the API and the worker.
+- **Only the trial of the first tariff read is followed.** The re-read follows the `start_trial` quota the tariff
+  service creates on the first read of the tariff. A trial activated on request is left as it is, and before the
+  first tariff read there is nothing to follow yet, so such a pass changes nothing. The wizard, on an active trial of
+  the editing service, writes the `start_trial` quota itself, replacing a trial activated on request.
 - **Completing the wizard counts as acceptance.** The user agrees to the license terms in the wizard, so a license
   file that later appears on the license path is applied by the background re-read without a separate accept.
 
@@ -102,8 +117,9 @@ See proposal.md - Why. The design relies on these existing requirements:
 - [Without Redis there is no shared cache] → Each process then keeps its own copy, as the rest of the server's
   caches do: the answer of the worker does not reach the API, and a restart loses the last answer. The re-read and
   the wizard still ask the editing service themselves.
-- [A trial write that started before an accept finishes after it] → The shared lock orders them; the accept always
-  ends with the license in force.
+- [A trial write that started before an accept finishes after it] → The shared lock orders them, so the accept ends
+  with the license in force, across processes only with a distributed lock provider (Redis or ZooKeeper); without one
+  the lock is per process, and the check of the license file under it only narrows the race.
 
 ## Migration Plan
 

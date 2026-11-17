@@ -188,21 +188,23 @@ public sealed class LicenseReaderTests : IDisposable
     // across midnight must not move an end to the other side of today.
 
     [Fact]
-    public async Task IsOwnTrialInForceAsync_OwnTrialEnded_IsFalse()
+    public async Task GetOwnTrialEndAsync_OwnTrialEnded_IsItsStoredEnd()
     {
-        // The wizard falls back on the installation's own trial when the editing service is silent; one that ended
-        // must ask for a license file instead.
-        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(-2));
+        // The wizard decides on the end itself (DocsTrialDecision.CompletesOnOwnTrial), so an ended trial still gives its
+        // end, not "no trial".
+        var end = DateTime.UtcNow.Date.AddDays(-2);
+        var reader = CreateReaderOnOwnTrial(end);
 
-        (await reader.IsOwnTrialInForceAsync()).Should().BeFalse();
+        (await reader.GetOwnTrialEndAsync()).Should().Be(end);
     }
 
     [Fact]
-    public async Task IsOwnTrialInForceAsync_OwnTrialNotEnded_IsTrue()
+    public async Task GetOwnTrialEndAsync_LicenseFromAFile_IsNone()
     {
-        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(1));
+        // A license from a file is no trial of the installation, whatever its end.
+        var reader = CreateReaderOnOwnTrial(DateTime.UtcNow.Date.AddDays(10), quotaName: LicenseReader.LicenseQuotaName);
 
-        (await reader.IsOwnTrialInForceAsync()).Should().BeTrue();
+        (await reader.GetOwnTrialEndAsync()).Should().BeNull();
     }
 
     [Fact]
@@ -254,9 +256,10 @@ public sealed class LicenseReaderTests : IDisposable
     /// <param name="storedTariffReadable">
     /// Whether the stored tariff may be read; otherwise only the cached one answers and a read of the stored one fails.
     /// </param>
-    private LicenseReader CreateReaderOnOwnTrial(DateTime trialDueDate, bool storedTariffReadable = true)
+    /// <param name="quotaName">The name of the license quota, the own trial's by default.</param>
+    private LicenseReader CreateReaderOnOwnTrial(DateTime trialDueDate, bool storedTariffReadable = true, string quotaName = LicenseReader.StartTrialQuotaName)
     {
-        var quota = new TenantQuota(LicenseReader.LicenseQuotaId) { Name = LicenseReader.StartTrialQuotaName, Trial = true };
+        var quota = new TenantQuota(LicenseReader.LicenseQuotaId) { Name = quotaName, Trial = true };
         var tariff = new Tariff { Quotas = [new ASC.Core.Billing.Quota(LicenseReader.LicenseQuotaId, 1)], DueDate = trialDueDate, CustomerId = "" };
 
         var quotaService = StubProxy<IQuotaService>.Create(new()

@@ -41,8 +41,10 @@ namespace ASC.Files.Worker.Services;
 /// <remarks>
 /// A license file is applied only once the license has been accepted (the setup wizard, also one completed on the
 /// editing service's trial, or the accept call), and a staged file is never touched: putting a license in force is
-/// the user's decision, not this service's. The installation's own trial follows the editing service's trial whether
-/// the license was accepted or not, also before the wizard is completed; its end is only ever brought closer.
+/// the user's decision, not this service's. The trial an Enterprise installation creates on the first read of its
+/// tariff follows the editing service's trial whether the license was accepted or not, also before the wizard is
+/// completed; its end is only ever brought closer. A trial activated on request is not followed, and before the
+/// tariff was first read there is no trial to follow yet, so a pass then changes nothing.
 /// </remarks>
 [Singleton]
 public class RefreshLicenseService(
@@ -90,16 +92,16 @@ public class RefreshLicenseService(
     }
 
     /// <summary>
-    /// While no license file is in force and the installation runs its own trial, brings the trial's end closer to the
-    /// end of the trial the editing service runs, never later, so the portal stops being usable by the day the editors
-    /// do.
+    /// While no license file is in force and the installation runs the trial it creates on the first read of its tariff
+    /// (not one activated on request), brings the trial's end closer to the end of the trial the editing service runs,
+    /// never later, so the portal stops being usable by the day the editors do.
     /// </summary>
     /// <remarks>
     /// An editing service that cannot be asked, or runs under a license file of its own, changes nothing.
     /// </remarks>
     private static async Task RefreshDocsTrialAsync(LicenseReader licenseReader, DocumentServiceLicense documentServiceLicense)
     {
-        if (!await licenseReader.IsStartTrialInForceAsync())
+        if (!await licenseReader.IsStartTrialQuotaAsync())
         {
             return;
         }

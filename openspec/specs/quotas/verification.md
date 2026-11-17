@@ -58,7 +58,7 @@ trimming by user type; the `getPortalQuota` and `saveRoomQuotaSettings` texts be
 | Strict for every non-editor write; grace only on the editor save path | `common/ASC.Data.Storage/IQuotaController.cs:38-42`; `TenantQuotaController.cs:232-249`; `FileDao.cs:450-455`; no test | CODE-ONLY (the tariff grace needs a `maxTotalSize`, which the Standalone stand lacks, and an editor save session; the Standalone portal quota, which has a soft overrun of its own, is in the enforcement row below) |
 | **Editor save may overrun once; editor opens read-only** | | |
 | Grace = `web:available-file-size`, default 100 MiB; only when used ≤ limit and file ≤ `maxFileSize`; serialized by `tenant_quota_{tenantId}` lock; audit "saved but tenant quota exceeded"; opt-in from `EntryManager.SaveEditingAsync` | `FileDao.cs:397-475`; `common/ASC.Data.Storage/TenantQuotaController.cs:34-44, 237-249`; `common/ASC.Data.Storage/Constants.cs:45`; `products/ASC.Files/Core/Utils/EntryManager.cs:1675-1684`; release notes v3.7, v4.0 | CODE-ONLY |
-| `quota_exceeded` scope `tenant` raised by the quota-row update | `TenantQuotaController.cs:109-146`; `common/ASC.Core.Common/Quota/QuotaSocketManager.cs:180-200` | CODE-ONLY |
+| `quota_exceeded` scope `tenant` raised by the quota-row update | `TenantQuotaController.cs:109-146`; `common/ASC.Core.Common/Quota/QuotaSocketManager.cs:207-227` | CODE-ONLY |
 | Editor opens without edit right with `quotaExceededScope` Tenant / Room / User | `products/ASC.Files/Core/Services/DocumentService/DocumentServiceHelper.cs:114-173`; `products/ASC.Files/Server/Api/EditorController.cs:291-300`; `products/ASC.Files/Server/ApiModels/ResponseDto/ConfigurationDto.cs:135-139`; release note v3.7; `07_Settings/Quota/QuotaEnforcementTests.cs:165-214` (`openEdit` after a soft overrun: `quotaExceededScope` User / Room / Tenant and `document.permissions.edit` false) | TEST-CONFIRMED [run: FAIL-BUG] (Tenant through the Standalone portal quota; the tariff `maxTotalSize` branch stays CODE-ONLY) |
 | **Default user quota of the portal** | | |
 | Owner / DocSpace admin read `getUserQuotaSettings` (200, `lastModified` set) | `02_Settings/Quota/UserQuotaSettingsTests.cs:45-74` | TEST-CONFIRMED [run: PASS] |
@@ -125,7 +125,7 @@ trimming by user type; the `getPortalQuota` and `saveRoomQuotaSettings` texts be
 | **Quota recalculation** | | |
 | Hidden endpoints, portal-settings right, one job per portal, reuse / restart, what is recomputed and stamped | `web/ASC.Web.Api/Api/Settings/SettingsController.cs:755-785`; `products/ASC.People/Server/Api/UserController.cs:2776-2803`; `products/ASC.Files/Core/Core/UsersQuotaSyncOperation.cs:36-164`; `products/ASC.Files/Core/Configuration/FilesSpaceUsageStatManager.cs:100-175` | CODE-ONLY |
 | **Quota changes are announced on the socket** | | |
-| `change-quota-used-value` on every counter change; `change-user-quota-used-value` per account and to admins on settings; `quota_exceeded` with scope | `common/ASC.Data.Storage/BaseStorage.cs:383-413`; `QuotaSocketManager.cs:47-66, 170-200`; `SettingsController.cs:355, 632`; `UserController.cs:2870`; `FileMoveCopyOperation.cs:533-534`; `FileDao.cs:1363` | CODE-ONLY |
+| `change-quota-used-value` on every counter change; `change-user-quota-used-value` per account and to admins on settings; `quota_exceeded` with scope | `common/ASC.Data.Storage/BaseStorage.cs:383-413`; `QuotaSocketManager.cs:47-79, 197-227`; `SettingsController.cs:355, 632`; `UserController.cs:2870`; `FileMoveCopyOperation.cs:533-534`; `FileDao.cs:1363` | CODE-ONLY |
 
 Counts (recounted 2026-11-10): 67 rows — TEST-CONFIRMED 46, CODE-ONLY 20, cross-reference 1, NOTES-ONLY 0; 11 CODE-ONLY rows were closed by tests that day, several only in part as the row says (nothing was written into
 the spec on the strength of the release notes alone; the v1.1, v2.0, v3.6, v3.7 and v4.0 items are each
@@ -157,7 +157,7 @@ three scenarios.
   feature switch** (`07_Settings/Quota/RoomQuota*Tests.cs`, `QuotaTests.cs`): specified in `room-types`;
   this spec refers to them.
 - **Billing, wallet, prices, top-up, `getPaymentQuotas`, the spending limits on the AI services and their
-  `change-service-limits` socket event** (`04_Portal/Payments/*`, `QuotaSocketManager.cs:148-163`): out of
+  `change-service-limits` socket event** (`04_Portal/Payments/*`, `QuotaSocketManager.cs:175-190`): out of
   scope, specified in `billing`; only the user-type trimming of `getQuotaPaymentInformation`, the
   tariff-limit refusals and a one-line cross-reference to the spending limits are used.
 - **Free backup count (`free_backup`), `docscloud` count and the DocsCloud tenant quota and quota report**

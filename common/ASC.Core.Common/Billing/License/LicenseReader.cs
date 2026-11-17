@@ -84,6 +84,8 @@ public class LicenseReader(
 
     // The license quota and the tariff are written by the accept call and the setup wizard (Web.Api) and by the
     // background refresh (Files.Worker): one writer at a time, so a trial never overwrites a license just accepted.
+    // That holds across processes only with a distributed lock provider (Redis or ZooKeeper); without one the lock is
+    // per process, and the check of the license file under it only narrows the race between Web.Api and the worker.
     // The trial activated on request (an endpoint outside the published contract) writes them outside this lock; it
     // refuses once any tariff end is set, so it can only run before the writers above have written
     private static readonly string _licenseLockKey = $"{Tenant.DefaultTenant}_license";
@@ -346,8 +348,10 @@ public class LicenseReader(
         };
 
         // The quota and the tariff are two writes: if the tariff write fails after the quota one, the quota describes the
-        // new license and the tariff the previous one until the next refresh rewrites both from the file in force. The
-        // customer id is written last, so it never names a license whose tariff is not in force.
+        // new license and the tariff the previous one until the next refresh rewrites both from the file in force. When
+        // the failure leaves no file in force (an accept whose staged file had no active one to back up deletes it), no
+        // refresh rewrites them: they stay as written until a license is accepted. The customer id is written last, so
+        // it never names a license whose tariff is not in force.
         await using (await distributedLockProvider.TryAcquireLockAsync(_licenseLockKey))
         {
             await tenantManager.SaveTenantQuotaAsync(quota);
@@ -373,13 +377,15 @@ public class LicenseReader(
     /// when it is missing or another trial is in force; the end is chosen by <see cref="ChooseTrialDueDate"/>, so an
     /// editing service reinstalled with a fresh trial does not extend the portal's. Never replaces a license put in
     /// force from a file: nothing is written while the license file is on disk or while the license quota was written
-    /// from a file, and the check runs under the lock the writers of a license from a file take too. Nothing is
-    /// written when the trial in force already ends on the chosen date. The chosen date is written even when it has
-    /// passed, so the background refresh ends a trial the editing service ended.
+    /// from a file, and the check runs under the lock the writers of a license from a file take too (across processes
+    /// only with a distributed lock provider). Nothing is written when the trial in force already ends on the chosen
+    /// date. The chosen date is written even when it has passed, so the background refresh ends a trial the editing
+    /// service ended.
     /// </remarks>
     /// <returns>
-    /// <c>true</c> when the trial is in force after the call; <c>false</c> when a license from a file prevented it, or
-    /// the chosen end has already passed.
+    /// <c>true</c> when the chosen end has not passed; <c>false</c> when no license path is configured, a license
+    /// from a file prevented the write, or the chosen end has already passed. A tariff write the tariff service drops without an error (it swallows a
+    /// conflicting concurrent insert) is not seen here.
     /// </returns>
     public async Task<bool> DocsTrialToDBAsync(DocsTrialLicense trial)
     {
@@ -500,28 +506,29 @@ public class LicenseReader(
     }
 
     /// <summary>
-    /// Returns whether the installation's own trial is in force rather than a license from a file.
+    /// Returns whether the license quota is the trial an Enterprise installation creates on the first read of its
+    /// tariff (<see cref="StartTrialQuotaName"/>). Says nothing about its end, which may have passed.
     /// </summary>
-    public async Task<bool> IsStartTrialInForceAsync()
+    public async Task<bool> IsStartTrialQuotaAsync()
     {
         return (await GetLicenseQuotaAsync())?.Name == StartTrialQuotaName;
     }
 
     /// <summary>
-    /// Returns whether a trial of the installation itself is in force: a license quota that was not written from a
-    /// license file and is a trial (the one of an installation without a license, or the one activated on request),
-    /// with a tariff end that has not passed.
+    /// Returns the end of the installation's own trial as stored: the tariff end of a license quota that was not
+    /// written from a license file and is a trial (the one of an installation without a license, or the one activated
+    /// on request); <c>null</c> when no such trial is in the tariff. The end may have passed. Writes nothing.
     /// </summary>
-    public async Task<bool> IsOwnTrialInForceAsync()
+    public async Task<DateTime?> GetOwnTrialEndAsync()
     {
         if (await GetLicenseQuotaAsync() is not { Trial: true } quota || quota.Name == LicenseQuotaName)
         {
-            return false;
+            return null;
         }
 
         var (_, dueDate) = await GetTrialTariffAsync(quota);
 
-        return dueDate.HasValue && IsInForce(dueDate.Value);
+        return dueDate;
     }
 
     /// <summary>

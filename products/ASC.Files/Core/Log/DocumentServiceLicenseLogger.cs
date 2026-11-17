@@ -39,7 +39,7 @@ internal static partial class DocumentServiceLicenseLogger
     public static partial void WarningDocsTrialRequest(this ILogger<DocumentServiceLicense> logger, Exception exception);
 
     [LoggerMessage(LogLevel.Warning, "The editing service did not say whether it runs its trial: '{error}' {errorString}, result '{resultType}', end date '{dueDate}'")]
-    public static partial void WarningDocsTrialUnreadable(this ILogger<DocumentServiceLicense> logger, ErrorTypes error, string errorString, CommandResponse.ServerInfo.ResultTypes? resultType, DateTime? dueDate);
+    public static partial void WarningDocsTrialUnreadable(this ILogger<DocumentServiceLicense> logger, ErrorTypes? error, string errorString, CommandResponse.ServerInfo.ResultTypes? resultType, DateTime? dueDate);
 
     [LoggerMessage(LogLevel.Debug, "No answer of the editing service about its trial is known: {reason}")]
     public static partial void DebugDocsTrialNoAnswerKnown(this ILogger<DocumentServiceLicense> logger, string reason);

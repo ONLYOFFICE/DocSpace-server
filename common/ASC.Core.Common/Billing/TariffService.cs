@@ -1421,29 +1421,15 @@ public class TariffService(
             }
         }
 
-        var failedPortals = 0;
-        Exception firstFailure = null;
+        var (failedPortals, firstFailure) = await TariffChangeNotification.SendAsync(
+            portals,
+            features,
+            portal => quotaSocketManager.ChangeTariffAsync(portal, state),
+            (portal, feature, value) => quotaSocketManager.ChangeQuotaFeatureValueAsync(portal, feature, value, state));
 
-        foreach (var portal in portals)
-        {
-            try
-            {
-                await quotaSocketManager.ChangeTariffAsync(portal, state);
-
-                foreach (var (feature, value) in features)
-                {
-                    await quotaSocketManager.ChangeQuotaFeatureValueAsync(portal, feature, value, state);
-                }
-            }
-            catch (Exception ex)
-            {
-                failedPortals++;
-                firstFailure ??= ex;
-            }
-        }
-
-        // One line for all the portals: a failure here is usually the same for each of them (the address of the socket
-        // service), and an installation may have many portals
+        // The sends only queue the requests for the socket service, which logs a request it cannot deliver. What fails
+        // here is building a request (a malformed address of the socket service), the same for every portal, so one
+        // line for all of them
         if (failedPortals > 0)
         {
             logger.WarningTariffChangedNotificationPortals(tenant, failedPortals, firstFailure);

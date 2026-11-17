@@ -18,14 +18,22 @@ trial for no longer than the editing service's, and switch to the license as soo
   already ended, nothing is written and a license file is required as before. If the editing service does not
   answer at that moment, the wizard completes on the installation's own trial, whose end stays as it is until the
   next background re-read. A license file is still required, as before, when that trial is not in force or has
-  already ended, or when the last answer known said the editing service runs no trial or its trial ended; then the
-  call fails and does not complete the wizard.
-- The daily background re-read follows the editing service's trial while no license file is on disk, also before
-  the license is accepted and before the wizard is completed: it brings the trial's end closer, never later, and an
+  already ended, or when the last answer known said the editing service runs no trial, that its trial ended, or that
+  it runs a trial that would leave no trial in force today once applied; then the call fails and does not complete
+  the wizard. With no answer known the wizard page asks for a file, but the wizard still completes on the own trial,
+  by decision.
+- The daily background re-read follows the editing service's trial while no license file is at the license path (a
+  staged upload does not count) and the
+  installation runs the trial it creates on its first tariff read (not one activated on request, and nothing before
+  that first read), also before the license is accepted and before the wizard is completed, also while an uploaded
+  license waits to be accepted: it brings the trial's end closer, never later, and an
   expired trial of the editing service ends the installation's trial no later than yesterday (earlier, when the
   editing service's trial ended earlier). **BREAKING** for existing Enterprise installations that run their 30-day
   trial without a license file.
-- A license from a file is never replaced by the trial; a file accepted later replaces the trial as before.
+- A license from a file is never replaced by the trial; a file accepted later replaces the trial as before. With no
+  distributed lock provider (Redis or ZooKeeper) the writers of the license quota and tariff are ordered per process
+  only, so the worker and the API may interleave.
+- An answer of the editing service whose body is `null` says nothing about its trial: it is unknown, not "no trial".
 - `acceptLicense` and `completeWizard` put the previous license file back on any failure before the license is
   applied, as the requirement already says; the server restored it only for a refused license.
 - The answer of the editing service about its trial is kept in the distributed cache, one value per installation.
@@ -50,10 +58,12 @@ None.
 
 - `branding-and-licensing`: "Whether a license is still required" (`getIsLicenseRequired`,
   `GET api/2.0/settings/license/required`), "Activating a license" (`acceptLicense`,
-  `POST api/2.0/settings/license/accept`, and the wizard); new requirement "Following the editing service's trial"
-  (`completeWizard`, `getPortalTariff`, and the background re-read next to `refreshLicense`,
-  `GET api/2.0/settings/license/refresh`).
-- `billing`: "Single tariff of a self-hosted installation" (`getPortalTariff`, `GET api/2.0/portal/tariff`).
+  `POST api/2.0/settings/license/accept`, and the wizard), "Uploading a license file" (`uploadLicense`,
+  `POST api/2.0/settings/license`), "Refreshing the license" (`refreshLicense`, `GET api/2.0/settings/license/refresh`),
+  "Audit trail of branding and license changes"; new requirement "Following the editing service's trial"
+  (`completeWizard`, `getPortalTariff`, and the background re-read next to `refreshLicense`).
+- `billing`: "Single tariff of a self-hosted installation" (`getPortalTariff`, `GET api/2.0/portal/tariff`); new
+  requirement "Tariff writes are announced" (the socket events of every tariff write).
 - `portal-lifecycle`: "First-run wizard of a server installation" (`completeWizard`,
   `PUT api/2.0/settings/wizard/complete`).
 
@@ -66,13 +76,28 @@ None.
   it, the last answer this process knows). Affected: the web client wizard (it skips the license upload step; no
   client change is needed), agents reading the published text. The OpenAPI document and the SDKs carry the new
   description after regeneration; no field, status code or route changes. Webhooks, socket events, backup and
-  restore, the portal migration and stored data: none.
+  restore and the portal migration: none. Stored data: the call reads the tariff through its cache, and on a miss,
+  when a trial license quota exists without a tariff, that read creates the 30-day trial, as the first read of any
+  page does. Without Redis the answer may follow an end another process moved only once the tariff cache expires (up
+  to 15 minutes).
 - **branding-and-licensing "Activating a license"**: completing the setup wizard without a license file no longer
   applies a file: it keeps the installation's trial in force and records the acceptance without an audit event.
   `acceptLicense` itself is unchanged for its callers, except that a failure of any kind (not only a refused
   license) leaves the previous license file in place. Affected: the audit trail (no `LicenseKeyUploaded` entry for a
   wizard completed on the trial), the web client (none). Socket events: the quota events the tariff write already
   sends, as with a license, and the new `s:change-tariff`. Backup, restore, migration: none.
+- **branding-and-licensing "Uploading a license file"** and **"Refreshing the license"**: a staged upload still does
+  not change the tariff, but while it waits to be accepted the end of a trial of "Following the editing service's
+  trial" may be brought closer by the re-read, so "the tariff is unchanged" no longer holds on such an installation.
+  Affected: none beyond the trial's `dueDate`; no field, status code or route changes.
+- **branding-and-licensing "Audit trail of branding and license changes"**: completing the setup wizard on the
+  editing service's trial counts as accepting the license and writes no audit event (no `LicenseKeyUploaded`).
+  Affected: the audit trail.
+- **billing "Tariff writes are announced"** (new): every tariff write, and its deletion, sends `s:change-tariff`
+  and the quota feature values (`change-quota-feature-value`) to the quota room of each portal the tariff applies to.
+  Before, the quota feature values went to the portal of the current request only, and a write of the default tariff
+  of a hosted installation sent them to that request's portal; now it sends nothing. Affected: the web client (the
+  quota values it already handles; `s:change-tariff` once it subscribes).
 - **branding-and-licensing "Following the editing service's trial"** (new, it covers the background re-read next to
   `refreshLicense`): the re-read now also runs without a license file and without acceptance, and changes the
   tariff's `dueDate` reported by `getPortalTariff` to the editing service's trial end when that is earlier.
@@ -90,9 +115,10 @@ None.
 - **portal-lifecycle "First-run wizard of a server installation"**: `completeWizard` answers 200 instead of 500
   "You must enter a license key" on an Enterprise installation without a license file in two cases. Either its
   editing service runs an active trial and the installation's own trial has not ended; or the editing service does
-  not answer, the installation's own trial is in force and has not ended, and the editing service last reported a
-  trial or never answered. Affected: the web client wizard (it no longer offers the upload step there); SDKs and
-  OpenAPI: description only.
+  not answer, the installation's own trial is in force and has not ended, and the editing service last reported an
+  active trial whose end, applied, would leave that trial in force today, or never answered. The silent path reads
+  the tariff first, which on a fresh installation creates the 30-day trial before the call decides. Affected: the web
+  client wizard (it no longer offers the upload step there); SDKs and OpenAPI: description only.
 
 Deviation T4 (plain exceptions of the wizard answer 500): kept as it is. The change adds no new 500: an editing
 service that does not answer at completion leads to the installation's own trial, not to an error.
@@ -107,6 +133,6 @@ service that does not answer at completion leads to the installation's own trial
   minute and at most a day; no configuration in the repository or in `buildtools/config` sets it.
 - Socket events: new `s:change-tariff` in the `{tenant}-quota` room, no payload; the web client does not subscribe
   to it yet.
-- API: no contract change; the descriptions of `getIsLicenseRequired`, `acceptLicense` and `completeWizard` change,
-  so the OpenAPI documents and SDKs need regeneration.
+- API: no contract change; the descriptions of `getIsLicenseRequired`, `acceptLicense` and `completeWizard` and the
+  200 response text of `getIsLicenseRequired` change, so the OpenAPI documents and SDKs need regeneration.
 - External dependency: the `license` command of the editing service (its answer while it runs its own trial).

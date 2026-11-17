@@ -185,7 +185,9 @@ public class FirstTimeTenantSettings(
         // the wizard asked for before. The question is asked without authentication, so a successful answer of the
         // editing service is reused for a while.
         var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: true);
-        return docsTrial.State != DocsTrialState.Active || !await licenseReader.WillDocsTrialBeInForceAsync(docsTrial.Trial);
+        var trialWouldBeInForce = docsTrial.State == DocsTrialState.Active && await licenseReader.WillDocsTrialBeInForceAsync(docsTrial.Trial);
+
+        return DocsTrialDecision.IsLicenseFileRequired(docsTrial, trialWouldBeInForce);
     }
 
     /// <summary>
@@ -193,9 +195,11 @@ public class FirstTimeTenantSettings(
     /// completed without one.
     /// </summary>
     /// <returns>
-    /// <c>true</c> when a trial is in force; <c>false</c> when a license file is on disk, the editing service runs
-    /// no active trial, a license from a file is already in force, or the installation's trial has already ended —
-    /// then the license file is required as before.
+    /// <c>true</c> when the wizard completes on a trial: the editing service's active trial was applied, or the
+    /// service is silent and the installation's own trial is kept. <c>false</c> — the license file is required as
+    /// before — when a license file is on disk (staged or in force), a license from a file is in force, the
+    /// editing service answers with no active trial or one that would already be over once applied, or, while it is
+    /// silent, the own trial is not in force or the last answer known asked for a file.
     /// </returns>
     /// <remarks>
     /// No upload is recorded in the audit trail: no file was given, and a file uploaded later is activated the usual
@@ -210,24 +214,21 @@ public class FirstTimeTenantSettings(
 
         var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: false);
 
-        // The wizard skips the license upload only after it was told the editing service runs its trial, so an
-        // editing service that cannot be asked now is not read as "no trial", which would ask for a file the wizard
-        // never offered. The installation keeps its own trial (created on the first read of the tariff) with its
-        // current end; the background refresh brings that end closer once the editing service answers. A file is
-        // still required when no trial of the installation is in force (a license from a file, no license quota at
-        // all, or a trial that has ended), or when the last answer the installation knows said the editing service
-        // runs no trial or its trial has ended: then the wizard asked for a file, and the silence changes nothing.
+        // The editing service cannot be asked now, which is not read as "no trial". The installation completes on its
+        // own trial with its current end. For the trial created on the first read of the tariff, the background
+        // refresh brings that end closer once the editing service answers; a trial activated on request keeps its end
+        // until a license is accepted. A file is still required when no own trial is in force
+        // (a license from a file, no license quota at all, or a trial that has ended), or when the last answer the
+        // installation knows said no trial, an ended trial, or a trial that would already be over once applied: the
+        // wizard page then asked for a file, and the silence changes nothing. With no answer known the page asked for
+        // a file too; the wizard still completes on the own trial, by decision (DocsTrialDecision.CompletesOnOwnTrial).
         if (docsTrial.State == DocsTrialState.Unknown)
         {
             await tenantExtra.GetCurrentTariffAsync();
 
-            if (!await licenseReader.IsOwnTrialInForceAsync())
-            {
-                return false;
-            }
-
+            var ownTrialEnd = await licenseReader.GetOwnTrialEndAsync();
             var lastKnown = await documentServiceLicense.GetLastKnownTrialAsync();
-            if (lastKnown is { State: DocsTrialState.NotTrial or DocsTrialState.Expired })
+            if (!DocsTrialDecision.CompletesOnOwnTrial(ownTrialEnd, lastKnown, DateTime.UtcNow))
             {
                 return false;
             }
@@ -238,7 +239,8 @@ public class FirstTimeTenantSettings(
 
         // A trial that would already be over is not taken, and nothing is written for it: the call then fails as it did
         // before the editing service's trial was followed. The write checks again under the lock of the license writers
-        if (docsTrial.State != DocsTrialState.Active || !await licenseReader.WillDocsTrialBeInForceAsync(docsTrial.Trial))
+        var trialWouldBeInForce = docsTrial.State == DocsTrialState.Active && await licenseReader.WillDocsTrialBeInForceAsync(docsTrial.Trial);
+        if (DocsTrialDecision.IsLicenseFileRequired(docsTrial, trialWouldBeInForce))
         {
             return false;
         }

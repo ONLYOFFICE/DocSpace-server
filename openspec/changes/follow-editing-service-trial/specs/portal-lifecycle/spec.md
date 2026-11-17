@@ -24,7 +24,7 @@ language and time zone, mark the wizard completed, sign the owner in and answer 
 
 #### Scenario: Enterprise installation without a licence file, editing service silent
 
-- **WHEN** `completeWizard` is called on such an installation, the editing service does not answer, the installation's own trial is in force and has not ended, and the editing service last reported a trial or never answered
+- **WHEN** `completeWizard` is called on such an installation, the editing service does not answer, the installation's own trial is in force and has not ended, and the editing service last reported an active trial whose end, applied, would leave the installation's trial in force today, or never answered
 - **THEN** the answer is 200 with `completed` true, the licence is accepted and the installation keeps its own trial with its current end
 
 #### Scenario: Enterprise installation without a licence file, file still required

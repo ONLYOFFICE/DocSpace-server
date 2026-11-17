@@ -106,6 +106,7 @@ global using DbQuota = ASC.Core.Common.EF.DbQuota;
 global using DocsTrialCache = ASC.Files.Core.Helpers.DocsTrialCache;
 global using DocsTrialCacheOptions = ASC.Files.Core.Helpers.DocsTrialCacheOptions;
 global using DocsTrialCheck = ASC.Files.Core.Helpers.DocsTrialCheck;
+global using DocsTrialDecision = ASC.Files.Core.Helpers.DocsTrialDecision;
 global using DocsTrialState = ASC.Files.Core.Helpers.DocsTrialState;
 global using DocumentService = ASC.Files.Core.Helpers.DocumentService;
 global using DocumentServiceLicense = ASC.Files.Core.Helpers.DocumentServiceLicense;

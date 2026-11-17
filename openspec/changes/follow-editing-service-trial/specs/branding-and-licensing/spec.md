@@ -4,11 +4,11 @@
 
 ### Requirement: Following the editing service's trial
 
-Without a license file at the configured path or a license from a file in force, an Enterprise or Developer
-installation SHALL end its own trial tariff no later than the day the editing service's trial ends, never moving the
-end later, and no later than yesterday once that trial expired. The daily background re-read SHALL apply this,
-accepted or not; so SHALL completing the setup wizard while that trial is active, which counts as acceptance. A license
-from a file SHALL never be replaced by it.
+With no license file at the license path (a staged upload aside) and no license from a file in force, an Enterprise
+or Developer installation SHALL end the trial of its first tariff read no later than the editing service's trial
+ends, never moving the end later, and by yesterday once that trial expired. The daily re-read SHALL apply this,
+accepted or not, and so SHALL a setup wizard completed during that trial, counting as acceptance. A license from a
+file SHALL never be replaced by it.
 
 #### Scenario: Wizard completed on the editing service's trial
 
@@ -23,12 +23,12 @@ from a file SHALL never be replaced by it.
 
 #### Scenario: Editing service silent at completion
 
-- **WHEN** `completeWizard` is called on such an installation, the editing service does not answer, the installation's own trial is in force and has not ended, and the last known answer of the editing service was an active trial or none is known
+- **WHEN** `completeWizard` is called on such an installation, the editing service does not answer, the installation's own trial is in force and has not ended, and the last known answer of the editing service was an active trial whose end, applied, would leave that trial in force today, or none is known
 - **THEN** the answer is 200 with `completed` true and the installation keeps its own trial tariff with its current end
 
 #### Scenario: Editing service silent, a license file still required
 
-- **WHEN** `completeWizard` is called without a license file, the editing service does not answer, and either no trial of the installation is in force, it has ended, or the last known answer was no trial or an ended one
+- **WHEN** `completeWizard` is called without a license file, the editing service does not answer, and either no trial of the installation is in force, it has ended, or the last known answer was no trial, an ended one, or an active trial that would leave no trial in force today once applied
 - **THEN** the call fails as without the editing service's trial, and the wizard stays open until a license file is given
 
 #### Scenario: Before the first re-read
@@ -40,6 +40,16 @@ from a file SHALL never be replaced by it.
 
 - **WHEN** the periodic re-read runs on an Enterprise installation without a license file, before the wizard is completed, and the editing service reports a trial ending before the installation's trial
 - **THEN** `getPortalTariff` reports the editing service's trial end day as `dueDate`
+
+#### Scenario: Trial activated on request
+
+- **WHEN** the daily background re-read runs on an installation that runs the trial activated on request, not the one created on the first tariff read
+- **THEN** the tariff is unchanged
+
+#### Scenario: Tariff not read yet
+
+- **WHEN** the daily background re-read runs on an Enterprise installation whose tariff was never read, so it has no trial yet
+- **THEN** nothing is written, and the trial created on the first read is followed from the next re-read on
 
 #### Scenario: Editing service trial ends later
 
@@ -96,6 +106,11 @@ days while it does not answer.
 - **WHEN** `getIsLicenseRequired` is called on such an installation and the editing service does not answer
 - **THEN** the system answers from the editing service's last answer of the past 3 days, and with none 200 true
 
+#### Scenario: Trial end moved by another process
+
+- **WHEN** the background re-read in another process brings the installation's trial end closer, and either there is no Redis to share the tariff cache or a read of the tariff that started before the write fills the cache after it
+- **THEN** `getIsLicenseRequired` may answer from the previous, later end until the tariff cache of the process that answers expires, up to 15 minutes
+
 #### Scenario: Hosted portal
 
 - **WHEN** `getIsLicenseRequired` is called on a hosted portal
@@ -133,3 +148,71 @@ same with a license file.
 
 - **WHEN** the editing service reports a different customer id or an error for the license
 - **THEN** the answer is 200 "License key is not correct" and the previous license file is back in place
+
+### Requirement: Uploading a license file
+
+`uploadLicense` SHALL be open to a DocSpace admin or to the setup-wizard confirmation link (403 once the wizard is
+completed), only on an Enterprise or Developer installation (415 otherwise), and take `multipart/form-data` with the
+license file in `files` (400 when empty). The file SHALL be parsed as JSON and staged beside the license path, not
+applied: it needs a customer id and a signature (500 "License is not correct") and a start date not in the future
+(400). It answers a confirmation text.
+
+#### Scenario: Valid license staged
+
+- **WHEN** a DocSpace admin uploads a license whose end date lies ahead
+- **THEN** the system answers 200 "Uploaded successfully" and the upload does not change the installation's tariff; only accepting the license does, while the end of a trial of "Following the editing service's trial" may still be brought closer
+
+#### Scenario: Overdue license
+
+- **WHEN** the uploaded license's end date lies in the past
+- **THEN** the system answers 200 with "Uploaded successfully. Support and updates are not available for this license since <date>."
+
+#### Scenario: Hosted or open-source installation
+
+- **WHEN** `uploadLicense` is called where no license file path is configured
+- **THEN** the system answers 415
+
+### Requirement: Refreshing the license
+
+`refreshLicense` SHALL answer 200 false on an installation that is not Enterprise or Developer and otherwise re-read
+the license file and rewrite the quota and tariff from it, answering true; a missing or unreadable file or an
+editing-service refusal SHALL answer 402, a start date in the future 400. After acceptance a background re-read of the
+license in force SHALL run daily by default, so a replaced file takes effect without a call; it SHALL NOT apply an
+uploaded license.
+
+#### Scenario: Open-source installation
+
+- **WHEN** `refreshLicense` is called on an installation without a license path
+- **THEN** the system answers 200 false
+
+#### Scenario: File replaced on disk
+
+- **WHEN** the license file is replaced by one with a later end date and the periodic re-read runs
+- **THEN** `getPortalTariff` reports the new `dueDate`
+
+#### Scenario: Uploaded license not accepted
+
+- **WHEN** a license was uploaded with `uploadLicense` and not accepted, and the periodic re-read runs
+- **THEN** the uploaded license stays staged and does not change the tariff; only `acceptLicense` or `refreshLicense` puts it in force, while the end of a trial of "Following the editing service's trial" may still be brought closer
+
+### Requirement: Audit trail of branding and license changes
+
+Saving or restoring logos, saving or restoring the logo text, saving or deleting the company details, saving
+or deleting the help links, changing the selected colour theme, saving the greeting title, and accepting or
+starting a license SHALL each write one audit event; adding a colour theme without selecting it, deleting an
+unselected theme, completing the setup wizard on the editing service's trial and every read SHALL write none.
+
+#### Scenario: Theme selected
+
+- **WHEN** the owner saves `selected` with an existing theme id
+- **THEN** the audit trail shows a colour theme change by the owner
+
+#### Scenario: Theme added only
+
+- **WHEN** the owner saves a `theme` without `selected`
+- **THEN** no audit event is written
+
+#### Scenario: Wizard completed on the editing service's trial
+
+- **WHEN** `completeWizard` completes without a license file on the trial of "Following the editing service's trial"
+- **THEN** the license counts as accepted and no audit event is written
