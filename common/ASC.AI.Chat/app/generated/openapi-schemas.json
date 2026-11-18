@@ -1601,6 +1601,10 @@
         "path": {
           "type": "string",
           "description": "Where the folder sits, as the host shows it (\"My documents / Reports\"): a folder's pill names it in full."
+        },
+        "kind": {
+          "$ref": "#/components/schemas/AiContextRoomKind",
+          "description": "Whether a connected data source is a room or a folder, for a host that tells them apart: the composer draws its icon and words its remove control by it. Optional - an entry without one (saved before the field existed, or from a host that does not say) is drawn as a folder."
         }
       },
       "required": [
@@ -1609,6 +1613,14 @@
       ],
       "additionalProperties": false,
       "description": "A room the caller can connect to a chat as context."
+    },
+    "AiContextRoomKind": {
+      "type": "string",
+      "enum": [
+        "room",
+        "folder"
+      ],
+      "description": "What a `ContextRoom` connected as a data source is."
     },
     "AiCreateProfileInput": {
       "type": "object",

@@ -9519,7 +9519,7 @@
         ],
         "operationId": "aiTemplatesInstall",
         "summary": "Install a template",
-        "description": "Installs one template into the portal through the Files API with the caller's own credentials, so the Files service decides whether the caller may create the rooms. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`) linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`) and its instructions. Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model and the instructions are the exceptions: when the portal has no chat model, or either of the two cannot be stored, the agent is still returned, with `modelNotSaved` or `instructionsNotSaved` in `warnings`. The template's description and category are not written anywhere.",
+        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`) and its instructions. Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model and the instructions are the exceptions: when the portal has no chat model, or either of the two cannot be stored, the agent is still returned, with `modelNotSaved` or `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
         "responses": {
           "200": {
             "description": "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
@@ -13484,6 +13484,10 @@
           "path": {
             "type": "string",
             "description": "Where the folder sits, as the host shows it (\"My documents / Reports\"): a folder's pill names it in full."
+          },
+          "kind": {
+            "$ref": "#/components/schemas/AiContextRoomKind",
+            "description": "Whether a connected data source is a room or a folder, for a host that tells them apart: the composer draws its icon and words its remove control by it. Optional - an entry without one (saved before the field existed, or from a host that does not say) is drawn as a folder."
           }
         },
         "required": [
@@ -13492,6 +13496,14 @@
         ],
         "additionalProperties": false,
         "description": "A room the caller can connect to a chat as context."
+      },
+      "AiContextRoomKind": {
+        "type": "string",
+        "enum": [
+          "room",
+          "folder"
+        ],
+        "description": "What a `ContextRoom` connected as a data source is."
       },
       "AiCreateProfileInput": {
         "type": "object",
