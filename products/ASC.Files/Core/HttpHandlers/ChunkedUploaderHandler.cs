@@ -156,7 +156,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                             {
                                 var folderDao = daoFactory.GetFolderDao<T>();
                                 var room = await folderDao.GetParentFoldersAsync(resumedSession.FolderId).FirstOrDefaultAsync(f => f.IsRoom);
-                                if (room != null)
+                                if (room != null && DocSpaceHelper.AnnouncesEntriesToMembers(room.FolderType))
                                 {
                                     var data = room.Id is int rId && resumedSession.File.Id is int fId
                                         ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }
@@ -226,7 +226,7 @@ public class ChunkedUploaderHandlerService(ILogger<ChunkedUploaderHandlerService
                         var folderDao = daoFactory.GetFolderDao<T>();
                         var parents = await folderDao.GetParentFoldersAsync(session.FolderId).ToListAsync();
                         var room = parents.FirstOrDefault(f => f.IsRoom);
-                        if (room != null)
+                        if (room != null && DocSpaceHelper.AnnouncesEntriesToMembers(room.FolderType))
                         {
                             var data = room.Id is int rId && session.File.Id is int fId
                                 ? new RoomNotifyIntegrationData<int> { RoomId = rId, FileId = fId }

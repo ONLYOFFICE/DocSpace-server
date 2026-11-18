@@ -148,7 +148,7 @@ public class FileMarker(
             if (fileEntry.RootFolderType is FolderType.VirtualRooms or FolderType.AiAgents or FolderType.AiHub or FolderType.Forms or FolderType.PrivateRooms)
             {
                 var room = parentFolders.Find(f => f.IsRoom);
-                if (room.CreateBy != obj.CurrentAccountId)
+                if (room.CreateBy != obj.CurrentAccountId && DocSpaceHelper.AnnouncesEntriesToMembers(room.FolderType))
                 {
                     additionalSubjects = [room.CreateBy];
                 }
