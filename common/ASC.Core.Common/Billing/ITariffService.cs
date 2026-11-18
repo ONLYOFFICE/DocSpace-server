@@ -56,7 +56,7 @@ public interface ITariffService
     bool IsConfigured();
     Task<CustomerInfo> GetCustomerInfoAsync(int tenantId, bool refresh = false);
     Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false);
-    Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true);
+    Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true, CancellationToken cancellationToken = default);
 
     Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
 

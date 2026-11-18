@@ -52,6 +52,15 @@ public partial class CoreDbContext
     {
         return Queries.DeleteTariffs(this, tenantId);
     }
+
+    /// <summary>
+    /// The row of the quota in the latest tariff of the tenant, null when that tariff does not hold the quota.
+    /// </summary>
+    [PreCompileQuery]
+    public Task<DbTariffRow> TariffRowAsync(int tenantId, int quota)
+    {
+        return Queries.TariffRowAsync(this, tenantId, quota);
+    }
 }
 
 static file class Queries
@@ -78,4 +87,11 @@ static file class Queries
     public static readonly Func<CoreDbContext, int, Task<int>> DeleteTariffs =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx, int tenantId) =>
             ctx.Tariffs.Where(r => r.TenantId == tenantId).ExecuteDelete());
+
+    public static readonly Func<CoreDbContext, int, int, Task<DbTariffRow>> TariffRowAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (CoreDbContext ctx, int tenantId, int quota) =>
+                ctx.TariffRows
+                    .Where(r => r.TenantId == tenantId && r.Quota == quota)
+                    .FirstOrDefault(r => r.TariffId == ctx.TariffRows.Where(x => x.TenantId == tenantId).Max(x => x.TariffId)));
 }

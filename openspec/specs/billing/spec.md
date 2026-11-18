@@ -511,6 +511,115 @@ refused with 402 and nothing charged.
 - **WHEN** the owner switches `AITools` off and sends a chat message
 - **THEN** the send answers 402 and no `ai-tools` movement is added
 
+### Requirement: Automatic renewal of a wallet subscription
+
+A wallet subscription SHALL be renewed shortly before its due date; for the main plan the wallet
+is topped up first for what it lacks, unless its payment method is delayed. A renewal a stopped service left unfinished SHALL be
+resumed by asking billing first and SHALL NOT be paid again once its payment was requested or billing
+reports the subscription extended. A renewal that fails SHALL send the failure letter to the payer and the
+owner, unless it is no longer wanted or its due date moved.
+
+#### Scenario: Wallet covers the next period
+
+- **WHEN** the due date of a wallet subscription comes near and the wallet holds its price
+- **THEN** the next period is paid for the quantity scheduled for it, raised to the seats or the storage in use, and the wallet is not topped up
+
+#### Scenario: Switch to another plan scheduled
+
+- **WHEN** a switch to another wallet plan is scheduled for the due date
+- **THEN** that plan is bought for the next period instead of renewing the current one
+
+#### Scenario: Wallet short of the price
+
+- **WHEN** the due date of the main plan comes near, the wallet holds less than the price and the payment method is not a delayed one
+- **THEN** the wallet is topped up for the shortfall and the next period is then paid from it; while other spending keeps the wallet short, it is topped up again, five deposits at most
+
+#### Scenario: Top-up cut short
+
+- **WHEN** the top-up of a renewal is still running eight minutes after the renewal was started, or the service stops during it
+- **THEN** a deposit already sent is let finish, no further deposit is begun, the payment is not requested, and the renewal is resumed later by asking billing first
+
+#### Scenario: Wallet short of the price with a delayed payment method
+
+- **WHEN** the due date of the main plan comes near, the wallet holds less than the price and the payment method is a delayed one
+- **THEN** the wallet is not topped up, nothing is paid and the failure letter is sent
+
+#### Scenario: Additional wallet service
+
+- **WHEN** the due date of an additional wallet service, not the main plan, comes near
+- **THEN** its next period is requested without topping the wallet up first
+
+#### Scenario: Additional wallet service while the tariff is overdue
+
+- **WHEN** the due date of an additional wallet service comes near while the portal's tariff is overdue
+- **THEN** it is not renewed and no failure letter is sent
+
+#### Scenario: Interrupted and already extended
+
+- **WHEN** the service stopped during a renewal and billing reports the subscription extended
+- **THEN** nothing is paid again and the renewal is closed
+
+#### Scenario: Interrupted after the payment was requested
+
+- **WHEN** the service stopped after requesting the payment, whether or not the request left, billing still reports the subscription not extended ten minutes after the request, and the renewal is still wanted with its due date unchanged
+- **THEN** the failure letter is sent and the payment is not requested a second time
+
+#### Scenario: Interrupted and billing gives no answer
+
+- **WHEN** the service stopped during a renewal and billing does not answer about the subscription
+- **THEN** the renewal is asked about again on the following runs, nothing is paid and no letter is sent meanwhile
+- **AND** thirty minutes after the payment was requested, or after the renewal was last started or queued when it was not, the failure letter is sent, unless the renewal is no longer wanted or its due date moved
+
+#### Scenario: Interrupted three times
+
+- **WHEN** a renewal that never got to request its payment was interrupted on each of three starts, billing does not report it extended, and it is still wanted with its due date unchanged
+- **THEN** its payment is not attempted a fourth time and the failure letter is sent
+
+#### Scenario: Renewal no longer wanted
+
+- **WHEN** the automatic renewal was switched off while an interrupted renewal waited
+- **THEN** the subscription is not renewed and no failure letter is sent
+
+#### Scenario: Due date moved meanwhile
+
+- **WHEN** the due date of the subscription changed while an interrupted renewal waited, and billing does not report it extended
+- **THEN** that renewal is closed without a payment and without the failure letter; the new due date is renewed when it comes near
+
+#### Scenario: Run interval and renewal advance not set
+
+- **WHEN** the installation sets neither how often due subscriptions are looked for nor how long before the due date one is renewed
+- **THEN** both are one minute
+
+#### Scenario: Run interval and renewal advance set empty
+
+- **WHEN** the run interval or the renewal advance is set to an empty value
+- **THEN** it is taken as not set, without a warning
+
+#### Scenario: Run interval below its minimum
+
+- **WHEN** the run interval is set to zero, to a negative value or to less than one second
+- **THEN** it is kept at one second and a warning is logged
+
+#### Scenario: Run interval above its maximum
+
+- **WHEN** the run interval is set to more than one hour
+- **THEN** it is kept at one hour and a warning is logged
+
+#### Scenario: Renewal advance shorter than the run interval
+
+- **WHEN** the renewal advance is set to zero, to a negative value or to less than the run interval
+- **THEN** it is kept at the run interval and a warning is logged
+
+#### Scenario: Renewal advance above its maximum
+
+- **WHEN** the renewal advance is set to more than one day
+- **THEN** it is kept at one day and a warning is logged
+
+#### Scenario: Interval value that cannot be read
+
+- **WHEN** the run interval or the renewal advance is set to text that is not an interval
+- **THEN** the default is used - one minute for the interval, the interval for the advance - and a warning is logged
+
 ### Requirement: Spending limits on the AI services
 
 A portal with a billing customer SHALL carry spending limits on the AI services (AI tools and AI search
@@ -799,7 +908,7 @@ never retried as if refused. Error messages SHALL name the call, never the servi
 #### Scenario: Renewal answer unreadable
 
 - **WHEN** the answer to a subscription renewal cannot be read
-- **THEN** the renewal is checked again later and no failure letter is sent
+- **THEN** the renewal is checked again on the following runs and its payment is not sent again; the failure letter is sent only if billing still reports the subscription not extended ten minutes later, or gives no answer for thirty minutes
 
 ### Requirement: Paid seats and tariff limits
 
@@ -834,16 +943,21 @@ limit, the administrators and the user concerned otherwise.
 
 ### Requirement: Audit trail of payment changes
 
-A subscription change, a wallet top-up (by the payer or by the automatic job), a change of the top-up
+A subscription change, a wallet top-up (manual or automatic), a change of the top-up
 settings, a switch of a wallet service, a change of the restricted AI models, a subscription balance moved
 to the wallet, a sales request, and the creation, update, bulk set, bulk disable and deletion of an AI
 spending limit SHALL each write one audit event; reads, price calculations and the checkout URLs SHALL
-write none.
+write none. A renewal resumed after it was started SHALL write one when billing reports it extended.
 
 #### Scenario: Top-up audited
 
 - **WHEN** the payer tops the wallet up by 10 USD
 - **THEN** the audit trail of `history-and-audit` shows the top-up with "10 USD"
+
+#### Scenario: Renewal interrupted after its audit event
+
+- **WHEN** the service stops after writing the audit event of an automatic renewal and before closing that renewal
+- **THEN** the resumed renewal finds the subscription extended and writes the event again: two events for one renewal
 
 #### Scenario: Personal limit audited with its user
 
