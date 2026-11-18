@@ -29,6 +29,7 @@
 - [x] 4.3 Add billing-suite cases for the renewal with a bonus that covers part and the whole price; verified by `BT/Wallet/RenewalWithBonusTests.cs`, which waits for the renewal job of Web.Studio, red without `8c5d6d7264`
 - [x] 4.4 Read the bonus again with the wallet after each top-up, keeping the last bonus read when a later read fails, and count a negative bonus as none; verified by `Unit/TariffServiceWalletCoverageTests.cs` (`EnsureWalletBalance_BonusSpentDuringTheTopUp_TopsUpAgainForTheRest`, `EnsureWalletBalance_BonusUnreadableAfterTheTopUp_KeepsTheBonusReadBefore`, `EnsureWalletBalance_NegativeBonus_CountsAsNone`, `EnsureWalletBalance_BonusAnswerUnreadable_TopsUpAsIfThereWereNone`), red without the re-read and without the clamp
 - [x] 4.5 Count only the bonus credits that have not ended, at most the sub-account (`GoodwillBalance.SpendableAmount`); verified by `Unit/WalletBonusDecisionsTests.cs` (the end a day and an hour ago, now, an hour and a day ahead, never; an end without an offset; other currency; no `lots`) and `Unit/TariffServiceWalletCoverageTests.cs` (`EnsureWalletBalance_BonusEndedAnHourAgo_TopsUpAsIfThereWereNone`)
+- [x] 4.6 Bring "Automatic renewal of a wallet subscription", which the release added, in line with the bonus: the wallet and the bonus decide the top-up; verified by `BT/Wallet/RenewalWithBonusTests.cs` (bonus 15 → top-up 25, bonus 40 → none) next to `BT/Renewal/WalletRenewalTests.cs`, whose stubs answer no bonus
 
 ## 5. Specs and checks
 

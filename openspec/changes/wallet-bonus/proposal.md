@@ -35,7 +35,8 @@ None.
 - `billing`: found by `moveSubscriptionToWallet`, `getCustomerOperations`, `getCustomerServiceUsage`,
   `createCustomerOperationsReport`, `createCustomerServiceUsageReport` and the routes
   `api/2.0/portal/payment/*`, where the new `applyPromoCode` and `getCustomerGoodwill` belong.
-  Requirement modified: "Moving the subscription balance to the wallet". Requirements added: redeeming a
+  Requirements modified: "Moving the subscription balance to the wallet", "Automatic renewal of a wallet
+  subscription" (the wallet and the bonus decide the top-up). Requirements added: redeeming a
   promo code, the bonus balance, the bonus part of movements and usage, paying from the wallet with the bonus counted.
 
 ## Breaks current behaviour
@@ -49,7 +50,8 @@ None.
   - SDKs and the OpenAPI document: only the description of the operation changes, no schema;
   - webhooks, socket events, backup and restore, portal migration, stored data: none; the same wallet event
     is sent after the move.
-- **Automatic renewal of a wallet subscription** (no requirement names its top-up amount today). The card is
+- **Automatic renewal of a wallet subscription** (the requirement the release added says the wallet is topped up
+  for what it lacks; it now says what the wallet and the bonus lack). The card is
   charged less, or not at all, when a bonus covers the price; "Insufficient balance" is raised only when the
   wallet and the bonus together fall short.
 - **`type` filter of `getCustomerOperations`**: a caller that passed it got every kind and now gets the kind

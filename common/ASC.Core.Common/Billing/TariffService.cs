@@ -1574,11 +1574,13 @@ public class TariffService(
 
     /// <summary>
     /// Tops the wallet up for what the wallet and the bonus lack of <paramref name="requiredAmount"/>, in up to five
-    /// deposits, and reports whether they cover the amount then. The token is checked before each deposit and ends the poll of the balance
-    /// that follows one: once it is cancelled, no further deposit is begun and the method throws
-    /// <see cref="OperationCanceledException"/>. A deposit already sent is let finish and announced to the clients
-    /// first, so a caller that stops it by a deadline does not know whether that deposit was applied, but the clients
-    /// are told of it.
+    /// deposits, and reports whether they cover the amount then. The token is checked before each deposit and ends the
+    /// poll of the balance that follows one: once it is cancelled, no further deposit is begun and the method throws
+    /// <see cref="OperationCanceledException"/>. It is not checked when <paramref name="allowTopUp"/> is false, and a
+    /// cancellation that falls during the reads after a deposit throws only when another deposit would follow;
+    /// otherwise the method reports what those reads gave. A deposit already sent is let finish and announced to the
+    /// clients first, so a caller that stops it by a deadline does not know whether that deposit was applied, but the
+    /// clients are told of it.
     /// </summary>
     public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true, CancellationToken cancellationToken = default)
     {

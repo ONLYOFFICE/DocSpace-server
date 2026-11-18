@@ -43,10 +43,11 @@ public class RenewalWithBonusTests(AspireAppFixture fixture) : BaseTest(fixture)
     private const int AdminWalletProductId = 1013;
     private const int Admins = 2;
 
-    // The job runs every minute and renews what falls due before its next run. A due date further than that run
-    // cannot have been passed over by a run made before this test, so the next runs renew it.
-    private static readonly TimeSpan _dueIn = TimeSpan.FromSeconds(100);
-    private static readonly TimeSpan _renewalDeadline = TimeSpan.FromMinutes(4);
+    // the subscription ends a few renewal periods from now, and is renewed one period before it ends
+    private static readonly TimeSpan _dueIn = Constants.PaymentStubRenewPeriod * 4;
+
+    // the due date, the run that picks it up, the renewal itself, and room for a busy machine
+    private static readonly TimeSpan _renewalDeadline = _dueIn + Constants.PaymentStubRenewPeriod * 8;
 
     [Theory]
     [InlineData(15, 25)]

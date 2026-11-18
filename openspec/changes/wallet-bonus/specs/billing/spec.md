@@ -189,6 +189,115 @@ the last. A delayed method or an add-on renewal gets no top-up.
 
 ## MODIFIED Requirements
 
+### Requirement: Automatic renewal of a wallet subscription
+
+A wallet subscription SHALL be renewed shortly before its due date; for the main plan the wallet
+is topped up first for what it and the bonus lack, unless its payment method is delayed. A renewal a stopped
+service left unfinished SHALL be resumed by asking billing first and SHALL NOT be paid again once its payment
+was requested or billing reports it extended. A renewal that fails SHALL send the failure letter to the payer and the
+owner, unless it is no longer wanted or its due date moved.
+
+#### Scenario: Wallet covers the next period
+
+- **WHEN** the due date of a wallet subscription comes near and the wallet and the bonus hold its price
+- **THEN** the next period is paid for the quantity scheduled for it, raised to the seats or the storage in use, and the wallet is not topped up
+
+#### Scenario: Switch to another plan scheduled
+
+- **WHEN** a switch to another wallet plan is scheduled for the due date
+- **THEN** that plan is bought for the next period instead of renewing the current one
+
+#### Scenario: Wallet short of the price
+
+- **WHEN** the due date of the main plan comes near, the wallet and the bonus hold less than the price and the payment method is not a delayed one
+- **THEN** the wallet is topped up for the shortfall and the next period is then paid from it; while other spending keeps them short, it is topped up again, five deposits at most
+
+#### Scenario: Top-up cut short
+
+- **WHEN** the top-up of a renewal is still running eight minutes after the renewal was started, or the service stops during it
+- **THEN** a deposit already sent is let finish, no further deposit is begun, the payment is not requested, and the renewal is resumed later by asking billing first
+
+#### Scenario: Wallet short of the price with a delayed payment method
+
+- **WHEN** the due date of the main plan comes near, the wallet and the bonus hold less than the price and the payment method is a delayed one
+- **THEN** the wallet is not topped up, nothing is paid and the failure letter is sent
+
+#### Scenario: Additional wallet service
+
+- **WHEN** the due date of an additional wallet service, not the main plan, comes near
+- **THEN** its next period is requested without topping the wallet up first
+
+#### Scenario: Additional wallet service while the tariff is overdue
+
+- **WHEN** the due date of an additional wallet service comes near while the portal's tariff is overdue
+- **THEN** it is not renewed and no failure letter is sent
+
+#### Scenario: Interrupted and already extended
+
+- **WHEN** the service stopped during a renewal and billing reports the subscription extended
+- **THEN** nothing is paid again and the renewal is closed
+
+#### Scenario: Interrupted after the payment was requested
+
+- **WHEN** the service stopped after requesting the payment, whether or not the request left, billing still reports the subscription not extended ten minutes after the request, and the renewal is still wanted with its due date unchanged
+- **THEN** the failure letter is sent and the payment is not requested a second time
+
+#### Scenario: Interrupted and billing gives no answer
+
+- **WHEN** the service stopped during a renewal and billing does not answer about the subscription
+- **THEN** the renewal is asked about again on the following runs, nothing is paid and no letter is sent meanwhile
+- **AND** thirty minutes after the payment was requested, or after the renewal was last started or queued when it was not, the failure letter is sent, unless the renewal is no longer wanted or its due date moved
+
+#### Scenario: Interrupted three times
+
+- **WHEN** a renewal that never got to request its payment was interrupted on each of three starts, billing does not report it extended, and it is still wanted with its due date unchanged
+- **THEN** its payment is not attempted a fourth time and the failure letter is sent
+
+#### Scenario: Renewal no longer wanted
+
+- **WHEN** the automatic renewal was switched off while an interrupted renewal waited
+- **THEN** the subscription is not renewed and no failure letter is sent
+
+#### Scenario: Due date moved meanwhile
+
+- **WHEN** the due date of the subscription changed while an interrupted renewal waited, and billing does not report it extended
+- **THEN** that renewal is closed without a payment and without the failure letter; the new due date is renewed when it comes near
+
+#### Scenario: Run interval and renewal advance not set
+
+- **WHEN** the installation sets neither how often due subscriptions are looked for nor how long before the due date one is renewed
+- **THEN** both are one minute
+
+#### Scenario: Run interval and renewal advance set empty
+
+- **WHEN** the run interval or the renewal advance is set to an empty value
+- **THEN** it is taken as not set, without a warning
+
+#### Scenario: Run interval below its minimum
+
+- **WHEN** the run interval is set to zero, to a negative value or to less than one second
+- **THEN** it is kept at one second and a warning is logged
+
+#### Scenario: Run interval above its maximum
+
+- **WHEN** the run interval is set to more than one hour
+- **THEN** it is kept at one hour and a warning is logged
+
+#### Scenario: Renewal advance shorter than the run interval
+
+- **WHEN** the renewal advance is set to zero, to a negative value or to less than the run interval
+- **THEN** it is kept at the run interval and a warning is logged
+
+#### Scenario: Renewal advance above its maximum
+
+- **WHEN** the renewal advance is set to more than one day
+- **THEN** it is kept at one day and a warning is logged
+
+#### Scenario: Interval value that cannot be read
+
+- **WHEN** the run interval or the renewal advance is set to text that is not an interval
+- **THEN** the default is used - one minute for the interval, the interval for the advance - and a warning is logged
+
 ### Requirement: Moving the subscription balance to the wallet
 
 `getSubscriptionBalanceInfo` SHALL show the payer (403) the unused balance of the subscription period

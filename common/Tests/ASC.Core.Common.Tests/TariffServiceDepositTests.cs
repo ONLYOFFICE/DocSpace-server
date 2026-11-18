@@ -47,6 +47,7 @@ public class TariffServiceDepositTests
 {
     private const int TenantId = 1;
     private const string PaymentRegion = "portal-";
+    private const string GoodwillPath = $"/api/customer/{PaymentRegion}1/goodwill";
 
     private static readonly DateTime _utcStartDate = new(2021, 3, 9, 17, 46, 59, DateTimeKind.Utc);
     private static readonly DateTime _utcEndDate = new(2026, 10, 26, 12, 0, 0, DateTimeKind.Utc);
@@ -155,8 +156,10 @@ public class TariffServiceDepositTests
         // deposit for the same shortfall would then charge the customer twice, so the top-up stops instead.
         using var billing = new HttpStub(_ => Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
         var (billingClient, _) = CreateBillingClient(billing);
-        var (accountingClient, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK,
-            """{"accountNumber":42,"accountCurrency":"USD","subAccounts":[{"currency":"USD","amount":10}]}"""));
+        // the portal has no bonus, so the wallet alone decides
+        var (accountingClient, _) = CreateAccountingClient(request => request.Path == GoodwillPath
+            ? Reply(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""")
+            : Reply(HttpStatusCode.OK, """{"accountNumber":42,"accountCurrency":"USD","subAccounts":[{"currency":"USD","amount":10}]}"""));
 
         var tariffService = PaymentStubs.CreateTariffService(accountingClient, billingClient,
             hybridCache: new FusionCache(new FusionCacheOptions()),
@@ -255,11 +258,17 @@ public class TariffServiceDepositTests
             return Reply(HttpStatusCode.OK, "\"ok\"");
         });
 
-        var accounting = new HttpStub(_ =>
+        var accounting = new HttpStub(request =>
         {
             if (deposited)
             {
                 onReadAfterDeposit?.Invoke();
+            }
+
+            // the portal has no bonus, so the wallet alone decides
+            if (request.Path == GoodwillPath)
+            {
+                return Reply(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""");
             }
 
             var amount = deposited && balanceAfterDeposit is { } after ? after : balance;

@@ -618,14 +618,14 @@ refused with 402 and nothing charged.
 ### Requirement: Automatic renewal of a wallet subscription
 
 A wallet subscription SHALL be renewed shortly before its due date; for the main plan the wallet
-is topped up first for what it lacks, unless its payment method is delayed. A renewal a stopped service left unfinished SHALL be
-resumed by asking billing first and SHALL NOT be paid again once its payment was requested or billing
-reports the subscription extended. A renewal that fails SHALL send the failure letter to the payer and the
+is topped up first for what it and the bonus lack, unless its payment method is delayed. A renewal a stopped
+service left unfinished SHALL be resumed by asking billing first and SHALL NOT be paid again once its payment
+was requested or billing reports it extended. A renewal that fails SHALL send the failure letter to the payer and the
 owner, unless it is no longer wanted or its due date moved.
 
 #### Scenario: Wallet covers the next period
 
-- **WHEN** the due date of a wallet subscription comes near and the wallet holds its price
+- **WHEN** the due date of a wallet subscription comes near and the wallet and the bonus hold its price
 - **THEN** the next period is paid for the quantity scheduled for it, raised to the seats or the storage in use, and the wallet is not topped up
 
 #### Scenario: Switch to another plan scheduled
@@ -635,8 +635,8 @@ owner, unless it is no longer wanted or its due date moved.
 
 #### Scenario: Wallet short of the price
 
-- **WHEN** the due date of the main plan comes near, the wallet holds less than the price and the payment method is not a delayed one
-- **THEN** the wallet is topped up for the shortfall and the next period is then paid from it; while other spending keeps the wallet short, it is topped up again, five deposits at most
+- **WHEN** the due date of the main plan comes near, the wallet and the bonus hold less than the price and the payment method is not a delayed one
+- **THEN** the wallet is topped up for the shortfall and the next period is then paid from it; while other spending keeps them short, it is topped up again, five deposits at most
 
 #### Scenario: Top-up cut short
 
@@ -645,7 +645,7 @@ owner, unless it is no longer wanted or its due date moved.
 
 #### Scenario: Wallet short of the price with a delayed payment method
 
-- **WHEN** the due date of the main plan comes near, the wallet holds less than the price and the payment method is a delayed one
+- **WHEN** the due date of the main plan comes near, the wallet and the bonus hold less than the price and the payment method is a delayed one
 - **THEN** the wallet is not topped up, nothing is paid and the failure letter is sent
 
 #### Scenario: Additional wallet service
