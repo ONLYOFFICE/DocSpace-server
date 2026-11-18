@@ -470,8 +470,9 @@ public static class ServiceCollectionExtension
         /// Registers the default HTTP client and the standard named clients that shared code asks for by name.
         /// </summary>
         /// <remarks>
-        /// Both <see cref="BaseStartup"/> and <see cref="BaseWorkerStartup"/> call this, because the same code runs
-        /// in both kinds of host. <see cref="IHttpClientFactory"/> does not refuse a name that was never registered.
+        /// Every host calls this: <see cref="BaseStartup"/> and <see cref="BaseWorkerStartup"/>, and the two hosts that
+        /// derive from neither, ApiSystem and Site.Core, because the same code runs in all of them.
+        /// <see cref="IHttpClientFactory"/> does not refuse a name that was never registered.
         /// It returns a client with the default handler, which keeps cookies. Every client created for that name
         /// within one handler's lifetime (two minutes by default) shares one cookie container, for as long as those
         /// clients live. Before this was

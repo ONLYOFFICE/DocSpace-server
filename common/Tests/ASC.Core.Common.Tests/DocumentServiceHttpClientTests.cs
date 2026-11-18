@@ -35,8 +35,9 @@ namespace ASC.Core.Common.Tests;
 
 /// <summary>
 /// The named clients of the document service: each one carries a single resilience pipeline, however many of a
-/// process's service extensions register them, and the clients behind the "SSL verification off" switch accept any
-/// certificate.
+/// process's service extensions register them, the clients behind the "SSL verification off" switch accept any
+/// certificate, and a timeout or retry count that does not parse or is out of bounds neither stops the registration
+/// nor breaks the clients.
 /// </summary>
 /// <remarks>
 /// The Monolith runs the services of every host in one process, so it calls <c>AddDocumentServiceHttpClient</c> once
@@ -50,7 +51,7 @@ public sealed class DocumentServiceHttpClientTests : IDisposable
 
     public DocumentServiceHttpClientTests()
     {
-        var configuration = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
+        var configuration = Configuration(timeout: null, @try: null);
         var services = new ServiceCollection();
 
         services.AddDocumentServiceHttpClient(configuration);
@@ -65,9 +66,7 @@ public sealed class DocumentServiceHttpClientTests : IDisposable
     [InlineData(false)]
     public void RegisteredThreeTimes_ClientHasOneResiliencePipeline(bool sslVerification)
     {
-        var handlers = HandlerChain(DocumentService.GetHttpClientName(sslVerification));
-
-        handlers.Count(h => h.GetType().Name == "ResilienceHandler").Should().Be(1);
+        HttpHandlerProbe.ResilienceHandlers(_provider, DocumentService.GetHttpClientName(sslVerification)).Should().Be(1);
     }
 
     [Theory]
@@ -76,17 +75,40 @@ public sealed class DocumentServiceHttpClientTests : IDisposable
     public void SslIgnoringClients_AcceptAnUntrustedCertificate(bool customClient)
     {
         var name = customClient ? DocumentService.CustomSslVerificationClient : DocumentService.GetHttpClientName(sslVerification: false);
-        var primary = HandlerChain(name).Last().Should().BeOfType<SocketsHttpHandler>().Subject;
 
-        AcceptsUntrustedCertificate(primary).Should().BeTrue();
+        HttpHandlerProbe.AcceptsUntrustedCertificate(HttpHandlerProbe.Primary(_provider, name)).Should().BeTrue();
     }
 
     [Fact]
     public void VerifyingClient_KeepsTheDefaultCertificateValidation()
     {
-        var primary = HandlerChain(DocumentService.GetHttpClientName(sslVerification: true)).Last();
+        var primary = HttpHandlerProbe.Primary(_provider, DocumentService.GetHttpClientName(sslVerification: true));
 
-        AcceptsUntrustedCertificate(primary as SocketsHttpHandler).Should().BeFalse();
+        HttpHandlerProbe.AcceptsUntrustedCertificate(primary).Should().BeFalse();
+    }
+
+    /// <summary>
+    /// The values used to be read with <c>Convert.ToInt32</c> during the registration, so one that did not parse
+    /// stopped the host from starting; a timeout under a second became a zero timeout and a retry count of 0 or less
+    /// an invalid strategy, which failed every request once the host ran.
+    /// </summary>
+    [Theory]
+    [InlineData("x", null)]
+    [InlineData("500", null)]
+    [InlineData("0", null)]
+    [InlineData(null, "x")]
+    [InlineData(null, "0")]
+    [InlineData(null, "-1")]
+    public void BrokenSettings_ClientsStillRegisterAndBuild(string? timeout, string? @try)
+    {
+        var services = new ServiceCollection();
+
+        services.AddDocumentServiceHttpClient(Configuration(timeout, @try));
+
+        using var provider = services.BuildServiceProvider();
+
+        HttpHandlerProbe.ResilienceHandlers(provider, DocumentService.GetHttpClientName(sslVerification: true)).Should().Be(1);
+        HttpHandlerProbe.ResilienceHandlers(provider, DocumentService.GetHttpClientName(sslVerification: false)).Should().Be(1);
     }
 
     public void Dispose()
@@ -94,39 +116,14 @@ public sealed class DocumentServiceHttpClientTests : IDisposable
         _provider.Dispose();
     }
 
-    private List<HttpMessageHandler> HandlerChain(string name)
+    private static IConfiguration Configuration(string? timeout, string? @try)
     {
-        var handler = _provider.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler(name);
-        var chain = new List<HttpMessageHandler> { handler };
-
-        while (handler is DelegatingHandler delegating)
-        {
-            handler = delegating.InnerHandler!;
-            chain.Add(handler);
-        }
-
-        return chain;
-    }
-
-    /// <summary>
-    /// Whether the handler would go on with a self-signed certificate whose chain does not validate. A handler that is
-    /// not a <see cref="SocketsHttpHandler"/> with a callback of its own applies the default validation, which refuses
-    /// it.
-    /// </summary>
-    private static bool AcceptsUntrustedCertificate(SocketsHttpHandler? handler)
-    {
-        var callback = handler?.SslOptions.RemoteCertificateValidationCallback;
-
-        if (callback is null)
-        {
-            return false;
-        }
-
-        using var key = RSA.Create(2048);
-        var request = new CertificateRequest("CN=untrusted.test", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
-        using var chain = new X509Chain();
-
-        return callback(handler!, certificate, chain, SslPolicyErrors.RemoteCertificateChainErrors);
+        return new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["files:docservice:timeout"] = timeout,
+                ["files:docservice:try"] = @try
+            })
+            .Build();
     }
 }

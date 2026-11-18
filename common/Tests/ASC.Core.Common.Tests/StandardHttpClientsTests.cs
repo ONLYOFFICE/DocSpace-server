@@ -44,11 +44,11 @@ namespace ASC.Core.Common.Tests;
 /// refuse an unregistered name: it serves the default handler, which keeps cookies and follows redirects.
 /// </para>
 /// <para>
-/// The test checks the registration itself, not the hosts that call it. That <c>BaseStartup</c> and
-/// <c>BaseWorkerStartup</c> both call <c>AddStandardHttpClients</c> is not checked here: building a host's service
-/// collection needs Redis and the DI scan. In the workers, only <c>customHttpClientNoCookie</c> is covered, for
-/// Files.Worker, by <c>ThirdPartyWorkerSessionIsolationTests</c> in the Files suite; no test notices another name
-/// missing from a worker.
+/// The test checks the registration itself, not the hosts that call it. That <c>BaseStartup</c>,
+/// <c>BaseWorkerStartup</c>, ApiSystem and Site.Core call <c>AddStandardHttpClients</c> is not checked here: their
+/// registrations run inside <c>ConfigureServices</c>, which needs Redis and the DI scan. In the workers, only
+/// <c>customHttpClientNoCookie</c> is covered, for Files.Worker, by <c>ThirdPartyWorkerSessionIsolationTests</c> in
+/// the Files suite; no test notices another name missing from a host.
 /// </para>
 /// </remarks>
 public sealed class StandardHttpClientsTests : IDisposable
@@ -104,35 +104,11 @@ public sealed class StandardHttpClientsTests : IDisposable
 
     private SocketsHttpHandler PrimaryHandler(string name)
     {
-        var handler = _provider.GetRequiredService<IHttpMessageHandlerFactory>().CreateHandler(name);
-
-        // the factory wraps the primary handler in its own delegating handlers (lifetime tracking, logging)
-        while (handler is DelegatingHandler delegating)
-        {
-            handler = delegating.InnerHandler!;
-        }
-
-        return handler.Should().BeOfType<SocketsHttpHandler>().Subject;
+        return HttpHandlerProbe.Primary(_provider, name);
     }
 
-    /// <summary>
-    /// Whether the handler would go on with a self-signed certificate whose chain does not validate. Without a
-    /// callback of its own, the handler applies the default validation, which refuses it.
-    /// </summary>
     private static bool AcceptsUntrustedCertificate(SocketsHttpHandler handler)
     {
-        var callback = handler.SslOptions.RemoteCertificateValidationCallback;
-
-        if (callback is null)
-        {
-            return false;
-        }
-
-        using var key = RSA.Create(2048);
-        var request = new CertificateRequest("CN=untrusted.test", key, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
-        using var certificate = request.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddDays(1));
-        using var chain = new X509Chain();
-
-        return callback(handler, certificate, chain, SslPolicyErrors.RemoteCertificateChainErrors);
+        return HttpHandlerProbe.AcceptsUntrustedCertificate(handler);
     }
 }

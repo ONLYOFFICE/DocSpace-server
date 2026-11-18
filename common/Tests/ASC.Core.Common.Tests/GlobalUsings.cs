@@ -46,6 +46,7 @@ global using System.Text;
 global using System.Text.Json;
 global using System.Xml.Linq;
 
+global using ASC.AI.Worker.Extensions;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Middleware;
 global using ASC.Api.Core.Webhook.Payloads;
@@ -73,6 +74,7 @@ global using ASC.Notify.Patterns;
 global using ASC.Notify.Recipients;
 global using ASC.Notify.Sinks;
 global using ASC.Notify.Textile;
+global using ASC.People.Extensions;
 global using ASC.Webhooks.Contract;
 global using ASC.Webhooks.Core;
 

@@ -67,7 +67,11 @@ public class Startup
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
-        services.AddHttpClient();
+        services.AddStandardHttpClients();
+
+        // registration by OAuth and the license quota send requests through these clients
+        services.AddDocumentServiceHttpClient(_configuration);
+
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();
 
