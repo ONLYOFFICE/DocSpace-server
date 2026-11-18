@@ -56,7 +56,7 @@ public class TariffServiceWalletCoverageTests
     {
         var (tariffService, billing) = CreateService(walletAmount: 0, goodwill: Goodwill(50));
 
-        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 30, "USD", null, "portal.example.com", auto: true);
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 30, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         covered.Should().BeTrue();
         billing.Requests.Should().NotContain(request => request.Path == "/billing/Deposit");
@@ -67,7 +67,7 @@ public class TariffServiceWalletCoverageTests
     {
         var (tariffService, billing) = CreateService(walletAmount: 10, goodwill: Goodwill(15));
 
-        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         DepositAmounts(billing).Should().Equal("25");
     }
@@ -77,7 +77,7 @@ public class TariffServiceWalletCoverageTests
     {
         var (tariffService, billing) = CreateService(walletAmount: 10, goodwill: Goodwill(15, "EUR"));
 
-        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         DepositAmounts(billing).Should().Equal("40");
     }
@@ -88,7 +88,7 @@ public class TariffServiceWalletCoverageTests
         var (tariffService, billing) = CreateService(walletAmount: 10,
             goodwill: Reply(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Something went wrong"}"""));
 
-        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         DepositAmounts(billing).Should().Equal("40");
     }
@@ -98,7 +98,7 @@ public class TariffServiceWalletCoverageTests
     {
         var (tariffService, billing) = CreateService(walletAmount: 10, goodwill: Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
 
-        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         DepositAmounts(billing).Should().Equal("40");
     }
@@ -114,7 +114,7 @@ public class TariffServiceWalletCoverageTests
              "lots":[{"operationId":1,"amount":15,"remaining":15,"currency":"USD","date":"2026-11-01T09:00:00Z","expiresAt":"{{ended}}"}]}
             """));
 
-        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         DepositAmounts(billing).Should().Equal("40");
     }
@@ -124,7 +124,7 @@ public class TariffServiceWalletCoverageTests
     {
         var (tariffService, billing) = CreateService(walletAmount: 10, goodwill: Goodwill(-20));
 
-        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true);
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         DepositAmounts(billing).Should().Equal("40");
     }
@@ -136,7 +136,7 @@ public class TariffServiceWalletCoverageTests
     {
         var (tariffService, billing) = CreateConfirmingService(Goodwill(15), Goodwill(5));
 
-        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 40, "USD", null, "portal.example.com", auto: true);
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 40, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         covered.Should().BeTrue();
         DepositAmounts(billing).Should().Equal("25", "10");
@@ -150,7 +150,7 @@ public class TariffServiceWalletCoverageTests
         var (tariffService, billing) = CreateConfirmingService(Goodwill(15),
             Reply(HttpStatusCode.InternalServerError, """{"title":"Internal Server Error","status":500}"""));
 
-        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 40, "USD", null, "portal.example.com", auto: true);
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 40, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
 
         covered.Should().BeTrue();
         DepositAmounts(billing).Should().Equal("25");
@@ -162,7 +162,7 @@ public class TariffServiceWalletCoverageTests
         // A delayed payment method is never topped up on the fly: what the portal already has decides alone.
         var (tariffService, billing) = CreateService(walletAmount: 5, goodwill: Goodwill(25));
 
-        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 30, "USD", null, "portal.example.com", auto: false, allowTopUp: false);
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 30, "USD", null, "portal.example.com", auto: false, allowTopUp: false, cancellationToken: TestContext.Current.CancellationToken);
 
         covered.Should().BeTrue();
         billing.Requests.Should().NotContain(request => request.Path == "/billing/Deposit");

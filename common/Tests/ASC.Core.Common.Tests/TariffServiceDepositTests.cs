@@ -224,6 +224,25 @@ public class TariffServiceDepositTests
         socket.TopUps.Should().Equal([true], "the automatic deposit is announced to the clients before the top-up stops");
     }
 
+    // A deposit that covers the amount does not turn a cancelled top-up into a covered one: the balance is not read
+    // again, so the method cannot know it, and the caller that set the deadline learns of the cancellation. The caller
+    // then has to ask billing and the balance itself, as a resumed wallet renewal does.
+    [Fact]
+    public async Task EnsureWalletBalance_TokenCancelledAtADepositThatCovers_StillThrows()
+    {
+        using var deadline = new CancellationTokenSource();
+        var readsAfterDeposit = 0;
+        var (tariffService, billing, socket) = CreateWalletService(balance: 10, onDeposit: deadline.Cancel, balanceAfterDeposit: 60,
+            onReadAfterDeposit: () => readsAfterDeposit++);
+
+        var act = async () => await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 50, "USD", null, "portal.example.com", auto: true, cancellationToken: deadline.Token);
+
+        await act.Should().ThrowAsync<OperationCanceledException>();
+        billing.Requests.Where(request => request.Path == "/billing/Deposit").Should().ContainSingle("the one deposit covers the amount");
+        readsAfterDeposit.Should().Be(0, "a cancelled top-up reads the balance no more, also after a deposit that covers it");
+        socket.TopUps.Should().Equal([true], "the deposit is announced to the clients before the top-up stops");
+    }
+
     // The socket event after a deposit is best effort: a socket client that throws does not fail the top-up, whose
     // deposit is made and whose balance now covers the cost.
     [Fact]
