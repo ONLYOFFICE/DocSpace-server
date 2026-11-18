@@ -29,5 +29,3 @@
 ## Workflow follow-up
 
 - Commit the proposal (`docs(openspec): propose delete-project-threads-on-profile-removal`) on the user's command, then apply.
-- Archive the change after its review, in a commit of its own.
-- Mark stage 12 done in `AI-THREAD-ARTIFACTS-PLAN.md` and write its journal line.
