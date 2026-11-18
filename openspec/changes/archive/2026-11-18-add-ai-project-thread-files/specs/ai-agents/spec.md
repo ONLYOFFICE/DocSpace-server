@@ -28,9 +28,9 @@ stored. A thread of any other entry has neither set.
 
 The storage route `POST internal/ai/threads/{id}/artifacts` SHALL save the sent file among the artifacts of
 the caller's project thread and answer with the stored file. It SHALL answer 400 for a thread that is not in
-an AI project, 404 for an unknown thread and 403 for a thread of another user, storing nothing. A title that
-an artifact of the thread already has SHALL NOT replace that artifact: the new file is stored under another
-title.
+an AI project, for an empty file and for a file over 100 MB, 404 for an unknown thread and 403 for a thread
+of another user, storing nothing. A title that an artifact of the thread already has SHALL NOT replace that
+artifact: the new file is stored under another title.
 
 #### Scenario: Saved artifact is listed
 
@@ -46,6 +46,16 @@ title.
 
 - **WHEN** the creator saves a file into a thread that has no entry
 - **THEN** the system answers 400
+
+#### Scenario: Empty file
+
+- **WHEN** the creator saves a file of 0 bytes into a thread of a project
+- **THEN** the system answers 400 and the thread lists no artifacts
+
+#### Scenario: File over the limit
+
+- **WHEN** the creator saves a file of 100 MB and one byte into a thread of a project
+- **THEN** the system answers 400 and the thread lists no artifacts
 
 #### Scenario: Unknown thread
 
@@ -109,6 +119,11 @@ any other value answers 400.
 
 - **WHEN** the creator calls either list with `startIndex` -1
 - **THEN** the system answers 400
+
+#### Scenario: Largest count
+
+- **WHEN** the creator calls either list with `count` 100 and `startIndex` 0
+- **THEN** the system answers 200
 
 ### Requirement: Uploading an attachment into a project
 

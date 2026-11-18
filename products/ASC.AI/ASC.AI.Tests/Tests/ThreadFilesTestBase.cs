@@ -66,10 +66,10 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         return member;
     }
 
-    protected async Task<HttpResponseMessage> PostArtifactAsync(Guid threadId, string name)
+    protected async Task<HttpResponseMessage> PostArtifactAsync(Guid threadId, string name, byte[]? bytes = null)
     {
         using var form = new MultipartFormDataContent();
-        using var file = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes($"Autotest artifact {name}"));
+        using var file = new ByteArrayContent(bytes ?? System.Text.Encoding.UTF8.GetBytes($"Autotest artifact {name}"));
         file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
         form.Add(file, "file", name);
 

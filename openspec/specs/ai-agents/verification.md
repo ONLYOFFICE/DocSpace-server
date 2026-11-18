@@ -178,6 +178,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Thread privacy** | | |
 | Creator only on every route (scenario "Two members") | `T/ThreadStorageTests/ThreadsPermissionTests.cs:67`; `ThreadsLifecycleTests.cs:209`; `T/ChatTests/ChatPermissionIsolationTests.cs:77`; `ChatPermissionIsolationSendTests.cs:51` | TEST-CONFIRMED [run: PASS] |
 | Removed member (scenario) | `T/ChatTests/ChatPermissionRevokedTests.cs:52,67,90` | TEST-CONFIRMED [run: PASS] |
+| Member removed from an AI project (scenario) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:43` | TEST-CONFIRMED |
 | Regeneration by a fellow member (scenario) | `T/MessageStorageTests/MessageRegenerateAccessTests.cs:55,79` | TEST-CONFIRMED [run: PASS] |
 | **One thread list per user** | | |
 | Rooms share one list (scenario); third-party | `T/ChatTests/ChatEntityContextTests.cs:71,108,139`; `ChatGlobalEntryTests.cs:146`; `T/ThirdPartyTests/ThirdPartyThreadTests.cs:68` (bug 82855, by design) | TEST-CONFIRMED [run: PASS] |
@@ -407,6 +408,55 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | AI access, profile, assign, server, vectorization, web search, user settings, project, quota | `SettingsController.cs`; `ProfileStorageService.cs`; `AssignmentsStorageService.cs`; `McpServerStorageService.cs`; `AiSettingsService.cs`; `WebSearchStorageService.cs` | CODE-ONLY |
 | Switch audited (scenario) | `SettingsController.cs` (`MessageAction`); `Web/05_Security/AuditTrail/` tests the audit API only | CODE-ONLY |
 | Reads not audited (scenario); socket events | absence of a message in read paths; `AI/Server/Service/AiSocketManager.cs:46-52` | CODE-ONLY |
+| **Files of a project thread** |  |  |
+| A set per thread (scenario "Two threads of one project"); one folder for saves made at the same moment (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:105,88`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:301` | TEST-CONFIRMED |
+| The thread does not name its folders (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:186` | TEST-CONFIRMED |
+| A thread of another entry has neither set | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:318` | TEST-CONFIRMED |
+| **Saving an artifact of a thread** |  |  |
+| Saved and listed (scenario); same title twice (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:41,56,72` | TEST-CONFIRMED |
+| Thread outside a project 400, unknown thread 404, thread of another member 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123,133,141` | TEST-CONFIRMED |
+| Empty file 400, file over 100 MB 400 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:158,172` | TEST-CONFIRMED |
+| **Listing the files of a thread** |  |  |
+| Thread without files; one page with the total (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:200,212` | TEST-CONFIRMED |
+| Project owner asks for a member's thread 404 (scenario); thread of another project 404; caller outside the project 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:226,247,260`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:350` | TEST-CONFIRMED |
+| Deleted thread 404 | `T/ThreadDeletionTests/ThreadDeletionTests.cs:61` | TEST-CONFIRMED |
+| Attachment that was not sent (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:336` | TEST-CONFIRMED |
+| `count` 0 and 101 and `startIndex` -1 answer 400; `count` 100 answers 200 (scenarios) | `T/ThreadArtifactsTests/ThreadFilesListBoundsTests.cs:47,60` | TEST-CONFIRMED |
+| `count` is 100 when omitted | `products/ASC.Files/Server/ApiModels/RequestDto/GetAiThreadFilesRequestDto.cs:61` | CODE-ONLY |
+| **Uploading an attachment into a project** |  |  |
+| Member uploads (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:44,54` | TEST-CONFIRMED |
+| Caller outside the project 403, relative path 403, unsupported format 400, upload in one request 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:67,80,90,100` | TEST-CONFIRMED |
+| **Copying a portal file into a project** |  |  |
+| Member copies; same file twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:115,127,186` | TEST-CONFIRMED |
+| Caller outside the project 403, folder 403, unsupported format 415, move 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:141,157,173,199` | TEST-CONFIRMED |
+| **Attachment of a file stored in a project** |  |  |
+| Document attached twice; picture attached twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:212,228` | TEST-CONFIRMED |
+| **A sent attachment is kept with its thread** |  |  |
+| Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:242,261,286,301,318` | TEST-CONFIRMED |
+| **Privacy of the contents of a project** |  |  |
+| Artifact, thread folder and file not sent of another member 403 to a member, the owner and a DocSpace admin (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:51,67,83,100,116,132` | TEST-CONFIRMED |
+| Creator reads, downloads and copies (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:41,52,63` | TEST-CONFIRMED |
+| Creator cannot change the file (scenario); creator opens the editor (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:78,92,107,132,146`; `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:121` | TEST-CONFIRMED |
+| **The contents of a project are not listed** |  |  |
+| Listing; search inside the project (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:51,69,80` | TEST-CONFIRMED |
+| Counters of the project; sources and skills (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:96,107` | TEST-CONFIRMED |
+| **Recipients of an upload into a project** |  |  |
+| Uploader is told; others are not told (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:52,68` | TEST-CONFIRMED |
+| Owner's new items (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:106` | TEST-CONFIRMED |
+| Upload notification (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:39,53` | TEST-CONFIRMED |
+| Upload notification (scenario): the decision is applied where the upload event is published and where it is handled | `products/ASC.Files/Server/Api/UploadController.cs`; `products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs`; `products/ASC.Files/Server/Helpers/FilesHelperBase.cs`; `products/ASC.Files/Worker/IntegrationEvents/EventHandling/RoomNotifyIntegrationEventHandler.cs` (calls of `AnnouncesEntriesToMembers`) | CODE-ONLY |
+| Shared users of a file (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:91` | TEST-CONFIRMED |
+| **Deleting a thread of a project** |  |  |
+| Gone at once (scenario) | `T/ThreadDeletionTests/ThreadDeletionTests.cs:41,61` | TEST-CONFIRMED |
+| Files removed by the background pass; other thread of the project; project deleted afterwards (scenarios) | `T/ThreadDeletionTests/ThreadDeletionTests.cs:90,111,135` | TEST-CONFIRMED |
+| The pass runs every 5 minutes by default | `products/ASC.AI/Worker/BackgroundServices/DeletedThreadsCleanerService.cs` (`_defaultPeriod`) | CODE-ONLY |
+| **Losing access to a project deletes the member's threads** |  |  |
+| Member removed by the owner; member leaves; deactivated member removed (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:43,64,83` | TEST-CONFIRMED |
+| Other members; invited again (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:105,125` | TEST-CONFIRMED |
+| Owner and member remove the project from the list (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:148,172` | TEST-CONFIRMED |
+| Owner changed (scenario) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:192` | TEST-CONFIRMED |
+| **Thread list of an AI project** |  |  |
+| Thread started in a project; thread started in a room (scenarios) | `T/ChatTests/ChatProjectThreadListTests.cs:41,62` | TEST-CONFIRMED |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 
