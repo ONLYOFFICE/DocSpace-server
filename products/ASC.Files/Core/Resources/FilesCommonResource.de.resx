@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Fehler beim Starten der Dateibearbeitung</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>Im verbundenen Drittanbieterspeicher ist nicht genügend freier Speicherplatz vorhanden. Geben Sie dort Speicherplatz frei und versuchen Sie es erneut.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Sie können archivierte Räume nicht bearbeiten</value>
   </data>

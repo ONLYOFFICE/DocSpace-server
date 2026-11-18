@@ -263,6 +263,38 @@ Trash for it, so reading it afterwards answers 404.
 - **WHEN** a file from My documents is copied into a connected folder with `copyBatchItems`
 - **THEN** the operation finishes without error, the folder lists the file and the source stays
 
+### Requirement: Connected account out of space
+
+When a Box, Dropbox, Google Drive, OneDrive or WebDAV account refuses a write for lack of space, the call SHALL
+answer 400 with the message "There is not enough free space in the connected third-party storage. Free up space in
+it and try again." instead of the service's own error. A file operation SHALL finish with that message as `error`,
+also when a later item fails otherwise. A SharePoint refusal keeps its own answer.
+
+#### Scenario: Creating a file
+
+- **WHEN** the owner calls `createFile` in a room on a Nextcloud account that has no free space
+- **THEN** the answer is 400 and its `error.message` is exactly that message
+
+#### Scenario: Room as a new folder
+
+- **WHEN** `createRoomThirdParty` is called with `createAsNewFolder` true for such an account
+- **THEN** the answer is 400 with that message, not the 403 of a folder the room cannot use
+
+#### Scenario: Copy into the full account
+
+- **WHEN** `copyBatchItems` copies a file from My documents into a room on such an account
+- **THEN** the operation finishes and its `error` is exactly that message
+
+#### Scenario: Upload through the chunk handler
+
+- **WHEN** a session opened with `createUploadSessionInFolder` in such a room gets the whole file in one part from the chunk handler
+- **THEN** the handler answers `success` false with `message` equal to that message
+
+#### Scenario: A later item fails otherwise
+
+- **WHEN** one item of a move, copy or duplicate is refused for space and a later item fails for another reason
+- **THEN** the operation's `error` is still that message
+
 ### Requirement: Recent section with a third-party file
 
 A third-party file in the caller's Recent section SHALL be removable with `deleteRecent`, and a file that has since

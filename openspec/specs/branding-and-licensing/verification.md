@@ -31,7 +31,7 @@ at 1151-1229; the service-limit work of hotfix v4.0.1 shifted the lines, the tar
 Tests: `T/` is `web/ASC.Web.Api.Tests/Tests/`, `TS/` is `../tests/api-tests/src/tests/settings/`. Status: **TEST-CONFIRMED**
 (an integration test asserts it; `(TS)` when only the TypeScript suite does, run against a hosted test portal),
 **CODE-ONLY** (read from the product code, the configuration or the OpenAPI document), **NOTES-ONLY** (only the release
-notes say it — nothing of that kind was written into the spec). Exception → status mapping (`Wrapper:53-131`):
+notes say it — nothing of that kind was written into the spec). Exception → status mapping (`Wrapper:53-139`):
 `ArgumentException` (incl. `ArgumentNullException`, `ArgumentOutOfRangeException`) 400, `SecurityException` 403
 "Access denied", `InvalidOperationException` 403, `BillingException` and `TenantQuotaException` 402,
 `NotSupportedException` 415, anything else 500.
