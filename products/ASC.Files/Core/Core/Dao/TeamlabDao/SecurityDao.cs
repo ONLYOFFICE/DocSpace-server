@@ -243,10 +243,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var groupShare = await filesDbContext.Security
-            .Where(s => s.TenantId == tenantId && s.EntryId == mappedId && s.EntryType == entry.FileEntryType && s.Subject == groupId)
-            .Select(s => s.Share)
-            .FirstOrDefaultAsync();
+        var groupShare = await GetGroupShareAsync(filesDbContext, tenantId, mappedId, entry.FileEntryType, groupId);
 
         if (groupShare == FileShare.None)
         {
@@ -260,6 +257,9 @@ internal abstract class SecurityBaseDao<T>(
 
         if (!string.IsNullOrEmpty(text))
         {
+            // Normalised as in the count: where the database compares with regard to case, a value with an uppercase
+            // letter would otherwise give an empty page under a total.
+            text = GetSearchText(text);
             users = users.Where(u => u.FirstName.ToLower().Contains(text) || u.LastName.ToLower().Contains(text) || u.Email.ToLower().Contains(text));
         }
 
@@ -292,6 +292,16 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
+    /// <summary>
+    /// The access the group has on the entry by a record of its own, or <see cref="FileShare.None"/> without one.
+    /// </summary>
+    private static async Task<FileShare> GetGroupShareAsync(FilesDbContext filesDbContext, int tenantId, string entryId, FileEntryType entryType, Guid groupId)
+    {
+        var record = await filesDbContext.EntrySharesBySubjectsAsync(tenantId, entryId, entryType, [groupId]).FirstOrDefaultAsync();
+
+        return record?.Share ?? FileShare.None;
+    }
+
     public async Task<int> GetGroupMembersWithSecurityCountAsync(FileEntry<T> entry, Guid groupId, string text)
     {
         if (entry == null)
@@ -300,8 +310,16 @@ internal abstract class SecurityBaseDao<T>(
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
+        var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        // The same condition as the list: a group without access to the entry has no members to show here, and a count
+        // of any group would tell its size, and with a text whether a name or an email is among its members.
+        if (await GetGroupShareAsync(filesDbContext, tenantId, mappedId, entry.FileEntryType, groupId) == FileShare.None)
+        {
+            return 0;
+        }
 
         var q = filesDbContext.UserGroup.Where(g =>
             g.TenantId == tenantId && g.UserGroupId == groupId && !g.Removed && g.RefType == UserGroupRefType.Contains);
@@ -586,7 +604,7 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    public async IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, int offset, int count, IEnumerable<Guid> parentUserIds)
+    public async IAsyncEnumerable<GroupInfoWithShared> GetGroupsWithSharedAsync(FileEntry<T> entry, string text, bool excludeShared, bool everyoneOnly, int offset, int count, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null || count == 0)
         {
@@ -598,7 +616,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext, parentUserIds);
+        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, everyoneOnly, filesDbContext, parentUserIds);
 
         if (offset > 0)
         {
@@ -616,7 +634,7 @@ internal abstract class SecurityBaseDao<T>(
         }
     }
 
-    public async Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, IEnumerable<Guid> parentUserIds)
+    public async Task<int> GetGroupsWithSharedCountAsync(FileEntry<T> entry, string text, bool excludeShared, bool everyoneOnly, IEnumerable<Guid> parentUserIds)
     {
         if (entry == null)
         {
@@ -628,7 +646,7 @@ internal abstract class SecurityBaseDao<T>(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, filesDbContext, parentUserIds);
+        var q = GetGroupsWithSharedQuery(tenantId, mappedId, text, entry, excludeShared, everyoneOnly, filesDbContext, parentUserIds);
 
         return await q.CountAsync();
     }
@@ -696,9 +714,17 @@ internal abstract class SecurityBaseDao<T>(
         return groups.Concat(everyone);
     }
 
-    private IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, FilesDbContext filesDbContext, IEnumerable<Guid> parentUserIds)
+    private IQueryable<GroupWithShared> GetGroupsWithSharedQuery(int tenantId, string entryId, string text, FileEntry entry, bool excludeShared, bool everyoneOnly, FilesDbContext filesDbContext, IEnumerable<Guid> parentUserIds)
     {
         var q = GetGroupsWithEveryone(tenantId, filesDbContext);
+
+        // Not precompiled on purpose: an optional predicate could be compiled, but the query it narrows is built per
+        // call from the request filters (text, excludeShared) and has no compiled form to add it to.
+        if (everyoneOnly)
+        {
+            var everyoneId = Constants.GroupEveryone.ID;
+            q = q.Where(g => g.Id == everyoneId);
+        }
 
         if (!string.IsNullOrEmpty(text))
         {
@@ -722,9 +748,9 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async IAsyncEnumerable<UserInfoWithShared> GetUsersWithSharedAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
+        bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, IEnumerable<Guid> knownFromShares, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds, int offset = 0, int count = -1)
     {
-        if (entry == null || count == 0)
+        if (entry == null || count == 0 || (includeShared && !sharedVisible))
         {
             yield break;
         }
@@ -733,8 +759,8 @@ internal abstract class SecurityBaseDao<T>(
         var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator,
-            includeStrangers, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, sharedVisible, filesDbContext, separator,
+            includeStrangers, knownToSubjects, knownFromShares, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         if (offset > 0)
         {
@@ -753,9 +779,9 @@ internal abstract class SecurityBaseDao<T>(
     }
 
     public async Task<int> GetUsersWithSharedCountAsync(FileEntry<T> entry, string text, EmployeeStatus? employeeStatus, EmployeeActivationStatus? activationStatus,
-        bool excludeShared, bool includeShared, string separator, bool includeStrangers, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
+        bool excludeShared, bool includeShared, bool sharedVisible, string separator, bool includeStrangers, IReadOnlyCollection<Guid> knownToSubjects, IEnumerable<Guid> knownFromShares, Area area, bool? invitedByMe, Guid? inviterId, IEnumerable<EmployeeType> employeeTypes, IEnumerable<Guid> parentUserIds)
     {
-        if (entry == null)
+        if (entry == null || (includeShared && !sharedVisible))
         {
             return 0;
         }
@@ -764,7 +790,7 @@ internal abstract class SecurityBaseDao<T>(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var (mappedId, _) = await daoFactory.GetMapping<T>().MappingIdAsync(entry.Id);
 
-        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, filesDbContext, separator, includeStrangers, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
+        var q1 = GetUsersWithSharedQuery(tenantId, mappedId, entry, text, employeeStatus, activationStatus, excludeShared, includeShared, sharedVisible, filesDbContext, separator, includeStrangers, knownToSubjects, knownFromShares, area, invitedByMe, inviterId, employeeTypes, parentUserIds);
 
         return await q1.CountAsync();
     }
@@ -778,9 +804,12 @@ internal abstract class SecurityBaseDao<T>(
         EmployeeActivationStatus? activationStatus,
         bool excludeShared,
         bool includeShared,
+        bool sharedVisible,
         FilesDbContext filesDbContext,
         string separator,
         bool includeStrangers,
+        IReadOnlyCollection<Guid> knownToSubjects,
+        IEnumerable<Guid> knownFromShares,
         Area area,
         bool? invitedByMe,
         Guid? inviterId,
@@ -790,6 +819,13 @@ internal abstract class SecurityBaseDao<T>(
         var q = filesDbContext.Users
             .Where(u => u.TenantId == tenantId && !u.Removed);
 
+        // The guests stay filtered by the caller's relations below, as for a room admin: a share to a guest is
+        // accepted only for a related one (CanUserShareAnotherUserAsync), so a guest met in a room only is not offered.
+        if (knownToSubjects != null)
+        {
+            q = FilterByKnownTo(q, tenantId, _authContext.CurrentAccount.ID, knownToSubjects, knownFromShares, filesDbContext);
+        }
+
         if (employeeStatus.HasValue)
         {
             q = q.Where(u => u.Status == employeeStatus.Value);
@@ -798,6 +834,14 @@ internal abstract class SecurityBaseDao<T>(
         if (activationStatus.HasValue)
         {
             q = q.Where(u => u.ActivationStatus == activationStatus.Value);
+        }
+
+        // Who invited an account is shown to DocSpace admins only (includeStrangers is set for them alone), so anybody
+        // else - a room admin as well as a caller limited to the accounts it knows - may filter by itself as the
+        // inviter but not by another account: the filter would tell it whom that account invited.
+        if (!includeStrangers && inviterId.HasValue && inviterId.Value != _authContext.CurrentAccount.ID)
+        {
+            inviterId = null;
         }
 
         q = UserQueryHelper.FilterByInviter(q, invitedByMe, inviterId, _authContext.CurrentAccount.ID);
@@ -895,7 +939,12 @@ internal abstract class SecurityBaseDao<T>(
 
         q = UserQueryHelper.FilterByText(q, text, separator);
 
-        var q1 = excludeShared
+        // Who has access to the entry is told only to a caller that may see its access list (FileSharing.CanSeeSharesAsync):
+        // otherwise a reader of somebody's document would learn which of its contacts the document is shared with.
+        // includeShared without it is answered with nothing before the query is built.
+        var q1 = !sharedVisible
+            ? q.Select(u => new UserWithShared { User = u, Shared = false })
+            : excludeShared
             ? q.Where(u =>
                     !filesDbContext.Security.Any(s =>
                         s.TenantId == tenantId &&
@@ -993,6 +1042,132 @@ internal abstract class SecurityBaseDao<T>(
             .ThenBy(u => u.User.FirstName);
 
         return q1;
+    }
+
+    /// <summary>
+    /// Keeps the users the caller already works with: the owners and the members of the rooms it is in, directly or
+    /// through a group, the members of the groups added to those rooms, the accounts it is related to, and the accounts
+    /// in the access list of the entry as the caller sees it (<paramref name="knownFromShares"/>: the records on the
+    /// entry and its parent folders without the Restrict ones, empty unless the caller may see that list). The records
+    /// on the entry are never read here on their own: a caller that may only read the entry would learn whom else it is
+    /// shared with. The owner of a room has no record of its own - it is the author of the room folder - so it is read
+    /// from there. Restricted access is no membership - neither a Restrict record of its own, nor one that takes a
+    /// member of a group out of a room the group is in, nor one in the access list of the entry, which any member of a
+    /// room sees - and room templates are not rooms. A room in the archive stays a room of its members: they still
+    /// open it there and see each other in its access list, so its owner and members remain known to them.
+    /// Rooms on third-party storage are not taken into account: their records carry no internal folder id
+    /// to check the room type by.
+    /// </summary>
+    /// <remarks>
+    /// The known users are collected first, as one deduplicated set, and the users are joined to it, so the cost
+    /// follows the number of known users rather than the size of the portal - the count has no page limit to stop
+    /// at. Every branch selects <c>core_user.id</c> itself: the user ids of the other tables have different column
+    /// types, which a set operation does not accept. The caller's subjects come in as a list of values, so its rooms
+    /// are found through the subject index: with the caller's groups looked up in a subquery, or with the sets
+    /// written as correlated <c>Any</c> calls, every room of the portal was scanned.
+    /// <para>
+    /// Not precompiled on purpose: the set of known users has a fixed shape, but it is joined into the query of
+    /// <c>GetUsersWithSharedQuery</c>, which is built per call from the request filters (area, types, inviter, text,
+    /// shared) and has no compiled form to join it to. Read on its own it would come back as a list of ids for an
+    /// <c>IN</c>, as long as the caller's rooms are populous.
+    /// </para>
+    /// <para>
+    /// The set is evaluated once for the count and once for the page, and the caller's rooms are read by three of
+    /// its branches, so the cost follows the members of the caller's rooms: for a caller in 200 rooms of 500 members
+    /// that is about 100 000 access records to deduplicate per statement.
+    /// </para>
+    /// </remarks>
+    private static IQueryable<User> FilterByKnownTo(
+        IQueryable<User> q,
+        int tenantId,
+        Guid currentUserId,
+        IReadOnlyCollection<Guid> knownToSubjects,
+        IEnumerable<Guid> knownFromShares,
+        FilesDbContext filesDbContext)
+    {
+        var roomTypes = DocSpaceHelper.RoomTypes;
+        var users = filesDbContext.Users.Where(u => u.TenantId == tenantId);
+
+        // A Restrict record is no membership, and a room the caller is restricted from personally is hidden from it
+        // even when one of its groups has access (the same rule as the room listing in FolderDao). Room templates
+        // keep a room type but live under the RoomTemplates root: access to one only allows to create rooms from it.
+        var callerRooms =
+            from mine in filesDbContext.Security
+            join folder in filesDbContext.Folders on mine.InternalEntryId equals folder.Id
+            join parent in filesDbContext.Folders on folder.ParentId equals parent.Id
+            where mine.TenantId == tenantId &&
+                  mine.EntryType == FileEntryType.Folder &&
+                  mine.Share != Security.FileShare.Restrict &&
+                  knownToSubjects.Contains(mine.Subject) &&
+                  folder.TenantId == tenantId &&
+                  roomTypes.Contains(folder.FolderType) &&
+                  parent.FolderType != FolderType.RoomTemplates &&
+                  !filesDbContext.Security.Any(r =>
+                      r.TenantId == tenantId &&
+                      r.EntryId == mine.EntryId &&
+                      r.EntryType == FileEntryType.Folder &&
+                      r.Subject == currentUserId &&
+                      r.Share == Security.FileShare.Restrict)
+            select new { mine.TenantId, mine.EntryId, mine.EntryType, folder.CreateBy };
+
+        var roomSubjects =
+            from room in callerRooms
+            join other in filesDbContext.Security
+                on new { room.TenantId, room.EntryId, room.EntryType } equals new { other.TenantId, other.EntryId, other.EntryType }
+            where other.Share != Security.FileShare.Restrict
+            select other;
+
+        var roomOwners =
+            from room in callerRooms
+            join u in users on room.CreateBy equals u.Id
+            select u.Id;
+
+        var roomUsers =
+            from other in roomSubjects
+            join u in users on other.Subject equals u.Id
+            where other.SubjectType == SubjectType.User
+            select u.Id;
+
+        var roomGroups = roomSubjects
+            .Where(s => s.SubjectType == SubjectType.Group)
+            .Select(s => new { s.EntryId, GroupId = s.Subject })
+            .Distinct();
+
+        // Only Contains rows are membership: the manager of a group has a row of its own, which is no membership.
+        // A member restricted from the room personally is no member of that room, although its group has access -
+        // the same rule as for the caller above - so the members are taken per room, and the Restrict check is a
+        // primary-key lookup per member.
+        var roomGroupMembers =
+            from roomGroup in roomGroups
+            join ug in filesDbContext.UserGroup on roomGroup.GroupId equals ug.UserGroupId
+            join u in users on ug.Userid equals u.Id
+            where ug.TenantId == tenantId && !ug.Removed && ug.RefType == UserGroupRefType.Contains &&
+                  !filesDbContext.Security.Any(r =>
+                      r.TenantId == tenantId &&
+                      r.EntryId == roomGroup.EntryId &&
+                      r.EntryType == FileEntryType.Folder &&
+                      r.Subject == ug.Userid &&
+                      r.Share == Security.FileShare.Restrict)
+            select u.Id;
+
+        var relatedUsers = users
+            .Where(u => filesDbContext.UserRelations
+                .Where(r => r.TenantId == tenantId && r.SourceUserId == currentUserId)
+                .Select(r => r.TargetUserId)
+                .Contains(u.Id))
+            .Select(u => u.Id);
+
+        var parentUsers = users
+            .Where(u => knownFromShares.Contains(u.Id))
+            .Select(u => u.Id);
+
+        var knownUsers = roomUsers
+            .Union(roomOwners)
+            .Union(roomGroupMembers)
+            .Union(relatedUsers)
+            .Union(parentUsers);
+
+        return q.Join(knownUsers, u => u.Id, id => id, (u, _) => u);
     }
 
     internal async IAsyncEnumerable<FileShareRecord<T>> InternalGetPureShareRecordsAsync(FileEntry<T> entry)

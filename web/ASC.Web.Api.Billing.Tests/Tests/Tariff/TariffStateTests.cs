@@ -31,35 +31,42 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.Tests._02_UserType;
+
+namespace ASC.Web.Api.Billing.Tests.Tests.Tariff;
 
 /// <summary>
-/// A user type change (<c>startUserTypeUpdate</c>) runs as a background task - the outcome, and
-/// sometimes even the permission check, only becomes visible through the progress endpoint some
-/// time after the start call returns. Every test that starts one polls through here instead of
-/// reading the progress once, so the assertion never races the background task.
+/// The state of the tariff (<c>GET portal/tariff</c>) as the due date of the payments billing lists moves into the
+/// past: a grace period first, then not paid.
 /// </summary>
-internal static class UserTypeUpdatePolling
+public class TariffStateTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
-    /// <summary>
-    /// Polls <c>GET /people/type/progress/{userid}</c> on a deadline and returns the last observed
-    /// progress - completed or not - so a timing-out assertion still shows what was actually there.
-    /// </summary>
-    public static async Task<TaskProgressResponseDto> WaitForCompletionAsync(UserTypeApi userTypeApi, Guid userId, TimeSpan? timeout = null)
+    [Fact]
+    public async Task GetPortalTariff_DueDateTwoDaysAgo_IsInTheGracePeriodThatEndsAfterTheDueDate()
     {
-        var deadline = DateTime.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(30));
-        TaskProgressResponseDto last;
+        // Arrange
+        var endDate = DateTime.UtcNow.Date.AddDays(-2);
+        Payments.Paid(Plans.AdminProductId, quantity: 10, endDate);
 
-        while (true)
-        {
-            last = (await userTypeApi.GetUserTypeUpdateProgressAsync(userId, TestContext.Current.CancellationToken)).Response;
+        // Act
+        var tariff = (await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken)).Response;
 
-            if (last.IsCompleted || DateTime.UtcNow >= deadline)
-            {
-                return last;
-            }
+        // Assert
+        tariff.State.Should().Be(TariffState.Delay);
+        tariff.DueDate.UtcTime.Date.Should().Be(endDate);
+        tariff.DelayDueDate.UtcTime.Date.Should().BeAfter(DateTime.UtcNow.Date.AddDays(-1),
+            "the grace period of a plan that lapsed two days ago has not run out yet");
+    }
 
-            await Task.Delay(500, TestContext.Current.CancellationToken);
-        }
+    [Fact]
+    public async Task GetPortalTariff_DueDateAYearAgo_IsNotPaid()
+    {
+        // Arrange
+        Payments.Paid(Plans.AdminProductId, quantity: 10, DateTime.UtcNow.Date.AddYears(-1));
+
+        // Act
+        var tariff = (await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        tariff.State.Should().Be(TariffState.NotPaid);
     }
 }

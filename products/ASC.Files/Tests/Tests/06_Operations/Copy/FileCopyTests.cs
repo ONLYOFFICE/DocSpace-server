@@ -93,9 +93,9 @@ public class FileCopyTests(
 
         // Assert
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
-        var newFile = results.OfType<FileOperationDto>().FirstOrDefault();
+        var newFile = results!.OfType<FileOperationDto>().FirstOrDefault();
         newFile.Should().NotBeNull();
-        newFile.Files.Should().Contain(r=> Path.GetFileNameWithoutExtension(r.Title) == Path.GetFileNameWithoutExtension(sourceFile.Title) + " (1)");
+        newFile!.Files.Should().Contain(r=> Path.GetFileNameWithoutExtension(r.Title) == Path.GetFileNameWithoutExtension(sourceFile.Title) + " (1)");
     }
 
     [Fact]

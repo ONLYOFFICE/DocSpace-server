@@ -50,19 +50,22 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Resolves the editor address the caller must open to fill out the given PDF form, and provisions the personal
-    /// draft that filling needs. The form has to live in a form-filling room and filling has to be started for it
-    /// with `PUT api/2.0/files/file/{fileId}/manageformfilling`; a caller who may edit the form, a form whose filling
-    /// has not started, and a request naming `view` or `embedded` as the action are all sent straight to the form
-    /// itself. Read access to the form is enough to get an address, fill-forms access is what puts the caller into
-    /// the filling flow, and a holder of an external link may call it without signing in, while a caller with neither
-    /// a session nor a link key is rejected. In the filling case the call is not read-only: it copies the form into
-    /// the room's in-progress folder under the caller's name, clears the new-item badge, closes the editing session
-    /// of the original, and answers with the address of that copy. A repeated call reuses that copy, and a call
-    /// naming an existing draft adds a discard notice when that draft is no longer valid. The answer is one URL
-    /// string that may carry a `#message/...` fragment the editor renders as a notice. For the full editor
-    /// configuration use `GET api/2.0/files/file/{fileId}/openedit`. A form the caller cannot open is refused with
-    /// 403, and one that does not exist is answered as missing.
+    /// Returns the editor address of a PDF form, or of a personal draft that it creates.
+    /// To start filling in a form-filling room, use `PUT api/2.0/files/file/{fileId}/manageformfilling` first.
+    /// Requires read access to the form. Other callers get 403. An external link holder can call it without signing
+    /// in. Without a sign-in or link key, the call returns 401. With `action` set to `view` or `embedded`, the call
+    /// returns the address of the form itself. It does the same for a caller who can edit the form, and before
+    /// filling starts. Otherwise, a caller with fill-forms access gets a personal draft. The first such call changes
+    /// data. It copies the form to the in-progress folder under the caller's name and clears its new mark. A repeated
+    /// call returns the same draft. It creates a new one if the draft is deleted, in Trash, or locked by another user.
+    /// Without a sign-in, each call creates a new draft. For an invalid draft, the call returns its address with a
+    /// notice to discard it. A draft becomes invalid if the form is deleted or changed, or the caller loses fill-forms
+    /// access. The next call on the form then creates a new draft. When the call creates or rejects a draft, the address
+    /// ends with a `#message/` notice for the editor. For the full editor configuration, use
+    /// `GET api/2.0/files/file/{fileId}/openedit`. The call returns 403 for a form in Trash or in a folder where the
+    /// caller cannot fill forms. It also returns 403 for a past revision without history access. The call returns
+    /// 404 for an unknown file or revision. It returns 400 if the body has no `version`. It returns 415 for a format
+    /// the editors cannot open. It returns 402 if the draft exceeds the storage quota.
     /// </remarks>
     /// <summary>
     /// Open a form draft for filling
@@ -77,7 +80,6 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     [SwaggerResponse(403, "The caller cannot open the form, asked for a past revision without history access, the form is in Trash, or the caller may fill the form but not the folder it lies in")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
     [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
-    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<string> CheckFillFormDraft(CheckFillFormDraftRequestDto<T> inDto)

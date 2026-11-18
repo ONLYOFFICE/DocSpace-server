@@ -74,16 +74,14 @@ public class FoldersControllerInternal(
 {
     private readonly FileStorageService _fileStorageServiceInternal = fileStorageService;
     /// <remarks>
-    /// Lists what has happened to a folder and to the entries inside it - creations, renames, uploads, moves,
-    /// deletions and changes of access - each record naming the action, the moment it happened and the member behind
-    /// it. Records that belong to one action are grouped, so a batch arrives as a single entry carrying the rest of
-    /// itself in `related`, and the list runs from the most recent record backwards. `fromDate` and `toDate` narrow
-    /// the period, `startIndex` and `count` page through the result, and the number of records matching the request
-    /// is reported in the response headers rather than in the body. Any member who can read the folder may read its
-    /// history; a caller without access is answered with 403 and a folder that does not exist with 404. When the
-    /// folder is a form-filling folder the caller reached through a filling invitation, the history is narrowed to
-    /// what that caller may see. The call is read-only. To take the same history away as a spreadsheet, start a
-    /// report with `POST api/2.0/files/folder/{folderId}/log/report`.
+    /// Returns the history of a folder and of the entries inside it. Each record names the action, its time, and the
+    /// user who did it. The records of one action form one entry, and its other records are in `related`. The list
+    /// starts with the most recent entry. Paging with `startIndex` and `count` counts records, so a page can hold
+    /// fewer entries. The response headers carry the total number of records, and the body does not. Requires read
+    /// access to the folder. Other callers get 403. A caller who only fills forms in a form-filling folder sees only
+    /// the entries available to them. The call is read-only. If the folder does not exist,
+    /// the call returns 404. The call returns 400 if `count` is out of range or a date has a wrong format. To get
+    /// the history as a file, use `POST api/2.0/files/folder/{folderId}/log/report`.
     /// </remarks>
     /// <summary>
     /// Get folder history
@@ -102,19 +100,19 @@ public class FoldersControllerInternal(
     }
 
     /// <remarks>
-    /// Queues a background job that renders the history of a folder into a spreadsheet, or into a CSV file when
-    /// `format` asks for one, and saves the result in the caller's "My documents". The answer is the queued task, not
-    /// the report: poll `GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true, then take the
-    /// file from `resultFileId`, `resultFileName` and `resultFileUrl`; the URL of a CSV file too large for the editor
-    /// downloads it instead of opening it. An XLSX report keeps only the most recent events, at most 200,000 by default
-    /// and fewer when the events are long, and its header says how many were left out; `format=Csv` exports every event
-    /// of the period. `from` and `to` limit the exported period; leaving both out exports the whole history. While a
-    /// report for the same folder and caller is still running, this call joins it and answers with the running task
-    /// instead of starting a second one, so retrying is safe. The caller needs read access to the folder and may not be
-    /// a guest - otherwise the call is refused with 403, and a folder that does not exist with 404; the report is
-    /// available on every pricing plan, and 402 comes only when the login history and audit trail section is turned
-    /// off for the portal. Only a portal administrator gets the address, browser and
-    /// platform columns. Give up a running report with `DELETE api/2.0/files/folder/{folderId}/log/report`.
+    /// Starts a job that saves the history of a folder as a report file in the caller's "My documents". The file is
+    /// an XLSX spreadsheet, or a CSV file if `format` is `Csv`. If both `from` and `to` are left out, the report
+    /// covers the whole history. Any user with read access to the folder can call it, except a guest. Other callers
+    /// get 403. The call queues work and returns the task, not the report. Repeat
+    /// `GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true. Then take the file from
+    /// `resultFileId` and `resultFileUrl`. For a CSV file too large for the editor, the URL downloads the file. You can
+    /// repeat the call. While a report of the same folder and caller runs, the call returns that task. It starts no
+    /// second report. After the report ends, a repeat starts a new report and saves one more file. An XLSX report keeps
+    /// at most the 200,000 most recent events by default, and fewer for long events. Its header says how many events it
+    /// left out. A CSV report has every event of the period. Only a DocSpace admin gets the IP address, browser, and
+    /// platform columns. To stop a running report, use `DELETE api/2.0/files/folder/{folderId}/log/report`. If the
+    /// folder does not exist, the call returns 404. It returns 402 only if the login history and audit trail section is
+    /// turned off for the portal.
     /// </remarks>
     /// <summary>
     /// Start the folder history report generation
@@ -152,22 +150,21 @@ public class FoldersControllerInternal(
     }
 
     /// <remarks>
-    /// Reports how far the history report of a folder has got, and is the operation to poll after
-    /// `POST api/2.0/files/folder/{folderId}/log/report` has queued one. `percentage` climbs to 100, `isCompleted`
-    /// turns true when the job is over however it ended, `error` carries the reason when it failed, and `resultFileId`,
-    /// `resultFileName` and `resultFileUrl` name the file that was saved in the caller's "My documents". An empty
-    /// answer means there is no report for this folder and caller, either because none was started or because a
-    /// finished one has already been picked up by an earlier poll. The caller needs read access to the folder and may
-    /// not be a guest; a caller who fails the access rule is answered with 403, a folder that does not exist with 404,
-    /// and a portal with the login history and audit trail section turned off with 402. The call is read-only, and each caller sees only
-    /// their own report.
+    /// Returns the state of the history report that the caller started for a folder. Each caller sees only their own
+    /// report. Any user with read access to the folder can call it, except a guest. Other callers get 403. The call
+    /// is read-only. This is the call to poll after `POST api/2.0/files/folder/{folderId}/log/report`. Repeat it
+    /// until `isCompleted` is true. It becomes true however the job ends. If the job fails, `error` gives the reason.
+    /// After a success, `resultFileId`, `resultFileName`, and `resultFileUrl` name the file in "My
+    /// documents". If the caller has no report for this folder, the response is empty. If the folder does not exist,
+    /// the call returns 404. It returns 402 if the login history and audit trail section is turned off for the
+    /// portal.
     /// </remarks>
     /// <summary>
     /// Get the folder history report generation status
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
-    /// <param name="folderId">The folder whose history report is being polled. It is the folder that was
-    /// passed to the operation that started the report.</param>
+    /// <param name="folderId">The ID of the folder that was passed to
+    /// `POST api/2.0/files/folder/{folderId}/log/report`.</param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The state of the report task, or nothing when there is none", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(402, "The login history and audit trail section is turned off for this portal")]
@@ -187,21 +184,20 @@ public class FoldersControllerInternal(
     }
 
     /// <remarks>
-    /// Gives up the history report the caller has started for a folder with
-    /// `POST api/2.0/files/folder/{folderId}/log/report`. The request only asks the background worker to stop, and
-    /// the answer carries no body, so a following `GET api/2.0/files/folder/{folderId}/log/report` is what shows the
-    /// task ending as cancelled. Asking to terminate when nothing is running is accepted and changes nothing, which
-    /// makes the call safe to repeat. A report that has already finished is not undone by this call and its file
-    /// stays in "My documents". The caller needs read access to the folder and may not be a guest; a caller who fails
-    /// the access rule is answered with 403, a folder that does not exist with 404, and a portal with the login history
-    /// and audit trail section turned off with 402. Each caller can only terminate their own report.
+    /// Stops the history report that the caller started for a folder with
+    /// `POST api/2.0/files/folder/{folderId}/log/report`. Each caller can stop only their own report. Any user with
+    /// read access to the folder can call it, except a guest. Other callers get 403. The call only queues a request
+    /// to stop the job and returns no body. To see the task end as cancelled, use
+    /// `GET api/2.0/files/folder/{folderId}/log/report`. If no report runs, the call changes nothing, so you can
+    /// repeat it. A finished report stays, and its file remains in "My documents". If the folder does not exist, the
+    /// call returns 404. It returns 402 if the login history and audit trail section is turned off for the portal.
     /// </remarks>
     /// <summary>
     /// Terminate the folder history report generation
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
-    /// <param name="folderId">The folder whose running history report is to be given up. It is the folder that
-    /// was passed to the operation that started the report.</param>
+    /// <param name="folderId">The ID of the folder that was passed to
+    /// `POST api/2.0/files/folder/{folderId}/log/report`.</param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The request to stop the report was accepted")]
     [SwaggerResponse(402, "The login history and audit trail section is turned off for this portal")]
@@ -221,14 +217,12 @@ public class FoldersControllerInternal(
     }
 
     /// <remarks>
-    /// Lists the fields the completed forms of a form-filling room carry, each of them a key and the kind of value
-    /// behind it, so that a client can offer them as filters. Feed a pair from this list back as `formsItemKey` and
-    /// `formsItemType` of `GET api/2.0/files/{folderId}` to keep only the completed forms whose field of that name
-    /// holds a value. The fields are read from the search index of one of the forms already gathered, so they appear
-    /// once indexing has caught up with the first submission. Only the "Complete" folder of a form-filling room
-    /// carries such fields: for any other folder, for a folder that does not exist and for one that has been deleted
-    /// the answer is an empty list rather than a refusal, and the same holds while nothing has been submitted yet.
-    /// The operation reads the index alone, changes nothing and needs no authorization.
+    /// Returns the fields of the completed forms in the "Complete" folder of a form-filling room. Each field has a
+    /// key and a value type. To filter by a field, pass a pair as `formsItemKey` and `formsItemType`
+    /// of `GET api/2.0/files/{folderId}`. That call then keeps only the completed forms whose field has a value.
+    /// Anyone can call it without signing in. The call is read-only. It reads the fields from the search index of
+    /// one completed form. So the list fills only after the portal indexes the first submitted form. For any other
+    /// folder, an unknown folder, or a folder without completed forms, the call returns an empty list.
     /// </remarks>
     /// <summary>
     /// Get folder form filter
@@ -246,15 +240,15 @@ public class FoldersControllerInternal(
     }
 
     /// <remarks>
-    /// Rebuilds the spreadsheet that gathers the answers submitted to a form, starting from the "Complete" folder
-    /// that holds the filled copies. The answer names the original form the results belong to, says in `isNewFile`
-    /// whether the spreadsheet is being created or an existing one rewritten in place, and carries the queued job in
-    /// `task`; the file itself is not ready yet, so poll `GET api/2.0/files/file/{fileId}/xlsx` with the identifier
-    /// of the form until the task reports completion. The folder has to be the "Complete" folder of a form-filling
-    /// room and has to hold at least one submitted copy whose original form still exists, and the caller needs the
-    /// right to maintain that form, which the room manager has. A folder that does not exist, or one that holds
-    /// nothing to report on, is answered with 404, and a folder of the wrong kind or a caller without those rights
-    /// with 403. The call is mutating: it writes the results file of the form.
+    /// Rebuilds the spreadsheet with the answers to a form from the "Complete" folder of a form-filling room. Requires
+    /// the right to update the results of the form, which a room manager has. Other callers get 403. The call changes
+    /// data and queues work. You can repeat it. A repeat during a run returns that run. A later repeat rewrites the same
+    /// spreadsheet. If that spreadsheet was deleted or moved, it creates a new one. The call returns the original form
+    /// and the queued job in `task`. In `isNewFile`, it says whether it creates a new spreadsheet or rewrites the
+    /// existing one. The file is not ready yet. Repeat `GET api/2.0/files/file/{fileId}/xlsx` with the ID of the form
+    /// until the task is completed. The call returns 404 if the folder does not exist, holds no completed form, or the
+    /// original form is deleted. It also returns 403 for another kind of folder or room, or a form whose filling is not
+    /// started.
     /// </remarks>
     /// <summary>
     /// Generate XLSX report by folder
@@ -325,15 +319,15 @@ public abstract class FoldersController<T>(
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Creates a folder inside the folder named in the path and answers with the folder as it was stored. The title
-    /// is trimmed, may not be blank and is refused when it is longer than the limit the schema prints; titles are not
-    /// required to be unique, so creating the same title twice leaves two folders side by side, which makes the call
-    /// mutating and not idempotent. The caller needs the right to create content in the parent, which the room
-    /// manager, a content creator and the owner of a personal section have; a member without that right, an archived
-    /// parent, and a section root that only holds rooms - "Rooms", "Forms" and "AI agents" - are all refused, as is a
-    /// parent that does not exist. Rooms are not created here: use `POST api/2.0/files/rooms` for those, and this
-    /// operation for ordinary folders within them. Members of the room are notified of the new folder. Read the
-    /// identifier of the new folder from `id` and fill it with `POST api/2.0/files/{folderId}/upload`.
+    /// Creates a folder in the parent folder named in the path. Requires the right to create content in the parent
+    /// folder. Other callers get 403. The room manager, a content creator, and the owner of a personal section have
+    /// this right. The call changes data. Do not repeat it. Each call creates one more folder. In portal storage, every
+    /// new folder has the same title. In a connected storage, a taken title gets a free name instead. The portal
+    /// notifies the room members about each new folder. Take the ID of the new folder from `id`. To upload files into
+    /// it, use `POST api/2.0/files/{folderId}/upload`. To create a room, use `POST api/2.0/files/rooms`. The call
+    /// returns 400 if the title is empty, has only spaces, or is too long. It returns 403 if the parent does not exist
+    /// or is in the archive. It also returns 403 in the Rooms, Forms, and AI agents section roots, which hold only
+    /// rooms. For a string ID that is not a folder of a connected storage, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Create a folder
@@ -354,24 +348,27 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Queues the deletion of one folder together with everything inside it, and answers with the file operations of
-    /// the caller, the one just created among them. The folder is not gone when the response arrives: poll
-    /// `GET api/2.0/files/fileops` until the operation reports `finished`, and read its `error` to learn whether the
-    /// deletion succeeded. By default the folder is moved to the "Trash" section, from where it can be restored;
-    /// `immediately=true` discards it for good instead, and inside a room, where there is no Trash, deletion is
-    /// always final. `deleteAfter=true` postpones the deletion until the editing sessions on the contents have ended,
-    /// so files somebody is working on are not pulled away. The caller needs the right to delete the folder, which
-    /// the room manager, a portal administrator acting as room manager and a content creator acting on a folder of
-    /// their own have; editing access alone, read access and a guest are refused. The call is destructive. To delete
-    /// several items at once use `PUT api/2.0/files/fileops/delete`.
+    /// Queues a job that deletes a folder with all its contents. It returns the file operations of the caller,
+    /// including the new job. Requires the right to delete the folder. Other callers get 403. The room manager and a
+    /// content creator who owns the folder have this right. Editing access is not enough, and a guest also gets 403.
+    /// The call queues work and changes data. Do not repeat it. A repeat deletes for good the folder that the first
+    /// call moved to the trash. After a deletion for good, a repeated call returns 404. The folder may still exist when
+    /// the response arrives. Repeat `GET api/2.0/files/fileops` until the job has `finished` set to true. Then read its
+    /// `error` to see if the deletion failed. If `deleteAfter` is true, `GET api/2.0/files/fileops` does not list the
+    /// job after it finishes. By default, the job moves the folder to the trash, where you can restore it. If
+    /// `immediately` is true, the deletion is final. The deletion is always final in the trash and for a private room
+    /// itself. Its subfolders go to the trash. The same applies to the root folder of a connected storage. If a file
+    /// inside is blocked, for example open for editing, the job deletes nothing. The call also returns 403 for a room
+    /// if `immediately` is not true. If the folder does not exist, the call returns 404. To delete several items in one
+    /// call, use `PUT api/2.0/files/fileops/delete`.
     /// </remarks>
     /// <summary>
     /// Delete a folder
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <collection>list</collection>
-    [RaisesWebhook(WebhookTrigger.FolderTrashed, When = "once the queued operation moves the folder to the trash; the folders inside it raise none")]
-    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "instead when the folder is deleted at once: `immediately` is true, or it is already in the trash, inside a room or the root of a third-party storage")]
+    [RaisesWebhook(WebhookTrigger.FolderTrashed, When = "for the folder only, when the queued job moves it to the trash")]
+    [RaisesWebhook(WebhookTrigger.FolderDeleted, When = "instead when the job deletes the folder for good")]
     [RaisesWebhook(WebhookTrigger.RoomDeleted, When = "instead when the folder is a room")]
     [RaisesWebhook(WebhookTrigger.AgentDeleted, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
@@ -390,15 +387,13 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Puts a folder at a given position among the entries of its parent and answers with the folder, its `order`
-    /// reporting where it now stands. Positions count from 1, and the entry that held the wanted position, together
-    /// with everything after it, is shifted to make room, so the numbering of the parent stays without gaps; a
-    /// position beyond the end places the folder last. The value may also be sent as a dotted path, as in "1.2.3", in
-    /// which case only its last segment is read. Ordering is what the manual arrangement of a room is built on, and
-    /// it only means something in rooms whose contents are indexed - elsewhere the value is stored and ignored. The
-    /// caller needs edit access to the folder, which room managers and content creators have, and a member without it
-    /// is refused, while a folder that does not exist is answered as not found. The call is mutating and idempotent.
-    /// To move several entries in one go use `PUT api/2.0/files/order`.
+    /// Moves a folder to a position among the entries of its parent folder. Requires editing access to the folder.
+    /// Other callers get 403. The room manager and content creators have this access. The call changes data. You can
+    /// repeat it with the same body. The entry at that position and all entries after it move down by one. A
+    /// position after the end puts the folder last. The order matters only in rooms with indexing turned on.
+    /// Elsewhere the call saves it, but nothing uses it. The response has the new position in `order`. The call
+    /// returns 400 if `order` is below 1 or has a wrong format. If the folder does not exist, the call returns 404.
+    /// To move several entries in one call, use `PUT api/2.0/files/order`.
     /// </remarks>
     /// <summary>
     /// Set folder order
@@ -419,17 +414,18 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Returns one page of the contents of a folder - its subfolders in `folders`, its files in `files`, the folder
-    /// itself in `current` and the chain of parents in `pathParts` - and is the operation a client browses the file
-    /// tree with. `filterType`, `filterValue`, `extension`, `userIdOrGroupId`, `sharedBy` and `folderType` narrow
-    /// what is listed, `applyFilterOption` decides whether those filters bite on the files, on the folders or on
-    /// both, and `withSubFolders`, which is on unless it is switched off, lets a narrowed request descend through the
-    /// whole subtree instead of the top level alone. `filterValue` is matched against titles and against indexed
-    /// document content, and indexing is asynchronous, so a file uploaded a moment ago can be missing from a search
-    /// for a short while. `count` and `startIndex` page through the result while `total` counts everything that
-    /// matches, and `sortBy` with `sortOrder` both order the page and are saved as the default order of the account.
-    /// Reading a room or an ordinary folder clears its new-item marks for the caller. A caller who may not read the
-    /// folder is answered with 403, and a folder that does not exist with 404.
+    /// Returns one page of the contents of a folder. The response has the subfolders in `folders`, the files in
+    /// `files`, and the folder itself in `current`. The chain of parent folders is in `pathParts`. Requires read
+    /// access to the folder. Other callers get 403. Without signing in, a caller needs an external link to the
+    /// folder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a
+    /// valid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the
+    /// call searches the whole subtree by default. The text filter also searches indexed document content. Indexing
+    /// runs in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`
+    /// to page through the result. The `total` field counts all matching entries. To filter by metadata with a typed
+    /// body, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`
+    /// out of range, or a negative `startIndex`. An invalid metadata filter also returns 400. It also returns 400 if `roomId` is not a
+    /// number but the folder ID is. It also returns 403 for a folder in the trash. If the folder does not exist, the
+    /// call returns 404. For an anonymous caller, it returns 403 instead.
     /// </remarks>
     /// <summary>
     /// Get a folder by ID
@@ -441,7 +437,6 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the `roomId` is not a number while the folder id is one")]
     [SwaggerResponse(403, "The caller may not read this folder, the folder lies inside Trash, or an anonymous caller asks for a folder that does not exist")]
     [SwaggerResponse(404, "The folder does not exist")]
-    [SwaggerResponse(500, "The folder lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderByFolderId(GetFolderRequestDto<T> inDto)
@@ -469,19 +464,18 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Lists one page of the contents of a folder narrowed by metadata, in the shape `GET api/2.0/files/{folderId}` returns:
-    /// subfolders in `folders`, files in `files`, the folder itself in `current`. The filter is a typed body:
-    /// `metadataTemplateId` alone keeps the entries the template is assigned to, every condition in `metadataFilters` must
-    /// hold at once, and `filterValue` adds a text search over titles and metadata values; the template and field IDs come
-    /// from `GET api/2.0/files/metadata/templates`, and a body with none of them lists the folder unfiltered. The caller
-    /// needs read access to the folder. No entry is changed, but a recognised `sortBy` is saved as the account's default
-    /// order while an unrecognised one is ignored, and opening a room or an ordinary folder clears its new-item marks for
-    /// the caller. `withSubFolders` searches the whole subtree unless switched off; `total` counts every match, and `count`
-    /// with `startIndex` page through them. A folder in a connected third-party storage carries no metadata, so a filter
-    /// there returns an empty page. An unknown template or field, a field outside the named template, more than 20
-    /// conditions, or a filter in the Templates or Private section is refused with 400; a folder the caller may not read
-    /// with 403, a missing one with 404. To combine metadata with the user, extension or form filters, use
-    /// `GET api/2.0/files/{folderId}`, which takes the same filter as a JSON string.
+    /// Returns one page of the contents of a folder, filtered by metadata. The response has the same shape as for
+    /// `GET api/2.0/files/{folderId}`. Requires read access to the folder. Other callers get 403. The call changes
+    /// data of the caller only. It clears the new-item marks of the folder. It also saves a valid `sortBy` as the
+    /// default order of the account. The call ignores an unknown `sortBy`. You can repeat it. All conditions of
+    /// `metadataFilters` must match. Without a template, conditions, and `filterValue`, the call lists the folder
+    /// unfiltered. By default, the search covers the whole subtree. Use `count` and `startIndex` to page through the
+    /// result. The `total` field counts all matches. Take the template and field IDs from
+    /// `GET api/2.0/files/metadata/templates`. A folder of a connected storage has no metadata, so a filter there
+    /// returns an empty page. The call returns 400 for an unknown template or field, or a field outside the named
+    /// template. It also returns 400 for more than 20 conditions or a filter in the Templates or Private section. If
+    /// the folder does not exist, the call returns 404. To combine metadata with the user, extension, or form filters,
+    /// use `GET api/2.0/files/{folderId}`.
     /// </remarks>
     /// <summary>
     /// Search a folder by metadata
@@ -504,14 +498,11 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Returns one folder as an object - its title, its parent, the moments it was created and last changed, the
-    /// access the caller has to it, the number of items that are new for them, and the room settings when the folder
-    /// is a room - without listing anything inside it. Use it to resolve a folder identifier into something
-    /// displayable, and `GET api/2.0/files/{folderId}` when the contents are what is wanted; unlike that operation,
-    /// this one leaves the new-item marks of the folder alone. Any member who can read the folder may call it, and an
-    /// anonymous caller only through an external link that grants access, everybody else being refused; a folder that
-    /// does not exist is answered as not found. The call is read-only. The chain of parents above the folder is not
-    /// part of the answer and is read with `GET api/2.0/files/folder/{folderId}/path`.
+    /// Returns the properties of one folder or room, without its contents. Requires read access to the folder. Other
+    /// callers get 403. Without signing in, a caller needs an external link to the folder. Without such a link, the
+    /// call returns 401. The call is read-only. It does not clear the new-item marks of the folder. If the folder
+    /// does not exist, the call returns 404. To list the contents, use `GET api/2.0/files/{folderId}`. To get the
+    /// chain of parent folders, use `GET api/2.0/files/folder/{folderId}/path`.
     /// </remarks>
     /// <summary>
     /// Get folder information
@@ -538,13 +529,11 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Returns the chain of folders that leads to the folder named in the path, ordered from the section root down to
-    /// the folder itself, which is the last entry. It is what a breadcrumb trail is built from, and it also tells a
-    /// client which section - a room, the personal section, the archive - a bare folder identifier belongs to. Only
-    /// the folders the caller may see are part of the chain, so a member who was given access to a folder deep inside
-    /// a room gets a shorter path than the room manager does. The caller needs read access to the folder and is
-    /// otherwise answered with 403, while a folder that does not exist is answered as not found. The call is
-    /// read-only and takes no paging parameters. To go the other way, from a folder down into its contents, call
+    /// Returns the chain of folders from the section root down to the given folder. The folder itself is the last
+    /// entry. Use it for a breadcrumb trail or to find the section of a folder. Requires read access to the folder.
+    /// Other callers get 403. The call is read-only. The chain has only the folders that the caller can see. So a user
+    /// with access to a deep folder gets a shorter chain than the room manager. The call returns the whole chain,
+    /// without paging. If the folder does not exist, the call returns 404. To list the contents of a folder, use
     /// `GET api/2.0/files/{folderId}`.
     /// </remarks>
     /// <summary>
@@ -581,14 +570,11 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Lists the folders that sit directly inside the folder named in the path, ordered by title, without their own
-    /// contents and without the files that lie beside them. The whole list arrives at once - there are no paging or
-    /// filtering parameters here - so for a large folder, or when the files are wanted as well, use
-    /// `GET api/2.0/files/{folderId}`, which pages and filters. A folder that holds no subfolders answers with an
-    /// empty list. The caller needs read access to the folder, and only the subfolders they may see are listed, so a
-    /// member of a room can get fewer entries than its manager; a caller without access is answered with 403, and a
-    /// folder that does not exist, or one that has been deleted for good, is answered as not found. The call is
-    /// read-only and leaves the new-item marks of the folder alone.
+    /// Returns the subfolders directly inside a folder, ordered by title. The list has no files and no contents of the
+    /// subfolders. Requires read access to the folder. Other callers get 403. The call is read-only, and it does not
+    /// clear the new-item marks. The list has only the subfolders that the caller can see. The call returns the
+    /// whole list in one response, without paging and filters. If the folder does not exist or was deleted for good, the call
+    /// returns 404. To page, filter, or get the files too, use `GET api/2.0/files/{folderId}`.
     /// </remarks>
     /// <summary>
     /// Get subfolders
@@ -610,14 +596,13 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Lists the entries of a folder that are new for the calling member - the files and folders created or changed
-    /// there since they last opened it - ordered from the most recently changed backwards. It is what the badge of a
-    /// room is filled from, and it is personal: two members of the same room get different answers. Reading this list
-    /// does not clear the marks, so the same entries come back until the folder itself is opened with
-    /// `GET api/2.0/files/{folderId}`, which does clear them. A folder with nothing new answers with an empty list,
-    /// and marks disappear on their own when the entry behind them is deleted or moved out of reach. The caller needs
-    /// read access to the folder and is otherwise answered with 403. The whole list arrives at once, without paging
-    /// or filtering, and the call is read-only.
+    /// Returns the entries of a folder that are new for the caller. These are files and folders created or changed
+    /// since the caller last opened the folder. The list starts with the most recently changed entry. Each user gets
+    /// their own list. Requires read access to the folder. Other callers get 403. The call is read-only. It does not
+    /// clear the new-item marks, so a repeated call returns the same entries. To clear them, open the folder with
+    /// `GET api/2.0/files/{folderId}`. A mark disappears when its entry is deleted or moved out of reach. The call
+    /// returns the whole list in one response, without paging and filters. It also returns 403 for a folder in the trash. If
+    /// the folder does not exist, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Get new folder items
@@ -640,16 +625,14 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Gives a folder a new title and answers with the folder as it now stands. The title is trimmed, may not be
-    /// blank and is refused when it is longer than the limit the schema prints; a title that matches the current one
-    /// leaves the folder untouched, and titles need not be unique among the neighbours. The caller needs the right to
-    /// rename the folder, which the room manager, a content creator acting on a folder of their own and the owner of
-    /// a personal section have, while a guest is refused with 403 whatever their access; a folder in the "Trash"
-    /// section or in an archived room cannot be renamed either, and a folder that does not exist is answered as
-    /// not found. A room may be renamed here as well, in which case the caller needs the right to edit the
-    /// room, and `PUT api/2.0/files/rooms/{id}` is the operation that changes its other settings. The call is
-    /// mutating and idempotent; on a folder stored in a connected third-party account the identifier of the folder
-    /// may change with the title.
+    /// Renames a folder or a room. Requires the right to rename the folder. Other callers get 403. The room manager, a
+    /// content creator who owns the folder, and the owner of a personal section have this right. For a room, the
+    /// call requires the right to edit the room. A guest gets 403 in any case. The call changes data. If the title is
+    /// the same as the current one, the call changes nothing, so you can repeat it. In a connected storage, the
+    /// folder ID can change with the title. So take the ID from the response. The call returns 400 if the title is
+    /// empty, has only spaces, or is too long. It also returns 403 for a folder in the trash or in the archive. If
+    /// the folder does not exist, the call returns 404. To change the other settings of a room, use
+    /// `PUT api/2.0/files/rooms/{id}`.
     /// </remarks>
     /// <summary>
     /// Rename a folder
@@ -672,14 +655,12 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Reports how much storage the portal spends on documents, split by section - "My documents", "Trash", "Rooms",
-    /// "Archive" and, where the feature is on, "AI agents" - each entry naming the section and the space it takes in
-    /// bytes. The figures cover the whole portal rather than the calling account, and moving an entry between
-    /// sections moves its space with it, which is why deleting a file to the Trash does not free anything until the
-    /// Trash is emptied. Only a caller who may change portal settings, that is the owner and the portal
-    /// administrators, is allowed here; a room administrator, an ordinary member and a guest are all refused. The
-    /// call is read-only, takes no parameters and answers with the sections in a fixed order. The quota of the portal
-    /// as a whole, storage outside documents included, is not part of this answer.
+    /// Returns the storage space that documents take in each section of the portal, in bytes. The sections are My
+    /// documents, Trash, Rooms, Archive, and AI agents if that feature is on. They come in a fixed order. The
+    /// figures cover the whole portal, not the account of the caller. A file in the trash still takes space until the
+    /// trash is emptied. Requires the EditPortalSettings permission, which the portal owner and DocSpace admins have.
+    /// Other callers get 403. The call is read-only. The response does not include the portal quota or storage
+    /// outside documents.
     /// </remarks>
     /// <summary>
     /// Get used space of files
@@ -697,19 +678,17 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Answers with the primary external link of a folder or a room, creating it on the first call and returning the
-    /// one that already exists afterwards, so the operation is idempotent in effect: a second call with other
-    /// parameters does not reconfigure the existing link, and changing one is the business of
-    /// `PUT api/2.0/files/folder/{id}/links`. The parameters therefore only shape the link at the moment it is born -
-    /// `access` its rights, `title` its name, `expirationDate` its lifetime, which is unlimited here unless one is
-    /// given, `internal` whether only signed-in members may follow it, `denyDownload` whether the contents may only
-    /// be viewed, and `password` a secret to be asked for. Sending `access` with the value that grants nothing
-    /// creates no link and answers with nothing. The caller needs the right to manage the links of the room the
-    /// folder belongs to, which its manager and a portal administrator acting as room manager have, and a member with
-    /// content-creator or read access is refused with 403; an unknown folder is answered with 404. A primary link
-    /// that was revoked is created anew by this call, with a new identifier, while
-    /// `GET api/2.0/files/folder/{id}/link` keeps answering such a link with 404. Read the address from
-    /// `sharedTo.shareLink`.
+    /// Returns the primary external link of a folder or a room, and creates it if it does not exist. The call uses
+    /// the body only when it creates the link. If the link exists, the call returns it unchanged. Requires the right
+    /// to manage the links of the folder. Other callers get 403. The room manager has this right, but a content
+    /// creator does not. The call changes data only when it creates the link. You can repeat it, and later calls
+    /// return the same link. To change a link, use `PUT api/2.0/files/folder/{id}/links`. If `access` grants nothing,
+    /// the call creates no link and returns an empty response. Read the address from `sharedTo.shareLink`. The call
+    /// returns 400 if the title or password is too long, or the password breaks the portal policy. It also returns
+    /// 400 if `expirationDate` is more than 10 years ahead. It also returns 403 if folder links cannot have this
+    /// access level. The link limit and a ban on external links outside public rooms also return 403. If the folder
+    /// does not exist, the call returns 404. If the primary link was revoked, the call creates a new one with a new
+    /// ID. Until then, `GET api/2.0/files/folder/{id}/link` returns 404.
     /// </remarks>
     /// <summary>
     /// Create the folder primary external link
@@ -739,16 +718,14 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Answers with the primary external link of a folder or a room - the one the "Copy link" action of a client
-    /// hands out - with its address in `sharedTo.shareLink`, its rights in `access`, and its title, expiration date,
-    /// password flag and download restriction beside them. The link is created on the first read if the folder has
-    /// none, with read rights, no password and no expiry, so this operation mutates on that first call and is a plain
-    /// read afterwards; repeated calls answer with the same link identifier. The caller needs the right to manage the
-    /// links of the room the folder belongs to, which its manager and a portal administrator acting as room manager
-    /// have; a member with read access alone is refused with 403 and an anonymous caller is rejected, while a link
-    /// that was deliberately revoked is answered with 404 rather than being recreated. The paging parameters are
-    /// accepted for compatibility and leave the single link answered here unchanged. Every external link of the same
-    /// folder is listed by `GET api/2.0/files/folder/{id}/links`.
+    /// Returns the primary external link of a folder or a room, and creates it if the folder has none. A new link
+    /// gives read access, with no password and no expiry. Read the address from `sharedTo.shareLink`. Requires the
+    /// right to manage the links of the folder. Other callers get 403. The room manager has this right, but a user
+    /// with read access does not. A caller who is not signed in and has no external link gets 401. The first call
+    /// can change data. Later calls are read-only and return the same link. If the primary link was revoked, the call
+    /// returns 404 and creates no new one. If the folder does not exist, the call also returns 404. If a string `id`
+    /// points to a storage account that is not connected, the call returns 400. To list all external links of the
+    /// folder, use `GET api/2.0/files/folder/{id}/links`.
     /// </remarks>
     /// <summary>
     /// Get the folder primary external link
@@ -757,7 +734,7 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
-    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder")]
     [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
@@ -771,17 +748,18 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Creates an external link to a folder or a room, or changes or revokes an existing one, and answers with the
-    /// link as it now stands. `linkId` decides which: an identifier that is not yet in use, the empty one included,
-    /// creates a link, while the identifier of an existing link rewrites it, so the whole set of parameters is
-    /// applied every time and a field left out is reset rather than kept. `access` carries the rights the link
-    /// grants, and `access` set to the value that denies everything revokes the link instead - the answer is then
-    /// empty, and a revoked primary link is not recreated by a later read. `title` names the link for the people who
-    /// manage it, `expirationDate` limits its lifetime and is ignored when it lies in the past, `password` asks
-    /// visitors for a secret, `denyDownload` leaves them with viewing only, `internal` admits signed-in members
-    /// alone, and `primary=true` makes it the primary link of the folder. The caller needs the right to manage the
-    /// links of the room, which its manager and a portal administrator acting as room manager have; anyone else is
-    /// refused and an unknown folder is answered as not found. The call is mutating.
+    /// Creates or changes an external link of a folder or a room, or revokes it. The `linkId` field selects the link. A new
+    /// or empty ID creates a link, and an existing ID changes that link. The call applies all fields every time, so a
+    /// missing field gets its default value. Requires the right to manage the links of the folder. Other callers
+    /// get 403. The room manager has this right. The call changes data. A repeated call with an existing `linkId`
+    /// changes nothing. A repeated call with an empty `linkId` creates one more link. If `access` grants nothing, the
+    /// call revokes the link and returns an empty response. A later read does not recreate a revoked primary link.
+    /// In a public room or a form-filling room, revoking the primary link creates a new one with default settings.
+    /// The call then returns the new link. A repeated revocation finds no link and returns an empty response. If the
+    /// link limit is reached, it returns 403 instead. The call returns 400 if the title or password is too long, or the
+    /// password breaks the portal policy. It also returns 400 if `expirationDate` is more than 10 years ahead. It also
+    /// returns 403 if folder links cannot have this access level or the link limit is reached. The admin's restriction
+    /// on external links can also return 403. If the folder does not exist, the call returns 404.
     /// </remarks>
     /// <summary>
     /// Set the folder external link
@@ -823,15 +801,13 @@ public abstract class FoldersController<T>(
     }
 
     /// <remarks>
-    /// Lists the external links of a folder or a room, each with its identifier, title, address, rights, expiration
-    /// date, password flag and download restriction, the primary link among them once it exists. At most the first
-    /// hundred links are answered and the number returned is reported in the response headers; there are no paging
-    /// parameters here. A folder that has never been shared by link answers with an empty list, and so does a member
-    /// who may read the folder but not manage its links - the empty answer therefore means "nothing to show you"
-    /// rather than "no links exist". A member without access to the room is refused, an anonymous caller is rejected,
-    /// and a folder that does not exist is answered as not found. The call is read-only. Take an identifier from here
-    /// to `PUT api/2.0/files/folder/{id}/links` to change or remove that link, and read the primary one alone with
-    /// `GET api/2.0/files/folder/{id}/link`.
+    /// Returns the external links of a folder or a room, including the primary link. The call returns at most the first
+    /// 100 links, without paging. Requires read access if the folder is a room. Other callers get 403. A caller who can
+    /// read the room but may not see its links gets an empty list. In other folders, a caller who cannot manage links
+    /// gets an empty list. In a public room, an unreadable folder returns 403. So an empty list does not prove that the
+    /// folder has no links. The call is read-only. If the folder does not exist, the call returns 404. To change or
+    /// revoke a link, pass its ID to `PUT api/2.0/files/folder/{id}/links`. To get only the primary link, use `GET
+    /// api/2.0/files/folder/{id}/link`.
     /// </remarks>
     /// <summary>
     /// Get folder external links
@@ -839,7 +815,8 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/links</path>
     /// <collection>list</collection>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The external links of the folder the caller may manage", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(200, "The external links of the folder, or an empty list when the caller may not see them", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(403, "The folder is a room that the caller cannot read")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetFolderLinks(GetFolderLinksRequestDto<T> inDto)
@@ -874,19 +851,19 @@ public class FoldersControllerCommon(
     private const string PrivateRoomsAppId = "e2e-rooms";
 
     /// <remarks>
-    /// Returns the detailed list of files and folders located in the "Common" section. `metadataTemplateId` and
-    /// `metadataFilters` narrow the listing to the entries carrying the template and matching the conditions, the
-    /// same way `GET api/2.0/files/{folderId}` does; an unknown template or field, or a malformed condition, is
-    /// refused with 400.
+    /// Returns one page of the files and folders in the "Common" section. Any signed-in user can call it. The call
+    /// is read-only, but a valid `sortBy` becomes the account's default order. The `total` field counts
+    /// all matching entries. The call returns 400 if `metadataTemplateId` or
+    /// `metadataFilters` names an unknown template or field, or has a malformed condition.
     /// </remarks>
     /// <summary>Get the "Common" section</summary>
     /// <path>api/2.0/files/@common</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The \"Common\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "The \"Common\" section with one page of its contents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
-    [SwaggerResponse(404, "The required folder was not found")]
+    [SwaggerResponse(403, "The caller is not allowed to read the \"Common\" section")]
+    [SwaggerResponse(404, "The \"Common\" section does not exist on the portal")]
     [HttpGet("@common")]
     public async Task<FolderContentDto<int>> GetCommonFolder(GetCommonFolderRequestDto inDto)
     {
@@ -896,24 +873,21 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the caller's own "Favorites" section: the files and folders this account has marked as favorite,
-    /// together with the section folder itself. Favorites are per-account, so the entries another member marked are
-    /// not listed here, and a guest sees only their own, usually empty, list. Mark a single file with
-    /// `GET api/2.0/files/favorites/{fileId}`, or add and remove batches of files and folders with
-    /// `POST api/2.0/files/favorites` and `DELETE api/2.0/files/favorites`. Nothing in the section is modified,
-    /// though passing `sortBy` saves the requested order as the default order for this account. Entries the caller
-    /// can no longer read, and entries that have been moved to the "Trash" section, drop out of the listing even
-    /// though their favorite mark stays, so the section can shrink without an explicit unmark. `folders` and `files`
-    /// hold one page of the section, `total` counts the entries matching the request before `count` and `startIndex`
-    /// are applied, and `current` describes the section folder itself.
+    /// Returns one page of the files and folders that the caller marked as favorite. Each account has its own
+    /// favorites, so the marks of other members do not show here. Any signed-in user can call it. The call is
+    /// read-only, but a valid `sortBy` becomes the account's default order. The list shows folders
+    /// first, then files, each in the `sortBy` order or the saved default. The `total` field
+    /// counts all matching entries. The list skips entries in the trash and entries that the caller can no longer
+    /// read. Their favorite marks stay. The call returns 400 if `metadataTemplateId` or `metadataFilters` names an
+    /// unknown template or field, or has a malformed condition. To add or remove favorites, use
+    /// `POST api/2.0/files/favorites` or `DELETE api/2.0/files/favorites`. To mark one file, you can also use
+    /// `GET api/2.0/files/favorites/{fileId}`.
     /// </remarks>
     /// <summary>Get the "Favorites" section</summary>
     /// <path>api/2.0/files/@favorites</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section with one page of the entries the caller marked as favorite", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"Favorites\" section")]
-    [SwaggerResponse(404, "The \"Favorites\" section could not be resolved for this account")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
     [HttpGet("@favorites")]
     public async Task<FolderContentDto<int>> GetFavoritesFolder(GetFavoritesFolderRequestDto inDto)
     {
@@ -923,26 +897,21 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the contents of the caller's "My documents" section, the personal storage that belongs to this account
-    /// alone and stays invisible to other members until something in it is shared explicitly. Any authenticated
-    /// member that has a personal section can read it; guest accounts are not given one, and the call then answers
-    /// 404. Nothing in the section is modified, though passing `sortBy` saves the requested order as the default
-    /// order for this account. Without a filter only the top level of the section is listed; as soon as `filterType`,
-    /// `userIdOrGroupId`, `filterValue` or a metadata filter narrows the request, the search descends through the whole
-    /// subtree. `filterValue` is matched against titles and against indexed document content, and the index is written
-    /// asynchronously, so a file uploaded a moment ago can be missing from a search for a short while.
-    /// `metadataTemplateId` and `metadataFilters` keep only the entries carrying the template and matching the
-    /// conditions, the same way `GET api/2.0/files/{folderId}` does; an unknown template or field, or a malformed
-    /// condition, is refused with 400. `folders` and `files` hold one page of the result, `total` counts everything
-    /// that matches before `count` and `startIndex` are applied, and `current` describes the section folder. To open
-    /// a folder inside the section, call `GET api/2.0/files/{folderId}` with its identifier.
+    /// Returns one page of the caller's personal "My documents" section. Other members
+    /// do not see its entries until the owner shares them. Any signed-in user can call it. A guest usually has no
+    /// personal section, and the call then returns 404. The call is read-only, but a valid `sortBy` becomes
+    /// the account's default order. Without filters, the call lists only the top level of the section. With
+    /// `filterType`, `userIdOrGroupId`, `filterValue`, or a metadata filter, it searches the whole section. It
+    /// matches `filterValue` against titles and indexed document content. A new file can be missing from that
+    /// search until the portal indexes it. The `total` field counts all matching entries.
+    /// The call returns 400 if `metadataTemplateId` or `metadataFilters` names an unknown template or field, or has
+    /// a malformed condition. To open a folder of the section, use `GET api/2.0/files/{folderId}`.
     /// </remarks>
     /// <summary>Get the "My documents" section</summary>
     /// <path>api/2.0/files/@my</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"My documents\" section with one page of its contents", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"My documents\" section")]
     [SwaggerResponse(404, "This account has no personal section")]
     [HttpGet("@my")]
     public async Task<FolderContentDto<int>> GetMyFolder(GetMyTrashFolderRequestDto inDto)
@@ -953,15 +922,18 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the detailed list of files and folders located in the "In projects" section.
+    /// Returns one page of the files and folders in the "In projects" section. The section exists only while the
+    /// Projects module is turned on. Any signed-in user can call it. The call is read-only, but a valid
+    /// `sortBy` becomes the account's default order. The `total` field counts all matching entries. The call
+    /// ignores the metadata parameters.
     /// </remarks>
     /// <summary>Get the "In projects" section</summary>
     /// <path>api/2.0/files/@projects</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The \"In projects\" section contents", typeof(FolderContentDto<string>))]
-    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
-    [SwaggerResponse(404, "The required folder was not found")]
+    [SwaggerResponse(200, "The \"In projects\" section with one page of its contents", typeof(FolderContentDto<string>))]
+    [SwaggerResponse(403, "The caller is not allowed to read the \"In projects\" section")]
+    [SwaggerResponse(404, "The \"In projects\" section does not exist on the portal")]
     [HttpGet("@projects")]
     public async Task<FolderContentDto<string>> GetProjectsFolder(GetCommonFolderRequestDto inDto)
     {
@@ -969,23 +941,25 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the "Recent" section: the files the calling account has opened lately. The section holds files only,
-    /// so `folders` comes back empty, and it is personal, so another member's history is not visible here. A file is
-    /// added when it is opened and can also be added explicitly with `POST api/2.0/files/file/{fileId}/recent`;
-    /// `DELETE api/2.0/files/recent` clears the whole history, and `PUT api/2.0/files/displayrecent` switches the
-    /// section on and off for the account, which also decides whether `GET api/2.0/files/@root` includes it. Nothing
-    /// in the section is modified, though passing `sortBy` saves the requested order as the default order for this
-    /// account. The listing is ordered by the moment the caller last opened each file, newest first, and `sortBy` and
-    /// `sortOrder` do not change that order. `files` holds one page, `total` counts the files matching the request
-    /// before `count` and `startIndex` are applied, and `current` describes the section folder itself.
+    /// Returns one page of the files that the caller opened recently. Each account has its own history, and the
+    /// section holds files only, so `folders` is empty. Any signed-in user can call it. The call is read-only, but
+    /// a valid `sortBy` becomes the account's default order. The call always sorts the list by the last
+    /// opening time, newest first. So `sortBy` and `sortOrder` do not change the order here. Without `searchArea`, or
+    /// with `Active`, the call lists files from personal sections and rooms, except form-filling rooms. With
+    /// `searchArea` set to `Forms`, it lists only files from form-filling rooms. If `searchArea` is `PrivateRooms`,
+    /// the call returns 400. Any other `searchArea` value lists all recent files. The call ignores
+    /// `applyFilterOption`. The `total` field counts all matching files. The call also
+    /// returns 400 if `metadataTemplateId` or `metadataFilters` names an unknown template or field, or has a
+    /// malformed condition. The portal adds a file to the section when the caller opens it. To add a file without
+    /// opening it, use `POST api/2.0/files/file/{fileId}/recent`. To clear the history, use
+    /// `DELETE api/2.0/files/recent`. This call works whether `PUT api/2.0/files/displayrecent` shows or hides the
+    /// section.
     /// </remarks>
     /// <summary>Get the "Recent" section</summary>
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section with one page of the files the caller opened lately", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"Recent\" section")]
-    [SwaggerResponse(404, "The \"Recent\" section could not be resolved for this account")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, `searchArea` is `PrivateRooms`, or the metadata filter names an unknown template or field")]
     [HttpGet("@recent")]
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolder(GetRecentFolderRequestDto inDto)
@@ -996,17 +970,17 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns every top-level section the calling account can see in one response, each of them a full section
-    /// object carrying its own first page of content: "Favorites", "Recent", "Shared with me", "My documents",
-    /// "Trash", "Rooms", "Forms", "Archive" and, while AI access is enabled for the portal, "AI agents". A section is
-    /// left out when the account has none of it, which is why a guest gets no personal section, and "Recent" is
-    /// listed only while it is switched on with `PUT api/2.0/files/displayrecent`. Pass `withoutTrash=true` to drop
-    /// the "Trash" section. The filters, `count` and `startIndex` are applied to each section separately, so
-    /// `count=1` returns one entry per section and every section reports its own `total`. Because it builds the
-    /// content of all of them, this is the most expensive listing in the module: when a single section is enough,
-    /// read it directly, for example with `GET api/2.0/files/@my`. The call modifies nothing in the sections and
-    /// leaves their new-item badges untouched, though passing `sortBy` saves the requested order as the default order
-    /// for this account.
+    /// Returns every top-level section that the caller can see, each with its first page of content. Sections come
+    /// in this order: "Favorites", "Recent", "Shared with me", "My documents", "Trash", "Rooms", "Forms", and
+    /// "Archive". While the private rooms app is on, "Private rooms" comes before "Archive". While AI access is on for
+    /// the portal, the AI agents and AI hub sections follow. The list has
+    /// "Recent" only after `PUT api/2.0/files/displayrecent` turns it on. It skips "My documents" if the account has
+    /// none, which is usual for a guest. To skip "Trash", set `withoutTrash` to `true`. Any signed-in user can call
+    /// it. The call is read-only, but a valid `sortBy` becomes the account's default order. It does not clear
+    /// new-item marks. The filters, `count`, and `startIndex` apply to each section. So `count=1` returns one entry
+    /// per section, and each section has its own `total`. This is the most expensive listing of the module. When you
+    /// need one section, read it directly, for example with `GET api/2.0/files/@my`. The call returns 400 if `count`
+    /// is outside its allowed range.
     /// </remarks>
     /// <summary>Get filtered sections</summary>
     /// <path>api/2.0/files/@root</path>
@@ -1014,8 +988,6 @@ public class FoldersControllerCommon(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The sections available to the caller, each with one page of its content", typeof(IAsyncEnumerable<FolderContentDto<int>>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
-    [SwaggerResponse(403, "The caller is not allowed to read one of the sections")]
-    [SwaggerResponse(404, "One of the sections could not be resolved for this account")]
     [HttpGet("@root")]
     public async IAsyncEnumerable<FolderContentDto<int>> GetRootFolders(GetRootFolderRequestDto inDto)
     {
@@ -1028,19 +1000,20 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the detailed list of files and folders located in the "Shared with me" section: the entries other
-    /// members shared with the caller directly. `metadataTemplateId` and `metadataFilters` keep only the shared
-    /// entries carrying the template and matching the conditions, the same way `GET api/2.0/files/{folderId}` does
-    /// with the section identifier; an unknown template or field, or a malformed condition, is refused with 400.
+    /// Returns one page of the "Shared with me" section. It holds the files and folders that other members shared with
+    /// the caller. Any signed-in user can call it. The call is read-only, but a valid `sortBy` becomes the
+    /// account's default order. If the order is `DateAndTime`, the call sorts by `New` instead. The `total` field
+    /// counts all matching entries. The call returns 400 if `metadataTemplateId` or `metadataFilters` names an
+    /// unknown template or field, or has a malformed condition.
     /// </remarks>
     /// <summary>Get the "Shared with me" section</summary>
     /// <path>api/2.0/files/@share</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The \"Shared with me\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "The \"Shared with me\" section with one page of the entries shared with the caller", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
-    [SwaggerResponse(404, "The required folder was not found")]
+    [SwaggerResponse(403, "The caller is not allowed to read the \"Shared with me\" section")]
+    [SwaggerResponse(404, "This account has no \"Shared with me\" section")]
     [HttpGet("@share")]
     public async Task<FolderContentDto<int>> GetShareFolder(GetCommonFolderRequestDto inDto)
     {
@@ -1050,18 +1023,19 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the detailed list of files located in the "Templates" section. The section gathers its files from
-    /// tags and cannot apply a metadata filter, so a request carrying `metadataTemplateId` or `metadataFilters` is
-    /// refused with 400 rather than answered unfiltered.
+    /// Returns one page of the files in the "Templates" section. Any signed-in user can call it, except a guest. A
+    /// guest has no such section and gets 404. The call is read-only, but a valid `sortBy` becomes the
+    /// account's default order. The `total` field counts all matching files. The section cannot apply a
+    /// metadata filter. So if `metadataTemplateId` or `metadataFilters` is set, the call returns 400.
     /// </remarks>
     /// <summary>Get the "Templates" section</summary>
     /// <path>api/2.0/files/@templates</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The \"Templates\" section contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "The \"Templates\" section with one page of its files", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or a metadata filter is set on a section that cannot apply it")]
-    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
-    [SwaggerResponse(404, "The required folder was not found")]
+    [SwaggerResponse(403, "The caller is not allowed to read the \"Templates\" section")]
+    [SwaggerResponse(404, "This account has no \"Templates\" section, as for a guest")]
     [HttpGet("@templates")]
     public async Task<FolderContentDto<int>> GetTemplatesFolder(GetCommonFolderRequestDto inDto)
     {
@@ -1071,25 +1045,21 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the caller's "Trash" section: the files and folders this account has deleted, kept there until they
-    /// are restored or discarded. Each member has a Trash of their own and sees only what they deleted themselves.
-    /// Restore an entry by moving it back with `PUT api/2.0/files/fileops/move`, or discard the whole section with
-    /// `PUT api/2.0/files/fileops/emptytrash`; both start a background operation that is polled through
-    /// `GET api/2.0/files/fileops`. This call itself modifies nothing, though passing `sortBy` saves the requested
-    /// order as the default order for this account. Only the top level of the section is listed, so the contents of a
-    /// deleted folder are not expanded into it, and `filterValue` is matched against titles alone here rather than
-    /// against document content. `metadataTemplateId` and `metadataFilters` keep only the deleted entries carrying the
-    /// template and matching the conditions, the same way `GET api/2.0/files/{folderId}` does; an unknown template or
-    /// field, or a malformed condition, is refused with 400. `folders` and `files` hold one page of the result,
-    /// `total` counts everything that matches before `count` and `startIndex` are applied, and `current` describes
-    /// the section folder. An account that is given no Trash of its own, an outsider for instance, receives 404.
+    /// Returns one page of the caller's "Trash" section, which holds the entries that this account deleted. Each
+    /// account has its own trash. Any signed-in user can call it. An account without its own trash gets 404. The call
+    /// is read-only, but a valid `sortBy` becomes the account's default order. The call lists only the
+    /// top level, so it does not expand deleted folders. It matches `filterValue` against titles only, not document
+    /// content. The `total` field counts all matching entries. The call returns 400 if `metadataTemplateId` or
+    /// `metadataFilters` names an unknown template or field, or has a malformed condition. To restore an entry, move
+    /// it with `PUT api/2.0/files/fileops/move`. To delete all entries for good, use
+    /// `PUT api/2.0/files/fileops/emptytrash`. Both calls start a background job. Then repeat
+    /// `GET api/2.0/files/fileops` until `finished` is true.
     /// </remarks>
     /// <summary>Get the "Trash" section</summary>
     /// <path>api/2.0/files/@trash</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Trash\" section with one page of the entries the caller deleted", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"Trash\" section")]
     [SwaggerResponse(404, "This account has no \"Trash\" section")]
     [HttpGet("@trash")]
     public async Task<FolderContentDto<int>> GetTrashFolder(GetMyTrashFolderRequestDto inDto)
@@ -1100,24 +1070,18 @@ public class FoldersControllerCommon(
     }
 
     /// <remarks>
-    /// Returns the "Forms" section: the flat list of form-filling rooms the caller may read. Such rooms are stored
-    /// under the "Rooms" tree but are surfaced only here, so `GET api/2.0/files/rooms` leaves them out of the active
-    /// area and lists them when `searchArea` names the forms area instead. The section is not expanded into room
-    /// content, so `folders` carries the rooms while `files` comes back empty; to read what is inside one of them,
-    /// call `GET api/2.0/files/{folderId}` with the room identifier. Nothing is modified, though passing `sortBy`
-    /// saves the requested order as the default order for this account. `filterType`, `filterValue`,
-    /// `userIdOrGroupId` and the sorting parameters narrow and order the room list, `metadataTemplateId` and
-    /// `metadataFilters` keep only the rooms carrying the template and matching the conditions (an unknown template
-    /// or field, or a malformed condition, is refused with 400), `count` and `startIndex` page through it, `total`
-    /// reports how many rooms match the request in full, and `current` describes the section folder itself.
+    /// Returns one page of the "Forms" section, the list of form-filling rooms that the caller can read. The
+    /// call does not open the rooms, so `files` is empty. To read a room, use `GET api/2.0/files/{folderId}` with
+    /// its ID. Any signed-in user can call it. The call is read-only, but a valid `sortBy` becomes the
+    /// account's default order. The `total` field counts all matching rooms. The call returns 400 if
+    /// `metadataTemplateId` or `metadataFilters` names an unknown template or field, or has a malformed condition. In
+    /// `GET api/2.0/files/rooms`, these rooms show only when `searchArea` is `Forms`.
     /// </remarks>
     /// <summary>Get the "Forms" section</summary>
     /// <path>api/2.0/files/@forms</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Forms\" section with one page of the form-filling rooms available to the caller", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the metadata filter names an unknown template or field")]
-    [SwaggerResponse(403, "The caller is not allowed to read the \"Forms\" section")]
-    [SwaggerResponse(404, "The \"Forms\" section could not be resolved for this account")]
     [HttpGet("@forms")]
     public async Task<FolderContentDto<int>> GetFormsFolder(GetCommonFolderRequestDto inDto)
     {
