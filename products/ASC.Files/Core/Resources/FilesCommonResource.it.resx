@@ -411,6 +411,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Errore di inizio della modifica file</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>Lo spazio libero nell'archivio di terze parti collegato non è sufficiente. Libera spazio al suo interno e riprova.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Non puoi modificare le stanze archiviate</value>
   </data>

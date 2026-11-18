@@ -229,7 +229,7 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and doc
 | Outside the BMP: the write fails with a 500 (scenario) | failure text of `CreateTemplate_WithACharacterOutsideTheBmpInTheName_StoresItIntact`, `CreateField_WithAnEmojiInTheFieldNameAndTheOptionValue_StoresThemIntact`, `SetFileValues_WithAnEmojiInAStringValueAndACustomField_StoresThemIntact` in run 365d87fe60 (MD10) | CODE-ONLY |
 | Characters outside the BMP are stored as `?` — not written into the spec, see MD10 | `T/MetadataUnicodeTests.cs:73-120` (Category=Bug, red); `Migration:16-136` | — |
 | **Assigned templates in the listings** | | |
-| `getFileInfo`, `getFolderInfo` and the listing agree; empty before assignment | `T/MetadataRequestLimitsTests.cs:257-284`; `FoldersController:534-535`; yaml `assignedMetadataTemplates` (79738, 89147) | TEST-CONFIRMED [run: PASS] |
+| `getFileInfo`, `getFolderInfo` and the listing agree; empty before assignment | `T/MetadataRequestLimitsTests.cs:257-284`; `FoldersController:536-537`; yaml `assignedMetadataTemplates` (79738, 89147) | TEST-CONFIRMED [run: PASS] |
 | First template of the portal drops the "no templates" memory | `T/FoldersMetadataSearchTests.cs:418-437` | TEST-CONFIRMED [run: PASS] |
 | `entryKind` names the concrete kind of every listing entry (`file`, `folder`, `thirdPartyFile`, `thirdPartyFolder`); the SDK builds the concrete model from it | `EntryDto:49-59`; yaml `FileEntryBaseDto` (79393-79403); `Listings:66-70, 269-286` (the tests read `id`, `assignedMetadataTemplates`, `metadataMatches` through it) | TEST-CONFIRMED [run: NO-LINK] |
 | **Filtering a listing by metadata** | | |
@@ -241,7 +241,7 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and doc
 | Per-type conditions on rooms: string case-insensitive exact, number range inclusive/open, date range, choice OR, several conditions AND | `T/RoomsMetadataFieldFilterTests.cs:45-205`; `T/MetadataSearchQueryTests.cs:72-262` (unit predicate) | TEST-CONFIRMED [run: PASS] |
 | Third-party entries left out; index candidates confirmed against the database | `Query:74-127`; yaml `getFolderByFolderId` (16321) — the candidates part is shown by `T/FoldersMetadataSearchTests.cs:211-231` (row under "The stored values are the truth of a filter"); third-party entries need a connected storage (Nextcloud), not in the integration-test stack | CODE-ONLY (third-party) |
 | **Access before the filter is validated** | | |
-| Anonymous with unknown `metadataTemplateId` → 401 | `T/FoldersMetadataSearchTests.cs:399-416`; `FoldersController:456-465` | TEST-CONFIRMED [run: PASS] |
+| Anonymous with unknown `metadataTemplateId` → 401 | `T/FoldersMetadataSearchTests.cs:399-416`; `FoldersController:458-467` | TEST-CONFIRMED [run: PASS] |
 | **Conditions and operators of a filter** | | |
 | `contains` substring case-insensitive, `eq` whole value; typed and listing agree | `T/MetadataFilterOperatorsTests.cs:50-82` | TEST-CONFIRMED [run: PASS] |
 | `gt`/`gte`/`lt`/`lte` on numbers; typed agrees | `T/MetadataFilterOperatorsTests.cs:98-148` | TEST-CONFIRMED [run: PASS] |
@@ -255,14 +255,14 @@ Revision 2026-11-14 (09d4de0768..6fb6dfb17a): only endpoint descriptions and doc
 | `gt`/`gte`/`lt`/`lte` with day-only and timed bounds | `T/MetadataFilterOperatorsTests.cs:223-274`; `Filter:526-578` | TEST-CONFIRMED [run: PASS] |
 | **Sections that take or refuse the metadata filter** | | |
 | Recent, Favorites, Shared with me by id: template and condition, `total` | `T/MetadataSectionFiltersTests.cs:50-205`; `EntryManager:402-508` | TEST-CONFIRMED [run: PASS] |
-| `@my`, `@trash`, `@share`, `@recent`, `@favorites`, `@forms`; unknown template 400 on alias | `T/MetadataSectionAliasFiltersTests.cs:48-186`; `T/MetadataSectionFiltersTests.cs:91-116`; `FoldersController:886-1117` | TEST-CONFIRMED [run: PASS] |
+| `@my`, `@trash`, `@share`, `@recent`, `@favorites`, `@forms`; unknown template 400 on alias | `T/MetadataSectionAliasFiltersTests.cs:48-186`; `T/MetadataSectionFiltersTests.cs:91-116`; `FoldersController:889-1120` | TEST-CONFIRMED [run: PASS] |
 | Templates section 400 by id, `@templates` alias (raw) and `searchFolder` | `T/MetadataSectionFiltersTests.cs:207-221`; `T/MetadataSectionAliasFiltersTests.cs:188-200`; `T/MetadataTypedSearchTests.cs:126-136`; `EntryManager:402-409` | TEST-CONFIRMED [run: PASS] |
 | Private rooms section filtered like the rooms; only the legacy Privacy folder refused | `products/ASC.Files/Tests/Tests/08_Private/PrivateRoomSectionMetadataFilterTests.cs:46-60` (private rooms section by id, `searchFolder` and the rooms listing with `PrivateRooms`: filtered, not refused); `EntryManager:405-408` refuses `FolderType.Privacy` (13), the legacy folder of the desktop encryption, which the stand cannot open | TEST-CONFIRMED [run: PASS] (private rooms filtered; spec corrected), CODE-ONLY (legacy Privacy folder 400) |
 | **Typed metadata search** | | |
 | Agrees with the listing (ids and `total`) | `T/MetadataTypedSearchTests.cs:46-72`; `T/MetadataFilterOperatorsTests.cs:70-82, 138-148` | TEST-CONFIRMED [run: PASS] |
 | `count` 101/0/-1/absent, `startIndex` -1 → 400 on `searchFolder`; 101/-1 on `searchRooms` | `T/MetadataRequestLimitsTests.cs:50-96`; `Request` (`[Range(1, 100)]`, `[Range(0, int.MaxValue)]`) | TEST-CONFIRMED [run: PASS] |
 | Recent through the body; Templates 400 | `T/MetadataTypedSearchTests.cs:126-167` | TEST-CONFIRMED [run: PASS] |
-| Body fields and routes | `T/MetadataTypedSearchPagingTests.cs:43-99` (`count`, `startIndex`, `sortBy`, `sortOrder`, `total` on both routes); the filter, text and hidden members by `T/MetadataTypedSearchTests.cs`; `FoldersController:487-503`; `RoomsController:1394-1423` | TEST-CONFIRMED [run: PASS] |
+| Body fields and routes | `T/MetadataTypedSearchPagingTests.cs:43-99` (`count`, `startIndex`, `sortBy`, `sortOrder`, `total` on both routes); the filter, text and hidden members by `T/MetadataTypedSearchTests.cs`; `FoldersController:489-505`; `RoomsController:1394-1423` | TEST-CONFIRMED [run: PASS] |
 | **String metadata values in the free text search** | | |
 | Found by a custom field, match with null ids (sub-folder and room) | `T/FoldersMetadataSearchTests.cs:254-275`; `T/RoomsMetadataSearchTests.cs:69-89` | TEST-CONFIRMED [run: PASS] |
 | Found by a template field, match with template/field ids and the whole value | `T/FoldersMetadataSearchTests.cs:277-297`; `T/RoomsMetadataSearchTests.cs:91-111` | TEST-CONFIRMED [run: PASS] |
