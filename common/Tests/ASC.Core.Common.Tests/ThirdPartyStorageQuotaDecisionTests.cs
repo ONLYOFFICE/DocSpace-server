@@ -109,7 +109,7 @@ public class ThirdPartyStorageQuotaDecisionTests
     [InlineData(ProxyPage, false)]
     [InlineData("", false)]
     [InlineData(null, false)]
-    public void IsGoogleDriveResponse_ReadsTheReasonFromTheBody(string body, bool outOfSpace)
+    public void IsGoogleDriveResponse_ReadsTheReasonFromTheBody(string? body, bool outOfSpace)
     {
         ThirdPartyStorageQuota.IsGoogleDriveResponse(body).Should().Be(outOfSpace);
     }
@@ -148,7 +148,7 @@ public class ThirdPartyStorageQuotaDecisionTests
     [InlineData("storage_limit_exceeded", true)]
     [InlineData("access_denied_insufficient_permissions", false)]
     [InlineData(null, false)]
-    public void IsBox_MatchesTheStorageLimitCode(string code, bool outOfSpace)
+    public void IsBox_MatchesTheStorageLimitCode(string? code, bool outOfSpace)
     {
         // BoxAPIException has no public constructor: the library builds it from the answer with this one
         var exception = (Exception)Activator.CreateInstance(
@@ -177,6 +177,23 @@ public class ThirdPartyStorageQuotaDecisionTests
         ThirdPartyStorageQuota.KeepReason(later, full).Should().BeSameAs(full);
         ThirdPartyStorageQuota.KeepReason(new InvalidOperationException("first"), later).Should().BeSameAs(later);
         ThirdPartyStorageQuota.KeepReason(null, later).Should().BeSameAs(later);
+    }
+
+    // A part of a move or copy: the out-of-space refusal it kept, and the error of the item it is on now ("" or
+    // null once a later item passed its checks)
+    [Theory]
+    [InlineData("full", "", null, null, "full")]
+    [InlineData("full", "denied", null, null, "full")]
+    [InlineData(null, "denied", "full", "", "full")]
+    [InlineData("", "denied", "full", "locked", "full")]
+    [InlineData(null, "denied", null, "locked", "denied")]
+    [InlineData(null, "", null, "locked", "locked")]
+    [InlineData("", "", "", "", null)]
+    [InlineData(null, null, null, null, null)]
+    public void OperationError_OutOfSpaceRefusalWinsOverLaterItemsAndTheOtherPart(
+        string? thirdPartyStorageFull, string? thirdPartyError, string? portalStorageFull, string? portalError, string? expected)
+    {
+        ThirdPartyStorageQuota.OperationError(thirdPartyStorageFull, thirdPartyError, portalStorageFull, portalError).Should().Be(expected);
     }
 
     [Theory]

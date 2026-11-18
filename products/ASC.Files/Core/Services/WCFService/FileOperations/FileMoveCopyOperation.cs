@@ -653,6 +653,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                     {
                         // the connected storage is full: the user has to free space there, it is not a server fault
                         Err = ex.Message;
+                        StorageFullErr ??= ex.Message;
 
                         Logger.InformationUnableFolderMoveCopyOperation(folderId.ToString(), ex.InnerException?.Message ?? ex.Message);
                     }
@@ -1056,6 +1057,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                 {
                     // the connected storage is full: the user has to free space there, it is not a server fault
                     Err = ex.Message;
+                    StorageFullErr ??= ex.Message;
 
                     Logger.InformationUnableFileMoveCopyOperation(fileId.ToString(), ex.InnerException?.Message ?? ex.Message);
                 }

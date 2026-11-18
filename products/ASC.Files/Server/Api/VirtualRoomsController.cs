@@ -374,9 +374,8 @@ public class VirtualRoomsThirdPartyController(
     /// 402 if the portal reached the room limit of its plan or its payment is overdue. It returns 403 if the storage
     /// account was not connected for rooms. It also returns 403 for a public room while the portal forbids external
     /// sharing. A room type of the AI rooms section also returns 403. With `createAsNewFolder`, a subfolder that
-    /// cannot be created also returns 403, unless the storage has no free space left: then the call returns 400
-    /// until the user frees up space in that storage. If `id` is not a folder of a connected storage account, the
-    /// call returns 404.
+    /// cannot be created also returns 403. If a storage other than SharePoint is full, the call returns 400 instead.
+    /// The user has to free up space there first. If `id` is not a folder of a connected storage account, the call returns 404.
     /// </remarks>
     /// <summary>Create a third-party room</summary>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>

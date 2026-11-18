@@ -113,8 +113,10 @@ public class ThirdPartyStorageQuotaTests(
     /// readable message never reached the user there.
     /// </summary>
     /// <remarks>
-    /// The session is opened through the SDK; the bytes go over raw HTTP, within the carve-outs of the tests
-    /// rule: the handler is not a controller, so it has no SDK signature at all.
+    /// The session is opened through the SDK with <c>{folderId}/session</c>, the operation that replaces the
+    /// deprecated <c>upload/create_session</c> and keeps its sessions in the same place, so the handler takes
+    /// them alike. The bytes go over raw HTTP, within the carve-outs of the tests rule: the handler is not a
+    /// controller, so it has no SDK signature at all.
     /// </remarks>
     [Fact]
     public async Task ChunkedUpload_IntoFullThirdPartyStorage_ReportsReadableReason()
@@ -127,9 +129,9 @@ public class ThirdPartyStorageQuotaTests(
         var content = Encoding.UTF8.GetBytes("content that does not fit into the storage");
 
         // opening a session writes nothing to a WebDAV storage yet, so it succeeds on the full account
-        var session = await _filesOperationsApi.CreateUploadSessionAsync(
+        var session = await _filesOperationsApi.CreateUploadSessionInFolderAsync(
             roomId, new SessionRequest(fileName: title, fileSize: content.Length), TestContext.Current.CancellationToken);
-        var uploadId = session.Response.Data.Id;
+        var uploadId = session.Response.Id;
 
         // Act: one chunk holding the whole file, so the handler commits it to the storage at once
         using var form = new MultipartFormDataContent();

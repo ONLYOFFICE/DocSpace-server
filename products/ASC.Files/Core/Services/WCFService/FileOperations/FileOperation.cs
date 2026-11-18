@@ -42,6 +42,14 @@ public abstract class FileOperation : DistributedTaskProgress
     public Guid Owner { get; set; }
     public abstract FileOperationType FileOperationType { get; set; }
     public string Err { get; set; }
+
+    /// <summary>
+    /// The out-of-space refusal of a connected storage that the first such item of the operation met. Unlike
+    /// <see cref="Err"/>, which follows the item the operation is on, it stays until the operation ends.
+    /// </summary>
+    [JsonIgnore]
+    public string StorageFullErr { get; protected set; }
+
     public int Process { get; set; }
 
     public string Src { get; set; }
@@ -181,16 +189,11 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
         var thirdpartyTask = ThirdPartyOperation;
         var daoTask = DaoOperation;
 
-        var error1 = thirdpartyTask.Err;
-        var error2 = daoTask.Err;
+        var error = ThirdPartyStorageQuota.OperationError(thirdpartyTask.StorageFullErr, thirdpartyTask.Err, daoTask.StorageFullErr, daoTask.Err);
 
-        if (!string.IsNullOrEmpty(error1))
+        if (error != null)
         {
-            Err = error1;
-        }
-        else if (!string.IsNullOrEmpty(error2))
-        {
-            Err = error2;
+            Err = error;
         }
 
         var status1 = thirdpartyTask.Result;

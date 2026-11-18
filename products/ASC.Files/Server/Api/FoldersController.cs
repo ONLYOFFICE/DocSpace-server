@@ -328,8 +328,8 @@ public abstract class FoldersController<T>(
     /// returns 400 if the title is empty, has only spaces, or is too long. It returns 403 if the parent does not exist
     /// or is in the archive. It also returns 403 in the Rooms, Forms, and AI agents section roots, which hold only
     /// rooms. For a string ID that is not a folder of a connected storage, the call returns 404.
-    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
-    /// until the user frees up space in that storage.
+    /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Create a folder
@@ -338,7 +338,7 @@ public abstract class FoldersController<T>(
     [RaisesWebhook(WebhookTrigger.FolderCreated)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder that was created", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters, or the connected third-party storage that holds the parent folder has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters, or the connected storage other than SharePoint that holds the parent folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(403, "The caller may not create content in the parent folder, or the parent does not exist, lies in the archive or is a section root that holds only rooms")]
     [SwaggerResponse(404, "The parent folder id is a string that is not the id of a folder in a known third-party storage")]
     [HttpPost("folder/{folderId}")]
@@ -634,9 +634,8 @@ public abstract class FoldersController<T>(
     /// folder ID can change with the title. So take the ID from the response. The call returns 400 if the title is
     /// empty, has only spaces, or is too long. It also returns 403 for a folder in the trash or in the archive. If
     /// the folder does not exist, the call returns 404. To change the other settings of a room, use
-    /// `PUT api/2.0/files/rooms/{id}`.
-    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
-    /// until the user frees up space in that storage.
+    /// `PUT api/2.0/files/rooms/{id}`. If the folder is in a full connected storage other than SharePoint, the call
+    /// can return 400. The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Rename a folder
@@ -647,7 +646,7 @@ public abstract class FoldersController<T>(
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with its new title", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters, or the connected third-party storage that holds the folder has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(403, "The caller may not rename this folder, or the folder lies in Trash or in the archive")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPut("folder/{folderId}")]

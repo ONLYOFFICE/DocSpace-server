@@ -119,8 +119,8 @@ public abstract class EditorController<T>(
     /// open for co-editing. If the file does not exist, the call returns 404. If a string `fileId` points to a storage
     /// account that is not connected, the call returns 400. If the content exceeds the storage quota, it returns 402.
     /// For large content, use `POST api/2.0/files/file/{fileId}/edit_session`.
-    /// If the file is in a connected third-party storage that has no free space left, the call returns 400
-    /// until the user frees up space in that storage.
+    /// If the file is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Save edited file content
@@ -129,7 +129,7 @@ public abstract class EditorController<T>(
     [RaisesWebhook(WebhookTrigger.FileUpdated, When = "for the saved file, also for a renamed copy in third-party storage, never `file.created`")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file is saved and the stored version is returned", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "A form field has the wrong type, or a third-party file identifier refers to a storage account that is not connected, or the connected third-party storage that holds the file has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "A form field has the wrong type, or a third-party file identifier refers to a storage account that is not connected, or the connected storage other than SharePoint that holds the file has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The content does not fit into the portal's storage quota, even with the overshoot allowed for editor saves")]
     [SwaggerResponse(403, "The caller cannot edit the file, or it is locked, in Trash, or open in somebody else's editing session")]
     [SwaggerResponse(404, "The file id resolves to nothing")]

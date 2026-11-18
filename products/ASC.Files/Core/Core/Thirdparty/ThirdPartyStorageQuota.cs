@@ -141,6 +141,18 @@ public static class ThirdPartyStorageQuota
     }
 
     /// <summary>
+    /// The error a move or copy of many items reports, from its two parts (the items of the connected storages and
+    /// those of the portal). An out-of-space refusal that either part met wins: each part sets its current error per
+    /// item and clears it when the next item passes its checks, so without this a later item, failed or copied,
+    /// hides the reason the user can act on. Otherwise the error of the connected-storage part, then that of the
+    /// portal part; <see langword="null"/> when no part has one, and the operation keeps what it reported before.
+    /// </summary>
+    public static string OperationError(string thirdPartyStorageFull, string thirdPartyError, string portalStorageFull, string portalError)
+    {
+        return NullIfEmpty(thirdPartyStorageFull) ?? NullIfEmpty(portalStorageFull) ?? NullIfEmpty(thirdPartyError) ?? NullIfEmpty(portalError);
+    }
+
+    /// <summary>
     /// OneDrive copy: whether an item of <paramref name="size"/> bytes fits into the <paramref name="remaining"/>
     /// bytes the drive reports. An unknown size or a drive that reports no quota fits: nothing says it does not.
     /// </summary>
@@ -163,6 +175,11 @@ public static class ThirdPartyStorageQuota
     public static bool IsWebDav(int statusCode)
     {
         return statusCode == (int)HttpStatusCode.InsufficientStorage;
+    }
+
+    private static string NullIfEmpty(string value)
+    {
+        return string.IsNullOrEmpty(value) ? null : value;
     }
 
     private static T Deserialize<T>(string json) where T : class
