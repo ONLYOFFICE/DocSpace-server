@@ -200,17 +200,17 @@ owned by this capability. `setDefaultTemplate` on third-party string ids was not
 | # | Where | What the server does | Evidence | Evidence kind |
 |---|---|---|---|---|
 | FX2 | `startEditFile` | A second person refused a claim is told "This document is being edited by you in another tab" | `T/01_Files/Editing/EditingStartTests.cs:116-136` asserts that text for another account | pinned by a test; wording judged by reading |
-| FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4500-4507` | FIXED (62419af921): the create request skips the revocation mark, asserted at `FileLinkPrimaryTests.cs:238-242` and `FolderLinkPrimarySetTests.cs:242-246` |
+| FX3 | `createFilePrimaryExternalLink` (and the folder one, same path) | After a revocation the POST answers 404, because create shares the read path; the UI button cannot share the file again. `setFileExternalLink` with `primary` true still works | `T/01_Files/Links/FileLinkPrimaryTests.cs:212-239` (Bug 84872), `FSS:4500-4507` | FIXED (62419af921): the create request skips the revocation mark, asserted at `FileLinkPrimaryTests.cs:238-242` and `FolderLinkPrimarySetTests.cs:242-246` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | FX4 | `get*PrimaryExternalLink`, `create*PrimaryExternalLink` | The revocation check runs before the sharing right check, so a caller with no access to a revoked entry gets 404 rather than 403, while an unrevoked entry gives 403 | `FSS:4500-4507` before `FSS:4527` | STILL OPEN for `get*`; for `create*` REFUTED since 62419af921 (the create skips the revocation check, so the sharing right check answers 403) |
 | FX6 | `setFilesOrder` | Items are applied one at a time with no transaction, so a later item's 403 or 404 leaves earlier items reordered while the caller sees an error | `FSS:2828-2874` | red by code reading |
-| FX7 | `createRoomTag` | A name with a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design | `T/03_Rooms/Tags/RoomTagCreateTests.cs:85-109` | per test comment |
+| FX7 | `createRoomTag` | A name with a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design | `T/03_Rooms/Tags/RoomTagCreateTests.cs:85-109` | per test comment — per test comment; `CreateRoomTag_NameOutsideBmp_Rejected` passes in run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) but asserts only that the name is refused, not the status code |
 | FX8 | `setDefaultTemplate` | A numeric `selectedFile` that is not a 32-bit integer answers 500 (`GetInt32` in `DefaultTemplateSettings.cs:102`); STILL OPEN after 09d4de0768..6fb6dfb17a, which only removed the documented 500, so the 500 is now undeclared | `DT:103`, yaml `setDefaultTemplate` | red by code reading |
 | FX9 | `getGroupsMembersWithFolderSecurity`, `getGroupsMembersWithFileSecurity` | `filterValue` with an uppercase letter matches nothing, per the yaml text | yaml `getGroupsMembersWithFolderSecurity`; not read in code | yaml text only |
 
 Stale test comments seen (assertions cited above are unaffected): `DefaultTemplateTests.cs:90-95,156-162,178-181,197-200`
 say the mismatches answer 403, `DT:129-134,218-221` raise the 400 exception; `FileLinkPrimaryTests.cs:189-192` and
 `FolderLinkCreateTests.cs:271-274` say "currently answers 200", while `FSS:4527` refuses and commits `021004d5bd` and
-`cdddfed875` are titled as fixing bug 81575. Whether those tests are green now was not established.
+`cdddfed875` are titled as fixing bug 81575. Those tests pass (run 2026-11-18): the fix is `021004d5bd`, R4 of `room-role-permissions`.
 
 ## Revision 2026-11-14 (`09d4de0768..6fb6dfb17a`)
 
