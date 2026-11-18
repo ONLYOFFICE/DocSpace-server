@@ -1,7 +1,10 @@
 # Known deviations between the specifications and the server
 
-Last updated 2026-11-10: integration tests for the CODE-ONLY rows (test agents, run 2026-11-10) on top of the revision of
-range `bb406b409b..6fb013e745` (verdicts read from the commits, not run). Statuses otherwise come from the `verification.md` of the 30 specs (`room-types` has no defect section);
+Last updated 2026-11-18: an editorial pass (references to rows that left the register removed, duplicates merged,
+row texts aligned with their `verification.md`); no test was run and no verdict changed except F22, whose
+`verification.md` names the fixing commit. Before that: the 2026-11-14 test run and live client check, integration
+tests for the CODE-ONLY rows (run 2026-11-10) and the revision of range `bb406b409b..6fb013e745` (verdicts read from
+the commits, not run). Statuses come from the `verification.md` of the 30 specs (`room-types` has no defect section);
 earlier checked ranges `1f1b052f7d..0ebdbb7c84` and `d58816bece..3533ad8a89`.
 
 The specifications in `specs/` describe the server as it behaves today (checked against the integration
@@ -11,9 +14,11 @@ and places where the product matrix ("Types and Roles. Access rights", "Shared l
 something the server does not do. Each item names the specification it would belong to; file:line evidence
 stays in that specification's `verification.md`.
 
-Status: **OPEN** (still open, or new in this revision), **FIXED** with the commit, **REFUTED**, or **not
-re-checked** when no `verification.md` gives a verdict. FIXED and REFUTED rows are in "Closed by v4.1.0" at the
-end. The `verification.md` of the seven new specs (people-and-groups, private-rooms, files-settings,
+Status: **OPEN** (still open, or new in this revision; a `verification.md` that says STILL OPEN is written OPEN
+here), **OPEN (product decision)** when which side is wrong is not settled, **FIXED** with the commit, **REFUTED**,
+**NOT REPRODUCED** when a test written for the defect passes and no fixing commit is known, **NOT A DEFECT** for
+behaviour recorded so nobody files it, or **not re-checked** when no `verification.md` gives a verdict. FIXED and
+REFUTED rows are in "Closed by v4.1.0" at the end. The `verification.md` of the seven new specs (people-and-groups, private-rooms, files-settings,
 storage-and-integrations, oauth2-applications, portal-settings, access-settings) gives an evidence kind and no
 status column; their rows are OPEN as new in this revision.
 
@@ -28,12 +33,6 @@ Defects that bypass access, leak data or secrets, or let a caller act for anothe
 | D11 | shared-links | Files and folders in My documents, Custom, Collaboration and VDR rooms accept up to 6 *primary* links in addition to 6 additional ones (`primary:true` with a new link id succeeds up to 6 times). Rooms and Public-room entries keep one primary link. | live run; `FileSecurity`/`FileSharing` link limits | OPEN |
 | D12 | shared-links | A primary link of a folder inside a Form filling room stores an expiration date on create; later updates and revocation are skipped unless the stored date is echoed. | live run | OPEN |
 | D13 | form-filling-room-roles | The "only ONLYOFFICE PDF forms" rule is enforced by extension only (`.pdf`), so an ordinary PDF enters the room and is auto-started on move; the form-signature check exists only in the advisory `checkdestfolder`. | live run; `FileDao`, `CopyPermissionsCheck` | OPEN |
-
-**Recorded contradiction, narrowed (hidden form read by id).** `form-filling-workflow` and its test (FW2) and
-`specs/form-filling-room-roles/spec.md` (scenario "Form Filler does not see a form that is not started") say 403,
-and the `verification.md` of the roles spec calls 403 the asserted value. The contradiction left is only with the
-old live-run text of D6, which said 404. Nothing has been run since the live run, so the D6 text above stays as
-recorded.
 
 ## Matrix says one thing, server does another (specs follow the server)
 
@@ -55,7 +54,7 @@ recorded.
 | room-role-permissions | Form Filler is a role of a general room | Only VDR and Form filling rooms accept it; a Public room accepts only Content creator and Room manager | not re-checked |
 | vdr-room-roles | A Form Filler sees a configured form only when their turn has come | Visible as soon as assigned; the turn governs filling | not re-checked |
 | vdr-room-roles | A Content creator stops filling of own forms and forms they organized | Only forms they created | not re-checked |
-| vdr-room-roles | A Form Filler views only forms they take part in | Non-form files are refused; see D5 for PDFs | not re-checked |
+| vdr-room-roles | A Form Filler views only forms they take part in | Non-form files are refused | not re-checked |
 | form-filling-room-roles | Only ONLYOFFICE PDF forms enter the room | Any PDF (see D13) | not re-checked |
 | form-filling-room-roles | A Form Filler does not copy or move forms; does not delete "Complete" forms | Copies forms out; deletes own results in both folders (delete: code only) | not re-checked |
 | form-filling-room-roles | Results sync by a Content creator "only own / organized" (resolved comment) | Any Content creator, any form | not re-checked |
@@ -73,13 +72,14 @@ recorded.
 
 ## Suspected defects (static findings)
 
-Static findings collected from the `verification.md` of each spec; the numbers are the ones used there. **No test
-was run in this revision**: every "red" below is a statement of the `verification.md`, not the result of a run.
+Static findings collected from the `verification.md` of each spec; the numbers are the ones used there. A row
+whose evidence names no run rests on the `verification.md` alone: its "red" is a statement of that file, not the
+result of a run.
 
 From 2026-11-10 many defects are backed by integration tests marked `Category=Bug` that fail on purpose until the
 defect is fixed; their rows carry the evidence "red test, run 2026-11-10".
 `form-filling-workflow` numbers two items F1 and F2 that have nothing to do with F1 and F2 of `file-operations`;
-this register labels them FW1 and FW2, and its F3 is FW3 here. Within a table, rows are ordered by how much they matter.
+this register labels them FW1 and FW2, and its later numbers FW4 to FW7. Within a table, rows are ordered by how much they matter.
 
 Evidence column:
 
@@ -96,6 +96,10 @@ Evidence column:
 - **by code reading**: the code was read and no test assertion was compared with it.
 - **per commit message**: the row rests on what a commit message says.
 - **yaml text only**: the row rests on the contract text; the code was not read.
+- **test, run <date>** / **full run <date>**: the test ran on that date (alone or in the full solution run) and its result is the one the row states.
+- **test passes, run <commit>** / **probe test passes**: a test written to reproduce the defect passed; the row is NOT REPRODUCED.
+- **commit read, not run** / **code and tests read, not run**: a FIXED row whose fix was read in the commit and the tests that pin it; nothing was run.
+- **tests**, **test**, **yaml**, **route gone**: a FIXED or REFUTED row whose `verification.md` gives that evidence and no run.
 
 ### Access and integrity
 
@@ -115,7 +119,6 @@ Evidence column:
 | PR1 | private-rooms | Deleting a subfolder of a private room still sends it to Trash. | per commit message | OPEN |
 | Q2 | quotas | Moving a file between two accounts' My documents silently raises the receiver's custom user quota by the file size. | red test, run 2026-11-10 | OPEN |
 | S6 | webhooks-and-api-keys | The "limited Developer Tools access for Users" setting also blocks Room admins, and now drops the events of their subscriptions; notes and endpoint text say Users only. Intent unclear. | test pins (bug 81236) | OPEN, widened |
-| A11 | ai-agents | Deleting another user's prompt answers success although nothing is deleted. | red by code reading (the engine between the two files was not read; the test comment says "used to") | OPEN |
 | P1 | plugins | A manifest with `"enabled": true` is reported as on for every portal without a stored row, and switching it off deletes the row so the manifest value returns: the plugin cannot be switched off; manifest `createBy`/`createOn` are trusted. | red test, run 2026-11-10 | OPEN |
 | M10 | data-import | `migratorName` of the body is trusted over the parsed job's migrator, so a wrong name re-parses the upload with the wrong migrator and fails late. | static | OPEN |
 | N1 | notifications | The room-deleted letter checks the subscription and mute list of the deleter instead of each recipient. | red test, run 2026-11-10 | OPEN |
@@ -167,7 +170,7 @@ Evidence column:
 | Q3 | quotas | `setTenantQuotaSettings` reports a non-admin caller or a hosted portal with `NotSupportedException` → 415 instead of 403. | red test, run 2026-11-10 | OPEN |
 | PS-6 | portal-settings | `closeAdminHelper` gives a signed-in non-administrator of a self-hosted portal 415 instead of 403, one branch for a role and for an edition; the yaml documents it. | test, run 2026-11-11 (`AdminHelperTests.cs`) | OPEN |
 | T2 | portal-lifecycle | Confirming the owner change reports every business refusal ("User not found", "Access denied") as 500; the sibling `sendOwnerChangeInstructions` uses 400/403. | static | OPEN |
-| T4 | portal-lifecycle | The "last full-access space" rule and the "wizard passed" check throw plain exceptions and answer 500; the yaml documents the 500 as intended. | static | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
+| T4 | portal-lifecycle | The "last full-access space" rule and the "wizard passed" check throw plain exceptions and answer 500. | static | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
 | T7 | portal-lifecycle | System-API registration on a server installation validates `portalName` only inside the tenant registration: a taken or malformed name answers 500 instead of the 400 codes of `validateportalname`. | static | OPEN |
 | M3 | data-import | `finishMigration` with `isSendWelcomeEmail: true` after a parse-only job: NullReferenceException, 500. | red test, run 2026-11-10 | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
 | M4 | data-import | Cancel/clear read the operation of a not-yet-started task: NRE in the event handler, or an unmatched parse that keeps running while its upload folder is deleted. | bug test (84792; M13 is its concrete form) | OPEN |
@@ -184,11 +187,11 @@ Evidence column:
 | SI3 | storage-and-integrations | `getStorageProgress` on a server installation dereferences a null cache value when no migration is remembered: 500, and with SI1 that is every call. | red test, run 2026-11-10 | OPEN |
 | SI7 | storage-and-integrations | `updateStorage` and `updateCdnStorage` read `props` unconditionally although it is not required: 500 instead of 400 for a configured module with no `props`. | red by code reading | OPEN |
 | SI9 | storage-and-integrations | `startStorageEncryption` reports a running backup by a bare exception: 500 with no message for an expected condition. | red by code reading | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
-| FX8 | files-settings | `setDefaultTemplate` with a numeric `selectedFile` that is not a 32-bit integer answers 500, and the yaml declares it. | red by code reading | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
+| FX8 | files-settings | `setDefaultTemplate` with a numeric `selectedFile` that is not a 32-bit integer answers 500. | red by code reading | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
 | FX7 | files-settings | `createRoomTag` with a name holding a character outside the BMP is refused by the database write with 500, not validated as 400; the test comment says bug 81682 was closed as by-design. | per test comment | OPEN |
-| PS-3 | portal-settings | `configureDeepLink` with a body without `deepLinkSettings` fails on a null reference: 500 for a request fault, documented in the yaml. | red by code reading | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
-| PS-4 | portal-settings | `configureCsp` with a `null` entry in `domains` fails on a null reference: 500 for a request fault, documented in the yaml. | red by code reading | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
-| PS-5 | portal-settings | `saveDnsSettings` answers 500 through plain exceptions for a malformed or taken name and a hidden section, not 400 or 402 as the sibling settings do; the yaml documents the 500. | test, run 2026-11-11 (`DnsSettingsTests.cs`) | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
+| PS-3 | portal-settings | `configureDeepLink` with a body without `deepLinkSettings` fails on a null reference: 500 for a request fault. | red by code reading | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
+| PS-4 | portal-settings | `configureCsp` with a `null` entry in `domains` fails on a null reference: 500 for a request fault. | red by code reading | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
+| PS-5 | portal-settings | `saveDnsSettings` answers 500 through plain exceptions for a malformed or taken name and a hidden section, not 400 or 402 as the sibling settings do. | test, run 2026-11-11 (`DnsSettingsTests.cs`) | OPEN (the yaml stopped documenting the 500 on 2026-11-14; the code still answers it) |
 | A24 | ai-agents | In a concurrent MCP add of one name the losers answer 403, not the soft "already registered". | per test (comment) | OPEN |
 | P4 | plugins | Every failure after the size checks, storage I/O included, is wrapped as 400 "Wrong plugin archive. …". | static | OPEN |
 | W9 | billing | `getPaymentUrl` quantity below 1 is validated after the configuration and admin checks: 403 without billing, 400 with it. | red test, run 2026-11-10 | OPEN |
@@ -210,6 +213,8 @@ Evidence column:
 | FX4 | files-settings | `get*PrimaryExternalLink` checks the revocation before the sharing right, so a caller with no access to a revoked entry gets 404, while an unrevoked entry gives 403. Refuted for `create*PrimaryExternalLink`, which no longer runs the revocation check. | red by code reading | OPEN, narrowed |
 | AP2 | apps | An application id longer than 64 characters in the configuration reads fine but every write fails at the database → 500; no start-up validation. | static | OPEN |
 | MD1 | metadata | Retyping single ↔ multi choice is refused like any retype, and retyping a choice field requires `options: []`. | static | OPEN |
+| FW6 | form-filling-workflow | `PUT files/file/{id}/manageformfilling` with `Resume` on a form that was never started answers 500 (no filling properties); since `0ff3031b59` the yaml no longer declares that 500. Spec number F6. | test (`FormFillingStateTests.cs:252`) | OPEN |
+| OA4 | oauth2-applications | `DELETE api/2.0/clients` (`deleteUserClients`) by a DocSpace admin answers 500 "Something went wrong"; it passed on 2026-11-10. The release brought Identity migration `V1_9_1__group_replication_keys.sql` (invisible primary keys on the client child tables), the likely cause, not proven. | full run 2026-11-14 and alone (`ClientWriteAccessTests.cs:237`); the other client writes failed in the full run with the same 500 and passed alone | OPEN (regression, cause not established) |
 
 ### Inconsistencies, messages and documentation
 
@@ -230,10 +235,10 @@ Evidence column:
 | SI5 | storage-and-integrations | The Yandex entry of `getAllProviders` has key `WebDav` without `requiredConnectionUrl`, while a WebDAV connection without an address is refused (the refusal read only as a comment). | red by code reading | OPEN |
 | SI8 | storage-and-integrations | A second `saveThirdPartyBackup` stores the new title without the invalid-character cleaning a new account gets. | red by code reading | OPEN |
 | PR2 | private-rooms | A private room or its subfolder can be added to Favorites. | per commit message | OPEN |
-| FW2 | form-filling-workflow | By-id read of a hidden form: this spec, the code, the test and `form-filling-room-roles` say 403, and only the old live-run text of D6 says 404; see the recorded contradiction after the D table. | test pins (documentation item) | OPEN |
+| FW2 | form-filling-workflow | By-id read of a hidden form: this spec, the code, the test and `form-filling-room-roles` say 403; an older live run recorded 404 and has not been repeated. | test pins (documentation item) | OPEN |
 | Q5 | quotas | A file that does not fit the remaining portal allowance is refused with "The maximum file size is exceeded (<remaining>)", quoting free space as a per-file limit. | static | OPEN |
 | FX2 | files-settings | A second person refused by `startEditFile` is told "This document is being edited by you in another tab". | pinned by a test; wording judged by reading | OPEN |
-| Q4 | quotas | `FolderQuotaChangeAsync` refuses a quota above `maxTotalSize` or the Standalone portal quota with `InvalidOperationException` (403) and the "greater than the total storage" message, the status of an access refusal; the user-quota sibling answers 400 (`ArgumentException`). The earlier second, unreachable "folder not found" refusal is gone. | red test, run 2026-11-10 | STILL OPEN |
+| Q4 | quotas | `FolderQuotaChangeAsync` refuses a quota above `maxTotalSize` or the Standalone portal quota with `InvalidOperationException` (403) and the "greater than the total storage" message, the status of an access refusal; the user-quota sibling answers 400 (`ArgumentException`). The earlier second, unreachable "folder not found" refusal is gone. | red test, run 2026-11-10 | OPEN |
 | Q6 | quotas | The `maxTotalSize = 0` branch of `getPortalQuota` for a User is dead code behind the permission demand, yet documented in the yaml. | static | OPEN |
 | S3 | webhooks-and-api-keys | `ApiKeyManager.DeleteApiKeyAsync` returns `result >= 0`, i.e. always true. | static | OPEN |
 | S4 | webhooks-and-api-keys | `PUT settings/webhook/enable` demands `name` and `uri` in a body it ignores. | static | OPEN |
@@ -279,10 +284,8 @@ Evidence column:
 | — | user-type-permissions | Matrix row "copy of an archived room" is allowed by the matrix but `room-types` refuses duplication of an archived room; kept MATRIX-ONLY and flagged, neither spec changed. | static | not re-checked |
 | AC-11 | access-settings | `getIpRestrictions` and `getSupportedCultures` compute the ETag by hashing a `MemoryStream` that is never rewound, so every list gets the same ETag (MD5 of zero bytes): after the IP list changes, a request with the old ETag still gets 304 and the client keeps the stale list. | red test, run 2026-11-11 (`IpRestrictionsRulesTests.GetIpRestrictions_ListChangedAfterTheETag_ReturnsList`, `Category=Bug`); code read | OPEN |
 | PS-7 | portal-settings | A refused `saveMailDomainSettings` (Custom list with a bad domain) and a refused `saveDnsSettings` (name mapped by another portal) change the cached portal object before the check: the database keeps the old value, but the portal then reports the refused value until the cache expires. | red test, run 2026-11-11 (`MailDomainSettingsTests.cs:70`, `DnsSettingsTests.cs:160`, `Category=Bug`) | OPEN |
-| FW6 | form-filling-workflow | `PUT files/file/{id}/manageformfilling` with `Resume` on a form that was never started answers 500 (no filling properties); since `0ff3031b59` the yaml no longer declares that 500. Spec number F6. | test (`FormFillingStateTests.cs:252`) | OPEN |
 | R11 | room-role-permissions | Since `fcd31cbadf` the yaml says `archiveRoom`/`unarchiveRoom` need the room manager role and refuse a non-invited DocSpace admin; the server refuses an invited Room manager on both (403) and lets a non-member DocSpace admin restore. The yaml text is wrong. | tests (`RoomArchiveRoomManagerTests.cs:46,62`, `RoomArchivePermissionsTests.cs:200`) | OPEN (documentation) |
-| A35 | ai-agents | `aiPromptsDelete` answers success for another user's prompt and does not delete it (bug 82809). | red by code reading; `PromptIsolationTests.cs:108` | OPEN |
-| OA4 | oauth2-applications | `DELETE api/2.0/clients` (`deleteUserClients`) by a DocSpace admin answers 500 "Something went wrong"; it passed on 2026-11-10. The release brought Identity migration `V1_9_1__group_replication_keys.sql` (invisible primary keys on the client child tables), the likely cause, not proven. | full run 2026-11-14 and alone (`ClientWriteAccessTests.cs:237`); the other client writes failed in the full run with the same 500 and passed alone | OPEN (regression, cause not established) |
+| A11, A35 | ai-agents | `aiPromptsDelete` answers success for another user's prompt and does not delete it (bug 82809); the yaml describes it as intended. One defect under two numbers of the `verification.md`. | red by code reading (the engine between `promptsStorage.ts` and `promptsController.ts` was not read); `PromptIsolationTests.cs:108` | OPEN |
 | FW7 | form-filling-workflow | The release's own unit test `GetTableColumns_DecidedVersionWithoutSubmissions_AddsNoColumns` fails: `FormFillingReportCreator.MatchFields` returns null for a field added in a decided, never-filled version, so the rename into it gets no column. | `FormEditorSessionsTests.cs:325` red in the full run and alone, deterministic (unit test, commit `c330e3222e`) | OPEN (release regression) |
 | F30 | file-operations | `deleteRecent` with a folder id sends `delete` of that folder to the parent folder's socket room, so open clients take the folder off its list although it stays there. | `SocketFolderEventsTests.cs:113` red in the 2026-11-07 and 2026-11-14 runs, also alone; no bug mark yet | OPEN |
 
@@ -308,12 +311,9 @@ range. The fixes were read, not run. "Submodule" is a commit of `sdk/docspace-ap
 
 | # | Spec | What the server did | Evidence | Status |
 |---|------|---------------------|----------|--------|
-| AC-1 | access-settings | `saveSsoSettingsV2` with no IdP entity ID, no SSO URL, a malformed SLO URL or an incomplete field mapping answered 500; it now answers 400 (bug 84685). | commit read, not run | FIXED `f3a52c35dd` |
-| AC-2 | access-settings | `saveSsoSettingsV2` with a missing or invalid SSO URL answered 500; it now answers 400 (bug 84686). | commit read, not run | FIXED `f3a52c35dd` |
-| AC-3 | access-settings | `saveSsoSettingsV2` with an incomplete field mapping answered 500; it now answers 400 (bug 84687). | commit read, not run | FIXED `f3a52c35dd` |
-| AC-4 | access-settings | `saveSsoSettingsV2` with a malformed SLO URL answered 500; it now answers 400 (bug 84688). | commit read, not run | FIXED `f3a52c35dd` |
+| AC-1 to AC-4 | access-settings | `saveSsoSettingsV2` answered 500 for no IdP entity ID (bug 84685), a missing or invalid SSO URL (84686), an incomplete field mapping (84687) and a malformed SLO URL (84688); each now answers 400. | commit read, not run | FIXED `f3a52c35dd` |
 | AC-5 | access-settings | `sendSmsCode` with valid credentials and SMS off for the account answered 500, the thrown exception type having no mapping (bug 84503). | commit read, not run | FIXED `f5f2735e30` |
-| F22 | file-operations | `updateFile` on a file locked by somebody else was refused through a 500 instead of a client error. | commit read, not run | FIXED, no commit named |
+| F22 | file-operations | `updateFile` on a file locked by somebody else was refused through a 500 instead of a client error; it now answers 403 (bug 84842). | tests (`LockedFileStateTests.cs:147`, `FileRenameLockedTests.cs:110`) | FIXED `77db3a6128` |
 | R10 | shared-links | After a file's primary link was revoked, `createFilePrimaryExternalLink` answered 404 from then on, while `setFileExternalLink` could still make one (bug 84872). | commit read, not run | FIXED `62419af921` |
 | FX3 | files-settings | Same bug as R10, on `createFilePrimaryExternalLink` and the folder one: create shared the read path, so after a revocation the POST answered 404 (bug 84872). | commit read, not run | FIXED `62419af921` |
 | AP1 | apps | The `app_settings` table was in no backup module, so a backup dropped every application flag and settings document. Backups taken before the fix still hold no rows; the full cycle has no test. | test prepares the row | FIXED `9e696831d5` (bug 84721) |
@@ -342,5 +342,5 @@ range. The fixes were read, not run. "Submodule" is a commit of `sdk/docspace-ap
 | W3 | billing | Nine `servicelimit` operations and the `aiServicesLimit` profile field were missing from the published document and the SDKs. | yaml | FIXED submodule `5ea4dc6` |
 | FS2 | file-sharing | `changeDefaultAccessRights` accepted an out-of-range number (bug 82641); the request model now answers 400. The `verification.md` calls it "not a defect" and names no commit. | green test by its assertion, not run | FIXED, no commit named |
 | A6 | ai-agents | A file id and the Trash root are accepted as thread `entityId`: by design, with a reopen decision on bug 82719. | test | REFUTED |
-| OA1 | oauth2-applications | `updateClient` accepts a `name` outside 3 to 256 characters (200), while `createClient` refuses it and the yaml declares the same bound on the update (bug 81670). | per test comment | FIXED (tests green 2026-11-10, no commit named) |
-| OA2 | oauth2-applications | `getPublicClientInfo` with an unknown id does not answer the 404 the yaml declares (bug 81728). | per test comment | FIXED (tests green 2026-11-10, no commit named) |
+| OA1 | oauth2-applications | `updateClient` accepted a `name` outside 3 to 256 characters (200), while `createClient` refused it and the yaml declared the same bound on the update (bug 81670). | per test comment | FIXED (tests green 2026-11-10, no commit named) |
+| OA2 | oauth2-applications | `getPublicClientInfo` with an unknown id did not answer the 404 the yaml declares (bug 81728). | per test comment | FIXED (tests green 2026-11-10, no commit named) |
