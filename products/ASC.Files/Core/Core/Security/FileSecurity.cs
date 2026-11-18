@@ -3009,6 +3009,61 @@ public class FileSecurity(
             subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter);
     }
 
+    public async Task<List<FileEntry>> GetPinnedAiProjectsAsync()
+    {
+        var userId = authContext.CurrentAccount.ID;
+
+        var pinnedIds = await daoFactory.GetTagDao<int>().GetTagsAsync(userId, 0, TagType.Pin)
+            .Where(t => t.EntryType == FileEntryType.Folder && t.EntryId is int)
+            .Select(t => (int)t.EntryId)
+            .Distinct()
+            .ToListAsync();
+
+        if (pinnedIds.Count == 0)
+        {
+            return [];
+        }
+
+        var isAdmin = await fileSecurityCommon.IsDocSpaceAdministratorAsync(userId);
+        var aiHubId = await globalFolder.GetFolderAiHubAsync(daoFactory);
+
+        var projects = await daoFactory.GetFolderDao<int>()
+            .GetAiProjectsVisibleToAsync(pinnedIds, aiHubId, userId, isAdmin)
+            .ToDictionaryAsync(p => p.Id);
+
+        var ordered = pinnedIds.Where(projects.ContainsKey).Select(id => projects[id]).ToList();
+
+        foreach (var project in ordered)
+        {
+            if (project.ShareRecord != null)
+            {
+                project.Access = project.ShareRecord.Share;
+            }
+            else
+            {
+                project.Access = FileShare.None;
+
+                if (isAdmin)
+                {
+                    project.ShareRecord = new FileShareRecord<int>
+                    {
+                        EntryId = project.Id,
+                        EntryType = FileEntryType.Folder,
+                        Share = FileShare.None,
+                        SubjectType = SubjectType.User,
+                        Subject = userId
+                    };
+                }
+            }
+
+            project.Pinned = true;
+            project.IsFavorite = false;
+            project.Tags = [];
+        }
+
+        return [.. ordered];
+    }
+
     // FillingFormsRoom rooms physically live under VirtualRooms but are surfaced in the separate Forms
     // section, so they are split by the room's own folder type: excluded from the Rooms (Active) listing
     // and shown only in Forms. The same split applies to room templates: they all physically live under

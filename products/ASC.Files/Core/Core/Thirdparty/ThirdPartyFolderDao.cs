@@ -130,6 +130,12 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             yield return room;
         }
     }
+
+    public IAsyncEnumerable<Folder<string>> GetAiProjectsVisibleToAsync(IEnumerable<string> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    {
+        return AsyncEnumerable.Empty<Folder<string>>();
+    }
+
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, FolderType type)
     {
         return GetFoldersAsync(parentId);

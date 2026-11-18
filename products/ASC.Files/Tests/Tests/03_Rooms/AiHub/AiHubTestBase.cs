@@ -86,6 +86,40 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
         return await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
     }
 
+    protected async Task<JsonElement> GetRootSectionsAsync(string query = "")
+    {
+        using var response = await Files.GetAsync($"api/2.0/files/@root{query}", TestContext.Current.CancellationToken);
+
+        return await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected static JsonElement AiHubSectionOf(JsonElement sections)
+    {
+        return sections.EnumerateArray().Single(s => s.GetProperty("current").GetProperty("rootFolderType").GetInt32() == AiHubFolderType);
+    }
+
+    protected async Task<JsonElement> GetRootAiHubSectionAsync(string query = "")
+    {
+        return AiHubSectionOf(await GetRootSectionsAsync(query));
+    }
+
+    protected Task<HttpResponseMessage> PinRoomResponseAsync(int roomId)
+    {
+        return Files.PutAsync($"api/2.0/files/rooms/{roomId}/pin", null, TestContext.Current.CancellationToken);
+    }
+
+    protected Task<HttpResponseMessage> UnpinRoomResponseAsync(int roomId)
+    {
+        return Files.PutAsync($"api/2.0/files/rooms/{roomId}/unpin", null, TestContext.Current.CancellationToken);
+    }
+
+    protected async Task PinRoomAsync(int roomId)
+    {
+        using var response = await PinRoomResponseAsync(roomId);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, $"room {roomId} has to be pinned in Arrange");
+    }
+
     protected static List<int> IdsOf(JsonElement section)
     {
         return section.GetProperty("folders").EnumerateArray().Select(f => f.GetProperty("id").GetInt32()).ToList();

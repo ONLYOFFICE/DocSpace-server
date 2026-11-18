@@ -29,7 +29,9 @@ share record on it.
 **Goals:**
 
 - The AI rooms section of `getRootFolders` reads the caller's pinned projects in two queries by keys.
-- The projects carry the same `access`, `pinned`, `tags`, `new` and favourite values as in the listing of the section.
+- The projects carry the same `access` and `pinned` values as in the listing of the section. `new` is 0, `isFavorite`
+  is false, `tags` is empty and `shared`/`sharedForUser` are false: the side menu, which reads this list for quick
+  access to the pinned projects, needs none of them, and the DTO does not read them per project when they are set.
 
 **Non-Goals:**
 
@@ -49,9 +51,10 @@ counter. Alternative: filter the full list in the controller — rejected, it ke
 
 **Where the flag acts.** In the rooms branch of `EntryManager.GetEntriesAsync`, when the flag is set and the parent
 is the AI rooms root, the entries come from a new `FileSecurity.GetPinnedAiProjectsAsync()` instead of
-`GetVirtualRoomsAsync`; `total` is their number; the in-memory sort and `Skip`/`Take` (both the ordinary path and
-the `SortedBy.New` path) are skipped, so the pin order stands; `SetTagsNewAsync` and `SetIsFavoriteFoldersAsync` run
-on these entries as on any page. The request's filters, search text and paging are not passed for this section;
+`GetVirtualRoomsAsync`; `total` is their number; the entries are sorted by `SortEntries` with the `orderBy` of
+the request (or the account's default), as the listing of the section sorts its pinned rooms, and `Skip`/`Take` are
+skipped; `SetTagsNewAsync` and `SetIsFavoriteFoldersAsync` do not
+run on these entries. The request's filters, search text and paging are not passed for this section;
 `FolderContentDtoHelper` reports `startIndex` 0. The flag is ignored for any other parent, so no other caller of
 these methods changes.
 
@@ -59,12 +62,15 @@ these methods changes.
 
 1. The caller's pins: the existing `TagDao.GetTagsAsync(userId, default, TagType.Pin)` (`TagsByOwnerAsync`). It
    returns every pin of the account (rooms, AI rooms and the rooms of the section, at most 10 of each kind under the
-   pin limits), newest first. The internal ids are parsed from `entry_id`; the order is kept.
+   pin limits). The internal ids are parsed from `entry_id`; the order of the pins is not used.
 2. The projects: a new precompiled query (`[PreCompileQuery]` in `FolderQueries.cs`, called from `FolderDao`) over
    `files_folder` by primary key (`id in ids`), with `folder_type` = AI project, `parent_id` = the AI rooms root,
-   and a left join to the caller's own `files_security` record on it (`internal_entry_id`, `entry_type` folder,
-   `subject` = the caller). It keeps a row when `isAdmin`, or `create_by` = the caller, or the record exists, and
-   returns the folder in the shape the folder mapper reads together with that record.
+   joined to its parent (the root, for the mapper), left-joined to its room settings (colour and cover of the logo:
+   without them the DTO saves a random colour per room) and to the caller's own `files_security` record on it
+   (`internal_entry_id`, `entry_type` folder, `subject` = the caller). Every join is by a primary key or the
+   `(tenant_id, internal_entry_id)` index and gives at most one row, so the query uses plain joins, not
+   `FirstOrDefault` subqueries (which EF turns into `ROW_NUMBER()` over every row of the portal), and no list of the
+   project's share records. It keeps a row when `isAdmin`, or `create_by` = the caller, or the record exists.
 
 Alternative: one query joining pins to folders — rejected: `files_tag_link.entry_id` is a string, so the join is
 `CAST(f.id AS CHAR) = l.entry_id` and cannot use the primary key of `files_folder`; the plan would scan the projects
@@ -81,9 +87,10 @@ are not listed. This keeps the open defect of "Members of the AI rooms" (an admi
 the listing has it; fixing it is a change of its own and would change both places.
 
 **What is set on each project.** `ShareRecord` and `Access` from the joined record, as the listing's filter does,
-so `access` and `inRoom` of the DTO are what `getRoomsFolder` reports; `Pinned` = true; custom `Tags` in one batch
-(`tagDao.GetTagsAsync([TagType.Custom], projects)`, as `SetTagsAsync` does), so the DTO does not read them per
-room. The creator has no record, so `ShareRecord` stays null and the rights of their project are computed through
+so `access` and `inRoom` of the DTO are what `getRoomsFolder` reports; `Pinned` = true; `Tags` empty and `IsFavorite` = false, so the DTO reads neither per project.
+`FolderContentDtoHelper` loads the caller's share records once for a non-empty AI rooms page, as for the Rooms
+root, so `inRoom` of a member's project is not computed with a read of those records per project. The rights of each
+project still cost one share query when its DTO is built, as every room of any listing does. The creator has no record, so `ShareRecord` stays null and the rights of their project are computed through
 the usual path in `FilterEntryAsync`, as in the listing.
 
 **Methods on the DAO interface.** The query method goes on `IFolderDao<T>` next to `GetRoomsAsync`; the
@@ -104,6 +111,11 @@ the AI rooms root id from `GlobalFolder` (cached) and works on `int` ids only.
   cannot create the record.
 - [`sortBy` of the request is still saved as the account's default order when the AI rooms section is built] →
   unchanged behaviour of `getRootFolders` for every section; the section itself ignores it.
+
+- [The order follows the account's sort, not the moment of the pin] → it is the order the listing of the section shows
+  pinned rooms in, so the side menu and the section agree; `SortEntries` breaks ties by id, so the order is total.
+- [`filesCount` and `foldersCount` of `current` of the AI rooms section are no longer summed over the rooms of the
+  section] → the section carries the counters of its root folder; the client does not read them.
 
 ## Migration Plan
 

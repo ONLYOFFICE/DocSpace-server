@@ -4,15 +4,15 @@
 
 ### Requirement: Pinned projects in the root folders
 
-`getRootFolders` SHALL return in `folders` of the AI rooms section the AI projects the caller pinned and may see,
-the latest pin first, and no other room. `total` and `count` of that section SHALL equal their number and
-`startIndex` SHALL be 0, whatever `count`, `startIndex`, `filterType`, `filterValue`, `userIdOrGroupId` and sort
-the request carries. The other sections SHALL keep their behaviour.
+`getRootFolders` SHALL return in `folders` of the AI rooms section only the AI projects the caller pinned and may
+see, sorted as the listing of the section sorts pinned rooms. `total` and `count` of that section SHALL equal their
+number and `startIndex` SHALL be 0, whatever paging and filters the request carries. The other sections SHALL keep
+their behaviour.
 
 #### Scenario: Only pinned projects are listed
 
 - **WHEN** the owner creates three AI projects and an Instructions room, pins two of the projects and then the Instructions room, and calls `getRootFolders` with `filterType=2` and `count=1`
-- **THEN** `folders` of the AI rooms section holds the two pinned projects, the one pinned later first, with `total` and `count` 2 and `startIndex` 0
+- **THEN** `folders` of the AI rooms section holds the two pinned projects with `total` and `count` 2 and `startIndex` 0
 - **AND** neither the Instructions room nor the unpinned project is in it
 
 #### Scenario: Nothing pinned
@@ -20,10 +20,10 @@ the request carries. The other sections SHALL keep their behaviour.
 - **WHEN** the caller has pinned no AI project, or only an Instructions room
 - **THEN** `folders` of the AI rooms section is empty and its `total` is 0, and the section itself is still listed
 
-#### Scenario: Paging, filters and sort do not cut the list
+#### Scenario: Paging and filters do not cut the list
 
 - **WHEN** ten AI projects are pinned, the most the pin limit of the AI rooms section allows, and `getRootFolders` is called with `count=1`, `startIndex=5`, a `filterValue` no project title contains and `sortBy=AZ`
-- **THEN** `folders` of the AI rooms section holds all ten projects, the latest pin first, with `total` and `count` 10 and `startIndex` 0
+- **THEN** `folders` of the AI rooms section holds all ten projects in the order of their titles, with `total` and `count` 10 and `startIndex` 0
 
 #### Scenario: Unpinned project leaves the list
 

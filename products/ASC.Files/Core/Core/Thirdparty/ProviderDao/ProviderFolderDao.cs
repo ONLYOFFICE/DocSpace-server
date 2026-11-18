@@ -119,6 +119,11 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         return result.Distinct();
     }
 
+    public IAsyncEnumerable<Folder<string>> GetAiProjectsVisibleToAsync(IEnumerable<string> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    {
+        return AsyncEnumerable.Empty<Folder<string>>();
+    }
+
     public override async IAsyncEnumerable<Folder<string>> GetProviderBasedRoomsAsync(SearchArea searchArea, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId,
         string searchText, bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, int? groupId = null)
     {

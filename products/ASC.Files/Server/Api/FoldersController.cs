@@ -973,12 +973,14 @@ public class FoldersControllerCommon(
     /// Returns every top-level section that the caller can see, each with its first page of content. Sections come
     /// in this order: "Favorites", "Recent", "Shared with me", "My documents", "Trash", "Rooms", "Forms", and
     /// "Archive". While the private rooms app is on, "Private rooms" comes before "Archive". While AI access is on for
-    /// the portal, the AI agents and AI hub sections follow. The list has
+    /// the portal, the AI agents and AI hub sections follow. AI hub lists only the AI projects the caller pinned and
+    /// can access. They are sorted like pinned rooms in the section listing. The list has
     /// "Recent" only after `PUT api/2.0/files/displayrecent` turns it on. It skips "My documents" if the account has
     /// none, which is usual for a guest. To skip "Trash", set `withoutTrash` to `true`. Any signed-in user can call
     /// it. The call is read-only, but a valid `sortBy` becomes the account's default order. It does not clear
-    /// new-item marks. The filters, `count`, and `startIndex` apply to each section. So `count=1` returns one entry
-    /// per section, and each section has its own `total`. This is the most expensive listing of the module. When you
+    /// new-item marks. The filters, `count`, and `startIndex` apply to each section except AI hub. So `count=1`
+    /// returns one entry per other section, each with its own `total`. AI hub always lists every pinned
+    /// project. This is the most expensive listing of the module. When you
     /// need one section, read it directly, for example with `GET api/2.0/files/@my`. The call returns 400 if `count`
     /// is outside its allowed range.
     /// </remarks>
@@ -993,8 +995,14 @@ public class FoldersControllerCommon(
     {
         var foldersIds = GetRootFoldersIdsAsync(inDto.WithoutTrash ?? false);
 
-        await foreach (var folder in foldersIds)
+        await foreach (var (folder, isAiHub) in foldersIds)
         {
+            if (isAiHub)
+            {
+                yield return await folderContentDtoHelper.GetAsync(folder, null, null, null, 0, false, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, 0, -1, null, pinnedAiProjects: true);
+                continue;
+            }
+
             yield return await folderContentDtoHelper.GetAsync(folder, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, false, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
         }
     }
@@ -1130,7 +1138,7 @@ public class FoldersControllerCommon(
         return app is { Enabled: true };
     }
 
-    private async IAsyncEnumerable<int> GetRootFoldersIdsAsync(bool withoutTrash)
+    private async IAsyncEnumerable<(int Id, bool IsAiHub)> GetRootFoldersIdsAsync(bool withoutTrash)
     {
         var aiAccessSettingsTask = settingsManager.LoadAsync<TenantAiAccessSettings>();
         var isOutsider = await userManager.IsOutsiderAsync(securityContext.CurrentAccount.ID);
@@ -1140,40 +1148,40 @@ public class FoldersControllerCommon(
             withoutTrash = true;
         }
 
-        yield return await globalFolderHelper.FolderFavoritesAsync;
+        yield return (await globalFolderHelper.FolderFavoritesAsync, false);
 
         if (await filesSettingsHelper.GetRecentSection())
         {
-            yield return await globalFolderHelper.FolderRecentAsync;
+            yield return (await globalFolderHelper.FolderRecentAsync, false);
         }
-        yield return await globalFolderHelper.FolderShareAsync;
+        yield return (await globalFolderHelper.FolderShareAsync, false);
 
         var my = await globalFolderHelper.FolderMyAsync;
         if (my != 0)
         {
-            yield return my;
+            yield return (my, false);
         }
 
         if (!withoutTrash)
         {
-            yield return await globalFolderHelper.FolderTrashAsync;
+            yield return (await globalFolderHelper.FolderTrashAsync, false);
         }
 
-        yield return await globalFolderHelper.FolderVirtualRoomsAsync;
-        yield return await globalFolderHelper.FolderFormsAsync;
+        yield return (await globalFolderHelper.FolderVirtualRoomsAsync, false);
+        yield return (await globalFolderHelper.FolderFormsAsync, false);
 
         if (await IsPrivateRoomsAppEnabledAsync())
         {
-            yield return await globalFolderHelper.FolderPrivateRoomsAsync;
+            yield return (await globalFolderHelper.FolderPrivateRoomsAsync, false);
         }
 
-        yield return await globalFolderHelper.FolderArchiveAsync;
+        yield return (await globalFolderHelper.FolderArchiveAsync, false);
 
         var aiAccessSettings = await aiAccessSettingsTask;
         if (aiAccessSettings.Enabled)
         {
-            yield return await globalFolderHelper.FolderAiAgentsAsync;
-            yield return await globalFolderHelper.FolderAiHubAsync;
+            yield return (await globalFolderHelper.FolderAiAgentsAsync, false);
+            yield return (await globalFolderHelper.FolderAiHubAsync, true);
         }
     }
 }

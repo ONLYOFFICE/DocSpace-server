@@ -10,7 +10,8 @@ needed.
 ## What Changes
 
 - **BREAKING** In the answer of `getRootFolders`, the AI rooms section (`current.rootFolderType` of the AI rooms
-  root) carries in `folders` the AI projects the caller pinned and can see, newest pin first, and nothing else:
+  root) carries in `folders` the AI projects the caller pinned and can see, in the order the listing of the section shows pinned rooms, and
+  nothing else:
   no Instructions or Knowledge room, pinned or not, and no unpinned project. `total` and `count` are the number of
   those projects, `startIndex` is 0.
 - `count`, `startIndex`, `filterType`, `filterValue`, `userIdOrGroupId` and the sort parameters of the request do

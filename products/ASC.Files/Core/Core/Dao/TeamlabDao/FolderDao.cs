@@ -52,6 +52,7 @@ internal class FolderDao(
         SelectorFactory selectorFactory,
         CrossDao crossDao,
         FolderMapper mapper,
+        SecurityTreeRecordMapper securityRecordMapper,
         GlobalStore globalStore,
     GlobalFolder globalFolder,
     Global global,
@@ -275,6 +276,26 @@ internal class FolderDao(
         await foreach (var e in FromQuery(filesDbContext, q).AsAsyncEnumerable())
         {
             yield return mapper.MapDbFolderQueryToDbFolderInternal(e);
+        }
+    }
+
+    public async IAsyncEnumerable<Folder<int>> GetAiProjectsVisibleToAsync(IEnumerable<int> projectsIds, int aiHubRootId, Guid userId, bool isAdmin)
+    {
+        var ids = projectsIds.ToList();
+        if (ids.Count == 0)
+        {
+            yield break;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var e in filesDbContext.AiProjectsWithOwnRecordAsync(tenantId, ids, aiHubRootId, userId, isAdmin))
+        {
+            var folder = mapper.MapDbFolderQueryToDbFolderInternal(e);
+            folder.ShareRecord = e.SharedRecord != null ? securityRecordMapper.MapToInternal(e.SharedRecord) : null;
+            yield return folder;
         }
     }
 
@@ -2929,6 +2950,7 @@ internal class CacheFolderDao(
     SelectorFactory selectorFactory,
     CrossDao crossDao,
     FolderMapper mapper,
+    SecurityTreeRecordMapper securityRecordMapper,
     GlobalStore globalStore,
     GlobalFolder globalFolder,
     Global global,
@@ -2953,6 +2975,7 @@ internal class CacheFolderDao(
         selectorFactory,
         crossDao,
         mapper,
+        securityRecordMapper,
         globalStore,
         globalFolder,
         global,

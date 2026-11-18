@@ -293,7 +293,8 @@ public class FileStorageService //: IFileStorageService
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
         List<FolderType> folderType = null,
         bool withAiFolder = false,
-        MetadataFilter metadataFilter = null)
+        MetadataFilter metadataFilter = null,
+        bool pinnedAiProjects = false)
     {
         var subjectId = subject ?? Guid.Empty;
         var subjectOwnerIdGuid = subjectOwnerId ?? Guid.Empty;
@@ -465,7 +466,7 @@ public class FileStorageService //: IFileStorageService
                 groupId,
                 privacyFilter,
                 folderType,
-                withAiFolder, metadataFilter);
+                withAiFolder, metadataFilter, pinnedAiProjects);
         }
         catch (Exception e)
         {
