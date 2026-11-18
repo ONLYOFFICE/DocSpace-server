@@ -56,8 +56,11 @@ import { primeChatContext, describeChatContextUsage } from "../storage/chatConte
 import { applyAiProjectChatContext } from "../storage/aiProjectChatContext.js";
 import {
   buildContextFoldersLines,
+  buildLocationLines,
   contextFolderIdsOf,
   resolveContextFolders,
+  resolveLocation,
+  type ChatLocation,
   type ContextFolder,
 } from "../storage/contextFolders.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
@@ -309,12 +312,12 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
 
 // Build the context fragment that tells the model where it is operating and
 // how to scope tool calls. The location lines are emitted only when the
-// user is somewhere (`entityId`) that is not already one of the context
+// user is somewhere (`location`) that is not already one of the context
 // folders; the context folders - the folders and rooms the user selected for
 // the chat, several of them at once - follow as a list the model can reach
 // by id through the tools.
 function buildContextFragment(
-  entityId: string | undefined,
+  location: ChatLocation | undefined,
   contextFolders: readonly ContextFolder[] = [],
 ): string {
   const today = new Date().toISOString().slice(0, 10);
@@ -322,15 +325,12 @@ function buildContextFragment(
     "Context:",
     "- You are an AI agent operating inside an ONLYOFFICE Apps workspace, not a generic standalone assistant.",
   ];
-  if (entityId && !contextFolders.some((folder) => folder.id === entityId)) {
-    lines.push(
-      `- You are currently in the folder or room with id ${entityId} — this is the user's current location. Any tool you call reads or modifies data on the user's behalf and with their permissions — never assume access beyond that.`,
-      `- When a tool needs a folder, room, or scope identifier and the user did not specify one, use this folder/room id (${entityId}) — e.g. scope searches and listings to it.`,
-      `- To see what is in the current location (its files and subfolders), call the get_folder_content tool with this id (${entityId}); use get_folder_info for the location's own properties. Do this when the user refers to "this folder/room", "these files", or asks what is here.`,
-    );
+  if (location) {
+    lines.push(...buildLocationLines(location));
   }
   lines.push(...buildContextFoldersLines(contextFolders));
   lines.push(
+    "- Ids of folders, rooms and files are for tool calls only and mean nothing to the user: in your replies, refer to them by their names.",
     `- Today's date is ${today}.`,
     "- Prefer answering from the conversation when you can; use tools only when the request clearly needs data or actions in the workspace.",
     "- When you link to a workspace file, use only a link a tool returned for it (its `url` or `webUrl`), copied verbatim. Never compose a link yourself from a file id or title; if no tool returned a link, name the file without one.",
@@ -348,11 +348,14 @@ async function withContextPrompt<T>(body: T): Promise<T> {
   // under the caller's credentials so the names and rights are the server's.
   // The project id (`entityId`) is never a location - inside a project
   // `applyAiProjectChatContext` supplies `contextEntityId`.
+  // The location is read as the context folders are, for its name.
   const contextFolders = await resolveContextFolders(contextFolderIdsOfBody(body));
-  return appendActionPrompt(
-    body,
-    buildContextFragment(stringField(body, "contextEntityId"), contextFolders),
-  );
+  const entityId = stringField(body, "contextEntityId");
+  const location =
+    entityId && !contextFolders.some((folder) => folder.id === entityId)
+      ? await resolveLocation(entityId)
+      : undefined;
+  return appendActionPrompt(body, buildContextFragment(location, contextFolders));
 }
 
 // Attribute the round to the DocSpace entry it runs for — the folder the
@@ -439,7 +442,8 @@ const engine = new AIEngine({
   // formAnalysisSubAgent adds the `analyze_form` delegating tool; its serverType is silent
   // (absent from systemServerTypes), so it runs without UI approval.
   // documentAgentTools adds the `document_agent` delegating tool when an agent is configured;
-  // its serverType is approval-required, a delegated task may run for minutes.
+  // its serverType is approval-required, a delegated task may run for minutes. The tool itself
+  // asks for no approval (it only creates files), so only the "ask" permission mode stops it.
   toolsAdapter: composeToolsAdapters(
     systemToolsSource,
     customToolsSource,

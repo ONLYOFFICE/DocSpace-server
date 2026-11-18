@@ -44,8 +44,9 @@
  * status, and the rooms made before it stay. The agent's model and its
  * instructions are the exceptions: a portal that has no chat model, or does
  * not store one of the two, still gets the agent, and the answer says so in
- * `warnings`. A template's description and category have nowhere to go in a
- * room and are not installed.
+ * `warnings`. An agent carries its template's category as a tag, which is
+ * what the Agents list filters categories by; a template's description has
+ * nowhere to go in a room and is not installed.
  */
 
 import { portalChatProfileId } from "../storage/aiProjectChatContext.js";
@@ -85,8 +86,13 @@ async function createRoom(
   templateId: string,
   title: string,
   roomType: number,
+  tags: string[] = [],
 ): Promise<InstalledRoom> {
-  const room = await filesApiSend("POST", "rooms", { title, roomType });
+  const room = await filesApiSend("POST", "rooms", {
+    title,
+    roomType,
+    ...(tags.length > 0 ? { tags } : {}),
+  });
   const id = isObject(room) ? getEntityId(room, "id") : undefined;
   if (!isObject(room) || id === undefined) {
     throw new Error("DocSpace returned a room without an id");
@@ -126,7 +132,7 @@ async function installAgent(
     knowledgeBases.push(await installSource(source));
   }
 
-  const agent = await createRoom(template.id, template.name, ROOM_TYPES.agent);
+  const agent = await createRoom(template.id, template.name, ROOM_TYPES.agent, [template.category]);
   const roomIds = [...skillSets, ...knowledgeBases].map((room) => Number(room.id));
   if (roomIds.length > 0) {
     await filesApiSend("POST", `rooms/${encodeURIComponent(agent.id)}/sources`, { roomIds });

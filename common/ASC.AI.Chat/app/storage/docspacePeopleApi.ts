@@ -32,7 +32,8 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // The calling user, from the portal's People API under the caller's own
-// session: who they are and whether they administer the portal.
+// session: who they are, whether they administer the portal and whether
+// they may create rooms.
 
 import { getForwardedHeaders } from "../requestContext.js";
 import { DocspaceApiHttpError } from "./docspaceFilesApi.js";
@@ -40,11 +41,13 @@ import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { getBoolean, getObject, isObject } from "../narrow.js";
 
 export interface DocspaceSelf {
+  /** A DocSpace admin other than the owner. */
   isAdmin: boolean;
   isOwner: boolean;
+  isRoomAdmin: boolean;
 }
 
-/** `GET people/@self`, the two flags the settings routes need. */
+/** `GET people/@self`, the role flags the service's checks need. */
 export async function getSelf(): Promise<DocspaceSelf> {
   const url = `${proxyBaseUrl}/api/2.0/people/@self`;
   const { signal, cancel } = withTimeout(undefined);
@@ -61,6 +64,7 @@ export async function getSelf(): Promise<DocspaceSelf> {
     return {
       isAdmin: getBoolean(self, "isAdmin") === true,
       isOwner: getBoolean(self, "isOwner") === true,
+      isRoomAdmin: getBoolean(self, "isRoomAdmin") === true,
     };
   } finally {
     cancel();
@@ -71,4 +75,13 @@ export async function getSelf(): Promise<DocspaceSelf> {
 export async function isPortalAdmin(): Promise<boolean> {
   const self = await getSelf();
   return self.isAdmin || self.isOwner;
+}
+
+/**
+ * Whether the caller may create agents and the other AI rooms: the portal
+ * owner, DocSpace admins and room admins may, Users and Guests may not.
+ */
+export async function mayCreateAiRooms(): Promise<boolean> {
+  const self = await getSelf();
+  return self.isOwner || self.isAdmin || self.isRoomAdmin;
 }
