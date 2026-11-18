@@ -44,7 +44,8 @@
  * status, and the rooms made before it stay. The agent's model and its
  * instructions are the exceptions: a portal that has no chat model, or does
  * not store one of the two, still gets the agent, and the answer says so in
- * `warnings`. An agent carries its template's category as a tag, which is
+ * `warnings`. Every room takes its template's colour and cover. An agent
+ * carries its template's category as a tag, which is
  * what the Agents list filters categories by; a template's description has
  * nowhere to go in a room and is not installed.
  */
@@ -83,14 +84,17 @@ function httpError(status: number, message: string): Error {
 }
 
 async function createRoom(
-  templateId: string,
-  title: string,
+  template: Template,
   roomType: number,
   tags: string[] = [],
 ): Promise<InstalledRoom> {
+  const { id: templateId, name: title, color, cover } = template;
   const room = await filesApiSend("POST", "rooms", {
     title,
     roomType,
+    // The room is drawn as the catalog draws its template.
+    ...(color ? { color } : {}),
+    ...(cover ? { cover } : {}),
     ...(tags.length > 0 ? { tags } : {}),
   });
   const id = isObject(room) ? getEntityId(room, "id") : undefined;
@@ -101,7 +105,7 @@ async function createRoom(
 }
 
 async function installSource(template: SourceTemplate): Promise<InstalledRoom> {
-  const room = await createRoom(template.id, template.name, ROOM_TYPES[template.kind]);
+  const room = await createRoom(template, ROOM_TYPES[template.kind]);
   for (const file of template.files) {
     await uploadFile(room.id, file, await readTemplateFile(template, file), mediaTypeOf(file));
   }
@@ -132,7 +136,7 @@ async function installAgent(
     knowledgeBases.push(await installSource(source));
   }
 
-  const agent = await createRoom(template.id, template.name, ROOM_TYPES.agent, [template.category]);
+  const agent = await createRoom(template, ROOM_TYPES.agent, [template.category]);
   const roomIds = [...skillSets, ...knowledgeBases].map((room) => Number(room.id));
   if (roomIds.length > 0) {
     await filesApiSend("POST", `rooms/${encodeURIComponent(agent.id)}/sources`, { roomIds });

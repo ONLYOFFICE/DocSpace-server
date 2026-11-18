@@ -2,6 +2,8 @@
   "name": "Spreadsheet formulas",
   "description": "Skills for writing a formula from a description and for debugging a broken one.",
   "category": "Tables",
+  "color": "F2D230",
+  "cover": "package",
   "files": [
     "formula-builder.md",
     "formula-debug.md"

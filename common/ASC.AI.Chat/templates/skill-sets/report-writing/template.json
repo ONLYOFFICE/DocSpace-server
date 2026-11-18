@@ -2,6 +2,8 @@
   "name": "Report writing",
   "description": "Skills for drafting a structured report and for writing its executive summary.",
   "category": "Document",
+  "color": "5CC3F7",
+  "cover": "file_2",
   "files": [
     "structured-report.md",
     "executive-summary.md"

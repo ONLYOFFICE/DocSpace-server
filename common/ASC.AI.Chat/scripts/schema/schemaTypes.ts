@@ -799,6 +799,10 @@ type TemplateSource = {
   description: string;
   /** The category the template is listed under. */
   category: string;
+  /** The colour the room is drawn in, six hexadecimal digits without `#`, as `POST api/2.0/files/rooms` takes it. */
+  color?: string;
+  /** The id of the built-in room cover drawn on the room, one of `GET api/2.0/files/rooms/covers`. */
+  cover?: string;
   /** The names of the files the template holds, in the order they are uploaded. */
   files: string[];
 };
@@ -811,6 +815,10 @@ type TemplateAgent = {
   description: string;
   /** The category the template is listed under. */
   category: string;
+  /** The colour the room is drawn in, six hexadecimal digits without `#`, as `POST api/2.0/files/rooms` takes it. */
+  color?: string;
+  /** The id of the built-in room cover drawn on the room, one of `GET api/2.0/files/rooms/covers`. */
+  cover?: string;
   /** The agent's instructions to the chat. */
   instructions: string;
   /** The ids of the skill set templates the agent is linked to. */

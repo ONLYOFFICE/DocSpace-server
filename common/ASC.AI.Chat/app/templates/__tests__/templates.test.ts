@@ -99,6 +99,15 @@ describe("the shipped catalog", () => {
     }
   });
 
+  it("gives every template a colour and a cover, no two of them the same cover", () => {
+    const all = [...catalog.agents, ...catalog.skillSets, ...catalog.knowledgeBases];
+    for (const template of all) {
+      expect(template.color, template.id).toMatch(/^[0-9A-F]{6}$/);
+      expect(template.cover, template.id).toMatch(/^[a-z0-9_]+$/);
+    }
+    expect(new Set(all.map((template) => template.cover)).size).toBe(all.length);
+  });
+
   it("reads only the files a template lists", () => {
     expect(() => readTemplateFile(catalog.skillSets[0]!, "../template.json")).toThrow();
   });
@@ -141,6 +150,14 @@ describe("readTemplateCatalog", () => {
       { "skill-sets/a/template.json": set(["b.txt"]), "skill-sets/a/b.txt": "x" },
     ],
     ["an agent linked to an unknown set", { "agents/document/a.json": agent(["skill-sets/none"]) }],
+    [
+      "a colour that is not hexadecimal",
+      { "agents/document/a.json": JSON.stringify({ ...JSON.parse(agent([])), color: "#FF0000" }) },
+    ],
+    [
+      "a cover that is not a cover id",
+      { "agents/document/a.json": JSON.stringify({ ...JSON.parse(agent([])), cover: "../x" }) },
+    ],
   ])("refuses %s", async (_case, files) => {
     await expect(readTemplateCatalog(await folder(files))).rejects.toThrow();
   });
@@ -158,6 +175,8 @@ describe("installTemplate", () => {
     expect(filesApiSend).toHaveBeenCalledExactlyOnceWith("POST", "rooms", {
       title: template.name,
       roomType: 10,
+      color: template.color,
+      cover: template.cover,
     });
     expect(vi.mocked(uploadFile).mock.calls.map(([room, title]) => [room, title])).toEqual(
       template.files.map((file) => ["101", file]),
@@ -179,22 +198,24 @@ describe("installTemplate", () => {
     expect(filesApiSend).toHaveBeenCalledExactlyOnceWith("POST", "rooms", {
       title: template.name,
       roomType: 11,
+      color: template.color,
+      cover: template.cover,
     });
     expect(uploadFile).toHaveBeenCalledTimes(template.files.length);
     expect(result.kind).toBe("knowledgeBase");
   });
 
-  it("installs an agent tagged with its category, links its sources and writes its model and instructions", async () => {
+  it("installs an agent in its colour and cover, tagged with its category, links its sources and writes its model and instructions", async () => {
     const template = catalog.agents[0]!;
     const result = await installTemplate(catalog, template.id);
+    const room = (id: string, roomType: number) => {
+      const { name: title, color, cover } = findTemplate(catalog, id)!;
+      return { title, roomType, color, cover };
+    };
     expect(vi.mocked(filesApiSend).mock.calls).toEqual([
-      ["POST", "rooms", { title: findTemplate(catalog, template.skills[0]!)!.name, roomType: 10 }],
-      [
-        "POST",
-        "rooms",
-        { title: findTemplate(catalog, template.knowledges[0]!)!.name, roomType: 11 },
-      ],
-      ["POST", "rooms", { title: template.name, roomType: 12, tags: [template.category] }],
+      ["POST", "rooms", room(template.skills[0]!, 10)],
+      ["POST", "rooms", room(template.knowledges[0]!, 11)],
+      ["POST", "rooms", { ...room(template.id, 12), tags: [template.category] }],
       ["POST", "rooms/103/sources", { roomIds: [101, 102] }],
       ["PUT", "rooms/103/model", { profileId: "p1" }],
       ["PUT", "rooms/103/instructions", { instructions: template.instructions }],

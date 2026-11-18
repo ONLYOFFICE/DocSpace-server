@@ -36,7 +36,9 @@
  * skill sets (`skill-sets/<name>/template.json` and its Markdown skills) and
  * knowledge bases (`knowledge-bases/<name>/template.json` and its files). A
  * template's id is its path under the folder, without the extension for an
- * agent. An agent names its skill sets and knowledge bases by their ids, and
+ * agent. A template may carry the look of the room it becomes: `color`, six
+ * hexadecimal digits, and `cover`, the id of a built-in room cover
+ * (`GET api/2.0/files/rooms/covers`), as `POST api/2.0/files/rooms` takes them. An agent names its skill sets and knowledge bases by their ids, and
  * each of those is a template of its own, installable without the agent.
  *
  * The folder is read once and checked as a whole: a broken entry is a
@@ -57,6 +59,10 @@ export interface SourceTemplate {
   name: string;
   description: string;
   category: string;
+  /** The room's colour, six hexadecimal digits without `#`, as `POST files/rooms` takes it. */
+  color?: string;
+  /** The id of the built-in room cover drawn on the room (`GET files/rooms/covers`). */
+  cover?: string;
   /** File names inside the template's folder, in the order they are uploaded. */
   files: string[];
 }
@@ -67,6 +73,10 @@ export interface AgentTemplate {
   name: string;
   description: string;
   category: string;
+  /** The room's colour, six hexadecimal digits without `#`, as `POST files/rooms` takes it. */
+  color?: string;
+  /** The id of the built-in room cover drawn on the room (`GET files/rooms/covers`). */
+  cover?: string;
   instructions: string;
   /** Ids of the skill set templates the agent is linked to. */
   skills: string[];
@@ -128,6 +138,26 @@ function stringList(raw: Record<string, unknown>, key: string, file: string): st
   return list;
 }
 
+/** The template's `color` and `cover`, each when it is set. */
+function readLook(raw: Record<string, unknown>, file: string): { color?: string; cover?: string } {
+  const look: { color?: string; cover?: string } = {};
+  if (raw.color !== undefined) {
+    const color = getString(raw, "color");
+    if (!color || !/^[0-9A-Fa-f]{6}$/.test(color)) {
+      throw new Error(`Template ${file} has a "color" that is not six hexadecimal digits`);
+    }
+    look.color = color.toUpperCase();
+  }
+  if (raw.cover !== undefined) {
+    const cover = getString(raw, "cover");
+    if (!cover || !/^[a-z0-9_]{1,50}$/.test(cover)) {
+      throw new Error(`Template ${file} has a "cover" that is not a room cover id`);
+    }
+    look.cover = cover;
+  }
+  return look;
+}
+
 async function readSources(root: string, kind: SourceTemplateKind): Promise<SourceTemplate[]> {
   const dir = SOURCE_DIRS[kind];
   const templates: SourceTemplate[] = [];
@@ -157,6 +187,7 @@ async function readSources(root: string, kind: SourceTemplateKind): Promise<Sour
       name: requiredString(raw, "name", manifest),
       description: requiredString(raw, "description", manifest),
       category: requiredString(raw, "category", manifest),
+      ...readLook(raw, manifest),
       files,
     });
   }
@@ -186,6 +217,7 @@ async function readAgents(root: string, known: Set<string>): Promise<AgentTempla
         name: requiredString(raw, "name", file),
         description: requiredString(raw, "description", file),
         category: requiredString(raw, "category", file),
+        ...readLook(raw, file),
         instructions: requiredString(raw, "instructions", file),
         skills: links("skills", SOURCE_DIRS.skillSet),
         knowledges: links("knowledges", SOURCE_DIRS.knowledgeBase),
