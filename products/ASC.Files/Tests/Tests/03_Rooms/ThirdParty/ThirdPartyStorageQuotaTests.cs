@@ -113,9 +113,8 @@ public class ThirdPartyStorageQuotaTests(
     /// readable message never reached the user there.
     /// </summary>
     /// <remarks>
-    /// Raw HTTP on both steps, within the carve-outs of the tests rule: the SDK types the folder id of
-    /// <c>create_session</c> as an integer, which cannot address a third-party room, and the handler is not
-    /// a controller, so it has no SDK signature at all.
+    /// The session is opened through the SDK; the bytes go over raw HTTP, within the carve-outs of the tests
+    /// rule: the handler is not a controller, so it has no SDK signature at all.
     /// </remarks>
     [Fact]
     public async Task ChunkedUpload_IntoFullThirdPartyStorage_ReportsReadableReason()
@@ -127,14 +126,10 @@ public class ThirdPartyStorageQuotaTests(
         var title = $"{UniqueTitle("TP Full Upload")}.txt";
         var content = Encoding.UTF8.GetBytes("content that does not fit into the storage");
 
-        using var created = await _filesClient.PostAsJsonAsync(
-            $"api/2.0/files/{Uri.EscapeDataString(roomId)}/upload/create_session",
-            new { fileName = title, fileSize = content.Length },
-            TestContext.Current.CancellationToken);
-        var sessionBody = await created.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        created.IsSuccessStatusCode.Should().BeTrue("opening a session writes nothing to the storage yet: {0} {1}", (int)created.StatusCode, sessionBody);
-        using var session = JsonDocument.Parse(sessionBody);
-        var uploadId = session.RootElement.GetProperty("response").GetProperty("data").GetProperty("id").GetString();
+        // opening a session writes nothing to a WebDAV storage yet, so it succeeds on the full account
+        var session = await _filesOperationsApi.CreateUploadSessionAsync(
+            roomId, new SessionRequest(fileName: title, fileSize: content.Length), TestContext.Current.CancellationToken);
+        var uploadId = session.Response.Data.Id;
 
         // Act: one chunk holding the whole file, so the handler commits it to the storage at once
         using var form = new MultipartFormDataContent();

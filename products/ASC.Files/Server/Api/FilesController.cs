@@ -288,6 +288,8 @@ public abstract class FilesController<T>(
     /// the converted content exceeds the maximum upload size, the call returns 402. If the installation does not
     /// accept the format of the new title, the call returns 415. If the new title is empty and the source has no
     /// extension, the call returns 400. To copy many items without conversion, use `PUT api/2.0/files/fileops/copy`.
+    /// If the destination folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Copy a file
@@ -327,6 +329,8 @@ public abstract class FilesController<T>(
     /// `templateId` is a string that matches no third-party file. If the new file exceeds the storage quota, the call
     /// returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
     /// section, use `POST api/2.0/files/@my/file`.
+    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Create a file
@@ -356,6 +360,8 @@ public abstract class FilesController<T>(
     /// it. Each call adds a file or a version. If the folder does not exist, the call returns 404. If the content
     /// exceeds the maximum upload size or the storage quota, the call returns 402. If `content` is missing, the call
     /// returns 400. To create the file in your own section, use `POST api/2.0/files/@my/html`.
+    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Create an HTML file
@@ -386,6 +392,8 @@ public abstract class FilesController<T>(
     /// version. If the folder does not exist, the call returns 404. If the content exceeds the maximum upload size or
     /// the storage quota, the call returns 402. If `content` is missing, the call returns 400. To create the file in
     /// your own section, use `POST api/2.0/files/@my/text`.
+    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Create a text file
@@ -800,6 +808,8 @@ public abstract class FilesController<T>(
     /// the file or `lastVersion` does not exist, the call returns 404. For
     /// a caller who may only fill forms, a form whose filling has not started also returns 404. If the restore
     /// exceeds the room or user storage quota, the call returns 402. A file that another user locked also returns 403.
+    /// If the file is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Update a file
@@ -1057,6 +1067,8 @@ public abstract class FilesController<T>(
     /// `folderId` or `title`, the call returns 400. If the file or the folder does not exist, the call returns 404.
     /// If the PDF exceeds the storage quota, the call returns 402. To convert the file itself, use
     /// `PUT api/2.0/files/file/{fileId}/checkconversion`.
+    /// If the destination folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Save a file as PDF

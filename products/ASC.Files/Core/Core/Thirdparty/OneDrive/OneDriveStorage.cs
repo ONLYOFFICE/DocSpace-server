@@ -263,7 +263,7 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
             return;
         }
 
-        if (size > remaining)
+        if (!ThirdPartyStorageQuota.CopyFits(size, remaining))
         {
             throw ThirdPartyStorageQuota.CreateException(
                 new InvalidOperationException($"The copy of {itemId} needs {size} bytes, the drive has {remaining} left"));

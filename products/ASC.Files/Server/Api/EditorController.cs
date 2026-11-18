@@ -119,6 +119,8 @@ public abstract class EditorController<T>(
     /// open for co-editing. If the file does not exist, the call returns 404. If a string `fileId` points to a storage
     /// account that is not connected, the call returns 400. If the content exceeds the storage quota, it returns 402.
     /// For large content, use `POST api/2.0/files/file/{fileId}/edit_session`.
+    /// If the file is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Save edited file content

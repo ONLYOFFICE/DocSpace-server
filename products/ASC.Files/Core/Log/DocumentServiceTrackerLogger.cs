@@ -78,4 +78,7 @@ internal static partial class DocumentServiceTrackerLogger
 
     [LoggerMessage(LogLevel.Information, "DocService mailMerge {index}/{count} send: {response}")]
     public static partial void InformationDocServiceMailMerge(this ILogger<DocumentServiceTrackerHelper> logger, int index, int count, string response);
+
+    [LoggerMessage(LogLevel.Information, "DocService save refused, the connected storage is out of space. File id: '{fileId}'. UserId: {userId}. DocKey '{docKey}': {reason}")]
+    public static partial void InformationDocServiceSaveStorageFull(this ILogger<DocumentServiceTrackerHelper> logger, string fileId, Guid userId, string docKey, string reason);
 }

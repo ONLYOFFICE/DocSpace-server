@@ -811,6 +811,9 @@ public class FileStorageService //: IFileStorageService
                     // the folder is fine, the user only has to free space in the storage
                     catch (Exception ex) when (ex is not ThirdPartyStorageQuotaException)
                     {
+                        // the user reads only that the folder cannot be used; the provider's reason goes to the log
+                        _logger.InformationThirdPartyRoomFolderNotCreated(parentId?.ToString(), ex);
+
                         throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidThirdPartyFolder);
                     }
                 }

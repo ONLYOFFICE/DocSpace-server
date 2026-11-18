@@ -328,6 +328,8 @@ public abstract class FoldersController<T>(
     /// returns 400 if the title is empty, has only spaces, or is too long. It returns 403 if the parent does not exist
     /// or is in the archive. It also returns 403 in the Rooms, Forms, and AI agents section roots, which hold only
     /// rooms. For a string ID that is not a folder of a connected storage, the call returns 404.
+    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Create a folder
@@ -633,6 +635,8 @@ public abstract class FoldersController<T>(
     /// empty, has only spaces, or is too long. It also returns 403 for a folder in the trash or in the archive. If
     /// the folder does not exist, the call returns 404. To change the other settings of a room, use
     /// `PUT api/2.0/files/rooms/{id}`.
+    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>
     /// Rename a folder

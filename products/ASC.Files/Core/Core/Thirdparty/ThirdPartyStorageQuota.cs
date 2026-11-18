@@ -64,10 +64,25 @@ public static class ThirdPartyStorageQuota
     {
         return exception switch
         {
-            ApiException<UploadError> { ErrorResponse: { IsPath: true } error } => error.AsPath.Value.Reason.IsInsufficientSpace,
-            ApiException<UploadSessionFinishError> { ErrorResponse: { IsPath: true } error } => error.AsPath.Value.IsInsufficientSpace,
-            ApiException<CreateFolderError> { ErrorResponse: { IsPath: true } error } => error.AsPath.Value.IsInsufficientSpace,
-            ApiException<RelocationError> { ErrorResponse: { } error } =>
+            ApiException<UploadError> e => IsDropboxError(e.ErrorResponse),
+            ApiException<UploadSessionFinishError> e => IsDropboxError(e.ErrorResponse),
+            ApiException<CreateFolderError> e => IsDropboxError(e.ErrorResponse),
+            ApiException<RelocationError> e => IsDropboxError(e.ErrorResponse),
+            _ => false
+        };
+    }
+
+    /// <summary>
+    /// The error object of a Dropbox route answer, as <see cref="IsDropbox"/> reads it from the exception.
+    /// </summary>
+    public static bool IsDropboxError(object errorResponse)
+    {
+        return errorResponse switch
+        {
+            UploadError { IsPath: true } error => error.AsPath.Value.Reason.IsInsufficientSpace,
+            UploadSessionFinishError { IsPath: true } error => error.AsPath.Value.IsInsufficientSpace,
+            CreateFolderError { IsPath: true } error => error.AsPath.Value.IsInsufficientSpace,
+            RelocationError error =>
                 error.IsInsufficientQuota
                 || (error.IsTo && error.AsTo.Value.IsInsufficientSpace)
                 || (error.IsFromWrite && error.AsFromWrite.Value.IsInsufficientSpace),
@@ -113,6 +128,25 @@ public static class ThirdPartyStorageQuota
         }
 
         return Deserialize<OneDriveErrorResponse>(responseBody)?.Error?.Code == OneDriveCode;
+    }
+
+    /// <summary>
+    /// The one error a copy of many items rethrows after it went on past failed items: once the destination has
+    /// refused an item for want of space, that refusal stays, whatever fails after it, since it is the reason the
+    /// user can act on; otherwise the latest error.
+    /// </summary>
+    public static Exception KeepReason(Exception kept, Exception next)
+    {
+        return kept is ThirdPartyStorageQuotaException ? kept : next;
+    }
+
+    /// <summary>
+    /// OneDrive copy: whether an item of <paramref name="size"/> bytes fits into the <paramref name="remaining"/>
+    /// bytes the drive reports. An unknown size or a drive that reports no quota fits: nothing says it does not.
+    /// </summary>
+    public static bool CopyFits(long? size, long? remaining)
+    {
+        return size is null || remaining is null || size <= remaining;
     }
 
     /// <summary>

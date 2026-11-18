@@ -61,6 +61,9 @@ internal static partial class FileStorageServiceLogger
     [LoggerMessage(LogLevel.Information, "Unable to perform file {fileId} move copy operation: {reason}")]
     public static partial void InformationUnableFileMoveCopyOperation(this ILogger logger, string fileId, string reason);
 
+    [LoggerMessage(LogLevel.Information, "The folder of a third-party room could not be created in {parentId}")]
+    public static partial void InformationThirdPartyRoomFolderNotCreated(this ILogger logger, string parentId, Exception exception);
+
     [LoggerMessage(LogLevel.Information, "Unable to perform folder {folderId} move copy operation: {reason}")]
     public static partial void InformationUnableFolderMoveCopyOperation(this ILogger logger, string folderId, string reason);
 }

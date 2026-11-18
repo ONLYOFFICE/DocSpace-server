@@ -103,6 +103,8 @@ public abstract class UploadController<T>(
     /// for a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder
     /// gets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an
     /// instructions room. If the installation does not allow uploads with this extension, the call returns 415.
+    /// If the target folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>Chunked upload</summary>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
@@ -144,6 +146,8 @@ public abstract class UploadController<T>(
     /// for a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder
     /// gets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an
     /// instructions room. If the installation does not allow uploads with this extension, the call returns 415.
+    /// If the target folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>Create an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session</path>
@@ -204,6 +208,8 @@ public abstract class UploadController<T>(
     /// returns 402 if the part is over `chunkUploadSize`, or the file is over a quota or size limit. If the session
     /// does not exist, is finalized, or has expired, the call returns 404. If the file is not a PDF and the room is a
     /// form-filling room, the call returns 403.
+    /// If the target folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>Upload the next chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
@@ -308,6 +314,8 @@ public abstract class UploadController<T>(
     /// request has no `File` part, or `chunkNumber` is below 1. It returns 402 if the part is over `chunkUploadSize`,
     /// or the file is over a quota or size limit. If the session does not exist, is finalized, or has expired, the
     /// call returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 403.
+    /// If the target folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>Upload a numbered chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>
@@ -339,6 +347,8 @@ public abstract class UploadController<T>(
     /// file. It changes data and deletes the session with its parts. A repeated call returns 404. If the parts do not
     /// add up to the size of the session, the call returns 400. Then send the missing parts and repeat the call. It
     /// returns 402 if the file is over a quota or size limit. A missing, finalized, or expired session returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 403.
+    /// If the target folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>Finalize an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/finalize</path>
@@ -419,6 +429,8 @@ public abstract class UploadController<T>(
     /// exist, the call returns 404. The call returns 400 if `fileSize` is below -1. It returns 402 if `fileSize` is
     /// over the portal limit for chunked uploads. It also returns 403 if the file is locked, open in the editor, in
     /// the trash, or encrypted.
+    /// If the file is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>Create the editing session</summary>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
@@ -519,6 +531,8 @@ public abstract class UploadController<T>(
     /// The call returns 402 if the file is over the upload limit or a storage quota. If the installation does not
     /// allow uploads with this extension, the call returns 415. If the file is not a PDF and the room is a
     /// form-filling room, the call returns 403. To upload a large file, use `POST api/2.0/files/{folderId}/session`.
+    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>Insert a file</summary>
     /// <path>api/2.0/files/{folderId}/insert</path>
@@ -552,6 +566,8 @@ public abstract class UploadController<T>(
     /// part. A missing folder returns 404. It returns 402 if the file is over the upload limit or a storage quota. If
     /// the installation does not allow uploads with this extension, the call returns 415. If the file is not a PDF
     /// and the room is a form-filling room, the call returns 403.
+    /// If the folder is in a connected third-party storage that has no free space left, the call returns 400
+    /// until the user frees up space in that storage.
     /// </remarks>
     /// <summary>Upload a file</summary>
     /// <path>api/2.0/files/{folderId}/upload</path>
