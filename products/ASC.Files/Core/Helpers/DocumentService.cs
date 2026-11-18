@@ -1444,7 +1444,11 @@ public static class DocumentServiceHttpClientExtension
     {
         var settings = context.ServiceProvider.GetRequiredService<DocumentServiceHttpClientSettings>();
 
-        builder.AddTimeout(settings.AttemptTimeout);
+        // the first strategy added is the outer one: the retry wraps the timeout, so the timeout cancels one attempt
+        // and the retry starts the next, instead of ending the request with all of its attempts. That holds while the
+        // configured timeout is shorter than the client's 100-second HttpClient.Timeout and the caller's own token;
+        // with the default of 100 seconds, HttpClient.Timeout ends a hanging request first and nothing is retried
         builder.AddRetry(settings.RetryOptions);
+        builder.AddTimeout(settings.AttemptTimeout);
     }
 }

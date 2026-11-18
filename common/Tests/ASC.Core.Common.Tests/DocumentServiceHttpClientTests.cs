@@ -36,8 +36,9 @@ namespace ASC.Core.Common.Tests;
 /// <summary>
 /// The named clients of the document service: each one carries a single resilience pipeline, however many of a
 /// process's service extensions register them, the clients behind the "SSL verification off" switch accept any
-/// certificate, and a timeout or retry count that does not parse or is out of bounds neither stops the registration
-/// nor breaks the clients.
+/// certificate, a timeout shorter than the client's own bounds one attempt and not the request, and a timeout or
+/// retry count that does not parse
+/// or is out of bounds neither stops the registration nor breaks the clients.
 /// </summary>
 /// <remarks>
 /// The Monolith runs the services of every host in one process, so it calls <c>AddDocumentServiceHttpClient</c> once
@@ -111,9 +112,56 @@ public sealed class DocumentServiceHttpClientTests : IDisposable
         HttpHandlerProbe.ResilienceHandlers(provider, DocumentService.GetHttpClientName(sslVerification: false)).Should().Be(1);
     }
 
+    /// <summary>
+    /// The timeout bounds one attempt: an attempt that hangs is cancelled and the next one is sent.
+    /// </summary>
+    /// <remarks>
+    /// The pipeline used to add the timeout before the retry. The first strategy added is the outer one, so the
+    /// timeout bounded all attempts together, and an attempt that hung ended the request with
+    /// <c>TimeoutRejectedException</c> at the configured timeout, with no retry.
+    /// </remarks>
+    [Fact]
+    public async Task HangingAttempt_IsCancelledByTheTimeoutAndRetried()
+    {
+        var name = DocumentService.GetHttpClientName(sslVerification: true);
+        var primary = new FirstAttemptHangsHandler();
+        var services = new ServiceCollection();
+
+        services.AddDocumentServiceHttpClient(Configuration(timeout: "1000", @try: "1"));
+        services.AddHttpClient(name).ConfigurePrimaryHttpMessageHandler(() => primary);
+
+        using var provider = services.BuildServiceProvider();
+        var client = provider.GetRequiredService<IHttpClientFactory>().CreateClient(name);
+
+        using var response = await client.GetAsync("http://docservice.test/", TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        primary.Attempts.Should().Be(2);
+    }
+
     public void Dispose()
     {
         _provider.Dispose();
+    }
+
+    /// <summary>
+    /// Hangs on the first request until it is cancelled, and answers 200 to every later one.
+    /// </summary>
+    private sealed class FirstAttemptHangsHandler : HttpMessageHandler
+    {
+        private int _attempts;
+
+        public int Attempts => _attempts;
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            if (Interlocked.Increment(ref _attempts) == 1)
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30), cancellationToken);
+            }
+
+            return new HttpResponseMessage(HttpStatusCode.OK);
+        }
     }
 
     private static IConfiguration Configuration(string? timeout, string? @try)

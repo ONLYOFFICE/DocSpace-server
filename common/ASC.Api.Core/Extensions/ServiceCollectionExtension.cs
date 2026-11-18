@@ -470,8 +470,9 @@ public static class ServiceCollectionExtension
         /// Registers the default HTTP client and the standard named clients that shared code asks for by name.
         /// </summary>
         /// <remarks>
-        /// Every host calls this: <see cref="BaseStartup"/> and <see cref="BaseWorkerStartup"/>, and the two hosts that
-        /// derive from neither, ApiSystem and Site.Core, because the same code runs in all of them.
+        /// Every service host calls this: <see cref="BaseStartup"/> and <see cref="BaseWorkerStartup"/>, and ApiSystem
+        /// and Site.Core, which derive from neither, because the same code runs in all of them. Two hosts do not:
+        /// Web.HealthChecks.UI, which references no DocSpace project, and the ASC.Migration.Runner tool.
         /// <see cref="IHttpClientFactory"/> does not refuse a name that was never registered.
         /// It returns a client with the default handler, which keeps cookies. Every client created for that name
         /// within one handler's lifetime (two minutes by default) shares one cookie container, for as long as those

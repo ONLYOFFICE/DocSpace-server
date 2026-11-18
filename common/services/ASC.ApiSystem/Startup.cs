@@ -67,9 +67,10 @@ public class Startup
         services.AddCustomHealthCheck(_configuration);
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
+        // the login providers of a registration by OAuth send their requests through customHttpClientNoCookie
         services.AddStandardHttpClients();
 
-        // registration by OAuth and the license quota send requests through these clients
+        // PortalController checks the document server's license quota through DocumentServiceLicense
         services.AddDocumentServiceHttpClient(_configuration);
 
         services.AddExceptionHandler<CustomExceptionHandler>();
