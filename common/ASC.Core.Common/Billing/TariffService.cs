@@ -278,7 +278,7 @@ public class TariffService(
                 {
                     var defaultQuota = await quotaService.GetTenantQuotaAsync(Tenant.DefaultTenant);
 
-                    var quota = new TenantQuota(defaultQuota) { Name = "start_trial", Trial = true, TenantId = -1000 };
+                    var quota = LicenseReader.CreateStartTrialQuota(defaultQuota);
 
                     await quotaService.SaveTenantQuotaAsync(quota);
 
@@ -1078,7 +1078,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenant);
 
-            await NotifyWebSocketAsync(currentTariff, tariffInfo);
+            await NotifyTariffChangedAsync(tenant, currentTariff, tariffInfo);
         }
 
         return inserted;
@@ -1160,7 +1160,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenant);
 
-            await NotifyWebSocketAsync(currentTariff, tariffInfo);
+            await NotifyTariffChangedAsync(tenant, currentTariff, tariffInfo);
 
             return true;
         }
@@ -1178,6 +1178,8 @@ public class TariffService(
         await coreDbContext.DeleteTariffs(tenant);
 
         await ClearCacheAsync(tenant);
+
+        await NotifyTariffChangedAsync(tenant, null, null);
     }
 
 
@@ -1369,39 +1371,119 @@ public class TariffService(
         }
     }
 
-    private async Task NotifyWebSocketAsync(Tariff currenTariff, Tariff newTariff)
+    /// <summary>
+    /// Tells the open clients that the tariff changed, so a payment page or a trial banner reads it again, and sends the
+    /// quota values the tariff sets (storage, paid users, rooms, and the free flag when it changed). The tariff of the
+    /// default tenant is the one tariff of a self-hosted installation, shared by all its portals, so each of them is
+    /// told. Best effort: the tariff is already written, and a failure here is only logged; a portal that cannot be told
+    /// does not keep the others from being told.
+    /// </summary>
+    /// <remarks>
+    /// Nothing here reads the tariff or the current tenant: the write may run under the lock of the tariff read, which a
+    /// read here would wait on, and a background job that writes the tariff has no current tenant.
+    /// </remarks>
+    /// <param name="tenant">The tenant whose tariff was written.</param>
+    /// <param name="currentTariff">The tariff before the write, if there was one.</param>
+    /// <param name="tariff">The tariff as it is stored now; <c>null</c> when it was deleted.</param>
+    private async Task NotifyTariffChangedAsync(int tenant, Tariff currentTariff, Tariff tariff)
     {
-        var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
-
-        var updatedQuota = await GetTenantQuotaFromTariffAsync(newTariff);
-
-        var maxTotalSize = updatedQuota.MaxTotalSize;
-        var maxTotalSizeFeatureName = updatedQuota.GetFeature<MaxTotalSizeFeature>().Name;
-
-        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxTotalSizeFeatureName, maxTotalSize);
-
-        var maxPaidUsers = updatedQuota.CountRoomAdmin;
-        var maxPaidUsersFeatureName = updatedQuota.GetFeature<CountPaidUserFeature>().Name;
-
-        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxPaidUsersFeatureName, maxPaidUsers);
-
-        var maxRoomCount = updatedQuota.CountRoom == int.MaxValue ? -1 : updatedQuota.CountRoom;
-        var maxRoomCountFeatureName = updatedQuota.GetFeature<CountRoomFeature>().Name;
-
-        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxRoomCountFeatureName, maxRoomCount);
-
-        if (currenTariff != null)
+        // The default tariff of a hosted installation belongs to no portal
+        if (tenant == Tenant.DefaultTenant && !coreBaseSettings.Standalone)
         {
-            var currentQuota = await GetTenantQuotaFromTariffAsync(currenTariff);
+            return;
+        }
 
-            var free = updatedQuota.Free;
-            if (currentQuota.Free != free)
+        QuotaSocketManager quotaSocketManager;
+        TariffState state;
+        List<int> portals;
+
+        try
+        {
+            quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+
+            // The state only picks the queue of the socket service. It is calculated on a copy, which leaves the
+            // caller's tariff as it is. A deleted tariff has no state until the next read creates one, so the state of
+            // the default tariff is used
+            state = tariff == null ? TariffState.Paid : (await CalculateTariffAsync(tenant, CopyForState(tariff))).State;
+
+            portals = tenant != Tenant.DefaultTenant
+                ? [tenant]
+                : (await tenantService.GetTenantsAsync(default(DateTime))).Select(t => t.Id).ToList();
+        }
+        catch (Exception ex)
+        {
+            logger.WarningTariffChangedNotification(tenant, ex);
+            return;
+        }
+
+        // The quota values are a second effect of their own: a quota that cannot be read does not keep the clients from
+        // being told that the tariff changed. A deleted tariff has no quota until the next read creates one
+        List<(string Feature, object Value)> features = [];
+        if (tariff != null)
+        {
+            try
             {
-                var freeFeatureName = updatedQuota.GetFeature<FreeFeature>().Name;
-
-                _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(freeFeatureName, free);
+                features = await GetQuotaFeaturesAsync(currentTariff, tariff);
+            }
+            catch (Exception ex)
+            {
+                logger.WarningTariffQuotaValues(tenant, ex);
             }
         }
+
+        var (failedPortals, firstFailure) = await TariffChangeNotification.SendAsync(
+            portals,
+            features,
+            portal => quotaSocketManager.ChangeTariffAsync(portal, state),
+            (portal, feature, value) => quotaSocketManager.ChangeQuotaFeatureValueAsync(portal, feature, value, state));
+
+        // The sends only queue the requests for the socket service, which logs a request it cannot deliver. What fails
+        // here is building a request (a malformed address of the socket service), the same for every portal, so one
+        // line for all of them
+        if (failedPortals > 0)
+        {
+            logger.WarningTariffChangedNotificationPortals(tenant, failedPortals, firstFailure);
+        }
+
+        static Tariff CopyForState(Tariff tariff)
+        {
+            return new Tariff
+            {
+                Id = tariff.Id,
+                DueDate = tariff.DueDate,
+                DelayDueDate = tariff.DelayDueDate,
+                LicenseDate = tariff.LicenseDate,
+                CustomerId = tariff.CustomerId,
+                Quotas = [.. tariff.Quotas]
+            };
+        }
+    }
+
+    /// <summary>
+    /// The quota values the clients show from the tariff: storage, paid users and rooms always, the free flag only when
+    /// it differs from the tariff before the write.
+    /// </summary>
+    private async Task<List<(string Feature, object Value)>> GetQuotaFeaturesAsync(Tariff currentTariff, Tariff tariff)
+    {
+        var updatedQuota = await GetTenantQuotaFromTariffAsync(tariff);
+
+        List<(string Feature, object Value)> features =
+        [
+            (updatedQuota.GetFeature<MaxTotalSizeFeature>().Name, updatedQuota.MaxTotalSize),
+            (updatedQuota.GetFeature<CountPaidUserFeature>().Name, updatedQuota.CountRoomAdmin),
+            (updatedQuota.GetFeature<CountRoomFeature>().Name, updatedQuota.CountRoom == int.MaxValue ? -1 : updatedQuota.CountRoom)
+        ];
+
+        if (currentTariff != null)
+        {
+            var currentQuota = await GetTenantQuotaFromTariffAsync(currentTariff);
+            if (currentQuota.Free != updatedQuota.Free)
+            {
+                features.Add((updatedQuota.GetFeature<FreeFeature>().Name, updatedQuota.Free));
+            }
+        }
+
+        return features;
     }
 
     private async Task<TenantQuota> GetTenantQuotaFromTariffAsync(Tariff tariff)

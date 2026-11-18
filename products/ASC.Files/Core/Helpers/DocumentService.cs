@@ -425,10 +425,18 @@ public static class DocumentService
             };
         }
 
+        return ReadCommandResponse(dataResponse);
+    }
+
+    /// <summary>
+    /// Reads the editing service's answer to a command; an answer that cannot be read comes back as
+    /// <see cref="CommandResponse.ErrorTypes.ParseError"/> carrying the content.
+    /// </summary>
+    public static CommandResponse ReadCommandResponse(string dataResponse)
+    {
         try
         {
-            var commandResponse = JsonSerializer.Deserialize<CommandResponse>(dataResponse, _commonSettings);
-            return commandResponse;
+            return JsonSerializer.Deserialize<CommandResponse>(dataResponse, _commonSettings);
         }
         catch (Exception ex)
         {

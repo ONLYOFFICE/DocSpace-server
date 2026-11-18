@@ -1528,24 +1528,37 @@ internal class FolderDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var toUpdate = await filesDbContext.FolderForUpdateAsync(tenantId, folder.Id);
+        var toUpdate = await filesDbContext.FolderWithSettingsAsync(tenantId, folder.Id);
 
         if (toUpdate.FolderType.IsRoom())
         {
-            toUpdate.Settings = new DbRoomSettings
+            var newQuota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue;
+
+            // only the quota changes: rebuilding the row from the domain object reset the settings it does not
+            // copy (the form room's SendFormToExternalDB and SaveFormAsXLSX)
+            if (toUpdate.Settings is not null)
             {
-                RoomId = toUpdate.Id,
-                TenantId = tenantId,
-                Private = folder.SettingsPrivate,
-                HasLogo = folder.SettingsHasLogo,
-                Color = folder.SettingsColor,
-                Cover = folder.SettingsCover,
-                Indexing = folder.SettingsIndexing,
-                DenyDownload = folder.SettingsDenyDownload,
-                Watermark = folder.SettingsWatermark.Map(),
-                Quota = quota >= TenantEntityQuotaSettings.NoQuota ? quota : TenantEntityQuotaSettings.DefaultQuotaValue,
-                Lifetime = folder.SettingsLifetime.Map(),
-            };
+                toUpdate.Settings.Quota = newQuota;
+            }
+            else
+            {
+                toUpdate.Settings = new DbRoomSettings
+                {
+                    RoomId = toUpdate.Id,
+                    TenantId = tenantId,
+                    Private = folder.SettingsPrivate,
+                    HasLogo = folder.SettingsHasLogo,
+                    Color = folder.SettingsColor,
+                    Cover = folder.SettingsCover,
+                    Indexing = folder.SettingsIndexing,
+                    DenyDownload = folder.SettingsDenyDownload,
+                    Watermark = folder.SettingsWatermark.Map(),
+                    Quota = newQuota,
+                    Lifetime = folder.SettingsLifetime.Map(),
+                    SendFormToExternalDB = folder.SettingsSendFormToExternalDB,
+                    SaveFormAsXLSX = folder.SettingsSaveFormAsXLSX
+                };
+            }
         }
 
         filesDbContext.Update(toUpdate);

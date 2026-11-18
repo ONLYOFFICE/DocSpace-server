@@ -36,4 +36,13 @@ internal static partial class LicenseReaderLogger
 {
     [LoggerMessage(LogLevel.Debug, "License not found: {message}")]
     public static partial void DebugLicenseNotFound(this ILogger<LicenseReader> logger, string message);
+
+    [LoggerMessage(LogLevel.Information, "The installation's trial tariff was asked to end on {dueDate:yyyy-MM-dd}, following the editing service's trial")]
+    public static partial void InfoDocsTrialSaved(this ILogger<LicenseReader> logger, DateTime dueDate);
+
+    [LoggerMessage(LogLevel.Information, "The editing service trial is not written: a license file is on disk")]
+    public static partial void InfoDocsTrialSkippedLicenseFile(this ILogger<LicenseReader> logger);
+
+    [LoggerMessage(LogLevel.Information, "The editing service trial is not written: the license quota in force was written from a license file ({quotaName})")]
+    public static partial void InfoDocsTrialSkippedLicenseQuota(this ILogger<LicenseReader> logger, string quotaName);
 }

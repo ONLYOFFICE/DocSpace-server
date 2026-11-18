@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Gabim në fillimin e redaktimit të skedarit</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>Nuk ka hapësirë të lirë të mjaftueshme në hapësirën ruajtëse të palës së tretë të lidhur. Lironi hapësirë në të dhe provoni përsëri.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Ju nuk mund të modifikoni dhomat e arkivuara</value>
   </data>
