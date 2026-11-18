@@ -104,7 +104,8 @@ public class QuotaSocketManager(
         await MakeRequest("change-tariff", new { room = $"{tenantId}-quota" }, tariffState);
     }
 
-    public async Task TopUpWallet(bool auto)
+    // virtual so that a unit test of the wallet top-up can record the event
+    public virtual async Task TopUpWallet(bool auto)
     {
         var room = GetQuotaRoom();
 

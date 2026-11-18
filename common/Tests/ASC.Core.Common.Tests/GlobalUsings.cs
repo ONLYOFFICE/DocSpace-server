@@ -33,6 +33,7 @@
 
 global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
+global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.NetworkInformation;
@@ -53,6 +54,7 @@ global using ASC.Common.Threading.DistributedLock.InMemoryLock;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core.Billing;
+global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Data;
 global using ASC.Core.Tenants;
@@ -86,6 +88,7 @@ global using Microsoft.Extensions.Logging.Abstractions;
 global using Microsoft.Extensions.Options;
 
 global using Polly;
+global using Polly.Registry;
 global using Polly.Retry;
 
 global using WireMock;

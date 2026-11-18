@@ -61,6 +61,24 @@ NOT_A_REVIEW_CRITERION = {".claude/rules/csharp-lsp.md"}
 LICENSE_MARKS = ("Copyright (C) Ascensio System SIA", "(c) Copyright Ascensio System SIA", "SPDX-License-Identifier: AGPL")
 
 
+def tooling_applies(path: str, ref: str, branch_paths: list[str]) -> bool:
+    """Whether a rule or review-tooling file, as `ref` holds it, applies to a branch that changes `branch_paths`:
+    a rule whose `paths:` match a file of the branch or that has none, fixing-findings.md always, this skill and its
+    scan, prove-red.sh, and the spec rules when the branch touches openspec/."""
+    if path in NOT_A_REVIEW_CRITERION:
+        return False
+    if path in ALWAYS_APPLIES:
+        return True
+    if path.startswith(".claude/rules/") and path.endswith(".md"):
+        text = (git_bytes("show", f"{ref}:{path}") or b"").decode("utf-8", "replace")
+        m = re.match(r"---\s*\n(.*?)\n---", text, re.S)
+        globs = [glob_to_regex(g) for g in re.findall(r'-\s*"([^"]+)"', m.group(1))] if m else []
+        return not text or not globs or any(g.match(p) for g in globs for p in branch_paths)
+    if path == "openspec/config.yaml":
+        return any(p.startswith("openspec/") for p in branch_paths)
+    return path.startswith(REVIEW_TOOLING)
+
+
 def fail(message: str) -> None:
     """Exit with 2, so that --gate's 1 always means a hard failure and never a scan that could not run."""
     print(message, file=sys.stderr)
@@ -980,33 +998,54 @@ def main() -> None:
     # The reviewer judges by the base's rules and skill (SKILL.md §1). What the base changed in them since the
     # merge-base, and what of that applies to this branch: a rule whose `paths:` match a file of the branch (or
     # that has none), this skill and its scan, prove-red.sh, and the spec rules when the branch touches openspec/.
-    changed_tooling = git("diff", "--name-only", merge_base, base, "--", *REVIEW_TOOLING).splitlines()
     branch_paths = [p for _, p in files]
     relevant = []
-    for t in changed_tooling:
+    for t in git("diff", "--name-only", merge_base, base, "--", *REVIEW_TOOLING).splitlines():
         # The branch already has the base's version (a cherry-pick, the same edit): nothing is missing.
         if git("rev-parse", "-q", "--verify", f"{base}:{t}", check=False).strip() == \
                 git("rev-parse", "-q", "--verify", f"{view}:{t}", check=False).strip():
             continue
-        if t in NOT_A_REVIEW_CRITERION:
-            continue
-        if t in ALWAYS_APPLIES:
-            relevant.append(t)
-        elif t.startswith(".claude/rules/") and t.endswith(".md"):
-            text = (git_bytes("show", f"{base}:{t}") or b"").decode("utf-8", "replace")
-            m = re.match(r"---\s*\n(.*?)\n---", text, re.S)
-            globs = [glob_to_regex(g) for g in re.findall(r'-\s*"([^"]+)"', m.group(1))] if m else []
-            if not text or not globs or any(g.match(p) for g in globs for p in branch_paths):
-                relevant.append(t)
-        elif t == "openspec/config.yaml":
-            if any(p.startswith("openspec/") for p in branch_paths):
-                relevant.append(t)
-        else:
+        if tooling_applies(t, base, branch_paths):
             relevant.append(t)
     if relevant:
         print(f"  !! the base changed rules or review tooling that apply to this branch since the merge-base - bring "
               f"the base in before a hand-over check; judge by the base's rules (SKILL.md §1): {', '.join(relevant)}")
         GATE.append(f"the base changed rules or review tooling that apply to this branch: {', '.join(relevant)}")
+    print()
+
+    # A merge of the base that brought rules or review tooling into the branch: a check of the branch made before it
+    # ran on the older copy and cannot have seen what the newer one checks (SKILL.md §1 "Earlier checks of the
+    # branch", fixing-findings.md §6 "The base first"). Not a gate: the author may have run what changed since.
+    print("## Review tooling brought in by the branch (SKILL.md §1 \"Earlier checks of the branch\")")
+    tooling_merges = 0
+    for line in git("log", "--merges", "--first-parent", "--format=%H %ad", "--date=short",
+                    f"{merge_base}..{a.head}").splitlines():
+        sha, date = line.split(" ", 1)
+        brought = [t for t in git("diff", "--name-only", f"{sha}^1", sha, "--", *REVIEW_TOOLING).splitlines()
+                   if tooling_applies(t, sha, branch_paths)]
+        if not brought:
+            continue
+        tooling_merges += 1
+        # The branch's own commits only: base commits a later merge brought in are ancestors of the merge-base.
+        before = int(git("rev-list", "--count", "--no-merges", f"{sha}^1", f"^{merge_base}").strip())
+        after = git("log", "--oneline", "--no-merges", a.head, f"^{sha}", f"^{merge_base}").splitlines()
+        shown = ", ".join(brought[:8]) + (f" (+{len(brought) - 8})" if len(brought) > 8 else "")
+        print(f"  merge {sha[:10]} ({date}): {shown}")
+        print(f"    commits of the branch: {before} before it, {len(after)} after it"
+              + (f": {', '.join(c.split(' ', 1)[0] for c in after[:12])}" + (" ..." if len(after) > 12 else "")
+                 if after else ""))
+    if tooling_merges:
+        print("  a check of the branch made before one of these merges ran on the older copy: what the merge changed "
+              "runs over the whole branch (fixing-findings.md §6 \"The base first\"); the commits after the newest "
+              "merge are checked by the next check only")
+    else:
+        print("  none")
+    # The copy of the rules and the skill a review ran with: a saved review records it (SKILL.md §8), so that a later
+    # reader can tell a check made on an older copy.
+    stamp = git("log", "-1", "--format=%H %ad", "--date=short", view, "--", *REVIEW_TOOLING).strip()
+    if a.worktree and stamp.startswith(view):
+        stamp = "the working tree (uncommitted changes)"
+    print(f"  tooling of the scanned tree: last changed in {stamp[:10] + stamp[40:] if len(stamp) > 40 else stamp or 'none'}")
     print()
 
     # --- line checks ---------------------------------------------------------------------------

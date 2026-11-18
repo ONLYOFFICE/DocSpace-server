@@ -56,7 +56,7 @@ paths around it. Before a fix is handed back:
      reviewer: the next check is theirs.
    - **The hand-over check again, instead of §7:** when, since the last hand-over check, the branch
      gained a new kind of state or a new artifact (a cache, a lock, a fallback, a new class, an
-     OpenSpec change) in a round other than the own batch of a self-review or a hand-over check, whose
+     OpenSpec change, a refactoring that moves or rewrites code) in a round other than the own batch of a self-review or a hand-over check, whose
      §7 reads the new artifact whole: §7 reads only the round's diff. Seen in review: one
      self-review ran before four fix rounds and a spec change; about 14 of the 20 later findings sat in
      that later code, and the fresh full pass at the end found 12 after a re-check that had found 1.
@@ -67,7 +67,16 @@ paths around it. Before a fix is handed back:
      changed rule over the branch; for a changed skill, every lens, matrix or step whose section the
      base changed, run over the whole branch (a lens S the base added means a pass of S); the scan
      re-run for a changed scan; §3 S for changed spec rules; and §7 on the merge's own conflict
-     resolutions (`git show --remerge-diff <merge>`). Then the gate and a new block.
+     resolutions (`git show --remerge-diff <merge>`). Then the gate and a new block. Until that has
+     run, no earlier check covers the branch for what the merge changed; the scan lists such merges
+     with the commits before and after each ("Review tooling brought in by the branch"), and the
+     reviewer, given earlier checks and no block, counts what they missed by that cause
+     (`review-branch` §4 "missed by earlier checks").
+   - **Every commit before the hand-over is in a check.** A commit made after the last check (a
+     refactoring after the last re-check, a small fix after the hand-over check) is in none of them:
+     the branch goes to review with a check that covers its final tree, or with no block and nothing
+     claimed. Seen in review: a branch was handed over with a re-check on a sha three commits back,
+     one of them a 1 300-line refactoring; four of the next review's 13 items were in those commits.
 
 7. **Reject a finding only with the same evidence a fix needs.** Read the code for every caller, entry
    kind and path the finding names, not for the one you know best. An argument that covers part of the
