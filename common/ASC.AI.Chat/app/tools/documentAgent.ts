@@ -157,7 +157,12 @@ const TOOL: TMCPItem = {
     required: ["task"],
   },
   serverType: DOCUMENT_AGENT_TYPE,
-  requireApproval: true,
+  // Its server type is approval-required (aiController's systemServerTypes),
+  // so under the user's "ask" permission mode the call still waits for the
+  // dialog. Under "auto" it runs without one, as image generation does: the
+  // agent never changes an existing file, every result is a new one. The
+  // destructive MCP tools keep asking there.
+  requireApproval: false,
   enabled: true,
 };
 

@@ -442,7 +442,8 @@ const engine = new AIEngine({
   // formAnalysisSubAgent adds the `analyze_form` delegating tool; its serverType is silent
   // (absent from systemServerTypes), so it runs without UI approval.
   // documentAgentTools adds the `document_agent` delegating tool when an agent is configured;
-  // its serverType is approval-required, a delegated task may run for minutes.
+  // its serverType is approval-required, a delegated task may run for minutes. The tool itself
+  // asks for no approval (it only creates files), so only the "ask" permission mode stops it.
   toolsAdapter: composeToolsAdapters(
     systemToolsSource,
     customToolsSource,
