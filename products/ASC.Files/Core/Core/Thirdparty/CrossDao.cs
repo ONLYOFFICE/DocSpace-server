@@ -173,7 +173,7 @@ internal class CrossDao(IServiceProvider serviceProvider, SetupInfo setupInfo, F
             }
             catch (Exception ex)
             {
-                copyException = ex;
+                copyException = ThirdPartyStorageQuota.KeepReason(copyException, ex);
             }
         }
 
@@ -189,7 +189,7 @@ internal class CrossDao(IServiceProvider serviceProvider, SetupInfo setupInfo, F
             }
             catch (Exception ex)
             {
-                copyException = ex;
+                copyException = ThirdPartyStorageQuota.KeepReason(copyException, ex);
             }
         }
 

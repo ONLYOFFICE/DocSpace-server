@@ -211,6 +211,7 @@ global using ASC.Webhooks.Core;
 global using Box.V2;
 global using Box.V2.Auth;
 global using Box.V2.Config;
+global using Box.V2.Exceptions;
 global using Box.V2.Models;
 
 global using DocuSign.eSign.Api;
@@ -306,6 +307,7 @@ global using JsonTokenType = System.Text.Json.JsonTokenType;
 global using License = ASC.Core.Billing.License;
 global using Location = ASC.Files.Core.Core.Entries.Location;
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
+global using NewtonsoftJsonException = Newtonsoft.Json.JsonException;
 global using Profile = ASC.AI.Integration.Profiles.Profile;
 global using ReportType = ASC.Files.Core.Services.DocumentBuilderService.ReportType;
 global using SecurityContext = ASC.Core.SecurityContext;

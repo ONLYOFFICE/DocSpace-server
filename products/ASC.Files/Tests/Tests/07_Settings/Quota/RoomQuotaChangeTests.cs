@@ -140,4 +140,55 @@ public class RoomQuotaChangeTests(
         result[0].QuotaLimit.Should().Be(QuotaMinimalBytes);
         result[0].IsCustomQuota.Should().BeTrue();
     }
+
+    /// <summary>
+    /// Changing the quota rebuilt the room settings from the folder object, which did not carry the form
+    /// settings, so setting, disabling or resetting the quota of a form filling room switched off
+    /// <c>sendFormToExternalDB</c> and <c>saveFormAsXLSX</c>. Fixed by changing only the quota.
+    /// </summary>
+    [Theory]
+    [InlineData((long)QuotaMinimalBytes)]
+    [InlineData(-1L)]
+    [InlineData(-2L)]
+    public async Task UpdateRoomsQuota_FillingFormsRoom_KeepsFormSettings(long quota)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
+        await EnableRoomQuota();
+
+        var room = await CreateFillingFormsRoom("Autotest Quota Form Settings " + Guid.NewGuid().ToString()[..8]);
+
+        if (quota == -2L)
+        {
+            // a new room already follows the default quota, so the reset would change nothing without a custom one
+            await _quotaApi.UpdateRoomsQuotaAsync(
+                new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
+                TestContext.Current.CancellationToken);
+        }
+
+        await _roomsApi.UpdateRoomAsync(
+            room.Id,
+            new UpdateRoomRequest(sendFormToExternalDB: true, saveFormAsXLSX: true),
+            TestContext.Current.CancellationToken);
+
+        // Act
+        if (quota == -2L)
+        {
+            await _quotaApi.ResetRoomQuotaAsync(
+                new UpdateRoomsRoomIdsRequestDto([new(room.Id)]),
+                TestContext.Current.CancellationToken);
+        }
+        else
+        {
+            await _quotaApi.UpdateRoomsQuotaAsync(
+                new UpdateRoomsQuotaRequestDto([new(room.Id)], quota),
+                TestContext.Current.CancellationToken);
+        }
+
+        // Assert
+        var info = (await _roomsApi.GetRoomInfoAsync(room.Id, TestContext.Current.CancellationToken)).Response;
+        info.SendFormToExternalDB.Should().BeTrue();
+        info.SaveFormAsXLSX.Should().BeTrue();
+    }
 }

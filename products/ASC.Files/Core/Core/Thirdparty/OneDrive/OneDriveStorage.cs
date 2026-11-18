@@ -36,7 +36,7 @@ using Folder = Microsoft.OneDrive.Sdk.Folder;
 namespace ASC.Files.Thirdparty.OneDrive;
 
 [Transient(typeof(IThirdPartyStorage<Item, Item, Item>))]
-internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper)
+internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHelper oAuth20TokenHelper, ILogger<OneDriveStorage> logger)
     : IThirdPartyStorage<Item, Item, Item>
 {
     private OAuth20Token _token;
@@ -153,9 +153,9 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
             Name = title
         };
 
-        return await GetItemRequest(parentId).Children
+        return await WriteAsync(() => GetItemRequest(parentId).Children
             .Request()
-            .AddAsync(newFolderItem);
+            .AddAsync(newFolderItem));
     }
 
 
@@ -170,8 +170,8 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         var parentPath = parent.ParentReference.Path == null ? "" : parent.ParentReference.Path.Replace(RootPath, string.Empty) + $"/{parent.Name}";
         var path = $"{parentPath}/{title}";
 
-        return await OnedriveClient.Drive.Root.ItemWithPath(path)
-            .Content.Request().PutAsync<Item>(fileStream);
+        return await WriteAsync(() => OnedriveClient.Drive.Root.ItemWithPath(path)
+            .Content.Request().PutAsync<Item>(fileStream));
     }
 
     public async Task DeleteItemAsync(Item item)
@@ -185,35 +185,99 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
     {
         var updateItem = new Item { ParentReference = new ItemReference { Id = toFolderId }, Name = newItemName };
 
-        return await OnedriveClient.Drive.Items[itemId]
+        return await WriteAsync(() => OnedriveClient.Drive.Items[itemId]
             .Request()
-            .UpdateAsync(updateItem);
+            .UpdateAsync(updateItem));
     }
 
     private async Task<Item> CopyItemAsync(string itemId, string newItemName, string toFolderId)
     {
-        var copyMonitor = await OnedriveClient.Drive.Items[itemId]
-            .Copy(newItemName, new ItemReference { Id = toFolderId })
-            .Request()
-            .PostAsync();
+        // OneDrive copies on its own side after it has accepted the request, and a copy that does not fit
+        // fails there: the monitor reports it as a bare generalException, with no status or code that says
+        // why. So the space is checked before the copy starts; WriteAsync still covers a refused request.
+        await ThrowIfCopyDoesNotFitAsync(itemId);
 
-        return await copyMonitor.PollForOperationCompletionAsync(null, CancellationToken.None);
+        return await WriteAsync(async () =>
+        {
+            var copyMonitor = await OnedriveClient.Drive.Items[itemId]
+                .Copy(newItemName, new ItemReference { Id = toFolderId })
+                .Request()
+                .PostAsync();
+
+            return await copyMonitor.PollForOperationCompletionAsync(null, CancellationToken.None);
+        });
     }
 
     private async Task<Item> RenameItemAsync(string itemId, string newName)
     {
         var updateItem = new Item { Name = newName };
 
-        return await OnedriveClient.Drive.Items[itemId]
+        return await WriteAsync(() => OnedriveClient.Drive.Items[itemId]
             .Request()
-            .UpdateAsync(updateItem);
+            .UpdateAsync(updateItem));
     }
 
     public async Task<Item> SaveStreamAsync(string fileId, Stream fileStream)
     {
-        return await OnedriveClient.Drive.Items[fileId].Content
+        return await WriteAsync(() => OnedriveClient.Drive.Items[fileId].Content
             .Request()
-            .PutAsync<Item>(fileStream);
+            .PutAsync<Item>(fileStream));
+    }
+
+    // OneDrive refuses a write the account has no space for with 507 / quotaLimitReached, which would
+    // otherwise reach the user as the library's raw error text; it is replaced with a readable one.
+    private static async Task<T> WriteAsync<T>(Func<Task<T>> write)
+    {
+        try
+        {
+            return await write();
+        }
+        catch (Exception ex) when (ThirdPartyStorageQuota.IsOneDrive(ex))
+        {
+            throw ThirdPartyStorageQuota.CreateException(ex);
+        }
+    }
+
+    // A copy stays in the same drive, so it needs as much free space as the item takes (a folder's size is
+    // that of everything in it). A drive that reports no quota is not checked, and neither is one whose
+    // lookup fails: that says nothing about the space, so the copy goes ahead as it did before the check.
+    // The check is not atomic: two copies started together can both pass it, and the one that does not
+    // fit then fails on OneDrive's side with the monitor's own error, as before.
+    private async Task ThrowIfCopyDoesNotFitAsync(string itemId)
+    {
+        long? size;
+        long? remaining;
+
+        try
+        {
+            size = (await GetItemAsync(itemId))?.Size;
+            remaining = size is null ? null : (await OnedriveClient.Drive.Request().GetAsync())?.Quota?.Remaining;
+        }
+        catch (Exception ex) when (ex is ServiceException or NewtonsoftJsonException)
+        {
+            // The SDK's HttpProvider turns a timeout (code "timeout") and a failed send ("generalException") into
+            // a ServiceException itself; only a 200 whose body is not JSON (a proxy's page) comes out raw, as the
+            // JsonReaderException of its Newtonsoft deserializer.
+            logger.WarningCopySpaceCheckSkipped(itemId, ex);
+
+            return;
+        }
+
+        if (!ThirdPartyStorageQuota.CopyFits(size, remaining))
+        {
+            throw ThirdPartyStorageQuota.CreateException(
+                new InvalidOperationException($"The copy of {itemId} needs {size} bytes, the drive has {remaining} left"));
+        }
+    }
+
+    // The upload session goes over plain HTTP, so the same refusal comes back as a status and a JSON body;
+    // any other failure is left to the caller as before.
+    private static void ThrowIfOutOfSpace(HttpResponseMessage response, string responseBody)
+    {
+        if ((int)response.StatusCode >= 400 && ThirdPartyStorageQuota.IsOneDriveResponse(response.StatusCode, responseBody))
+        {
+            throw ThirdPartyStorageQuota.CreateException(new HttpRequestException(responseBody, null, response.StatusCode));
+        }
     }
 
     public Task<long> GetFileSizeAsync(Item file)
@@ -256,6 +320,8 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
         using (var response = await httpClient.SendAsync(request))
         {
             var responseString = await response.Content.ReadAsStringAsync();
+            ThrowIfOutOfSpace(response, responseString);
+
             var responseJson = JObject.Parse(responseString);
             uploadSession.Location = responseJson.Value<string>("uploadUrl");
         }
@@ -287,6 +353,11 @@ internal class OneDriveStorage(IHttpClientFactory clientFactory, OAuth20TokenHel
 #pragma warning restore CA2000
 
         using var response = await httpClient.SendAsync(request);
+        if ((int)response.StatusCode >= 400)
+        {
+            ThrowIfOutOfSpace(response, await response.Content.ReadAsStringAsync());
+        }
+
         if (response.StatusCode != HttpStatusCode.Created && response.StatusCode != HttpStatusCode.OK)
         {
             oneDriveSession.BytesTransferred += chunkLength;
