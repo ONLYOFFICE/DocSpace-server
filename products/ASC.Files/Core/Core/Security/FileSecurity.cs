@@ -3596,6 +3596,16 @@ public class FileSecurity(
         return daoFactory.GetSecurityDao<int>().RemoveAiProjectMemberAsync(userId, projectId);
     }
 
+    public Task MarkAiProjectThreadsDeletedAsync(Guid userId)
+    {
+        return daoFactory.GetSecurityDao<int>().MarkAiProjectThreadsDeletedAsync(userId);
+    }
+
+    public Task MarkOwnedAiProjectThreadsDeletedAsync(Guid userId)
+    {
+        return daoFactory.GetSecurityDao<int>().MarkOwnedAiProjectThreadsDeletedAsync(userId);
+    }
+
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)
     {
         return (await GetUserOrderedSubjectsAsync(userId, includeAvailableLinks)).Select(r=> r.Subject).ToList();

@@ -81,6 +81,7 @@ public sealed class PortalClients : PortalClientsBase
     // People service
     public ProfilesApi ProfilesApi { get; }
     public UserStatusApi UserStatusApi { get; }
+    public UserDataApi UserDataApi { get; }
 
     // Web.Api: the portal-wide AI switch (settings/ai-access)
     public CommonSettingsApi CommonSettingsApi { get; }
@@ -127,6 +128,7 @@ public sealed class PortalClients : PortalClientsBase
         var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };
         ProfilesApi = new ProfilesApi(PeopleHttpClient, peopleConfig);
         UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
+        UserDataApi = new UserDataApi(PeopleHttpClient, peopleConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);

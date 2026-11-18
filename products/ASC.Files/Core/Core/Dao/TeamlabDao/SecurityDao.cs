@@ -90,6 +90,24 @@ internal abstract class SecurityBaseDao<T>(
         });
     }
 
+    public async Task MarkAiProjectThreadsDeletedAsync(Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var deletedOn = ThreadsStorage.TruncateToMilliseconds(DateTime.UtcNow);
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.MarkAiProjectThreadsDeletedAsync(tenantId, userId, deletedOn);
+    }
+
+    public async Task MarkOwnedAiProjectThreadsDeletedAsync(Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var deletedOn = ThreadsStorage.TruncateToMilliseconds(DateTime.UtcNow);
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await filesDbContext.MarkOwnedAiProjectThreadsDeletedAsync(tenantId, userId, deletedOn);
+    }
+
     public async Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord<T>> records)
     {
         var mapping = daoFactory.GetMapping<T>();

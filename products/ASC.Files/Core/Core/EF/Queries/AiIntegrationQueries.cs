@@ -83,6 +83,27 @@ public partial class FilesDbContext
         return AiIntegrationQueries.MarkProjectMemberThreadsDeletedAsync(this, tenantId, projectId, userId, deletedOn);
     }
 
+    public Task<int> MarkAiProjectThreadsDeletedAsync(int tenantId, Guid userId, DateTime deletedOn)
+    {
+        return Threads
+            .Where(x => x.TenantId == tenantId && x.CreatedBy == userId && x.DeletedOn == null &&
+                        Folders.Any(f => f.TenantId == tenantId &&
+                                         f.Id == x.EntryId &&
+                                         f.FolderType == FolderType.AiProjectRoom))
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
+    }
+
+    public Task<int> MarkOwnedAiProjectThreadsDeletedAsync(int tenantId, Guid userId, DateTime deletedOn)
+    {
+        return Threads
+            .Where(x => x.TenantId == tenantId && x.CreatedBy == userId && x.DeletedOn == null &&
+                        Folders.Any(f => f.TenantId == tenantId &&
+                                         f.Id == x.EntryId &&
+                                         f.FolderType == FolderType.AiProjectRoom &&
+                                         f.CreateBy == userId))
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
+    }
+
     [PreCompileQuery]
     public IAsyncEnumerable<AiAgentChatBinding> AiAgentChatBindingsAsync(int tenantId)
     {

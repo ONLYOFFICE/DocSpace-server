@@ -330,9 +330,21 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public IAsyncEnumerable<FolderReassignInfo> GetRoomsFoldersReassignInfoAsync(int tenantId, Guid ownerId)
+    public IAsyncEnumerable<FolderReassignInfo> GetRoomsFoldersReassignInfoAsync(int tenantId, Guid ownerId, IEnumerable<int> exceptFolderIds)
     {
-        return FolderQueries.GetRoomsFoldersReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes);
+        return FolderQueries.GetRoomsFoldersReassignInfoAsync(this, tenantId, ownerId, DocSpaceHelper.RoomTypes, exceptFolderIds);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> AiProjectIdsAsync(int tenantId)
+    {
+        return FolderQueries.AiProjectIdsAsync(this, tenantId);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> AiProjectChildFolderIdsAsync(int tenantId)
+    {
+        return FolderQueries.AiProjectChildFolderIdsAsync(this, tenantId);
     }
 
     [PreCompileQuery]
@@ -840,14 +852,30 @@ static file class FolderQueries
                 .Where(r => r.TenantId == tenantId && roomTypes.Contains(r.FolderType) && r.CreateBy == oldOwnerId)
                 .ExecuteUpdateAsync(p => p.SetProperty(f => f.CreateBy, newOwnerId));
 
-    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =
+    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> AiProjectIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, Guid ownerId, IEnumerable<FolderType> roomTypes) =>
+            (FilesDbContext ctx, int tenantId) =>
+                ctx.Folders
+                    .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.AiProjectRoom)
+                    .Select(f => f.Id));
+
+    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<int>> AiProjectChildFolderIdsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId) =>
+                ctx.Folders
+                    .Where(f => f.TenantId == tenantId &&
+                                ctx.Folders.Any(p => p.TenantId == tenantId && p.Id == f.ParentId && p.FolderType == FolderType.AiProjectRoom))
+                    .Select(f => f.Id));
+
+    public static readonly Func<FilesDbContext, int, Guid, IEnumerable<FolderType>, IEnumerable<int>, IAsyncEnumerable<FolderReassignInfo>> GetRoomsFoldersReassignInfoAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, Guid ownerId, IEnumerable<FolderType> roomTypes, IEnumerable<int> exceptFolderIds) =>
                 ctx.Folders
                     .Where(f =>
                         f.TenantId == tenantId &&
                         f.CreateBy == ownerId &&
-                        (f.FolderType == FolderType.DEFAULT || f.FolderType == FolderType.Ai))
+                        (f.FolderType == FolderType.DEFAULT || f.FolderType == FolderType.Ai) &&
+                        ctx.Tree.FirstOrDefault(t => t.FolderId == f.Id && exceptFolderIds.Contains(t.ParentId)) == null)
                     .Select(f => new FolderReassignInfo
                     {
                         FolderId = f.Id,

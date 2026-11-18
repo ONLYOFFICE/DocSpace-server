@@ -457,6 +457,15 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Owner changed (scenario) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:192` | TEST-CONFIRMED |
 | **Thread list of an AI project** |  |  |
 | Thread started in a project; thread started in a room (scenarios) | `T/ChatTests/ChatProjectThreadListTests.cs:41,62` | TEST-CONFIRMED |
+| **Deleting a profile deletes its project threads** |  |  |
+| Data of a member removed; owner of the project before the background pass (scenarios) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:43,62` | TEST-CONFIRMED |
+| Member deleted at once; owner of the project deleted (scenarios) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:79,99` | TEST-CONFIRMED |
+| Data transferred with the profile deleted (scenario) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:126` | TEST-CONFIRMED |
+| **Transferring data keeps the contents of a project with their creator** |  |  |
+| Member's data transferred to the project's owner (scenario) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:146` | TEST-CONFIRMED |
+| **Transferring a project deletes its former owner's threads** |  |  |
+| Owner's data transferred; members of the transferred project (scenarios) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:166,190` | TEST-CONFIRMED |
+| Former owner's thread in another project (scenario) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:213` | TEST-CONFIRMED |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 

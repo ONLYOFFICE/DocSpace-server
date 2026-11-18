@@ -78,10 +78,10 @@ No row of `openspec/deviations.md` is touched.
 - **Data removal and reassignment jobs** (`ASC.Data.Reassigns`): one more step after the personal data is
   deleted; in a transfer without deleting the profile, one more step before the creator of the user's folders
   is changed.
-- **Files service**: the method that removes a member from a project and marks the member's threads gains
-  the form "every project of the portal"; a second method marks the user's threads in the projects the user
-  owns; the six queries that change the creator of files and folders
-  during a removal or a transfer skip the contents of AI projects.
+- **Files service**: two new methods mark the user's threads, one in every AI project of the portal, the other
+  only in the projects the user owns; the method that removes a member from one project is unchanged. The steps that
+  change the creator of files and folders during a removal or a transfer skip the contents of AI projects
+  through their exclusion lists.
 - **AI worker**: no change; the background pass of `aiThreadsDelete` removes the files.
 - **Not in this change**: a file uploaded into a project and never sent stays there after its creator's
   profile is deleted or the project the creator owned is transferred, readable by nobody, as it stays after the

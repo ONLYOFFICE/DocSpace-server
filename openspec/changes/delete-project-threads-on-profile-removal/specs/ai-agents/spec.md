@@ -18,7 +18,7 @@ recipient of the data SHALL NOT read them.
 #### Scenario: Owner of the project before the background pass
 
 - **WHEN** the data of a disabled member with a thread in a project is removed with `startRemove` and the job completes
-- **THEN** the project's owner reading the member's artifact gets 403 until the background pass removes it, and 404 after
+- **THEN** the project's owner reading the member's artifact gets 403 or 404, never 200, and 404 after the background pass
 
 #### Scenario: Member deleted at once
 
@@ -33,7 +33,7 @@ recipient of the data SHALL NOT read them.
 #### Scenario: Data transferred with the profile deleted
 
 - **WHEN** a disabled member's data is transferred with `startReassign` and `deleteProfile` true to the project's owner, who then reads the member's artifact
-- **THEN** the read answers 403 until the background pass removes the artifact, and 404 after
+- **THEN** the read answers 403 or 404, never 200, and 404 after the background pass
 
 ### Requirement: Transferring data keeps the contents of a project with their creator
 
@@ -56,7 +56,7 @@ user gets no access to the project. Threads of other members of the project SHAL
 #### Scenario: Owner's data transferred
 
 - **WHEN** the data of a disabled room admin who owns a project and has a thread there with an artifact and a sent attachment is transferred with `startReassign` and `deleteProfile` false, and the background pass has run
-- **THEN** the project's `ownedBy` is the recipient, both files answer 404 and the project's used space equals what it was before the former owner's thread
+- **THEN** the recipient owns the project (its `createdBy`), both files answer 404 and the project's used space equals what it was before the former owner's thread
 
 #### Scenario: Members of the transferred project
 

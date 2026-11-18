@@ -1828,13 +1828,16 @@ internal class FolderDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        if (exceptFolderIds == null || !exceptFolderIds.Any())
+        var except = await filesDbContext.AiProjectChildFolderIdsAsync(tenantId).ToListAsync();
+        except.AddRange(exceptFolderIds ?? []);
+
+        if (except.Count == 0)
         {
             await filesDbContext.ReassignFoldersAsync(tenantId, oldOwnerId, newOwnerId);
         }
         else
         {
-            await filesDbContext.ReassignFoldersPartiallyAsync(tenantId, oldOwnerId, newOwnerId, exceptFolderIds);
+            await filesDbContext.ReassignFoldersPartiallyAsync(tenantId, oldOwnerId, newOwnerId, except);
         }
     }
 
@@ -1857,7 +1860,8 @@ internal class FolderDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var items = await filesDbContext.GetRoomsFoldersReassignInfoAsync(tenantId, oldOwnerId).ToListAsync();
+        var except = await filesDbContext.AiProjectChildFolderIdsAsync(tenantId).ToListAsync();
+        var items = await filesDbContext.GetRoomsFoldersReassignInfoAsync(tenantId, oldOwnerId, except).ToListAsync();
 
         foreach (var group in items.GroupBy(x => x.RoomOwnerId))
         {

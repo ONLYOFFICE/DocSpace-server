@@ -4219,6 +4219,16 @@ public class FileStorageService //: IFileStorageService
         await fileDao.ReassignRoomsFilesAsync(userFromId);
     }
 
+    public async Task DeleteAiProjectThreadsAsync(Guid userId)
+    {
+        await fileSecurity.MarkAiProjectThreadsDeletedAsync(userId);
+    }
+
+    public async Task DeleteOwnedAiProjectThreadsAsync(Guid userId)
+    {
+        await fileSecurity.MarkOwnedAiProjectThreadsDeletedAsync(userId);
+    }
+
     #endregion
 
     #region Favorites Manager
