@@ -13,11 +13,13 @@ test, code or live evidence found — flagged).
 Nearly every permission suite of the Files tests creates a *Custom* room (`CreateCustomRoom`), so it is
 evidence for `room-role-permissions`, not for this spec; such rows below are marked "(Custom-room analogue)"
 and count as CODE-ONLY: the role check is the same `FileSecurity` path for every room type, the room type
-only selects the role set (`products/ASC.Files/Core/Core/Security/FileSecurity.cs:219-227`, VDR entry of
+only selects the role set (`products/ASC.Files/Core/Core/Security/FileSecurity.cs:220-228`, VDR entry of
 `AvailableRoomAccesses`: Room manager, Content creator, Editor, Viewer, Form Filler). The theory data
 `03_Rooms/RoomAccessData.cs:57-72, 150-152` (VDR access sets) exists but has no consumer. The message
 "The role is not available for this user type" (`FilesCommonResource.resx:331`) is never asserted. Where
 the Custom-room test is cited, its line range is given for the reader who wants the assertion.
+
+Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row.
 
 Revision 2026-10-25: first verification; the spec was reshaped at the same time (the three matrices moved
 into the scenarios "VDR room management matrix", "VDR file management matrix", "VDR form workflow matrix";
@@ -34,12 +36,12 @@ Line references below were refreshed; the spec text is unchanged.
 | Claim | Source | Status |
 |---|---|---|
 | **VDR role set** | | |
-| Reviewer and Commentator → 403, member absent; Viewer, Editor, Form Filler, Content creator accepted | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:73-80, 104-114` | TEST-CONFIRMED [run: PASS] |
+| Reviewer and Commentator → 403, member absent; Viewer, Editor, Form Filler, Content creator accepted | `03_Rooms/Sharing/RoomShareAccessLevelTests.cs:75-82, 106-116` | TEST-CONFIRMED [run: PASS] |
 | Room manager accepted in a VDR (for a Room admin) | `01_Files/Update/FileUpdateTests.cs:140-182` (Arrange) | TEST-CONFIRMED [run: PASS] |
 | **VDR room management by role** | | |
 | Edit the room: owner changes indexing, deny-download, watermark, lifetime | `03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:46-168` (owner only) | TEST-CONFIRMED [run: PASS] (owner) |
 | Edit the room by role (Room manager yes, others 403) | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:59-90` (rename: Room manager 200; Content creator, Editor, Form Filler, Viewer 403, title unchanged) | TEST-CONFIRMED [run: PASS] |
-| Invite / assign / change roles / remove: Room manager yes, lower roles 403 | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:94-141` (Room manager invites with a role, changes a role, removes; every lower role 403 for all three, members unchanged); `FileSharing.cs:87-104` | TEST-CONFIRMED [run: PASS] |
+| Invite / assign / change roles / remove: Room manager yes, lower roles 403 | `03_Rooms/Permissions/VdrRoomManagementRolesTests.cs:94-141` (Room manager invites with a role, changes a role, removes; every lower role 403 for all three, members unchanged); `FileSharing.cs:88-105` | TEST-CONFIRMED [run: PASS] |
 | View member list / history / info by every role | `03_Rooms/Permissions/VdrRoomReadArchiveRolesTests.cs:57-74` (room info, `rooms/{id}/share`, `folder/{id}/log` for all five roles) | TEST-CONFIRMED [run: PASS] |
 | Archive / delete: owner only | `03_Rooms/Permissions/VdrRoomReadArchiveRolesTests.cs:78-121` (all five member roles incl. Room manager 403 for archive and delete, room stays active; the owner archives, then deletes) | TEST-CONFIRMED [run: PASS] |
 | **VDR files and folders by role** | | |
@@ -108,7 +110,7 @@ spec text is unchanged.
   (`03_Rooms/Templates/RoomFromTemplateTests.cs:76-95`); **settings accepted and ignored on third-party
   rooms** (`03_Rooms/ThirdParty/ThirdPartyRoomTests.cs:154-170`); **history entry on a deny-download
   change** (`02_Folders/History/FolderHistoryRoomSettingsTests.cs:314-332`): `room-types`.
-- **`isformpdf` of an uploaded or document-server-converted form** (`01_Files/Forms/IsFormPdfTests.cs:112-168`;
+- **`isformpdf` of an uploaded or document-server-converted form** (`01_Files/Forms/IsFormPdfTests.cs:135-191`;
   the conversion cases run since 4.1.0, the integration host has a document server): `form-filling-workflow`.
 - **Start / stop / resume of filling as a lifecycle** (`manageFormFilling`): `form-filling-workflow`; this
   spec states only who may.

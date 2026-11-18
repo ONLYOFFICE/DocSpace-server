@@ -25,6 +25,8 @@ Line numbers of the code come from the tree as of 2026-11-06.
 
 ## Requirement rows
 
+Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row.
+
 | Claim | Source | Status |
 |---|---|---|
 | **Reading another profile by ID** | | |
@@ -58,8 +60,8 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Not disabled 403 (bug 79560); unknown 404 | `P/DeleteMemberTests.cs:82,96,126` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Deleting several disabled profiles** | | |
 | Both returned with status and flags | `P/RemoveUsersTests.cs:47-62` | TEST-CONFIRMED [run: PASS] |
-| Wrong field name 400, bug 80048 (body text "Value cannot be null. (Parameter 'inDto?.UserIds')") | `P/RemoveUsersTests.cs:140-157` | TEST-CONFIRMED [run: PASS] |
-| Not disabled 403 (79560, 79876); non-admin 403; anonymous 401 | `P/RemoveUsersTests.cs:71,87,105,124` | TEST-CONFIRMED [run: PASS] (by name) |
+| Wrong field name 400, bug 80048 (body text "Value cannot be null. (Parameter 'inDto?.UserIds')") | `P/RemoveUsersTests.cs:181-198` | TEST-CONFIRMED [run: PASS] |
+| Not disabled 403 (79560, 79876); non-admin 403; anonymous 401 | `P/RemoveUsersTests.cs:71,87,105,165` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Deleted profile leaves the contact list** | | |
 | Plain and after reassignment, bug 83188 | `P/DeletedUserVisibilityTests.cs:46,61` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Disabling and re-enabling accounts** | | |
@@ -70,7 +72,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | **Activation status through a confirmation link** | | |
 | Roles Activation, EmailActivation; list must be the caller alone, else 400; welcome letter once | `User:2117-2159` | CODE-ONLY (unreachable: the confirmation key arrives only in a letter) |
 | **Who may start an email change** | | |
-| Allowed pairs | `E/EmailChangeInstructionsTests.cs:43-55,100-110` | TEST-CONFIRMED [run: PASS] |
+| Allowed pairs | `E/EmailChangeInstructionsTests.cs:43-55,124-134` | TEST-CONFIRMED [run: PASS] |
 | DocSpace admin on a Guest: 200 (the web client offers "Change email" too) | live check 2026-11-14 on the `test` stand; `products/ASC.People/Server/Api/UserController.cs:1883-1897` (only an admin target needs the Owner) | LIVE-CONFIRMED |
 | Denied pairs 403 "Access denied" | `E/EmailChangeInstructionsPermissionsTests.cs:42-73` | TEST-CONFIRMED [run: PASS] |
 | Anonymous 401 | `E/EmailChangeInstructionsPermissionsTests.cs:134` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -136,7 +138,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Peer admin 403; Guest conversion counts shared entries | `D/UserDataRulesTests.cs:45,58,74` | TEST-CONFIRMED [run: PASS] |
 | **Starting a data reassignment** | | |
 | Owner starts; active source 400; non-admin 403 | `D/ReassignStartTests.cs:43-55,77-108` | TEST-CONFIRMED [run: PASS] |
-| admin starts; anonymous 401 | `D/ReassignStartTests.cs:59,110` | TEST-CONFIRMED [run: PASS] (by name) |
+| admin starts; anonymous 401 | `D/ReassignStartTests.cs:59,180` | TEST-CONFIRMED [run: PASS] (by name) |
 | Recipient rule, Owner and self as source | `D/UserDataRulesTests.cs:108` (to User, Guest, disabled Room admin; from Owner, self) | TEST-CONFIRMED [run: PASS] |
 | **Watching a data reassignment** | | |
 | Completed, `error` empty; peer admin 403 (bug 78957) | `D/ReassignProgressTests.cs:43-58,105-125` | TEST-CONFIRMED [run: PASS] |
@@ -164,7 +166,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | 100, `isCompleted`, `error` empty | `T/UserTypeChangeTests.cs:153-162` | TEST-CONFIRMED [run: PASS] |
 | Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:44,63,82` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Cancelling a type conversion** | | |
-| Admin cancels the Owner's; Canceled; target unchanged | `T/UserTypeChangeTests.cs:188-208` | TEST-CONFIRMED [run: PASS] |
+| Admin cancels the Owner's; Canceled; target unchanged | `T/UserTypeChangeTests.cs:217-237` | TEST-CONFIRMED [run: PASS] |
 | Room admin, User, Guest 403 | `T/UserTypeProgressAndTerminatePermissionsTests.cs:101-212` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Listing third-party providers** | | |
 | No linked entry, each names a provider, env empty list | `X/ThirdPartyAuthProvidersTests.cs:48-75` | TEST-CONFIRMED [run: PASS] |
@@ -182,7 +184,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | `getGroup`: admins and Room admin yes, User and Guest 403 | `G/GroupPermissionGetGroupTests.cs:83-110` | TEST-CONFIRMED [run: PASS] |
 | `getGroupByUserId` own 403; `getGroups` matrix | `G/GroupPermissionGetByUserIdTests.cs:77,90,102,116,128,142`; `G/GroupPermissionGetGroupsListTests.cs:46,61,77` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Creating a group** | | |
-| Missing, empty names and manager; unknown manager, member; dedupe; manager-only count 1 | `G/GroupPermissionCreateTests.cs:52-115,190-197`; `G/GroupCreateTests.cs:76-84` | TEST-CONFIRMED [run: PASS] |
+| Missing, empty names and manager; unknown manager, member; dedupe; manager-only count 1 | `G/GroupPermissionCreateTests.cs:52-115,190-197`; `G/GroupCreateTests.cs:98-106` | TEST-CONFIRMED [run: PASS] |
 | Overlong (255 chars) 400 | `G/GroupPermissionCreateTests.cs:146-155` | TEST-CONFIRMED [run: PASS] |
 | Wrong types, blank name, special and unicode names | `G/GroupPermissionCreateTests.cs:119,128,137,159,170,180` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Reading a group** | | |
@@ -210,7 +212,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | Empty and null lists 400; unknown group 404 | `G/GroupPermissionSetMembersTests.cs:47,93,105,118,130` | TEST-CONFIRMED [run: PASS] (by name) |
 | Valid + unknown mix keeps the valid ones (any-valid check) | `G/GroupMembersReplaceTests.cs:235` | TEST-CONFIRMED [run: PASS] |
 | **Adding members to a group** | | |
-| All clauses, null list bug 81484 | `G/GroupMembersAddTests.cs:49-137`; `G/GroupPermissionAddMembersTests.cs:46,57,70,84` | TEST-CONFIRMED [run: PASS] (by name) |
+| All clauses, null list bug 81484 | `G/GroupMembersAddTests.cs:49-153`; `G/GroupPermissionAddMembersTests.cs:46,57,70,84` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Removing members from a group** | | |
 | null `members` unchanged (bug 81509); mixed malformed: status below 500, unchanged | `G/GroupPermissionRemoveMembersTests.cs:141-150,190-207` | TEST-CONFIRMED [run: PASS] |
 | Rest | `G/GroupMembersRemoveTests.cs:53-219`; `G/GroupPermissionRemoveMembersTests.cs:46,67,98,114,175` | TEST-CONFIRMED [run: PASS] (by name) |
@@ -227,7 +229,7 @@ Line numbers of the code come from the tree as of 2026-11-06.
 | All clauses | `R/GroupFileSharedTests.cs:159`; `R/GroupFolderSharedTests.cs:146-219`; `R/GroupRoomSharedTests.cs:162-272` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Who may read the group lists** | | |
 | Room admin owner of a room: group shared; admin on Owner's 403; invited Read 403; rule can edit access | `R/GroupSearchPermissionsTests.cs:43,279-292,326`; `Groups:782-785` | TEST-CONFIRMED [run: PASS] (re-cited 2026-11-14: the User file owner of the old scenario now gets only Everyone, see the revision section) |
-| Others | `R/GroupSearchPermissionsTests.cs:75,91,107,119-183,228,244,278` | TEST-CONFIRMED [run: PASS] (by name) |
+| Others | `R/GroupSearchPermissionsTests.cs:130,146,162,174-249,294,310,344` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Unknown entries in the group lists** | | |
 | Non-numeric, empty, negative | `R/GroupFileSharedTests.cs:185-197`; `R/GroupRoomSharedValidationTests.cs:55-78` | TEST-CONFIRMED [run: PASS] |
 | Others, deleted folder | `R/GroupFileSharedTests.cs:174`; `R/GroupFolderSharedTests.cs:235-261`; `R/GroupRoomSharedValidationTests.cs:46` | TEST-CONFIRMED [run: PASS] (by name) |

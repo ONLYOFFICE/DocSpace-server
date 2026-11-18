@@ -2,6 +2,8 @@
 
 > **Test run 80268dcdbe** (`dotnet test ASC.Tests.slnx --max-parallel-test-modules 1`, 2026-11-14), written by script. After TEST-CONFIRMED: `[run: PASS]` the cited tests passed; `[run: PASS-ON-RERUN]` failed in the full run and passed alone; `[run: FAIL-BUG]` a cited test failed and carries a bug mark, so the row may describe a defect; `[run: FAIL]` failed without a bug mark, repeated alone; `[run: SKIP]` only skipped; `[run: NOT-IN-RUN]` cited test not in the results; `[run: NO-LINK]` no test citation the script could resolve. PASS means the cited test passed, not that it proves the claim. Line ranges map to test methods approximately.
 
+Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row.
+
 Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
 
 Revision 2026-11-09 (bb406b409b..6fb013e745)
@@ -74,7 +76,7 @@ None of those specs was edited.
 | Unknown file 404 | same file 119-128; `DT:210-211` | TEST-CONFIRMED [run: NO-LINK] |
 | Copy, previous file deleted, unknown extension is a silent 200 | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:87,103,120` | TEST-CONFIRMED [run: PASS] |
 | **Default template from an upload** | | |
-| Over 100 MB 400 with the message | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:140-151`; `S:710-712` | TEST-CONFIRMED [run: PASS] |
+| Over 100 MB 400 with the message | `T/07_Settings/SharingDefaults/DefaultTemplateTests.cs:140-151`; `S:591-593` | TEST-CONFIRMED [run: PASS] |
 | Declared extension contradicted 400 | same file 165-213; `DT:129-134` (the comments saying 403 are stale by that code) | TEST-CONFIRMED [run: NO-LINK] |
 | PDF not a form 403; storing and previous file deleted | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:134,151` | TEST-CONFIRMED [run: PASS] |
 | **Default template reset** | `T/07_Settings/SharingDefaults/DefaultTemplateReadResetTests.cs:167` (entry null, stored copy 404, original kept), 184 (repeated), 198 (room admin 403); extension outside the set by `DT:91-94` only | TEST-CONFIRMED [run: PASS] |
@@ -105,11 +107,11 @@ None of those specs was edited.
 | Empty list, 0 is 400, maximum accepted, 404 unknown and wrong type | same file 172-181,192-205,226-239,264-294 | TEST-CONFIRMED [run: NO-LINK] |
 | Guest and read 403, anonymous 401, room manager allowed | `T/01_Files/Order/FilesBulkOrderPermissionsTests.cs:67-84,117-134`; 47,97 by name; `FSS:2836` | TEST-CONFIRMED [run: PASS] |
 | **Saving a file as PDF** | | |
-| Title ends with `.pdf` | `T/01_Files/Forms/IsFormPdfTests.cs:159-168` | TEST-CONFIRMED [run: PASS] |
+| Title ends with `.pdf` | `T/01_Files/Forms/IsFormPdfTests.cs:182-191` | TEST-CONFIRMED [run: PASS] |
 | 404, archived 403, nothing created | `T/01_Files/CopySave/SaveFileAsPdfTests.cs:53-107` | TEST-CONFIRMED [run: PASS] |
 | No create access, other room 403; no access, anonymous | `T/01_Files/CopySave/SaveFileAsPdfPermissionsTests.cs:52-75,131-156`; 81,107 by name | TEST-CONFIRMED [run: PASS] |
 | **HTML file in My documents** | | |
-| Created, 400, true same id, omitted new id | `T/01_Files/Create/HtmlFileCreateTests.cs:85-96,101-108,112-124,145-155`; 128 by name | TEST-CONFIRMED [run: PASS] |
+| Created, 400, true same id, omitted new id | `T/01_Files/Create/HtmlFileCreateTests.cs:85-96,101-108,112-124,167-177`; 128 by name | TEST-CONFIRMED [run: PASS] |
 | Roles, guest 404, anonymous 401 | `T/01_Files/Create/HtmlFileCreatePermissionsTests.cs:102-111`; 47-88,115 by name | TEST-CONFIRMED [run: PASS] |
 | `true` updates the content with a version | `T/01_Files/Create/HtmlFileCreateTests.cs:128` (same id, version +1, new length, two versions) | TEST-CONFIRMED [run: PASS] |
 | **Encryption data of a file** | | |
@@ -134,9 +136,9 @@ None of those specs was edited.
 | ReadWrite 403, unknown id creates, 404, 401, 403 | same file 214-228,237-251,255-268,343-379; 383 by name | TEST-CONFIRMED [run: NO-LINK] |
 | Roles | same file 272-325 by name | TEST-CONFIRMED [run: NO-LINK] |
 | **Setting an external link of a folder or room** | | |
-| Revoke answer, past expiration, ReadWrite 403, unknown id | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:170-184,263-274,334-350,354-366` | TEST-CONFIRMED [run: PASS] |
+| Revoke answer, past expiration, ReadWrite 403, unknown id | `T/02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:170-184,295-306,366-382,386-398` | TEST-CONFIRMED [run: PASS] |
 | Fields, same id | same file 46-150,278,370,387 by name | TEST-CONFIRMED [run: NO-LINK] |
-| Roles, 401, 404 | `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:50-178` by name; `FolderLinkPrimarySetTests.cs:218-248` by name | TEST-CONFIRMED [run: PASS] |
+| Roles, 401, 404 | `T/02_Folders/LinksPrimary/FolderLinkPrimaryPermissionsTests.cs:50-178` by name; `FolderLinkPrimarySetTests.cs:250-280` by name | TEST-CONFIRMED [run: PASS] |
 | **Listing the links of a file** | | |
 | Empty, 401, 403 | `T/01_Files/Links/FileLinkListTests.cs:45-56,206-243` | TEST-CONFIRMED [run: PASS] |
 | Paging, created link, roles | same file 76-190 by name | TEST-CONFIRMED [run: NO-LINK] |
