@@ -33,6 +33,7 @@
 
 global using System.Collections.Concurrent;
 global using System.ComponentModel.DataAnnotations;
+global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.NetworkInformation;
@@ -57,6 +58,7 @@ global using ASC.Common.Threading.DistributedLock.InMemoryLock;
 global using ASC.Common.Utils;
 global using ASC.Common.Web;
 global using ASC.Core.Billing;
+global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Data;
 global using ASC.Core.Tenants;
@@ -64,6 +66,7 @@ global using ASC.Core.Users;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.Files.Core.ApiModels.WebhookDto;
 global using ASC.Files.Core.Helpers;
+global using ASC.Files.Core.Core.Thirdparty;
 global using ASC.Notify;
 global using ASC.Notify.Channels;
 global using ASC.Notify.Cron;
@@ -92,6 +95,7 @@ global using Microsoft.Extensions.Logging.Abstractions;
 global using Microsoft.Extensions.Options;
 
 global using Polly;
+global using Polly.Registry;
 global using Polly.Retry;
 
 global using WireMock;
@@ -108,5 +112,28 @@ global using ZiggyCreatures.Caching.Fusion.Serialization.SystemTextJson;
 
 global using static ASC.Core.Common.Tests.PaymentStubs;
 
+global using BoxAPIException = Box.V2.Exceptions.BoxAPIException;
+global using BoxError = Box.V2.BoxError;
+global using CreateFolderError = Dropbox.Api.Files.CreateFolderError;
 global using DbQuota = ASC.Core.Common.EF.DbQuota;
+global using GoogleApiException = Google.GoogleApiException;
+global using GoogleRequestError = Google.Apis.Requests.RequestError;
+global using GoogleSingleError = Google.Apis.Requests.SingleError;
+global using GraphError = Microsoft.Graph.Error;
+global using GraphServiceException = Microsoft.Graph.ServiceException;
 global using MySqlServerVersionCache = ASC.Core.Common.EF.MySqlServerVersionCache;
+global using RelocationError = Dropbox.Api.Files.RelocationError;
+global using UploadError = Dropbox.Api.Files.UploadError;
+global using UploadSessionFinishError = Dropbox.Api.Files.UploadSessionFinishError;
+global using UploadWriteFailed = Dropbox.Api.Files.UploadWriteFailed;
+global using WriteError = Dropbox.Api.Files.WriteError;
+global using DocsTrialCache = ASC.Files.Core.Helpers.DocsTrialCache;
+global using DocsTrialCacheOptions = ASC.Files.Core.Helpers.DocsTrialCacheOptions;
+global using DocsTrialCheck = ASC.Files.Core.Helpers.DocsTrialCheck;
+global using DocsTrialDecision = ASC.Files.Core.Helpers.DocsTrialDecision;
+global using DocsTrialState = ASC.Files.Core.Helpers.DocsTrialState;
+global using DocumentService = ASC.Files.Core.Helpers.DocumentService;
+global using DocumentServiceLicense = ASC.Files.Core.Helpers.DocumentServiceLicense;
+global using MachinePseudoKeys = ASC.Security.Cryptography.MachinePseudoKeys;
+global using QuotaSocketManager = ASC.Core.Common.Quota.QuotaSocketManager;
+global using SocketData = ASC.Core.Notify.Socket.SocketData;

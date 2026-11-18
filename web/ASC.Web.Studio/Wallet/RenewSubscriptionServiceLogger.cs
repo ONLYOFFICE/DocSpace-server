@@ -52,6 +52,46 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Warning, "Subscription renewal that timed out at {timedOutAt} is not confirmed yet: tenant {tenantId}, {description}: {reason}")]
     public static partial void WarningRenewSubscriptionServiceNotConfirmed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, DateTime timedOutAt, string reason, Exception exception);
 
+    [LoggerMessage(LogLevel.Error, "Subscription renewal was interrupted at {stage} on attempt {attempt} and left unfinished by an earlier run, resuming: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceInterrupted(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, string stage, int attempt);
+
+    // a warning: nothing was paid and the renewal is simply made by the next run - what a rollout leaves behind
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal was left queued by an earlier run, starting it: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceLeftQueued(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal is not started, its journal entry is gone or changed - another instance has it: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceNotClaimed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal left unfinished by an earlier run is not made, the subscription has changed or been extended since: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceOutdated(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal left unfinished by an earlier run waits for billing to answer: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceWaits(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal is taken out of the journal, the re-check of its payment change settles it: tenant {tenantId}, quota {quota}")]
+    public static partial void WarningRenewSubscriptionServiceLeftToRecheck(this ILogger<RenewSubscriptionService> logger, int tenantId, int quota);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal is taken out of the journal, its quota is not a wallet quota any more: tenant {tenantId}, quota {quota}")]
+    public static partial void WarningRenewSubscriptionServiceUnknownQuota(this ILogger<RenewSubscriptionService> logger, int tenantId, int quota);
+
+    // an error: a renewal is left unfinished, with a top-up possibly made
+    [LoggerMessage(LogLevel.Error, "Subscription renewal has been under its claim too long to pay safely and is left to be resumed through billing: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceClaimTooOld(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    // an error: a renewal is left unfinished, with a top-up possibly made
+    [LoggerMessage(LogLevel.Error, "Subscription renewal sends no payment change, its journal entry could not be marked; left to be resumed through billing: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceNotMarked(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal sends no payment change, its journal entry is another instance's by now: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceTakenOver(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal is left to be resumed, the service is stopping: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceStopping(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    // an error: a renewal is left unfinished, with a deposit possibly made
+    [LoggerMessage(LogLevel.Error, "Subscription renewal stopped its top-up at the limit of its claim or because the service is stopping; left to be resumed through billing: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceTopUpStopped(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
     [LoggerMessage(LogLevel.Error, "RenewSubscriptionService: error processing tenant {tenantId}")]
     public static partial void ErrorRenewSubscriptionServiceTenant(this ILogger<RenewSubscriptionService> logger, int tenantId, Exception exception);
 

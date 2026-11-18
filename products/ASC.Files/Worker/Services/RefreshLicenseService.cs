@@ -35,11 +35,16 @@ namespace ASC.Files.Worker.Services;
 
 /// <summary>
 /// Re-reads the license in force from the license path, so a file replaced on disk or a renewal takes effect without
-/// a restart.
+/// a restart. While no license file is on that path, keeps the installation's trial in step with the trial of the
+/// editing service.
 /// </summary>
 /// <remarks>
-/// Nothing is applied before the license has been accepted (the setup wizard or the accept call), and a staged file
-/// is never touched: putting a license in force is the user's decision, not this service's.
+/// A license file is applied only once the license has been accepted (the setup wizard, also one completed on the
+/// editing service's trial, or the accept call), and a staged file is never touched: putting a license in force is
+/// the user's decision, not this service's. The trial an Enterprise installation creates on the first read of its
+/// tariff follows the editing service's trial whether the license was accepted or not, also before the wizard is
+/// completed; its end is only ever brought closer. A trial activated on request is not followed, and before the
+/// tariff was first read there is no trial to follow yet, so a pass then changes nothing.
 /// </remarks>
 [Singleton]
 public class RefreshLicenseService(
@@ -50,7 +55,7 @@ public class RefreshLicenseService(
 {
     private readonly IServiceScopeFactory _serviceScopeFactory = scopeFactory;
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = TimeSpan.Parse(configuration["files:refreshLicense:period"] ?? "1", CultureInfo.InvariantCulture);
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } = DocsTrialCacheOptions.ReadRefreshPeriod(configuration, logger);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -64,18 +69,47 @@ public class RefreshLicenseService(
                 return;
             }
 
+            var documentServiceLicense = scope.ServiceProvider.GetRequiredService<DocumentServiceLicense>();
+
+            if (!File.Exists(licenseReader.LicensePath))
+            {
+                await RefreshDocsTrialAsync(licenseReader, documentServiceLicense);
+                return;
+            }
+
             var settingsManager = scope.ServiceProvider.GetRequiredService<SettingsManager>();
             if (!await TariffSettings.GetLicenseAcceptAsync(settingsManager))
             {
                 return;
             }
 
-            var documentServiceLicense = scope.ServiceProvider.GetRequiredService<DocumentServiceLicense>();
             await licenseReader.RefreshActiveLicenseAsync(documentServiceLicense.ValidateLicense);
         }
         catch (Exception ex)
         {
             logger.ErrorWithException(ex);
+        }
+    }
+
+    /// <summary>
+    /// While no license file is in force and the installation runs the trial it creates on the first read of its tariff
+    /// (not one activated on request), brings the trial's end closer to the end of the trial the editing service runs,
+    /// never later, so the portal stops being usable by the day the editors do.
+    /// </summary>
+    /// <remarks>
+    /// An editing service that cannot be asked, or runs under a license file of its own, changes nothing.
+    /// </remarks>
+    private static async Task RefreshDocsTrialAsync(LicenseReader licenseReader, DocumentServiceLicense documentServiceLicense)
+    {
+        if (!await licenseReader.IsStartTrialQuotaAsync())
+        {
+            return;
+        }
+
+        var docsTrial = await documentServiceLicense.GetTrialAsync(useCache: false);
+        if (docsTrial.State is DocsTrialState.Active or DocsTrialState.Expired)
+        {
+            await licenseReader.DocsTrialToDBAsync(docsTrial.Trial);
         }
     }
 }

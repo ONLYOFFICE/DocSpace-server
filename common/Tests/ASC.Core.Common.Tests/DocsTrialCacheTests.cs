@@ -1,0 +1,487 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Core.Common.Tests;
+
+/// <summary>
+/// How the answer of the editing service about its own trial is kept in the distributed cache: what a cached reader
+/// gets while the service fails, what a fresh question does to the cached answer, and what another process sees.
+/// </summary>
+/// <remarks>
+/// A real FusionCache with a distributed cache in memory and the System.Text.Json serializer the services use, so the
+/// answers go through serialization; a second FusionCache over the same distributed cache plays another process. The
+/// request to the editing service is a function that answers from a queue and counts the calls.
+/// </remarks>
+public sealed class DocsTrialCacheTests : IDisposable
+{
+    private static readonly DocsTrialCheck _active = new(DocsTrialState.Active, new DocsTrialLicense(new DateTime(2026, 12, 11, 0, 0, 0, DateTimeKind.Utc)));
+    private static readonly DocsTrialCheck _expired = new(DocsTrialState.Expired, new DocsTrialLicense(new DateTime(2026, 11, 10, 0, 0, 0, DateTimeKind.Utc)));
+
+    private readonly MemoryDistributedCache _distributedCache = new(Options.Create(new MemoryDistributedCacheOptions()));
+    private readonly List<FusionCache> _caches = [];
+    private readonly FusionCache _cache;
+    private readonly Queue<DocsTrialCheck> _answers = new();
+    private int _requests;
+
+    public DocsTrialCacheTests()
+    {
+        _cache = CreateProcessCache();
+    }
+
+    public void Dispose()
+    {
+        foreach (var cache in _caches)
+        {
+            cache.Dispose();
+        }
+    }
+
+    [Fact]
+    public async Task GetAsync_FreshAnswerOfAnotherProcess_IsWhatThisProcessReads()
+    {
+        // The background refresh of the worker asks the editing service; the wizard page of the API reads the answer.
+        _answers.Enqueue(_expired);
+
+        (await new DocsTrialCache(CreateProcessCache(), NullLogger<DocumentServiceLicense>.Instance, DocsTrialCacheOptions.Default)
+            .GetAsync(RequestAsync, useCache: false)).Should().Be(_expired);
+
+        (await CreateCache(DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: true)).Should().Be(_expired);
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_AfterTheProcessRestarts_ReadsTheDistributedCopy()
+    {
+        _answers.Enqueue(_active);
+        (await CreateCache(DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+
+        var restarted = new DocsTrialCache(CreateProcessCache(), NullLogger<DocumentServiceLicense>.Instance, DocsTrialCacheOptions.Default);
+
+        (await restarted.GetLastKnownAsync()).Should().Be(_active);
+    }
+
+    [Fact]
+    public async Task GetAsync_FreshQuestionUnknown_KeepsTheLastAnswerKnown()
+    {
+        // A failure seen by the setup wizard or the background refresh must not remove the answer the anonymous
+        // question of the wizard page relies on.
+        var trialCache = CreateCache(DocsTrialCacheOptions.Default);
+        _answers.Enqueue(_active);
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+        (await trialCache.GetAsync(RequestAsync, useCache: false)).Should().Be(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+        _requests.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetAsync_FreshQuestionAnswered_ReplacesTheCachedAnswer()
+    {
+        var trialCache = CreateCache(DocsTrialCacheOptions.Default);
+        _answers.Enqueue(_active);
+        _answers.Enqueue(_expired);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+        (await trialCache.GetAsync(RequestAsync, useCache: false)).Should().Be(_expired);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_expired);
+        _requests.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetAsync_AnswerExpiredAndServiceFails_UsesTheLastAnswerKnown()
+    {
+        var trialCache = CreateCache(new DocsTrialCacheOptions(
+            Duration: TimeSpan.FromMilliseconds(100),
+            FailSafeMaxDuration: TimeSpan.FromHours(1),
+            FailureDuration: TimeSpan.FromMinutes(1),
+            HardTimeout: TimeSpan.FromSeconds(10)));
+        _answers.Enqueue(_active);
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+
+        // Let the answer expire; it is a duration running out, not an asynchronous write to wait for
+        await Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+        _requests.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetAsync_FailureWithNoAnswerKnown_IsKeptOnlyForTheFailureDuration()
+    {
+        // The failure is kept for the failure duration, not for the duration of an answer: once it expires, the
+        // editing service is asked again.
+        var trialCache = CreateCache(new DocsTrialCacheOptions(
+            Duration: TimeSpan.FromMinutes(15),
+            FailSafeMaxDuration: TimeSpan.FromDays(3),
+            FailureDuration: TimeSpan.FromMilliseconds(100),
+            HardTimeout: TimeSpan.FromSeconds(10)));
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+        _answers.Enqueue(_active);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
+
+        // Let the failure expire; it is a duration running out, not an asynchronous write to wait for
+        await Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_active);
+        _requests.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task GetAsync_FailureWithNoAnswerKnown_LeavesNoCopyOnceExpired()
+    {
+        // A failure is no answer to fall back on: once it expires, nothing of it stays in the cache, not even a
+        // fail-safe copy that a later failure would serve.
+        var trialCache = CreateCache(new DocsTrialCacheOptions(
+            Duration: TimeSpan.FromMinutes(15),
+            FailSafeMaxDuration: TimeSpan.FromDays(3),
+            FailureDuration: TimeSpan.FromMilliseconds(100),
+            HardTimeout: TimeSpan.FromSeconds(10)));
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
+
+        // Let the failure expire; it is a duration running out, not an asynchronous write to wait for
+        await Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+
+        (await _cache.TryGetAsync<DocsTrialCheck>(DocsTrialCache.GetCacheKey(), entry => entry.SetAllowStaleOnReadOnly(),
+            TestContext.Current.CancellationToken)).HasValue.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task GetAsync_NoAnswerKnownAndServiceFails_KeepsTheFailureForAWhile()
+    {
+        var trialCache = CreateCache(DocsTrialCacheOptions.Default);
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
+
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetAsync_TwoReadersWhileTheServiceIsSlow_AskItOnce()
+    {
+        // Anonymous callers of the wizard page arrive together; while the editing service is slow, the second must
+        // wait for the first answer rather than send a request of its own once the cache's lock timeout passes. The
+        // lock timeout of the services (5 seconds) is shortened here; the service takes longer than it.
+        var trialCache = new DocsTrialCache(CreateProcessCache(lockTimeout: TimeSpan.FromMilliseconds(100)), NullLogger<DocumentServiceLicense>.Instance, DocsTrialCacheOptions.Default);
+
+        var answers = await Task.WhenAll(
+            trialCache.GetAsync(SlowRequestAsync, useCache: true),
+            trialCache.GetAsync(SlowRequestAsync, useCache: true));
+
+        answers.Should().AllBeEquivalentTo(_active);
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetAsync_TwoReadersWhileTheServiceFailsWithNoAnswerKnown_AskItOnce()
+    {
+        // With no answer known, the failure of the first request is kept before the waiting reader goes on, so the
+        // second reader takes it instead of asking a service that does not answer once more. Between the failure and
+        // its record the reader logs it; the logger here takes its time, as a write to Redis does in the services, so a
+        // record made only after the lock is released comes too late for the waiting reader.
+        var trialCache = new DocsTrialCache(_cache, new SlowLogger(TimeSpan.FromMilliseconds(500)), DocsTrialCacheOptions.Default);
+
+        var answers = await Task.WhenAll(
+            trialCache.GetAsync(SlowFailingRequestAsync, useCache: true),
+            trialCache.GetAsync(SlowFailingRequestAsync, useCache: true));
+
+        answers.Should().AllBeEquivalentTo(DocsTrialCheck.Unknown);
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetAsync_FailsWhileAnotherProcessStoresAnAnswer_KeepsThatAnswer()
+    {
+        // The background refresh of another process stores a known answer while this process asks and gets none: the
+        // failure must not replace that answer, which the wizard falls back on when the editing service is silent.
+        var otherProcess = new DocsTrialCache(CreateProcessCache(), NullLogger<DocumentServiceLicense>.Instance, DocsTrialCacheOptions.Default);
+        var trialCache = CreateCache(DocsTrialCacheOptions.Default);
+
+        var answer = await trialCache.GetAsync(async () =>
+        {
+            await otherProcess.GetAsync(() => Task.FromResult(_active), useCache: false);
+            return DocsTrialCheck.Unknown;
+        }, useCache: true);
+
+        answer.Should().Be(_active);
+        (await trialCache.GetLastKnownAsync()).Should().Be(_active);
+    }
+
+    [Theory]
+    [InlineData(null, "1.00:00:00", false)]
+    [InlineData("12:00:00", "12:00:00", false)]
+    [InlineData("x", "1.00:00:00", true)]
+    [InlineData("00:00:00", "00:01:00", true)]
+    [InlineData("-1.00:00:00", "00:01:00", true)]
+    [InlineData("00:00:10", "00:01:00", true)]
+    [InlineData("2.00:00:00", "1.00:00:00", true)]
+    [InlineData("3.00:00:00", "1.00:00:00", true)]
+    public void ReadRefreshPeriod_Configured_StaysWithinTheLastAnswerKept(string? configured, string expected, bool warned)
+    {
+        // The last answer known has to outlive one refresh that finds the editing service silent, with a period to
+        // spare for the time the refreshes take, so the period is at most a third of the fail-safe. A value that is
+        // not used as written is logged.
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?> { [DocsTrialCacheOptions.RefreshPeriodKey] = configured })
+            .Build();
+        var logger = new RecordingLogger();
+
+        DocsTrialCacheOptions.ReadRefreshPeriod(configuration, logger)
+            .Should().Be(TimeSpan.Parse(expected, CultureInfo.InvariantCulture));
+        logger.Entries.Any(e => e.Level == LogLevel.Warning).Should().Be(warned);
+    }
+
+    [Fact]
+    public async Task GetAsync_CacheFailsAndSoDoesTheFallback_IsUnknownAndLogsBoth()
+    {
+        // A cache that cannot read its entry (a value of another shape in Redis) fails the read, and the read of the last
+        // answer known that follows fails the same way: the anonymous question still gets an answer, and neither
+        // failure is lost.
+        var first = new InvalidOperationException("the entry cannot be read");
+        var second = new InvalidOperationException("the last answer cannot be read");
+        var cache = StubProxy<IFusionCache>.Create(new()
+        {
+            // What the entry options of a call start from
+            ["get_" + nameof(IFusionCache.DefaultEntryOptionsProvider)] = _ => null,
+            ["get_" + nameof(IFusionCache.DefaultEntryOptions)] = _ => new FusionCacheEntryOptions(),
+            [nameof(IFusionCache.GetOrSetAsync)] = _ => throw first,
+            [nameof(IFusionCache.TryGetAsync)] = _ => throw second,
+            [nameof(IFusionCache.SetAsync)] = _ => ValueTask.CompletedTask
+        });
+        var logger = new RecordingLogger();
+
+        var answer = await new DocsTrialCache(cache, logger, DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: true);
+
+        answer.Should().Be(DocsTrialCheck.Unknown);
+        logger.Entries.Where(e => e.Level == LogLevel.Warning).Select(e => e.Exception).Should().Equal(first, second);
+    }
+
+    [Fact]
+    public async Task GetAsync_RequestRunsPastTheHardTimeout_IsUnknownAndLoggedAsDebugOnly()
+    {
+        // A request that runs past the hard timeout is expected: its cause is logged where the service was asked, so
+        // the cache logs no warning for it. Any other failure of the cache is a warning (the test above).
+        var cache = StubProxy<IFusionCache>.Create(new()
+        {
+            ["get_" + nameof(IFusionCache.DefaultEntryOptionsProvider)] = _ => null,
+            ["get_" + nameof(IFusionCache.DefaultEntryOptions)] = _ => new FusionCacheEntryOptions(),
+            [nameof(IFusionCache.GetOrSetAsync)] = _ => throw new SyntheticTimeoutException("the request ran past the hard timeout"),
+            [nameof(IFusionCache.TryGetAsync)] = _ => new ValueTask<MaybeValue<DocsTrialCheck>>(default(MaybeValue<DocsTrialCheck>)),
+            [nameof(IFusionCache.SetAsync)] = _ => ValueTask.CompletedTask
+        });
+        var logger = new RecordingLogger();
+
+        var answer = await new DocsTrialCache(cache, logger, DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: true);
+
+        answer.Should().Be(DocsTrialCheck.Unknown);
+        logger.Entries.Select(e => e.Level).Should().Equal(LogLevel.Debug);
+    }
+
+    [Fact]
+    public async Task GetAsync_FreshAnswerTheCacheCannotKeep_IsStillTheAnswer()
+    {
+        // The setup wizard and the background refresh ask the service themselves: an answer in hand is theirs even when
+        // the cache cannot keep it, and the failure is logged.
+        var failure = new InvalidOperationException("the answer cannot be written");
+        var cache = StubProxy<IFusionCache>.Create(new()
+        {
+            ["get_" + nameof(IFusionCache.DefaultEntryOptionsProvider)] = _ => null,
+            ["get_" + nameof(IFusionCache.DefaultEntryOptions)] = _ => new FusionCacheEntryOptions(),
+            [nameof(IFusionCache.SetAsync)] = _ => throw failure
+        });
+        var logger = new RecordingLogger();
+        _answers.Enqueue(_active);
+
+        var answer = await new DocsTrialCache(cache, logger, DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: false);
+
+        answer.Should().Be(_active);
+        logger.Entries.Should().Equal((LogLevel.Warning, failure));
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_CacheCannotBeRead_IsNoneAndLogged()
+    {
+        // The wizard falls back on the last answer known when the service is silent: a cache it cannot read means no
+        // answer known, not a failed wizard.
+        var failure = new InvalidOperationException("the last answer cannot be read");
+        var cache = StubProxy<IFusionCache>.Create(new()
+        {
+            ["get_" + nameof(IFusionCache.DefaultEntryOptionsProvider)] = _ => null,
+            ["get_" + nameof(IFusionCache.DefaultEntryOptions)] = _ => new FusionCacheEntryOptions(),
+            [nameof(IFusionCache.TryGetAsync)] = _ => throw failure
+        });
+        var logger = new RecordingLogger();
+
+        (await new DocsTrialCache(cache, logger, DocsTrialCacheOptions.Default).GetLastKnownAsync()).Should().BeNull();
+        logger.Entries.Should().Equal((LogLevel.Warning, failure));
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_NothingAsked_IsNull()
+    {
+        (await CreateCache(DocsTrialCacheOptions.Default).GetLastKnownAsync()).Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_AnswerExpiredButKeptByFailSafe_ReturnsItWithoutAsking()
+    {
+        // The setup wizard reads the last answer when the editing service is silent at completion; an answer past its
+        // duration still tells whether the wizard asked for a file.
+        var trialCache = CreateCache(new DocsTrialCacheOptions(
+            Duration: TimeSpan.FromMilliseconds(100),
+            FailSafeMaxDuration: TimeSpan.FromHours(1),
+            FailureDuration: TimeSpan.FromMinutes(1),
+            HardTimeout: TimeSpan.FromSeconds(10)));
+        _answers.Enqueue(_expired);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(_expired);
+
+        // Let the answer expire; it is a duration running out, not an asynchronous write to wait for
+        await Task.Delay(TimeSpan.FromMilliseconds(300), TestContext.Current.CancellationToken);
+
+        (await trialCache.GetLastKnownAsync()).Should().Be(_expired);
+        _requests.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_OnlyAFailureKnown_IsNull()
+    {
+        var trialCache = CreateCache(DocsTrialCacheOptions.Default);
+        _answers.Enqueue(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetAsync(RequestAsync, useCache: true)).Should().Be(DocsTrialCheck.Unknown);
+
+        (await trialCache.GetLastKnownAsync()).Should().BeNull();
+    }
+
+    /// <summary>
+    /// A FusionCache with the default entry options the services register (common/ASC.Api.Core
+    /// ServiceCollectionExtension: a 5-second lock timeout and factory hard timeout) over the shared distributed cache.
+    /// </summary>
+    /// <param name="lockTimeout">Replaces the 5-second lock timeout, so a test of it does not wait that long.</param>
+    private FusionCache CreateProcessCache(TimeSpan? lockTimeout = null)
+    {
+        var cache = new FusionCache(new FusionCacheOptions
+        {
+            DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
+            DefaultEntryOptions = new FusionCacheEntryOptions
+            {
+                Duration = TimeSpan.MaxValue,
+                LockTimeout = lockTimeout ?? TimeSpan.FromSeconds(5),
+                FactoryHardTimeout = TimeSpan.FromSeconds(5)
+            }
+        });
+        cache.SetupDistributedCache(_distributedCache, new FusionCacheSystemTextJsonSerializer());
+        _caches.Add(cache);
+
+        return cache;
+    }
+
+    private DocsTrialCache CreateCache(DocsTrialCacheOptions options)
+    {
+        return new DocsTrialCache(_cache, NullLogger<DocumentServiceLicense>.Instance, options);
+    }
+
+    /// <summary>A logger that blocks for <paramref name="pause"/> on every entry it writes.</summary>
+    private sealed class SlowLogger(TimeSpan pause) : ILogger<DocumentServiceLicense>
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+        {
+            return null;
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            Thread.Sleep(pause);
+        }
+    }
+
+    /// <summary>A logger that keeps the level and the exception of every entry.</summary>
+    private sealed class RecordingLogger : ILogger<DocumentServiceLicense>
+    {
+        public List<(LogLevel Level, Exception? Exception)> Entries { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+        {
+            return null;
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            Entries.Add((logLevel, exception));
+        }
+    }
+
+    private Task<DocsTrialCheck> RequestAsync()
+    {
+        _requests++;
+        return Task.FromResult(_answers.Dequeue());
+    }
+
+    /// <summary>An editing service that gives no readable answer after half a second.</summary>
+    private async Task<DocsTrialCheck> SlowFailingRequestAsync()
+    {
+        Interlocked.Increment(ref _requests);
+        await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
+
+        return DocsTrialCheck.Unknown;
+    }
+
+    /// <summary>An editing service that answers an active trial after half a second.</summary>
+    private async Task<DocsTrialCheck> SlowRequestAsync()
+    {
+        Interlocked.Increment(ref _requests);
+        await Task.Delay(TimeSpan.FromMilliseconds(500), TestContext.Current.CancellationToken);
+
+        return _active;
+    }
+}

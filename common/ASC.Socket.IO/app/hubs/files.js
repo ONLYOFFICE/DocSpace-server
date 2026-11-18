@@ -464,6 +464,12 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:wallet-low-balance", {});
   }
 
+  // The tariff of the portal changed (its end, its quotas): the clients read it again. No data is sent.
+  function changeTariff({ room } = {}) {
+    logger.info(`tariff changed ${room}`);
+    filesIO.to(room).emit("s:change-tariff", {});
+  }
+
   // A personal limit goes to the personal room of each of its users (`${room}-${userId}`, where room is the tenant ID),
   // a limit of the whole portal to the quota room.
   function changeServiceLimits({ room, serviceName, id, userIds } = {}) {
@@ -755,6 +761,7 @@ module.exports = (io) => {
     changeAppEnabled,
     topUpWallet,
     walletLowBalance,
+    changeTariff,
     changeServiceLimits,
     updateHistory,
     logoutSession,

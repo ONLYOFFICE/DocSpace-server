@@ -144,6 +144,11 @@ public static class Constants
     // MigrationSizeLimitTests reach it with an archive of a few kilobytes.
     public const long MigrationTestMaxExtractedEntries = 1000;
 
+    // core:accounting:renewperiod of that profile: how often RenewSubscriptionService looks for wallet subscriptions
+    // that are due, and - as core:accounting:renewadvance is not set - how long before its due date one is renewed.
+    // The renewal tests (WalletRenewalTests) give a subscription a due date a few such periods ahead and wait for it.
+    public static TimeSpan PaymentStubRenewPeriod { get; } = TimeSpan.FromSeconds(5);
+
     // The delivery schedule of the integration-test profile (webhooks:retryIntervals and webhooks:requestTimeout,
     // set in ConnectionStringManager.AddBaseConfig): WebhookTestRetryCount retries WebhookTestRetryInterval apart,
     // four attempts in all, instead of the production schedule of minutes to hours, and an attempt that gives up on a

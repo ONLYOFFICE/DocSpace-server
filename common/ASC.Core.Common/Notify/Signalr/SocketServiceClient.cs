@@ -62,6 +62,28 @@ public class SocketServiceClient(
 
     protected async Task MakeRequest(string method, object data, int? tenantId = null)
     {
+        await MakeRequest(method, data, async () =>
+        {
+            var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
+
+            return (await tariffService.GetTariffAsync(tenant)).State;
+        });
+    }
+
+    /// <summary>
+    /// Sends the request with a tariff state the caller already knows, without reading the tariff. For the code that
+    /// writes the tariff: it may run under the lock of the tariff read, which a read here would wait on.
+    /// </summary>
+    /// <param name="method">The route of the socket service.</param>
+    /// <param name="data">The body of the request.</param>
+    /// <param name="tariffState">Only chooses the queue of the socket service: paid portals have one of their own.</param>
+    protected async Task MakeRequest(string method, object data, TariffState tariffState)
+    {
+        await MakeRequest(method, data, () => Task.FromResult(tariffState));
+    }
+
+    private async Task MakeRequest(string method, object data, Func<Task<TariffState>> getTariffState)
+    {
         if (string.IsNullOrEmpty(Url))
         {
             return;
@@ -73,10 +95,7 @@ public class SocketServiceClient(
 #pragma warning restore CA2000
         if (await channelWriter.WaitToWriteAsync())
         {
-            var tenant = tenantId ?? _tenantManager.GetCurrentTenantId();
-
-            var tariff = await tariffService.GetTariffAsync(tenant);
-            await channelWriter.WriteAsync(new SocketData(request, tariff.State));
+            await channelWriter.WriteAsync(new SocketData(request, await getTariffState()));
         }
     }
 

@@ -39,6 +39,7 @@ public class DocumentServiceLicense(ICache cache,
     CoreBaseSettings coreBaseSettings,
     FilesLinkUtility filesLinkUtility,
     IHttpClientFactory clientFactory,
+    IFusionCache fusionCache,
     ILogger<DocumentServiceLicense> logger)
 {
     private static readonly TimeSpan _cacheExpiration = TimeSpan.FromMinutes(15);
@@ -163,4 +164,165 @@ public class DocumentServiceLicense(ICache cache,
             (null, null) :
             (commandResponse.Quota?.Users?.ToDictionary(r => r.UserId, r => r.Expire), commandResponse.License);
     }
+
+    /// <summary>
+    /// Asks the editing service whether it runs its own trial, the state it is in while it has no license file.
+    /// </summary>
+    /// <param name="useCache">
+    /// Whether a cached answer may be used; <see cref="DocsTrialCache"/> says how long answers and failures are kept.
+    /// A fresh question with a known answer replaces the cached one for every process; one with an unknown answer
+    /// leaves the cache alone.
+    /// </param>
+    /// <returns>
+    /// <see cref="DocsTrialState.NotTrial"/> on an installation that has no editing service to ask;
+    /// <see cref="DocsTrialState.Unknown"/> when the service cannot be reached or its answer cannot be read.
+    /// </returns>
+    public Task<DocsTrialCheck> GetTrialAsync(bool useCache)
+    {
+        return CreateTrialCache().GetAsync(RequestTrialAsync, useCache);
+    }
+
+    /// <summary>
+    /// Returns the last answer of the editing service about its trial that the installation knows, without asking the
+    /// service; <c>null</c> when none is known.
+    /// </summary>
+    public Task<DocsTrialCheck> GetLastKnownTrialAsync()
+    {
+        return CreateTrialCache().GetLastKnownAsync();
+    }
+
+    private DocsTrialCache CreateTrialCache()
+    {
+        return new DocsTrialCache(fusionCache, logger, DocsTrialCacheOptions.Default);
+    }
+
+    private async Task<DocsTrialCheck> RequestTrialAsync()
+    {
+        CommandResponse commandResponse;
+        try
+        {
+            commandResponse = await GetDocumentServiceLicenseAsync(false);
+        }
+        catch (Exception ex)
+        {
+            logger.WarningDocsTrialRequest(ex);
+            return DocsTrialCheck.Unknown;
+        }
+
+        var serviceConfigured = coreBaseSettings.Standalone && !string.IsNullOrEmpty(filesLinkUtility.DocServiceCommandUrl);
+        var check = ClassifyAnswer(serviceConfigured, commandResponse, DateTime.UtcNow);
+        if (check.State == DocsTrialState.Unknown)
+        {
+            logger.WarningDocsTrialUnreadable(
+                commandResponse?.Error,
+                commandResponse?.ErrorString,
+                commandResponse?.Server?.ResultType,
+                commandResponse?.License?.DueDate);
+        }
+
+        return check;
+    }
+
+    /// <summary>
+    /// Reads the trial state from the answer to the license command, or from its absence.
+    /// </summary>
+    /// <param name="serviceConfigured">
+    /// Whether there is an editing service to ask: a self-hosted installation with the address of its command service.
+    /// </param>
+    /// <param name="commandResponse">The answer read; <c>null</c> when nothing was asked or the body was <c>null</c>.</param>
+    /// <param name="utcNow">The current UTC time.</param>
+    /// <remarks>
+    /// With no service to ask there is no trial to follow. With a service, a missing answer (a body of <c>null</c>)
+    /// says nothing about its trial and is <see cref="DocsTrialState.Unknown"/>: read as "no trial", it would be kept as
+    /// a known answer and make the wizard ask for a file the service never refused.
+    /// </remarks>
+    public static DocsTrialCheck ClassifyAnswer(bool serviceConfigured, CommandResponse commandResponse, DateTime utcNow)
+    {
+        if (!serviceConfigured)
+        {
+            return DocsTrialCheck.NotTrial;
+        }
+
+        return commandResponse == null ? DocsTrialCheck.Unknown : ClassifyTrial(commandResponse, utcNow);
+    }
+
+    /// <summary>
+    /// Reads the trial state from the editing service's answer to the license command.
+    /// </summary>
+    /// <remarks>
+    /// Only an answer that says <c>trial</c> describes a trial: the service also answers <c>ExpiredTrial</c> for a
+    /// license file it cannot accept, with the fields of that file and no <c>trial</c> flag. An answer that cannot be
+    /// read is <see cref="DocsTrialState.Unknown"/>, never an expired trial. The end of the trial is kept as a UTC
+    /// date, because the service moves it by seconds when it restarts. An expired trial always ends before today, so
+    /// the portal's tariff becomes unpaid at once.
+    /// </remarks>
+    public static DocsTrialCheck ClassifyTrial(CommandResponse commandResponse, DateTime utcNow)
+    {
+        if (commandResponse is not { Error: ErrorTypes.NoError })
+        {
+            return DocsTrialCheck.Unknown;
+        }
+
+        if (commandResponse.License is not { Trial: true } license)
+        {
+            return DocsTrialCheck.NotTrial;
+        }
+
+        if (commandResponse.Server == null || license.DueDate == default)
+        {
+            return DocsTrialCheck.Unknown;
+        }
+
+        // The service writes the dates it computes in UTC with a zone, but echoes the dates of a license file as they
+        // are, possibly without one: a date without a zone is read as UTC, not as the time zone of this server
+        var end = license.DueDate.Kind == DateTimeKind.Unspecified ? license.DueDate : license.DueDate.ToUniversalTime();
+        var dueDate = DateTime.SpecifyKind(end.Date, DateTimeKind.Utc);
+
+        switch (commandResponse.Server.ResultType)
+        {
+            case CommandResponse.ServerInfo.ResultTypes.Success:
+            case CommandResponse.ServerInfo.ResultTypes.SuccessLimit:
+            case CommandResponse.ServerInfo.ResultTypes.Connections:
+            case CommandResponse.ServerInfo.ResultTypes.UsersCount:
+                return new DocsTrialCheck(DocsTrialState.Active, new DocsTrialLicense(dueDate));
+
+            case CommandResponse.ServerInfo.ResultTypes.ExpiredTrial:
+            case CommandResponse.ServerInfo.ResultTypes.Expired:
+            case CommandResponse.ServerInfo.ResultTypes.ExpiredLimited:
+                var yesterday = utcNow.Date.AddDays(-1);
+                return new DocsTrialCheck(DocsTrialState.Expired, new DocsTrialLicense(dueDate < yesterday ? dueDate : yesterday));
+
+            default:
+                return DocsTrialCheck.Unknown;
+        }
+    }
+}
+
+/// <summary>
+/// The state of the editing service's own trial.
+/// </summary>
+public enum DocsTrialState
+{
+    /// <summary>The service could not be asked, or its answer cannot be read.</summary>
+    Unknown,
+
+    /// <summary>The service runs under a license file, or there is no service to ask.</summary>
+    NotTrial,
+
+    /// <summary>The service runs its trial.</summary>
+    Active,
+
+    /// <summary>The service's trial has ended.</summary>
+    Expired
+}
+
+/// <summary>
+/// The state of the editing service's own trial, with the trial when the state is <see cref="DocsTrialState.Active"/>
+/// or <see cref="DocsTrialState.Expired"/>.
+/// </summary>
+public record DocsTrialCheck(DocsTrialState State, DocsTrialLicense Trial)
+{
+    public static readonly DocsTrialCheck Unknown = new(DocsTrialState.Unknown, null);
+
+    public static readonly DocsTrialCheck NotTrial = new(DocsTrialState.NotTrial, null);
 }

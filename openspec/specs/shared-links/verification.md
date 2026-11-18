@@ -4,6 +4,8 @@
 
 > Revision 2026-11-14 (09d4de0768..6fb6dfb17a): requirement "Listing the links of a room" (`getRoomLinks`) added; no link behaviour changed in the range.
 
+Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row. The `yaml` line numbers were moved to the submodule commit release/v4.1.0 pins (`ce37da4`); where the header names an older submodule commit, that stays the version the yaml texts were read from.
+
 Revision 2026-11-09 (bb406b409b..6fb013e745)
 
 >
@@ -11,31 +13,31 @@ Revision 2026-11-09 (bb406b409b..6fb013e745)
 
 Every requirement and scenario of `spec.md`, with where it was verified. Paths are relative to the repo
 root (`server/`); Files test paths omit the `products/ASC.Files/Tests/Tests/` prefix. `yaml` is
-`sdk/docspace-api-spec/docspace-backend.yaml` (submodule `5ea4dc6`, 2026-11-04): room links `setRoomLink` (31583),
-`getRoomLinks` (31686), `getRoomsPrimaryExternalLink` (31789); file links `createFilePrimaryExternalLink`
-(12258), `getFilePrimaryExternalLink` (12365), `getFileLinks` (12496), `setFileExternalLink` (12629); folder
-links `createFolderPrimaryExternalLink` (17303), `getFolderPrimaryExternalLink` (17410),
+`sdk/docspace-api-spec/docspace-backend.yaml` (submodule `5ea4dc6`, 2026-11-04; line numbers of `ce37da4`): room links `setRoomLink` (31998),
+`getRoomLinks` (32103), `getRoomsPrimaryExternalLink` (32212); file links `createFilePrimaryExternalLink`
+(12258), `getFilePrimaryExternalLink` (12825), `getFileLinks` (12950), `setFileExternalLink` (13085); folder
+links `createFolderPrimaryExternalLink` (17817), `getFolderPrimaryExternalLink` (17920),
 `setFolderPrimaryExternalLink` (17539 — the one PUT that creates, changes or revokes any folder link,
 `primary` marking the primary; there is no separate "set folder external link" operation), `getFolderLinks`
-(17644); visitors `getExternalShareData` (28811), `applyExternalSharePassword` (28922). Status:
+(17644); visitors `getExternalShareData` (29210), `applyExternalSharePassword` (29317). Status:
 **TEST-CONFIRMED** (an integration test asserts it), **CODE-ONLY** (read from the product code or the
 OpenAPI document, no test), **LIVE-CONFIRMED** (only the live run of 2026-10-14 recorded in
 `openspec/deviations.md` asserts it), **MATRIX-ONLY** (stated by the product matrix "Shared link rules"; no
 test, code or live evidence found — flagged).
 
 Code behind the rows: the link limits are two tables in
-`products/ASC.Files/Core/Core/Security/FileSecurity.cs:113-157` (rooms: Custom and Public 1 primary + 5
+`products/ASC.Files/Core/Core/Security/FileSecurity.cs:114-158` (rooms: Custom and Public 1 primary + 5
 additional, Form filling room 1 primary; entries inside: My documents, Custom, Collaboration, VDR and AI
 rooms (agents) 6 additional, Public room 1 primary + 5 additional, Form filling room 1 primary; no row for
 the rooms of the AI rooms section), applied in
-`products/ASC.Files/Core/Utils/FileSharing.cs:358-383` under a per-entry lock, with the message "The maximum
+`products/ASC.Files/Core/Utils/FileSharing.cs:368-393` under a per-entry lock, with the message "The maximum
 number of links may not exceed {0}" (`FilesCommonResource.resx:313`); the audience is forced in
-`FileSharing.cs:223-247` (VDR → DocSpace users only, Public room → anyone); the primary link of a Public or
-Form filling room drops a requested expiration (`FileSharing.cs:195-198`) and an expiration change on it is
-skipped (`FileSharing.cs:207-221`); the role sets of links per room type are `FileSecurity.cs:159-263`
+`FileSharing.cs:233-257` (VDR → DocSpace users only, Public room → anyone); the primary link of a Public or
+Form filling room drops a requested expiration (`FileSharing.cs:205-208`) and an expiration change on it is
+skipped (`FileSharing.cs:217-231`); the role sets of links per room type are `FileSecurity.cs:160-264`
 (`AvailableRoomAccesses`, the link subject rows; the Instructions, Knowledge and AI project entries at
 `:237-263` carry no external-link subject) with the message "The role is not available for this user
-type" (`FilesCommonResource.resx:331`, `FileSharing.cs:159-206`). Neither message is asserted by a test —
+type" (`FilesCommonResource.resx:331`, `FileSharing.cs:169-216`). Neither message is asserted by a test —
 every "403 + message" row is confirmed for the status only. Shared theory data: `BaseTest.cs:87-110`
 (valid file-link rights Editing / Review / Comment / Read; invalid ReadWrite / Varies / RoomManager /
 ContentCreator; room types with links Custom, Public; without Collaboration, VDR). Trap in several
@@ -62,12 +64,12 @@ and R10; the yaml line numbers were refreshed to submodule `5ea4dc6`. D11, D12, 
 |---|---|---|
 | **Entities that accept a shared link** | | |
 | My documents: file links (additional and primary) and folder primary link created | `01_Files/Links/FileLinkSetTests.cs:46-86`; `04_Security/FileShareTests.cs:139-184`; `02_Folders/Links/FolderLinkCreateTests.cs:204-217`; `04_Security/FolderShareTests.cs:44-59` | TEST-CONFIRMED [run: PASS] |
-| My documents: up to 6 additional | `01_Files/Links/FileLinkLimitTests.cs:56-79` (case `USER`: 6 accepted, the 7th 403); `FileSecurity.cs:144` | TEST-CONFIRMED [run: PASS] |
-| AI rooms section: no link to an Instructions, Knowledge or AI project room nor to its entries (403, role not available) | `03_Rooms/Links/AiHubRoomLinkTests.cs:61-79` (room link on an Instructions and an AI project room: 403 + "The role is not available for this user type"), `:81-106` (link on a skill file in an Instructions room: same); `FileSecurity.cs:237-263`; the Knowledge room is not reached: creating one needs vectorization (`FileStorageService.CheckKnowledgeRoomCreationAsync`), which the integration-test stack does not configure | TEST-CONFIRMED [run: PASS] (Instructions, AI project) / CODE-ONLY (Knowledge room and its entries; folders inside) |
+| My documents: up to 6 additional | `01_Files/Links/FileLinkLimitTests.cs:56-79` (case `USER`: 6 accepted, the 7th 403); `FileSecurity.cs:145` | TEST-CONFIRMED [run: PASS] |
+| AI rooms section: no link to an Instructions, Knowledge or AI project room nor to its entries (403, role not available) | `03_Rooms/Links/AiHubRoomLinkTests.cs:61-79` (room link on an Instructions and an AI project room: 403 + "The role is not available for this user type"), `:81-106` (link on a skill file in an Instructions room: same); `FileSecurity.cs:238-264`; the Knowledge room is not reached: creating one needs vectorization (`FileStorageService.CheckKnowledgeRoomCreationAsync`), which the integration-test stack does not configure | TEST-CONFIRMED [run: PASS] (Instructions, AI project) / CODE-ONLY (Knowledge room and its entries; folders inside) |
 | Public room: primary link auto-created, exactly one; 4 additional links listed with it; folder and file inside carry a primary link | `03_Rooms/Links/RoomLinkPrimaryTests.cs:47-60, 101-115`; `RoomLinkReadTests.cs:67-80, 289-314`; `RoomLinkCreateTests.cs:331-361`; `FolderShareTests.cs:324-340`; `04_Security/ShareInheritanceTests.cs:643-673` | TEST-CONFIRMED [run: PASS] |
 | Public room: up to 5 additional on the room and on entries | room `03_Rooms/Links/RoomLinkLimitTests.cs:46-69`; file `FileLinkLimitTests.cs:81-101`; folder `02_Folders/Links/FolderLinkLimitTests.cs:48-71` (5 accepted, the 6th 403 "…5" each) | TEST-CONFIRMED [run: PASS] |
 | Form filling room: one auto-created primary link with the filling right; additional link → 403; file inside carries a primary link with filling only | `RoomLinkPrimaryTests.cs:63-77`; `RoomLinkReadTests.cs:367-380`; `04_Security/RoomShareTests.cs:75-98, 205-224`; `RoomLinkCreateTests.cs:364-383`; `ShareInheritanceTests.cs:812-826` | TEST-CONFIRMED [run: PASS] |
-| Form filling room: folder inside carries a primary link | `FolderShareTests.cs:363-374` asserts that `getFolderPrimaryExternalLink` on a folder in an FFR THROWS — contradicts the cell; `FileSecurity.cs:155` allows 1 primary for FFR entries; `deviations.md` D12 (live run: a primary link of a folder inside an FFR was created with an expiration) | LIVE-CONFIRMED (see R6) |
+| Form filling room: folder inside carries a primary link | `FolderShareTests.cs:363-374` asserts that `getFolderPrimaryExternalLink` on a folder in an FFR THROWS — contradicts the cell; `FileSecurity.cs:156` allows 1 primary for FFR entries; `deviations.md` D12 (live run: a primary link of a folder inside an FFR was created with an expiration) | LIVE-CONFIRMED (see R6) |
 | Collaboration room and VDR: link to the room itself → 403; primary link GET 403; link list empty | `RoomLinkCreateTests.cs:364-383`; `RoomShareTests.cs:100-133`; `RoomLinkPrimaryTests.cs:172-185`; `RoomLinkReadTests.cs:338-364` | TEST-CONFIRMED [run: PASS] |
 | Collaboration room: folder inside gets a primary link; VDR: folder and file inside get primary links | `FolderShareTests.cs:342-361`; `ShareInheritanceTests.cs:760-809`; `FolderShareTests.cs:304-321` | TEST-CONFIRMED [run: PASS] |
 | Collaboration room: file inside; up to 6 additional in both room types | `FileLinkLimitTests.cs:56-79` (cases `EditingRoom`, `VirtualDataRoom`: 6 accepted, the 7th 403 "…6") | TEST-CONFIRMED [run: PASS] |
@@ -76,7 +78,7 @@ and R10; the yaml line numbers were refreshed to submodule `5ea4dc6`. D11, D12, 
 | 7th additional link on a file in My documents → 403 "…6" | `FileLinkLimitTests.cs:56-79` (also Custom, Collaboration, VDR); `FileSharing.cs:370-397` | TEST-CONFIRMED [run: PASS] |
 | 6th additional link on a Custom room → 403 | `RoomShareTests.cs:177-201` | TEST-CONFIRMED [run: PASS] |
 | 6th additional link on a Public room → 403 "…5" | `RoomLinkLimitTests.cs:46-69` (5 additional + 1 primary listed after the refusal) | TEST-CONFIRMED [run: PASS] |
-| Second primary link in a Public room or on a file inside → 403 "…1" | `FileSecurity.cs:119, 150`; `deviations.md` D11 (live run: Public-room entries keep one primary link) | LIVE-CONFIRMED |
+| Second primary link in a Public room or on a file inside → 403 "…1" | `FileSecurity.cs:125-128, 149-152`; `deviations.md` D11 (live run: Public-room entries keep one primary link) | LIVE-CONFIRMED |
 | Additional link in an FFR (room) → 403 | `RoomLinkCreateTests.cs:364-383`; `RoomShareTests.cs:205-224` | TEST-CONFIRMED [run: PASS] |
 | Additional link on a folder / file inside an FFR → 403 "…0" | file `FileLinkLimitTests.cs:103-118`; folder `FolderLinkLimitTests.cs:73-88` (FillForms right, 403 "…0") | TEST-CONFIRMED [run: PASS] |
 | The refusal carries "The maximum number of links may not exceed {N}" | `ErrorContent` asserted with N = 6, 5, 0 in the six limit tests `FileLinkLimitTests.cs:56-118`, `FolderLinkLimitTests.cs:48-88`, `RoomLinkLimitTests.cs:46-69` | TEST-CONFIRMED [run: PASS] |
@@ -88,23 +90,23 @@ and R10; the yaml line numbers were refreshed to submodule `5ea4dc6`. D11, D12, 
 | **Link settings by room type** | | |
 | My documents: access right (Editing / Review / Comment / Read accepted; manager rights 403), audience, password (asked from an anonymous visitor, wrong → invalid), deny download (visitor cannot download), lifetime (saved; expired refused) | `FileShareTests.cs:47-108, 186-225, 341-383`; `FileLinkSetTests.cs:116-147, 214-229`; `FolderShareTests.cs:133-203, 228-274, 844-864` | TEST-CONFIRMED [run: PASS] |
 | Public room: Read and Editing links accepted; deny download reflected | `RoomShareTests.cs:135-175`; `RoomLinkReadTests.cs:96-115` | TEST-CONFIRMED [run: PASS] |
-| Public room: audience fixed to anyone (file and folder inside: `internal:true` → stored false) | `ShareInheritanceTests.cs:701-725`; `FolderShareTests.cs:323-340` (both without `access` — see the trap; the code `FileSharing.cs:244` settles it) | TEST-CONFIRMED [run: PASS] |
+| Public room: audience fixed to anyone (file and folder inside: `internal:true` → stored false) | `ShareInheritanceTests.cs:701-725`; `FolderShareTests.cs:323-340` (both without `access` — see the trap; the code `FileSharing.cs:254` settles it) | TEST-CONFIRMED [run: PASS] |
 | Public room: password | `04_Security/LinkSettingsByRoomTypeTests.cs:47-72` (anonymous visitor: `RequiredPassword`, the right password → `Ok`) | TEST-CONFIRMED [run: PASS] |
 | Public room: primary link ignores an expiration; additional links keep one; entries inside keep one | `LinkSettingsByRoomTypeTests.cs:74-97` (primary, `access` sent: same id, no expiration), `:99-115` (additional keeps it), `:117-136` (file inside, primary link keeps it) | TEST-CONFIRMED [run: PASS] |
-| Form filling room: room link grants reading or filling; editing / review / comment → 403; a form inside offers filling only | `RoomShareTests.cs:75-98, 205-224`; `ShareInheritanceTests.cs:812-826`; `FileSecurity.cs:206-207`; `deviations.md` matrix row "Form filling room link: filling only / The room link also accepts the read right; entries accept filling only" | TEST-CONFIRMED [run: PASS] |
+| Form filling room: room link grants reading or filling; editing / review / comment → 403; a form inside offers filling only | `RoomShareTests.cs:75-98, 205-224`; `ShareInheritanceTests.cs:812-826`; `FileSecurity.cs:207-208`; `deviations.md` matrix row "Form filling room link: filling only / The room link also accepts the read right; entries accept filling only" | TEST-CONFIRMED [run: PASS] |
 | Form filling room: a link to a form / folder inside with the read right → 403 | `ShareInheritanceTests.cs:812-826` (offered rights are filling and none); `deviations.md` row above | TEST-CONFIRMED [run: PASS] |
-| Form filling room: audience, password, deny download offered; primary room link perpetual; entries keep an expiration | `FileSharing.cs:195-198` (room primary); `deviations.md` D12 and matrix row "Form filling room and Public room links are perpetual / Only the room's own primary link; entries and additional links keep an expiration date" | LIVE-CONFIRMED |
+| Form filling room: audience, password, deny download offered; primary room link perpetual; entries keep an expiration | `FileSharing.cs:205-208` (room primary); `deviations.md` D12 and matrix row "Form filling room and Public room links are perpetual / Only the room's own primary link; entries and additional links keep an expiration date" | LIVE-CONFIRMED |
 | Collaboration room: every setting on entry links | `LinkSettingsByRoomTypeTests.cs:138-167` (file link: Editing, `internal` true and false, deny download, password, lifetime stored); folder primary link `FolderShareTests.cs:342-361` | TEST-CONFIRMED [run: PASS] (file links) / CODE-ONLY (password, deny download, lifetime on folder links) |
 | VDR: audience fixed to DocSpace users (folder and file links internal by default; `internal:false` with access kept → still internal; audience not editable) | `ShareInheritanceTests.cs:760-809`; `FolderShareTests.cs:304-321` | TEST-CONFIRMED [run: PASS] |
 | VDR: access right, password, deny download, lifetime offered | `LinkSettingsByRoomTypeTests.cs:169-198` (file link, Read and Editing: right, password, deny download, lifetime stored; `internal:false` stored as true) | TEST-CONFIRMED [run: PASS] (file links) / CODE-ONLY (folder links) |
-| Custom room: access right (every valid right echoed), audience toggles, password (visitor asked), deny download (visitor cannot download), lifetime (future saved, past ignored) | `RoomShareTests.cs:227-322, 344-367, 369-472`; `RoomLinkUpdateTests.cs:129-237`; `04_Security/Sharing/ShareResolveLinkTests.cs:126-146`; `FolderLinkCreateTests.cs:219-232`; `FolderLinkPrimarySetTests.cs:295-351`; `FolderLinkPrimaryGetTests.cs:283-303` | TEST-CONFIRMED [run: PASS] |
+| Custom room: access right (every valid right echoed), audience toggles, password (visitor asked), deny download (visitor cannot download), lifetime (future saved, past ignored) | `RoomShareTests.cs:227-322, 344-367, 369-472`; `RoomLinkUpdateTests.cs:129-237`; `04_Security/Sharing/ShareResolveLinkTests.cs:126-146`; `FolderLinkCreateTests.cs:219-232`; `FolderLinkPrimarySetTests.cs:327-383`; `FolderLinkPrimaryGetTests.cs:283-303` | TEST-CONFIRMED [run: PASS] |
 | **A fixed "who has access" value silently skips the update** | | |
 | Public room entry link with `internal:true` → 200, stays anyone | `ShareInheritanceTests.cs:701-725`; `FolderShareTests.cs:323-340` | TEST-CONFIRMED [run: PASS] |
 | VDR link with `internal:false` → 200, stays DocSpace-only | `ShareInheritanceTests.cs:777-809`; `FolderShareTests.cs:304-321` | TEST-CONFIRMED [run: PASS] |
-| The whole request is skipped (password, title, revocation not applied) | `FileSharing.cs:207-210` (`continue` when the audience differs and cannot be edited); `deviations.md` matrix row "'Rejects' an audience or lifetime value that is not offered / Answers 200 and silently normalises or skips" | LIVE-CONFIRMED |
+| The whole request is skipped (password, title, revocation not applied) | `FileSharing.cs:220-225` (`continue` when the audience differs and cannot be edited); `deviations.md` matrix row "'Rejects' an audience or lifetime value that is not offered / Answers 200 and silently normalises or skips" | LIVE-CONFIRMED |
 | Anonymous visitor of a VDR link must sign in | `LinkSettingsByRoomTypeTests.cs:200-226` (VDR file primary link: anonymous `GetFileInfo` 403, a signed-in User with the same token opens the file) | TEST-CONFIRMED [run: PASS] |
 | **Deny-download on links combines with the VDR room setting** | | |
-| Flag stored as requested in every room type | `RoomLinkUpdateTests.cs:193-214`; `RoomLinkReadTests.cs:96-115`; `FolderLinkPrimarySetTests.cs:295-312`; `FileLinkSetTests.cs:116-130` | TEST-CONFIRMED [run: PASS] |
+| Flag stored as requested in every room type | `RoomLinkUpdateTests.cs:193-214`; `RoomLinkReadTests.cs:96-115`; `FolderLinkPrimarySetTests.cs:327-344`; `FileLinkSetTests.cs:116-130` | TEST-CONFIRMED [run: PASS] |
 | Room setting on + link flag off → download refused; room setting off → the link flag decides | `deviations.md` matrix row "VDR: deny-download cannot be turned off on a link while the room setting is on / The flag is stored; the room setting still blocks the download"; room flag `03_Rooms/Update/RoomUpdateVdrFieldsTests.cs:79-93`; link flag effect on `download` `ShareInheritanceTests.cs:266-362` (Custom) | LIVE-CONFIRMED |
 | Owner, Room managers, Content creators, Editors not restricted | owner `RoomShareTests.cs:324-342`, `FolderShareTests.cs:160-178`; VDR room setting on: `04_Security/VdrDenyDownloadRolesTests.cs:55-67` (owner keeps `security.Download`), `:69-85` (Room manager, Content creator, Editor keep it; a Viewer loses it) | TEST-CONFIRMED [run: PASS] |
 | **Roles that manage links** | | |
@@ -128,9 +130,9 @@ beyond the audience field itself.
 | Matrix ("Shared link rules") | Server | Reference |
 |---|---|---|
 | Maximum 6 links per file or folder | 6 additional plus primary links (D11: up to 6 primary links on entries outside Public rooms) | `deviations.md`, matrix table, D11 |
-| Form filling room link: filling only | The room link also accepts the read right (`FileSecurity.cs:204-205`); entries accept filling only | same |
-| Form filling room and Public room links are perpetual | Only the room's own primary link (`FileSharing.cs:193-199`); entries and additional links keep an expiration | same; D12 |
-| "Rejects" an audience or lifetime value that is not offered | Answers 200 and silently normalises or skips | same; `FileSharing.cs:207-239` |
+| Form filling room link: filling only | The room link also accepts the read right (`FileSecurity.cs:206-207`); entries accept filling only | same |
+| Form filling room and Public room links are perpetual | Only the room's own primary link (`FileSharing.cs:203-209`); entries and additional links keep an expiration | same; D12 |
+| "Rejects" an audience or lifetime value that is not offered | Answers 200 and silently normalises or skips | same; `FileSharing.cs:217-249` |
 | VDR: deny-download cannot be turned off on a link while the room setting is on | The flag is stored; the room setting still blocks the download | same |
 | Previous revision of this spec: "Any member MAY read the room's primary link" (scenario: a Viewer of a Custom room) | A User invited with Read gets 403 on `getRoomsPrimaryExternalLink` and on the folder endpoint; Room manager and Content creator get 200. The scenario now says so. | `RoomLinkPermissionsTests.cs:126-147`; `FolderLinkPrimaryPermissionsTests.cs:259-276` |
 | yaml `setFolderPrimaryExternalLink` is named as if it set only the primary link | It is the one PUT for any folder or room link (create, change, revoke), `primary` marks the primary; the SDK method name follows the operationId | yaml 17231 |
@@ -145,7 +147,7 @@ beyond the audience field itself.
   (R9, R10 below). Since `62419af921` an explicit `createFilePrimaryExternalLink` / `createFolderPrimaryExternalLink`
   makes a new primary link after a revocation (R10 fixed, `files-settings`); the read still answers 404.
 - **Past or malformed expiration silently ignored** (`RoomLinkUpdateTests.cs:155-191`;
-  `RoomLinkValidationTests.cs:295-319`; `FolderLinkPrimarySetTests.cs:333-351`); **unknown link id is an
+  `RoomLinkValidationTests.cs:295-319`; `FolderLinkPrimarySetTests.cs:365-383`); **unknown link id is an
   upsert**; **link type cannot be changed**; **missing type defaults to invitation**; **missing access creates
   nothing** (`RoomLinkCreateTests.cs:158-233`; `RoomLinkUpdateTests.cs:292-312`; `FileLinkSetTests.cs:236-252`):
   request semantics, `file-sharing`.
@@ -172,17 +174,17 @@ D-numbers are the ones of `openspec/deviations.md`; R-numbers are new.
 
 | # | Where | What the server does | Evidence | Status |
 |---|-------|----------------------|----------|--------|
-| D11 | Link count limits | Entries in My documents, Custom, Collaboration and VDR rooms accept up to 6 *primary* links in addition to 6 additional ones; rooms and Public-room entries keep one primary link. | `deviations.md` D11 (live run); `FileSharing.cs:361-366` (an entry without a primary-link limit inherits the additional-link limit) | STILL OPEN (2026-11-04: the fallback is as before) |
-| D12 | Link settings (FFR) | A primary link of a folder inside an FFR stores an expiration on create; later updates and the revocation are skipped unless the stored date is echoed. | `deviations.md` D12 (live run); `FileSharing.cs:207-221` | STILL OPEN (2026-11-04: untouched) |
-| R6 | Entities that accept a link (FFR folder) | `getFolderPrimaryExternalLink` on a folder inside a Form filling room throws (the test asserts the exception without a status) although the limits table allows one primary link on it and the live run created one through the PUT. GET and PUT disagree. | `FolderShareTests.cs:363-374`; `FileSecurity.cs:155`; D12 | STILL OPEN (2026-11-04: test and table unchanged) |
+| D11 | Link count limits | Entries in My documents, Custom, Collaboration and VDR rooms accept up to 6 *primary* links in addition to 6 additional ones; rooms and Public-room entries keep one primary link. | `deviations.md` D11 (live run); `FileSharing.cs:371-376` (an entry without a primary-link limit inherits the additional-link limit) | STILL OPEN (2026-11-04: the fallback is as before) |
+| D12 | Link settings (FFR) | A primary link of a folder inside an FFR stores an expiration on create; later updates and the revocation are skipped unless the stored date is echoed. | `deviations.md` D12 (live run); `FileSharing.cs:217-231` | STILL OPEN (2026-11-04: untouched) |
+| R6 | Entities that accept a link (FFR folder) | `getFolderPrimaryExternalLink` on a folder inside a Form filling room throws (the test asserts the exception without a status) although the limits table allows one primary link on it and the live run created one through the PUT. GET and PUT disagree. | `FolderShareTests.cs:363-374`; `FileSecurity.cs:156`; D12 | STILL OPEN (2026-11-04: test and table unchanged) |
 | R7 | Roles that manage links | `getFilePrimaryExternalLink` answers 200 to a caller without access to the file instead of 403; `POST folder/{id}/link` answers 200 with an empty list to a Content creator, a Viewer, a non-member admin, a Guest, and on an archived room instead of 403. | `FileLinkPrimaryTests.cs:189-210` (bug 81572, red); `FolderLinkCreateTests.cs:271-421` (bug 81575, red) | NOT REPRODUCED in run 365d87fe60: the test of bug 81572 and all of `FolderLinkCreateTests` (bug 81575) pass; no fixing commit identified, the "currently answers 200" remarks are stale |
-| R8 | Link count limits | The link-limit refusal is produced as the operation's *warning* with the entry skipped, not as an exception; the observed 403 depends on the caller turning the warning into an error. Invalid link type or access answers 403 instead of 400. | `FileSharing.cs:379-381`; `RoomLinkValidationTests.cs:235, 258` (bugs 82370, 82371) | STILL OPEN (2026-11-04: the warning path and the tests are unchanged) |
-| R9 | Custom room primary link | Revoking a Custom room's primary link with the body the client sends (`setRoomLink` with `access` 0 and no `primary` field) leaves `getRoomsPrimaryExternalLink` at 404 for good; the TypeScript suite found that a revocation carrying `primary:true` lets the link be minted again, so the outcome hinges on a field the request does not need. The new test asserts that the primary link is readable again after that revocation. | `03_Rooms/Links/RoomLinkPrimaryTests.cs:233-261` (bug 84873, Category Bug, red: no fix commit in the range or after it) | OPEN — red test, run 365d87fe60 (404 "The required file was not found") |
-| R10 | File primary link | Once a file's primary link has been revoked, `createFilePrimaryExternalLink` (the "create external link" button) answers 404 for that file from then on, while a new primary link can still be made through `setFileExternalLink`; the new test asserts that the POST mints a new primary link with a new id. | `01_Files/Links/FileLinkPrimaryTests.cs:212-242` (bug 84872) | FIXED (62419af921): the create request ignores the revocation mark; new id asserted at `FileLinkPrimaryTests.cs:239`, the read at `:242`; the folder twin at `02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` |
+| R8 | Link count limits | The link-limit refusal is produced as the operation's *warning* with the entry skipped, not as an exception; the observed 403 depends on the caller turning the warning into an error. Invalid link type or access answers 403 instead of 400. | `FileSharing.cs:389-391`; `RoomLinkValidationTests.cs:235, 258` (bugs 82370, 82371) | STILL OPEN (2026-11-04: the warning path and the tests are unchanged) — narrowed by run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`): invalid `linkType`/`access` now answer 400 (bugs 82370, 82371, tests green); the link-limit part was not run |
+| R9 | Custom room primary link | Revoking a Custom room's primary link with the body the client sends (`setRoomLink` with `access` 0 and no `primary` field) leaves `getRoomsPrimaryExternalLink` at 404 for good; the TypeScript suite found that a revocation carrying `primary:true` lets the link be minted again, so the outcome hinges on a field the request does not need. The new test asserts that the primary link is readable again after that revocation. | `03_Rooms/Links/RoomLinkPrimaryTests.cs:233-261` (bug 84873, Category Bug, red: no fix commit in the range or after it) | OPEN — red test, run 365d87fe60 (404 "The required file was not found") — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 84873) |
+| R10 | File primary link | Once a file's primary link has been revoked, `createFilePrimaryExternalLink` (the "create external link" button) answers 404 for that file from then on, while a new primary link can still be made through `setFileExternalLink`; the new test asserts that the POST mints a new primary link with a new id. | `01_Files/Links/FileLinkPrimaryTests.cs:212-242` (bug 84872) | FIXED (62419af921): the create request ignores the revocation mark; new id asserted at `FileLinkPrimaryTests.cs:239`, the read at `:242`; the folder twin at `02_Folders/LinksPrimary/FolderLinkPrimarySetTests.cs:242-246` — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 
 ## Revision 2026-11-14 (09d4de0768..6fb6dfb17a)
 
 | Claim | Source | Status |
 |---|---|---|
 | Public room: auto-created external link, primary true; custom room empty by default; `type` external / invitation / none | `products/ASC.Files/Tests/Tests/03_Rooms/Links/RoomLinkReadTests.cs:50,67,83,173,193,213` | TEST-CONFIRMED [run: PASS] (by name) |
-| Read access required (403), unknown room 404, member without the link right gets an empty list, at most 100, paging ignored | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:903-924`; yaml `getRoomLinks` | CODE-ONLY |
+| Read access required (403), unknown room 404, member without the link right gets an empty list, at most 100, paging ignored | `products/ASC.Files/Server/Api/VirtualRoomsController.cs:904-925`; yaml `getRoomLinks` | CODE-ONLY |
