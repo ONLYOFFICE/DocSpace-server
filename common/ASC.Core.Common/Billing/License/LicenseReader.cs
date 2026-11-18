@@ -86,8 +86,12 @@ public class LicenseReader(
     // background refresh (Files.Worker): one writer at a time, so a trial never overwrites a license just accepted.
     // That holds across processes only with a distributed lock provider (Redis or ZooKeeper); without one the lock is
     // per process, and the check of the license file under it only narrows the race between Web.Api and the worker.
-    // The trial activated on request (an endpoint outside the published contract) writes them outside this lock; it
-    // refuses once any tariff end is set, so it can only run before the writers above have written
+    // Two writers stay outside this lock. The first read of the tariff creates the 30-day trial under the lock of the
+    // tariff read; both writers above read the tariff first under this lock, so that creation ends before their writes.
+    // That too holds across processes only with a distributed lock provider: without one each process has its own lock
+    // of the tariff read and its own tariff cache, and a first read already running in another process can still write
+    // its 30 days after them. The trial activated on request (an endpoint outside the published contract) refuses once
+    // any tariff end is set, so it can only run before the writers above have written
     private static readonly string _licenseLockKey = $"{Tenant.DefaultTenant}_license";
 
     /// <summary>The id of the quota that carries the license of a self-hosted Enterprise installation.</summary>
@@ -354,6 +358,10 @@ public class LicenseReader(
         // it never names a license whose tariff is not in force.
         await using (await distributedLockProvider.TryAcquireLockAsync(_licenseLockKey))
         {
+            // The tariff is read first, as the trial write does: on an installation without a tariff that read creates
+            // the 30-day trial, under the same quota id, and it has to end before the license is written over it
+            await tariffService.GetTariffAsync(Tenant.DefaultTenant, withRequestToPaymentSystem: false);
+
             await tenantManager.SaveTenantQuotaAsync(quota);
 
             var tariff = new Tariff
@@ -378,7 +386,11 @@ public class LicenseReader(
     /// editing service reinstalled with a fresh trial does not extend the portal's. Never replaces a license put in
     /// force from a file: nothing is written while the license file is on disk or while the license quota was written
     /// from a file, and the check runs under the lock the writers of a license from a file take too (across processes
-    /// only with a distributed lock provider). Nothing is written when the trial in force already ends on the chosen
+    /// only with a distributed lock provider). The tariff is read first under that lock, so on an installation without
+    /// a tariff the 30-day trial of the first read is created before this write and then brought closer, not written
+    /// over it by a read that started earlier (across processes, again, only with a distributed lock provider). That read
+    /// waits for the lock of the tariff read; when it is not acquired in time, the write fails with the lock's exception,
+    /// as it does when the lock of the license writers is not. Nothing is written when the trial in force already ends on the chosen
     /// date. The chosen date is written even when it has passed, so the background refresh ends a trial the editing
     /// service ended.
     /// </remarks>
@@ -405,6 +417,11 @@ public class LicenseReader(
                 logger.InfoDocsTrialSkippedLicenseFile();
                 return false;
             }
+
+            // The tariff is read first: on an installation without a tariff that read creates the 30-day trial under
+            // the lock of the tariff read, and it has to end before this write. Started later, it would find no tariff
+            // and write the 30 days over the end chosen here
+            await tariffService.GetTariffAsync(Tenant.DefaultTenant, withRequestToPaymentSystem: false);
 
             // The other license quotas are trials DocSpace starts by itself: the 30-day one of an Enterprise
             // installation without a license, or the one activated on request

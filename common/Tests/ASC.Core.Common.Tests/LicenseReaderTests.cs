@@ -236,6 +236,40 @@ public sealed class LicenseReaderTests : IDisposable
         (await reader.DocsTrialToDBAsync(new DocsTrialLicense(DateTime.UtcNow.Date.AddDays(20)))).Should().BeFalse();
     }
 
+    [Fact]
+    public async Task DocsTrialToDBAsync_NoTariffYet_FirstReadEndsBeforeTheWrite()
+    {
+        // On an installation without a tariff the first read creates the 30-day trial under the lock of the tariff
+        // read. Run after the trial write, a read that had found no tariff would write the 30 days over the end chosen
+        // here, so the trial write reads the tariff first, under the lock of the license writers, and brings that
+        // trial closer.
+        var events = new List<string>();
+        var (reader, written) = CreateReaderWithoutTariff(events);
+        var docsEnd = DateTime.UtcNow.Date.AddDays(10);
+
+        (await reader.DocsTrialToDBAsync(new DocsTrialLicense(docsEnd))).Should().BeTrue();
+
+        events.Should().Equal("lock", "first read", "write", "unlock");
+        written.Single().Should().Be(docsEnd);
+    }
+
+    [Fact]
+    public async Task RefreshActiveLicenseAsync_NoTariffYet_FirstReadEndsBeforeTheLicenseWrite()
+    {
+        // The first read of the tariff saves the 30-day trial under the quota id of the license: run after the license
+        // is written, a read that had found no tariff would replace the license with the trial. The license write reads
+        // the tariff first, under the lock of the license writers. The customer id is written last, to settings this
+        // reader has none of, so the tariff write stops the test there.
+        await File.WriteAllTextAsync(_licensePath, LicenseJson(ActiveCustomer), TestContext.Current.CancellationToken);
+        var events = new List<string>();
+        var (reader, written) = CreateReaderWithoutTariff(events, stopAtTheWrite: true);
+
+        await Assert.ThrowsAsync<StoppedByTheTestException>(() => reader.RefreshActiveLicenseAsync(AcceptAsync));
+
+        events.Should().Equal("lock", "first read", "quota", "write", "unlock");
+        written.Single().Date.Should().Be(new DateTime(2099, 1, 1));
+    }
+
     private LicenseReader CreateReader()
     {
         return new LicenseReader(
@@ -290,6 +324,81 @@ public sealed class LicenseReaderTests : IDisposable
             logger: NullLogger<LicenseReader>.Instance);
     }
 
+    /// <summary>
+    /// A reader of an installation whose tariff was never read: the first read of the tariff creates the 30-day trial
+    /// under the quota id of the license, as the tariff service does. The lock of the license writers, the first read,
+    /// a quota write and a tariff write are recorded in <paramref name="events"/> in the order they happen.
+    /// </summary>
+    /// <param name="events">Receives "lock", "first read", "quota", "write" and "unlock".</param>
+    /// <param name="stopAtTheWrite">Whether the tariff write throws <see cref="StoppedByTheTestException"/> once recorded.</param>
+    /// <returns>The reader, and the end of each tariff written.</returns>
+    private (LicenseReader Reader, List<DateTime> Written) CreateReaderWithoutTariff(List<string> events, bool stopAtTheWrite = false)
+    {
+        var quotas = new List<TenantQuota>();
+        var written = new List<DateTime>();
+        Tariff? stored = null;
+
+        var quotaService = StubProxy<IQuotaService>.Create(new()
+        {
+            [nameof(IQuotaService.GetTenantQuotasAsync)] = _ => Task.FromResult<IEnumerable<TenantQuota>>(quotas.ToList()),
+            [nameof(IQuotaService.GetTenantQuotaAsync)] = args => Task.FromResult(new TenantQuota((int)args![0]!)),
+            [nameof(IQuotaService.SaveTenantQuotaAsync)] = args =>
+            {
+                events.Add("quota");
+                return Task.FromResult((TenantQuota)args![0]!);
+            }
+        });
+        var tariffService = StubProxy<ITariffService>.Create(new()
+        {
+            [nameof(ITariffService.GetTariffAsync)] = _ =>
+            {
+                events.Add("first read");
+                if (stored == null)
+                {
+                    quotas.Add(new TenantQuota(LicenseReader.LicenseQuotaId) { Name = LicenseReader.StartTrialQuotaName, Trial = true });
+                    stored = new Tariff { Quotas = [new ASC.Core.Billing.Quota(LicenseReader.LicenseQuotaId, 1)], DueDate = DateTime.UtcNow.AddDays(30), CustomerId = "" };
+                }
+
+                return Task.FromResult(stored!);
+            },
+            [nameof(ITariffService.GetBillingInfoAsync)] = _ => Task.FromResult(stored),
+            [nameof(ITariffService.SetTariffAsync)] = args =>
+            {
+                events.Add("write");
+                written.Add(((Tariff)args![1]!).DueDate);
+                return stopAtTheWrite ? throw new StoppedByTheTestException() : Task.CompletedTask;
+            }
+        });
+
+        // The lock of the license writers: the reader takes no other lock of this provider
+        var handle = StubProxy<IDistributedLockHandle>.Create(new()
+        {
+            [nameof(IAsyncDisposable.DisposeAsync)] = _ =>
+            {
+                events.Add("unlock");
+                return ValueTask.CompletedTask;
+            }
+        });
+        var lockProvider = StubProxy<IDistributedLockProvider>.Create(new()
+        {
+            [nameof(IDistributedLockProvider.TryAcquireLockAsync)] = _ =>
+            {
+                events.Add("lock");
+                return Task.FromResult(handle);
+            }
+        });
+
+        var reader = new LicenseReader(
+            tenantManager: new TenantManager(null!, quotaService, null!, tariffService, null!, null!, new InMemoryLockProvider()),
+            tariffService: tariffService,
+            coreSettings: null!,
+            licenseReaderConfig: new LicenseReaderConfig(CreateConfiguration()),
+            distributedLockProvider: lockProvider,
+            logger: NullLogger<LicenseReader>.Instance);
+
+        return (reader, written);
+    }
+
     private IConfiguration CreateConfiguration()
     {
         return new ConfigurationBuilder()
@@ -301,6 +410,12 @@ public sealed class LicenseReaderTests : IDisposable
     {
         _validated.Add(license);
         throw new InvalidOperationException("failed by the test");
+    }
+
+    private Task<LicenseValidationResult> AcceptAsync(License license)
+    {
+        _validated.Add(license);
+        return Task.FromResult(new LicenseValidationResult(true, null!));
     }
 
     private Task<LicenseValidationResult> RefuseAsync(License license)
@@ -318,4 +433,6 @@ public sealed class LicenseReaderTests : IDisposable
     {
         return $$"""{"customer_id":"{{customerId}}","signature":"signature","start_date":"2020-01-01T00:00:00Z","end_date":"2099-01-01T00:00:00Z"}""";
     }
+
+    private sealed class StoppedByTheTestException() : Exception("stopped by the test");
 }

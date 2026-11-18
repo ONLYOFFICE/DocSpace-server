@@ -111,7 +111,16 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
             var fresh = await request();
             if (fresh.State != DocsTrialState.Unknown)
             {
-                await cache.SetAsync(GetCacheKey(), fresh, entry => SetupEntry(entry));
+                // The answer is in hand: a cache that cannot keep it costs the next readers a question, never this one
+                // its answer
+                try
+                {
+                    await cache.SetAsync(GetCacheKey(), fresh, entry => SetupEntry(entry));
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    logger.WarningDocsTrialCache(ex);
+                }
             }
 
             return fresh;
@@ -163,14 +172,36 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            // The request ran past the hard timeout, or failed in a way the factory does not expect, with no answer
-            // known to fall back on. The cause is logged where the service was asked; a request cut by the hard timeout
-            // goes on in the background and replaces this answer when it ends
-            logger.DebugDocsTrialNoAnswerKnown(ex.Message);
+            // The request ran past the hard timeout, or failed in a way the factory does not expect (the cache itself
+            // failed, an entry it cannot read), with no answer known to fall back on. A timeout is expected: its cause
+            // is logged where the service was asked, and the request goes on in the background and replaces this
+            // answer when it ends. Any other failure is logged here, with the exception
+            if (ex is SyntheticTimeoutException)
+            {
+                logger.DebugDocsTrialNoAnswerKnown(ex.Message);
+            }
+            else
+            {
+                logger.WarningDocsTrialCache(ex);
+            }
 
-            // Another process (the background refresh) may have stored a known answer in the meantime: the failure of
-            // this one must not replace it. A known answer stored between this read and the write below is still
-            // replaced for the failure duration; the next fresh question stores it again
+            return await KeepFailureAsync();
+        }
+    }
+
+    /// <summary>
+    /// Keeps a failure with no answer known for <see cref="DocsTrialCacheOptions.FailureDuration"/>, unless another
+    /// process (the background refresh) stored a known answer in the meantime, which is returned instead. A known
+    /// answer stored between the read and the write here is still replaced for the failure duration; the next fresh
+    /// question stores it again.
+    /// </summary>
+    /// <returns>The known answer another process stored, or <see cref="DocsTrialCheck.Unknown"/>.</returns>
+    private async Task<DocsTrialCheck> KeepFailureAsync()
+    {
+        // The cache can fail here too: this failure is logged on its own, so it never hides the one being handled,
+        // and the answer stays Unknown
+        try
+        {
             var known = await GetLastKnownAsync();
             if (known != null)
             {
@@ -178,20 +209,34 @@ public sealed class DocsTrialCache(IFusionCache cache, ILogger<DocumentServiceLi
             }
 
             await cache.SetAsync(GetCacheKey(), DocsTrialCheck.Unknown, options.FailureDuration);
-
-            return DocsTrialCheck.Unknown;
         }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.WarningDocsTrialCache(ex);
+        }
+
+        return DocsTrialCheck.Unknown;
     }
 
     /// <summary>
     /// Returns the last answer of the editing service the installation knows, also one past its duration that the
-    /// fail-safe still keeps, without asking the service; <c>null</c> when none is known.
+    /// fail-safe still keeps, without asking the service; <c>null</c> when none is known, also when the cache cannot be
+    /// read (logged as a warning).
     /// </summary>
     public async Task<DocsTrialCheck> GetLastKnownAsync()
     {
-        var known = await cache.TryGetAsync<DocsTrialCheck>(GetCacheKey(), entry => entry.SetAllowStaleOnReadOnly());
+        try
+        {
+            var known = await cache.TryGetAsync<DocsTrialCheck>(GetCacheKey(), entry => entry.SetAllowStaleOnReadOnly());
 
-        return known.HasValue && known.Value is { State: not DocsTrialState.Unknown } ? known.Value : null;
+            return known.HasValue && known.Value is { State: not DocsTrialState.Unknown } ? known.Value : null;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.WarningDocsTrialCache(ex);
+
+            return null;
+        }
     }
 
     private FusionCacheEntryOptions SetupEntry(FusionCacheEntryOptions entry)

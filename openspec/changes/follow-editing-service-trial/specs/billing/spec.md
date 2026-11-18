@@ -45,10 +45,9 @@ and never fails the write.
 ### Requirement: Single tariff of a self-hosted installation
 
 A self-hosted installation SHALL have one tariff shared by all its portals, read from the licence file
-(`branding-and-licensing`), never from a billing service. An Enterprise installation without an activated
-licence SHALL get a 30-day trial tariff on first read; one without a licence path (open source) SHALL report
-`openSource` true and is never treated as not paid. Every operation that needs the billing service SHALL
-answer 403 "Tariff service is not configured" there.
+(`branding-and-licensing`), never from a billing service. An Enterprise one without an activated licence
+SHALL get a 30-day trial tariff on first read, which the editing service's trial may end sooner; one without a licence path (open source) SHALL report `openSource` true and is never treated as not paid.
+Operations needing billing SHALL answer 403 "Tariff service is not configured" there.
 
 #### Scenario: Integration host without billing
 

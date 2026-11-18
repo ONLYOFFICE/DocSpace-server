@@ -4,11 +4,11 @@
 
 ### Requirement: Following the editing service's trial
 
-With no license file at the license path (a staged upload aside) and no license from a file in force, an Enterprise
-or Developer installation SHALL end the trial of its first tariff read no later than the editing service's trial
-ends, never moving the end later, and by yesterday once that trial expired. The daily re-read SHALL apply this,
-accepted or not, and so SHALL a setup wizard completed during that trial, counting as acceptance. A license from a
-file SHALL never be replaced by it.
+With no license file at the license path and no license from a file in force, an Enterprise installation SHALL end
+the trial of its first tariff read no later than the editing service's trial ends, never moving the end later, and
+by yesterday once that trial expired. The daily re-read SHALL apply this, accepted or not, as SHALL a setup wizard
+completed during that trial, counting as acceptance. A license from a file SHALL never be replaced by it; across
+processes, only with a distributed lock.
 
 #### Scenario: Wizard completed on the editing service's trial
 
@@ -80,11 +80,11 @@ file SHALL never be replaced by it.
 
 ### Requirement: Whether a license is still required
 
-`getIsLicenseRequired` SHALL need no authentication and answer true only when the installation is Enterprise
-or Developer, its tariff page is enabled (not an anyone-access portal, not an image-based deployment), no
-license file exists at the configured path and no trial of "Following the editing service's trial" would be in force
-today; false in every other case, including a hosted portal. The editing service's answer MAY be 15 minutes old, or 3
-days while it does not answer.
+`getIsLicenseRequired` SHALL need no authentication and answer true only when the installation is Enterprise, its
+tariff page is enabled (not an anyone-access portal, not an image-based deployment), no license file exists at the
+configured path and no trial of "Following the editing service's trial" would be in force today; false in every
+other case, including a hosted portal. The editing service's answer and the trial end MAY be 15 minutes old, the
+answer 3 days while the service is silent.
 
 #### Scenario: Fresh Enterprise installation
 

@@ -247,21 +247,112 @@ public sealed class DocsTrialCacheTests : IDisposable
     }
 
     [Theory]
-    [InlineData(null, "1.00:00:00")]
-    [InlineData("12:00:00", "12:00:00")]
-    [InlineData("00:00:10", "00:01:00")]
-    [InlineData("2.00:00:00", "1.00:00:00")]
-    [InlineData("3.00:00:00", "1.00:00:00")]
-    public void ReadRefreshPeriod_Configured_StaysWithinTheLastAnswerKept(string? configured, string expected)
+    [InlineData(null, "1.00:00:00", false)]
+    [InlineData("12:00:00", "12:00:00", false)]
+    [InlineData("x", "1.00:00:00", true)]
+    [InlineData("00:00:00", "00:01:00", true)]
+    [InlineData("-1.00:00:00", "00:01:00", true)]
+    [InlineData("00:00:10", "00:01:00", true)]
+    [InlineData("2.00:00:00", "1.00:00:00", true)]
+    [InlineData("3.00:00:00", "1.00:00:00", true)]
+    public void ReadRefreshPeriod_Configured_StaysWithinTheLastAnswerKept(string? configured, string expected, bool warned)
     {
         // The last answer known has to outlive one refresh that finds the editing service silent, with a period to
-        // spare for the time the refreshes take, so the period is at most a third of the fail-safe.
+        // spare for the time the refreshes take, so the period is at most a third of the fail-safe. A value that is
+        // not used as written is logged.
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?> { [DocsTrialCacheOptions.RefreshPeriodKey] = configured })
             .Build();
+        var logger = new RecordingLogger();
 
-        DocsTrialCacheOptions.ReadRefreshPeriod(configuration, NullLogger.Instance)
+        DocsTrialCacheOptions.ReadRefreshPeriod(configuration, logger)
             .Should().Be(TimeSpan.Parse(expected, CultureInfo.InvariantCulture));
+        logger.Entries.Any(e => e.Level == LogLevel.Warning).Should().Be(warned);
+    }
+
+    [Fact]
+    public async Task GetAsync_CacheFailsAndSoDoesTheFallback_IsUnknownAndLogsBoth()
+    {
+        // A cache that cannot read its entry (a value of another shape in Redis) fails the read, and the read of the last
+        // answer known that follows fails the same way: the anonymous question still gets an answer, and neither
+        // failure is lost.
+        var first = new InvalidOperationException("the entry cannot be read");
+        var second = new InvalidOperationException("the last answer cannot be read");
+        var cache = StubProxy<IFusionCache>.Create(new()
+        {
+            // What the entry options of a call start from
+            ["get_" + nameof(IFusionCache.DefaultEntryOptionsProvider)] = _ => null,
+            ["get_" + nameof(IFusionCache.DefaultEntryOptions)] = _ => new FusionCacheEntryOptions(),
+            [nameof(IFusionCache.GetOrSetAsync)] = _ => throw first,
+            [nameof(IFusionCache.TryGetAsync)] = _ => throw second,
+            [nameof(IFusionCache.SetAsync)] = _ => ValueTask.CompletedTask
+        });
+        var logger = new RecordingLogger();
+
+        var answer = await new DocsTrialCache(cache, logger, DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: true);
+
+        answer.Should().Be(DocsTrialCheck.Unknown);
+        logger.Entries.Where(e => e.Level == LogLevel.Warning).Select(e => e.Exception).Should().Equal(first, second);
+    }
+
+    [Fact]
+    public async Task GetAsync_RequestRunsPastTheHardTimeout_IsUnknownAndLoggedAsDebugOnly()
+    {
+        // A request that runs past the hard timeout is expected: its cause is logged where the service was asked, so
+        // the cache logs no warning for it. Any other failure of the cache is a warning (the test above).
+        var cache = StubProxy<IFusionCache>.Create(new()
+        {
+            ["get_" + nameof(IFusionCache.DefaultEntryOptionsProvider)] = _ => null,
+            ["get_" + nameof(IFusionCache.DefaultEntryOptions)] = _ => new FusionCacheEntryOptions(),
+            [nameof(IFusionCache.GetOrSetAsync)] = _ => throw new SyntheticTimeoutException("the request ran past the hard timeout"),
+            [nameof(IFusionCache.TryGetAsync)] = _ => new ValueTask<MaybeValue<DocsTrialCheck>>(default(MaybeValue<DocsTrialCheck>)),
+            [nameof(IFusionCache.SetAsync)] = _ => ValueTask.CompletedTask
+        });
+        var logger = new RecordingLogger();
+
+        var answer = await new DocsTrialCache(cache, logger, DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: true);
+
+        answer.Should().Be(DocsTrialCheck.Unknown);
+        logger.Entries.Select(e => e.Level).Should().Equal(LogLevel.Debug);
+    }
+
+    [Fact]
+    public async Task GetAsync_FreshAnswerTheCacheCannotKeep_IsStillTheAnswer()
+    {
+        // The setup wizard and the background refresh ask the service themselves: an answer in hand is theirs even when
+        // the cache cannot keep it, and the failure is logged.
+        var failure = new InvalidOperationException("the answer cannot be written");
+        var cache = StubProxy<IFusionCache>.Create(new()
+        {
+            ["get_" + nameof(IFusionCache.DefaultEntryOptionsProvider)] = _ => null,
+            ["get_" + nameof(IFusionCache.DefaultEntryOptions)] = _ => new FusionCacheEntryOptions(),
+            [nameof(IFusionCache.SetAsync)] = _ => throw failure
+        });
+        var logger = new RecordingLogger();
+        _answers.Enqueue(_active);
+
+        var answer = await new DocsTrialCache(cache, logger, DocsTrialCacheOptions.Default).GetAsync(RequestAsync, useCache: false);
+
+        answer.Should().Be(_active);
+        logger.Entries.Should().Equal((LogLevel.Warning, failure));
+    }
+
+    [Fact]
+    public async Task GetLastKnownAsync_CacheCannotBeRead_IsNoneAndLogged()
+    {
+        // The wizard falls back on the last answer known when the service is silent: a cache it cannot read means no
+        // answer known, not a failed wizard.
+        var failure = new InvalidOperationException("the last answer cannot be read");
+        var cache = StubProxy<IFusionCache>.Create(new()
+        {
+            ["get_" + nameof(IFusionCache.DefaultEntryOptionsProvider)] = _ => null,
+            ["get_" + nameof(IFusionCache.DefaultEntryOptions)] = _ => new FusionCacheEntryOptions(),
+            [nameof(IFusionCache.TryGetAsync)] = _ => throw failure
+        });
+        var logger = new RecordingLogger();
+
+        (await new DocsTrialCache(cache, logger, DocsTrialCacheOptions.Default).GetLastKnownAsync()).Should().BeNull();
+        logger.Entries.Should().Equal((LogLevel.Warning, failure));
     }
 
     [Fact]
@@ -346,6 +437,27 @@ public sealed class DocsTrialCacheTests : IDisposable
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             Thread.Sleep(pause);
+        }
+    }
+
+    /// <summary>A logger that keeps the level and the exception of every entry.</summary>
+    private sealed class RecordingLogger : ILogger<DocumentServiceLicense>
+    {
+        public List<(LogLevel Level, Exception? Exception)> Entries { get; } = [];
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+        {
+            return null;
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            Entries.Add((logLevel, exception));
         }
     }
 
