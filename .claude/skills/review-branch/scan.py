@@ -5,12 +5,27 @@ Everything here is a cheap, deterministic signal read from `git diff` — a HINT
 reviewer, never a verdict. Each hit still has to be read in context before it becomes a finding.
 
 Usage (from the repo root, server/):
-    python .claude/skills/review-branch/scan.py [--base <ref>] [--head <ref>] [--worktree]
+    python .claude/skills/review-branch/scan.py [--base <ref>] [--head <ref>] [--worktree] [--full] [--gate]
 
 --base      ref to compare against; default: the candidate with the fewest commits ahead of it
             (origin/release/* newest first, origin/develop, origin/master)
 --head      default HEAD
---worktree  compare the base against the working tree (uncommitted changes included)
+--worktree  compare the base against the working tree (uncommitted changes included); only for the
+            checked-out branch, so with a --head that names another ref (another branch, even at the same
+            commit) it exits 2; with a detached HEAD a --head at that commit is accepted
+--full      print the long hint lists (claims with numbers, stale verification.md rows) whole instead of
+            their first rows and a count
+--gate      exit with 1 when the "Gate" section lists a hard failure: AI attribution in a commit; a
+            change of the base, since the merge-base, to rules or review tooling that apply to the
+            branch; an untracked file (--worktree; the branch's own saved review at the root
+            excepted); a requirement the branch adds at 500 characters or more, brings to 500 or
+            more, or makes longer while over; a whole-file line-ending flip; a conflict marker; a new source file
+            without a license header (generated files and thirdparty/ excepted). Exit 0 otherwise; 2
+            when the scan itself cannot run (git, the arguments, an error of the script)
+
+With --worktree the scan reads a commit of what `git commit -a` would record (clean filters applied,
+intent-to-add files and moved submodule pointers included), built in a temporary copy of the index; the
+header prints its tree id, which a Hand-over block records.
 """
 
 from __future__ import annotations
@@ -18,6 +33,7 @@ from __future__ import annotations
 import argparse
 import functools
 import fnmatch
+import os
 import re
 import subprocess
 import sys
@@ -25,16 +41,65 @@ from collections import defaultdict
 from pathlib import Path
 
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+# The scan reads the repository; `git status` would otherwise refresh and rewrite the real index under its lock,
+# and an IDE's git call running at the same moment would fail on that lock.
+os.environ["GIT_OPTIONAL_LOCKS"] = "0"
 
 RULES_DIR = Path(".claude/rules")
-LICENSE_MARK = "Copyright (C) Ascensio System SIA"
+# Hard failures of --gate, collected while the sections are printed.
+GATE: list[str] = []
+# What a review runs: a base change to one of these that applies to the branch makes a check on the branch's older
+# copy see less. CLAUDE.md is left out: its frequent edits are lists, and the rules it points to are covered here.
+REVIEW_TOOLING = (".claude/rules", ".claude/skills/review-branch", ".claude/scripts/prove-red.sh", "openspec/config.yaml")
+# Rules whose `paths:` say less than where they apply: CLAUDE.md (Git Workflow) has every branch follow
+# fixing-findings.md §6 and §9-§11, whatever files the branch changes.
+ALWAYS_APPLIES = {".claude/rules/fixing-findings.md"}
+# Rules with no `paths:` that govern how the agent works, not what a branch must hold (SKILL.md §3 A): a base change
+# to them leaves nothing for a branch to bring in.
+NOT_A_REVIEW_CRITERION = {".claude/rules/csharp-lsp.md"}
+# The header forms in use: the full AGPL header, the short "(c) Copyright" one, and the SPDX line.
+LICENSE_MARKS = ("Copyright (C) Ascensio System SIA", "(c) Copyright Ascensio System SIA", "SPDX-License-Identifier: AGPL")
+
+
+def fail(message: str) -> None:
+    """Exit with 2, so that --gate's 1 always means a hard failure and never a scan that could not run."""
+    print(message, file=sys.stderr)
+    raise SystemExit(2)
 
 
 def git(*args: str, check: bool = True) -> str:
     res = subprocess.run(["git", *args], capture_output=True, text=True, encoding="utf-8", errors="replace")
     if check and res.returncode != 0:
-        raise SystemExit(f"git {' '.join(args)} failed: {res.stderr.strip()}")
+        fail(f"git {' '.join(args)} failed: {res.stderr.strip()}")
     return res.stdout
+
+
+def worktree_snapshot() -> str:
+    """A commit of what `git commit -a` would record from the working tree: tracked changes, intent-to-add
+    entries and moved submodule pointers, with git's clean filters applied. It is built in a temporary copy of
+    the index, so the real index, its lock and the stash are never touched; it leaves only unreachable objects,
+    which `git gc` prunes."""
+    import shutil
+    import tempfile
+
+    index = git("rev-parse", "--git-path", "index").strip()
+    with tempfile.TemporaryDirectory() as tmp:
+        copy = os.path.join(tmp, "index")
+        if os.path.exists(index):
+            shutil.copyfile(index, copy)
+        env = dict(os.environ, GIT_INDEX_FILE=copy, GIT_AUTHOR_NAME="scan.py", GIT_AUTHOR_EMAIL="scan@localhost",
+                   GIT_COMMITTER_NAME="scan.py", GIT_COMMITTER_EMAIL="scan@localhost")
+
+        def run(*args: str) -> str:
+            res = subprocess.run(["git", *args], env=env, capture_output=True, text=True, encoding="utf-8",
+                                 errors="replace")
+            if res.returncode != 0:
+                fail(f"git {' '.join(args)} failed: {res.stderr.strip()}")
+            return res.stdout.strip()
+
+        run("add", "-u")
+        tree = run("write-tree")
+        return run("commit-tree", tree, "-p", "HEAD", "-m", "scan.py snapshot of the working tree")
 
 
 def git_bytes(*args: str) -> bytes | None:
@@ -57,7 +122,7 @@ def pick_base(head: str) -> str:
         if best_count is None or n < best_count:
             best, best_count = c, n
     if best is None:
-        raise SystemExit("cannot detect a base branch; pass --base")
+        fail("cannot detect a base branch; pass --base")
     return best
 
 
@@ -81,13 +146,16 @@ def glob_to_regex(glob: str) -> re.Pattern[str]:
     return re.compile("^" + "".join(out) + "$")
 
 
-def load_rules() -> dict[str, list[re.Pattern[str]]]:
+def load_rules(ref: str) -> dict[str, list[re.Pattern[str]]]:
+    """The rules of the reviewed tree `ref` (not of the checkout on disk) with their `paths:` globs."""
     rules: dict[str, list[re.Pattern[str]]] = {}
-    for f in sorted(RULES_DIR.glob("*.md")):
-        text = f.read_text(encoding="utf-8")
+    for path in sorted(git("ls-tree", "--name-only", f"{ref}", f"{RULES_DIR.as_posix()}/", check=False).splitlines()):
+        if not path.endswith(".md"):
+            continue
+        text = (git_bytes("show", f"{ref}:{path}") or b"").decode("utf-8", "replace").replace("\r\n", "\n")
         m = re.match(r"---\s*\n(.*?)\n---", text, re.S)
         globs = re.findall(r'-\s*"([^"]+)"', m.group(1)) if m else []
-        rules[f.name] = [glob_to_regex(g) for g in globs]  # [] = always-on rule
+        rules[path.rsplit("/", 1)[-1]] = [glob_to_regex(g) for g in globs]  # [] = always-on rule
     return rules
 
 
@@ -164,6 +232,13 @@ LINE_CHECKS = [
      re.compile(r"\.(GetOrSet|Set)Async\s*[<(]"), is_cs),
     ("caching.md", "cache tag built inline (tags come from CacheExtention only)",
      re.compile(r'[Tt]ags?\s*[:=].*\$"'), is_cs),
+    # a field named *Format holds a format string, not a key (caching.md "Keys")
+    ("caching.md", "cache key in a field (keys come from a static Get*CacheKey method)",
+     re.compile(r"\b(?:private|protected|internal|public)\s+(?:static\s+)?(?:readonly\s+)?(?:const\s+)?string\s+"
+                r"_?(?!\w*Format\s*=)\w*[Cc]ache[Kk]ey\w*\s*=(?!=)"),
+     lambda p: is_cs(p) and not is_test(p)),
+    ("caching.md", "* memory cache - obtained and read by the same process, no decision falls back on it? (\"Which instance\")",
+     re.compile(r"\bGetMemoryCache\s*\("), lambda p: is_cs(p) and not is_test(p)),
     ("tests.md", "Skip in a test (open bug = [Trait(\"Bug\")] + red test, not Skip)",
      re.compile(r"\[(Fact|Theory)\([^)]*\bSkip\s*=|Assert\.Skip|SkipWhen|SkipUnless"), lambda p: is_cs(p) and is_test(p)),
     ("tests.md", "Thread.Sleep in a test",
@@ -410,15 +485,12 @@ def print_endpoints_section(files, added, read_head) -> list[str]:
 REQUIREMENT = re.compile(r"^###\s+Requirement:\s*(.+)$")
 
 
-def print_openspec_section(files, endpoint_names, head: str | None) -> None:
+def print_openspec_section(files, endpoint_names, head: str, merge_base: str, old_paths=(), untracked=(),
+                           full: bool = False, renames: dict[str, str] | None = None) -> None:
     print("## OpenSpec (requirements that govern the changed code, SKILL.md §3 S)")
-    if head is None:
-        spec_paths = sorted(str(p).replace("\\", "/") for p in Path("openspec/specs").glob("*/*.md"))
-        read = lambda p: Path(p).read_bytes() if Path(p).exists() else None
-    else:
-        spec_paths = sorted(p for p in git("ls-tree", "-r", "--name-only", head, "openspec/specs", check=False).splitlines()
-                            if p.endswith(".md"))
-        read = lambda p: git_bytes("show", f"{head}:{p}")
+    spec_paths = sorted(p for p in git("ls-tree", "-r", "--name-only", head, "openspec/specs", check=False).splitlines()
+                        if p.endswith(".md"))
+    read = lambda p: git_bytes("show", f"{head}:{p}")
     if not spec_paths:
         print("  no openspec/specs in the reviewed tree - skip")
         print()
@@ -455,12 +527,309 @@ def print_openspec_section(files, endpoint_names, head: str | None) -> None:
     print("  capabilities whose verification.md was checked against a changed file:")
     print("\n".join(named) if named else "    none")
 
-    touched = [p for _, p in files if p.startswith("openspec/")]
+    # claims.md §4: a row cites lines of a file, and a branch that moves those lines leaves the row pointing elsewhere.
+    # Rows cite a file by its full path, an alias the file defines (`Lic` is `web/.../LicenseController.cs`, or a
+    # target elided as `.../Api/X.cs`), the alias with an extension, its bare file name, or a folder alias and the
+    # rest (`Unit/` is `common/Tests/...`). A file name that several tracked files share is marked as such: the row
+    # may cite another of them.
+    changed = sorted({p for _, p in files if not p.startswith("sdk/")
+                      and (not p.startswith("openspec/") or p.endswith("/spec.md"))} | set(old_paths))
+    tracked = git("ls-tree", "-r", "--name-only", head, check=False)
+    name_count: dict[str, int] = defaultdict(int)
+    for t in tracked.splitlines():
+        name_count[t.rsplit("/", 1)[-1]] += 1
+    stale = []
+    for p in spec_paths:
+        if not p.endswith("/verification.md"):
+            continue
+        lines = texts[p]
+        cited: dict[str, set[int]] = defaultdict(set)
+        for i, line in enumerate(lines, 1):
+            for m in CITATION.finditer(line):
+                cited[m.group(1)].add(i)
+        aliases = re.findall(r"`([A-Za-z][\w./-]*)`\s+(?:is|=)\s+`([^`]+)`", "\n".join(lines))
+        for f in changed:
+            name = f.rsplit("/", 1)[-1]
+            forms = {f: f, name: f"{name} (file name shared by {name_count[name]} files)" if name_count[name] > 1 else name}
+            for alias, target in aliases:
+                elided = target.startswith("...")
+                tail = target[3:] if elided else target
+                if tail.endswith("/"):
+                    rooted = "/" + f
+                    if not elided and f.startswith(tail):
+                        form = alias.rstrip("/") + "/" + f[len(tail):]
+                        forms[form] = form
+                    elif elided and tail in rooted:
+                        form = alias.rstrip("/") + "/" + rooted.split(tail, 1)[1]
+                        forms[form] = form
+                elif target == f or (elided and f.endswith(tail)):
+                    forms[alias] = alias
+                    forms[alias + Path(f).suffix] = alias + Path(f).suffix
+            matched = [t for t in forms if t in cited]
+            rows = sorted({r for t in matched for r in cited[t]})
+            if rows:
+                listed = rows if full else rows[:8]
+                shown = ", ".join(str(r) for r in listed) + (f" (+{len(rows) - 8})" if len(rows) > len(listed) else "")
+                stale.append(f"    {p}: {len(rows)} row(s) cite {f} (as {', '.join(sorted(forms[t] for t in matched))}) - lines {shown}")
+    print("  verification.md rows citing changed files (a moved line or a changed behaviour makes the row stale;")
+    print("  a citation in another form than path, alias, file name or folder alias is not found):")
+    print_capped(stale, STALE_ROWS_SHOWN, full, "    none")
+
+    # An untracked proposal is the branch's change to openspec/ too (--worktree).
+    touched = [p for st, p in files if p.startswith("openspec/")] + \
+              [f"{p} (untracked)" for p in untracked if p.startswith("openspec/")]
     print(f"  openspec/ files changed by the branch: {len(touched)}")
     for p in touched[:10]:
         print(f"    {p}")
     if (hits or named) and not touched:
         print("  !! the branch changes specified behaviour and leaves openspec/ untouched - check each requirement above")
+
+    # openspec/config.yaml and claims.md §4, measured on what the branch writes: a requirement whose body is new or
+    # differs from the same-named requirement at the merge-base (in the same file, its old path, or - for a delta
+    # under openspec/changes/<change>/specs/<capability>/ - the capability's spec), outside a REMOVED section; and the
+    # task lists it changes. With --worktree also the untracked files, since openspec-propose writes a change before
+    # anyone adds it: they are not in the snapshot, so they are read from disk.
+    untracked_set = set(untracked)
+    read_any = lambda q: (Path(q).read_bytes() if Path(q).exists() else None) if q in untracked_set \
+        else git_bytes("show", f"{head}:{q}")
+    format_hits = []
+    candidates = [p for st, p in files if not st.startswith("D")] + list(untracked)
+    for p in dict.fromkeys(candidates):
+        if not p.startswith("openspec/") or not p.endswith(".md"):
+            continue
+        lines = (read_any(p) or b"").decode("utf-8", "replace").splitlines()
+        if p.endswith("/spec.md"):
+            delta = re.match(r"openspec/changes/(?:archive/)?[^/]+/specs/([^/]+)/spec\.md$", p)
+            # Every body each requirement had at the merge-base, by name, read in a fixed order - the same file, its
+            # old path, the capability's spec - with REMOVED entries left out, so that the verdict never depends on
+            # which source comes first. A requirement the branch renamed is also looked up by its old name (a
+            # RENAMED FROM/TO pair). A requirement with no old body at all whose body equals that of a requirement
+            # gone from the same file (or its old path) is a rename without a pair, so unchanged. A requirement moved
+            # to another spec file is measured as new.
+            own = [p] + ([renames[p]] if renames and p in renames else [])
+            ordered = own + ([f"openspec/specs/{delta.group(1)}/spec.md"] if delta else [])
+            old_bodies: dict[str, list[str]] = defaultdict(list)
+            own_names: set[str] = set()
+            for q in dict.fromkeys(ordered):
+                for _, name, body, section in requirement_bodies(
+                        (git_bytes("show", f"{merge_base}:{q}") or b"").decode("utf-8", "replace").splitlines()):
+                    if not section.startswith("REMOVED"):
+                        old_bodies[name].append(body)
+                        if q in own:
+                            own_names.add(name)
+            current = requirement_bodies(lines)
+            renamed_from = renamed_requirements(lines)
+            names_now = {name for _, name, _, _ in current}
+            gone = {b for name in own_names - names_now for b in old_bodies[name]}
+            for n, name, body, section in current:
+                if section.startswith("REMOVED") or len(body) < REQUIREMENT_LIMIT:
+                    continue
+                olds = old_bodies.get(name, []) + old_bodies.get(renamed_from.get(name, ""), [])
+                if body in olds or (not olds and body in gone):
+                    continue
+                long_olds = [len(o) for o in olds if len(o) >= REQUIREMENT_LIMIT]
+                if long_olds and len(body) <= max(long_olds):
+                    # already over the limit at the merge-base and not made longer: an edit of such a requirement
+                    # must not be blocked, only reminded
+                    format_hits.append(f"  {p}:{n}  requirement \"{name}\" is {len(body)} characters; it was "
+                                       f"{max(long_olds)} before the branch and did not grow - shorten it when you can")
+                    continue
+                format_hits.append(f"  !! {p}:{n}  requirement \"{name}\" is {len(body)} characters (under {REQUIREMENT_LIMIT} required, openspec/config.yaml)")
+                GATE.append(f"{p}:{n} requirement \"{name}\" is {len(body)} characters (openspec/config.yaml: under {REQUIREMENT_LIMIT})")
+        if p.endswith("/tasks.md"):
+            for i, line in enumerate(lines, 1):
+                if says_not_done(line):
+                    format_hits.append(f"  !! {p}:{i}  ticked, but says it is not done (claims.md §4): {line.strip()[:110]}")
+    for line in format_hits:
+        print(line)
+    print()
+
+
+def print_capped(rows: list[str], limit: int, full: bool, empty: str) -> None:
+    """Every row with --full; otherwise the first `limit` and a count of the rest, so a release-sized diff stays readable."""
+    if not rows:
+        print(empty)
+        return
+    shown = rows if full else rows[:limit]
+    for r in shown:
+        print(r)
+    if len(rows) > len(shown):
+        print(f"    ... {len(rows) - len(shown)} more not shown - run with --full to list them")
+
+
+REQUIREMENT_LIMIT = 500
+STALE_ROWS_SHOWN = 100
+CLAIMS_SHOWN = 200
+TICKED = re.compile(r"^\s*[-*]\s+\[[xX]\]\s*")
+# Whether a ticked task says it is not done (claims.md §4). A status, not a domain word:
+# - a status word, with at most one qualifier, at the start of a clause - the task text, or after ". ", ":", ";",
+#   "(", a dash or a comma - and followed by a break (".", ":", ";", ",", a bracket, a dash, the end) or by "on",
+#   "by", "because", "until", "due", "here", "yet", "for now", "to a follow-up", "to <version>" (a dotted number
+#   or v<n>): "...: blocked, because", "Done. Blocked on CI.", "(still blocked)", "Not covered, needs a stand",
+#   "Port it, skipped on CI"; "not done", "not covered", "not run" and "cannot run" at a clause start whatever
+#   follows ("...: not done for PostgreSQL", "...: cannot run without the stand");
+# - a status word right before a colon ("Tests skipped: no stand"), or followed anywhere by "for now", "to a
+#   follow-up" or "to <version>" ("Tests deferred to a follow-up", "postponed to 4.2"), and "cannot be run here"
+#   anywhere;
+# - TODO or TBD as a mark, unless it is the direct object of remove/delete/drop/resolve/address/fix ("Remove the
+#   TODO from X") or a file name ("TODO.md").
+# Not a status: a domain word inside a clause ("the login is blocked after 5 attempts", "Deferred loading of the
+# list", "blocked for guests", "postponed to 30 seconds after a failure"), an item of a list of one-word states
+# ("active, terminated, blocked", "copied, skipped, failed"), a value after "status:" or "state:".
+# It is a hint for the reader, not a gate: it misses forms such as "**blocked**", "tests—blocked" or "[blocked]",
+# and it can flag a domain line ("Return 403 - blocked by the firewall rule").
+_STATUS = r"(?:blocked|not done|not yet done|not run|cannot (?:be )?run|not covered|skipped|deferred|postponed)"
+_STATUS_AT = re.compile(rf"(?:(?:still|partially|currently)\s+)?{_STATUS}\b", re.I)
+_CLAUSE_START = re.compile(r"^|[.:;(]\s*|\s[-–—]\s+|,\s*")
+_VERSION = r"v?\d+(?:\.\d+)+\b|v\d+\b"
+_STATUS_END = re.compile(
+    r"\s*(?:[.:;,()]|[-–—]\s|$)"
+    rf"|\s+(?:(?:on|by|because|until|due|here|yet|for now|to (?:a )?follow-up)\b|to (?:{_VERSION}))", re.I)
+_STATUS_COLON = re.compile(rf"(?<!state )(?<!status )\b{_STATUS}:", re.I)
+_NOT_HERE = re.compile(r"\b(?:cannot (?:be )?run|not run|not covered) here\b", re.I)
+_STATUS_LATER = re.compile(rf"\b{_STATUS}\s+(?:for now\b|to (?:a )?follow-up\b|to (?:{_VERSION}))", re.I)
+NOT_DONE_MARK = re.compile(r"\b(?:TBD|TODO)\b(?!\.\w)")
+_REMOVED_MARK = re.compile(r"\b(?:remove|delete|drop|resolve|address|fix)\s+(?:(?:the|a|all|every|this)\s+)?$", re.I)
+
+
+def says_not_done(line: str) -> bool:
+    """A ticked task line that says it is not done (see the comment above)."""
+    m = TICKED.match(line)
+    if not m:
+        return False
+    text = re.sub(r"^[\d.]+\s+", "", line[m.end():]).rstrip()
+    if _NOT_HERE.search(text) or _STATUS_COLON.search(text):
+        return True
+    # a TODO is a mark unless it is what the task removes; every occurrence counts
+    if any(not _REMOVED_MARK.search(text[:mark.start()]) for mark in NOT_DONE_MARK.finditer(text)):
+        return True
+    for start in _CLAUSE_START.finditer(text):
+        status = _STATUS_AT.match(text, start.end())
+        # "not done", "not covered", "cannot run" at the start of a clause are a status whatever follows them
+        if not status or not (_STATUS_END.match(text, status.end())
+                              or re.search(r"(?:\b|can)not\b", status.group(0), re.I)):
+            continue
+        before = text[:start.start()]
+        separator = start.group(0).strip()
+        if separator in (":", "(") and re.search(r"\b(?:status|state)(?:es|s)?\s*$", before, re.I):
+            continue
+        # An item of a list of one-word states: it ends at a comma or at the end, and the next item is one word,
+        # or it is the last item and the one before it is one word.
+        rest = text[status.end():]
+        if re.match(r"\s*(?:,|$)", rest):
+            following = re.match(r",\s*([^,.;:()]*)", rest)
+            previous = re.split(r"[.:;,(]", before)[-1].strip() if separator == "," else ""
+            if following is not None and following.group(1).strip() and " " not in following.group(1).strip():
+                continue
+            if following is None and previous and " " not in previous:
+                continue
+        return True
+    return bool(_STATUS_LATER.search(text))
+# A citation `token:line`: a full path (also one starting with a dot, `.claude/...`), an alias, a file name.
+CITATION = re.compile(r"(?<![\w/.-])(\.?\w[\w./-]*):\d")
+
+
+def renamed_requirements(lines: list[str]) -> dict[str, str]:
+    """New name -> old name for each pair of a delta's `## RENAMED Requirements` section (`- FROM: ...`, `- TO: ...`,
+    with or without the backticks and the `### Requirement:` prefix)."""
+    pairs, section, old = {}, "", None
+    for line in lines:
+        if line.startswith("## "):
+            section, old = line[3:].strip().upper(), None
+            continue
+        if not section.startswith("RENAMED"):
+            continue
+        m = re.match(r"\s*[-*+]?\s*(FROM|TO)\s*:\s*`?(?:###\s*Requirement:\s*)?(.+?)`?\s*$", line, re.I)
+        if not m:
+            continue
+        if m.group(1).upper() == "FROM":
+            old = m.group(2).strip()
+        elif old is not None:
+            pairs[m.group(2).strip()] = old
+            old = None
+    return pairs
+
+
+def requirement_bodies(lines: list[str]) -> list[tuple[int, str, str, str]]:
+    """(line, name, body, section) per requirement: its text up to the first scenario or heading, lines trimmed, and
+    the `##` heading it sits under ("ADDED Requirements", "MODIFIED Requirements", "REMOVED Requirements", ...)."""
+    result, name, start, body, section = [], None, 0, [], ""
+
+    def close() -> None:
+        if name is not None:
+            result.append((start, name, "\n".join(body).strip(), section))
+
+    for i, line in enumerate(lines, 1):
+        if m := REQUIREMENT.match(line):
+            close()
+            name, start, body = m.group(1).strip(), i, []
+        elif line.startswith("#"):
+            close()
+            name = None
+            if line.startswith("## "):
+                section = line[3:].strip().upper()
+        elif name is not None:
+            body.append(line.strip())
+    close()
+    return result
+
+
+# claims.md §1: a number with a unit, a worded duration, a limit or a date word in a text is checked against the
+# source that makes it true. Worded forms outside these lists stay to the reader.
+_UNITS = (r"(?:ms|milliseconds?|s|secs?|seconds?|mins?|minutes?|h|hrs?|hours?|d|days?|weeks?|months?|years?|"
+          r"bytes?|KB|MB|GB|%|characters?|chars|times|attempts?|retries)")
+_NUMERALS = r"(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|sixty|ninety|hundred)"
+NUMBER_CLAIM = re.compile(
+    rf"(?<![§\w.])(?<![A-Za-z]-)\d+(?:\.\d+)?\s?-?\s?{_UNITS}(?![\w%])|(?<![§\w.])(?<![A-Za-z]-)\d+m\b"
+    rf"|\b{_NUMERALS}\s+(?:milliseconds?|seconds?|minutes?|hours?|days?|weeks?|months?|years?)\b"
+    r"|\ban?\s+(?:minute|hour|day|week|month|year)\b"
+    r"|\b(?:at most|at least|up to|no more than|no fewer than|maximum of|limit of)\s+\d+"
+    r"|\b(?:yesterday|today|tomorrow)\b", re.I)
+# The result lines prove-red.sh writes, pasted into a commit message, are measurements, not claims about the code.
+PROVE_RED_LINE = re.compile(r"^\s*(?:prove-red\b|RED as expected|STILL GREEN)")
+
+
+def comment_part(text: str) -> str | None:
+    """The comment of a C# line: a whole-line `//`, `///`, `/*` or `*` line, or the first `//` or `/*` outside a
+    string or char literal. The inner lines of a block comment that do not start with `*` are not recognized."""
+    s = text.strip()
+    if s.startswith(("//", "/*", "*")):
+        return s
+    quote, i = None, 0
+    while i < len(s) - 1:
+        c = s[i]
+        if quote:
+            if c == "\\" and quote == '"':
+                i += 2
+                continue
+            if c == quote:
+                quote = None
+        elif c in "\"'":
+            quote = c
+        elif s.startswith(("//", "/*"), i):
+            return s[i:]
+        i += 1
+    return None
+
+
+def print_claims_section(added, commit_bodies: list[tuple[str, str]], full: bool) -> None:
+    rows = []
+    for sha, body in commit_bodies:
+        for line in body.splitlines():
+            if NUMBER_CLAIM.search(line) and not PROVE_RED_LINE.match(line):
+                rows.append(f"    commit {sha}: {line.strip()[:130]}")
+    for path, lines in sorted(added.items()):
+        spec = path.startswith("openspec/") and path.endswith(".md")
+        if not spec and not is_cs(path):
+            continue
+        for n, text in lines:
+            part = text.strip() if spec else comment_part(text)
+            if part and NUMBER_CLAIM.search(part):
+                rows.append(f"    {path}:{n}  {part[:130]}")
+    print("## Claims with numbers (claims.md §1, SKILL.md §3 B) - each against the constant, timeout or test behind it")
+    if rows:
+        print(f"  {len(rows)} line(s) in commit messages, C# comments and spec texts")
+    print_capped(rows, CLAIMS_SHOWN, full, "  none")
     print()
 
 
@@ -503,37 +872,62 @@ def main() -> None:
     ap.add_argument("--base")
     ap.add_argument("--head", default="HEAD")
     ap.add_argument("--worktree", action="store_true")
+    ap.add_argument("--full", action="store_true")
+    ap.add_argument("--gate", action="store_true")
     a = ap.parse_args()
 
+    head_sha = git("rev-parse", "--verify", f"{a.head}^{{commit}}").strip()
+    # "Checked out" is decided by the ref, not the commit: another branch at the same commit is not the branch the
+    # working tree belongs to. A detached HEAD matches by commit (a sha, a tag).
+    head_ref = git("symbolic-ref", "-q", "HEAD", check=False).strip()
+    if a.head == "HEAD":
+        checked_out = True
+    elif head_ref:
+        checked_out = git("rev-parse", "--symbolic-full-name", a.head, check=False).strip() == head_ref
+    else:
+        checked_out = head_sha == git("rev-parse", "--verify", "HEAD^{commit}", check=False).strip()
+    current_branch = git("rev-parse", "--abbrev-ref", "HEAD", check=False).strip()
+    if a.worktree and not checked_out:
+        # the working tree belongs to the checked-out branch; mixing it with another head's history scans neither
+        fail(f"--worktree scans the checked-out working tree, but --head {a.head} is not checked out: "
+             "check it out, or leave --worktree out")
     base = a.base or pick_base(a.head)
     merge_base = git("merge-base", base, a.head).strip()
-    diff_args = [merge_base] if a.worktree else [f"{merge_base}..{a.head}"]
+    # With --worktree the scan reads what `git commit -a` would record, not the bytes on disk (clean filters
+    # applied, a submodule as its pointer); its tree id is what a Hand-over block records (SKILL.md §8).
+    view = worktree_snapshot() if a.worktree else a.head
+    diff_args = [f"{merge_base}..{view}"]
     head_label = "working tree" if a.worktree else a.head
+    tree = git("rev-parse", f"{view}^{{tree}}").strip()
 
-    branch = git("rev-parse", "--abbrev-ref", "HEAD").strip()
+    branch = current_branch if a.head == "HEAD" else a.head
     commits = git("log", "--oneline", "--no-merges", f"{merge_base}..{a.head}").splitlines()
     merges = git("log", "--oneline", "--merges", f"{merge_base}..{a.head}").splitlines()
-    status = git("status", "--porcelain", "--untracked-files=no").splitlines()
+    # the state of the working tree matters only for the checked-out branch
+    status = git("status", "--porcelain", "--untracked-files=no").splitlines() if checked_out else []
 
     print(f"# Branch scan: {branch}")
-    print(f"base: {base}  merge-base: {merge_base[:10]}  head: {head_label}")
+    print(f"base: {base}  merge-base: {merge_base[:10]}  head: {head_label}  tree: {tree}")
     print(f"commits: {len(commits)} (+{len(merges)} merge)")
     for c in commits[:40]:
         print(f"  {c}")
     if len(commits) > 40:
         print(f"  ... and {len(commits) - 40} more")
     # git-commits.md: no AI attribution in the branch's own commit messages
-    attributed = []
+    attributed, commit_bodies = [], []
     for block in git("log", "--no-merges", "--format=%h%x1f%B%x1e", f"{merge_base}..{a.head}").split("\x1e"):
         if "\x1f" not in block:
             continue
         sha, body = block.strip().split("\x1f", 1)
+        commit_bodies.append((sha, body))
         if re.search(r"co-authored-by:.*(claude|anthropic|copilot|gpt|openai)|generated with \[?claude|noreply@anthropic\.com", body, re.I):
             attributed.append(sha)
     if attributed:
         print(f"!! [git-commits.md] AI attribution in commit messages: {', '.join(attributed)}")
+        GATE.append(f"[git-commits.md] AI attribution in commit messages: {', '.join(attributed)}")
     if status and not a.worktree:
         print(f"!! working tree is dirty ({len(status)} files) - uncommitted changes are NOT scanned; pass --worktree to include them")
+    untracked: list[str] = []
     if a.worktree:
         # `git diff` of the working tree sees tracked files only: a new file nobody added is reviewed by no one.
         untracked = [l[3:] for l in git("status", "--porcelain", "--untracked-files=all").splitlines() if l.startswith("?? ")]
@@ -543,6 +937,12 @@ def main() -> None:
                 print(f"  {p}")
             if len(untracked) > 20:
                 print(f"  ... and {len(untracked) - 20} more")
+            # A hand-over records the tree git would commit: a file left out of it is reviewed by no one. The review
+            # of this branch that the skill saved at the repo root stays untracked by design (SKILL.md §8).
+            saved = {f"{current_branch.replace('/', '-')}-review.md", f"{current_branch.replace('/', '-')}-self-review.md"}
+            left_out = [p for p in untracked if p not in saved]
+            if left_out:
+                GATE.append(f"{len(left_out)} untracked file(s): `git add` the branch's own, remove or ignore the rest")
     print()
 
     # --- files ---------------------------------------------------------------------------------
@@ -564,7 +964,7 @@ def main() -> None:
     print()
 
     # --- applicable rules ------------------------------------------------------------------------
-    rules = load_rules()
+    rules = load_rules(view)
     applies: dict[str, int] = defaultdict(int)
     for _, p in files:
         for name, pats in rules.items():
@@ -576,6 +976,37 @@ def main() -> None:
             print(f"  {name}: always")
         elif applies.get(name):
             print(f"  {name}: {applies[name]} file(s)")
+
+    # The reviewer judges by the base's rules and skill (SKILL.md §1). What the base changed in them since the
+    # merge-base, and what of that applies to this branch: a rule whose `paths:` match a file of the branch (or
+    # that has none), this skill and its scan, prove-red.sh, and the spec rules when the branch touches openspec/.
+    changed_tooling = git("diff", "--name-only", merge_base, base, "--", *REVIEW_TOOLING).splitlines()
+    branch_paths = [p for _, p in files]
+    relevant = []
+    for t in changed_tooling:
+        # The branch already has the base's version (a cherry-pick, the same edit): nothing is missing.
+        if git("rev-parse", "-q", "--verify", f"{base}:{t}", check=False).strip() == \
+                git("rev-parse", "-q", "--verify", f"{view}:{t}", check=False).strip():
+            continue
+        if t in NOT_A_REVIEW_CRITERION:
+            continue
+        if t in ALWAYS_APPLIES:
+            relevant.append(t)
+        elif t.startswith(".claude/rules/") and t.endswith(".md"):
+            text = (git_bytes("show", f"{base}:{t}") or b"").decode("utf-8", "replace")
+            m = re.match(r"---\s*\n(.*?)\n---", text, re.S)
+            globs = [glob_to_regex(g) for g in re.findall(r'-\s*"([^"]+)"', m.group(1))] if m else []
+            if not text or not globs or any(g.match(p) for g in globs for p in branch_paths):
+                relevant.append(t)
+        elif t == "openspec/config.yaml":
+            if any(p.startswith("openspec/") for p in branch_paths):
+                relevant.append(t)
+        else:
+            relevant.append(t)
+    if relevant:
+        print(f"  !! the base changed rules or review tooling that apply to this branch since the merge-base - bring "
+              f"the base in before a hand-over check; judge by the base's rules (SKILL.md §1): {', '.join(relevant)}")
+        GATE.append(f"the base changed rules or review tooling that apply to this branch: {', '.join(relevant)}")
     print()
 
     # --- line checks ---------------------------------------------------------------------------
@@ -621,7 +1052,7 @@ def main() -> None:
     for path, lines in added.items():
         if not is_cs(path) or is_test(path):
             continue
-        blob = Path(path).read_bytes() if a.worktree and Path(path).exists() else git_bytes("show", f"{a.head}:{path}")
+        blob = git_bytes("show", f"{view}:{path}")
         if not blob:
             continue
         text = blob.decode("utf-8", "replace")
@@ -631,12 +1062,16 @@ def main() -> None:
             if added_numbers & set(range(line, line + m.group(0).count("\n") + 1)):
                 hits[("correctness", "* empty catch / swallowed failure - logged, and is the primary action still right?")].append(f"{path}:{line}")
 
-    # license header on new source files
+    # license header on new source files - not on generated files (a `*.Designer.cs`, an `<auto-generated>` header)
+    # and not on vendored code under thirdparty/, which carry no header of ours by design
     for st, p in files:
-        if st.startswith("A") and p.endswith((".cs", ".ts")) and not p.startswith(("migrations/", "sdk/")):
-            blob = git_bytes("show", f"{a.head}:{p}") if not a.worktree else (Path(p).read_bytes() if Path(p).exists() else None)
-            if blob is not None and LICENSE_MARK not in blob[:600].decode("utf-8", "replace"):
+        if st.startswith("A") and p.endswith((".cs", ".ts")) and not p.startswith(("migrations/", "sdk/", "thirdparty/")) \
+                and not p.endswith(".Designer.cs"):
+            blob = git_bytes("show", f"{view}:{p}")
+            head_text = blob[:600].decode("utf-8", "replace") if blob is not None else ""
+            if blob is not None and "<auto-generated" not in head_text and not any(m in head_text for m in LICENSE_MARKS):
                 hits[("csharp-style.md", "new file without the AGPL header")].append(p)
+                GATE.append(f"[csharp-style.md] new file without the AGPL header: {p}")
 
     print("## Rule signals (hints - verify each in context)")
     if not hits:
@@ -664,7 +1099,7 @@ def main() -> None:
         if st.startswith("R"):
             old_path = next(ns[1] for ns in name_status if ns[-1] == p)
         old = git_bytes("show", f"{merge_base}:{old_path}")
-        new = Path(p).read_bytes() if a.worktree and Path(p).exists() else git_bytes("show", f"{a.head}:{p}")
+        new = git_bytes("show", f"{view}:{p}")
         if not old or not new or b"\0" in old[:8000]:
             continue
 
@@ -678,11 +1113,13 @@ def main() -> None:
         if so != sn and "-" not in (so, sn):
             add, rem = numstat.get(p, ("?", "?"))
             flips.append(f"  {p}: {so} -> {sn}  (+{add}/-{rem} in the diff)")
+            GATE.append(f"{p}: line endings switched {so} -> {sn} for the whole file")
     print("\n".join(flips) if flips else "  none")
     print()
 
     check = git("diff", "--check", *diff_args, check=False).splitlines()
     ws = [l for l in check if not l.startswith(("+", "-"))]
+    GATE.extend(l for l in ws if "conflict marker" in l)
     print(f"## git diff --check (trailing whitespace, conflict markers): {len(ws)}")
     for l in ws[:15]:
         print(f"  {l}")
@@ -712,20 +1149,23 @@ def main() -> None:
     print("## API contract and SDK")
     print(f"  contract files (controllers/DTOs/ApiModels): {len(contract)}")
     print(f"  sdk/ submodule pointers in the branch: {', '.join(sdk_touched) or 'unchanged'}")
-    sub = [l for l in git("submodule", "status").splitlines() if l[:1] in "+-U"]
+    # the submodule checkouts belong to the checked-out branch: for another --head they say nothing about it
+    sub = [l for l in git("submodule", "status").splitlines() if l[:1] in "+-U"] if checked_out else []
     for l in sub:
         print(f"  !! submodule checkout differs from the recorded pointer: {l.strip()}")
     print()
 
-    read_head = (lambda p: Path(p).read_bytes() if Path(p).exists() else None) if a.worktree \
-        else (lambda p: git_bytes("show", f"{a.head}:{p}"))
+    read_head = lambda p: git_bytes("show", f"{view}:{p}")
     endpoint_names = print_endpoints_section(files, added, read_head)
-    print_openspec_section(files, endpoint_names, None if a.worktree else a.head)
+    old_paths = [ns[1] for ns in name_status if ns[0].startswith(("R", "D")) and len(ns) > 1]
+    renames = {ns[-1]: ns[1] for ns in name_status if ns[0].startswith("R") and len(ns) > 2}
+    print_openspec_section(files, endpoint_names, view, merge_base, old_paths, untracked, a.full, renames)
+    print_claims_section(added, commit_bodies, a.full)
     print_stateful_section(added)
     print_size_section(added)
 
     # --- localized resources -------------------------------------------------------------------
-    print_resx_section(files, merge_base, None if a.worktree else a.head)
+    print_resx_section(files, merge_base, view)
 
     # --- tests ---------------------------------------------------------------------------------
     test_files = [p for _, p in files if is_test(p)]
@@ -767,7 +1207,23 @@ def main() -> None:
         or ("/" not in p and p.endswith(".md") and p not in ("README.md", "CLAUDE.md")))]
     print("## Possibly committed by accident")
     print("\n".join(f"  {p}" for p in junk) if junk else "  none")
+    print()
+
+    # --- gate ----------------------------------------------------------------------------------
+    # Only what stops a hand-over whatever the branch is, so a script stops it, not a reader (SKILL.md §8 "Hand-over
+    # block"). The heuristic sections above stay hints and never fail the gate.
+    print("## Gate (hard failures - `--gate` exits with 1 when there is any)")
+    print("\n".join(f"  !! {g}" for g in GATE) if GATE else "  none")
+    if a.gate and GATE:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit:
+        raise
+    except Exception:  # an exit code of 1 is reserved for --gate's hard failures (fail())
+        import traceback
+        traceback.print_exc()
+        sys.exit(2)
