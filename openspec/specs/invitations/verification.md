@@ -122,7 +122,7 @@ moved with the AI-project checks. Behaviour of the existing scenarios is unchang
 | Guest to an AI agent as Room manager / Content creator → 403 | FS:268-273; release notes v3.6 | CODE-ONLY |
 | Guest to an AI project by id (any access) or by the email of a Guest → 403 "The role is not available for this user type", not added; the project accepts Room manager and Read only | FT/03_Rooms/AiHub/AiProjectGuestInviteTests.cs:45-79 (message asserted); FS:275-281; `products/ASC.Files/Core/Core/Security/FileSecurity.cs:255-263` (`AvailableRoomAccesses`, AI project) | TEST-CONFIRMED [run: PASS] |
 | Invisible subjects and notification: subject the caller cannot see is dropped | VRC `SetRoomSecurity` wrappers filter (`CanUserViewAnotherUserAsync`); yaml `setRoomSecurity` | CODE-ONLY |
-| Group as subject | FS:144-157 (subject type resolved to Group), 460-466 (group members); `products/ASC.People/Tests/Tests/BaseTest.cs:175-189` helper "user or a group"; release notes v2.5; a group invited to an AI project with Read: FT/03_Rooms/AiHub/AiProjectMemberAccessTests.cs:84-100 | CODE-ONLY (TEST-CONFIRMED [run: PASS] for an AI project) |
+| Group as subject | FS:144-157 (subject type resolved to Group), 460-466 (group members); `products/ASC.People/Tests/Tests/BaseTest.cs:175-189` helper "user or a group"; release notes v2.5; an AI project refuses a group with any access (403): FT/03_Rooms/AiHub/AiProjectRolesTests.cs:65 | CODE-ONLY (the AI project refusal: TEST-CONFIRMED, not run yet) |
 | `notify` emails existing accounts that gained access, with `message` | FS:432-451 (`SendEmailRoomInviteExistingUserAsync`); yaml `RoomInvitationRequest.notify/message` | CODE-ONLY |
 
 ## Everyone system group as a share subject
@@ -176,7 +176,7 @@ The AI-project test above is the only integration test that sends an `email` ent
 | Missing `linkType` → invitation link | RoomLinkCreateTests.cs:201-214 | TEST-CONFIRMED [run: PASS] |
 | Missing access → no link | RoomLinkCreateTests.cs:218-231 | TEST-CONFIRMED [run: PASS] |
 | Custom / Public / Collaboration / VDR lifecycle | RoomLinkCreateTests.cs:297-324 | TEST-CONFIRMED [run: PASS] |
-| AI project: the invitation link is created with Room manager, the only access its link offers | created with Room manager: FT/03_Rooms/AiHub/AiProjectInvitationLinkTests.cs:47-52, AiProjectGuestInviteTests.cs:84-89; the offered set `FileSecurity.cs:255-263` (`InvitationLink`: Room manager, none) — no test asks for another access | TEST-CONFIRMED [run: PASS] (creation) / CODE-ONLY (only access) |
+| AI project: the invitation link is created with Room manager, the only access its link offers | created with Room manager: FT/03_Rooms/AiHub/AiProjectInvitationLinkTests.cs:47-52, AiProjectGuestInviteTests.cs:84-89; the offered set `FileSecurity.cs:255-262` (`InvitationLink`: Room manager, none) — no test asks for another access | TEST-CONFIRMED [run: PASS] (creation) / CODE-ONLY (only access) |
 | Form filling room: invitation link with FillForms / ContentCreator created (200), second one 403 "exceed 1", Read 403 "role not available" | live run 2026-10-04 (scratchpad live-roles/report.md, scenario 13); the test RoomLinkCreateTests.cs:387-404 sends access Read only, so its 403 is the role check, not a ban on invitation links | TEST-CONFIRMED [run: PASS] (Read half) / LIVE-RUN (FillForms half) |
 | Not the primary link | FT/03_Rooms/Links/RoomLinkPrimaryTests.cs:118-134 | TEST-CONFIRMED [run: PASS] |
 
@@ -184,7 +184,7 @@ The AI-project test above is the only integration test that sends an `email` ent
 
 | Claim | Source | Status |
 |---|---|---|
-| Existing account not in room → added during the check, `UserExisted`, room data | IS:96-205 (`ResolveAccessAsync` → `ProcessShare`), 210-216; release notes v2.6; for an AI project: FT/03_Rooms/AiHub/AiProjectInvitationLinkTests.cs:44-68 (`UserExisted`, member with Read) ; custom room: products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:73-83 | TEST-CONFIRMED [run: PASS] (`UserExisted`, added with the link's access) / CODE-ONLY (room data in the answer) |
+| Existing account not in room → added during the check, `UserExisted`, room data | IS:96-205 (`ResolveAccessAsync` → `ProcessShare`), 210-216; release notes v2.6; for an AI project: FT/03_Rooms/AiHub/AiProjectInvitationLinkTests.cs:44-68 (`UserExisted`, member with Content creator) ; custom room: products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:73-83 | TEST-CONFIRMED [run: PASS] (`UserExisted`, added with the link's access) / CODE-ONLY (room data in the answer) |
 | Existing member → `UserExisted`, no new share | IS:109-128, 210-216 ; products/ASC.Files/Tests/Tests/03_Rooms/Invitations/RoomInvitationLinkCheckTests.cs:85-96 | TEST-CONFIRMED [run: PASS] |
 | Unknown person → `Ok`, email, room data; registration creates, counts use, joins room | IS:220-224; UC:273-290, 395-398, 430-433; IS:330-360 | CODE-ONLY |
 | Check not Ok → `POST /people` 403 | UC:283-290; yaml `addMember` 403 | CODE-ONLY |

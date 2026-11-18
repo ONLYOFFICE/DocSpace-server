@@ -257,7 +257,6 @@ public class FileSecurity(
                 new Dictionary<SubjectType, HashSet<FileShare>>
                 {
                     { SubjectType.User, [FileShare.RoomManager, FileShare.ContentCreator, FileShare.None] },
-                    { SubjectType.Group, [FileShare.ContentCreator, FileShare.None] },
                     { SubjectType.InvitationLink, [FileShare.RoomManager, FileShare.None] }
                 }.ToFrozenDictionary()
             }
@@ -3590,6 +3589,11 @@ public class FileSecurity(
     public Task RemoveSecuritiesAsync(Guid subject, Guid owner, SubjectType subjectType)
     {
         return daoFactory.GetSecurityDao<int>().RemoveSecuritiesAsync(subject, owner, subjectType);
+    }
+
+    public Task RemoveAiProjectMemberAsync(Guid userId, int projectId)
+    {
+        return daoFactory.GetSecurityDao<int>().RemoveAiProjectMemberAsync(userId, projectId);
     }
 
     public async Task<List<Guid>> GetUserSubjectsAsync(Guid userId, bool includeAvailableLinks = false)

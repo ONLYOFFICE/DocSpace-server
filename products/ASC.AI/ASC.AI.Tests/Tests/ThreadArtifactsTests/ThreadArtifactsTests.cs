@@ -155,6 +155,34 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
     }
 
     [Fact]
+    public async Task Upload_AnEmptyFile_Returns400AndAddsNothing()
+    {
+        var projectId = await CreateProjectAsync();
+        var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
+
+        using var response = await PostArtifactAsync(thread.Id, "empty.txt", []);
+
+        var page = await ListArtifactsAsync(projectId, thread.Id);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        page.Total.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task Upload_AFileOverTheLimit_Returns400AndAddsNothing()
+    {
+        var projectId = await CreateProjectAsync();
+        var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
+
+        using var response = await PostArtifactAsync(thread.Id, "large.txt", new byte[(100 * 1024 * 1024) + 1]);
+
+        var page = await ListArtifactsAsync(projectId, thread.Id);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        page.Total.Should().Be(0);
+    }
+
+    [Fact]
     public async Task Upload_DoesNotExposeFolderIdsInTheThread()
     {
         var projectId = await CreateProjectAsync();

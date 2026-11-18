@@ -605,7 +605,8 @@ few minutes and kept while accounting is down. User socket events carry none.
 `getCustomerOperations` SHALL page the wallet movements for a DocSpace admin (`offset` 0 and `limit` 25 by
 default, echoed with `totalQuantity`, `totalPage`, `currentPage`), filtered by `serviceName` (404 for a
 name not sold), `startDate`/`endDate` in the portal time zone, `participantName`, `credit`, `debit`, `type`,
-`status`, sorted by `orderBy`/`orderType`. `getCustomerServiceUsage` SHALL sum them per service,
+`status`, sorted by `orderBy`/`orderType`. `getCustomerServiceUsage` SHALL sum them per service, also
+filtered by `metadata` pairs (a pair with an empty or blank value is ignored),
 `getCustomerMonthlyUsage` per month. Each has a report trio.
 
 #### Scenario: Owner pages the movements
@@ -654,9 +655,11 @@ name not sold), `startDate`/`endDate` in the portal time zone, `participantName`
 ### Requirement: Wallet top-ups and their invoices
 
 `getCustomerDeposits` SHALL page the payments into the wallet for a DocSpace admin (403 otherwise and
-without billing, 401 anonymous), filtered by `startDate`/`endDate` and `status`, with `offset` of 0 or more
+without billing, 401 anonymous), filtered by `startDate`/`endDate`, `status`, `initiator` and `metadata` pairs
+(all of them must match; a pair with an empty or blank value is ignored), with `offset` of 0 or more
 and `limit` 1–100 (400 otherwise) echoed with the totals; each entry has `id`, `date`, `amount`, `currency`,
-`status`, `hasInvoice`. A portal without a customer or a readable wallet gets an empty result.
+`status`, `initiator` (null when accounting does not report it or reports an unknown kind), `hasInvoice`.
+A portal without a customer or a readable wallet gets an empty result.
 `getDepositInvoice` SHALL answer the invoice page address of one top-up by `id`.
 
 #### Scenario: Portal that never topped up

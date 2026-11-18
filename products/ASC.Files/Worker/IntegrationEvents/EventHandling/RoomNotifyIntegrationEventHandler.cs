@@ -75,7 +75,14 @@ public class RoomNotifyIntegrationEventHandler(
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
 
-        var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantId, await folderDao.GetFolderAsync(roomId), createBy);
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (!DocSpaceHelper.AnnouncesEntriesToMembers(room.FolderType))
+        {
+            return;
+        }
+
+        var queue = roomNotifyEventQueue.GetOrCreateRoomQueue(tenantId, room, createBy);
         queue.AddMessage(await fileDao.GetFileAsync(fileId));
     }
 }

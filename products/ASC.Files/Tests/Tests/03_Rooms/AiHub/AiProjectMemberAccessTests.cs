@@ -82,24 +82,6 @@ public class AiProjectMemberAccessTests(AspireAppFixture fixture) : AiHubTestBas
     }
 
     [Fact]
-    public async Task LinkedRoom_ProjectMemberThroughGroup_ReadsFile()
-    {
-        // Arrange
-        var (projectId, _, fileId) = await CreateLinkedRoomWithSkillAsync();
-        var member = await InviteContact(EmployeeType.User);
-        var groupId = await CreateGroupAsync(member);
-        await ShareRoomAsync(projectId, groupId, FileShare.ContentCreator);
-
-        await _filesClient.Authenticate(member);
-
-        // Act
-        using var file = await GetFileResponseAsync(fileId);
-
-        // Assert
-        file.StatusCode.Should().Be(HttpStatusCode.OK);
-    }
-
-    [Fact]
     public async Task LinkedRoom_AfterUnlink_ProjectMemberLosesAccess()
     {
         // Arrange

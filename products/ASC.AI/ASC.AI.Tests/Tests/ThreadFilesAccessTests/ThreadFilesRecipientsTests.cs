@@ -102,6 +102,49 @@ public class ThreadFilesRecipientsTests(AspireAppFixture fixture) : ThreadFilesT
         users.Should().BeEmpty();
     }
 
+    [Fact]
+    public async Task UploadToProject_IsNotMarkedNewForTheProjectOwner()
+    {
+        var projectId = await CreateProjectAsync();
+        var author = await InviteMemberAsync(projectId);
+        var room = (await RoomsApi.CreateRoomAsync(
+            new CreateRoomRequestDto($"room-{Guid.NewGuid():N}", roomType: RoomType.CustomRoom),
+            TestContext.Current.CancellationToken)).Response;
+        await RoomsApi.SetRoomSecurityAsync(
+            room.Id,
+            new RoomInvitationRequest([new RoomInvitation(author.Id, FileShare.ContentCreator)], notify: false),
+            TestContext.Current.CancellationToken);
+
+        await FilesHttpClient.Authenticate(author);
+        await UploadAsync(projectId, "notes.txt");
+        var announced = await UploadAsync(room.Id, "announced.txt");
+        await FilesHttpClient.Authenticate(Owner);
+
+        var roomNews = await NewTitlesAsync(room.Id, titles => titles.Contains(announced.Title));
+        var projectNews = await NewTitlesAsync(projectId, _ => true);
+
+        roomNews.Should().Contain(announced.Title);
+        projectNews.Should().BeEmpty();
+    }
+
+    private async Task<List<string>> NewTitlesAsync(int roomId, Func<List<string>, bool> until)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            var groups = (await RoomsApi.GetNewRoomItemsAsync(roomId, TestContext.Current.CancellationToken)).Response;
+            List<string> titles = [.. (groups ?? []).SelectMany(g => g.Items ?? []).Select(e => e.Title)];
+
+            if (until(titles) || DateTime.UtcNow >= deadline)
+            {
+                return titles;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
+
     private async Task<PortalSocket> WatchAsync(User user, int folderId)
     {
         var socket = await ConnectSocket(user);

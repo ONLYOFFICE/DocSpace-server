@@ -70,6 +70,26 @@ internal abstract class SecurityBaseDao<T>(
         await filesDbContext.RemoveSecuritiesAsync(tenantId, subject, ownerId, subjectType);
     }
 
+    public async Task RemoveAiProjectMemberAsync(Guid userId, int projectId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var deletedOn = ThreadsStorage.TruncateToMilliseconds(DateTime.UtcNow);
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteForSetShareAsync(tenantId, userId, [projectId], [], FileEntryType.Folder);
+            await context.MarkProjectMemberThreadsDeletedAsync(tenantId, projectId, userId, deletedOn);
+
+            await tr.CommitAsync();
+        });
+    }
+
     public async Task DeleteShareRecordsAsync(IEnumerable<FileShareRecord<T>> records)
     {
         var mapping = daoFactory.GetMapping<T>();

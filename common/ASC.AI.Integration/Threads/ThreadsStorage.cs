@@ -185,7 +185,7 @@ public class ThreadsStorage(IDbContextFactory<AiIntegrationContext> dbContextFac
         ];
     }
 
-    private static DateTime TruncateToMilliseconds(DateTime value)
+    public static DateTime TruncateToMilliseconds(DateTime value)
     {
         return new DateTime(value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond, value.Kind);
     }

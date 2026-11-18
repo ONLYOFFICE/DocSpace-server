@@ -180,6 +180,25 @@ The test also has to fail only for a reason:
 - Never give something a short fixed budget to arrive ("the request reached the stub within one
   second"): poll on a deadline.
 
+### A decision the stand cannot reach
+
+"Not proven red: needs an Enterprise stack" is where later reviews kept finding the bugs: in one
+branch three fix commits wrote it, and the next reviews found the decisions behind it wrong (a
+wizard's fallback, an expired-trial check). A stand that cannot reach the path does not excuse the
+decision from a test:
+
+- Move the decision into a function of its inputs — the quota, the tariff end, the last answer
+  known, now — with no I/O, and call it where the decision was. The unit-test projects are
+  `common/Tests/ASC.Core.Common.Tests` and `common/Tests/ASC.Data.Backup.Core.Tests`; the product and
+  Web suites are Aspire integration suites. So the function goes into a library a unit-test project
+  references (`ASC.Core.Common`, `ASC.Files.Core` or `ASC.Api.Core` for `ASC.Core.Common.Tests`),
+  also when the decision is made in Web.Api or Web.Studio, which no unit-test project reaches.
+  The integration test stays for the wiring; the unit test covers the decision with its boundaries:
+  the end yesterday, today and later (`failure-paths.md` §9), an unknown answer next to a refusal
+  (§4), each cell of a multi-step table the stand cannot reach (§10).
+- Prove that unit test red with `prove-red.sh` like any other.
+- "Not proven" is left for what remains after that — the wiring itself — and the commit names it.
+
 ## Endpoints the SDK does not expose
 
 Controller actions marked `[ApiExplorerSettings(IgnoreApi = true)]` are absent from the
@@ -265,7 +284,7 @@ that table fails in Arrange and the test is simply wrong. For `SubjectType.User`
 | EditingRoom | RoomManager, ContentCreator, Editing, Read |
 | VirtualDataRoom | RoomManager, ContentCreator, Editing, Read, FillForms |
 | AiRoom | RoomManager, ContentCreator, Read |
-| AiProjectRoom | RoomManager, ContentCreator — no Read; never a Guest |
+| AiProjectRoom | RoomManager, ContentCreator — no Read; never a Guest; no `SubjectType.Group` at all (403) |
 
 Plus one rule that is not in that table: **`RoomManager` can only be granted to a
 `RoomAdmin`** — the API rejects it for a `User` or a `Guest`.

@@ -50,6 +50,7 @@ global using ASC.Common.Log;
 
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.HeartBeat.Abstractions;
+global using ASC.Common.Utils;
 
 global using ASC.ElasticSearch.VectorData;
 

@@ -157,32 +157,4 @@ public class ThreadFilesAuthorAccessTests(AspireAppFixture fixture) : ThreadFile
 
         exception.ErrorCode.Should().Be(403);
     }
-
-    [Fact]
-    public async Task Read_AfterLeavingAndRejoiningTheProject_FollowsTheProjectAccess()
-    {
-        var artifact = await CreateArtifactAsync();
-
-        await SetProjectAccessAsync(artifact, FileShare.None);
-        await FilesHttpClient.Authenticate(artifact.Author);
-        var exception = await Assert.ThrowsAsync<ApiException>(async () => await FilesApi.GetFileInfoAsync(
-            artifact.File.Id,
-            cancellationToken: TestContext.Current.CancellationToken));
-
-        await SetProjectAccessAsync(artifact, FileShare.ContentCreator);
-        await FilesHttpClient.Authenticate(artifact.Author);
-        var file = (await FilesApi.GetFileInfoAsync(artifact.File.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-        exception.ErrorCode.Should().Be(403);
-        file.Id.Should().Be(artifact.File.Id);
-    }
-
-    private async Task SetProjectAccessAsync(Artifact artifact, FileShare access)
-    {
-        await FilesHttpClient.Authenticate(Owner);
-        await RoomsApi.SetRoomSecurityAsync(
-            artifact.ProjectId,
-            new RoomInvitationRequest([new RoomInvitation(artifact.Author.Id, access)], notify: false),
-            TestContext.Current.CancellationToken);
-    }
 }

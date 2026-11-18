@@ -41,9 +41,15 @@ public class DeletedThreadsCleanerService(
 {
     private const int BatchSize = 100;
 
+    private static readonly TimeSpan _defaultPeriod = TimeSpan.FromMinutes(5);
+    private static readonly TimeSpan _minPeriod = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan _maxPeriod = TimeSpan.FromDays(1);
+
     private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } = ReadPeriod(configuration);
+    // d.hh:mm:ss, from 5 seconds to 1 day; five minutes is "0.00:05:00"
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } =
+        configuration.ReadInterval("ai:deletedThreadsCleaner:period", _defaultPeriod, _minPeriod, _maxPeriod, logger);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -107,12 +113,5 @@ public class DeletedThreadsCleanerService(
         await scope.ServiceProvider.GetRequiredService<SecurityContext>().AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
 
         await scope.ServiceProvider.GetRequiredService<AiProjectThreadsService>().DeleteMarkedAsync(thread);
-    }
-
-    private static TimeSpan ReadPeriod(IConfiguration configuration)
-    {
-        var value = configuration.GetValue<string>("ai:deletedThreadsCleaner:period");
-
-        return string.IsNullOrEmpty(value) ? TimeSpan.FromMinutes(5) : TimeSpan.Parse(value, CultureInfo.InvariantCulture);
     }
 }

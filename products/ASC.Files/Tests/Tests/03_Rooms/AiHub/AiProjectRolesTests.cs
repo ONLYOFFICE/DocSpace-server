@@ -35,7 +35,8 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
 /// The roles of an AI project: Project manager is <c>RoomManager</c>, member is <c>ContentCreator</c> - the role that
-/// may use AI in a room - and <c>Read</c> is not a project role at all. A room admin demoted to a user keeps the
+/// may use AI in a room - and <c>Read</c> is not a project role at all. A group cannot be a member of a project, with
+/// any role: only users are invited. A room admin demoted to a user keeps the
 /// member role in the projects they managed or owned.
 /// </summary>
 [Trait("Category", "Rooms")]
@@ -58,8 +59,10 @@ public class AiProjectRolesTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
         (await GetUserAccessAsync(projectId, user.Id)).Should().BeNull();
     }
 
-    [Fact]
-    public async Task Share_GroupAtRead_Returns403()
+    [Theory]
+    [InlineData(FileShare.ContentCreator)]
+    [InlineData(FileShare.Read)]
+    public async Task Share_Group_Returns403AndGroupIsNotAdded(FileShare access)
     {
         // Arrange
         var projectId = await CreateProjectAsync();
@@ -67,11 +70,15 @@ public class AiProjectRolesTests(AspireAppFixture fixture) : AiHubTestBase(fixtu
         var groupId = await CreateGroupAsync(member);
 
         // Act
-        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ShareRoomAsync(projectId, groupId, FileShare.Read));
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await ShareRoomAsync(projectId, groupId, access));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent!.ToString().Should().Contain("The role is not available for this user type");
+
+        var shares = (await _roomsApi.GetRoomSecurityInfoAsync(projectId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        shares.Should().NotBeEmpty();
+        shares.Should().NotContain(s => s.SharedToGroup != null && s.SharedToGroup.Id == groupId);
     }
 
     [Fact]
