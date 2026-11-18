@@ -328,7 +328,7 @@ public abstract class FoldersController<T>(
     /// returns 400 if the title is empty, has only spaces, or is too long. It returns 403 if the parent does not exist
     /// or is in the archive. It also returns 403 in the Rooms, Forms, and AI agents section roots, which hold only
     /// rooms. For a string ID that is not a folder of a connected storage, the call returns 404.
-    /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// If the folder is in a full connected storage other than SharePoint, the call can return 400.
     /// The user has to free up space there first.
     /// </remarks>
     /// <summary>

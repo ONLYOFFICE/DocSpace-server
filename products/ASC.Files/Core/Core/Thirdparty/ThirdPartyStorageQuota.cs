@@ -146,9 +146,16 @@ public static class ThirdPartyStorageQuota
     /// item and clears it when the next item passes its checks, so without this a later item, failed or copied,
     /// hides the reason the user can act on. Otherwise the error of the connected-storage part, then that of the
     /// portal part; <see langword="null"/> when no part has one, and the operation keeps what it reported before.
+    /// A cancelled operation reports the cancellation, which its parts set as their current error, and never an
+    /// out-of-space refusal met before it.
     /// </summary>
-    public static string OperationError(string thirdPartyStorageFull, string thirdPartyError, string portalStorageFull, string portalError)
+    public static string OperationError(bool canceled, string thirdPartyStorageFull, string thirdPartyError, string portalStorageFull, string portalError)
     {
+        if (canceled)
+        {
+            return NullIfEmpty(thirdPartyError) ?? NullIfEmpty(portalError);
+        }
+
         return NullIfEmpty(thirdPartyStorageFull) ?? NullIfEmpty(portalStorageFull) ?? NullIfEmpty(thirdPartyError) ?? NullIfEmpty(portalError);
     }
 

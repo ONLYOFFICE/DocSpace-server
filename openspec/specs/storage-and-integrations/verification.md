@@ -89,6 +89,7 @@ WireMock and tests the behaviour. `DocsCloudClient` itself was not read.
 | Chunk handler `success` false with the message | `TP/ThirdPartyStorageQuotaTests.cs:122` | TEST-CONFIRMED (not in a recorded run; passed on the branch) |
 | Box, Dropbox, Google Drive and OneDrive answers read as out of space | `common/Tests/ASC.Core.Common.Tests/ThirdPartyStorageQuotaDecisionTests.cs:77-168` (the stand mints no OAuth tokens, so only the decisions are tested) | TEST-CONFIRMED (unit) |
 | A later item failing otherwise keeps the message | `common/Tests/ASC.Core.Common.Tests/ThirdPartyStorageQuotaDecisionTests.cs:171-197` (the decision); the wiring into move, copy and duplicate is read from the code only: the stand makes no later item fail for another reason | TEST-CONFIRMED (unit), wiring CODE-ONLY |
+| Cancelled after a refusal for space: the cancellation in `error` | `common/Tests/ASC.Core.Common.Tests/ThirdPartyStorageQuotaDecisionTests.cs:199-210` (the decision); the wiring through the token of the operation is read from the code only | TEST-CONFIRMED (unit), wiring CODE-ONLY |
 | SharePoint keeps its own answer | `products/ASC.Files/Core/Core/Thirdparty/SharePoint/` has no translation of the refusal | CODE-ONLY |
 | **Recent section** (bug 84528) | | |
 | Removal | `TP/ThirdPartyRecentDeleteTests.cs:53` | TEST-CONFIRMED [run: PASS] |

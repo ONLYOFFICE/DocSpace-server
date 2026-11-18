@@ -193,7 +193,20 @@ public class ThirdPartyStorageQuotaDecisionTests
     public void OperationError_OutOfSpaceRefusalWinsOverLaterItemsAndTheOtherPart(
         string? thirdPartyStorageFull, string? thirdPartyError, string? portalStorageFull, string? portalError, string? expected)
     {
-        ThirdPartyStorageQuota.OperationError(thirdPartyStorageFull, thirdPartyError, portalStorageFull, portalError).Should().Be(expected);
+        ThirdPartyStorageQuota.OperationError(false, thirdPartyStorageFull, thirdPartyError, portalStorageFull, portalError).Should().Be(expected);
+    }
+
+    // A cancelled operation: each part sets the cancellation as its current error, and an out-of-space refusal met
+    // before the cancel must not hide it
+    [Theory]
+    [InlineData("full", "canceled", null, null, "canceled")]
+    [InlineData(null, "canceled", "full", "canceled", "canceled")]
+    [InlineData(null, "", "full", "canceled", "canceled")]
+    [InlineData("full", "", "full", "", null)]
+    public void OperationError_CancellationWinsOverAnOutOfSpaceRefusal(
+        string? thirdPartyStorageFull, string? thirdPartyError, string? portalStorageFull, string? portalError, string? expected)
+    {
+        ThirdPartyStorageQuota.OperationError(true, thirdPartyStorageFull, thirdPartyError, portalStorageFull, portalError).Should().Be(expected);
     }
 
     [Theory]

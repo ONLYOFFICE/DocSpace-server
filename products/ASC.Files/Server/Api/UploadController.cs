@@ -349,15 +349,15 @@ public abstract class UploadController<T>(
     /// file. It changes data and deletes the session with its parts. A repeated call returns 404. If the parts do not
     /// add up to the size of the session, the call returns 400. Then send the missing parts and repeat the call. It
     /// returns 402 if the file is over a quota or size limit. A missing, finalized, or expired session returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 403.
-    /// If the target folder is in a full connected storage other than SharePoint, the call returns 400.
-    /// The user has to free up space there first.
+    /// If the target folder is in a full Box, Dropbox or WebDAV storage, the call returns 400. The user has to free up
+    /// space there first.
     /// </remarks>
     /// <summary>Finalize an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/finalize</path>
     [RaisesWebhook(WebhookTrigger.FileUploaded, When = "without `file.created`")]
     [Tags("Files / Operations")]
     [SwaggerResponse(201, "The assembled file and the identifiers of the closed session", typeof(UploadSessionResponseDto<int>))]
-    [SwaggerResponse(400, "The parts received so far do not add up to the size the session was opened for, or the connected storage other than SharePoint that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The parts received so far do not add up to the size the session was opened for, or the Box, Dropbox or WebDAV storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "Storing the file would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]

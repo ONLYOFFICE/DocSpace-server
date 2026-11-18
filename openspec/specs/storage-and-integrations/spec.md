@@ -265,10 +265,10 @@ Trash for it, so reading it afterwards answers 404.
 
 ### Requirement: Connected account out of space
 
-When a Box, Dropbox, Google Drive, OneDrive or WebDAV account refuses a write for lack of space, the call SHALL
+When a Box, Dropbox, Google Drive, OneDrive or WebDAV account refuses a write for lack of space, an API call SHALL
 answer 400 with the message "There is not enough free space in the connected third-party storage. Free up space in
-it and try again." instead of the service's own error. A file operation SHALL finish with that message as `error`,
-also when a later item fails otherwise. A SharePoint refusal keeps its own answer.
+it and try again."; the chunk handler answers `success` false with it. A file operation SHALL end with it as
+`error`, also when a later item fails otherwise, unless the operation is cancelled. SharePoint is not covered.
 
 #### Scenario: Creating a file
 
@@ -294,6 +294,11 @@ also when a later item fails otherwise. A SharePoint refusal keeps its own answe
 
 - **WHEN** one item of a move, copy or duplicate is refused for space and a later item fails for another reason
 - **THEN** the operation's `error` is still that message
+
+#### Scenario: Cancelled after a refusal for space
+
+- **WHEN** an item of a move, copy or duplicate is refused for space and the operation is then cancelled
+- **THEN** the operation finishes Canceled with the cancellation in `error`, as "Cancelling an operation" in file-operations states
 
 ### Requirement: Recent section with a third-party file
 

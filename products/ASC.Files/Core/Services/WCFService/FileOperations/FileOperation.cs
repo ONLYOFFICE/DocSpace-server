@@ -163,8 +163,13 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
         Init(data.HoldResult);
     }
 
+    // the token both parts run with: a cancelled operation reports the cancellation (ThirdPartyStorageQuota.OperationError)
+    private CancellationToken _cancellationToken;
+
     public override async Task RunJob(CancellationToken cancellationToken)
     {
+        _cancellationToken = cancellationToken;
+
         var daoOperation = DaoOperation.Files.Count != 0 || DaoOperation.Folders.Count != 0;
         var thirdPartyOperation = ThirdPartyOperation.Files.Count != 0 || ThirdPartyOperation.Folders.Count != 0;
 
@@ -189,7 +194,8 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
         var thirdpartyTask = ThirdPartyOperation;
         var daoTask = DaoOperation;
 
-        var error = ThirdPartyStorageQuota.OperationError(thirdpartyTask.StorageFullErr, thirdpartyTask.Err, daoTask.StorageFullErr, daoTask.Err);
+        var error = ThirdPartyStorageQuota.OperationError(
+            _cancellationToken.IsCancellationRequested, thirdpartyTask.StorageFullErr, thirdpartyTask.Err, daoTask.StorageFullErr, daoTask.Err);
 
         if (error != null)
         {

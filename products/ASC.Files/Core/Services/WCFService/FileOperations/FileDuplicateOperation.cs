@@ -123,10 +123,11 @@ internal class FileDuplicateOperation<T>(IServiceProvider serviceProvider, FileO
         }
 
         // each item is copied by an operation of its own; an out-of-space refusal of one of them stays over
-        // the errors of the others, as in a move or copy of many items (ThirdPartyStorageQuota.OperationError)
-        if (!string.IsNullOrEmpty(StorageFullErr))
+        // the errors of the others, unless the duplication was cancelled, as in a move or copy of many items
+        var error = ThirdPartyStorageQuota.OperationError(_cancellationToken.IsCancellationRequested, StorageFullErr, Err, null, null);
+        if (error != null)
         {
-            Err = StorageFullErr;
+            Err = error;
         }
 
         var progressSteps = Total;

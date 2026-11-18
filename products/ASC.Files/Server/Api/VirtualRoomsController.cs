@@ -374,8 +374,9 @@ public class VirtualRoomsThirdPartyController(
     /// 402 if the portal reached the room limit of its plan or its payment is overdue. It returns 403 if the storage
     /// account was not connected for rooms. It also returns 403 for a public room while the portal forbids external
     /// sharing. A room type of the AI rooms section also returns 403. With `createAsNewFolder`, a subfolder that
-    /// cannot be created also returns 403. If a storage other than SharePoint is full, the call returns 400 instead.
-    /// The user has to free up space there first. If `id` is not a folder of a connected storage account, the call returns 404.
+    /// cannot be created also returns 403. If a storage other than SharePoint is full, the call can return 400
+    /// instead. The user has to free up space there first. If `id` is not a folder of a connected storage account,
+    /// the call returns 404.
     /// </remarks>
     /// <summary>Create a third-party room</summary>
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
@@ -383,7 +384,7 @@ public class VirtualRoomsThirdPartyController(
     [RaisesWebhook(WebhookTrigger.AgentCreated, When = "instead when `roomType` is `AiRoom`")]
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected, or, with `createAsNewFolder`, the connected third-party storage has no free space left in its own account for the subfolder; free up space there and repeat the call")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `private` is set, which a third-party storage does not support, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected, or, with `createAsNewFolder`, the connected storage, other than SharePoint, has no free space left in its own account for the subfolder; free up space there and repeat the call")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue")]
     [SwaggerResponse(403, "The caller is not the account that connected the storage or may not create rooms, the storage account was not connected for room storage or already backs a room, the room would be public while the portal forbids external sharing, or, with `createAsNewFolder`, the subfolder cannot be created, as when `title` is blank, `cover` is not a known cover, a tag name is empty or the logo cannot be applied")]
     [SwaggerResponse(404, "`id` is not a folder of a connected third-party storage: a plain number, an identifier with a storage type the portal does not know, or a folder the storage does not have")]
