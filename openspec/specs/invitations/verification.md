@@ -233,7 +233,7 @@ effect rows above stay code-only.
 
 | Claim | Source | Status |
 |---|---|---|
-| Per-portal fixed one-day window (`core:hosting:rateLimiterOptions:maxEmailInvitationsPerDay`), each address one permit, no address not counted, 429 | `common/ASC.Api.Core/Core/BaseStartup.cs:293-360`; `RateLimiterPolicy.cs:39`; UC `[EnableRateLimiting(EmailInvitationApi)]` on `POST invite`; VRC on `PUT {id}/share`; release notes, technical changes v2.6 | CODE-ONLY |
+| Per-portal fixed one-day window (`core:hosting:rateLimiterOptions:maxEmailInvitationsPerDay`), each address one permit, no address not counted, 429 | `common/ASC.Api.Core/Core/BaseStartup.cs:257-323`; `RateLimiterPolicy.cs:39`; UC `[EnableRateLimiting(EmailInvitationApi)]` on `POST invite`; VRC on `PUT {id}/share`; release notes, technical changes v2.6 | CODE-ONLY |
 
 ## Paid-user limit when inviting
 

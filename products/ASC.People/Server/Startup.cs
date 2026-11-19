@@ -50,6 +50,6 @@ public class Startup : BaseStartup
     {
         await base.ConfigureServices(builder);
 
-        builder.Services.AddPeopleServices();
+        builder.Services.AddPeopleServices(_configuration);
     }
 }
