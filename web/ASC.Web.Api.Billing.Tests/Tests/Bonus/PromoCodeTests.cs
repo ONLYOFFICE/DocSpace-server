@@ -62,14 +62,17 @@ public class PromoCodeTests(AspireAppFixture fixture) : BaseTest(fixture)
         BillingValue(call, "Initiator").Should().Be(Owner.Email);
     }
 
-    // The billing service may send the expiry without an offset; the answer gives it one, so no reader takes it for
-    // its own zone.
-    [Fact]
-    public async Task ApplyPromoCode_ExpiryWithoutAnOffset_IsAnsweredWithOne()
+    // The billing service may send the expiry without an offset, or with an offset of its own; the answer gives it the
+    // portal's offset and keeps the moment. The test portal is in UTC, so an offset taken for the host's zone shows
+    // wherever the host is not in UTC.
+    [Theory]
+    [InlineData("2027-02-07T12:00:00")]
+    [InlineData("2027-02-07T17:00:00+05:00")]
+    public async Task ApplyPromoCode_ExpiryWithoutAnOffsetOrWithAnother_KeepsItsMomentWithAnOffset(string expiresAt)
     {
         // Arrange
         Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
-            """{"Status":"completed","Amount":10,"Currency":"USD","ExpiresAt":"2027-02-07T12:00:00"}""");
+            $$"""{"Status":"completed","Amount":10,"Currency":"USD","ExpiresAt":"{{expiresAt}}"}""");
 
         // Act
         var bonus = await RawResponseAsync(HttpMethod.Post, "api/2.0/portal/payment/promoCode", $$"""{"promoCode":"{{PromoCode}}"}""");

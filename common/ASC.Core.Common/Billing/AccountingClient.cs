@@ -847,7 +847,7 @@ public class GoodwillBalance : Balance
         }
 
         var lots = Lots
-            .Where(lot => lot.Currency == currency && (lot.ExpiresAt == null || AsUtc(lot.ExpiresAt.Value) > utcNow))
+            .Where(lot => lot.Currency == currency && (lot.ExpiresAt == null || BillingTime.AsUtc(lot.ExpiresAt.Value) > utcNow))
             .Sum(lot => Math.Max(lot.Remaining, 0));
 
         return Math.Min(account, lots);
@@ -857,18 +857,17 @@ public class GoodwillBalance : Balance
     /// Whether a purchase from the wallet in <paramref name="currency"/> has anything to be paid with: a wallet
     /// sub-account in that currency, whatever its amount, or a bonus in it that has not ended at
     /// <paramref name="utcNow"/>. A customer who has never topped up the wallet has no wallet sub-account, also with a
-    /// bonus credited; the accounting service spends the bonus on the purchase all the same.
+    /// bonus credited; the accounting service spends the bonus on the purchase all the same. When the bonus could not be
+    /// read (<paramref name="goodwillUnknown"/>), the answer is true: an unknown bonus is not a refusal, and billing
+    /// decides whether the purchase is paid.
     /// </summary>
-    public static bool CanPayFromWallet(Balance wallet, GoodwillBalance goodwill, string currency, DateTime utcNow)
+    public static bool CanPayFromWallet(Balance wallet, GoodwillBalance goodwill, bool goodwillUnknown, string currency, DateTime utcNow)
     {
-        return wallet?.SubAccounts?.Any(x => x.Currency == currency) == true || goodwill?.SpendableAmount(currency, utcNow) > 0;
+        return wallet?.SubAccounts?.Any(x => x.Currency == currency) == true
+            || goodwillUnknown
+            || goodwill?.SpendableAmount(currency, utcNow) > 0;
     }
 
-    // ToUniversalTime would read a time without an offset as the host's local time and move the end by its offset.
-    private static DateTime AsUtc(DateTime value)
-    {
-        return value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(value, DateTimeKind.Utc) : value.ToUniversalTime();
-    }
 }
 
 /// <summary>

@@ -92,19 +92,22 @@ public class GoodwillBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
         goodwill.Lots[1].ExpiresAt.Should().BeNull("a bonus that never expires has no expiry");
     }
 
-    // The accounting service may send its times without an offset; the answer gives them one, so no reader takes them
-    // for its own zone.
-    [Fact]
-    public async Task GetCustomerGoodwill_TimesWithoutAnOffset_AreAnsweredWithOne()
+    // The accounting service may send its times without an offset, or with an offset of its own; the answer gives them
+    // the portal's offset and keeps the moment. The test portal is in UTC, so an offset taken for the host's zone shows
+    // wherever the host is not in UTC.
+    [Theory]
+    [InlineData("2026-11-01T09:00:00", "2026-12-01T09:00:00")]
+    [InlineData("2026-11-01T14:00:00+05:00", "2026-12-01T14:00:00+05:00")]
+    public async Task GetCustomerGoodwill_TimesWithoutAnOffsetOrWithAnother_KeepTheirMomentWithAnOffset(string date, string expiresAt)
     {
         // Arrange
         Payments.Customer(Owner.Email)
-            .On(PaymentService.Accounting, "GET", GoodwillRoute, """
+            .On(PaymentService.Accounting, "GET", GoodwillRoute, $$"""
                 {
                   "accountCurrency": "USD",
                   "subAccounts": [{"currency": "USD", "amount": 50}],
-                  "lastCredit": {"amount": 50, "currency": "USD", "date": "2026-11-01T09:00:00"},
-                  "lots": [{"operationId": 987654, "amount": 50, "remaining": 50, "currency": "USD", "date": "2026-11-01T09:00:00", "expiresAt": "2026-12-01T09:00:00"}]
+                  "lastCredit": {"amount": 50, "currency": "USD", "date": "{{date}}"},
+                  "lots": [{"operationId": 987654, "amount": 50, "remaining": 50, "currency": "USD", "date": "{{date}}", "expiresAt": "{{expiresAt}}"}]
                 }
                 """);
 

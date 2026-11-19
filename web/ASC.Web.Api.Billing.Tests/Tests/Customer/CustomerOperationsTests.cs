@@ -64,6 +64,23 @@ public class CustomerOperationsTests(AspireAppFixture fixture) : BaseTest(fixtur
         query["limit"].Should().Be("10");
     }
 
+    // The kind reaches the accounting service under the name it reads, so only the bonus credits come back.
+    [Fact]
+    public async Task GetCustomerOperations_FilterByBonusCredits_AsksAccountingForThatKindOnly()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email).Balance(10m)
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/operations",
+                """{"collection":[],"offset":0,"limit":25,"totalQuantity":0,"totalPage":0,"currentPage":1}""");
+
+        // Act
+        await _paymentApi.GetCustomerOperationsAsync(type: OperationType.GoodwillCredit, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        var request = PaymentCalls.Should().ContainSingle(call => call.Route == "/customer/{portalId}/operations").Subject;
+        HttpUtility.ParseQueryString(request.Query).GetValues("operationTypes").Should().Equal("GoodwillCredit");
+    }
+
     [Fact]
     public async Task GetCustomerOperations_ExpiredBonus_IsDescribedAndSplitByItsSources()
     {

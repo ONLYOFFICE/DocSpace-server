@@ -106,7 +106,7 @@ public class ReportDto
 }
 
 /// <summary>
-/// One movement on the portal wallet: what it was for, who caused it, and how much money it moved.
+/// One movement on the portal wallet or its bonus balance: what it was for, who caused it, and how much money it moved.
 /// </summary>
 public class OperationDto
 {
@@ -153,14 +153,15 @@ public class OperationDto
     /// <example>USD</example>
     public string Currency { get; set; }
     /// <summary>
-    /// The amount that went into the wallet. It is `0` on a movement that only took money out, so the pair of
-    /// `credit` and `debit` is what shows which way the money went; the `credit` and `debit` filters of the
-    /// operation select the two directions by exactly this.
+    /// The whole amount that came in - a top-up, a refund or a bonus credit. It is `0` on a movement that only took
+    /// money out, so the pair of `credit` and `debit` is what shows which way the money went; the `credit` and `debit`
+    /// filters of the operation select the two directions by exactly this. `sources` gives the part on the bonus.
     /// </summary>
     /// <example>99.99</example>
     public decimal Credit { get; set; }
     /// <summary>
-    /// The amount that was taken out of the wallet, `0` on a movement that put money in.
+    /// The whole amount that went out - from the wallet money and the bonus together, or an expired bonus - and `0` on
+    /// a movement that put money in. `sources` gives the part on the bonus.
     /// </summary>
     /// <example>99.99</example>
     public decimal Debit { get; set; }
@@ -225,8 +226,8 @@ public class OperationDto
     /// <example>[{"subAccount": 53, "isBonus": true, "amount": 4.5}, {"subAccount": 0, "isBonus": false, "amount": 9.5}]</example>
     public List<OperationSourceDto> Sources { get; set; }
     /// <summary>
-    /// What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter
-    /// matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not
+    /// What kind of movement this is - a payment, a charge, a refund, a correction, a bonus credit or a bonus
+    /// expiration. It is what the `type` filter matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not
     /// recognise.
     /// </summary>
     /// <example>Unknown</example>

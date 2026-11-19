@@ -198,9 +198,10 @@ public class PaymentHelper(
     /// <summary>
     /// Demands that a purchase from the wallet in the given currency (defaults to the first supported accounting
     /// currency) has something to be paid with: a wallet sub-account or a bonus that has not ended. The bonus is read
-    /// only when the wallet has no sub-account in the currency.
+    /// only when the wallet has no sub-account in the currency. A bonus that could not be read lets the purchase go on,
+    /// and billing decides.
     /// </summary>
-    /// <exception cref="ItemNotFoundException">Thrown when the balance cannot be read, or the portal has neither.</exception>
+    /// <exception cref="ItemNotFoundException">Thrown when the balance cannot be read, or the portal is known to have neither.</exception>
     public async Task DemandWalletOrBonusAsync(int tenantId, string currency = null, bool refresh = false)
     {
         var balance = await tariffService.GetCustomerBalanceAsync(tenantId, refresh);
@@ -211,14 +212,14 @@ public class PaymentHelper(
 
         currency ??= tariffService.GetSupportedAccountingCurrencies().First();
 
-        if (GoodwillBalance.CanPayFromWallet(balance, null, currency, DateTime.UtcNow))
+        if (GoodwillBalance.CanPayFromWallet(balance, null, goodwillUnknown: false, currency, DateTime.UtcNow))
         {
             return;
         }
 
-        var goodwill = await tariffService.GetCustomerGoodwillAsync(tenantId);
+        var (goodwill, known) = await tariffService.ReadCustomerGoodwillAsync(tenantId);
 
-        if (!GoodwillBalance.CanPayFromWallet(balance, goodwill, currency, DateTime.UtcNow))
+        if (!GoodwillBalance.CanPayFromWallet(balance, goodwill, goodwillUnknown: !known, currency, DateTime.UtcNow))
         {
             throw new ItemNotFoundException("Subaccount could not be found");
         }
@@ -406,20 +407,13 @@ public class PaymentHelper(
         return updated;
     }
 
-    // An amount in the audit trail reads the same whatever the culture of the request, and without the trailing zeros
-    // the billing service may send (10.0000 is "10").
-    internal static string AuditAmount(decimal amount, string currency)
-    {
-        return $"{amount.ToString("G29", CultureInfo.InvariantCulture)} {currency}";
-    }
-
     public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, bool waitForChanges)
     {
         var result = await tariffService.TopUpDepositAsync(tenantId, amount, currency, customerParticipantName, siteName, null, waitForChanges);
 
         if (result)
         {
-            messageService.Send(MessageAction.CustomerWalletToppedUp, AuditAmount(amount, currency));
+            messageService.Send(MessageAction.CustomerWalletToppedUp, BillingAudit.Amount(amount, currency));
 
             // waitForChanges doubles as "the balance already reflects this deposit". With a delayed payment
             // method it does not: the deposit is accepted but the money is credited only once the
@@ -474,7 +468,7 @@ public class PaymentHelper(
             throw new BillingException("Failed to move the subscription balance to the wallet");
         }
 
-        messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, $"{transfer.Amount} {transfer.Currency}");
+        messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, BillingAudit.Amount(transfer.Amount, transfer.Currency));
 
         await NotifyWalletChangedAsync(tenantId);
 
@@ -501,7 +495,7 @@ public class PaymentHelper(
         }
 
         // The code itself stays out of the audit trail: anyone who reads the trail could redeem a reusable one.
-        messageService.Send(MessageAction.CustomerPromoCodeApplied, AuditAmount(result.Amount, result.Currency?.ToUpperInvariant()));
+        messageService.Send(MessageAction.CustomerPromoCodeApplied, BillingAudit.Amount(result.Amount, result.Currency));
 
         // A pending bonus is not on the balance yet, so there is nothing new for the clients to read.
         if (result.IsCredited)

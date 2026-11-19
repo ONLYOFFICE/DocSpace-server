@@ -57,18 +57,21 @@ public class CustomerBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
         PaymentCalls.Should().Contain(call => call.Service == PaymentService.Accounting && call.Route == "/customer/{portalId}/balance");
     }
 
-    // The accounting service may send its times without an offset; the answer gives the last credit one, so no reader
-    // takes it for its own zone.
-    [Fact]
-    public async Task GetCustomerBalance_LastCreditWithoutAnOffset_IsAnsweredWithOne()
+    // The accounting service may send its times without an offset, or with an offset of its own; the answer gives the
+    // last credit the portal's offset and keeps the moment. The test portal is in UTC, so an offset taken for the
+    // host's zone shows wherever the host is not in UTC.
+    [Theory]
+    [InlineData("2026-11-01T09:00:00")]
+    [InlineData("2026-11-01T14:00:00+05:00")]
+    public async Task GetCustomerBalance_LastCreditWithoutAnOffsetOrWithAnother_KeepsItsMomentWithAnOffset(string date)
     {
         // Arrange
         Payments.Customer(Owner.Email)
-            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance", """
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance", $$"""
                 {
                   "accountCurrency": "USD",
                   "subAccounts": [{"currency": "USD", "amount": 150.25}],
-                  "lastCredit": {"amount": 100, "currency": "USD", "date": "2026-11-01T09:00:00"}
+                  "lastCredit": {"amount": 100, "currency": "USD", "date": "{{date}}"}
                 }
                 """);
 

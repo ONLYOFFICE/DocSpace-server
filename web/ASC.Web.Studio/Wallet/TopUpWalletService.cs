@@ -175,7 +175,7 @@ public class TopUpWalletService(
             if (result)
             {
                 var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
-                var description = $"{amount} {settings.Currency}";
+                var description = BillingAudit.Amount(amount, settings.Currency);
                 messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerWalletToppedUp, description);
 
                 // The wallet is topped up by now: a failure to tell the clients must not reach the catch below, which

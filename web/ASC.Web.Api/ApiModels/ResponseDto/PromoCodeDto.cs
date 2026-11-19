@@ -53,8 +53,7 @@ public class PromoCodeDto
     public PromoCodeStatus Status { get; init; }
 
     /// <summary>
-    /// How much bonus money the code credits, in `currency`. It lands on the bonus balance, read with
-    /// `GET api/2.0/portal/payment/customer/goodwill`, not on the money paid into the wallet.
+    /// How much bonus money the code credits, in `currency`.
     /// </summary>
     /// <example>10</example>
     public decimal Amount { get; init; }
@@ -81,9 +80,9 @@ public partial class PromoCodeDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
     public partial PromoCodeDto Map(PromoCodeResult source);
 
     // The billing service gives the expiry in UTC; the client sees it with the offset of the portal.
-    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(source);
+    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(BillingTime.AsUtc(source));
 
-    private ApiDateTime MapNullableDate(DateTime? source) => apiDateTimeHelper.Get(source);
+    private ApiDateTime MapNullableDate(DateTime? source) => apiDateTimeHelper.Get(BillingTime.AsUtc(source));
 
     // The billing service may spell the currency in lower case, as it does for a subscription moved to the wallet.
     private static string ToUpperCurrency(string currency)

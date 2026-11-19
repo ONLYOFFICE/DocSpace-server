@@ -31,14 +31,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-
 namespace ASC.Web.Api.Billing.Tests.Tests.WalletServices;
 
 /// <summary>
 /// The check before a purchase from the wallet (<c>PUT payment/calculatewallet</c>, and <c>updatewallet</c> through
 /// the same check) for a customer who has linked a card but never topped up the wallet: the accounting service gives
-/// such a wallet no sub-account, also with a bonus credited. A bonus is enough to go on; with neither, the call
-/// answers 404.
+/// such a wallet no sub-account, also with a bonus credited. A bonus is enough to go on, and so is a bonus that could
+/// not be read; only a portal known to have neither gets 404.
 /// </summary>
 public class WalletPurchaseWithoutSubAccountTests(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -58,6 +57,24 @@ public class WalletPurchaseWithoutSubAccountTests(AspireAppFixture fixture) : Ba
             new WalletQuantityRequestDto(new Dictionary<string, int?> { ["storage"] = 100 }, ProductQuantityType.Add), TestContext.Current.CancellationToken);
 
         // Assert: the bonus was asked for, and the call went on to the price instead of answering 404
+        PaymentCalls.Should().Contain(call => call.Route == GoodwillRoute);
+        PaymentCalls.Should().Contain(call => call.Route == "/billing/CalculateSubscription");
+    }
+
+    // An unknown answer is not a refusal: the call goes on to the price, and billing decides.
+    [Fact]
+    public async Task CalculateWalletPayment_NoWalletSubAccountAndTheBonusCannotBeRead_IsNotRefused()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .On(PaymentService.Accounting, "GET", BalanceRoute, NeverToppedUpWallet())
+            .On(PaymentService.Accounting, "GET", GoodwillRoute, """{"title":"Internal Server Error","status":500}""", HttpStatusCode.InternalServerError);
+
+        // Act
+        await _paymentApi.CalculateWalletPaymentAsync(
+            new WalletQuantityRequestDto(new Dictionary<string, int?> { ["storage"] = 100 }, ProductQuantityType.Add), TestContext.Current.CancellationToken);
+
+        // Assert
         PaymentCalls.Should().Contain(call => call.Route == GoodwillRoute);
         PaymentCalls.Should().Contain(call => call.Route == "/billing/CalculateSubscription");
     }

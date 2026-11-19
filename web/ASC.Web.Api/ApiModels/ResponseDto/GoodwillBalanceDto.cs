@@ -35,7 +35,8 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// The bonus balance of the portal - the bonus money credited to it, which the accounting service holds on a goodwill
-/// account of its own rather than on the wallet - with the bonus credits not spent in full.
+/// account of its own rather than on the wallet - with the bonus credits not spent in full. The amount of a
+/// sub-account may still include a credit that has ended, until the accounting service writes it off.
 /// </summary>
 /// <example>
 /// {
@@ -110,7 +111,7 @@ public partial class GoodwillBalanceDtoMapper(ApiDateTimeHelper apiDateTimeHelpe
     public partial GoodwillBalanceDto Map(GoodwillBalance source);
 
     // The accounting service gives its times in UTC; the client sees them with the offset of the portal.
-    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(source);
+    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(BillingTime.AsUtc(source));
 
-    private ApiDateTime MapNullableDate(DateTime? source) => apiDateTimeHelper.Get(source);
+    private ApiDateTime MapNullableDate(DateTime? source) => apiDateTimeHelper.Get(BillingTime.AsUtc(source));
 }

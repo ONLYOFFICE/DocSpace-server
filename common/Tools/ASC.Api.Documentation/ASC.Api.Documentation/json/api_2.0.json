@@ -2701,7 +2701,7 @@
           "Portal / Payment"
         ],
         "summary": "Change a wallet service quantity",
-        "description": "Buys units of a wallet service, or schedules the quantity of the service for the next period. The mode comes\r\nfrom `productQuantityType`. With `Add`, the call buys the units immediately and pays for them from the portal\r\nwallet. With `Set`, the call charges nothing and changes the quantity from the next period. With `Set`, an\r\nempty quantity cancels a change that was scheduled earlier. With a zero quantity, the portal does not renew the\r\nservice at the next period. The call returns 400 for `Renew` and `Sub`. If the portal has no billing customer,\r\nthe call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the\r\ninstallation has no billing service. An `Add` call spends money. Do not repeat an `Add` call. Each call buys\r\nthe units again. You can repeat a `Set` call with the same body. With `Add`, the wallet needs a sub-account in\r\nthe accounting currency. If it has none, the call returns 404. Its money and the bonus balance together must\r\ncover the price. The bonus is spent first. If the\r\nbilling service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402\r\nfor an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400\r\nif the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and\r\n10 for Docs Connect Dev Pack. With `Add`, the minimum for admins is the number\r\nof admins the portal already has. With `Add`, the call checks the minimum only while the portal does not have\r\nthe service yet. With `Add`, an empty or zero quantity also returns 400. While Docs Connect is active, a\r\nrequest for Docs Connect Dev Pack returns 400. To move to Docs Connect Dev Pack, use\r\n`POST api/2.0/settings/docscloud/switchtodevpack`. While Docs Connect Dev Pack is active, `Set` with Docs\r\nConnect schedules the return to it. The return happens at the next period and needs a quantity above zero. In\r\nthis case, `Add` with Docs Connect returns 400. With `Add`, the call returns `true`. With `Set`, it returns\r\n`true`, or `false` if the portal does not have the service or cannot save the change. By default, the limit\r\nis 10 calls a minute per user. More calls return 429. To get the price first, use\r\n`PUT api/2.0/portal/payment/calculatewallet`.",
+        "description": "Buys units of a wallet service, or schedules the quantity of the service for the next period. The mode comes\r\nfrom `productQuantityType`. With `Add`, the call buys the units immediately and pays for them from the portal\r\nwallet. With `Set`, the call charges nothing and changes the quantity from the next period. With `Set`, an\r\nempty quantity cancels a change that was scheduled earlier. With a zero quantity, the portal does not renew the\r\nservice at the next period. The call returns 400 for `Renew` and `Sub`. If the portal has no billing customer,\r\nthe call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the\r\ninstallation has no billing service. An `Add` call spends money. Do not repeat an `Add` call. Each call buys\r\nthe units again. You can repeat a `Set` call with the same body. With `Add`, the call needs a wallet\r\nsub-account or a bonus in the accounting currency. A bonus counts only until it ends. Without either, the call\r\nreturns 404. A wallet that was never topped up has no sub-account. If the bonus cannot be read, the call goes\r\non. If the wallet balance cannot be read, the call returns 404. The wallet money and the bonus balance together must cover the price. The bonus is spent first. If the\r\nbilling service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402\r\nfor an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400\r\nif the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and\r\n10 for Docs Connect Dev Pack. With `Add`, the minimum for admins is the number\r\nof admins the portal already has. With `Add`, the call checks the minimum only while the portal does not have\r\nthe service yet. With `Add`, an empty or zero quantity also returns 400. While Docs Connect is active, a\r\nrequest for Docs Connect Dev Pack returns 400. To move to Docs Connect Dev Pack, use\r\n`POST api/2.0/settings/docscloud/switchtodevpack`. While Docs Connect Dev Pack is active, `Set` with Docs\r\nConnect schedules the return to it. The return happens at the next period and needs a quantity above zero. In\r\nthis case, `Add` with Docs Connect returns 400. With `Add`, the call returns `true`. With `Set`, it returns\r\n`true`, or `false` if the portal does not have the service or cannot save the change. By default, the limit\r\nis 10 calls a minute per user. More calls return 429. To get the price first, use\r\n`PUT api/2.0/portal/payment/calculatewallet`.",
         "operationId": "updateWalletPayment",
         "requestBody": {
           "content": {
@@ -2771,7 +2771,7 @@
             "description": "The caller is not a DocSpace administrator, or the portal has no billing service configured"
           },
           "404": {
-            "description": "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency"
+            "description": "This portal has no billing customer, or in the `Add` form the wallet balance cannot be read or the portal is known to have neither a wallet sub-account nor a bonus that has not ended in the accounting currency"
           },
           "401": {
             "description": "Unauthorized",
@@ -2855,7 +2855,7 @@
           "Portal / Payment"
         ],
         "summary": "Calculate the wallet payment amount",
-        "description": "Returns the price of a wallet service purchase without making it. Use it to show the amount before the user\r\nconfirms the purchase. The call returns 400 if `productQuantityType` is not `Add` or the quantity is not above\r\nzero. It also returns 400 if the product is not a wallet service. If the portal has no billing customer or no\r\nwallet sub-account in the accounting currency, the call returns 404. Requires a DocSpace admin. Other callers\r\nget 403. The call also returns 403 if the installation has no billing service. The call is read-only and buys\r\nnothing, so you can repeat it. To make the purchase, use `PUT api/2.0/portal/payment/updatewallet`. The price\r\nis for the moment of the call and is not reserved. So it can change before the purchase. If the billing\r\nservice fails, the call returns 200 with an empty body.",
+        "description": "Returns the price of a wallet service purchase without making it. Use it to show the amount before the user\r\nconfirms the purchase. The call returns 400 if `productQuantityType` is not `Add` or the quantity is not above\r\nzero. It also returns 400 if the product is not a wallet service. The call returns 404 without a billing\r\ncustomer. The call needs a wallet sub-account or a bonus in the accounting currency. A bonus counts only until it\r\nends. Without either, the call returns 404. If the bonus cannot be read, the call goes on. If the wallet\r\nbalance cannot be read, the call returns 404, also for up to 10 minutes after that. Requires a DocSpace\r\nadmin. Other callers get 403. The call also returns 403 if the installation has no billing service. The call is read-only and buys\r\nnothing, so you can repeat it. To make the purchase, use `PUT api/2.0/portal/payment/updatewallet`. The price\r\nis for the moment of the call and is not reserved. So it can change before the purchase. If the billing\r\nservice fails, the call returns 200 with an empty body.",
         "operationId": "calculateWalletPayment",
         "requestBody": {
           "content": {
@@ -2896,7 +2896,7 @@
             "description": "The caller is not a DocSpace administrator, or the portal has no billing service configured"
           },
           "404": {
-            "description": "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency"
+            "description": "This portal has no billing customer, the wallet balance cannot be read, or the portal is known to have neither a wallet sub-account nor a bonus that has not ended in the accounting currency"
           },
           "401": {
             "description": "Unauthorized",
@@ -3080,7 +3080,7 @@
           "Portal / Payment"
         ],
         "summary": "Move the subscription to the wallet",
-        "description": "Ends the paid subscription of the portal and moves the portal to the wallet. First, the call adds the unused\r\nbalance of the period to the wallet. If the wallet and the bonus balance fall short, it tops up the wallet from\r\nthe payment method. Then it buys the requested admins as a wallet service and spends the bonus first. To read\r\nthe credit beforehand, use `GET api/2.0/portal/payment/subscription/balance`. The payer is the user with the\r\nemail of the billing customer. Only the payer can call it. Other callers get 403. The call spends money and\r\ncannot be undone. Do not repeat it. It returns `true` if it bought the admins. If the purchase fails, it returns\r\n`false` with 200. The portal then stays on the wallet with the moved money. To buy the admins after that, use\r\n`Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the wallet and the bonus must\r\nalready cover the price. By default, the limit is 10 calls a minute per user. More calls return 429. The call\r\nreturns 403 if the installation has no billing service or the customer has no payment method. It returns 404 if\r\nthe portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`\r\nnames a product other than the admins wallet service. It also returns 400 for zero admins or fewer than the\r\nportal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan\r\nis not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and\r\nthe bonus still fall short after the top-up, the call returns 402. If the wallet has no balance or no\r\nsub-account in the accounting currency, the call returns 404.",
+        "description": "Ends the paid subscription of the portal and moves the portal to the wallet. First, the call adds the unused\r\nbalance of the period to the wallet. If the wallet and the bonus balance fall short, it tops up the wallet from\r\nthe payment method. Then it buys the requested admins as a wallet service and spends the bonus first. To read\r\nthe credit beforehand, use `GET api/2.0/portal/payment/subscription/balance`. The payer is the user with the\r\nemail of the billing customer. Only the payer can call it. Other callers get 403. The call spends money and\r\ncannot be undone. Do not repeat it. It returns `true` if it bought the admins. If the purchase fails, it returns\r\n`false` with 200. The portal then stays on the wallet with the moved money. To buy the admins after that, use\r\n`Add` in `PUT api/2.0/portal/payment/updatewallet`. With a delayed payment method, the wallet and the bonus must\r\nalready cover the price. By default, the limit is 10 calls a minute per user. More calls return 429. The call\r\nreturns 403 if the installation has no billing service or the customer has no payment method. It returns 404 if\r\nthe portal has no billing customer or its paid plan has no subscription. The call returns 400 if `quantity`\r\nnames a product other than the admins wallet service. It also returns 400 for zero admins or fewer than the\r\nportal already has. It also returns 400 if the paid plan is a wallet product. The call returns 402 if the plan\r\nis not paid or the balance cannot be moved. Two errors come after the subscription has ended. If the wallet and\r\nthe bonus still fall short after the top-up, the call returns 402. If the wallet balance cannot be read, the\r\ncall returns 404.",
         "operationId": "moveSubscriptionToWallet",
         "requestBody": {
           "content": {
@@ -3150,7 +3150,7 @@
             "description": "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set"
           },
           "404": {
-            "description": "This portal has no billing customer, its paid plan has no subscription, or after the move its wallet has no balance or no sub-account in the accounting currency"
+            "description": "This portal has no billing customer, its paid plan has no subscription, or after the move the wallet balance cannot be read"
           },
           "401": {
             "description": "Unauthorized",
@@ -4777,7 +4777,7 @@
           "Portal / Payment"
         ],
         "summary": "Get the customer balance",
-        "description": "Returns the money in the portal wallet as the accounting service has it. The answer has a sub-account with its\r\namount for each currency and the last credit movement. Requires a DocSpace admin. Other callers get 403. The\r\ncall also returns 403 if the installation has no billing service. If the portal has no billing customer, the\r\ncall returns an empty result. The call is read-only. The wallet services spend this balance, and `POST\r\napi/2.0/portal/payment/deposit` adds to it. To list the movements, use `GET\r\napi/2.0/portal/payment/customer/operations`. Each call reads the balance from the accounting service, so it is\r\ncurrent right after a top-up too. Only a failed read is cached. A read fails if the service cannot be reached,\r\nanswers with an error, or does not know the portal. Then the call returns an empty result for 10 minutes. Use\r\n`refresh=true` to read it again immediately.",
+        "description": "Returns the money in the portal wallet as the accounting service has it. The answer has a sub-account with its\r\namount for each currency and the last credit movement. Requires a DocSpace admin. Other callers get 403. The\r\ncall also returns 403 if the installation has no billing service. If the portal has no billing customer, the\r\ncall returns an empty result. The call is read-only. The wallet services spend this balance, and `POST\r\napi/2.0/portal/payment/deposit` adds to it. The bonus money is not in this balance: to read it, use `GET\r\napi/2.0/portal/payment/customer/goodwill`. To list the movements, use `GET\r\napi/2.0/portal/payment/customer/operations`. Each call reads the balance from the accounting service, so it is\r\ncurrent right after a top-up too. Only a failed read is cached. A read fails if the service cannot be reached,\r\nanswers with an error, or does not know the portal. Then the call returns an empty result for 10 minutes. Use\r\n`refresh=true` to read it again immediately.",
         "operationId": "getCustomerBalance",
         "parameters": [
           {
@@ -4900,7 +4900,7 @@
           "Portal / Payment"
         ],
         "summary": "Get the bonus balance",
-        "description": "Returns the bonus balance of the portal, which the accounting service keeps apart from the wallet. Requires a\r\nDocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service. The\r\ncall is read-only. Each call reads the balance from the accounting service, so a new bonus shows up immediately.\r\nThe account part has a sub-account with its amount for each currency. If the portal has no billing customer, the\r\ncall returns an empty result. It also returns an empty result if the accounting service cannot be read. So treat\r\nan empty result as nothing to show, not as zero. To read the money paid into the wallet, use `GET api/2.0/portal/payment/customer/balance`.",
+        "description": "Returns the bonus balance of the portal, which the accounting service keeps apart from the wallet. Requires a\r\nDocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service. The\r\ncall is read-only. Each call reads the balance from the accounting service, so a new bonus shows up immediately.\r\nThe account part has a sub-account with its amount for each currency. That amount may still include a credit\r\nthat has ended, until the accounting service writes it off. A purchase counts only the rest of the credits in\r\n`lots` that have not ended, up to that amount. If the portal has no billing customer, the\r\ncall returns an empty result. It also returns an empty result if the accounting service cannot be read. So treat\r\nan empty result as nothing to show, not as zero. To read the money paid into the wallet, use `GET api/2.0/portal/payment/customer/balance`.",
         "operationId": "getCustomerGoodwill",
         "responses": {
           "200": {
@@ -5000,7 +5000,7 @@
           "Portal / Payment"
         ],
         "summary": "Get the wallet operations",
-        "description": "Returns a page of the money movements of the portal wallet. The movements are top-ups, service charges,\r\nrefunds, and corrections. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the\r\ninstallation has no billing service. If the portal has no billing customer, the call returns an empty result.\r\nThe call is read-only. All filters are optional. If `serviceName` has a name that the installation does not\r\nsell, the call returns 404. If neither `credit` nor `debit` is set, the list has both directions. AI usage\r\npaid with the portal's own provider keys has the service names `ai-tools-byok` and `ai-search-byok`. The\r\n`serviceName` filter accepts them. Such a movement looks like its AI service, with `byok` set. By default,\r\n`offset` is 0 and `limit` is 25. The answer repeats them next to `totalQuantity`, `totalPage`, and\r\n`currentPage`. To get the same data as a file, use `POST api/2.0/portal/payment/customer/operationsreport`. To\r\nget the totals per service, use `GET api/2.0/portal/payment/customer/usage`.",
+        "description": "Returns a page of the money movements of the portal wallet and its bonus balance. The movements are top-ups,\r\nservice charges, refunds, corrections, bonus credits, and bonus expirations. A movement keeps its whole amount\r\nin `credit` or `debit`, and `sources` gives the part on the bonus. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the\r\ninstallation has no billing service. If the portal has no billing customer, the call returns an empty result.\r\nThe call is read-only. All filters are optional. If `serviceName` has a name that the installation does not\r\nsell, the call returns 404. If neither `credit` nor `debit` is set, the list has both directions. AI usage\r\npaid with the portal's own provider keys has the service names `ai-tools-byok` and `ai-search-byok`. The\r\n`serviceName` filter accepts them. Such a movement looks like its AI service, with `byok` set. By default,\r\n`offset` is 0 and `limit` is 25. The answer repeats them next to `totalQuantity`, `totalPage`, and\r\n`currentPage`. To get the same data as a file, use `POST api/2.0/portal/payment/customer/operationsreport`. To\r\nget the totals per service, use `GET api/2.0/portal/payment/customer/usage`.",
         "operationId": "getCustomerOperations",
         "parameters": [
           {
@@ -33428,7 +33428,7 @@
               "array"
             ],
             "items": {
-              "description": "A sub-account of the wallet: its currency and balance.",
+              "description": "A sub-account of the account: one currency and the amount held in it.",
               "$ref": "#/components/schemas/SubAccountDto"
             },
             "description": "A list of sub-accounts."
@@ -38610,7 +38610,7 @@
             }
           }
         ],
-        "description": "The bonus balance of the portal - the bonus money credited to it, which the accounting service holds on a goodwill\r\naccount of its own rather than on the wallet - with the bonus credits not spent in full."
+        "description": "The bonus balance of the portal - the bonus money credited to it, which the accounting service holds on a goodwill\r\naccount of its own rather than on the wallet - with the bonus credits not spent in full. The amount of a\r\nsub-account may still include a credit that has ended, until the accounting service writes it off."
       },
       "GoodwillBalanceWrapper": {
         "type": "object",
@@ -42196,7 +42196,7 @@
               99.99
             ],
             "type": "number",
-            "description": "The amount that went into the wallet. It is `0` on a movement that only took money out, so the pair of\r\n`credit` and `debit` is what shows which way the money went; the `credit` and `debit` filters of the\r\noperation select the two directions by exactly this.",
+            "description": "The whole amount that came in - a top-up, a refund or a bonus credit. It is `0` on a movement that only took\r\nmoney out, so the pair of `credit` and `debit` is what shows which way the money went; the `credit` and `debit`\r\nfilters of the operation select the two directions by exactly this. `sources` gives the part on the bonus.",
             "format": "double"
           },
           "debit": {
@@ -42204,7 +42204,7 @@
               99.99
             ],
             "type": "number",
-            "description": "The amount that was taken out of the wallet, `0` on a movement that put money in.",
+            "description": "The whole amount that went out - from the wallet money and the bonus together, or an expired bonus - and `0` on\r\na movement that put money in. `sources` gives the part on the bonus.",
             "format": "double"
           },
           "byok": {
@@ -42315,11 +42315,11 @@
             "description": "Which sub-accounts of the portal the amount was taken from or put on, and how much fell on each - one charge\r\nmay be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a movement\r\nthe accounting service reported without the split."
           },
           "type": {
-            "description": "What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter\r\nmatches on, and `Unknown` covers a movement the billing service reported under a kind this build does not\r\nrecognise.",
+            "description": "What kind of movement this is - a payment, a charge, a refund, a correction, a bonus credit or a bonus\r\nexpiration. It is what the `type` filter matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not\r\nrecognise.",
             "$ref": "#/components/schemas/OperationType"
           }
         },
-        "description": "One movement on the portal wallet: what it was for, who caused it, and how much money it moved."
+        "description": "One movement on the portal wallet or its bonus balance: what it was for, who caused it, and how much money it moved."
       },
       "OperationOrderType": {
         "oneOf": [
@@ -43793,7 +43793,7 @@
               10
             ],
             "type": "number",
-            "description": "How much bonus money the code credits, in `currency`. It lands on the bonus balance, read with\r\n`GET api/2.0/portal/payment/customer/goodwill`, not on the money paid into the wallet.",
+            "description": "How much bonus money the code credits, in `currency`.",
             "format": "double"
           },
           "currency": {
@@ -44274,7 +44274,7 @@
               "array"
             ],
             "items": {
-              "description": "One movement on the portal wallet: what it was for, who caused it, and how much money it moved.",
+              "description": "One movement on the portal wallet or its bonus balance: what it was for, who caused it, and how much money it moved.",
               "$ref": "#/components/schemas/OperationDto"
             },
             "description": "The movements on this page - top-ups, charges, refunds and corrections alike, newest first. It is empty\r\nfor a page past the end of the report as well as for a period in which nothing happened."
@@ -47876,7 +47876,7 @@
             "format": "double"
           }
         },
-        "description": "A sub-account of the wallet: its currency and balance."
+        "description": "A sub-account of the account: one currency and the amount held in it."
       },
       "SubscriptionBalanceDto": {
         "type": "object",

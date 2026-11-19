@@ -75,6 +75,13 @@ public interface ITariffService
     Task<GoodwillBalance> GetCustomerGoodwillAsync(int tenantId);
 
     /// <summary>
+    /// The goodwill balance of the portal, read from the accounting service on every call, and whether it is known.
+    /// A portal that is not a customer, or an installation without an accounting service, has no bonus: null and
+    /// known. A request that fails or an answer that cannot be read gives null and not known.
+    /// </summary>
+    Task<(GoodwillBalance Goodwill, bool Known)> ReadCustomerGoodwillAsync(int tenantId);
+
+    /// <summary>
     /// Whether money is left on the portal's wallet: true or false when the accounting service answered
     /// (a portal it does not know has no wallet, so false), null when it could not be asked or did not answer
     /// before <paramref name="cancellationToken"/> was cancelled. Only the money paid into the wallet counts, never

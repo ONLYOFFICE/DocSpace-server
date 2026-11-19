@@ -191,6 +191,23 @@ public class TariffServiceWalletCoverageTests
         billing.Requests.Should().NotContain(request => request.Path == "/billing/Deposit");
     }
 
+    // A purchase from a wallet without a sub-account is refused only when the portal is known to have no bonus: a request
+    // that failed or an answer that cannot be read is unknown, never "no bonus".
+    [Theory]
+    [InlineData(HttpStatusCode.OK, """{"accountNumber":42,"subAccountNumber":53,"accountCurrency":"USD","subAccounts":[],"lots":[]}""", true)]
+    [InlineData(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Customer not found"}""", true)]
+    [InlineData(HttpStatusCode.InternalServerError, """{"title":"Internal Server Error","status":500}""", false)]
+    [InlineData(HttpStatusCode.BadRequest, """{"title":"Bad request","status":400,"detail":"Something went wrong"}""", false)]
+    [InlineData(HttpStatusCode.OK, "<html>Bad Gateway</html>", false)]
+    public async Task ReadCustomerGoodwill_TellsAnUnknownAnswerFromNoBonus(HttpStatusCode status, string body, bool known)
+    {
+        var (tariffService, _) = CreateService(NeverToppedUpWalletJson, Reply(status, body));
+
+        var result = await tariffService.ReadCustomerGoodwillAsync(TenantId);
+
+        result.Known.Should().Be(known);
+    }
+
     private static StubResponse Goodwill(decimal amount, string currency = "USD")
     {
         return Reply(HttpStatusCode.OK, $$"""

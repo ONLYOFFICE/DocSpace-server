@@ -1738,13 +1738,18 @@ public class TariffService(
         Unknown
     }
 
-    // The bonus in the given currency, or null when the goodwill account could not be read.
+    // The bonus in the given currency, 0 for a portal without one, or null when the goodwill account could not be read.
     private async Task<decimal?> GetGoodwillAmountAsync(int tenantId, string currency)
     {
-        var goodwill = await GetCustomerGoodwillAsync(tenantId);
-        if (goodwill == null)
+        var (goodwill, known) = await ReadCustomerGoodwillAsync(tenantId);
+        if (!known)
         {
             return null;
+        }
+
+        if (goodwill == null)
+        {
+            return 0;
         }
 
         // Only credits that have not ended pay: the accounting service may write an ended one off later. A negative
@@ -1853,27 +1858,34 @@ public class TariffService(
 
     public async Task<GoodwillBalance> GetCustomerGoodwillAsync(int tenantId)
     {
+        return (await ReadCustomerGoodwillAsync(tenantId)).Goodwill;
+    }
+
+    public async Task<(GoodwillBalance Goodwill, bool Known)> ReadCustomerGoodwillAsync(int tenantId)
+    {
         if (!accountingClient.Configured)
         {
-            return null;
+            return (null, true);
         }
 
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            return await accountingClient.GetCustomerGoodwillAsync(portalId);
+            return (await accountingClient.GetCustomerGoodwillAsync(portalId), true);
         }
         catch (AccountingCustomerNotFoundException exception)
         {
             logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+
+            return (null, true);
         }
         catch (Exception error)
         {
             LogError(error, tenantId.ToString());
-        }
 
-        return null;
+            return (null, false);
+        }
     }
 
     public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)

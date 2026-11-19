@@ -76,7 +76,7 @@ public class BalanceDto
 }
 
 /// <summary>
-/// A sub-account of the wallet: its currency and balance.
+/// A sub-account of the account: one currency and the amount held in it.
 /// </summary>
 public class SubAccountDto
 {
@@ -124,5 +124,5 @@ public partial class BalanceDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
     public partial BalanceDto Map(Balance source);
 
     // The accounting service gives its times in UTC; the client sees them with the offset of the portal.
-    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(source);
+    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(BillingTime.AsUtc(source));
 }

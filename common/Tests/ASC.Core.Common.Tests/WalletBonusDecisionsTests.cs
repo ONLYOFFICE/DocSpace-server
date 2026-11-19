@@ -133,19 +133,65 @@ public class WalletBonusDecisionsTests
     }
 
     // A wallet never topped up has no sub-account, also with a bonus credited: the bonus pays the purchase all the same,
-    // and only a portal with neither has nothing to pay with.
+    // and only a portal known to have neither has nothing to pay with. A bonus that could not be read is no refusal:
+    // the purchase goes on and billing decides.
     [Theory]
-    [InlineData("USD", null, null, true)]
-    [InlineData(null, 5.0, null, true)]
-    [InlineData(null, 5.0, -60, false)]
-    [InlineData(null, null, null, false)]
-    [InlineData("EUR", null, null, false)]
-    public void CanPayFromWallet_WalletSubAccountOrABonusThatHasNotEnded(string? walletCurrency, double? bonus, int? bonusEndsInMinutes, bool expected)
+    [InlineData("USD", null, null, false, true)]
+    [InlineData(null, 5.0, null, false, true)]
+    [InlineData(null, 5.0, -60, false, false)]
+    [InlineData(null, null, null, false, false)]
+    [InlineData("EUR", null, null, false, false)]
+    [InlineData(null, null, null, true, true)]
+    [InlineData("EUR", null, null, true, true)]
+    public void CanPayFromWallet_WalletSubAccountOrABonusThatHasNotEnded(string? walletCurrency, double? bonus, int? bonusEndsInMinutes, bool goodwillUnknown, bool expected)
     {
         var wallet = new Balance { SubAccounts = walletCurrency == null ? [] : [new SubAccount { Currency = walletCurrency, Amount = 0 }] };
         var goodwill = bonus == null ? null : Goodwill((decimal)bonus, Lot((decimal)bonus, "USD", bonusEndsInMinutes));
 
-        GoodwillBalance.CanPayFromWallet(wallet, goodwill, "USD", _now).Should().Be(expected);
+        GoodwillBalance.CanPayFromWallet(wallet, goodwill, goodwillUnknown, "USD", _now).Should().Be(expected);
+    }
+
+    // The JSON reader gives a time without an offset as Unspecified and one with an offset as the host's local time; both
+    // name one moment in UTC, whatever the zone of the host. A Local time has the ticks of UTC on a host in UTC, so the
+    // cases with an offset can fail only on a host in another zone.
+    [Theory]
+    [InlineData("2026-11-01T09:00:00")]
+    [InlineData("2026-11-01T09:00:00Z")]
+    [InlineData("2026-11-01T14:00:00+05:00")]
+    [InlineData("2026-11-01T04:00:00-05:00")]
+    public void BillingTimeAsUtc_AnyFormTheServiceSends_IsTheSameMoment(string time)
+    {
+        var read = JsonSerializer.Deserialize<DateTime>($"\"{time}\"");
+
+        var utc = BillingTime.AsUtc(read);
+
+        utc.Kind.Should().Be(DateTimeKind.Utc);
+        utc.Should().Be(new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
+        BillingTime.AsUtc((DateTime?)read).Should().Be(utc);
+        BillingTime.AsUtc((DateTime?)null).Should().BeNull();
+    }
+
+    // Every amount in the payment audit events (top-ups, the automatic top-up, the subscription balance moved to the
+    // wallet, a redeemed promo code) goes through one formatter: a Russian thread would otherwise write "10,5 USD", and
+    // an amount billing sends as 10.0000 "10.0000 USD".
+    [Theory]
+    [InlineData("10.0000", "usd", "en-US", "10 USD")]
+    [InlineData("10.5", "USD", "ru", "10.5 USD")]
+    [InlineData("1234.50", "eur", "de-DE", "1234.5 EUR")]
+    public void BillingAuditAmount_AnyScaleCultureAndCase_IsInvariant(string amount, string currency, string culture, string expected)
+    {
+        var previous = CultureInfo.CurrentCulture;
+
+        try
+        {
+            CultureInfo.CurrentCulture = new CultureInfo(culture);
+
+            BillingAudit.Amount(decimal.Parse(amount, CultureInfo.InvariantCulture), currency).Should().Be(expected);
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = previous;
+        }
     }
 
     [Theory]

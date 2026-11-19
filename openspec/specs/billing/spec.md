@@ -946,9 +946,9 @@ characters (400). The list is cached for all portals for up to an hour.
 
 `updateWalletPayment` SHALL require the billing service, a DocSpace admin and a customer, one wallet
 product and `productQuantityType` `Set` or `Add` (400 "Invalid product quantity type"). `Add` buys
-now from the wallet (404 if neither a sub-account nor a bonus; 402 when the plan payment is overdue and the
-service is an add-on; minimums: storage 100, Dev Pack 10, administrators not fewer than the portal has; 400
-"Invalid quantity"). `Set` writes the next period's quantity, zero cancelling it.
+from the wallet (404 if known to have no sub-account and no bonus not ended in the accounting currency;
+402 for an add-on while the plan is overdue; minimums: storage 100, Dev Pack 10, the portal's
+administrators; 400 "Invalid quantity"). `Set` writes the next period's quantity, zero cancelling it.
 
 #### Scenario: Owner adds, lowers and cancels storage
 
@@ -970,7 +970,8 @@ service is an add-on; minimums: storage 100, Dev Pack 10, administrators not few
 #### Scenario: Wallet never topped up
 
 - **WHEN** a customer with a linked card has never topped up the wallet, so the wallet has no sub-account, and `calculateWalletPayment` is called with 100 storage units and `Add`
-- **THEN** with a bonus of 5 USD the call goes on to the price, and without a bonus it answers 404 "Subaccount could not be found"
+- **THEN** with a bonus of 5 USD, or when the bonus read fails with 500, the call goes on to the price
+- **AND** without a bonus it answers 404 "Subaccount could not be found"
 
 ### Requirement: Moving the subscription balance to the wallet
 
@@ -1042,6 +1043,11 @@ the last. A delayed method or an add-on renewal gets no top-up.
 
 - **WHEN** a payment costs 40 USD, the wallet holds 0, the bonus 15 USD, the wallet is topped up by 25 USD and the bonus then cannot be read
 - **THEN** the 15 USD read before still count and no second top-up is made
+
+#### Scenario: Wallet never topped up
+
+- **WHEN** a payment costs 30 USD and the wallet has no sub-account, as for a customer who has never topped it up
+- **THEN** with a bonus of 50 USD the wallet is not topped up, and without a bonus it is topped up by 30 USD
 
 #### Scenario: Delayed payment method
 
