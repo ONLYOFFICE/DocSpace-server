@@ -145,5 +145,10 @@
           <groupId>org.apache.commons</groupId>
           <artifactId>commons-pool2</artifactId>
         </dependency>
+        <dependency>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+          <scope>runtime</scope>
+        </dependency>
     </dependencies>
 </project>

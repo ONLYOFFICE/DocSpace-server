@@ -76,7 +76,6 @@
         <shedlock.version>7.11.0</shedlock.version>
         <spring.oauth2.server.version>7.1.2</spring.oauth2.server.version>
         <springdoc.version>3.2.0</springdoc.version>
-        <spring.jcl.version>6.2.19</spring.jcl.version>
         <testcontainers.version>2.0.5</testcontainers.version>
         <os.maven.plugin.version>1.7.1</os.maven.plugin.version>
         <protobuf.maven.plugin.version>0.6.1</protobuf.maven.plugin.version>
@@ -229,12 +228,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring-jcl</artifactId>
-          <version>${spring.jcl.version}</version>
-          <scope>test</scope>
         </dependency>
         <dependency>
           <groupId>org.testcontainers</groupId>
