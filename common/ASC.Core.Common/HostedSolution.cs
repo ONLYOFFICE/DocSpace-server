@@ -89,25 +89,27 @@ public class HostedSolution(ITenantService tenantService,
     {
         ArgumentNullException.ThrowIfNull(registrationInfo);
 
+        // The caller's values: an ArgumentException, so the registration endpoints can answer 400 for them
+        // (a plain Exception reached the caller as a 500).
         if (string.IsNullOrEmpty(registrationInfo.Address))
         {
-            throw new Exception("Address can not be empty");
+            throw new ArgumentException("Address can not be empty");
         }
         if (string.IsNullOrEmpty(registrationInfo.Email))
         {
-            throw new Exception("Account email can not be empty");
+            throw new ArgumentException("Account email can not be empty");
         }
         if (registrationInfo.FirstName == null)
         {
-            throw new Exception("Account firstname can not be empty");
+            throw new ArgumentException("Account firstname can not be empty");
         }
         if (registrationInfo.LastName == null)
         {
-            throw new Exception("Account lastname can not be empty");
+            throw new ArgumentException("Account lastname can not be empty");
         }
         if (!userFormatter.IsValidUserName(registrationInfo.FirstName, registrationInfo.LastName))
         {
-            throw new Exception("Incorrect firstname or lastname");
+            throw new ArgumentException("Incorrect firstname or lastname");
         }
 
         if (string.IsNullOrEmpty(registrationInfo.PasswordHash))

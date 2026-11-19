@@ -60,6 +60,12 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     private DistributedApplication _app = null!;
     private HttpClient _apiSystemClient = null!;
 
+    /// <summary>
+    /// Raw, anonymous access to ASC.ApiSystem (no <c>Origin</c>, no sign-in), as portal registration uses it: for the
+    /// tests of its own endpoints. Its answers are not wrapped in the <c>response</c> envelope of the other services.
+    /// </summary>
+    public RawApiClient ApiSystem { get; private set; } = null!;
+
     private readonly Dictionary<string, Uri> _baseAddresses = [];
 
     // Local and in whole seconds, like the dates in the log it is compared with.
@@ -236,6 +242,7 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
         // A single ApiSystem client is enough: portal registration is tenant-agnostic and only
         // issues stateless POSTs, so it is safe to share across parallel tests.
         _apiSystemClient = CreateRawClient(_baseAddresses[ResourceNames.ApiSystem], origin: null);
+        ApiSystem = new RawApiClient(_apiSystemClient);
 
         // Before the first request of the run — see the method for why the order matters.
         await DisableStartDocsAsync();
