@@ -650,7 +650,17 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
         try
         {
-            await documentServiceConnector.CheckDocServiceUrlAsync();
+            try
+            {
+                await documentServiceConnector.CheckDocServiceUrlAsync();
+            }
+            catch (Exception ex)
+            {
+                // The check failed on the Document Server at the new addresses; the connector has logged the failure.
+                // Wrapped in a plain exception it was a 500. It is a failure of the server behind the portal, a 502
+                // as in DocumentServiceConnector.GetConvertedFileAsync, and the step that failed is passed on.
+                throw new CustomHttpException(HttpStatusCode.BadGateway, $"Unable to establish a connection with the Document Server. {ex.Message}");
+            }
 
             messageService.Send(MessageAction.DocumentServiceLocationSetting);
 
@@ -658,10 +668,10 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
 
             _ = await cspSettingsHelper.SaveAsync(settings.Domains ?? []);
         }
-        catch (Exception ex)
+        catch
         {
             await RestoreSettingsAsync();
-            throw new Exception("Unable to establish a connection with the Document Server.", ex);
+            throw;
         }
 
         var version = new DocServiceUrlRequestDto { Version = false };

@@ -449,7 +449,9 @@ public class OperationController(
             checkedFiles = await fileStorageService.MoveOrCopyDestFolderCheckAsync(inDto.FileIds.ToList(), inDto.DestFolderId.GetString());
         }
 
-        var entries = await fileStorageService.GetItemsAsync(checkedFiles.Select(Convert.ToInt32), checkedFiles.Select(Convert.ToInt32), FilterType.FilesOnly, false);
+        // The accepted ids hold both kinds: a third-party id is a string, and Convert.ToInt32 of it threw a 500.
+        // Each kind is looked up with its own DAO.
+        var entries = await fileStorageService.GetItemsAsync(checkedFiles.OfType<int>(), checkedFiles.OfType<int>(), FilterType.FilesOnly, false);
         entries.AddRange(await fileStorageService.GetItemsAsync(checkedFiles.OfType<string>(), [], FilterType.FilesOnly, false));
 
         var filesTask = GetFilesDto(entries).ToListAsync();

@@ -87,7 +87,17 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
         catch (Exception ex)
         {
-            throw CustomizeError(ex);
+            // CustomizeError gives a plain Exception, a 500 on every route that converts (save as PDF, copy as another
+            // format, saving an edited third-party file). The failures the source or the request cause become a 400, as in
+            // GetConvertedFileAsync; the rest are failures of the document service, a 502. The text stays as it was,
+            // and the cause stays inside: background callers read its error code (a password, a failed conversion).
+            var error = CustomizeError(ex);
+            if (ex is DocumentServiceException documentServiceException && GetCallerError(documentServiceException.Code) is not null)
+            {
+                throw new ArgumentException(error.Message, ex);
+            }
+
+            throw new CustomHttpException(HttpStatusCode.BadGateway, error.Message, ex);
         }
     }
 

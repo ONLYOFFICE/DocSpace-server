@@ -110,7 +110,11 @@ public class FillingFormResultDtoHelper(
             if (properties is { FormFilling: not null })
             {
 
-                var originalForm = await fileDao.GetFileAsync(properties.FormFilling.OriginalFormId);
+                // The original form can be deleted for good while the filled copy and the cached session id live
+                // on. Its owner was then read from null and the call ended as 500. Without the original the result
+                // cannot be built, so it is not found, as a session that is no longer remembered.
+                var originalForm = await fileDao.GetFileAsync(properties.FormFilling.OriginalFormId)
+                    ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
                 var manager = await userManager.GetUsersAsync(originalForm.CreateBy);
 
                 var folderDao = daoFactory.GetFolderDao<T>();

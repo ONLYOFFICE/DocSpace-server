@@ -206,6 +206,29 @@ public class RoomLogoCreateValidationTests(
         exception.ErrorCode.Should().Be(400);
     }
 
+    /// <remarks>
+    /// The validator of the range converted the value with <c>Convert.ToInt32</c>, so a width or height above
+    /// <c>int.MaxValue</c> ended as 500 (<c>OverflowException</c>) instead of a validation 400. Sent raw: the
+    /// generated client types both as int.
+    /// </remarks>
+    [Theory]
+    [InlineData("Width", """{"tmpFile":"logo.png","x":0,"y":0,"width":2147483648,"height":1}""")]
+    [InlineData("Height", """{"tmpFile":"logo.png","x":0,"y":0,"width":1,"height":4294967295}""")]
+    public async Task CreateLogo_SizeAboveInt32_BadRequest(string field, string json)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Logo Size Above Int32 Room");
+
+        // Act
+        using var response = await CreateRoomLogoRaw(room.Id, json);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
+            .Should().Contain($"The field {field} must be between 1 and 1280.");
+    }
+
     [Fact]
     public async Task CreateLogo_NegativeHeight_BadRequest()
     {

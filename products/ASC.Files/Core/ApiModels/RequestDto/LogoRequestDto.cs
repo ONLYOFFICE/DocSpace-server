@@ -64,14 +64,16 @@ public class LogoRequest
     /// and the portal builds the four logo sizes out of the piece.
     /// </summary>
     /// <example>300</example>
-    [Range(1, 1280)]
+    // The bounds are typed as uint: the int overload of Range converted the value with Convert.ToInt32, which threw
+    // an OverflowException - a 500 instead of a validation 400 - for a value above int.MaxValue.
+    [Range(typeof(uint), "1", "1280")]
     public uint Width { get; set; }
 
     /// <summary>
     /// How tall a piece of the uploaded picture to cut out, in pixels. It has to be sent together with the width.
     /// </summary>
     /// <example>300</example>
-    [Range(1, 1280)]
+    [Range(typeof(uint), "1", "1280")]
     public uint Height { get; set; }
 }
 

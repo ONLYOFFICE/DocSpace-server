@@ -314,9 +314,10 @@ public class FileStorageService //: IFileStorageService
                 throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
             }
 
+            // A third-party storage that could not deliver the folder gives a placeholder with Error set.
             if (parent != null && !string.IsNullOrEmpty(parent.Error))
             {
-                throw new Exception(parent.Error);
+                throw ThirdPartyFolderUnavailable(new HttpRequestException(parent.Error));
             }
 
             if (parent == null)
@@ -358,9 +359,9 @@ public class FileStorageService //: IFileStorageService
         }
         catch (Exception e)
         {
-            if (parent is { ProviderEntry: true })
+            if (parent is { ProviderEntry: true } && !IsOwnRefusal(e))
             {
-                throw GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e));
+                throw GenerateException(ThirdPartyFolderUnavailable(e));
             }
 
             throw GenerateException(e);
@@ -469,9 +470,9 @@ public class FileStorageService //: IFileStorageService
         }
         catch (Exception e)
         {
-            if (parent.ProviderEntry)
+            if (parent.ProviderEntry && !IsOwnRefusal(e))
             {
-                throw GenerateException(new Exception(FilesCommonResource.ErrorMessage_SharpBoxException, e));
+                throw GenerateException(ThirdPartyFolderUnavailable(e));
             }
 
             throw GenerateException(e);
@@ -1920,8 +1921,10 @@ public class FileStorageService //: IFileStorageService
             var ace = await fileSharing.GetPureSharesAsync(parent, new List<Guid> { authContext.CurrentAccount.ID }).FirstOrDefaultAsync();
             if (ace is { Access: FileShare.FillForms })
             {
+                // Properties saved without form filling data (FormFilling null) mean "not started" too, as FileSecurity
+                // reads them; dereferenced, they were a NullReferenceException (500).
                 var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-                if (properties == null || !properties.FormFilling.StartFilling)
+                if (properties?.FormFilling?.StartFilling != true)
                 {
                     return null;
                 }
@@ -1965,6 +1968,13 @@ public class FileStorageService //: IFileStorageService
         }
 
         folder ??= await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderMyAsync<T>());
+
+        // No folder id and no My documents (a guest has none): the folder was dereferenced as null, a 500. Not found, as the
+        // uploads into My documents (FileUploader) answer the same guest.
+        if (folder == null)
+        {
+            throw new DirectoryNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
 
         var file = serviceProvider.GetService<File<T>>();
         file.ParentId = folder.Id;
@@ -2767,7 +2777,10 @@ public class FileStorageService //: IFileStorageService
         else
         {
             var fileDao = daoFactory.GetFileDao<T>();
-            var fromFile = await fileDao.GetFileAsync(fileId, version);
+            // No such file or version was a NullReferenceException on fromFile, a 500. The restore without a url
+            // answers the same condition with this exception (UpdateToVersionFileAsync), a 404.
+            var fromFile = await fileDao.GetFileAsync(fileId, version)
+                ?? throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
             var modifiedOnString = fromFile.ModifiedOnString;
             file = await entryManager.SaveEditingAsync(fileId, null, url, null, string.Format(FilesCommonResource.CommentRevertChanges, modifiedOnString));
         }
@@ -3104,7 +3117,9 @@ public class FileStorageService //: IFileStorageService
             }
             catch (Exception e)
             {
-                throw GenerateException(e.InnerException ?? e);
+                // A status already chosen (502 for a storage that could not be asked) is passed on as is: unwrapping it
+                // would hand its cause, the connection error, to the caller as a 500.
+                throw GenerateException(e is HttpException ? e : e.InnerException ?? e);
             }
         }
         else
@@ -3225,7 +3240,9 @@ public class FileStorageService //: IFileStorageService
             }
             catch (Exception e)
             {
-                throw GenerateException(e.InnerException ?? e);
+                // A status already chosen (502 for a storage that could not be asked) is passed on as is: unwrapping it
+                // would hand its cause, the connection error, to the caller as a 500.
+                throw GenerateException(e is HttpException ? e : e.InnerException ?? e);
             }
         }
         else
@@ -3440,6 +3457,14 @@ public class FileStorageService //: IFileStorageService
             foreach (var id in filesId)
             {
                 var file = await fileDao.GetFileAsync(id);
+
+                // An unknown id was read as null here and the check ended as 500. It is not accepted, as an unknown
+                // id is left out of the answer for any other destination.
+                if (file == null)
+                {
+                    continue;
+                }
+
                 var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
                 if (fileType == FileType.Pdf && await fileChecker.CheckExtendedPDF(file))
@@ -4824,6 +4849,14 @@ public class FileStorageService //: IFileStorageService
 
         var result = await SetAceLinkAsync(room, SubjectType.InvitationLink, linkId, share, options);
 
+        // SetAceObjectAsync skips a link whose id is the id of the room's creator, or of a removed or terminated
+        // account, and then sets nothing. Reading the result made that a NullReferenceException, a 500; nothing is
+        // changed, so the call answers with what that id already holds, as SetExternalLinkAsync does.
+        if (result == null)
+        {
+            return await fileSharing.GetPureSharesAsync(room, [linkId]).FirstOrDefaultAsync();
+        }
+
         await filesMessageService.SendAsync(_roomMessageActions[SubjectType.InvitationLink][result.EventType], room, result.Ace.Id, result.Ace.FileShareOptions?.Title,
             FileShareExtensions.GetAccessString(result.Ace.Access, true, room.FolderType == FolderType.AiRoom));
 
@@ -4869,7 +4902,26 @@ public class FileStorageService //: IFileStorageService
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
             var httpClient = clientFactory.CreateClient();
 #pragma warning restore CA2000
-            using var response = await httpClient.SendAsync(request);
+
+            // The converted copy is fetched from the address the document service gave. A send that failed was a plain
+            // exception, a 500, and an answer with an error was saved as the PDF; both are failures of the document
+            // service, a 502, as for the conversion itself. No token is passed, so a cancelled send is the client's timeout.
+            HttpResponseMessage sent;
+            try
+            {
+                sent = await httpClient.SendAsync(request);
+            }
+            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            {
+                throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {e.Message}", e);
+            }
+
+            using var response = sent;
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+            }
+
             await using var fileStream = await response.Content.ReadAsStreamAsync();
             File<T> result;
 
@@ -4950,9 +5002,12 @@ public class FileStorageService //: IFileStorageService
     {
         File<T> file = null;
         var fileDao = daoFactory.GetFileDao<T>();
-        if (portalName == tenantManager.GetCurrentTenantId().ToString())
+        // A fileKey that is no id of the source file's type - not a number, beyond the int range, the id of a
+        // third-party file - names no file of this lookup, so it does not resolve here, as a key of another portal
+        // does not; the lookup goes on by path and link. Convert.ChangeType threw for it, and a 500 came back.
+        if (portalName == tenantManager.GetCurrentTenantId().ToString() && TryParseFileKey(fileId, out T fileKey))
         {
-            file = await fileDao.GetFileAsync((T)Convert.ChangeType(fileId, typeof(T)));
+            file = await fileDao.GetFileAsync(fileKey);
         }
 
         if (file == null && !string.IsNullOrEmpty(path) && string.IsNullOrEmpty(link))
@@ -5051,6 +5106,20 @@ public class FileStorageService //: IFileStorageService
         };
         fileReference.Token = documentServiceHelper.GetSignature(fileReference);
         return fileReference;
+    }
+
+    private static bool TryParseFileKey<T>(string fileKey, out T id)
+    {
+        if (typeof(T) == typeof(int))
+        {
+            // NumberStyles.Integer: what Convert.ChangeType accepted before keeps resolving.
+            var parsed = int.TryParse(fileKey, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intId);
+            id = (T)(object)intId;
+            return parsed;
+        }
+
+        id = (T)(object)fileKey;
+        return fileKey is not null;
     }
 
     public async Task<bool> ShouldPreventUserDeletion<T>(Folder<T> room, Guid userId)
@@ -5868,9 +5937,12 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
 
         var form = await fileDao.GetFileAsync(formId);
-        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
 
+        // The check comes before GetParentRoom: that read form.ParentId first, so an unknown formId was a
+        // NullReferenceException - a 500 - instead of the refusal ManageFormFilling gives for the same form (403).
         await ValidateChangeRolesPermission(form);
+
+        var currentRoom = await DocSpaceHelper.GetParentRoom(form, folderDao);
 
         if ((roles?.Any() == false && !await fileSecurity.CanResetFillingAsync(form, authContext.CurrentAccount.ID)) ||
             (roles?.Any() == true && !await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID)))
@@ -5981,6 +6053,15 @@ public class FileStorageService //: IFileStorageService
         await ValidateChangeRolesPermission(form);
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
+
+        // A form whose filling was never set up has no properties (outside a form-filling room they appear only with
+        // the role mapping), and a form in a third-party storage never has any. The branches that read
+        // properties.FormFilling failed on it with a NullReferenceException - a 500. There is no filling to resume,
+        // stop or reopen there, so those branches refuse the action like the other refusals here (403). The branches
+        // that never read it keep answering as before.
+        FormFillingProperties<T> FormFilling() => properties?.FormFilling
+            ?? throw new InvalidOperationException("The form filling has not been set up for this form");
+
         var room = await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<T>());
 
         List<Guid> formFillersLosingTheForm = null;
@@ -5995,8 +6076,8 @@ public class FileStorageService //: IFileStorageService
                 if (room.FolderType == FolderType.VirtualDataRoom)
                 {
                     var role = await fileDao.GetFormRoles(formId).Where(r => !r.Submitted).FirstOrDefaultAsync();
-                    properties.FormFilling.FillingStopedDate = DateTime.UtcNow;
-                    properties.FormFilling.FormFillingInterruption =
+                    FormFilling().FillingStopedDate = DateTime.UtcNow;
+                    FormFilling().FormFillingInterruption =
                         new FormFillingInterruption
                         {
                             UserId = authContext.CurrentAccount.ID,
@@ -6008,7 +6089,7 @@ public class FileStorageService //: IFileStorageService
                 }
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
-                    properties.FormFilling.StartFilling = false;
+                    FormFilling().StartFilling = false;
                     formFillersLosingTheForm = await GetFormFillersAsync(room);
                 }
 
@@ -6019,8 +6100,8 @@ public class FileStorageService //: IFileStorageService
                 break;
 
             case FormFillingManageAction.Resume:
-                properties.FormFilling.FillingStopedDate = DateTime.MinValue;
-                properties.FormFilling.FormFillingInterruption = null;
+                FormFilling().FillingStopedDate = DateTime.MinValue;
+                FormFilling().FormFillingInterruption = null;
                 break;
 
             case FormFillingManageAction.Start:
@@ -6030,18 +6111,18 @@ public class FileStorageService //: IFileStorageService
                 }
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
-                    if (properties.FormFilling.OriginalFormVersion != 0
-                        && properties.FormFilling.OriginalFormVersion != form.Version)
+                    if (FormFilling().OriginalFormVersion != 0
+                        && FormFilling().OriginalFormVersion != form.Version)
                     {
                         await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(formId);
                         // New drafts copy this version, and a submission of a draft of another version is refused. A
                         // version saved by the editor sets it on save; any other, as one uploaded as a file, only here.
-                        properties.FormFilling.OriginalFormVersion = form.Version;
-                        properties.FormFilling.IsVersionChanged = true;
+                        FormFilling().OriginalFormVersion = form.Version;
+                        FormFilling().IsVersionChanged = true;
                     }
 
-                    properties.FormFilling.StartFilling = true;
-                    properties.FormFilling.StartedByUserId = authContext.CurrentAccount.ID;
+                    FormFilling().StartFilling = true;
+                    FormFilling().StartedByUserId = authContext.CurrentAccount.ID;
 
                     var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                     await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, currentUser?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
@@ -6073,10 +6154,10 @@ public class FileStorageService //: IFileStorageService
                         throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
                     }
 
-                    var wasFilling = properties.FormFilling.StartFilling;
+                    var wasFilling = FormFilling().StartFilling;
 
-                    properties.FormFilling.StartFilling = false;
-                    properties.FormFilling.OriginalFormVersion = form.Version;
+                    FormFilling().StartFilling = false;
+                    FormFilling().OriginalFormVersion = form.Version;
 
                     if (wasFilling)
                     {
@@ -6636,6 +6717,26 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException();
         }
+    }
+
+    /// <summary>
+    /// A third-party storage that cannot deliver a folder or its contents (unreachable, credentials rejected, an error of
+    /// its API) is a failure of the upstream storage, so it is 502, as a failing document server is. A plain exception
+    /// with this text was a 500. The cause stays inside.
+    /// </summary>
+    private static CustomHttpException ThirdPartyFolderUnavailable(Exception inner)
+    {
+        return new CustomHttpException(HttpStatusCode.BadGateway, FilesCommonResource.ErrorMessage_SharpBoxException, inner);
+    }
+
+    /// <summary>
+    /// The refusals the module throws on purpose (the types <see cref="GenerateException{T}"/> logs as warnings, and the
+    /// statuses already chosen). Under a third-party folder they keep their own status (400, 403, 404, 402, 502) instead
+    /// of being reported as an unavailable storage.
+    /// </summary>
+    private static bool IsOwnRefusal(Exception e)
+    {
+        return e is ItemNotFoundException or SecurityException or ArgumentException or TenantQuotaException or InvalidOperationException or HttpException;
     }
 
     private Exception GenerateException<T>(T error, bool warning = false) where T : Exception

@@ -216,7 +216,7 @@ public static class FileOperationsManager
             switch (item.ValueKind)
             {
                 case JsonValueKind.Number:
-                    resultInt.Add(item.GetInt32());
+                    resultInt.Add(ReadInt32Id(item));
                     break;
                 case JsonValueKind.String:
                     {
@@ -251,7 +251,7 @@ public static class FileOperationsManager
         {
             if (item.Id.ValueKind == JsonValueKind.Number)
             {
-                resultInt.Add(new FilesDownloadOperationItem<int>(item.Id.GetInt32(), item.Ext, item.Password));
+                resultInt.Add(new FilesDownloadOperationItem<int>(ReadInt32Id(item.Id), item.Ext, item.Password));
             }
             else if (item.Id.ValueKind == JsonValueKind.String)
             {
@@ -267,8 +267,13 @@ public static class FileOperationsManager
             }
             else if (item.Id.ValueKind == JsonValueKind.Object)
             {
-                var key = item.Id.GetProperty("key");
-                var val = item.Id.GetProperty("value").GetString();
+                // GetProperty threw a KeyNotFoundException - a 500 - for an object without "key" or "value".
+                if (!item.Id.TryGetProperty("key", out var key) || !item.Id.TryGetProperty("value", out var value))
+                {
+                    throw new ArgumentException($"An ID object must have \"key\" and \"value\": {item.Id.GetRawText()}");
+                }
+
+                var val = value.GetString();
                 var password = "";
                 if (item.Id.TryGetProperty("password", out var p))
                 {
@@ -277,7 +282,7 @@ public static class FileOperationsManager
 
                 if (key.ValueKind == JsonValueKind.Number)
                 {
-                    resultInt.Add(new FilesDownloadOperationItem<int>(key.GetInt32(), val, password));
+                    resultInt.Add(new FilesDownloadOperationItem<int>(ReadInt32Id(key), val, password));
                 }
                 else
                 {
@@ -287,6 +292,21 @@ public static class FileOperationsManager
         }
 
         return (resultInt, resultString);
+    }
+
+    /// <summary>
+    /// Reads an ID sent as a JSON number. GetInt32 threw a FormatException - a 500 - for a number that is not a
+    /// 32-bit integer (a fraction, an exponent, a value out of range), which can name no file, folder or room.
+    /// Shared by every request that takes an ID as a JsonElement (batch operations, copyas, file templates).
+    /// </summary>
+    public static int ReadInt32Id(JsonElement id)
+    {
+        if (!id.TryGetInt32(out var value))
+        {
+            throw new ArgumentException($"Invalid ID: {id.GetRawText()}");
+        }
+
+        return value;
     }
 }
 

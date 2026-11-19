@@ -51,12 +51,22 @@ public class OFormRequestManager(
         try
         {
             using var httpClient = httpClientFactory.CreateClient();
-            using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}?filters[id][$eq]={id}&locale=*&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={ext}");
-            var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
+            using var response = await SendAsync(httpClient, $"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}?filters[id][$eq]={id}&locale=*&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={ext}");
+
+            OFromRequestData data;
+            try
+            {
+                data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
+            }
+            catch (JsonException e)
+            {
+                throw GalleryFailed(e.Message, e);
+            }
 
             var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
 
-            var streamResponse = await httpClient.GetAsync(file.Url);
+            // Not disposed here: the caller reads and disposes the content stream.
+            var streamResponse = await SendAsync(httpClient, file.Url);
             return await streamResponse.Content.ReadAsStreamAsync();
         }
         catch (Exception e)
@@ -64,6 +74,40 @@ public class OFormRequestManager(
             logger.ErrorWithException(e);
             throw;
         }
+    }
+
+    /// <summary>
+    /// The form gallery is an upstream service: when it cannot be reached, times out or answers with an error, the
+    /// request fails with 502, as a failing document server does. These were a 500 (an unhandled HttpRequestException,
+    /// TaskCanceledException or JsonException), and an error answer to the file download was even saved as the form.
+    /// </summary>
+    private static async Task<HttpResponseMessage> SendAsync(HttpClient httpClient, string url)
+    {
+        HttpResponseMessage response;
+        try
+        {
+            response = await httpClient.GetAsync(url);
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+        {
+            // No token is passed, so a cancelled request is the client's timeout, not the caller giving up.
+            throw GalleryFailed(e.Message, e);
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var status = response.StatusCode;
+            response.Dispose();
+
+            throw GalleryFailed(status.ToString(), null);
+        }
+
+        return response;
+    }
+
+    private static CustomHttpException GalleryFailed(string reason, Exception inner)
+    {
+        return new CustomHttpException(HttpStatusCode.BadGateway, $"The form gallery failed: {reason}", inner);
     }
 
     private static OFromFileAttribute GetFile(OFromRequestData data, string ext)

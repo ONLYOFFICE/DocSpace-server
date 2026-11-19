@@ -57,6 +57,14 @@ internal class ProviderFileDao(
     {
         var selector = _selectorFactory.GetSelector(fileId);
 
+        // A numeric string has no selector (SelectorFactory.GetSelector gives null): it is no third-party id,
+        // so nothing is found, as ProviderFolderDao.GetFolderAsync answers it. Used as a selector, the null
+        // was a NullReferenceException (500).
+        if (selector == null)
+        {
+            return null;
+        }
+
         var fileDao = selector.GetFileDao(fileId);
         var result = await fileDao.GetFileAsync(selector.ConvertId(fileId));
 
@@ -67,6 +75,12 @@ internal class ProviderFileDao(
     {
         var selector = _selectorFactory.GetSelector(fileId);
 
+        // Not a third-party id: see GetFileAsync(string).
+        if (selector == null)
+        {
+            return null;
+        }
+
         var fileDao = selector.GetFileDao(fileId);
         var result = await fileDao.GetFileAsync(selector.ConvertId(fileId), fileVersion);
 
@@ -76,6 +90,13 @@ internal class ProviderFileDao(
     public async Task<File<string>> GetFileAsync(string parentId, string title)
     {
         var selector = _selectorFactory.GetSelector(parentId);
+
+        // Not a third-party id: see GetFileAsync(string).
+        if (selector == null)
+        {
+            return null;
+        }
+
         var fileDao = selector.GetFileDao(parentId);
         var result = await fileDao.GetFileAsync(selector.ConvertId(parentId), title);
 
@@ -86,6 +107,12 @@ internal class ProviderFileDao(
     {
         var selector = _selectorFactory.GetSelector(fileId);
 
+        // Not a third-party id: see GetFileAsync(string).
+        if (selector == null)
+        {
+            return null;
+        }
+
         var fileDao = selector.GetFileDao(fileId);
         var result = await fileDao.GetFileAsync(selector.ConvertId(fileId), fileVersion);
 
@@ -95,6 +122,13 @@ internal class ProviderFileDao(
     public IAsyncEnumerable<File<string>> GetFileHistoryAsync(string fileId)
     {
         var selector = _selectorFactory.GetSelector(fileId);
+
+        // Not a third-party id: see GetFileAsync(string).
+        if (selector == null)
+        {
+            return AsyncEnumerable.Empty<File<string>>();
+        }
+
         var fileDao = selector.GetFileDao(fileId);
 
         return fileDao.GetFileHistoryAsync(selector.ConvertId(fileId));
@@ -232,6 +266,13 @@ internal class ProviderFileDao(
     public async IAsyncEnumerable<string> GetFilesAsync(string parentId)
     {
         var selector = _selectorFactory.GetSelector(parentId);
+
+        // Not a third-party id: see GetFileAsync(string).
+        if (selector == null)
+        {
+            yield break;
+        }
+
         var fileDao = selector.GetFileDao(parentId);
         var files = fileDao.GetFilesAsync(selector.ConvertId(parentId));
 
@@ -245,6 +286,12 @@ internal class ProviderFileDao(
         string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         var selector = _selectorFactory.GetSelector(parentId);
+
+        // Not a third-party id: see GetFileAsync(string).
+        if (selector == null)
+        {
+            yield break;
+        }
 
         var fileDao = selector.GetFileDao(parentId);
         var files = fileDao.GetFilesAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, excludeSubject, formsItemDto: formsItemDto);

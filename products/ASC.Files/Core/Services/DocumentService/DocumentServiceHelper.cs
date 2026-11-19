@@ -66,6 +66,11 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         var fileDao = daoFactory.GetFileDao<T>();
 
         var file = await fileDao.GetFileAsync(fileId);
+
+        // Checked before anything reads the file: an entry of a third-party storage that could not be fetched has no
+        // parent, and the callers that look for its room right after this (OpenEditFile) failed with a 500 on it.
+        ThrowIfThirdPartyFailed(file);
+
         if (file != null && 0 < version)
         {
             // An explicit ?version= is a history read whatever value it names; a caller allowed to
@@ -88,6 +93,20 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
         }
 
         return (file, lastVersion);
+    }
+
+    /// <summary>
+    /// A third-party storage that cannot deliver an entry (unreachable, credentials rejected, an error of its API) makes
+    /// its DAO return a placeholder with <see cref="FileEntry.Error"/> set instead of throwing. That is a failure of the
+    /// upstream storage, so it is 502, as a failing document server is; a plain exception was a 500. The text stays the
+    /// storage's own message.
+    /// </summary>
+    private static void ThrowIfThirdPartyFailed<T>(File<T> file)
+    {
+        if (file != null && !string.IsNullOrEmpty(file.Error))
+        {
+            throw new CustomHttpException(HttpStatusCode.BadGateway, file.Error);
+        }
     }
 
     public async Task<(File<T> File, Configuration<T> Configuration, bool LocatedInPrivateRoom)> GetParamsAsync<T>(File<T> file, bool lastVersion, bool editPossible, bool tryEdit,
@@ -181,10 +200,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!string.IsNullOrEmpty(file.Error))
-        {
-            throw new Exception(file.Error);
-        }
+        ThrowIfThirdPartyFailed(file);
 
         var rightToReview = rightToEdit;
         var reviewPossible = editPossible;

@@ -360,11 +360,26 @@ public class FileConverter(
         request.RequestUri = new Uri(convertUri);
 
         var httpClient = clientFactory.CreateClient(nameof(DocumentService));
-        var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+
+        // The converted copy is fetched from the address the document service gave. A failure here was a plain exception,
+        // a 500; it is a failure of the document service, a 502, as for the conversion itself.
+        HttpResponseMessage response;
+        try
+        {
+            response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+        {
+            // No token is passed, so a cancelled send is the client's timeout, not the caller giving up.
+            throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {e.Message}", e);
+        }
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+            var statusCode = response.StatusCode;
+            response.Dispose();
+
+            throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {statusCode}");
         }
 
         return await ResponseStream.FromMessageAsync(response);
@@ -556,7 +571,7 @@ public class FileConverter(
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+                throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
             }
 
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
@@ -572,16 +587,20 @@ public class FileConverter(
                 await socketManager.CreateFileAsync(newFile);
             }
         }
-        catch (HttpRequestException e)
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
         {
-            var errorString = $"HttpRequestException: {e.StatusCode}";
+            // The converted copy is fetched from the address the document service gave. This failure, and the answer with
+            // an error above, were plain exceptions, a 500; they are failures of the document service, a 502, as for the
+            // conversion itself. No token is passed, so a cancelled send is the client's timeout.
+            var statusCode = (e as HttpRequestException)?.StatusCode;
+            var errorString = $"{e.GetType().Name}: {statusCode}";
 
-            if (e.StatusCode != HttpStatusCode.NotFound)
+            if (statusCode != HttpStatusCode.NotFound)
             {
                 errorString += $" Error {e.Message}";
             }
 
-            throw new Exception(errorString);
+            throw new CustomHttpException(HttpStatusCode.BadGateway, errorString, e);
         }
 
         await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
@@ -674,23 +693,27 @@ public class FileConverter(
 
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+                throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
             }
 
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
 
             newFile = await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream, headers, action);
         }
-        catch (HttpRequestException e)
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
         {
-            var errorString = $"HttpRequestException: {e.StatusCode}";
+            // The converted copy is fetched from the address the document service gave. This failure, and the answer with
+            // an error above, were plain exceptions, a 500; they are failures of the document service, a 502, as for the
+            // conversion itself. No token is passed, so a cancelled send is the client's timeout.
+            var statusCode = (e as HttpRequestException)?.StatusCode;
+            var errorString = $"{e.GetType().Name}: {statusCode}";
 
-            if (e.StatusCode != HttpStatusCode.NotFound)
+            if (statusCode != HttpStatusCode.NotFound)
             {
                 errorString += $" Error {e.Message}";
             }
 
-            throw new Exception(errorString);
+            throw new CustomHttpException(HttpStatusCode.BadGateway, errorString, e);
         }
 
         return newFile;

@@ -255,6 +255,24 @@ public class RoomCreateValidationTests(AspireAppFixture fixture) : BaseTest(fixt
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+    /// <remarks>
+    /// The validator of the logo's range converted the width with <c>Convert.ToInt32</c>, so a value above
+    /// <c>int.MaxValue</c> ended as 500 (<c>OverflowException</c>) instead of a validation 400. Sent raw: the
+    /// generated client types the width as an int.
+    /// </remarks>
+    [Fact]
+    public async Task CreateRoom_LogoWidthAboveInt32_BadRequest()
+    {
+        // Act
+        using var response = await CreateRoomRawAsync(
+            """{"title":"Autotest","roomType":5,"logo":{"tmpFile":"logo.png","x":0,"y":0,"width":4294967295,"height":1}}""");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        (await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken))
+            .Should().Contain("The field Width must be between 1 and 1280.");
+    }
+
     /// <summary>
     /// Sends a raw POST /api/2.0/files/rooms with an arbitrary JSON body, bypassing the typed SDK for
     /// bodies the generated DTO cannot express (a missing/null required property, or a value of the

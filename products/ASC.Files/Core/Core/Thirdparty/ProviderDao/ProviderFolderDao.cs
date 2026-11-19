@@ -64,6 +64,14 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     {
         var selector = _selectorFactory.GetSelector(parentId);
 
+        // A numeric string has no selector (SelectorFactory.GetSelector gives null): it is no third-party id,
+        // so nothing is found, as GetFolderAsync(string) answers it. Used as a selector, the null was a
+        // NullReferenceException (500).
+        if (selector == null)
+        {
+            return null;
+        }
+
         var folder = await selector.GetFolderDao(parentId).GetFolderAsync(title, selector.ConvertId(parentId));
 
         return await ResolveParentAsync(folder);
@@ -72,6 +80,13 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     public async Task<Folder<string>> GetRootFolderAsync(string folderId)
     {
         var selector = _selectorFactory.GetSelector(folderId);
+
+        // Not a third-party id: see GetFolderAsync(string, string).
+        if (selector == null)
+        {
+            return null;
+        }
+
         var folderDao = selector.GetFolderDao(folderId);
 
         var folder = await folderDao.GetRootFolderAsync(selector.ConvertId(folderId));
@@ -82,6 +97,13 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     public async Task<Folder<string>> GetRootFolderByFileAsync(string fileId)
     {
         var selector = _selectorFactory.GetSelector(fileId);
+
+        // Not a third-party id: see GetFolderAsync(string, string).
+        if (selector == null)
+        {
+            return null;
+        }
+
         var folderDao = selector.GetFolderDao(fileId);
 
         var folder = await folderDao.GetRootFolderByFileAsync(selector.ConvertId(fileId));
@@ -201,6 +223,13 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
     public async IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId)
     {
         var selector = _selectorFactory.GetSelector(parentId);
+
+        // Not a third-party id: see GetFolderAsync(string, string).
+        if (selector == null)
+        {
+            yield break;
+        }
+
         var folderDao = selector.GetFolderDao(parentId);
         var folders = folderDao.GetFoldersAsync(selector.ConvertId(parentId));
 
@@ -215,6 +244,13 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         MetadataFilter metadataFilter = null)
     {
         var selector = _selectorFactory.GetSelector(parentId);
+
+        // Not a third-party id: see GetFolderAsync(string, string).
+        if (selector == null)
+        {
+            yield break;
+        }
+
         var folderDao = selector.GetFolderDao(parentId);
         var folders = folderDao.GetFoldersAsync(selector.ConvertId(parentId), orderBy, filterType, subjectGroup, subjectID, searchText, withSubfolders, excludeSubject);
         var result = await folders.Where(r => r != null).ToListAsync();

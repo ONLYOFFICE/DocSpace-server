@@ -97,10 +97,12 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
 
         if (fileId != null)
         {
+            // ReadInt32Id answers a number that is not a 32-bit integer with 400, like an id of an unsupported kind
+            // below; GetInt32 threw a 500.
             var template = fileId.Value.ValueKind switch
             {
                 JsonValueKind.String => await CheckAndCopyFile(fileThirdPartyDao, fileId.Value.GetString(), extension),
-                JsonValueKind.Number => await CheckAndCopyFile(fileDao, fileId.Value.GetInt32(), extension),
+                JsonValueKind.Number => await CheckAndCopyFile(fileDao, FileOperationsManager.ReadInt32Id(fileId.Value), extension),
                 _ => throw new ArgumentException(FilesCommonResource.ErrorMessage_FileNotFound)
             };
             setting.SelectedFile = template.Id;

@@ -178,9 +178,27 @@ internal class ProviderAccountDao(
         return res.Id;
     }
 
+    /// <summary>
+    /// Asks the storage whether it accepts the credentials. A refusal is false (the callers answer 403). A storage that
+    /// cannot be asked at all (no connection, a timeout, an error of its API) used to reach the caller as a 500; it is a
+    /// failure of the upstream storage, so it is 502, as a third-party folder that cannot be listed is. The refusals of
+    /// our own code on the way (an address that is not a URL, a missing token) keep their status.
+    /// </summary>
     public async Task<bool> CheckProviderInfoAsync(IProviderInfo providerInfo)
     {
-        return providerInfo != null && await providerInfo.CheckAccessAsync();
+        if (providerInfo == null)
+        {
+            return false;
+        }
+
+        try
+        {
+            return await providerInfo.CheckAccessAsync();
+        }
+        catch (Exception e) when (e is not (ArgumentException or UnauthorizedAccessException or SecurityException or InvalidOperationException or HttpException))
+        {
+            throw new CustomHttpException(HttpStatusCode.BadGateway, $"The {providerInfo.ProviderKey} storage could not be reached to check the credentials: {e.Message}", e);
+        }
     }
 
     public async Task<IProviderInfo> UpdateRoomProviderInfoAsync(ProviderData data)

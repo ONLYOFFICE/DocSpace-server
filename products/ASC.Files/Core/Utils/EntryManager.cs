@@ -1639,18 +1639,39 @@ public class EntryManager(IDaoFactory daoFactory,
             }
             else
             {
+                // The content is fetched from the address the document service gave: the converted copy of a
+                // third-party file, the editor's saved revision, or the version a restore names. These failures were
+                // plain exceptions, each a 500. An address that is not one is the caller's input (400); an address
+                // that does not answer, or answers with an error, is a failure of the server behind it, a 502 as in
+                // DocumentServiceConnector.GetConvertedFileAsync.
+                if (!Uri.TryCreate(downloadUri, UriKind.Absolute, out var downloadAddress))
+                {
+                    throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest);
+                }
 
                 using var request = new HttpRequestMessage
                 {
-                    RequestUri = new Uri(downloadUri)
+                    RequestUri = downloadAddress
                 };
 
                 var httpClient = clientFactory.CreateClient(nameof(DocumentService));
-                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                HttpResponseMessage sent;
+
+                try
+                {
+                    sent = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                }
+                catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+                {
+                    // No token is passed, so a cancelled send is the client's timeout, not the caller giving up.
+                    throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {e.Message}");
+                }
+
+                using var response = sent;
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception($"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
+                    throw new CustomHttpException(HttpStatusCode.BadGateway, $"{FilesCommonResource.ErrorMessage_DocServiceException} {response.StatusCode}");
                 }
 
                 await using var editedFileStream = await response.Content.ReadAsStreamAsync();
@@ -1808,9 +1829,11 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
+        // CanEditAsync above already refuses a file in Trash, which allows only reading, deleting and moving; the check
+        // stays as a guard, and throws the type the other Trash checks of the module throw (403), not a 500.
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         checkRight = await fileTracker.ProlongEditingAsync(fileId, tabId, userId, tenant, commonLinkUtility.ServerRootPath, docKey, editingAlone, token, fillingSessionId);
@@ -1873,30 +1896,33 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
+        // The refusals below were plain exceptions, each a 500. They throw what the same refusals throw elsewhere in the
+        // module - SaveEditingAsync for a file being edited or in Trash, the history and owner calls of FileStorageService
+        // for a third-party file and an update in progress: InvalidOperationException, a 403.
         if (checkRight && await fileTracker.IsEditingAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         if (file.ProviderEntry)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_BadRequest);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
         if (file.Encrypted)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
         }
 
         var exists = cache.Get<string>(UpdateList + fileId) != null;
         if (exists)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_UpdateEditingFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateEditingFile);
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -2034,7 +2060,9 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             logger.ErrorUpdateFile(fileId.ToString(), version, e);
 
-            throw new Exception(e.Message, e);
+            // Rethrown as it is: wrapping it in a plain Exception turned every failure of the restore, a refused quota
+            // or argument included, into a 500.
+            throw;
         }
         finally
         {
@@ -2063,14 +2091,17 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
+        // CanEditHistoryAsync above already refuses a file in Trash and a third-party file when the rights are checked;
+        // the checks stay for the callers that skip them, and throw what the other Trash and third-party checks of the
+        // module throw (403), not a 500.
         if (fileVersion.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         if (fileVersion.ProviderEntry)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_BadRequest);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_BadRequest);
         }
 
         var lastVersionFile = await fileDao.GetFileAsync(fileVersion.Id);
@@ -2121,14 +2152,17 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
         }
 
+        // Both refusals were plain exceptions, each a 500. They throw what the same refusals throw elsewhere in the module -
+        // the owner change for a file being edited, FolderRenameAsync for an entry in Trash: InvalidOperationException, a 403.
+        // CanRenameAsync above already refuses a file in Trash, so that check stays only as a guard.
         if (file.ProviderEntry && await fileTracker.IsEditingAsync(file.Id))
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_UpdateEditingFile);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UpdateEditingFile);
         }
 
         if (file.RootFolderType == FolderType.TRASH)
         {
-            throw new Exception(FilesCommonResource.ErrorMessage_ViewTrashItem);
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
         }
 
         title = Global.ReplaceInvalidCharsAndTruncate(title);

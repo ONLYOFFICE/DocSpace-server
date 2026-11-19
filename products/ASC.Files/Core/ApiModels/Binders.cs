@@ -122,14 +122,23 @@ public static class ModelBindingContextExtension
         }
     }
 
+    /// <summary>
+    /// Reads an id from the query: a text <c>int.TryParse</c> accepts is a portal id, any other text is a third-party
+    /// id taken as it is.
+    /// </summary>
+    /// <remarks>
+    /// The text used to be pasted into a JSON literal and parsed, so a quote, a control character or a backslash
+    /// in an id (and a number with a sign or a leading zero, which <c>int.TryParse</c> accepts and JSON does not)
+    /// ended the request as 500. Such an id now names nothing, like any other unknown string id.
+    /// </remarks>
     public static JsonElement ParseQueryParam(string? data)
     {
-        if (int.TryParse(data, out _))
+        if (int.TryParse(data, out var id))
         {
-            return JsonSerializer.Deserialize<JsonElement>(data);
+            return JsonSerializer.SerializeToElement(id);
         }
 
-        return JsonSerializer.Deserialize<JsonElement>($"\"{data}\"");
+        return JsonSerializer.SerializeToElement(data ?? string.Empty);
     }
 }
 

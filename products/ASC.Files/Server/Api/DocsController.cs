@@ -79,7 +79,9 @@ public class DocsController(
     [HttpPost("converter")]
     public async Task<FileDto<int>> ConvertFile(ConvertFileRequestDto inDto)
     {
-        var file = await fileStorageService.GetFileAsync(inDto.FileId, -1);
+        // GetFileAsync returns null for a form a form filler may not see yet (filling not started); passed on, it was a
+        // NullReferenceException (500). Not found, as GET file/{fileId} answers the same null.
+        var file = (await fileStorageService.GetFileAsync(inDto.FileId, -1)).NotFoundIfNull("File not found");
 
         var folderId = inDto.FolderId ?? await globalFolderHelper.FolderMyAsync;
         if (folderId == 0)

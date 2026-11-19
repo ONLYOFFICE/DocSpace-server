@@ -80,7 +80,9 @@ public class FilesControllerHelper(
 
     public async Task<bool> isFormPDF<T>(T fileId)
     {
-        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        // GetFileAsync returns null for a form a form filler may not see yet (filling not started); read as a file it
+        // was a NullReferenceException (500). Not found, as GetFileInfoAsync answers the same null.
+        var file = (await _fileStorageService.GetFileAsync(fileId, -1)).NotFoundIfNull("File not found");
         var fileType = FileUtility.GetFileTypeByFileName(file.Title);
 
         if (fileType == FileType.Pdf)
@@ -92,7 +94,8 @@ public class FilesControllerHelper(
 
     public async Task<string> GetPresignedUri<T>(T fileId)
     {
-        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+        // A form hidden from a form filler comes back as null; see isFormPDF.
+        var file = (await _fileStorageService.GetFileAsync(fileId, -1)).NotFoundIfNull("File not found");
         return pathProvider.GetFileStreamUrl(file);
     }
 
@@ -138,9 +141,10 @@ public class FilesControllerHelper(
 
     public async Task<FileDto<T>> CreateFileAsync<T>(T folderId, string title, JsonElement templateId, int formId, bool enableExternalExt = false)
     {
+        // ReadInt32Id answers a templateId that is not a 32-bit integer with 400; GetInt32 threw a 500.
         var file = templateId.ValueKind switch
         {
-            JsonValueKind.Number => await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = templateId.GetInt32() }, enableExternalExt),
+            JsonValueKind.Number => await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = FileOperationsManager.ReadInt32Id(templateId) }, enableExternalExt),
             JsonValueKind.String => await _fileStorageService.CreateNewFileAsync(new FileModel<T, string> { ParentId = folderId, Title = title, TemplateId = templateId.GetString() }, enableExternalExt),
             _ => await _fileStorageService.CreateNewFileAsync(new FileModel<T, int> { ParentId = folderId, Title = title, TemplateId = 0, FormId = formId }, enableExternalExt)
         };
@@ -265,7 +269,9 @@ public class FilesControllerHelper(
     public async Task<FileDto<TTemplate>> CopyFileAsAsync<T, TTemplate>(T fileId, TTemplate destFolderId, string destTitle, string password = null, bool toForm = false)
     {
         var service = serviceProvider.GetService<FileStorageService>();
-        var file = await _fileStorageService.GetFileAsync(fileId, -1);
+
+        // A form hidden from a form filler comes back as null; see isFormPDF.
+        var file = (await _fileStorageService.GetFileAsync(fileId, -1)).NotFoundIfNull("File not found");
 
         // A copy made here is written in the clear: out of a private room it would keep nothing but
         // ciphertext without its key, and into one it would put open content where only encrypted is allowed.

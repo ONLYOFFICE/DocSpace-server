@@ -35,6 +35,7 @@ global using System.Collections.Immutable;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
+global using System.Net;
 global using System.Security;
 global using System.Security.Authentication;
 global using System.Text;

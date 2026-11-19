@@ -305,9 +305,10 @@ public abstract class FilesController<T>(
     [HttpPost("file/{fileId}/copyas")]
     public async Task<FileEntryBaseDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
+        // ReadInt32Id answers a destFolderId that is not a 32-bit integer with 400; GetInt32 threw a 500.
         return inDto.File.DestFolderId.ValueKind switch
         {
-            JsonValueKind.Number => await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetInt32(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm),
+            JsonValueKind.Number => await filesControllerHelper.CopyFileAsAsync(inDto.FileId, FileOperationsManager.ReadInt32Id(inDto.File.DestFolderId), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm),
             JsonValueKind.String => await filesControllerHelper.CopyFileAsAsync(inDto.FileId, inDto.File.DestFolderId.GetString(), inDto.File.DestTitle, inDto.File.Password, inDto.File.ToForm),
             _ => null
         };

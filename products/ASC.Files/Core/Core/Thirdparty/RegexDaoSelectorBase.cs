@@ -51,6 +51,8 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
     protected internal string Id => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Id;
     public Regex Selector => field ??= new Regex(@"^" + Id + @"-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
 
+    private const string ProviderNotFoundMessage = "Provider id not found or you have no access";
+
     private ConcurrentDictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; } = new();
 
     public virtual string ConvertId(string id)
@@ -139,7 +141,15 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
             throw new ArgumentException($"Id is not {Name} id");
         }
 
-        var providerInfo = GetProviderInfo(Convert.ToInt32(match.Groups["id"].Value));
+        // The account number is the id of a provider row, an int. The selector's \d+ also matches a
+        // number beyond the int range, which Convert.ToInt32 answered with an OverflowException - a 500.
+        // No provider can carry such an id, so it is answered like any other id that names no provider.
+        if (!int.TryParse(match.Groups["id"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var linkId))
+        {
+            throw new ProviderInfoArgumentException(ProviderNotFoundMessage);
+        }
+
+        var providerInfo = GetProviderInfo(linkId);
 
         info = new BaseProviderInfo<TFile, TFolder, TItem>
         {
@@ -184,7 +194,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
             // and so does not match the older clause. Callers depend on this translation - the backup
             // cleaner treats ProviderInfoArgumentException as "provider is gone" and drops records
             // older than six months on the strength of it, and would otherwise keep them forever.
-            throw new ProviderInfoArgumentException("Provider id not found or you have no access");
+            throw new ProviderInfoArgumentException(ProviderNotFoundMessage);
         }
     }
 
