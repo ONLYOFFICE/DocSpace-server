@@ -4462,6 +4462,17 @@
                 ],
                 "description": "The form the completed copies in this folder were filled from, taken from the copy submitted last. Null while\r\nthe folder holds no completed copy, and for every folder that does not collect them.",
                 "format": "int32"
+              },
+              "linkedProjectsCount": {
+                "examples": [
+                  2
+                ],
+                "type": [
+                  "null",
+                  "integer"
+                ],
+                "description": "How many AI projects use the room as a source. Every project the room is linked to is counted, the ones the\r\ncaller may not read included, so the number can be higher than the list of `GET\r\napi/2.0/files/rooms/{id}/projects` is long. 0 means that no project uses the room. Filled in for a Knowledge\r\nand an Instructions room only: null for every other room type, an AI project included, and for a folder that\r\nis not a room.",
+                "format": "int32"
               }
             }
           }
@@ -6251,6 +6262,17 @@
                   "integer"
                 ],
                 "description": "The form the completed copies in this folder were filled from, taken from the copy submitted last. Null while\r\nthe folder holds no completed copy, and for every folder that does not collect them.",
+                "format": "int32"
+              },
+              "linkedProjectsCount": {
+                "examples": [
+                  2
+                ],
+                "type": [
+                  "null",
+                  "integer"
+                ],
+                "description": "How many AI projects use the room as a source. Every project the room is linked to is counted, the ones the\r\ncaller may not read included, so the number can be higher than the list of `GET\r\napi/2.0/files/rooms/{id}/projects` is long. 0 means that no project uses the room. Filled in for a Knowledge\r\nand an Instructions room only: null for every other room type, an AI project included, and for a folder that\r\nis not a room.",
                 "format": "int32"
               }
             }

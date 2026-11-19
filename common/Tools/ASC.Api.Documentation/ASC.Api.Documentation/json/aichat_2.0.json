@@ -1885,10 +1885,10 @@
         ],
         "operationId": "aiAttachmentsDelete",
         "summary": "Delete one attachment",
-        "description": "Permanently deletes one attachment, whether it is still a draft or already bound to a message. The ID is not validated here, so a malformed one surfaces as an error relayed from storage rather than as a 400, and an ID that does not exist answers success without deleting anything. Deleting a bound attachment leaves the message in place without it. The deletion cannot be undone.",
+        "description": "Hands one of the caller's own drafts to the background cleanup, which removes it at its next pass (every 15 minutes by default); until then the draft can still be read and linked to a message. When the draft was made from a file uploaded or copied into an AI project and not sent yet, that file is removed with it and its size is returned to the project. An attachment already bound to a message is left as it is, and so is a file outside a project. The ID is not validated here, so a malformed one surfaces as an error relayed from storage rather than as a 400, and an ID that does not exist or belongs to another user answers success without changing anything. Once the pass has run, the deletion cannot be undone.",
         "responses": {
           "200": {
-            "description": "Confirms the request was accepted, whether or not anything was deleted.",
+            "description": "Confirms the request was accepted, whether or not a draft was handed to the cleanup.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1962,10 +1962,10 @@
         ],
         "operationId": "aiAttachmentsDeleteMany",
         "summary": "Delete many",
-        "description": "Permanently deletes several attachments in one round trip. `ids` is optional and an absent value is treated as an empty list, so a malformed request quietly deletes nothing instead of failing. IDs that do not exist are skipped without being reported, so the answer confirms only that the call was accepted. The deletions cannot be undone.",
+        "description": "Hands several of the caller's own drafts to the background cleanup in one round trip; the cleanup removes them at its next pass (every 15 minutes by default), and until then they can still be read and linked to a message. A draft made from a file uploaded or copied into an AI project and not sent yet takes that file with it, and the file's size is returned to the project. Attachments already bound to a message are left as they are, and so are files outside a project. `ids` is optional and an absent value is treated as an empty list, so a malformed request quietly changes nothing instead of failing. IDs that do not exist or belong to another user are skipped without being reported, so the answer confirms only that the call was accepted. Once the pass has run, the deletions cannot be undone.",
         "responses": {
           "200": {
-            "description": "Confirms the request was accepted, whether or not anything was deleted.",
+            "description": "Confirms the request was accepted, whether or not any draft was handed to the cleanup.",
             "content": {
               "application/json": {
                 "schema": {
