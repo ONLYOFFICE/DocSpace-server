@@ -1,6 +1,6 @@
 ---
 name: openapi-missing-responses
-description: "Documenting the status codes DocSpace API endpoints really return but do not declare: a queue of actions whose code or the services it calls (throw, Demand*, controller helpers, services up to three calls deep, DTO validation, 304) produce a code with no [SwaggerResponse], and declared codes no request can get; a run settles a batch of N, adds or removes attributes or records rejections, verifies, reports and stops. A reachable 500 is only reported, never documented or fixed. USE FOR: find undocumented / missing responses or error codes, which codes does this endpoint really return, add SwaggerResponse for the codes an action throws, remove a documented code the endpoint cannot return, continue the missing-responses campaign, take the next N endpoints, how many endpoints are left, check the last batch, show or undo rejected findings — use it whenever the user means the set of status codes an endpoint declares versus what its code returns, even without naming the campaign. DO NOT USE FOR: pipeline-wide responses that belong to a document filter (global MVC filters, the rate limiter), rewriting summaries/remarks (openapi-desc-opt), Spectral findings (openapi-lint-fix), changing server behaviour, fixing the cause of a 500."
+description: "Documenting the status codes DocSpace API endpoints really return but do not declare: a queue of actions whose code, or a service it calls, produces a code with no [SwaggerResponse], and declared codes no request can get; a run settles a batch of N, adds or removes attributes or records rejections, verifies, reports and stops. A reachable 500 is only reported, never documented or fixed. USE FOR: find undocumented or missing responses, which codes an endpoint really returns, add a SwaggerResponse for a code an action throws or remove one it cannot return, continue the missing-responses campaign, take the next N endpoints, how many are left, check the last batch, show or undo rejections — even when the campaign is not named. DO NOT USE FOR: pipeline-wide responses that belong to a document filter (global MVC filters, the rate limiter), rewriting summaries/remarks (openapi-desc-opt), Spectral findings (openapi-lint-fix), changing server behaviour, fixing the cause of a 500."
 ---
 
 # Undocumented responses: one batch of endpoints per run
@@ -47,7 +47,7 @@ counts such actions and `--all` lists them):
   anywhere in the repository, followed to what they throw; a literal `true`/`false` argument (or a literal default
   left out) switches off the callee's `if (flag)` / `if (!flag)` block — `DemandRebrandingPermissionAsync(false)`;
 - services: a call `member.X(...)` on a field, property or constructor parameter goes into `X` of its declared type
-  (every implementation of an interface), a static `Class.X(...)` into that class, up to three calls deep. A class
+  (every implementation of an interface), a static `Class.X(...)` into that class, as deep as the `Calls followed:` line of the output says. A class
   of the action's own project (`FilesControllerHelper`) is the controller's layer and costs no hop. Each line says
   how far: `[service hop N]`. A service finding counts like one in the action, except these, which stay hints
   with the reason in `[hint: …]`: a null guard, a throw that is itself the `_ =>` or `default:` arm of a switch, a
@@ -66,8 +66,8 @@ text cannot resolve (a local variable, a chained call, a lambda) are followed, a
 hint. Without the index, or with `--no-codegraph`, the queue is the same; the `Calls followed:` line of the output
 says which way this run went.
 
-What it does not see — your part in step 3: calls through locals and chains without the index, services more
-than three calls deep, which overload or implementation actually runs when several fit, exceptions thrown by
+What it does not see — your part in step 3: calls through locals and chains without the index, services deeper
+than the `Calls followed:` line says, which overload or implementation actually runs when several fit, exceptions thrown by
 framework or library code, a `catch` in a caller that converts one exception into another, and whether a branch
 can be reached at all. A project another host also loads gets the other host's code on each line:
 `[in ASC.Monolith: 403]` (conventions §1).
@@ -107,7 +107,7 @@ as a reason (the size and format checks in `FileSecurity.FilterEntryAsync` are u
 python .claude/skills/openapi-missing-responses/scan.py --batch <N>
 ```
 
-One run indexes the whole tree and walks the services of every action (20–35 s); do not repeat calls whose output
+One run indexes the whole tree and walks the services of every action (tens of seconds); do not repeat calls whose output
 you already have. The output: per host, the exception table and the global filters; which calls were followed; the
 scope and queue counts, with the gap codes by the depth of their nearest evidence; then the batch — per action its
 id, verb and route, document, declared codes, gap, and the evidence per gap code with the call path (`via`).
@@ -250,7 +250,7 @@ the diff; say so. Do not commit — git is the user's. Stop and wait for the nex
   them for the user; do not document, reject or fix them. The block shows only what the scanner sees (step 3
   limits).
 - Declared codes a `catch` may make unreachable, typed or catch-all, in the action or in a service it calls —
-  `scan.py --audit-catches` (all actions, ~45 s) or with ids/files; settle every line it prints by conventions §7
+  `scan.py --audit-catches` (all actions, tens of seconds) or with ids/files; settle every line it prints by conventions §7
   and report it like a batch: removed, kept with the path that produces the code, or not traced to the end.
 - Rejections — `scan.py --rejected` lists them with their state (`valid`, `expired`, `orphaned`);
   `scan.py --unreject "<id>" [code]` drops one, and the code is back in the queue on the next run.

@@ -165,7 +165,7 @@ like a missing one is added.
 
 The burden of proof is the other way round from a gap code. The scanner's `=` lines show what backs a declared
 code in the action and the services it follows, and `-` marks a declared code with no evidence there — but the
-scanner stops at three service calls and at calls it cannot resolve, so `-` is a lead, never a verdict. Remove only when you have traced every path that could
+scanner stops at the depth the `Calls followed:` line names and at calls it cannot resolve, so `-` is a lead, never a verdict. Remove only when you have traced every path that could
 produce the code and can name the check that rules it out, as for a rejection:
 
 - the exception behind it maps to another code in the host's table (`InvalidOperationException` is 403, not 409),
