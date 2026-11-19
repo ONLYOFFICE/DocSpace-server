@@ -2,6 +2,8 @@
   "name": "Editorial standards",
   "description": "The editorial style guide and the list of commonly confused words.",
   "category": "Document",
+  "color": "7757D9",
+  "cover": "bookmark",
   "files": [
     "Editorial style guide.docx",
     "Commonly confused words.md"

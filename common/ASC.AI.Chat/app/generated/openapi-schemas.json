@@ -4868,6 +4868,14 @@
                   "type": "string",
                   "description": "The category the template is listed under."
                 },
+                "color": {
+                  "type": "string",
+                  "description": "The colour the room is drawn in, six hexadecimal digits without `#`, as `POST api/2.0/files/rooms` takes it."
+                },
+                "cover": {
+                  "type": "string",
+                  "description": "The id of the built-in room cover drawn on the room, one of `GET api/2.0/files/rooms/covers`."
+                },
                 "instructions": {
                   "type": "string",
                   "description": "The agent's instructions to the chat."
@@ -4927,6 +4935,14 @@
                   "type": "string",
                   "description": "The category the template is listed under."
                 },
+                "color": {
+                  "type": "string",
+                  "description": "The colour the room is drawn in, six hexadecimal digits without `#`, as `POST api/2.0/files/rooms` takes it."
+                },
+                "cover": {
+                  "type": "string",
+                  "description": "The id of the built-in room cover drawn on the room, one of `GET api/2.0/files/rooms/covers`."
+                },
                 "files": {
                   "type": "array",
                   "items": {
@@ -4972,6 +4988,14 @@
                 "category": {
                   "type": "string",
                   "description": "The category the template is listed under."
+                },
+                "color": {
+                  "type": "string",
+                  "description": "The colour the room is drawn in, six hexadecimal digits without `#`, as `POST api/2.0/files/rooms` takes it."
+                },
+                "cover": {
+                  "type": "string",
+                  "description": "The id of the built-in room cover drawn on the room, one of `GET api/2.0/files/rooms/covers`."
                 },
                 "files": {
                   "type": "array",

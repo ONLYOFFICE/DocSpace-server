@@ -2,6 +2,8 @@
   "name": "Contract standards",
   "description": "Standard clause wording and the checklist a contract is reviewed against.",
   "category": "Document",
+  "color": "6191F2",
+  "cover": "book_open",
   "files": [
     "Standard clauses.docx",
     "Review checklist.md"

@@ -2,6 +2,8 @@
   "name": "Data analysis guide",
   "description": "How an analysis is carried out and the data quality checklist applied before it.",
   "category": "Tables",
+  "color": "1FCECB",
+  "cover": "map",
   "files": [
     "Analysis guide.docx",
     "Data quality checklist.md"

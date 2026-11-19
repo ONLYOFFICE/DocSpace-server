@@ -2,6 +2,8 @@
   "name": "Pitch deck guide",
   "description": "The standard structure of a pitch deck and the rules for writing slides.",
   "category": "Presentation",
+  "color": "FF6680",
+  "cover": "medal",
   "files": [
     "Pitch deck structure.docx",
     "Slide writing rules.md"
