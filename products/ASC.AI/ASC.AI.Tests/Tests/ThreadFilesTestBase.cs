@@ -213,6 +213,18 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         }
     }
 
+    protected async Task AgeDraftAsync(string attachmentId, TimeSpan age)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "UPDATE ai_integration_attachments SET created_at = @createdAt WHERE id = @id";
+        command.Parameters.AddWithValue("@createdAt", DateTime.UtcNow - age);
+        command.Parameters.AddWithValue("@id", attachmentId);
+
+        (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
+    }
+
     private async Task<ThreadFilesPage> ReadPageAsync(HttpResponseMessage response)
     {
         var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ThreadFile>>(response, TestContext.Current.CancellationToken);

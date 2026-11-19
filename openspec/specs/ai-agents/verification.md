@@ -337,9 +337,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Batch (scenarios "Batch with one bad element", "Batch") | `T/AttachmentTests/AttachmentSaveFilesManyTests.cs:45,97,141,214,230`; `AttachmentCrossUserTests.cs:236` | TEST-CONFIRMED [run: PASS] |
 | Fields stored as sent (scenario) | `T/AttachmentTests/AttachmentSaveFileTypeTests.cs:47,75`; `AttachmentSaveFileValidationTests.cs:155`; `AttachmentSaveFileTests.cs:115` | TEST-CONFIRMED [run: PASS] |
 | **Reading and deleting attachments** | | |
-| Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED [run: PASS] |
-| Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:71,103,131` | TEST-CONFIRMED [run: PASS] |
-| Immediately readable, gone; source kept | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:85,172` | TEST-CONFIRMED [run: PASS] |
+| Another user's draft (scenario); mixed delete (scenario) | `T/AttachmentTests/AttachmentCrossUserTests.cs:57,77,186,209` | TEST-CONFIRMED |
+| Unknown, malformed, empty, missing body | `T/AttachmentTests/AttachmentGetManyTests.cs:45,74,86,119`; `AttachmentGetTests.cs:72,85,106`; `AttachmentDeleteTests.cs:72,104,132` | TEST-CONFIRMED |
+| Immediately readable; deleted draft gone after the background pass, source kept (scenario "Deleted draft") | `T/AttachmentTests/AttachmentGetManyTests.cs:130,151`; `AttachmentDeleteTests.cs:86,173` | TEST-CONFIRMED |
+| Linked attachment (scenario) | `T/AttachmentTests/AttachmentDeleteTests.cs:209` | TEST-CONFIRMED |
 | Draft does not reach the model (scenario) | failure text of `AttachmentSendTests.SendWithStream_DraftPassedAsAttachmentsIdOnly_ReachesTheModel` and `SendWithStream_FullyInlinedAttachmentRecord_ReachesTheModelToo` in run 365d87fe60 (bug 82773, A30); `T/ReasoningTests/ReasoningAttachTests.cs:48` passes and does not decide it; run 2026-11-10: both red again | TEST-CONFIRMED [run: FAIL-BUG] - `T/AttachmentTests/AttachmentSendTests.cs:68,91` (A30) |
 | Unpaid portal (scenario) | `TS/attachments/attachments.ai-disabled.spec.ts` | TS-ONLY |
 | **Linking attachments to a message** | | |
@@ -482,6 +483,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | DocSpace admin outside the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:226` | TEST-CONFIRMED |
 | Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:246` | TEST-CONFIRMED |
 | A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiProjectsWithOwnRecordAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
+| **Drafts that are not sent are removed** |  |  |
+| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:47,69` | TEST-CONFIRMED |
+| Abandoned draft of a file outside a project; sent attachment older than the lifetime (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:91,107` | TEST-CONFIRMED |
+| The pass runs every 15 minutes and a draft lives 2 hours by default | `products/ASC.AI/Worker/BackgroundServices/OrphanAttachmentsCleanerService.cs` (`_defaultPeriod`, `_defaultLifetime`) | CODE-ONLY |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
 

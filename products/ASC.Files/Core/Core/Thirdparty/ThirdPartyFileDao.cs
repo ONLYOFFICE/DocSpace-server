@@ -501,6 +501,11 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         throw new NotSupportedException();
     }
 
+    public IAsyncEnumerable<(string FileId, string ProjectId, long Size)> GetChatDraftFilesAsync(IReadOnlyCollection<Guid> attachmentIds)
+    {
+        throw new NotSupportedException();
+    }
+
     public Task<string> MoveThreadFileAsync(string fileId, string toFolderId, Guid threadId)
     {
         throw new NotSupportedException();

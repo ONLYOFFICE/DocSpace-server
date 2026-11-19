@@ -42,57 +42,97 @@ public class OrphanAttachmentsCleanerService(
 {
     private const int BatchSize = 100;
 
-    protected override TimeSpan ExecuteTaskPeriod { get; set; } =
-        ReadTimeSpan(configuration, "period", TimeSpan.FromHours(1));
+    private static readonly TimeSpan _defaultPeriod = TimeSpan.FromMinutes(15);
+    private static readonly TimeSpan _minPeriod = TimeSpan.FromSeconds(5);
+    private static readonly TimeSpan _maxPeriod = TimeSpan.FromDays(1);
 
+    private static readonly TimeSpan _defaultLifetime = TimeSpan.FromHours(2);
+    private static readonly TimeSpan _minLifetime = TimeSpan.FromMinutes(30);
+    private static readonly TimeSpan _maxLifetime = TimeSpan.FromDays(7);
+
+    private readonly IServiceScopeFactory _scopeFactory = scopeFactory;
+
+    // d.hh:mm:ss, from 5 seconds to 1 day; fifteen minutes is "0.00:15:00"
+    protected override TimeSpan ExecuteTaskPeriod { get; set; } =
+        configuration.ReadInterval("ai:orphanAttachmentsCleaner:period", _defaultPeriod, _minPeriod, _maxPeriod, logger);
+
+    // d.hh:mm:ss, from 30 minutes to 7 days; two hours is "0.02:00:00"
     private readonly TimeSpan _lifetime =
-        ReadTimeSpan(configuration, "lifetime", TimeSpan.FromHours(24));
+        configuration.ReadInterval("ai:orphanAttachmentsCleaner:lifetime", _defaultLifetime, _minLifetime, _maxLifetime, logger);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
+        var cutoffDate = DateTime.UtcNow - _lifetime;
+        var createdAt = DateTime.MinValue;
+        var id = Guid.Empty;
+        var draftsCount = 0;
+        var filesCount = 0;
+
         try
         {
-            var cutoffDate = DateTime.UtcNow - _lifetime;
-            var totalCount = 0;
-
             while (!stoppingToken.IsCancellationRequested)
             {
-                await using var context = await dbContextFactory.CreateDbContextAsync(stoppingToken);
+                List<OrphanAttachment> rows;
 
-                var rows = await context.GetOrphanAttachmentsAsync(cutoffDate, BatchSize)
-                    .ToListAsync(stoppingToken);
-
-                if (rows.Count == 0)
+                await using (var context = await dbContextFactory.CreateDbContextAsync(stoppingToken))
                 {
-                    break;
+                    rows = await context.GetOrphanAttachmentsAsync(cutoffDate, createdAt, id, BatchSize).ToListAsync(stoppingToken);
                 }
 
                 foreach (var group in rows.GroupBy(x => x.TenantId))
                 {
-                    totalCount += await context.DeleteAttachmentsAsync(group.Key, group.Select(x => x.Id));
+                    stoppingToken.ThrowIfCancellationRequested();
+
+                    try
+                    {
+                        var (drafts, files) = await DeleteAsync(group.Key, group.Select(x => x.Id).ToList());
+                        draftsCount += drafts;
+                        filesCount += files;
+                    }
+                    catch (Exception e) when (e is not OperationCanceledException)
+                    {
+                        logger.ErrorDeleteOrphanAttachments(group.Key, e);
+                    }
                 }
 
                 if (rows.Count < BatchSize)
                 {
                     break;
                 }
-            }
 
-            if (totalCount > 0)
-            {
-                logger.InformationDeletedOrphanAttachments(totalCount, cutoffDate);
+                (createdAt, id) = (rows[^1].CreatedAt, rows[^1].Id);
             }
         }
-        catch (Exception e)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
             logger.ErrorCleanUpOrphanAttachments(e);
         }
+        finally
+        {
+            if (draftsCount > 0 || filesCount > 0)
+            {
+                logger.InformationDeletedOrphanAttachments(draftsCount, filesCount, cutoffDate);
+            }
+        }
     }
 
-    private static TimeSpan ReadTimeSpan(IConfiguration configuration, string key, TimeSpan fallback)
+    private async Task<(int Drafts, int Files)> DeleteAsync(int tenantId, List<Guid> ids)
     {
-        var value = configuration.GetValue<string>($"ai:orphanAttachmentsCleaner:{key}");
+        await using var scope = _scopeFactory.CreateAsyncScope();
 
-        return string.IsNullOrEmpty(value) ? fallback : TimeSpan.Parse(value, CultureInfo.InvariantCulture);
+        var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+
+        var tenant = await tenantManager.GetTenantAsync(tenantId);
+        if (tenant == null)
+        {
+            await using var context = await dbContextFactory.CreateDbContextAsync();
+
+            return (await context.DeleteAttachmentsAsync(tenantId, ids), 0);
+        }
+
+        tenantManager.SetCurrentTenant(tenant);
+        await scope.ServiceProvider.GetRequiredService<SecurityContext>().AuthenticateMeWithoutCookieAsync(ASC.Core.Configuration.Constants.CoreSystem);
+
+        return await scope.ServiceProvider.GetRequiredService<AiProjectThreadsService>().DeleteChatDraftsAsync(ids);
     }
 }

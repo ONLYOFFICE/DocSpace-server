@@ -120,14 +120,7 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
         await context.UpdateAttachmentBindingsByIdsAsync(tenantId, createdBy, ids, messageId);
     }
 
-    public async Task DeleteAsync(int tenantId, Guid createdBy, Guid id)
-    {
-        await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        await context.DeleteAttachmentAsync(tenantId, createdBy, id);
-    }
-
-    public async Task DeleteManyAsync(int tenantId, Guid createdBy, HashSet<Guid> ids)
+    public async Task MarkForDeletionAsync(int tenantId, Guid createdBy, IReadOnlyCollection<Guid> ids)
     {
         if (ids.Count == 0)
         {
@@ -136,7 +129,19 @@ public class AttachmentsStorage(IDbContextFactory<AiIntegrationContext> dbContex
 
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
-        await context.DeleteAttachmentsByIdsAsync(tenantId, createdBy, ids);
+        await context.AgeUnboundAttachmentsAsync(tenantId, createdBy, ids);
+    }
+
+    public async Task<int> DeleteUnboundAsync(int tenantId, IReadOnlyCollection<Guid> ids)
+    {
+        if (ids.Count == 0)
+        {
+            return 0;
+        }
+
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return await context.DeleteAttachmentsAsync(tenantId, ids);
     }
 
     private static Attachment ToDomainEntity(DbAttachment entity)

@@ -151,8 +151,9 @@ public class AttachmentGetManyTests(AspireAppFixture fixture) : AttachmentTestBa
     public async Task GetMany_AfterASingleDelete_NoLongerServesTheDraft()
     {
         // The same symptom on the write side, and the more dangerous half: a client that deleted an attachment was told
-        // `{success:true}` while the record kept being served to later reads.
-        var survivors = new List<string>();
+        // `{success:true}` while the record kept being served to later reads. A delete hands the draft to the background
+        // cleanup, so the draft has to be gone once a pass has run, not right after the call.
+        var probes = new List<string>();
 
         for (var index = 0; index < 10; index++)
         {
@@ -162,17 +163,12 @@ public class AttachmentGetManyTests(AspireAppFixture fixture) : AttachmentTestBa
             deleted.Status.Should().Be(200, deleted.Error);
             deleted.Data!.Success.Should().BeTrue();
 
-            // Three immediate reads: one lucky miss must not clear a draft that is still served.
-            for (var attempt = 0; attempt < 3; attempt++)
-            {
-                if (await ReadOnceAsync(probeId) is not null)
-                {
-                    survivors.Add(probeId);
-                    break;
-                }
-            }
+            probes.Add(probeId);
         }
 
-        survivors.Should().BeEmpty("drafts still readable after a delete that reported success");
+        foreach (var probeId in probes)
+        {
+            await ExpectCleanedUpAsync(probeId, "a draft after a delete that reported success");
+        }
     }
 }

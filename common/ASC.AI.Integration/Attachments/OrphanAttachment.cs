@@ -41,4 +41,5 @@ public class OrphanAttachment
 {
     public int TenantId { get; init; }
     public Guid Id { get; init; }
+    public DateTime CreatedAt { get; init; }
 }

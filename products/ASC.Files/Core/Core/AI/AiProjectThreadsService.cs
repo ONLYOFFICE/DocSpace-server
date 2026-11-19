@@ -38,6 +38,7 @@ public class AiProjectThreadsService(
     TenantManager tenantManager,
     AuthContext authContext,
     ThreadsStorage storage,
+    AttachmentsStorage attachmentsStorage,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     IServiceProvider serviceProvider,
@@ -115,6 +116,24 @@ public class AiProjectThreadsService(
         await DeleteFolderAsync(thread.AttachmentsFolderId);
 
         await storage.DeleteMarkedAsync(thread.TenantId, thread.Id);
+    }
+
+    public async Task<(int Drafts, int Files)> DeleteChatDraftsAsync(IReadOnlyCollection<Guid> attachmentIds)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var files = await fileDao.GetChatDraftFilesAsync(attachmentIds).ToListAsync();
+
+        var deleted = (await fileDao.DeleteFilesAsync(files.Select(f => KeyValuePair.Create(f.FileId, ASC.Core.Configuration.Constants.CoreSystem.ID)))).ToHashSet();
+
+        var folderDao = daoFactory.GetFolderDao<int>();
+        foreach (var project in files.Where(f => deleted.Contains(f.FileId)).GroupBy(f => f.ProjectId))
+        {
+            await folderDao.ChangeTreeFolderSizeAsync(project.Key, -project.Sum(f => f.Size));
+        }
+
+        var drafts = await attachmentsStorage.DeleteUnboundAsync(tenantManager.GetCurrentTenantId(), attachmentIds);
+
+        return (drafts, deleted.Count);
     }
 
     private async Task<Folder<int>> GetForWriteAsync(AiThread thread)

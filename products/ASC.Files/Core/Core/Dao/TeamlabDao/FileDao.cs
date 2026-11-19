@@ -1340,6 +1340,23 @@ internal class FileDao(
         return deletedIds;
     }
 
+    public async IAsyncEnumerable<(int FileId, int ProjectId, long Size)> GetChatDraftFilesAsync(IReadOnlyCollection<Guid> attachmentIds)
+    {
+        if (attachmentIds.Count == 0)
+        {
+            yield break;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var file in filesDbContext.ChatDraftFilesAsync(tenantId, attachmentIds))
+        {
+            yield return (file.Id, file.ProjectId, file.Size);
+        }
+    }
+
     public async Task<bool> IsExistAsync(string title, int folderId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
