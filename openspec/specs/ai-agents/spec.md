@@ -686,7 +686,7 @@ message is appended.
 
 ### Requirement: Where a thread may be started
 
-`entityId` of `aiThreadsCreate` SHALL be checked, never used as a partition: omitted, null, empty or 0 is
+`entityId` of `aiThreadsCreate` SHALL be checked and, an AI project excepted, never used as a partition: omitted, null, empty or 0 is
 the ordinary case; a value naming no folder, a malformed one included, 404; a folder the caller cannot open
 403; any accessible folder is accepted, Read in a room sufficing. An AI project SHALL refuse a Room admin or
 a User who is not its member (403).
