@@ -959,7 +959,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/promoCode</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Whether the bonus is credited already or later, with its amount, currency and expiry", typeof(PromoCodeDto))]
-    [SwaggerResponse(400, "`promoCode` is empty or longer than 100 characters, or the billing service refused the code; the message is its reason code, such as `promo_not_found`")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `promoCode`, `promoCode` is empty or longer than 100 characters, or the billing service refused the code; the message is its reason code, such as `promo_not_found`")]
     [SwaggerResponse(402, "The billing service could not be reached, failed, or does not know this portal yet")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpPost("promoCode")]
@@ -1019,19 +1019,16 @@ public class PaymentController(
     /// Returns the bonus balance of the portal, which the accounting service keeps apart from the wallet. Requires a
     /// DocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service. The
     /// call is read-only. Each call reads the balance from the accounting service, so a new bonus shows up immediately.
-    /// The account part has a sub-account with its amount for each currency. The list `lots` holds the bonus credits
-    /// not spent in full, in the order they are spent. A credit may stay there after its `expiresAt` until the
-    /// accounting service writes it off. It is no longer spent then. If the portal has no billing customer, the call
-    /// returns an empty result. It also returns
-    /// an empty result if the accounting service cannot be read. So treat an empty result as nothing to show, not as
-    /// zero. To read the money paid into the wallet, use `GET api/2.0/portal/payment/customer/balance`.
+    /// The account part has a sub-account with its amount for each currency. If the portal has no billing customer, the
+    /// call returns an empty result. It also returns an empty result if the accounting service cannot be read. So treat
+    /// an empty result as nothing to show, not as zero. To read the money paid into the wallet, use `GET api/2.0/portal/payment/customer/balance`.
     /// </remarks>
     /// <summary>
-    /// Get the goodwill balance
+    /// Get the bonus balance
     /// </summary>
     /// <path>api/2.0/portal/payment/customer/goodwill</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The goodwill account with its sub-account per currency and the bonus credits not spent in full, or an empty result when the portal has no billing customer or the accounting service could not be read", typeof(GoodwillBalanceDto))]
+    [SwaggerResponse(200, "The bonus balance with its sub-account per currency and the bonus credits not spent in full, or an empty result when the portal has no billing customer or the accounting service could not be read", typeof(GoodwillBalanceDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpGet("customer/goodwill")]
     public async Task<GoodwillBalanceDto> GetCustomerGoodwill()

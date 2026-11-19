@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Billing.Tests.Tests.Wallet;
+namespace ASC.Web.Api.Billing.Tests.Tests.Renewal;
 
 /// <summary>
 /// The automatic renewal of a wallet subscription (the renewal job of Web.Studio) with a bonus on the portal: the

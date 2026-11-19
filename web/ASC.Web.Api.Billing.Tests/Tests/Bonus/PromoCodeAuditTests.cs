@@ -67,11 +67,13 @@ public class PromoCodeAuditTests(AspireAppFixture fixture) : BaseTest(fixture)
         Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute, """{"Message":"error: promo_not_found"}""");
 
         // Act
-        await Assert.ThrowsAsync<ApiException>(
+        var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken));
         var events = await AuditWithSentinelAsync(_ => true);
 
-        // Assert
+        // Assert: the refusal itself, so a request stopped earlier for another reason cannot pass for it.
+        exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("promo_not_found");
         events.Should().ContainSingle().Which.Action.Should().Be(SentinelAction);
     }
 

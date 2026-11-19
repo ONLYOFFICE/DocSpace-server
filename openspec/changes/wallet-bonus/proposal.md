@@ -20,8 +20,9 @@ when it pays from the wallet, so customers were charged on their card for what t
 - The `type` filter of `getCustomerOperations` and its report now reaches the accounting service; before it was
   sent under a name the service ignores, so every kind came back.
 - **BREAKING** `moveSubscriptionToWallet` counts the bonus credits that have not ended: it tops the wallet up only for the part the wallet
-  money and the bonus do not cover, and answers 402 only when both together fall short after the top-up. An
-  unreadable bonus counts as none.
+  money and the bonus do not cover, and answers 402 only when both together fall short after the top-up. A bonus
+  that cannot be read before the first top-up counts as none; one that cannot be read after it keeps the bonus read
+  before.
 - **BREAKING** The automatic renewal of a wallet subscription counts the bonus the same way.
 
 ## Capabilities

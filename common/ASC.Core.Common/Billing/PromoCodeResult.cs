@@ -71,18 +71,18 @@ public class PromoCodeResult
 /// <summary>
 /// What became of the bonus of a redeemed promo code.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(JsonStringEnumConverter<PromoCodeStatus>))]
 public enum PromoCodeStatus
 {
     /// <summary>
     /// The bonus is on the bonus balance already.
     /// </summary>
-    [Description("Completed")]
+    [Description("The bonus is on the bonus balance already")]
     Completed,
 
     /// <summary>
     /// The code is accepted, and the bonus is credited later.
     /// </summary>
-    [Description("Pending")]
+    [Description("The code is accepted, and the bonus is credited later")]
     Pending
 }

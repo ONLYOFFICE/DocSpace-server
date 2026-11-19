@@ -164,8 +164,9 @@ public class PromoCodeTests(AspireAppFixture fixture) : BaseTest(fixture)
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(code), TestContext.Current.CancellationToken));
 
-        // Assert
+        // Assert: refused by the validation of the trimmed code, not by billing.
         exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("The PromoCode field is required.");
         PaymentCalls.Should().NotContain(c => c.Route == ApplyPromoCodeRoute);
     }
 
@@ -192,8 +193,9 @@ public class PromoCodeTests(AspireAppFixture fixture) : BaseTest(fixture)
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(new string('A', 101)), TestContext.Current.CancellationToken));
 
-        // Assert
+        // Assert: refused by the length check, not by billing.
         exception.ErrorCode.Should().Be(400);
+        exception.ErrorContent!.ToString().Should().Contain("The field PromoCode must be a string with a maximum length of 100.");
         PaymentCalls.Should().NotContain(c => c.Route == ApplyPromoCodeRoute);
     }
 }

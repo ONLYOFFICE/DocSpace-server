@@ -435,7 +435,7 @@ public enum OperationType
     /// <summary>
     /// Bonus money credited to the portal's goodwill account, by a promo code or by the service itself.
     /// </summary>
-    [Description("GoodwillCredit")]
+    [Description("Bonus money credited to the bonus balance, by a promo code or by the service itself")]
     GoodwillCredit,
     [Description("WriteOffProfit")]
     WriteOffProfit,
@@ -448,7 +448,7 @@ public enum OperationType
     /// <summary>
     /// The unspent rest of a bonus credit written off the goodwill account when the credit expires.
     /// </summary>
-    [Description("GoodwillExpiration")]
+    [Description("The unspent rest of a bonus credit written off when the credit expires")]
     GoodwillExpiration
 }
 

@@ -4626,7 +4626,7 @@
           "Portal / Payment"
         ],
         "summary": "Redeem a promo code",
-        "description": "Redeems a promo code for the portal and credits the bonus money it carries. Only a DocSpace administrator may\r\ncall it, and an installation without a billing service answers 403. The call is not idempotent: whether a\r\ncode may be redeemed twice is up to the billing service, and a code it refuses fails with 400 without crediting\r\nanything, the error message being the billing reason code such as `promo_not_found` or `promo_expired`. The letter case, spaces and dashes of the code do not\r\nmatter. It is limited to ten requests a minute per user by default. The answer says whether the bonus is\r\ncredited already (`status` Completed) or later (Pending), its amount, currency and expiry. The money lands on\r\nthe bonus balance, read with `GET api/2.0/portal/payment/customer/goodwill`; the portal clients are told over\r\ntheir socket connection only of a completed credit, so read that balance again to see a pending one arrive.\r\nWhen the billing service cannot be reached, fails, or does not know the portal yet, the call fails with 402;\r\nthe bonus may have been credited all the same, so read the bonus balance before trying the same code again.",
+        "description": "Redeems a promo code for the portal and credits its bonus money to the bonus balance. Requires a DocSpace admin.\r\nOther callers get 403. The call also returns 403 if the installation has no billing service. The call changes\r\ndata. A repeated call returns 400 if the billing service does not accept the same code twice. If the billing\r\nservice refuses the code, the call returns 400 and credits nothing. The error message is then the billing reason\r\ncode, such as `promo_not_found` or `promo_expired`. The call removes spaces around `promoCode`, then returns 400 if it is empty or too long. The answer\r\nsays whether the bonus is credited already (`status` Completed) or later (Pending). To see the bonus, use `GET\r\napi/2.0/portal/payment/customer/goodwill`. A pending bonus appears there later. If the billing service cannot be\r\nreached, fails, or does not know the portal, the call returns 402. After 402 or another server error, the bonus\r\nmay be credited all the same. So read the bonus balance before you try the same code again. By default, the limit\r\nis 10 calls a minute per user. More calls return 429.",
         "operationId": "applyPromoCode",
         "requestBody": {
           "content": {
@@ -4687,7 +4687,7 @@
             }
           },
           "400": {
-            "description": "`promoCode` is empty or longer than 100 characters, or the billing service refused the code; the message is its reason code, such as `promo_not_found`"
+            "description": "The request body cannot be read or has no `promoCode`, `promoCode` is empty or longer than 100 characters, or the billing service refused the code; the message is its reason code, such as `promo_not_found`"
           },
           "402": {
             "description": "The billing service could not be reached, failed, or does not know this portal yet"
@@ -4899,12 +4899,12 @@
         "tags": [
           "Portal / Payment"
         ],
-        "summary": "Get the goodwill balance",
-        "description": "Returns the goodwill balance of the portal: the bonus money credited to it, which the accounting service holds\r\non an account of its own rather than on the wallet, together with every bonus credit that can still be spent.\r\nOnly a DocSpace administrator may read it, an installation without a billing service answers 403, and a portal\r\nthat has never been a customer gets an empty result. The call is read-only and is answered by the accounting\r\nservice on every request, so a bonus shows up as soon as it is credited. The account part has the same shape as\r\nthe wallet balance, while `lots` lists the individual credits that have neither expired nor been spent in full,\r\nin the order they are spent, with times in UTC. An empty `lots` means no bonus is left. The money paid into the wallet is read with\r\n`GET api/2.0/portal/payment/customer/balance` instead. An empty result is also what the portal gets when the\r\naccounting service cannot be reached, so a client should treat it as \"nothing to show\" rather than as zero.",
+        "summary": "Get the bonus balance",
+        "description": "Returns the bonus balance of the portal, which the accounting service keeps apart from the wallet. Requires a\r\nDocSpace admin. Other callers get 403. The call also returns 403 if the installation has no billing service. The\r\ncall is read-only. Each call reads the balance from the accounting service, so a new bonus shows up immediately.\r\nThe account part has a sub-account with its amount for each currency. If the portal has no billing customer, the\r\ncall returns an empty result. It also returns an empty result if the accounting service cannot be read. So treat\r\nan empty result as nothing to show, not as zero. To read the money paid into the wallet, use `GET api/2.0/portal/payment/customer/balance`.",
         "operationId": "getCustomerGoodwill",
         "responses": {
           "200": {
-            "description": "The goodwill account with its sub-account per currency and the bonus credits left to spend, or an empty result when the portal has no billing customer or the accounting service could not be read",
+            "description": "The bonus balance with its sub-account per currency and the bonus credits not spent in full, or an empty result when the portal has no billing customer or the accounting service could not be read",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -32282,7 +32282,7 @@
             "maxLength": 100,
             "minLength": 0,
             "type": "string",
-            "description": "The promo code as it was handed out; its letter case, spaces and dashes do not matter."
+            "description": "The promo code as it was handed out."
           }
         },
         "description": "The promo code to redeem for the portal."
@@ -35285,7 +35285,7 @@
               "description": "The part of an amount - of one wallet movement, or of a service's usage total - that fell on one sub-account of the\r\nportal: the money paid into the wallet, or the bonuses.",
               "$ref": "#/components/schemas/OperationSourceDto"
             },
-            "description": "Which sub-accounts of the portal `totalAmount` was taken from, and how much fell on each - the consumption may\r\nbe paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a total the\r\nbilling service reported without the split."
+            "description": "Which sub-accounts of the portal `totalAmount` was taken from, and how much fell on each - the consumption may\r\nbe paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a total the\r\naccounting service reported without the split, or on a total merged from several when one of them had none."
           }
         },
         "description": "What one wallet service was consumed and cost over the requested period, added up rather than listed."
@@ -38602,15 +38602,15 @@
                   "array"
                 ],
                 "items": {
-                  "description": "One bonus credit of the portal that can still be spent: how much was credited, how much is left, and until when.",
+                  "description": "One bonus credit of the portal not spent in full: how much was credited, how much is left, and until when.",
                   "$ref": "#/components/schemas/GoodwillLotDto"
                 },
-                "description": "The bonus credits that have neither expired nor been spent in full, in the order they are spent. An empty list\r\nmeans no bonus is left to spend."
+                "description": "The bonus credits not spent in full, in the order they are spent. A credit may stay here after its `expiresAt`\r\nuntil the accounting service writes it off, and is no longer spent then. An empty list means no bonus is left;\r\nnull means the accounting service sent no list of credits, and only the sub-account amounts are known."
               }
             }
           }
         ],
-        "description": "The goodwill balance of the portal - the bonus money credited to it, held on an account of its own rather than on the\r\nwallet - with the bonus credits that can still be spent."
+        "description": "The bonus balance of the portal - the bonus money credited to it, which the accounting service holds on a goodwill\r\naccount of its own rather than on the wallet - with the bonus credits not spent in full."
       },
       "GoodwillBalanceWrapper": {
         "type": "object",
@@ -38716,7 +38716,7 @@
             "format": "date-time"
           }
         },
-        "description": "One bonus credit of the portal that can still be spent: how much was credited, how much is left, and until when."
+        "description": "One bonus credit of the portal not spent in full: how much was credited, how much is left, and until when."
       },
       "GreetingSettingsRequestDto": {
         "required": [
@@ -42323,7 +42323,7 @@
               "description": "The part of an amount - of one wallet movement, or of a service's usage total - that fell on one sub-account of the\r\nportal: the money paid into the wallet, or the bonuses.",
               "$ref": "#/components/schemas/OperationSourceDto"
             },
-            "description": "Which sub-accounts of the portal the amount was taken from or put on, and how much fell on each - one charge\r\nmay be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a movement\r\nthe billing service reported without the split."
+            "description": "Which sub-accounts of the portal the amount was taken from or put on, and how much fell on each - one charge\r\nmay be paid partly from the bonuses and partly from the money paid into the wallet. It is `null` on a movement\r\nthe accounting service reported without the split."
           },
           "type": {
             "description": "What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter\r\nmatches on, and `Unknown` covers a movement the billing service reported under a kind this build does not\r\nrecognise.",
@@ -42523,7 +42523,7 @@
               "GoodwillExpiration"
             ],
             "type": "string",
-            "description": "[Unknown - Unknown, ServicePayment - ServicePayment, PackagePayment - PackagePayment, AiServicePayment - AiServicePayment, Deposit - Deposit, ReceiveProviderInvoice - ReceiveProviderInvoice, ProcessProviderInvoice - ProcessProviderInvoice, WriteOffServiceProfit - WriteOffServiceProfit, Profit - Profit, PartnerAccrual - PartnerAccrual, ProviderPayment - ProviderPayment, PartnerPayment - PartnerPayment, Refund - Refund, BankDeposit - BankDeposit, BankWithdrawal - BankWithdrawal, GoodwillCredit - GoodwillCredit, WriteOffProfit - WriteOffProfit, WriteOffDifferenceCurrency - WriteOffDifferenceCurrency, AiDebit - AiDebit, AiCredit - AiCredit, GoodwillExpiration - GoodwillExpiration]"
+            "description": "[Unknown - Unknown, ServicePayment - ServicePayment, PackagePayment - PackagePayment, AiServicePayment - AiServicePayment, Deposit - Deposit, ReceiveProviderInvoice - ReceiveProviderInvoice, ProcessProviderInvoice - ProcessProviderInvoice, WriteOffServiceProfit - WriteOffServiceProfit, Profit - Profit, PartnerAccrual - PartnerAccrual, ProviderPayment - ProviderPayment, PartnerPayment - PartnerPayment, Refund - Refund, BankDeposit - BankDeposit, BankWithdrawal - BankWithdrawal, GoodwillCredit - Bonus money credited to the bonus balance, by a promo code or by the service itself, WriteOffProfit - WriteOffProfit, WriteOffDifferenceCurrency - WriteOffDifferenceCurrency, AiDebit - AiDebit, AiCredit - AiCredit, GoodwillExpiration - The unspent rest of a bonus credit written off when the credit expires]"
           },
           {
             "examples": [
@@ -42553,7 +42553,7 @@
               20
             ],
             "type": "integer",
-            "description": "[0 - Unknown, 1 - ServicePayment, 2 - PackagePayment, 3 - AiServicePayment, 4 - Deposit, 5 - ReceiveProviderInvoice, 6 - ProcessProviderInvoice, 7 - WriteOffServiceProfit, 8 - Profit, 9 - PartnerAccrual, 10 - ProviderPayment, 11 - PartnerPayment, 12 - Refund, 13 - BankDeposit, 14 - BankWithdrawal, 15 - GoodwillCredit, 16 - WriteOffProfit, 17 - WriteOffDifferenceCurrency, 18 - AiDebit, 19 - AiCredit, 20 - GoodwillExpiration]",
+            "description": "[0 - Unknown, 1 - ServicePayment, 2 - PackagePayment, 3 - AiServicePayment, 4 - Deposit, 5 - ReceiveProviderInvoice, 6 - ProcessProviderInvoice, 7 - WriteOffServiceProfit, 8 - Profit, 9 - PartnerAccrual, 10 - ProviderPayment, 11 - PartnerPayment, 12 - Refund, 13 - BankDeposit, 14 - BankWithdrawal, 15 - Bonus money credited to the bonus balance, by a promo code or by the service itself, 16 - WriteOffProfit, 17 - WriteOffDifferenceCurrency, 18 - AiDebit, 19 - AiCredit, 20 - The unspent rest of a bonus credit written off when the credit expires]",
             "x-enum-varnames": [
               "Unknown",
               "ServicePayment",
@@ -43842,7 +43842,7 @@
               "Pending"
             ],
             "type": "string",
-            "description": "[Completed - Completed, Pending - Pending]"
+            "description": "[Completed - The bonus is on the bonus balance already, Pending - The code is accepted, and the bonus is credited later]"
           },
           {
             "examples": [
@@ -43853,7 +43853,7 @@
               1
             ],
             "type": "integer",
-            "description": "[0 - Completed, 1 - Pending]",
+            "description": "[0 - The bonus is on the bonus balance already, 1 - The code is accepted, and the bonus is credited later]",
             "x-enum-varnames": [
               "Completed",
               "Pending"
@@ -43861,7 +43861,7 @@
           }
         ],
         "description": "What became of the bonus of a redeemed promo code.",
-        "x-enum-type": "integer"
+        "x-enum-type": "string"
       },
       "PromoCodeWrapper": {
         "type": "object",

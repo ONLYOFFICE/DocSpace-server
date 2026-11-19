@@ -34,14 +34,14 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The goodwill balance of the portal - the bonus money credited to it, held on an account of its own rather than on the
-/// wallet - with the bonus credits not spent in full.
+/// The bonus balance of the portal - the bonus money credited to it, which the accounting service holds on a goodwill
+/// account of its own rather than on the wallet - with the bonus credits not spent in full.
 /// </summary>
 /// <example>
 /// {
-///   "accountNumber": 12345,
-///   "subAccountNumber": 12345,
-///   "accountName": "account name",
+///   "accountNumber": 100238,
+///   "subAccountNumber": 53,
+///   "accountName": "goodwill",
 ///   "accountCurrency": "USD",
 ///   "subAccounts": [{"currency": "USD", "amount": 35.5}],
 ///   "lastCredit": {"date": "2026-11-01T09:00:00Z", "currency": "USD", "amount": 50},
@@ -52,7 +52,8 @@ public class GoodwillBalanceDto : BalanceDto
 {
     /// <summary>
     /// The bonus credits not spent in full, in the order they are spent. A credit may stay here after its `expiresAt`
-    /// until the accounting service writes it off, and is no longer spent then. An empty list means no bonus is left.
+    /// until the accounting service writes it off, and is no longer spent then. An empty list means no bonus is left;
+    /// null means the accounting service sent no list of credits, and only the sub-account amounts are known.
     /// </summary>
     /// <example>[{"operationId": 987654, "amount": 50, "remaining": 35.5, "currency": "USD", "date": "2026-11-01T09:00:00Z", "expiresAt": "2026-12-01T09:00:00Z"}]</example>
     public List<GoodwillLotDto> Lots { get; init; }
