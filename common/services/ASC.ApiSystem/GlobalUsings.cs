@@ -105,3 +105,4 @@ global using Microsoft.Extensions.Options;
 global using Swashbuckle.AspNetCore.Annotations;
 
 global using DisableResponseWrapperAttribute = ASC.Api.Core.Middleware.DisableResponseWrapperAttribute;
+global using SecurityException = System.Security.SecurityException;

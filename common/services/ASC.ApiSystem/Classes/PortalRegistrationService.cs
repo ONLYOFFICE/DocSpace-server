@@ -82,6 +82,13 @@ public class PortalRegistrationService(
 
     public async Task<(PortalRegistrationResponseDto Response, PortalRegistrationErrorDto Error, int StatusCode)> HandleRegisterAsync(TenantModel model)
     {
+        // Without an email the registration failed later inside HostedSolution.RegisterTenantAsync and came back
+        // as a 500; checked first with the same 400 that registerbyemail and provision give for it.
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            return (null, new PortalRegistrationErrorDto { Error = "emailEmpty", Message = "Email is required" }, StatusCodes.Status400BadRequest);
+        }
+
         if (!CheckPasswordAndHash(model, out var error))
         {
             return (null, error, StatusCodes.Status400BadRequest);
@@ -131,10 +138,10 @@ public class PortalRegistrationService(
             model.PartnerId,
             model.Campaign);
 
-        var (t, reference, sendCongratulationsAddress, regError) = await RegisterPortalFlowAsync(info, model, model.AWSRegion);
+        var (t, reference, sendCongratulationsAddress, regError, regStatusCode) = await RegisterPortalFlowAsync(info, model, model.AWSRegion);
         if (regError != null)
         {
-            return (null, regError, StatusCodes.Status500InternalServerError);
+            return (null, regError, regStatusCode);
         }
 
         return (new PortalRegistrationResponseDto
@@ -225,10 +232,10 @@ public class PortalRegistrationService(
             model.Campaign,
             activationStatus);
 
-        var (t, reference, sendCongratulationsAddress, regError) = await RegisterPortalFlowAsync(info, model, model.AWSRegion, loginProfile: loginProfile);
+        var (t, reference, sendCongratulationsAddress, regError, regStatusCode) = await RegisterPortalFlowAsync(info, model, model.AWSRegion, loginProfile: loginProfile);
         if (regError != null)
         {
-            return (null, regError, StatusCodes.Status500InternalServerError);
+            return (null, regError, regStatusCode);
         }
 
         return (new PortalRegistrationResponseDto
@@ -313,10 +320,10 @@ public class PortalRegistrationService(
             ? (IEnumerable<string>)null
             : [model.ProvisionProvider.CspDomain];
 
-        var (t, reference, _, regError) = await RegisterPortalFlowAsync(info, model, model.AWSRegion, cspDomains);
+        var (t, reference, _, regError, regStatusCode) = await RegisterPortalFlowAsync(info, model, model.AWSRegion, cspDomains);
         if (regError != null)
         {
-            return (null, regError, StatusCodes.Status500InternalServerError);
+            return (null, regError, regStatusCode);
         }
 
         var (providerConfigured, providerConfigurationError) = await ConfigureOAuthAsync(consumer, model.ProvisionProvider, portalName);
@@ -472,7 +479,31 @@ public class PortalRegistrationService(
             return await GetRandomPortalNameAsync(aliasPrefix);
         }
 
+        // A name the caller chose went to the database unchecked, and a taken one failed on the unique alias there
+        // with a 500. Refused here with the error validateportalname gives for it (400). Only "taken" is checked:
+        // a short name or one with other characters has always been registered as given, and refusing it now would
+        // change what the call accepts, not only the code it answers with.
+        if (await IsAliasTakenAsync(portalName))
+        {
+            return (null, PortalNameExistError());
+        }
+
         return (portalName, null);
+    }
+
+    private static PortalRegistrationErrorDto PortalNameExistError()
+    {
+        return new PortalRegistrationErrorDto { Error = "portalNameExist", Message = "Portal already exists" };
+    }
+
+    private async Task<bool> IsAliasTakenAsync(string alias)
+    {
+        alias = alias.Trim().ToLowerInvariant();
+
+        var tenant = await hostedSolution.GetTenantAsync(alias);
+
+        // The lookup also matches a mapped domain; only the alias column is unique.
+        return tenant != null && string.Equals(tenant.Alias, alias, StringComparison.OrdinalIgnoreCase);
     }
 
     public async Task<(string PortalName, PortalRegistrationErrorDto Error)> GetRandomPortalNameAsync(string aliasPrefix = null)
@@ -666,17 +697,17 @@ public class PortalRegistrationService(
         }
     }
 
-    public async Task<(Tenant Tenant, string Reference, string SendCongratulationsAddress, PortalRegistrationErrorDto Error)> RegisterPortalFlowAsync(
+    public async Task<(Tenant Tenant, string Reference, string SendCongratulationsAddress, PortalRegistrationErrorDto Error, int StatusCode)> RegisterPortalFlowAsync(
         TenantRegistrationInfo info,
         TenantModel model,
         string awsRegion,
         IEnumerable<string> cspDomains = null,
         LoginProfile loginProfile = null)
     {
-        var (t, regError) = await RegisterTenantCoreAsync(info, awsRegion, cspDomains);
+        var (t, regError, regStatusCode) = await RegisterTenantCoreAsync(info, awsRegion, cspDomains);
         if (regError != null)
         {
-            return (null, null, null, regError);
+            return (null, null, null, regError, regStatusCode);
         }
 
         if (loginProfile != null)
@@ -703,17 +734,43 @@ public class PortalRegistrationService(
 
         var reference = commonMethods.CreateReference(t.Id, scheme, t.GetTenantDomain(coreSettings), info.Email, isFirst);
 
-        return (t, reference, sendCongratulationsAddress, null);
+        return (t, reference, sendCongratulationsAddress, null, StatusCodes.Status200OK);
     }
 
-    public async Task<(Tenant Tenant, PortalRegistrationErrorDto Error)> RegisterTenantCoreAsync(
+    public async Task<(Tenant Tenant, PortalRegistrationErrorDto Error, int StatusCode)> RegisterTenantCoreAsync(
         TenantRegistrationInfo info,
         string awsRegion,
         IEnumerable<string> cspDomains = null)
     {
+        Tenant tenant;
+
         try
         {
-            var tenant = await hostedSolution.RegisterTenantAsync(info);
+            tenant = await hostedSolution.RegisterTenantAsync(info);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorTenantRegistrationFailed(e);
+
+            // Every failure here used to be a 500. Two of them are the caller's: a value RegisterTenantAsync refuses
+            // (an ArgumentException, e.g. an empty first name next to a last name), and a name another request took
+            // between the check and the insert, which fails on the unique alias. Both get the 400 the checks before
+            // them give. Anything else is a fault of the server and stays a 500.
+            if (e is ArgumentException)
+            {
+                return (null, new PortalRegistrationErrorDto { Error = "registerNewTenantError", Message = e.Message }, StatusCodes.Status400BadRequest);
+            }
+
+            if (await IsAliasTakenAfterFailureAsync(info.Address))
+            {
+                return (null, PortalNameExistError(), StatusCodes.Status400BadRequest);
+            }
+
+            return (null, new PortalRegistrationErrorDto { Error = "registerNewTenantError", Message = e.Message }, StatusCodes.Status500InternalServerError);
+        }
+
+        try
+        {
             tenantManager.SetCurrentTenant(tenant);
 
             await cspSettingsHelper.SaveAsync(cspDomains, forNewTenant: true);
@@ -726,16 +783,31 @@ public class PortalRegistrationService(
 
             logger.InfoTenantRegistered(info.Address);
 
-            return (tenant, null);
+            return (tenant, null, StatusCodes.Status200OK);
         }
         catch (Exception e)
         {
+            // The portal exists by now; what failed is the server's own follow-up work.
             logger.ErrorTenantRegistrationFailed(e);
             return (null, new PortalRegistrationErrorDto
             {
                 Error = "registerNewTenantError",
                 Message = e.Message
-            });
+            }, StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    private async Task<bool> IsAliasTakenAfterFailureAsync(string alias)
+    {
+        try
+        {
+            return await IsAliasTakenAsync(alias);
+        }
+        catch (Exception e)
+        {
+            // The registration error is already logged and is the one the caller gets.
+            logger.WarnAliasCheckAfterRegistrationFailed(e);
+            return false;
         }
     }
 

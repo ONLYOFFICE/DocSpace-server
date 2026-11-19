@@ -71,6 +71,9 @@ internal static partial class PortalRegistrationServiceLogger
     [LoggerMessage(LogLevel.Error, "Tenant registration failed")]
     public static partial void ErrorTenantRegistrationFailed(this ILogger logger, Exception exception);
 
+    [LoggerMessage(LogLevel.Warning, "Could not check whether the alias was taken after the registration failed")]
+    public static partial void WarnAliasCheckAfterRegistrationFailed(this ILogger logger, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "Configure wizard failed")]
     public static partial void ErrorConfigureWizard(this ILogger logger, Exception exception);
 }

@@ -215,16 +215,28 @@ public class CommonMethods(
 
     public async Task<List<Tenant>> GetTenantsAsync(string email, string passwordHash)
     {
+        // Wrong credentials were a plain Exception here and a SecurityException from FindTenantsAsync, and the
+        // sign-in endpoint answered both with a 500. An AuthenticationException lets it answer 401, as a wrong
+        // password does at the portal's own sign-in.
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(passwordHash))
         {
-            throw new Exception("Invalid login or password.");
+            throw new AuthenticationException("Invalid login or password.");
         }
 
-        var tenants = await hostedSolution.FindTenantsAsync(email, passwordHash);
+        List<Tenant> tenants;
+
+        try
+        {
+            tenants = await hostedSolution.FindTenantsAsync(email, passwordHash);
+        }
+        catch (SecurityException e)
+        {
+            throw new AuthenticationException(e.Message, e);
+        }
 
         if (tenants.Count == 0)
         {
-            throw new Exception("Invalid login or password.");
+            throw new AuthenticationException("Invalid login or password.");
         }
 
         return tenants;
