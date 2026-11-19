@@ -79,12 +79,11 @@ public class UpdateApiKeyFieldTests(
     }
 
     /// <summary>
-    /// S13: the update stores <c>["*"]</c> as no list at all (<c>null</c>), where the creation stores an empty one, so
-    /// the listing then leaves the required <c>permissions</c> field out and the generated client cannot read the
-    /// listing of the portal any more ("Required property 'permissions' not found"). The key itself does become
-    /// unrestricted; the listing has to carry an empty list as it does after a creation with <c>["*"]</c>.
+    /// S13: the update stored <c>["*"]</c> as no list at all (<c>null</c>), where the creation stores an empty one, so
+    /// the listing left the required <c>permissions</c> field out and the generated client could not read the
+    /// listing of the portal any more ("Required property 'permissions' not found"). The update now stores the empty
+    /// list a creation with <c>["*"]</c> stores.
     /// </summary>
-    [Trait("Category", "Bug")]
     [Fact]
     public async Task UpdateApiKey_StarPermission_MakesTheKeyUnrestricted()
     {
@@ -123,12 +122,11 @@ public class UpdateApiKeyFieldTests(
     }
 
     /// <summary>
-    /// S1: an update with <c>["*", "files:read"]</c> keeps <c>*</c> in the stored list (the run shows the listing
-    /// with <c>*</c> as a scope), while the authentication treats any key holding <c>*</c> as unrestricted — so the
-    /// listing and <c>keys/@self</c> show a scoped key that can in fact write everywhere. The creation normalises the same list to an unrestricted key with no scopes; the
-    /// update has to do the same, so what is shown is what the key may do.
+    /// S1: an update with <c>["*", "files:read"]</c> kept <c>*</c> in the stored list, while the authentication
+    /// treats any key holding <c>*</c> as unrestricted, so the listing and <c>keys/@self</c> showed a scoped key that
+    /// could in fact write everywhere. The update now normalises the list as the creation does, to an unrestricted
+    /// key with no scopes, so what is shown is what the key may do.
     /// </summary>
-    [Trait("Category", "Bug")]
     [Fact]
     public async Task UpdateApiKey_StarAmongOtherScopes_IsStoredAsUnrestrictedLikeOnCreation()
     {
@@ -150,11 +148,10 @@ public class UpdateApiKeyFieldTests(
     }
 
     /// <summary>
-    /// S2: for an expired key the endpoint answers <c>200 false</c> before it checks who owns the key, so a Room admin
-    /// or User learns that another member's key id exists and has expired. A foreign key has to be refused with 403
-    /// whatever its state, as it is while it has not expired.
+    /// S2: for an expired key the endpoint answered <c>200 false</c> before it checked who owns the key, so a Room
+    /// admin or User learned that another member's key id exists and has expired. The ownership check now comes
+    /// first, so a foreign key is refused with 403 whatever its state.
     /// </summary>
-    [Trait("Category", "Bug")]
     [Theory]
     [InlineData(ApiKeyActor.RoomAdmin)]
     [InlineData(ApiKeyActor.User)]

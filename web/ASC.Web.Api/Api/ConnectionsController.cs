@@ -184,17 +184,24 @@ public class ConnectionsController(
 
             await LogOutAllActiveConnections(user.Id);
 
-            securityContext.Logout();
+            // The audit event takes its author from the current account, so the context is cleared only after the
+            // event is written; the finally keeps the logout when building the link or the event fails.
+            try
+            {
+                var auditEventDate = DateTime.UtcNow;
+                auditEventDate = auditEventDate.AddTicks(-(auditEventDate.Ticks % TimeSpan.TicksPerSecond));
 
-            var auditEventDate = DateTime.UtcNow;
-            auditEventDate = auditEventDate.AddTicks(-(auditEventDate.Ticks % TimeSpan.TicksPerSecond));
+                var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
+                var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
 
-            var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
-            var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PasswordChange, hash, user.Id);
+                messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
 
-            messageService.Send(MessageAction.UserSentPasswordChangeInstructions, MessageTarget.Create(user.Id), auditEventDate, userName);
-
-            return confirmationUrl;
+                return confirmationUrl;
+            }
+            finally
+            {
+                securityContext.Logout();
+            }
         }
         catch (Exception ex)
         {

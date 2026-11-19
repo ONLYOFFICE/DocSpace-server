@@ -35,12 +35,11 @@
 namespace ASC.Files.Tests.Tests._06_Operations.UploadSession;
 
 /// <summary>
-/// Suspected defect F24 of the file-operations verification record: the part and finalize routes find a
-/// session by its id alone, so a caller who cannot read the target folder but holds the id writes into the
-/// owner's session and finalizes it into the owner's folder. Abort already checks the owner. The test asserts
-/// what the access rules say - the stranger is refused and nothing lands - so it stays red while the defect is open.
+/// Defect F24 of the file-operations verification record: the part and finalize routes found a session by its
+/// id alone, so a caller who could not read the target folder but held the id wrote into the owner's session and
+/// finalized it into the owner's folder. Only abort checked the owner. Now every session route accepts only the
+/// user who opened the session: the stranger is refused and nothing lands.
 /// </summary>
-[Trait("Category", "Bug")]
 [Trait("Feature", "Files")]
 public class UploadSessionForeignIdBugTests(
     AspireAppFixture fixture)

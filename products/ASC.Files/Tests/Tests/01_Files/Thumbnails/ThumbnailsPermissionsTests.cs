@@ -42,9 +42,9 @@ public class ThumbnailsPermissionsTests(
     : BaseTest(fixture)
 {
     /// <remarks>
-    /// BUG 81268: an unauthenticated caller should get 401 Unauthorized, like every other
-    /// endpoint under <c>files/</c> that mutates state. The controller action currently carries
-    /// <c>[AllowAnonymous]</c>, so the request succeeds instead of being rejected.
+    /// BUG 81268: an unauthenticated caller without a link succeeded, although like every other endpoint under
+    /// <c>files/</c> that mutates state it should get 401. The action still carries <c>[AllowAnonymous]</c> for
+    /// link holders, and the service now answers 401 to an anonymous caller who has no link.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81268")]

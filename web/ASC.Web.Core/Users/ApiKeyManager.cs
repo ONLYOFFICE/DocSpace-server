@@ -165,12 +165,10 @@ public class ApiKeyManager(
 
         if (permissions is { Count: > 0 })
         {
-            if (permissions.Count == 1 && permissions[0] == "*")
-            {
-                permissions = null;
-            }
-
-            apiKey.Permissions = permissions;
+            // The same rule and the same stored form as on creation: a list that contains "*" is an unrestricted key,
+            // whatever else it lists, stored with no scopes. Storing ["*", "files:read"] as it is let the auth handler
+            // read "*" as every scope with write access while the key was listed as a files:read key.
+            apiKey.Permissions = permissions.Exists(x => x == "*") ? [] : permissions;
         }
 
         if (!string.IsNullOrEmpty(name))

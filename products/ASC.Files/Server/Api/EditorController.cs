@@ -113,10 +113,10 @@ public abstract class EditorController<T>(
     /// content. If a third-party storage cannot convert it, the portal saves a renamed copy. Requires editing access
     /// to the file. Other callers get 403. The call changes data. Do not repeat it. Each call adds a version. If the
     /// last save of the file was an autosave, the call replaces that version instead. With `forcesave` true, the call
-    /// saves an autosave and keeps the editing session open. Without it, the call closes a session opened with
-    /// `editingAlone` true. The call returns 403 if the file is locked by another user, is in Trash, or is encrypted.
-    /// It also returns 403 for a file in a private room. Without `forcesave`, it also returns 403 while the file is
-    /// open for co-editing. If the file does not exist, the call returns 404. If a string `fileId` points to a storage
+    /// saves an autosave and keeps the editing session open. Without it, the call closes the caller's own session
+    /// opened with `editingAlone` true. The call returns 403 if the file is locked by another user, is in Trash, or is
+    /// encrypted. It also returns 403 for a file in a private room. Without `forcesave`, it also returns 403 while the
+    /// file is open for co-editing or in an editing session of another user. If the file does not exist, the call returns 404. If a string `fileId` points to a storage
     /// account that is not connected, the call returns 400. If the content exceeds the storage quota, it returns 402.
     /// For large content, use `POST api/2.0/files/file/{fileId}/edit_session`.
     /// If the file is in a full connected storage other than SharePoint, the call returns 400.

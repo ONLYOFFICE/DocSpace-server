@@ -256,14 +256,16 @@ public class ApiKeysController(
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
         var apiKey = await apiKeyManager.GetApiKeyAsync(requestDto.KeyId) ?? throw new ItemNotFoundException("API key not found");
 
-        if (apiKey.ExpiresAt.HasValue && apiKey.ExpiresAt.Value < DateTime.UtcNow)
-        {
-            return false;
-        }
-
+        // The ownership check comes first: answering "false" for an expired key before it told a non-owner
+        // that a key with this ID exists and has expired.
         if (!isAdmin && apiKey.CreateBy != authContext.CurrentAccount.ID)
         {
             throw new SecurityException("Access denied");
+        }
+
+        if (apiKey.ExpiresAt.HasValue && apiKey.ExpiresAt.Value < DateTime.UtcNow)
+        {
+            return false;
         }
 
         if (!IsValidPermission(requestDto.Changed.Permissions))

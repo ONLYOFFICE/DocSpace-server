@@ -66,7 +66,7 @@ Revision 2026-11-18 (c8bb15c779, no product change): line citations that no long
 | Plain and after reassignment, bug 83188 | `P/DeletedUserVisibilityTests.cs:46,61` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Disabling and re-enabling accounts** | | |
 | Four types, status and flag each | `S/UserStatusUpdateTests.cs:43-65` | TEST-CONFIRMED [run: PASS] |
-| Re-activation; denied pairs in `user-type-permissions` | `S/UserStatusUpdateTests.cs:76`; `S/UserStatusUpdatePermissionsTests.cs:100-131` | TEST-CONFIRMED [run: PASS] (by name) |
+| Re-activation; denied pairs in `user-type-permissions` | `S/UserStatusUpdateTests.cs:76`; `S/UserStatusUpdatePermissionsTests.cs:98-129` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Listing accounts by status** | | |
 | Owner, admin, Room admin lists; Room admin Terminated empty 200; User, Guest 403 | `S/UserStatusGetTests.cs:43,106,174,199`; `S/UserStatusGetPermissionsTests.cs:44,62,86` | TEST-CONFIRMED [run: PASS] (by name) |
 | **Activation status through a confirmation link** | | |

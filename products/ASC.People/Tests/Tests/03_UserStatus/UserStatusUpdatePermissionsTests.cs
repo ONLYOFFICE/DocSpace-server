@@ -56,10 +56,9 @@ public class UserStatusUpdatePermissionsTests(AspireAppFixture fixture) : BaseTe
         exception.ErrorCode.Should().Be(401);
     }
 
-    // The product should never let a DocSpace admin deactivate a peer DocSpace admin; today it does,
-    // which is the bug. This test asserts the correct behaviour, so it stays red until the bug is fixed.
+    // A DocSpace admin could deactivate a peer DocSpace admin (bug 79900); UpdateUserStatus now refuses it,
+    // only the portal owner may.
     [Fact]
-    [Trait("Category", "Bug")]
     [Trait("Bug", "79900")]
     public async Task UpdateUserStatus_DocSpaceAdminDeactivatesPeerDocSpaceAdmin_ReturnsAccessDenied()
     {
@@ -77,9 +76,8 @@ public class UserStatusUpdatePermissionsTests(AspireAppFixture fixture) : BaseTe
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
     }
 
-    // Same bug as above: a DocSpace admin should never be able to deactivate the portal owner.
+    // Same bug as above: a DocSpace admin could deactivate the portal owner; it is now refused.
     [Fact]
-    [Trait("Category", "Bug")]
     [Trait("Bug", "79900")]
     public async Task UpdateUserStatus_DocSpaceAdminDeactivatesOwner_ReturnsAccessDenied()
     {

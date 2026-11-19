@@ -363,8 +363,9 @@ public class AuditCsvReportWriter(
 
         await using var stream = tempStream.Create();
 
-        // UTF-8 with a byte order mark, which is what lets spreadsheet applications read non-Latin text right.
-        await csvFileHelper.CreateLargeFileAsync(stream, batches, new BaseEventMap<T>(), encoding: Encoding.UTF8, cancellationToken: cancellationToken);
+        // UTF-8 with a byte order mark, which is what lets spreadsheet applications read non-Latin text right. The
+        // columns are the ones resolved for the report and its reader, the same as in the workbook.
+        await csvFileHelper.CreateLargeFileAsync(stream, batches, new BaseEventMap<T>(descriptor.Columns.Select(c => c.Property)), encoding: Encoding.UTF8, cancellationToken: cancellationToken);
 
         await onProgressAsync(50);
 

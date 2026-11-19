@@ -59,9 +59,9 @@ public class LicenseController(
     /// Re-reads the license file of this Enterprise installation and applies its quota and tariff to the portal. So a
     /// replaced file or a renewed license takes effect without a restart. If a file was staged by
     /// `POST api/2.0/settings/license`, the call activates it. For the first activation, use
-    /// `POST api/2.0/settings/license/accept` instead. Any signed-in user can call it. Despite the `GET`, the call
-    /// changes data. You can repeat it, and each call applies the same license again. The call returns `true` when
-    /// it applied the license. It returns `false` and changes nothing on a SaaS or open-source installation, which
+    /// `POST api/2.0/settings/license/accept` instead. Requires a DocSpace admin. Other callers get 403. Despite the
+    /// `GET`, the call changes data. You can repeat it, and each call applies the same license again. The call returns
+    /// `true` when it applied the license. It returns `false` and changes nothing on a SaaS or open-source installation, which
     /// has no license path. The call returns 402 if the file is missing, cannot be read, or has no customer id or
     /// signature. It also returns 402 if the editing service does not confirm the license or reports another one. If
     /// the license starts later, the call returns 400. The call works while the portal is unpaid.
@@ -72,10 +72,13 @@ public class LicenseController(
     [SwaggerResponse(200, "`true` when the license file was re-read and the portal quota and tariff rewritten from it, `false` on an installation that has no license path configured", typeof(bool))]
     [SwaggerResponse(400, "The license file does not start until a later date")]
     [SwaggerResponse(402, "No license file is on disk, the file cannot be read as a license or carries no customer id or signature, or the editing service does not confirm it")]
+    [SwaggerResponse(403, "The caller is not a DocSpace admin")]
     [HttpGet("refresh")]
     [AllowNotPayment]
     public async Task<bool> RefreshLicense()
     {
+        await DemandDocSpaceAdminAsync();
+
         if (!tenantExtra.Enterprise)
         {
             return false;
@@ -88,9 +91,9 @@ public class LicenseController(
     /// <remarks>
     /// Activates the license file staged by `POST api/2.0/settings/license` on this Enterprise installation. The call
     /// makes the staged file the active one and applies its quota and tariff to the portal. This replaces any trial in
-    /// force. Without a staged file, it applies the active license file again. Any signed-in user can call it. The call
-    /// changes data, and you can repeat it. Read the result from the body, not from the status code. An empty string
-    /// means the license is now active. Any other string is a message that explains why the activation failed. The call
+    /// force. Without a staged file, it applies the active license file again. Requires a DocSpace admin. Other
+    /// callers get 403. The call changes data, and you can repeat it. Read the result from the body, not from the status
+    /// code. An empty string means the license is now active. Any other string is a message that explains why the activation failed. The call
     /// returns such a message for a missing or incorrect file, or a license the editing service rejects. It also
     /// returns a message if the license starts later. The call records the acceptance of the license even if the
     /// activation fails. On a SaaS or open-source installation, the call changes nothing. It returns a message that the
@@ -100,10 +103,13 @@ public class LicenseController(
     /// <path>api/2.0/settings/license/accept</path>
     [Tags("Settings / License")]
     [SwaggerResponse(200, "An empty string when the license is now active, or a localized sentence explaining why it was not activated", typeof(string))]
+    [SwaggerResponse(403, "The caller is not a DocSpace admin")]
     [AllowNotPayment]
     [HttpPost("accept")]
     public async Task<string> AcceptLicense()
     {
+        await DemandDocSpaceAdminAsync();
+
         if (!tenantExtra.Enterprise)
         {
             return Resource.ErrorNotAllowedOption;
@@ -337,6 +343,17 @@ public class LicenseController(
         {
             _log.ErrorLicenseUpload(ex);
             throw new Exception(Resource.LicenseError);
+        }
+    }
+
+    // Both calls rewrite the license, quota and tariff of the whole installation, so they need a DocSpace admin, as
+    // starting a trial does. Neither is reachable with the setup wizard's confirmation link, which only uploading
+    // a license accepts.
+    private async Task DemandDocSpaceAdminAsync()
+    {
+        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException();
         }
     }
 }

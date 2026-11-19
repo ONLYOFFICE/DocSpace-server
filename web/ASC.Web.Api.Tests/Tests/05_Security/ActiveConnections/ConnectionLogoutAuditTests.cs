@@ -99,12 +99,11 @@ public class ConnectionLogoutAuditTests(
     }
 
     /// <summary>
-    /// H7: the controller signs the caller out (<c>securityContext.Logout()</c>) before it sends
-    /// <c>UserSentPasswordChangeInstructions</c>, so the audit event names the anonymous account as the one
-    /// who acted instead of the user.
+    /// H7: the controller signed the caller out (<c>securityContext.Logout()</c>) before it sent
+    /// <c>UserSentPasswordChangeInstructions</c>, so the audit event named the anonymous account as the one
+    /// who acted instead of the user. The sign-out now comes after the event.
     /// </summary>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task LogOutAllActiveConnectionsChangePassword_RecordsInstructionsAndKeepsThePassword()
     {
         // Arrange

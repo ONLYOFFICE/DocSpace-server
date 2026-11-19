@@ -658,6 +658,11 @@ fields left out keep their values, `name` when sent MUST be 1–30 characters an
 caller may update their own keys and a DocSpace admin any key; an unknown or already deleted `keyId` answers
 404. The change is recorded in the audit trail.
 
+#### Scenario: Update to an unrestricted key
+
+- **WHEN** a key is updated with `permissions` `["*"]`
+- **THEN** the key is unrestricted, and `GET keys` lists it with an empty `permissions` list, as after a creation with `["*"]`
+
 #### Scenario: Expired key is left untouched
 
 - **WHEN** a key whose `expiresAt` has passed is updated

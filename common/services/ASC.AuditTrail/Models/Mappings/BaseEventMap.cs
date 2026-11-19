@@ -38,12 +38,20 @@ namespace ASC.AuditTrail.Models.Mappings;
 public class BaseEventMap<T> : ClassMap<T> where T : BaseEvent
 {
     public BaseEventMap()
-    {
-        var eventType = typeof(T);
-        var eventProps = eventType
+        : this(typeof(T)
             .GetProperties()
             .Where(r => r.GetCustomAttribute<EventAttribute>() != null)
-            .OrderBy(r => r.GetCustomAttribute<EventAttribute>().Order);
+            .OrderBy(r => r.GetCustomAttribute<EventAttribute>().Order))
+    {
+    }
+
+    /// <summary>
+    /// Maps only the given properties, in the given order: a report that hides some columns from its reader
+    /// (the folder history report) passes the columns it resolved for that reader.
+    /// </summary>
+    public BaseEventMap(IEnumerable<PropertyInfo> eventProps)
+    {
+        var eventType = typeof(T);
 
         foreach (var prop in eventProps)
         {

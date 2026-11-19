@@ -56,7 +56,8 @@ public class EditedFileStateTests(
     /// <summary>
     /// <c>saveediting</c> is documented to refuse (403) a file open in an editing session started by somebody
     /// else. It answered 200 and really replaced the content: the version grew, the bytes were the uploaded
-    /// ones and the owner's editing flag was cleared.
+    /// ones and the owner's editing flag was cleared. The save now closes only the caller's own editing session, so
+    /// the existing check refuses it.
     /// </summary>
     [Fact]
     [Trait("Bug", "84769")]
@@ -80,5 +81,100 @@ public class EditedFileStateTests(
         after.Version.Should().Be(before.Version);
         after.Editing.Should().BeTrue();
         status.Should().Be(403);
+    }
+
+    /// <summary>
+    /// The user who opened the file with <c>editingAlone</c> saves it through <c>saveediting</c>: the save goes
+    /// through, adds a version and closes that user's own editing session. Only another user's session is kept.
+    /// </summary>
+    [Fact]
+    public async Task SaveEditing_OwnEditingAloneSession_SavesAndClosesTheSession()
+    {
+        // Arrange
+        var (_, fileId) = await EditedByOwner();
+        var before = await ReadState(fileId);
+        before.Editing.Should().BeTrue("the owner opened the file with editingAlone");
+        var content = Convert.FromBase64String(before.Bytes);
+
+        // Act: the owner saves the file's own docx content, so nothing has to be converted
+        var status = await StatusOf(async () => await _filesApi.SaveEditingFileFromFormAsync(
+            fileId,
+            fileExtension: ".docx",
+            file: new FileParameter("Autotest Edited.docx", DocxContentType, new MemoryStream(content)),
+            forcesave: false,
+            cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        status.Should().Be(200);
+        var after = await ReadState(fileId);
+        after.Version.Should().Be(before.Version + 1);
+        after.Editing.Should().BeFalse("the save closes the caller's own editing session");
+    }
+
+    /// <summary>
+    /// The hidden <c>PUT api/2.0/files/{fileId}/update</c> dropped the editing sessions of a file before its own
+    /// check, so a member with editing access who was not editing it replaced the content of a file open in the
+    /// owner's session. It now leaves another user's session alone and the update is refused. Hidden from the
+    /// OpenAPI document, so it is called over raw HTTP.
+    /// </summary>
+    [Fact]
+    public async Task UpdateFileStream_EditedByOwner_ForbiddenAndNothingChanges()
+    {
+        // Arrange
+        var (member, fileId) = await EditedByOwner();
+        var before = await ReadState(fileId);
+        await _filesClient.Authenticate(member);
+
+        // Act
+        var status = await UpdateFileStreamAsync(fileId, Encoding.UTF8.GetBytes("replaced"));
+
+        // Assert
+        var after = await ReadState(fileId);
+        after.Bytes.Should().Be(before.Bytes);
+        after.Version.Should().Be(before.Version);
+        after.Editing.Should().BeTrue();
+        status.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    /// <summary>
+    /// The editor of the file updates it through the hidden <c>PUT api/2.0/files/{fileId}/update</c>: the update
+    /// goes through, adds a version and closes the session.
+    /// </summary>
+    [Fact]
+    public async Task UpdateFileStream_OwnEditingSession_SavesAndClosesTheSession()
+    {
+        // Arrange
+        var (_, fileId) = await EditedByOwner();
+        var before = await ReadState(fileId);
+        before.Editing.Should().BeTrue("the owner opened the file with editingAlone");
+
+        // Act
+        var status = await UpdateFileStreamAsync(fileId, Convert.FromBase64String(before.Bytes));
+
+        // Assert
+        status.Should().Be(HttpStatusCode.OK);
+        var after = await ReadState(fileId);
+        after.Version.Should().Be(before.Version + 1);
+        after.Editing.Should().BeFalse("the update closes the editing session of its caller");
+    }
+
+    private const string DocxContentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    /// <summary>
+    /// <c>PUT api/2.0/files/{fileId}/update</c> with the content as the multipart <c>File</c> part, without
+    /// <c>Forcesave</c>, as the current user of the files client. ReadState switches the client to the owner, so the
+    /// caller authenticates right before this call.
+    /// </summary>
+    private async Task<HttpStatusCode> UpdateFileStreamAsync(int fileId, byte[] content)
+    {
+        using var form = new MultipartFormDataContent();
+        var part = new ByteArrayContent(content);
+        part.Headers.ContentType = new MediaTypeHeaderValue(DocxContentType);
+        form.Add(part, "File", "Autotest Edited.docx");
+        form.Add(new StringContent("false"), "Forcesave");
+
+        using var response = await _filesClient.PutAsync($"api/2.0/files/{fileId}/update", form, TestContext.Current.CancellationToken);
+
+        return response.StatusCode;
     }
 }

@@ -84,6 +84,30 @@ public class RemoveProgressTests(AspireAppFixture fixture) : UserDataTestBase(fi
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
     }
 
+    /// <summary>
+    /// The deletion of a DocSpace admin's data is the owner's alone, and so is its progress: another DocSpace admin
+    /// was shown it. The rule is decided by the account's type, so it holds while the job has not yet deleted the
+    /// profile: the other admin asks right after the start.
+    /// </summary>
+    [Fact]
+    public async Task GetRemoveProgress_AsDocSpaceAdminForAnotherDocSpaceAdminsRemoval_ThrowsAccessDenied()
+    {
+        var (target, _) = await CreateActorWithRoomAndFileAsync(EmployeeType.DocSpaceAdmin, "Autotest Remove Room", "Autotest Remove File");
+        await TerminateUser(target);
+        var otherAdmin = await InviteContact(EmployeeType.DocSpaceAdmin);
+
+        await _peopleClient.Authenticate(Owner);
+        await _userDataApi.StartRemoveAsync(new TerminateRequestDto(target.Id), TestContext.Current.CancellationToken);
+
+        await _peopleClient.Authenticate(otherAdmin);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _userDataApi.GetRemoveProgressAsync(target.Id, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent!.ToString().Should().Contain("Access denied");
+    }
+
     [Fact]
     public async Task GetRemoveProgress_Anonymous_ThrowsUnauthorized()
     {

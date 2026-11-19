@@ -111,12 +111,11 @@ public class GroupMembersFolderSecurityTests(
     }
 
     /// <summary>
-    /// The list of a group the folder is not shared with is empty, but <c>total</c> (and <c>count</c>) report the
-    /// group's size: the count query counts the group members without checking that the group has a share on the
-    /// entry, while the list query stops when it has none. A paging client sees pages that never fill.
+    /// The list of a group the folder is not shared with is empty, and <c>total</c> (and <c>count</c>) used to report
+    /// the group's size: the count query counted the group members without checking that the group has a share on
+    /// the entry, while the list query stops when it has none. The count query now has the same check.
     /// </summary>
     [Fact]
-    [Trait("Category", "Bug")]
     public async Task GetGroupsMembersWithFolderSecurity_GroupNotSharedWithFolder_ReportsZeroTotal()
     {
         // Arrange

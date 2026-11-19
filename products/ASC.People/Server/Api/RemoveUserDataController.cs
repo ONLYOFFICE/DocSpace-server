@@ -50,6 +50,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <remarks>
     /// Returns the progress of the job that deletes the data of a user.
     /// To start the job, use `POST api/2.0/people/remove/start`. Requires a DocSpace admin. Other callers get 403.
+    /// Only the portal owner can read the job of a DocSpace admin. Other DocSpace admins get 403 for it.
     /// The call is read-only. This is the call to poll. Repeat it until `isCompleted` is true.
     /// If no job exists for the user, the response has no progress object. If the job fails, `error` holds the reason.
     /// To cancel a running job, use `PUT api/2.0/people/remove/terminate`.
@@ -65,6 +66,8 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = tenantManager.GetCurrentTenant();
+        await DemandOwnerForDocSpaceAdminAsync(tenant, inDto.UserId);
+
         var progressItem = await queueWorkerRemove.GetProgressItemStatus(tenant.Id, inDto.UserId);
 
         return TaskProgressResponseDto.Get(progressItem);
@@ -167,6 +170,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <remarks>
     /// Cancels the job that deletes the data of a user.
     /// Requires a DocSpace admin. Other callers get 403.
+    /// Only the portal owner can cancel the job of a DocSpace admin. Other DocSpace admins get 403 for it.
     /// The call changes data. It removes the job from the queue and returns no body.
     /// It does not restore the data that the job already deleted. You cannot resume the job.
     /// To start again, use `POST api/2.0/people/remove/start`.
@@ -186,7 +190,19 @@ public class RemoveUserDataController(PermissionContext permissionContext,
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
 
         var tenant = tenantManager.GetCurrentTenant();
+        await DemandOwnerForDocSpaceAdminAsync(tenant, inDto.UserId);
+
         await queueWorkerRemove.Terminate(tenant.Id, inDto.UserId);
+    }
+
+    // Only the portal owner may delete the data of a DocSpace admin (StartRemove), so only the owner may read or
+    // cancel such a job, as for the reassignment.
+    private async Task DemandOwnerForDocSpaceAdminAsync(Tenant tenant, Guid userId)
+    {
+        if (await userManager.GetUserTypeAsync(userId) is EmployeeType.DocSpaceAdmin && !securityContext.CurrentAccount.ID.Equals(tenant.OwnerId))
+        {
+            throw new SecurityException(Resource.ErrorAccessDenied);
+        }
     }
 
     /// <remarks>

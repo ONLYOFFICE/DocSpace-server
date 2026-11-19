@@ -118,7 +118,7 @@ are unchanged (verdicts below).
 | Room admin cannot demote a Room admin | `02_UserType/UserTypeUpdatePermissionsTests.cs:162-194` (synchronous endpoint 403; job ends with "You don't have enough permission to perform the operation"; type stays Room admin) | TEST-CONFIRMED [run: PASS] |
 | **Disabling, deleting and reassigning users** | | |
 | Owner disables every type; DocSpace admin disables Room admin / User / Guest | `03_UserStatus/UserStatusUpdateTests.cs:42-73, 110-138` | TEST-CONFIRMED [run: PASS] |
-| Room admin / User / Guest cannot disable anyone (15 actor/target pairs → 403) | `UserStatusUpdatePermissionsTests.cs:100-164` | TEST-CONFIRMED [run: PASS] |
+| Room admin / User / Guest cannot disable anyone (15 actor/target pairs → 403) | `UserStatusUpdatePermissionsTests.cs:98-162` | TEST-CONFIRMED [run: PASS] |
 | Owner deletes User / DocSpace admin / Room admin / Guest; DocSpace admin deletes Room admin / User; DocSpace admin → DocSpace admin 403 | `01_Profiles/DeleteMemberTests.cs:43-79 (bug 80753), 109-123`; `RemoveUsersTests.cs:45-66, 101-121` | TEST-CONFIRMED [run: PASS] |
 | Active account cannot be deleted → 403 "not suspended" | `DeleteMemberTests.cs:81-107` (bug 79560); `RemoveUsersTests.cs:68-99` | TEST-CONFIRMED [run: PASS] |
 | Reassign: Owner / DocSpace admin start; Room admin / User / Guest 403; active source 400 | `10_UserData/ReassignStartTests.cs:42-107`; `RemoveStartTests.cs:46-122` (bug 80714); `NecessaryReassignTests.cs:65-77` | TEST-CONFIRMED [run: PASS] |

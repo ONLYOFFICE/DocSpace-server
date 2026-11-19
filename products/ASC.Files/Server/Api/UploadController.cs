@@ -199,8 +199,9 @@ public abstract class UploadController<T>(
 
     /// <remarks>
     /// Uploads the next part of a file to a chunked upload session. Send the part as the multipart `File` field. The
-    /// call adds parts in the order they arrive. Do not send two parts to one session at the same time. Any signed-in
-    /// user with the session ID can call it. The call finds the session by its ID and ignores the folder in the path.
+    /// call adds parts in the order they arrive. Do not send two parts to one session at the same time. Only the user
+    /// who opened the session can call it. Other callers get 403. The call finds the session by its ID and ignores the
+    /// folder in the path.
     /// The call changes data. Do not repeat a part. The session stores a repeated part as the next part. Then the file
     /// has that part twice, or the session never stores the file. While bytes are missing, the response has `uploaded`
     /// false. When the parts reach the size of the session, the call stores the file. It then returns 201, `uploaded`
@@ -221,7 +222,7 @@ public abstract class UploadController<T>(
     [SwaggerResponse(201, "The last part has arrived and the file is stored; `uploaded` is true and `file` holds the file", typeof(UploadSessionResponseDto<int>))]
     [SwaggerResponse(400, "The request has no `File` part, or the connected storage other than SharePoint that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit")]
-    [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
+    [SwaggerResponse(403, "The session was opened by another user, or a file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
     [HttpPost("{folderId}/session/{sessionId}")]
     public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto<T> inDto)
@@ -305,8 +306,8 @@ public abstract class UploadController<T>(
     /// Uploads one part of a file to a chunked upload session under the number in `chunkNumber`. The session keeps
     /// parts by number. So you can resend a failed part with the same number. Without `chunkNumber`, the call numbers
     /// parts in the order they arrive. Split the file into parts of at most `chunkUploadSize` from
-    /// `GET api/2.0/files/settings`. Any signed-in user with the session ID can call it. The call ignores the folder
-    /// in the path. It changes data. With `chunkNumber`, a repeated part replaces the part with that number. Without
+    /// `GET api/2.0/files/settings`. Only the user who opened the session can call it. Other callers get 403. The
+    /// call ignores the folder in the path. It changes data. With `chunkNumber`, a repeated part replaces the part with that number. Without
     /// it, the session stores a repeated part as the next part. Then the file has that part twice, or the session
     /// never stores the file. The call returns the session, not the file. After the last part, store the file with
     /// `PUT api/2.0/files/{folderId}/session/{sessionId}/finalize`. A session below `chunkUploadSize` stores the file
@@ -325,7 +326,7 @@ public abstract class UploadController<T>(
     [SwaggerResponse(200, "The session with its progress after the part was stored", typeof(ChunkedUploadSessionDto<int>))]
     [SwaggerResponse(400, "The request has no `File` part, or `chunkNumber` is 0 or negative, or the connected storage other than SharePoint that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file")]
-    [SwaggerResponse(403, "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room")]
+    [SwaggerResponse(403, "The session was opened by another user, or a session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
     [HttpPost("{folderId}/session/{sessionId}/upload")]
     public async Task<ChunkedUploadSessionDto<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
@@ -345,8 +346,8 @@ public abstract class UploadController<T>(
     /// Stores the file of a chunked upload session from its parts and closes the session. A session from
     /// `POST api/2.0/files/file/{fileId}/edit_session` replaces the content of that file and keeps its version. A
     /// session for a folder creates a file, or adds a new version to the file with the same name. A PDF form loses
-    /// its form-filling state. Any signed-in user with the session ID can call it. The call returns 201 with the
-    /// file. It changes data and deletes the session with its parts. A repeated call returns 404. If the parts do not
+    /// its form-filling state. Only the user who opened the session can call it. Other callers get 403. The call
+    /// returns 201 with the file. It changes data and deletes the session with its parts. A repeated call returns 404. If the parts do not
     /// add up to the size of the session, the call returns 400. Then send the missing parts and repeat the call. It
     /// returns 402 if the file is over a quota or size limit. A missing, finalized, or expired session returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 403.
     /// If the target folder is in a full Box, Dropbox or WebDAV storage, the call returns 400. The user has to free up
@@ -359,12 +360,12 @@ public abstract class UploadController<T>(
     [SwaggerResponse(201, "The assembled file and the identifiers of the closed session", typeof(UploadSessionResponseDto<int>))]
     [SwaggerResponse(400, "The parts received so far do not add up to the size the session was opened for, or the Box, Dropbox or WebDAV storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "Storing the file would exceed a storage quota or size limit")]
-    [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
+    [SwaggerResponse(403, "The session was opened by another user, or a file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
     [HttpPut("{folderId}/session/{sessionId}/finalize")]
     public async Task<UploadSessionResponseDto<T>> FinalizeSession(FinalizeSessionDto<T> inDto)
     {
-        var session = await chunkedUploadSessionHolder.GetSessionAsync<T>(inDto.SessionId);
+        var session = await fileUploader.GetOwnSessionAsync<T>(inDto.SessionId);
         if (session.UseChunks)
         {
             session = await fileUploader.FinalizeUploadSessionAsync<T>(inDto.SessionId);

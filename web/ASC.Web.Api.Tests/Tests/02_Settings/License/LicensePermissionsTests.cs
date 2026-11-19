@@ -36,9 +36,9 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.License;
 /// <summary>
 /// Access control of the license endpoints. Upload and the trial activation are limited to DocSpace administrators;
 /// activation (<c>settings/license/accept</c>) and refresh (<c>settings/license/refresh</c>) rewrite the
-/// installation's license, quota and tariff and must be limited the same way, but demand no right at all (L8 of
-/// the branding-and-licensing spec). On this open-source host both return before touching anything, so a member
-/// calling them changes nothing.
+/// installation's license, quota and tariff and are limited the same way (L8: they used to demand no right at
+/// all). On this open-source host both return before touching anything, so a member calling them changed nothing
+/// even then.
 /// </summary>
 [Trait("Category", "Settings")]
 public class LicensePermissionsTests(AspireAppFixture fixture) : LicenseTestBase(fixture)
@@ -72,11 +72,10 @@ public class LicensePermissionsTests(AspireAppFixture fixture) : LicenseTestBase
     }
 
     /// <summary>
-    /// L8: activation demands no right, so any member could put a staged license in force for the whole
-    /// installation and write the "license key uploaded" audit event. Red while the defect is open.
+    /// L8: activation demanded no right, so any member could put a staged license in force for the whole
+    /// installation and write the "license key uploaded" audit event. It now requires a DocSpace admin.
     /// </summary>
     [Theory]
-    [Trait("Category", "Bug")]
     [InlineData(EmployeeType.RoomAdmin)]
     [InlineData(EmployeeType.User)]
     [InlineData(EmployeeType.Guest)]
@@ -94,11 +93,10 @@ public class LicensePermissionsTests(AspireAppFixture fixture) : LicenseTestBase
     }
 
     /// <summary>
-    /// L8: refresh demands no right, so any member could force a re-read of the installation's license and a
-    /// rewrite of its quota and tariff. Red while the defect is open.
+    /// L8: refresh demanded no right, so any member could force a re-read of the installation's license and a
+    /// rewrite of its quota and tariff. It now requires a DocSpace admin.
     /// </summary>
     [Theory]
-    [Trait("Category", "Bug")]
     [InlineData(EmployeeType.RoomAdmin)]
     [InlineData(EmployeeType.User)]
     [InlineData(EmployeeType.Guest)]

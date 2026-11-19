@@ -2250,7 +2250,10 @@ public class FileStorageService //: IFileStorageService
     {
         try
         {
-            if (!forceSave && await fileTracker.IsEditingAloneAsync(fileId))
+            // Only the caller's own editing session is closed here. Another user's session used to be dropped as
+            // well, so the check in EntryManager passed and the content of a file open in someone else's editor
+            // was replaced; now that check refuses such a save.
+            if (!forceSave && await fileTracker.IsEditingAloneAsync(fileId) && await IsEditedByCurrentUserAsync(fileId))
             {
                 await fileTracker.RemoveAsync(fileId);
                 await socketManager.StopEditAsync(fileId);
@@ -2273,11 +2276,18 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    private async Task<bool> IsEditedByCurrentUserAsync<T>(T fileId)
+    {
+        return (await fileTracker.GetEditingByAsync(fileId)).Contains(authContext.CurrentAccount.ID);
+    }
+
     public async Task<File<T>> UpdateFileStreamAsync<T>(T fileId, Stream stream, string fileExtension, bool encrypted, bool forcesave)
     {
         try
         {
-            if (!forcesave && await fileTracker.IsEditingAsync(fileId))
+            // The same rule as in SaveEditingAsync: a caller who is not editing the file cannot close the sessions
+            // of those who are.
+            if (!forcesave && await fileTracker.IsEditingAsync(fileId) && await IsEditedByCurrentUserAsync(fileId))
             {
                 await fileTracker.RemoveAsync(fileId);
                 await socketManager.StopEditAsync(fileId);

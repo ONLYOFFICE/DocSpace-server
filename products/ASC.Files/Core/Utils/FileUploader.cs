@@ -328,7 +328,7 @@ public partial class FileUploader(
 
     public async Task<ChunkedUploadSession<T>> UploadChunkAsync<T>(string uploadId, Stream stream, long chunkLength, int? chunkNumber = null)
     {
-        var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+        var uploadSession = await GetOwnSessionAsync<T>(uploadId);
         uploadSession.Expired = DateTime.UtcNow + ChunkedUploadSessionHolder.SlidingExpiration;
 
         if (chunkLength > setupInfo.ChunkUploadSize)
@@ -410,7 +410,7 @@ public partial class FileUploader(
 
     public async Task<ChunkedUploadSession<T>> FinalizeUploadSessionAsync<T>(string uploadId)
     {
-        var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+        var uploadSession = await GetOwnSessionAsync<T>(uploadId);
         var dao = daoFactory.GetFileDao<T>();
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
@@ -458,18 +458,36 @@ public partial class FileUploader(
 
     private async Task AbortUploadAsync<T>(ChunkedUploadSession<T> uploadSession)
     {
-
-        // The endpoint used to check nothing at all: any authenticated caller who knew a session id
-        // could abort somebody else's upload, whatever access they had to the room it was going into.
-        // A session belongs to whoever opened it (set in CreateUploadSessionAsync).
-        if (uploadSession.UserId != authContext.CurrentAccount.ID)
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        DemandSessionOwner(uploadSession);
 
         await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
 
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);
+    }
+
+    /// <summary>
+    /// Reads an upload session for a caller who is about to write into it, finalize it or close it: only the one who
+    /// opened the session may do that.
+    /// </summary>
+    public async Task<ChunkedUploadSession<T>> GetOwnSessionAsync<T>(string uploadId)
+    {
+        var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+
+        DemandSessionOwner(uploadSession);
+
+        return uploadSession;
+    }
+
+    // The session routes used to find a session by its id alone: any signed-in caller who knew the id could write
+    // parts into somebody else's upload, finalize it, or abort it, whatever access they had to the folder it was
+    // going into. A session belongs to whoever opened it (set in CreateUploadSessionAsync); the upload handler
+    // already authorized only that user.
+    private void DemandSessionOwner<T>(ChunkedUploadSession<T> uploadSession)
+    {
+        if (uploadSession.UserId != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
     }
 
     public Task<long> GetTransferredBytesCountAsync<T>(ChunkedUploadSession<T> uploadSession)
