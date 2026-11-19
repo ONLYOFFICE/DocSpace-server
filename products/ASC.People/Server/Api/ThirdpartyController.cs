@@ -154,7 +154,7 @@ public class ThirdpartyController(
     [HttpPut("linkaccount")]
     public async Task LinkThirdPartyAccount(LinkAccountRequestDto inDto)
     {
-        var profile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
+        var profile = await ReadProfileAsync(inDto.SerializedProfile);
 
         if (!(coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Oauth))
         {
@@ -168,10 +168,11 @@ public class ThirdpartyController(
         }
         else
         {
-            // ignore cancellation
+            // ignore cancellation; any other error the sign-in ended with makes the profile unusable, so the request
+            // is refused as a bad one (400) - a plain Exception came back as 500
             if (profile.AuthorizationError != "Canceled at provider")
             {
-                throw new Exception(profile.AuthorizationError);
+                throw new ArgumentException(profile.AuthorizationError);
             }
         }
     }
@@ -206,13 +207,13 @@ public class ThirdpartyController(
     [HttpPost("signup")]
     public async Task<EmployeeDto> SignupThirdPartyAccount(SignupAccountRequestDto inDto)
     {
-        var thirdPartyProfile = await loginProfileTransport.FromTransport(inDto.SerializedProfile);
+        var thirdPartyProfile = await ReadProfileAsync(inDto.SerializedProfile);
         if (!string.IsNullOrEmpty(thirdPartyProfile.AuthorizationError))
         {
-            // ignore cancellation
+            // ignore cancellation; another error is refused with 400, as in LinkThirdPartyAccount
             if (thirdPartyProfile.AuthorizationError != "Canceled at provider")
             {
-                throw new Exception(thirdPartyProfile.AuthorizationError);
+                throw new ArgumentException(thirdPartyProfile.AuthorizationError);
             }
 
             return null;
@@ -231,7 +232,9 @@ public class ThirdpartyController(
 
         if (string.IsNullOrWhiteSpace(email))
         {
-            throw new Exception(Resource.ErrorNotCorrectEmail);
+            // The identity cannot become an account without an email: 400, as every other refusal of an email
+            // address; a plain Exception came back as 500.
+            throw new ArgumentException(Resource.ErrorNotCorrectEmail);
         }
 
         var model = emailValidationKeyModelHelper.GetModel();
@@ -312,6 +315,23 @@ public class ThirdpartyController(
         }
 
         return await employeeDtoHelper.GetAsync(user);
+    }
+
+    /// <summary>
+    /// Reads the <c>serializedProfile</c> the login flow issued. A value it did not issue - not Base64url, not
+    /// encrypted with the key of the installation, not a list of profile fields - is the caller's input and is refused
+    /// with 400, like a profile of another portal; decrypting and splitting it threw exceptions that came back as 500.
+    /// </summary>
+    private async Task<LoginProfile> ReadProfileAsync(string serializedProfile)
+    {
+        try
+        {
+            return await loginProfileTransport.FromTransport(serializedProfile);
+        }
+        catch (Exception e) when (e is FormatException or System.Security.Cryptography.CryptographicException or IndexOutOfRangeException)
+        {
+            throw new ArgumentException("The serialized profile was not issued by the sign-in of this portal", nameof(serializedProfile), e);
+        }
     }
 
     private async Task<UserInfo> GetUserByThirdPartyProfileAsync(LoginProfile profile)

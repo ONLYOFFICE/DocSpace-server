@@ -144,28 +144,69 @@ public abstract class PeopleControllerBase(
 
         await _permissionContext.DemandPermissionsAsync(new UserSecurityProvider(user.Id), Constants.Action_EditUser);
 
+        // Each failure below used to leave as an exception that nothing maps (500), except an error answer, which was
+        // InvalidOperationException (403) and stays so. The address that did not answer or timed out (the pinned
+        // client allows 10 seconds) is a remote failure: 502, as for a Document Server that does not answer. What it
+        // returned is the caller's input: 400 with the texts the photo upload of PhotoController gives.
         var httpClient = httpClientFactory.CreateClient(UrlValidator.PinnedHttpClient);
         using var request = new HttpRequestMessage(HttpMethod.Get, photoValidation.ParsedUri);
         request.Options.Set(UrlValidator.PinnedIpKey, photoValidation.ResolvedAddresses[0]);
-        using var response = await httpClient.SendAsync(request);
 
-        if (!response.IsSuccessStatusCode)
+        byte[] imageByteArray;
+        try
         {
-            throw new InvalidOperationException($"Failed to download photo: {response.StatusCode}");
+            using var response = await httpClient.SendAsync(request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new InvalidOperationException($"Failed to download photo: {response.StatusCode}");
+            }
+
+            var contentLength = response.Content.Headers.ContentLength;
+            if (contentLength.HasValue && contentLength.Value > _setupInfo.MaxImageUploadSize)
+            {
+                throw new ArgumentException(PeopleResource.ErrorImageSizetLimit);
+            }
+
+            imageByteArray = await response.Content.ReadAsByteArrayAsync();
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+        {
+            throw new CustomHttpException(HttpStatusCode.BadGateway, $"Failed to download photo: {e.Message}");
         }
 
-        var contentLength = response.Content.Headers.ContentLength;
-        if (contentLength.HasValue && contentLength.Value > _setupInfo.MaxImageUploadSize)
-        {
-            throw new ImageSizeLimitException();
-        }
-
-        var imageByteArray = await response.Content.ReadAsByteArrayAsync();
         if (imageByteArray.Length > _setupInfo.MaxImageUploadSize)
         {
-            throw new ImageSizeLimitException();
+            throw new ArgumentException(PeopleResource.ErrorImageSizetLimit);
         }
 
-        await _userPhotoManager.SaveOrUpdatePhoto(user.Id, imageByteArray);
+        try
+        {
+            await _userPhotoManager.SaveOrUpdatePhoto(user.Id, imageByteArray);
+        }
+        catch (UnknownImageFormatException e)
+        {
+            throw new ArgumentException(PeopleResource.ErrorUnknownFileImageType, e);
+        }
+        catch (ImageWeightLimitException e)
+        {
+            throw new ArgumentException(PeopleResource.ErrorImageWeightLimit, e);
+        }
+        catch (ImageSizeLimitException e)
+        {
+            throw new ArgumentException(PeopleResource.ErrorImageSizetLimit, e);
+        }
+        // UserPhotoManager turns only an ArgumentException of ImageMagick into UnknownImageFormatException, but
+        // ImageMagick reports content it cannot read with its own exceptions (a page that is not an image gives
+        // MagickMissingDelegateErrorException), which left as a 500. They are the caller's input too: a resource
+        // limit means the image is too large, anything else that it is not an image ImageMagick can read.
+        catch (ImageMagick.MagickResourceLimitErrorException e)
+        {
+            throw new ArgumentException(PeopleResource.ErrorImageSizetLimit, e);
+        }
+        catch (ImageMagick.MagickException e)
+        {
+            throw new ArgumentException(PeopleResource.ErrorUnknownFileImageType, e);
+        }
     }
 }

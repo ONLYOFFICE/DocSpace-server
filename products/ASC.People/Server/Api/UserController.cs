@@ -842,9 +842,11 @@ public class UserController(
 
         var user = await GetUserInfoAsync(securityContext.CurrentAccount.ID.ToString());
 
+        // GetUserInfoAsync above already answers 404 for the same condition, so this cannot be reached; it says 404
+        // too rather than a plain Exception, which nothing maps and which would come back as 500.
         if (!_userManager.UserExists(user))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -1056,7 +1058,7 @@ public class UserController(
 
         if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            var groupId = new Guid(inDto.Text);
+            var groupId = ParseGroupFilterValue(inDto.Text);
             //Filter by group
             list = list.Where(async (x, _) => await _userManager.IsUserInGroupAsync(x.Id, groupId));
         }
@@ -1268,7 +1270,7 @@ public class UserController(
         Guid? groupId = null;
         if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            groupId = new Guid(inDto.Text);
+            groupId = ParseGroupFilterValue(inDto.Text);
         }
 
         var filter = new SimpleByFilterRequestDto
@@ -1402,7 +1404,7 @@ public class UserController(
         var groupId = Guid.Empty;
         if ("group".Equals(inDto.FilterBy, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(inDto.Text))
         {
-            groupId = new Guid(inDto.Text);
+            groupId = ParseGroupFilterValue(inDto.Text);
         }
 
         var users = await _userManager.SearchAsync(inDto.Query, EmployeeStatus.Active, groupId);
@@ -1411,6 +1413,20 @@ public class UserController(
         {
             yield return await employeeFullDtoHelper.GetFullAsync(user);
         }
+    }
+
+    /// <summary>
+    /// Reads the group ID that `filterValue` carries when `filterBy` is `group`.
+    /// </summary>
+    /// <remarks>
+    /// The value used to go to the Guid constructor, whose FormatException was a 500. It is the caller's input, so a value
+    /// that is not a GUID is refused with 400, as the other request values of the module are.
+    /// </remarks>
+    private static Guid ParseGroupFilterValue(string text)
+    {
+        return Guid.TryParse(text, out var groupId)
+            ? groupId
+            : throw new ArgumentException($"The filterValue is not a group ID: {text}");
     }
 
     /// <remarks>
@@ -1576,9 +1592,11 @@ public class UserController(
         List<UserInfo> users;
 
         var currentUser = await _userManager.GetUsersAsync(securityContext.CurrentAccount.ID);
+        // A caller without a profile of this portal is refused like the other callers below: 403. A plain Exception,
+        // which nothing maps, would come back as 500.
         if (currentUser == null || currentUser.Equals(Constants.LostUser))
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var currentUserType = await _userManager.GetUserTypeAsync(currentUser);
@@ -2893,7 +2911,9 @@ public class UserController(
 
             var userName = (await _userManager.GetUsersAsync(userId)).DisplayUserName(displayUserSettingsHelper);
 
-            throw new Exception(string.Format(Resource.ReassignDataRemoveUserError, userName));
+            // A reassignment still running is a state the caller waits out, not a server fault: 409, as for a
+            // webhook retry or a migration in progress. A plain Exception, which nothing maps, came back as 500.
+            throw new CustomHttpException(HttpStatusCode.Conflict, string.Format(Resource.ReassignDataRemoveUserError, userName));
         }
     }
 
