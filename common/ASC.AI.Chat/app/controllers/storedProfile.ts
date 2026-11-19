@@ -38,16 +38,35 @@
 // the profile routes make with `assertSafeBaseUrl`. Only the id is trusted.
 
 import type { Profile } from "@onlyoffice/ai-chat/core";
+import { AiServiceHttpError } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
 import { getString, isObject } from "../narrow.js";
 
 /**
+ * The stored profile with this id, or `undefined` for an id the AI service
+ * refuses as malformed (400): a string that is no id names no profile. Any
+ * other failure of the read is a failure of the service, not an absent
+ * profile, and is passed on.
+ */
+async function readStored(id: string): Promise<Profile | undefined> {
+  try {
+    return await storage.profiles.readById(id);
+  } catch (err) {
+    if (err instanceof AiServiceHttpError && err.status === 400) {
+      return undefined;
+    }
+    throw err;
+  }
+}
+
+/**
  * The stored profile a client-sent `profile` names by its id. Answers 404
- * when the object has no id or the store holds no such profile.
+ * when the object has no id or the store holds no such profile; a store that
+ * cannot be read fails the call with its own error.
  */
 export async function resolveStoredProfile(sent: unknown): Promise<Profile> {
   const id = isObject(sent) ? getString(sent, "id") : undefined;
-  const stored = id ? await storage.profiles.readById(id).catch(() => undefined) : undefined;
+  const stored = id ? await readStored(id) : undefined;
   if (!stored) {
     throw Object.assign(new Error("the AI profile does not exist"), { status: 404, expose: true });
   }

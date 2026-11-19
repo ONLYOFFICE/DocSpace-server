@@ -35,7 +35,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const readById = vi.fn();
 vi.mock("../../storage/index.js", () => ({ storage: { profiles: { readById } } }));
+vi.mock("../../storage/httpClient.js", () => {
+  class AiServiceHttpError extends Error {
+    constructor(public readonly status: number) {
+      super(`AI service ${status}`);
+    }
+  }
+  return { AiServiceHttpError };
+});
 
+const { AiServiceHttpError } = await import("../../storage/httpClient.js");
 const { resolveStoredProfile } = await import("../storedProfile.js");
 
 describe("resolveStoredProfile", () => {
@@ -58,12 +67,21 @@ describe("resolveStoredProfile", () => {
     expect(readById).toHaveBeenCalledExactlyOnceWith("p1");
   });
 
-  it("answers 404 for a profile the store does not hold or cannot read", async () => {
+  it("answers 404 for a profile the store does not hold or an id it refuses as malformed", async () => {
     readById.mockResolvedValueOnce(undefined);
     await expect(resolveStoredProfile({ id: "gone" })).rejects.toMatchObject({ status: 404 });
 
-    readById.mockRejectedValueOnce(new Error("bad id"));
+    readById.mockRejectedValueOnce(new AiServiceHttpError(400, "Bad Request", "", "url"));
     await expect(resolveStoredProfile({ id: "not-a-guid" })).rejects.toMatchObject({ status: 404 });
+  });
+
+  // A store that is down is not a profile that does not exist.
+  it("passes on a failure of the read", async () => {
+    readById.mockRejectedValueOnce(new AiServiceHttpError(503, "Unavailable", "", "url"));
+    await expect(resolveStoredProfile({ id: "p1" })).rejects.toMatchObject({ status: 503 });
+
+    readById.mockRejectedValueOnce(new Error("timeout"));
+    await expect(resolveStoredProfile({ id: "p1" })).rejects.toThrow("timeout");
   });
 
   it("answers 404 without a read when no id was sent", async () => {
