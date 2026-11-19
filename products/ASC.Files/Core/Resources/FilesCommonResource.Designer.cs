@@ -547,6 +547,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The form gallery is temporarily unavailable. Try again later or create the form from another template..
+        /// </summary>
+        public static string ErrorMessage_FormGalleryUnavailable {
+            get {
+                return ResourceManager.GetString("ErrorMessage_FormGalleryUnavailable", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to File larger than {0} will not be copied.
         /// </summary>
         public static string ErrorMessage_FileSizeCopy {

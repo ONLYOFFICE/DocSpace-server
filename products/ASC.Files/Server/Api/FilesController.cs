@@ -326,7 +326,8 @@ public abstract class FilesController<T>(
     /// data. Do not repeat it. Each call creates another file. The call returns 403 in the Rooms root, the archive, and
     /// the template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable template. The
     /// call returns 404 for an unknown `formId` or a gallery form without a file of this format. It also returns 404 if
-    /// `templateId` is a string that matches no third-party file. If the new file exceeds the storage quota, the call
+    /// `templateId` is a string that matches no third-party file. If the form gallery does not answer within 30
+    /// seconds or returns no valid file, the call returns 502. If the new file exceeds the storage quota, the call
     /// returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
     /// section, use `POST api/2.0/files/@my/file`.
     /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
@@ -343,6 +344,7 @@ public abstract class FilesController<T>(
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
     [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
+    [SwaggerResponse(502, "The form gallery that `formId` refers to did not answer in time, answered with an error, or returned a file that is not a valid form")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -1319,7 +1321,8 @@ public class FilesControllerCommon(
     /// missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403 if the
     /// template does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a gallery form
     /// without a file of the format of the title. If a string `templateId` is not a file of a connected third-party
-    /// storage, the call also returns 404.
+    /// storage, the call also returns 404. If the form gallery does not answer within 30 seconds or returns no valid
+    /// file, the call returns 502.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents
@@ -1332,6 +1335,7 @@ public class FilesControllerCommon(
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the template does not exist or cannot be read")]
     [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
+    [SwaggerResponse(502, "The form gallery that `formId` refers to did not answer in time, answered with an error, or returned a file that is not a valid form")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {

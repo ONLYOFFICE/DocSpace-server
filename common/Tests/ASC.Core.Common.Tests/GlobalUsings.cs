@@ -62,6 +62,7 @@ global using ASC.Core.Users;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.Files.Core.ApiModels.WebhookDto;
 global using ASC.Files.Core.Core.Thirdparty;
+global using ASC.Files.Core.Services.OFormService;
 global using ASC.Notify;
 global using ASC.Notify.Channels;
 global using ASC.Notify.Cron;

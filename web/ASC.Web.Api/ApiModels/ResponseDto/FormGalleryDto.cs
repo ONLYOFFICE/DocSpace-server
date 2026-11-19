@@ -85,6 +85,15 @@ public class FormGalleryDto
     /// </summary>
     /// <example>/dashboard/forms</example>
     public required string UploadDashboard { get; set; }
+
+    /// <summary>
+    /// Whether the portal can create files from gallery forms now. `false` when no gallery is configured or the
+    /// portal could not reach it at its last check. The answer of a check is reused
+    /// for 10 minutes when the gallery answered and for 1 minute when it did not. A client should then show the
+    /// gallery as unavailable. Until the portal has checked once, the value is `true`.
+    /// </summary>
+    /// <example>true</example>
+    public bool Available { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

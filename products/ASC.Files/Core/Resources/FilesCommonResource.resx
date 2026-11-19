@@ -282,6 +282,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>The required folder was not found</value>
   </data>
+  <data name="ErrorMessage_FormGalleryUnavailable" xml:space="preserve">
+    <value>The form gallery is temporarily unavailable. Try again later or create the form from another template.</value>
+  </data>
   <data name="ErrorMessage_InstructionsRoomMarkdownOnly" xml:space="preserve">
     <value>Only Markdown files (.md) can be added to an instructions room</value>
   </data>
