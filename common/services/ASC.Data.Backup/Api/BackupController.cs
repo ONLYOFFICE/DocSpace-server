@@ -153,7 +153,12 @@ public class BackupController(
         }
 
         var storageType = inDto.StorageType ?? BackupStorageType.Documents;
-        var storageParams = inDto.StorageParams == null ? new Dictionary<string, string>() : inDto.StorageParams.ToDictionary(r => r.Key.ToString(), r => r.Value.ToString());
+        // An item without a key or a value was a NullReferenceException, a 500; refused as in startbackup (400).
+        var storageParams = inDto.StorageParams == null
+            ? new Dictionary<string, string>()
+            : inDto.StorageParams.ToDictionary(
+                r => r?.Key?.ToString() ?? throw new ArgumentException("every item of storageParams must have a key"),
+                r => r.Value?.ToString() ?? throw new ArgumentException("every item of storageParams must have a value"));
         var backupStored = inDto.BackupsStored ?? 1;
         var cronParams = inDto.CronParams ?? throw new ArgumentException("cronParams is required");
         var cron = new CronParams
@@ -275,6 +280,12 @@ public class BackupController(
         if (!coreBaseSettings.Standalone && inDto.Dump)
         {
             throw new ArgumentException("backup can`t start as dump");
+        }
+
+        // BackupService refuses it too, but only after the payment session below is opened.
+        if (!coreBaseSettings.Standalone && storageType == BackupStorageType.Local)
+        {
+            throw new ArgumentException(BackupService.LocalStorageStandaloneOnly);
         }
 
         if (storageType is BackupStorageType.Documents or BackupStorageType.ThridpartyDocuments)

@@ -63,6 +63,11 @@ public class BackupService(
     private const string BackupFileName = "backup";
     private const int BackupCustomerSessionDuration = 86400; // 60 * 60 * 24;
 
+    /// <summary>
+    /// The refusal of a backup to the server's local disk on a portal that is not a standalone installation.
+    /// </summary>
+    public const string LocalStorageStandaloneOnly = "backup can not use local storage on a portal that is not a standalone installation";
+
     public async Task<string> StartBackupAsync(BackupStorageType storageType, Dictionary<string, string> storageParams, string serverBaseUri, bool dump, bool enqueueTask = true, string taskId = null, int billingSessionId = 0, DateTime billingSessionExpire = default, IDictionary<string, string> headers = null)
     {
         await DemandPermissionsBackupAsync();
@@ -85,17 +90,19 @@ public class BackupService(
 
         switch (storageType)
         {
+            // A missing key was a KeyNotFoundException and local storage on a portal a plain exception, each a 500. Both
+            // are the caller's request: 400, as for a dump on a portal and for the same keys of a schedule below.
             case BackupStorageType.ThridpartyDocuments:
             case BackupStorageType.Documents:
-                backupRequest.StorageBasePath = storageParams["folderId"];
+                backupRequest.StorageBasePath = storageParams.GetValueOrDefault("folderId") ?? throw new ArgumentException("storageParams must contain folderId");
                 break;
             case BackupStorageType.Local:
                 if (!coreBaseSettings.Standalone)
                 {
-                    throw new Exception("Access denied");
+                    throw new ArgumentException(LocalStorageStandaloneOnly);
                 }
 
-                backupRequest.StorageBasePath = storageParams["filePath"];
+                backupRequest.StorageBasePath = storageParams.GetValueOrDefault("filePath") ?? throw new ArgumentException("storageParams must contain filePath");
                 break;
         }
 
@@ -408,9 +415,10 @@ public class BackupService(
                 scheduleRequest.StorageBasePath = storageParams.GetValueOrDefault("folderId") ?? throw new ArgumentException("storageParams must contain folderId");
                 break;
             case BackupStorageType.Local:
+                // A plain exception, a 500, before; refused as the caller's request (400), as a dump on a portal is.
                 if (!coreBaseSettings.Standalone)
                 {
-                    throw new Exception("Access denied");
+                    throw new ArgumentException(LocalStorageStandaloneOnly);
                 }
 
                 scheduleRequest.StorageBasePath = storageParams.GetValueOrDefault("filePath") ?? throw new ArgumentException("storageParams must contain filePath");
