@@ -122,6 +122,16 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
                 message = e.Message;
                 withStackTrace = false;
                 break;
+            // DocsCloud, the accounting service or the AI gateway gave no answer or answered with a server error: the
+            // failure is on their side, so 502, as for a Document Server that does not answer; they came back as 500.
+            // Only the status changes: they are still logged as critical, as before. Their other failures (not
+            // configured, an authorization they reject, a 4xx no case above maps) are ours to fix and stay 500.
+            case DocsCloudException { ServiceFailed: true }:
+            case AccountingException { ServiceFailed: true }:
+            case ASC.Core.Common.AI.AiGatewayUnavailableException:
+                status = HttpStatusCode.BadGateway;
+                criticalException = true;
+                break;
             case CustomHttpException httpException:
                 status = (HttpStatusCode)httpException.StatusCode;
                 withStackTrace = false;

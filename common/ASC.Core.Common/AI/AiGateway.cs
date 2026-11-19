@@ -221,10 +221,33 @@ public class AiGateway(
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = httpClientFactory.CreateClient();
 #pragma warning restore CA2000
-        using var response = await httpClient.SendAsync(request);
-        response.EnsureSuccessStatusCode();
 
-        return await response.Content.ReadFromJsonAsync<T>();
+        // No answer and a server error of the gateway are its failures (502 in the API); they came back as 500. The
+        // path, not the address: the address names the internal host, and the message reaches the client of the API.
+        // A 4xx answers a request of ours (a key or a route the gateway does not accept) and stays a plain
+        // HttpRequestException, as before.
+        HttpResponseMessage response;
+        try
+        {
+            response = await httpClient.SendAsync(request);
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+        {
+            throw new AiGatewayUnavailableException($"AI gateway request {method} {path} failed", e);
+        }
+
+        using (response)
+        {
+            if ((int)response.StatusCode >= 500)
+            {
+                throw new AiGatewayUnavailableException(
+                    $"AI gateway request {method} {path} failed with status code {response.StatusCode}", statusCode: response.StatusCode);
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadFromJsonAsync<T>();
+        }
     }
 
     private string GetCustomerModelsCacheKey()
@@ -255,6 +278,14 @@ public class AiGatewaySettings
 public class AiGatewayNotConfiguredException(string message = "AI gateway is not configured") : Exception(message);
 
 public class AiServiceDisabledException(string message = "AI service is disabled") : Exception(message);
+
+/// <summary>
+/// The AI gateway gave no answer (no connection, TLS, timeout) or answered with a server error; the API reports it as
+/// 502. It is an <see cref="HttpRequestException"/>, so the callers that treat a failed gateway call as optional keep
+/// catching it.
+/// </summary>
+public class AiGatewayUnavailableException(string message, Exception inner = null, HttpStatusCode? statusCode = null)
+    : HttpRequestException(message, inner, statusCode);
 
 /// <summary>
 /// The currency the AI prices are quoted in.

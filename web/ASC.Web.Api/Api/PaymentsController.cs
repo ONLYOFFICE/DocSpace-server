@@ -1743,7 +1743,17 @@ public class PaymentController(
 
         await paymentHelper.DemandAdminAsync();
 
-        var prices = await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
+        List<ServicePriceInfo> prices;
+        try
+        {
+            prices = await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
+        }
+        catch (AccountingNotFoundException)
+        {
+            // The accounting service answers 404 for a service name it does not know - the caller's input, which
+            // came back as 500. 404 here too, as GET walletservice answers for a service this installation does not sell.
+            throw new ItemNotFoundException("Service could not be found");
+        }
 
         return prices?.Select(r => r.Map()).ToList();
     }

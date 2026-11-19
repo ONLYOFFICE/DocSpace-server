@@ -1758,7 +1758,7 @@ public static class AccountingHttpClientExtension
 
         // The route template, not the address: the address names the internal host and the portal key, and the message
         // reaches the logs and the client of the API. What went wrong stays in the inner exception.
-        return new AccountingException($"Accounting request {PaymentServiceOperation.Of(request)} failed", exception);
+        return new AccountingException($"Accounting request {PaymentServiceOperation.Of(request)} failed", exception) { ServiceFailed = true };
     }
     // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found /
     // resource not found), and wraps any other failure into AccountingException with the status code and response body.
@@ -1819,7 +1819,11 @@ public static class AccountingHttpClientExtension
             return new AccountingBadRequestException(detail);
         }
 
-        return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
+        // A server error is a failure of the accounting service itself; any other status answers a request of ours.
+        return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}")
+        {
+            ServiceFailed = (int)response.StatusCode >= 500
+        };
     }
 
     private const string ServiceLimitExceededTitle = "Service limit exceeded";
@@ -1896,6 +1900,12 @@ public class AccountingException : Exception
     public AccountingException(string message, Exception inner) : base(message, inner)
     {
     }
+
+    /// <summary>
+    /// The service gave no answer (no connection, TLS, timeout) or answered with a server error: the failure is on the
+    /// side of the accounting service, not of the request, and the API reports it as 502. False for every other failure.
+    /// </summary>
+    public bool ServiceFailed { get; init; }
 }
 
 public class AccountingNotConfiguredException(string message = "Accounting service is not configured") : AccountingException(message);

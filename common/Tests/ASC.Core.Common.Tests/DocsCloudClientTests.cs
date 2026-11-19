@@ -132,13 +132,42 @@ public class DocsCloudClientTests
     }
 
     /// <summary>
-    /// Only the "no such tenant" case is a client error. A DocsCloud service failure stays a 500, so the
-    /// mapping cannot hide a broken dependency behind a 400.
+    /// Only the "no such tenant" case is a client error. A server error of DocsCloud is a failure of the dependency,
+    /// so it is reported as 502 - never as a 400 that would hide a broken dependency. It used to be a 500.
     /// </summary>
     [Fact]
-    public async Task GetTenantConfig_ServiceFailure_StaysInternalServerError()
+    public async Task GetTenantConfig_ServiceFailure_IsReportedAsBadGateway()
     {
         var (client, _) = CreateDocsCloudClient(_ => Reply(HttpStatusCode.InternalServerError, "\"boom\""));
+
+        var response = await CallAndHandleAsync(() => client.GetTenantConfigAsync(PortalId));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadGateway);
+    }
+
+    /// <summary>
+    /// No answer at all is a failure of the dependency too: 502, as a server error. It used to be a 500.
+    /// </summary>
+    [Fact]
+    public async Task GetTenantConfig_ServiceUnreachable_IsReportedAsBadGateway()
+    {
+        var (client, _) = CreateDocsCloudClient(HttpStub.Unreachable());
+
+        var response = await CallAndHandleAsync(() => client.GetTenantConfigAsync(PortalId));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadGateway);
+    }
+
+    /// <summary>
+    /// A 4xx that no case maps answers a request of ours, and a rejected authorization is ours to fix: both stay 500,
+    /// so the 502 above cannot hide a defect of our own behind a failure of the dependency.
+    /// </summary>
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest)]
+    [InlineData(HttpStatusCode.Forbidden)]
+    public async Task GetTenantConfig_RequestRefused_StaysInternalServerError(HttpStatusCode status)
+    {
+        var (client, _) = CreateDocsCloudClient(_ => Reply(status, "\"refused\""));
 
         var response = await CallAndHandleAsync(() => client.GetTenantConfigAsync(PortalId));
 

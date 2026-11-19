@@ -54,15 +54,19 @@ public class AccountingServicePricesTests(AspireAppFixture fixture) : BaseTest(f
         price.TimeUnit.Should().Be(PriceTimeUnit.Minute);
     }
 
+    /// <summary>
+    /// The accounting service answers 404 for a name it does not know. That is the caller's input, and it came back as
+    /// 500; the endpoint answers 404 now, as <c>GET payment/walletservice</c> does for a service it does not sell.
+    /// </summary>
     [Fact]
-    public async Task GetAccountingServicePrices_ServiceAccountingDoesNotKnow_ThrowsInternalServerError()
+    public async Task GetAccountingServicePrices_ServiceAccountingDoesNotKnow_Returns404()
     {
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _paymentApi.GetAccountingServicePricesAsync("no-such-service", true, TestContext.Current.CancellationToken));
 
         // Assert
-        exception.ErrorCode.Should().Be(500);
-        exception.ErrorContent!.ToString().Should().Contain("Resource not found");
+        exception.ErrorCode.Should().Be(404);
+        exception.ErrorContent!.ToString().Should().Contain("Service could not be found");
     }
 }

@@ -133,15 +133,10 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         {
 
             var jwt = await GenerateJwtTokenAsync(true, userId);
-#pragma warning disable CA2000
-            var httpClient = httpClientFactory.CreateClient();
-#pragma warning restore CA2000
-
             using var request = new HttpRequestMessage(HttpMethod.Delete, Url + "clients");
 
             request.Headers.Add("x-signature", jwt);
-            using var cts = new CancellationTokenSource(_requestTimeout);
-            using var response = await httpClient.SendAsync(request, cts.Token);
+            using var response = await SendAsync(request);
 
             // Deleting the clients of a user who has none is idempotent: a 404 must not abort
             // the user-deletion flow this cleanup is part of.
@@ -157,19 +152,37 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
         if (!string.IsNullOrEmpty(Url))
         {
             var jwt = await GenerateJwtTokenAsync(true, Guid.Empty);
-#pragma warning disable CA2000
-            var httpClient = httpClientFactory.CreateClient();
-#pragma warning restore CA2000
-
             using var request = new HttpRequestMessage(HttpMethod.Delete, (Url + "clients/tenant"));
             request.Headers.Add("x-signature", jwt);
-            using var cts = new CancellationTokenSource(_requestTimeout);
-            using var response = await httpClient.SendAsync(request, cts.Token);
+            using var response = await SendAsync(request);
 
             if (!response.IsSuccessStatusCode && throwIfNotSuccess)
             {
                 throw new InvalidOperationException(response.ReasonPhrase);
             }
+        }
+    }
+
+    /// <summary>
+    /// Sends a request to the identity service. A service that does not answer (no connection, a failed TLS
+    /// handshake, the timeout above) reached the caller as a 500; it is a failure of the upstream service, so it is
+    /// 502, as a failing document server is. An answer with an error is left to the caller.
+    /// </summary>
+    private async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+    {
+#pragma warning disable CA2000
+        var httpClient = httpClientFactory.CreateClient();
+#pragma warning restore CA2000
+
+        using var cts = new CancellationTokenSource(_requestTimeout);
+
+        try
+        {
+            return await httpClient.SendAsync(request, cts.Token);
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+        {
+            throw new CustomHttpException(HttpStatusCode.BadGateway, $"The OAuth service could not be reached: {e.Message}", e);
         }
     }
 }

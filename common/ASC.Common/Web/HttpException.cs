@@ -68,4 +68,15 @@ public class HttpException : Exception
     }
 }
 
-public class CustomHttpException(HttpStatusCode httpStatusCode, string message) : HttpException(httpStatusCode, message);
+public class CustomHttpException : HttpException
+{
+    public CustomHttpException(HttpStatusCode httpStatusCode, string message) : base(httpStatusCode, message)
+    {
+    }
+
+    // Keeps the cause for the code that inspects it after the status is chosen: background callers of a document service
+    // conversion read the error code of the DocumentServiceException inside.
+    public CustomHttpException(HttpStatusCode httpStatusCode, string message, Exception inner) : base(httpStatusCode, message, inner)
+    {
+    }
+}

@@ -734,7 +734,7 @@ public static class DocsCloudHttpClientExtension
 
         // The route template, not the address: the address names the internal host and the portal key, and the message
         // reaches the logs and the client of the API. What went wrong stays in the inner exception.
-        return new DocsCloudException($"DocsCloud request {PaymentServiceOperation.Of(request)} failed", exception);
+        return new DocsCloudException($"DocsCloud request {PaymentServiceOperation.Of(request)} failed", exception) { ServiceFailed = true };
     }
     // Maps non-success responses to the domain exceptions the callers expect (resource not found / authorization
     // failed), and wraps any other failure into DocsCloudException with the status code and response body.
@@ -757,7 +757,11 @@ public static class DocsCloudHttpClientExtension
 
         var content = await response.Content.ReadAsStringAsync();
 
-        return new DocsCloudException($"DocsCloud request failed with status code {response.StatusCode} {content}");
+        // A server error is a failure of DocsCloud itself; any other status answers a request of ours.
+        return new DocsCloudException($"DocsCloud request failed with status code {response.StatusCode} {content}")
+        {
+            ServiceFailed = (int)response.StatusCode >= 500
+        };
     }
 }
 
@@ -770,6 +774,12 @@ public class DocsCloudException : Exception
     public DocsCloudException(string message, Exception inner) : base(message, inner)
     {
     }
+
+    /// <summary>
+    /// The service gave no answer (no connection, TLS, timeout) or answered with a server error: the failure is on the
+    /// side of DocsCloud, not of the request, and the API reports it as 502. False for every other failure.
+    /// </summary>
+    public bool ServiceFailed { get; init; }
 }
 
 public class DocsCloudNotConfiguredException(string message = "DocsCloud service is not configured") : DocsCloudException(message);

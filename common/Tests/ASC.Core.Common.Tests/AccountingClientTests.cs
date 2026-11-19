@@ -240,6 +240,36 @@ public class AccountingClientTests
             .Which.Message.Should().Contain("InternalServerError").And.Contain("boom");
     }
 
+    /// <summary>
+    /// A server error is a failure of the accounting service, which the API reports as 502; any other status that no
+    /// subclass maps answers a request of ours and stays a plain failure, 500.
+    /// </summary>
+    [Theory]
+    [InlineData(HttpStatusCode.InternalServerError, true)]
+    [InlineData(HttpStatusCode.ServiceUnavailable, true)]
+    [InlineData(HttpStatusCode.BadRequest, false)]
+    [InlineData(HttpStatusCode.Forbidden, false)]
+    public async Task OtherErrorResponse_IsAServiceFailureOnlyForServerErrors(HttpStatusCode status, bool serviceFailed)
+    {
+        var (client, _) = CreateAccountingClient(_ => Reply(status, "boom"));
+
+        var act = async () => await client.OpenCustomerSessionAsync("portal-1", "backup", "ref", 1, 10);
+
+        (await act.Should().ThrowExactlyAsync<AccountingException>())
+            .Which.ServiceFailed.Should().Be(serviceFailed);
+    }
+
+    [Fact]
+    public async Task TransportFailure_IsAServiceFailure()
+    {
+        var (client, _) = CreateAccountingClient(HttpStub.Unreachable());
+
+        var act = async () => await client.GetAllCurrenciesAsync();
+
+        (await act.Should().ThrowExactlyAsync<AccountingException>())
+            .Which.ServiceFailed.Should().BeTrue();
+    }
+
     [Fact]
     public async Task GetRequest_RetriesOnTransientError_ThenSucceeds()
     {
