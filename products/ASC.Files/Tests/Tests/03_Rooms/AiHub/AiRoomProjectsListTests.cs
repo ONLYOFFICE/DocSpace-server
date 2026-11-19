@@ -34,9 +34,8 @@
 namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
-/// The list of the AI projects that use a room, <c>GET api/2.0/files/rooms/{id}/projects</c>. The pinned SDK does not
-/// have the operation yet, so the calls go over raw HTTP. A Knowledge room needs vectorization, which the test
-/// environment does not have, so the room here is an Instructions room.
+/// The list of the AI projects that use a room, <c>GET api/2.0/files/rooms/{id}/projects</c>. A Knowledge room needs
+/// vectorization, which the test environment does not have, so the room here is an Instructions room.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]
@@ -49,9 +48,9 @@ public class AiRoomProjectsListTests(AspireAppFixture fixture) : AiHubTestBase(f
 
         var page = await GetRoomProjectsAsync(roomId);
 
-        page.Projects.Select(p => p.Title).Should().Equal("Alpha", "Beta", "Gamma");
-        page.Ids.Should().Equal(projectIds[1], projectIds[2], projectIds[0]);
-        page.Projects.Should().OnlyContain(p => p.Logo.ValueKind == JsonValueKind.Object);
+        page.Response.Select(p => p.Title).Should().Equal("Alpha", "Beta", "Gamma");
+        IdsOf(page).Should().Equal(projectIds[1], projectIds[2], projectIds[0]);
+        page.Response.Should().OnlyContain(p => p.Logo != null);
         page.Total.Should().Be(3);
     }
 
@@ -63,18 +62,18 @@ public class AiRoomProjectsListTests(AspireAppFixture fixture) : AiHubTestBase(f
         var page = await GetRoomProjectsAsync(roomId);
 
         projectIds[0].Should().BeLessThan(projectIds[1]);
-        page.Ids.Should().Equal(projectIds);
+        IdsOf(page).Should().Equal(projectIds);
     }
 
     [Fact]
     public async Task GetRoomProjects_RoomLinkedToNoProject_EmptyPageAndTotal0()
     {
-        var roomId = await CreateInstructionsRoomAsync();
-        await CreateProjectAsync();
+        var room = await CreateSectionRoomAsync(RoomType.InstructionsRoom);
+        await CreateSectionRoomAsync(RoomType.AiProjectRoom);
 
-        var page = await GetRoomProjectsAsync(roomId);
+        var page = await GetRoomProjectsAsync(room.Id);
 
-        page.Projects.Should().BeEmpty();
+        page.Response.Should().BeEmpty();
         page.Total.Should().Be(0);
     }
 
@@ -92,11 +91,11 @@ public class AiRoomProjectsListTests(AspireAppFixture fixture) : AiHubTestBase(f
             _ => int.MaxValue
         };
 
-        using var room = await GetRoomProjectsResponseAsync(roomId);
-        using var response = await GetRoomProjectsResponseAsync(id);
+        var room = await GetRoomProjectsAsync(roomId);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await GetRoomProjectsAsync(id));
 
-        room.StatusCode.Should().Be(HttpStatusCode.OK);
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        IdsOf(room).Should().Equal(projectIds);
+        exception.ErrorCode.Should().Be(404, exception.ErrorContent!.ToString());
     }
 
     [Fact]
@@ -106,8 +105,8 @@ public class AiRoomProjectsListTests(AspireAppFixture fixture) : AiHubTestBase(f
         var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
 
-        using var response = await GetRoomProjectsResponseAsync(roomId);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await GetRoomProjectsAsync(roomId));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+        exception.ErrorCode.Should().Be(403, exception.ErrorContent!.ToString());
     }
 }

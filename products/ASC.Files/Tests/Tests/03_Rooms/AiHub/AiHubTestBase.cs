@@ -34,10 +34,13 @@
 namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
-/// Helpers for the AI rooms section: Instructions rooms, AI projects, project sources and skills. The pinned SDK knows
-/// neither the Instructions and project room types nor the sources and skills routes, and it cannot read a room of
-/// those types back, so rooms of the section are created, read and changed over raw HTTP; deleting a room, archiving
-/// it and the file operations go through the SDK.
+/// Helpers for the AI rooms section: Instructions rooms, AI projects, project sources and skills. The helpers that
+/// answer a <see cref="JsonElement"/> or an <see cref="HttpResponseMessage"/> create, read and change the rooms of
+/// the section over raw HTTP: they were written when the pinned SDK knew neither the room types of the section nor
+/// its sources and skills routes. The helpers for the projects of a room (<c>CreateSectionRoomAsync</c>,
+/// <c>CreateRoomWithProjectsAsync</c>, <c>LinkAsync</c>, <c>UnlinkAsync</c>, <c>GetRoomInfoAsync</c>,
+/// <c>GetAiHubFoldersAsync</c>, <c>GetRoomProjectsAsync</c>), deleting a room, archiving it and the file operations
+/// go through the SDK.
 /// </summary>
 public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -153,21 +156,29 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
         return await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task LinkAsync(int projectId, params int[] roomIds)
+    protected Task<FolderDto> CreateSectionRoomAsync(RoomType roomType, string? title = null)
     {
-        using var response = await LinkSourcesAsync(projectId, roomIds);
+        return CreateRoom(new CreateRoomRequestDto(title ?? $"Autotest {roomType} {Guid.NewGuid():N}", roomType: roomType));
+    }
 
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent, $"the rooms have to be linked to project {projectId} in Arrange");
+    protected Task LinkAsync(int projectId, params int[] roomIds)
+    {
+        return _roomsAiApi.LinkProjectSourcesAsync(projectId, new LinkAiProjectSourcesRequest([.. roomIds]), TestContext.Current.CancellationToken);
+    }
+
+    protected Task UnlinkAsync(int projectId, params int[] roomIds)
+    {
+        return _roomsAiApi.UnlinkProjectSourcesAsync(projectId, new UnlinkAiProjectSourcesRequest([.. roomIds]), TestContext.Current.CancellationToken);
     }
 
     protected async Task<(int RoomId, List<int> ProjectIds)> CreateRoomWithProjectsAsync(params string[] projectTitles)
     {
-        var roomId = await CreateInstructionsRoomAsync();
+        var roomId = (await CreateSectionRoomAsync(RoomType.InstructionsRoom)).Id;
         var projectIds = new List<int>();
 
         foreach (var title in projectTitles)
         {
-            var projectId = await CreateProjectAsync(title);
+            var projectId = (await CreateSectionRoomAsync(RoomType.AiProjectRoom, title)).Id;
             await LinkAsync(projectId, roomId);
             projectIds.Add(projectId);
         }
@@ -175,29 +186,26 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
         return (roomId, projectIds);
     }
 
-    protected async Task<JsonElement> GetRoomAsync(int roomId)
+    protected async Task<FolderDto> GetRoomInfoAsync(int roomId)
     {
-        using var response = await GetRoomResponseAsync(roomId);
-
-        return await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+        return (await _roomsApi.GetRoomInfoAsync(roomId, TestContext.Current.CancellationToken)).Response;
     }
 
-    protected static int? LinkedProjectsCountOf(JsonElement room)
+    protected async Task<List<FolderDto>> GetAiHubFoldersAsync()
     {
-        return room.TryGetProperty("linkedProjectsCount", out var count) && count.ValueKind != JsonValueKind.Null ? count.GetInt32() : null;
+        var section = await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.AiHub, cancellationToken: TestContext.Current.CancellationToken);
+
+        return [.. section.Response.Folders.OfType<FolderDto>()];
     }
 
-    protected Task<HttpResponseMessage> GetRoomProjectsResponseAsync(int roomId, string query = "")
+    protected Task<AiRoomProjectArrayWrapper> GetRoomProjectsAsync(int roomId, int? count = null, int? startIndex = null)
     {
-        return Files.GetAsync($"api/2.0/files/rooms/{roomId}/projects{query}", TestContext.Current.CancellationToken);
+        return _roomsAiApi.GetRoomProjectsAsync(roomId, count, startIndex, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<RoomProjectsPage> GetRoomProjectsAsync(int roomId, string query = "")
+    protected static List<int> IdsOf(AiRoomProjectArrayWrapper page)
     {
-        using var response = await GetRoomProjectsResponseAsync(roomId, query);
-        var envelope = await Files.ReadEnvelopeAsync<List<RoomProject>>(response, TestContext.Current.CancellationToken);
-
-        return new RoomProjectsPage(envelope.Response!, envelope.Total);
+        return [.. page.Response.Select(p => p.Id)];
     }
 
     protected async Task<List<int>> GetInstructionsSourceIdsAsync(int projectId)
@@ -314,11 +322,4 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
     protected sealed record SkillsRoom(int Id, string Title, List<Skill> Skills);
 
     protected sealed record Skill(string Id, string Name, string Description);
-
-    protected sealed record RoomProject(int Id, string Title, JsonElement Logo);
-
-    protected sealed record RoomProjectsPage(List<RoomProject> Projects, long? Total)
-    {
-        public List<int> Ids => [.. Projects.Select(p => p.Id)];
-    }
 }

@@ -35,26 +35,19 @@ namespace ASC.Files.Tests.Tests._05_Features.Socket;
 
 /// <summary>
 /// What a change of the links between AI projects and rooms pushes to clients: the update of each room whose number
-/// of projects changed, to whoever watches the AI rooms section and may read the room. The pinned SDK knows neither
-/// the room types of the section nor the sources routes, so the rooms are created and linked over raw HTTP. A
-/// Knowledge room needs vectorization, which the test environment does not have, so the rooms here are Instructions
-/// rooms.
+/// of projects changed, to whoever watches the AI rooms section and may read the room. A Knowledge room needs
+/// vectorization, which the test environment does not have, so the rooms here are Instructions rooms.
 /// </summary>
 [Trait("Category", "Socket")]
 [Trait("Feature", "AiHub")]
 public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestBase(fixture)
 {
-    private const int InstructionsRoomType = 10;
-    private const int AiProjectRoomType = 12;
-
-    private RawApiClient Files => new(_filesClient);
-
     [Fact]
     public async Task LinkSources_ByAProjectManager_ReachesTheOwnerWatchingTheSection()
     {
         await _filesClient.Authenticate(Owner);
-        var projectId = await CreateHubRoomAsync(AiProjectRoomType);
-        var roomId = await CreateHubRoomAsync(InstructionsRoomType);
+        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
+        var roomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
         var manager = await InviteContact(EmployeeType.RoomAdmin);
         await InviteToRoom(projectId, manager, FileShare.RoomManager);
         await InviteToRoom(roomId, manager, FileShare.RoomManager);
@@ -70,8 +63,8 @@ public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestB
     public async Task UnlinkSources_ByAProjectManager_ReachesTheOwnerWatchingTheSection()
     {
         await _filesClient.Authenticate(Owner);
-        var projectId = await CreateHubRoomAsync(AiProjectRoomType);
-        var roomId = await CreateHubRoomAsync(InstructionsRoomType);
+        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
+        var roomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
         var manager = await InviteContact(EmployeeType.RoomAdmin);
         await InviteToRoom(projectId, manager, FileShare.RoomManager);
         await using var socket = await ConnectAndWatch(Owner, await GetAiHubIdAsync());
@@ -79,9 +72,8 @@ public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestB
         await WaitForModified(socket, "update", "folder", roomId);
 
         await _filesClient.Authenticate(manager);
-        using var unlinked = await Files.DeleteAsync($"api/2.0/files/rooms/{projectId}/sources", new { roomIds = new[] { roomId } }, TestContext.Current.CancellationToken);
+        await _roomsAiApi.UnlinkProjectSourcesAsync(projectId, new UnlinkAiProjectSourcesRequest([roomId]), TestContext.Current.CancellationToken);
 
-        unlinked.StatusCode.Should().Be(HttpStatusCode.NoContent);
         await WaitForUpdates(socket, roomId, 2);
     }
 
@@ -89,9 +81,9 @@ public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestB
     public async Task DeleteProject_WithTwoRooms_ReachesTheOwnerForEachRoom()
     {
         await _filesClient.Authenticate(Owner);
-        var projectId = await CreateHubRoomAsync(AiProjectRoomType);
-        var firstRoomId = await CreateHubRoomAsync(InstructionsRoomType);
-        var secondRoomId = await CreateHubRoomAsync(InstructionsRoomType);
+        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
+        var firstRoomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
+        var secondRoomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
         await using var socket = await ConnectAndWatch(Owner, await GetAiHubIdAsync());
         await LinkAsync(projectId, firstRoomId, secondRoomId);
         await WaitForModified(socket, "update", "folder", firstRoomId);
@@ -108,9 +100,9 @@ public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestB
     public async Task LinkSources_RoomAlreadyLinked_SendsNoSecondEvent()
     {
         await _filesClient.Authenticate(Owner);
-        var projectId = await CreateHubRoomAsync(AiProjectRoomType);
-        var roomId = await CreateHubRoomAsync(InstructionsRoomType);
-        var laterRoomId = await CreateHubRoomAsync(InstructionsRoomType);
+        var projectId = await CreateHubRoomAsync(RoomType.AiProjectRoom);
+        var roomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
+        var laterRoomId = await CreateHubRoomAsync(RoomType.InstructionsRoom);
         var manager = await InviteContact(EmployeeType.RoomAdmin);
         await InviteToRoom(projectId, manager, FileShare.RoomManager);
         await InviteToRoom(roomId, manager, FileShare.RoomManager);
@@ -133,24 +125,20 @@ public class SocketAiRoomLinkEventsTests(AspireAppFixture fixture) : SocketTestB
         return socket.WaitForCountAsync(ModifyFolder, Modified("update", "folder", roomId), count, cancellationToken: TestContext.Current.CancellationToken);
     }
 
-    private async Task<int> CreateHubRoomAsync(int roomType)
+    private async Task<int> CreateHubRoomAsync(RoomType roomType)
     {
-        using var response = await Files.PostAsync("api/2.0/files/rooms", new { title = $"Autotest Socket {Guid.NewGuid():N}", roomType }, TestContext.Current.CancellationToken);
-
-        return (await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken)).GetProperty("id").GetInt32();
+        return (await CreateRoom(new CreateRoomRequestDto($"Autotest Socket {Guid.NewGuid():N}", roomType: roomType))).Id;
     }
 
     private async Task<int> GetAiHubIdAsync()
     {
-        using var response = await Files.GetAsync("api/2.0/files/rooms?searchArea=AiHub", TestContext.Current.CancellationToken);
+        var section = await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.AiHub, cancellationToken: TestContext.Current.CancellationToken);
 
-        return (await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken)).GetProperty("current").GetProperty("id").GetInt32();
+        return section.Response.Current.Id;
     }
 
-    private async Task LinkAsync(int projectId, params int[] roomIds)
+    private Task LinkAsync(int projectId, params int[] roomIds)
     {
-        using var response = await Files.PostAsync($"api/2.0/files/rooms/{projectId}/sources", new { roomIds }, TestContext.Current.CancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        return _roomsAiApi.LinkProjectSourcesAsync(projectId, new LinkAiProjectSourcesRequest([.. roomIds]), TestContext.Current.CancellationToken);
     }
 }

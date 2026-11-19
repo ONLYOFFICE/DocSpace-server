@@ -35,7 +35,7 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 
 /// <summary>
 /// Paging of <c>GET api/2.0/files/rooms/{id}/projects</c>: <c>count</c> from 1 to 100 and <c>startIndex</c> from 0.
-/// The pinned SDK does not have the operation yet, so the calls go over raw HTTP. A Knowledge room needs
+/// The typed client cannot send an empty <c>count</c>, so that one case goes over raw HTTP. A Knowledge room needs
 /// vectorization, which the test environment does not have, so the room here is an Instructions room.
 /// </summary>
 [Trait("Category", "Rooms")]
@@ -47,10 +47,10 @@ public class AiRoomProjectsPagingTests(AspireAppFixture fixture) : AiHubTestBase
     {
         var (roomId, projectIds) = await CreateRoomWithProjectsAsync("Gamma", "Alpha", "Beta");
 
-        var page = await GetRoomProjectsAsync(roomId, "?count=1&startIndex=1");
+        var page = await GetRoomProjectsAsync(roomId, count: 1, startIndex: 1);
 
-        page.Ids.Should().Equal(projectIds[2]);
-        page.Projects.Single().Title.Should().Be("Beta");
+        IdsOf(page).Should().Equal(projectIds[2]);
+        page.Response.Single().Title.Should().Be("Beta");
         page.Total.Should().Be(3);
     }
 
@@ -59,26 +59,37 @@ public class AiRoomProjectsPagingTests(AspireAppFixture fixture) : AiHubTestBase
     {
         var (roomId, _) = await CreateRoomWithProjectsAsync("Gamma", "Alpha", "Beta");
 
-        var page = await GetRoomProjectsAsync(roomId, "?startIndex=3");
+        var page = await GetRoomProjectsAsync(roomId, startIndex: 3);
 
-        page.Projects.Should().BeEmpty();
+        page.Response.Should().BeEmpty();
         page.Total.Should().Be(3);
     }
 
     [Theory]
-    [InlineData("?count=0")]
-    [InlineData("?count=-1")]
-    [InlineData("?count=101")]
-    [InlineData("?count=")]
-    [InlineData("?startIndex=-1")]
-    public async Task GetRoomProjects_CountOrStartIndexOutOfRange_Returns400(string query)
+    [InlineData(0, null)]
+    [InlineData(-1, null)]
+    [InlineData(101, null)]
+    [InlineData(null, -1)]
+    public async Task GetRoomProjects_CountOrStartIndexOutOfRange_Returns400(int? count, int? startIndex)
     {
-        var (roomId, _) = await CreateRoomWithProjectsAsync("Autotest Project");
+        var (roomId, projectIds) = await CreateRoomWithProjectsAsync("Autotest Project");
 
-        using var valid = await GetRoomProjectsResponseAsync(roomId);
-        using var response = await GetRoomProjectsResponseAsync(roomId, query);
+        var valid = await GetRoomProjectsAsync(roomId);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await GetRoomProjectsAsync(roomId, count, startIndex));
 
-        valid.StatusCode.Should().Be(HttpStatusCode.OK);
+        IdsOf(valid).Should().Equal(projectIds);
+        exception.ErrorCode.Should().Be(400, exception.ErrorContent!.ToString());
+    }
+
+    [Fact]
+    public async Task GetRoomProjects_EmptyCount_Returns400()
+    {
+        var (roomId, projectIds) = await CreateRoomWithProjectsAsync("Autotest Project");
+
+        var valid = await GetRoomProjectsAsync(roomId);
+        using var response = await Files.GetAsync($"api/2.0/files/rooms/{roomId}/projects?count=", TestContext.Current.CancellationToken);
+
+        IdsOf(valid).Should().Equal(projectIds);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest, await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
     }
 
@@ -87,10 +98,8 @@ public class AiRoomProjectsPagingTests(AspireAppFixture fixture) : AiHubTestBase
     {
         var (roomId, projectIds) = await CreateRoomWithProjectsAsync("Gamma", "Alpha", "Beta");
 
-        using var response = await GetRoomProjectsResponseAsync(roomId, "?count=100&startIndex=0");
-        var projects = await Files.ReadAsync<List<RoomProject>>(response, TestContext.Current.CancellationToken);
+        var page = await GetRoomProjectsAsync(roomId, count: 100, startIndex: 0);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        projects.Select(p => p.Id).Should().Equal(projectIds[1], projectIds[2], projectIds[0]);
+        IdsOf(page).Should().Equal(projectIds[1], projectIds[2], projectIds[0]);
     }
 }

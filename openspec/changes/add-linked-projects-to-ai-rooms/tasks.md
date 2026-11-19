@@ -36,5 +36,5 @@
 ## Workflow follow-up
 
 - Commit the proposal (`docs(openspec): propose add-linked-projects-to-ai-rooms`) on the user's command, then apply.
-- After the merge, regenerate the OpenAPI documents and the SDKs (`generate-sdk`), then move the tests of 1.4, 2.5 and 2.6 from raw HTTP and raw JSON to the SDK.
+- Done on the branch, ahead of the merge: the OpenAPI documents and the C# SDK package are regenerated (`generate-sdk`), and the tests of 1.4, 2.5, 2.6 and 3.3 call the SDK; an empty `count` stays over raw HTTP. Still to do: the SDKs of the other languages and the SDK submodule pointers.
 - Tell the frontend: the field `linkedProjectsCount`, the operation `getRoomProjects`, and that a change of the number arrives as the existing `update-folder` event of the room.

@@ -36,9 +36,8 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 /// <summary>
 /// Who is listed by <c>GET api/2.0/files/rooms/{id}/projects</c>: a project only to a caller who may read it, a
 /// DocSpace admin, the creator of the project or a member with a role of their own in it, while
-/// <c>linkedProjectsCount</c> of the room counts every project. The pinned SDK has neither the operation nor the
-/// field yet, so both are read over raw HTTP. A Knowledge room needs vectorization, which the test environment does
-/// not have, so the room here is an Instructions room.
+/// <c>linkedProjectsCount</c> of the room counts every project. A Knowledge room needs vectorization, which the test
+/// environment does not have, so the room here is an Instructions room.
 /// </summary>
 [Trait("Category", "Permissions")]
 [Trait("Feature", "AiHub")]
@@ -55,12 +54,12 @@ public class AiRoomProjectsVisibilityTests(AspireAppFixture fixture) : AiHubTest
         await _filesClient.Authenticate(member);
 
         var page = await GetRoomProjectsAsync(roomId);
-        var room = await GetRoomAsync(roomId);
+        var room = await GetRoomInfoAsync(roomId);
 
-        all.Ids.Should().Equal(projectIds);
-        page.Ids.Should().Equal(projectIds[0]);
+        IdsOf(all).Should().Equal(projectIds);
+        IdsOf(page).Should().Equal(projectIds[0]);
         page.Total.Should().Be(1);
-        LinkedProjectsCountOf(room).Should().Be(2);
+        room.LinkedProjectsCount.Should().Be(2);
     }
 
     [Fact]
@@ -74,9 +73,9 @@ public class AiRoomProjectsVisibilityTests(AspireAppFixture fixture) : AiHubTest
 
         var page = await GetRoomProjectsAsync(roomId);
 
-        all.Ids.Should().Equal(projectIds);
+        IdsOf(all).Should().Equal(projectIds);
         all.Total.Should().Be(2);
-        page.Projects.Should().BeEmpty();
+        page.Response.Should().BeEmpty();
         page.Total.Should().Be(0);
     }
 
@@ -89,12 +88,10 @@ public class AiRoomProjectsVisibilityTests(AspireAppFixture fixture) : AiHubTest
         var all = await GetRoomProjectsAsync(roomId);
         await _filesClient.Authenticate(member);
 
-        using var response = await GetRoomProjectsResponseAsync(roomId);
-        var projects = await Files.ReadAsync<List<RoomProject>>(response, TestContext.Current.CancellationToken);
+        var page = await GetRoomProjectsAsync(roomId);
 
-        all.Ids.Should().Equal(projectIds);
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        projects.Select(p => p.Id).Should().Equal(projectIds[1]);
+        IdsOf(all).Should().Equal(projectIds);
+        IdsOf(page).Should().Equal(projectIds[1]);
     }
 
     [Fact]
@@ -106,7 +103,7 @@ public class AiRoomProjectsVisibilityTests(AspireAppFixture fixture) : AiHubTest
 
         var page = await GetRoomProjectsAsync(roomId);
 
-        page.Ids.Should().Equal(projectIds);
+        IdsOf(page).Should().Equal(projectIds);
         page.Total.Should().Be(2);
     }
 
@@ -116,12 +113,12 @@ public class AiRoomProjectsVisibilityTests(AspireAppFixture fixture) : AiHubTest
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         var anotherRoomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         await _filesClient.Authenticate(roomAdmin);
-        var ownProject = await CreateProjectAsync("Autotest Own Project");
-        var roomId = await CreateInstructionsRoomAsync();
+        var ownProject = (await CreateSectionRoomAsync(RoomType.AiProjectRoom, "Autotest Own Project")).Id;
+        var roomId = (await CreateSectionRoomAsync(RoomType.InstructionsRoom)).Id;
         await LinkAsync(ownProject, roomId);
         await ShareRoomAsync(roomId, anotherRoomAdmin.Id, FileShare.RoomManager);
         await _filesClient.Authenticate(anotherRoomAdmin);
-        var otherProject = await CreateProjectAsync("Autotest Other Project");
+        var otherProject = (await CreateSectionRoomAsync(RoomType.AiProjectRoom, "Autotest Other Project")).Id;
         await LinkAsync(otherProject, roomId);
         await _filesClient.Authenticate(Owner);
         var all = await GetRoomProjectsAsync(roomId);
@@ -129,8 +126,8 @@ public class AiRoomProjectsVisibilityTests(AspireAppFixture fixture) : AiHubTest
 
         var page = await GetRoomProjectsAsync(roomId);
 
-        all.Ids.Should().BeEquivalentTo([ownProject, otherProject]);
-        page.Ids.Should().Equal(ownProject);
+        IdsOf(all).Should().BeEquivalentTo([ownProject, otherProject]);
+        IdsOf(page).Should().Equal(ownProject);
         page.Total.Should().Be(1);
     }
 }

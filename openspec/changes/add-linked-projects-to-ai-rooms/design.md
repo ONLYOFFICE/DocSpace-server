@@ -163,8 +163,10 @@ the `Bug` category; the citations of that file in `verification.md` follow its l
 
 ### 9. Tests before the SDK knows the change
 
-The SDK is regenerated after the change, so the tests call `getRoomProjects` over raw HTTP and read
-`linkedProjectsCount` from the raw JSON of the room, each with a comment that says why (`tests.md`).
+The tests were written before the SDK knew the change: they called `getRoomProjects` over raw HTTP and read
+`linkedProjectsCount` from the raw JSON of the room. Once the OpenAPI documents and the C# SDK package were
+regenerated on the branch, they moved to the SDK, with the rooms created and linked through it as well. One case
+stays over raw HTTP: an empty `count`, which the typed client cannot send.
 
 ## Who learns what
 

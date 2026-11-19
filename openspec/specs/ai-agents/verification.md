@@ -117,7 +117,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Audited (scenario) | `AI/Server/Service/AssignmentsStorageService.cs` (`AiProfileAssigned`, `AiProfileUnassigned`) | CODE-ONLY |
 | **The AI rooms section** | | |
 | Created by owner / admin / Room admin, User 403; section root (scenario "Section listing") | `Hub/AiHubRootTests.cs:48,63,124`; `Hub/AiProjectRoomTests.cs:46,63,77,87,101,132,164` | TEST-CONFIRMED [run: PASS] |
-| Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,81,92,105,118`; a private project 400: `Hub/AiHubRoomSettingsTests.cs:69` (not run yet) | TEST-CONFIRMED [run: PASS] |
+| Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,82,93,106,119`; a private project 400: `Hub/AiHubRoomSettingsTests.cs:69` (not run yet) | TEST-CONFIRMED [run: PASS] |
 | Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
 | Knowledge room needs vectorization 403 | `Security:1422,1441`; `AI/Core/Settings` | CODE-ONLY |
 | **Members of the AI rooms** | | |
@@ -147,31 +147,31 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Room linked to two projects (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:46` | TEST-CONFIRMED (not run yet) |
 | Room linked to no project (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:58` | TEST-CONFIRMED (not run yet) |
 | Room changed (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:69` | TEST-CONFIRMED (not run yet) |
-| Rooms of other types (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:81` | TEST-CONFIRMED (not run yet) |
-| Reader of the room outside the projects (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:97` | TEST-CONFIRMED (not run yet) |
-| Number follows the links (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:110` | TEST-CONFIRMED (not run yet) |
+| Rooms of other types (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:80` | TEST-CONFIRMED (not run yet) |
+| Reader of the room outside the projects (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:96` | TEST-CONFIRMED (not run yet) |
+| Number follows the links (scenario) | `Hub/AiRoomLinkedProjectsCountTests.cs:109` | TEST-CONFIRMED (not run yet) |
 | The same for a Knowledge room: the tests use an Instructions room, the stand has no vectorization | `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs` (`CarriesLinkedProjectsCount`) | CODE-ONLY |
 | **Listing the projects that use a room** | | |
-| Projects sorted by title (scenario) | `Hub/AiRoomProjectsListTests.cs:46` | TEST-CONFIRMED (not run yet) |
-| Projects with one title (scenario) | `Hub/AiRoomProjectsListTests.cs:59` | TEST-CONFIRMED (not run yet) |
-| Room linked to no project (scenario) | `Hub/AiRoomProjectsListTests.cs:70` | TEST-CONFIRMED (not run yet) |
-| Id that is no Knowledge or Instructions room (scenario) | `Hub/AiRoomProjectsListTests.cs:85` | TEST-CONFIRMED (not run yet) |
-| Caller who cannot read the room (scenario) | `Hub/AiRoomProjectsListTests.cs:103` | TEST-CONFIRMED (not run yet) |
+| Projects sorted by title (scenario) | `Hub/AiRoomProjectsListTests.cs:45` | TEST-CONFIRMED (not run yet) |
+| Projects with one title (scenario) | `Hub/AiRoomProjectsListTests.cs:58` | TEST-CONFIRMED (not run yet) |
+| Room linked to no project (scenario) | `Hub/AiRoomProjectsListTests.cs:69` | TEST-CONFIRMED (not run yet) |
+| Id that is no Knowledge or Instructions room (scenario) | `Hub/AiRoomProjectsListTests.cs:84` | TEST-CONFIRMED (not run yet) |
+| Caller who cannot read the room (scenario) | `Hub/AiRoomProjectsListTests.cs:102` | TEST-CONFIRMED (not run yet) |
 | One page (scenario) | `Hub/AiRoomProjectsPagingTests.cs:46` | TEST-CONFIRMED (not run yet) |
 | Start index past the end (scenario) | `Hub/AiRoomProjectsPagingTests.cs:58` | TEST-CONFIRMED (not run yet) |
-| Count of zero, negative count, count above the maximum, empty count, negative start index (scenarios) | `Hub/AiRoomProjectsPagingTests.cs:74` | TEST-CONFIRMED (not run yet) |
-| Largest count (scenario) | `Hub/AiRoomProjectsPagingTests.cs:86` | TEST-CONFIRMED (not run yet) |
+| Count of zero, negative count, count above the maximum, empty count, negative start index (scenarios) | `Hub/AiRoomProjectsPagingTests.cs:73,85` | TEST-CONFIRMED (not run yet) |
+| Largest count (scenario) | `Hub/AiRoomProjectsPagingTests.cs:97` | TEST-CONFIRMED (not run yet) |
 | **Who is listed among the projects of a room** | | |
-| Member of one of two projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:48` | TEST-CONFIRMED (not run yet) |
-| Reader of the room outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:67` | TEST-CONFIRMED (not run yet) |
-| Member who reads the room through a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:84` | TEST-CONFIRMED (not run yet) |
-| DocSpace admin outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:101` | TEST-CONFIRMED (not run yet) |
-| Creator of a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:114` | TEST-CONFIRMED (not run yet) |
+| Member of one of two projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:47` | TEST-CONFIRMED (not run yet) |
+| Reader of the room outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:66` | TEST-CONFIRMED (not run yet) |
+| Member who reads the room through a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:83` | TEST-CONFIRMED (not run yet) |
+| DocSpace admin outside the projects (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:98` | TEST-CONFIRMED (not run yet) |
+| Creator of a project (scenario) | `Hub/AiRoomProjectsVisibilityTests.cs:111` | TEST-CONFIRMED (not run yet) |
 | **Clients are told when the number of projects of a room changes** | | |
-| Room linked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:53` | TEST-CONFIRMED (not run yet) |
-| Room unlinked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:70` | TEST-CONFIRMED (not run yet) |
-| Project deleted (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:89` | TEST-CONFIRMED (not run yet) |
-| Nothing linked anew (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:108` | TEST-CONFIRMED (not run yet) |
+| Room linked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:46` | TEST-CONFIRMED (not run yet) |
+| Room unlinked (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:63` | TEST-CONFIRMED (not run yet) |
+| Project deleted (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:81` | TEST-CONFIRMED (not run yet) |
+| Nothing linked anew (scenario) | `products/ASC.Files/Tests/Tests/05_Features/Socket/SocketAiRoomLinkEventsTests.cs:100` | TEST-CONFIRMED (not run yet) |
 | **Skills of an Instructions room** | | |
 | Front matter rules, upload, chunked, new version (scenario "Invalid name") | `Instr/SkillUploadTests.cs:41-221` | TEST-CONFIRMED [run: PASS] |
 | Copy and move refused; no folder | `Instr/SkillMoveCopyTests.cs:58,90,107`; `Instr/InstructionsRoomFolderTests.cs:41,56,75,91` | TEST-CONFIRMED [run: PASS] |

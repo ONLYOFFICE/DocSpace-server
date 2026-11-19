@@ -70,11 +70,12 @@ public class AiHubRoomSettingsTests(AspireAppFixture fixture) : AiHubTestBase(fi
     {
         var privateRoom = await CreatePrivateRoom("Autotest Private Custom Room", RoomType.CustomRoom);
 
-        using var response = await CreateHubRoomResponseAsync(new { title = "Autotest Private Project", roomType = AiProjectRoomType, @private = true });
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateRoom(new CreateRoomRequestDto("Autotest Private Project", roomType: RoomType.AiProjectRoom, @private: true)));
 
         privateRoom.Private.Should().BeTrue();
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        IdsOf(await GetAiHubSectionAsync()).Should().BeEmpty();
+        exception.ErrorCode.Should().Be(400, exception.ErrorContent!.ToString());
+        (await GetAiHubFoldersAsync()).Should().BeEmpty();
     }
 
     [Fact]
