@@ -53,12 +53,20 @@ vi.mock("../chatContextSnapshot.js", () => ({
 const resolveAiProjectEntityId = vi.fn(async (id: string | undefined) =>
   id === "12" ? id : undefined,
 );
-vi.mock("../docspaceFilesApi.js", () => ({ resolveAiProjectEntityId }));
+vi.mock("../docspaceFilesApi.js", () => {
+  class DocspaceApiHttpError extends Error {
+    constructor(public readonly status: number) {
+      super(`DocSpace API ${status}`);
+    }
+  }
+  return { DocspaceApiHttpError, resolveAiProjectEntityId };
+});
 
 const setRoundThreadId = vi.fn();
 vi.mock("../../requestContext.js", () => ({ setRoundThreadId }));
 
 const { aiService } = await import("../httpClient.js");
+const { DocspaceApiHttpError } = await import("../docspaceFilesApi.js");
 const { HttpThreadsStorage } = await import("../threadsStorage.js");
 
 const thread = { id: "t-1", title: "Chat", lastEditDate: 1 };
@@ -120,6 +128,31 @@ describe("the project of a thread", () => {
   it("lists the threads of no project without a scope", async () => {
     await storage.readAll(undefined, 20);
     expect(aiService.get).toHaveBeenCalledWith("/threads", { query: { count: 20 } });
+  });
+
+  // A room the caller cannot open lists the same threads as no room at all.
+  it("lists the threads of no project for a folder the caller cannot open", async () => {
+    resolveAiProjectEntityId.mockRejectedValueOnce(
+      new DocspaceApiHttpError(403, "Forbidden", "url"),
+    );
+    await storage.readAll("40", 20);
+    expect(aiService.get).toHaveBeenCalledWith("/threads", { query: { count: 20 } });
+  });
+
+  it("fails the list when the folder cannot be read for another reason", async () => {
+    resolveAiProjectEntityId.mockRejectedValueOnce(
+      new DocspaceApiHttpError(503, "Unavailable", "url"),
+    );
+    await expect(storage.readAll("40", 20)).rejects.toMatchObject({ status: 503 });
+    expect(aiService.get).not.toHaveBeenCalled();
+  });
+
+  it("refuses a thread in a folder the caller cannot open", async () => {
+    resolveAiProjectEntityId.mockRejectedValueOnce(
+      new DocspaceApiHttpError(403, "Forbidden", "url"),
+    );
+    await expect(storage.create("Chat", undefined, "40")).rejects.toMatchObject({ status: 403 });
+    expect(aiService.post).not.toHaveBeenCalled();
   });
 
   it("keeps the scope on every page of a whole-list read", async () => {
