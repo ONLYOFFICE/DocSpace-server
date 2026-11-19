@@ -93,6 +93,12 @@ public partial class FilesDbContext
             .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
     }
 
+    [PreCompileQuery]
+    public Task<int> DeleteAiProjectSharesAsync(int tenantId, Guid userId)
+    {
+        return AiIntegrationQueries.DeleteAiProjectSharesAsync(this, tenantId, userId);
+    }
+
     public Task<int> MarkOwnedAiProjectThreadsDeletedAsync(int tenantId, Guid userId, DateTime deletedOn)
     {
         return Threads
@@ -113,6 +119,15 @@ public partial class FilesDbContext
 
 static file class AiIntegrationQueries
 {
+    public static readonly Func<FilesDbContext, int, Guid, Task<int>> DeleteAiProjectSharesAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, Guid userId) =>
+            ctx.Security
+                .Where(r => r.TenantId == tenantId && r.Subject == userId && r.EntryType == FileEntryType.Folder &&
+                            ctx.Folders.Any(f => f.TenantId == tenantId &&
+                                                 f.Id == r.InternalEntryId &&
+                                                 f.FolderType == FolderType.AiProjectRoom))
+                .ExecuteDelete());
+
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, Task> DeleteThreadsByFolderIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, IEnumerable<int> folderIds) =>
             ctx.Threads

@@ -90,6 +90,26 @@ internal abstract class SecurityBaseDao<T>(
         });
     }
 
+    public async Task RemoveFromAiProjectsAsync(Guid userId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var deletedOn = ThreadsStorage.TruncateToMilliseconds(DateTime.UtcNow);
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tr = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteAiProjectSharesAsync(tenantId, userId);
+            await context.MarkAiProjectThreadsDeletedAsync(tenantId, userId, deletedOn);
+
+            await tr.CommitAsync();
+        });
+    }
+
     public async Task MarkAiProjectThreadsDeletedAsync(Guid userId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

@@ -16,8 +16,8 @@ Viewer.
 
 #### Scenario: Thread closed when the job completes
 
-- **WHEN** a member with a thread in a project is converted to Guest and the job completes
-- **THEN** the thread answers 404 before the background pass has run
+- **WHEN** a User who reads their thread in a project is converted to Guest, the job completes and the user is converted back to User
+- **THEN** the thread answers 404 to the user
 
 #### Scenario: Other members
 

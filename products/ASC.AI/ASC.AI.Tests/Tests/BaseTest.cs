@@ -217,6 +217,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected HttpClient PeopleHttpClient => _clients.PeopleHttpClient;
     protected ProfilesApi ProfilesApi => _clients.ProfilesApi;
     protected UserStatusApi UserStatusApi => _clients.UserStatusApi;
+    protected UserTypeApi UserTypeApi => _clients.UserTypeApi;
     protected UserDataApi UserDataApi => _clients.UserDataApi;
 
     // Web.Api, for portal settings and quotas. Starts unsigned: authenticate it before the first call.

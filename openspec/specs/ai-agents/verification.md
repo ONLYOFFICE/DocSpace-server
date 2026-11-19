@@ -455,6 +455,10 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Other members; invited again (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:105,125` | TEST-CONFIRMED |
 | Owner and member remove the project from the list (scenarios) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:148,172` | TEST-CONFIRMED |
 | Owner changed (scenario) | `T/ProjectMemberRemovalTests/ProjectMemberRemovalTests.cs:192` | TEST-CONFIRMED |
+| **Converting a member to Guest removes them from the projects** |  |  |
+| Member converted; thread closed when the job completes (scenarios) | `T/GuestConversionTests/GuestConversionTests.cs:43,66` | TEST-CONFIRMED |
+| Other members; owner of a project converted (scenarios) | `T/GuestConversionTests/GuestConversionTests.cs:85,105` | TEST-CONFIRMED |
+| Member of an agent converted (scenario) | `T/GuestConversionTests/GuestConversionTests.cs:126` | TEST-CONFIRMED |
 | **Thread list of an AI project** |  |  |
 | Thread started in a project; thread started in a room (scenarios) | `T/ChatTests/ChatProjectThreadListTests.cs:41,62` | TEST-CONFIRMED |
 | **Deleting a profile deletes its project threads** |  |  |
