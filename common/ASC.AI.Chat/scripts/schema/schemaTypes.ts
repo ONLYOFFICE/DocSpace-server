@@ -850,7 +850,7 @@ export type Res_aiTemplatesInstall = TemplateRoom & {
   skillSets: TemplateRoom[];
   /** The Knowledge rooms made for an agent's knowledge bases; empty for the other kinds. */
   knowledgeBases: TemplateRoom[];
-  /** What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` when its instructions could not be stored. */
+  /** What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` for every agent, as its instructions are not installed yet. */
   warnings: string[];
 };
 

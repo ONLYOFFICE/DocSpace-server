@@ -205,7 +205,7 @@ describe("installTemplate", () => {
     expect(result.kind).toBe("knowledgeBase");
   });
 
-  it("installs an agent in its colour and cover, tagged with its category, links its sources and writes its model and instructions", async () => {
+  it("installs an agent in its colour and cover, tagged with its category, links its sources and writes its model, and says its instructions were skipped", async () => {
     const template = catalog.agents[0]!;
     const result = await installTemplate(catalog, template.id);
     const room = (id: string, roomType: number) => {
@@ -218,7 +218,6 @@ describe("installTemplate", () => {
       ["POST", "rooms", { ...room(template.id, 12), tags: [template.category] }],
       ["POST", "rooms/103/sources", { roomIds: [101, 102] }],
       ["PUT", "rooms/103/model", { profileId: "p1" }],
-      ["PUT", "rooms/103/instructions", { instructions: template.instructions }],
     ]);
     expect(result).toMatchObject({
       templateId: template.id,
@@ -226,14 +225,14 @@ describe("installTemplate", () => {
       kind: "agent",
       skillSets: [{ templateId: template.skills[0], id: "101" }],
       knowledgeBases: [{ templateId: template.knowledges[0], id: "102" }],
-      warnings: [],
+      warnings: ["instructionsNotSaved"],
     });
   });
 
   it("keeps the agent when the portal has no chat model, and says so", async () => {
     portalChatProfileId.mockResolvedValue(null);
     const result = await installTemplate(catalog, catalog.agents[0]!.id);
-    expect(result.warnings).toEqual(["modelNotSaved"]);
+    expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
     expect(
       vi.mocked(filesApiSend).mock.calls.some(([, apiPath]) => apiPath.endsWith("/model")),
     ).toBe(false);
@@ -242,7 +241,7 @@ describe("installTemplate", () => {
   it("keeps the agent when the portal's chat model cannot be read, and says so", async () => {
     portalChatProfileId.mockRejectedValue(new Error("AI service down"));
     const result = await installTemplate(catalog, catalog.agents[0]!.id);
-    expect(result.warnings).toEqual(["modelNotSaved"]);
+    expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
   });
 
   it("keeps the agent when its model is refused, and says so", async () => {
@@ -253,18 +252,7 @@ describe("installTemplate", () => {
       return apiPath === "rooms" ? { id: 7, title: (body as { title: string }).title } : undefined;
     });
     const result = await installTemplate(catalog, catalog.agents[0]!.id);
-    expect(result.warnings).toEqual(["modelNotSaved"]);
-  });
-
-  it("keeps the agent when its instructions are refused, and says so", async () => {
-    vi.mocked(filesApiSend).mockImplementation(async (method, apiPath, body) => {
-      if (method === "PUT" && apiPath.endsWith("/instructions")) {
-        throw new DocspaceApiHttpError(404, "Not Found", "url");
-      }
-      return apiPath === "rooms" ? { id: 7, title: (body as { title: string }).title } : undefined;
-    });
-    const result = await installTemplate(catalog, catalog.agents[0]!.id);
-    expect(result.warnings).toEqual(["instructionsNotSaved"]);
+    expect(result.warnings).toEqual(["modelNotSaved", "instructionsNotSaved"]);
   });
 
   it("fails with the Files status when a room is refused, before anything is uploaded", async () => {

@@ -36,15 +36,16 @@
  * client would by hand. A skill set becomes an Instructions room holding its
  * skills, a knowledge base a Knowledge room holding its files, and an agent
  * an AI project room linked to the rooms of its skill sets and knowledge
- * bases, which are installed with it, and given the portal's chat model and
- * its instructions.
+ * bases, which are installed with it, and given the portal's chat model.
  *
  * Every install makes new rooms: nothing is matched against what the portal
  * already holds. A step the Files service refuses fails the install with its
- * status, and the rooms made before it stay. The agent's model and its
- * instructions are the exceptions: a portal that has no chat model, or does
- * not store one of the two, still gets the agent, and the answer says so in
- * `warnings`. Every room takes its template's colour and cover. An agent
+ * status, and the rooms made before it stay. The agent's model is the
+ * exception: a portal that has no chat model, or does not store it, still
+ * gets the agent, and the answer says so in `warnings`. The agent's
+ * instructions are not installed: the Files service has no route that stores
+ * them yet, so every agent comes with `instructionsNotSaved` in `warnings`
+ * and no request is made. Every room takes its template's colour and cover. An agent
  * carries its template's category as a tag, which is
  * what the Agents list filters categories by; a template's description has
  * nowhere to go in a room and is not installed.
@@ -75,7 +76,7 @@ export interface InstalledTemplate extends InstalledRoom {
   skillSets: InstalledRoom[];
   /** The Knowledge rooms made for an agent's knowledge bases; empty otherwise. */
   knowledgeBases: InstalledRoom[];
-  /** What was skipped: `modelNotSaved`, `instructionsNotSaved`. */
+  /** What was skipped: `modelNotSaved`; `instructionsNotSaved` for every agent. */
   warnings: string[];
 }
 
@@ -165,17 +166,9 @@ async function installAgent(
     logger.warn(`installTemplate: ${template.id}: model not saved (${err.status})`);
     warnings.push("modelNotSaved");
   }
-  try {
-    await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/instructions`, {
-      instructions: template.instructions,
-    });
-  } catch (err) {
-    if (!(err instanceof DocspaceApiHttpError)) {
-      throw err;
-    }
-    logger.warn(`installTemplate: ${template.id}: instructions not saved (${err.status})`);
-    warnings.push("instructionsNotSaved");
-  }
+  // Nothing stores an agent's instructions yet (the Files service has no
+  // `rooms/{id}/instructions`), so they are skipped and the caller is told.
+  warnings.push("instructionsNotSaved");
   logger.info(`installTemplate: ${template.id} -> agent ${agent.id}`);
   return { ...agent, kind: "agent", skillSets, knowledgeBases, warnings };
 }
