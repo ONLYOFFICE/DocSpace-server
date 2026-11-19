@@ -35,7 +35,9 @@ namespace ASC.Web.Api.Billing.Tests.Tests.Renewal;
 
 /// <summary>
 /// The renewal of a subscription paid from the wallet, which Web.Studio (<c>RenewSubscriptionService</c>) makes by itself
-/// shortly before the due date: the wallet is topped up for what it lacks, then billing is asked for the next period.
+/// shortly before the due date: the wallet is topped up for what it and the bonus lack, then billing is asked for the
+/// next period. These portals have no bonus: the goodwill read is not scripted, and the stub's refusal of it counts
+/// as none.
 /// </summary>
 public class WalletRenewalTests(AspireAppFixture fixture) : BaseTest(fixture)
 {

@@ -485,6 +485,16 @@ public class TariffService(
         return result;
     }
 
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string initiator)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var result = await billingClient.ApplyPromoCodeAsync(portalId, promoCode, initiator);
+        // The bonus lands on the goodwill account, which is never cached. Only a failed read of the wallet balance is,
+        // and it must not outlive a call that has just reached the portal's customer - as after every other write.
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+        return result;
+    }
+
     public async Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
     {
         if (!billingClient.Configured)
@@ -1645,16 +1655,25 @@ public class TariffService(
     }
 
     /// <summary>
-    /// Tops the wallet up for what it lacks of <paramref name="requiredAmount"/>, in up to five deposits, and reports
-    /// whether it covers the amount then. The token is checked before each deposit and ends the poll of the balance
-    /// that follows one: once it is cancelled, no further deposit is begun and the method throws
-    /// <see cref="OperationCanceledException"/>. A deposit already sent is let finish and announced to the clients
-    /// first, so a caller that stops it by a deadline does not know whether that deposit was applied, but the clients
-    /// are told of it.
+    /// Tops the wallet up for what the wallet and the bonus lack of <paramref name="requiredAmount"/>, in up to five
+    /// deposits, and reports whether they cover the amount then. The token ends the poll of the balance after a deposit,
+    /// and once it is cancelled no further deposit is begun. A cancellation the method sees before a deposit, or once a
+    /// deposit and its announcement are done, throws <see cref="OperationCanceledException"/> without reading the
+    /// balance again, also when that deposit covered the amount. One that falls during the reads after a deposit is
+    /// seen only before the next deposit, so when none follows, the method reports what those reads gave. With
+    /// <paramref name="allowTopUp"/> false the token is not checked. A deposit already sent is let finish and
+    /// announced to the clients first, so a caller that stops it by a deadline does not know whether that deposit was
+    /// applied, but the clients are told of it.
     /// </summary>
     public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true, CancellationToken cancellationToken = default)
     {
-        var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+        // The accounting service spends the bonus credits before the wallet money, a payment from the wallet for the
+        // subscription included, so the portal can pay with both. Charges running meanwhile spend the bonus first, so
+        // it is read again with the wallet after every top-up. A bonus that cannot be read before the first top-up
+        // counts as none: the wallet is then topped up as if there were no bonus. A later read that fails keeps the
+        // bonus read before, so a failed read never fires a deposit of its own after a confirmed one.
+        var goodwillAmount = await GetGoodwillAmountAsync(tenantId, currency) ?? 0;
+        var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency) + goodwillAmount;
 
         // A delayed payment method accepts the deposit right away, but the money is credited only
         // once the transfer settles, so the balance cannot reflect it within this call and the loop below would
@@ -1677,15 +1696,17 @@ public class TariffService(
             var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true, cancellationToken);
             if (toppedUp)
             {
+                // The money has moved, so a failure to tell the clients must not fail the purchase that waits for it:
+                // the purchase is funded by then.
                 try
                 {
                     var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
                     await quotaSocketManager.TopUpWallet(auto);
                 }
-                catch (Exception ex)
+                catch (Exception e)
                 {
-                    // best effort: the deposit is made, a client that misses the event reads the balance on its next request
-                    logger.WarningWithException(ex);
+                    // a client that misses the event reads the balance on its next request
+                    logger.WarningWalletChangeNotSent(tenantId, e);
                 }
             }
 
@@ -1693,7 +1714,8 @@ public class TariffService(
             // read of the balance and no further deposit.
             cancellationToken.ThrowIfCancellationRequested();
 
-            balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+            goodwillAmount = await GetGoodwillAmountAsync(tenantId, currency) ?? goodwillAmount;
+            balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency) + goodwillAmount;
 
             if (outcome == TopUpOutcome.Unknown)
             {
@@ -1716,6 +1738,25 @@ public class TariffService(
         Unknown
     }
 
+    // The bonus in the given currency, 0 for a portal without one, or null when the goodwill account could not be read.
+    private async Task<decimal?> GetGoodwillAmountAsync(int tenantId, string currency)
+    {
+        var (goodwill, known) = await ReadCustomerGoodwillAsync(tenantId);
+        if (!known)
+        {
+            return null;
+        }
+
+        if (goodwill == null)
+        {
+            return 0;
+        }
+
+        // Only credits that have not ended pay: the accounting service may write an ended one off later. A negative
+        // amount is no money to pay with, so it never raises the top-up above the shortfall of the wallet.
+        return goodwill.SpendableAmount(currency, DateTime.UtcNow);
+    }
+
     private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)
     {
         var balance = await GetCustomerBalanceAsync(tenantId, true);
@@ -1724,13 +1765,9 @@ public class TariffService(
             throw new ItemNotFoundException("Balance could not be found");
         }
 
-        var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
-        if (subAccount == null)
-        {
-            throw new ItemNotFoundException("Subaccount could not be found");
-        }
-
-        return subAccount.Amount;
+        // A customer who has linked a card but never topped up the wallet has no wallet sub-account, also with a bonus
+        // credited: that is an empty wallet, so the bonus still counts and the shortfall is topped up.
+        return balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0;
     }
 
     #region Accounting
@@ -1817,6 +1854,38 @@ public class TariffService(
         }
 
         return balance;
+    }
+
+    public async Task<GoodwillBalance> GetCustomerGoodwillAsync(int tenantId)
+    {
+        return (await ReadCustomerGoodwillAsync(tenantId)).Goodwill;
+    }
+
+    public async Task<(GoodwillBalance Goodwill, bool Known)> ReadCustomerGoodwillAsync(int tenantId)
+    {
+        if (!accountingClient.Configured)
+        {
+            return (null, true);
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return (await accountingClient.GetCustomerGoodwillAsync(portalId), true);
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+
+            return (null, true);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return (null, false);
+        }
     }
 
     public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)

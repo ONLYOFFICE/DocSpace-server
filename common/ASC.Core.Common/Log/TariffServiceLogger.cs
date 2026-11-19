@@ -55,6 +55,9 @@ internal static partial class TariffServiceLogger
     [LoggerMessage(LogLevel.Error, "Billing tenant {tenantId}: {message}")]
     public static partial void ErrorBilling(this ILogger<TariffService> logger, string tenantId, string message);
 
+    [LoggerMessage(LogLevel.Warning, "The clients of tenant {tenantId} were not told that the wallet changed")]
+    public static partial void WarningWalletChangeNotSent(this ILogger<TariffService> logger, int tenantId, Exception exception);
+
     [LoggerMessage(LogLevel.Warning, "The clients of tenant {tenantId} could not be told that its tariff changed")]
     public static partial void WarningTariffChangedNotification(this ILogger<TariffService> logger, int tenantId, Exception exception);
 

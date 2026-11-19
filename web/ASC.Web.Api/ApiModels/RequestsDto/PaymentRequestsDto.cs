@@ -232,6 +232,24 @@ public class TopUpDepositRequestDto
 }
 
 /// <summary>
+/// The promo code to redeem for the portal.
+/// </summary>
+public class ApplyPromoCodeRequestDto
+{
+    /// <summary>
+    /// The promo code as it was handed out.
+    /// </summary>
+    /// <example>K7QX-M42P-9TRB</example>
+    [Required]
+    [StringLength(100)]
+    public string PromoCode
+    {
+        get;
+        set => field = value?.Trim();
+    }
+}
+
+/// <summary>
 /// Which wallet service is looked up in the billing catalogue.
 /// </summary>
 public class GetWalletServiceRequestDto
