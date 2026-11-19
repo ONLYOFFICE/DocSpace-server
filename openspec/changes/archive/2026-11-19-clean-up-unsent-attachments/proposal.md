@@ -80,7 +80,7 @@ No row of `openspec/deviations.md` is touched.
   instead of deleting them.
 - **AI worker**: the pass for unsent drafts reads its settings with bounds, sets the portal of each group of
   drafts and removes the drafts with their files in projects through the Files service.
-- **Files service**: a new method removes drafts and their unsent files in a project in one transaction and
-  returns the size to the project.
+- **Files service**: a new method finds the unsent files of drafts in a project; the AI project service
+  deletes them with the existing file deletion, returns their size to the project and then deletes the drafts.
 - **Chat service** (`common/ASC.AI.Chat`): the descriptions of the two delete operations.
 - **Test stack**: the pass runs every 5 seconds in the `integration-test` profile.

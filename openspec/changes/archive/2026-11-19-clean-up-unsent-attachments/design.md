@@ -53,25 +53,29 @@ the routes (the file holds the project's space for the whole lifetime).
 **A row linked to a message is never touched.** The aging update, the read of the pass and the deletion of
 rows all carry `message_id is null`. Deleting a linked attachment through the routes changes nothing.
 
-**Rows and files go in one transaction of `FilesDbContext`.** `FilesDbContext` maps the attachments table.
-A new `IFileDao<int>` method takes the ids of a batch for the current portal and, in one transaction, deletes
-the rows that are still unlinked, then reads the files they pointed at that lie in a folder of type
-`AiProjectRoom` and were created by the row's creator, and deletes those files with the steps of
-`DeleteFilesAsync`. It is a thin entry into the existing deletion: the body of `DeleteFilesAsync` takes an
-optional step that runs first inside its transaction, as `SaveThreadFileAsync` passes its thread to the body
-of `SaveFileAsync`. The method returns the files it deleted. The third-party DAOs throw `NotSupportedException`.
-A failure rolls both back, so a file in the root of a project never loses its row.
+**Files first, rows last, no shared transaction.** A new `IFileDao<int>` method only reads: for the ids of a
+batch of the current portal it returns the files the still unlinked rows (`message_id is null`) point at
+that lie in a folder of type `AiProjectRoom` and were created by the row's creator, with their project and
+size. The third-party DAOs throw `NotSupportedException`. The files are then deleted through the existing
+`DeleteFilesAsync`, untouched, and the rows last, through `AttachmentsStorage` with `message_id is null`.
+A failure after the files are gone leaves the rows; the next pass finds no file for them and deletes the
+rows only. The opposite order would leave a file in the root of a project without the row that is the only
+way to find it. Until the rows go, a draft whose file was deleted can still be read; it is already one the
+pass removes.
 
 **Racing a link.** Linking moves the file out of the root first and binds the row after, in two
-transactions. If the move commits first, the pass deletes the unlinked row, finds the file outside the root
-and leaves it in the thread's folder, where the thread's deletion removes it; the link then binds nothing.
-If the pass commits first, the move finds no file and the link fails; a repeat answers 404 for the missing
-attachment. No lock is added: a link needs a draft the client kept for the whole lifetime or deleted itself.
+transactions. If the move commits before the pass reads, the pass finds the file outside the root and
+leaves it in the thread's folder, where the thread's deletion removes it; the row is deleted unless the
+link has bound it by then. If the pass deletes the file first, the move finds no file and the link fails;
+a repeat answers 404 once the row is gone. If the move commits between the pass's read and its delete, the
+file is deleted from the thread's folder and the message keeps an attachment without its file. No lock is
+added: a link needs a draft the client kept for the whole lifetime or deleted itself.
 
-**`AiProjectThreadsService` calls it and returns the size.** A new method of `AiProjectThreadsService`
-(Files.Core) calls the DAO method and then `ChangeTreeFolderSizeAsync` once per project with minus the size
-of the files that were deleted, as `DeleteFolderAsync` does for a thread. A failure between the two leaves
-the project's size too high, as for a thread.
+**`AiProjectThreadsService` drives the steps and returns the size.** A new method of
+`AiProjectThreadsService` (Files.Core) reads the files, deletes them, calls `ChangeTreeFolderSizeAsync` once
+per project with minus the size of the files that were deleted, as `DeleteFolderAsync` does for a thread,
+and deletes the rows last. A failure between the deletion of the files and the size update leaves the
+project's size too high, as for a thread.
 
 **The pass walks a cursor, a portal at a time.** The read takes unlinked rows older than the cutoff after
 the cursor (`created_at`, `id`), ordered by both, 100 at a time, as `DeletedThreadsCleanerService` does; a
@@ -83,7 +87,7 @@ logged in `finally`.
 
 **Settings with bounds.** `ai:orphanAttachmentsCleaner:period` and `:lifetime` are read once with
 `ReadInterval`: the period defaults to 15 minutes within 5 seconds and 1 day, the lifetime to 2 hours within
-1 minute and 7 days. Neither key is set in `buildtools/config` or in the AppHost today. The
+30 minutes and 7 days; a lower bound of minutes would let a misread value take a draft out of a composer while the message is typed. Neither key is set in `buildtools/config` or in the AppHost today. The
 `integration-test` branch of `ProjectConfigurator` sets the period to `0.00:00:05`, as for the deleted
 threads; the lifetime keeps its default there.
 
@@ -102,7 +106,8 @@ covers linked attachments; they are rewritten to the new behaviour. Nothing else
 - [The size of a project stays too high if the process stops between the deletion and the size update] →
   The same window exists for a deleted thread; the next upload or deletion does not correct it.
 - [A link that races the pass] → Covered above; the outcome is a file in the thread's folder or a 404,
-  never a lost file of a sent message.
+  except when the move commits between the pass's read and its delete: then the sent message loses the file.
+  The window is two statements of one pass, for a draft the client kept for the whole lifetime or deleted.
 
 ## Migration Plan
 
