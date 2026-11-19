@@ -57,8 +57,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
-    [SwaggerResponse(500, "`tags` is not a JSON array of strings")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or `tags` is not a JSON array of strings")]
     [HttpGet("agents")]
     public async Task<FolderContentDto<int>> GetAgents(GetAgentListRequestDto inDto)
     {
@@ -66,9 +65,22 @@ public class AgentsController(
 
         HashSet<FilterType> filter = [FilterType.AiRooms];
 
-        var tagNames = !string.IsNullOrEmpty(inDto.Tags)
-            ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags)
-            : null;
+        IEnumerable<string>? tagNames = null;
+
+        if (!string.IsNullOrEmpty(inDto.Tags))
+        {
+            try
+            {
+                tagNames = JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags);
+            }
+            catch (JsonException)
+            {
+                // the parameter carries a JSON array as a string; anything else - a bare tag name, an array with a
+                // number in it - used to end the request as 500. A malformed query value is the caller's mistake: 400,
+                // as GET api/2.0/files/rooms answers for the same parameter
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(inDto.Tags));
+            }
+        }
 
         OrderBy? orderBy = null;
         if (SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
@@ -120,7 +132,6 @@ public class AgentsController(
     [SwaggerResponse(402, "The portal has reached the AI agent limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
     [SwaggerResponse(403, "The caller is a user or a guest, `private` is set while the caller has no encryption keys or the connected document server cannot work with encrypted files, `quota` is set while the storage quota for AI agents is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
     [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
-    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("agents")]
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
     {
@@ -176,7 +187,6 @@ public class AgentsController(
     [SwaggerResponse(402, "The new logo or watermark image does not fit into the portal storage quota")]
     [SwaggerResponse(403, "The caller may not edit the agent, the agent lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
     [SwaggerResponse(404, "The AI agent is not found, or the uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists")]
-    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPut("agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
     {
