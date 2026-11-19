@@ -247,6 +247,16 @@ public class FolderDto<T> : FileEntryDto<T>
     /// </summary>
     /// <example>42</example>
     public int? OriginalFormId { get; set; }
+
+    /// <summary>
+    /// How many AI projects use the room as a source. Every project the room is linked to is counted, the ones the
+    /// caller may not read included, so the number can be higher than the list of `GET
+    /// api/2.0/files/rooms/{id}/projects` is long. 0 means that no project uses the room. Filled in for a Knowledge
+    /// and an Instructions room only: null for every other room type, an AI project included, and for a folder that
+    /// is not a room.
+    /// </summary>
+    /// <example>2</example>
+    public int? LinkedProjectsCount { get; set; }
 }
 
 [Scope]
@@ -277,17 +287,30 @@ public class FolderDtoHelper(
     BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IFusionCache fusionCache,
     MetadataTemplatesCache metadataTemplatesCache,
+    AiProjectRoomDao aiProjectRoomDao,
     ILogger<FileEntryDtoHelper> logger)
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
     private readonly TenantManager _tenantManager = tenantManager;
 
+    public async Task<Dictionary<int, int>> GetLinkedProjectsCountsAsync(IEnumerable<FileEntry> entries)
+    {
+        var roomIds = entries.OfType<Folder<int>>().Where(CarriesLinkedProjectsCount).Select(f => f.Id).ToList();
+        if (roomIds.Count == 0)
+        {
+            return null;
+        }
+
+        return await aiProjectRoomDao.GetProjectsCountsAsync(_tenantManager.GetCurrentTenantId(), roomIds);
+    }
+
     public async Task<FolderDto<T>> GetAsync<T>(
         Folder<T> folder,
         List<FileShareRecord<string>> currentUserRecords = null,
         string order = null,
-        IFolder contextFolder = null)
+        IFolder contextFolder = null,
+        IReadOnlyDictionary<int, int> linkedProjectsCounts = null)
     {
         var result = await GetFolderWrapperAsync(folder);
         result.ParentId = folder.ParentId;
@@ -306,6 +329,12 @@ public class FolderDtoHelper(
 
             result.Logo = await roomLogoManager.GetLogoAsync(folder);
             result.RoomType = DocSpaceHelper.MapToRoomType(folder.FolderType);
+
+            if (folder is Folder<int> internalRoom && CarriesLinkedProjectsCount(internalRoom))
+            {
+                linkedProjectsCounts ??= await aiProjectRoomDao.GetProjectsCountsAsync(_tenantManager.GetCurrentTenantId(), [internalRoom.Id]);
+                result.LinkedProjectsCount = linkedProjectsCounts.GetValueOrDefault(internalRoom.Id);
+            }
 
             if (folder.ProviderEntry)
             {
@@ -559,6 +588,11 @@ public class FolderDtoHelper(
         result.Logo = await roomLogoManager.GetLogoAsync(folder);
 
         return result;
+    }
+
+    private static bool CarriesLinkedProjectsCount(Folder<int> folder)
+    {
+        return folder is { FolderType: FolderType.KnowledgeRoom or FolderType.InstructionsRoom, RootFolderType: FolderType.AiHub };
     }
 
     private async Task<FolderDto<T>> GetFolderWrapperAsync<T>(Folder<T> folder)

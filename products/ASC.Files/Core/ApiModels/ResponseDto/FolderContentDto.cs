@@ -162,6 +162,10 @@ public class FolderContentDtoHelper(
 
         var aiStatus = await accessibility.GetStatusAsync();
 
+        var linkedProjectsCounts = folderItems.FolderInfo is { FolderType: FolderType.AiHub }
+            ? await folderWrapperHelper.GetLinkedProjectsCountsAsync(folderItems.Entries)
+            : null;
+
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
             var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
@@ -286,7 +290,7 @@ public class FolderContentDtoHelper(
         {
             return folderEntry switch
             {
-                Folder<int> fol1 => await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder),
+                Folder<int> fol1 => await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, linkedProjectsCounts),
                 Folder<string> fol2 => await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder),
                 _ => null,
             };

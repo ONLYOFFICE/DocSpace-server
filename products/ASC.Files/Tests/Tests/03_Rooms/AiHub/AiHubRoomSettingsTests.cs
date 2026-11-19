@@ -66,6 +66,18 @@ public class AiHubRoomSettingsTests(AspireAppFixture fixture) : AiHubTestBase(fi
     }
 
     [Fact]
+    public async Task CreateProject_Private_Returns400()
+    {
+        var privateRoom = await CreatePrivateRoom("Autotest Private Custom Room", RoomType.CustomRoom);
+
+        using var response = await CreateHubRoomResponseAsync(new { title = "Autotest Private Project", roomType = AiProjectRoomType, @private = true });
+
+        privateRoom.Private.Should().BeTrue();
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        IdsOf(await GetAiHubSectionAsync()).Should().BeEmpty();
+    }
+
+    [Fact]
     public async Task CreateInstructionsRoom_WithIndexing_Returns400()
     {
         // Act

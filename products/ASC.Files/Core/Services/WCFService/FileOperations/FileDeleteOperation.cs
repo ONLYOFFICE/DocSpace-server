@@ -290,6 +290,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                 else
                 {
                     var immediately = _immediately || !FolderDao.UseTrashForRemoveAsync(folder);
+                    var projectRoomIds = immediately ? await GetProjectRoomIdsAsync(scope, folder) : null;
                     if (immediately && FolderDao.UseRecursiveOperation(folder.Id, default(T)))
                     {
                         // fast path: the whole subtree is checked and cleaned at once, folder rows are
@@ -393,6 +394,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                     _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                                 }
                             }
+
+                            await NotifyProjectRoomsUpdatedAsync(scope, projectRoomIds);
 
                             ProcessedFolder(folderId);
                         }
@@ -499,6 +502,8 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                                         _ = quotaSocketManager.ChangeQuotaUsedValueAsync(name, value);
                                     }
                                 }
+
+                                await NotifyProjectRoomsUpdatedAsync(scope, projectRoomIds);
                             }
                             else
                             {
@@ -530,6 +535,43 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             }
 
             await ProgressStep(canCalculate);
+        }
+    }
+
+    private async Task<List<int>> GetProjectRoomIdsAsync(IServiceScope scope, Folder<T> folder)
+    {
+        if (folder is not Folder<int> { FolderType: FolderType.AiProjectRoom } project)
+        {
+            return null;
+        }
+
+        return await scope.ServiceProvider.GetService<AiProjectRoomDao>().GetRoomIdsAsync(CurrentTenantId, project.Id);
+    }
+
+    private async Task NotifyProjectRoomsUpdatedAsync(IServiceScope scope, List<int> roomIds)
+    {
+        if (roomIds is not { Count: > 0 })
+        {
+            return;
+        }
+
+        var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var folderDao = scope.ServiceProvider.GetService<IFolderDao<int>>();
+
+        foreach (var roomId in roomIds)
+        {
+            try
+            {
+                var room = await folderDao.GetFolderAsync(roomId);
+                if (room != null)
+                {
+                    await socketManager.UpdateFolderAsync(room);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.WarningRoomUpdateEventNotSent(e, roomId);
+            }
         }
     }
 

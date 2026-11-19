@@ -40,6 +40,7 @@ public class AiHubController(
     AiHubService aiHubService,
     AiProjectSourcesDtoMapper aiProjectSourcesDtoMapper,
     AiSkillsDtoMapper aiSkillsDtoMapper,
+    AiRoomProjectDtoMapper aiRoomProjectDtoMapper,
     FolderContentDtoHelper folderContentDtoHelper,
     ApiContext apiContext,
     FolderDtoHelper folderDtoHelper,
@@ -179,6 +180,47 @@ public class AiHubController(
         var rooms = await aiHubService.GetSkillsAsync(inDto.RoomIds);
 
         return await aiSkillsDtoMapper.MapAsync(rooms);
+    }
+
+    /// <remarks>
+    /// Returns the AI projects that use a Knowledge or an Instructions room as a source, one page at a time.
+    /// Requires read access to the room. Other callers get 403.
+    /// The call is read-only.
+    /// It lists only the projects the caller may read.
+    /// A DocSpace admin reads every project.
+    /// Other callers read the projects they created or are members of.
+    /// So the list can be shorter than `linkedProjectsCount` of the room, which counts every project.
+    /// The call sorts the projects by title.
+    /// The total in the answer counts the listed projects of all pages.
+    /// A room that no listed project uses gives an empty list.
+    /// An unknown ID or another kind of room, such as an AI project, returns 404.
+    /// The call returns 400 if `count` or `startIndex` is out of range.
+    /// It also returns 403 if AI features are turned off on the portal.
+    /// To see the rooms that a project uses, use `GET api/2.0/files/rooms/{id}/sources`.
+    /// </remarks>
+    /// <summary>Get the AI projects of a room</summary>
+    /// <path>api/2.0/files/rooms/{id}/projects</path>
+    /// <collection>list</collection>
+    [Tags("Rooms / AI")]
+    [SwaggerResponse(200, "One page of the AI projects that use the room and that the caller may read", typeof(IEnumerable<AiRoomProjectDto>))]
+    [SwaggerResponse(400, "`count` is outside its allowed range or `startIndex` is negative")]
+    [SwaggerResponse(403, "The caller may not read the room, or the AI features are turned off on the portal")]
+    [SwaggerResponse(404, "No Knowledge or Instructions room has this id")]
+    [HttpGet("{id}/projects")]
+    public async Task<IEnumerable<AiRoomProjectDto>> GetRoomProjects(GetAiRoomProjectsRequestDto inDto)
+    {
+        var (projects, total) = await aiHubService.GetRoomProjectsAsync(inDto.Id, inDto.StartIndex, inDto.Count);
+
+        apiContext.SetCount(projects.Count).SetTotalCount(total);
+
+        var result = new List<AiRoomProjectDto>(projects.Count);
+
+        foreach (var project in projects)
+        {
+            result.Add(await aiRoomProjectDtoMapper.MapAsync(project));
+        }
+
+        return result;
     }
 
     /// <remarks>

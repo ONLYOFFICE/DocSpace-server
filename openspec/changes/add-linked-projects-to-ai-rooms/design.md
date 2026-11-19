@@ -38,7 +38,9 @@ read differently.
 - The number costs the listing of the section one indexed query per page, and nothing for a page without
   Knowledge or Instructions rooms.
 - The list of projects never costs more than the projects of one room, and its rights filter runs in the query.
-- A room object without the number always means "not a Knowledge or Instructions room", on every route.
+- A room object without the number always means "not a Knowledge or Instructions room", on every route that
+  answers the full room object. The short room object of the new-items listing (`FolderDtoHelper.GetShortAsync`,
+  which also leaves out the tags and the quota) does not carry the number.
 
 **Non-Goals:**
 
@@ -75,8 +77,14 @@ the reader of the room needs before changing or deleting it, and it names no pro
 `FolderDtoHelper.GetAsync` fills `LinkedProjectsCount` for an internal room of type Knowledge or Instructions
 under the AI rooms root. It takes one more optional argument, the numbers of the page; when it is absent the
 helper reads the number of its one room. `FolderContentDtoHelper.GetAsync` loads the numbers once before it
-builds the room objects, when the page holds such a room, and hands them in, as it does with
-`currentUserRecords`. The dictionary is only read after that, so the parallel build is safe.
+builds the room objects, when the listed folder is the AI rooms root and its page holds such a room, and hands
+them in, as it does with `currentUserRecords`. The dictionary is only read after that, so the parallel build is
+safe. Every other listing pays one comparison. A listing inside such a room builds the room as its current
+folder, and the helper reads that one number itself. Two listings can answer such a room among their entries
+without the AI rooms root as the listed folder: the Rooms root asked with `searchArea=AiHub`
+(`GET api/2.0/files/{id}` keeps the caller's area for that root), and Favorites, after the room was marked with
+`POST api/2.0/files/favorites`, which takes any folder the caller reads. There the helper also reads the number
+of each such room itself: the number is right, at one read per room instead of one per page.
 
 Alternatives:
 
@@ -122,10 +130,14 @@ has to visit the same rows anyway.
 Alternative: read the ids of the room's projects, pass them to `GetAiProjectsVisibleToAsync`, sort and page in
 memory. Every page would load every project of the room.
 
-To settle before the queries are written: whether a room of the AI rooms section can be created end-to-end
-encrypted. The admin bypass of `FileSecurity` does not reach such a room, while `isAdmin ||` would list it. If
-`createRoom` accepts it for a project, the predicate keeps a private project from a DocSpace admin who is not
-its member; if it refuses, nothing changes.
+Settled: a room of the AI rooms section cannot be end-to-end encrypted, so the predicate needs no case for a
+private project. `createRoom` for an AI project with `private: true` answers 400 on a stand where the
+`e2e-rooms` app is on and the caller holds encryption keys: the same test first creates a private Custom room
+(`AiHubRoomSettingsTests.CreateProject_Private_Returns400`). The refusal is the first check of
+`FileStorageService.CreateRoomAsync` for every type of the section, and the flag is written at creation only;
+`updateRoom` does not carry it. Had a project been private, `FileSecurity.FilterEntryAsync` would have kept it
+from a DocSpace admin outside it: in the branch of the AI rooms root the admin bypass is skipped for a room
+with the flag, and such an admin falls through to the share records.
 
 ### 7. Events
 

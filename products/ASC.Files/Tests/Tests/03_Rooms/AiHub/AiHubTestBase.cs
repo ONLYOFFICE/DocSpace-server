@@ -153,6 +153,53 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
         return await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
     }
 
+    protected async Task LinkAsync(int projectId, params int[] roomIds)
+    {
+        using var response = await LinkSourcesAsync(projectId, roomIds);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent, $"the rooms have to be linked to project {projectId} in Arrange");
+    }
+
+    protected async Task<(int RoomId, List<int> ProjectIds)> CreateRoomWithProjectsAsync(params string[] projectTitles)
+    {
+        var roomId = await CreateInstructionsRoomAsync();
+        var projectIds = new List<int>();
+
+        foreach (var title in projectTitles)
+        {
+            var projectId = await CreateProjectAsync(title);
+            await LinkAsync(projectId, roomId);
+            projectIds.Add(projectId);
+        }
+
+        return (roomId, projectIds);
+    }
+
+    protected async Task<JsonElement> GetRoomAsync(int roomId)
+    {
+        using var response = await GetRoomResponseAsync(roomId);
+
+        return await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+    }
+
+    protected static int? LinkedProjectsCountOf(JsonElement room)
+    {
+        return room.TryGetProperty("linkedProjectsCount", out var count) && count.ValueKind != JsonValueKind.Null ? count.GetInt32() : null;
+    }
+
+    protected Task<HttpResponseMessage> GetRoomProjectsResponseAsync(int roomId, string query = "")
+    {
+        return Files.GetAsync($"api/2.0/files/rooms/{roomId}/projects{query}", TestContext.Current.CancellationToken);
+    }
+
+    protected async Task<RoomProjectsPage> GetRoomProjectsAsync(int roomId, string query = "")
+    {
+        using var response = await GetRoomProjectsResponseAsync(roomId, query);
+        var envelope = await Files.ReadEnvelopeAsync<List<RoomProject>>(response, TestContext.Current.CancellationToken);
+
+        return new RoomProjectsPage(envelope.Response!, envelope.Total);
+    }
+
     protected async Task<List<int>> GetInstructionsSourceIdsAsync(int projectId)
     {
         var sources = await GetSourcesAsync(projectId);
@@ -267,4 +314,11 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
     protected sealed record SkillsRoom(int Id, string Title, List<Skill> Skills);
 
     protected sealed record Skill(string Id, string Name, string Description);
+
+    protected sealed record RoomProject(int Id, string Title, JsonElement Logo);
+
+    protected sealed record RoomProjectsPage(List<RoomProject> Projects, long? Total)
+    {
+        public List<int> Ids => [.. Projects.Select(p => p.Id)];
+    }
 }

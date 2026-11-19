@@ -34,7 +34,7 @@
 namespace ASC.Files.Core.Data;
 
 [Scope]
-public class AiProjectRoomDao(IDbContextFactory<FilesDbContext> dbContextFactory)
+public class AiProjectRoomDao(IDbContextFactory<FilesDbContext> dbContextFactory, FolderMapper folderMapper)
 {
     public async Task<List<int>> GetRoomIdsAsync(int tenantId, int projectId)
     {
@@ -55,6 +55,29 @@ public class AiProjectRoomDao(IDbContextFactory<FilesDbContext> dbContextFactory
         await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
         return await filesDbContext.AiProjectLinkableRoomsAsync(tenantId, roomsFolderId, roomIds).ToDictionaryAsync(f => f.Id, f => f.FolderType);
+    }
+
+    public async Task<Dictionary<int, int>> GetProjectsCountsAsync(int tenantId, IEnumerable<int> roomIds)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.AiRoomProjectsCountsAsync(tenantId, roomIds).ToDictionaryAsync(r => r.RoomId, r => r.Count);
+    }
+
+    public async Task<List<Folder<int>>> GetProjectsAsync(int tenantId, int roomId, int roomsFolderId, Guid userId, bool isAdmin, int offset, int count)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.AiRoomProjectsAsync(tenantId, roomId, roomsFolderId, userId, isAdmin, offset, count)
+            .Select(folderMapper.MapDbFolderQueryToDbFolderInternal)
+            .ToListAsync();
+    }
+
+    public async Task<int> GetProjectsTotalAsync(int tenantId, int roomId, int roomsFolderId, Guid userId, bool isAdmin)
+    {
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.AiRoomProjectsTotalAsync(tenantId, roomId, roomsFolderId, userId, isAdmin);
     }
 
     public async Task AddRoomsAsync(int tenantId, int projectId, IEnumerable<int> roomIds)
