@@ -55,11 +55,27 @@ public class PromoCodeTests(AspireAppFixture fixture) : BaseTest(fixture)
         bonus.Status.Should().Be(PromoCodeStatus.Completed);
         bonus.Amount.Should().Be(10);
         bonus.Currency.Should().Be("USD");
-        bonus.ExpiresAt!.Value.ToUniversalTime().Should().Be(new DateTime(2027, 2, 7, 12, 0, 0, DateTimeKind.Utc));
+        bonus.ExpiresAt!.UtcTime.Should().Be(new DateTime(2027, 2, 7, 12, 0, 0, DateTimeKind.Utc));
 
         var call = PaymentCalls.Should().ContainSingle(c => c.Route == ApplyPromoCodeRoute).Subject;
         BillingValue(call, "Code").Should().Be(PromoCode);
         BillingValue(call, "Initiator").Should().Be(Owner.Email);
+    }
+
+    // The billing service may send the expiry without an offset; the answer gives it one, so no reader takes it for
+    // its own zone.
+    [Fact]
+    public async Task ApplyPromoCode_ExpiryWithoutAnOffset_IsAnsweredWithOne()
+    {
+        // Arrange
+        Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
+            """{"Status":"completed","Amount":10,"Currency":"USD","ExpiresAt":"2027-02-07T12:00:00"}""");
+
+        // Act
+        var bonus = await RawResponseAsync(HttpMethod.Post, "api/2.0/portal/payment/promoCode", $$"""{"promoCode":"{{PromoCode}}"}""");
+
+        // Assert
+        ShouldCarryAnOffset(bonus.GetProperty("expiresAt"), new DateTime(2027, 2, 7, 12, 0, 0, DateTimeKind.Utc));
     }
 
     [Fact]

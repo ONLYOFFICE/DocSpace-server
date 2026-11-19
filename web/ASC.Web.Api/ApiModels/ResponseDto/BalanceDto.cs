@@ -71,7 +71,7 @@ public class BalanceDto
     /// <summary>
     /// The most recent credit transaction applied to the account.
     /// </summary>
-    /// <example>{"date": "2024-01-15T10:30:00Z", "currency": "USD", "amount": 1500.75}</example>
+    /// <example>{"date": "2024-01-15T13:30:00.0000000+03:00", "currency": "USD", "amount": 1500.75}</example>
     public TransactionInfoDto LastCredit { get; init; }
 }
 
@@ -99,10 +99,10 @@ public class SubAccountDto
 public class TransactionInfoDto
 {
     /// <summary>
-    /// The date and time when the credit transaction occurred.
+    /// The date and time when the credit transaction occurred. It carries its own offset.
     /// </summary>
-    /// <example>2024-01-15T10:30:00Z</example>
-    public DateTime Date { get; init; }
+    /// <example>2024-01-15T13:30:00.0000000+03:00</example>
+    public ApiDateTime Date { get; init; }
 
     /// <summary>
     /// The three-character ISO 4217 currency symbol.
@@ -117,8 +117,12 @@ public class TransactionInfoDto
     public decimal Amount { get; init; }
 }
 
+[Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class BalanceDtoMapper
+public partial class BalanceDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
 {
-    public static partial BalanceDto Map(this Balance source);
+    public partial BalanceDto Map(Balance source);
+
+    // The accounting service gives its times in UTC; the client sees them with the offset of the portal.
+    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(source);
 }

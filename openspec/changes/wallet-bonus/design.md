@@ -30,6 +30,11 @@ decisions behind it. It relies on these requirements of `billing`:
 
 ## Decisions
 
+- **A missing wallet sub-account is an empty wallet.** A customer who has linked a card but never topped up has no
+  wallet sub-account, also with a bonus credited. The top-up reads it as 0, and a purchase from the wallet is let
+  through when a bonus in the currency has not ended (`GoodwillBalance.CanPayFromWallet`, unit-tested). Without a
+  balance, or without both a sub-account and a bonus, the answer stays 404.
+
 - **The bonus is read past every cache, and again with the wallet after each top-up.** The decision how much
   to charge must use fresh data, as the wallet read already does. Charges running during the top-up spend the
   bonus before the wallet, so a bonus read only once could make the check pass while the purchase that follows

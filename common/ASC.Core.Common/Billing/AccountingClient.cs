@@ -92,22 +92,6 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
             customerParticipantName, metadata));
     }
 
-    /// <summary>
-    /// Credits a bonus to the customer's goodwill account at once, without the approval a manual operation needs, and
-    /// returns the completed operation. <paramref name="externalRef"/> is our reference of the bonus, and
-    /// <paramref name="utcExpiresAt"/> the moment the bonus expires, or <c>null</c> for one that does not. A 409 of the
-    /// accounting service throws <see cref="AccountingConflictException"/>; it does not say the bonus is not on the
-    /// account, as a credit with the same reference may have been made before. The request is
-    /// never retried, so the caller decides what a failure means; the cached balance of the portal is not touched here.
-    /// </summary>
-    public async Task<OperationResult> CreditBonusAsync(string portalId, decimal sum, string currency, string externalRef,
-        DateTime? utcExpiresAt = null, Dictionary<string, string> metadata = null)
-    {
-        EnsureConfigured();
-
-        return await accountingApi.CreditBonusAsync(new BonusCreditOperation(portalId, externalRef, utcExpiresAt, sum, currency, metadata));
-    }
-
     public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter)
     {
         EnsureConfigured();
@@ -869,6 +853,17 @@ public class GoodwillBalance : Balance
         return Math.Min(account, lots);
     }
 
+    /// <summary>
+    /// Whether a purchase from the wallet in <paramref name="currency"/> has anything to be paid with: a wallet
+    /// sub-account in that currency, whatever its amount, or a bonus in it that has not ended at
+    /// <paramref name="utcNow"/>. A customer who has never topped up the wallet has no wallet sub-account, also with a
+    /// bonus credited; the accounting service spends the bonus on the purchase all the same.
+    /// </summary>
+    public static bool CanPayFromWallet(Balance wallet, GoodwillBalance goodwill, string currency, DateTime utcNow)
+    {
+        return wallet?.SubAccounts?.Any(x => x.Currency == currency) == true || goodwill?.SpendableAmount(currency, utcNow) > 0;
+    }
+
     // ToUniversalTime would read a time without an offset as the host's local time and move the end by its offset.
     private static DateTime AsUtc(DateTime value)
     {
@@ -922,22 +917,6 @@ public class Session
     /// The expiration date of the session.
     /// </summary>
     public DateTime Expire { get; init; }
-}
-
-/// <summary>
-/// The result of an operation the accounting service completed at once.
-/// </summary>
-public class OperationResult : CurrencyAmount
-{
-    /// <summary>
-    /// The ID of the operation in the accounting service.
-    /// </summary>
-    public long OperationId { get; init; }
-
-    /// <summary>
-    /// The quantity of the service the operation covers.
-    /// </summary>
-    public int Quantity { get; init; }
 }
 
 /// <summary>
@@ -1515,7 +1494,8 @@ public class OperationSource
 
     /// <summary>
     /// The bonus part of a movement split by its direction, as the operations report shows it next to the credit and
-    /// the debit: the bonus part goes to each side above 0, and a side of 0 gets 0.
+    /// the debit: the bonus part goes to each side above 0, and a side of 0 gets 0. A movement of the accounting
+    /// service is either a credit or a debit, so one side gets it; the product owner confirmed this for the bonus.
     /// </summary>
     public static (decimal Credit, decimal Debit) BonusPartsOf(decimal credit, decimal debit, IEnumerable<OperationSource> sources)
     {
@@ -1905,14 +1885,6 @@ public record SessionCompleteOperation(
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);
 
-public record BonusCreditOperation(
-    string CustomerName,
-    string ExternalRef,
-    DateTime? ExpiresAt,
-    decimal Sum,
-    string Currency,
-    Dictionary<string, string> Metadata);
-
 public static class AccountingHttpClientExtension
 {
     /// <summary>How the service is named in the exceptions of its client.</summary>
@@ -2078,9 +2050,8 @@ public static class AccountingHttpClientExtension
             return new AccountingServiceLimitExceededException(detail);
         }
 
-        // A second limit of the same scope or for the same user, or a bonus credit that conflicts with one already made;
-        // elsewhere a 409 stays a plain failure, as before.
-        if (response.StatusCode == HttpStatusCode.Conflict && (serviceLimitRequest || IsBonusCreditRequest(response.RequestMessage)))
+        // A second limit of the same scope or for the same user; elsewhere a 409 stays a plain failure, as before.
+        if (response.StatusCode == HttpStatusCode.Conflict && serviceLimitRequest)
         {
             return new AccountingConflictException(detail);
         }
@@ -2136,11 +2107,6 @@ public static class AccountingHttpClientExtension
         return path != null &&
                (path.EndsWith("/serviceLimit", StringComparison.OrdinalIgnoreCase) ||
                 path.Contains("/serviceLimit/", StringComparison.OrdinalIgnoreCase));
-    }
-
-    private static bool IsBonusCreditRequest(HttpRequestMessage request)
-    {
-        return request?.RequestUri?.AbsolutePath.EndsWith("/operation/bonus-credit", StringComparison.OrdinalIgnoreCase) == true;
     }
 
     private static bool IsServiceLimitNotFound(string detail)

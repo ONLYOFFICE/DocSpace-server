@@ -1760,13 +1760,9 @@ public class TariffService(
             throw new ItemNotFoundException("Balance could not be found");
         }
 
-        var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
-        if (subAccount == null)
-        {
-            throw new ItemNotFoundException("Subaccount could not be found");
-        }
-
-        return subAccount.Amount;
+        // A customer who has linked a card but never topped up the wallet has no wallet sub-account, also with a bonus
+        // credited: that is an empty wallet, so the bonus still counts and the shortfall is topped up.
+        return balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0;
     }
 
     #region Accounting
@@ -1906,15 +1902,6 @@ public class TariffService(
         await accountingClient.CompleteCustomerSessionAsync(portalId, serviceName, sessionId, quantity, customerParticipantName, metadata);
         await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return true;
-    }
-
-    public async Task<OperationResult> CreditBonusAsync(int tenantId, decimal sum, string currency, string externalRef, DateTime? utcExpiresAt = null, Dictionary<string, string> metadata = null)
-    {
-        var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await accountingClient.CreditBonusAsync(portalId, sum, currency, externalRef, utcExpiresAt, metadata);
-        // As in ApplyPromoCodeAsync: only a failed read of the wallet balance is cached, and it goes with this write.
-        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
-        return result;
     }
 
     public async Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter)

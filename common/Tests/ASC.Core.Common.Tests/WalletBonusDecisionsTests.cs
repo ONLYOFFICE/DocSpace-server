@@ -132,6 +132,22 @@ public class WalletBonusDecisionsTests
         parts.Should().Be(((decimal)expectedCredit, (decimal)expectedDebit));
     }
 
+    // A wallet never topped up has no sub-account, also with a bonus credited: the bonus pays the purchase all the same,
+    // and only a portal with neither has nothing to pay with.
+    [Theory]
+    [InlineData("USD", null, null, true)]
+    [InlineData(null, 5.0, null, true)]
+    [InlineData(null, 5.0, -60, false)]
+    [InlineData(null, null, null, false)]
+    [InlineData("EUR", null, null, false)]
+    public void CanPayFromWallet_WalletSubAccountOrABonusThatHasNotEnded(string? walletCurrency, double? bonus, int? bonusEndsInMinutes, bool expected)
+    {
+        var wallet = new Balance { SubAccounts = walletCurrency == null ? [] : [new SubAccount { Currency = walletCurrency, Amount = 0 }] };
+        var goodwill = bonus == null ? null : Goodwill((decimal)bonus, Lot((decimal)bonus, "USD", bonusEndsInMinutes));
+
+        GoodwillBalance.CanPayFromWallet(wallet, goodwill, "USD", _now).Should().Be(expected);
+    }
+
     [Theory]
     [InlineData(PromoCodeStatus.Completed, true)]
     [InlineData(PromoCodeStatus.Pending, false)]

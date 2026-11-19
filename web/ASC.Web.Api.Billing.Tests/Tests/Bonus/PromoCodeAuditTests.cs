@@ -60,6 +60,27 @@ public class PromoCodeAuditTests(AspireAppFixture fixture) : BaseTest(fixture)
         (audit.Target ?? []).Should().NotContain(t => t.Contains(PromoCode));
     }
 
+    // The amount is written as billing means it, whatever the scale billing sends it with and whatever the culture of
+    // the caller: a Russian owner would otherwise read "10,5 USD", and an amount of 10.0000 "10.0000 USD".
+    [Theory]
+    [InlineData("10.0000", "en-US", "Promo code applied: 10 USD")]
+    [InlineData("10.5", "ru", "Promo code applied: 10.5 USD")]
+    public async Task ApplyPromoCode_AnyScaleAndCulture_WritesTheAmountInvariantly(string amount, string culture, string expected)
+    {
+        // Arrange
+        await _peopleClient.Authenticate(Owner);
+        await _profilesApi.UpdateMemberCultureAsync(Owner.Id.ToString(), new UpdateMemberCultureRequest(culture), TestContext.Current.CancellationToken);
+        Payments.On(PaymentService.Billing, "POST", ApplyPromoCodeRoute,
+            $$"""{"Status":"completed","Amount":{{amount}},"Currency":"usd","ExpiresAt":null}""");
+
+        // Act
+        await _paymentApi.ApplyPromoCodeAsync(new ApplyPromoCodeRequestDto(PromoCode), TestContext.Current.CancellationToken);
+        var events = await AuditWithSentinelAsync(events => events.Any(e => e.Action != SentinelAction));
+
+        // Assert
+        events.Should().ContainSingle(e => e.Action != SentinelAction).Which.Action.Should().Be(expected);
+    }
+
     [Fact]
     public async Task ApplyPromoCode_BillingRefusesTheCode_WritesNoAuditEvent()
     {

@@ -41,7 +41,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 ///   "status": "Completed",
 ///   "amount": 10,
 ///   "currency": "USD",
-///   "expiresAt": "2027-02-07T12:00:00Z"
+///   "expiresAt": "2027-02-07T15:00:00.0000000+03:00"
 /// }
 /// </example>
 public class PromoCodeDto
@@ -66,18 +66,24 @@ public class PromoCodeDto
     public string Currency { get; init; }
 
     /// <summary>
-    /// The moment the bonus expires, in UTC; whatever is left of it can no longer be spent after that. Null for a bonus
-    /// that never expires.
+    /// The moment the bonus expires; whatever is left of it can no longer be spent after that. It carries its own
+    /// offset. Null for a bonus that never expires.
     /// </summary>
-    /// <example>2027-02-07T12:00:00Z</example>
-    public DateTime? ExpiresAt { get; init; }
+    /// <example>2027-02-07T15:00:00.0000000+03:00</example>
+    public ApiDateTime ExpiresAt { get; init; }
 }
 
+[Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class PromoCodeDtoMapper
+public partial class PromoCodeDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
 {
     [MapProperty(nameof(PromoCodeResult.Currency), nameof(PromoCodeDto.Currency), Use = nameof(ToUpperCurrency))]
-    public static partial PromoCodeDto Map(this PromoCodeResult source);
+    public partial PromoCodeDto Map(PromoCodeResult source);
+
+    // The billing service gives the expiry in UTC; the client sees it with the offset of the portal.
+    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(source);
+
+    private ApiDateTime MapNullableDate(DateTime? source) => apiDateTimeHelper.Get(source);
 
     // The billing service may spell the currency in lower case, as it does for a subscription moved to the wallet.
     private static string ToUpperCurrency(string currency)

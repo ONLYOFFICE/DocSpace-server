@@ -79,7 +79,10 @@ public class PaymentController(
     IServiceProvider serviceProvider,
     PaymentHelper paymentHelper,
     QuotaSocketManager quotaSocketManager,
-    DepositDtoMapper depositDtoMapper)
+    DepositDtoMapper depositDtoMapper,
+    BalanceDtoMapper balanceDtoMapper,
+    GoodwillBalanceDtoMapper goodwillBalanceDtoMapper,
+    PromoCodeDtoMapper promoCodeDtoMapper)
     : ControllerBase
 {
     /// <remarks>
@@ -219,10 +222,9 @@ public class PaymentController(
     /// service at the next period. The call returns 400 for `Renew` and `Sub`. If the portal has no billing customer,
     /// the call returns 404. Requires a DocSpace admin. Other callers get 403. The call also returns 403 if the
     /// installation has no billing service. An `Add` call spends money. Do not repeat an `Add` call. Each call buys
-    /// the units again. You can repeat a `Set` call with the same body. With `Add`, the wallet needs a sub-account in
-    /// the accounting currency. If it has none, the call returns 404. Its money and the bonus balance together must
-    /// cover the price. The bonus is spent first. If the
-    /// billing service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402
+    /// the units again. You can repeat a `Set` call with the same body. With `Add`, the call returns 404 if the wallet
+    /// has neither a sub-account nor a bonus in the currency. A wallet that was never topped up has no sub-account. The wallet money and the bonus balance together must cover the price. The bonus is spent first.
+    /// If the billing service declines the purchase, fails, or cannot be reached, the call returns 402. The call returns 402
     /// for an add-on to the plan if the plan payment is overdue. A trial plan passes this check. The call returns 400
     /// if the quantity is below the minimum of the service. By default, the minimum is 100 units for disk storage and
     /// 10 for Docs Connect Dev Pack. With `Add`, the minimum for admins is the number
@@ -245,7 +247,7 @@ public class PaymentController(
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, or that service is already set")]
     [SwaggerResponse(402, "The payment for the plan of the portal is overdue and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance, or neither a sub-account nor a bonus in the accounting currency")]
     [HttpPut("updatewallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
@@ -345,7 +347,7 @@ public class PaymentController(
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-        await paymentHelper.GetSubAccountRequiredAsync(tenantId, defaultCurrency, refresh: true);
+        await paymentHelper.DemandWalletOrBonusAsync(tenantId, defaultCurrency, refresh: true);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
@@ -355,8 +357,8 @@ public class PaymentController(
     /// <remarks>
     /// Returns the price of a wallet service purchase without making it. Use it to show the amount before the user
     /// confirms the purchase. The call returns 400 if `productQuantityType` is not `Add` or the quantity is not above
-    /// zero. It also returns 400 if the product is not a wallet service. If the portal has no billing customer or no
-    /// wallet sub-account in the accounting currency, the call returns 404. Requires a DocSpace admin. Other callers
+    /// zero. It also returns 400 if the product is not a wallet service. The call returns 404 without a billing
+    /// customer. It also returns 404 if the portal has neither a wallet sub-account nor a bonus. Requires a DocSpace admin. Other callers
     /// get 403. The call also returns 403 if the installation has no billing service. The call is read-only and buys
     /// nothing, so you can repeat it. To make the purchase, use `PUT api/2.0/portal/payment/updatewallet`. The price
     /// is for the moment of the call and is not reserved. So it can change before the purchase. If the billing
@@ -370,7 +372,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for, or an empty body when the billing service failed", typeof(PaymentCalculationDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance, or neither a sub-account nor a bonus in the accounting currency")]
     [HttpPut("calculatewallet")]
     public async Task<PaymentCalculationDto> CalculateWalletPayment(WalletQuantityRequestDto inDto)
     {
@@ -397,7 +399,7 @@ public class PaymentController(
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
-        await paymentHelper.GetSubAccountRequiredAsync(tenantId, defaultCurrency);
+        await paymentHelper.DemandWalletOrBonusAsync(tenantId, defaultCurrency);
 
         var quantity = new Dictionary<string, int> { { productName, productQty.Value } };
 
@@ -976,7 +978,7 @@ public class PaymentController(
 
         var result = await paymentHelper.ApplyPromoCodeAsync(tenant.Id, inDto.PromoCode, initiator.Email);
 
-        return result.Map();
+        return promoCodeDtoMapper.Map(result);
     }
 
     /// <remarks>
@@ -1012,7 +1014,9 @@ public class PaymentController(
             return null;
         }
 
-        return (await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh))?.Map();
+        var balance = await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh);
+
+        return balance == null ? null : balanceDtoMapper.Map(balance);
     }
 
     /// <remarks>
@@ -1045,7 +1049,9 @@ public class PaymentController(
             return null;
         }
 
-        return (await tariffService.GetCustomerGoodwillAsync(tenant.Id))?.Map();
+        var goodwill = await tariffService.GetCustomerGoodwillAsync(tenant.Id);
+
+        return goodwill == null ? null : goodwillBalanceDtoMapper.Map(goodwill);
     }
 
     /// <remarks>

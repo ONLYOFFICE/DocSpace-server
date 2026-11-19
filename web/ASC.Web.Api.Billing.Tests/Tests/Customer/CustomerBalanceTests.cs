@@ -57,6 +57,28 @@ public class CustomerBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
         PaymentCalls.Should().Contain(call => call.Service == PaymentService.Accounting && call.Route == "/customer/{portalId}/balance");
     }
 
+    // The accounting service may send its times without an offset; the answer gives the last credit one, so no reader
+    // takes it for its own zone.
+    [Fact]
+    public async Task GetCustomerBalance_LastCreditWithoutAnOffset_IsAnsweredWithOne()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance", """
+                {
+                  "accountCurrency": "USD",
+                  "subAccounts": [{"currency": "USD", "amount": 150.25}],
+                  "lastCredit": {"amount": 100, "currency": "USD", "date": "2026-11-01T09:00:00"}
+                }
+                """);
+
+        // Act
+        var balance = await RawResponseAsync(HttpMethod.Get, "api/2.0/portal/payment/customer/balance?refresh=true");
+
+        // Assert
+        ShouldCarryAnOffset(balance.GetProperty("lastCredit").GetProperty("date"), new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
+    }
+
     [Fact]
     public async Task GetCustomerBalance_PortalIsNotACustomer_ReturnsNothingWithoutAskingAccounting()
     {

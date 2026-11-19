@@ -37,7 +37,8 @@ None.
   `createCustomerOperationsReport`, `createCustomerServiceUsageReport` and the routes
   `api/2.0/portal/payment/*`, where the new `applyPromoCode` and `getCustomerGoodwill` belong.
   Requirements modified: "Moving the subscription balance to the wallet", "Automatic renewal of a wallet
-  subscription" (the wallet and the bonus decide the top-up). Requirements added: redeeming a
+  subscription" (the wallet and the bonus decide the top-up), "Buying wallet services" (a bonus stands in for a
+  missing wallet sub-account). Requirements added: redeeming a
   promo code, the bonus balance, the bonus part of movements and usage, paying from the wallet with the bonus counted.
 
 ## Breaks current behaviour
@@ -57,18 +58,32 @@ None.
   wallet and the bonus together fall short.
 - **`type` filter of `getCustomerOperations`**: a caller that passed it got every kind and now gets the kind
   asked for, as the requirement "Wallet movements, usage and reports" already states.
+- **Buying wallet services** (`updateWalletPayment` and `calculateWalletPayment` with `Add`). The accounting service
+  gives a customer who has linked a card but never topped up the wallet no wallet sub-account, also with a bonus
+  credited (seen on a stand with the accounting test service). Such a portal got 404 "Subaccount could not be
+  found"; with a bonus in the currency it now goes on to the purchase, which the bonus pays. Without a sub-account
+  and without a bonus it is still 404.
+- **A wallet never topped up, when the wallet pays** (`moveSubscriptionToWallet`, the automatic renewal). The top-up
+  read the missing sub-account as a missing balance and answered 404, also before this change; it now reads it as
+  an empty wallet, so the bonus counts and the shortfall is topped up. Without a balance at all it is still 404.
+- **`lastCredit.date` of `getCustomerBalance`**: it shared the type of the bonus balance's `lastCredit` and was a
+  plain date written as UTC (`...Z`); it is now an `ApiDateTime` with the portal's offset, like the dates of the
+  movements. The moment is the same; a client that parses ISO 8601 reads both forms. The web client (its
+  `feature/wallet-bonus` branch and its UI kit) does not read `lastCredit`.
 - Additive for existing callers: two operations, `sources` on movements and usage totals, the movement kind
   `GoodwillExpiration`, bonus columns in the report files.
 
 Deviations: `W4` (`moveSubscriptionToWallet` compares a price in the request region's currency with a USD
 wallet) is kept: the bonus is read in the same currency as the wallet. `W13` (`topUpDeposit` reads an
-unreadable answer as false) is kept.
+unreadable answer as false) is kept. `getCustomerGoodwill` answers an accounting service it cannot read with an
+empty result, as `getCustomerBalance` does (the class of `W10` and `W12`), by decision: the client reads the two
+together, and the web client shows no bonus for an empty answer and for an error alike.
 
 ## Impact
 
 - API: `PaymentController` (two actions, texts of `moveSubscriptionToWallet`, movements and usage), payment
   DTOs, `PaymentHelper`.
-- Core: billing and accounting clients (promo code, goodwill balance, bonus credit, `operationTypes`),
+- Core: billing and accounting clients (promo code, goodwill balance, `operationTypes`),
   `TariffService` (goodwill read, top-up with the bonus counted), operation sources.
 - Reports: operations and service usage report builders.
 - Audit: a new payment action; its text is in English only for now (`AuditReportResource`, neutral culture).

@@ -76,7 +76,7 @@ public class GoodwillBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         goodwill.LastCredit.Amount.Should().Be(50);
         goodwill.LastCredit.Currency.Should().Be("USD");
-        goodwill.LastCredit.Date.ToUniversalTime().Should().Be(new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
+        goodwill.LastCredit.Date.UtcTime.Should().Be(new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
 
         goodwill.Lots.Should().HaveCount(2);
 
@@ -85,11 +85,37 @@ public class GoodwillBalanceTests(AspireAppFixture fixture) : BaseTest(fixture)
         first.Amount.Should().Be(50);
         first.Remaining.Should().Be(35.5);
         first.Currency.Should().Be("USD");
-        first.Date.ToUniversalTime().Should().Be(new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
-        first.ExpiresAt!.Value.ToUniversalTime().Should().Be(new DateTime(2026, 12, 1, 9, 0, 0, DateTimeKind.Utc));
+        first.Date.UtcTime.Should().Be(new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
+        first.ExpiresAt!.UtcTime.Should().Be(new DateTime(2026, 12, 1, 9, 0, 0, DateTimeKind.Utc));
 
         goodwill.Lots[1].OperationId.Should().Be(987655);
         goodwill.Lots[1].ExpiresAt.Should().BeNull("a bonus that never expires has no expiry");
+    }
+
+    // The accounting service may send its times without an offset; the answer gives them one, so no reader takes them
+    // for its own zone.
+    [Fact]
+    public async Task GetCustomerGoodwill_TimesWithoutAnOffset_AreAnsweredWithOne()
+    {
+        // Arrange
+        Payments.Customer(Owner.Email)
+            .On(PaymentService.Accounting, "GET", GoodwillRoute, """
+                {
+                  "accountCurrency": "USD",
+                  "subAccounts": [{"currency": "USD", "amount": 50}],
+                  "lastCredit": {"amount": 50, "currency": "USD", "date": "2026-11-01T09:00:00"},
+                  "lots": [{"operationId": 987654, "amount": 50, "remaining": 50, "currency": "USD", "date": "2026-11-01T09:00:00", "expiresAt": "2026-12-01T09:00:00"}]
+                }
+                """);
+
+        // Act
+        var goodwill = await RawResponseAsync(HttpMethod.Get, "api/2.0/portal/payment/customer/goodwill");
+
+        // Assert
+        var lot = goodwill.GetProperty("lots")[0];
+        ShouldCarryAnOffset(lot.GetProperty("date"), new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
+        ShouldCarryAnOffset(lot.GetProperty("expiresAt"), new DateTime(2026, 12, 1, 9, 0, 0, DateTimeKind.Utc));
+        ShouldCarryAnOffset(goodwill.GetProperty("lastCredit").GetProperty("date"), new DateTime(2026, 11, 1, 9, 0, 0, DateTimeKind.Utc));
     }
 
     [Fact]

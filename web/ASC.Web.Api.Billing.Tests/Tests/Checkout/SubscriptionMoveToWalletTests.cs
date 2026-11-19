@@ -105,6 +105,33 @@ public class SubscriptionMoveToWalletTests(AspireAppFixture fixture) : BaseTest(
         decimal.Parse(BillingValue(deposit, "Amount")!, CultureInfo.InvariantCulture).Should().Be(40m);
     }
 
+    // A customer who has linked a card but never topped up the wallet has no wallet sub-account, also with a bonus
+    // credited: that is an empty wallet, so the bonus pays and nothing is topped up.
+    [Fact]
+    public async Task MoveSubscriptionToWallet_WalletNeverToppedUpAndTheBonusCovers_BuysWithoutATopUp()
+    {
+        // Arrange
+        Payments.Paid(Plans.AdminProductId, quantity: 5, DateTime.UtcNow.Date.AddMonths(1), Owner.Email)
+            .Customer(Owner.Email)
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/balance",
+                $$"""{"accountNumber":{{Payments.AccountNumber}},"subAccountNumber":0,"accountCurrency":"USD","subAccounts":[]}""")
+            .On(PaymentService.Billing, "POST", "/billing/SubscriptionBalanceToWallet", """{"amount":0,"currency":"usd"}""")
+            .On(PaymentService.Billing, "POST", "/billing/ChangeSubscription", "true")
+            .On(PaymentService.Accounting, "GET", "/customer/{portalId}/goodwill", GoodwillJson(40m));
+
+        // the plan is read anew, so the move sees the paid subscription instead of the cached free plan
+        await _portalQuotaApi.GetPortalTariffAsync(true, TestContext.Current.CancellationToken);
+
+        // Act
+        var bought = (await _paymentApi.MoveSubscriptionToWalletAsync(
+            new QuantityRequestDto(new Dictionary<string, int> { [AdminWalletProduct] = Admins }), TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        bought.Should().BeTrue();
+        PaymentCalls.Should().NotContain(c => c.Route == "/billing/Deposit", "the bonus covers the whole price");
+        PaymentCalls.Should().ContainSingle(c => c.Route == "/billing/ChangeSubscription");
+    }
+
     private string GoodwillJson(decimal amount, string currency = "USD")
     {
         return new JsonObject

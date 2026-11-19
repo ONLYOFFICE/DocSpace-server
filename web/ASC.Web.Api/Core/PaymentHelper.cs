@@ -196,11 +196,12 @@ public class PaymentHelper(
     }
 
     /// <summary>
-    /// Loads the customer balance and returns the sub-account for the given currency
-    /// (defaults to the first supported accounting currency).
+    /// Demands that a purchase from the wallet in the given currency (defaults to the first supported accounting
+    /// currency) has something to be paid with: a wallet sub-account or a bonus that has not ended. The bonus is read
+    /// only when the wallet has no sub-account in the currency.
     /// </summary>
-    /// <exception cref="ItemNotFoundException">Thrown when the balance or the matching sub-account cannot be found.</exception>
-    public async Task<SubAccount> GetSubAccountRequiredAsync(int tenantId, string currency = null, bool refresh = false)
+    /// <exception cref="ItemNotFoundException">Thrown when the balance cannot be read, or the portal has neither.</exception>
+    public async Task DemandWalletOrBonusAsync(int tenantId, string currency = null, bool refresh = false)
     {
         var balance = await tariffService.GetCustomerBalanceAsync(tenantId, refresh);
         if (balance == null)
@@ -210,13 +211,17 @@ public class PaymentHelper(
 
         currency ??= tariffService.GetSupportedAccountingCurrencies().First();
 
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == currency);
-        if (subAccount == null)
+        if (GoodwillBalance.CanPayFromWallet(balance, null, currency, DateTime.UtcNow))
+        {
+            return;
+        }
+
+        var goodwill = await tariffService.GetCustomerGoodwillAsync(tenantId);
+
+        if (!GoodwillBalance.CanPayFromWallet(balance, goodwill, currency, DateTime.UtcNow))
         {
             throw new ItemNotFoundException("Subaccount could not be found");
         }
-
-        return subAccount;
     }
 
     /// <summary>
@@ -401,13 +406,20 @@ public class PaymentHelper(
         return updated;
     }
 
+    // An amount in the audit trail reads the same whatever the culture of the request, and without the trailing zeros
+    // the billing service may send (10.0000 is "10").
+    internal static string AuditAmount(decimal amount, string currency)
+    {
+        return $"{amount.ToString("G29", CultureInfo.InvariantCulture)} {currency}";
+    }
+
     public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, bool waitForChanges)
     {
         var result = await tariffService.TopUpDepositAsync(tenantId, amount, currency, customerParticipantName, siteName, null, waitForChanges);
 
         if (result)
         {
-            messageService.Send(MessageAction.CustomerWalletToppedUp, $"{amount} {currency}");
+            messageService.Send(MessageAction.CustomerWalletToppedUp, AuditAmount(amount, currency));
 
             // waitForChanges doubles as "the balance already reflects this deposit". With a delayed payment
             // method it does not: the deposit is accepted but the money is credited only once the
@@ -489,7 +501,7 @@ public class PaymentHelper(
         }
 
         // The code itself stays out of the audit trail: anyone who reads the trail could redeem a reusable one.
-        messageService.Send(MessageAction.CustomerPromoCodeApplied, $"{result.Amount} {result.Currency?.ToUpperInvariant()}");
+        messageService.Send(MessageAction.CustomerPromoCodeApplied, AuditAmount(result.Amount, result.Currency?.ToUpperInvariant()));
 
         // A pending bonus is not on the balance yet, so there is nothing new for the clients to read.
         if (result.IsCredited)

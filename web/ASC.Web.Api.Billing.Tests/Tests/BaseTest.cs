@@ -183,4 +183,39 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
         return new User(fakeGuest.Email, fakeGuest.Password) { Id = json.RootElement.GetProperty("response").GetProperty("id").GetGuid() };
     }
+
+    /// <summary>
+    /// The <c>response</c> of a Web.Api call as raw JSON, for what the SDK model cannot show: the SDK reads an
+    /// <c>ApiDateTime</c> as a date, so the offset it was sent with is lost.
+    /// </summary>
+    protected async Task<JsonElement> RawResponseAsync(HttpMethod method, string path, string? body = null)
+    {
+        using var request = new HttpRequestMessage(method, path);
+
+        if (body != null)
+        {
+            request.Content = new StringContent(body, Encoding.UTF8, "application/json");
+        }
+
+        using var response = await _webApiClient.SendAsync(request, TestContext.Current.CancellationToken);
+        var text = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        response.IsSuccessStatusCode.Should().BeTrue(text);
+
+        using var json = JsonDocument.Parse(text);
+
+        return json.RootElement.GetProperty("response").Clone();
+    }
+
+    /// <summary>
+    /// Asserts that a time of an answer carries an offset, <c>Z</c> or <c>+hh:mm</c>, and names <paramref name="utc"/>:
+    /// a time without one is read in the zone of whoever reads it.
+    /// </summary>
+    protected static void ShouldCarryAnOffset(JsonElement value, DateTime utc)
+    {
+        var text = value.GetString()!;
+
+        text.Should().MatchRegex(@"(Z|[+-]\d{2}:\d{2})$");
+        DateTimeOffset.Parse(text, CultureInfo.InvariantCulture).UtcDateTime.Should().Be(utc);
+    }
 }

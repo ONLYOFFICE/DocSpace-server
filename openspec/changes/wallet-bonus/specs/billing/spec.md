@@ -86,9 +86,9 @@ to push SHALL NOT fail the redemption.
 ### Requirement: Bonus balance
 
 `getCustomerGoodwill` SHALL return to a DocSpace admin (403 otherwise and without billing, 401 anonymous) the
-portal's goodwill account, read from the accounting service on every call: the account with one sub-account
+portal's goodwill account, read from the accounting service on each call: the account with one sub-account
 per currency, and `lots`, the bonus credits not spent in full, in spending order, each with
-`operationId`, `amount`, `remaining`, `currency`, `date` and `expiresAt` in UTC. A portal without a customer,
+`operationId`, `amount`, `remaining`, `currency`, `date` and `expiresAt` with the portal offset. A portal without a customer,
 or an unreadable accounting service, SHALL get an empty result.
 
 #### Scenario: Customer with bonuses
@@ -188,6 +188,36 @@ the last. A delayed method or an add-on renewal gets no top-up.
 - **THEN** no top-up is made and the payment goes on
 
 ## MODIFIED Requirements
+
+### Requirement: Buying wallet services
+
+`updateWalletPayment` SHALL require the billing service, a DocSpace admin and a customer, one wallet
+product and `productQuantityType` `Set` or `Add` (400 "Invalid product quantity type"). `Add` buys
+now from the wallet (404 if neither a sub-account nor a bonus; 402 when the plan payment is overdue and the
+service is an add-on; minimums: storage 100, Dev Pack 10, administrators not fewer than the portal has; 400
+"Invalid quantity"). `Set` writes the next period's quantity, zero cancelling it.
+
+#### Scenario: Owner adds, lowers and cancels storage
+
+- **WHEN** the owner or a DocSpace admin buys 100 storage units with `Add`, schedules a lower quantity with `Set`, then cancels it with an empty `Set`
+- **THEN** every answer is 200 `true`
+- **AND** a Room admin, a User and a Guest get 403 "Access denied", an anonymous caller 401
+
+#### Scenario: Price before buying
+
+- **WHEN** the owner or a DocSpace admin calls `calculateWalletPayment` with 100 storage units and `Add`
+- **THEN** the answer carries `operationId`, `amount`, `currency` USD and `quantity` 100, and nothing is bought
+- **AND** when the billing service fails the answer is an empty body; `updateWalletPayment` answers `false` only for a `Set` the portal cannot apply (it does not have the service, or the change is not saved)
+
+#### Scenario: Negative or non-numeric quantity
+
+- **WHEN** the quantity is negative, a string or special characters
+- **THEN** the system answers 400 ("Invalid quantity", or the JSON conversion error for a non-number)
+
+#### Scenario: Wallet never topped up
+
+- **WHEN** a customer with a linked card has never topped up the wallet, so the wallet has no sub-account, and `calculateWalletPayment` is called with 100 storage units and `Add`
+- **THEN** with a bonus of 5 USD the call goes on to the price, and without a bonus it answers 404 "Subaccount could not be found"
 
 ### Requirement: Automatic renewal of a wallet subscription
 

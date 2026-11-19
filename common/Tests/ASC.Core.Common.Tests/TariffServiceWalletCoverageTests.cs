@@ -119,6 +119,29 @@ public class TariffServiceWalletCoverageTests
         DepositAmounts(billing).Should().Equal("40");
     }
 
+    // A wallet never topped up has no sub-account, also with a bonus credited: it is an empty wallet, not a missing one.
+    [Fact]
+    public async Task EnsureWalletBalance_NoWalletSubAccountAndTheBonusCovers_TopsUpNothing()
+    {
+        var (tariffService, billing) = CreateService(NeverToppedUpWalletJson, Goodwill(50));
+
+        var covered = await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 30, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
+
+        covered.Should().BeTrue();
+        billing.Requests.Should().NotContain(request => request.Path == "/billing/Deposit");
+    }
+
+    [Fact]
+    public async Task EnsureWalletBalance_NoWalletSubAccountAndNoBonus_TopsUpTheWholePrice()
+    {
+        var (tariffService, billing) = CreateService(NeverToppedUpWalletJson,
+            Reply(HttpStatusCode.OK, """{"accountNumber":42,"subAccountNumber":53,"accountCurrency":"USD","subAccounts":[],"lots":[]}"""));
+
+        await tariffService.EnsureWalletBalanceAsync(TenantId, requiredAmount: 30, "USD", null, "portal.example.com", auto: true, cancellationToken: TestContext.Current.CancellationToken);
+
+        DepositAmounts(billing).Should().Equal("30");
+    }
+
     [Fact]
     public async Task EnsureWalletBalance_NegativeBonus_CountsAsNone()
     {
@@ -187,12 +210,17 @@ public class TariffServiceWalletCoverageTests
 
     private static (TariffService tariffService, HttpStub billing) CreateService(decimal walletAmount, StubResponse goodwill)
     {
+        return CreateService(WalletJson(walletAmount), goodwill);
+    }
+
+    private static (TariffService tariffService, HttpStub billing) CreateService(string walletJson, StubResponse goodwill)
+    {
         var billing = new HttpStub(_ => Reply(HttpStatusCode.OK, "<html>Bad Gateway</html>"));
         var (billingClient, _) = CreateBillingClient(billing);
 
         var (accountingClient, _) = CreateAccountingClient(request => request.Path switch
         {
-            BalancePath => Reply(HttpStatusCode.OK, WalletJson(walletAmount)),
+            BalancePath => Reply(HttpStatusCode.OK, walletJson),
             GoodwillPath => goodwill,
             _ => Reply(HttpStatusCode.NotFound, """{"title":"Not found","status":404}""")
         });
@@ -239,6 +267,9 @@ public class TariffServiceWalletCoverageTests
             distributedLockProvider: new InMemoryLockProvider(),
             resiliencePipelineProvider: resiliencePipelineProvider);
     }
+
+    // What the accounting service answers for a customer with a linked card who has never topped up the wallet.
+    private const string NeverToppedUpWalletJson = """{"accountNumber":42,"subAccountNumber":0,"accountCurrency":"USD","subAccounts":[]}""";
 
     private static string WalletJson(decimal amount)
     {

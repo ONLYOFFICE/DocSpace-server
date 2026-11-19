@@ -44,8 +44,8 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 ///   "accountName": "goodwill",
 ///   "accountCurrency": "USD",
 ///   "subAccounts": [{"currency": "USD", "amount": 35.5}],
-///   "lastCredit": {"date": "2026-11-01T09:00:00Z", "currency": "USD", "amount": 50},
-///   "lots": [{"operationId": 987654, "amount": 50, "remaining": 35.5, "currency": "USD", "date": "2026-11-01T09:00:00Z", "expiresAt": "2026-12-01T09:00:00Z"}]
+///   "lastCredit": {"date": "2026-11-01T12:00:00.0000000+03:00", "currency": "USD", "amount": 50},
+///   "lots": [{"operationId": 987654, "amount": 50, "remaining": 35.5, "currency": "USD", "date": "2026-11-01T12:00:00.0000000+03:00", "expiresAt": "2026-12-01T12:00:00.0000000+03:00"}]
 /// }
 /// </example>
 public class GoodwillBalanceDto : BalanceDto
@@ -55,7 +55,7 @@ public class GoodwillBalanceDto : BalanceDto
     /// until the accounting service writes it off, and is no longer spent then. An empty list means no bonus is left;
     /// null means the accounting service sent no list of credits, and only the sub-account amounts are known.
     /// </summary>
-    /// <example>[{"operationId": 987654, "amount": 50, "remaining": 35.5, "currency": "USD", "date": "2026-11-01T09:00:00Z", "expiresAt": "2026-12-01T09:00:00Z"}]</example>
+    /// <example>[{"operationId": 987654, "amount": 50, "remaining": 35.5, "currency": "USD", "date": "2026-11-01T12:00:00.0000000+03:00", "expiresAt": "2026-12-01T12:00:00.0000000+03:00"}]</example>
     public List<GoodwillLotDto> Lots { get; init; }
 }
 
@@ -90,21 +90,27 @@ public class GoodwillLotDto
     public string Currency { get; init; }
 
     /// <summary>
-    /// The date and time the bonus was credited, in UTC.
+    /// The date and time the bonus was credited. It carries its own offset.
     /// </summary>
-    /// <example>2026-11-01T09:00:00Z</example>
-    public DateTime Date { get; init; }
+    /// <example>2026-11-01T12:00:00.0000000+03:00</example>
+    public ApiDateTime Date { get; init; }
 
     /// <summary>
-    /// The date and time after which whatever is left of the bonus can no longer be spent, in UTC; null for a bonus that
-    /// never expires.
+    /// The date and time after which whatever is left of the bonus can no longer be spent. It carries its own offset.
+    /// Null for a bonus that never expires.
     /// </summary>
-    /// <example>2026-12-01T09:00:00Z</example>
-    public DateTime? ExpiresAt { get; init; }
+    /// <example>2026-12-01T12:00:00.0000000+03:00</example>
+    public ApiDateTime ExpiresAt { get; init; }
 }
 
+[Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class GoodwillBalanceDtoMapper
+public partial class GoodwillBalanceDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
 {
-    public static partial GoodwillBalanceDto Map(this GoodwillBalance source);
+    public partial GoodwillBalanceDto Map(GoodwillBalance source);
+
+    // The accounting service gives its times in UTC; the client sees them with the offset of the portal.
+    private ApiDateTime MapDate(DateTime source) => apiDateTimeHelper.Get(source);
+
+    private ApiDateTime MapNullableDate(DateTime? source) => apiDateTimeHelper.Get(source);
 }

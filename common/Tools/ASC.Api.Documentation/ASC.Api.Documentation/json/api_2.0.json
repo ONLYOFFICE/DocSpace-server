@@ -38592,8 +38592,8 @@
                       "amount": 50,
                       "remaining": 35.5,
                       "currency": "USD",
-                      "date": "2026-11-01T09:00:00Z",
-                      "expiresAt": "2026-12-01T09:00:00Z"
+                      "date": "2026-11-01T12:00:00.0000000+03:00",
+                      "expiresAt": "2026-12-01T12:00:00.0000000+03:00"
                     }
                   ]
                 ],
@@ -38697,23 +38697,12 @@
             "description": "The three-character ISO 4217 currency symbol of `amount` and `remaining`."
           },
           "date": {
-            "examples": [
-              "2026-11-01T09:00:00Z"
-            ],
-            "type": "string",
-            "description": "The date and time the bonus was credited, in UTC.",
-            "format": "date-time"
+            "description": "The date and time the bonus was credited. It carries its own offset.",
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "expiresAt": {
-            "examples": [
-              "2026-12-01T09:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The date and time after which whatever is left of the bonus can no longer be spent, in UTC; null for a bonus that\r\nnever expires.",
-            "format": "date-time"
+            "description": "The date and time after which whatever is left of the bonus can no longer be spent. It carries its own offset.\r\nNull for a bonus that never expires.",
+            "$ref": "#/components/schemas/ApiDateTime"
           }
         },
         "description": "One bonus credit of the portal not spent in full: how much was credited, how much is left, and until when."
@@ -43818,15 +43807,8 @@
             "description": "The three-letter ISO 4217 code of `amount`, in upper case."
           },
           "expiresAt": {
-            "examples": [
-              "2027-02-07T12:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The moment the bonus expires, in UTC; whatever is left of it can no longer be spent after that. Null for a bonus\r\nthat never expires.",
-            "format": "date-time"
+            "description": "The moment the bonus expires; whatever is left of it can no longer be spent after that. It carries its own\r\noffset. Null for a bonus that never expires.",
+            "$ref": "#/components/schemas/ApiDateTime"
           }
         },
         "description": "The bonus a redeemed promo code credits to the portal."
@@ -50771,12 +50753,8 @@
         "type": "object",
         "properties": {
           "date": {
-            "examples": [
-              "2024-01-15T10:30:00Z"
-            ],
-            "type": "string",
-            "description": "The date and time when the credit transaction occurred.",
-            "format": "date-time"
+            "description": "The date and time when the credit transaction occurred. It carries its own offset.",
+            "$ref": "#/components/schemas/ApiDateTime"
           },
           "currency": {
             "examples": [

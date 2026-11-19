@@ -382,9 +382,9 @@ An AI charge SHALL reduce the balance by the debit of its movement.
 ### Requirement: Bonus balance
 
 `getCustomerGoodwill` SHALL return to a DocSpace admin (403 otherwise and without billing, 401 anonymous) the
-portal's goodwill account, read from the accounting service on every call: the account with one sub-account
+portal's goodwill account, read from the accounting service on each call: the account with one sub-account
 per currency, and `lots`, the bonus credits not spent in full, in spending order, each with
-`operationId`, `amount`, `remaining`, `currency`, `date` and `expiresAt` in UTC. A portal without a customer,
+`operationId`, `amount`, `remaining`, `currency`, `date` and `expiresAt` with the portal offset. A portal without a customer,
 or an unreadable accounting service, SHALL get an empty result.
 
 #### Scenario: Customer with bonuses
@@ -946,9 +946,9 @@ characters (400). The list is cached for all portals for up to an hour.
 
 `updateWalletPayment` SHALL require the billing service, a DocSpace admin and a customer, one wallet
 product and `productQuantityType` `Set` or `Add` (400 "Invalid product quantity type"). `Add` buys
-the units now from the wallet (404 without a sub-account; 402 when the plan payment is overdue and the service is
-an add-on; minimums: storage 100, Dev Pack 10, administrators not fewer than the portal has; 400 "Invalid
-quantity"). `Set` writes the next period's quantity, zero cancelling it.
+now from the wallet (404 if neither a sub-account nor a bonus; 402 when the plan payment is overdue and the
+service is an add-on; minimums: storage 100, Dev Pack 10, administrators not fewer than the portal has; 400
+"Invalid quantity"). `Set` writes the next period's quantity, zero cancelling it.
 
 #### Scenario: Owner adds, lowers and cancels storage
 
@@ -966,6 +966,11 @@ quantity"). `Set` writes the next period's quantity, zero cancelling it.
 
 - **WHEN** the quantity is negative, a string or special characters
 - **THEN** the system answers 400 ("Invalid quantity", or the JSON conversion error for a non-number)
+
+#### Scenario: Wallet never topped up
+
+- **WHEN** a customer with a linked card has never topped up the wallet, so the wallet has no sub-account, and `calculateWalletPayment` is called with 100 storage units and `Add`
+- **THEN** with a bonus of 5 USD the call goes on to the price, and without a bonus it answers 404 "Subaccount could not be found"
 
 ### Requirement: Moving the subscription balance to the wallet
 
