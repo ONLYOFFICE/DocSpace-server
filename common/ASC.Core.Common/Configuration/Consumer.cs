@@ -415,6 +415,15 @@ public class ConsumerFactory : IDisposable
         return new T();
     }
 
+    /// <summary>
+    /// Whether the installation registers <typeparamref name="T"/> among its consumers. <see cref="Get{T}"/> never
+    /// says so: for an unregistered type it returns a bare instance with no name and no keys.
+    /// </summary>
+    public bool IsRegistered<T>() where T : Consumer
+    {
+        return Builder.IsRegistered<T>();
+    }
+
     public IEnumerable<T> GetAll<T>() where T : Consumer, new()
     {
         return Builder.Resolve<IEnumerable<T>>();

@@ -46,6 +46,9 @@ public class BaseTest(
     /// <summary>The id of this test's own portal.</summary>
     protected int TenantId => _clients.TenantId;
 
+    /// <summary>The name of this test's own portal: on the Standalone stack, the alias the portal was registered with.</summary>
+    protected string PortalName => _clients.PortalName;
+
     /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
     protected AspireAppFixture Fixture => fixture;
 

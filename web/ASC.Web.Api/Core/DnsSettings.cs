@@ -50,7 +50,9 @@ public class DnsSettings(PermissionContext permissionContext,
 
         if (!SetupInfo.IsVisibleSettings<DnsSettings>())
         {
-            throw new Exception(Resource.ErrorNotAllowedOption);
+            // a section the installation hides used to fail with a plain Exception (500); refused like the other
+            // hidden settings sections with the same text (cookie, SMTP, portal security settings): 402
+            throw new BillingException(Resource.ErrorNotAllowedOption);
         }
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -69,13 +71,24 @@ public class DnsSettings(PermissionContext permissionContext,
             var oldDomain = tenant.GetTenantDomain(coreSettings);
 
             tenant.MappedDomain = dnsName;
-            await tenantManager.SaveTenantAsync(tenant);
+
+            try
+            {
+                await tenantManager.SaveTenantAsync(tenant);
+            }
+            catch (TenantAlreadyExistsException ex)
+            {
+                // the save checks the domain again: another portal may have taken it since the check below
+                throw new ArgumentException(ex.Message, ex);
+            }
+
             messageService.Send(MessageAction.DnsSettingsUpdated, oldDomain, [dnsName]);
             await cspSettingsHelper.RenameDomainAsync(oldDomain, tenant.GetTenantDomain(coreSettings));
             return null;
         }
 
-        throw new Exception(Resource.ErrorNotCorrectTrustedDomain);
+        // an invalid domain used to fail with a plain Exception (500); it is the caller's input: 400
+        throw new ArgumentException(Resource.ErrorNotCorrectTrustedDomain);
     }
 
     private async Task<bool> CheckCustomDomainAsync(string alias, string domain)
@@ -103,16 +116,22 @@ public class DnsSettings(PermissionContext permissionContext,
             {
                 await tenantManager.CheckTenantAddressAsync(test.Host);
             }
+            // a domain of the wrong length or one that is reserved or already the alias or mapped domain of a portal
+            // used to escape as a 500; refused with 400 and the same texts, as the portal rename does
             catch (TenantTooShortException ex)
             {
                 var minLength = ex.MinLength;
                 var maxLength = ex.MaxLength;
                 if (minLength > 0 && maxLength > 0)
                 {
-                    throw new TenantTooShortException(string.Format(Resource.ErrorTenantTooShortFormat, minLength, maxLength));
+                    throw new ArgumentException(string.Format(Resource.ErrorTenantTooShortFormat, minLength, maxLength), ex);
                 }
 
-                throw new TenantTooShortException(Resource.ErrorTenantTooShort);
+                throw new ArgumentException(Resource.ErrorTenantTooShort, ex);
+            }
+            catch (TenantAlreadyExistsException ex)
+            {
+                throw new ArgumentException(ex.Message, ex);
             }
             catch (TenantIncorrectCharsException)
             {

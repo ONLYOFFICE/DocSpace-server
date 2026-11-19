@@ -213,7 +213,9 @@ public class StorageController(
             var progress = await backupService.GetBackupProgressAsync(tenant.Id);
             if (progress is { IsCompleted: false })
             {
-                throw new Exception();
+                // A plain Exception, which nothing maps, came back as 500 with no message. A running backup is a
+                // state the caller waits out, so 409, as for a webhook retry or a migration still in progress.
+                throw new CustomHttpException(HttpStatusCode.Conflict, "A backup of one of the portals is still running");
             }
         }
 

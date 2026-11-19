@@ -46,7 +46,7 @@ namespace ASC.Web.Api.Controllers;
 /// <name>thirdparty</name>
 [Scope]
 [ApiEndpoint("thirdparty")]
-public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase
+public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper, ConsumerFactory consumerFactory) : ControllerBase
 {
     /// <remarks>
     /// Returns the OAuth 2.0 consent URL of an external provider as a string. The user opens it in a browser to give
@@ -80,26 +80,38 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
 
         return inDto.Provider switch
         {
-            LoginProvider.Google => oAuth20TokenHelper.RequestCode<GoogleLoginProvider>(
+            LoginProvider.Google => RequestCode<GoogleLoginProvider>(
                 GoogleLoginProvider.GoogleScopeDrive,
                 GoogleLoginProvider.GoogleAdditionalArgs,
                 additionalStateArgs: additionals),
-            LoginProvider.Dropbox => oAuth20TokenHelper.RequestCode<DropboxLoginProvider>(
+            LoginProvider.Dropbox => RequestCode<DropboxLoginProvider>(
                 additionalArgs: new Dictionary<string, string>
                 {
                     { "force_reauthentication", "true" }, { "token_access_type", "offline" }
                 }, additionalStateArgs: additionals),
-            LoginProvider.Docusign => oAuth20TokenHelper.RequestCode<DocuSignLoginProvider>(
+            LoginProvider.Docusign => RequestCode<DocuSignLoginProvider>(
                 DocuSignLoginProvider.DocuSignLoginProviderScopes,
                 new Dictionary<string, string> { { "prompt", "login" } }, additionalStateArgs: additionals),
-            LoginProvider.Box => oAuth20TokenHelper.RequestCode<BoxLoginProvider>(additionalStateArgs: additionals),
-            LoginProvider.OneDrive => oAuth20TokenHelper.RequestCode<OneDriveLoginProvider>(
+            LoginProvider.Box => RequestCode<BoxLoginProvider>(additionalStateArgs: additionals),
+            LoginProvider.OneDrive => RequestCode<OneDriveLoginProvider>(
                 OneDriveLoginProvider.OneDriveLoginProviderScopes, additionalStateArgs: additionals),
-            LoginProvider.Wordpress => oAuth20TokenHelper.RequestCode<WordpressLoginProvider>(
-                additionalStateArgs: additionals),
-            LoginProvider.Github => oAuth20TokenHelper.RequestCode<GithubLoginProvider>(additionalStateArgs: additionals),
+            LoginProvider.Wordpress => RequestCode<WordpressLoginProvider>(additionalStateArgs: additionals),
+            LoginProvider.Github => RequestCode<GithubLoginProvider>(additionalStateArgs: additionals),
             _ => null
         };
+    }
+
+    // A provider the installation does not register among its authorization consumers (the default configuration
+    // lists none for DocuSign, WordPress and GitHub) came back from ConsumerFactory as a bare instance without a
+    // name or keys, and building the URL failed with a 500: a NullReferenceException on the name, or for DocuSign a
+    // UriFormatException on a consent address with no host. Such a provider cannot produce a URL here, so the call
+    // answers like the providers this operation does not support at all: 200 with no URL.
+    private string RequestCode<T>(string scope = null, IDictionary<string, string> additionalArgs = null, IDictionary<string, string> additionalStateArgs = null)
+        where T : Consumer, IOAuthProvider, new()
+    {
+        return consumerFactory.IsRegistered<T>()
+            ? oAuth20TokenHelper.RequestCode<T>(scope, additionalArgs, additionalStateArgs)
+            : null;
     }
 
     /// <remarks>

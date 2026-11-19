@@ -58,7 +58,9 @@ public class BaseSettingsController(IFusionCache fusionCache, WebItemManager web
         var count = countFromCache.HasValue ? countFromCache.Value : 0;
         if (count > _maxCount)
         {
-            throw new Exception(Resource.ErrorRequestLimitExceeded);
+            // A plain Exception is mapped to nothing and came back as 500, although the server is fine and
+            // the caller only has to wait. 429 is the status the portal rate limiter gives for the same case.
+            throw new CustomHttpException(HttpStatusCode.TooManyRequests, Resource.ErrorRequestLimitExceeded);
         }
 
         await fusionCache.SetAsync(key, count + 1, TimeSpan.FromMinutes(_expirationMinutes));

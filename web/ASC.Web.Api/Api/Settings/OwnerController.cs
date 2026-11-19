@@ -147,30 +147,44 @@ public class OwnerController(
             // ignored
         }
 
+        // The refusals below were plain Exceptions, which nothing maps, so each came back as 500. An unknown
+        // ownerId is 404; a guest is 403, as the same check of POST settings/owner gives; an account that is
+        // not active and a link that was not issued to the portal owner are refusals too, so 403.
         if (Constants.LostUser.Equals(newOwner))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
         if (await userManager.IsUserInGroupAsync(newOwner.Id, Constants.GroupGuest.ID))
         {
-            throw new Exception(Resource.ErrorUserNotFound);
+            throw new SecurityException(Resource.ErrorUserNotFound);
         }
 
         if (newOwner.Status != EmployeeStatus.Active)
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         var curTenant = tenantManager.GetCurrentTenant();
 
         var confirmModel = emailValidationKeyModelHelper.GetModel();
-        var currentOwnerEmail = emailValidationKeyModelHelper.DecryptEmail(confirmModel.EncEmail);
-        var currentOwner = await userManager.GetUserByEmailAsync(currentOwnerEmail);
+        var currentOwner = Constants.LostUser;
+        try
+        {
+            // A link without encemail still throws ArgumentNullException here, which comes back as 400, as before.
+            var currentOwnerEmail = emailValidationKeyModelHelper.DecryptEmail(confirmModel.EncEmail);
+            currentOwner = await userManager.GetUserByEmailAsync(currentOwnerEmail);
+        }
+        catch (Exception e) when (e is FormatException or CryptographicException)
+        {
+            // An encemail that does not decrypt names no one, so it is refused below like any address that
+            // is not the owner's. It got past the confirm scheme only beside a plain email, which the scheme
+            // checks instead; decrypting it here threw, and that came back as 500.
+        }
 
         if (Constants.LostUser.Equals(currentOwner) || !currentOwner.Id.Equals(curTenant.OwnerId))
         {
-            throw new Exception(Resource.ErrorAccessDenied);
+            throw new SecurityException(Resource.ErrorAccessDenied);
         }
 
         await securityContext.AuthenticateMeWithoutCookieAsync(currentOwner.Id);

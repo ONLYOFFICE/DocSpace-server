@@ -1312,6 +1312,8 @@ public class PortalController(
             }
         }
 
-        throw new Exception(Resource.ErrorCannotDeleteLastSpace);
+        // A plain exception, a 500, before. The same refusal of the portal registration service, when the last full
+        // access space is to be deleted there, answers 400, so this one does too.
+        throw new ArgumentException(Resource.ErrorCannotDeleteLastSpace);
     }
 }

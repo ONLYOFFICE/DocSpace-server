@@ -44,12 +44,15 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 /// </example>
 public class FirebaseRequestsDto
 {
+    // the column holds 255 characters: a longer token reached the INSERT and the database refused it with a 500
+    // (PostgreSQL, MySQL in strict mode); it is the caller's input, so model validation refuses it with 400 first
     /// <summary>
     /// The registration token Firebase issued to the mobile client for this device, obtained on the device itself.
     /// It is kept as an opaque string of up to 255 characters and is never verified here; it identifies the device
     /// and is matched but never changed, and a token belonging to another member or another portal matches nothing.
     /// </summary>
     /// <example>dGhpc2lzYXRva2Vu...</example>
+    [StringLength(255)]
     public string FirebaseDeviceToken { get; set; }
 
     /// <summary>

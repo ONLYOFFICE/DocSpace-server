@@ -411,9 +411,11 @@ public partial class SettingsController(
     {
         await DemandStatisticPermissionAsync();
 
+        // A size the portal cannot take is the caller's input: 400, as SaveUserQuotaSettings answers for the same
+        // checks. These were plain Exceptions, which nothing maps, so they came back as 500.
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.RoomQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.RoomQuotaGreaterPortalError);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -422,7 +424,7 @@ public partial class SettingsController(
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.RoomQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.RoomQuotaGreaterPortalError);
         }
         if (coreBaseSettings.Standalone)
         {
@@ -431,7 +433,7 @@ public partial class SettingsController(
             {
                 if (tenantQuotaSetting.Quota < quota)
                 {
-                    throw new Exception(Resource.RoomQuotaGreaterPortalError);
+                    throw new ArgumentException(Resource.RoomQuotaGreaterPortalError);
                 }
             }
         }
@@ -476,9 +478,11 @@ public partial class SettingsController(
     {
         await DemandStatisticPermissionAsync();
 
+        // 400 for a size the portal cannot take, as in SaveUserQuotaSettings and SaveRoomQuotaSettings; these were
+        // plain Exceptions that came back as 500.
         if (!inDto.DefaultQuota.TryGetInt64(out var quota))
         {
-            throw new Exception(Resource.AiAgentQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.AiAgentQuotaGreaterPortalError);
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -487,7 +491,7 @@ public partial class SettingsController(
 
         if (maxTotalSize < quota)
         {
-            throw new Exception(Resource.AiAgentQuotaGreaterPortalError);
+            throw new ArgumentException(Resource.AiAgentQuotaGreaterPortalError);
         }
 
         if (coreBaseSettings.Standalone)
@@ -495,7 +499,7 @@ public partial class SettingsController(
             var tenantQuotaSetting = await settingsManager.LoadAsync<TenantQuotaSettings>();
             if (tenantQuotaSetting.EnableQuota && tenantQuotaSetting.Quota < quota)
             {
-                throw new Exception(Resource.AiAgentQuotaGreaterPortalError);
+                throw new ArgumentException(Resource.AiAgentQuotaGreaterPortalError);
             }
         }
 
@@ -536,6 +540,14 @@ public partial class SettingsController(
     public async Task<TenantDeepLinkSettingsDto> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        // A body without deepLinkSettings reached the mode below, and its NullReferenceException was a 500. It is the
+        // caller's input, refused with 400 like a mode outside the defined set.
+        if (inDto.DeepLinkSettings is null)
+        {
+            throw new ArgumentException("The request has no deepLinkSettings", nameof(inDto.DeepLinkSettings));
+        }
+
         if (!Enum.IsDefined(inDto.DeepLinkSettings.HandlingMode))
         {
             throw new ArgumentException(nameof(inDto.DeepLinkSettings.HandlingMode));

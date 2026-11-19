@@ -665,6 +665,13 @@ public class SecurityController(
         {
             foreach (var domain in request.Domains)
             {
+                // A null entry reached domain.Replace, and its NullReferenceException was a 500. It is the caller's input,
+                // refused with 400 like an entry that is not an address.
+                if (domain is null)
+                {
+                    throw new ArgumentException("An entry of domains is null", nameof(request.Domains));
+                }
+
                 var uriString = domain.Replace($"{Uri.SchemeDelimiter}*.", Uri.SchemeDelimiter);
 
                 if (uriString.StartsWith("*."))

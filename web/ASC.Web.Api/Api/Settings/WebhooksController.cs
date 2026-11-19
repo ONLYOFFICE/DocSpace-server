@@ -583,7 +583,7 @@ public class WebhooksController(
         var httpClient = clientFactory.CreateClient(httpClientName);
         using var request = new HttpRequestMessage(HttpMethod.Head, validationResult.ParsedUri);
         request.Options.Set(UrlValidator.PinnedIpKey, validationResult.ResolvedAddresses[0]);
-        using var response = await httpClient.SendAsync(request);
+        using var response = await SendProbeAsync(httpClient, request);
 
         if (response is not { IsSuccessStatusCode: true })
         {
@@ -591,6 +591,24 @@ public class WebhooksController(
         }
 
         return await CheckTargetAsync(targetId, triggers, ownerId);
+    }
+
+    /// <summary>
+    /// Sends the HEAD probe of a target. A target that refuses the connection, fails the TLS handshake or the
+    /// certificate check, or stays silent past the client's timeout used to escape as a 500. The address is the
+    /// caller's choice and the probe only validates it, so such a target is refused like one that answers with an
+    /// error code: 400 with the same text.
+    /// </summary>
+    private static async Task<HttpResponseMessage> SendProbeAsync(HttpClient httpClient, HttpRequestMessage request)
+    {
+        try
+        {
+            return await httpClient.SendAsync(request);
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
+        {
+            throw new ArgumentException(Resource.ErrorWebhookUrlNotAvaliable, ex);
+        }
     }
 
     /// <summary>

@@ -61,16 +61,18 @@ public class FirstTimeTenantSettings(
 
             var tenant = tenantManager.GetCurrentTenant();
             var settings = await settingsManager.LoadAsync<WizardSettings>();
+            // each refusal below used to be a plain Exception, a 500. A repeated call on a completed wizard is a state
+            // that does not allow the call: 409, as a repeated retry of a webhook; the others are the caller's input: 400
             if (settings.Completed)
             {
-                throw new Exception("Wizard passed.");
+                throw new CustomHttpException(HttpStatusCode.Conflict, "Wizard passed.");
             }
 
             var ami = !string.IsNullOrEmpty(setupInfo.AmiMetaUrl);
 
             if (ami && await IncorrectAmiId(amiid))
             {
-                throw new Exception(Resource.EmailAndPasswordIncorrectAmiId);
+                throw new ArgumentException(Resource.EmailAndPasswordIncorrectAmiId);
             }
 
             if (tenant.OwnerId == Guid.Empty)
@@ -87,12 +89,12 @@ public class FirstTimeTenantSettings(
 
             if (!UserManagerWrapper.ValidateEmail(email))
             {
-                throw new Exception(Resource.EmailAndPasswordIncorrectEmail);
+                throw new ArgumentException(Resource.EmailAndPasswordIncorrectEmail);
             }
 
             if (string.IsNullOrEmpty(passwordHash))
             {
-                throw new Exception(Resource.ErrorPasswordEmpty);
+                throw new ArgumentException(Resource.ErrorPasswordEmpty);
             }
 
             if ((await tenantExtra.GetEnableTariffSettings() || ami) && tenantExtra.Enterprise)
@@ -136,23 +138,26 @@ public class FirstTimeTenantSettings(
 
             return settings;
         }
-        catch (BillingNotFoundException)
+        // the license the caller uploaded before the wizard is missing, unreadable, refused by validation or of the wrong
+        // type: these were turned into plain exceptions, each a 500. It is the caller's file: 400 with the same texts, as
+        // the license upload answers for the same faults
+        catch (BillingNotFoundException ex)
         {
-            throw new Exception(UserControlsCommonResource.LicenseKeyNotFound);
+            throw new ArgumentException(UserControlsCommonResource.LicenseKeyNotFound, ex);
         }
         catch (BillingNotConfiguredException ex)
         {
             logger.ErrorWithException(ex);
-            throw new Exception(UserControlsCommonResource.LicenseKeyNotCorrect);
+            throw new ArgumentException(UserControlsCommonResource.LicenseKeyNotCorrect, ex);
         }
-        catch (BillingLicenseTypeException)
+        catch (BillingLicenseTypeException ex)
         {
             var logoText = await tenantLogoManager.GetLogoTextAsync();
-            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
+            throw new ArgumentException(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText), ex);
         }
-        catch (BillingException)
+        catch (BillingException ex)
         {
-            throw new Exception(UserControlsCommonResource.LicenseException);
+            throw new ArgumentException(UserControlsCommonResource.LicenseException, ex);
         }
         catch (Exception ex)
         {

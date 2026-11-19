@@ -319,11 +319,26 @@ public class MigrationController(
 
         if (inDto.IsSendWelcomeEmail)
         {
+            // No job was a plain exception, and a job that has not reached the user step - a parse pass, an import
+            // still running or stopped before it - has no list of imported users, so the loop below threw a
+            // NullReferenceException: each a 500. No such import is a 404, as for the log; a job still running is a
+            // 409, since the call can succeed once it ends.
             var status = await migrationCore.GetStatusAsync();
             if (status == null)
             {
-                throw new Exception(MigrationResource.MigrationProgressException);
+                throw new ItemNotFoundException(MigrationResource.MigrationProgressException);
             }
+
+            if (status.ImportedUsers == null)
+            {
+                if (!status.IsCompleted)
+                {
+                    throw new CustomHttpException(HttpStatusCode.Conflict, "The migration job is still running");
+                }
+
+                throw new ItemNotFoundException(MigrationResource.MigrationProgressException);
+            }
+
             var emails = status.ImportedUsers;
             foreach (var email in emails)
             {

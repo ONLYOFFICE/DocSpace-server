@@ -182,9 +182,11 @@ public class MessageSettingsController(
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
         var enableAdmMess = studioAdminMessageSettings.Enable || await tenantExtra.IsNotPaidAsync();
 
+        // The contact form is switched off. An unmapped MethodAccessException came back as a 500; the form not
+        // existing is said with 405, as SendJoinInviteMail says it when the portal has nothing to join.
         if (!enableAdmMess)
         {
-            throw new MethodAccessException("Method not available");
+            throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, "Method not available");
         }
 
         if (!inDto.Email.TestEmailRegex())

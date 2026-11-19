@@ -97,9 +97,11 @@ public class TfaManager(
 
         code = (code ?? "").Trim();
 
+        // A plain Exception, which nothing maps, so a missing code was a 500 on tfaapp/validate. It is the caller's input,
+        // refused with 400 like a wrong code below; the sign-in path wraps both into its own 401 as before.
         if (string.IsNullOrEmpty(code))
         {
-            throw new Exception(Resource.ActivateTfaAppEmptyCode);
+            throw new ArgumentException(Resource.ActivateTfaAppEmptyCode);
         }
 
         int.TryParse(Cache.Get<string>("tfa/" + user.Id), out var counter);

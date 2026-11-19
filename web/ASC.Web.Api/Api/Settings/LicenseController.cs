@@ -308,27 +308,36 @@ public class LicenseController(
             _log.ErrorLicenseUpload(ex);
             throw;
         }
+        // A license that does not fit, and a file that is not a license at all (empty, unreadable, or without a customer
+        // id or signature, which the reader reports as billing exceptions), were turned into plain exceptions, each a
+        // 500. They are the caller's file: 400 with the same localized texts, as the ArgumentException above.
         catch (LicenseExpiredException ex)
         {
             _log.ErrorLicenseUpload(ex);
-            throw new Exception(Resource.LicenseErrorExpired);
+            throw new ArgumentException(Resource.LicenseErrorExpired);
         }
         catch (LicenseQuotaException ex)
         {
             _log.ErrorLicenseUpload(ex);
-            throw new Exception(Resource.LicenseErrorQuota);
+            throw new ArgumentException(Resource.LicenseErrorQuota);
         }
         catch (LicensePortalException ex)
         {
             _log.ErrorLicenseUpload(ex);
-            throw new Exception(Resource.LicenseErrorPortal);
+            throw new ArgumentException(Resource.LicenseErrorPortal);
         }
         catch (BillingLicenseTypeException ex)
         {
             _log.ErrorLicenseUpload(ex);
             var logoText = await tenantLogoManager.GetLogoTextAsync();
-            throw new Exception(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
+            throw new ArgumentException(string.Format(UserControlsCommonResource.LicenseTypeNotCorrect, logoText));
         }
+        catch (BillingException ex)
+        {
+            _log.ErrorLicenseUpload(ex);
+            throw new ArgumentException(Resource.LicenseError);
+        }
+        // What is left is a fault of the installation, such as the staged file that cannot be written: still a 500.
         catch (Exception ex)
         {
             _log.ErrorLicenseUpload(ex);
