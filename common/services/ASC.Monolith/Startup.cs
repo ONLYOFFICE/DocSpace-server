@@ -74,7 +74,7 @@ public class Startup : BaseStartup
         services.AddWebStudioServices(_configuration);
         services.AddFilesServerServices(_configuration);
         services.AddFilesWorkerServices(_configuration);
-        services.AddPeopleServices();
+        services.AddPeopleServices(_configuration);
         services.AddAiServerServices();
         services.AddAiWorkerServices(_configuration);
         services.AddBackupServices();

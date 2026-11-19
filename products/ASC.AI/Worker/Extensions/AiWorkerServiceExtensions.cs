@@ -45,6 +45,9 @@ public static class AiWorkerServiceExtensions
         services.AddAiIntegrationServices();
         services.RegisterQuotaFeature();
 
+        // MdTextToDocxTask converts through the document server
+        services.AddDocumentServiceHttpClient(configuration);
+
         services.RegisterQueue<VectorizationTask>(20);
         services.RegisterQueue<MdTextToDocxTask>(10);
         services.RegisterQueue<AsyncTaskData<int>>();

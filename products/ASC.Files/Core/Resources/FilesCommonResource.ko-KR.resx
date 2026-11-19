@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>파일 편집 시작 오류</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>연결된 타사 스토리지에 여유 공간이 부족합니다. 해당 스토리지의 공간을 확보한 후 다시 시도하세요.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>아카이브된 방은 편집할 수 없습니다</value>
   </data>

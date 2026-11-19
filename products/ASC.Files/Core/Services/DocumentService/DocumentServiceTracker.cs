@@ -501,7 +501,16 @@ public class DocumentServiceTrackerHelper(
             }
             catch (Exception ex)
             {
-                logger.ErrorDocServiceSave(fileId.ToString(), userId, fileData.Key, fileData.Url, ex);
+                if (ex is ThirdPartyStorageQuotaException)
+                {
+                    // the connected storage is full: the user has to free space there, it is not a server fault
+                    logger.InformationDocServiceSaveStorageFull(fileId.ToString(), userId, fileData.Key, ex.InnerException?.Message ?? ex.Message);
+                }
+                else
+                {
+                    logger.ErrorDocServiceSave(fileId.ToString(), userId, fileData.Key, fileData.Url, ex);
+                }
+
                 saveMessage = ex.Message;
 
                 await StoringFileAfterErrorAsync(fileId, userId.ToString(), documentServiceConnector.ReplaceDocumentAddress(fileData.Url), fileData.Filetype);

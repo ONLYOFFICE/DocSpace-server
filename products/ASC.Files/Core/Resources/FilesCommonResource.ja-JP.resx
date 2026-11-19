@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>ファイル編集の開始でエラーが発生してしまいました</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>接続されているサードパーティストレージに十分な空き容量がありません。ストレージの空き容量を増やしてから、もう一度お試しください。</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>アーカイブされたルームを編集することはできません</value>
   </data>

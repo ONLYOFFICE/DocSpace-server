@@ -103,13 +103,16 @@ public abstract class UploadController<T>(
     /// for a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder
     /// gets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an
     /// instructions room. If the installation does not allow uploads with this extension, the call returns 415.
+    /// If the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a
+    /// `fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is
+    /// stored. The user has to free up space there first.
     /// </remarks>
     /// <summary>Chunked upload</summary>
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Obsolete]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The created session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension")]
+    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
     [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`")]
     [SwaggerResponse(404, "No folder with the specified ID")]
@@ -144,12 +147,15 @@ public abstract class UploadController<T>(
     /// for a knowledge folder. It returns 403 if a private room gets a file without `encrypted`, or a knowledge folder
     /// gets an unsupported format. It also returns 403 for a `relativePath` into a knowledge folder or an
     /// instructions room. If the installation does not allow uploads with this extension, the call returns 415.
+    /// If the folder is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a
+    /// `fileSize` of `chunkUploadSize` or more. Box, Dropbox and WebDAV storages refuse later, when the file is
+    /// stored. The user has to free up space there first.
     /// </remarks>
     /// <summary>Create an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The created upload session", typeof(ChunkedUploadSessionDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension")]
+    [SwaggerResponse(400, "The request body cannot be read, has no `fileName`, `fileSize` is negative, or the name of a file in a private room is not a lowercase UUID with an optional lowercase extension, or, for a `fileSize` of `chunkUploadSize` or more, the Google Drive or OneDrive storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
     [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, a knowledge folder does not accept this format, a `relativePath` points into a knowledge folder or an instructions room, or the file going into a private room is not marked `encrypted`")]
     [SwaggerResponse(404, "No folder with the specified ID")]
@@ -204,6 +210,8 @@ public abstract class UploadController<T>(
     /// returns 402 if the part is over `chunkUploadSize`, or the file is over a quota or size limit. If the session
     /// does not exist, is finalized, or has expired, the call returns 404. If the file is not a PDF and the room is a
     /// form-filling room, the call returns 403.
+    /// If the target folder is in a full connected storage other than SharePoint, the call can return 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>Upload the next chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
@@ -211,7 +219,7 @@ public abstract class UploadController<T>(
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The part is stored and bytes are still missing; `uploaded` is false", typeof(UploadSessionResponseDto<int>))]
     [SwaggerResponse(201, "The last part has arrived and the file is stored; `uploaded` is true and `file` holds the file", typeof(UploadSessionResponseDto<int>))]
-    [SwaggerResponse(400, "The request has no `File` part")]
+    [SwaggerResponse(400, "The request has no `File` part, or the connected storage other than SharePoint that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
@@ -308,12 +316,14 @@ public abstract class UploadController<T>(
     /// request has no `File` part, or `chunkNumber` is below 1. It returns 402 if the part is over `chunkUploadSize`,
     /// or the file is over a quota or size limit. If the session does not exist, is finalized, or has expired, the
     /// call returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 403.
+    /// If the target folder is in a full connected storage other than SharePoint, the call can return 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>Upload a numbered chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The session with its progress after the part was stored", typeof(ChunkedUploadSessionDto<int>))]
-    [SwaggerResponse(400, "The request has no `File` part, or `chunkNumber` is 0 or negative")]
+    [SwaggerResponse(400, "The request has no `File` part, or `chunkNumber` is 0 or negative, or the connected storage other than SharePoint that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file")]
     [SwaggerResponse(403, "A session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
@@ -339,13 +349,15 @@ public abstract class UploadController<T>(
     /// file. It changes data and deletes the session with its parts. A repeated call returns 404. If the parts do not
     /// add up to the size of the session, the call returns 400. Then send the missing parts and repeat the call. It
     /// returns 402 if the file is over a quota or size limit. A missing, finalized, or expired session returns 404. If the file is not a PDF and the room is a form-filling room, the call returns 403.
+    /// If the target folder is in a full Box, Dropbox or WebDAV storage, the call returns 400. The user has to free up
+    /// space there first.
     /// </remarks>
     /// <summary>Finalize an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/finalize</path>
     [RaisesWebhook(WebhookTrigger.FileUploaded, When = "without `file.created`")]
     [Tags("Files / Operations")]
     [SwaggerResponse(201, "The assembled file and the identifiers of the closed session", typeof(UploadSessionResponseDto<int>))]
-    [SwaggerResponse(400, "The parts received so far do not add up to the size the session was opened for")]
+    [SwaggerResponse(400, "The parts received so far do not add up to the size the session was opened for, or the Box, Dropbox or WebDAV storage that holds the target folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "Storing the file would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "A file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No open session with the specified ID in this folder: it never existed, was finalized or aborted, has expired, or belongs to another folder")]
@@ -419,12 +431,15 @@ public abstract class UploadController<T>(
     /// exist, the call returns 404. The call returns 400 if `fileSize` is below -1. It returns 402 if `fileSize` is
     /// over the portal limit for chunked uploads. It also returns 403 if the file is locked, open in the editor, in
     /// the trash, or encrypted.
+    /// If the file is in a full Google Drive or OneDrive storage, the call returns 400. This holds for a `fileSize`
+    /// of -1 or of `chunkUploadSize` and more. Box, Dropbox and WebDAV storages refuse later, when the file is
+    /// stored. The user has to free up space there first.
     /// </remarks>
     /// <summary>Create the editing session</summary>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created editing session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
-    [SwaggerResponse(400, "`fileSize` is below -1")]
+    [SwaggerResponse(400, "`fileSize` is below -1, or, for a `fileSize` of -1 or of `chunkUploadSize` and more, the Google Drive or OneDrive storage that holds the file has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads")]
     [SwaggerResponse(403, "The caller cannot edit this file, or the file is locked, open in the editor, in the trash or encrypted")]
     [SwaggerResponse(404, "No file with the specified ID")]
@@ -519,12 +534,15 @@ public abstract class UploadController<T>(
     /// The call returns 402 if the file is over the upload limit or a storage quota. If the installation does not
     /// allow uploads with this extension, the call returns 415. If the file is not a PDF and the room is a
     /// form-filling room, the call returns 403. To upload a large file, use `POST api/2.0/files/{folderId}/session`.
+    /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>Insert a file</summary>
     /// <path>api/2.0/files/{folderId}/insert</path>
     [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "for a new file and for a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "The caller cannot add content to this folder, the folder is a section root or in a private room, or a file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No folder with the specified ID")]
@@ -551,13 +569,15 @@ public abstract class UploadController<T>(
     /// part. A missing folder returns 404. It returns 402 if the file is over the upload limit or a storage quota. If
     /// the installation does not allow uploads with this extension, the call returns 415. If the file is not a PDF
     /// and the room is a form-filling room, the call returns 403.
+    /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>Upload a file</summary>
     /// <path>api/2.0/files/{folderId}/upload</path>
     [RaisesWebhook(WebhookTrigger.FileCreated, WebhookTrigger.FileUploaded, When = "for a new file and for a new version of an existing file")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file, as a list with one element", typeof(List<FileDto<int>>))]
-    [SwaggerResponse(400, "The request has no file part")]
+    [SwaggerResponse(400, "The request has no file part, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "The caller cannot add content to this folder, the folder is a section root or in a private room, or a file that is not a PDF is stored in a form-filling room")]
     [SwaggerResponse(404, "No folder with the specified ID")]
