@@ -59,6 +59,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.http.HttpHeaders;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -72,6 +73,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.lifecycle.Startables;
 
 @Testcontainers
+@DirtiesContext
 @ActiveProfiles({"test", "saas"})
 @Import(RegistrationTestBeanConfiguration.class)
 @EnabledIfSystemProperty(named = "RUN_INTEGRATION_TESTS", matches = "true")

@@ -15,7 +15,7 @@ Exception → status mapping used throughout: `SecurityException` 403, `Argument
 `BillingException` / `TenantQuotaException` / `AccountingPaymentRequiredException` 402, `ItemNotFoundException` /
 `FileNotFoundException` / `DirectoryNotFoundException` 404, `NotSupportedException` 415, any other exception 500
 (`CustomExceptionHandler` in `common/ASC.Api.Core/Middleware/ResponseWrapper.cs:42-150`, registered by
-`common/ASC.Api.Core/Core/BaseStartup.cs:129`).
+`common/ASC.Api.Core/Core/BaseStartup.cs:90`).
 
 Revised after the merge of `hotfix/v4.0.1` (`183da52625`, previous state `34df477e4e`). That range added the
 integration suite `common/Tests/ASC.Data.Backup.Tests` (74 test files; `ASC.Tests.slnx`, and the backup service plus

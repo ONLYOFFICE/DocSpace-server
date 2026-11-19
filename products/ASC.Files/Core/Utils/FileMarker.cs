@@ -80,7 +80,8 @@ public class FileMarker(
     RoomsNotificationSettingsHelper roomsNotificationSettingsHelper,
     FileMarkerCache fileMarkerCache,
     IDistributedLockProvider distributedLockProvider,
-    EntryStatusManager entryStatusManager)
+    EntryStatusManager entryStatusManager,
+    ILogger<FileMarker> logger)
 {
     private const string CacheKeyFormat = "MarkedAsNew/{0}/folder_{1}";
     private const string LockKey = "file_marker";
@@ -728,6 +729,7 @@ public class FileMarker(
         var toRemove = removeTags.Select(r => new Tag(r.Name, r.Type, r.Owner) { EntryId = r.EntryId, EntryType = r.EntryType });
 
         await SendChangeNoticeAsync(updateTags.Concat(toRemove).ToList(), socketManager);
+        await SendSectionNoticeAsync(parentFolders.Find(f => f.IsRoom), userId, socketManager);
     }
 
     private async Task UpdateRemoveTags<TFolder>(FileEntry<TFolder> folder, Guid userId, int valueNew, List<Tag> updateTags, List<Tag> removeTags)
@@ -1393,6 +1395,112 @@ public class FileMarker(
         {
             await socketManager.ExecMarkAsNewFoldersAsync(chunk);
         }
+    }
+
+    /// <summary>The section whose new-items badge counts the room, split as in <see cref="SetTagsNewAsync{T}"/>.</summary>
+    private static FolderType RoomSection<T>(Folder<T> room)
+    {
+        if (room.FolderType == FolderType.FillingFormsRoom)
+        {
+            return FolderType.Forms;
+        }
+
+        return room.SettingsPrivate ? FolderType.PrivateRooms : FolderType.VirtualRooms;
+    }
+
+    /// <summary>The ids of the rooms among the folder tags that the Forms and the Private rooms badges count.</summary>
+    private async Task<(HashSet<string> FormRoomIds, HashSet<string> PrivateRoomIds)> SplitSectionRoomsAsync(IEnumerable<Tag> tags)
+    {
+        var formRoomIds = new HashSet<string>();
+        var privateRoomIds = new HashSet<string>();
+
+        var roomIds = tags
+            .Where(t => t.EntryType == FileEntryType.Folder && int.TryParse(t.EntryId?.ToString(), out _))
+            .Select(t => int.Parse(t.EntryId.ToString()))
+            .Distinct()
+            .ToList();
+
+        if (roomIds.Count == 0)
+        {
+            return (formRoomIds, privateRoomIds);
+        }
+
+        await foreach (var room in daoFactory.GetFolderDao<int>().GetFoldersAsync(roomIds))
+        {
+            switch (RoomSection(room))
+            {
+                case FolderType.Forms:
+                    formRoomIds.Add(room.Id.ToString());
+                    break;
+                case FolderType.PrivateRooms:
+                    privateRoomIds.Add(room.Id.ToString());
+                    break;
+            }
+        }
+
+        return (formRoomIds, privateRoomIds);
+    }
+
+    /// <summary>
+    /// Forms and Private rooms have no tag of their own, and the VirtualRooms tag whose event used to refresh their
+    /// badge can be gone while a room still has marks: clearing marks there sends the section root's event itself.
+    /// </summary>
+    private async Task SendSectionNoticeAsync<T>(Folder<T> room, Guid userId, SocketManager socketManager)
+    {
+        if (room == null)
+        {
+            return;
+        }
+
+        var section = RoomSection(room);
+        if (section == FolderType.VirtualRooms)
+        {
+            return;
+        }
+
+        try
+        {
+            var sectionId = section == FolderType.Forms
+                ? await globalFolder.GetFolderFormsAsync(daoFactory)
+                : await globalFolder.GetFolderPrivateRoomsAsync(daoFactory);
+
+            if (sectionId == 0)
+            {
+                return;
+            }
+
+            var count = await GetSectionNewCountAsync(userId, section);
+            var tag = new Tag("new", TagType.New, userId, count) { EntryId = sectionId, EntryType = FileEntryType.Folder };
+
+            await socketManager.ExecMarkAsNewFoldersAsync([tag]);
+        }
+        catch (Exception e)
+        {
+            logger.WarningSectionNotice(section, userId, e);
+        }
+    }
+
+    /// <summary>The Forms or Private rooms badge of the user, counted as <see cref="SetTagsNewAsync{T}"/> counts it.</summary>
+    private async Task<int> GetSectionNewCountAsync(Guid userId, FolderType section)
+    {
+        var virtualRooms = await daoFactory.GetFolderDao<int>().GetFolderAsync(await globalFolder.GetFolderVirtualRoomsAsync(daoFactory));
+        if (virtualRooms == null)
+        {
+            return 0;
+        }
+
+        var disabledRooms = (await roomsNotificationSettingsHelper.GetDisabledRoomsAsync(userId)).ToHashSet();
+        var tags = (await daoFactory.GetTagDao<int>().GetNewTagsAsync(userId, virtualRooms, false).ToListAsync())
+            .Distinct()
+            .Where(t => !disabledRooms.Contains(t.EntryId.ToString()))
+            .ToList();
+
+        var (formRoomIds, privateRoomIds) = await SplitSectionRoomsAsync(tags);
+        var sectionRoomIds = section == FolderType.Forms ? formRoomIds : privateRoomIds;
+
+        return tags
+            .Where(t => t.EntryType == FileEntryType.Folder && sectionRoomIds.Contains(t.EntryId.ToString()))
+            .Sum(t => t.Count);
     }
 
     private record Data

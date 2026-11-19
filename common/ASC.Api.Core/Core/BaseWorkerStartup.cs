@@ -85,7 +85,7 @@ public class BaseWorkerStartup(IConfiguration configuration)
                 .AddEventBus(Configuration)
                 .AddDistributedTaskQueue()
                 .AddCacheNotify(Configuration)
-                .AddHttpClient()
+                .AddStandardHttpClients()
                 .AddDistributedLock(Configuration)
                 .AddHeartBeat(Configuration);
 
