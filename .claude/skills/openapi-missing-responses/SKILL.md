@@ -1,6 +1,6 @@
 ---
 name: openapi-missing-responses
-description: "Documenting the status codes DocSpace API endpoints really return but do not declare: a queue of actions whose own code (throw, Demand*, controller helpers, DTO validation, 304) produces a code with no [SwaggerResponse], and declared codes no request can get; a run settles a batch of N, adds or removes attributes or records rejections, verifies, reports and stops. A reachable 500 is only reported, never documented or fixed. USE FOR: find undocumented / missing responses or error codes, which codes does this endpoint really return, add SwaggerResponse for the codes an action throws, remove a documented code the endpoint cannot return, continue the missing-responses campaign, take the next N endpoints, how many endpoints are left, check the last batch, show or undo rejected findings — use it whenever the user means the set of status codes an endpoint declares versus what its code returns, even without naming the campaign. DO NOT USE FOR: pipeline-wide responses that belong to a document filter (global MVC filters, the rate limiter), rewriting summaries/remarks (openapi-desc-opt), Spectral findings (openapi-lint-fix), changing server behaviour, fixing the cause of a 500."
+description: "Documenting the status codes DocSpace API endpoints really return but do not declare: a queue of actions whose code or the services it calls (throw, Demand*, controller helpers, services up to three calls deep, DTO validation, 304) produce a code with no [SwaggerResponse], and declared codes no request can get; a run settles a batch of N, adds or removes attributes or records rejections, verifies, reports and stops. A reachable 500 is only reported, never documented or fixed. USE FOR: find undocumented / missing responses or error codes, which codes does this endpoint really return, add SwaggerResponse for the codes an action throws, remove a documented code the endpoint cannot return, continue the missing-responses campaign, take the next N endpoints, how many endpoints are left, check the last batch, show or undo rejected findings — use it whenever the user means the set of status codes an endpoint declares versus what its code returns, even without naming the campaign. DO NOT USE FOR: pipeline-wide responses that belong to a document filter (global MVC filters, the rate limiter), rewriting summaries/remarks (openapi-desc-opt), Spectral findings (openapi-lint-fix), changing server behaviour, fixing the cause of a 500."
 ---
 
 # Undocumented responses: one batch of endpoints per run
@@ -40,19 +40,37 @@ found nothing behind, `*` a 500 — kept out of the gap, so it never puts an act
 counts such actions and `--all` lists them):
 
 - `throw new X(...)` in the action, mapped to a status through the exception handler of the action's host;
-  subclasses resolve through the repository's class hierarchy;
+  subclasses resolve through the repository's class hierarchy. A handler case with a condition
+  (`case X { ServiceFailed: true }:`, `case X e when …:`) maps only when the throw itself sets that property;
+  otherwise the next matching case (or 500) counts and the conditional code is a hint;
 - helpers of the controller and its base classes (any name, followed recursively), and `Demand*` methods
-  anywhere in the repository, followed to what they throw;
-- a `throw` inside a `try` whose `catch` takes it without rethrowing is not counted;
+  anywhere in the repository, followed to what they throw; a literal `true`/`false` argument (or a literal default
+  left out) switches off the callee's `if (flag)` / `if (!flag)` block — `DemandRebrandingPermissionAsync(false)`;
+- services: a call `member.X(...)` on a field, property or constructor parameter goes into `X` of its declared type
+  (every implementation of an interface), a static `Class.X(...)` into that class, up to three calls deep. A class
+  of the action's own project (`FilesControllerHelper`) is the controller's layer and costs no hop. Each line says
+  how far: `[service hop N]`. A service finding counts like one in the action, except these, which stay hints
+  with the reason in `[hint: …]`: a null guard, a throw that is itself the `_ =>` or `default:` arm of a switch, a
+  framework (non-repository) exception two or more services deep, a 401 (conventions §1), and a code that only
+  some of the bodies a call resolves to produce (implementations of an interface, overloads with the same number
+  of parameters);
+- a `throw` inside a `try` whose `catch` takes it without rethrowing is not counted, at every call on the path;
 - `TryGetFromCache` → 304, `NotFound()`/`StatusCode(…)` results, `Response.StatusCode = …`;
 - DTO validation → 400: validation attributes on bound properties and parameters, `required` members of the JSON
   body, `IValidatableObject` — counted only under `[ApiController]` or an attribute deriving from it. A complex
   parameter that names no binding source, and whose members name none either, is taken as the body, as
   `[ApiController]` infers it, and its whole graph is checked.
 
-What it does not see — your part in step 3: services called on other objects (`someService.X()`), exceptions
-thrown by framework or library code, a `catch` in a caller that converts one exception into another, and whether
-a branch can be reached at all.
+If the repository has a CodeGraph index (`.codegraph/codegraph.db`), `scan.py` reads its call edges too: calls the
+text cannot resolve (a local variable, a chained call, a lambda) are followed, and what they lead to is only ever a
+hint. Without the index, or with `--no-codegraph`, the queue is the same; the `Calls followed:` line of the output
+says which way this run went.
+
+What it does not see — your part in step 3: calls through locals and chains without the index, services more
+than three calls deep, which overload or implementation actually runs when several fit, exceptions thrown by
+framework or library code, a `catch` in a caller that converts one exception into another, and whether a branch
+can be reached at all. A project another host also loads gets the other host's code on each line:
+`[in ASC.Monolith: 403]` (conventions §1).
 
 ## 0. Before the batch
 
@@ -89,9 +107,10 @@ as a reason (the size and format checks in `FileSecurity.FilterEntryAsync` are u
 python .claude/skills/openapi-missing-responses/scan.py --batch <N>
 ```
 
-One run indexes the whole tree; do not repeat calls whose output you already have. The output: per host, the
-exception table and the global filters; the scope and queue counts; then the batch — per action its id, verb and
-route, document, declared codes, gap, and the evidence per gap code with the call path (`via`).
+One run indexes the whole tree and walks the services of every action (20–35 s); do not repeat calls whose output
+you already have. The output: per host, the exception table and the global filters; which calls were followed; the
+scope and queue counts, with the gap codes by the depth of their nearest evidence; then the batch — per action its
+id, verb and route, document, declared codes, gap, and the evidence per gap code with the call path (`via`).
 
 If the user named an endpoint or a file, use `--endpoint <id | file | file::Method>` instead — it also prints
 hints (`?`), the evidence behind already declared codes (`=`) and the declared codes with no evidence in the
@@ -105,7 +124,9 @@ Start the reply with the batch: the ids you are taking, each marked if its file 
 
 ## 2. Settle every gap code
 
-For each `+` line open the code at the reported location and follow the `via` path. Three questions:
+For each `+` line open the code at the reported location and follow the `via` path. A `[service hop N]` line was
+found by the declared type of each call on the path: confirm each hop (the overload and the implementation that
+really run, the arguments passed) before a text rests on it. Three questions:
 
 1. **Can a real caller reach it?** Follow the conditions. The usual false positives are in
    `references/conventions.md` (below: conventions) §4. Reachable is the only test — a code that exists because
@@ -125,23 +146,30 @@ If an action needs a decision only the user can make, stop on it and ask rather 
 
 For each `*` line, note what triggers it — which input or state — for the report; nothing else is done with it.
 
-## 3. Walk one level deeper
+## 3. Settle the hints and the declared codes
 
-For each action you are going to edit, go one level into every service it calls (each call in the action body,
-by `goToDefinition` or by the declared type — step 0) and collect what those methods throw or demand, with the conditions. Go further only through
-thin wrappers that just forward the call. Map each exception through the table the scanner printed for this
-action's host. Add the codes found there as well — the action is being documented now, and coming back for it
-later costs a second review. An exception the table maps to 500 goes into the report, like a `*` line. Also extend the text of an already declared code when the callee adds another reason
+The scanner has walked the services already; what is left is what it could not decide. For each action you are
+going to edit, run `scan.py --endpoint <id>` and go through:
+
+- the `?` lines with a `[hint: …]` — each names why it does not count (conventions §4, last rows). Settle the
+  ones whose condition may come from the request: a body enum behind a fallback arm, a framework exception that
+  checks a request value, the overload or implementation the call really reaches. A hint that turns out to be
+  reachable is added like a gap code;
+- calls the scanner could not follow (a local variable, a chained call, an extension method — the `via` paths
+  stop short of them): go one level in by `goToDefinition` or by the declared type (step 0), further only through
+  thin wrappers that just forward the call.
+
+Map each exception through the table the scanner printed for this action's host. Add the codes found as well — the
+action is being documented now, and coming back for it later costs a second review. An exception the table maps to 500 goes into the report, like a `*` line. Also extend the text of an already declared code when the callee adds another reason
 for it.
 
 Settle the declared codes on the same walk. Every declared error code needs a path that produces it; a `-` line
-of the scanner is where to look first, since the scanner does not follow services and most `-` codes come from
-them. A declared code that no path produces — the exception maps to another code, a `catch` converts it, the
+of the scanner is where to look first: nothing in the action or the services followed produces it. A declared code that no path produces — the exception maps to another code, a `catch` converts it, the
 branch is dead — is removed; what counts as proof, and what is kept anyway, is conventions §7.
-`scan.py --audit-catches <ids>` points at the `catch` case: it follows the services the action calls as well and
-lists each declared code whose every producer it found is caught on the way. It is a lead for §7, never a
-verdict — calls through locals, chained expressions, statics and extension methods are not followed, and a status
-picked by a callee and answered through `StatusCode(<variable>)` is not seen (the output notes that case).
+`scan.py --audit-catches <ids>` points at the `catch` case: it lists each declared code whose every producer it
+found in the action and its services is caught on the way. It is a lead for §7, never a verdict — what the scanner
+does not follow (above) is not seen, and a status picked by a callee and answered through `StatusCode(<variable>)`
+is not seen either (the output notes that case).
 
 Binding of unusual DTO shapes (form data, `[FromQuery]` complex types, enums) is decided by ASP.NET, not by
 DocSpace: check it against conventions §2, and on a Kestrel stand (conventions §5) when §2 does not cover the
@@ -217,10 +245,12 @@ the diff; say so. Do not commit — git is the user's. Stop and wait for the nex
 - Check the last batch — redo steps 2 and 5 on it, report problems found in the edit and the limits of the
   check, and stop. Checking is not a licence to take the next batch.
 - Progress, how much is left — `scan.py --batch 0` (counts only) or `scan.py --all` (the whole queue).
-- Which endpoints return 500 — `scan.py --all`, its `Reachable 500` block. List them for the user; do not
-  document, reject or fix them. The block shows only what the scanner sees (step 3 limits).
+- Which endpoints return 500 — `scan.py --all`, its `Reachable 500` block, one line per throw site with the
+  actions that reach it. A site many actions reach (tenant resolution, a distributed lock) is one finding. List
+  them for the user; do not document, reject or fix them. The block shows only what the scanner sees (step 3
+  limits).
 - Declared codes a `catch` may make unreachable, typed or catch-all, in the action or in a service it calls —
-  `scan.py --audit-catches` (all actions, ~5 s) or with ids/files; settle every line it prints by conventions §7
+  `scan.py --audit-catches` (all actions, ~45 s) or with ids/files; settle every line it prints by conventions §7
   and report it like a batch: removed, kept with the path that produces the code, or not traced to the end.
 - Rejections — `scan.py --rejected` lists them with their state (`valid`, `expired`, `orphaned`);
   `scan.py --unreject "<id>" [code]` drops one, and the code is back in the queue on the next run.

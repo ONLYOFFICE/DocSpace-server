@@ -44,7 +44,8 @@ nothing), while inside `ASC.Monolith` the table of `ASC.Api.Core` applies — `A
 
 - document only the codes the action sets explicitly — `BadRequest(…)`, `StatusCode(…)`, a status returned by a
   service and passed on, a `catch` that answers with a code: they are the same in both hosts;
-- an exception that reaches the handler is documented only after checking what it becomes in **both** tables; if
+- an exception that reaches the handler is documented only after checking what it becomes in **both** tables (the
+  scanner appends the other host's code to each line where it differs: `[in ASC.Monolith: 403]`); if
   they differ, name both, with the host each one belongs to, rather than picking one. If either table gives 500,
   it is not documented at all: report it with both codes (SKILL.md, "500 is the exception");
 - the other host's global filters are pipeline responses there, as in the list above.
@@ -117,13 +118,17 @@ relying on this list.
 | Finding | Why it may not be a response | How to tell |
 |---|---|---|
 | a `Demand` on an object the caller owns (their own profile, their own id) | a default ACE may grant the action to the owner role unconditionally | read the ACE defaults for that action and object; on another user's object it is usually a real 403 |
-| a branch switched off by a literal argument | the call site passes a constant that skips the check | read the call site's arguments |
+| a branch switched off by a literal argument | the call site passes a constant that skips the check | the scanner drops `if (flag)` / `if (!flag)` blocks a literal `true`/`false` switches off; any other shape (`flag && …`, an enum, a constant field) — read the call site's arguments |
 | a branch for a system account that never authenticates | no request can carry that identity | read how the account is created and whether authentication accepts it |
 | `default:` / `_ =>` throw behind a route enum | binding already answered 400 | not for a query or body enum: an undefined number reaches the arm |
 | an argument guard on an internal value | its input never comes from the request | trace the argument back to the request |
-| an exception caught by a caller outside the class chain, or converted by a `catch` | the scanner checks `try/catch` only in the method that throws or calls | read the callers on the `via` path |
+| an exception caught by a caller outside the class chain, or converted by a `catch` | the scanner checks `try/catch` at every call it followed, not in callers it did not follow (a local, a lambda) | read the callers on the `via` path |
 | `catch (...) when (...)` | the scanner treats a filtered catch as not catching | read the filter |
 | a check that an earlier step of the same request already enforced | the earlier step answers first, with its own code | follow the action from its first line and see which check fails first |
+| a `[service hop N]` finding | the declared type was followed, not the object that runs, and the arguments of each hop were not | confirm every hop of `via`: the implementation registered for the interface, the overload the arguments pick, and that the value checked comes from the request |
+| `[hint: a null guard / the fallback arm of a switch / a framework exception N service calls deep]` | an internal consistency check whose input the server builds itself | trace the checked value back: a value from the request (a body enum with an undefined number, a raw id) makes it a real response |
+| `[hint: only some of the N bodies … resolves to]` | which implementation or overload runs decides, and the scanner cannot tell | find the one that runs here (the registration, the argument types); if it is among those that produce the code, the code is real |
+| `[hint: a call only CodeGraph links]` | the graph links calls by name, also overloads and namesakes never called here | confirm the call in the code before treating it as a path |
 
 A code that is reachable but exists by accident (a library failing on an edge input, a missing null check, an
 exception type nobody chose on purpose) is still a response: document it as it is. A 500 is not: report it.
@@ -159,8 +164,8 @@ existing `[SwaggerResponse]` whose code no request to this endpoint can get is *
 like a missing one is added.
 
 The burden of proof is the other way round from a gap code. The scanner's `=` lines show what backs a declared
-code in the action's own code, and `-` marks a declared code with no evidence there — but the scanner does not
-follow services, so `-` is a lead, never a verdict. Remove only when you have traced every path that could
+code in the action and the services it follows, and `-` marks a declared code with no evidence there — but the
+scanner stops at three service calls and at calls it cannot resolve, so `-` is a lead, never a verdict. Remove only when you have traced every path that could
 produce the code and can name the check that rules it out, as for a rejection:
 
 - the exception behind it maps to another code in the host's table (`InvalidOperationException` is 403, not 409),
