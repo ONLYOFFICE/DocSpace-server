@@ -47,7 +47,7 @@ None.
     and every entry, without looking at `security.ReadHistory`; for an AI project and its entries the tab would show
     a 403. The client has to hide the tab for them (follow-up for the frontend; the server change does not wait).
   - Published SDKs and the OpenAPI document: no schema change; the remarks of the five operations name the new 403.
-    The documents are regenerated.
+    The OpenAPI documents and the C# SDK package are regenerated (4b35bd28d8); the SDK submodules are not changed.
   - Socket events: `update-history` is no longer sent to `{tenant}-DIR-{projectId}` nor to the rooms of entries inside
     a project. No other event changes.
   - Webhooks: none are raised by history.
@@ -65,8 +65,8 @@ No row of `openspec/deviations.md` is touched.
 
 - `products/ASC.Files/Core/Helpers/FilesMessageService.cs`: no history references for the project and the entries
   inside it, in the single-entry path and on each side of a move or copy.
-- `products/ASC.Files/Core/Core/Security/FileSecurity.cs`: no `ReadHistory`, `EditHistory` or `HistoryExport` right on
-  an AI project.
+- `products/ASC.Files/Core/Core/Security/FileSecurity.cs`: no `HistoryExport` right on an AI project. `ReadHistory` and
+  `EditHistory` are rights of a file and already false inside a project for everyone but the file's creator.
 - `products/ASC.Files/Server/ApiModels/ResponseDto/HistoryDto.cs` (`HistoryApiHelper`): the history and report checks
   refuse an AI project and the entries inside it.
 - Remarks and `[SwaggerResponse(403)]` texts of `getFileHistory`, `getFolderHistory` and the three report operations.

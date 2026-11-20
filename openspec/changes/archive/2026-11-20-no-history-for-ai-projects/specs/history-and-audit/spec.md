@@ -84,5 +84,5 @@ still records them.
 
 #### Scenario: The other side of a copy keeps its history
 
-- **WHEN** a member copies a file from a folder of their My documents into an AI project, or their file from the project into that folder
+- **WHEN** the owner of an AI project copies a file from a folder of their My documents into the project, or their file from the project into that folder
 - **THEN** the history of that folder contains `FileCopied` for each copy

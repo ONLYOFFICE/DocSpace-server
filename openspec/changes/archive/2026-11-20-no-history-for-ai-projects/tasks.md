@@ -14,8 +14,8 @@
     Instructions room answers 200.
   - "Project reports no history export right": `getRoomInfo` of the project has `security.HistoryExport` false, and
     of an Instructions room true.
-  - "The other side of a copy keeps its history": a member copies a file of a My documents folder into the project,
-    and the copy back into that folder; the history of that folder contains `FileCopied` for both.
+  - "The other side of a copy keeps its history": the project's owner copies a file of a My documents folder into
+    the project, and a file of the project into that folder; the history of that folder contains `FileCopied` for both.
   No test is marked `Category=Bug`.
 - [x] 1.2 Prove the tests red without the fix with `.claude/scripts/prove-red.sh` and keep the result line for the
   commit message. "The other side of a copy keeps its history" passes before the fix as well; it guards the move and
@@ -54,7 +54,8 @@
   tests of 1.1 by file and line; the rows of "Who may read an entry history" and "Who may export a folder history"
   keep their citations (their scenarios are unchanged) and gain a row for the AI project exception pointing at the
   same tests.
-- [ ] 3.3 Regenerate the Files OpenAPI document and the SDKs for the changed remarks (`generate-sdk` skill).
+- [x] 3.3 Regenerate the Files OpenAPI document and the SDKs for the changed remarks (`generate-sdk` skill): done in
+  4b35bd28d8 for the OpenAPI documents and the C# SDK package; the SDK submodules are not regenerated in this branch.
 - [x] 3.4 Run `openspec validate --specs --no-interactive`,
   `python -I -X utf8 .claude/skills/openspec-maintain/scripts/api_test_coverage.py --spec history-and-audit` (the
   change adds no operation; `getFileHistory`, `getFolderHistory`, `createReportFolderHistory`,
