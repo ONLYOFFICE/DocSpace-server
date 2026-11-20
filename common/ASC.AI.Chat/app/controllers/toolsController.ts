@@ -94,19 +94,23 @@ function assertRoutableServerName(rawName: unknown): string {
 // getSystemServerConfig in tools/systemTools.ts) so such an entry never
 // shadows the system group with a broken connection. A write without a
 // config re-saves the entry already registered under that name; anything
-// else without a config is refused.
+// else without a config is refused. `stored` is the registry read once by a
+// caller that resolves many entries (the whole-map save).
 async function resolveConfig(
   name: string,
   provided: McpServerConfig | undefined,
+  stored?: Record<string, McpServerConfig>,
 ): Promise<McpServerConfig> {
   const system = getSystemServerConfig(name);
   if (system) {
     return system;
   }
+  const portal = stored
+    ? (stored[name] ?? null)
+    : await storage.mcpServers.readByName(name, undefined);
   if (provided && Object.keys(provided).length > 0) {
-    return provided;
+    return keepStoredHeaders(provided, portal);
   }
-  const portal = await storage.mcpServers.readByName(name, undefined);
   if (portal) {
     return portal;
   }
@@ -114,6 +118,34 @@ async function resolveConfig(
     new Error(`No config provided and no portal-level server named "${name}"`),
     { status: 400, expose: true },
   );
+}
+
+// No read answers a server's headers (see withoutHeaders below), so a config
+// that comes back from the editor has none. Writing it as is would erase the
+// credentials on every save; a config with no `headers` key therefore keeps
+// the stored ones. Only while it still points at the same `url`: carried to
+// another address they would hand the credentials to whoever can edit the
+// entry. An explicit `headers` (an empty object included) always wins, which
+// is how they are replaced or removed.
+function keepStoredHeaders(
+  provided: McpServerConfig,
+  stored: McpServerConfig | null,
+): McpServerConfig {
+  if ("headers" in provided || !stored || !isObject(stored["headers"])) {
+    return provided;
+  }
+  if (typeof provided["url"] !== "string" || provided["url"] !== stored["url"]) {
+    return provided;
+  }
+  return { ...provided, headers: stored["headers"] };
+}
+
+// The headers a server is called with carry its credentials. The servers run
+// in this process (see tools/customTools.ts), so the browser never needs
+// them and no read answers them.
+function withoutHeaders(config: McpServerConfig): McpServerConfig {
+  const { headers: _headers, ...shown } = config;
+  return shown;
 }
 
 // System-server entries are pinned to the canonical internal endpoint
@@ -228,14 +260,7 @@ export const toolsController = {
       res.json(null);
       return;
     }
-    // Without the headers a server is called with: they carry its
-    // credentials, the servers run in this process (see tools/customTools.ts)
-    // and nothing reads one server's config back to edit it. The config
-    // editor reads and rewrites the whole map through list-custom-servers.
-    const { headers: _headers, ...shown } = redactSystemServer(name, config) as McpServerConfig & {
-      headers?: unknown;
-    };
-    res.json(shown);
+    res.json(withoutHeaders(redactSystemServer(name, config)));
   }),
 
   listCustomServers: asyncHandler(async (req, res) => {
@@ -247,7 +272,9 @@ export const toolsController = {
       // entry named after it must not surface as a selectable entry (it is
       // always enabled server-side, see systemTools).
       if (name === PORTAL_MCP_SERVER_NAME) continue;
-      redacted[name] = redactSystemServer(name, config);
+      // The config editor reads this map and writes it back whole; the
+      // headers it does not get are kept by resolveConfig on that write.
+      redacted[name] = withoutHeaders(redactSystemServer(name, config));
     }
     res.json(redacted);
   }),
@@ -306,10 +333,11 @@ export const toolsController = {
     // scope and WIPE its whole server map (Bug 82975).
     await assertEntityAccessible(args.entityId as string | undefined);
     const map = args.map as Record<string, McpServerConfig>;
+    const stored = await storage.mcpServers.readAll(undefined);
     const normalized: Record<string, McpServerConfig> = {};
     for (const [name, config] of Object.entries(map)) {
       assertRoutableServerName(name);
-      normalized[name] = await resolveConfig(name, config);
+      normalized[name] = await resolveConfig(name, config, stored);
     }
     const result = await engine.replaceAllCustomServers(
       normalized,
