@@ -779,9 +779,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.55.tgz::locator=asc-ai-chat%40workspace%3A.":
-  version: 1.0.2-progress.55
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.55.tgz#onlyoffice-ai-chat-1.0.2-progress.55.tgz::hash=1399ee&locator=asc-ai-chat%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.59.tgz::locator=asc-ai-chat%40workspace%3A.":
+  version: 1.0.2-progress.59
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-1.0.2-progress.59.tgz#onlyoffice-ai-chat-1.0.2-progress.59.tgz::hash=e7b2e9&locator=asc-ai-chat%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -880,7 +880,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/ee4f05639ca5d992fc02e71cebc05aa0cf501a34ad416ae65efebbae20ea6af5fb17e6b20a02cac8e5854d8659b585e0449139de7bad968465cc6a82090fdddb
+  checksum: 10/135061503cf081e5de0f43d073837b11951faf59b85d78c05a66de46ede84f6df9e95dfd8ecfa814bf611d54fb749937809ad5b29967d074c4d1f35878a725a6
   languageName: node
   linkType: hard
 
@@ -2001,7 +2001,7 @@ __metadata:
     "@google/genai": "npm:^1.30.0"
     "@mistralai/mistralai": "npm:^1.11.0"
     "@modelcontextprotocol/sdk": "npm:^1.32.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-1.0.2-progress.55.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-1.0.2-progress.59.tgz"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.222.0"
     "@opentelemetry/exporter-metrics-otlp-proto": "npm:^0.222.0"

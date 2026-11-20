@@ -173,9 +173,17 @@ export type AiActionArgs = {
    */
   knowledgeRoom?: KnowledgeRoomRef;
   /**
-   * The folder connected to the chat as the round's context. It becomes
-   * the location the model is told the user works in, and the entry the
-   * round is attributed to.
+   * The folders and rooms connected to the chat as the round's data sources.
+   * Each is read again under the caller's credentials, so only its `id` is
+   * trusted; one that is gone or that the caller cannot read is left out.
+   * The first 20 distinct ids are used and any further entry is ignored.
+   */
+  folderContexts?: FolderContextRef[];
+  /**
+   * A single data source, as an older client sends it. Read as a list of one
+   * when `folderContexts` is absent; send `folderContexts` instead.
+   *
+   * @deprecated
    */
   folderContext?: FolderContextRef;
   /**
@@ -850,7 +858,7 @@ export type Res_aiTemplatesInstall = TemplateRoom & {
   skillSets: TemplateRoom[];
   /** The Knowledge rooms made for an agent's knowledge bases; empty for the other kinds. */
   knowledgeBases: TemplateRoom[];
-  /** What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` when its instructions could not be stored. */
+  /** What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` for every agent, as its instructions are not installed yet. */
   warnings: string[];
 };
 

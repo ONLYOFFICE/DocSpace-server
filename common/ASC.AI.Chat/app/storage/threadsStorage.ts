@@ -33,7 +33,7 @@
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { isObject, getString, getNumber, getObject, getArray } from "../narrow.js";
-import { resolveAiProjectEntityId } from "./docspaceFilesApi.js";
+import { DocspaceApiHttpError, resolveAiProjectEntityId } from "./docspaceFilesApi.js";
 import { setRoundThreadId } from "../requestContext.js";
 import { PAGE_SIZE } from "@onlyoffice/ai-chat/core";
 import type { ThreadsStorage, ThreadsCursor } from "@onlyoffice/ai-chat/core";
@@ -115,6 +115,25 @@ async function toProjectId(entityId: string | undefined): Promise<string | null>
   return (await resolveAiProjectEntityId(entityId)) ?? null;
 }
 
+/**
+ * The project whose threads a list is read for. A folder the caller cannot
+ * open is no project of theirs, so it lists the threads of no project, as a
+ * folder that does not exist does: the id of a list is read, never checked.
+ * Any other failure of the read stays a failure, since answering the threads
+ * of no project for a project that could not be read would show the wrong
+ * list as if it were the right one.
+ */
+async function toListedProjectId(entityId: string | undefined): Promise<string | null> {
+  try {
+    return await toProjectId(entityId);
+  } catch (err) {
+    if (err instanceof DocspaceApiHttpError && err.status === 403) {
+      return null;
+    }
+    throw err;
+  }
+}
+
 export class HttpThreadsStorage implements ThreadsStorage {
   async create(title: string, profileId?: string, entityId?: string): Promise<Thread> {
     const raw = await aiService.post(PATH, {
@@ -164,7 +183,7 @@ export class HttpThreadsStorage implements ThreadsStorage {
         ? { lastEditDate: cursor.lastEditDate, id: cursor.id || cursor.threadId }
         : undefined;
 
-    const projectId = await toProjectId(entityId);
+    const projectId = await toListedProjectId(entityId);
     if (count !== undefined) {
       const page = await this.readPage(projectId, count, wireCursor, query);
       return page.items;

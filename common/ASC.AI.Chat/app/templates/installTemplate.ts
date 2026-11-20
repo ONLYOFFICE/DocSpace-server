@@ -36,15 +36,20 @@
  * client would by hand. A skill set becomes an Instructions room holding its
  * skills, a knowledge base a Knowledge room holding its files, and an agent
  * an AI project room linked to the rooms of its skill sets and knowledge
- * bases, which are installed with it, and given the portal's chat model and
- * its instructions.
+ * bases, which are installed with it, and given the portal's chat model.
  *
  * Every install makes new rooms: nothing is matched against what the portal
  * already holds. A step the Files service refuses fails the install with its
- * status, and the rooms made before it stay. The agent's model and its
- * instructions are the exceptions: a portal that has no chat model, or does
- * not store one of the two, still gets the agent, and the answer says so in
- * `warnings`. Every room takes its template's colour and cover. An agent
+ * status, and the rooms made before it stay. The agent's model is the
+ * exception: a portal that has no chat model, or does not store it, still
+ * gets the agent, and the answer says so in `warnings`. A template that
+ * holds a knowledge base is refused with 409 before the first room on a
+ * portal where vectorization is not set up, since the Files service makes
+ * no Knowledge room there and an agent's Instructions rooms, made first,
+ * would be left behind. The agent's
+ * instructions are not installed: the Files service has no route that stores
+ * them yet, so every agent comes with `instructionsNotSaved` in `warnings`
+ * and no request is made. Every room takes its template's colour and cover. An agent
  * carries its template's category as a tag, which is
  * what the Agents list filters categories by; a template's description has
  * nowhere to go in a room and is not installed.
@@ -53,6 +58,7 @@
 import { portalChatProfileId } from "../storage/aiProjectChatContext.js";
 import { mediaTypeOf, uploadFile } from "../storage/docspaceFileTransfer.js";
 import { DocspaceApiHttpError, filesApiSend } from "../storage/docspaceFilesApi.js";
+import { aiService } from "../storage/httpClient.js";
 import { getEntityId, getString, isObject } from "../narrow.js";
 import logger from "../log.js";
 import { findTemplate, readTemplateFile } from "./catalog.js";
@@ -75,7 +81,7 @@ export interface InstalledTemplate extends InstalledRoom {
   skillSets: InstalledRoom[];
   /** The Knowledge rooms made for an agent's knowledge bases; empty otherwise. */
   knowledgeBases: InstalledRoom[];
-  /** What was skipped: `modelNotSaved`, `instructionsNotSaved`. */
+  /** What was skipped: `modelNotSaved`; `instructionsNotSaved` for every agent. */
   warnings: string[];
 }
 
@@ -165,19 +171,36 @@ async function installAgent(
     logger.warn(`installTemplate: ${template.id}: model not saved (${err.status})`);
     warnings.push("modelNotSaved");
   }
-  try {
-    await filesApiSend("PUT", `rooms/${encodeURIComponent(agent.id)}/instructions`, {
-      instructions: template.instructions,
-    });
-  } catch (err) {
-    if (!(err instanceof DocspaceApiHttpError)) {
-      throw err;
-    }
-    logger.warn(`installTemplate: ${template.id}: instructions not saved (${err.status})`);
-    warnings.push("instructionsNotSaved");
-  }
+  // Nothing stores an agent's instructions yet (the Files service has no
+  // `rooms/{id}/instructions`), so they are skipped and the caller is told.
+  warnings.push("instructionsNotSaved");
   logger.info(`installTemplate: ${template.id} -> agent ${agent.id}`);
   return { ...agent, kind: "agent", skillSets, knowledgeBases, warnings };
+}
+
+/** Whether installing the template makes a Knowledge room. */
+function makesKnowledgeRoom(template: Template): boolean {
+  return template.kind === "agent"
+    ? template.knowledges.length > 0
+    : template.kind === "knowledgeBase";
+}
+
+// The Files service refuses a Knowledge room on a portal without
+// vectorization (`CheckKnowledgeRoomCreationAsync`, a 403). It checks the
+// provider alone, so settings that only wait for a reset still pass. A
+// failed read is not "off": it throws, and nothing is made either way.
+async function assertKnowledgeRoomsAllowed(template: Template): Promise<void> {
+  const config = await aiService.get("/config");
+  const enabled =
+    isObject(config) &&
+    (config["vectorizationEnabled"] === true || config["vectorizationNeedReset"] === true);
+  if (!enabled) {
+    logger.info(`installTemplate: ${template.id}: refused, vectorization is not set up`);
+    throw httpError(
+      409,
+      "This template holds a knowledge base, which needs vectorization to be set up on the portal",
+    );
+  }
 }
 
 /** Installs the template with this id, or answers 404 for an id the catalog does not hold. */
@@ -188,6 +211,9 @@ export async function installTemplate(
   const template = findTemplate(catalog, id);
   if (!template) {
     throw httpError(404, "Template not found");
+  }
+  if (makesKnowledgeRoom(template)) {
+    await assertKnowledgeRoomsAllowed(template);
   }
   if (template.kind === "agent") {
     return installAgent(template, catalog);

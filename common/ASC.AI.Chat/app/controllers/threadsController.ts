@@ -116,10 +116,11 @@ const assignmentsEngine = new AssignmentsEngine({ storage });
 //  1. If an `entityId` is supplied it must reference a folder the caller can
 //     access — a missing folder surfaces as 404, a no-access response as 403
 //     (see `assertEntityAccessible`). The client sends one only inside an AI
-//     project (the project id); any other accessible folder is allowed BY
-//     DESIGN (Bug 82719 reopen decision): threads are one list per user,
-//     so `HttpThreadsStorage` ignores the id instead of rejecting it. An
-//     absent entityId is the ordinary case.
+//     project (the project id), and the thread then belongs to that project;
+//     any other accessible folder is allowed BY DESIGN (Bug 82719 reopen
+//     decision): outside a project threads are one list per user, so
+//     `HttpThreadsStorage` binds the thread to no folder instead of rejecting
+//     the id. An absent entityId is the ordinary case.
 //  2. A live profile must be resolvable — an explicit `profileId` that exists,
 //     or the `Chat` assignment for the scope — otherwise there is no model to
 //     run the thread against, so reject with 404.
@@ -207,8 +208,9 @@ export const threadsController = {
     // object directly, so a missing/non-object profile means there is no model
     // to run the thread against → 404 (this also avoids the engine TypeError
     // that previously collapsed to a 500). A supplied entityId must be
-    // reachable; the thread itself is global whatever it names (see
-    // `assertThreadCreatable` for the Bug 82719 design decision).
+    // reachable; the thread belongs to it only when it is an AI project and
+    // is global otherwise (see `assertThreadCreatable` for the Bug 82719
+    // design decision).
     const body = req.body;
     if (!isObject(body) || !isObject(body.profile)) {
       res.status(404).json({

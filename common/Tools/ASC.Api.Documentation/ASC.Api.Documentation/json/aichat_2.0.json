@@ -5185,7 +5185,7 @@
         ],
         "operationId": "aiThreadsOpenOrCreate",
         "summary": "Open or create",
-        "description": "Opens a chat thread and returns it with its history, or creates one whose title is generated from the first message supplied in the request. That first message is not persisted: follow up with `POST api/2.0/ai/threads/append-user-message` to store it, or start the round directly with `POST api/2.0/ai/ai/send-with-stream`. Unlike `create` this takes a whole resolved `profile` object rather than an ID, and a request without one answers 404 because no model could be bound. A supplied `entityId` has to be a room the caller can open; threads are one list per user whatever it names.",
+        "description": "Opens a chat thread and returns it with its history, or creates one whose title is generated from the first message supplied in the request. That first message is not persisted: follow up with `POST api/2.0/ai/threads/append-user-message` to store it, or start the round directly with `POST api/2.0/ai/ai/send-with-stream`. Unlike `create` this takes a whole resolved `profile` object rather than an ID, and a request without one answers 404 because no model could be bound. A supplied `entityId` has to be a room the caller can open. A thread created in an AI project belongs to that project and is listed for it alone; one created anywhere else joins the caller's one list, whatever the `entityId` names.",
         "responses": {
           "200": {
             "description": "The thread that was opened or created, with its prior messages. A created one carries the generated title.",
@@ -5218,7 +5218,7 @@
             }
           },
           "404": {
-            "description": "The `entityId` names a room the caller cannot open, or no live AI profile is bound to it.",
+            "description": "The `entityId` names a room the caller cannot open, no live AI profile is bound to it, or the `profile` carries no `id` of a stored profile.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5697,7 +5697,7 @@
         ],
         "operationId": "aiThreadsRegenerateTitle",
         "summary": "Regenerate title",
-        "description": "Asks the model to produce a title from the thread's first user message, stores it, and returns the new title. Both `threadId` and a resolved `profile` object are required; a thread with no user message yet has nothing to title and fails. This costs a model call, unlike `POST api/2.0/ai/threads/rename`, which just stores the string it is given. An `entityMeta` sent with the request is only read for its `entityId` hint - the source itself is resolved server-side under the caller's credentials, so a client cannot attribute the call to somebody else's room.",
+        "description": "Asks the model to produce a title from the thread's first user message, stores it, and returns the new title. Both `threadId` and a `profile` object are required; a thread with no user message yet has nothing to title and fails. Only the `id` of the `profile` is read: the model runs on the profile stored under it, so an object without an `id`, or one whose `id` names no stored profile, answers 404. This costs a model call, unlike `POST api/2.0/ai/threads/rename`, which just stores the string it is given. An `entityMeta` sent with the request is only read for its `entityId` hint - the source itself is resolved server-side under the caller's credentials, so a client cannot attribute the call to somebody else's room.",
         "responses": {
           "200": {
             "description": "The newly generated title, already stored on the thread.",
@@ -5752,6 +5752,16 @@
               }
             }
           },
+          "404": {
+            "description": "The `profile` carries no `id`, or no stored profile has it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "413": {
             "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
             "content": {
@@ -5792,7 +5802,7 @@
         ],
         "operationId": "aiThreadsList",
         "summary": "List chat threads",
-        "description": "Lists the threads of the caller, most recently edited first, and searches their titles case-insensitively when `query` is given. Threads are one list per user: `entityId` is accepted and ignored, so naming a room lists the same threads as naming none. Every parameter is optional, and omitting `count` lets the service apply its own page size. Pagination is by cursor, and the cursor is a JSON object passed as a string in the query - `{\"id\": <last thread id>, \"lastEditDate\": <its date>}` - taken from the last entry of the previous page. A cursor that is not valid JSON, or that lacks an `id`, is ignored rather than rejected, and the read silently starts from the first page again.",
+        "description": "Lists the threads of the caller, most recently edited first, and searches their titles case-insensitively when `query` is given. Threads are one list per user, an AI project excepted: when `entityId` is the ID of an AI project the caller can open, the list holds the threads started in that project and no other; any other `entityId` - a room, a folder, one the caller cannot open, a string that is no ID - is not checked and lists the same threads as naming none, which are the threads of no project. Every parameter is optional, and omitting `count` lets the service apply its own page size. Pagination is by cursor, and the cursor is a JSON object passed as a string in the query - `{\"id\": <last thread id>, \"lastEditDate\": <its date>}` - taken from the last entry of the previous page. A cursor that is not valid JSON, or that lacks an `id`, is ignored rather than rejected, and the read silently starts from the first page again.",
         "responses": {
           "200": {
             "description": "The caller's threads, most recently edited first.",
@@ -9543,7 +9553,7 @@
         ],
         "operationId": "aiTemplatesInstall",
         "summary": "Install a template",
-        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`) and its instructions. Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model and the instructions are the exceptions: when the portal has no chat model, or either of the two cannot be stored, the agent is still returned, with `modelNotSaved` or `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
+        "description": "Installs one template into the portal through the Files API with the caller's own credentials. Only the portal owner, portal admins and room admins may install one: anyone else is refused with 403 before any room is made, and the Files service then decides on each room as well. A skill set becomes a new Instructions room holding its skills, a knowledge base a new Knowledge room holding its files, both uploaded through `POST api/2.0/files/{folderId}/insert`. Each room is created in the template's `color` and with its `cover`. An agent first installs its skill sets and knowledge bases that way, then becomes a new agent room (`POST api/2.0/files/rooms`), tagged with the template's `category`, linked to those rooms through `POST api/2.0/files/rooms/{id}/sources` and given the portal's chat model (`PUT api/2.0/files/rooms/{id}/model`). Every call makes new rooms: nothing is matched against the rooms the portal already has, so installing twice makes two copies. A template that holds a knowledge base - a knowledge base itself, or an agent that links one - is refused with 409 before any room is made on a portal where vectorization is not set up, since the Files service makes no Knowledge room there. A step the Files service refuses fails the call with that status, and the rooms made before it are kept. The model is the exception: when the portal has no chat model, or it cannot be stored, the agent is still returned, with `modelNotSaved` in `warnings`. The agent's instructions are not installed, as the Files service has no route that stores them yet: every installed agent carries `instructionsNotSaved` in `warnings`. The template's description is not written anywhere.",
         "responses": {
           "200": {
             "description": "The new room of the template and, for an agent, the rooms made for its skill sets and knowledge bases.",
@@ -9622,7 +9632,7 @@
                       "items": {
                         "type": "string"
                       },
-                      "description": "What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` when its instructions could not be stored."
+                      "description": "What was skipped: `modelNotSaved` when the agent could not be given the portal's chat model, `instructionsNotSaved` for every agent, as its instructions are not installed yet."
                     },
                     "templateId": {
                       "type": "string",
@@ -9682,6 +9692,16 @@
           },
           "404": {
             "description": "The catalog has no template with this `id`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The template holds a knowledge base and vectorization is not set up on the portal; no room was made.",
             "content": {
               "application/json": {
                 "schema": {
@@ -12046,9 +12066,17 @@
             "description": "A single knowledge room, as an older client sends it. Read only when `knowledgeRooms` is absent; send `knowledgeRooms` instead.",
             "deprecated": true
           },
+          "folderContexts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AiFolderContextRef"
+            },
+            "description": "The folders and rooms connected to the chat as the round's data sources. Each is read again under the caller's credentials, so only its `id` is trusted; one that is gone or that the caller cannot read is left out. The first 20 distinct ids are used and any further entry is ignored."
+          },
           "folderContext": {
             "$ref": "#/components/schemas/AiFolderContextRef",
-            "description": "The folder connected to the chat as the round's context. It becomes the location the model is told the user works in, and the entry the round is attributed to."
+            "description": "A single data source, as an older client sends it. Read as a list of one when `folderContexts` is absent; send `folderContexts` instead.",
+            "deprecated": true
           },
           "entityId": {
             "type": "string",
