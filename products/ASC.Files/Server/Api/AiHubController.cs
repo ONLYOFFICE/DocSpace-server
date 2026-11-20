@@ -273,7 +273,19 @@ public class AiHubController(
     }
 
     /// <remarks>
-    /// Returns the artifacts of a thread in an AI project: the files the chat tools created in it. Only the author of the thread can read them.
+    /// Returns the artifacts of a thread in an AI project, one page at a time.
+    /// They are the files that the chat tools created in the thread.
+    /// Requires read access to the project. Other callers get 403.
+    /// Only the author of the thread sees these files.
+    /// The call is read-only.
+    /// The total in the answer counts the files of all pages.
+    /// A thread with no artifacts yet gives an empty list.
+    /// A valid `sortBy` also becomes the saved default order of the account.
+    /// The call returns 404 for an unknown AI project or thread.
+    /// A thread of another user also returns 404, even to the project owner or a DocSpace admin.
+    /// The call returns 400 if `count` or `startIndex` is out of range.
+    /// It also returns 403 if AI features are turned off on the portal.
+    /// To get the files the user sent with the messages of the thread, use `GET api/2.0/files/rooms/{id}/threads/{threadId}/attachments`.
     /// </remarks>
     /// <summary>Get the AI thread artifacts</summary>
     /// <path>api/2.0/files/rooms/{id}/threads/{threadId}/artifacts</path>
@@ -292,7 +304,19 @@ public class AiHubController(
     }
 
     /// <remarks>
-    /// Returns the attachments of a thread in an AI project: the files the user sent with its messages. Only the author of the thread can read them.
+    /// Returns the attachments of a thread in an AI project, one page at a time.
+    /// They are the files that the user sent with the messages of the thread.
+    /// Requires read access to the project. Other callers get 403.
+    /// Only the author of the thread sees these files.
+    /// The call is read-only.
+    /// The total in the answer counts the files of all pages.
+    /// A thread with no attachments yet gives an empty list.
+    /// A valid `sortBy` also becomes the saved default order of the account.
+    /// The call returns 404 for an unknown AI project or thread.
+    /// A thread of another user also returns 404, even to the project owner or a DocSpace admin.
+    /// The call returns 400 if `count` or `startIndex` is out of range.
+    /// It also returns 403 if AI features are turned off on the portal.
+    /// To get the files the chat tools created in the thread, use `GET api/2.0/files/rooms/{id}/threads/{threadId}/artifacts`.
     /// </remarks>
     /// <summary>Get the AI thread attachments</summary>
     /// <path>api/2.0/files/rooms/{id}/threads/{threadId}/attachments</path>
