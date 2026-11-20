@@ -2549,7 +2549,7 @@ A background pass, every 15 minutes by default, SHALL remove each draft its crea
 not linked to a message 2 hours, by default, after it was created, in a project from the upload or copy.
 With the draft it SHALL remove the file the draft was made from when that file still lies in an AI project
 unsent, then return its size to the project's space unless that step fails (A37). Any other file and any
-linked attachment SHALL stay, except a file linked during the pass (A36).
+linked attachment SHALL stay. A draft the pass has taken SHALL be left unlinked by a link that comes after.
 
 #### Scenario: Deleted draft of a file in a project
 
