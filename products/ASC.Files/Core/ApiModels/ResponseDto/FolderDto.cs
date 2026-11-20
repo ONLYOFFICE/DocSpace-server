@@ -45,17 +45,18 @@ public class FolderDto<T> : FileEntryDto<T>
     public T ParentId { get; set; }
 
     /// <summary>
-    /// How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room
-    /// templates, default templates and AI agents sections always report 0, because the number is not collected for
-    /// them.
+    /// How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose
+    /// files no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI
+    /// rooms sections, for which the number is not collected.
     /// </summary>
     /// <example>5</example>
     public int FilesCount { get; set; }
 
     /// <summary>
     /// How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are
-    /// subtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI
-    /// agents sections report 0.
+    /// subtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders
+    /// no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms
+    /// sections.
     /// </summary>
     /// <example>7</example>
     public int FoldersCount { get; set; }
@@ -185,7 +186,8 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is
     /// refreshed when a file operation finishes, so a read right after an upload or a deletion can still report the
-    /// previous figure. Null for a folder that is not a room.
+    /// previous figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files
+    /// of a project belong to the members who added them, so only who manages the project sees their total.
     /// </summary>
     /// <example>524288000</example>
     public long? UsedSpace { get; set; }
@@ -366,7 +368,10 @@ public class FolderDtoHelper(
                                 !currentUserRecords.Exists(c => c.EntryId.Equals(folder.Id.ToString()) && c.SubjectType == SubjectType.Group);
             }
 
-            result.UsedSpace = folder.Counter;
+            result.UsedSpace = folder.FolderType != FolderType.AiProjectRoom ||
+                               (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEditProject) && canEditProject)
+                ? folder.Counter
+                : null;
 
             if ((await _tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEdit) && canEdit) ||

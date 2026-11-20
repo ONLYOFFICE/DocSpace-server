@@ -1109,7 +1109,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 if (x is Folder<T> { IsRoom: true, ProviderEntry: false } x1 &&
                     y is Folder<T> { IsRoom: true, ProviderEntry: false } y1)
                 {
-                    cmp = c * x1.Counter.CompareTo(y1.Counter);
+                    cmp = c * SortedCounter(x1).CompareTo(SortedCounter(y1));
                 }
 
                 return cmp == 0 ? x.Title.EnumerableComparer(y.Title) : cmp;
@@ -1250,6 +1250,11 @@ public class EntryManager(IDaoFactory daoFactory,
             FileEntry<string> thirdPartyEntry => thirdPartyEntry.Id,
             _ => entry.Title
         };
+    }
+
+    private static long SortedCounter<T>(Folder<T> room)
+    {
+        return room.FolderType == FolderType.AiProjectRoom ? 0 : room.Counter;
     }
 
     private static long GetContentLength(FileEntry entry)

@@ -33,8 +33,10 @@ None.
 - `ai-agents`: found by `getProjectSources`, `linkProjectSources`, `unlinkProjectSources`, `getProjectModel` and
   `getRoomSkills` (the link between a project and its rooms, and who reads it), by `getRoomsFolder` with
   `searchArea=AiHub` and `getRoomInfo` (the room objects that get the new field), and by `deleteRoom` on a
-  project (the links go with it). "Members of the AI rooms" is modified; four requirements are added: the number
-  on a room, the listing of the projects of a room, who is listed there, and the real-time event.
+  project (the links go with it). "Members of the AI rooms" is modified; five requirements are added: the number
+  on a room, the listing of the projects of a room, who is listed there, the real-time event, and "Users only in
+  an AI project", the rule that a project takes users only, split out of "Members of the AI rooms" to keep that
+  requirement under 500 characters.
 
 ## Breaks current behaviour
 

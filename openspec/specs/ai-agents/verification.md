@@ -28,6 +28,8 @@ Exception → status mapping of the .NET services: `SecurityException` and `Inva
 (`common/ASC.Api.Core/Middleware/ResponseWrapper.cs`); Chat relays the AI service's status (`AiServiceHttpError`) and adds
 its own 400s in the controllers. Status of a defect marked "red by code reading": no test was run in this revision.
 
+Revision 2026-11-18 (c8bb15c779, no product change): line citations that no longer pointed at the code their row describes were moved to it (most shifted with the longer controller remarks); no row status or claim changed, except where a quoted remark or a removed attribute is noted in the row.
+
 Revision 2026-11-14 (09d4de0768..6fb6dfb17a): document agent portal settings in the AI service (`d5d515f748`) proxied by the chat service (`d4463d237b`, `33789fe142`, `3400e63edb`), the task log kept from the chat model (`a7d94e4b81`), `POST skills/create` (`051a7422c3`); the spec now names every `aiPrompts*` operation. New defect A35. Rows added carry no run mark; "unit level" rows cite vitest files that were not run in this revision.
 
 Revision 2026-11-09 (bb406b409b..6fb013e745): BYOK for AI (keys, providers, the gateway BYOK route, the revert of embedding and web-search BYOK); see the section of that name.
@@ -119,13 +121,14 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Created by owner / admin / Room admin, User 403; section root (scenario "Section listing") | `Hub/AiHubRootTests.cs:48,63,124`; `Hub/AiProjectRoomTests.cs:46,63,77,87,101,132,164` | TEST-CONFIRMED [run: PASS] |
 | Settings that do not apply 400 (scenario) | `Hub/AiHubRoomSettingsTests.cs:47,58,82,93,106,119`; a private project 400: `Hub/AiHubRoomSettingsTests.cs:69` (not run yet) | TEST-CONFIRMED [run: PASS] |
 | Never archived, no template, no folder in the root (scenario) | `Hub/AiHubRootTests.cs:79,94,109`; `Hub/AiProjectRoomTests.cs:196,210` | TEST-CONFIRMED [run: PASS] |
-| Knowledge room needs vectorization 403 | `Security:1422,1441`; `AI/Core/Settings` | CODE-ONLY |
+| Knowledge room needs vectorization 403 | `Security:1424,1443`; `AI/Core/Settings` | CODE-ONLY |
 | **Members of the AI rooms** | | |
-| Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
-| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
 | Content creator reads, Room manager writes (scenario); non-member 403 | `Hub/AiProjectModelTests.cs:60,77,106`; `Hub/AiProjectRoomTests.cs:116,148,179` | TEST-CONFIRMED [run: PASS] |
 | DocSpace admin outside the project reads its model, sources and skills (scenario) | `Hub/AiRoomOutsiderAccessTests.cs:55` | TEST-CONFIRMED (not run yet) |
 | Role sets of Instructions and Knowledge rooms | `Security` (`GetAccesses`); `products/ASC.Files/Core/Helpers` | CODE-ONLY |
+| **Users only in an AI project** | | |
+| Guest not in a project (scenario); User joins through a link as Content creator | `Hub/AiProjectGuestInviteTests.cs:46,62,82`; `Hub/AiProjectInvitationLinkTests.cs:45` | TEST-CONFIRMED [run: PASS] |
+| Group invited to a project (scenario) | `Hub/AiProjectRolesTests.cs:65` | TEST-CONFIRMED (not run yet) |
 | **The model of an AI project** | | |
 | Null while none selected; Instructions / unknown 404 | `Hub/AiProjectModelTests.cs:46,93,167` | TEST-CONFIRMED [run: PASS] |
 | Manager only; unknown, empty 400 (scenario "Selection cannot be cleared") | `Hub/AiProjectModelTests.cs:106,123,137,150` | TEST-CONFIRMED [run: PASS] |
@@ -392,9 +395,9 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Same title (scenario); truncation; cleared; simultaneous | `T/TextToDocxTests/TextToDocxNamingTests.cs:47,74`; `TextToDocxThreadExportTests.cs:231`; `TextToDocxConcurrencyTests.cs:100` | TEST-CONFIRMED [run: PASS] |
 | **Vectorization of knowledge** | | |
 | AI off 403, missing file 404 | `T/SettingsTests/SettingsAiDisabledTests.cs:66` | TEST-CONFIRMED [run: PASS] |
-| File in My documents (scenario), list rules, Guest, repeats, no handle | `TS/vectorization/vectorization.validation.spec.ts:58,95`; `products/ASC.Files/Core/Vectorization/VectorizationTaskPublisher.cs:55-90`; `Security:681-691,2693-2706` | TS-ONLY (TS block skipped) |
-| Status and socket; Knowledge room rights (scenario) | `Security:1428-1447`; `VectorizationTaskPublisher.cs` | CODE-ONLY |
-| Knowledge room without vectorization (scenario) | `Security:1441`; room creation in `products/ASC.Files/Core/Core/FileStorageService.cs` | CODE-ONLY |
+| File in My documents (scenario), list rules, Guest, repeats, no handle | `TS/vectorization/vectorization.validation.spec.ts:58,95`; `products/ASC.Files/Core/Vectorization/VectorizationTaskPublisher.cs:55-90`; `Security:682-692,2712-2725` | TS-ONLY (TS block skipped) |
+| Status and socket; Knowledge room rights (scenario) | `Security:1430-1449`; `VectorizationTaskPublisher.cs` | CODE-ONLY |
+| Knowledge room without vectorization (scenario) | `Security:1443`; room creation in `products/ASC.Files/Core/Core/FileStorageService.cs` | CODE-ONLY |
 | **Searching knowledge in a chat** | | |
 | One query, room filter, 20-room cap (scenario) | `products/ASC.AI/Core/Knowledge/KnowledgeSearchEngine.cs:46-75` (`roomIds.Contains`); `Chat/storage/aiProjectChatContext.ts` | CODE-ONLY |
 | Tool offered only while enabled; `aiContextGetKnowledgeFolders` | `Chat/controllers/contextController.ts`; yaml 1806 | CODE-ONLY |
@@ -462,21 +465,31 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Caller outside the project 403, folder 403, unsupported format 415, move 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:141,157,173,199` | TEST-CONFIRMED |
 | **Attachment of a file stored in a project** |  |  |
 | Document attached twice; picture attached twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:212,228` | TEST-CONFIRMED |
+| Deleted attachment attached again (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:69` | TEST-CONFIRMED |
 | **A sent attachment is kept with its thread** |  |  |
 | Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:242,261,286,301,318` | TEST-CONFIRMED |
 | **Privacy of the contents of a project** |  |  |
 | Artifact, thread folder and file not sent of another member 403 to a member, the owner and a DocSpace admin (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:51,67,83,100,116,132` | TEST-CONFIRMED |
 | Creator reads, downloads and copies (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:41,52,63` | TEST-CONFIRMED |
 | Creator cannot change the file (scenario); creator opens the editor (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:78,92,107,132,146`; `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:121` | TEST-CONFIRMED |
+| **Used space of a project** |  |  |
+| Used space of a project (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:51`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:371-374` | TEST-CONFIRMED |
+| Sorting by used space (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:82`; `products/ASC.Files/Core/Utils/EntryManager.cs:1112,1255-1258` | TEST-CONFIRMED |
 | **The contents of a project are not listed** |  |  |
 | Listing; search inside the project (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:51,69,80` | TEST-CONFIRMED |
 | Counters of the project; sources and skills (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:96,107` | TEST-CONFIRMED |
+| **The rooms roots list nothing inside a project** |  |  |
+| Listing the AI rooms root; filtering it by the title of a thread folder (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:53,86,103`; `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:69` | TEST-CONFIRMED |
+| Listing the rooms root across all sections (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAiHubRootListingTests.cs:126` | TEST-CONFIRMED |
 | **Recipients of an upload into a project** |  |  |
 | Uploader is told; others are not told (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:52,68` | TEST-CONFIRMED |
 | Owner's new items (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:106` | TEST-CONFIRMED |
 | Upload notification (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:39,53` | TEST-CONFIRMED |
 | Upload notification (scenario): the decision is applied where the upload event is published and where it is handled | `products/ASC.Files/Server/Api/UploadController.cs`; `products/ASC.Files/Core/HttpHandlers/ChunkedUploaderHandler.cs`; `products/ASC.Files/Server/Helpers/FilesHelperBase.cs`; `products/ASC.Files/Worker/IntegrationEvents/EventHandling/RoomNotifyIntegrationEventHandler.cs` (calls of `AnnouncesEntriesToMembers`) | CODE-ONLY |
 | Shared users of a file (scenario) | `T/ThreadFilesAccessTests/ThreadFilesRecipientsTests.cs:91` | TEST-CONFIRMED |
+| **Activity digests leave out AI projects** |  |  |
+| Activity digests (scenario): the decision by room type | `CoreTests/DocSpaceHelperAnnouncementTests.cs:59,74` | TEST-CONFIRMED |
+| Activity digests (scenario): the decision is applied to every digest event of a room | `products/ASC.Files/Core/Configuration/ProductEntryPoint.cs` (`GetAuditEventsAsync`, call of `ReportsActivityInDigest`) | CODE-ONLY |
 | **Deleting a thread of a project** |  |  |
 | Gone at once (scenario) | `T/ThreadDeletionTests/ThreadDeletionTests.cs:41,61` | TEST-CONFIRMED |
 | Files removed by the background pass; other thread of the project; project deleted afterwards (scenarios) | `T/ThreadDeletionTests/ThreadDeletionTests.cs:90,111,135` | TEST-CONFIRMED |
@@ -502,20 +515,20 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Owner's data transferred; members of the transferred project (scenarios) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:166,190` | TEST-CONFIRMED |
 | Former owner's thread in another project (scenario) | `T/ProfileRemovalTests/ProfileRemovalTests.cs:213` | TEST-CONFIRMED |
 | **Pinned projects in the root folders** |  |  |
-| Only pinned projects are listed, `total`/`count` 2, `startIndex` 0 (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:45` | TEST-CONFIRMED |
-| Nothing pinned; only an Instructions room pinned (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:69,85` | TEST-CONFIRMED |
-| Paging and filters do not cut the list; `sortBy=AZ` orders it by title (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:103` | TEST-CONFIRMED |
-| Unpinned project leaves the list (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:129` | TEST-CONFIRMED |
-| Other sections are not changed (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:148` | TEST-CONFIRMED |
+| Only pinned projects are listed, `total`/`count` 2, `startIndex` 0 (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:44` | TEST-CONFIRMED |
+| Nothing pinned; only an Instructions room pinned (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:68,84` | TEST-CONFIRMED |
+| Paging and filters do not cut the list; `sortBy=AZ` orders it by title (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:102` | TEST-CONFIRMED |
+| Unpinned project leaves the list (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:128` | TEST-CONFIRMED |
+| Other sections are not changed (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:146` | TEST-CONFIRMED |
 | **Who finds a pinned project in the root folders** |  |  |
-| Member pins a project; the owner without a pin does not see it (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:171` | TEST-CONFIRMED |
-| Member loses access and regains it (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:194` | TEST-CONFIRMED |
-| DocSpace admin outside the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:226` | TEST-CONFIRMED |
-| Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:246` | TEST-CONFIRMED |
+| Member pins a project; the owner without a pin does not see it (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:169` | TEST-CONFIRMED |
+| Member loses access and regains it (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:192` | TEST-CONFIRMED |
+| DocSpace admin outside the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:224` | TEST-CONFIRMED |
+| Creator of the project (scenario) | `Hub/AiHubRootPinnedProjectsTests.cs:244` | TEST-CONFIRMED |
 | A share held through a group does not count | `products/ASC.Files/Core/Core/EF/Queries/FolderQueries.cs` (`AiProjectsWithOwnRecordAsync`, `s.Subject == userId`); no test: the API refuses a group on a project | CODE-ONLY |
 | **Drafts that are not sent are removed** |  |  |
-| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:47,69` | TEST-CONFIRMED |
-| Abandoned draft of a file outside a project; sent attachment older than the lifetime (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:91,107` | TEST-CONFIRMED |
+| Deleted draft of a file in a project; abandoned draft of a file in a project (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:47,101` | TEST-CONFIRMED |
+| Abandoned draft of a file outside a project; sent attachment older than the lifetime (scenarios) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:123,139` | TEST-CONFIRMED |
 | The pass runs every 15 minutes and a draft lives 2 hours by default | `products/ASC.AI/Worker/BackgroundServices/OrphanAttachmentsCleanerService.cs` (`_defaultPeriod`, `_defaultLifetime`) | CODE-ONLY |
 
 ## Revision 2026-11-06 (`1f1b052f7d..0ebdbb7c84`)
@@ -602,22 +615,24 @@ A32 and A34 come from new tests of that run.
 | A3 | Agent create | Room left behind when the binding failed. | route gone | FIXED by removal (`ecf76402b3`) |
 | A4 | Default slot | Image-only Default handed to Chat. Default still takes it, resolve answers 404 and try-resolve null. | `T/AssignmentTests/AssignmentResolutionTests.cs:153,175`; `Chat/controllers/assignmentsController.ts:80-100,207-210` | FIXED (`d59923d4a0`) |
 | A5 | Title regeneration | 500 on a real conversation. | `T/ThreadStorageTests/ThreadsRegenerateTitleTests.cs:102`; `T/ChatTests/ChatRegenerateTitleTests.cs:51` | FIXED (`876875d79d`, test comment), TS `test.fail` stale |
-| A6 | Thread scope validation | File id, Trash accepted. | `T/ChatTests/ChatPermissionValidationTests.cs:58-64` | REFUTED: by design, reopen decision on bug 82719 |
+| A6 | Thread scope validation | File id, Trash accepted. | `T/ChatTests/ChatPermissionValidationTests.cs:58-64` | REFUTED: by design, reopen decision on bug 82719 — tests green, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
 | A8 | MCP replace-all | Case twins stored. | `T/McpTests/McpServerReplaceAllTests.cs:227` (comment "used to") | FIXED (`b6d11f1999`, the library update) |
-| A9 | Export drops the file | A form-filling room or a room out of quota answers 202 and writes nothing: the publisher checks the folder and the right only; the quota and the room rule meet the job later. | `AI/Core/MdTextToDocx/MdTextToDocxTaskQueue.cs:48-90`; `T/TextToDocxTests/TextToDocxQuotaTests.cs:51`, `TextToDocxRoomTypesTests.cs:73` | STILL OPEN, red by code reading |
+| A9 | Export drops the file | A form-filling room or a room out of quota answers 202 and writes nothing: the publisher checks the folder and the right only; the quota and the room rule meet the job later. | `AI/Core/MdTextToDocx/MdTextToDocxTaskQueue.cs:48-90`; `T/TextToDocxTests/TextToDocxQuotaTests.cs:51`, `TextToDocxRoomTypesTests.cs:73` | STILL OPEN, red by code reading — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bugs 83070, 83071; cause by code reading) |
 | A10 | OpenAI passthrough bodies | 500 with a stack trace on a large body and malformed image requests. | commit message; `TS/openai-passthrough/openai-passthrough.spec.ts:404,497` keep old titles; no .NET test | FIXED (`9768f0a6f3`, `e84932692d`), by commit and code |
-| A11 | Foreign prompt delete | `promptsStorage.delete` swallows the 404 and the controller answers success; the prompt survives. | `Chat/storage/promptsStorage.ts:148-157`; `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` | STILL OPEN, red by code reading of those two files; the library engine between them was not read, and the test comment says "used to" |
+| A11 | Foreign prompt delete | `promptsStorage.delete` swallows the 404 and the controller answers success; the prompt survives. | `Chat/storage/promptsStorage.ts:148-157`; `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` | STILL OPEN, red by code reading of those two files; the library engine between them was not read, and the test comment says "used to" — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82809, `PromptIsolationTests.cs:108`) |
 | A13 | Metadata gate | `assertAiAccess` borrows the gate through a throwaway tool-prefs read, now on four routes. | `Chat/controllers/aiAccess.ts:51`; `metaController.ts:148,161`; `profilesController.ts:253`; `editorToolsController.ts:130` | STILL OPEN |
 | A14 | Contract drift | See the contract table. | yaml `5ea4dc6` | FIXED except the `aiTools` build field and its route (STILL OPEN) |
-| A16 | Read member of a project | A round is not bound to the project: chat context drops a folder without `CanUseAi` (Room manager or Content creator), and the fallback reads `type` from the folder DTO, null for a room. The round runs on what the composer sent, without the project's model and sources. | `Security:2723-2735`; `AI/Server/Service/ChatContextService.cs:157-172`; `Chat/storage/docspaceFilesApi.ts:166,450-458`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:158,406-416`; `T/ChatTests/ChatProjectModelTests.cs:129` | OPEN — red test, run 365d87fe60: `GetModel_ProjectMember_…` and `Send_OtherProfileInProject_…(asMember: True)`; the manager's case passes |
-| A21 | Export names | `/` in a title is a path separator (`Notes 12/31` → `31.docx`); two simultaneous exports with one title get one name. | `T/TextToDocxTests/TextToDocxNamingTests.cs:118`, `TextToDocxConcurrencyTests.cs:68` (bugs 82711, 84459, "measured" in the comments) | NEW, per the tests, code not read |
-| A22 | Export of formulas; failure language | TeX source lands in the document; a stored provider failure stays English under any culture. | `T/MessageStorageTests/MessageMarkdownDocxTests.cs:99` (83038); `T/ChatTests/ChatFailureLanguageTests.cs:81` (83046) | NEW, per the tests, code not read |
-| A23 | `aiThreadsOpenOrCreate` without a message | No `threadId`, no `firstMessage`: 500 from the engine. | `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:156` (82826) | NEW, per the test comment |
-| A24 | Concurrent add of one name | Losers answer 403, not the soft "already registered". | `T/McpTests/McpServerConcurrencyTests.cs:62` | NEW, per the test comment |
-| A25 | Profile `createdAt` | The create answer has milliseconds no later read reproduces. | `T/ProfileStorageTests/ProfileReadTests.cs:47` | NEW, per the test comment |
-| A27 | Tool mode gates | An invalid value to the write route from a Guest or while AI is off answers 400: validation comes before the Guest and switch checks. | `ToolPermissionMode_Guest_CannotReadOrChangeIt` (84303), `ToolPermissionMode_AiDisabled_ReadAndWriteReturn403` (84302) | OPEN — red test, run 365d87fe60 |
-| A28 | Attachment cap | More attachments than the composer allows are answered 200 and stored whole on `aiThreadsAppendUserMessage` and the send (11 stored). | `AttachmentComposerRuleTests`, the two `MoreAttachmentsThanTheClientAllows` tests (82894) | OPEN — red test, run 365d87fe60 |
-| A30 | Attachment to the model | A round with a draft by id, an inline record, a device file or an image ends healthy but no streamed request to the stub carries the text. Whether the stand's file reading plays a part was not traced. | `AttachmentSendTests`, four tests (82773) | OPEN — red test, run 365d87fe60 |
-| A32 | Dropped provider connection | `aiProfilesListModels` on a saved profile whose provider accepts the connection and closes it without an answer is answered 200 with an empty model list instead of 502, so the form shows no models instead of the failure. | `T/ProfileTests/ProfileListModelsFailureTests.cs:67` (Category=Bug); `Chat/controllers/profilesController.ts` (`listModels`) | NEW 2026-11-10, red by run |
-| A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 128); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run |
-| A35 | `aiPromptsDelete` | Deleting another user's prompt answers `success` true although nothing is deleted (bug 82809): the route never reports whether a prompt of the caller was removed. The yaml describes it as intended. | `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` (Trait Bug 82809) | NEW 2026-11-14, red by code reading |
+| A16 | Read member of a project | A round is not bound to the project: chat context drops a folder without `CanUseAi` (Room manager or Content creator), and the fallback reads `type` from the folder DTO, null for a room. The round runs on what the composer sent, without the project's model and sources. | `Security:2742-2754`; `AI/Server/Service/ChatContextService.cs:161-176`; `Chat/storage/docspaceFilesApi.ts:166,450-458`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:158,407-417`; `T/ChatTests/ChatProjectModelTests.cs:129` | OPEN — red test, run 365d87fe60: `GetModel_ProjectMember_…` and `Send_OtherProfileInProject_…(asMember: True)`; the manager's case passes — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (cause by code reading) |
+| A21 | Export names | `/` in a title is a path separator (`Notes 12/31` → `31.docx`); two simultaneous exports with one title get one name. | `T/TextToDocxTests/TextToDocxNamingTests.cs:118`, `TextToDocxConcurrencyTests.cs:68` (bugs 82711, 84459, "measured" in the comments) | NEW, per the tests, code not read — narrowed by run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`): the test of bug 82711 (`/`, `\` in an export title) is still red; the test of bug 84459 (two simultaneous exports with one title) is green |
+| A22 | Export of formulas; failure language | TeX source lands in the document; a stored provider failure stays English under any culture. | `T/MessageStorageTests/MessageMarkdownDocxTests.cs:99` (83038); `T/ChatTests/ChatFailureLanguageTests.cs:81` (83046) | NEW, per the tests, code not read — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bugs 83038, 83046; code not read) |
+| A23 | `aiThreadsOpenOrCreate` without a message | No `threadId`, no `firstMessage`: 500 from the engine. | `T/ThreadStorageTests/ThreadsOpenOrCreateTests.cs:156` (82826) | NEW, per the test comment — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82826) |
+| A24 | Concurrent add of one name | Losers answer 403, not the soft "already registered". | `T/McpTests/McpServerConcurrencyTests.cs:62` | NEW, per the test comment — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| A25 | Profile `createdAt` | The create answer has milliseconds no later read reproduces. | `T/ProfileStorageTests/ProfileReadTests.cs:47` | NEW, per the test comment — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (`ProfileReadTests.cs:47`) |
+| A27 | Tool mode gates | An invalid value to the write route from a Guest or while AI is off answers 400: validation comes before the Guest and switch checks. | `ToolPermissionMode_Guest_CannotReadOrChangeIt` (84303), `ToolPermissionMode_AiDisabled_ReadAndWriteReturn403` (84302) | OPEN — red test, run 365d87fe60 — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bugs 84303, 84302) |
+| A28 | Attachment cap | More attachments than the composer allows are answered 200 and stored whole on `aiThreadsAppendUserMessage` and the send (11 stored). | `AttachmentComposerRuleTests`, the two `MoreAttachmentsThanTheClientAllows` tests (82894) | OPEN — red test, run 365d87fe60 — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82894) |
+| A30 | Attachment to the model | A round with a draft by id, an inline record, a device file or an image ends healthy but no streamed request to the stub carries the text. Whether the stand's file reading plays a part was not traced. | `AttachmentSendTests`, four tests (82773) | OPEN — red test, run 365d87fe60 — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82773; the stand's part was not traced) |
+| A32 | Dropped provider connection | `aiProfilesListModels` on a saved profile whose provider accepts the connection and closes it without an answer is answered 200 with an empty model list instead of 502, so the form shows no models instead of the failure. | `T/ProfileTests/ProfileListModelsFailureTests.cs:67` (Category=Bug); `Chat/controllers/profilesController.ts` (`listModels`) | NEW 2026-11-10, red by run — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) |
+| A34 | `withAiFolder` alone | The description of `getRoomAiFolder` says the rooms with skills are listed with `GET api/2.0/files/rooms?withAiFolder=true`, but without `searchArea=AiHub` the flag filters the Rooms section and the answer is empty; with `searchArea=AiHub` it lists the Instructions rooms only. | `products/ASC.Files/Tests/Tests/03_Rooms/AiHub/AiRoomOutsiderAccessTests.cs:107,129` (Category=Bug on 128); `FolderDao` (`withAiFolder`), `VirtualRoomsController.GetRoomAiFolder` remarks | NEW 2026-11-10, red by run — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (`AiRoomOutsiderAccessTests.cs:129`, `Category=Bug`) |
+| A35 | `aiPromptsDelete` | Deleting another user's prompt answers `success` true although nothing is deleted (bug 82809): the route never reports whether a prompt of the caller was removed. The yaml describes it as intended. | `Chat/controllers/promptsController.ts:295-304`; `T/PromptTests/PromptIsolationTests.cs:108` (Trait Bug 82809) | NEW 2026-11-14, red by code reading — red test, run 2026-11-18 (`2a64d461e6`, repeated on `c245ce0160`) (bug 82809, `PromptIsolationTests.cs:108`) |
+| A36 | Draft cleanup races a link | The pass reads the files of unlinked drafts, then deletes them by id with no lock. A link that moves the file into the thread in between loses it: the message keeps the attachment without the file. A link that read the file before the deletion and moves it after answers 500. | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:124,126`; `products/ASC.AI/Server/Service/AttachmentsStorageService.cs:230-242`; `FileDao.MoveFileAsync` (`file.ParentId` of a missing file) | NEW 2026-11-20, red by code reading; left open on purpose |
+| A37 | Size after the deletion | Both passes return the size of the deleted files to the project after the deletion is committed; a failure of that step or a stop in between leaves the used space too high for good, as in every deletion path of Files (`FileDeleteOperation`). | `products/ASC.Files/Core/Core/AI/AiProjectThreadsService.cs:126-131,191-193`; `products/ASC.Files/Core/Services/WCFService/FileOperations/FileDeleteOperation.cs:905-984` | NEW 2026-11-20, red by code reading; left open on purpose |

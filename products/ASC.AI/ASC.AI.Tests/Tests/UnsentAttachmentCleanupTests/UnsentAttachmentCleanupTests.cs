@@ -66,6 +66,38 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
     }
 
     [Fact]
+    public async Task SaveFilesMany_DeletedDraftOfAProjectFileAttachedAgain_Answers404AndStoresNothing()
+    {
+        var projectId = await CreateProjectAsync();
+        var member = await InviteMemberAsync(projectId);
+        await ActAsAsync(member);
+
+        var spaceBefore = await UsedSpaceAsync(projectId);
+        var file = await UploadAsync(projectId, "notes.txt");
+        var other = await UploadAsync(await MyDocumentsIdAsync(), "other.txt");
+        var draft = await AttachStoredFileAsync(file.Id);
+
+        (await _aiAttachments.AiAttachmentsDeleteAsync(draft.Id, TestContext.Current.CancellationToken)).Success.Should().BeTrue();
+
+        var exception = await Assert.ThrowsAsync<ApiException>(async () => await _aiAttachments.AiAttachmentsSaveFilesManyAsync(
+            new AiAttachmentsSaveFilesManyRequest(
+            [
+                new AiAttachmentsSaveFileRequestInput(file.Id.ToString(), string.Empty, DocumentType),
+                new AiAttachmentsSaveFileRequestInput(other.Id.ToString(), string.Empty, DocumentType)
+            ]),
+            TestContext.Current.CancellationToken));
+
+        var otherDrafts = await CountDraftsAsync(member.Id, other.Id);
+        var state = await WaitForRemovalAsync(projectId, draft.Id, file.Id, 404, spaceBefore);
+
+        exception.ErrorCode.Should().Be(404);
+        otherDrafts.Should().Be(0);
+        state.Draft.Should().BeNull();
+        state.FileStatus.Should().Be(404);
+        state.UsedSpace.Should().Be(spaceBefore);
+    }
+
+    [Fact]
     public async Task Cleanup_AbandonedDraftOfAFileInAProject_RemovesTheFileAndFreesTheProjectSpace()
     {
         var projectId = await CreateProjectAsync();
@@ -144,6 +176,18 @@ public class UnsentAttachmentCleanupTests(AspireAppFixture fixture) : ThreadFile
             TestContext.Current.CancellationToken);
 
         return saved.Should().ContainSingle().Subject;
+    }
+
+    private async Task<long> CountDraftsAsync(Guid userId, int fileId)
+    {
+        await using var connection = await OpenDatabaseAsync();
+        await using var command = connection.CreateCommand();
+
+        command.CommandText = "SELECT COUNT(*) FROM ai_integration_attachments WHERE created_by = @userId AND entry_id = @fileId";
+        command.Parameters.AddWithValue("@userId", userId.ToString());
+        command.Parameters.AddWithValue("@fileId", fileId);
+
+        return Convert.ToInt64(await command.ExecuteScalarAsync(TestContext.Current.CancellationToken));
     }
 
     private async Task<AiAttachment?> ReadDraftAsync(string id)

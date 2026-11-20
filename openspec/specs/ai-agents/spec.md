@@ -445,21 +445,9 @@ take no folder in the section root (403) and are deleted outright.
 ### Requirement: Members of the AI rooms
 
 An Instructions room SHALL offer the Room manager, Content creator, Editor and Viewer roles, a Knowledge room
-the same without Editor, an AI project only Room manager and Content creator. The members of a project are
-users only: a group SHALL NOT be invited to a project with any role (403, "The role is not available for this
-user type"). A Guest SHALL NOT hold any role in a project (403, nobody added) while a User joins through a
-link as Content creator. Every member reads the project; only a Room manager edits it; a non-member other
-than a DocSpace admin SHALL NOT read its model, sources or skills (403).
-
-#### Scenario: Guest invited to a project
-
-- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
-- **THEN** the system answers 403 and the Guest is not a member
-
-#### Scenario: Group invited to a project
-
-- **WHEN** the owner invites a group to a project with any role
-- **THEN** the system answers 403 and the group is not a member
+the same without Editor, an AI project only Room manager and Content creator. Every member reads the project;
+only a Room manager edits it; a non-member other than a DocSpace admin SHALL NOT read its model, sources or
+skills (403).
 
 #### Scenario: Content creator reads, Room manager writes
 
@@ -470,6 +458,22 @@ than a DocSpace admin SHALL NOT read its model, sources or skills (403).
 
 - **WHEN** a DocSpace admin who is not a member of a project calls `getProjectModel`, `getProjectSources` and `getRoomSkills` for it
 - **THEN** each call answers 200
+
+### Requirement: Users only in an AI project
+
+The members of an AI project SHALL be users only: a group SHALL NOT be invited to a project with any role
+(403, "The role is not available for this user type"). A Guest SHALL NOT hold any role in a project (403,
+nobody added), while a User joins through an invitation link as Content creator.
+
+#### Scenario: Guest invited to a project
+
+- **WHEN** the owner invites a Guest to a project as Content creator by id, by email or through an invitation link
+- **THEN** the system answers 403 and the Guest is not a member
+
+#### Scenario: Group invited to a project
+
+- **WHEN** the owner invites a group to a project with any role
+- **THEN** the system answers 403 and the group is not a member
 
 ### Requirement: The model of an AI project
 
@@ -2066,7 +2070,8 @@ picture nor a document text can be read from. `moveBatchItems` into a project SH
 
 `aiAttachmentsSaveFilesMany` for a file the caller stored in an AI project SHALL answer one attachment per
 file: a repeated call for the same file SHALL return the same attachment, with the extracted text for a
-document and as an image attachment for a picture.
+document and as an image attachment for a picture. Once the caller deleted that attachment, a call for the
+file SHALL answer 404 and store nothing of the batch, before the background pass and after it.
 
 #### Scenario: Document attached twice
 
@@ -2077,6 +2082,11 @@ document and as an image attachment for a picture.
 
 - **WHEN** the owner uploads a PNG picture into the project and attaches it twice
 - **THEN** both answers carry one attachment id and the kind `image`
+
+#### Scenario: Deleted attachment attached again
+
+- **WHEN** a Content creator of a project uploads a file into the project, attaches it, deletes the attachment and attaches the file again in a batch with a file of their My documents
+- **THEN** the system answers 404, no attachment of the My documents file is stored, and after the next background pass the project file answers 404 and the deleted attachment reads as null
 
 ### Requirement: A sent attachment is kept with its thread
 
@@ -2148,6 +2158,21 @@ download and copy it and nothing else: `updateFile`, `deleteFile`, `moveBatchIte
 - **WHEN** the creator calls `openEditFile` for an own artifact
 - **THEN** the document opens with the edit permission false
 
+### Requirement: Used space of a project
+
+The project's `usedSpace` SHALL be null for a caller who may not edit the project, a DocSpace admin outside it
+included, and sorting the AI rooms root by `UsedSpace` SHALL order projects by title.
+
+#### Scenario: Used space of a project
+
+- **WHEN** a member uploads a file into a project, and another member, the project's owner and a DocSpace admin each call `getRoomInfo`
+- **THEN** `usedSpace` is positive for the owner and null for the member and the admin
+
+#### Scenario: Sorting by used space
+
+- **WHEN** a member of two projects lists the AI rooms root with `sortBy` `UsedSpace` descending, and only the later title holds a file
+- **THEN** the project with the earlier title comes first
+
 ### Requirement: The contents of a project are not listed
 
 `getFolderByFolderId` of an AI project SHALL answer no files, no folders and total 0, `getFolders` an empty
@@ -2174,6 +2199,28 @@ and `getRoomSkills` of the project SHALL answer as they do for a project without
 
 - **WHEN** the owner links an Instructions room to a project that holds thread files
 - **THEN** `getProjectSources` lists that room and `getRoomSkills` of the project answers
+
+### Requirement: The rooms roots list nothing inside a project
+
+`getFolderByFolderId` and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with
+`searchArea` AiHub, SHALL list rooms only, whatever `withSubFolders` says. `getFolderByFolderId` of the rooms
+root with `searchArea` Any SHALL list no entry inside a project, with `withSubFolders` true as well. No entry
+inside a project SHALL count in `total` of these listings.
+
+#### Scenario: Listing the AI rooms root
+
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each call `getFolderByFolderId` and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with `searchArea` AiHub, for a project with an artifact and a file not sent yet
+- **THEN** every answer lists the project and other rooms only, no file and no folder of a thread, with a total equal to the number of rooms listed
+
+#### Scenario: Filtering the AI rooms root by the title of a thread folder
+
+- **WHEN** the same callers call `getFolderByFolderId` of the AI rooms root with `filterValue` `artifacts`
+- **THEN** the answer holds no folder of a thread and no file
+
+#### Scenario: Listing the rooms root across all sections
+
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each call `getFolderByFolderId` of the rooms root with `searchArea` Any, without a filter and with `filterValue` `artifacts`, for a project with an artifact and a file not sent yet
+- **THEN** no answer holds the folder of the thread, the artifact or the file not sent yet, and each total equals the number of entries listed; the unfiltered answer to the member lists the project
 
 ### Requirement: Recipients of an upload into a project
 
@@ -2208,13 +2255,23 @@ answer an empty list.
 - **WHEN** a member uploads a file into a project on a portal that has a DocSpace admin, and calls `getSharedUsers` for it
 - **THEN** the list is empty
 
+### Requirement: Activity digests leave out AI projects
+
+The hourly room activity digest and the daily feed digest SHALL leave out every event of an AI project and of
+the entries inside it, for every recipient, the project's owner and DocSpace admins included.
+
+#### Scenario: Activity digests
+
+- **WHEN** a member uploads or creates a file in a project, or the project is created, renamed or gets a new member
+- **THEN** neither the hourly room activity digest nor the daily feed digest of any recipient lists the event
+
 ### Requirement: Deleting a thread of a project
 
 `aiThreadsDelete` of a thread in an AI project SHALL answer at once and close the thread everywhere: it
 leaves the list and the search, and reading or renaming it, reading or adding a message, saving an artifact
 and both file lists answer 404. Its files SHALL be removed afterwards by a background pass, every 5 minutes
-by default, which returns their size to the project's used space. Other threads of the project SHALL keep
-their files.
+by default, which then returns their size to the project's used space unless that step fails (A37). Other
+threads of the project SHALL keep their files.
 
 #### Scenario: Gone at once
 
@@ -2461,10 +2518,10 @@ kept, so the project is listed again once the caller regains access.
 ### Requirement: Drafts that are not sent are removed
 
 A background pass, every 15 minutes by default, SHALL remove each draft its creator deleted and each draft
-not linked to a message 2 hours, by default, after it was created; for a file stored in an AI project the
-draft counts from the upload or the copy. With the draft it SHALL remove the file the draft was made from
-when that file still lies in an AI project unsent, and return its size to the project's space. Any other
-file and any linked attachment SHALL stay.
+not linked to a message 2 hours, by default, after it was created, in a project from the upload or copy.
+With the draft it SHALL remove the file the draft was made from when that file still lies in an AI project
+unsent, then return its size to the project's space unless that step fails (A37). Any other file and any
+linked attachment SHALL stay, except a file linked during the pass (A36).
 
 #### Scenario: Deleted draft of a file in a project
 

@@ -53,6 +53,9 @@ internal static partial class FirstTimeTenantSettingsLogger
     [LoggerMessage(LogLevel.Debug, "Subscribe response: {response}")]
     public static partial void DebugSubscribeResponse(this ILogger<FirstTimeTenantSettings> logger, HttpResponseMessage response);
 
+    [LoggerMessage(LogLevel.Warning, "The wizard is completed on the installation's own trial: the editing service did not say whether it runs its trial")]
+    public static partial void WarningWizardOnOwnTrial(this ILogger<FirstTimeTenantSettings> logger);
+
     [LoggerMessage(LogLevel.Error, "Subscribe request")]
     public static partial void ErrorSubscribeRequest(this ILogger<FirstTimeTenantSettings> logger, Exception exception);
 }

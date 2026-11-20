@@ -78,7 +78,8 @@ public class FoldersControllerInternal(
     /// user who did it. The records of one action form one entry, and its other records are in `related`. The list
     /// starts with the most recent entry. Paging with `startIndex` and `count` counts records, so a page can hold
     /// fewer entries. The response headers carry the total number of records, and the body does not. Requires read
-    /// access to the folder. Other callers get 403. A caller who only fills forms in a form-filling folder sees only
+    /// access to the folder. Other callers get 403. An AI project and the folders inside it have no history. For them
+    /// the call returns 403 to everyone. A caller who only fills forms in a form-filling folder sees only
     /// the entries available to them. The call is read-only. If the folder does not exist,
     /// the call returns 404. The call returns 400 if `count` is out of range or a date has a wrong format. To get
     /// the history as a file, use `POST api/2.0/files/folder/{folderId}/log/report`.
@@ -91,7 +92,7 @@ public class FoldersControllerInternal(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "One page of the folder history, the most recent record first", typeof(IAsyncEnumerable<HistoryDto>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset")]
-    [SwaggerResponse(403, "The caller may not read this folder")]
+    [SwaggerResponse(403, "The caller may not read this folder, or the folder is an AI project or lies inside one")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{folderId:int}/log")]
     public IAsyncEnumerable<HistoryDto> GetFolderHistory(HistoryFolderRequestDto inDto)
@@ -103,7 +104,8 @@ public class FoldersControllerInternal(
     /// Starts a job that saves the history of a folder as a report file in the caller's "My documents". The file is
     /// an XLSX spreadsheet, or a CSV file if `format` is `Csv`. If both `from` and `to` are left out, the report
     /// covers the whole history. Any user with read access to the folder can call it, except a guest. Other callers
-    /// get 403. The call queues work and returns the task, not the report. Repeat
+    /// get 403. An AI project and the folders inside it have no history, so the call returns 403 for them. The call
+    /// queues work and returns the task, not the report. Repeat
     /// `GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true. Then take the file from
     /// `resultFileId` and `resultFileUrl`. For a CSV file too large for the editor, the URL downloads the file. You can
     /// repeat the call. While a report of the same folder and caller runs, the call returns that task. It starts no
@@ -121,7 +123,7 @@ public class FoldersControllerInternal(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The queued report task", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(402, "The login history and audit trail section is turned off for this portal")]
-    [SwaggerResponse(403, "The caller may not export the history of this folder")]
+    [SwaggerResponse(403, "The caller may not export the history of this folder, or the folder is an AI project or lies inside one")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{folderId:int}/log/report")]
     public async Task<DocumentBuilderTaskDto> CreateReportFolderHistoryAsync(FolderHistoryReportRequestDto inDto)
@@ -151,8 +153,9 @@ public class FoldersControllerInternal(
 
     /// <remarks>
     /// Returns the state of the history report that the caller started for a folder. Each caller sees only their own
-    /// report. Any user with read access to the folder can call it, except a guest. Other callers get 403. The call
-    /// is read-only. This is the call to poll after `POST api/2.0/files/folder/{folderId}/log/report`. Repeat it
+    /// report. Any user with read access to the folder can call it, except a guest. Other callers get 403. For an AI
+    /// project and the folders inside it, the call returns 403. The call is read-only. This is the call to poll
+    /// after `POST api/2.0/files/folder/{folderId}/log/report`. Repeat it
     /// until `isCompleted` is true. It becomes true however the job ends. If the job fails, `error` gives the reason.
     /// After a success, `resultFileId`, `resultFileName`, and `resultFileUrl` name the file in "My
     /// documents". If the caller has no report for this folder, the response is empty. If the folder does not exist,
@@ -168,7 +171,7 @@ public class FoldersControllerInternal(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The state of the report task, or nothing when there is none", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(402, "The login history and audit trail section is turned off for this portal")]
-    [SwaggerResponse(403, "The caller may not export the history of this folder")]
+    [SwaggerResponse(403, "The caller may not export the history of this folder, or the folder is an AI project or lies inside one")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{folderId:int}/log/report")]
     public async Task<DocumentBuilderTaskDto> GetReportFolderHistoryAsync(int folderId)
@@ -186,8 +189,8 @@ public class FoldersControllerInternal(
     /// <remarks>
     /// Stops the history report that the caller started for a folder with
     /// `POST api/2.0/files/folder/{folderId}/log/report`. Each caller can stop only their own report. Any user with
-    /// read access to the folder can call it, except a guest. Other callers get 403. The call only queues a request
-    /// to stop the job and returns no body. To see the task end as cancelled, use
+    /// read access to the folder can call it, except a guest. Other callers get 403. For an AI project and the
+    /// folders inside it, the call returns 403. The call only queues a request to stop the job and returns no body. To see the task end as cancelled, use
     /// `GET api/2.0/files/folder/{folderId}/log/report`. If no report runs, the call changes nothing, so you can
     /// repeat it. A finished report stays, and its file remains in "My documents". If the folder does not exist, the
     /// call returns 404. It returns 402 if the login history and audit trail section is turned off for the portal.
@@ -201,7 +204,7 @@ public class FoldersControllerInternal(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The request to stop the report was accepted")]
     [SwaggerResponse(402, "The login history and audit trail section is turned off for this portal")]
-    [SwaggerResponse(403, "The caller may not export the history of this folder")]
+    [SwaggerResponse(403, "The caller may not export the history of this folder, or the folder is an AI project or lies inside one")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpDelete("folder/{folderId:int}/log/report")]
     public async Task TerminateReportFolderHistoryAsync(int folderId)
@@ -328,6 +331,8 @@ public abstract class FoldersController<T>(
     /// returns 400 if the title is empty, has only spaces, or is too long. It returns 403 if the parent does not exist
     /// or is in the archive. It also returns 403 in the Rooms, Forms, and AI agents section roots, which hold only
     /// rooms. For a string ID that is not a folder of a connected storage, the call returns 404.
+    /// If the folder is in a full connected storage other than SharePoint, the call can return 400.
+    /// The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Create a folder
@@ -336,7 +341,7 @@ public abstract class FoldersController<T>(
     [RaisesWebhook(WebhookTrigger.FolderCreated)]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder that was created", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters, or the connected storage other than SharePoint that holds the parent folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(403, "The caller may not create content in the parent folder, or the parent does not exist, lies in the archive or is a section root that holds only rooms")]
     [SwaggerResponse(404, "The parent folder id is a string that is not the id of a folder in a known third-party storage")]
     [HttpPost("folder/{folderId}")]
@@ -419,7 +424,8 @@ public abstract class FoldersController<T>(
     /// access to the folder. Other callers get 403. Without signing in, a caller needs an external link to the
     /// folder. The call changes data of the caller only. It clears the new-item marks of the folder. It also saves a
     /// valid `sortBy` and `sortOrder` as the default order of the account. You can repeat it. With a filter, the
-    /// call searches the whole subtree by default. The text filter also searches indexed document content. Indexing
+    /// call searches the whole subtree by default. The AI rooms root, and the rooms root with `searchArea` AiHub,
+    /// list rooms only. The text filter also searches indexed document content. Indexing
     /// runs in the background, so a new file can be missing from the results at first. Use `count` and `startIndex`
     /// to page through the result. The `total` field counts all matching entries. To filter by metadata with a typed
     /// body, use `POST api/2.0/files/{folderId}/search`. The call returns 400 for a wrong parameter type, a `count`
@@ -469,8 +475,9 @@ public abstract class FoldersController<T>(
     /// data of the caller only. It clears the new-item marks of the folder. It also saves a valid `sortBy` as the
     /// default order of the account. The call ignores an unknown `sortBy`. You can repeat it. All conditions of
     /// `metadataFilters` must match. Without a template, conditions, and `filterValue`, the call lists the folder
-    /// unfiltered. By default, the search covers the whole subtree. Use `count` and `startIndex` to page through the
-    /// result. The `total` field counts all matches. Take the template and field IDs from
+    /// unfiltered. By default, the search covers the whole subtree. The AI rooms root lists rooms only. Use `count`
+    /// and `startIndex` to page through the result. The `total` field counts all matches. Take the template and
+    /// field IDs from
     /// `GET api/2.0/files/metadata/templates`. A folder of a connected storage has no metadata, so a filter there
     /// returns an empty page. The call returns 400 for an unknown template or field, or a field outside the named
     /// template. It also returns 400 for more than 20 conditions or a filter in the Templates or Private section. If
@@ -632,7 +639,8 @@ public abstract class FoldersController<T>(
     /// folder ID can change with the title. So take the ID from the response. The call returns 400 if the title is
     /// empty, has only spaces, or is too long. It also returns 403 for a folder in the trash or in the archive. If
     /// the folder does not exist, the call returns 404. To change the other settings of a room, use
-    /// `PUT api/2.0/files/rooms/{id}`.
+    /// `PUT api/2.0/files/rooms/{id}`. If the folder is in a full connected storage other than SharePoint, the call
+    /// can return 400. The user has to free up space there first.
     /// </remarks>
     /// <summary>
     /// Rename a folder
@@ -643,7 +651,7 @@ public abstract class FoldersController<T>(
     [RaisesWebhook(WebhookTrigger.AgentUpdated, When = "instead when it is an AI agent")]
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with its new title", typeof(FolderDto<int>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(403, "The caller may not rename this folder, or the folder lies in Trash or in the archive")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPut("folder/{folderId}")]

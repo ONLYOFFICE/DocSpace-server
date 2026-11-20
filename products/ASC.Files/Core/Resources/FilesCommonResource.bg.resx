@@ -414,6 +414,9 @@
   <data name="ErrorMessage_StartEditing" xml:space="preserve">
     <value>Грешка при стартирането на файла</value>
   </data>
+  <data name="ErrorMessage_ThirdPartyStorageFull" xml:space="preserve">
+    <value>В свързаното хранилище на трета страна няма достатъчно свободно място. Освободете място в него и опитайте отново.</value>
+  </data>
   <data name="ErrorMessage_UpdateArchivedRoom" xml:space="preserve">
     <value>Не можете да редактирате архивирани стаи</value>
   </data>

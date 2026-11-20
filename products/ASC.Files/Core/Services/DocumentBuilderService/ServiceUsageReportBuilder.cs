@@ -55,6 +55,7 @@ public class ServiceUsageReportBuilder(
             new(Resource.AccountingCustomerOperationQuantity, ReportColumnAlign.Right),
             new(Resource.AccountingCustomerOperationServiceUnit),
             new(Resource.AccountingCustomerOperationDebit, ReportColumnAlign.Right, Sum: true),
+            new(Resource.AccountingCustomerOperationBonusDebit, ReportColumnAlign.Right, Sum: true),
             new(Resource.AccountingCustomerOperationCurrency, Currency: true)
         };
 
@@ -122,7 +123,9 @@ public class ServiceUsageReportBuilder(
                 new(WalletServiceDescriptionManager.MarkByok(title, record.Service), "@"),
                 CountValue(record.TotalQuantity),
                 new(serviceUnit, "@"),
+                // The whole amount, then how much of it the bonuses paid: the money of the wallet itself is the difference.
                 MoneyValue(record.TotalAmount),
+                MoneyValue(OperationSource.BonusAmountOf(record.Sources)),
                 new(record.Currency, "@")
             };
 

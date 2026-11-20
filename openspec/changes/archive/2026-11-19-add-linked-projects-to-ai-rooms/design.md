@@ -157,7 +157,9 @@ a room they no longer read. The event exists on both halves of the socket servic
 
 ### 8. The requirement about a DocSpace admin
 
-The delta rewrites the last sentence of "Members of the AI rooms" and adds a scenario.
+The delta rewrites the last sentence of "Members of the AI rooms" and adds a scenario. The rule that a project
+takes users only (no group, no Guest) moves from it into "Users only in an AI project", with its two scenarios,
+so that neither requirement reaches 500 characters.
 `AiRoomOutsiderAccessTests.ProjectReads_DocSpaceAdminOutsideTheProject_Return403` becomes a test of 200 without
 the `Bug` category; the citations of that file in `verification.md` follow its lines.
 

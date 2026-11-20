@@ -278,7 +278,7 @@ public class TariffService(
                 {
                     var defaultQuota = await quotaService.GetTenantQuotaAsync(Tenant.DefaultTenant);
 
-                    var quota = new TenantQuota(defaultQuota) { Name = "start_trial", Trial = true, TenantId = -1000 };
+                    var quota = LicenseReader.CreateStartTrialQuota(defaultQuota);
 
                     await quotaService.SaveTenantQuotaAsync(quota);
 
@@ -482,6 +482,16 @@ public class TariffService(
         // Clear the cache to get up-to-date tariff and balance information.
         await ClearCacheAsync(tenantId);
 
+        return result;
+    }
+
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string initiator)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        var result = await billingClient.ApplyPromoCodeAsync(portalId, promoCode, initiator);
+        // The bonus lands on the goodwill account, which is never cached. Only a failed read of the wallet balance is,
+        // and it must not outlive a call that has just reached the portal's customer - as after every other write.
+        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
         return result;
     }
 
@@ -1068,7 +1078,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenant);
 
-            await NotifyWebSocketAsync(currentTariff, tariffInfo);
+            await NotifyTariffChangedAsync(tenant, currentTariff, tariffInfo);
         }
 
         return inserted;
@@ -1150,7 +1160,7 @@ public class TariffService(
 
             await ClearCacheAsync(tenant);
 
-            await NotifyWebSocketAsync(currentTariff, tariffInfo);
+            await NotifyTariffChangedAsync(tenant, currentTariff, tariffInfo);
 
             return true;
         }
@@ -1168,6 +1178,8 @@ public class TariffService(
         await coreDbContext.DeleteTariffs(tenant);
 
         await ClearCacheAsync(tenant);
+
+        await NotifyTariffChangedAsync(tenant, null, null);
     }
 
 
@@ -1359,39 +1371,119 @@ public class TariffService(
         }
     }
 
-    private async Task NotifyWebSocketAsync(Tariff currenTariff, Tariff newTariff)
+    /// <summary>
+    /// Tells the open clients that the tariff changed, so a payment page or a trial banner reads it again, and sends the
+    /// quota values the tariff sets (storage, paid users, rooms, and the free flag when it changed). The tariff of the
+    /// default tenant is the one tariff of a self-hosted installation, shared by all its portals, so each of them is
+    /// told. Best effort: the tariff is already written, and a failure here is only logged; a portal that cannot be told
+    /// does not keep the others from being told.
+    /// </summary>
+    /// <remarks>
+    /// Nothing here reads the tariff or the current tenant: the write may run under the lock of the tariff read, which a
+    /// read here would wait on, and a background job that writes the tariff has no current tenant.
+    /// </remarks>
+    /// <param name="tenant">The tenant whose tariff was written.</param>
+    /// <param name="currentTariff">The tariff before the write, if there was one.</param>
+    /// <param name="tariff">The tariff as it is stored now; <c>null</c> when it was deleted.</param>
+    private async Task NotifyTariffChangedAsync(int tenant, Tariff currentTariff, Tariff tariff)
     {
-        var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
-
-        var updatedQuota = await GetTenantQuotaFromTariffAsync(newTariff);
-
-        var maxTotalSize = updatedQuota.MaxTotalSize;
-        var maxTotalSizeFeatureName = updatedQuota.GetFeature<MaxTotalSizeFeature>().Name;
-
-        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxTotalSizeFeatureName, maxTotalSize);
-
-        var maxPaidUsers = updatedQuota.CountRoomAdmin;
-        var maxPaidUsersFeatureName = updatedQuota.GetFeature<CountPaidUserFeature>().Name;
-
-        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxPaidUsersFeatureName, maxPaidUsers);
-
-        var maxRoomCount = updatedQuota.CountRoom == int.MaxValue ? -1 : updatedQuota.CountRoom;
-        var maxRoomCountFeatureName = updatedQuota.GetFeature<CountRoomFeature>().Name;
-
-        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxRoomCountFeatureName, maxRoomCount);
-
-        if (currenTariff != null)
+        // The default tariff of a hosted installation belongs to no portal
+        if (tenant == Tenant.DefaultTenant && !coreBaseSettings.Standalone)
         {
-            var currentQuota = await GetTenantQuotaFromTariffAsync(currenTariff);
+            return;
+        }
 
-            var free = updatedQuota.Free;
-            if (currentQuota.Free != free)
+        QuotaSocketManager quotaSocketManager;
+        TariffState state;
+        List<int> portals;
+
+        try
+        {
+            quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+
+            // The state only picks the queue of the socket service. It is calculated on a copy, which leaves the
+            // caller's tariff as it is. A deleted tariff has no state until the next read creates one, so the state of
+            // the default tariff is used
+            state = tariff == null ? TariffState.Paid : (await CalculateTariffAsync(tenant, CopyForState(tariff))).State;
+
+            portals = tenant != Tenant.DefaultTenant
+                ? [tenant]
+                : (await tenantService.GetTenantsAsync(default(DateTime))).Select(t => t.Id).ToList();
+        }
+        catch (Exception ex)
+        {
+            logger.WarningTariffChangedNotification(tenant, ex);
+            return;
+        }
+
+        // The quota values are a second effect of their own: a quota that cannot be read does not keep the clients from
+        // being told that the tariff changed. A deleted tariff has no quota until the next read creates one
+        List<(string Feature, object Value)> features = [];
+        if (tariff != null)
+        {
+            try
             {
-                var freeFeatureName = updatedQuota.GetFeature<FreeFeature>().Name;
-
-                _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(freeFeatureName, free);
+                features = await GetQuotaFeaturesAsync(currentTariff, tariff);
+            }
+            catch (Exception ex)
+            {
+                logger.WarningTariffQuotaValues(tenant, ex);
             }
         }
+
+        var (failedPortals, firstFailure) = await TariffChangeNotification.SendAsync(
+            portals,
+            features,
+            portal => quotaSocketManager.ChangeTariffAsync(portal, state),
+            (portal, feature, value) => quotaSocketManager.ChangeQuotaFeatureValueAsync(portal, feature, value, state));
+
+        // The sends only queue the requests for the socket service, which logs a request it cannot deliver. What fails
+        // here is building a request (a malformed address of the socket service), the same for every portal, so one
+        // line for all of them
+        if (failedPortals > 0)
+        {
+            logger.WarningTariffChangedNotificationPortals(tenant, failedPortals, firstFailure);
+        }
+
+        static Tariff CopyForState(Tariff tariff)
+        {
+            return new Tariff
+            {
+                Id = tariff.Id,
+                DueDate = tariff.DueDate,
+                DelayDueDate = tariff.DelayDueDate,
+                LicenseDate = tariff.LicenseDate,
+                CustomerId = tariff.CustomerId,
+                Quotas = [.. tariff.Quotas]
+            };
+        }
+    }
+
+    /// <summary>
+    /// The quota values the clients show from the tariff: storage, paid users and rooms always, the free flag only when
+    /// it differs from the tariff before the write.
+    /// </summary>
+    private async Task<List<(string Feature, object Value)>> GetQuotaFeaturesAsync(Tariff currentTariff, Tariff tariff)
+    {
+        var updatedQuota = await GetTenantQuotaFromTariffAsync(tariff);
+
+        List<(string Feature, object Value)> features =
+        [
+            (updatedQuota.GetFeature<MaxTotalSizeFeature>().Name, updatedQuota.MaxTotalSize),
+            (updatedQuota.GetFeature<CountPaidUserFeature>().Name, updatedQuota.CountRoomAdmin),
+            (updatedQuota.GetFeature<CountRoomFeature>().Name, updatedQuota.CountRoom == int.MaxValue ? -1 : updatedQuota.CountRoom)
+        ];
+
+        if (currentTariff != null)
+        {
+            var currentQuota = await GetTenantQuotaFromTariffAsync(currentTariff);
+            if (currentQuota.Free != updatedQuota.Free)
+            {
+                features.Add((updatedQuota.GetFeature<FreeFeature>().Name, updatedQuota.Free));
+            }
+        }
+
+        return features;
     }
 
     private async Task<TenantQuota> GetTenantQuotaFromTariffAsync(Tariff tariff)
@@ -1488,7 +1580,7 @@ public class TariffService(
     /// balance did not reflect the change in time - the deposit may or may not have been applied on the
     /// billing side, so callers must not blindly retry with a recomputed amount, or they risk depositing twice.
     /// </summary>
-    private async Task<(TopUpOutcome Outcome, bool Result)> TopUpDepositInternalAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata, bool waitForChanges)
+    private async Task<(TopUpOutcome Outcome, bool Result)> TopUpDepositInternalAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata, bool waitForChanges, CancellationToken cancellationToken = default)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
@@ -1503,6 +1595,9 @@ public class TariffService(
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
         var result = false;
         TopUpOutcome outcome;
+
+        // the last moment a cancelled caller sends nothing
+        cancellationToken.ThrowIfCancellationRequested();
 
         try
         {
@@ -1521,15 +1616,30 @@ public class TariffService(
             return (outcome, result);
         }
 
-        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
+        // The deposit is sent. A cancelled caller does not wait to learn whether it was applied: the poll is skipped or
+        // cut short and the outcome is unknown. The deposit is reported all the same, so that the caller announces
+        // it before it acts on the cancellation.
+        var updated = false;
 
-        var updated = await pipeline.ExecuteAsync(async _ =>
+        if (!cancellationToken.IsCancellationRequested)
         {
-            var newBalance = await GetCustomerBalanceAsync(tenantId, true);
-            var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+            var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
 
-            return oldBalanceAmount != newBalanceAmount;
-        });
+            try
+            {
+                updated = await pipeline.ExecuteAsync(async _ =>
+                {
+                    var newBalance = await GetCustomerBalanceAsync(tenantId, true);
+                    var newBalanceAmount = newBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
+
+                    return oldBalanceAmount != newBalanceAmount;
+                }, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // the caller's deadline fell during the poll: the deposit stays unconfirmed
+            }
+        }
 
         if (!updated)
         {
@@ -1544,9 +1654,26 @@ public class TariffService(
         return (outcome, result);
     }
 
-    public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true)
+    /// <summary>
+    /// Tops the wallet up for what the wallet and the bonus lack of <paramref name="requiredAmount"/>, in up to five
+    /// deposits, and reports whether they cover the amount then. The token ends the poll of the balance after a deposit,
+    /// and once it is cancelled no further deposit is begun. A cancellation the method sees before a deposit, or once a
+    /// deposit and its announcement are done, throws <see cref="OperationCanceledException"/> without reading the
+    /// balance again, also when that deposit covered the amount. One that falls during the reads after a deposit is
+    /// seen only before the next deposit, so when none follows, the method reports what those reads gave. With
+    /// <paramref name="allowTopUp"/> false the token is not checked. A deposit already sent is let finish and
+    /// announced to the clients first, so a caller that stops it by a deadline does not know whether that deposit was
+    /// applied, but the clients are told of it.
+    /// </summary>
+    public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true, CancellationToken cancellationToken = default)
     {
-        var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+        // The accounting service spends the bonus credits before the wallet money, a payment from the wallet for the
+        // subscription included, so the portal can pay with both. Charges running meanwhile spend the bonus first, so
+        // it is read again with the wallet after every top-up. A bonus that cannot be read before the first top-up
+        // counts as none: the wallet is then topped up as if there were no bonus. A later read that fails keeps the
+        // bonus read before, so a failed read never fires a deposit of its own after a confirmed one.
+        var goodwillAmount = await GetGoodwillAmountAsync(tenantId, currency) ?? 0;
+        var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency) + goodwillAmount;
 
         // A delayed payment method accepts the deposit right away, but the money is credited only
         // once the transfer settles, so the balance cannot reflect it within this call and the loop below would
@@ -1560,18 +1687,35 @@ public class TariffService(
         // The balance may be consumed concurrently, so the top-up is retried several times.
         for (var attempt = 0; attempt < MaxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
 
             // waitForChanges must stay true: TopUpOutcome.Unknown is the only early exit that stops this loop
             // from firing a second real deposit, and it can only be reported when the balance is polled.
-            var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
+            var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true, cancellationToken);
             if (toppedUp)
             {
-                var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
-                await quotaSocketManager.TopUpWallet(auto);
+                // The money has moved, so a failure to tell the clients must not fail the purchase that waits for it:
+                // the purchase is funded by then.
+                try
+                {
+                    var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+                    await quotaSocketManager.TopUpWallet(auto);
+                }
+                catch (Exception e)
+                {
+                    // a client that misses the event reads the balance on its next request
+                    logger.WarningWalletChangeNotSent(tenantId, e);
+                }
             }
 
-            balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+            // A cancelled caller learns of it only now, once the deposit it may have made is announced: no further
+            // read of the balance and no further deposit.
+            cancellationToken.ThrowIfCancellationRequested();
+
+            goodwillAmount = await GetGoodwillAmountAsync(tenantId, currency) ?? goodwillAmount;
+            balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency) + goodwillAmount;
 
             if (outcome == TopUpOutcome.Unknown)
             {
@@ -1594,6 +1738,25 @@ public class TariffService(
         Unknown
     }
 
+    // The bonus in the given currency, 0 for a portal without one, or null when the goodwill account could not be read.
+    private async Task<decimal?> GetGoodwillAmountAsync(int tenantId, string currency)
+    {
+        var (goodwill, known) = await ReadCustomerGoodwillAsync(tenantId);
+        if (!known)
+        {
+            return null;
+        }
+
+        if (goodwill == null)
+        {
+            return 0;
+        }
+
+        // Only credits that have not ended pay: the accounting service may write an ended one off later. A negative
+        // amount is no money to pay with, so it never raises the top-up above the shortfall of the wallet.
+        return goodwill.SpendableAmount(currency, DateTime.UtcNow);
+    }
+
     private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)
     {
         var balance = await GetCustomerBalanceAsync(tenantId, true);
@@ -1602,13 +1765,9 @@ public class TariffService(
             throw new ItemNotFoundException("Balance could not be found");
         }
 
-        var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
-        if (subAccount == null)
-        {
-            throw new ItemNotFoundException("Subaccount could not be found");
-        }
-
-        return subAccount.Amount;
+        // A customer who has linked a card but never topped up the wallet has no wallet sub-account, also with a bonus
+        // credited: that is an empty wallet, so the bonus still counts and the shortfall is topped up.
+        return balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount ?? 0;
     }
 
     #region Accounting
@@ -1695,6 +1854,38 @@ public class TariffService(
         }
 
         return balance;
+    }
+
+    public async Task<GoodwillBalance> GetCustomerGoodwillAsync(int tenantId)
+    {
+        return (await ReadCustomerGoodwillAsync(tenantId)).Goodwill;
+    }
+
+    public async Task<(GoodwillBalance Goodwill, bool Known)> ReadCustomerGoodwillAsync(int tenantId)
+    {
+        if (!accountingClient.Configured)
+        {
+            return (null, true);
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return (await accountingClient.GetCustomerGoodwillAsync(portalId), true);
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+
+            return (null, true);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return (null, false);
+        }
     }
 
     public async Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration)

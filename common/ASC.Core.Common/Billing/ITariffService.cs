@@ -48,6 +48,14 @@ public interface ITariffService
     Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency);
     Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(int tenantId, string productId);
     Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId);
+
+    /// <summary>
+    /// Redeems a promo code for the portal and forgets a remembered failure to read the balance, so the next read asks
+    /// the accounting service. Failures
+    /// are not caught: a code the billing service refuses comes back as a <see cref="BillingPromoCodeException"/>.
+    /// <paramref name="initiator"/> is the e-mail of the user who redeems the code.
+    /// </summary>
+    Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string initiator);
     Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
     Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity);
     Task<bool> GetDocsCloudTrialAsync(int tenantId, DocsCloudTrialCustomer customer);
@@ -56,20 +64,37 @@ public interface ITariffService
     bool IsConfigured();
     Task<CustomerInfo> GetCustomerInfoAsync(int tenantId, bool refresh = false);
     Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false);
-    Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true);
+    Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true, CancellationToken cancellationToken = default);
 
     Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
 
     /// <summary>
+    /// The goodwill balance of the portal with the goodwill credits not spent in full, read from the accounting
+    /// service on every call; null when the portal is not a customer or the accounting service could not be read.
+    /// </summary>
+    Task<GoodwillBalance> GetCustomerGoodwillAsync(int tenantId);
+
+    /// <summary>
+    /// The goodwill balance of the portal, read from the accounting service on every call, and whether it is known.
+    /// A portal that is not a customer, or an installation without an accounting service, has no bonus: null and
+    /// known. A request that fails or an answer that cannot be read gives null and not known.
+    /// </summary>
+    Task<(GoodwillBalance Goodwill, bool Known)> ReadCustomerGoodwillAsync(int tenantId);
+
+    /// <summary>
     /// Whether money is left on the portal's wallet: true or false when the accounting service answered
     /// (a portal it does not know has no wallet, so false), null when it could not be asked or did not answer
-    /// before <paramref name="cancellationToken"/> was cancelled.
+    /// before <paramref name="cancellationToken"/> was cancelled. Only the money paid into the wallet counts, never
+    /// the bonus credits of the goodwill account: the answer decides whether the customer's own money would be lost
+    /// with the portal, and a bonus is a gift, not money the customer paid in. To know whether the portal can pay, which
+    /// counts the bonus, see <see cref="EnsureWalletBalanceAsync"/>.
     /// </summary>
     Task<bool?> HasPositiveBalanceAsync(int tenantId, CancellationToken cancellationToken = default);
     Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration);
     Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId);
     Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration);
     Task<bool> CompleteCustomerSessionAsync(int tenantId, string serviceName, int sessionId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null);
+
     Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter);
     Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, MonthlyUsageFilter filter);
     Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter);

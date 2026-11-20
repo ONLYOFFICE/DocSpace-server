@@ -198,8 +198,8 @@ them or submits a form. The actor never receives their own push.
 
 ### Requirement: New items of a room
 
-`getNewRoomItems` SHALL list, grouped by day, the files somebody else created in a room since
-the caller last opened it; `getNewFolderItems` on the room id SHALL report the same entries. A
+`getNewRoomItems` SHALL list, grouped by day, the files somebody else created or renamed in a room
+since the caller last opened it; `getNewFolderItems` on the room id SHALL report the same entries. A
 new subfolder is not an entry, a file inside it is. Reading clears nothing; opening the room
 clears everything. The caller needs access to the room (any level; a DocSpace admin always),
 otherwise 403; an unknown or deleted room is 404; anonymous 401.
@@ -208,6 +208,11 @@ otherwise 403; an unknown or deleted room is 404; anonymous 401.
 
 - **WHEN** a member with Read access opened the room and the owner then creates a file in it, or in a subfolder of it
 - **THEN** the member's `getNewRoomItems` lists that file with `title`, `createdBy` and `updated`
+
+#### Scenario: File renamed by somebody else
+
+- **WHEN** a member with Read access opened the room and the owner then renames a file in it with `updateFile`
+- **THEN** the member's `getNewRoomItems` lists that file under its new title and not under the old one
 
 #### Scenario: Own file and a subfolder
 
@@ -291,6 +296,17 @@ Telegram.
 
 - **WHEN** the portal's tariff is not paid
 - **THEN** no hourly digest is sent either, while the letters a room sends at once still go out
+
+### Requirement: AI projects in the digests
+
+The daily feed digest and the hourly room activity digest SHALL list no event of an AI project or of an
+entry inside it, for every recipient, the project's owner and DocSpace admins included (`ai-agents`,
+"Activity digests leave out AI projects").
+
+#### Scenario: Activity in a project
+
+- **WHEN** a member uploads or creates a file in an AI project, or the project is created, renamed or gets a new member
+- **THEN** neither digest of any recipient lists the event
 
 ### Requirement: SMTP settings of the portal
 

@@ -74,16 +74,16 @@ public class ThreadDeletionTests(AspireAppFixture fixture) : ThreadFilesTestBase
             new { contents = BuildMessageContents() },
             TestContext.Current.CancellationToken);
         using var uploaded = await PostArtifactAsync(thread.Id, "late.txt");
-        using var artifacts = await GetArtifactsAsync(projectId, thread.Id);
-        using var attachments = await GetAttachmentsAsync(projectId, thread.Id);
+        var artifacts = await ArtifactsStatusAsync(projectId, thread.Id);
+        var attachments = await AttachmentsStatusAsync(projectId, thread.Id);
 
         deleted.StatusCode.Should().Be(HttpStatusCode.NoContent);
         renamed.StatusCode.Should().Be(HttpStatusCode.NotFound);
         readMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         appended.StatusCode.Should().Be(HttpStatusCode.NotFound);
         uploaded.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        artifacts.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        attachments.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        artifacts.Should().Be(404);
+        attachments.Should().Be(404);
     }
 
     [Fact]

@@ -117,11 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AccountingCustomerOperationBonusCredit" xml:space="preserve">
+    <value>Ghi có (tiền thưởng)</value>
+  </data>
+  <data name="AccountingCustomerOperationBonusDebit" xml:space="preserve">
+    <value>Ghi nợ (tiền thưởng)</value>
+  </data>
   <data name="AccountingCustomerOperationContact" xml:space="preserve">
     <value>Liên hệ</value>
   </data>
   <data name="AccountingCustomerOperationCredit" xml:space="preserve">
-    <value>Tín dụng</value>
+    <value>Ghi có</value>
   </data>
   <data name="AccountingCustomerOperationCurrency" xml:space="preserve">
     <value>Loại tiền</value>
@@ -149,6 +155,12 @@
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Sao lưu</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus" xml:space="preserve">
+    <value>Cộng tiền thưởng</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_bonus-expiration" xml:space="preserve">
+    <value>Tiền thưởng hết hạn</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Véc-tơ hóa</value>

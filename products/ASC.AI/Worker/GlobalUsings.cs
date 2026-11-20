@@ -61,6 +61,7 @@ global using ASC.Files.Core;
 global using ASC.Files.Core.Core;
 global using ASC.Files.Core.Core.AI;
 global using ASC.Files.Core.EF;
+global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Vectorization;
 global using ASC.Files.Core.Vectorization.Events;
 

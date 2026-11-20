@@ -4261,7 +4261,7 @@
                   5
                 ],
                 "type": "integer",
-                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
+                "description": "How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose\r\nfiles no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI\r\nrooms sections, for which the number is not collected.",
                 "format": "int32"
               },
               "foldersCount": {
@@ -4269,7 +4269,7 @@
                   7
                 ],
                 "type": "integer",
-                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
+                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders\r\nno listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms\r\nsections.",
                 "format": "int32"
               },
               "isShareable": {
@@ -4400,7 +4400,7 @@
                   "null",
                   "integer"
                 ],
-                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room.",
+                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files\r\nof a project belong to the members who added them, so only who manages the project sees their total.",
                 "format": "int64"
               },
               "passwordProtected": {
@@ -6062,7 +6062,7 @@
                   5
                 ],
                 "type": "integer",
-                "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates, default templates and AI agents sections always report 0, because the number is not collected for\r\nthem.",
+                "description": "How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose\r\nfiles no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI\r\nrooms sections, for which the number is not collected.",
                 "format": "int32"
               },
               "foldersCount": {
@@ -6070,7 +6070,7 @@
                   7
                 ],
                 "type": "integer",
-                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI\r\nagents sections report 0.",
+                "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders\r\nno listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms\r\nsections.",
                 "format": "int32"
               },
               "isShareable": {
@@ -6201,7 +6201,7 @@
                   "null",
                   "integer"
                 ],
-                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room.",
+                "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room, and for an AI project the caller may not edit: the files\r\nof a project belong to the members who added them, so only who manages the project sees their total.",
                 "format": "int64"
               },
               "passwordProtected": {

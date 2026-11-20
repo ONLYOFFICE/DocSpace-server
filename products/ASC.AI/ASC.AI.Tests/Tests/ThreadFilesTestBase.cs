@@ -83,28 +83,28 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         return await _ai.ReadAsync<ThreadFile>(response, TestContext.Current.CancellationToken);
     }
 
-    protected Task<HttpResponseMessage> GetArtifactsAsync(int projectId, Guid threadId, string query = "")
+    protected Task<int> ArtifactsStatusAsync(int projectId, Guid threadId)
     {
-        return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/artifacts{query}", TestContext.Current.CancellationToken);
+        return StatusOfAsync(() => RoomsAiApi.GetThreadArtifactsAsync(projectId, threadId, cancellationToken: TestContext.Current.CancellationToken));
     }
 
-    protected async Task<ThreadFilesPage> ListArtifactsAsync(int projectId, Guid threadId, string query = "")
+    protected async Task<ThreadFilesPage> ListArtifactsAsync(int projectId, Guid threadId, int? count = null, int? startIndex = null)
     {
-        using var response = await GetArtifactsAsync(projectId, threadId, query);
+        var page = await RoomsAiApi.GetThreadArtifactsAsync(projectId, threadId, count, startIndex, cancellationToken: TestContext.Current.CancellationToken);
 
-        return await ReadPageAsync(response);
+        return ToPage(page);
     }
 
-    protected Task<HttpResponseMessage> GetAttachmentsAsync(int projectId, Guid threadId)
+    protected Task<int> AttachmentsStatusAsync(int projectId, Guid threadId)
     {
-        return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/attachments", TestContext.Current.CancellationToken);
+        return StatusOfAsync(() => RoomsAiApi.GetThreadAttachmentsAsync(projectId, threadId, cancellationToken: TestContext.Current.CancellationToken));
     }
 
     protected async Task<ThreadFilesPage> ListAttachmentsAsync(int projectId, Guid threadId)
     {
-        using var response = await GetAttachmentsAsync(projectId, threadId);
+        var page = await RoomsAiApi.GetThreadAttachmentsAsync(projectId, threadId, cancellationToken: TestContext.Current.CancellationToken);
 
-        return await ReadPageAsync(response);
+        return ToPage(page);
     }
 
     protected async Task<Attachment> AttachAsync(int fileId)
@@ -225,10 +225,8 @@ public abstract class ThreadFilesTestBase(AspireAppFixture fixture) : BaseTest(f
         (await command.ExecuteNonQueryAsync(TestContext.Current.CancellationToken)).Should().Be(1);
     }
 
-    private async Task<ThreadFilesPage> ReadPageAsync(HttpResponseMessage response)
+    private static ThreadFilesPage ToPage(FileArrayWrapper page)
     {
-        var envelope = await new RawApiClient(FilesHttpClient).ReadEnvelopeAsync<List<ThreadFile>>(response, TestContext.Current.CancellationToken);
-
-        return new ThreadFilesPage(envelope.Response ?? [], envelope.Total ?? 0);
+        return new ThreadFilesPage([.. page.Response.Select(f => new ThreadFile(f.Id, f.Title, f.FolderId))], page.Total);
     }
 }

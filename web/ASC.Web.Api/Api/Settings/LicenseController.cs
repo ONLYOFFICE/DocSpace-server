@@ -86,15 +86,15 @@ public class LicenseController(
     }
 
     /// <remarks>
-    /// Activates the license file staged by `POST api/2.0/settings/license` on this Enterprise installation. The
-    /// call makes the staged file the active one and applies its quota and tariff to the portal. Without a staged
-    /// file, it applies the active license file again. Any signed-in user can call it. The call changes data, and
-    /// you can repeat it. Read the result from the body, not from the status code. An empty string means the license
-    /// is now active. Any other string is a message that explains why the activation failed. The call returns such a
-    /// message for a missing or incorrect file, or a license the editing service rejects. It also returns a message
-    /// if the license starts later. The call records the acceptance of the license even if the activation
-    /// fails. On a SaaS or open-source installation, the call changes nothing. It returns a message that the pricing
-    /// plan does not support the option. The call works while the portal is unpaid.
+    /// Activates the license file staged by `POST api/2.0/settings/license` on this Enterprise installation. The call
+    /// makes the staged file the active one and applies its quota and tariff to the portal. This replaces any trial in
+    /// force. Without a staged file, it applies the active license file again. Any signed-in user can call it. The call
+    /// changes data, and you can repeat it. Read the result from the body, not from the status code. An empty string
+    /// means the license is now active. Any other string is a message that explains why the activation failed. The call
+    /// returns such a message for a missing or incorrect file, or a license the editing service rejects. It also
+    /// returns a message if the license starts later. The call records the acceptance of the license even if the
+    /// activation fails. On a SaaS or open-source installation, the call changes nothing. It returns a message that the
+    /// pricing plan does not support the option. The call works while the portal is unpaid.
     /// </remarks>
     /// <summary>Activate a license</summary>
     /// <path>api/2.0/settings/license/accept</path>
@@ -186,7 +186,7 @@ public class LicenseController(
             return false;
         }
 
-        var quota = new TenantQuota(-1000)
+        var quota = new TenantQuota(LicenseReader.LicenseQuotaId)
         {
             Name = "apirequest",
             CountUser = curQuota.CountUser,
@@ -198,12 +198,12 @@ public class LicenseController(
 
         await tenantManager.SaveTenantQuotaAsync(quota);
 
-        const int DEFAULT_TRIAL_PERIOD = 30;
+        const int defaultTrialPeriod = 30;
 
         var tariff = new Tariff
         {
             Quotas = [new Quota(quota.TenantId, 1)],
-            DueDate = DateTime.Today.AddDays(DEFAULT_TRIAL_PERIOD)
+            DueDate = DateTime.Today.AddDays(defaultTrialPeriod)
         };
 
         await tariffService.SetTariffAsync(Tenant.DefaultTenant, tariff, [quota]);
@@ -214,21 +214,25 @@ public class LicenseController(
     }
 
     /// <remarks>
-    /// Returns whether this installation still needs a license file. The setup wizard asks
-    /// this before it offers to upload a license. Anyone can call it without signing in. The call is read-only. It
-    /// returns `true` only for an Enterprise installation whose license file is not on disk yet. It returns `false`
-    /// on a SaaS or open-source installation, which needs no license. It also returns `false` if the portal lets
-    /// anyone in without an account, or hides the pricing section. The same applies to an installation set up from
-    /// cloud image metadata. So `false` does not mean that the portal has a license. The call does not describe the
-    /// active license or check it with the editing service. The answer becomes `false` only after a staged file is
-    /// activated, not after the upload. To activate it, use `POST api/2.0/settings/license/accept`. The call works
-    /// while the portal is unpaid.
+    /// Returns whether this installation still needs a license file. The setup wizard asks this before it offers a
+    /// license upload. Anyone can call it without signing in. The call is read-only, except that its tariff read may
+    /// start the 30-day trial. It returns `true` only for an Enterprise installation whose license file is not on disk
+    /// yet. The editing service must also run no trial of its own. While that trial runs, the call returns `false`. The
+    /// wizard then completes without a file. After that, the portal's trial ends by the day the editing service's trial
+    /// ends. If the portal's own trial already ended, the call still returns `true`. It asks the editing service only
+    /// about its trial, not the active license. It reuses the editing service's answer for up to 15 minutes. While the
+    /// service does not answer, the call uses its last answer for up to 3 days. With no answer known yet, a silent
+    /// service counts as no trial. It returns `false` on a SaaS or open-source installation, which needs no license. It
+    /// also returns `false` if the portal lets anyone in without an account, or hides the pricing section. The same
+    /// applies to an installation set up from cloud image metadata. So `false` does not mean the portal has a license.
+    /// An uploaded file makes the answer `false` only once it is activated, not on upload. To activate it, use `POST
+    /// api/2.0/settings/license/accept`. The call works while the portal is unpaid.
     /// </remarks>
     /// <summary>Check if a license is required</summary>
     /// <path>api/2.0/settings/license/required</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / License")]
-    [SwaggerResponse(200, "`true` when this Enterprise installation still needs a license file, `false` when one is already active or the build needs none", typeof(bool))]
+    [SwaggerResponse(200, "`true` when this Enterprise installation still needs a license file, `false` when one is already active, the editing service's trial stands in for it, or the build needs none", typeof(bool))]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("required")]

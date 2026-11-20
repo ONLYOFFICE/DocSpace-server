@@ -196,11 +196,13 @@ public class PaymentHelper(
     }
 
     /// <summary>
-    /// Loads the customer balance and returns the sub-account for the given currency
-    /// (defaults to the first supported accounting currency).
+    /// Demands that a purchase from the wallet in the given currency (defaults to the first supported accounting
+    /// currency) has something to be paid with: a wallet sub-account or a bonus that has not ended. The bonus is read
+    /// only when the wallet has no sub-account in the currency. A bonus that could not be read lets the purchase go on,
+    /// and billing decides.
     /// </summary>
-    /// <exception cref="ItemNotFoundException">Thrown when the balance or the matching sub-account cannot be found.</exception>
-    public async Task<SubAccount> GetSubAccountRequiredAsync(int tenantId, string currency = null, bool refresh = false)
+    /// <exception cref="ItemNotFoundException">Thrown when the balance cannot be read, or the portal is known to have neither.</exception>
+    public async Task DemandWalletOrBonusAsync(int tenantId, string currency = null, bool refresh = false)
     {
         var balance = await tariffService.GetCustomerBalanceAsync(tenantId, refresh);
         if (balance == null)
@@ -210,13 +212,17 @@ public class PaymentHelper(
 
         currency ??= tariffService.GetSupportedAccountingCurrencies().First();
 
-        var subAccount = balance.SubAccounts.FirstOrDefault(x => x.Currency == currency);
-        if (subAccount == null)
+        if (GoodwillBalance.CanPayFromWallet(balance, null, goodwillUnknown: false, currency, DateTime.UtcNow))
+        {
+            return;
+        }
+
+        var (goodwill, known) = await tariffService.ReadCustomerGoodwillAsync(tenantId);
+
+        if (!GoodwillBalance.CanPayFromWallet(balance, goodwill, goodwillUnknown: !known, currency, DateTime.UtcNow))
         {
             throw new ItemNotFoundException("Subaccount could not be found");
         }
-
-        return subAccount;
     }
 
     /// <summary>
@@ -292,7 +298,8 @@ public class PaymentHelper(
                 Currency = g.Key.Currency,
                 TotalQuantity = g.Sum(r => r.TotalQuantity),
                 TotalAmount = g.Sum(r => r.TotalAmount),
-                OperationCount = g.Sum(r => r.OperationCount)
+                OperationCount = g.Sum(r => r.OperationCount),
+                Sources = MergeSources(g)
             })
             .ToList();
 
@@ -305,6 +312,24 @@ public class PaymentHelper(
             TotalPage = (merged.Count + limit - 1) / limit,
             CurrentPage = offset / limit + 1
         };
+    }
+
+    // The split of the merged total by sub-account: the parts of every total added up per sub-account. A total
+    // reported without the split leaves the merged one without it too, since a partial split would not add up to it.
+    private static List<OperationSource> MergeSources(IEnumerable<CustomerServiceUsage> records)
+    {
+        var all = records.ToList();
+
+        if (all.Exists(r => r.Sources == null))
+        {
+            return null;
+        }
+
+        return all
+            .SelectMany(r => r.Sources)
+            .GroupBy(s => s.SubAccount)
+            .Select(g => new OperationSource { SubAccount = g.Key, Amount = g.Sum(s => s.Amount) })
+            .ToList();
     }
 
     /// <summary>
@@ -388,14 +413,14 @@ public class PaymentHelper(
 
         if (result)
         {
-            messageService.Send(MessageAction.CustomerWalletToppedUp, $"{amount} {currency}");
+            messageService.Send(MessageAction.CustomerWalletToppedUp, BillingAudit.Amount(amount, currency));
 
             // waitForChanges doubles as "the balance already reflects this deposit". With a delayed payment
             // method it does not: the deposit is accepted but the money is credited only once the
             // transfer settles, so pushing a refresh would just show the old value.
             if (waitForChanges)
             {
-                await quotaSocketManager.TopUpWallet(false);
+                await NotifyWalletChangedAsync(tenantId);
             }
 
             await EnsureLowBalanceThresholdAsync(waitForChanges);
@@ -443,11 +468,56 @@ public class PaymentHelper(
             throw new BillingException("Failed to move the subscription balance to the wallet");
         }
 
-        messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, $"{transfer.Amount} {transfer.Currency}");
+        messageService.Send(MessageAction.SubscriptionBalanceMovedToWallet, BillingAudit.Amount(transfer.Amount, transfer.Currency));
 
-        await quotaSocketManager.TopUpWallet(false);
+        await NotifyWalletChangedAsync(tenantId);
 
         return transfer;
+    }
+
+    /// <summary>
+    /// Redeems a promo code for the portal, records it in the audit trail and, once the bonus is credited, tells the
+    /// portal clients that the balance changed.
+    /// </summary>
+    /// <exception cref="ArgumentException">The billing service refused the code; the message is its reason code, such
+    /// as <c>promo_not_found</c>, for the client to show its own text.</exception>
+    public async Task<PromoCodeResult> ApplyPromoCodeAsync(int tenantId, string promoCode, string initiator)
+    {
+        PromoCodeResult result;
+
+        try
+        {
+            result = await tariffService.ApplyPromoCodeAsync(tenantId, promoCode, initiator);
+        }
+        catch (BillingPromoCodeException e)
+        {
+            throw new ArgumentException(e.Code, e);
+        }
+
+        // The code itself stays out of the audit trail: anyone who reads the trail could redeem a reusable one.
+        messageService.Send(MessageAction.CustomerPromoCodeApplied, BillingAudit.Amount(result.Amount, result.Currency));
+
+        // A pending bonus is not on the balance yet, so there is nothing new for the clients to read.
+        if (result.IsCredited)
+        {
+            await NotifyWalletChangedAsync(tenantId);
+        }
+
+        return result;
+    }
+
+    // Tells the portal clients that the wallet changed. The money has moved by then, so a failure to tell them must not
+    // turn the request into an error: the caller would retry an operation that already took effect.
+    private async Task NotifyWalletChangedAsync(int tenantId)
+    {
+        try
+        {
+            await quotaSocketManager.TopUpWallet(false);
+        }
+        catch (Exception e)
+        {
+            logger.WarningWalletChangeNotSent(tenantId, e);
+        }
     }
 
     public async Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, string toProductName)

@@ -34,7 +34,6 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 /// <summary>
 /// The AI rooms section of the root folders (`GET api/2.0/files/@root`) lists the AI projects the caller pinned and
 /// may see, whatever paging and filters the request carries, sorted as the listing of the section sorts pinned rooms.
-/// The pinned SDK cannot read a room of the AI rooms section, so the root folders and the pin calls go over raw HTTP.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AiHub")]
@@ -54,14 +53,14 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         await PinRoomAsync(instructions);
 
         // Act
-        var section = await GetRootAiHubSectionAsync("?filterType=2&count=1");
+        var section = await GetRootAiHubSectionAsync(filterType: FilterType.FoldersOnly, count: 1);
 
         // Assert
         IdsOf(section).Should().BeEquivalentTo([first, second]);
-        section.GetProperty("total").GetInt32().Should().Be(2);
-        section.GetProperty("count").GetInt32().Should().Be(2);
-        section.GetProperty("startIndex").GetInt32().Should().Be(0);
-        IdsOf(await GetAiHubSectionAsync()).Should().Contain([unpinned, instructions]);
+        section.Total.Should().Be(2);
+        section.Count.Should().Be(2);
+        section.StartIndex.Should().Be(0);
+        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain([unpinned, instructions]);
     }
 
     [Fact]
@@ -75,9 +74,9 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         var section = await GetRootAiHubSectionAsync();
 
         // Assert
-        IdsOf(await GetAiHubSectionAsync()).Should().Contain(project);
+        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(project);
         IdsOf(section).Should().BeEmpty();
-        section.GetProperty("total").GetInt32().Should().Be(0);
+        section.Total.Should().Be(0);
     }
 
     [Fact]
@@ -93,9 +92,9 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         var section = await GetRootAiHubSectionAsync();
 
         // Assert
-        PinnedOf(await GetAiHubSectionAsync()).Should().Contain(instructions);
+        PinnedOf(await GetAiHubFoldersAsync()).Should().Contain(instructions);
         IdsOf(section).Should().BeEmpty();
-        section.GetProperty("total").GetInt32().Should().Be(0);
+        section.Total.Should().Be(0);
     }
 
     [Fact]
@@ -115,13 +114,13 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         }
 
         // Act
-        var section = await GetRootAiHubSectionAsync("?count=1&startIndex=5&filterValue=NoProjectHasThisTitle&sortBy=AZ");
+        var section = await GetRootAiHubSectionAsync(count: 1, startIndex: 5, sortBy: "AZ", filterValue: "NoProjectHasThisTitle");
 
         // Assert
         IdsOf(section).Should().Equal(projects);
-        section.GetProperty("total").GetInt32().Should().Be(10);
-        section.GetProperty("count").GetInt32().Should().Be(10);
-        section.GetProperty("startIndex").GetInt32().Should().Be(0);
+        section.Total.Should().Be(10);
+        section.Count.Should().Be(10);
+        section.StartIndex.Should().Be(0);
     }
 
     [Fact]
@@ -134,13 +133,12 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         IdsOf(await GetRootAiHubSectionAsync()).Should().Contain(project);
 
         // Act
-        using var unpinned = await UnpinRoomResponseAsync(project);
+        await UnpinRoomAsync(project);
         var section = await GetRootAiHubSectionAsync();
 
         // Assert
-        unpinned.StatusCode.Should().Be(HttpStatusCode.OK);
         IdsOf(section).Should().NotContain(project);
-        IdsOf(await GetAiHubSectionAsync()).Should().Contain(project);
+        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(project);
     }
 
     [Fact]
@@ -157,12 +155,12 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         var roomsRootId = (await _roomsApi.GetRoomsFolderAsync(searchArea: SearchArea.Active, cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
 
         // Act
-        var sections = await GetRootSectionsAsync("?count=1");
+        var sections = await GetRootSectionsAsync(count: 1);
 
         // Assert
-        var rooms = sections.EnumerateArray().Single(s => s.GetProperty("current").GetProperty("id").GetInt32() == roomsRootId);
+        var rooms = sections.Single(s => s.Current.Id == roomsRootId);
         IdsOf(rooms).Should().HaveCount(1);
-        rooms.GetProperty("total").GetInt32().Should().Be(2);
+        rooms.Total.Should().Be(2);
         IdsOf(AiHubSectionOf(sections)).Should().BeEquivalentTo([project, otherProject]);
     }
 
@@ -186,7 +184,7 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
         // Assert
         IdsOf(memberSection).Should().Equal(project);
         IdsOf(ownerSection).Should().NotContain(project);
-        IdsOf(await GetAiHubSectionAsync()).Should().Contain(project, "the owner sees the project in the section, only the pin is missing");
+        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(project, "the owner sees the project in the section, only the pin is missing");
     }
 
     [Fact]
@@ -217,7 +215,7 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
 
         // Assert
         IdsOf(whileOut).Should().BeEmpty();
-        whileOut.GetProperty("total").GetInt32().Should().Be(0);
+        whileOut.Total.Should().Be(0);
         IdsOf(afterReinvite).Should().Equal(project);
     }
 
@@ -238,7 +236,7 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
 
         // Assert
         IdsOf(section).Should().Equal(project);
-        IdsOf(await GetAiHubSectionAsync()).Should().Contain([project, unpinnedProject], "the listing of the section shows every project to the admin");
+        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain([project, unpinnedProject], "the listing of the section shows every project to the admin");
     }
 
     [Fact]
@@ -256,15 +254,17 @@ public class AiHubRootPinnedProjectsTests(AspireAppFixture fixture) : AiHubTestB
 
         // Assert
         IdsOf(section).Should().Equal(project);
-        section.GetProperty("total").GetInt32().Should().Be(1);
-        IdsOf(await GetAiHubSectionAsync()).Should().Contain(unpinnedProject);
+        section.Total.Should().Be(1);
+        AiHubIdsOf(await GetAiHubFoldersAsync()).Should().Contain(unpinnedProject);
     }
 
-    private static List<int> PinnedOf(JsonElement section)
+    private static List<int> AiHubIdsOf(List<FolderDto> folders)
     {
-        return section.GetProperty("folders").EnumerateArray()
-            .Where(f => f.TryGetProperty("pinned", out var pinned) && pinned.GetBoolean())
-            .Select(f => f.GetProperty("id").GetInt32())
-            .ToList();
+        return [.. folders.Select(f => f.Id)];
+    }
+
+    private static List<int> PinnedOf(List<FolderDto> folders)
+    {
+        return [.. folders.Where(f => f.Pinned == true).Select(f => f.Id)];
     }
 }

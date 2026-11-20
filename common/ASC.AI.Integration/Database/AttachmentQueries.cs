@@ -121,7 +121,7 @@ static file class AttachmentQueriesContainer
         (AiIntegrationContext ctx, int tenantId, Guid createdBy, IEnumerable<Guid> ids) =>
             ctx.Attachments
                 .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.MessageId == null && ids.Contains(x.Id))
-                .ExecuteUpdateAsync(x => x.SetProperty(y => y.CreatedAt, DateTime.UnixEpoch));
+                .ExecuteUpdateAsync(x => x.SetProperty(y => y.CreatedAt, AttachmentsStorage.DeletedMark));
 
     public static readonly Func<AiIntegrationContext, DateTime, DateTime, Guid, int, IAsyncEnumerable<OrphanAttachment>> GetOrphanAttachmentsAsync =
         EF.CompileAsyncQuery(

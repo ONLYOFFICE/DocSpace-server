@@ -52,6 +52,7 @@ public sealed class PortalClients : PortalClientsBase
     public DocsCloudApi DocsCloudApi { get; }
     public CommonSettingsApi CommonSettingsApi { get; }
     public DocSpace.API.SDK.Api.Settings.QuotaApi SettingsQuotaApi { get; }
+    public AuditTrailDataApi AuditTrailDataApi { get; }
 
     public PortalClients(PortalContext context) : base(context)
     {
@@ -67,5 +68,6 @@ public sealed class PortalClients : PortalClientsBase
         DocsCloudApi = new DocsCloudApi(WebApiHttpClient, webApiConfig);
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
         SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(WebApiHttpClient, webApiConfig);
+        AuditTrailDataApi = new AuditTrailDataApi(WebApiHttpClient, webApiConfig);
     }
 }

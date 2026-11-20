@@ -240,7 +240,7 @@
                 <configuration>
                     <apiDocsUrl>http://localhost:9090/docs</apiDocsUrl>
                     <outputFileName>identity-authorization-openapi.json</outputFileName>
-                    <outputDir>${build.directory}</outputDir>
+                    <outputDir>${project.build.directory}</outputDir>
                     <skip>false</skip>
                 </configuration>
             </plugin>

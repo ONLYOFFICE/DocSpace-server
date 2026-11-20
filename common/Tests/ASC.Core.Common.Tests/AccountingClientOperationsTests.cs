@@ -74,7 +74,7 @@ public class AccountingClientOperationsTests
         query["debit"].Should().Be("false");
         query["offset"].Should().Be("5");
         query["limit"].Should().Be("50");
-        query["types"].Should().Be("Deposit");
+        query["operationTypes"].Should().Be("Deposit");
         query["status"].Should().Be("Completed");
         query["orderBy"].Should().Be("date");
         query["orderType"].Should().Be("Ascending");
@@ -192,6 +192,34 @@ public class AccountingClientOperationsTests
         var query = queries.Should().ContainSingle().Subject;
         query["metadata.source_id"].Should().Be("agent-1");
         query.Keys.Should().NotContain(["metadata.empty", "metadata.blank"], "a pair with an empty or blank value is not sent");
+    }
+
+    [Fact]
+    public async Task GetCustomerServiceUsage_ReadsTheSplitBySubAccount_AndNoSplitAsNull()
+    {
+        var (client, _) = CreateAccountingClient(_ => Reply(HttpStatusCode.OK, """
+            {"collection":[
+              {"service":"ai-tools","currency":"USD","totalQuantity":2204,"totalAmount":49.99,"operationCount":2,
+               "sources":[{"subAccount":53,"amount":20.0},{"subAccount":0,"amount":29.99}]},
+              {"service":"backup","currency":"USD","totalQuantity":1,"totalAmount":10,"operationCount":1}
+            ],"totalQuantity":2}
+            """));
+
+        var report = await client.GetCustomerServiceUsageAsync("portal-1", new UsageFilter());
+
+        var aiTools = report.Collection[0];
+        aiTools.Sources.Select(s => (s.SubAccount, s.Amount, s.IsBonus)).Should().Equal((53, 20.0m, true), (0, 29.99m, false));
+        OperationSource.BonusAmountOf(aiTools.Sources).Should().Be(20.0m);
+
+        report.Collection[1].Sources.Should().BeNull("a total reported without the split has none");
+        OperationSource.BonusAmountOf(report.Collection[1].Sources).Should().Be(0m);
+    }
+
+    [Fact]
+    public void BonusAmountOf_NegativeBonusPart_IsTakenAsAMagnitude()
+    {
+        OperationSource.BonusAmountOf([new OperationSource { SubAccount = 53, Amount = -4.5m }, new OperationSource { SubAccount = 0, Amount = -9.5m }])
+            .Should().Be(4.5m);
     }
 
     [Fact]
