@@ -38,37 +38,41 @@ namespace ASC.AI.Tests.Tests.ThreadArtifactsTests;
 public class ThreadFilesListBoundsTests(AspireAppFixture fixture) : ThreadFilesTestBase(fixture)
 {
     [Theory]
-    [InlineData("artifacts", "?count=0")]
-    [InlineData("artifacts", "?count=101")]
-    [InlineData("artifacts", "?startIndex=-1")]
-    [InlineData("attachments", "?count=0")]
-    [InlineData("attachments", "?count=101")]
-    [InlineData("attachments", "?startIndex=-1")]
-    public async Task List_WithAValueOutsideTheBounds_Returns400(string list, string query)
+    [InlineData(true, 0, null)]
+    [InlineData(true, 101, null)]
+    [InlineData(true, null, -1)]
+    [InlineData(false, 0, null)]
+    [InlineData(false, 101, null)]
+    [InlineData(false, null, -1)]
+    public async Task List_WithAValueOutsideTheBounds_Returns400(bool artifacts, int? count, int? startIndex)
     {
         var projectId = await CreateProjectAsync();
         var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
 
-        using var response = await GetAsync(projectId, thread.Id, list, query);
+        var status = await ListStatusAsync(artifacts, projectId, thread.Id, count, startIndex);
 
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        status.Should().Be(400);
     }
 
     [Theory]
-    [InlineData("artifacts")]
-    [InlineData("attachments")]
-    public async Task List_WithTheLargestCountAndTheFirstIndex_Returns200(string list)
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task List_WithTheLargestCountAndTheFirstIndex_Returns200(bool artifacts)
     {
         var projectId = await CreateProjectAsync();
         var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
 
-        using var response = await GetAsync(projectId, thread.Id, list, "?count=100&startIndex=0");
+        var status = await ListStatusAsync(artifacts, projectId, thread.Id, 100, 0);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        status.Should().Be(200);
     }
 
-    private Task<HttpResponseMessage> GetAsync(int projectId, Guid threadId, string list, string query)
+    private Task<int> ListStatusAsync(bool artifacts, int projectId, Guid threadId, int? count, int? startIndex)
     {
-        return FilesHttpClient.GetAsync($"/api/2.0/files/rooms/{projectId}/threads/{threadId}/{list}{query}", TestContext.Current.CancellationToken);
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        return artifacts
+            ? StatusOfAsync(() => RoomsAiApi.GetThreadArtifactsAsync(projectId, threadId, count, startIndex, cancellationToken: cancellationToken))
+            : StatusOfAsync(() => RoomsAiApi.GetThreadAttachmentsAsync(projectId, threadId, count, startIndex, cancellationToken: cancellationToken));
     }
 }

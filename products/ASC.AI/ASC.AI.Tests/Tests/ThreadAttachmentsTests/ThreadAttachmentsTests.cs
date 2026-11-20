@@ -101,14 +101,11 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
     {
         var projectId = await CreateProjectAsync();
 
-        using var form = new MultipartFormDataContent();
-        using var content = new ByteArrayContent(System.Text.Encoding.UTF8.GetBytes(FileText));
-        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/plain");
-        form.Add(content, "file", "notes.txt");
+        var file = new FileParameter("notes.txt", "text/plain", new MemoryStream(System.Text.Encoding.UTF8.GetBytes(FileText)));
 
-        using var response = await FilesHttpClient.PostAsync($"/api/2.0/files/{projectId}/upload", form, TestContext.Current.CancellationToken);
+        var status = await StatusOfAsync(() => FoldersApi.UploadFileAsync(projectId, file: file, cancellationToken: TestContext.Current.CancellationToken));
 
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        status.Should().Be(403);
     }
 
     [Fact]

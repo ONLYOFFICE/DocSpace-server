@@ -379,7 +379,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | **Linking attachments to a message** | | |
 | Dies with the message (scenario), thread | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:68,89,199,218` | TEST-CONFIRMED [run: PASS] |
 | 400 / 404 / 403 refusals; foreign draft | `T/AttachmentTests/AttachmentLinkToMessageTests.cs:111,122,133,145,156,166,177,190`; `AttachmentCrossUserTests.cs:139,265` | TEST-CONFIRMED [run: PASS] |
-| Deleted draft is not linked; draft of another thread; another message of the same thread (scenarios), on the AI binding the operation calls | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:355,373,398`; `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`UpdateAttachmentBindingsByIdsAsync`) | TEST-CONFIRMED |
+| Deleted draft is not linked; draft of another thread; another message of the same thread (scenarios), on the AI binding the operation calls | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:352,370,395`; `common/ASC.AI.Integration/Database/AttachmentQueries.cs` (`UpdateAttachmentBindingsByIdsAsync`) | TEST-CONFIRMED |
 | **Suggested questions for a form attachment** | | |
 | 200 status and list; unknown (scenario); foreign; bad id; anonymous; AI off | `T/AttachmentTests/AttachmentSuggestedQuestionsTests.cs:63,87,98,106,119,133`; `AttachmentAiDisabledTests.cs:225` | TEST-CONFIRMED [run: PASS] |
 | **Exporting markdown into a document** | | |
@@ -444,32 +444,32 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Switch audited (scenario) | `SettingsController.cs` (`MessageAction`); `Web/05_Security/AuditTrail/` tests the audit API only | CODE-ONLY |
 | Reads not audited (scenario); socket events | absence of a message in read paths; `AI/Server/Service/AiSocketManager.cs:46-52` | CODE-ONLY |
 | **Files of a project thread** |  |  |
-| A set per thread (scenario "Two threads of one project"); one folder for saves made at the same moment (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:105,88`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:301` | TEST-CONFIRMED |
+| A set per thread (scenario "Two threads of one project"); one folder for saves made at the same moment (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:105,88`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:298` | TEST-CONFIRMED |
 | The thread does not name its folders (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:186` | TEST-CONFIRMED |
-| A thread of another entry has neither set | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:318` | TEST-CONFIRMED |
+| A thread of another entry has neither set | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:315` | TEST-CONFIRMED |
 | **Saving an artifact of a thread** |  |  |
 | Saved and listed (scenario); same title twice (scenario) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:41,56,72` | TEST-CONFIRMED |
 | Thread outside a project 400, unknown thread 404, thread of another member 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:123,133,141` | TEST-CONFIRMED |
 | Empty file 400, file over 100 MB 400 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:158,172` | TEST-CONFIRMED |
 | **Listing the files of a thread** |  |  |
 | Thread without files; one page with the total (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:200,212` | TEST-CONFIRMED |
-| Project owner asks for a member's thread 404 (scenario); thread of another project 404; caller outside the project 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:226,247,260`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:432` | TEST-CONFIRMED |
+| Project owner asks for a member's thread 404 (scenario); thread of another project 404; caller outside the project 403 (scenarios) | `T/ThreadArtifactsTests/ThreadArtifactsTests.cs:226,247,260`; `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:429` | TEST-CONFIRMED |
 | Deleted thread 404 | `T/ThreadDeletionTests/ThreadDeletionTests.cs:61` | TEST-CONFIRMED |
-| Attachment that was not sent (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:418` | TEST-CONFIRMED |
+| Attachment that was not sent (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:415` | TEST-CONFIRMED |
 | `count` 0 and 101 and `startIndex` -1 answer 400; `count` 100 answers 200 (scenarios) | `T/ThreadArtifactsTests/ThreadFilesListBoundsTests.cs:47,60` | TEST-CONFIRMED |
 | `count` is 100 when omitted | `products/ASC.Files/Server/ApiModels/RequestDto/GetAiThreadFilesRequestDto.cs:61` | CODE-ONLY |
 | **Uploading an attachment into a project** |  |  |
 | Member uploads (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:44,54` | TEST-CONFIRMED |
 | Caller outside the project 403, relative path 403, unsupported format 400, upload in one request 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:67,80,90,100` | TEST-CONFIRMED |
 | **Copying a portal file into a project** |  |  |
-| Member copies; same file twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:115,127,186` | TEST-CONFIRMED |
-| Caller outside the project 403, folder 403, unsupported format 415, move 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:141,157,173,199` | TEST-CONFIRMED |
+| Member copies; same file twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:112,124,183` | TEST-CONFIRMED |
+| Caller outside the project 403, folder 403, unsupported format 415, move 403 (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:138,154,170,196` | TEST-CONFIRMED |
 | **Attachment of a file stored in a project** |  |  |
-| Document attached twice; picture attached twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:212,228` | TEST-CONFIRMED |
+| Document attached twice; picture attached twice (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:209,225` | TEST-CONFIRMED |
 | Deleted attachment attached again (scenario) | `T/UnsentAttachmentCleanupTests/UnsentAttachmentCleanupTests.cs:69` | TEST-CONFIRMED |
 | **A sent attachment is kept with its thread** |  |  |
-| Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:242,261,286,301,318` | TEST-CONFIRMED |
-| Deleted draft in a project (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:336` | TEST-CONFIRMED |
+| Linked file is listed; copy outlives the original; two messages of one thread; threads of one project; thread outside a project (scenarios) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:239,258,283,298,315` | TEST-CONFIRMED |
+| Deleted draft in a project (scenario) | `T/ThreadAttachmentsTests/ThreadAttachmentsTests.cs:333` | TEST-CONFIRMED |
 | **Privacy of the contents of a project** |  |  |
 | Artifact, thread folder and file not sent of another member 403 to a member, the owner and a DocSpace admin (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesStrangerAccessTests.cs:51,67,83,100,116,132` | TEST-CONFIRMED |
 | Creator reads, downloads and copies (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:41,52,63` | TEST-CONFIRMED |
