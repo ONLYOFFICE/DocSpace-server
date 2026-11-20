@@ -141,6 +141,7 @@ static file class AttachmentQueriesContainer
                 .Where(x => x.TenantId == tenantId && x.CreatedBy == createdBy && x.MessageId == null && x.DeletedOn == null && ids.Contains(x.Id))
                 .ExecuteUpdateAsync(x => x.SetProperty(y => y.DeletedOn, deletedOn));
 
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
     public static readonly Func<AiIntegrationContext, int, IEnumerable<Guid>, DateTime, Task<int>> MarkOrphanAttachmentsDeletedAsync =
         (AiIntegrationContext ctx, int tenantId, IEnumerable<Guid> ids, DateTime deletedOn) =>
             ctx.Attachments
