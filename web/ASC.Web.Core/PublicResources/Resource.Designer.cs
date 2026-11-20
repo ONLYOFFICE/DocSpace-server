@@ -3112,6 +3112,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This plugin is already installed on the portal by the administrator.
+        /// </summary>
+        public static string ErrorWebPluginInstalledForPortal {
+            get {
+                return ResourceManager.GetString("ErrorWebPluginInstalledForPortal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The number of plugins exceeds the limit.
         /// </summary>
         public static string ErrorWebPluginMaxCount {

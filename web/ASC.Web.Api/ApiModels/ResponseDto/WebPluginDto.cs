@@ -136,6 +136,15 @@ public class WebPluginDto
     public required bool System { get; set; }
 
     /// <summary>
+    /// Whether the plugin was installed by the calling user for themselves rather than for the portal. A personal
+    /// plugin is loaded for its owner alone, keeps its state and settings for that owner, and is addressed with
+    /// `personal=true`; it is left out of the list while a portal or installation-wide plugin holds its `name` or
+    /// `pluginName`.
+    /// </summary>
+    /// <example>false</example>
+    public bool Personal { get; set; }
+
+    /// <summary>
     /// The address of the plugin's script, which a client loads to run it. It ends in a `hash` query taken from
     /// `version`, so the address changes whenever the plugin is updated and an old one may be cached.
     /// </summary>

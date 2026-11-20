@@ -44,10 +44,17 @@ public class WebPluginConfigSettings
     public bool Enabled { get; set; }
     public bool Upload { get; set; }
     public bool Delete { get; set; }
+    public bool Personal { get; set; } = true;
 
     public int MaxCount
     {
         get => field > 0 ? field : 100;
+        set;
+    }
+
+    public int PersonalMaxCount
+    {
+        get => field > 0 ? field : 10;
         set;
     }
 

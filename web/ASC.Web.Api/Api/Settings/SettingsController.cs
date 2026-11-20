@@ -199,6 +199,8 @@ public partial class SettingsController(
                 settings.Plugins.Delete = pluginsDelete;
             }
 
+            settings.Plugins.Personal = !bool.TryParse(configuration["plugins:personal"], out var pluginsPersonal) || pluginsPersonal;
+
             var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = formGallerySettings.Map();
 

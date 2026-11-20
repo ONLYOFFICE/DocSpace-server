@@ -79,7 +79,8 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         }
 
         if (checkAuth && !authContext.IsAuthenticated && !SecureHelper.CheckSecureKeyHeader(header, path, emailValidationKeyProvider) && !fromPublicRoom
-            || module == "backup" && (!authContext.IsAuthenticated || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID)))
+            || module == "backup" && (!authContext.IsAuthenticated || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+            || module == "webplugins" && IsForeignPersonalWebPlugin(pathInfo, authContext))
         {
             context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return;
@@ -243,6 +244,21 @@ public class StorageHandler(string storagePath, string module, string domain, bo
         context.Response.Headers.ContentRange = $" bytes {offset}-{endOffset}/{fullLength}";
 
         return length;
+    }
+
+    private static bool IsForeignPersonalWebPlugin(string pathInfo, AuthContext authContext)
+    {
+        var segments = pathInfo.Split(['/', '\\'], StringSplitOptions.RemoveEmptyEntries);
+
+        if (segments.Length == 0 || !segments[0].Equals(".personal", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return !authContext.IsAuthenticated
+            || segments.Length < 2
+            || !Guid.TryParse(segments[1], out var owner)
+            || owner != authContext.CurrentAccount.ID;
     }
 
     private static bool IsTraversal(string pathInfo)

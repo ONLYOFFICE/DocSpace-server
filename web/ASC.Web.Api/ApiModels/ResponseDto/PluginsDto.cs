@@ -40,7 +40,8 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 /// {
 ///   "enabled": true,
 ///   "upload": true,
-///   "delete": true
+///   "delete": true,
+///   "personal": true
 /// }
 /// </example>
 public class PluginsDto
@@ -67,4 +68,12 @@ public class PluginsDto
     /// </summary>
     /// <example>true</example>
     public bool Delete { get; set; }
+
+    /// <summary>
+    /// Whether a portal member other than a guest may install plugins for themselves alone through
+    /// `POST api/2.0/settings/webplugins?personal=true`. It is `true` unless the installation switched personal
+    /// plugins off in its configuration; uploading one still needs `upload`.
+    /// </summary>
+    /// <example>true</example>
+    public bool Personal { get; set; }
 }

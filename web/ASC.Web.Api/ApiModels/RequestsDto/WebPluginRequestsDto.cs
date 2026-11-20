@@ -77,6 +77,14 @@ public class WebPluginRequestsDto
     /// <example>{"enabled": true, "settings": "{\"theme\":\"dark\"}"}</example>
     [FromBody]
     public required WebPluginRequests WebPlugin { get; set; }
+
+    /// <summary>
+    /// Whether the plugin to change is the calling user's personal plugin rather than a plugin of the portal. The
+    /// state of a personal plugin is kept for its owner alone and needs no portal-settings right.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "personal")]
+    public bool Personal { get; set; }
 }
 
 /// <summary>
@@ -92,10 +100,18 @@ public class WebPluginNameRequestDto
     /// <example>example-plugin</example>
     [FromRoute(Name = "name")]
     public required string Name { get; set; }
+
+    /// <summary>
+    /// Whether the plugin addressed is the calling user's personal plugin rather than a plugin of the portal.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "personal")]
+    public bool Personal { get; set; }
 }
 
 /// <summary>
-/// Whether an uploaded plugin package is installed for the whole installation or for this portal alone.
+/// Whether an uploaded plugin package is installed for the whole installation, for this portal, or for the calling
+/// user alone.
 /// </summary>
 public class WebPluginFromFileRequestDto
 {
@@ -107,6 +123,15 @@ public class WebPluginFromFileRequestDto
     /// <example>false</example>
     [FromQuery(Name = "system")]
     public bool System { get; set; }
+
+    /// <summary>
+    /// Whether the plugin is installed for the calling user alone. Any portal member except a guest may install a
+    /// personal plugin; it cannot take the `name` or `pluginName` of a portal or installation-wide plugin and cannot
+    /// be combined with `system`, and the domains its `cspDomains` declares are allowed on that user's pages alone.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "personal")]
+    public bool Personal { get; set; }
 }
 
 
@@ -122,4 +147,12 @@ public class GetWebPluginsRequestDto
     /// <example>true</example>
     [FromQuery(Name = "enabled")]
     public bool? Enabled { get; set; }
+
+    /// <summary>
+    /// Whether to list the calling user's personal plugins alone, including the ones that are not loaded because a
+    /// portal or installation-wide plugin holds their `name` or `pluginName`.
+    /// </summary>
+    /// <example>false</example>
+    [FromQuery(Name = "personal")]
+    public bool Personal { get; set; }
 }

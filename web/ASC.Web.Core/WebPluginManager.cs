@@ -52,6 +52,8 @@ public class WebPlugin
     public DateTime CreateOn { get; set; }
     public bool Enabled { get; set; }
     public bool System { get; set; }
+    [JsonIgnore]
+    public bool Personal { get; set; }
     public string Url { get; set; }
     public string CssUrl { get; set; }
     public string Settings { get; set; }
@@ -74,12 +76,16 @@ public class WebPluginManager(
     WebPluginConfigSettings webPluginConfigSettings,
     StorageFactory storageFactory,
     AuthContext authContext,
+    UserManager userManager,
     TempPath tempPath,
     ILogger<WebPluginManager> log,
     IFusionCacheProvider cacheProvider)
 {
     private const string StorageSystemModuleName = "systemwebplugins";
     private const string StorageModuleName = "webplugins";
+    private const string PersonalFolderName = ".personal";
+
+    public const string PersonalCspCookieName = "asc_personal_csp";
     private const string ConfigFileName = "config.json";
     private const string PluginFileName = "plugin.js";
     private const string PluginCssFileName = "plugin.css";
@@ -102,6 +108,21 @@ public class WebPluginManager(
         }
     }
 
+    private async Task DemandPersonalWebPluginsAsync(bool upload = false)
+    {
+        DemandWebPlugins(upload: upload);
+
+        if (!await IsPersonalWebPluginsAllowedAsync())
+        {
+            throw new SecurityException("Personal plugins disabled");
+        }
+    }
+
+    private async Task<bool> IsPersonalWebPluginsAllowedAsync()
+    {
+        return webPluginConfigSettings.Personal && !await userManager.IsGuestAsync(authContext.CurrentAccount.ID);
+    }
+
     private async Task<IDataStore> GetPluginStorageAsync(int tenantId)
     {
         var module = tenantId == Tenant.DefaultTenant ? StorageSystemModuleName : StorageModuleName;
@@ -111,9 +132,36 @@ public class WebPluginManager(
         return storage;
     }
 
-    private static string GetCacheKey(int tenantId)
+    private static string GetCacheKey(int tenantId, Guid? owner = null)
     {
-        return $"{StorageModuleName}:{tenantId}";
+        return owner.HasValue ? $"{StorageModuleName}:{tenantId}:{owner}" : $"{StorageModuleName}:{tenantId}";
+    }
+
+    private static string GetBasePath(Guid? owner)
+    {
+        return owner.HasValue ? Path.Combine(PersonalFolderName, owner.Value.ToString()) : string.Empty;
+    }
+
+    private static bool IsPluginConfigPath(string path)
+    {
+        return path.Split('/', '\\').Length == 2;
+    }
+
+    private static bool ClashesWith(WebPlugin webPlugin, IEnumerable<WebPlugin> webPlugins)
+    {
+        return webPlugins.Any(x =>
+            x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase) ||
+            x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture));
+    }
+
+    private Task<WebPluginSettings> LoadWebPluginSettingsAsync(bool personal)
+    {
+        return personal ? settingsManager.LoadForCurrentUserAsync<WebPluginSettings>() : settingsManager.LoadAsync<WebPluginSettings>();
+    }
+
+    private Task<bool> SaveWebPluginSettingsAsync(WebPluginSettings webPluginSettings, bool personal)
+    {
+        return personal ? settingsManager.SaveForCurrentUserAsync(webPluginSettings) : settingsManager.SaveAsync(webPluginSettings);
     }
 
     // The name is also the plugin folder in the storage, so it must never carry a path
@@ -124,21 +172,35 @@ public class WebPluginManager(
 
     // The cache holds the plugin manifests read from the storage, not the enabled state and the settings of a portal,
     // so it is reset only when the storage changes
-    private ValueTask ResetWebPluginsCacheAsync(int tenantId)
+    private ValueTask ResetWebPluginsCacheAsync(int tenantId, Guid? owner = null)
     {
-        return _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetWebPluginsTag(tenantId));
+        return owner.HasValue
+            ? _cache.RemoveAndNotifyAsync(GetCacheKey(tenantId, owner))
+            : _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetWebPluginsTag(tenantId));
     }
 
-    private static async Task<string> GetPluginUrlTemplateAsync(IDataStore storage)
+    private static async Task<string> GetPluginUrlTemplateAsync(IDataStore storage, string basePath)
     {
-        var uri = await storage.GetUriAsync(Path.Combine("{0}", PluginFileName));
+        var uri = await storage.GetUriAsync(Path.Combine(basePath, "{0}", PluginFileName));
 
         return uri?.ToString() ?? string.Empty;
     }
 
-    public async Task<WebPlugin> AddWebPluginFromFileAsync(int tenantId, IFormFile file, bool system)
+    public async Task<WebPlugin> AddWebPluginFromFileAsync(int tenantId, IFormFile file, bool system, bool personal = false)
     {
-        DemandWebPlugins(upload: true);
+        if (personal)
+        {
+            if (system)
+            {
+                throw new ArgumentException(Resource.ErrorWebPluginForbiddenSystem);
+            }
+
+            await DemandPersonalWebPluginsAsync(upload: true);
+        }
+        else
+        {
+            DemandWebPlugins(upload: true);
+        }
 
         if (system && !coreBaseSettings.Standalone)
         {
@@ -160,7 +222,11 @@ public class WebPluginManager(
             throw new ArgumentException(Resource.ErrorWebPluginFileSize);
         }
 
-        var tenantWebPlugins = await GetWebPluginsForTenantAsync(tenantId);
+        var owner = personal ? authContext.CurrentAccount.ID : (Guid?)null;
+
+        var existingWebPlugins = owner.HasValue
+            ? await GetWebPluginsFromCacheAsync(tenantId, owner)
+            : await GetWebPluginsForTenantAsync(tenantId);
 
         string tempDirToDelete = null;
 
@@ -172,39 +238,41 @@ public class WebPluginManager(
 
             AnalyzeZip(zipFile, webPluginConfigSettings.MaxSize, maxEntriesCount, 100, 2); // 100:1 ratio, 2 depth levels
 
-            var (webPlugin, tempPath) = await SafeExtractPluginToTemp(zipFile, tenantId, system);
+            var (webPlugin, tempPath) = await SafeExtractPluginToTemp(zipFile, tenantId, system, owner);
 
             tempDirToDelete = tempPath;
 
-            if (tenantWebPlugins.Count + 1 > webPluginConfigSettings.MaxCount)
+            var maxCount = owner.HasValue ? webPluginConfigSettings.PersonalMaxCount : webPluginConfigSettings.MaxCount;
+
+            if (existingWebPlugins.Count + 1 > maxCount &&
+                !existingWebPlugins.Exists(x => x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
             {
-                var existingWebPlugin = await GetWebPluginByNameAsync(tenantId, webPlugin.Name);
-                if (existingWebPlugin == null)
-                {
-                    throw new InvalidOperationException(Resource.ErrorWebPluginMaxCount);
-                }
+                throw new InvalidOperationException(Resource.ErrorWebPluginMaxCount);
             }
 
             var storage = await GetPluginStorageAsync(system ? Tenant.DefaultTenant : tenantId);
 
-            await CopyPluginFromTempToStore(webPlugin, tempPath, storage);
+            var basePath = GetBasePath(owner);
 
-            await ResetWebPluginsCacheAsync(system ? Tenant.DefaultTenant : tenantId);
+            await CopyPluginFromTempToStore(webPlugin, tempPath, storage, basePath);
+
+            await ResetWebPluginsCacheAsync(system ? Tenant.DefaultTenant : tenantId, owner);
 
             webPlugin.System = system;
+            webPlugin.Personal = personal;
 
-            var urlTemplate = await GetPluginUrlTemplateAsync(storage);
+            var urlTemplate = await GetPluginUrlTemplateAsync(storage, basePath);
 
             var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
 
             webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
 
-            if (await storage.IsFileAsync(Path.Combine(webPlugin.Name, PluginCssFileName)))
+            if (await storage.IsFileAsync(Path.Combine(basePath, webPlugin.Name, PluginCssFileName)))
             {
                 webPlugin.CssUrl = webPlugin.Url.Replace(PluginFileName, PluginCssFileName);
             }
 
-            var existingSettings = await GetWebPluginSettingsAsync(webPlugin.Name);
+            var existingSettings = await GetWebPluginSettingsAsync(webPlugin.Name, personal);
 
             webPlugin = await UpdateWebPluginAsync(webPlugin, true, existingSettings);
 
@@ -223,7 +291,7 @@ public class WebPluginManager(
         }
     }
 
-    private async Task ValidatePlugin(WebPlugin webPlugin, int tenantId, bool system)
+    private async Task ValidatePlugin(WebPlugin webPlugin, int tenantId, bool system, Guid? owner)
     {
         if (!IsValidName(webPlugin.Name))
         {
@@ -235,6 +303,25 @@ public class WebPluginManager(
         if (string.IsNullOrEmpty(webPlugin.PluginName) || !jsVariableRegex.IsMatch(webPlugin.PluginName))
         {
             throw new Exception(Resource.ErrorWebPluginName);
+        }
+
+        if (owner.HasValue)
+        {
+            if (ClashesWith(webPlugin, await GetWebPluginsForTenantAsync(tenantId)))
+            {
+                throw new Exception(Resource.ErrorWebPluginInstalledForPortal);
+            }
+
+            var personalWebPlugins = await GetWebPluginsFromCacheAsync(tenantId, owner);
+
+            if (personalWebPlugins.Any(x =>
+                    x.PluginName.Equals(webPlugin.PluginName, StringComparison.InvariantCulture) &&
+                    !x.Name.Equals(webPlugin.Name, StringComparison.InvariantCultureIgnoreCase)))
+            {
+                throw new Exception(Resource.ErrorWebPluginExist);
+            }
+
+            return;
         }
 
         var systemWebPlugins = await GetWebPluginsFromCacheAsync(Tenant.DefaultTenant);
@@ -281,40 +368,102 @@ public class WebPluginManager(
 
         var webPlugins = await GetWebPluginsForTenantAsync(tenantId);
 
-        if (webPlugins.Count == 0)
+        await ApplyWebPluginStatesAsync(webPlugins, false);
+
+        return webPlugins;
+    }
+
+    public async Task<List<WebPlugin>> GetPersonalWebPluginsAsync(int tenantId)
+    {
+        await DemandPersonalWebPluginsAsync();
+
+        var webPlugins = (await GetWebPluginsFromCacheAsync(tenantId, authContext.CurrentAccount.ID))
+            .Select(x => x.Clone())
+            .ToList();
+
+        await ApplyWebPluginStatesAsync(webPlugins, true);
+
+        return webPlugins;
+    }
+
+    public async Task<List<WebPlugin>> GetAvailableWebPluginsAsync(int tenantId)
+    {
+        var webPlugins = await GetWebPluginsAsync(tenantId);
+
+        if (!await IsPersonalWebPluginsAllowedAsync())
         {
             return webPlugins;
         }
 
-        var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
+        var personalWebPlugins = await GetPersonalWebPluginsAsync(tenantId);
+
+        webPlugins.AddRange(personalWebPlugins.Where(x => !ClashesWith(x, webPlugins)).ToList());
+
+        return webPlugins;
+    }
+
+    public async Task<List<string>> GetPersonalCspDomainsAsync(int tenantId)
+    {
+        if (!authContext.IsAuthenticated || !webPluginConfigSettings.Enabled || !await IsPersonalWebPluginsAllowedAsync())
+        {
+            return [];
+        }
+
+        return GetPersonalCspDomains(await GetAvailableWebPluginsAsync(tenantId));
+    }
+
+    public static List<string> GetPersonalCspDomains(IEnumerable<WebPlugin> availableWebPlugins)
+    {
+        return availableWebPlugins
+            .Where(x => x.Personal && x.Enabled && !string.IsNullOrWhiteSpace(x.CspDomains))
+            .SelectMany(x => x.CspDomains.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+            .Distinct()
+            .ToList();
+    }
+
+    public async Task<WebPlugin> GetPersonalWebPluginByNameAsync(int tenantId, string name)
+    {
+        var webPlugins = await GetPersonalWebPluginsAsync(tenantId);
+
+        return webPlugins.Find(x => x.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase)) ?? throw new ItemNotFoundException(Resource.ErrorWebPluginNotFound);
+    }
+
+    private async Task ApplyWebPluginStatesAsync(List<WebPlugin> webPlugins, bool personal)
+    {
+        if (webPlugins.Count == 0)
+        {
+            return;
+        }
+
+        var webPluginSettings = await LoadWebPluginSettingsAsync(personal);
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? [];
 
-        if (enabledPlugins.Count != 0)
+        if (enabledPlugins.Count == 0)
         {
-            foreach (var webPlugin in webPlugins)
+            return;
+        }
+
+        foreach (var webPlugin in webPlugins)
+        {
+            if (enabledPlugins.TryGetValue(webPlugin.Name, out var webPluginState))
             {
-                if (enabledPlugins.TryGetValue(webPlugin.Name, out var webPluginState))
+                try
                 {
-                    try
-                    {
-                        webPlugin.Enabled = webPluginState.Enabled;
-                        webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : await instanceCrypto.DecryptAsync(webPluginState.Settings);
-                    }
-                    catch (CryptographicException e)
-                    {
-                        log.ErrorWithException(webPlugin.Name, e);
+                    webPlugin.Enabled = webPluginState.Enabled;
+                    webPlugin.Settings = string.IsNullOrEmpty(webPluginState.Settings) ? null : await instanceCrypto.DecryptAsync(webPluginState.Settings);
+                }
+                catch (CryptographicException e)
+                {
+                    log.ErrorWithException(webPlugin.Name, e);
 
-                        webPlugin.Enabled = false;
-                        webPlugin.Settings = null;
+                    webPlugin.Enabled = false;
+                    webPlugin.Settings = null;
 
-                        await UpdateWebPluginAsync(webPlugin, false, null);
-                    }
+                    await UpdateWebPluginAsync(webPlugin, false, null);
                 }
             }
         }
-
-        return webPlugins;
     }
 
     private async Task<List<WebPlugin>> GetWebPluginsForTenantAsync(int tenantId)
@@ -336,13 +485,13 @@ public class WebPluginManager(
         return webPlugins;
     }
 
-    private async Task<List<WebPlugin>> GetWebPluginsFromCacheAsync(int tenantId)
+    private async Task<List<WebPlugin>> GetWebPluginsFromCacheAsync(int tenantId, Guid? owner = null)
     {
-        var key = GetCacheKey(tenantId);
+        var key = GetCacheKey(tenantId, owner);
 
         var webPlugins = await _cache.GetOrSetAsync<List<WebPlugin>>(key, async (ctx, token) =>
         {
-            var webPlugins = await GetWebPluginsFromStorageAsync(tenantId);
+            var webPlugins = await GetWebPluginsFromStorageAsync(tenantId, owner);
 
             ctx.Tags = [CacheExtention.GetWebPluginsTag(tenantId)];
             return ctx.Modified(webPlugins);
@@ -352,7 +501,7 @@ public class WebPluginManager(
         return webPlugins;
     }
 
-    private async Task<List<WebPlugin>> GetWebPluginsFromStorageAsync(int tenantId)
+    private async Task<List<WebPlugin>> GetWebPluginsFromStorageAsync(int tenantId, Guid? owner = null)
     {
         var webPlugins = new List<WebPlugin>();
 
@@ -360,23 +509,26 @@ public class WebPluginManager(
 
         var storage = await GetPluginStorageAsync(tenantId);
 
-        var urlTemplate = await GetPluginUrlTemplateAsync(storage);
+        var basePath = GetBasePath(owner);
 
-        var configFiles = await storage.ListFilesRelativeAsync(string.Empty, string.Empty, ConfigFileName, true).ToArrayAsync();
+        var urlTemplate = await GetPluginUrlTemplateAsync(storage, basePath);
 
-        foreach (var path in configFiles)
+        var configFiles = await storage.ListFilesRelativeAsync(string.Empty, basePath, ConfigFileName, true).ToArrayAsync();
+
+        foreach (var path in configFiles.Where(IsPluginConfigPath))
         {
             try
             {
-                var webPlugin = await ReadWebPluginConfigAsync(storage, path);
+                var webPlugin = await ReadWebPluginConfigAsync(storage, Path.Combine(basePath, path));
 
                 webPlugin.System = system;
+                webPlugin.Personal = owner.HasValue;
 
                 var hash = string.IsNullOrEmpty(webPlugin.Version) ? string.Empty : $"?hash={webPlugin.Version}";
 
                 webPlugin.Url = string.Format(urlTemplate, webPlugin.Name) + hash;
 
-                if (await storage.IsFileAsync(Path.Combine(webPlugin.Name, PluginCssFileName)))
+                if (await storage.IsFileAsync(Path.Combine(basePath, webPlugin.Name, PluginCssFileName)))
                 {
                     webPlugin.CssUrl = webPlugin.Url.Replace(PluginFileName, PluginCssFileName);
                 }
@@ -479,16 +631,18 @@ public class WebPluginManager(
         return webPlugin;
     }
 
-    public async Task<WebPlugin> UpdateWebPluginAsync(int tenantId, string name, bool enabled, string settings)
+    public async Task<WebPlugin> UpdateWebPluginAsync(int tenantId, string name, bool enabled, string settings, bool personal = false)
     {
-        var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
+        var webPlugin = personal
+            ? await GetPersonalWebPluginByNameAsync(tenantId, name)
+            : await GetWebPluginByNameAsync(tenantId, name);
 
         return await UpdateWebPluginAsync(webPlugin, enabled, settings);
     }
 
-    private async Task<string> GetWebPluginSettingsAsync(string name)
+    private async Task<string> GetWebPluginSettingsAsync(string name, bool personal)
     {
-        var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
+        var webPluginSettings = await LoadWebPluginSettingsAsync(personal);
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? [];
 
@@ -509,7 +663,7 @@ public class WebPluginManager(
 
     private async Task<WebPlugin> UpdateWebPluginAsync(WebPlugin webPlugin, bool enabled, string settings)
     {
-        var webPluginSettings = await settingsManager.LoadAsync<WebPluginSettings>();
+        var webPluginSettings = await LoadWebPluginSettingsAsync(webPlugin.Personal);
 
         var enabledPlugins = webPluginSettings?.EnabledPlugins ?? [];
 
@@ -530,37 +684,55 @@ public class WebPluginManager(
 
         webPluginSettings.EnabledPlugins = enabledPlugins.Count != 0 ? enabledPlugins : null;
 
-        await settingsManager.SaveAsync(webPluginSettings);
+        await SaveWebPluginSettingsAsync(webPluginSettings, webPlugin.Personal);
 
         webPlugin.Enabled = enabled;
         webPlugin.Settings = settings;
 
-        await quotaSocketManager.ChangeWebPlugin(webPlugin.Name, enabled);
+        if (!webPlugin.Personal)
+        {
+            await quotaSocketManager.ChangeWebPlugin(webPlugin.Name, enabled);
+        }
 
         return webPlugin;
     }
 
-    public async Task<WebPlugin> DeleteWebPluginAsync(int tenantId, string name)
+    public async Task<WebPlugin> DeleteWebPluginAsync(int tenantId, string name, bool personal = false)
     {
-        DemandWebPlugins(delete: true);
+        WebPlugin webPlugin;
 
-        var webPlugin = await GetWebPluginByNameAsync(tenantId, name);
-
-        if (webPlugin.System && !coreBaseSettings.Standalone)
+        if (personal)
         {
-            throw new InvalidOperationException(Resource.ErrorWebPluginForbiddenSystem);
+            webPlugin = await GetPersonalWebPluginByNameAsync(tenantId, name);
+        }
+        else
+        {
+            DemandWebPlugins(delete: true);
+
+            webPlugin = await GetWebPluginByNameAsync(tenantId, name);
+
+            if (webPlugin.System && !coreBaseSettings.Standalone)
+            {
+                throw new InvalidOperationException(Resource.ErrorWebPluginForbiddenSystem);
+            }
         }
 
-        var storage = await GetPluginStorageAsync(webPlugin.System ? Tenant.DefaultTenant : tenantId);
+        var owner = personal ? authContext.CurrentAccount.ID : (Guid?)null;
 
-        if (!await storage.IsDirectoryAsync(webPlugin.Name))
+        var storageTenantId = webPlugin.System ? Tenant.DefaultTenant : tenantId;
+
+        var storage = await GetPluginStorageAsync(storageTenantId);
+
+        var pluginPath = Path.Combine(GetBasePath(owner), webPlugin.Name);
+
+        if (!await storage.IsDirectoryAsync(pluginPath))
         {
             throw new ItemNotFoundException(Resource.ErrorWebPluginNotFound);
         }
 
-        await storage.DeleteDirectoryAsync(webPlugin.Name);
+        await storage.DeleteDirectoryAsync(pluginPath);
 
-        await ResetWebPluginsCacheAsync(webPlugin.System ? Tenant.DefaultTenant : tenantId);
+        await ResetWebPluginsCacheAsync(storageTenantId, owner);
 
         await UpdateWebPluginAsync(webPlugin, false, null);
 
@@ -621,7 +793,7 @@ public class WebPluginManager(
         }
     }
 
-    private async Task<(WebPlugin webPlugin, string tempPath)> SafeExtractPluginToTemp(ZipFile zipFile, int tenantId, bool system)
+    private async Task<(WebPlugin webPlugin, string tempPath)> SafeExtractPluginToTemp(ZipFile zipFile, int tenantId, bool system, Guid? owner)
     {
         var rootTempDir = tempPath.GetTempPath();
 
@@ -661,7 +833,7 @@ public class WebPluginManager(
                 throw new Exception("Can't deserialize web plugin config file.");
             }
 
-            await ValidatePlugin(webPlugin, tenantId, system);
+            await ValidatePlugin(webPlugin, tenantId, system, owner);
 
             webPlugin.CreateBy = authContext.CurrentAccount.ID;
             webPlugin.CreateOn = DateTime.UtcNow;
@@ -777,11 +949,13 @@ public class WebPluginManager(
         }
     }
 
-    private async Task CopyPluginFromTempToStore(WebPlugin webPlugin, string tempPath, IDataStore storage)
+    private async Task CopyPluginFromTempToStore(WebPlugin webPlugin, string tempPath, IDataStore storage, string basePath)
     {
-        if (await storage.IsDirectoryAsync(webPlugin.Name))
+        var pluginPath = Path.Combine(basePath, webPlugin.Name);
+
+        if (await storage.IsDirectoryAsync(pluginPath))
         {
-            await storage.DeleteDirectoryAsync(webPlugin.Name);
+            await storage.DeleteDirectoryAsync(pluginPath);
         }
 
         var files = Directory.GetFiles(tempPath, "*", SearchOption.AllDirectories);
@@ -789,7 +963,7 @@ public class WebPluginManager(
         foreach (var file in files)
         {
             await using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
-            var path = Path.Combine(webPlugin.Name, file.Replace(tempPath, string.Empty).TrimStart('/').TrimStart('\\'));
+            var path = Path.Combine(pluginPath, file.Replace(tempPath, string.Empty).TrimStart('/').TrimStart('\\'));
             await storage.SaveAsync(path, stream);
         }
     }

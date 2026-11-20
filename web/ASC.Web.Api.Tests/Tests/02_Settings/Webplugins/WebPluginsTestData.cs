@@ -86,7 +86,15 @@ internal static class WebPluginsTestData
     /// Uploads a freshly built plugin package as the currently authenticated <paramref name="webApiClient"/>
     /// caller, returning the raw HTTP response so the test can assert on its status.
     /// </summary>
-    public static async Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, string pluginName, CancellationToken cancellationToken)
+    public static Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, string pluginName, CancellationToken cancellationToken)
+    {
+        return UploadPluginAsync(webApiClient, pluginName, false, cancellationToken);
+    }
+
+    /// <summary>
+    /// Uploads a freshly built plugin package, for the caller alone when <paramref name="personal"/> is set.
+    /// </summary>
+    public static async Task<HttpResponseMessage> UploadPluginAsync(HttpClient webApiClient, string pluginName, bool personal, CancellationToken cancellationToken)
     {
         var zipBytes = CreatePluginZip(pluginName);
 
@@ -95,6 +103,8 @@ internal static class WebPluginsTestData
         fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/zip");
         content.Add(fileContent, "file", "plugin.zip");
 
-        return await webApiClient.PostAsync("api/2.0/settings/webplugins", content, cancellationToken);
+        var url = personal ? "api/2.0/settings/webplugins?personal=true" : "api/2.0/settings/webplugins";
+
+        return await webApiClient.PostAsync(url, content, cancellationToken);
     }
 }

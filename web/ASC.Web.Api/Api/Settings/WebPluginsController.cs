@@ -57,7 +57,11 @@ public class WebPluginsController(
     /// Policy. It returns the freshly installed plugin, enabled, with the `url` its script is served from. A portal
     /// holds up to 100 plugins by default, the manifest name has to be lower-case letters, digits, `_`, `.` or `-`,
     /// and the package is rejected when another installed plugin registers the same JavaScript object under a
-    /// different name. List what is installed with `GET api/2.0/settings/webplugins`.
+    /// different name. List what is installed with `GET api/2.0/settings/webplugins`. Pass `personal=true` to install
+    /// the plugin for the calling user alone: any member except a guest may do so without the portal-settings right,
+    /// the plugin is loaded for that user only, it may not take the `name` or `pluginName` of a portal or
+    /// installation-wide plugin, the domains its manifest declares are allowed on that user's pages alone while the
+    /// portal Content Security Policy is left as it is, and a user holds up to 10 personal plugins by default.
     /// </remarks>
     /// <summary>Add a web plugin</summary>
     /// <path>api/2.0/settings/webplugins</path>
@@ -68,7 +72,10 @@ public class WebPluginsController(
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        if (!inDto.Personal)
+        {
+            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        }
 
         if (HttpContext.Request.Form.Files == null || HttpContext.Request.Form.Files.Count == 0)
         {
@@ -84,11 +91,18 @@ public class WebPluginsController(
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System);
+        var webPlugin = await webPluginManager.AddWebPluginFromFileAsync(tenant.Id, file, inDto.System, inDto.Personal);
 
         messageService.Send(MessageAction.WebpluginUploaded, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
-        await ChangeCspSettings(webPlugin, webPlugin.Enabled);
+        if (webPlugin.Personal)
+        {
+            await SyncPersonalCspCookieAsync(tenant.Id);
+        }
+        else
+        {
+            await ChangeCspSettings(webPlugin, webPlugin.Enabled);
+        }
 
         var outDto = await mapper.ToDtoManual(webPlugin);
 
@@ -96,8 +110,10 @@ public class WebPluginsController(
     }
 
     /// <remarks>
-    /// Lists the web plugins available in the current portal: the plugins installed for the whole installation first,
-    /// then the portal's own, with a portal plugin dropped when an installation-wide plugin already uses its name.
+    /// Lists the web plugins available to the caller: the plugins installed for the whole installation first, then the
+    /// portal's own, with a portal plugin dropped when an installation-wide plugin already uses its name, then the
+    /// caller's personal plugins whose `name` and `pluginName` no plugin above holds. Pass `personal=true` to list the
+    /// caller's personal plugins alone, the ones left out of the list for a taken name included.
     /// Any authenticated portal member may call it, no settings permission needed, and the installation has to have
     /// web plugins enabled in its configuration. The call is read-only and idempotent. Pass `enabled=true` or
     /// `enabled=false` to keep only the plugins in that state, and leave the parameter out to get every plugin. Each
@@ -118,7 +134,14 @@ public class WebPluginsController(
     {
         var tenant = tenantManager.GetCurrentTenant();
 
-        var webPlugins = await webPluginManager.GetWebPluginsAsync(tenant.Id);
+        var webPlugins = inDto.Personal
+            ? await webPluginManager.GetPersonalWebPluginsAsync(tenant.Id)
+            : await webPluginManager.GetAvailableWebPluginsAsync(tenant.Id);
+
+        if (!inDto.Personal)
+        {
+            SetPersonalCspCookie(WebPluginManager.GetPersonalCspDomains(webPlugins).Count != 0);
+        }
 
         List<WebPluginDto> outDto = [];
         foreach (var webPlugin in webPlugins)
@@ -144,7 +167,8 @@ public class WebPluginsController(
     /// response carries the manifest data along with the state the portal stored for that plugin: `enabled`, the
     /// `settings` string, `system`, and the `url` and `cssUrl` a client loads it from. A name that is not installed
     /// is rejected as not found, and 403 means web plugins are switched off for the installation. Change the state of
-    /// the plugin with `PUT api/2.0/settings/webplugins/{name}`.
+    /// the plugin with `PUT api/2.0/settings/webplugins/{name}`. Pass `personal=true` to look up the caller's
+    /// personal plugin instead.
     /// </remarks>
     /// <summary>Get a web plugin by name</summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
@@ -157,7 +181,9 @@ public class WebPluginsController(
     {
         var tenant = tenantManager.GetCurrentTenant();
 
-        var webPlugin = await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
+        var webPlugin = inDto.Personal
+            ? await webPluginManager.GetPersonalWebPluginByNameAsync(tenant.Id, inDto.Name)
+            : await webPluginManager.GetWebPluginByNameAsync(tenant.Id, inDto.Name);
 
         var outDto = await mapper.ToDtoManual(webPlugin);
 
@@ -175,7 +201,8 @@ public class WebPluginsController(
     /// its manifest declares to the portal Content Security Policy and switching it off takes them away again, and
     /// the connected clients are notified of the new state. Nothing is returned on success. A name that is not
     /// installed is rejected as not found, and 403 means web plugins are switched off or the caller may not edit the
-    /// portal settings.
+    /// portal settings. Pass `personal=true` to change the caller's personal plugin instead: no portal-settings right
+    /// is needed, the state is kept for the caller alone, and the Content Security Policy is not touched.
     /// </remarks>
     /// <summary>Update a web plugin</summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
@@ -187,15 +214,25 @@ public class WebPluginsController(
     [HttpPut("{name}")]
     public async Task UpdateWebPlugin(WebPluginRequestsDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        if (!inDto.Personal)
+        {
+            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        }
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings);
+        var webPlugin = await webPluginManager.UpdateWebPluginAsync(tenant.Id, inDto.Name, inDto.WebPlugin.Enabled, inDto.WebPlugin.Settings, inDto.Personal);
 
         messageService.Send(MessageAction.WebpluginUpdated, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
-        await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
+        if (webPlugin.Personal)
+        {
+            await SyncPersonalCspCookieAsync(tenant.Id);
+        }
+        else
+        {
+            await ChangeCspSettings(webPlugin, inDto.WebPlugin.Enabled);
+        }
     }
 
     /// <remarks>
@@ -242,7 +279,8 @@ public class WebPluginsController(
     /// back means uploading its package again with `POST api/2.0/settings/webplugins`, and the settings it had are
     /// gone. Nothing is returned on success, and a repeated call on a name that is no longer installed is rejected as
     /// not found instead of answered as success. To keep a plugin installed but inactive, switch it off with
-    /// `PUT api/2.0/settings/webplugins/{name}` instead.
+    /// `PUT api/2.0/settings/webplugins/{name}` instead. Pass `personal=true` to remove the caller's personal plugin
+    /// instead; no portal-settings right is needed, and a portal plugin that held its name is left in place.
     /// </remarks>
     /// <summary>Delete a web plugin</summary>
     /// <path>api/2.0/settings/webplugins/{name}</path>
@@ -253,15 +291,49 @@ public class WebPluginsController(
     [HttpDelete("{name}")]
     public async Task DeleteWebPlugin(WebPluginNameRequestDto inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        if (!inDto.Personal)
+        {
+            await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        }
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name);
+        var webPlugin = await webPluginManager.DeleteWebPluginAsync(tenant.Id, inDto.Name, inDto.Personal);
 
         messageService.Send(MessageAction.WebpluginDeleted, MessageTarget.Create($"{webPlugin.PluginName}{webPlugin.Version}"), webPlugin.Name);
 
-        await ChangeCspSettings(webPlugin, false);
+        if (webPlugin.Personal)
+        {
+            await SyncPersonalCspCookieAsync(tenant.Id);
+        }
+        else
+        {
+            await ChangeCspSettings(webPlugin, false);
+        }
+    }
+
+    private async Task SyncPersonalCspCookieAsync(int tenantId)
+    {
+        var personalCspDomains = await webPluginManager.GetPersonalCspDomainsAsync(tenantId);
+
+        SetPersonalCspCookie(personalCspDomains.Count != 0);
+    }
+
+    private void SetPersonalCspCookie(bool hasPersonalCspDomains)
+    {
+        if (hasPersonalCspDomains)
+        {
+            Response.Cookies.Append(WebPluginManager.PersonalCspCookieName, "1", new CookieOptions
+            {
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddYears(1)
+            });
+        }
+        else if (Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName))
+        {
+            Response.Cookies.Delete(WebPluginManager.PersonalCspCookieName);
+        }
     }
 
     private async Task ChangeCspSettings(WebPlugin plugin, bool enabled)
