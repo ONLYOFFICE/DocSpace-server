@@ -75,14 +75,17 @@ public class AiSettingsService(
                     {
                         await embeddingProviderProbe.PingAsync(type, url, key);
                     }
-                    catch (HttpRequestException httpException)
+                    // Only a refused key was mapped; any other answer of the provider, no answer and a timeout went on as
+                    // exceptions nothing maps, a 500. A key the provider refuses or will not serve (no credits, no access
+                    // to the models) is the caller's input: 400. The rest is a failure of the provider: 502.
+                    catch (HttpRequestException httpException) when (httpException.StatusCode is
+                        HttpStatusCode.Unauthorized or HttpStatusCode.PaymentRequired or HttpStatusCode.Forbidden)
                     {
-                        if (httpException.StatusCode is HttpStatusCode.Unauthorized)
-                        {
-                            throw new ArgumentException(ErrorMessages.InvalidKey);
-                        }
-
-                        throw;
+                        throw new ArgumentException(ErrorMessages.InvalidKey);
+                    }
+                    catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+                    {
+                        throw new CustomHttpException(HttpStatusCode.BadGateway, "The embedding provider could not be reached or failed to answer", e);
                     }
 
                     settings.Type = type;

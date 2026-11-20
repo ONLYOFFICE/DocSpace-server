@@ -78,6 +78,7 @@ public class PhotoController(
     /// <path>api/2.0/people/{userId}/photo/thumbnails</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the rebuilt photo sizes", typeof(ThumbnailsDataDto))]
+    [SwaggerResponse(400, "`tmpFile` names an empty file or a file that is not an image, or the image is too large to process")]
     [SwaggerResponse(403, "The ID in the route is not the calling account, the account may not edit its own profile, or `x` equals the width of the image or `y` its height")]
     [SwaggerResponse(404, "No user has the specified ID, or no temporary file has the name given in `tmpFile`")]
     [HttpPost("{userId}/photo/thumbnails")]
@@ -97,12 +98,38 @@ public class PhotoController(
             var fileName = Path.GetFileName(inDto.Thumbnails.TmpFile);
             var data = await _userPhotoManager.GetTempPhotoData(fileName);
 
+            // The temporary folder of photos also holds what the whitelabel logo upload stores as .svg or .ico without
+            // reading it, so tmpFile can name content ImageMagick cannot read. Its exceptions (and an empty file, which
+            // UserPhotoManager turns into UnknownImageFormatException) are mapped to nothing and left as a 500 - after
+            // the current photo had already been removed. It is the caller's input: 400 with the texts the photo
+            // upload gives, checked before anything is changed.
+            if (data is not { Length: > 0 })
+            {
+                throw new ArgumentException(PeopleResource.ErrorUnknownFileImageType);
+            }
+
+            uint imageWidth;
+            uint imageHeight;
+            try
+            {
+                using var img = new MagickImage(data);
+                imageWidth = img.Width;
+                imageHeight = img.Height;
+            }
+            catch (MagickResourceLimitErrorException e)
+            {
+                throw new ArgumentException(PeopleResource.ErrorImageSizetLimit, e);
+            }
+            catch (MagickException e)
+            {
+                throw new ArgumentException(PeopleResource.ErrorUnknownFileImageType, e);
+            }
+
             UserPhotoThumbnailSettings settings;
 
             if (inDto.Thumbnails.Width == 0 && inDto.Thumbnails.Height == 0)
             {
-                using var img = new MagickImage(data);
-                settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, img.Width, img.Height);
+                settings = new UserPhotoThumbnailSettings(inDto.Thumbnails.X, inDto.Thumbnails.Y, imageWidth, imageHeight);
             }
             else
             {
@@ -220,9 +247,10 @@ public class PhotoController(
     [RaisesWebhook(WebhookTrigger.UserUpdated, When = "on every call, even when `files` is the current avatar")]
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the photo sizes built from the downloaded image", typeof(ThumbnailsDataDto))]
-    [SwaggerResponse(400, "The request body cannot be read, or the files field is empty")]
+    [SwaggerResponse(400, "The request body cannot be read, the files field is empty, or the image at `files` is empty, too large or not an image")]
     [SwaggerResponse(403, "The ID in the route is not the calling account, the account may not edit its own profile, the URL was refused, or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(502, "The address in `files` did not answer or timed out")]
     [HttpPut("{userId}/photo")]
     public async Task<ThumbnailsDataDto> UpdateMemberPhoto(UpdatePhotoMemberRequestDto inDto)
     {
