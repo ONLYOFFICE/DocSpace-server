@@ -102,7 +102,8 @@ public class RoomWebhookDto<T> : FileEntryWebhookDto<T>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
-    /// The space used by the room in bytes.
+    /// The space used by the room in bytes. Absent for an AI project when the subscription's creator may not edit it,
+    /// as the REST API hides it from them: the files of a project belong to the members who added them.
     /// </summary>
     /// <example>12345</example>
     public long? UsedSpace { get; set; }
