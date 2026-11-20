@@ -253,7 +253,8 @@ internal class FolderDao(
         int? groupId = null,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
         bool withAiFolder = false,
-        MetadataFilter metadataFilter = null)
+        MetadataFilter metadataFilter = null,
+        bool excludeAiProjectContent = false)
     {
         if (CheckInvalidFilters(filterTypes) || provider != ProviderFilter.None)
         {
@@ -270,7 +271,7 @@ internal class FolderDao(
 
         q = !withSubfolders ?
             BuildRoomsQuery(filesDbContext, q, filter, tags, subjectId, searchByTags, withoutTags, searchByTypes, false, excludeSubject, subjectOwnerId, subjectEntriesIds, groupId: groupId, privacyFilter: privacyFilter, withAiFolder: withAiFolder) :
-            BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectOwnerId, subjectEntriesIds, privacyFilter, withAiFolder);
+            BuildRoomsWithSubfoldersQuery(filesDbContext, roomsIds, filter, tags, searchByTags, searchByTypes, withoutTags, excludeSubject, subjectId, subjectOwnerId, subjectEntriesIds, privacyFilter, withAiFolder, excludeAiProjectContent);
 
         q = await ApplyFolderSearchAsync(q, filesDbContext, searchText, metadataFilter);
 
@@ -2632,11 +2633,14 @@ internal class FolderDao(
     }
 
     private IQueryable<DbFolder> BuildRoomsWithSubfoldersQuery(FilesDbContext filesDbContext, IEnumerable<int> roomsIds, IEnumerable<FolderType> folderTypes, IEnumerable<string> tags, bool searchByTags, bool searchByFilter, bool withoutTags,
-        bool withoutMe, Guid subjectId, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false)
+        bool withoutMe, Guid subjectId, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
+        bool excludeAiProjectContent = false)
     {
         var q1 = GetFolderQuery(filesDbContext, f => roomsIds.Contains(f.Id));
 
         q1 = BuildRoomsQuery(filesDbContext, q1, folderTypes, tags, subjectId, searchByTags, withoutTags, searchByFilter, true, withoutMe, subjectOwnerId, subjectEntriesIds, privacyFilter: privacyFilter, withAiFolder: withAiFolder);
+
+        IQueryable<DbFolder> subtree;
 
         if (searchByTags)
         {
@@ -2645,24 +2649,33 @@ internal class FolderDao(
                 .Where(r => tags.Contains(r.Name))
                 .Select(r => r.folder.Id).Distinct();
 
-            return GetFolderQuery(filesDbContext)
+            subtree = GetFolderQuery(filesDbContext)
                 .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
                 .Where(r => q2.Contains(r.tree.ParentId))
                 .Select(r => r.folder);
         }
-
-        if (!searchByFilter && !withoutTags && !withoutMe && !withAiFolder)
+        else if (!searchByFilter && !withoutTags && !withoutMe && !withAiFolder)
         {
-            return GetFolderQuery(filesDbContext)
+            subtree = GetFolderQuery(filesDbContext)
                 .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })
                 .Where(r => roomsIds.Contains(r.tree.ParentId))
                 .Select(r => r.folder);
         }
+        else
+        {
+            subtree = GetFolderQuery(filesDbContext)
+                .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
+                .Where(r => q1.Select(f => f.Id).Contains(r.tree.ParentId))
+                .Select(r => r.folder);
+        }
 
-        return GetFolderQuery(filesDbContext)
-                    .Join(filesDbContext.Tree, f => f.Id, t => t.FolderId, (folder, tree) => new { folder, tree })
-                    .Where(r => q1.Select(f => f.Id).Contains(r.tree.ParentId))
-                    .Select(r => r.folder);
+        if (!excludeAiProjectContent)
+        {
+            return subtree;
+        }
+
+        return subtree.Where(f => !filesDbContext.Tree.Any(t => t.FolderId == f.Id && t.Level > 0 &&
+            filesDbContext.Folders.Any(p => p.Id == t.ParentId && p.FolderType == FolderType.AiProjectRoom)));
     }
 
     private static bool CheckInvalidFilters(IEnumerable<FilterType> filterTypes)

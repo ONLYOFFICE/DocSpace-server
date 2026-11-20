@@ -3255,9 +3255,12 @@ public class FileSecurity(
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
+        var excludeAiProjectContent = withSubfolders && searchArea is SearchArea.Any or SearchArea.AiHub;
+
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, rootFoldersIds, groupId, privacyFilter, withAiFolder, metadataFilter)
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, rootFoldersIds, groupId, privacyFilter, withAiFolder, metadataFilter,
+                    excludeAiProjectContent)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => MatchesFormsSplit(r, searchArea))
                 .Where(r => Filter(r, internalRecords))
@@ -3275,7 +3278,8 @@ public class FileSecurity(
 
         if (withSubfolders && (filterTypes == null || !filterTypes.Contains(FilterType.FoldersOnly)))
         {
-            var files = await fileDao.GetFilesAsync(rooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
+            var filesParents = excludeAiProjectContent ? rooms.Where(r => r.FolderType != FolderType.AiProjectRoom) : rooms;
+            var files = await fileDao.GetFilesAsync(filesParents.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent).ToListAsync();
             var thirdPartyFiles = await thirdPartyFileDao.GetFilesAsync(thirdPartyRooms.Select(r => r.Id), FilterType.None, false, Guid.Empty, search, null, searchInContent)
                 .ToListAsync();
 

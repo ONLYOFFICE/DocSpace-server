@@ -116,6 +116,40 @@ public class ThreadFilesAiHubRootListingTests(AspireAppFixture fixture) : Thread
         AssertOnlyRoomsListed(content, project, expectProject: true);
     }
 
+    [Theory]
+    [InlineData(Viewer.ProjectMember, null)]
+    [InlineData(Viewer.ProjectOwner, null)]
+    [InlineData(Viewer.PortalAdmin, null)]
+    [InlineData(Viewer.ProjectMember, "artifacts")]
+    [InlineData(Viewer.ProjectOwner, "artifacts")]
+    [InlineData(Viewer.PortalAdmin, "artifacts")]
+    public async Task ListRoomsRootAsAnyArea_ShowsNoContentOfSomeoneElsesThread(Viewer viewer, string? filterValue)
+    {
+        var project = await CreateProjectContentAsync();
+
+        await AuthenticateAsync(viewer, project.ProjectId);
+        var roomsRootId = (await RoomsApi.GetRoomsFolderAsync(
+            searchArea: SearchArea.Active,
+            cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
+        var content = (await FoldersApi.GetFolderByFolderIdAsync(
+            roomsRootId,
+            searchArea: SearchArea.Any,
+            filterValue: filterValue,
+            cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        var folderIds = (content.Folders ?? []).OfType<FileEntryDto>().Select(f => f.Id).ToList();
+        var fileIds = (content.Files ?? []).OfType<FileEntryDto>().Select(f => f.Id).ToList();
+
+        if (viewer == Viewer.ProjectMember && filterValue == null)
+        {
+            folderIds.Should().Contain(project.ProjectId);
+        }
+
+        folderIds.Should().NotContain(project.ThreadFolderId);
+        fileIds.Should().NotContain([project.ArtifactId, project.UnsentFileId]);
+        content.Total.Should().Be(folderIds.Count + fileIds.Count);
+    }
+
     private async Task<ProjectContent> CreateProjectContentAsync()
     {
         var artifact = await CreateArtifactAsync();

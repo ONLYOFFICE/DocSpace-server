@@ -2181,6 +2181,8 @@ admin alike. `getRoomInfo` of a project SHALL report `filesCount` and `foldersCo
 and `getRoomSkills` of the project SHALL answer as they do for a project without files. `getFolderByFolderId`
 and `searchFolder` of the AI rooms root, and `getFolderByFolderId` of the rooms root with `searchArea` AiHub,
 SHALL list rooms only, whatever `withSubFolders` says: no entry inside a project, and no such entry in `total`.
+`getFolderByFolderId` of the rooms root with `searchArea` Any SHALL list no entry inside a project, with
+`withSubFolders` true as well, and count none in `total`.
 
 #### Scenario: Listing a project that holds thread files
 
@@ -2201,6 +2203,11 @@ SHALL list rooms only, whatever `withSubFolders` says: no entry inside a project
 
 - **WHEN** the same callers call `getFolderByFolderId` of the AI rooms root with `filterValue` `artifacts`
 - **THEN** the answer holds no folder of a thread and no file
+
+#### Scenario: Listing the rooms root across all sections
+
+- **WHEN** another member of the project, the project's owner and a DocSpace admin each call `getFolderByFolderId` of the rooms root with `searchArea` Any, without a filter and with `filterValue` `artifacts`, for a project with an artifact and a file not sent yet
+- **THEN** no answer holds the folder of the thread, the artifact or the file not sent yet, and each total equals the number of entries listed; the unfiltered answer to the member lists the project
 
 #### Scenario: Counters of the project
 
