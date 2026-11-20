@@ -80,6 +80,7 @@ public class OrphanAttachmentsCleanerService(
                 (context, position, id) => context.GetDeletedAttachmentsAsync(position, id, BatchSize),
                 x => x.DeletedOn!.Value,
                 now - _retryWindow,
+                now,
                 totals,
                 stoppingToken);
 
@@ -87,6 +88,7 @@ public class OrphanAttachmentsCleanerService(
                 (context, position, id) => context.GetOrphanAttachmentsAsync(cutoffDate, position, id, BatchSize),
                 x => x.CreatedAt,
                 cutoffDate - _retryWindow,
+                now,
                 totals,
                 stoppingToken);
         }
@@ -107,6 +109,7 @@ public class OrphanAttachmentsCleanerService(
         Func<AiIntegrationContext, DateTime, Guid, IAsyncEnumerable<OrphanAttachment>> read,
         Func<OrphanAttachment, DateTime> positionOf,
         DateTime from,
+        DateTime passStart,
         Totals totals,
         CancellationToken stoppingToken)
     {
@@ -135,6 +138,13 @@ public class OrphanAttachmentsCleanerService(
                 catch (Exception e) when (e is not OperationCanceledException)
                 {
                     logger.ErrorDeleteOrphanAttachments(group.Key, e);
+
+                    var nextFrom = from + (DateTime.UtcNow - passStart) + ExecuteTaskPeriod;
+
+                    foreach (var row in group.Where(x => positionOf(x) < nextFrom))
+                    {
+                        logger.WarningOrphanAttachmentLeavesRetryWindow(row.Id, group.Key, positionOf(row));
+                    }
                 }
             }
 

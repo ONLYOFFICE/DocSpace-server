@@ -61,7 +61,9 @@ public class DeletedThreadsCleanerService(
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
-        var deletedOn = DateTime.UtcNow - _retryWindow;
+        var passStart = DateTime.UtcNow;
+        var from = passStart - _retryWindow;
+        var deletedOn = from;
         var id = Guid.Empty;
         var totalCount = 0;
 
@@ -88,6 +90,11 @@ public class DeletedThreadsCleanerService(
                     catch (Exception e)
                     {
                         logger.ErrorDeleteThread(thread.TenantId, thread.Id, e);
+
+                        if (thread.DeletedOn < from + (DateTime.UtcNow - passStart) + ExecuteTaskPeriod)
+                        {
+                            logger.WarningThreadLeavesRetryWindow(thread.Id, thread.TenantId, thread.DeletedOn);
+                        }
                     }
                 }
 
