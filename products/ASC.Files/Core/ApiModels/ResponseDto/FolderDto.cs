@@ -45,17 +45,18 @@ public class FolderDto<T> : FileEntryDto<T>
     public T ParentId { get; set; }
 
     /// <summary>
-    /// How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room
-    /// templates, default templates and AI agents sections always report 0, because the number is not collected for
-    /// them.
+    /// How many files lie directly in the folder, without counting the subfolders. Always 0 for an AI project, whose
+    /// files no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI
+    /// rooms sections, for which the number is not collected.
     /// </summary>
     /// <example>5</example>
     public int FilesCount { get; set; }
 
     /// <summary>
     /// How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are
-    /// subtracted, so the number matches what a listing of it shows, and the roots of the `Rooms`, templates and AI
-    /// agents sections report 0.
+    /// subtracted, so the number matches what a listing of it shows. Always 0 for an AI project, whose thread folders
+    /// no listing shows, and for the roots of the `Rooms`, room templates, default templates, AI agents and AI rooms
+    /// sections.
     /// </summary>
     /// <example>7</example>
     public int FoldersCount { get; set; }

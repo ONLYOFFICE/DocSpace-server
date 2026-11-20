@@ -39,14 +39,16 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class GetAiThreadFilesRequestDto
 {
     /// <summary>
-    /// ID of the project.
+    /// ID of the AI project the thread was started in. Take it from `GET api/2.0/files/rooms` with `searchArea`
+    /// set to `AiHub`, which lists the AI projects together with the other AI rooms.
     /// </summary>
-    /// <example>1</example>
+    /// <example>18432</example>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
-    /// ID of the thread.
+    /// ID of a thread the caller started in the project. Take it from `GET api/2.0/ai/threads/list` with `entityId`
+    /// set to the project ID.
     /// </summary>
     /// <example>0198c3f4-6a2e-7c41-9b8d-2f5e7a1c3d90</example>
     [FromRoute(Name = "threadId")]
@@ -69,7 +71,9 @@ public class GetAiThreadFilesRequestDto
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The field to sort the files by.
+    /// The name of the field the files are ordered by, matched case-insensitively against the file sort fields:
+    /// `DateAndTime`, `AZ`, `Size`, `Author`, `Type`, `New`, `DateAndTimeCreation`, `RoomType`, `Tags`, `Room`,
+    /// `CustomOrder`, `LastOpened` and `UsedSpace`. Without a recognized value the saved default order of the account applies.
     /// </summary>
     /// <example>DateAndTime</example>
     [FromQuery(Name = "sortBy")]
