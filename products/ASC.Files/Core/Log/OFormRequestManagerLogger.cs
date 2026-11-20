@@ -39,15 +39,18 @@ internal static partial class OFormRequestManagerLogger
     [LoggerMessage(LogLevel.Warning, "The form gallery answered {status} to {uri}")]
     public static partial void WarningOFormGalleryStatus(this ILogger<OFormRequestManager> logger, Uri uri, int status);
 
-    [LoggerMessage(LogLevel.Warning, "The form gallery gave a file that is not a PDF: {url}")]
-    public static partial void WarningOFormGalleryNotPdf(this ILogger<OFormRequestManager> logger, string url);
+    [LoggerMessage(LogLevel.Warning, "The form gallery answered {uri} without its form list")]
+    public static partial void WarningOFormGalleryNoList(this ILogger<OFormRequestManager> logger, Uri uri);
+
+    [LoggerMessage(LogLevel.Warning, "The form gallery gave a file that is not a form of its format: {url}")]
+    public static partial void WarningOFormGalleryNotForm(this ILogger<OFormRequestManager> logger, string url);
 
     [LoggerMessage(LogLevel.Warning, "The form gallery could not be reached or gave an unreadable answer")]
     public static partial void WarningOFormGalleryUnreachable(this ILogger<OFormRequestManager> logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Debug, "The check of the form gallery got {status} from {uri}")]
-    public static partial void DebugOFormGalleryProbeStatus(this ILogger<OFormRequestManager> logger, Uri uri, int status);
+    [LoggerMessage(LogLevel.Warning, "The check of the form gallery got {status} from {uri}")]
+    public static partial void WarningOFormGalleryProbeStatus(this ILogger<OFormRequestManager> logger, Uri uri, int status);
 
-    [LoggerMessage(LogLevel.Debug, "The check of the form gallery could not reach it or read its answer")]
-    public static partial void DebugOFormGalleryProbeFailed(this ILogger<OFormRequestManager> logger, Exception exception);
+    [LoggerMessage(LogLevel.Warning, "The check of the form gallery could not reach it or read its answer")]
+    public static partial void WarningOFormGalleryProbeFailed(this ILogger<OFormRequestManager> logger, Exception exception);
 }

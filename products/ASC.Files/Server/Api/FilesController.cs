@@ -325,11 +325,12 @@ public abstract class FilesController<T>(
     /// caller's language. Requires the right to create files in the folder. Other callers get 403. The call changes
     /// data. Do not repeat it. Each call creates another file. The call returns 403 in the Rooms root, the archive, and
     /// the template sections, even for a DocSpace admin. It also returns 403 for a missing or unreadable template. The
-    /// call returns 404 for an unknown `formId` or a gallery form without a file of this format. It also returns 404 if
-    /// `templateId` is a string that matches no third-party file. If the form gallery does not answer within 30
-    /// seconds or returns no valid file, the call returns 502. If the new file exceeds the storage quota, the call
-    /// returns 402. The call returns 400 if `title` is missing, empty, or too long. To create the file in your own
-    /// section, use `POST api/2.0/files/@my/file`.
+    /// call returns 404 for an unknown `formId` or a gallery form without a file of this format. With a `formId`, it
+    /// also returns 404 when no form gallery is configured. A string `templateId` that matches no third-party file also
+    /// returns 404. The call returns 502 if the form gallery is unreachable or takes over 30 seconds. It also returns
+    /// 502 if the gallery answers with an error or without its form list. A gallery form whose file is not of its
+    /// format also returns 502. If the new file exceeds the storage quota, the call returns 402. The call returns 400 if
+    /// `title` is missing, empty, or too long. To create the file in your own section, use `POST api/2.0/files/@my/file`.
     /// If the folder is in a full connected storage other than SharePoint, the call returns 400.
     /// The user has to free up space there first.
     /// </remarks>
@@ -343,8 +344,8 @@ public abstract class FilesController<T>(
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters, or the connected storage other than SharePoint that holds the folder has no free space left in its own account; free up space there and repeat the call")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the file is not a PDF and the folder lies in a form-filling room")]
-    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
-    [SwaggerResponse(502, "The form gallery that `formId` refers to did not answer in time, answered with an error, or returned a file that is not a valid form")]
+    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it, or a `formId` is given and no form gallery is configured")]
+    [SwaggerResponse(502, "The form gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its form list, or returned a gallery form whose file is not of its format")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -1320,9 +1321,10 @@ public class FilesControllerCommon(
     /// in a room or another folder, use `POST api/2.0/files/{folderId}/file`. The call returns 400 if `title` is
     /// missing, empty, or too long. It returns 402 if the file does not fit into a storage quota. It returns 403 if the
     /// template does not exist or the caller cannot read it. It returns 404 for an unknown `formId` or a gallery form
-    /// without a file of the format of the title. If a string `templateId` is not a file of a connected third-party
-    /// storage, the call also returns 404. If the form gallery does not answer within 30 seconds or returns no valid
-    /// file, the call returns 502.
+    /// without a file of the title's format. A `formId` without a configured gallery also returns 404. If a string
+    /// `templateId` is not a file of a connected third-party storage, the call also returns 404. The call returns 502
+    /// if the form gallery is unreachable or takes over 30 seconds. It also returns 502 if the gallery answers with an
+    /// error or without its form list. A gallery form whose file is not of its format also returns 502.
     /// </remarks>
     /// <summary>
     /// Create a file in My documents
@@ -1334,8 +1336,8 @@ public class FilesControllerCommon(
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller is a guest whose My documents still exists, or the template does not exist or cannot be read")]
-    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it")]
-    [SwaggerResponse(502, "The form gallery that `formId` refers to did not answer in time, answered with an error, or returned a file that is not a valid form")]
+    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage, or the form gallery has no form with this `formId` or no file of the title's format for it, or a `formId` is given and no form gallery is configured")]
+    [SwaggerResponse(502, "The form gallery that `formId` refers to cannot be reached, took more than 30 seconds, answered with an error or without its form list, or returned a gallery form whose file is not of its format")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFileRequest<JsonElement> inDto)
     {

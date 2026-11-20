@@ -73,8 +73,7 @@ public partial class SettingsController(
     CustomQuota customQuota,
     UserSocketManager userSocketManager,
     QuotaSocketManager quotaSocketManager,
-    ExternalDatabaseClient externalDatabaseClient,
-    OFormRequestManager oFormRequestManager)
+    ExternalDatabaseClient externalDatabaseClient)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     [GeneratedRegex("^[a-z0-9]([a-z0-9-.]){1,253}[a-z0-9]$")]
@@ -198,10 +197,6 @@ public partial class SettingsController(
 
             var formGallerySettings = configuration.GetSection("files:oform").Get<OFormSettings>();
             settings.FormGallery = formGallerySettings.Map();
-            if (settings.FormGallery != null)
-            {
-                settings.FormGallery.Available = await oFormRequestManager.IsAvailableAsync();
-            }
 
             settings.InvitationLimit = await userInvitationLimitHelper.GetLimit();
             settings.MaxImageUploadSize = setupInfo.MaxImageUploadSize;

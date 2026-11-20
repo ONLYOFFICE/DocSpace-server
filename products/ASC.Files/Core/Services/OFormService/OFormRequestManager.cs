@@ -46,17 +46,26 @@ public class OFormRequestManager(
     /// </summary>
     private static readonly TimeSpan _downloadTimeout = TimeSpan.FromSeconds(30);
 
-    private static readonly TimeSpan _probeTimeout = TimeSpan.FromSeconds(10);
-
     /// <summary>
-    /// How long an answer of the availability check is reused: a gallery that did not answer is asked again sooner,
-    /// so a short failure of the network does not hide it for long.
+    /// How long the availability check waits for the gallery: below the 5-second lock timeout of this process's cache,
+    /// so the readers of this process that arrive meanwhile wait for this check instead of starting their own.
     /// </summary>
+    private static readonly TimeSpan _probeTimeout = TimeSpan.FromSeconds(4);
+
     private static readonly TimeSpan _availableDuration = TimeSpan.FromMinutes(10);
 
+    /// <summary>
+    /// How long "unavailable" is kept, and how long a known "available" is kept after a failed check before the gallery
+    /// is asked again.
+    /// </summary>
     private static readonly TimeSpan _unavailableDuration = TimeSpan.FromMinutes(1);
 
+    private static readonly TimeSpan _availabilityFailSafe = TimeSpan.FromDays(1);
+
     private static readonly byte[] _pdfSignature = "%PDF-"u8.ToArray();
+
+    // DOCX, XLSX and PPTX are ZIP packages
+    private static readonly byte[] _zipSignature = [0x50, 0x4B, 0x03, 0x04];
 
     private static readonly JsonSerializerOptions _options = new()
     {
@@ -73,7 +82,7 @@ public class OFormRequestManager(
     /// <exception cref="ItemNotFoundException">The gallery has no such form, or no file of this format for it.</exception>
     /// <exception cref="CustomHttpException">
     /// 502: the gallery did not answer in time, answered with an error status or with a body that is not the form list,
-    /// or gave a file that is not a PDF for a PDF form.
+    /// or gave a PDF, DOCX, XLSX or PPTX file that does not start as a file of its format.
     /// </exception>
     public async Task<Stream> Get(int id, string ext)
     {
@@ -96,10 +105,16 @@ public class OFormRequestManager(
             }
 
             var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(cts.Token), _options);
+            if (data?.Data == null)
+            {
+                logger.WarningOFormGalleryNoList(response.RequestMessage?.RequestUri);
+
+                throw GalleryUnavailable();
+            }
 
             var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
 
-            using var streamResponse = await httpClient.GetAsync(file.Url, cts.Token);
+            using var streamResponse = await httpClient.GetAsync(file.Url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
             if (!streamResponse.IsSuccessStatusCode)
             {
                 logger.WarningOFormGalleryStatus(streamResponse.RequestMessage?.RequestUri, (int)streamResponse.StatusCode);
@@ -113,19 +128,23 @@ public class OFormRequestManager(
 
             // A proxy of a closed network answers 200 with a page of its own: such a page saved as the form opens as a
             // blank editor
-            if (FileUtility.GetFileTypeByExtention(ext) == FileType.Pdf && !await HasPdfSignatureAsync(stream))
+            if (!await HasFormatSignatureAsync(stream, ext))
             {
                 await stream.DisposeAsync();
-                logger.WarningOFormGalleryNotPdf(file.Url);
+                logger.WarningOFormGalleryNotForm(file.Url);
 
                 throw GalleryUnavailable();
             }
 
             return stream;
         }
-        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException)
+        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException or UriFormatException
+                                       or InvalidOperationException and not ObjectDisposedException)
         {
-            // No token of a caller reaches here: a cancellation is a timeout, of this download or of the client
+            // No token of a caller reaches here: a cancellation is a timeout, of this download or of the client. An
+            // InvalidOperationException is a charset of the answer the runtime cannot decode, or a gallery address
+            // without a scheme; a UriFormatException is an address that does not parse (in the configuration or in the
+            // file address the gallery gave)
             logger.WarningOFormGalleryUnreachable(e);
 
             throw GalleryUnavailable();
@@ -133,10 +152,12 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// Whether the gallery is configured and answered its last check with its form list. The answer is one per
-    /// installation, kept in the distributed cache: a reader with none known waits at most 2 seconds and then gets
-    /// <c>true</c> while the check goes on in the background; an expired answer is still returned while the next check
-    /// runs.
+    /// Whether the gallery is configured and answers with its form list. "Available" is one answer per installation,
+    /// kept in the distributed cache for 10 minutes. A failed check of any kind keeps a known "available" for up to a
+    /// day, so a short failure of the gallery or the network never hides a gallery that answered before. With nothing
+    /// known, a failed check means "unavailable" for 1 minute, kept by this process only, so one process that cannot
+    /// reach the gallery never hides it from the others. When the next check takes longer than 200 ms, a reader with an
+    /// expired answer gets that answer; a reader with no answer waits for the check, at most 4 seconds.
     /// </summary>
     public async Task<bool> IsAvailableAsync()
     {
@@ -149,22 +170,32 @@ public class OFormRequestManager(
         {
             return await cache.GetOrSetAsync<bool>(GetAvailabilityCacheKey(), async (context, cancellationToken) =>
             {
-                var available = await ProbeAsync(cancellationToken);
-                if (!available)
+                if (await ProbeAsync(cancellationToken))
                 {
-                    context.Options.Duration = _unavailableDuration;
+                    return true;
                 }
 
-                return available;
+                // A failed check is no answer: the fail-safe keeps a known "available" and asks again after a minute
+                if (context.HasStaleValue && context.StaleValue.Value)
+                {
+                    throw new InvalidOperationException("The form gallery did not answer its check");
+                }
+
+                // "Unavailable" stays in this process: it never replaces the answer other processes got
+                context.Options.Duration = _unavailableDuration;
+                context.Options.SkipDistributedCacheWrite = true;
+                context.Options.SkipBackplaneNotifications = true;
+
+                return false;
             }, entry => entry
                 .SetDuration(_availableDuration)
-                .SetFailSafe(true)
-                .SetFactoryTimeouts(TimeSpan.FromMilliseconds(100), TimeSpan.FromSeconds(2)));
+                .SetFailSafe(true, _availabilityFailSafe, _unavailableDuration)
+                .SetFactoryTimeouts(TimeSpan.FromMilliseconds(200)));
         }
         catch (SyntheticTimeoutException)
         {
-            // The first check of the installation is still running and stores its answer when it ends
-            return true;
+            // The check ran past the cache's hard timeout with no answer known: no answer is "unavailable"
+            return false;
         }
     }
 
@@ -178,7 +209,7 @@ public class OFormRequestManager(
 
     /// <summary>
     /// Asks the gallery for one form of its list. Never throws: a gallery that does not answer in time, answers with an
-    /// error status or with a body that is not the list (the page of a proxy) is not available.
+    /// error status or with a body that is not the list (the page of a proxy) fails the check.
     /// </summary>
     private async Task<bool> ProbeAsync(CancellationToken cancellationToken)
     {
@@ -191,18 +222,25 @@ public class OFormRequestManager(
             using var response = await httpClient.GetAsync($"{GetListUrl()}?pagination[pageSize]=1&fields[0]=updatedAt", cts.Token);
             if (!response.IsSuccessStatusCode)
             {
-                logger.DebugOFormGalleryProbeStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
+                logger.WarningOFormGalleryProbeStatus(response.RequestMessage?.RequestUri, (int)response.StatusCode);
 
                 return false;
             }
 
             var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(cts.Token), _options);
+            if (data?.Data == null)
+            {
+                logger.WarningOFormGalleryNoList(response.RequestMessage?.RequestUri);
 
-            return data?.Data != null;
+                return false;
+            }
+
+            return true;
         }
-        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException)
+        catch (Exception e) when (e is HttpRequestException or JsonException or OperationCanceledException or UriFormatException
+                                       or InvalidOperationException and not ObjectDisposedException)
         {
-            logger.DebugOFormGalleryProbeFailed(e);
+            logger.WarningOFormGalleryProbeFailed(e);
 
             return false;
         }
@@ -219,15 +257,22 @@ public class OFormRequestManager(
     }
 
     /// <summary>
-    /// Whether the PDF header is in the first 1024 bytes, where readers look for it.
+    /// Whether the file starts as a file of its format does: a PDF has its header in the first 1024 bytes, where readers
+    /// look for it, and a DOCX, XLSX or PPTX starts with the ZIP signature. Other formats are not checked.
     /// </summary>
-    private static async Task<bool> HasPdfSignatureAsync(Stream stream)
+    private static async Task<bool> HasFormatSignatureAsync(Stream stream, string ext)
     {
         var buffer = new byte[1024];
         var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false);
         stream.Position = 0;
+        var head = buffer.AsSpan(0, read);
 
-        return buffer.AsSpan(0, read).IndexOf(_pdfSignature) >= 0;
+        return ext.ToLowerInvariant() switch
+        {
+            ".pdf" => head.IndexOf(_pdfSignature) >= 0,
+            ".docx" or ".xlsx" or ".pptx" => head.StartsWith(_zipSignature),
+            _ => true
+        };
     }
 
     private static OFromFileAttribute GetFile(OFromRequestData data, string ext)

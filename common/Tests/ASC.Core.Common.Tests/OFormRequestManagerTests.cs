@@ -35,13 +35,17 @@
 namespace ASC.Core.Common.Tests;
 
 /// <summary>
-/// How a form is downloaded from the form gallery when a file is created from it, and what the portal settings report
-/// about the gallery (bug 78009: in a closed network the editor page waited for the gallery and opened blank).
+/// How a form is downloaded from the form gallery when a file is created from it, and how the portal checks whether
+/// the gallery answers (bug 78009: in a closed network the editor page waited for the gallery and opened blank).
 /// </summary>
 /// <remarks>
 /// The gallery is a WireMock stub that answers its list and its files under the stub's own path, so the request manager
-/// runs with its real HTTP client, its parsing and its error mapping, over a real FusionCache in memory. A gallery that
-/// does not answer in time is a stub that answers later than the timeout given to the client of the test.
+/// runs with its real HTTP client, its parsing and its error mapping, over a real FusionCache in memory with the default
+/// entry options the services register (common/ASC.Api.Core ServiceCollectionExtension: a 5-second lock timeout and
+/// factory hard timeout), without the distributed level and the backplane of the services; the test of two nodes
+/// shares a distributed cache in memory between two of them. A gallery that does not
+/// answer in time is a stub that answers later than the timeout given to the client of the test, so the manager's own
+/// 30-second and 4-second deadlines are not what these tests reach.
 /// </remarks>
 [Trait("Bug", "78009")]
 public sealed class OFormRequestManagerTests : IDisposable
@@ -51,7 +55,15 @@ public sealed class OFormRequestManagerTests : IDisposable
 
     private readonly List<ServiceProvider> _services = [];
     private readonly List<HttpStub> _stubs = [];
-    private readonly FusionCache _cache = new(new FusionCacheOptions());
+    private readonly FusionCache _cache = new(new FusionCacheOptions
+    {
+        DefaultEntryOptions = new FusionCacheEntryOptions
+        {
+            Duration = TimeSpan.MaxValue,
+            LockTimeout = TimeSpan.FromSeconds(5),
+            FactoryHardTimeout = TimeSpan.FromSeconds(5)
+        }
+    });
 
     // The address of the file the list names; set when the gallery stub is made, read when the list is answered
     private string _fileUrl = "";
@@ -102,6 +114,17 @@ public sealed class OFormRequestManagerTests : IDisposable
         await AssertGalleryUnavailableAsync(CreateManager(gallery.Url));
     }
 
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("""{"data":null}""")]
+    public async Task Get_ListAnswersWithoutItsForms_Returns502(string body)
+    {
+        // The probe reads the same answer as "unavailable": the download must not call it "no such form"
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, body));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url));
+    }
+
     [Fact]
     public async Task Get_ListIsAPageOfAProxy_Returns502()
     {
@@ -122,6 +145,30 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task Get_DocxIsAPageOfAProxy_Returns502()
+    {
+        var gallery = Gallery(request => request.Path.EndsWith("/file.docx", StringComparison.Ordinal)
+            ? new StubResponse(HttpStatusCode.OK, "<html>Access denied</html>")
+            : StubResponse.Json(HttpStatusCode.OK, ListWithFile(".docx")));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url), ".docx");
+    }
+
+    [Fact]
+    public async Task Get_GalleryAnswersWithTheDocx_ReturnsIt()
+    {
+        const string docx = "PK\u0003\u0004word/document.xml";
+        var gallery = Gallery(request => request.Path.EndsWith("/file.docx", StringComparison.Ordinal)
+            ? new StubResponse(HttpStatusCode.OK, docx)
+            : StubResponse.Json(HttpStatusCode.OK, ListWithFile(".docx")));
+
+        await using var stream = await CreateManager(gallery.Url).Get(1, ".docx");
+
+        using var reader = new StreamReader(stream);
+        (await reader.ReadToEndAsync(TestContext.Current.CancellationToken)).Should().Be(docx);
+    }
+
+    [Fact]
     public async Task Get_FileAnswersWithAnError_Returns502()
     {
         var gallery = Gallery(request => IsFile(request)
@@ -137,6 +184,15 @@ public sealed class OFormRequestManagerTests : IDisposable
         var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK, List).After(TimeSpan.FromSeconds(5)));
 
         await AssertGalleryUnavailableAsync(CreateManager(gallery.Url, clientTimeout: TimeSpan.FromMilliseconds(500)));
+    }
+
+    [Fact]
+    public async Task Get_FileAddressDoesNotParse_Returns502()
+    {
+        var gallery = Gallery(_ => StubResponse.Json(HttpStatusCode.OK,
+            """{"data":[{"id":1,"file_oform":[{"url":"http://exa mple:x/file.pdf","name":"form","ext":".pdf"}]}]}"""));
+
+        await AssertGalleryUnavailableAsync(CreateManager(gallery.Url));
     }
 
     [Fact]
@@ -190,40 +246,153 @@ public sealed class OFormRequestManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task IsAvailableAsync_GalleryAddressDoesNotParse_IsFalse()
+    {
+        (await CreateManager("http://exa mple:x").IsAvailableAsync()).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task IsAvailableAsync_NoGalleryConfigured_IsFalse()
     {
         (await CreateManager(null).IsAvailableAsync()).Should().BeFalse();
     }
 
-    [Fact]
-    public async Task IsAvailableAsync_FirstCheckIsSlow_IsTrueWithinSecondsThenTheAnswer()
+    [Theory]
+    [InlineData(HttpStatusCode.BadGateway, "")]
+    [InlineData(HttpStatusCode.Forbidden, "<html>Access denied</html>")]
+    [InlineData(HttpStatusCode.OK, "<html>Maintenance</html>")]
+    public async Task IsAvailableAsync_CheckFailsWithAvailableKnown_StaysTrue(HttpStatusCode status, string body)
     {
-        // The settings request must not wait for a gallery that does not answer: with no answer known it gets true
-        // after the 2-second hard timeout, and the check stores its answer when it ends
-        var gallery = Gallery(_ => new StubResponse(HttpStatusCode.BadGateway).After(TimeSpan.FromSeconds(4)));
+        // A failed check of any kind, the maintenance page of a CDN included, must not hide a gallery that answered:
+        // no false "unavailable" in SaaS
+        var failing = false;
+        var gallery = Gallery(_ => failing ? new StubResponse(status, body) : StubResponse.Json(HttpStatusCode.OK, List));
         var manager = CreateManager(gallery.Url);
 
-        var watch = Stopwatch.StartNew();
         (await manager.IsAvailableAsync()).Should().BeTrue();
-        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(3));
 
-        var deadline = DateTime.UtcNow.AddSeconds(15);
+        failing = true;
+        await _cache.ExpireAsync(OFormRequestManager.GetAvailabilityCacheKey(), token: TestContext.Current.CancellationToken);
+
+        (await manager.IsAvailableAsync()).Should().BeTrue();
+        (await WaitForCallsAsync(gallery, 2)).Should().Be(2);
+        (await manager.IsAvailableAsync()).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_GalleryAnswersWithUnavailableKnown_BecomesTrue()
+    {
+        var failing = true;
+        var gallery = Gallery(_ => failing
+            ? new StubResponse(HttpStatusCode.BadGateway)
+            : StubResponse.Json(HttpStatusCode.OK, List));
+        var manager = CreateManager(gallery.Url);
+
+        (await manager.IsAvailableAsync()).Should().BeFalse();
+
+        failing = false;
+        await _cache.ExpireAsync(OFormRequestManager.GetAvailabilityCacheKey(), token: TestContext.Current.CancellationToken);
+
+        // The check may outlast the 200 ms the reader waits for it: the answer then comes with a later call
+        var deadline = DateTime.UtcNow.AddSeconds(10);
         bool available;
         do
         {
-            await Task.Delay(500, TestContext.Current.CancellationToken);
             available = await manager.IsAvailableAsync();
+            if (!available)
+            {
+                await Task.Delay(100, TestContext.Current.CancellationToken);
+            }
         }
-        while (available && DateTime.UtcNow < deadline);
+        while (!available && DateTime.UtcNow < deadline);
 
-        available.Should().BeFalse();
+        available.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_ExpiredAnswerAndSlowCheck_ReturnsTheAnswerWithinTheWait()
+    {
+        var slow = false;
+        var gallery = Gallery(_ => slow
+            ? StubResponse.Json(HttpStatusCode.OK, List).After(TimeSpan.FromSeconds(3))
+            : StubResponse.Json(HttpStatusCode.OK, List));
+        var manager = CreateManager(gallery.Url);
+
+        (await manager.IsAvailableAsync()).Should().BeTrue();
+
+        slow = true;
+        await _cache.ExpireAsync(OFormRequestManager.GetAvailabilityCacheKey(), token: TestContext.Current.CancellationToken);
+
+        var watch = Stopwatch.StartNew();
+        (await manager.IsAvailableAsync()).Should().BeTrue();
+        watch.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(2));
+    }
+
+    [Fact]
+    public async Task IsAvailableAsync_FailedChecksWithNothingKnown_StayOnTheNodeThatChecked()
+    {
+        // In SaaS one process that cannot reach the gallery must not show it as unavailable on every node, also after
+        // its second failed check: the other node, sharing the distributed cache, asks the gallery itself
+        var distributed = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        using var first = CreateNodeCache(distributed);
+        using var second = CreateNodeCache(distributed);
+        var failing = true;
+        var gallery = Gallery(_ => failing
+            ? new StubResponse(HttpStatusCode.BadGateway)
+            : StubResponse.Json(HttpStatusCode.OK, List));
+        var firstManager = CreateManager(gallery.Url, cache: first);
+
+        (await firstManager.IsAvailableAsync()).Should().BeFalse();
+
+        await first.ExpireAsync(OFormRequestManager.GetAvailabilityCacheKey(), token: TestContext.Current.CancellationToken);
+        await firstManager.IsAvailableAsync();
+        (await WaitForCallsAsync(gallery, 2)).Should().Be(2);
+
+        failing = false;
+        (await CreateManager(gallery.Url, cache: second).IsAvailableAsync()).Should().BeTrue();
+        gallery.CallCount.Should().Be(3);
+    }
+
+    /// <summary>
+    /// Waits on a deadline until the gallery got <paramref name="count"/> requests, and returns the count it saw last:
+    /// a check that outlasts the reader's wait goes on in the background.
+    /// </summary>
+    private static async Task<int> WaitForCallsAsync(HttpStub gallery, int count)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+        while (gallery.CallCount < count && DateTime.UtcNow < deadline)
+        {
+            await Task.Delay(100, TestContext.Current.CancellationToken);
+        }
+
+        // Let a check that just arrived end and store its answer
+        await Task.Delay(300, TestContext.Current.CancellationToken);
+
+        return gallery.CallCount;
+    }
+
+    private static FusionCache CreateNodeCache(IDistributedCache distributed)
+    {
+        var cache = new FusionCache(new FusionCacheOptions
+        {
+            DistributedCacheKeyModifierMode = CacheKeyModifierMode.None,
+            DefaultEntryOptions = new FusionCacheEntryOptions
+            {
+                Duration = TimeSpan.MaxValue,
+                LockTimeout = TimeSpan.FromSeconds(5),
+                FactoryHardTimeout = TimeSpan.FromSeconds(5)
+            }
+        });
+        cache.SetupDistributedCache(distributed, new FusionCacheSystemTextJsonSerializer());
+
+        return cache;
     }
 
     private HttpStub Gallery(Func<StubRequest, StubResponse> respond)
     {
         var stub = new HttpStub(respond);
         _stubs.Add(stub);
-        _fileUrl = stub.Url + "/uploads/file.pdf";
+        _fileUrl = stub.Url + "/uploads/file";
 
         return stub;
     }
@@ -238,7 +407,7 @@ public sealed class OFormRequestManagerTests : IDisposable
 
     /// <param name="domain">The address of the gallery; <c>null</c> configures none.</param>
     /// <param name="clientTimeout">The timeout of the HTTP client, shorter than the manager's own to test it quickly.</param>
-    private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null)
+    private OFormRequestManager CreateManager(string? domain, TimeSpan? clientTimeout = null, IFusionCache? cache = null)
     {
         var services = new ServiceCollection();
         services.AddHttpClient(Options.DefaultName, client =>
@@ -260,7 +429,7 @@ public sealed class OFormRequestManagerTests : IDisposable
             })
             .Build();
 
-        return new OFormRequestManager(NullLogger<OFormRequestManager>.Instance, configuration, provider.GetRequiredService<IHttpClientFactory>(), _cache);
+        return new OFormRequestManager(NullLogger<OFormRequestManager>.Instance, configuration, provider.GetRequiredService<IHttpClientFactory>(), cache ?? _cache);
     }
 
     private static bool IsFile(StubRequest request)
@@ -268,14 +437,14 @@ public sealed class OFormRequestManagerTests : IDisposable
         return request.Path.EndsWith("/file.pdf", StringComparison.Ordinal);
     }
 
-    private string ListWithFile()
+    private string ListWithFile(string ext = ".pdf")
     {
-        return $$"""{"data":[{"id":1,"file_oform":[{"url":"{{_fileUrl}}","name":"form","ext":".pdf"}]}]}""";
+        return $$"""{"data":[{"id":1,"file_oform":[{"url":"{{_fileUrl}}{{ext}}","name":"form","ext":"{{ext}}"}]}]}""";
     }
 
-    private static async Task AssertGalleryUnavailableAsync(OFormRequestManager manager)
+    private static async Task AssertGalleryUnavailableAsync(OFormRequestManager manager, string ext = ".pdf")
     {
-        var exception = await Assert.ThrowsAsync<CustomHttpException>(() => manager.Get(1, ".pdf"));
+        var exception = await Assert.ThrowsAsync<CustomHttpException>(() => manager.Get(1, ext));
 
         exception.StatusCode.Should().Be((int)HttpStatusCode.BadGateway);
     }
