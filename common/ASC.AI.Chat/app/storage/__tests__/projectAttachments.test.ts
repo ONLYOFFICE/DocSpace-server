@@ -66,8 +66,13 @@ vi.mock("../roomSkills.js", () => {
 
 const { filesApiGet } = await import("../docspaceFilesApi.js");
 const { FileTooLargeError, readFileBytes } = await import("../roomSkills.js");
-const { copyIntoProject, MAX_COPY_BYTES, uploadInChunks } =
-  await import("../projectAttachments.js");
+const {
+  copyIntoProject,
+  copyManyIntoProject,
+  MAX_CONCURRENT_COPIES,
+  MAX_COPY_BYTES,
+  uploadInChunks,
+} = await import("../projectAttachments.js");
 
 const fetchMock = vi.fn();
 
@@ -160,5 +165,54 @@ describe("copyIntoProject", () => {
     portal({ title: "Report.docx", folderId: 5 });
     vi.mocked(readFileBytes).mockRejectedValue(new Error("boom"));
     await expect(copyIntoProject("12", "40")).rejects.toThrow("boom");
+  });
+});
+
+describe("copyManyIntoProject", () => {
+  it("copies a file named more than once a single time", async () => {
+    portal({ title: "Report.docx", folderId: 5, pureContentLength: 6 });
+    expect(await copyManyIntoProject("12", ["40", "40", "sbox-1-abc", "40"])).toEqual([
+      "77",
+      "77",
+      "sbox-1-abc",
+      "77",
+    ]);
+    expect(readFileBytes).toHaveBeenCalledTimes(1);
+  });
+
+  it("holds no more files in memory at once than the limit, across batches", async () => {
+    portal({ title: "Report.docx", folderId: 5, pureContentLength: 6 });
+    let held = 0;
+    let most = 0;
+    const release: (() => void)[] = [];
+    vi.mocked(readFileBytes).mockImplementation(async () => {
+      held += 1;
+      most = Math.max(most, held);
+      await new Promise<void>((resolve) => release.push(resolve));
+      held -= 1;
+      return new Uint8Array([1, 2, 3]);
+    });
+
+    const ids = ["41", "42", "43", "44", "45", "46", "47"];
+    const batches = Promise.all([
+      copyManyIntoProject("12", ids.slice(0, 4)),
+      copyManyIntoProject("12", ids.slice(4)),
+    ]);
+    for (let done = 0; done < ids.length; done++) {
+      await vi.waitFor(() => expect(release.length).toBeGreaterThan(0));
+      release.shift()!();
+    }
+    expect((await batches).flat()).toHaveLength(ids.length);
+    expect(readFileBytes).toHaveBeenCalledTimes(ids.length);
+    expect(most).toBe(MAX_CONCURRENT_COPIES);
+  });
+
+  it("frees its place when a copy fails", async () => {
+    portal({ title: "Report.docx", folderId: 5 });
+    vi.mocked(readFileBytes).mockRejectedValue(new Error("boom"));
+    await expect(copyManyIntoProject("12", ["41", "42", "43"])).rejects.toThrow("boom");
+
+    vi.mocked(readFileBytes).mockResolvedValue(new Uint8Array([1]));
+    expect(await copyManyIntoProject("12", ["44", "45", "46"])).toEqual(["77", "77", "77"]);
   });
 });

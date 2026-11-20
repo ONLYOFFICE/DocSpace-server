@@ -285,6 +285,13 @@ describe("applyAiProjectChatContext inside a project", () => {
     });
   });
 
+  it("fails the round when the profile itself cannot be read, instead of calling the model unavailable", async () => {
+    readById.mockRejectedValue(Object.assign(new Error("AI service down"), { status: 503 }));
+    await expect(applyAiProjectChatContext({ entityId: "42" })).rejects.toMatchObject({
+      status: 503,
+    });
+  });
+
   // A portal nobody picked a Chat model on still has the model it fills the
   // Default slot with: a project without a model of its own runs on that.
   it("runs on the portal's Default model when the Chat action has none", async () => {

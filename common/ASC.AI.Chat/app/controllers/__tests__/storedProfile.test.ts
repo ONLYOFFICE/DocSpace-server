@@ -45,7 +45,7 @@ vi.mock("../../storage/httpClient.js", () => {
 });
 
 const { AiServiceHttpError } = await import("../../storage/httpClient.js");
-const { resolveStoredProfile } = await import("../storedProfile.js");
+const { readStoredProfile, resolveStoredProfile } = await import("../storedProfile.js");
 
 describe("resolveStoredProfile", () => {
   beforeEach(() => {
@@ -90,5 +90,29 @@ describe("resolveStoredProfile", () => {
     });
     await expect(resolveStoredProfile(undefined)).rejects.toMatchObject({ status: 404 });
     expect(readById).not.toHaveBeenCalled();
+  });
+});
+
+// The checks that only ask whether a profile id names a profile (a round's
+// `profileId`, a new thread's) read through this.
+describe("readStoredProfile", () => {
+  beforeEach(() => {
+    readById.mockReset();
+  });
+
+  it("answers nothing for an absent profile or an id refused as malformed", async () => {
+    readById.mockResolvedValueOnce(undefined);
+    expect(await readStoredProfile("gone")).toBeUndefined();
+
+    readById.mockRejectedValueOnce(new AiServiceHttpError(400, "Bad Request", "", "url"));
+    expect(await readStoredProfile("not-a-guid")).toBeUndefined();
+  });
+
+  it("passes on a failure of the read", async () => {
+    readById.mockRejectedValueOnce(new AiServiceHttpError(503, "Unavailable", "", "url"));
+    await expect(readStoredProfile("p1")).rejects.toMatchObject({ status: 503 });
+
+    readById.mockRejectedValueOnce(new Error("timeout"));
+    await expect(readStoredProfile("p1")).rejects.toThrow("timeout");
   });
 });

@@ -51,7 +51,7 @@ import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
 import { readAiProjectChatContext } from "../storage/aiProjectChatContext.js";
-import { resolveStoredProfile } from "./storedProfile.js";
+import { readStoredProfile, resolveStoredProfile } from "./storedProfile.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
 // the library: DEFAULT_THREADS_ROUTES.readMessages). Malformed or alien
@@ -147,14 +147,11 @@ export async function assertThreadCreatable(
       expose: true,
     });
   }
-  // A malformed profileId makes the C# lookup fail with a non-404 status;
-  // treat that the same as "no such profile" and fall through to the
-  // scope-assignment resolution instead of relaying an opaque error
-  // (Bug 83045).
-  if (
-    profileId
-    && (await storage.profiles.readById(profileId).catch(() => undefined))
-  ) {
+  // A malformed profileId makes the C# lookup fail with 400; treat that the
+  // same as "no such profile" and fall through to the scope-assignment
+  // resolution instead of relaying an opaque error (Bug 83045). A lookup
+  // that fails any other way is the service failing, and is passed on.
+  if (profileId && (await readStoredProfile(profileId))) {
     return;
   }
   const resolved = await assignmentsEngine.tryResolveForAction(ActionType.Chat, entityId);
@@ -229,6 +226,13 @@ export const threadsController = {
     await primeSourceMeta(getString(body, "entityId"));
     // Only the id of the sent profile is trusted (see storedProfile.ts).
     const profile = await resolveStoredProfile(body.profile);
+    // Without a threadId this creates a thread, so it is gated as
+    // threads/create is: inside an AI project only those who may chat in it
+    // get one, and only while its model is available. Opening a thread that
+    // exists is left to the storage, which answers the caller's own threads.
+    if (!getString(body, "threadId")) {
+      await assertThreadCreatable(getString(body, "entityId"), profile.id);
+    }
     const result = await engine.openOrCreate({ ...(body as OpenOrCreateInput), profile });
     res.json(result);
   }),
@@ -270,7 +274,12 @@ export const threadsController = {
 
   touch: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "profileId"] as const);
-    await engine.touch(args.threadId as string, args.profileId as string | undefined);
+    // Without a thread id the storage would touch `/threads/undefined`.
+    if (typeof args.threadId !== "string" || args.threadId.length === 0) {
+      res.status(400).json({ error: "threadId is required" });
+      return;
+    }
+    await engine.touch(args.threadId, args.profileId as string | undefined);
     res.json({ success: true });
   }),
 

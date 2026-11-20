@@ -70,6 +70,7 @@ import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } fro
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
+import { readStoredProfile } from "./storedProfile.js";
 import { asActionType, getString, isObject, parseInt10 } from "../narrow.js";
 import {
   HttpToolsAdapter,
@@ -706,21 +707,80 @@ function hasPromptContent(userMessage: unknown): boolean {
 // Validation error when the effective profileId does not reference an
 // existing profile, or null when it does (or when no profileId is supplied —
 // the engine then resolves the scope's assignment itself). A malformed id
-// makes the C# lookup fail with a non-404 status; that is just as much "no
-// such profile" to the caller, so both collapse to the same message.
+// makes the C# lookup fail with 400; that is just as much "no such profile"
+// to the caller, so both collapse to the same message. A lookup that fails
+// any other way is the service failing, and is passed on with its status.
 async function unknownProfileIdError(
   profileId: string | undefined,
 ): Promise<string | null> {
   if (!profileId) {
     return null;
   }
-  const profile = await storage.profiles
-    .readById(profileId)
-    .catch(() => undefined);
+  const profile = await readStoredProfile(profileId);
   if (!profile) {
     return `unknown profileId: ${profileId}`;
   }
   return aiToolsUnpaidError(profile.providerType);
+}
+
+// What a round that stores its user message checks before the stream opens,
+// for `send-with-stream` and its OpenAI-framed twin alike. Answers `false`
+// when it has already responded with the refusal. Runs after the AI-project
+// binding, so the profile checked is the one the round will use.
+async function preflightStreamRound(body: SendStreamInput, res: Response): Promise<boolean> {
+  // Reject an empty prompt before opening the stream: a user message with
+  // neither non-whitespace text nor an attachment otherwise reaches the
+  // provider and streams back nothing (Bug 82720). A file-only message
+  // passes — the composer sends one when a file is dropped with no text.
+  if (!hasPromptContent(body.userMessage)) {
+    res.status(400).json({
+      error: "userMessage must contain non-empty text content or an attachment",
+    });
+    return false;
+  }
+  // The same per-kind attachment cap as threads/append-user-message —
+  // these endpoints persist the user message through the same engine, so
+  // they are the other way around the composer's limit (Bug 82894).
+  const limitError = attachmentLimitError(body.userMessage);
+  if (limitError) {
+    res.status(400).json({ error: limitError });
+    return false;
+  }
+  // A new thread (no threadId) is created implicitly here, so gate it like
+  // threads/create (review #6): `assertThreadCreatable` throws the refusal
+  // for an entity the caller cannot use or a round no profile resolves for.
+  if (!body.threadId) {
+    await assertThreadCreatable(body.entityId, body.profileId);
+  }
+  // Without a profileId the round runs on the model the thread was created
+  // with (Bug 82860). Pre-fill it from the thread's stored value so the
+  // checks below and the document agent tool see the profile the round
+  // really uses; a session-level profileId is honored for the request
+  // without mutating persisted state.
+  if (!body.profileId && body.threadId) {
+    const thread = await storage.threads.readById(body.threadId);
+    if (thread?.profileId) {
+      body.profileId = thread.profileId;
+    }
+  }
+  // The effective profile, for the document agent tool: it runs the agent
+  // on the chat's own model, and `callTool` carries no profile.
+  setRoundProfileId(body.profileId);
+  setRoundThreadId(body.threadId);
+  // The effective profileId must reference an existing profile BEFORE the
+  // stream opens: a malformed or unknown id otherwise surfaces only as an
+  // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
+  // engine silently falls back to another model (Bug 83160).
+  const profileError = await unknownProfileIdError(body.profileId);
+  if (profileError === AI_TOOLS_UNPAID_ERROR) {
+    res.status(402).json({ error: await aiToolsUnpaidMessage() });
+    return false;
+  }
+  if (profileError) {
+    res.status(400).json({ error: profileError });
+    return false;
+  }
+  return true;
 }
 
 // Sentinel so the callers can tell the billing failure (402) apart from the
@@ -823,7 +883,7 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
-    const result = await engine.send(await withSourceMetadata(req.body));
+    const result = await engine.send(await withSourceMetadata(withRequestSignal(res, req.body)));
     res.json(result);
   }),
 
@@ -863,6 +923,21 @@ export const aiController = {
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
     await primeChatContext({ entityId: customScopeOf(req.body) });
+    // A profileId that names no profile would otherwise fall back to another
+    // model without a word, and an unpaid AI Tools wallet would answer inside
+    // the stream (Bugs 83160, 83344): refuse both up front, as the stored
+    // rounds do.
+    {
+      const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError === AI_TOOLS_UNPAID_ERROR) {
+        res.status(402).json({ error: await aiToolsUnpaidMessage() });
+        return;
+      }
+      if (profileError) {
+        res.status(400).json({ error: profileError });
+        return;
+      }
+    }
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -914,65 +989,8 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
-    // Reject an empty prompt before opening the stream: a user message with
-    // neither non-whitespace text nor an attachment otherwise reaches the
-    // provider and streams back nothing (Bug 82720). A file-only message
-    // passes — the composer sends one when a file is dropped with no text.
-    if (!hasPromptContent(req.body.userMessage)) {
-      res.status(400).json({
-        error: "userMessage must contain non-empty text content or an attachment",
-      });
+    if (!(await preflightStreamRound(req.body, res))) {
       return;
-    }
-    // The same per-kind attachment cap as threads/append-user-message —
-    // this endpoint persists the user message through the same engine, so
-    // it is the other way around the composer's limit (Bug 82894).
-    {
-      const limitError = attachmentLimitError(req.body.userMessage);
-      if (limitError) {
-        res.status(400).json({ error: limitError });
-        return;
-      }
-    }
-    // A new thread (no threadId) is created implicitly here, so gate it like
-    // threads/create: a supplied entityId must be accessible and a profile
-    // must resolve, otherwise 404 (review #6).
-    if (!req.body.threadId) {
-      await assertThreadCreatable(req.body.entityId, req.body.profileId);
-    }
-    // When the request omits profileId, the engine resolves the Chat
-    // assignment (or the Default slot) and persists it onto the thread,
-    // silently overwriting the model the thread was created with (Bug 82860).
-    // Pre-fill profileId from the thread's stored value: a session-level
-    // profileId is honored for the request without mutating persisted state,
-    // so the thread keeps its own model. The proper fix lives in the engine's
-    // profile resolution; this is a proxy-side guard.
-    if (!req.body.profileId && req.body.threadId) {
-      const thread = await storage.threads.readById(req.body.threadId);
-      if (thread?.profileId) {
-        req.body.profileId = thread.profileId;
-      }
-    }
-    // The effective profile, for the document agent tool: it runs the agent
-    // on the chat's own model, and `callTool` carries no profile.
-    setRoundProfileId(req.body.profileId);
-    setRoundThreadId(req.body.threadId);
-    // The effective profileId must reference an existing profile BEFORE the
-    // stream opens: a malformed or unknown id otherwise surfaces only as an
-    // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
-    // engine silently falls back to another model (Bug 83160). Runs after
-    // the thread prefill and the AI-project binding, so only the value that
-    // will actually be used is checked.
-    {
-      const profileError = await unknownProfileIdError(req.body.profileId);
-      if (profileError === AI_TOOLS_UNPAID_ERROR) {
-        res.status(402).json({ error: await aiToolsUnpaidMessage() });
-        return;
-      }
-      if (profileError) {
-        res.status(400).json({ error: profileError });
-        return;
-      }
     }
     const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
@@ -1014,19 +1032,10 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
-    setRoundProfileId(req.body.profileId);
-    setRoundThreadId(req.body.threadId);
-    // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
-    {
-      const profileError = await unknownProfileIdError(req.body.profileId);
-      if (profileError === AI_TOOLS_UNPAID_ERROR) {
-        res.status(402).json({ error: await aiToolsUnpaidMessage() });
-        return;
-      }
-      if (profileError) {
-        res.status(400).json({ error: profileError });
-        return;
-      }
+    // The same pre-flight as sendWithStream: this route stores the user
+    // message and creates the thread through the same engine path.
+    if (!(await preflightStreamRound(req.body, res))) {
+      return;
     }
     const body = await withContextPrompt(
       await withToolsPrompt(await withSourceMetadata(withRequestSignal(res, req.body))),
@@ -1057,6 +1066,15 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers();
+    // The effective profile and thread, for the document agent tool (see
+    // sendWithStream): the sent profile, else the thread's own model.
+    {
+      const thread = req.body.profileId
+        ? undefined
+        : await storage.threads.readById(req.body.threadId);
+      setRoundProfileId(req.body.profileId ?? thread?.profileId ?? undefined);
+      setRoundThreadId(req.body.threadId);
+    }
     // Same prompt envelope as sendWithStream: the regenerated round must
     // see the identical workspace-context fragment the original reply had.
     const body = await withContextPrompt(

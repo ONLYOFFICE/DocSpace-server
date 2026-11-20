@@ -59,6 +59,27 @@ async function resolveOrNull(
   }
 }
 
+// The resolution as an HTTP response may carry it. The engine resolves with
+// the read in-process provider calls use: the provider key and, for an
+// `onlyoffice` profile, the internal gateway address and the caller's
+// forwarded auth headers (Bug 82821). The profile is read again as
+// `profiles/get-by-id` answers it, without the override, and `key` and
+// `headers` are dropped: the callers of these routes read the profile's
+// name and model, and a round names its profile by id.
+async function resolvedForResponse(
+  resolved: Awaited<ReturnType<typeof resolveOrNull>>,
+): Promise<{ profileId: string; profile: object } | null> {
+  if (resolved === null) {
+    return null;
+  }
+  const stored = await storage.profiles.readByIdRaw(resolved.profileId);
+  if (!stored) {
+    return null;
+  }
+  const { key: _key, headers: _headers, ...profile } = stored;
+  return { profileId: resolved.profileId, profile };
+}
+
 interface AssignBody {
   actionType?: string;
   profileId?: string;
@@ -66,10 +87,6 @@ interface AssignBody {
 
 interface UnassignBody {
   actionType?: string;
-}
-
-interface ProfileIdBody {
-  profileId?: string;
 }
 
 interface BulkAssignBody {
@@ -94,7 +111,7 @@ export const assignmentsController = {
     // variant answers null for the same states (and `resolveOrNull` for an
     // assigned profile that is gone), and that is a 404 here — the status
     // threads/create gives the same condition.
-    const result = await resolveOrNull(actionType, entityId);
+    const result = await resolvedForResponse(await resolveOrNull(actionType, entityId));
     if (result === null) {
       res.status(404).json({ error: `no AI profile is available for ActionType.${actionType}` });
       return;
@@ -110,7 +127,7 @@ export const assignmentsController = {
     }
     const entityId = asString(req.query["entityId"]);
     await assertEntityAccessible(entityId);
-    const result = await resolveOrNull(actionType, entityId);
+    const result = await resolvedForResponse(await resolveOrNull(actionType, entityId));
     res.json(result);
   }),
 
@@ -218,8 +235,14 @@ export const assignmentsController = {
     res.json(result);
   }),
 
-  cascadeProfileDelete: asyncHandler<ProfileIdBody>(async (req, res) => {
-    const profileId = req.body?.profileId ?? asString(req.query["profileId"]);
+  cascadeProfileDelete: asyncHandler(async (req, res) => {
+    // The id as the widget's ApiProvider sends a single argument (the bare
+    // string as the body), as a named field, or in the query.
+    const args = unpackPositional(req.body, ["profileId"] as const);
+    const profileId =
+      typeof args.profileId === "string" && args.profileId.length > 0
+        ? args.profileId
+        : asString(req.query["profileId"]);
     if (!profileId) {
       res.status(400).json({ error: "profileId required" });
       return;

@@ -33,7 +33,7 @@
 
 import { AttachmentsEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
-import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { asyncHandler, MAX_ATTACHMENTS_PER_REQUEST, unpackPositional } from "./_helpers.js";
 import { isObject, parseInt10 } from "../narrow.js";
 import { setAnalyzeEntryIds } from "../requestContext.js";
 import { getSuggestedQuestions } from "../forms/suggestedQuestions.js";
@@ -161,6 +161,15 @@ export const attachmentsController = {
       res.status(400).json({ error: "inputs must be an array" });
       return;
     }
+    // Every file named is resolved by the backend, and in a chat of an AI
+    // project copied into its room through this process's memory, so the
+    // batch is bounded.
+    if (list.length > MAX_ATTACHMENTS_PER_REQUEST) {
+      res.status(400).json({
+        error: `inputs may name at most ${MAX_ATTACHMENTS_PER_REQUEST} files (got ${list.length})`,
+      });
+      return;
+    }
     const inputs: FileInput[] = [];
     const analyzeEntryIds: string[] = [];
     for (let i = 0; i < list.length; i++) {
@@ -213,6 +222,13 @@ export const attachmentsController = {
       });
       return;
     }
+    // Every id is read, and an image among them downloaded and inlined.
+    if (args.ids.length > MAX_ATTACHMENTS_PER_REQUEST) {
+      res.status(400).json({
+        error: `ids may name at most ${MAX_ATTACHMENTS_PER_REQUEST} attachments (got ${args.ids.length})`,
+      });
+      return;
+    }
     const result = await engine.getMany(args.ids as string[]);
     res.json(result);
   }),
@@ -231,7 +247,13 @@ export const attachmentsController = {
 
   delete: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id"] as const);
-    await engine.delete(args.id as string);
+    // Without an id the storage would ask the backend to delete
+    // `/attachments/undefined`.
+    if (typeof args.id !== "string" || args.id.length === 0) {
+      res.status(400).json({ error: "id is required" });
+      return;
+    }
+    await engine.delete(args.id);
     res.json({ success: true });
   }),
 
@@ -265,7 +287,14 @@ export const attachmentsController = {
     // thread) still answered `success: true`. The thread's own existence
     // follows from the ownership check — a nonexistent threadId can never
     // match the message's actual thread.
-    const ids = args.ids as string[];
+    if (args.ids.length > MAX_ATTACHMENTS_PER_REQUEST) {
+      res.status(400).json({
+        error: `ids may name at most ${MAX_ATTACHMENTS_PER_REQUEST} attachments (got ${args.ids.length})`,
+      });
+      return;
+    }
+    // An attachment named twice is bound once.
+    const ids = [...new Set(args.ids as string[])];
     const messageThreadId = await storage.messages.readThreadId(args.messageId);
     if (messageThreadId === null) {
       res.status(404).json({ error: "message not found" });
