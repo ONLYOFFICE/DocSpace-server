@@ -133,6 +133,7 @@ public class OwnerController(
     [SwaggerResponse(401, "The caller is not signed in and sent no owner change link, or the link is invalid or expired, its address no longer belongs to the portal owner, or its `uid` account is deleted or disabled")]
     [SwaggerResponse(402, "The user named as the new owner is a regular user, and promoting them to DocSpace administrator needs a paid seat the portal has run out of")]
     [SwaggerResponse(403, "The caller is signed in but sent no owner change link, whatever their role, or sent a valid confirmation link of another type")]
+    [SwaggerResponse(404, "No user has the ID in `ownerId`")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
     public async Task UpdatePortalOwner(OwnerIdSettingsRequestDto inDto)

@@ -162,6 +162,7 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
+    [SwaggerResponse(403, "The caller cannot read the AI agent")]
     [SwaggerResponse(404, "The AI agent is not found")]
     [HttpGet("agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
@@ -244,6 +245,8 @@ public class AgentsController(
     [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `roomIds` is not a 32-bit integer")]
+    [SwaggerResponse(403, "The storage quota for AI agents is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed agent")]
     [HttpPut("agents/agentquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
     {
@@ -291,6 +294,8 @@ public class AgentsController(
     [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder rather than a room, which the operation does not refuse")]
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `roomIds` is not a 32-bit integer")]
+    [SwaggerResponse(403, "The storage quota for AI agents is turned off, or the caller may not edit a listed agent")]
     [HttpPut("agents/resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
     {

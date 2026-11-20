@@ -438,6 +438,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The merged sharing rights of the listed files and folders, one record per account or group", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
     [SwaggerResponse(403, "The caller may not read one of the listed files or folders")]
     [HttpPost("share")]
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfo(BaseBatchRequestDto inDto)
@@ -470,6 +471,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Always true: the accounts and groups that had access to the listed entries no longer have it", typeof(bool))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
     [SwaggerResponse(403, "The caller may not change the access of a listed entry and cannot read it either, so it cannot be dropped from their own list. A portal administrator outside a private room gets this as well")]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfo(BaseBatchRequestDto inDto)

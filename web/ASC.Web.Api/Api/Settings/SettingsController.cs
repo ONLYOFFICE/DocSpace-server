@@ -739,6 +739,8 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Confirmation that the DNS mapping was updated", typeof(string))]
+    [SwaggerResponse(400, "`dnsName` is not a valid domain name, its length is out of range, or it is reserved or already used by another portal")]
+    [SwaggerResponse(402, "The installation hides the DNS settings section")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(415, "The portal is not a Standalone installation, so a custom domain cannot be mapped")]
     [HttpPut("dns")]
@@ -823,8 +825,9 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettingsDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, or the license's start date is in the future")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, the new password is the current password of the owner, or the license is missing, invalid, of the wrong type or starts in the future")]
     [SwaggerResponse(403, "The account the confirmation link was issued for has no portal-settings right")]
+    [SwaggerResponse(409, "The setup wizard has already been completed")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]

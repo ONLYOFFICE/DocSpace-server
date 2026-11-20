@@ -1736,6 +1736,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceDto>))]
     [SwaggerResponse(400, "The `serviceName` is longer than 255 characters")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the billing and accounting services are not configured on the server")]
+    [SwaggerResponse(404, "The accounting service does not know a service named `serviceName`")]
     [HttpGet("accounting/prices/{serviceName}")]
     public async Task<List<ServicePriceDto>> GetAccountingServicePrices(ServicePricesRequestDto inDto)
     {
@@ -2340,7 +2341,9 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/ai-prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The prices of the chat, embedding and image models and of the web search providers, with the currency they are in", typeof(AiPricesDto))]
+    [SwaggerResponse(402, "The billing service reports no customer for the portal or fails to answer")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation has no billing service or no AI gateway configured")]
+    [SwaggerResponse(502, "The AI gateway did not answer or answered with a server error")]
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
     {
@@ -2367,6 +2370,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The identifiers of the AI chat models barred on this portal, empty when none is", typeof(RestrictedAiModelsDto))]
     [SwaggerResponse(402, "AI tools is on for the portal, but the billing service reports no customer for it or fails to answer")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
+    [SwaggerResponse(502, "The AI gateway did not answer or answered with a server error")]
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedAiModelsDto> GetRestrictedAiModels()
     {
@@ -2399,8 +2403,10 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The set of barred AI chat models as it was stored", typeof(RestrictedAiModelsDto))]
     [SwaggerResponse(400, "The request body cannot be read, or `models` is missing, `null` or holds a `null` entry")]
+    [SwaggerResponse(402, "The billing service reports no customer for the portal or fails to answer")]
     [SwaggerResponse(403, "The caller has no portal-settings right or is not a DocSpace administrator, the installation has no billing service or no AI gateway configured, or the AI tools wallet service is off for the portal")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
+    [SwaggerResponse(502, "The AI gateway did not answer or answered with a server error")]
     [HttpPut("ai-model/restrictions")]
     public async Task<RestrictedAiModelsDto> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {

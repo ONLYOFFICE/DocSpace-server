@@ -71,7 +71,7 @@ public class OperationController(
     [RaisesWebhook(WebhookTrigger.FileDownloaded, When = "for each listed file when the job packs it, not for the files inside listed folders")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The download operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(400, "The request body cannot be read, or an item of `fileConvertIds` has no `key` or `value`")]
+    [SwaggerResponse(400, "The request body cannot be read, an item of `fileConvertIds` has no `key` or `value`, or a number in `folderIds`, `fileIds` or a `key` is not a 32-bit integer")]
     [SwaggerResponse(401, "The caller is not signed in and holds no external link")]
     [SwaggerResponse(403, "The caller can download none of the listed items that exist, counted separately for the portal's own items and for those on third-party accounts, or another download of theirs is still queued or running")]
     [SwaggerResponse(404, "None of the listed items exists, counted separately for the portal's own items and for those on third-party accounts")]
@@ -117,6 +117,7 @@ public class OperationController(
     [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every copied file, and for files inside copied folders only within one storage")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot copy one of the listed items, the destination is a listed folder or lies inside one, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
     [SwaggerResponse(404, "The destination folder, a listed file or a listed folder does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
@@ -158,6 +159,7 @@ public class OperationController(
     [RaisesWebhook(WebhookTrigger.FileDeleted, When = "instead for a listed file deleted for good, not moved to the trash")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
     [SwaggerResponse(403, "The caller does not have the rights to delete one of the listed items, one of them is locked by another user or open for editing, or a room is sent to Trash without `immediately`")]
     [SwaggerResponse(404, "A listed file or folder does not exist")]
     [HttpPut("delete")]
@@ -321,6 +323,7 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The mark-as-read operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
@@ -366,6 +369,7 @@ public class OperationController(
     [RaisesWebhook(WebhookTrigger.FileRestored, When = "instead for a file moved out of the trash")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, a listed folder would exceed the room or user quota, a file that is not a PDF form goes to a form-filling room, a file is too large for a knowledge folder, a listed file is locked or open for editing, a file inside a listed folder is open for editing, or a file to overwrite is locked, open for editing or cannot be edited by the caller")]
     [SwaggerResponse(404, "The destination folder, a listed file or a listed folder does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
@@ -400,6 +404,7 @@ public class OperationController(
     [RaisesWebhook(WebhookTrigger.FileCopied, When = "for every duplicated file, including the files inside duplicated folders and rooms")]
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The duplicate operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `folderIds` or `fileIds` is not a 32-bit integer")]
     [SwaggerResponse(403, "The caller cannot create items in the folder that holds one of the listed items, or cannot copy that item")]
     [SwaggerResponse(404, "A listed file or folder does not exist")]
     [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload")]

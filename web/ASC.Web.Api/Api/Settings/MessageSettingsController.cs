@@ -173,6 +173,7 @@ public class MessageSettingsController(
     [SwaggerResponse(200, "A localized message confirming that the message has been queued for the portal administrators", typeof(string))]
     [SwaggerResponse(400, "The request body cannot be read or has no `email` or `message`, the email address is malformed or longer than 255 characters, or the message is longer than 255 characters or empty once its markup is stripped")]
     [SwaggerResponse(403, "The caller is not signed in, the installation has a CAPTCHA configured, and `recaptchaResponse` is missing or not accepted")]
+    [SwaggerResponse(405, "The contact form for administrators is turned off on the portal")]
     [SwaggerResponse(429, "Too many contact attempts came from the same address within the rate-limit window")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
@@ -241,6 +242,7 @@ public class MessageSettingsController(
     [SwaggerResponse(200, "A localized message confirming that the invitation with the join link has been sent", typeof(string))]
     [SwaggerResponse(400, "The request body cannot be read or has no `email`, the email address is malformed, internationalized or longer than 255 characters, lies outside the trusted domains, or already belongs to a member of the portal")]
     [SwaggerResponse(405, "The portal publishes no trusted-domain policy, so it has nothing to join")]
+    [SwaggerResponse(429, "The IP address of the caller has sent too many of these requests in the last 2 minutes")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<string> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)

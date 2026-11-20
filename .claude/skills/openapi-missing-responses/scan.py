@@ -695,26 +695,31 @@ def condition_holds(cond, init):
 class Ev:
     """One piece of evidence. `entry` is where it enters the method whose list holds it (the throw itself, or the
     call that leads to it); `hops` how many service calls lie between the action and the throw; `note` why a
-    service-level finding counts only as a hint (empty when it counts)."""
+    service-level finding counts only as a hint (empty when it counts); `graph` that its path takes a call only a
+    CodeGraph index links, so it exists only when the scan runs with the index."""
 
-    def __init__(self, code, kind, f, pos, exc=None, via=(), strong=True, detail="", entry=None, hops=0, note=""):
+    def __init__(self, code, kind, f, pos, exc=None, via=(), strong=True, detail="", entry=None, hops=0, note="",
+                 graph=False):
         self.code, self.kind, self.f, self.pos, self.exc = code, kind, f, pos, exc
         self.via, self.strong, self.detail = tuple(via), strong, detail
         self.entry = pos if entry is None else entry
-        self.hops, self.note = hops, note
+        self.hops, self.note, self.graph = hops, note, graph
 
-    def moved(self, entry, step, caller_hops, strong=None, note=None):
+    def moved(self, entry, step, caller_hops, strong=None, note=None, graph=False):
         """The same evidence as seen from a caller: entered through the call at `entry`, `step` prepended to the
         path. A service call raises `hops`; a helper or Demand* call keeps the callee's."""
         return Ev(self.code, self.kind, self.f, self.pos, self.exc, (step,) + self.via,
                   self.strong if strong is None else strong, self.detail, entry, max(self.hops, caller_hops),
-                  self.note if note is None else note)
+                  self.note if note is None else note, self.graph or graph)
 
     def where(self):
         return f"{self.f.rel}:{self.f.line(self.pos)}"
 
     def text(self):
         return self.detail or self.f.line_text(self.pos)
+
+
+CATCH_CLAUSE = re.compile(r"\s*catch\b\s*(\(([^)]*)\))?\s*(when\s*\()?")
 
 
 def try_blocks(bl, a, b):
@@ -725,10 +730,11 @@ def try_blocks(bl, a, b):
         t_close = match_close(bl, t_open, "{", "}")
         catches, k = [], t_close + 1
         while True:
-            cm = re.match(r"\s*catch\b\s*(\(([^)]*)\))?\s*(when\s*\()?", bl[k:k + 300])
+            # no window: a comment between two catch clauses (blanked to spaces) can be longer than any fixed one
+            cm = CATCH_CLAUSE.match(bl, k)
             if not cm:
                 break
-            k += cm.end()
+            k = cm.end()
             if cm.group(3):
                 k = match_close(bl, k - 1, "(", ")") + 1
             k = bl.find("{", k)
@@ -1043,13 +1049,14 @@ class Analyzer:
                     if ev.kind == "dto" or self.caught(f, method, pos, ev.exc):
                         continue
                     evs.append(ev.moved(pos, f"{t.cls.name}.{t.name}@{f.rel.split('/')[-1]}:{f.line(pos)}", hops,
-                                        False, ev.note or "a call only CodeGraph links"))
+                                        False, ev.note or "a call only CodeGraph links", graph=True))
         # one line per site: overload chains reach the same throw several times; keep a counted path over a hint,
-        # then the shortest
+        # then a path found without CodeGraph (the one a scan without the index sees too), then the shortest
         best = {}
         for ev in evs:
             k = (ev.code, ev.kind, ev.f.rel, ev.pos)
-            if k not in best or (not ev.strong, len(ev.via)) < (not best[k].strong, len(best[k].via)):
+            if k not in best or (not ev.strong, ev.graph, len(ev.via)) < (not best[k].strong, best[k].graph,
+                                                                          len(best[k].via)):
                 best[k] = ev
         evs = sorted(best.values(), key=lambda e: (e.hops, len(e.via), e.f.rel, e.pos))
         # At the action's own level only a complete walk is cached, with its height: reused from another depth, a
@@ -1328,9 +1335,10 @@ def print_foreign_hosts(ix, actions):
 
 
 def fingerprint(a, code):
+    # evidence only CodeGraph links stays out: a rejection must read the same with and without the index
     h = hashlib.sha1(norm(a.m.body_text()).encode())
     parts = sorted({f"{e.kind}|{norm(e.text())}|{'>'.join(v.split('@')[0] for v in e.via)}"
-                    for e in a.evs if e.code == code})
+                    for e in a.evs if e.code == code and not e.graph})
     for p in parts:
         h.update(p.encode())
     return h.hexdigest()[:16]

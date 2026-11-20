@@ -312,6 +312,8 @@ public class MigrationController(
     [SwaggerResponse(200, "The activation emails have been sent if they were asked for and the clean-up has been queued. The response carries no content")]
     [SwaggerResponse(400, "The request body cannot be read or has no `isSendWelcomeEmail`")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
+    [SwaggerResponse(404, "With `isSendWelcomeEmail`, there is no migration job, or the job ended before it imported users")]
+    [SwaggerResponse(409, "With `isSendWelcomeEmail`, the migration job is still running and has not imported users yet")]
     [HttpPost("finish")]
     public async Task FinishMigration(FinishDto inDto)
     {

@@ -202,6 +202,7 @@ public class ThirdpartyController(
     [Tags("People / Third-party accounts")]
     [SwaggerResponse(200, "The profile linked to the third-party identity, or an empty body when the authorization was cancelled or the profile could not be created", typeof(EmployeeDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `key` or `serializedProfile`, or `serializedProfile` is empty or was issued by another portal")]
+    [SwaggerResponse(402, "The account joins a room through the invitation link, but the portal already has as many room members as its plan allows")]
     [SwaggerResponse(403, "The invitation link is invalid, has expired or has no uses left, or the email already belongs to a profile that has not been activated yet")]
     [AllowAnonymous]
     [HttpPost("signup")]

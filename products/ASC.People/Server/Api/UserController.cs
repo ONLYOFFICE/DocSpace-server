@@ -252,8 +252,10 @@ public class UserController(
     [RaisesWebhook(WebhookTrigger.UserCreated, When = "after the portal saves the avatar from `files`, if any, but not if the download fails")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "The password does not meet the portal password policy")]
+    [SwaggerResponse(400, "The password does not meet the portal password policy, or the image at `files` is empty, too large or not an image")]
+    [SwaggerResponse(402, "The account joins a room through the invitation link, but the portal already has as many room members as its plan allows")]
     [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created")]
+    [SwaggerResponse(502, "The address in `files` did not answer or timed out")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -453,7 +455,7 @@ public class UserController(
     [RaisesWebhook(WebhookTrigger.UserInvited, When = "for every address without an account, not for an existing account whose type it raises")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Every pending profile the caller may see, not only the ones just invited", typeof(List<EmployeeDto>))]
-    [SwaggerResponse(400, "An address is malformed or written in punycode, or it belongs to a disabled account")]
+    [SwaggerResponse(400, "An address is malformed or written in punycode, it belongs to a disabled account, or it is linked to a third-party profile of another account")]
     [SwaggerResponse(402, "The invitations would need more paid seats than the tariff has left")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("invite")]
@@ -578,7 +580,7 @@ public class UserController(
     /// <path>api/2.0/people/{userId}/password</path>
     [Tags("People / Password")]
     [SwaggerResponse(200, "The profile whose password was changed", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "The user ID is empty, no password was sent, or the password does not meet the portal policy")]
+    [SwaggerResponse(400, "The user ID is empty, no password was sent or it has only spaces, the password does not meet the portal policy, or it is the current password")]
     [SwaggerResponse(403, "The account is not active, or only its owner may change this password")]
     [SwaggerResponse(404, "No account has the specified ID")]
     [AllowNotPayment]
@@ -746,6 +748,8 @@ public class UserController(
     [SwaggerResponse(200, "The profile as it was just before it was deleted", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, the caller may not delete a DocSpace administrator, or the OAuth service refused to remove the OAuth clients of the account")]
     [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(409, "Data of the user is still being reassigned to another user")]
+    [SwaggerResponse(502, "The OAuth service did not answer when the OAuth apps of the user were deleted; the user is not deleted")]
     [HttpDelete("{userId}")]
     public async Task<EmployeeFullDto> DeleteMember(GetMemberByIdRequestDto inDto)
     {
@@ -1372,6 +1376,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "`filterValue` is not a group ID while the search filters by group")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("search")]
     public IAsyncEnumerable<EmployeeFullDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
@@ -1392,6 +1397,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "`filterValue` is not a group ID while the search filters by group")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(GetMemberByQueryRequestDto inDto)
@@ -1505,6 +1511,8 @@ public class UserController(
     [SwaggerResponse(200, "The listed accounts, including the skipped DocSpace admins; system, LDAP, deleted and unknown accounts are left out", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The userIds field is missing")]
     [SwaggerResponse(403, "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account")]
+    [SwaggerResponse(409, "Data of the user is still being reassigned to another user")]
+    [SwaggerResponse(502, "The OAuth service did not answer when the OAuth apps of the user were deleted; the user is not deleted")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -2166,10 +2174,11 @@ public class UserController(
     [RaisesWebhook(WebhookTrigger.UserUpdated, When = "for another account when `disable` is sent or `isUser` changes the type")]
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
+    [SwaggerResponse(400, "The first and last name pair is not a valid user name, or the image at `files` is empty, too large or not an image")]
     [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat")]
     [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(502, "The address in `files` did not answer or timed out")]
     [HttpPut("{userId}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
     {

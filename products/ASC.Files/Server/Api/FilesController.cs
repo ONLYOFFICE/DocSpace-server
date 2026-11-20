@@ -297,11 +297,12 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileUploaded, When = "as well when the copy is converted to another format")]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, the new title is empty while the source file has no extension, or the document service refuses the source: it is protected with a password, too large, or cannot be converted to the new format")]
     [SwaggerResponse(402, "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size")]
     [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, the caller may not create files in it, or the file or the destination lies in a private room")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
     [SwaggerResponse(415, "The installation filters uploads and does not accept the format of the new title")]
+    [SwaggerResponse(502, "The document service did not answer the conversion request or failed the conversion")]
     [HttpPost("file/{fileId}/copyas")]
     public async Task<FileEntryBaseDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
@@ -721,10 +722,11 @@ public abstract class FilesController<T>(
     [RaisesWebhook(WebhookTrigger.FileUpdated)]
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editing revisions of the file after the restore", typeof(IAsyncEnumerable<EditHistoryDto>))]
-    [SwaggerResponse(400, "The version is missing or is already the current one")]
+    [SwaggerResponse(400, "The version is missing or is already the current one, `url` is not an absolute address, or the document service refuses to convert the content at `url`")]
     [SwaggerResponse(402, "The restored content does not fit into the storage quota")]
     [SwaggerResponse(403, "The caller may not change the version history of the file, the file is locked by somebody else, or, with `url`, may not edit the file or the file is being edited")]
     [SwaggerResponse(404, "Without `url`, the file id or the requested version resolves to nothing")]
+    [SwaggerResponse(502, "With `url`, the address did not answer or answered with an error, or the document service failed to convert the content")]
     [AllowAnonymous]
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)

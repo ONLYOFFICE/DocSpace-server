@@ -56,6 +56,7 @@ public class PushController(
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "The stored device registration of the calling user, with the Firebase token, the `doc` application and the subscription state as they are kept", typeof(FirebaseDeviceDto))]
+    [SwaggerResponse(400, "The request body cannot be read, or `firebaseDeviceToken` is longer than 255 characters")]
     [HttpPost("docregisterdevice")]
     public async Task<FirebaseDeviceDto> DocRegisterPusnNotificationDevice(FirebaseRequestsDto inDto)
     {
@@ -79,6 +80,7 @@ public class PushController(
     /// <path>api/2.0/settings/push/docsubscribe</path>
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "The device registration as it stands after the change, or an empty response when no registration of the calling user carries the token that was sent", typeof(FirebaseDeviceDto))]
+    [SwaggerResponse(400, "The request body cannot be read, or `firebaseDeviceToken` is longer than 255 characters")]
     [HttpPut("docsubscribe")]
     public async Task<FirebaseDeviceDto> SubscribeDocumentsPushNotification(FirebaseRequestsDto inDto)
     {

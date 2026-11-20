@@ -164,6 +164,7 @@ public abstract class EditorController<T>(
     [SwaggerResponse(403, "The caller cannot edit the file, the file is locked or in Trash, somebody is already editing it and the session was claimed alone, or the document service did not accept the tracking request")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
+    [SwaggerResponse(502, "The third-party storage that holds the file could not deliver it")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<string> StartEditFile(StartEditRequestDto<T> inDto)
@@ -219,6 +220,7 @@ public abstract class EditorController<T>(
     [SwaggerResponse(401, "An anonymous caller has no external link, or refreshes the session through a link that does not grant editing")]
     [SwaggerResponse(403, "The document key does not match the revision being edited, the caller has none of the editing rights on the file, or the session is refreshed while the file is locked by somebody else")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
+    [SwaggerResponse(502, "The third-party storage that holds the file could not deliver it")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<ItemKeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
@@ -251,6 +253,7 @@ public abstract class EditorController<T>(
     [SwaggerResponse(403, "The caller cannot read the file, asked for a past version without access to the file history, or the file is in Trash")]
     [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
     [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing, or it is an encrypted file of a private room and the connected document server cannot work with encrypted files")]
+    [SwaggerResponse(502, "The third-party storage that holds the file could not deliver it")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
@@ -599,6 +602,7 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     [SwaggerResponse(200, "The settings are stored and the Document Server answered the verification requests", typeof(DocServiceUrlDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `docServiceUrl`, an address cannot be parsed or carries a query string, the signature secret is sent without its header, or an http address is given for a portal served over https")]
     [SwaggerResponse(403, "The caller is not the portal owner or a DocSpace administrator")]
+    [SwaggerResponse(502, "The Document Server did not answer the verification requests at the new addresses; the previous settings are restored")]
     //[SwaggerResponse(503, "Unable to establish a connection with the Document Server")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)

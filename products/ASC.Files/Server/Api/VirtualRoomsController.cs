@@ -505,6 +505,7 @@ public abstract class VirtualRoomsController<T>(
     [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder, not a room")]
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the new limit was applied", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `roomIds` is not a 32-bit integer")]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed room or it lies in Trash or in the archive")]
     [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuota(UpdateRoomsQuotaRequestDto<T> inDto)
@@ -559,6 +560,7 @@ public abstract class VirtualRoomsController<T>(
     [RaisesWebhook(WebhookTrigger.FolderUpdated, When = "instead for a listed ID that is a folder, not a room")]
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the default limit was restored", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a number in `roomIds` is not a 32-bit integer")]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, or the caller may not edit a listed room or it lies in Trash or in the archive")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuota(UpdateRoomsRoomIdsRequestDto<T> inDto)

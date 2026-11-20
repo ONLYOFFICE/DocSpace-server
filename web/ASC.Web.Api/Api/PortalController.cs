@@ -965,6 +965,7 @@ public class PortalController(
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The request is accepted: the deactivation letter is queued and the request recorded in the audit trail, unless the same letter already went out within the repeat period; the portal itself is still active and the response carries no content")]
+    [SwaggerResponse(400, "On a standalone installation every other space has limited access, so this is the last space with full access")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [AllowNotPayment]
     [HttpPost("suspend")]
@@ -1008,6 +1009,7 @@ public class PortalController(
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The request is accepted, and the removal letter is queued unless one already went out within the repeat period; nothing about the portal has changed yet and the response carries no content")]
+    [SwaggerResponse(400, "On a standalone installation every other space has limited access, so this is the last space with full access")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [AllowNotPayment]
     [HttpPost("delete")]
@@ -1126,6 +1128,7 @@ public class PortalController(
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The portal is now suspended, its users can no longer work in it and its content is kept; the response carries no content")]
+    [SwaggerResponse(400, "On a standalone installation every other space has limited access, so this is the last space with full access")]
     [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
     [HttpPut("suspend")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
@@ -1158,7 +1161,9 @@ public class PortalController(
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The absolute URL of the feedback form to send the owner of the removed portal to", typeof(string))]
+    [SwaggerResponse(400, "On a standalone installation every other space has limited access, so this is the last space with full access")]
     [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
+    [SwaggerResponse(502, "The OAuth service did not answer when the OAuth apps of the portal were deleted; the portal is not deleted")]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]

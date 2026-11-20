@@ -152,8 +152,9 @@ public class StorageController(
     /// <path>api/2.0/settings/encryption/start</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "True when the encryption job has been queued; false in a build where storage encryption is switched off", typeof(bool))]
-    [SwaggerResponse(402, "The portal pricing plan does not include storage encryption")]
+    [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "The caller may not edit portal settings, or this installation does not allow storage encryption")]
+    [SwaggerResponse(409, "A backup of one of the portals is still running")]
     [SwaggerResponse(415, "Storage encryption is not available on this installation, or the storage or the CDN of the current portal is a third-party provider")]
     [HttpPost("encryption/start")]
     public async Task<bool> StartStorageEncryption(StorageEncryptionRequestsDto inDto)
