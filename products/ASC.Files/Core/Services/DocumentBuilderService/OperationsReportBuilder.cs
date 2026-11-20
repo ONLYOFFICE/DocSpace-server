@@ -79,6 +79,7 @@ public class OperationsReportBuilder(
 
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationServiceUnit));
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCredit, ReportColumnAlign.Right, Sum: true));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationBonusCredit, ReportColumnAlign.Right, Sum: true));
 
         if (isAiService)
         {
@@ -86,6 +87,7 @@ public class OperationsReportBuilder(
         }
 
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationDebit, ReportColumnAlign.Right, Sum: true));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationBonusDebit, ReportColumnAlign.Right, Sum: true));
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCurrency, Currency: true));
 
         if (isAiService)
@@ -252,8 +254,14 @@ public class OperationsReportBuilder(
                 }
             }
 
+            // Credit and debit stay the whole amount of the operation; the bonus columns say how much of it
+            // was put on or taken from the bonuses, so the money of the wallet itself is the difference.
+            // The direction is already given by whether the operation is a credit or a debit.
+            var bonus = OperationSource.BonusPartsOf(record.Credit, record.Debit, record.Sources);
+
             properties.Add(new PropertyValue(record.ServiceUnit, "@"));
             properties.Add(MoneyValue(record.Credit));
+            properties.Add(MoneyValue(bonus.Credit));
 
             if (isAiService)
             {
@@ -261,6 +269,7 @@ public class OperationsReportBuilder(
             }
 
             properties.Add(MoneyValue(record.Debit));
+            properties.Add(MoneyValue(bonus.Debit));
             properties.Add(new PropertyValue(record.Currency, "@"));
 
             if (isAiService)

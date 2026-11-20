@@ -89,7 +89,10 @@ public class ProjectConfigurator(
     {
         var project = builder
             .AddProject<TProject>(GetProjectName<TProject>())
-            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+            .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly)
+            // The project's own appsettings.json points at buildtools by a relative path, which misses it in a git
+            // worktree (server/.claude/worktrees/<name>/); the AppHost already found it.
+            .WithEnvironment("pathToConf", AppPaths.GetConfigDirectory(basePath));
 
         // The testing builder randomizes every endpoint port, but the router's upstream map (NginxConfiguration)
         // and the document server reach the services at their fixed ports through host.docker.internal. With
@@ -312,6 +315,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
+                .WithEnvironment("app:appsettings", AppPaths.GetConfigDirectory(basePath))
                 .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
                 .WithEnvironment("Redis:Hosts:0:Host", () => connectionManager.Redis?.Host ?? string.Empty)
                 .WithEnvironment("Redis:Hosts:0:Port", () => connectionManager.Redis?.Port ?? string.Empty)
@@ -360,6 +364,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder.AddJavaScriptApp(name, path, "start")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
+                .WithEnvironment("app:appsettings", AppPaths.GetConfigDirectory(basePath))
                 .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
@@ -481,6 +486,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder.AddJavaScriptApp(name, path, "dev")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
+                .WithEnvironment("app:appsettings", AppPaths.GetConfigDirectory(basePath))
                 // `__` form, not `:` — AI.Chat's nconf would otherwise nest a
                 // `:`-keyed var and turn the `ai.mcp` array into an object.
                 .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp")

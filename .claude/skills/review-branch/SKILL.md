@@ -150,6 +150,17 @@ merges of the base into the branch do not show up as branch changes. Read its he
   `<base>:<path>` argument with a `/` on both sides of the colon is rewritten into a Windows path list,
   `git show` fails and the redirect leaves an empty file. Name the gap in the report header — for
   someone else's branch it is a note, not a finding.
+- **Earlier checks of the branch.** A branch can come with earlier reviews, self-reviews or re-checks
+  (saved files, a list in the PR description) and no Hand-over block. They are not a check of what you
+  review: take from them only their Coverage sections (§3 "Start where the last run did not look") and
+  two facts for the report header. First, the newest sha any of them covered: the branch's own
+  commits after it (`git log --no-merges <sha>..<branch> ^<merge-base>`) were checked by no one, and a
+  refactoring among them (code moved or rewritten, a new class) is new code. Second, the copy of the
+  rules each of them ran with (its header's tooling line, §8), against the scan's "Review tooling brought
+  in by the branch": a check made before one of those merges could not see what the merge added.
+  Seen in review: a branch came after five re-checks; all five ran before the rules on texts and on
+  multi-step operations reached it, the last covered a sha three commits back, one of them a
+  1 300-line refactoring, and the next first review found 13 items, 4 of them in those commits.
 - **Remember the reviewed sha** — of `HEAD`, or of `<branch>` when it is not checked out. Branches
   here move during a review (a merge of the base, a rename of a migration). Check it again before the
   report; if it moved, re-scan and say what the new commits changed.
@@ -175,6 +186,7 @@ is read in context. What each section is for:
 | Tests | §3 A3 and §6 |
 | Changed endpoints | not a finding by itself: the rows of the cross-cutting matrix (§3 A0) |
 | OpenSpec | the requirements reviewer S reads (§3 S). `!! ... openspec/ untouched` is not a finding by itself: it becomes one when a listed requirement no longer holds on the branch. The `!!` format lines are findings once read: a requirement the branch adds at 500 characters or more, one it brings to 500 or more, or one it makes longer while it is already over (`openspec/config.yaml` asks for under 500), and a ticked task that says it is blocked or not done (`claims.md` §4); with `--worktree` they cover untracked spec files too. A requirement is compared with every body it had at the merge-base under its name or the name a RENAMED pair gives — in the same file, its old path and, for a delta (active or archived), its capability's spec; REMOVED sections are not measured. A requirement with no such old body whose body equals that of a requirement gone from the same file is a rename without a pair, so unchanged; a requirement moved to another spec file is measured as new. An edit of a requirement that was already that long and did not grow is a reminder line without `!!`: not a finding, a note the author may act on. `verification.md rows citing changed files` is a list to check: each row whose lines moved or whose behaviour changed is stale. It finds citations by path (a `.claude/` one and a spec file included), alias, file name (marked when several files share it, so the row may cite another one) and folder alias; a row citing a changed file in another form is the reviewer's to find. The first 100 entries (a changed file in one `verification.md`) and 8 line numbers each are printed, all with `--full` |
+| Review tooling brought in by the branch | not a finding: each merge of the base that brought a rule or review-tooling change applying to the branch, with the branch's own commits before and after it, and the date the scanned tree's tooling last changed. A check of the branch older than the newest such merge ran on the older copy (§1 "Earlier checks of the branch"); the author runs what the merge changed over the whole branch (`fixing-findings.md` §6 "The base first"). The tooling line goes into the report header (§8) |
 | Claims with numbers | §3 B "claims the branch writes": each number with a unit, worded duration, limit and date word the scan finds in the branch's commit messages, C# comments and spec texts is checked against the constant, the timeout or the test that makes it true (`claims.md` §1). A hit whose source says otherwise is a finding; a claim worded in a form the scan does not list is still read. The first 200 lines are printed, all with `--full` |
 | Stateful / background processing | the files reviewer G walks (§3 G) |
 | Size | how many chunks reviewers B, D, E and G are split into (§3 Coverage) |
@@ -559,6 +571,14 @@ Reviewers over-report. For every finding, open the code at `where` yourself and 
   violation — and the change to the tooling that would have caught the class: a rule section, a matrix
   row, a scan check, or "none: within the estimate the block gave". This is how the next hand-over
   check sees what this one missed.
+- **missed by earlier checks**: with no Hand-over block, but with earlier reviews of this branch (§1
+  "Earlier checks of the branch"), name per "missed earlier" finding why those checks could not see
+  it, from the list above and these: the commit came after the newest check; the check ran on an older
+  copy of the rules (the scan's "Review tooling brought in by the branch"); it was a re-check and the
+  code was outside its rounds' diffs; its fresh reviewer (§7 point 3) did not run; its Coverage lists
+  the file as skimmed or not opened. Give the counts per cause in the report: it is the answer to "why
+  did the earlier review not see this", and it tells a process gap (a check skipped, an old copy) from
+  a tooling gap, which gets a change offered as above.
 
 Drop what you cannot confirm. A short report of true findings beats a long one the user has to
 re-check.
@@ -612,6 +632,11 @@ conversation). Re-scan (§1) and then:
      the test's filter (`--patch` with the behavioural hunk when the test calls what the fix adds).
      STILL GREEN is a finding. A run the stand does not allow goes under "Not verified";
    - run the class matrices (§3 M) over the fix diff: a fix commit adds rows like any other code.
+
+   A commit that moves or rewrites code (a refactoring, a split into new files or classes) is not read
+   as a diff: the moved code is reviewed whole, as in a first review, with the matrices over it. Its
+   diff shows the move, not what the code does, and blame lands on it, so a defect that moved with the
+   code reads as new and one that the move introduced reads as old.
 3. Give the fix commits to one more reviewer **without** the previous findings — the code only,
    with §3 B and G, and §3 S over the spec texts they change. A reviewer handed the earlier list
    checks that list; the fresh one finds what the list did not name. This step is not skipped for a
@@ -637,11 +662,19 @@ conversation). Re-scan (§1) and then:
    its whole row of the matrix it belongs to (`fixing-findings.md` §8): a suggestion written without
    walking the other paths is where the next finding comes from (seen in review: "keep the claim" in
    a wallet renewal opened a path to a second payment).
+9. When the previous review ran on an older copy of the rules or this skill (its header's tooling line
+   against the scan's "Review tooling brought in by the branch"), the re-check is not limited to the
+   diff: each lens, matrix, rule or scan check the newer copy added runs over the whole branch, as
+   `fixing-findings.md` §6 "The base first" has the author do. A re-check of the diff alone on the newer
+   copy sees the new classes only in the newest code.
 
 ## 8. Report
 
 Header line: branch, base, number of commits and files, sha reviewed, what was run (build / format
-/ tests) and what was **not** — "verified by reading the code, tests not run" when that is the case.
+/ tests) and what was **not** — "verified by reading the code, tests not run" when that is the case;
+the tooling the review ran with (the scan's "tooling of the scanned tree" line, of the copy you ran:
+the base's when you ran the base's scan), and, with earlier checks of the branch, the newest sha they
+covered (§1 "Earlier checks of the branch").
 Coverage line: how many chunks, and the files no reviewer read in full (they also go to "Not
 verified"), the class matrices built with their row counts, which findings you opened yourself
 in §4 versus took from a reviewer's citation, in a re-check whether the fresh reviewer of §7 point 3
@@ -657,6 +690,7 @@ Then, omitting empty sections:
 ## 🟡 Remarks          — real but not blocking
 ## ❓ Questions        — behaviour changes and debatable semantics that need the author's decision
 ## Missed by the hand-over check — only with a Hand-over block (§4): per finding, why, and the tooling change
+## Missed by earlier checks — no block, but earlier reviews of the branch (§4): counts per cause, the tooling change
 ## Not verified       — what stays unverified and what would verify it (a suite, a profile)
 ```
 
@@ -676,7 +710,8 @@ Do not report:
 End with one line offering the next step: fix the blockers, run the named suites, or save the
 findings to a file. When "Missed by the hand-over check" names tooling changes, offer them to the user
 too, as a change of their own to the rules, this skill or the scan: they are what keeps the next
-hand-over from missing the same class. The saved review keeps that section.
+hand-over from missing the same class. The saved review keeps that section, and so it keeps "Missed by
+earlier checks".
 
 ### Saving to a file
 
@@ -686,7 +721,8 @@ named). Make each item readable without this conversation: place, scenario, fix,
 stays untracked; never `git add` it.
 
 End the file with a `Coverage` section the next run reads (§3 Coverage): the reviewed sha and date,
-the matrices built with their row counts, and the files no reviewer read in full. Every run of a
+the tooling line of the header (§8), the matrices built with their row counts, and the files no
+reviewer read in full. Every run of a
 branch saves one, also when the user did not ask for the findings: offer it in the closing line,
 since without it the next run cannot tell what is new from what was missed.
 

@@ -113,6 +113,14 @@ public class WalletServiceDescriptionManager
                     serviceName = "top-up";
                     quantity = 0;
                     break;
+                case OperationType.GoodwillCredit:
+                    serviceName = "bonus";
+                    quantity = 0;
+                    break;
+                case OperationType.GoodwillExpiration:
+                    serviceName = "bonus-expiration";
+                    quantity = 0;
+                    break;
                 case OperationType.AiCredit:
                     serviceName = "ai-tools";
                     quantity = (int)operation.Debit; // truncate

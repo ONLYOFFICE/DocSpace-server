@@ -80,9 +80,11 @@ public static class ContainerMemoryExtensions
     /// <summary>
     /// Measured on identity-authorization: 706 -> 492 MiB idle, health UP. Serial GC and a small
     /// thread stack fit a dev instance that serves one developer; the default ergonomics would give
-    /// each JVM a 2 GB max heap on an 8 GB Docker VM.
+    /// each JVM a 2 GB max heap on an 8 GB Docker VM. Metaspace grows with the classes the OAuth paths load, not
+    /// with the traffic: identity-registration ran out of a 160m metaspace about 30 s into the Web.Api
+    /// integration suite (2026-11-19), answered 500 and then stopped, so the cap is 256m.
     /// </summary>
-    public const string IdentityJavaOptions = "-Xmx384m -XX:MaxMetaspaceSize=160m -XX:+UseSerialGC -Xss512k";
+    public const string IdentityJavaOptions = "-Xmx384m -XX:MaxMetaspaceSize=256m -XX:+UseSerialGC -Xss512k";
 
     /// <summary>
     /// Measured: 1722 -> 1011 MiB idle against the image default of 1g. Safe only together with the

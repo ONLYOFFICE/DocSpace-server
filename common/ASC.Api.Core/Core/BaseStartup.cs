@@ -85,46 +85,7 @@ public abstract class BaseStartup
         services.AddHttpContextAccessor();
         services.AddMemoryCache();
 
-        services.AddHttpClient();
-        services.AddHttpClient("customHttpClient", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
-            {
-                AllowAutoRedirect = false
-            });
-        services.AddHttpClient("customHttpClientSslIgnore", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ =>
-            {
-                var handler = new SocketsHttpHandler { AllowAutoRedirect = false };
-                handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
-                return handler;
-            });
-        services.AddHttpClient("customHttpClientNoCookie", _ => { })
-            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
-            {
-                UseCookies = false
-            });
-        services.AddHttpClient(UrlValidator.PinnedHttpClient)
-            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
-            .ConfigurePrimaryHttpMessageHandler(_ => new SocketsHttpHandler
-            {
-                AllowAutoRedirect = false,
-                ConnectCallback = UrlValidator.PinnedConnectCallback
-            });
-        services.AddHttpClient(UrlValidator.PinnedHttpClientSslIgnore)
-            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .ConfigureHttpClient(c => c.Timeout = TimeSpan.FromSeconds(10))
-            .ConfigurePrimaryHttpMessageHandler(_ =>
-            {
-                var handler = new SocketsHttpHandler
-                {
-                    AllowAutoRedirect = false,
-                    ConnectCallback = UrlValidator.PinnedConnectCallback
-                };
-                handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
-                return handler;
-            });
-
+        services.AddStandardHttpClients();
 
         services.AddExceptionHandler<CustomExceptionHandler>();
         services.AddProblemDetails();

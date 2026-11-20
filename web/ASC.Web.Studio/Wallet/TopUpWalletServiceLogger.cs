@@ -58,4 +58,7 @@ internal static partial class TopUpWalletServiceLogger
 
     [LoggerMessage(LogLevel.Error, "TopUpWalletService: balance is null for tenant {tenantId}")]
     public static partial void ErrorTopUpWalletServiceBalanceIsNull(this ILogger<TopUpWalletService> logger, int tenantId);
+
+    [LoggerMessage(LogLevel.Warning, "TopUpWalletService: the clients of tenant {tenantId} were not told that the wallet changed")]
+    public static partial void WarningTopUpWalletServiceNotificationNotSent(this ILogger<TopUpWalletService> logger, int tenantId, Exception exception);
 }
