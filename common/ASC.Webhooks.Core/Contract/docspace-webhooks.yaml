@@ -2865,7 +2865,10 @@ components:
             usedSpace:
               type: integer
               format: int64
-              description: The space used by the room in bytes.
+              description: >-
+                The space used by the room in bytes. Absent for an AI project when the subscription's
+                creator may not edit it, as the REST API hides it from them: the files of a project belong
+                to the members who added them.
               example: 12345
             color:
               type: string

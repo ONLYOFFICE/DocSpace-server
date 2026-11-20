@@ -474,6 +474,7 @@ two rows of the previous draft wrong (`0` as a preference scope, `ask` and a sav
 | Creator cannot change the file (scenario); creator opens the editor (scenario) | `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:78,92,107,132,146`; `T/ThreadFilesAccessTests/ThreadFilesAuthorAccessTests.cs:121` | TEST-CONFIRMED |
 | **Used space of a project** |  |  |
 | Used space of a project (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:51`; `products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs:371-374` | TEST-CONFIRMED |
+| Used space in a room webhook (scenario) | `web/ASC.Web.Api.Tests/Tests/02_Settings/Webhooks/WebhookEntryContextTests.cs:255`; `products/ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDtoHelper.cs` (`RestrictForSubscriberAsync`) | TEST-CONFIRMED [run: PASS] |
 | Sorting by used space (scenario) | `T/ThreadFilesAccessTests/ThreadFilesDisclosureTests.cs:82`; `products/ASC.Files/Core/Utils/EntryManager.cs:1112,1255-1258` | TEST-CONFIRMED |
 | **The contents of a project are not listed** |  |  |
 | Listing; search inside the project (scenarios) | `T/ThreadFilesAccessTests/ThreadFilesProjectListingTests.cs:51,69,80` | TEST-CONFIRMED |
