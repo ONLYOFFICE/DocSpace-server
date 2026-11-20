@@ -65,6 +65,7 @@ public class SecurityController(
         AuditActionMapper auditActionMapper,
         CoreBaseSettings coreBaseSettings,
         CspSettingsHelper cspSettingsHelper,
+        WebPluginManager webPluginManager,
         ApiDateTimeHelper apiDateTimeHelper,
         IdentityClient identityClient,
         SecurityContext securityContext,
@@ -724,6 +725,8 @@ public class SecurityController(
     /// earlier answer and an unchanged policy comes back as an empty not-modified response rather than a body.
     /// `domains` is an empty list on a portal nobody has configured, while `header` is filled from the defaults even
     /// then. Change the allowed domains with `POST api/2.0/security/csp`, which does need a DocSpace administrator.
+    /// A signed-in member whose request carries the `asc_personal_csp` cookie gets `header` extended with the domains
+    /// of their own enabled personal web plugins, without the not-modified shortcut; `domains` stays the portal's list.
     /// </remarks>
     /// <summary>
     /// Get CSP settings
@@ -740,9 +743,15 @@ public class SecurityController(
     {
         //await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = await cspSettingsHelper.LoadAsync(HttpContext.GetIfModifiedSince());
+        var personalCspDomains = Request.Cookies.ContainsKey(WebPluginManager.PersonalCspCookieName)
+            ? await webPluginManager.GetPersonalCspDomainsAsync(tenantManager.GetCurrentTenantId())
+            : [];
 
-        if (HttpContext.TryGetFromCache(settings.LastModified))
+        var settings = personalCspDomains.Count == 0
+            ? await cspSettingsHelper.LoadAsync(HttpContext.GetIfModifiedSince())
+            : await cspSettingsHelper.LoadAsync();
+
+        if (personalCspDomains.Count == 0 && HttpContext.TryGetFromCache(settings.LastModified))
         {
             return null;
         }
@@ -755,7 +764,7 @@ public class SecurityController(
         return new CspDto
         {
             Domains = settings.Domains ?? [],
-            Header = await cspSettingsHelper.CreateHeaderAsync(settings.Domains)
+            Header = await cspSettingsHelper.CreateHeaderAsync((settings.Domains ?? []).Concat(personalCspDomains))
         };
     }
 
