@@ -216,7 +216,7 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
         await UploadArtifactAsync(thread.Id, "first.txt");
         await UploadArtifactAsync(thread.Id, "second.txt");
 
-        var page = await ListArtifactsAsync(projectId, thread.Id, "?count=1&startIndex=1");
+        var page = await ListArtifactsAsync(projectId, thread.Id, count: 1, startIndex: 1);
 
         page.Files.Should().ContainSingle();
         page.Total.Should().Be(2);
@@ -237,10 +237,10 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
         var memberPage = await ListArtifactsAsync(projectId, thread.Id);
 
         await FilesHttpClient.Authenticate(Owner);
-        using var ownerResponse = await GetArtifactsAsync(projectId, thread.Id);
+        var ownerStatus = await ArtifactsStatusAsync(projectId, thread.Id);
 
         memberPage.Files.Should().ContainSingle().Which.Id.Should().Be(uploaded.Id);
-        ownerResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        ownerStatus.Should().Be(404);
     }
 
     [Fact]
@@ -251,9 +251,9 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
         var thread = await CreateThreadInternalAsync(entityId: projectId.ToString());
         await UploadArtifactAsync(thread.Id, "report.txt");
 
-        using var response = await GetArtifactsAsync(otherProjectId, thread.Id);
+        var status = await ArtifactsStatusAsync(otherProjectId, thread.Id);
 
-        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        status.Should().Be(404);
     }
 
     [Fact]
@@ -264,9 +264,9 @@ public class ThreadArtifactsTests(AspireAppFixture fixture) : ThreadFilesTestBas
         var outsider = await InviteContact(EmployeeType.User, TestContext.Current.CancellationToken);
 
         await FilesHttpClient.Authenticate(outsider);
-        using var response = await GetArtifactsAsync(projectId, thread.Id);
+        var status = await ArtifactsStatusAsync(projectId, thread.Id);
         await FilesHttpClient.Authenticate(Owner);
 
-        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        status.Should().Be(403);
     }
 }

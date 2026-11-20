@@ -39,8 +39,9 @@ namespace ASC.Files.Tests.Tests._03_Rooms.AiHub;
 /// the section over raw HTTP: they were written when the pinned SDK knew neither the room types of the section nor
 /// its sources and skills routes. The helpers for the projects of a room (<c>CreateSectionRoomAsync</c>,
 /// <c>CreateRoomWithProjectsAsync</c>, <c>LinkAsync</c>, <c>UnlinkAsync</c>, <c>GetRoomInfoAsync</c>,
-/// <c>GetAiHubFoldersAsync</c>, <c>GetRoomProjectsAsync</c>), deleting a room, archiving it and the file operations
-/// go through the SDK.
+/// <c>GetAiHubFoldersAsync</c>, <c>GetRoomProjectsAsync</c>), the root folders (<c>GetRootSectionsAsync</c>,
+/// <c>GetRootAiHubSectionAsync</c>), pinning and unpinning, deleting a room, archiving it and the file operations go
+/// through the SDK.
 /// </summary>
 public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -89,38 +90,52 @@ public abstract class AiHubTestBase(AspireAppFixture fixture) : BaseTest(fixture
         return await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<JsonElement> GetRootSectionsAsync(string query = "")
+    protected async Task<List<FolderContentDto>> GetRootSectionsAsync(
+        FilterType? filterType = null,
+        int? count = null,
+        int? startIndex = null,
+        string? sortBy = null,
+        string? filterValue = null)
     {
-        using var response = await Files.GetAsync($"api/2.0/files/@root{query}", TestContext.Current.CancellationToken);
+        var sections = await _foldersApi.GetRootFoldersAsync(
+            filterType: filterType,
+            count: count,
+            startIndex: startIndex,
+            sortBy: sortBy,
+            filterValue: filterValue,
+            cancellationToken: TestContext.Current.CancellationToken);
 
-        return await Files.ReadAsync<JsonElement>(response, TestContext.Current.CancellationToken);
+        return sections.Response;
     }
 
-    protected static JsonElement AiHubSectionOf(JsonElement sections)
+    protected static FolderContentDto AiHubSectionOf(List<FolderContentDto> sections)
     {
-        return sections.EnumerateArray().Single(s => s.GetProperty("current").GetProperty("rootFolderType").GetInt32() == AiHubFolderType);
+        return sections.Single(s => s.Current.RootFolderType == FolderType.AiHub);
     }
 
-    protected async Task<JsonElement> GetRootAiHubSectionAsync(string query = "")
+    protected async Task<FolderContentDto> GetRootAiHubSectionAsync(
+        FilterType? filterType = null,
+        int? count = null,
+        int? startIndex = null,
+        string? sortBy = null,
+        string? filterValue = null)
     {
-        return AiHubSectionOf(await GetRootSectionsAsync(query));
-    }
-
-    protected Task<HttpResponseMessage> PinRoomResponseAsync(int roomId)
-    {
-        return Files.PutAsync($"api/2.0/files/rooms/{roomId}/pin", null, TestContext.Current.CancellationToken);
-    }
-
-    protected Task<HttpResponseMessage> UnpinRoomResponseAsync(int roomId)
-    {
-        return Files.PutAsync($"api/2.0/files/rooms/{roomId}/unpin", null, TestContext.Current.CancellationToken);
+        return AiHubSectionOf(await GetRootSectionsAsync(filterType, count, startIndex, sortBy, filterValue));
     }
 
     protected async Task PinRoomAsync(int roomId)
     {
-        using var response = await PinRoomResponseAsync(roomId);
+        await _roomsApi.PinRoomAsync(roomId, TestContext.Current.CancellationToken);
+    }
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK, $"room {roomId} has to be pinned in Arrange");
+    protected async Task UnpinRoomAsync(int roomId)
+    {
+        await _roomsApi.UnpinRoomAsync(roomId, TestContext.Current.CancellationToken);
+    }
+
+    protected static List<int> IdsOf(FolderContentDto section)
+    {
+        return [.. section.Folders.OfType<FolderDto>().Select(f => f.Id)];
     }
 
     protected static List<int> IdsOf(JsonElement section)

@@ -360,10 +360,10 @@ public class ThreadAttachmentsTests(AspireAppFixture fixture) : ThreadFilesTestB
         await _aiClient.Authenticate(Owner);
 
         await FilesHttpClient.Authenticate(Owner);
-        using var ownerResponse = await GetAttachmentsAsync(projectId, thread.Id);
+        var ownerStatus = await AttachmentsStatusAsync(projectId, thread.Id);
 
         memberPage.Files.Should().ContainSingle().Which.Id.Should().Be(file.Id);
-        ownerResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        ownerStatus.Should().Be(404);
     }
 
     private Task<ChunkedUploadSessionWrapper> OpenSessionAsync(int folderId, string name, string? relativePath = null)

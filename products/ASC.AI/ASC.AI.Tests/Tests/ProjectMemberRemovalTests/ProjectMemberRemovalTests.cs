@@ -134,12 +134,12 @@ public class ProjectMemberRemovalTests(AspireAppFixture fixture) : ThreadFilesTe
 
         var read = await ThreadStatusAsync(member, thread.ThreadId);
         await FilesHttpClient.Authenticate(member);
-        using var artifacts = await GetArtifactsAsync(projectId, thread.ThreadId);
+        var artifacts = await ArtifactsStatusAsync(projectId, thread.ThreadId);
         await FilesHttpClient.Authenticate(Owner);
         var state = await WaitForCleanupAsync(projectId, thread.Artifact.Id, thread.Attachment.Id, spaceBefore);
 
         read.Should().Be(HttpStatusCode.NotFound);
-        artifacts.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        artifacts.Should().Be(404);
         state.ArtifactStatus.Should().Be(404);
         state.UsedSpace.Should().Be(spaceBefore);
     }
